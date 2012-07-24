@@ -808,6 +808,14 @@ public class TypeCreator extends TypeCache
 		{
 			type.setSuperType(getType(context, "RuntimeComponent"));
 		}
+		else if (cls.getSuperclass() != null)
+		{
+			Class< ? > superCls = classTypes.get(cls.getSuperclass().getSimpleName());
+			if (superCls != null)
+			{
+				type.setSuperType(getType(context, cls.getSuperclass().getSimpleName()));
+			}
+		}
 		Class< ? >[] returnTypes = linkedTypes.get(cls);
 		if (returnTypes != null)
 		{
@@ -2073,7 +2081,7 @@ public class TypeCreator extends TypeCache
 				String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
 				if (cachedSuperTypeTemplateType == null)
 				{
-					cachedSuperTypeTemplateType = createType(context, Record.JS_RECORD);
+					cachedSuperTypeTemplateType = TypeCreator.this.createType(context, fullTypeName, Record.class);
 				}
 				EList<Member> members = cachedSuperTypeTemplateType.getMembers();
 				List<Member> overwrittenMembers = new ArrayList<Member>();
@@ -2323,9 +2331,10 @@ public class TypeCreator extends TypeCache
 			}
 
 			String config = fullTypeName.substring(indexOf + 1, fullTypeName.length() - 1);
+			String superTypeName = fullTypeName.substring(0, indexOf);
 			if (cachedSuperTypeTemplateType == null)
 			{
-				cachedSuperTypeTemplateType = createType(context, fullTypeName.substring(0, indexOf));
+				cachedSuperTypeTemplateType = createBaseType(context, superTypeName);
 			}
 			EList<Member> members = cachedSuperTypeTemplateType.getMembers();
 			List<Member> overwrittenMembers = new ArrayList<Member>();
@@ -2343,7 +2352,7 @@ public class TypeCreator extends TypeCache
 			type.setName(fullTypeName);
 			type.setKind(TypeKind.JAVA);
 //			type.setAttribute(IMAGE_DESCRIPTOR, imageDescriptor);
-			type.setSuperType(cachedSuperTypeTemplateType);
+			type.setSuperType(getType(context, superTypeName));
 			return type;
 		}
 
