@@ -39,6 +39,7 @@ import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
 import com.servoy.eclipse.ui.property.TableValueEditor;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.TreeSelectViewer;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.DataSourceUtils;
@@ -170,8 +171,17 @@ public class DatasourceSelectComposite extends Composite
 	{
 		if (relationEditor.getRelation().getPrimaryServerName() != null && relationEditor.getRelation().getPrimaryTableName() != null)
 		{
+			boolean isView = false;
+			try
+			{
+				isView = (relationEditor.getRelation().getPrimaryTable() != null && relationEditor.getRelation().getPrimaryTable().getTableType() == ITable.VIEW);
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError(e);
+			}
 			sourceTable.setSelection(new StructuredSelection(new TableWrapper(relationEditor.getRelation().getPrimaryServerName(),
-				relationEditor.getRelation().getPrimaryTableName())));
+				relationEditor.getRelation().getPrimaryTableName(), isView)));
 		}
 		else
 		{
@@ -179,8 +189,17 @@ public class DatasourceSelectComposite extends Composite
 		}
 		if (relationEditor.getRelation().getForeignServerName() != null && relationEditor.getRelation().getForeignTableName() != null)
 		{
+			boolean isView = false;
+			try
+			{
+				isView = (relationEditor.getRelation().getForeignTable() != null && relationEditor.getRelation().getForeignTable().getTableType() == ITable.VIEW);
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError(e);
+			}
 			destinationTable.setSelection(new StructuredSelection(new TableWrapper(relationEditor.getRelation().getForeignServerName(),
-				relationEditor.getRelation().getForeignTableName())));
+				relationEditor.getRelation().getForeignTableName(), isView)));
 		}
 		else
 		{
@@ -244,7 +263,8 @@ public class DatasourceSelectComposite extends Composite
 					relationEditor.registerListeners();
 					if (relationEditor.getRelation().getPrimaryDataSource() == null)
 					{
-						sourceTable.setSelection(new StructuredSelection(new TableWrapper(tableWrapper.getServerName(), tableWrapper.getTableName())));
+						sourceTable.setSelection(new StructuredSelection(new TableWrapper(tableWrapper.getServerName(), tableWrapper.getTableName(),
+							tableWrapper.isView())));
 					}
 					if (relation.getInitialSort() != null && tableWrapper.getServerName() != null && tableWrapper.getTableName() != null &&
 						(!tableWrapper.getServerName().equals(oldServerName) || !tableWrapper.getTableName().equals(oldTableName)))
