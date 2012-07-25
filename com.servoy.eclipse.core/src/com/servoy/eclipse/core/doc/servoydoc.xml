@@ -20824,6 +20824,7 @@ forms['printForm'].controller.showPrintPreview();]]></sample>
         </constant>
       </constants>
     </object>
+    <object publicName="PrinterJob" qualifiedName="com.servoy.j2db.documentation.scripting.docs.PrinterJob"/>
     <object publicName="QBAggregate" qualifiedName="com.servoy.j2db.querybuilder.impl.QBAggregate">
       <properties>
         <property name="abs">
@@ -43898,7 +43899,7 @@ Note: The omitted records are discarded when these functions are executed: loadA
             <parameter name="showPrinterSelectDialog" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[to show the printer select dialog (default printer is normally used)]]></description>
             </parameter>
-            <parameter name="printerJob" type="java.awt.print.PrinterJob" typecode="java.awt.print.PrinterJob">
+            <parameter name="printerJob" type="com.servoy.j2db.documentation.scripting.docs.PrinterJob" typecode="java.awt.print.PrinterJob">
               <description><![CDATA[print to plugin printer job, see pdf printer plugin for example]]></description>
             </parameter>
           </parameters>
@@ -44519,7 +44520,7 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <parameter name="printCurrentRecordOnly" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[to print the current record only]]></description>
             </parameter>
-            <parameter name="printerJob" type="java.awt.print.PrinterJob" typecode="java.awt.print.PrinterJob">
+            <parameter name="printerJob" type="com.servoy.j2db.documentation.scripting.docs.PrinterJob" typecode="java.awt.print.PrinterJob">
               <description><![CDATA[print to plugin printer job, see pdf printer plugin for example (incase print is used from printpreview)]]></description>
             </parameter>
           </parameters>
@@ -44543,7 +44544,7 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <parameter name="printCurrentRecordOnly" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[to print the current record only]]></description>
             </parameter>
-            <parameter name="printerJob" type="java.awt.print.PrinterJob" typecode="java.awt.print.PrinterJob">
+            <parameter name="printerJob" type="com.servoy.j2db.documentation.scripting.docs.PrinterJob" typecode="java.awt.print.PrinterJob">
               <description><![CDATA[print to plugin printer job, see pdf printer plugin for example (incase print is used from printpreview)]]></description>
             </parameter>
             <parameter name="zoomFactor" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
