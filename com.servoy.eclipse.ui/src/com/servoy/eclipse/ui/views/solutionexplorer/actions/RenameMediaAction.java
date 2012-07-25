@@ -30,6 +30,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.eclipse.ui.util.MediaNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Media;
@@ -47,6 +48,7 @@ public class RenameMediaAction extends Action implements ISelectionChangedListen
 	private final SolutionExplorerView viewer;
 	private Solution solution;
 	private String selectedMediaName = "";
+	private String selectedMediaPath = "";
 
 	/**
 	 * Creates a new "rename media" action for the given solution view.
@@ -72,7 +74,10 @@ public class RenameMediaAction extends Action implements ISelectionChangedListen
 			SimpleUserNode solutionNode = node.getAncestorOfType(Solution.class);
 			if (solutionNode != null)
 			{
+				//get media folder for further usage
+				if (node.parent.getRealObject() instanceof MediaNode) selectedMediaPath = ((MediaNode)node.parent.getRealObject()).getPath();
 				selectedMediaName = node.getName();
+
 				// make sure you have the in-memory version of the solution
 				solution = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(((Solution)solutionNode.getRealObject()).getName()).getEditingSolution();
 			}
@@ -107,8 +112,8 @@ public class RenameMediaAction extends Action implements ISelectionChangedListen
 		if (res == Window.OK)
 		{
 			ServoyProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solution.getName());
-			Media selectedMediaItem = project.getEditingSolution().getMedia(selectedMediaName);
-			selectedMediaItem.setName(nameDialog.getValue());
+			Media selectedMediaItem = project.getEditingSolution().getMedia(selectedMediaPath + selectedMediaName);
+			selectedMediaItem.setName(selectedMediaPath + nameDialog.getValue());
 			try
 			{
 				project.saveEditingSolutionNodes(new IPersist[] { selectedMediaItem }, true);
