@@ -80,7 +80,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	{
 		if (allowSQLKeywords == null)
 		{
-			allowSQLKeywords = Boolean.valueOf(UIUtils.askConformation(
+			allowSQLKeywords = Boolean.valueOf(UIUtils.askConfirmation(
 				shell,
 				"SQL Keywords",
 				"SQL keywords are used in this solution as table or column names.\nDo you want to try and import the solution anyway?\n(This will fail unless supported by the backend database)"));
@@ -242,7 +242,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 		{
 			return RENAME_ACTION;
 		}
-		return UIUtils.askConformation(shell, "No new name specified for " + RepositoryHelper.getObjectTypeName(objectTypeId) + " '" + name + "'.", //$NON-NLS-1$
+		return UIUtils.askConfirmation(shell, "No new name specified for " + RepositoryHelper.getObjectTypeName(objectTypeId) + " '" + name + "'.", //$NON-NLS-1$
 			"Do you wish to skip it and continue the import?") ? SKIP_ACTION : CANCEL_ACTION;
 
 	}
@@ -584,7 +584,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	{
 		if (allowDataModelChanges == null)
 		{
-			allowDataModelChanges = Boolean.valueOf(UIUtils.askConformation(shell, "Allow Database Change",
+			allowDataModelChanges = Boolean.valueOf(UIUtils.askConfirmation(shell, "Allow Database Change",
 				"Do you want to change database structure as in import file?"));
 		}
 		return allowDataModelChanges.booleanValue() ? OK_ACTION : CANCEL_ACTION;

@@ -27,8 +27,10 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TrayDialog;
@@ -60,6 +62,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.extension.ExtensionUIUtils;
 import com.servoy.eclipse.core.extension.InstalledWithPendingExtensionProvider;
 import com.servoy.eclipse.core.util.SerialRule;
 import com.servoy.eclipse.core.util.UIUtils;
@@ -180,7 +183,12 @@ public class InstalledExtensionsDialog extends TrayDialog
 
 		getShell().setImages(new Image[] { i1, i2, i3, i4 });
 
-		refreshInstalledExtensions();
+		if (automaticUpdateCheck)
+		{
+			automaticUpdateCheck = false;
+			updateTableUI();
+		}
+		else refreshInstalledExtensions();
 	}
 
 	/**
@@ -190,12 +198,13 @@ public class InstalledExtensionsDialog extends TrayDialog
 	{
 		this.automaticUpdateCheck = true;
 		readInstalledExtensions();
-		return checkForUpdatesInternal(monitor);
+		return checkForUpdatesInternal(monitor).getLeft().booleanValue();
 	}
 
-	protected boolean checkForUpdatesInternal(IProgressMonitor monitor)
+	protected Pair<Boolean, Message[]> checkForUpdatesInternal(IProgressMonitor monitor)
 	{
 		boolean foundUpdates = false;
+		Message[] warnings = null;
 		DependencyMetadata installedDmds[];
 		DependencyMetadata availableUpdates[];
 		MarketPlaceExtensionProvider marketPlaceProvider;
@@ -255,7 +264,11 @@ public class InstalledExtensionsDialog extends TrayDialog
 		finally
 		{
 			Message[] msgs = marketPlaceProvider.getMessages();
-			if (msgs.length > 0) ServoyLog.logInfo("While checking for upgrades, problems were found: " + Arrays.asList(msgs).toString()); //$NON-NLS-1$
+			if (msgs.length > 0)
+			{
+				ServoyLog.logInfo("While checking for upgrades, problems were found: " + Arrays.asList(msgs).toString()); //$NON-NLS-1$
+				warnings = msgs;
+			}
 			marketPlaceProvider.dispose();
 		}
 
@@ -282,7 +295,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 		}
 		monitor.worked(1);
 		monitor.done();
-		return foundUpdates;
+		return new Pair<Boolean, Message[]>(Boolean.valueOf(foundUpdates), warnings);
 	}
 
 	@Override
@@ -676,13 +689,14 @@ public class InstalledExtensionsDialog extends TrayDialog
 				@Override
 				protected IStatus run(IProgressMonitor monitor)
 				{
-					final boolean updatesFound[] = new boolean[] { false };
+					Pair<Boolean, Message[]> updFnd = null;
 					try
 					{
-						updatesFound[0] = checkForUpdatesInternal(monitor);
+						updFnd = checkForUpdatesInternal(monitor);
 					}
 					finally
 					{
+						final Pair<Boolean, Message[]> updatesFound = updFnd;
 						if (!getShell().isDisposed())
 						{
 							getShell().getDisplay().asyncExec(new Runnable()
@@ -692,9 +706,20 @@ public class InstalledExtensionsDialog extends TrayDialog
 									if (!getButton(UPDATE_CHECK_BUTTON_ID).isDisposed())
 									{
 										getButton(UPDATE_CHECK_BUTTON_ID).setEnabled(true);
-										if (updatesFound[0]) updateTableUI();
-										else MessageDialog.openInformation(getShell(), "Check for upgrades", //$NON-NLS-1$
-											"No new compatible versions found for installed extensions."); //$NON-NLS-1$
+										if (updatesFound == null)
+										{
+											MessageDialog.openError(getShell(), "Update check", //$NON-NLS-1$
+												"Errors encountered while checking for updates.\nCheck logs for more information."); //$NON-NLS-1$
+										}
+										else if (updatesFound.getLeft().booleanValue()) updateTableUI();
+										else if (updatesFound.getRight() == null) MessageDialog.openInformation(getShell(), "Update check", //$NON-NLS-1$
+											"No new (and compatible) versions were found for installed extensions in the marketplace."); //$NON-NLS-1$
+										else
+										{
+											MultiStatus details = ExtensionUIUtils.translateMessagesToStatus(
+												"Could not find any updates for installed extensions.", updatesFound.getRight()); //$NON-NLS-1$
+											ErrorDialog.openError(getShell(), "Update check", null, details); //$NON-NLS-1$
+										}
 									}
 								}
 							});

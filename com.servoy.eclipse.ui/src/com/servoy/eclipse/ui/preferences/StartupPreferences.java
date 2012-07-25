@@ -18,13 +18,14 @@ package com.servoy.eclipse.ui.preferences;
 
 
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.grouplayout.GroupLayout;
-import org.eclipse.swt.layout.grouplayout.LayoutStyle;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
@@ -53,8 +54,10 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 	// stored in ui plugin prefs
 	public static final String DEBUG_CLIENT_CONFIRMATION_WHEN_ERRORS = "debugger.showConfirmationDialogWhenErrors";
 	public static final String DEBUG_CLIENT_CONFIRMATION_WHEN_WARNINGS = "debugger.showConfirmationDialogWhenWarnings";
+	public static final String STARTUP_EXTENSION_UPDATE_CHECK = "startup.checkForExtensionUpdates";
 	public static boolean DEFAULT_ERROR_CONFIRMATION = true;
 	public static boolean DEFAULT_WARNING_CONFIRMATION = false;
+	public static boolean DEFAULT_STARTUP_EXTENSION_UPDATE_CHECK = false;
 
 	private static final int RETRIES_DEFAULT = 5;
 
@@ -63,6 +66,7 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 	private Text shutdownLauncherText;
 	private Button showErrorsConfirmation;
 	private Button showWarningsConfirmation;
+	private Button startupExtensionUpdateCheck;
 
 	public void init(IWorkbench workbench)
 	{
@@ -73,49 +77,51 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 	{
 		initializeDialogUnits(parent);
 
+		// create contents
 		Composite composite = new Composite(parent, SWT.NONE);
+		Group nativeLaunchers = new Group(composite, SWT.NONE);
+		nativeLaunchers.setText("Native launchers");
+
+		Group settings = new Group(composite, SWT.NONE);
+		settings.setText("Settings");
+
+		Group others = new Group(composite, SWT.NONE);
 
 		Label startupLauncherLabel;
-		startupLauncherLabel = new Label(composite, SWT.NONE);
+		startupLauncherLabel = new Label(nativeLaunchers, SWT.NONE);
 		startupLauncherLabel.setText("Startup launcher");
+		startupLauncherText = new Text(nativeLaunchers, SWT.BORDER);
 
 		Label shutdownLauncherLabel;
-		shutdownLauncherLabel = new Label(composite, SWT.NONE);
+		shutdownLauncherLabel = new Label(nativeLaunchers, SWT.NONE);
 		shutdownLauncherLabel.setText("Shutdown launcher");
+		shutdownLauncherText = new Text(nativeLaunchers, SWT.BORDER);
 
 		Label retriesLabel;
-		retriesLabel = new Label(composite, SWT.NONE);
+		retriesLabel = new Label(settings, SWT.NONE);
 		retriesLabel.setText("Max repository connect retries");
-
-		startupLauncherText = new Text(composite, SWT.BORDER);
-
-		shutdownLauncherText = new Text(composite, SWT.BORDER);
-
-		retriesSpinner = new Spinner(composite, SWT.BORDER);
+		retriesSpinner = new Spinner(settings, SWT.BORDER);
 		retriesSpinner.setValues(0, 1, 100, 0, 1, 5);
 
-		Label lErrors = new Label(composite, SWT.NONE);
-		Label lWarnings = new Label(composite, SWT.NONE);
-		lErrors.setText("Debug client confirmation launch when errors");
-		lWarnings.setText("Debug client confirmation launch when warnings");
-		showErrorsConfirmation = new Button(composite, SWT.CHECK);
-		showWarningsConfirmation = new Button(composite, SWT.CHECK);
+		startupExtensionUpdateCheck = new Button(others, SWT.CHECK);
+		startupExtensionUpdateCheck.setText("Check for Servoy Extension updates at startup");
+		showErrorsConfirmation = new Button(others, SWT.CHECK);
+		showErrorsConfirmation.setText("Check for error markers when launching (debug) client");
+		showWarningsConfirmation = new Button(others, SWT.CHECK);
+		showWarningsConfirmation.setText("Check for warning markers when launching (debug) client");
 
-		final GroupLayout groupLayout = new GroupLayout(composite);
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(startupLauncherLabel).add(shutdownLauncherLabel).add(retriesLabel).add(lErrors).add(
-					lWarnings)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(startupLauncherText).add(shutdownLauncherText).add(retriesSpinner).add(
-					showErrorsConfirmation).add(showWarningsConfirmation)).addContainerGap()));
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(startupLauncherLabel).add(startupLauncherText)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(shutdownLauncherLabel).add(shutdownLauncherText)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(retriesSpinner).add(retriesLabel)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(showErrorsConfirmation).add(lErrors)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(showWarningsConfirmation).add(lWarnings)).addContainerGap()));
-		composite.setLayout(groupLayout);
+		// layout contents
+		GridLayoutFactory gridFactory = GridLayoutFactory.fillDefaults();
+		gridFactory.extendedMargins(5, 5, 5, 5);
+		gridFactory.numColumns(2);
+		gridFactory.generateLayout(settings);
+		gridFactory.generateLayout(nativeLaunchers);
+		gridFactory.numColumns(1);
+		gridFactory.generateLayout(others);
+		gridFactory.extendedMargins(0, 5, 5, 5);
+		gridFactory.generateLayout(composite);
+		((GridData)startupLauncherText.getLayoutData()).widthHint = 200;
+		((GridData)shutdownLauncherText.getLayoutData()).widthHint = 200;
 
 		initializeFields();
 
@@ -133,6 +139,7 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 		IEclipsePreferences eclipsePreferences = Activator.getDefault().getEclipsePreferences();
 		showErrorsConfirmation.setSelection(eclipsePreferences.getBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_ERRORS, DEFAULT_ERROR_CONFIRMATION));
 		showWarningsConfirmation.setSelection(eclipsePreferences.getBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_WARNINGS, DEFAULT_WARNING_CONFIRMATION));
+		startupExtensionUpdateCheck.setSelection(eclipsePreferences.getBoolean(STARTUP_EXTENSION_UPDATE_CHECK, DEFAULT_STARTUP_EXTENSION_UPDATE_CHECK));
 	}
 
 	@Override
@@ -147,6 +154,7 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 		IEclipsePreferences eclipsePreferences = Activator.getDefault().getEclipsePreferences();
 		eclipsePreferences.putBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_ERRORS, showErrorsConfirmation.getSelection());
 		eclipsePreferences.putBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_WARNINGS, showWarningsConfirmation.getSelection());
+		eclipsePreferences.putBoolean(STARTUP_EXTENSION_UPDATE_CHECK, startupExtensionUpdateCheck.getSelection());
 		return true;
 	}
 
@@ -159,6 +167,7 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 		shutdownLauncherText.setText(settings.getProperty(SHUTDOWN_LAUNCHER_SETTING, ""));
 		retriesSpinner.setSelection(RETRIES_DEFAULT);
 
+		startupExtensionUpdateCheck.setSelection(DEFAULT_STARTUP_EXTENSION_UPDATE_CHECK);
 		showErrorsConfirmation.setSelection(DEFAULT_ERROR_CONFIRMATION);
 		showWarningsConfirmation.setSelection(DEFAULT_WARNING_CONFIRMATION);
 		super.performDefaults();

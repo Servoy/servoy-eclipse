@@ -646,7 +646,7 @@ public class UIUtils
 		return dialog.getSelectedOption();
 	}
 
-	public static boolean askConformation(final Shell shell, final String title, final String message)
+	public static boolean askConfirmation(final Shell shell, final String title, final String message)
 	{
 		final boolean[] ok = new boolean[1];
 		Display.getDefault().syncExec(new Runnable()

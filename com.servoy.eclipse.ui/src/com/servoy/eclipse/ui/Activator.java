@@ -22,24 +22,32 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
 import org.eclipse.equinox.p2.core.IProvisioningAgentProvider;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.search.internal.ui.SearchPlugin;
 import org.eclipse.search.internal.ui.SearchPreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.prefs.BackingStoreException;
 
+import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.marketplace.ExtensionUpdateCheckJob;
+import com.servoy.eclipse.marketplace.InstalledExtensionsDialog;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.preferences.StartupPreferences;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 
 /**
  * The activator class controls the plug-in life cycle.
@@ -71,11 +79,6 @@ public class Activator extends AbstractUIPlugin
 	private final Map<ImageDescriptor, Image> imageCacheDescriptor = new HashMap<ImageDescriptor, Image>();
 
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
-	 */
 	@Override
 	public void start(BundleContext context) throws Exception
 	{
@@ -85,15 +88,13 @@ public class Activator extends AbstractUIPlugin
 		//replace Eclipse default text search query provider with Servoy's
 		SearchPlugin.getDefault().getPreferenceStore().putValue(SearchPreferencePage.TEXT_SEARCH_QUERY_PROVIDER, "com.servoy.eclipse.ui.search.textSearch");
 
-		// make sure that core is fully initialized.
+		// make sure that core is fully initialized; this should also make sure app. server is initialised
 		com.servoy.eclipse.core.Activator.getDefault();
+
+		// warn if incompatible extensions are found
+		doExtensionRelatedChecks();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
-	 */
 	@Override
 	public void stop(BundleContext context) throws Exception
 	{
@@ -144,6 +145,46 @@ public class Activator extends AbstractUIPlugin
 
 		plugin = null;
 		super.stop(context);
+	}
+
+	private void doExtensionRelatedChecks()
+	{
+		// see if installed extensions are not out of sync with Servoy version
+		ServoyModel.startAppServer(); // this will probably do nothing as core Activator initialise probably did it
+		IApplicationServerSingleton applicationServer = ApplicationServerSingleton.get();
+		if (applicationServer.hadIncompatibleExtensionsWhenStarted())
+		{
+			Display.getDefault().asyncExec(new Runnable()
+			{
+				public void run()
+				{
+					boolean update = MessageDialog.openQuestion(
+						Display.getDefault().getActiveShell(),
+						"Incompatible extension found", "One or more installed extensions are incompatible with the current Servoy release (probably due to a Servoy update).\nDo you want to check for extension updates?"); //$NON-NLS-1$ //$NON-NLS-2$
+
+					if (update)
+					{
+						InstalledExtensionsDialog dialog = InstalledExtensionsDialog.getOrCreateInstance(Display.getCurrent().getActiveShell());
+						dialog.open();
+					}
+				}
+			});
+		}
+		else
+		{
+			// inside else, because there is no use doing this if incompatible extensions were found, because the user will be prompted to check for updates anyway;
+			// it would be a bit strange if the user said "no" but still a check for updates would be done in background
+
+			//automatically check for extension updates at startup if this is the preference of the user
+			if (getEclipsePreferences().getBoolean(StartupPreferences.STARTUP_EXTENSION_UPDATE_CHECK, StartupPreferences.DEFAULT_STARTUP_EXTENSION_UPDATE_CHECK))
+			{
+				Job updateCheckJob = new ExtensionUpdateCheckJob("Checking for Servoy Extension updates.");
+				updateCheckJob.setUser(false);
+				updateCheckJob.setSystem(false);
+				updateCheckJob.schedule();
+				updateCheckJob.setPriority(Job.LONG);
+			}
+		}
 	}
 
 	/**

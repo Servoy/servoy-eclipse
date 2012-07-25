@@ -1544,7 +1544,9 @@ application.setToolbarVisible('text',false);]]></sample>
             <argumentType typecode="com.servoy.j2db.dataprocessing.JSDataSet"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></description>
+          <description><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.
+
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
           <summary><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></summary>
           <sample><![CDATA[//set display values (return values will be same as display values)
 application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 3'));
@@ -1573,7 +1575,9 @@ application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 
             <argumentType typecode="boolean"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></description>
+          <description><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.
+
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
           <summary><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></summary>
           <sample><![CDATA[//set display values (return values will be same as display values)
 application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 3'));
@@ -1604,7 +1608,9 @@ application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 
             <argumentType typecode="[Ljava.lang.Object;"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></description>
+          <description><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.
+
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
           <summary><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></summary>
           <sample><![CDATA[//set display values (return values will be same as display values)
 application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 3'));
@@ -1633,7 +1639,9 @@ application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 
             <argumentType typecode="boolean"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></description>
+          <description><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.
+
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
           <summary><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></summary>
           <sample><![CDATA[//set display values (return values will be same as display values)
 application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 3'));
@@ -1665,7 +1673,9 @@ application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 
             <argumentType typecode="[Ljava.lang.Object;"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></description>
+          <description><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.
+
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
           <summary><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></summary>
           <sample><![CDATA[//set display values (return values will be same as display values)
 application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 3'));
@@ -1698,7 +1708,9 @@ application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 
             <argumentType typecode="boolean"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></description>
+          <description><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.
+
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
           <summary><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></summary>
           <sample><![CDATA[//set display values (return values will be same as display values)
 application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 3'));
@@ -5359,12 +5371,12 @@ component.fontType = solutionModel.createFont('Arial',SM_FONTSTYLE.PLAIN,10);]]>
           <return type="com.servoy.j2db.documentation.scripting.docs.Form" typecode="com.servoy.j2db.scripting.FormScope"/>
           <description><![CDATA[Get a form by name.]]></description>
           <summary><![CDATA[Get a form by name.]]></summary>
-          <sample><![CDATA[var allFormNames = forms.allnames;
-application.output("There are " + allFormNames.length + " forms.");
-for (var i=0; i<allFormNames.length; i++) 
+          <sample><![CDATA[var allForms = solutionModel.getForms();
+application.output("There are " + allForms.length + " forms.");
+for (var i=0; i<allForms.length; i++) 
 {
-	var f = forms[allFormNames[i]];
-	application.output("Form " + allFormNames[i] + " has selected index " + f.controller.getSelectedIndex());
+	var f = forms[allForms[i].name];
+	application.output("Form " + allForms[i].name + " has selected index " + f.controller.getSelectedIndex());
 }]]></sample>
         </property>
         <property deprecated="true" name="allnames" special="true">
@@ -27991,7 +28003,9 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <description><![CDATA[Sets the display/real values to the custom valuelist of the element (if element has custom valuelist).
 <br>This does not effect the value list with same name list on other elements or value lists at application level.
 
-<br>Should receive a dataset parameter, first column is for display values, second column (optional) is for real values.]]></description>
+<br>Should receive a dataset parameter, first column is for display values, second column (optional) is for real values.
+
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
           <summary><![CDATA[Sets the display/real values to the custom valuelist of the element (if element has custom valuelist).]]></summary>
           <sample><![CDATA[var dataset = databaseManager.createEmptyDataSet(0,new Array('display_values','optional_real_values'));
 dataset.addRow(['aa',1]);
@@ -28448,7 +28462,9 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <description><![CDATA[Sets the display/real values to the custom valuelist of the element (if element has custom valuelist).
 <br>This does not effect the value list with same name list on other elements or value lists at application level.
 
-<br>Should receive a dataset parameter, first column is for display values, second column (optional) is for real values.]]></description>
+<br>Should receive a dataset parameter, first column is for display values, second column (optional) is for real values.
+
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
           <summary><![CDATA[Sets the display/real values to the custom valuelist of the element (if element has custom valuelist).]]></summary>
           <sample><![CDATA[var dataset = databaseManager.createEmptyDataSet(0,new Array('display_values','optional_real_values'));
 dataset.addRow(['aa',1]);
@@ -28865,7 +28881,9 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <description><![CDATA[Sets the display/real values to the custom valuelist of the element (if element has custom valuelist).
 <br>This does not effect the value list with same name list on other elements or value lists at application level.
 
-<br>Should receive a dataset parameter, first column is for display values, second column (optional) is for real values.]]></description>
+<br>Should receive a dataset parameter, first column is for display values, second column (optional) is for real values.
+
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
           <summary><![CDATA[Sets the display/real values to the custom valuelist of the element (if element has custom valuelist).]]></summary>
           <sample><![CDATA[var dataset = databaseManager.createEmptyDataSet(0,new Array('display_values','optional_real_values'));
 dataset.addRow(['aa',1]);
@@ -30034,7 +30052,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object publicName="RuntimeForm" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Form" scriptingName="Form">
+    <object publicName="RuntimeForm" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Form">
       <properties>
         <property name="_super">
           <return type="com.servoy.j2db.documentation.scripting.docs.Form" typecode="com.servoy.j2db.scripting.FormScope"/>
@@ -32236,7 +32254,9 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <description><![CDATA[Sets the display/real values to the custom valuelist of the element (if element has custom valuelist).
 <br>This does not effect the value list with same name list on other elements or value lists at application level.
 
-<br>Should receive a dataset parameter, first column is for display values, second column (optional) is for real values.]]></description>
+<br>Should receive a dataset parameter, first column is for display values, second column (optional) is for real values.
+
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
           <summary><![CDATA[Sets the display/real values to the custom valuelist of the element (if element has custom valuelist).]]></summary>
           <sample><![CDATA[var dataset = databaseManager.createEmptyDataSet(0,new Array('display_values','optional_real_values'));
 dataset.addRow(['aa',1]);
@@ -33500,7 +33520,9 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <description><![CDATA[Sets the display/real values to the custom valuelist of the element (if element has custom valuelist).
 <br>This does not effect the value list with same name list on other elements or value lists at application level.
 
-<br>Should receive a dataset parameter, first column is for display values, second column (optional) is for real values.]]></description>
+<br>Should receive a dataset parameter, first column is for display values, second column (optional) is for real values.
+
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
           <summary><![CDATA[Sets the display/real values to the custom valuelist of the element (if element has custom valuelist).]]></summary>
           <sample><![CDATA[var dataset = databaseManager.createEmptyDataSet(0,new Array('display_values','optional_real_values'));
 dataset.addRow(['aa',1]);
@@ -33964,7 +33986,9 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <description><![CDATA[Sets the display/real values to the custom valuelist of the element (if element has custom valuelist).
 <br>This does not effect the value list with same name list on other elements or value lists at application level.
 
-<br>Should receive a dataset parameter, first column is for display values, second column (optional) is for real values.]]></description>
+<br>Should receive a dataset parameter, first column is for display values, second column (optional) is for real values.
+
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
           <summary><![CDATA[Sets the display/real values to the custom valuelist of the element (if element has custom valuelist).]]></summary>
           <sample><![CDATA[var dataset = databaseManager.createEmptyDataSet(0,new Array('display_values','optional_real_values'));
 dataset.addRow(['aa',1]);
@@ -35206,7 +35230,9 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <description><![CDATA[Sets the display/real values to the custom valuelist of the element (if element has custom valuelist).
 <br>This does not effect the value list with same name list on other elements or value lists at application level.
 
-<br>Should receive a dataset parameter, first column is for display values, second column (optional) is for real values.]]></description>
+<br>Should receive a dataset parameter, first column is for display values, second column (optional) is for real values.
+
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
           <summary><![CDATA[Sets the display/real values to the custom valuelist of the element (if element has custom valuelist).]]></summary>
           <sample><![CDATA[var dataset = databaseManager.createEmptyDataSet(0,new Array('display_values','optional_real_values'));
 dataset.addRow(['aa',1]);
@@ -37211,7 +37237,9 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <description><![CDATA[Sets the display/real values to the custom valuelist of the element (if element has custom valuelist).
 <br>This does not effect the value list with same name list on other elements or value lists at application level.
 
-<br>Should receive a dataset parameter, first column is for display values, second column (optional) is for real values.]]></description>
+<br>Should receive a dataset parameter, first column is for display values, second column (optional) is for real values.
+
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
           <summary><![CDATA[Sets the display/real values to the custom valuelist of the element (if element has custom valuelist).]]></summary>
           <sample><![CDATA[var dataset = databaseManager.createEmptyDataSet(0,new Array('display_values','optional_real_values'));
 dataset.addRow(['aa',1]);
