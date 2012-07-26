@@ -112,8 +112,9 @@ public class RenameMediaAction extends Action implements ISelectionChangedListen
 		if (res == Window.OK)
 		{
 			ServoyProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solution.getName());
-			Media selectedMediaItem = project.getEditingSolution().getMedia(selectedMediaPath + selectedMediaName);
-			selectedMediaItem.setName(selectedMediaPath + nameDialog.getValue());
+			Media selectedMediaItem = project.getEditingSolution().getMedia(
+				selectedMediaPath != null ? selectedMediaPath + selectedMediaName : selectedMediaName);
+			selectedMediaItem.setName(selectedMediaPath != null ? selectedMediaPath + nameDialog.getValue() : nameDialog.getValue());
 			try
 			{
 				project.saveEditingSolutionNodes(new IPersist[] { selectedMediaItem }, true);
