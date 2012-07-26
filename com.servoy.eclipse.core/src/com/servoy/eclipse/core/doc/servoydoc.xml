@@ -44635,7 +44635,7 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
 //show the form in the main window
 //%%prefix%%controller.show(null);]]></sample>
           <parameters>
-            <parameter name="window">
+            <parameter name="window" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the window in which this form should be shown, specified by the name of an existing window]]></description>
             </parameter>
           </parameters>
