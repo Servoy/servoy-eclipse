@@ -3930,18 +3930,35 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									if (!styleClasses.contains(styleClass))
 									{
 										ServoyMarker mk = MarkerMessages.StyleFormClassNotFound.fill(styleClass, form.getName());
+										IMarker marker = null;
 										if (o instanceof Part)
 										{
 											mk = MarkerMessages.StyleElementClassNotFound.fill(styleClass, Part.getDisplayName(((Part)o).getPartType()),
 												form.getName());
-											addMarker(project, mk.getType(), mk.getText(), -1, STYLE_CLASS_NOT_FOUND, IMarker.PRIORITY_NORMAL, null, o);
+											marker = addMarker(project, mk.getType(), mk.getText(), -1, STYLE_CLASS_NOT_FOUND, IMarker.PRIORITY_NORMAL, null, o);
 										}
 										else if (o instanceof ISupportName && !(o instanceof Form) && (((ISupportName)o).getName() != null))
 										{
 											mk = MarkerMessages.StyleElementClassNotFound.fill(styleClass, ((ISupportName)o).getName(), form.getName());
-											addMarker(project, mk.getType(), mk.getText(), -1, STYLE_CLASS_NOT_FOUND, IMarker.PRIORITY_NORMAL, null, o);
+											marker = addMarker(project, mk.getType(), mk.getText(), -1, STYLE_CLASS_NOT_FOUND, IMarker.PRIORITY_NORMAL, null, o);
 										}
-										else addMarker(project, mk.getType(), mk.getText(), -1, STYLE_CLASS_NOT_FOUND, IMarker.PRIORITY_NORMAL, null, o);
+										else marker = addMarker(project, mk.getType(), mk.getText(), -1, STYLE_CLASS_NOT_FOUND, IMarker.PRIORITY_NORMAL, null,
+											o);
+										for (String currentClass : styleClasses)
+										{
+											if (currentClass.equalsIgnoreCase(styleClass))
+											{
+												try
+												{
+													marker.setAttribute("styleClass", currentClass);
+												}
+												catch (CoreException e)
+												{
+													ServoyLog.logError(e);
+												}
+												break;
+											}
+										}
 									}
 								}
 							}

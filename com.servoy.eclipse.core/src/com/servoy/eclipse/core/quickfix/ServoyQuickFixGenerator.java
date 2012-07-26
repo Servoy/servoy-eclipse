@@ -230,9 +230,9 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 			else if (type.equals(ServoyBuilder.MISSING_STYLE))
 			{
 				boolean clearStyle = marker.getAttribute("clearStyle", false);
-				String solName = (String)marker.getAttribute("SolutionName");
 				String uuid = (String)marker.getAttribute("Uuid");
-				fixes = new IMarkerResolution[] { new ClearMissingStyleQuickFix(uuid, solName, clearStyle) };
+				String styleClass = (String)marker.getAttribute("styleClass");
+				fixes = new IMarkerResolution[] { new ClearOrModifyToCaseSensitiveMissingStyleQuickFix(uuid, clearStyle, styleClass) };
 			}
 			else if (type.equals(ServoyBuilder.DUPLICATE_NAME_MARKER_TYPE))
 			{
