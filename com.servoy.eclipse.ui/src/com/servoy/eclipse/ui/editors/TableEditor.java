@@ -22,6 +22,8 @@ import java.sql.SQLException;
 import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
@@ -31,6 +33,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiPageEditorPart;
 
@@ -421,6 +424,31 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		if (Table.class.equals(adapter))
 		{
 			return getTable();
+		}
+		if (adapter.equals(IGotoMarker.class))
+		{
+			return new IGotoMarker()
+			{
+				public void gotoMarker(IMarker marker)
+				{
+					try
+					{
+						String columnName = (String)marker.getAttribute("columnName");
+						if (columnName != null)
+						{
+							Column column = getTable().getColumn(columnName);
+							if (column != null && columnComposite != null)
+							{
+								columnComposite.selectColumn(column);
+							}
+						}
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
+			};
 		}
 		return super.getAdapter(adapter);
 	}

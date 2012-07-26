@@ -3740,7 +3740,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								!column.getColumnInfo().hasFlag(Column.UUID_COLUMN))
 							{
 								ServoyMarker mk = MarkerMessages.ColumnUUIDFlagNotSet.fill(tableName, column.getName());
-								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_UUID_FLAG_NOT_SET, IMarker.PRIORITY_NORMAL, null, null);
+								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_UUID_FLAG_NOT_SET, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
+									"columnName", column.getName());
 							}
 							// check type defined by column converter
 							int dataProviderType = getDataType(res, column, null, null);
@@ -3748,7 +3749,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								(column.getSequenceType() == ColumnInfo.SERVOY_SEQUENCE && (dataProviderType != IColumnTypes.INTEGER && dataProviderType != IColumnTypes.NUMBER)))
 							{
 								ServoyMarker mk = MarkerMessages.ColumnIncompatibleTypeForSequence.fill(tableName, column.getName());
-								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_INCOMPATIBLE_TYPE_FOR_SEQUENCE, IMarker.PRIORITY_NORMAL, null, null);
+								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_INCOMPATIBLE_TYPE_FOR_SEQUENCE, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
+									"columnName", column.getName());
 							}
 							if (column.hasFlag(Column.UUID_COLUMN))
 							{
@@ -3766,20 +3768,23 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								if (!compatibleForUUID)
 								{
 									ServoyMarker mk = MarkerMessages.ColumnIncompatbleWithUUID.fill(tableName, column.getName());
-									addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_INCOMPATIBLE_WITH_UUID, IMarker.PRIORITY_NORMAL, null, null);
+									addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_INCOMPATIBLE_WITH_UUID, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
+										"columnName", column.getName());
 								}
 							}
 							if (column.getSequenceType() == ColumnInfo.DATABASE_IDENTITY && !column.isDatabasePK())
 							{
 								ServoyMarker mk = MarkerMessages.ColumnDatabaseIdentityProblem.fill(tableName, column.getName());
-								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_DATABASE_IDENTITY_PROBLEM, IMarker.PRIORITY_NORMAL, null, null);
+								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_DATABASE_IDENTITY_PROBLEM, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
+									"columnName", column.getName());
 							}
 							if (column.getColumnInfo() != null && column.getColumnInfo().getForeignType() != null &&
 								!tableNames.contains(column.getColumnInfo().getForeignType()))
 							{
 								ServoyMarker mk = MarkerMessages.ColumnForeignTypeProblem.fill(tableName, column.getName(),
 									column.getColumnInfo().getForeignType());
-								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_FOREIGN_TYPE_PROBLEM, IMarker.PRIORITY_NORMAL, null, null);
+								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_FOREIGN_TYPE_PROBLEM, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
+									"columnName", column.getName());
 							}
 							if (column.getColumnInfo() != null && column.getColumnInfo().getAutoEnterType() == ColumnInfo.LOOKUP_VALUE_AUTO_ENTER)
 							{
@@ -3822,7 +3827,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									if (invalid)
 									{
 										ServoyMarker mk = MarkerMessages.ColumnLookupInvalid.fill(tableName, column.getName());
-										addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_LOOKUP_INVALID, IMarker.PRIORITY_NORMAL, null, null);
+										addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_LOOKUP_INVALID, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
+											"columnName", column.getName());
 									}
 								}
 							}
@@ -3845,7 +3851,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									otherColumn = columnsByDataProviderID.get(columnName);
 								}
 								ServoyMarker mk = MarkerMessages.ColumnDuplicateNameDPID.fill(tableName, column.getName(), otherColumn.getName());
-								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_DUPLICATE_NAME_DPID, IMarker.PRIORITY_NORMAL, null, null);
+								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_DUPLICATE_NAME_DPID, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
+									"columnName", column.getName());
 							}
 							columnsByName.put(columnName, column);
 							columnsByDataProviderID.put(columnDataProviderID, column);
