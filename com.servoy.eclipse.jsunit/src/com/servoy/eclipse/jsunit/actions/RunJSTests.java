@@ -62,6 +62,7 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.SerialRule;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.debug.actions.StartJsUnitClientActionDelegate;
 import com.servoy.eclipse.jsunit.SolutionRemoteTestRunner;
 import com.servoy.eclipse.jsunit.SolutionUnitTestTarget;
@@ -72,6 +73,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 
 /**
@@ -108,6 +110,28 @@ public class RunJSTests implements IObjectActionDelegate, IWorkbenchWindowAction
 		final ServoyProject sp = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 		if (sp != null)
 		{
+			// until more authentication options are supported, just warn the user about what won't work
+			try
+			{
+				if (sp.getSolution() != null && sp.getSolution().getLoginSolutionName() != null)
+				{
+					UIUtils.runInUI(new Runnable()
+					{
+						public void run()
+						{
+							MessageDialog.openWarning(window == null ? Display.getCurrent().getActiveShell() : window.getShell(),
+								"Unable to run unit tests", //$NON-NLS-1$
+								"Running unit tests for solutions that require authentication through a login/authenticator solution is not currently supported.\n\nStill you can create a new solution that does not require authentication, add current solution as it's module and activate the test solution.\nThis way you will be able to run the tests without authenticating."); //$NON-NLS-1$
+						}
+					}, false);
+					return;
+				}
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError(e);
+			}
+
 			try
 			{
 				// in case debug smart client was already used, start clean
