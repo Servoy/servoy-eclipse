@@ -121,7 +121,7 @@ public class RunJSTests implements IObjectActionDelegate, IWorkbenchWindowAction
 						{
 							MessageDialog.openWarning(window == null ? Display.getCurrent().getActiveShell() : window.getShell(),
 								"Unable to run unit tests", //$NON-NLS-1$
-								"Running unit tests for solutions that require authentication through a login/authenticator solution is not currently supported.\n\nStill you can create a new solution that does not require authentication, add current solution as it's module and activate the test solution.\nThis way you will be able to run the tests without authenticating."); //$NON-NLS-1$
+								"Running unit tests for solutions that require authentication through a login/authenticator solution is not currently supported.\n\nTo run unit tests for such a solution, create a new solution that does not require authentication and add the solution that requires authentication to it as a module.\nThis way you will be able to run tests without authenticating."); //$NON-NLS-1$
 						}
 					}, false);
 					return;
