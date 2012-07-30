@@ -27,22 +27,19 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
 import org.eclipse.equinox.p2.core.IProvisioningAgentProvider;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.search.internal.ui.SearchPlugin;
 import org.eclipse.search.internal.ui.SearchPreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.servoy.eclipse.core.ServoyModel;
-import com.servoy.eclipse.marketplace.ExtensionUpdateCheckJob;
-import com.servoy.eclipse.marketplace.InstalledExtensionsDialog;
+import com.servoy.eclipse.marketplace.ExtensionUpdateAndIncompatibilityCheckJob;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
 import com.servoy.j2db.IApplication;
@@ -152,38 +149,17 @@ public class Activator extends AbstractUIPlugin
 		// see if installed extensions are not out of sync with Servoy version
 		ServoyModel.startAppServer(); // this will probably do nothing as core Activator initialise probably did it
 		IApplicationServerSingleton applicationServer = ApplicationServerSingleton.get();
-		if (applicationServer.hadIncompatibleExtensionsWhenStarted())
-		{
-			Display.getDefault().asyncExec(new Runnable()
-			{
-				public void run()
-				{
-					boolean update = MessageDialog.openQuestion(
-						Display.getDefault().getActiveShell(),
-						"Incompatible extension found", "One or more installed extensions are incompatible with the current Servoy release (probably due to a Servoy update).\nDo you want to check for extension updates?"); //$NON-NLS-1$ //$NON-NLS-2$
 
-					if (update)
-					{
-						InstalledExtensionsDialog dialog = InstalledExtensionsDialog.getOrCreateInstance(Display.getCurrent().getActiveShell());
-						dialog.open();
-					}
-				}
-			});
-		}
-		else
+		// if incompatible extensions were found or we need to automatically check for extension updates at startup (if this is the preference of the user)
+		if (applicationServer.hadIncompatibleExtensionsWhenStarted() ||
+			getEclipsePreferences().getBoolean(StartupPreferences.STARTUP_EXTENSION_UPDATE_CHECK, StartupPreferences.DEFAULT_STARTUP_EXTENSION_UPDATE_CHECK))
 		{
-			// inside else, because there is no use doing this if incompatible extensions were found, because the user will be prompted to check for updates anyway;
-			// it would be a bit strange if the user said "no" but still a check for updates would be done in background
-
-			//automatically check for extension updates at startup if this is the preference of the user
-			if (getEclipsePreferences().getBoolean(StartupPreferences.STARTUP_EXTENSION_UPDATE_CHECK, StartupPreferences.DEFAULT_STARTUP_EXTENSION_UPDATE_CHECK))
-			{
-				Job updateCheckJob = new ExtensionUpdateCheckJob("Checking for Servoy Extension updates.");
-				updateCheckJob.setUser(false);
-				updateCheckJob.setSystem(false);
-				updateCheckJob.schedule();
-				updateCheckJob.setPriority(Job.LONG);
-			}
+			Job updateCheckJob = new ExtensionUpdateAndIncompatibilityCheckJob(
+				"Checking for Servoy Extension " + (applicationServer.hadIncompatibleExtensionsWhenStarted() ? " incompatibilities." : "updates.")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			updateCheckJob.setUser(false);
+			updateCheckJob.setSystem(false);
+			updateCheckJob.schedule();
+			updateCheckJob.setPriority(applicationServer.hadIncompatibleExtensionsWhenStarted() ? Job.INTERACTIVE : Job.LONG);
 		}
 	}
 

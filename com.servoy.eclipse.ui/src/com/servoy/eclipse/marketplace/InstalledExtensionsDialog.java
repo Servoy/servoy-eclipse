@@ -676,6 +676,11 @@ public class InstalledExtensionsDialog extends TrayDialog
 		createButton(parent, UPDATE_CHECK_BUTTON_ID, "Check for updates", true); //$NON-NLS-1$
 	}
 
+	public void simulateUpdateCheckButtonClick()
+	{
+		buttonPressed(UPDATE_CHECK_BUTTON_ID);
+	}
+
 	@Override
 	protected void buttonPressed(int buttonId)
 	{
