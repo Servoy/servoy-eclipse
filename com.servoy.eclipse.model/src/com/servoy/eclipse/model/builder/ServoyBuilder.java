@@ -1325,10 +1325,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									{
 										if (!missingServers.containsKey(parentForm.getServerName()))
 										{
-											IDataProvider dataProvider = flattenedSolution.getDataProviderForTable(parentForm.getTable(), id);
+											FlattenedSolution persistFlattenedSolution = ModelUtils.getEditingFlattenedSolution(o);
+											if (persistFlattenedSolution == null) persistFlattenedSolution = flattenedSolution;
+											IDataProvider dataProvider = persistFlattenedSolution.getDataProviderForTable(parentForm.getTable(), id);
 											if (dataProvider == null)
 											{
-												Form flattenedForm = flattenedSolution.getFlattenedForm(o);
+												Form flattenedForm = persistFlattenedSolution.getFlattenedForm(o);
 												if (flattenedForm != null)
 												{
 													dataProvider = flattenedForm.getScriptVariable(id);
@@ -1338,7 +1340,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											{
 												try
 												{
-													dataProvider = flattenedSolution.getGlobalDataProvider(id);
+													dataProvider = persistFlattenedSolution.getGlobalDataProvider(id);
 												}
 												catch (Exception e)
 												{
