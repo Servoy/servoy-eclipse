@@ -678,7 +678,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 
 	public void simulateUpdateCheckButtonClick()
 	{
-		buttonPressed(UPDATE_CHECK_BUTTON_ID);
+		if (getButton(UPDATE_CHECK_BUTTON_ID).isEnabled()) buttonPressed(UPDATE_CHECK_BUTTON_ID);
 	}
 
 	@Override

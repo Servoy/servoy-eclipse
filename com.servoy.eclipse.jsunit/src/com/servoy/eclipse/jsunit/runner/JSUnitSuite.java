@@ -233,6 +233,26 @@ public class JSUnitSuite extends TestSuite
 		this.stackElementFilters = stackElementFilters;
 	}
 
+	/**
+	 * Call this if you do not want references to used scopes to prevent garbage collection, but if you still plan to use this test suite
+	 * later. When you do, you MUST call {@link #changeScope(Scriptable, Reader)} to reinitialise the test scope before using the suite again.<BR>
+	 * 
+	 * This is useful in some cases where creating the test suite hierarchy is needed before unit tests start running (such as UI/ant reporting).
+	 * After you create the test suite hierarchy, the suite might not be used for a long while, and you might want to free up some memory, which
+	 * will be re-allocated when the test is run.
+	 * 
+	 * This method is automatically called after the suite runs.
+	 */
+	protected void releaseScopes()
+	{
+		runner = null;
+	}
+
+	/**
+	 * Can be called if the test scopes need to be re-initialized. See {@link #releaseScopes()}.
+	 * @param scope new scope.
+	 * @param jsTestCode the code to be tested.
+	 */
 	protected void changeScope(Scriptable scope, Reader jsTestCode)
 	{
 		runner = new JSUnitToJavaRunner(scope, createSeparateScopeForTestCode);
@@ -291,6 +311,10 @@ public class JSUnitSuite extends TestSuite
 				// else intentional shut down of the javascript engine, probably due to an user action
 				result.addError(this, new Exception("Unit tests stopped by user..."));
 			}
+		}
+		finally
+		{
+			releaseScopes();
 		}
 	}
 
