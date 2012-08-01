@@ -357,49 +357,56 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 	private TestIdentifier addTestCaseIfNecessary(Iterator<ScriptMethod> it, TestTarget target, String nameOfTest, String callPrefix, StringBuffer testCode)
 	{
 		TestIdentifier testIdentifier = null;
+		boolean testMethodsFound = false;
+		StringBuffer tmp = new StringBuffer();
 		while (it.hasNext())
 		{
 			ScriptMethod method = it.next();
-			if (target == null || target.testMethodToTest == null || target.testMethodToTest == method)
+			if (method.getName().equals(SET_UP_METHOD) || method.getName().equals(TEAR_DOWN_METHOD) ||
+				((target == null || target.testMethodToTest == null || target.testMethodToTest == method) && method.getName().startsWith(TEST_METHOD_PREFIX)))
 			{
-				if (method.getName().startsWith(TEST_METHOD_PREFIX) || method.getName().equals(SET_UP_METHOD) || method.getName().equals(TEAR_DOWN_METHOD))
+				if (!testMethodsFound && method.getName().startsWith(TEST_METHOD_PREFIX))
 				{
-					if (testIdentifier == null)
-					{
-						// create globals TestCase class
-						testIdentifier = new TestIdentifier(nameOfTest);
-						testCode.append("function ");
-						testCode.append(testIdentifier.getTestClassName());
-						testCode.append("(name) { TestCase.call(this, name); }\n");
-					}
-					testCode.append("function ");
-					testCode.append(testIdentifier.getTestClassName());
-					testCode.append("_");
-					testCode.append(method.getName());
-					testCode.append("() { ");
-					testCode.append(IExecutingEnviroment.TOPLEVEL_JSUNIT);
-					testCode.append(" = this; ");
-					testCode.append(callPrefix);
-					testCode.append(".");
-					if (method.getParent() instanceof Solution)
-					{
-						testCode.append(method.getScopeName()).append('.');
-					}
-					testCode.append(method.getName());
-					testCode.append("(); ");
-					testCode.append(IExecutingEnviroment.TOPLEVEL_JSUNIT);
-					testCode.append(" = null; }\n");
+					testMethodsFound = true;
+					testCode.append(tmp);
+					tmp = testCode;
 				}
+
+				if (testIdentifier == null)
+				{
+					// create globals TestCase class
+					testIdentifier = new TestIdentifier(nameOfTest);
+					tmp.append("function ");
+					tmp.append(testIdentifier.getTestClassName());
+					tmp.append("(name) { TestCase.call(this, name); }\n");
+				}
+				tmp.append("function ");
+				tmp.append(testIdentifier.getTestClassName());
+				tmp.append("_");
+				tmp.append(method.getName());
+				tmp.append("() { ");
+				tmp.append(IExecutingEnviroment.TOPLEVEL_JSUNIT);
+				tmp.append(" = this; ");
+				tmp.append(callPrefix);
+				tmp.append(".");
+				if (method.getParent() instanceof Solution)
+				{
+					tmp.append(method.getScopeName()).append('.');
+				}
+				tmp.append(method.getName());
+				tmp.append("(); ");
+				tmp.append(IExecutingEnviroment.TOPLEVEL_JSUNIT);
+				tmp.append(" = null; }\n");
 			}
 		}
-		if (testIdentifier != null)
+		if (testMethodsFound && testIdentifier != null)
 		{
 			testCode.append(testIdentifier.getTestClassName());
 			testCode.append(".prototype = new TestCase();\n");
 			testCode.append(testIdentifier.getTestClassName());
 			testCode.append(".glue(this);\n\n");
 		}
-		return testIdentifier;
+		return testMethodsFound ? testIdentifier : null;
 	}
 
 	private TestIdentifier addModuleSuite(List<TestIdentifier> modulesThatAddedTests, StringBuffer testCode)
