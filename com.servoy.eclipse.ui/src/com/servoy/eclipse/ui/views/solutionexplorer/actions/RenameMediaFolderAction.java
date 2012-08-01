@@ -20,6 +20,7 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -31,7 +32,9 @@ import org.eclipse.jface.window.Window;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -104,6 +107,7 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 		renameFolderNameDlg.open();
 		if (renameFolderNameDlg.getReturnCode() == Window.OK)
 		{
+			WorkspaceFileAccess wsa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
 			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solution.getName());
 			EclipseRepository repository = (EclipseRepository)solution.getRepository();
 			String replaceName = ((MediaNode)selection.getRealObject()).getPath();
@@ -112,6 +116,7 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 			String newName = (replaceStartIdx == -1) ? renameFolderNameDlg.getValue() + "/" : replaceName.substring(0, replaceStartIdx) + "/" +
 				renameFolderNameDlg.getValue() + "/";
 
+			ArrayList<Media> createdMedias = new ArrayList<Media>();
 			ArrayList<IPersist> newMedias = new ArrayList<IPersist>();
 			ArrayList<IPersist> removedMedias = new ArrayList<IPersist>();
 			Iterator<Media> mediaIte = solution.getMedias(false);
@@ -124,14 +129,19 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 					media = mediaIte.next();
 					if (media.getName().startsWith(replaceName))
 					{
-						movedMedia = solution.createNewMedia(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(),
-							media.getName().replaceFirst(replaceName, newName));
-						movedMedia.setMimeType(media.getMimeType());
-						movedMedia.setPermMediaData(media.getMediaData());
-						movedMedia.flagChanged();
-						newMedias.add(movedMedia);
+						createdMedias.add(media);
 						removedMedias.add(servoyProject.getEditingPersist(media.getUUID()));
 					}
+				}
+
+				for (Media m : createdMedias)
+				{
+					movedMedia = solution.createNewMedia(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(),
+						m.getName().replaceFirst(replaceName, newName));
+					movedMedia.setMimeType(m.getMimeType());
+					movedMedia.setPermMediaData(m.getMediaData());
+					movedMedia.flagChanged();
+					newMedias.add(movedMedia);
 				}
 
 				for (IPersist m : newMedias)
@@ -148,9 +158,16 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 				ArrayList<IPersist> changedMedias = new ArrayList<IPersist>(newMedias);
 				changedMedias.addAll(removedMedias);
 				ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solution.getName()).saveEditingSolutionNodes(
-					changedMedias.toArray(new Media[0]), false);
+					changedMedias.toArray(new IPersist[changedMedias.size()]), true, false);
+
+				wsa.delete(solution.getName() + "/" + SolutionSerializer.MEDIAS_DIR + "/" + replaceName);
+				viewer.refreshTreeCompletely();
 			}
 			catch (RepositoryException ex)
+			{
+				ServoyLog.logError(ex);
+			}
+			catch (Exception ex)
 			{
 				ServoyLog.logError(ex);
 			}
