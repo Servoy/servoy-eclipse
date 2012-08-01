@@ -13584,15 +13584,19 @@ var current = %%prefix%%foundset.getSelectedIndex();
         </function>
         <function name="getSelectedIndexes">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[I"><![CDATA[Array current indexes (1-based)]]></return>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[Ljava.lang.Number;"><![CDATA[Array current indexes (1-based)]]></return>
           <description><![CDATA[Get the indexes of the selected records.
 When the founset is in multiSelect mode (see property multiSelect), a selection can consist of more than one index.]]></description>
           <summary><![CDATA[Get the indexes of the selected records.]]></summary>
-          <sample><![CDATA[var current = %%prefix%%foundset.getSelectedIndexes();
-var newSelection = new Array();
-newSelection[0] = current[0]; // first current selection
-newSelection[1] = current[0] + 1; // and the next row
-%%prefix%%foundset.setSelectedIndexes(newSelection);]]></sample>
+          <sample><![CDATA[// modify selection to the first selected item and the following row only
+var current = %%prefix%%foundset.getSelectedIndexes();
+if (current.length > 1)
+{
+	var newSelection = new Array();
+	newSelection[0] = current[0]; // first current selection
+	newSelection[1] = current[0] + 1; // and the next row
+	%%prefix%%foundset.setSelectedIndexes(newSelection);
+}]]></sample>
         </function>
         <function name="getSelectedRecord">
           <argumentsTypes/>
@@ -14646,18 +14650,22 @@ var current = %%prefix%%foundset.getSelectedIndex();
         </function>
         <function name="setSelectedIndexes">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="[Ljava.lang.Number;"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Set the selected records indexes.]]></description>
           <summary><![CDATA[Set the selected records indexes.]]></summary>
-          <sample><![CDATA[var current = %%prefix%%foundset.getSelectedIndexes();
-var newSelection = new Array();
-newSelection[0] = current[0]; // first current selection
-newSelection[1] = current[0] + 1; // and the next row
-%%prefix%%foundset.setSelectedIndexes(newSelection);]]></sample>
+          <sample><![CDATA[// modify selection to the first selected item and the following row only
+var current = %%prefix%%foundset.getSelectedIndexes();
+if (current.length > 1)
+{
+	var newSelection = new Array();
+	newSelection[0] = current[0]; // first current selection
+	newSelection[1] = current[0] + 1; // and the next row
+	%%prefix%%foundset.setSelectedIndexes(newSelection);
+}]]></sample>
           <parameters>
-            <parameter name="indexes" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
+            <parameter name="indexes" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[Ljava.lang.Number;">
               <description><![CDATA[An array with indexes to set.]]></description>
             </parameter>
           </parameters>
@@ -24959,15 +24967,19 @@ var current = %%prefix%%foundset.getSelectedIndex();
         </function>
         <function name="getSelectedIndexes">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[I"><![CDATA[Array current indexes (1-based)]]></return>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[Ljava.lang.Number;"><![CDATA[Array current indexes (1-based)]]></return>
           <description><![CDATA[Get the indexes of the selected records.
 When the founset is in multiSelect mode (see property multiSelect), a selection can consist of more than one index.]]></description>
           <summary><![CDATA[Get the indexes of the selected records.]]></summary>
-          <sample><![CDATA[var current = %%prefix%%foundset.getSelectedIndexes();
-var newSelection = new Array();
-newSelection[0] = current[0]; // first current selection
-newSelection[1] = current[0] + 1; // and the next row
-%%prefix%%foundset.setSelectedIndexes(newSelection);]]></sample>
+          <sample><![CDATA[// modify selection to the first selected item and the following row only
+var current = %%prefix%%foundset.getSelectedIndexes();
+if (current.length > 1)
+{
+	var newSelection = new Array();
+	newSelection[0] = current[0]; // first current selection
+	newSelection[1] = current[0] + 1; // and the next row
+	%%prefix%%foundset.setSelectedIndexes(newSelection);
+}]]></sample>
         </function>
         <function name="getSelectedRecord">
           <argumentsTypes/>
@@ -26021,18 +26033,22 @@ var current = %%prefix%%foundset.getSelectedIndex();
         </function>
         <function name="setSelectedIndexes">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="[Ljava.lang.Number;"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Set the selected records indexes.]]></description>
           <summary><![CDATA[Set the selected records indexes.]]></summary>
-          <sample><![CDATA[var current = %%prefix%%foundset.getSelectedIndexes();
-var newSelection = new Array();
-newSelection[0] = current[0]; // first current selection
-newSelection[1] = current[0] + 1; // and the next row
-%%prefix%%foundset.setSelectedIndexes(newSelection);]]></sample>
+          <sample><![CDATA[// modify selection to the first selected item and the following row only
+var current = %%prefix%%foundset.getSelectedIndexes();
+if (current.length > 1)
+{
+	var newSelection = new Array();
+	newSelection[0] = current[0]; // first current selection
+	newSelection[1] = current[0] + 1; // and the next row
+	%%prefix%%foundset.setSelectedIndexes(newSelection);
+}]]></sample>
           <parameters>
-            <parameter name="indexes" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
+            <parameter name="indexes" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[Ljava.lang.Number;">
               <description><![CDATA[An array with indexes to set.]]></description>
             </parameter>
           </parameters>
