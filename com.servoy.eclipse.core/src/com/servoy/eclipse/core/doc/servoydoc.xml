@@ -14650,7 +14650,7 @@ var current = %%prefix%%foundset.getSelectedIndex();
         </function>
         <function name="setSelectedIndexes">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Number;"/>
+            <argumentType typecode="[Ljava.lang.Object;"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Set the selected records indexes.]]></description>
@@ -14665,7 +14665,7 @@ if (current.length > 1)
 	%%prefix%%foundset.setSelectedIndexes(newSelection);
 }]]></sample>
           <parameters>
-            <parameter name="indexes" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[Ljava.lang.Number;">
+            <parameter name="indexes" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
               <description><![CDATA[An array with indexes to set.]]></description>
             </parameter>
           </parameters>
@@ -26033,7 +26033,7 @@ var current = %%prefix%%foundset.getSelectedIndex();
         </function>
         <function name="setSelectedIndexes">
           <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Number;"/>
+            <argumentType typecode="[Ljava.lang.Object;"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Set the selected records indexes.]]></description>
@@ -26048,7 +26048,7 @@ if (current.length > 1)
 	%%prefix%%foundset.setSelectedIndexes(newSelection);
 }]]></sample>
           <parameters>
-            <parameter name="indexes" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[Ljava.lang.Number;">
+            <parameter name="indexes" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
               <description><![CDATA[An array with indexes to set.]]></description>
             </parameter>
           </parameters>
