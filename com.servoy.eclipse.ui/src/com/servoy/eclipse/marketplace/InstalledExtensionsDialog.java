@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -82,6 +83,7 @@ import com.servoy.extension.parser.EXPParserPool;
 import com.servoy.extension.parser.ExtensionConfiguration;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.StringComparator;
 
 /**
  * Dialog that shows currently installed extensions and allows uninstall and checking for updates.
@@ -473,6 +475,14 @@ public class InstalledExtensionsDialog extends TrayDialog
 		{
 			int ml = installedProvider.getMessages().length;
 			DependencyMetadata[] allInstalled = installedProvider.getAllAvailableExtensions();
+
+			Arrays.sort(allInstalled, new Comparator<DependencyMetadata>()
+			{
+				public int compare(DependencyMetadata o1, DependencyMetadata o2)
+				{
+					return StringComparator.INSTANCE.compare(o1.extensionName, o2.extensionName);
+				}
+			});
 
 			Message[] msgs = installedProvider.getMessages();
 			if (msgs.length > ml) ServoyLog.logWarning(
