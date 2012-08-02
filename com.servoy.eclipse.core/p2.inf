@@ -2,6 +2,6 @@ instructions.configure=addRepository(type:0,name:Servoy update site,location:htt
 addRepository(type:0,name:SQLExplorer Updates,location:http${#58}//eclipsesql.sourceforge.net/);addRepository(type:1,name:SQLExplorer Updates,location:http${#58}//eclipsesql.sourceforge.net/);\
 addRepository(type:0,name:Indigo,location:http${#58}//download.eclipse.org/releases/indigo);addRepository(type:1,name:Indigo,location:http${#58}//download.eclipse.org/releases/indigo);\
 addRepository(type:0,name:The Eclipse Project Updates,location:http${#58}//download.eclipse.org/eclipse/updates/3.7);addRepository(type:1,name:The Eclipse Project Updates,location:http${#58}//download.eclipse.org/eclipse/updates/3.7);\
-addRepository(type:0,name:Subclipse 1.6.x Update Site,location:http${#58}//subclipse.tigris.org/update_1.6.x);addRepository(type:1,name:Subclipse 1.6.x Update Site,location:http${#58}//subclipse.tigris.org/update_1.6.x);
+addRepository(type:0,name:Subclipse 1.8.x Update Site,location:http${#58}//subclipse.tigris.org/update_1.8.x);addRepository(type:1,name:Subclipse 1.8.x Update Site,location:http${#58}//subclipse.tigris.org/update_1.8.x);
 addRepository(type:0,name:ServoyEclipse JSDoc Plugin,location:http${#58}//www.servoy-stuff.net/downloads/developer/updates);addRepository(type:1,name:ServoyEclipse JSDoc Plugin,location:http${#58}//www.servoy-stuff.net/downloads/developer/updates);\
 addRepository(type:0,name:QuickImage,location:http${#58}//psnet.nu/eclipse/updates);addRepository(type:1,name:QuickImage,location:http${#58}//psnet.nu/eclipse/updates);
