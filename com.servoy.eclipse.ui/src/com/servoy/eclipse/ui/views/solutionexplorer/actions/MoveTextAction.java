@@ -31,7 +31,12 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
+import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.wst.sse.ui.StructuredTextEditor;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -40,6 +45,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
+import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.ActiveEditorListener;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.Form;
@@ -56,8 +62,9 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 {
 	private final SolutionExplorerView viewer;
 	private final boolean moveSampleText;
-	private boolean editorAvailable = false; // true if any a JS editor is the active editor
+	private boolean jsEditorAvailable = false; // true if any a JS editor is the active editor
 	private boolean moveTextSourceAvailable = false; // true if the node in the detail list is able to produce code in normal mode
+	private boolean cssEditorAvailable = false;
 
 	public MoveTextAction(SolutionExplorerView sev, boolean moveSampleText)
 	{
@@ -125,17 +132,16 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 	 */
 	public static void insertText(IEditorPart ed, String codeText, Form sourceForm, boolean replacePrefix)
 	{
-		if (!(ed instanceof ScriptEditor)) return;
+		if (!(ed instanceof AbstractTextEditor)) return;
 
-		ScriptEditor editor = (ScriptEditor)ed;
-		ISourceViewer sv = editor.getScriptSourceViewer();
-		if (sv == null) return;
+		AbstractTextEditor editor = (AbstractTextEditor)ed;
+		IDocumentProvider dp = editor.getDocumentProvider();
+		if (dp == null) return;
 
-		IDocument document = sv.getDocument();
+		IDocument document = dp.getDocument(editor.getEditorInput());
 		if (document == null) return;
 
-
-		StyledText st = sv.getTextWidget();
+		StyledText st = (StyledText)editor.getAdapter(Control.class);
 		if (st == null || st.isDisposed()) return;
 
 		Form currentMethodForm = getFormForEditor(ed);
@@ -157,7 +163,11 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 		{
 			if (!txt.startsWith(DataSourceUtils.DB_DATASOURCE_SCHEME_COLON_SLASH))
 			{
-				txt = NewMethodAction.format(txt, (IFile)ed.getEditorInput().getAdapter(IFile.class), caretOffset).trim();
+				IFile file = (IFile)ed.getEditorInput().getAdapter(IFile.class);
+				if (file.getName().toLowerCase().endsWith(SolutionSerializer.JS_FILE_EXTENSION))
+				{
+					txt = NewMethodAction.format(txt, file, caretOffset).trim();
+				}
 			}
 		}
 		st.replaceTextRange(textSelection.x, textSelection.y, txt);
@@ -166,9 +176,9 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 		else st.setCaretOffset(textSelection.x + index + 1);
 		st.showSelection();
 		st.forceFocus();
-		if (!replacePrefix)
+		if (!replacePrefix && ed instanceof ScriptEditor)
 		{
-			ISourceViewer scriptSourceViewer = editor.getScriptSourceViewer();
+			ISourceViewer scriptSourceViewer = ((ScriptEditor)ed).getScriptSourceViewer();
 			if (scriptSourceViewer instanceof ITextOperationTarget)
 			{
 				((ITextOperationTarget)scriptSourceViewer).doOperation(ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION);
@@ -264,8 +274,8 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 
 	public void activeEditorChanged(IEditorPart newActiveEditor)
 	{
-		editorAvailable = (newActiveEditor instanceof ScriptEditor);
-		if (editorAvailable)
+		jsEditorAvailable = (newActiveEditor instanceof ScriptEditor);
+		if (jsEditorAvailable)
 		{
 			try
 			{
@@ -279,13 +289,22 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 				}
 				if (resource == null || !resource.getName().toLowerCase().endsWith(SolutionSerializer.JS_FILE_EXTENSION))
 				{
-					editorAvailable = false;
+					jsEditorAvailable = false;
 				}
 			}
 			catch (ModelException e)
 			{
-				editorAvailable = false;
+				jsEditorAvailable = false;
 				ServoyLog.logError("Editor exception while trying to determine if editor is for a .js file", e);
+			}
+		}
+		cssEditorAvailable = (newActiveEditor instanceof StructuredTextEditor);
+		if (cssEditorAvailable)
+		{
+			IEditorInput input = newActiveEditor.getEditorInput();
+			if (!input.getName().endsWith(SolutionSerializer.STYLE_FILE_EXTENSION))
+			{
+				cssEditorAvailable = false;
 			}
 		}
 		enableAsNecessary();
@@ -293,7 +312,15 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 
 	private void enableAsNecessary()
 	{
-		setEnabled(moveTextSourceAvailable && editorAvailable);
+		if (cssEditorAvailable)
+		{
+			SimpleUserNode un = viewer.getSelectedListNode();
+			setEnabled(un != null && un.getRealType() == UserNodeType.MEDIA_IMAGE);
+		}
+		else
+		{
+			setEnabled(moveTextSourceAvailable && jsEditorAvailable);
+		}
 	}
 
 	public static String modifyCodeAccordingToUsedForms(Form currentMethodForm, Form appliedForm, String code, boolean replacePrefix)
