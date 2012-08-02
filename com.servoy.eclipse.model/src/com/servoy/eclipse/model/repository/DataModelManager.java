@@ -256,8 +256,18 @@ public class DataModelManager implements IColumnInfoManager
 		}
 		else
 		{
-			addMissingColumnMarkersIfNeeded = false; // no need adding missing column information markers if the file is missing altogether...
-			addDifferenceMarker(new TableDifference(t, null, TableDifference.MISSING_DBI_FILE, null, null));
+			boolean clonedServerWithoutTableDbiInDeveloper = false;
+			if (ApplicationServerSingleton.get().isDeveloperStartup())
+			{
+				IServerInternal s = (IServerInternal)sm.getServer(t.getServerName());
+				// checking if the server is a clone
+				if (s != null && s.getConfig() != null && s.getConfig().getDataModelCloneFrom() != null && s.getConfig().getDataModelCloneFrom().length() != 0) clonedServerWithoutTableDbiInDeveloper = true;
+			}
+			if (!clonedServerWithoutTableDbiInDeveloper)
+			{
+				addMissingColumnMarkersIfNeeded = false; // no need adding missing column information markers if the file is missing altogether...
+				addDifferenceMarker(new TableDifference(t, null, TableDifference.MISSING_DBI_FILE, null, null));
+			}
 		}
 
 		Iterator<Column> columns = t.getColumns().iterator();
