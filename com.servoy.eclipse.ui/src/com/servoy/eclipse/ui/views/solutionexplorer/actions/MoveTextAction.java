@@ -102,6 +102,11 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 				textToMove = un.getCode();
 			}
 
+			if (cssEditorAvailable)
+			{
+				textToMove = "url(" + textToMove + ")"; //$NON-NLS-1$//$NON-NLS-2$
+			}
+
 			SimpleUserNode formNode = un.parent;
 			while (formNode != null && !(formNode.getRealObject() instanceof Form))
 			{
