@@ -1786,7 +1786,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				for (Class param : parameterTypes)
 				{
 					paramTypes.append(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(param));
-					paramTypes.append(',');
+					paramTypes.append(", ");
 				}
 			}
 			else if (names != null)
@@ -1816,10 +1816,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 							paramTypes.append(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(parameterTypes[i]));
 						}
 					}
-					paramTypes.append(',');
+					paramTypes.append(", ");
 				}
 			}
-			return paramTypes.substring(0, paramTypes.length() - 1);
+			return paramTypes.substring(0, paramTypes.length() - 2);
 		}
 	}
 
