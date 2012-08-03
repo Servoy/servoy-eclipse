@@ -13696,132 +13696,21 @@ omitted records will not be loaded,]]></description>
         <function name="loadRecords">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Load records with primary key (dataset/number/uuid) or query.
-
-Load records can be used in 5 different ways
-1) to copy foundset data from another foundset
-foundset.loadRecords(fs);
-
-2) to load a primary key dataset, will remove related sort!
-var dataset = databaseManager.getDataSetByQuery(...);
-foundset.loadRecords(dataset);
-
-3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-foundset.loadRecords(123);
-foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
-when in find mode, this will reload the records from before the find() call.
-
-foundset.loadRecords();
-
-5) to load records in to the form based on a query (also known as 'Form by query')
-foundset.loadRecords(sqlstring,parameters);
-limitations/requirements for sqlstring are:
--must start with 'select'
--the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
--can contain '?' which are replaced with values from the array supplied to parameters argument
-if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
--must contain 'from' keyword
--the 'from' must be a comma separated list of table names
--must at least select from the table used in Servoy Form
--cannot contain 'group by', 'having' or 'union'
--all columns must be fully qualified like 'orders.order_id']]></description>
-          <summary><![CDATA[Load records with primary key (dataset/number/uuid) or query.]]></summary>
-          <sample><![CDATA[//Load records can be used in 5 different ways
-//1) to copy foundset data from another foundset
-//%%prefix%%foundset.loadRecords(fs);
-
-//2) to load a primary key dataset, will remove related sort!
-//var dataset = databaseManager.getDataSetByQuery(...);
-// dataset must match the table primary key columns (alphabetically ordered)
-//%%prefix%%foundset.loadRecords(dataset);
-
-//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-//%%prefix%%foundset.loadRecords(123);
-//%%prefix%%foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-//4) to reload all last related records again, if for example when searched in tabpanel
-//%%prefix%%foundset.loadRecords();
-
-//5) to load records in to the form based on a query (also known as 'Form by query')
-//%%prefix%%foundset.loadRecords(sqlstring,parameters);
-//limitations/requirements for sqlstring are:
-//-must start with 'select'
-//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
-//-can contain '?' which are replaced with values from the array supplied to parameters argument
-//if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
-//-must contain 'from' keyword
-//-the 'from' must be a comma separated list of table names
-//-must at least select from the table used in Servoy Form
-//-cannot contain 'group by', 'having' or 'union'
-//-all columns must be fully qualified like 'orders.order_id']]></sample>
+          <description><![CDATA[Reloads all last (related) records again, if, for example, after search in tabpanel.
+When in find mode, this will reload the records from before the find() call.]]></description>
+          <summary><![CDATA[Reloads all last (related) records again, if, for example, after search in tabpanel.]]></summary>
+          <sample><![CDATA[//to reload all last (related) records again, if for example when searched in tabpanel
+ %%prefix%%foundset.loadRecords();]]></sample>
         </function>
         <function name="loadRecords">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Load records with primary key (dataset/number/uuid) or query.
-
-Load records can be used in 5 different ways
-1) to copy foundset data from another foundset
-foundset.loadRecords(fs);
-
-2) to load a primary key dataset, will remove related sort!
-var dataset = databaseManager.getDataSetByQuery(...);
-foundset.loadRecords(dataset);
-
-3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-foundset.loadRecords(123);
-foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
-when in find mode, this will reload the records from before the find() call.
-
-foundset.loadRecords();
-
-5) to load records in to the form based on a query (also known as 'Form by query')
-foundset.loadRecords(sqlstring,parameters);
-limitations/requirements for sqlstring are:
--must start with 'select'
--the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
--can contain '?' which are replaced with values from the array supplied to parameters argument
-if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
--must contain 'from' keyword
--the 'from' must be a comma separated list of table names
--must at least select from the table used in Servoy Form
--cannot contain 'group by', 'having' or 'union'
--all columns must be fully qualified like 'orders.order_id']]></description>
-          <summary><![CDATA[Load records with primary key (dataset/number/uuid) or query.]]></summary>
-          <sample><![CDATA[//Load records can be used in 5 different ways
-//1) to copy foundset data from another foundset
-//%%prefix%%foundset.loadRecords(fs);
-
-//2) to load a primary key dataset, will remove related sort!
-//var dataset = databaseManager.getDataSetByQuery(...);
-// dataset must match the table primary key columns (alphabetically ordered)
-//%%prefix%%foundset.loadRecords(dataset);
-
-//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-//%%prefix%%foundset.loadRecords(123);
-//%%prefix%%foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-//4) to reload all last related records again, if for example when searched in tabpanel
-//%%prefix%%foundset.loadRecords();
-
-//5) to load records in to the form based on a query (also known as 'Form by query')
-//%%prefix%%foundset.loadRecords(sqlstring,parameters);
-//limitations/requirements for sqlstring are:
-//-must start with 'select'
-//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
-//-can contain '?' which are replaced with values from the array supplied to parameters argument
-//if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
-//-must contain 'from' keyword
-//-the 'from' must be a comma separated list of table names
-//-must at least select from the table used in Servoy Form
-//-cannot contain 'group by', 'having' or 'union'
-//-all columns must be fully qualified like 'orders.order_id']]></sample>
+          <description><![CDATA[Copies foundset data from another foundset.]]></description>
+          <summary><![CDATA[Copies foundset data from another foundset.]]></summary>
+          <sample><![CDATA[//Copies foundset data from another foundset
+%%prefix%%foundset.loadRecords(fs);]]></sample>
           <parameters>
             <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
               <description><![CDATA[The foundset to load records from]]></description>
@@ -13852,66 +13741,12 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
             <argumentType typecode="com.servoy.j2db.dataprocessing.IDataSet"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Load records with primary key (dataset/number/uuid) or query.
-
-Load records can be used in 5 different ways
-1) to copy foundset data from another foundset
-foundset.loadRecords(fs);
-
-2) to load a primary key dataset, will remove related sort!
-var dataset = databaseManager.getDataSetByQuery(...);
-foundset.loadRecords(dataset);
-
-3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-foundset.loadRecords(123);
-foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
-when in find mode, this will reload the records from before the find() call.
-
-foundset.loadRecords();
-
-5) to load records in to the form based on a query (also known as 'Form by query')
-foundset.loadRecords(sqlstring,parameters);
-limitations/requirements for sqlstring are:
--must start with 'select'
--the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
--can contain '?' which are replaced with values from the array supplied to parameters argument
-if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
--must contain 'from' keyword
--the 'from' must be a comma separated list of table names
--must at least select from the table used in Servoy Form
--cannot contain 'group by', 'having' or 'union'
--all columns must be fully qualified like 'orders.order_id']]></description>
-          <summary><![CDATA[Load records with primary key (dataset/number/uuid) or query.]]></summary>
-          <sample><![CDATA[//Load records can be used in 5 different ways
-//1) to copy foundset data from another foundset
-//%%prefix%%foundset.loadRecords(fs);
-
-//2) to load a primary key dataset, will remove related sort!
+          <description><![CDATA[Loads a primary key dataset, will remove related sort.]]></description>
+          <summary><![CDATA[Loads a primary key dataset, will remove related sort.]]></summary>
+          <sample><![CDATA[// loads a primary key dataset, will remove related sort!
 //var dataset = databaseManager.getDataSetByQuery(...);
 // dataset must match the table primary key columns (alphabetically ordered)
-//%%prefix%%foundset.loadRecords(dataset);
-
-//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-//%%prefix%%foundset.loadRecords(123);
-//%%prefix%%foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-//4) to reload all last related records again, if for example when searched in tabpanel
-//%%prefix%%foundset.loadRecords();
-
-//5) to load records in to the form based on a query (also known as 'Form by query')
-//%%prefix%%foundset.loadRecords(sqlstring,parameters);
-//limitations/requirements for sqlstring are:
-//-must start with 'select'
-//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
-//-can contain '?' which are replaced with values from the array supplied to parameters argument
-//if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
-//-must contain 'from' keyword
-//-the 'from' must be a comma separated list of table names
-//-must at least select from the table used in Servoy Form
-//-cannot contain 'group by', 'having' or 'union'
-//-all columns must be fully qualified like 'orders.order_id']]></sample>
+%%prefix%%foundset.loadRecords(dataset);]]></sample>
           <parameters>
             <parameter name="dataset" type="com.servoy.j2db.dataprocessing.IDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet">
               <description><![CDATA[pkdataset]]></description>
@@ -13942,66 +13777,9 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Load records with primary key (dataset/number/uuid) or query.
-
-Load records can be used in 5 different ways
-1) to copy foundset data from another foundset
-foundset.loadRecords(fs);
-
-2) to load a primary key dataset, will remove related sort!
-var dataset = databaseManager.getDataSetByQuery(...);
-foundset.loadRecords(dataset);
-
-3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-foundset.loadRecords(123);
-foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
-when in find mode, this will reload the records from before the find() call.
-
-foundset.loadRecords();
-
-5) to load records in to the form based on a query (also known as 'Form by query')
-foundset.loadRecords(sqlstring,parameters);
-limitations/requirements for sqlstring are:
--must start with 'select'
--the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
--can contain '?' which are replaced with values from the array supplied to parameters argument
-if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
--must contain 'from' keyword
--the 'from' must be a comma separated list of table names
--must at least select from the table used in Servoy Form
--cannot contain 'group by', 'having' or 'union'
--all columns must be fully qualified like 'orders.order_id']]></description>
-          <summary><![CDATA[Load records with primary key (dataset/number/uuid) or query.]]></summary>
-          <sample><![CDATA[//Load records can be used in 5 different ways
-//1) to copy foundset data from another foundset
-//%%prefix%%foundset.loadRecords(fs);
-
-//2) to load a primary key dataset, will remove related sort!
-//var dataset = databaseManager.getDataSetByQuery(...);
-// dataset must match the table primary key columns (alphabetically ordered)
-//%%prefix%%foundset.loadRecords(dataset);
-
-//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-//%%prefix%%foundset.loadRecords(123);
-//%%prefix%%foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-//4) to reload all last related records again, if for example when searched in tabpanel
-//%%prefix%%foundset.loadRecords();
-
-//5) to load records in to the form based on a query (also known as 'Form by query')
-//%%prefix%%foundset.loadRecords(sqlstring,parameters);
-//limitations/requirements for sqlstring are:
-//-must start with 'select'
-//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
-//-can contain '?' which are replaced with values from the array supplied to parameters argument
-//if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
-//-must contain 'from' keyword
-//-the 'from' must be a comma separated list of table names
-//-must at least select from the table used in Servoy Form
-//-cannot contain 'group by', 'having' or 'union'
-//-all columns must be fully qualified like 'orders.order_id']]></sample>
+          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.]]></description>
+          <summary><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
+          <sample><![CDATA[%%prefix%%foundset.loadRecords(qbselect);]]></sample>
           <parameters>
             <parameter name="querybuilder" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
               <description><![CDATA[the query builder]]></description>
@@ -14013,66 +13791,10 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
             <argumentType typecode="com.servoy.j2db.util.UUID"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Load records with primary key (dataset/number/uuid) or query.
-
-Load records can be used in 5 different ways
-1) to copy foundset data from another foundset
-foundset.loadRecords(fs);
-
-2) to load a primary key dataset, will remove related sort!
-var dataset = databaseManager.getDataSetByQuery(...);
-foundset.loadRecords(dataset);
-
-3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-foundset.loadRecords(123);
-foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
-when in find mode, this will reload the records from before the find() call.
-
-foundset.loadRecords();
-
-5) to load records in to the form based on a query (also known as 'Form by query')
-foundset.loadRecords(sqlstring,parameters);
-limitations/requirements for sqlstring are:
--must start with 'select'
--the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
--can contain '?' which are replaced with values from the array supplied to parameters argument
-if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
--must contain 'from' keyword
--the 'from' must be a comma separated list of table names
--must at least select from the table used in Servoy Form
--cannot contain 'group by', 'having' or 'union'
--all columns must be fully qualified like 'orders.order_id']]></description>
-          <summary><![CDATA[Load records with primary key (dataset/number/uuid) or query.]]></summary>
-          <sample><![CDATA[//Load records can be used in 5 different ways
-//1) to copy foundset data from another foundset
-//%%prefix%%foundset.loadRecords(fs);
-
-//2) to load a primary key dataset, will remove related sort!
-//var dataset = databaseManager.getDataSetByQuery(...);
-// dataset must match the table primary key columns (alphabetically ordered)
-//%%prefix%%foundset.loadRecords(dataset);
-
-//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-//%%prefix%%foundset.loadRecords(123);
-//%%prefix%%foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-//4) to reload all last related records again, if for example when searched in tabpanel
-//%%prefix%%foundset.loadRecords();
-
-//5) to load records in to the form based on a query (also known as 'Form by query')
-//%%prefix%%foundset.loadRecords(sqlstring,parameters);
-//limitations/requirements for sqlstring are:
-//-must start with 'select'
-//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
-//-can contain '?' which are replaced with values from the array supplied to parameters argument
-//if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
-//-must contain 'from' keyword
-//-the 'from' must be a comma separated list of table names
-//-must at least select from the table used in Servoy Form
-//-cannot contain 'group by', 'having' or 'union'
-//-all columns must be fully qualified like 'orders.order_id']]></sample>
+          <description><![CDATA[Loads a single record by primary key, will remove related sort.]]></description>
+          <summary><![CDATA[Loads a single record by primary key, will remove related sort.]]></summary>
+          <sample><![CDATA[//Loads a single record by primary key, will remove related sort!
+%%prefix%%foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));]]></sample>
           <parameters>
             <parameter name="uuidpk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID">
               <description><![CDATA[single-column pk value]]></description>
@@ -14103,66 +13825,10 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
             <argumentType typecode="java.lang.Number"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Load records with primary key (dataset/number/uuid) or query.
-
-Load records can be used in 5 different ways
-1) to copy foundset data from another foundset
-foundset.loadRecords(fs);
-
-2) to load a primary key dataset, will remove related sort!
-var dataset = databaseManager.getDataSetByQuery(...);
-foundset.loadRecords(dataset);
-
-3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-foundset.loadRecords(123);
-foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
-when in find mode, this will reload the records from before the find() call.
-
-foundset.loadRecords();
-
-5) to load records in to the form based on a query (also known as 'Form by query')
-foundset.loadRecords(sqlstring,parameters);
-limitations/requirements for sqlstring are:
--must start with 'select'
--the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
--can contain '?' which are replaced with values from the array supplied to parameters argument
-if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
--must contain 'from' keyword
--the 'from' must be a comma separated list of table names
--must at least select from the table used in Servoy Form
--cannot contain 'group by', 'having' or 'union'
--all columns must be fully qualified like 'orders.order_id']]></description>
-          <summary><![CDATA[Load records with primary key (dataset/number/uuid) or query.]]></summary>
-          <sample><![CDATA[//Load records can be used in 5 different ways
-//1) to copy foundset data from another foundset
-//%%prefix%%foundset.loadRecords(fs);
-
-//2) to load a primary key dataset, will remove related sort!
-//var dataset = databaseManager.getDataSetByQuery(...);
-// dataset must match the table primary key columns (alphabetically ordered)
-//%%prefix%%foundset.loadRecords(dataset);
-
-//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-//%%prefix%%foundset.loadRecords(123);
-//%%prefix%%foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-//4) to reload all last related records again, if for example when searched in tabpanel
-//%%prefix%%foundset.loadRecords();
-
-//5) to load records in to the form based on a query (also known as 'Form by query')
-//%%prefix%%foundset.loadRecords(sqlstring,parameters);
-//limitations/requirements for sqlstring are:
-//-must start with 'select'
-//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
-//-can contain '?' which are replaced with values from the array supplied to parameters argument
-//if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
-//-must contain 'from' keyword
-//-the 'from' must be a comma separated list of table names
-//-must at least select from the table used in Servoy Form
-//-cannot contain 'group by', 'having' or 'union'
-//-all columns must be fully qualified like 'orders.order_id']]></sample>
+          <description><![CDATA[Loads a single record by primary key, will remove related sort.]]></description>
+          <summary><![CDATA[Loads a single record by primary key, will remove related sort.]]></summary>
+          <sample><![CDATA[//Loads a single record by primary key, will remove related sort!
+%%prefix%%foundset.loadRecords(123);]]></sample>
           <parameters>
             <parameter name="numberpk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[single-column pk value]]></description>
@@ -14209,66 +13875,10 @@ Deprecated method to handle pre-6.1 calls to varargs function foundset.loadRecor
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Load records with primary key (dataset/number/uuid) or query.
-
-Load records can be used in 5 different ways
-1) to copy foundset data from another foundset
-foundset.loadRecords(fs);
-
-2) to load a primary key dataset, will remove related sort!
-var dataset = databaseManager.getDataSetByQuery(...);
-foundset.loadRecords(dataset);
-
-3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-foundset.loadRecords(123);
-foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
-when in find mode, this will reload the records from before the find() call.
-
-foundset.loadRecords();
-
-5) to load records in to the form based on a query (also known as 'Form by query')
-foundset.loadRecords(sqlstring,parameters);
-limitations/requirements for sqlstring are:
--must start with 'select'
--the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
--can contain '?' which are replaced with values from the array supplied to parameters argument
-if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
--must contain 'from' keyword
--the 'from' must be a comma separated list of table names
--must at least select from the table used in Servoy Form
--cannot contain 'group by', 'having' or 'union'
--all columns must be fully qualified like 'orders.order_id']]></description>
-          <summary><![CDATA[Load records with primary key (dataset/number/uuid) or query.]]></summary>
-          <sample><![CDATA[//Load records can be used in 5 different ways
-//1) to copy foundset data from another foundset
-//%%prefix%%foundset.loadRecords(fs);
-
-//2) to load a primary key dataset, will remove related sort!
-//var dataset = databaseManager.getDataSetByQuery(...);
-// dataset must match the table primary key columns (alphabetically ordered)
-//%%prefix%%foundset.loadRecords(dataset);
-
-//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-//%%prefix%%foundset.loadRecords(123);
-//%%prefix%%foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-//4) to reload all last related records again, if for example when searched in tabpanel
-//%%prefix%%foundset.loadRecords();
-
-//5) to load records in to the form based on a query (also known as 'Form by query')
-//%%prefix%%foundset.loadRecords(sqlstring,parameters);
-//limitations/requirements for sqlstring are:
-//-must start with 'select'
-//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
-//-can contain '?' which are replaced with values from the array supplied to parameters argument
-//if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
-//-must contain 'from' keyword
-//-the 'from' must be a comma separated list of table names
-//-must at least select from the table used in Servoy Form
-//-cannot contain 'group by', 'having' or 'union'
-//-all columns must be fully qualified like 'orders.order_id']]></sample>
+          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.]]></description>
+          <summary><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
+          <sample><![CDATA[//loads records in to the foundset based on a query (also known as 'Form by query')
+%%prefix%%foundset.loadRecords(sqlstring);]]></sample>
           <parameters>
             <parameter name="queryString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[select statement]]></description>
@@ -14281,66 +13891,10 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
             <argumentType typecode="[Ljava.lang.Object;"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Load records with primary key (dataset/number/uuid) or query.
-
-Load records can be used in 5 different ways
-1) to copy foundset data from another foundset
-foundset.loadRecords(fs);
-
-2) to load a primary key dataset, will remove related sort!
-var dataset = databaseManager.getDataSetByQuery(...);
-foundset.loadRecords(dataset);
-
-3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-foundset.loadRecords(123);
-foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
-when in find mode, this will reload the records from before the find() call.
-
-foundset.loadRecords();
-
-5) to load records in to the form based on a query (also known as 'Form by query')
-foundset.loadRecords(sqlstring,parameters);
-limitations/requirements for sqlstring are:
--must start with 'select'
--the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
--can contain '?' which are replaced with values from the array supplied to parameters argument
-if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
--must contain 'from' keyword
--the 'from' must be a comma separated list of table names
--must at least select from the table used in Servoy Form
--cannot contain 'group by', 'having' or 'union'
--all columns must be fully qualified like 'orders.order_id']]></description>
-          <summary><![CDATA[Load records with primary key (dataset/number/uuid) or query.]]></summary>
-          <sample><![CDATA[//Load records can be used in 5 different ways
-//1) to copy foundset data from another foundset
-//%%prefix%%foundset.loadRecords(fs);
-
-//2) to load a primary key dataset, will remove related sort!
-//var dataset = databaseManager.getDataSetByQuery(...);
-// dataset must match the table primary key columns (alphabetically ordered)
-//%%prefix%%foundset.loadRecords(dataset);
-
-//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-//%%prefix%%foundset.loadRecords(123);
-//%%prefix%%foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-//4) to reload all last related records again, if for example when searched in tabpanel
-//%%prefix%%foundset.loadRecords();
-
-//5) to load records in to the form based on a query (also known as 'Form by query')
-//%%prefix%%foundset.loadRecords(sqlstring,parameters);
-//limitations/requirements for sqlstring are:
-//-must start with 'select'
-//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
-//-can contain '?' which are replaced with values from the array supplied to parameters argument
-//if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
-//-must contain 'from' keyword
-//-the 'from' must be a comma separated list of table names
-//-must at least select from the table used in Servoy Form
-//-cannot contain 'group by', 'having' or 'union'
-//-all columns must be fully qualified like 'orders.order_id']]></sample>
+          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.]]></description>
+          <summary><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
+          <sample><![CDATA[//loads records in to the foundset based on a query (also known as 'Form by query')
+%%prefix%%foundset.loadRecords(sqlstring,parameters);]]></sample>
           <parameters>
             <parameter name="queryString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[select statement]]></description>
@@ -21314,7 +20868,7 @@ Operator: greaterThan]]></description>
 query.where().add(query.getColumn("value").in(subQuery.result().add(query.getColumn("code")).getParent().where().add(subQuery.getColumn("flag").eq("T"))));
 </pre>]]></description>
           <summary><![CDATA[Compare column with subquery result.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.in(query2))]]></sample>
+          <sample><![CDATA[query.where.add(query.columns.flag.isin(query2))]]></sample>
           <parameters>
             <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBPart" typecode="com.servoy.j2db.querybuilder.impl.QBPart">
               <description><![CDATA[subquery]]></description>
@@ -21331,7 +20885,7 @@ query.where().add(query.getColumn("value").in(subQuery.result().add(query.getCol
 query.where().add(query.getColumn("value").in(subQuery.result().add(new Object[]{Integer.valueOf(1), Integer.valueof(100)});
 </pre>]]></description>
           <summary><![CDATA[Compare column with values.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.in([1, 5, 99]))]]></sample>
+          <sample><![CDATA[query.where.add(query.columns.flag.isin([1, 5, 99]))]]></sample>
           <parameters>
             <parameter name="values" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
               <description><![CDATA[array of values]]></description>
@@ -21859,7 +21413,7 @@ Operator: greaterThan]]></description>
 query.where().add(query.getColumn("value").in(subQuery.result().add(query.getColumn("code")).getParent().where().add(subQuery.getColumn("flag").eq("T"))));
 </pre>]]></description>
           <summary><![CDATA[Compare column with subquery result.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.in(query2))]]></sample>
+          <sample><![CDATA[query.where.add(query.columns.flag.isin(query2))]]></sample>
           <parameters>
             <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBPart" typecode="com.servoy.j2db.querybuilder.impl.QBPart">
               <description><![CDATA[subquery]]></description>
@@ -21876,7 +21430,7 @@ query.where().add(query.getColumn("value").in(subQuery.result().add(query.getCol
 query.where().add(query.getColumn("value").in(subQuery.result().add(new Object[]{Integer.valueOf(1), Integer.valueof(100)});
 </pre>]]></description>
           <summary><![CDATA[Compare column with values.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.in([1, 5, 99]))]]></sample>
+          <sample><![CDATA[query.where.add(query.columns.flag.isin([1, 5, 99]))]]></sample>
           <parameters>
             <parameter name="values" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
               <description><![CDATA[array of values]]></description>
@@ -22438,7 +21992,7 @@ Operator: greaterThan]]></description>
 query.where().add(query.getColumn("value").in(subQuery.result().add(query.getColumn("code")).getParent().where().add(subQuery.getColumn("flag").eq("T"))));
 </pre>]]></description>
           <summary><![CDATA[Compare column with subquery result.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.in(query2))]]></sample>
+          <sample><![CDATA[query.where.add(query.columns.flag.isin(query2))]]></sample>
           <parameters>
             <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBPart" typecode="com.servoy.j2db.querybuilder.impl.QBPart">
               <description><![CDATA[subquery]]></description>
@@ -22455,7 +22009,7 @@ query.where().add(query.getColumn("value").in(subQuery.result().add(query.getCol
 query.where().add(query.getColumn("value").in(subQuery.result().add(new Object[]{Integer.valueOf(1), Integer.valueof(100)});
 </pre>]]></description>
           <summary><![CDATA[Compare column with values.]]></summary>
-          <sample><![CDATA[query.where.add(query.columns.flag.in([1, 5, 99]))]]></sample>
+          <sample><![CDATA[query.where.add(query.columns.flag.isin([1, 5, 99]))]]></sample>
           <parameters>
             <parameter name="values" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
               <description><![CDATA[array of values]]></description>
@@ -25079,132 +24633,21 @@ omitted records will not be loaded,]]></description>
         <function name="loadRecords">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Load records with primary key (dataset/number/uuid) or query.
-
-Load records can be used in 5 different ways
-1) to copy foundset data from another foundset
-foundset.loadRecords(fs);
-
-2) to load a primary key dataset, will remove related sort!
-var dataset = databaseManager.getDataSetByQuery(...);
-foundset.loadRecords(dataset);
-
-3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-foundset.loadRecords(123);
-foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
-when in find mode, this will reload the records from before the find() call.
-
-foundset.loadRecords();
-
-5) to load records in to the form based on a query (also known as 'Form by query')
-foundset.loadRecords(sqlstring,parameters);
-limitations/requirements for sqlstring are:
--must start with 'select'
--the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
--can contain '?' which are replaced with values from the array supplied to parameters argument
-if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
--must contain 'from' keyword
--the 'from' must be a comma separated list of table names
--must at least select from the table used in Servoy Form
--cannot contain 'group by', 'having' or 'union'
--all columns must be fully qualified like 'orders.order_id']]></description>
-          <summary><![CDATA[Load records with primary key (dataset/number/uuid) or query.]]></summary>
-          <sample><![CDATA[//Load records can be used in 5 different ways
-//1) to copy foundset data from another foundset
-//%%prefix%%foundset.loadRecords(fs);
-
-//2) to load a primary key dataset, will remove related sort!
-//var dataset = databaseManager.getDataSetByQuery(...);
-// dataset must match the table primary key columns (alphabetically ordered)
-//%%prefix%%foundset.loadRecords(dataset);
-
-//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-//%%prefix%%foundset.loadRecords(123);
-//%%prefix%%foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-//4) to reload all last related records again, if for example when searched in tabpanel
-//%%prefix%%foundset.loadRecords();
-
-//5) to load records in to the form based on a query (also known as 'Form by query')
-//%%prefix%%foundset.loadRecords(sqlstring,parameters);
-//limitations/requirements for sqlstring are:
-//-must start with 'select'
-//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
-//-can contain '?' which are replaced with values from the array supplied to parameters argument
-//if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
-//-must contain 'from' keyword
-//-the 'from' must be a comma separated list of table names
-//-must at least select from the table used in Servoy Form
-//-cannot contain 'group by', 'having' or 'union'
-//-all columns must be fully qualified like 'orders.order_id']]></sample>
+          <description><![CDATA[Reloads all last (related) records again, if, for example, after search in tabpanel.
+When in find mode, this will reload the records from before the find() call.]]></description>
+          <summary><![CDATA[Reloads all last (related) records again, if, for example, after search in tabpanel.]]></summary>
+          <sample><![CDATA[//to reload all last (related) records again, if for example when searched in tabpanel
+ %%prefix%%foundset.loadRecords();]]></sample>
         </function>
         <function name="loadRecords">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Load records with primary key (dataset/number/uuid) or query.
-
-Load records can be used in 5 different ways
-1) to copy foundset data from another foundset
-foundset.loadRecords(fs);
-
-2) to load a primary key dataset, will remove related sort!
-var dataset = databaseManager.getDataSetByQuery(...);
-foundset.loadRecords(dataset);
-
-3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-foundset.loadRecords(123);
-foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
-when in find mode, this will reload the records from before the find() call.
-
-foundset.loadRecords();
-
-5) to load records in to the form based on a query (also known as 'Form by query')
-foundset.loadRecords(sqlstring,parameters);
-limitations/requirements for sqlstring are:
--must start with 'select'
--the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
--can contain '?' which are replaced with values from the array supplied to parameters argument
-if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
--must contain 'from' keyword
--the 'from' must be a comma separated list of table names
--must at least select from the table used in Servoy Form
--cannot contain 'group by', 'having' or 'union'
--all columns must be fully qualified like 'orders.order_id']]></description>
-          <summary><![CDATA[Load records with primary key (dataset/number/uuid) or query.]]></summary>
-          <sample><![CDATA[//Load records can be used in 5 different ways
-//1) to copy foundset data from another foundset
-//%%prefix%%foundset.loadRecords(fs);
-
-//2) to load a primary key dataset, will remove related sort!
-//var dataset = databaseManager.getDataSetByQuery(...);
-// dataset must match the table primary key columns (alphabetically ordered)
-//%%prefix%%foundset.loadRecords(dataset);
-
-//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-//%%prefix%%foundset.loadRecords(123);
-//%%prefix%%foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-//4) to reload all last related records again, if for example when searched in tabpanel
-//%%prefix%%foundset.loadRecords();
-
-//5) to load records in to the form based on a query (also known as 'Form by query')
-//%%prefix%%foundset.loadRecords(sqlstring,parameters);
-//limitations/requirements for sqlstring are:
-//-must start with 'select'
-//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
-//-can contain '?' which are replaced with values from the array supplied to parameters argument
-//if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
-//-must contain 'from' keyword
-//-the 'from' must be a comma separated list of table names
-//-must at least select from the table used in Servoy Form
-//-cannot contain 'group by', 'having' or 'union'
-//-all columns must be fully qualified like 'orders.order_id']]></sample>
+          <description><![CDATA[Copies foundset data from another foundset.]]></description>
+          <summary><![CDATA[Copies foundset data from another foundset.]]></summary>
+          <sample><![CDATA[//Copies foundset data from another foundset
+%%prefix%%foundset.loadRecords(fs);]]></sample>
           <parameters>
             <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
               <description><![CDATA[The foundset to load records from]]></description>
@@ -25235,66 +24678,12 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
             <argumentType typecode="com.servoy.j2db.dataprocessing.IDataSet"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Load records with primary key (dataset/number/uuid) or query.
-
-Load records can be used in 5 different ways
-1) to copy foundset data from another foundset
-foundset.loadRecords(fs);
-
-2) to load a primary key dataset, will remove related sort!
-var dataset = databaseManager.getDataSetByQuery(...);
-foundset.loadRecords(dataset);
-
-3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-foundset.loadRecords(123);
-foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
-when in find mode, this will reload the records from before the find() call.
-
-foundset.loadRecords();
-
-5) to load records in to the form based on a query (also known as 'Form by query')
-foundset.loadRecords(sqlstring,parameters);
-limitations/requirements for sqlstring are:
--must start with 'select'
--the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
--can contain '?' which are replaced with values from the array supplied to parameters argument
-if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
--must contain 'from' keyword
--the 'from' must be a comma separated list of table names
--must at least select from the table used in Servoy Form
--cannot contain 'group by', 'having' or 'union'
--all columns must be fully qualified like 'orders.order_id']]></description>
-          <summary><![CDATA[Load records with primary key (dataset/number/uuid) or query.]]></summary>
-          <sample><![CDATA[//Load records can be used in 5 different ways
-//1) to copy foundset data from another foundset
-//%%prefix%%foundset.loadRecords(fs);
-
-//2) to load a primary key dataset, will remove related sort!
+          <description><![CDATA[Loads a primary key dataset, will remove related sort.]]></description>
+          <summary><![CDATA[Loads a primary key dataset, will remove related sort.]]></summary>
+          <sample><![CDATA[// loads a primary key dataset, will remove related sort!
 //var dataset = databaseManager.getDataSetByQuery(...);
 // dataset must match the table primary key columns (alphabetically ordered)
-//%%prefix%%foundset.loadRecords(dataset);
-
-//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-//%%prefix%%foundset.loadRecords(123);
-//%%prefix%%foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-//4) to reload all last related records again, if for example when searched in tabpanel
-//%%prefix%%foundset.loadRecords();
-
-//5) to load records in to the form based on a query (also known as 'Form by query')
-//%%prefix%%foundset.loadRecords(sqlstring,parameters);
-//limitations/requirements for sqlstring are:
-//-must start with 'select'
-//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
-//-can contain '?' which are replaced with values from the array supplied to parameters argument
-//if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
-//-must contain 'from' keyword
-//-the 'from' must be a comma separated list of table names
-//-must at least select from the table used in Servoy Form
-//-cannot contain 'group by', 'having' or 'union'
-//-all columns must be fully qualified like 'orders.order_id']]></sample>
+%%prefix%%foundset.loadRecords(dataset);]]></sample>
           <parameters>
             <parameter name="dataset" type="com.servoy.j2db.dataprocessing.IDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet">
               <description><![CDATA[pkdataset]]></description>
@@ -25325,66 +24714,9 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Load records with primary key (dataset/number/uuid) or query.
-
-Load records can be used in 5 different ways
-1) to copy foundset data from another foundset
-foundset.loadRecords(fs);
-
-2) to load a primary key dataset, will remove related sort!
-var dataset = databaseManager.getDataSetByQuery(...);
-foundset.loadRecords(dataset);
-
-3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-foundset.loadRecords(123);
-foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
-when in find mode, this will reload the records from before the find() call.
-
-foundset.loadRecords();
-
-5) to load records in to the form based on a query (also known as 'Form by query')
-foundset.loadRecords(sqlstring,parameters);
-limitations/requirements for sqlstring are:
--must start with 'select'
--the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
--can contain '?' which are replaced with values from the array supplied to parameters argument
-if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
--must contain 'from' keyword
--the 'from' must be a comma separated list of table names
--must at least select from the table used in Servoy Form
--cannot contain 'group by', 'having' or 'union'
--all columns must be fully qualified like 'orders.order_id']]></description>
-          <summary><![CDATA[Load records with primary key (dataset/number/uuid) or query.]]></summary>
-          <sample><![CDATA[//Load records can be used in 5 different ways
-//1) to copy foundset data from another foundset
-//%%prefix%%foundset.loadRecords(fs);
-
-//2) to load a primary key dataset, will remove related sort!
-//var dataset = databaseManager.getDataSetByQuery(...);
-// dataset must match the table primary key columns (alphabetically ordered)
-//%%prefix%%foundset.loadRecords(dataset);
-
-//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-//%%prefix%%foundset.loadRecords(123);
-//%%prefix%%foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-//4) to reload all last related records again, if for example when searched in tabpanel
-//%%prefix%%foundset.loadRecords();
-
-//5) to load records in to the form based on a query (also known as 'Form by query')
-//%%prefix%%foundset.loadRecords(sqlstring,parameters);
-//limitations/requirements for sqlstring are:
-//-must start with 'select'
-//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
-//-can contain '?' which are replaced with values from the array supplied to parameters argument
-//if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
-//-must contain 'from' keyword
-//-the 'from' must be a comma separated list of table names
-//-must at least select from the table used in Servoy Form
-//-cannot contain 'group by', 'having' or 'union'
-//-all columns must be fully qualified like 'orders.order_id']]></sample>
+          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.]]></description>
+          <summary><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
+          <sample><![CDATA[%%prefix%%foundset.loadRecords(qbselect);]]></sample>
           <parameters>
             <parameter name="querybuilder" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
               <description><![CDATA[the query builder]]></description>
@@ -25396,66 +24728,10 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
             <argumentType typecode="com.servoy.j2db.util.UUID"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Load records with primary key (dataset/number/uuid) or query.
-
-Load records can be used in 5 different ways
-1) to copy foundset data from another foundset
-foundset.loadRecords(fs);
-
-2) to load a primary key dataset, will remove related sort!
-var dataset = databaseManager.getDataSetByQuery(...);
-foundset.loadRecords(dataset);
-
-3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-foundset.loadRecords(123);
-foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
-when in find mode, this will reload the records from before the find() call.
-
-foundset.loadRecords();
-
-5) to load records in to the form based on a query (also known as 'Form by query')
-foundset.loadRecords(sqlstring,parameters);
-limitations/requirements for sqlstring are:
--must start with 'select'
--the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
--can contain '?' which are replaced with values from the array supplied to parameters argument
-if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
--must contain 'from' keyword
--the 'from' must be a comma separated list of table names
--must at least select from the table used in Servoy Form
--cannot contain 'group by', 'having' or 'union'
--all columns must be fully qualified like 'orders.order_id']]></description>
-          <summary><![CDATA[Load records with primary key (dataset/number/uuid) or query.]]></summary>
-          <sample><![CDATA[//Load records can be used in 5 different ways
-//1) to copy foundset data from another foundset
-//%%prefix%%foundset.loadRecords(fs);
-
-//2) to load a primary key dataset, will remove related sort!
-//var dataset = databaseManager.getDataSetByQuery(...);
-// dataset must match the table primary key columns (alphabetically ordered)
-//%%prefix%%foundset.loadRecords(dataset);
-
-//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-//%%prefix%%foundset.loadRecords(123);
-//%%prefix%%foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-//4) to reload all last related records again, if for example when searched in tabpanel
-//%%prefix%%foundset.loadRecords();
-
-//5) to load records in to the form based on a query (also known as 'Form by query')
-//%%prefix%%foundset.loadRecords(sqlstring,parameters);
-//limitations/requirements for sqlstring are:
-//-must start with 'select'
-//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
-//-can contain '?' which are replaced with values from the array supplied to parameters argument
-//if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
-//-must contain 'from' keyword
-//-the 'from' must be a comma separated list of table names
-//-must at least select from the table used in Servoy Form
-//-cannot contain 'group by', 'having' or 'union'
-//-all columns must be fully qualified like 'orders.order_id']]></sample>
+          <description><![CDATA[Loads a single record by primary key, will remove related sort.]]></description>
+          <summary><![CDATA[Loads a single record by primary key, will remove related sort.]]></summary>
+          <sample><![CDATA[//Loads a single record by primary key, will remove related sort!
+%%prefix%%foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));]]></sample>
           <parameters>
             <parameter name="uuidpk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID">
               <description><![CDATA[single-column pk value]]></description>
@@ -25486,66 +24762,10 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
             <argumentType typecode="java.lang.Number"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Load records with primary key (dataset/number/uuid) or query.
-
-Load records can be used in 5 different ways
-1) to copy foundset data from another foundset
-foundset.loadRecords(fs);
-
-2) to load a primary key dataset, will remove related sort!
-var dataset = databaseManager.getDataSetByQuery(...);
-foundset.loadRecords(dataset);
-
-3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-foundset.loadRecords(123);
-foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
-when in find mode, this will reload the records from before the find() call.
-
-foundset.loadRecords();
-
-5) to load records in to the form based on a query (also known as 'Form by query')
-foundset.loadRecords(sqlstring,parameters);
-limitations/requirements for sqlstring are:
--must start with 'select'
--the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
--can contain '?' which are replaced with values from the array supplied to parameters argument
-if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
--must contain 'from' keyword
--the 'from' must be a comma separated list of table names
--must at least select from the table used in Servoy Form
--cannot contain 'group by', 'having' or 'union'
--all columns must be fully qualified like 'orders.order_id']]></description>
-          <summary><![CDATA[Load records with primary key (dataset/number/uuid) or query.]]></summary>
-          <sample><![CDATA[//Load records can be used in 5 different ways
-//1) to copy foundset data from another foundset
-//%%prefix%%foundset.loadRecords(fs);
-
-//2) to load a primary key dataset, will remove related sort!
-//var dataset = databaseManager.getDataSetByQuery(...);
-// dataset must match the table primary key columns (alphabetically ordered)
-//%%prefix%%foundset.loadRecords(dataset);
-
-//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-//%%prefix%%foundset.loadRecords(123);
-//%%prefix%%foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-//4) to reload all last related records again, if for example when searched in tabpanel
-//%%prefix%%foundset.loadRecords();
-
-//5) to load records in to the form based on a query (also known as 'Form by query')
-//%%prefix%%foundset.loadRecords(sqlstring,parameters);
-//limitations/requirements for sqlstring are:
-//-must start with 'select'
-//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
-//-can contain '?' which are replaced with values from the array supplied to parameters argument
-//if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
-//-must contain 'from' keyword
-//-the 'from' must be a comma separated list of table names
-//-must at least select from the table used in Servoy Form
-//-cannot contain 'group by', 'having' or 'union'
-//-all columns must be fully qualified like 'orders.order_id']]></sample>
+          <description><![CDATA[Loads a single record by primary key, will remove related sort.]]></description>
+          <summary><![CDATA[Loads a single record by primary key, will remove related sort.]]></summary>
+          <sample><![CDATA[//Loads a single record by primary key, will remove related sort!
+%%prefix%%foundset.loadRecords(123);]]></sample>
           <parameters>
             <parameter name="numberpk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[single-column pk value]]></description>
@@ -25592,66 +24812,10 @@ Deprecated method to handle pre-6.1 calls to varargs function foundset.loadRecor
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Load records with primary key (dataset/number/uuid) or query.
-
-Load records can be used in 5 different ways
-1) to copy foundset data from another foundset
-foundset.loadRecords(fs);
-
-2) to load a primary key dataset, will remove related sort!
-var dataset = databaseManager.getDataSetByQuery(...);
-foundset.loadRecords(dataset);
-
-3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-foundset.loadRecords(123);
-foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
-when in find mode, this will reload the records from before the find() call.
-
-foundset.loadRecords();
-
-5) to load records in to the form based on a query (also known as 'Form by query')
-foundset.loadRecords(sqlstring,parameters);
-limitations/requirements for sqlstring are:
--must start with 'select'
--the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
--can contain '?' which are replaced with values from the array supplied to parameters argument
-if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
--must contain 'from' keyword
--the 'from' must be a comma separated list of table names
--must at least select from the table used in Servoy Form
--cannot contain 'group by', 'having' or 'union'
--all columns must be fully qualified like 'orders.order_id']]></description>
-          <summary><![CDATA[Load records with primary key (dataset/number/uuid) or query.]]></summary>
-          <sample><![CDATA[//Load records can be used in 5 different ways
-//1) to copy foundset data from another foundset
-//%%prefix%%foundset.loadRecords(fs);
-
-//2) to load a primary key dataset, will remove related sort!
-//var dataset = databaseManager.getDataSetByQuery(...);
-// dataset must match the table primary key columns (alphabetically ordered)
-//%%prefix%%foundset.loadRecords(dataset);
-
-//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-//%%prefix%%foundset.loadRecords(123);
-//%%prefix%%foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-//4) to reload all last related records again, if for example when searched in tabpanel
-//%%prefix%%foundset.loadRecords();
-
-//5) to load records in to the form based on a query (also known as 'Form by query')
-//%%prefix%%foundset.loadRecords(sqlstring,parameters);
-//limitations/requirements for sqlstring are:
-//-must start with 'select'
-//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
-//-can contain '?' which are replaced with values from the array supplied to parameters argument
-//if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
-//-must contain 'from' keyword
-//-the 'from' must be a comma separated list of table names
-//-must at least select from the table used in Servoy Form
-//-cannot contain 'group by', 'having' or 'union'
-//-all columns must be fully qualified like 'orders.order_id']]></sample>
+          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.]]></description>
+          <summary><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
+          <sample><![CDATA[//loads records in to the foundset based on a query (also known as 'Form by query')
+%%prefix%%foundset.loadRecords(sqlstring);]]></sample>
           <parameters>
             <parameter name="queryString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[select statement]]></description>
@@ -25664,66 +24828,10 @@ if the sqlstring contains an 'order by' clause, the records will be sorted accor
             <argumentType typecode="[Ljava.lang.Object;"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Load records with primary key (dataset/number/uuid) or query.
-
-Load records can be used in 5 different ways
-1) to copy foundset data from another foundset
-foundset.loadRecords(fs);
-
-2) to load a primary key dataset, will remove related sort!
-var dataset = databaseManager.getDataSetByQuery(...);
-foundset.loadRecords(dataset);
-
-3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-foundset.loadRecords(123);
-foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-4) Use without arguments to reload all last related records again, if for example when searched in tabpanel.
-when in find mode, this will reload the records from before the find() call.
-
-foundset.loadRecords();
-
-5) to load records in to the form based on a query (also known as 'Form by query')
-foundset.loadRecords(sqlstring,parameters);
-limitations/requirements for sqlstring are:
--must start with 'select'
--the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
--can contain '?' which are replaced with values from the array supplied to parameters argument
-if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
--must contain 'from' keyword
--the 'from' must be a comma separated list of table names
--must at least select from the table used in Servoy Form
--cannot contain 'group by', 'having' or 'union'
--all columns must be fully qualified like 'orders.order_id']]></description>
-          <summary><![CDATA[Load records with primary key (dataset/number/uuid) or query.]]></summary>
-          <sample><![CDATA[//Load records can be used in 5 different ways
-//1) to copy foundset data from another foundset
-//%%prefix%%foundset.loadRecords(fs);
-
-//2) to load a primary key dataset, will remove related sort!
-//var dataset = databaseManager.getDataSetByQuery(...);
-// dataset must match the table primary key columns (alphabetically ordered)
-//%%prefix%%foundset.loadRecords(dataset);
-
-//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-//%%prefix%%foundset.loadRecords(123);
-//%%prefix%%foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-//4) to reload all last related records again, if for example when searched in tabpanel
-//%%prefix%%foundset.loadRecords();
-
-//5) to load records in to the form based on a query (also known as 'Form by query')
-//%%prefix%%foundset.loadRecords(sqlstring,parameters);
-//limitations/requirements for sqlstring are:
-//-must start with 'select'
-//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
-//-can contain '?' which are replaced with values from the array supplied to parameters argument
-//if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
-//-must contain 'from' keyword
-//-the 'from' must be a comma separated list of table names
-//-must at least select from the table used in Servoy Form
-//-cannot contain 'group by', 'having' or 'union'
-//-all columns must be fully qualified like 'orders.order_id']]></sample>
+          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.]]></description>
+          <summary><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
+          <sample><![CDATA[//loads records in to the foundset based on a query (also known as 'Form by query')
+%%prefix%%foundset.loadRecords(sqlstring,parameters);]]></sample>
           <parameters>
             <parameter name="queryString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[select statement]]></description>
@@ -43383,134 +42491,23 @@ Notes:
         <function name="loadRecords">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.
-
-Load records can be used in 5 different ways
-1) to load a (related)foundset into the form.
-the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
-controller.loadRecords(order_to_orderdetails);
-
-2) to load a primary key dataset, will remove related sort!
-var dataset = databaseManager.getDataSetByQuery(...);
-controller.loadRecords(dataset);
-
-3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-controller.loadRecords(123);
-or
-controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-4) to reload all last related records again, if for example after a search in related tabpanel
-controller.loadRecords();
-
-5) to load records in to the form based on a query (also known as 'Form by query')
-controller.loadRecords(sqlstring,parameters);
-limitations/requirements for sqlstring are:
--must start with 'select'
--the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
--can contain '?' which are replaced with values from the array supplied to parameters argument
- if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
--must contain 'from' keyword
--the 'from' must be a comma separated list of table names
--must at least select from the table used in Servoy Form
--cannot contain 'group by', 'having' or 'union'
--all columns must be fully qualified like 'orders.order_id']]></description>
-          <summary><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.]]></summary>
-          <sample><![CDATA[//Load records can be used in 5 different ways
-//1) to load a (related)foundset into the form.
-//the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
-//%%prefix%%controller.loadRecords(order_to_orderdetails);
-
-//2) to load a primary key dataset, will remove related sort!
-//var dataset = databaseManager.getDataSetByQuery(...);
-// dataset must match the table primary key columns (alphabetically ordered)
-//%%prefix%%controller.loadRecords(dataset);
-
-//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-//%%prefix%%controller.loadRecords(123);
-//%%prefix%%controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-//4) to reload all last related records again, if for example after a search in related tabpanel
-//%%prefix%%controller.loadRecords();
-
-//5) to load records in to the form based on a query (also known as 'Form by query')
-//%%prefix%%controller.loadRecords(sqlstring,parameters);
-//limitations/requirements for sqlstring are:
-//-must start with 'select'
-//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
-//-can contain '?' which are replaced with values from the array supplied to parameters argument
-// if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
-//-must contain 'from' keyword
-//-the 'from' must be a comma separated list of table names
-//-must at least select from the table used in Servoy Form
-//-cannot contain 'group by', 'having' or 'union'
-//-all columns must be fully qualified like 'orders.order_id']]></sample>
+          <description><![CDATA[Loads all accessible records from the datasource into the form foundset. Typical usage is loading records after search in related tabpanel. 
+The difference to loadAllRecords() is that related foundset will load related records.]]></description>
+          <summary><![CDATA[Loads all accessible records from the datasource into the form foundset.]]></summary>
+          <sample><![CDATA[//to reload all last (related) records again, if for example after a search in related tabpanel
+%%prefix%%controller.loadRecords();]]></sample>
         </function>
         <function name="loadRecords">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.
-
-Load records can be used in 5 different ways
-1) to load a (related)foundset into the form.
-the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
-controller.loadRecords(order_to_orderdetails);
-
-2) to load a primary key dataset, will remove related sort!
-var dataset = databaseManager.getDataSetByQuery(...);
-controller.loadRecords(dataset);
-
-3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-controller.loadRecords(123);
-or
-controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-4) to reload all last related records again, if for example after a search in related tabpanel
-controller.loadRecords();
-
-5) to load records in to the form based on a query (also known as 'Form by query')
-controller.loadRecords(sqlstring,parameters);
-limitations/requirements for sqlstring are:
--must start with 'select'
--the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
--can contain '?' which are replaced with values from the array supplied to parameters argument
- if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
--must contain 'from' keyword
--the 'from' must be a comma separated list of table names
--must at least select from the table used in Servoy Form
--cannot contain 'group by', 'having' or 'union'
--all columns must be fully qualified like 'orders.order_id']]></description>
-          <summary><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.]]></summary>
-          <sample><![CDATA[//Load records can be used in 5 different ways
-//1) to load a (related)foundset into the form.
+          <description><![CDATA[Loads a (related) foundset into the form.
+The form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset.]]></description>
+          <summary><![CDATA[Loads a (related) foundset into the form.]]></summary>
+          <sample><![CDATA[//to load a (related)foundset into the form.
 //the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
-//%%prefix%%controller.loadRecords(order_to_orderdetails);
-
-//2) to load a primary key dataset, will remove related sort!
-//var dataset = databaseManager.getDataSetByQuery(...);
-// dataset must match the table primary key columns (alphabetically ordered)
-//%%prefix%%controller.loadRecords(dataset);
-
-//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-//%%prefix%%controller.loadRecords(123);
-//%%prefix%%controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-//4) to reload all last related records again, if for example after a search in related tabpanel
-//%%prefix%%controller.loadRecords();
-
-//5) to load records in to the form based on a query (also known as 'Form by query')
-//%%prefix%%controller.loadRecords(sqlstring,parameters);
-//limitations/requirements for sqlstring are:
-//-must start with 'select'
-//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
-//-can contain '?' which are replaced with values from the array supplied to parameters argument
-// if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
-//-must contain 'from' keyword
-//-the 'from' must be a comma separated list of table names
-//-must at least select from the table used in Servoy Form
-//-cannot contain 'group by', 'having' or 'union'
-//-all columns must be fully qualified like 'orders.order_id']]></sample>
+%%prefix%%controller.loadRecords(order_to_orderdetails);]]></sample>
           <parameters>
             <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
               <description><![CDATA[to load]]></description>
@@ -43537,67 +42534,12 @@ limitations/requirements for sqlstring are:
             <argumentType typecode="com.servoy.j2db.dataprocessing.IDataSet"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.
-
-Load records can be used in 5 different ways
-1) to load a (related)foundset into the form.
-the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
-controller.loadRecords(order_to_orderdetails);
-
-2) to load a primary key dataset, will remove related sort!
-var dataset = databaseManager.getDataSetByQuery(...);
-controller.loadRecords(dataset);
-
-3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-controller.loadRecords(123);
-or
-controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-4) to reload all last related records again, if for example after a search in related tabpanel
-controller.loadRecords();
-
-5) to load records in to the form based on a query (also known as 'Form by query')
-controller.loadRecords(sqlstring,parameters);
-limitations/requirements for sqlstring are:
--must start with 'select'
--the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
--can contain '?' which are replaced with values from the array supplied to parameters argument
- if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
--must contain 'from' keyword
--the 'from' must be a comma separated list of table names
--must at least select from the table used in Servoy Form
--cannot contain 'group by', 'having' or 'union'
--all columns must be fully qualified like 'orders.order_id']]></description>
-          <summary><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.]]></summary>
-          <sample><![CDATA[//Load records can be used in 5 different ways
-//1) to load a (related)foundset into the form.
-//the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
-//%%prefix%%controller.loadRecords(order_to_orderdetails);
-
-//2) to load a primary key dataset, will remove related sort!
+          <description><![CDATA[Loads a primary key dataset, will remove related sort.]]></description>
+          <summary><![CDATA[Loads a primary key dataset, will remove related sort.]]></summary>
+          <sample><![CDATA[//to load a primary key dataset, will remove related sort
 //var dataset = databaseManager.getDataSetByQuery(...);
 // dataset must match the table primary key columns (alphabetically ordered)
-//%%prefix%%controller.loadRecords(dataset);
-
-//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-//%%prefix%%controller.loadRecords(123);
-//%%prefix%%controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-//4) to reload all last related records again, if for example after a search in related tabpanel
-//%%prefix%%controller.loadRecords();
-
-//5) to load records in to the form based on a query (also known as 'Form by query')
-//%%prefix%%controller.loadRecords(sqlstring,parameters);
-//limitations/requirements for sqlstring are:
-//-must start with 'select'
-//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
-//-can contain '?' which are replaced with values from the array supplied to parameters argument
-// if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
-//-must contain 'from' keyword
-//-the 'from' must be a comma separated list of table names
-//-must at least select from the table used in Servoy Form
-//-cannot contain 'group by', 'having' or 'union'
-//-all columns must be fully qualified like 'orders.order_id']]></sample>
+%%prefix%%controller.loadRecords(dataset);]]></sample>
           <parameters>
             <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.IDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet">
               <description><![CDATA[to load]]></description>
@@ -43624,67 +42566,9 @@ limitations/requirements for sqlstring are:
             <argumentType typecode="com.servoy.j2db.util.UUID"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.
-
-Load records can be used in 5 different ways
-1) to load a (related)foundset into the form.
-the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
-controller.loadRecords(order_to_orderdetails);
-
-2) to load a primary key dataset, will remove related sort!
-var dataset = databaseManager.getDataSetByQuery(...);
-controller.loadRecords(dataset);
-
-3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-controller.loadRecords(123);
-or
-controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-4) to reload all last related records again, if for example after a search in related tabpanel
-controller.loadRecords();
-
-5) to load records in to the form based on a query (also known as 'Form by query')
-controller.loadRecords(sqlstring,parameters);
-limitations/requirements for sqlstring are:
--must start with 'select'
--the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
--can contain '?' which are replaced with values from the array supplied to parameters argument
- if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
--must contain 'from' keyword
--the 'from' must be a comma separated list of table names
--must at least select from the table used in Servoy Form
--cannot contain 'group by', 'having' or 'union'
--all columns must be fully qualified like 'orders.order_id']]></description>
-          <summary><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.]]></summary>
-          <sample><![CDATA[//Load records can be used in 5 different ways
-//1) to load a (related)foundset into the form.
-//the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
-//%%prefix%%controller.loadRecords(order_to_orderdetails);
-
-//2) to load a primary key dataset, will remove related sort!
-//var dataset = databaseManager.getDataSetByQuery(...);
-// dataset must match the table primary key columns (alphabetically ordered)
-//%%prefix%%controller.loadRecords(dataset);
-
-//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-//%%prefix%%controller.loadRecords(123);
-//%%prefix%%controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-//4) to reload all last related records again, if for example after a search in related tabpanel
-//%%prefix%%controller.loadRecords();
-
-//5) to load records in to the form based on a query (also known as 'Form by query')
-//%%prefix%%controller.loadRecords(sqlstring,parameters);
-//limitations/requirements for sqlstring are:
-//-must start with 'select'
-//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
-//-can contain '?' which are replaced with values from the array supplied to parameters argument
-// if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
-//-must contain 'from' keyword
-//-the 'from' must be a comma separated list of table names
-//-must at least select from the table used in Servoy Form
-//-cannot contain 'group by', 'having' or 'union'
-//-all columns must be fully qualified like 'orders.order_id']]></sample>
+          <description><![CDATA[Loads a single record by primary key, will remove related sort.]]></description>
+          <summary><![CDATA[Loads a single record by primary key, will remove related sort.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));]]></sample>
           <parameters>
             <parameter name="UUIDpk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID">
               <description><![CDATA[to load]]></description>
@@ -43711,67 +42595,9 @@ limitations/requirements for sqlstring are:
             <argumentType typecode="java.lang.Number"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.
-
-Load records can be used in 5 different ways
-1) to load a (related)foundset into the form.
-the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
-controller.loadRecords(order_to_orderdetails);
-
-2) to load a primary key dataset, will remove related sort!
-var dataset = databaseManager.getDataSetByQuery(...);
-controller.loadRecords(dataset);
-
-3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-controller.loadRecords(123);
-or
-controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-4) to reload all last related records again, if for example after a search in related tabpanel
-controller.loadRecords();
-
-5) to load records in to the form based on a query (also known as 'Form by query')
-controller.loadRecords(sqlstring,parameters);
-limitations/requirements for sqlstring are:
--must start with 'select'
--the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
--can contain '?' which are replaced with values from the array supplied to parameters argument
- if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
--must contain 'from' keyword
--the 'from' must be a comma separated list of table names
--must at least select from the table used in Servoy Form
--cannot contain 'group by', 'having' or 'union'
--all columns must be fully qualified like 'orders.order_id']]></description>
-          <summary><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.]]></summary>
-          <sample><![CDATA[//Load records can be used in 5 different ways
-//1) to load a (related)foundset into the form.
-//the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
-//%%prefix%%controller.loadRecords(order_to_orderdetails);
-
-//2) to load a primary key dataset, will remove related sort!
-//var dataset = databaseManager.getDataSetByQuery(...);
-// dataset must match the table primary key columns (alphabetically ordered)
-//%%prefix%%controller.loadRecords(dataset);
-
-//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-//%%prefix%%controller.loadRecords(123);
-//%%prefix%%controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-//4) to reload all last related records again, if for example after a search in related tabpanel
-//%%prefix%%controller.loadRecords();
-
-//5) to load records in to the form based on a query (also known as 'Form by query')
-//%%prefix%%controller.loadRecords(sqlstring,parameters);
-//limitations/requirements for sqlstring are:
-//-must start with 'select'
-//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
-//-can contain '?' which are replaced with values from the array supplied to parameters argument
-// if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
-//-must contain 'from' keyword
-//-the 'from' must be a comma separated list of table names
-//-must at least select from the table used in Servoy Form
-//-cannot contain 'group by', 'having' or 'union'
-//-all columns must be fully qualified like 'orders.order_id']]></sample>
+          <description><![CDATA[Loads a single record by primary key, will remove related sort.]]></description>
+          <summary><![CDATA[Loads a single record by primary key, will remove related sort.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.loadRecords(123);]]></sample>
           <parameters>
             <parameter name="singlenNmber_pk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[to load]]></description>
@@ -43814,67 +42640,9 @@ Deprecated method to handle pre-6.1 calls to varargs function controller.loadRec
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.
-
-Load records can be used in 5 different ways
-1) to load a (related)foundset into the form.
-the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
-controller.loadRecords(order_to_orderdetails);
-
-2) to load a primary key dataset, will remove related sort!
-var dataset = databaseManager.getDataSetByQuery(...);
-controller.loadRecords(dataset);
-
-3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-controller.loadRecords(123);
-or
-controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-4) to reload all last related records again, if for example after a search in related tabpanel
-controller.loadRecords();
-
-5) to load records in to the form based on a query (also known as 'Form by query')
-controller.loadRecords(sqlstring,parameters);
-limitations/requirements for sqlstring are:
--must start with 'select'
--the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
--can contain '?' which are replaced with values from the array supplied to parameters argument
- if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
--must contain 'from' keyword
--the 'from' must be a comma separated list of table names
--must at least select from the table used in Servoy Form
--cannot contain 'group by', 'having' or 'union'
--all columns must be fully qualified like 'orders.order_id']]></description>
-          <summary><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.]]></summary>
-          <sample><![CDATA[//Load records can be used in 5 different ways
-//1) to load a (related)foundset into the form.
-//the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
-//%%prefix%%controller.loadRecords(order_to_orderdetails);
-
-//2) to load a primary key dataset, will remove related sort!
-//var dataset = databaseManager.getDataSetByQuery(...);
-// dataset must match the table primary key columns (alphabetically ordered)
-//%%prefix%%controller.loadRecords(dataset);
-
-//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-//%%prefix%%controller.loadRecords(123);
-//%%prefix%%controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-//4) to reload all last related records again, if for example after a search in related tabpanel
-//%%prefix%%controller.loadRecords();
-
-//5) to load records in to the form based on a query (also known as 'Form by query')
-//%%prefix%%controller.loadRecords(sqlstring,parameters);
-//limitations/requirements for sqlstring are:
-//-must start with 'select'
-//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
-//-can contain '?' which are replaced with values from the array supplied to parameters argument
-// if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
-//-must contain 'from' keyword
-//-the 'from' must be a comma separated list of table names
-//-must at least select from the table used in Servoy Form
-//-cannot contain 'group by', 'having' or 'union'
-//-all columns must be fully qualified like 'orders.order_id']]></sample>
+          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.]]></description>
+          <summary><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
+          <sample><![CDATA[%%prefix%%controller.loadRecords(sqlstring);]]></sample>
           <parameters>
             <parameter name="queryString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[to load]]></description>
@@ -43887,67 +42655,9 @@ limitations/requirements for sqlstring are:
             <argumentType typecode="[Ljava.lang.Object;"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.
-
-Load records can be used in 5 different ways
-1) to load a (related)foundset into the form.
-the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
-controller.loadRecords(order_to_orderdetails);
-
-2) to load a primary key dataset, will remove related sort!
-var dataset = databaseManager.getDataSetByQuery(...);
-controller.loadRecords(dataset);
-
-3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-controller.loadRecords(123);
-or
-controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-4) to reload all last related records again, if for example after a search in related tabpanel
-controller.loadRecords();
-
-5) to load records in to the form based on a query (also known as 'Form by query')
-controller.loadRecords(sqlstring,parameters);
-limitations/requirements for sqlstring are:
--must start with 'select'
--the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
--can contain '?' which are replaced with values from the array supplied to parameters argument
- if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
--must contain 'from' keyword
--the 'from' must be a comma separated list of table names
--must at least select from the table used in Servoy Form
--cannot contain 'group by', 'having' or 'union'
--all columns must be fully qualified like 'orders.order_id']]></description>
-          <summary><![CDATA[Load records via a (related) foundset, primary key (dataset/number/uuid) or query into the form.]]></summary>
-          <sample><![CDATA[//Load records can be used in 5 different ways
-//1) to load a (related)foundset into the form.
-//the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
-//%%prefix%%controller.loadRecords(order_to_orderdetails);
-
-//2) to load a primary key dataset, will remove related sort!
-//var dataset = databaseManager.getDataSetByQuery(...);
-// dataset must match the table primary key columns (alphabetically ordered)
-//%%prefix%%controller.loadRecords(dataset);
-
-//3) to load a single record by primary key, will remove related sort! (pk should be a number or UUID)
-//%%prefix%%controller.loadRecords(123);
-//%%prefix%%controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));
-
-//4) to reload all last related records again, if for example after a search in related tabpanel
-//%%prefix%%controller.loadRecords();
-
-//5) to load records in to the form based on a query (also known as 'Form by query')
-//%%prefix%%controller.loadRecords(sqlstring,parameters);
-//limitations/requirements for sqlstring are:
-//-must start with 'select'
-//-the selected columns must be the (Servoy Form) table primary key columns (alphabetically ordered like 'select a_id, b_id,c_id ...')
-//-can contain '?' which are replaced with values from the array supplied to parameters argument
-// if the sqlstring contains an 'order by' clause, the records will be sorted accordingly and additional constraints apply:
-//-must contain 'from' keyword
-//-the 'from' must be a comma separated list of table names
-//-must at least select from the table used in Servoy Form
-//-cannot contain 'group by', 'having' or 'union'
-//-all columns must be fully qualified like 'orders.order_id']]></sample>
+          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.]]></description>
+          <summary><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
+          <sample><![CDATA[%%prefix%%controller.loadRecords(sqlstring,parameters);]]></sample>
           <parameters>
             <parameter name="queryString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[to load]]></description>
