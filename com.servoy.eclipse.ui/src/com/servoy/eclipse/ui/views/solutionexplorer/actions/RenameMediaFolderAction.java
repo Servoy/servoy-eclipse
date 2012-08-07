@@ -159,9 +159,7 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 				changedMedias.addAll(removedMedias);
 				ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solution.getName()).saveEditingSolutionNodes(
 					changedMedias.toArray(new IPersist[changedMedias.size()]), true, false);
-
 				wsa.delete(solution.getName() + "/" + SolutionSerializer.MEDIAS_DIR + "/" + replaceName);
-				viewer.refreshTreeCompletely();
 			}
 			catch (RepositoryException ex)
 			{
