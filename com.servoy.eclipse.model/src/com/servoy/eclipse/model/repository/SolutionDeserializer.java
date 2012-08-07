@@ -1649,6 +1649,7 @@ public class SolutionDeserializer
 	//for reference tracking we need to have 2 stage deserialize, this is the last part
 	private void completePersist(Map<IPersist, JSONObject> persist_json_map, boolean useFilesForDirtyMark) throws RepositoryException, JSONException
 	{
+		SimpleJSDocParser jsdocParser = new SimpleJSDocParser();
 		Iterator<Map.Entry<IPersist, JSONObject>> it = persist_json_map.entrySet().iterator();
 		while (it.hasNext())
 		{
@@ -1682,7 +1683,6 @@ public class SolutionDeserializer
 					((AbstractScriptProvider)retval).setRuntimeProperty(IScriptProvider.COMMENT, comment);
 					if (comment != null)
 					{
-						SimpleJSDocParser jsdocParser = new SimpleJSDocParser();
 						JSDocTags jsDocTags = jsdocParser.parse(comment, 0);
 						Iterator<JSDocTag> jsDocTagIte = jsDocTags.iterator();
 						JSDocTag jsDocTag;
