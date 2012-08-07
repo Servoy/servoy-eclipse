@@ -1031,7 +1031,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				{
 					if (sm.isPrivate()) continue;
 
-					nodeText = getScriptMethodSignature(sm, sm.getName() + " [" + ((Form)sm.getParent()).getName() + "]", false, true, true, true); //$NON-NLS-1$ //$NON-NLS-2$
+					nodeText = getScriptMethodSignature(sm, null, false, true, true, true) + " [" + ((Form)sm.getParent()).getName() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
 
 				Image icon = null;
@@ -1050,7 +1050,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 				String sampleCode = getScriptMethodSignature(sm, null, true, false, false, false);
 				String tooltipCode = getScriptMethodSignature(sm, null, true, true, true, false);
-				dlm.add(new UserNode(nodeText, UserNodeType.FORM_METHOD, sampleCode + ";", "//Method call\n%%prefix%%" + sampleCode, tooltipCode, sm, icon)); //$NON-NLS-1$ //$NON-NLS-2$
+				dlm.add(new UserNode(nodeText, UserNodeType.FORM_METHOD, sampleCode, "//Method call\n%%prefix%%" + sampleCode, tooltipCode, sm, icon)); //$NON-NLS-1$
 			}
 		}
 		catch (Exception e)
@@ -1131,8 +1131,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			String nodeName = getScriptMethodSignature(sm, getDisplayName(sm, pair.getLeft()), false, true, true, true);
 			String sampleCode = getScriptMethodSignature(sm, sm.getPrefixedName(), true, false, false, false);
 			String tooltipCode = getScriptMethodSignature(sm, null, true, true, true, false);
-			SimpleUserNode node = new UserNode(nodeName, UserNodeType.GLOBAL_METHOD_ITEM,
-				sampleCode + ";", tooltipCode, sm, uiActivator.loadImageFromBundle("global_method.gif")); //$NON-NLS-1$ //$NON-NLS-2$
+			SimpleUserNode node = new UserNode(nodeName, UserNodeType.GLOBAL_METHOD_ITEM, sampleCode, tooltipCode, sm,
+				uiActivator.loadImageFromBundle("global_method.gif")); //$NON-NLS-1$
 			dlm.add(node);
 		}
 		return dlm.toArray();
