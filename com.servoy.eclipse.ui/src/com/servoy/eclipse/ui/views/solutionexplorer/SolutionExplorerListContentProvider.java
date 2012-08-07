@@ -1128,7 +1128,16 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		for (IPersist persist : persists)
 		{
 			ScriptMethod sm = (ScriptMethod)persist;
-			String nodeName = getScriptMethodSignature(sm, getDisplayName(sm, pair.getLeft()), false, true, true, true);
+			String nodeName;
+			Solution persistSolution = (Solution)persist.getAncestor(IRepository.SOLUTIONS);
+			if (persistSolution == null || persistSolution.equals(pair.getLeft()))
+			{
+				nodeName = getScriptMethodSignature(sm, ((ISupportName)persist).getName(), false, true, true, true);
+			}
+			else
+			{
+				nodeName = getScriptMethodSignature(sm, ((ISupportName)persist).getName(), false, true, true, true) + " [" + persistSolution.getName() + ']'; //$NON-NLS-1$
+			}
 			String sampleCode = getScriptMethodSignature(sm, sm.getPrefixedName(), true, false, false, false);
 			String tooltipCode = getScriptMethodSignature(sm, null, true, true, true, false);
 			SimpleUserNode node = new UserNode(nodeName, UserNodeType.GLOBAL_METHOD_ITEM, sampleCode, tooltipCode, sm,

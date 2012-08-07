@@ -1742,7 +1742,9 @@ public class SolutionDeserializer
 //								}
 //							}
 
-							ArgumentType argumentType = ArgumentType.valueOf(paramIdToTypeMap.get(name));
+							String paramType = paramIdToTypeMap.get(name);
+							if (paramType == null) paramType = paramIdToTypeMap.get('[' + name + ']'); // if it's an optional param
+							ArgumentType argumentType = ArgumentType.valueOf(paramType);
 							methodArguments[i] = new MethodArgument(name, argumentType, null); // TODO: parse description
 						}
 					}
