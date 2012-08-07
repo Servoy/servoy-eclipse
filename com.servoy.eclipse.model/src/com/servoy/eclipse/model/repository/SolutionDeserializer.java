@@ -140,8 +140,6 @@ public class SolutionDeserializer
 	private final File jsFile;
 	private final String jsContent;
 
-	private final SimpleJSDocParser jsdocParser = new SimpleJSDocParser();
-
 	public SolutionDeserializer(IDeveloperRepository repository, ErrorKeeper<File, Exception> errorKeeper)
 	{
 		this.repository = repository;
@@ -1684,6 +1682,7 @@ public class SolutionDeserializer
 					((AbstractScriptProvider)retval).setRuntimeProperty(IScriptProvider.COMMENT, comment);
 					if (comment != null)
 					{
+						SimpleJSDocParser jsdocParser = new SimpleJSDocParser();
 						JSDocTags jsDocTags = jsdocParser.parse(comment, 0);
 						Iterator<JSDocTag> jsDocTagIte = jsDocTags.iterator();
 						JSDocTag jsDocTag;
