@@ -85,9 +85,11 @@ import com.servoy.j2db.persistence.IColumnListener;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -961,6 +963,42 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		dlm.addAll(sl);
 	}
 
+	private String getScriptMethodSignature(ScriptMethod sm, String methodName, boolean showParam, boolean showParamType, boolean showReturnType,
+		boolean showReturnTypeAtEnd)
+	{
+		MethodArgument[] args = sm.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
+
+		StringBuilder methodSignatureBuilder = new StringBuilder();
+		methodSignatureBuilder.append(methodName != null ? methodName : sm.getName()).append('(');
+		for (int i = 0; i < args.length; i++)
+		{
+			if (showParam)
+			{
+				methodSignatureBuilder.append(args[i].getName());
+				if (showParamType) methodSignatureBuilder.append(':');
+			}
+			if (showParamType) methodSignatureBuilder.append(args[i].getType());
+			if (i < args.length - 1) methodSignatureBuilder.append(", "); //$NON-NLS-1$
+		}
+		methodSignatureBuilder.append(')');
+
+		if (showReturnType)
+		{
+			String returnType = sm.getRuntimeProperty(IScriptProvider.METHOD_RETURN_TYPE);
+			if (returnType == null) returnType = "void"; //$NON-NLS-1$
+			if (showReturnTypeAtEnd)
+			{
+				methodSignatureBuilder.append(" - ").append(returnType); //$NON-NLS-1$		
+			}
+			else
+			{
+				methodSignatureBuilder.insert(0, ' ').insert(0, returnType);
+			}
+		}
+
+		return methodSignatureBuilder.toString();
+	}
+
 	private Object[] createFormScripts(Form f)
 	{
 		Form form = f;
@@ -987,14 +1025,15 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				ScriptMethod sm = it.next();
 				if (sm.getParent() == f)
 				{
-					nodeText = sm.getName();
+					nodeText = getScriptMethodSignature(sm, null, false, true, true, true);
 				}
 				else
 				{
 					if (sm.isPrivate()) continue;
 
-					nodeText = sm.getName() + " [" + ((Form)sm.getParent()).getName() + "]";
+					nodeText = getScriptMethodSignature(sm, sm.getName() + " [" + ((Form)sm.getParent()).getName() + "]", false, true, true, true); //$NON-NLS-1$ //$NON-NLS-2$
 				}
+
 				Image icon = null;
 				if (sm.isPrivate())
 				{
@@ -1008,8 +1047,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				{
 					icon = uiActivator.loadImageFromBundle("form_method.gif"); //$NON-NLS-1$
 				}
-				dlm.add(new UserNode(nodeText, UserNodeType.FORM_METHOD, sm.getName() + "();", "//Method call\n%%prefix%%" + sm.getName() + "()", sm.getName() +
-					"()", sm, icon));
+
+				String sampleCode = getScriptMethodSignature(sm, null, true, false, false, false);
+				String tooltipCode = getScriptMethodSignature(sm, null, true, true, true, false);
+				dlm.add(new UserNode(nodeText, UserNodeType.FORM_METHOD, sampleCode + ";", "//Method call\n%%prefix%%" + sampleCode, tooltipCode, sm, icon)); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		catch (Exception e)
@@ -1087,8 +1128,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		for (IPersist persist : persists)
 		{
 			ScriptMethod sm = (ScriptMethod)persist;
-			SimpleUserNode node = new UserNode(getDisplayName(sm, pair.getLeft()), UserNodeType.GLOBAL_METHOD_ITEM,
-				sm.getPrefixedName() + "();", sm.getName() + "()", sm, uiActivator.loadImageFromBundle("global_method.gif")); //$NON-NLS-1$ //$NON-NLS-2$
+			String nodeName = getScriptMethodSignature(sm, getDisplayName(sm, pair.getLeft()), false, true, true, true);
+			String sampleCode = getScriptMethodSignature(sm, sm.getPrefixedName(), true, false, false, false);
+			String tooltipCode = getScriptMethodSignature(sm, null, true, true, true, false);
+			SimpleUserNode node = new UserNode(nodeName, UserNodeType.GLOBAL_METHOD_ITEM,
+				sampleCode + ";", tooltipCode, sm, uiActivator.loadImageFromBundle("global_method.gif")); //$NON-NLS-1$ //$NON-NLS-2$
 			dlm.add(node);
 		}
 		return dlm.toArray();

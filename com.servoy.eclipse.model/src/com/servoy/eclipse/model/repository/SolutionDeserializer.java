@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -66,6 +67,9 @@ import org.eclipse.dltk.javascript.ast.VariableDeclaration;
 import org.eclipse.dltk.javascript.ast.VariableStatement;
 import org.eclipse.dltk.javascript.ast.VoidExpression;
 import org.eclipse.dltk.javascript.parser.JavaScriptParser;
+import org.eclipse.dltk.javascript.parser.jsdoc.JSDocTag;
+import org.eclipse.dltk.javascript.parser.jsdoc.JSDocTags;
+import org.eclipse.dltk.javascript.parser.jsdoc.SimpleJSDocParser;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -135,6 +139,8 @@ public class SolutionDeserializer
 	private static final Map<UUID, HashSet<UUID>> alreadyUsedUUID = new HashMap<UUID, HashSet<UUID>>(16, 0.9f);
 	private final File jsFile;
 	private final String jsContent;
+
+	private final SimpleJSDocParser jsdocParser = new SimpleJSDocParser();
 
 	public SolutionDeserializer(IDeveloperRepository repository, ErrorKeeper<File, Exception> errorKeeper)
 	{
@@ -1671,6 +1677,49 @@ public class SolutionDeserializer
 			}
 			else if (retval instanceof AbstractScriptProvider)
 			{
+				HashMap<String, String> paramIdToTypeMap = new HashMap<String, String>();
+				if (obj.has(COMMENT_JSON_ATTRIBUTE))
+				{
+					String comment = obj.getString(COMMENT_JSON_ATTRIBUTE);
+					((AbstractScriptProvider)retval).setRuntimeProperty(IScriptProvider.COMMENT, comment);
+					if (comment != null)
+					{
+						JSDocTags jsDocTags = jsdocParser.parse(comment, 0);
+						Iterator<JSDocTag> jsDocTagIte = jsDocTags.iterator();
+						JSDocTag jsDocTag;
+						String jsDocTagName;
+						String jsDocTagValue;
+						while (jsDocTagIte.hasNext())
+						{
+							jsDocTag = jsDocTagIte.next();
+							jsDocTagName = jsDocTag.name();
+							jsDocTagValue = jsDocTag.value();
+
+							int endBracketIdx;
+							if ((JSDocTag.PARAM.equals(jsDocTagName) || JSDocTag.RETURNS.equals(jsDocTagName)) && jsDocTagValue.startsWith("{") && //$NON-NLS-1$
+								(endBracketIdx = jsDocTagValue.indexOf('}', 1)) != -1)
+							{
+								String tagValueType = jsDocTagValue.substring(1, endBracketIdx);
+								if (JSDocTag.RETURNS.equals(jsDocTagName))
+								{
+									((AbstractScriptProvider)retval).setRuntimeProperty(IScriptProvider.METHOD_RETURN_TYPE, tagValueType);
+								}
+								else
+								{
+									if (endBracketIdx < jsDocTagValue.length() - 1)
+									{
+										StringTokenizer tagValueTk = new StringTokenizer(jsDocTagValue.substring(endBracketIdx + 1));
+										if (tagValueTk.hasMoreTokens())
+										{
+											paramIdToTypeMap.put(tagValueTk.nextToken(), tagValueType);
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+
 				MethodArgument[] methodArguments = NULL;
 				if (obj.has(ARGUMENTS_JSON_ATTRIBUTE))
 				{
@@ -1693,18 +1742,14 @@ public class SolutionDeserializer
 //									continue outer;
 //								}
 //							}
-							ArgumentType argumentType = ArgumentType.valueOf(null);
+
+							ArgumentType argumentType = ArgumentType.valueOf(paramIdToTypeMap.get(name));
 							methodArguments[i] = new MethodArgument(name, argumentType, null); // TODO: parse description
 						}
 					}
 				}
 				((AbstractScriptProvider)retval).setRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS, methodArguments);
 
-				if (obj.has(COMMENT_JSON_ATTRIBUTE))
-				{
-					String comment = obj.getString(COMMENT_JSON_ATTRIBUTE);
-					((AbstractScriptProvider)retval).setRuntimeProperty(IScriptProvider.COMMENT, comment);
-				}
 				if (obj.has(JS_TYPE_JSON_ATTRIBUTE))
 				{
 					String type = obj.getString(JS_TYPE_JSON_ATTRIBUTE);
@@ -2041,5 +2086,4 @@ public class SolutionDeserializer
 			this.start = start;
 		}
 	}
-
 }
