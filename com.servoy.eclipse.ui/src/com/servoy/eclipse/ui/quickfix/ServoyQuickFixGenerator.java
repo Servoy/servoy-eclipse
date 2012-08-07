@@ -26,13 +26,20 @@ import org.eclipse.ui.IMarkerResolutionGenerator;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.ScopesUtils;
+import com.servoy.j2db.util.UUID;
+import com.servoy.j2db.util.keyword.Ident;
 
 /**
  * Class that gives the list of quick-fixes (available in the ui plugin) for Servoy markers.
@@ -119,9 +126,42 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 
 				resolutions.add(new ClearPropertyQuickFix(solName, uuid, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
 					StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName()));
-				// don't create column name when dpid is a global
-				if (!ScopesUtils.isVariableScope(dataProviderID)) resolutions.add(new CreateColumnReferenceQuickFix(uuid, solName));
-				resolutions.add(new CreateVariableReferenceQuickFix(uuid, solName));
+
+				UUID id = UUID.fromString(uuid);
+				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
+				try
+				{
+					IPersist persist = servoyProject.getEditingPersist(id);
+					if (persist instanceof ISupportDataProviderID)
+					{
+						IPersist parent = persist.getAncestor(IRepository.FORMS);
+						if (parent != null)
+						{
+							Table table = ((Form)parent).getTable();
+							if (table != null)
+							{
+								String columnName = ((ISupportDataProviderID)persist).getDataProviderID();
+								if (table.getColumn(Ident.RESERVED_NAME_PREFIX + columnName) != null)
+								{
+									//resolutions.add(new RenameDataProviderIDQuickFix((ISupportDataProviderID)persist, columnName));
+									resolutions.add(new RenamePropertyQuickFix(solName, uuid,
+										StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
+										StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), Ident.RESERVED_NAME_PREFIX + columnName));
+								}
+								else
+								{
+									// don't create column name when dpid is a global
+									if (!ScopesUtils.isVariableScope(columnName)) resolutions.add(new CreateColumnReferenceQuickFix(uuid, solName));
+									resolutions.add(new CreateVariableReferenceQuickFix(uuid, solName));
+								}
+							}
+						}
+					}
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
 			}
 
 			return resolutions.toArray(new IMarkerResolution[resolutions.size()]);

@@ -38,6 +38,7 @@ import com.servoy.eclipse.core.quickfix.dbi.DBIQuickFixCreateInfoForColumn;
 import com.servoy.eclipse.core.quickfix.dbi.DBIQuickFixDeleteColumnFromDB;
 import com.servoy.eclipse.core.quickfix.dbi.DBIQuickFixDeleteInfoForColumn;
 import com.servoy.eclipse.core.quickfix.dbi.DBIQuickFixIgnoreColumnDifference;
+import com.servoy.eclipse.core.quickfix.dbi.DBIQuickFixRenameInfoFromColumn;
 import com.servoy.eclipse.core.quickfix.dbi.DBIQuickFixUpdateColumnFromInfo;
 import com.servoy.eclipse.core.quickfix.dbi.DBIQuickFixUpdateInfoFromColumn;
 import com.servoy.eclipse.core.quickfix.dbi.TableDifferenceQuickFix;
@@ -282,7 +283,7 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 	{
 		if (possibleTableFixes == null)
 		{
-			possibleTableFixes = new TableDifferenceQuickFix[] { DBIQuickFixCreateColumnInDB.getInstance(), DBIQuickFixDeleteInfoForColumn.getInstance(), DBIQuickFixCreateInfoForColumn.getInstance(), DBIQuickFixDeleteColumnFromDB.getInstance(), DBIQuickFixUpdateInfoFromColumn.getInstance(), DBIQuickFixUpdateColumnFromInfo.getInstance(), DBIQuickFixChangeInfoPkIntoUserRowIdent.getInstance(), DBIQuickFixIgnoreColumnDifference.getInstance() };
+			possibleTableFixes = new TableDifferenceQuickFix[] { DBIQuickFixRenameInfoFromColumn.getInstance(), DBIQuickFixCreateColumnInDB.getInstance(), DBIQuickFixDeleteInfoForColumn.getInstance(), DBIQuickFixCreateInfoForColumn.getInstance(), DBIQuickFixDeleteColumnFromDB.getInstance(), DBIQuickFixUpdateInfoFromColumn.getInstance(), DBIQuickFixUpdateColumnFromInfo.getInstance(), DBIQuickFixChangeInfoPkIntoUserRowIdent.getInstance(), DBIQuickFixIgnoreColumnDifference.getInstance() };
 		}
 		List<IMarkerResolution> fixes = new ArrayList<IMarkerResolution>();
 		TableDifference difference = TableDifferenceQuickFix.getTableDifference(marker);

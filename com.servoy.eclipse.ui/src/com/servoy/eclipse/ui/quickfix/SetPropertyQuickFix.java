@@ -27,7 +27,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
  */
 public class SetPropertyQuickFix extends BaseSetPropertyQuickFix
 {
-	private final Object value;
+	protected final Object value;
 
 	public SetPropertyQuickFix(String solutionName, String uuid, String propertyName, String displayName, Object value)
 	{
