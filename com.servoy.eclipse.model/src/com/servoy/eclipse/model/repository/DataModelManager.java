@@ -263,9 +263,9 @@ public class DataModelManager implements IColumnInfoManager
 				// checking if the server is a clone
 				if (s != null && s.getConfig() != null && s.getConfig().getDataModelCloneFrom() != null && s.getConfig().getDataModelCloneFrom().length() != 0) clonedServerWithoutTableDbiInDeveloper = true;
 			}
+			addMissingColumnMarkersIfNeeded = false; // no need adding missing column information markers if the file is missing altogether...
 			if (!clonedServerWithoutTableDbiInDeveloper)
 			{
-				addMissingColumnMarkersIfNeeded = false; // no need adding missing column information markers if the file is missing altogether...
 				addDifferenceMarker(new TableDifference(t, null, TableDifference.MISSING_DBI_FILE, null, null));
 			}
 		}
