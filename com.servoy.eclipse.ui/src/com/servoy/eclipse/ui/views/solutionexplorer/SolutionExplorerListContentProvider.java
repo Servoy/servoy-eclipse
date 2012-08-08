@@ -972,12 +972,14 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		methodSignatureBuilder.append(methodName != null ? methodName : sm.getName()).append('(');
 		for (int i = 0; i < args.length; i++)
 		{
+			if ((showParam || showParamType) && args[i].isOptional()) methodSignatureBuilder.append('[');
 			if (showParam)
 			{
 				methodSignatureBuilder.append(args[i].getName());
 				if (showParamType) methodSignatureBuilder.append(':');
 			}
 			if (showParamType) methodSignatureBuilder.append(args[i].getType());
+			if ((showParam || showParamType) && args[i].isOptional()) methodSignatureBuilder.append(']');
 			if (i < args.length - 1) methodSignatureBuilder.append(", "); //$NON-NLS-1$
 		}
 		methodSignatureBuilder.append(')');

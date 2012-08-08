@@ -1695,11 +1695,12 @@ public class SolutionDeserializer
 							jsDocTagValue = jsDocTag.value();
 
 							int endBracketIdx;
-							if ((JSDocTag.PARAM.equals(jsDocTagName) || JSDocTag.RETURNS.equals(jsDocTagName)) && jsDocTagValue.startsWith("{") && //$NON-NLS-1$
+							if ((JSDocTag.PARAM.equals(jsDocTagName) || JSDocTag.RETURNS.equals(jsDocTagName) || JSDocTag.RETURN.equals(jsDocTagName)) &&
+								jsDocTagValue.startsWith("{") && //$NON-NLS-1$
 								(endBracketIdx = jsDocTagValue.indexOf('}', 1)) != -1)
 							{
 								String tagValueType = jsDocTagValue.substring(1, endBracketIdx);
-								if (JSDocTag.RETURNS.equals(jsDocTagName))
+								if (JSDocTag.RETURNS.equals(jsDocTagName) || JSDocTag.RETURN.equals(jsDocTagName))
 								{
 									((AbstractScriptProvider)retval).setRuntimeProperty(IScriptProvider.METHOD_RETURN_TYPE, tagValueType);
 								}
@@ -1743,9 +1744,14 @@ public class SolutionDeserializer
 //							}
 
 							String paramType = paramIdToTypeMap.get(name);
-							if (paramType == null) paramType = paramIdToTypeMap.get('[' + name + ']'); // if it's an optional param
+							boolean isOptional = false;
+							if (paramType == null)
+							{
+								paramType = paramIdToTypeMap.get('[' + name + ']'); // if it's an optional param
+								isOptional = paramType != null;
+							}
 							ArgumentType argumentType = ArgumentType.valueOf(paramType);
-							methodArguments[i] = new MethodArgument(name, argumentType, null); // TODO: parse description
+							methodArguments[i] = new MethodArgument(name, argumentType, null, isOptional); // TODO: parse description
 						}
 					}
 				}
