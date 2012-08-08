@@ -17,6 +17,7 @@
 package com.servoy.eclipse.ui.editors.table;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -45,6 +46,7 @@ import org.eclipse.swt.widgets.TreeItem;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.eclipse.ui.editors.table.actions.SearchForDataProvidersReferencesAction;
@@ -62,6 +64,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.query.QueryAggregate;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Utils;
 
 public class AggregationsComposite extends Composite
 {
@@ -264,7 +267,8 @@ public class AggregationsComposite extends Composite
 		if (selection != null && selection.length > 0)
 		{
 			IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
-			String agrName = "type_here"; //$NON-NLS-1$
+			String orgName = "type_here"; //$NON-NLS-1$
+			String newName = orgName;
 			int type = QueryAggregate.ALL_DEFINED_AGGREGATES[0];
 			Iterator<Column> it = te.getTable().getColumns().iterator();
 			if (it.hasNext()) //we need to make sure there is one column
@@ -283,7 +287,23 @@ public class AggregationsComposite extends Composite
 						}
 						if (solution != null)
 						{
-							AggregateVariable aggregationVariable = solution.createNewAggregateVariable(nameValidator, te.getTable().getDataSource(), agrName,
+							HashMap<String, AggregateVariable> agrVariables = new HashMap<String, AggregateVariable>();
+							AggregateVariable agr = null;
+							for (AggregateVariable aggr : Utils.iterate(ModelUtils.getEditingFlattenedSolution(solution).getAggregateVariables(te.getTable(),
+								false)))
+							{
+								agrVariables.put(aggr.getName(), aggr);
+							}
+							agr = agrVariables.get(newName);
+							int i = 1;
+							while (agr != null)
+							{
+								newName = orgName + i;
+								i++;
+								agr = agrVariables.get(newName);
+							}
+
+							AggregateVariable aggregationVariable = solution.createNewAggregateVariable(nameValidator, te.getTable().getDataSource(), newName,
 								type, column.getDataProviderID());
 							treeViewer.refresh(solution);
 							treeViewer.editElement(aggregationVariable, 0);
