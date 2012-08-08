@@ -61,6 +61,7 @@ import org.eclipse.ui.progress.WorkbenchJob;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
 import com.servoy.eclipse.core.util.SerialRule;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.debug.actions.StartJsUnitClientActionDelegate;
@@ -70,11 +71,13 @@ import com.servoy.eclipse.jsunit.runner.ApplicationJSTestSuite;
 import com.servoy.eclipse.jsunit.runner.JSUnitTestListenerHandler;
 import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.JSUnitUserManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
 /**
  * Runs the JS unit tests on active Servoy solution using the existing JUnit runner view.<br>
@@ -144,6 +147,8 @@ public class RunJSTests implements IObjectActionDelegate, IWorkbenchWindowAction
 					if (scriptEngine != null) scriptEngine.destroy();
 					cancelCleanupShutDown = true;
 				}
+				final JSUnitUserManager testUserManager = ((JSUnitUserManager)testApp.getUserManager());
+				testUserManager.reloadFromWorkspace();
 
 				final int port = SocketUtil.findFreePort();
 				if (port == -1)
@@ -318,6 +323,7 @@ public class RunJSTests implements IObjectActionDelegate, IWorkbenchWindowAction
 												cancelCleanupShutDown = false; // because of the rule, last run session should have already finished by now, so no more danger in old cleanup shutting down newly open client
 												StartJsUnitClientActionDelegate startJsUnitClientAction = new StartJsUnitClientActionDelegate();
 												startJsUnitClientAction.init(window);
+												((SwitchableEclipseUserManager)ApplicationServerSingleton.get().getUserManager()).switchTo(testUserManager); // use testUserManager in app. server code as well
 												startJsUnitClientAction.run((IAction)null);
 
 												if (startJsUnitClientAction.clientStartSucceeded())
@@ -423,6 +429,7 @@ public class RunJSTests implements IObjectActionDelegate, IWorkbenchWindowAction
 
 	private void cleanUp2()
 	{
+		((SwitchableEclipseUserManager)ApplicationServerSingleton.get().getUserManager()).switchTo(null); // restore use of EclipseUserManager in app. server code
 		if (!cancelCleanupShutDown)
 		{
 			Activator plugin = Activator.getDefault();

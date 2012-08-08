@@ -22,9 +22,13 @@ import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IFile;
@@ -94,7 +98,6 @@ import com.servoy.j2db.persistence.IColumnInfoBasedSequenceProvider;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
-import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.Pair;
@@ -291,7 +294,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 		}
 	}
 
-	private static List<Pair<IServerInternal, String>> getMissingTables(List<IServerInternal> servers, DataModelManager dmm)
+	private static List<Pair<IServerInternal, String>> getMissingTables(List<IServerInternal> servers, final DataModelManager dmm)
 	{
 		// choose which of the missing tables (tables that do not exist in the DB but for which there are .dbi files)
 		// will be created and which of the .dbi files are no longer wanted.
@@ -320,6 +323,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 									if (tableName.toLowerCase().equals(tableName))
 									{
 										foundMissingTables.add(new Pair<IServerInternal, String>(s, tableName));
+										dmm.updateMarkerStatesForMissingTable(null, s.getName(), tableName); // add marker as well
 									}
 									else
 									{
@@ -362,6 +366,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 					if (!serverInformationFolder.getFile(tableName + DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT).exists())
 					{
 						foundSupplementalTables.add(new Pair<IServerInternal, String>(s, tableName));
+						dmm.addMissingDBIMarker(s.getName(), tableName, true);
 					}
 				}
 			}
@@ -1024,6 +1029,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 
 		private class PairSplitLabelProvider extends LabelProvider implements ITableLabelProvider
 		{
+			Map<String, Set<String>> serverNameToViewNames = new HashMap<String, Set<String>>();
 
 			public Image getColumnImage(Object element, int columnIndex)
 			{
@@ -1034,11 +1040,16 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 						try
 						{
 							IServerInternal s = (IServerInternal)((Pair)element).getLeft();
-							Table table = s.getTable((String)((Pair)element).getRight());
-							if (table != null)
+							Set<String> serverViews = serverNameToViewNames.get(s.getName());
+							if (serverViews == null)
 							{
-								int tableType = table.getTableType();
-								if (tableType == ITable.VIEW) return image3;
+								serverViews = new HashSet<String>(s.getViewNames(true));
+								serverNameToViewNames.put(s.getName(), serverViews);
+							}
+
+							if (serverViews.contains(((Pair)element).getRight()))
+							{
+								return image3;
 							}
 						}
 						catch (RepositoryException e)

@@ -503,7 +503,7 @@ public class Activator extends Plugin
 
 	public IDebugJ2DBClient getJSUnitJ2DBClient()
 	{
-		return getDebugClientHandler().getJSUnitJ2DBClient(new JSUnitUserManager());
+		return getDebugClientHandler().getJSUnitJ2DBClient(new JSUnitUserManager(ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager()));
 	}
 
 	/**

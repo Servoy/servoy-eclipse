@@ -96,6 +96,7 @@ import org.eclipse.ui.progress.UIJob;
 
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
+import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
@@ -499,7 +500,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 				{
 					public IUserManager createUserManager(IDataServer dataServer)
 					{
-						return new EclipseUserManager();
+						return new SwitchableEclipseUserManager();
 					}
 				});
 			// set the START_AS_TEAMPROVIDER_SETTING flag as system property, so
@@ -518,10 +519,14 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		return messagesManager;
 	}
 
+	/**
+	 * Returns the user manager reflecting the state of the workspace. When running unit tests, the ApplicationServer.getUserManager() delegates to
+	 * and alternate user manager, not to this one.
+	 */
 	public EclipseUserManager getUserManager()
 	{
 		startAppServer();
-		return (EclipseUserManager)ApplicationServerSingleton.get().getUserManager();
+		return ((SwitchableEclipseUserManager)ApplicationServerSingleton.get().getUserManager()).getEclipseUserManager();
 	}
 
 	public static IServerManagerInternal getServerManager()

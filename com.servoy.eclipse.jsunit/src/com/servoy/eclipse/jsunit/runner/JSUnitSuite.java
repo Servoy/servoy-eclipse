@@ -248,6 +248,11 @@ public class JSUnitSuite extends TestSuite
 		runner = null;
 	}
 
+	protected boolean areScopesReleased()
+	{
+		return runner == null;
+	}
+
 	/**
 	 * Can be called if the test scopes need to be re-initialized. See {@link #releaseScopes()}.
 	 * @param scope new scope.

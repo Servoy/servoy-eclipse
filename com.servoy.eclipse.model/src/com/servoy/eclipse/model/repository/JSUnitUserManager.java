@@ -30,19 +30,24 @@ import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Settings;
 
 /**
- * A special workspaceuser manager for jsunit testing, this one does copy over all the existing users once,
+ * A special workspace user manager for jsunit testing, this one does copy over all the existing users once,
  * But then will not touch the workspace data (update/create or delete users)
  * @author jcompagner
  * @since 6.1
  */
 public final class JSUnitUserManager extends WorkspaceUserManager
 {
-	public JSUnitUserManager()
+
+	private final WorkspaceUserManager workspaceUM;
+
+	public JSUnitUserManager(WorkspaceUserManager workspaceUM)
 	{
-		WorkspaceUserManager userManager = (WorkspaceUserManager)ApplicationServerSingleton.get().getUserManager();
-		this.allDefinedUsers.addAll(userManager.allDefinedUsers);
-		this.groupInfos.addAll(userManager.groupInfos);
-		this.userGroups.putAll(userManager.userGroups);
+		this.workspaceUM = workspaceUM;
+	}
+
+	public void reloadFromWorkspace()
+	{
+		copyDataFrom(workspaceUM);
 	}
 
 	/** Check if user is administrator.
@@ -128,4 +133,5 @@ public final class JSUnitUserManager extends WorkspaceUserManager
 	protected void writeAllTableInfo() throws RepositoryException
 	{
 	}
+
 }

@@ -97,36 +97,10 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		public void userGroupChanged();
 	}
 
-	/** Check if user is administrator.
-	 */
-	@SuppressWarnings("unused")
-	protected void checkForAdminUser(String clientId, String ownerUserId) throws RepositoryException
-	{
-		// default implementation
-	}
-
-	private final ArrayList<IUserGroupChangeListener> userGroupChangedChangeListeners = new ArrayList<IUserGroupChangeListener>();
-
-	public void addUserGroupChangeListener(IUserGroupChangeListener listener)
-	{
-		userGroupChangedChangeListeners.add(listener);
-	}
-
-	public void removeUserGroupChangeListener(IUserGroupChangeListener listener)
-	{
-		userGroupChangedChangeListeners.remove(listener);
-	}
-
-	private void fireUserGroupChanged()
-	{
-		for (IUserGroupChangeListener listener : userGroupChangedChangeListeners)
-			listener.userGroupChanged();
-	}
-
 	public static class SecurityInfo implements Comparable<SecurityInfo>
 	{
-		public String element_uid;//element UUID or columnname
-		public int access;
+		public final String element_uid;//element UUID or columnname
+		public final int access;
 
 		public SecurityInfo(String element_uid, int access)
 		{
@@ -171,7 +145,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	}
 
-	public static class User implements Comparable<User>
+	public static class User implements Comparable<User>, PCloneable<User>
 	{
 		public static final String NAME = "name"; //$NON-NLS-1$
 		public static final String PASSWORD_HASH = "password_hash"; //$NON-NLS-1$
@@ -179,7 +153,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 		public String name;
 		public String passwordHash;
-		public String userUid;//mostly uuid
+		public String userUid; //mostly uuid
 
 		public User(String name, String password_hash, String user_uid)
 		{
@@ -263,9 +237,15 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			return false;
 		}
 
+		@Override
+		public User clone()
+		{
+			return new User(name, passwordHash, userUid);
+		}
+
 	}
 
-	public static class GroupSecurityInfo implements ISupportName
+	public static class GroupSecurityInfo implements ISupportName, PCloneable<GroupSecurityInfo>
 	{
 		public String groupName;
 		public Map<String, List<SecurityInfo>> tableSecurity = new ConcurrentHashMap<String, List<SecurityInfo>>();//servername.tablename -> SecurityInfos 
@@ -286,6 +266,34 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		{
 			return groupName;
 		}
+
+		@Override
+		public GroupSecurityInfo clone()
+		{
+			GroupSecurityInfo gsi = new GroupSecurityInfo(groupName);
+			for (Entry<String, List<SecurityInfo>> element : tableSecurity.entrySet())
+			{
+				List<SecurityInfo> valCopy = null;
+				if (element.getValue() != null)
+				{
+					valCopy = new SortedList<SecurityInfo>(element.getValue().size());
+					valCopy.addAll(element.getValue());
+				}
+				gsi.tableSecurity.put(element.getKey(), valCopy);
+			}
+			for (Entry<UUID, List<SecurityInfo>> element : formSecurity.entrySet())
+			{
+				List<SecurityInfo> valCopy = null;
+				if (element.getValue() != null)
+				{
+					valCopy = new SortedList<SecurityInfo>(element.getValue().size());
+					valCopy.addAll(element.getValue());
+				}
+				gsi.formSecurity.put(element.getKey(), valCopy);
+			}
+			return gsi;
+		}
+
 	}
 
 	public static class SecurityReadException extends RepositoryException // only extends RepositoryException so it can be thrown in certain inherited methods
@@ -353,12 +361,11 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	private final HashMap<Integer, String> idToUUID = new HashMap<Integer, String>();
 	private final HashMap<String, Integer> UUIDToId = new HashMap<String, Integer>();
 	private int idCounter = 1;
-
-	protected boolean writingResources = false;
-
 	protected final List<GroupSecurityInfo> groupInfos = new SortedList<GroupSecurityInfo>(NameComparator.INSTANCE); //group names
 	protected final List<User> allDefinedUsers = new SortedList<User>();
 	protected final Map<String, List<String>> userGroups = new ConcurrentHashMap<String, List<String>>(); //groupname -> list of user_uids
+
+	protected boolean writingResources = false;
 
 	protected int writeMode = WRITE_MODE_AUTOMATIC;
 	protected IProject resourcesProject;
@@ -366,6 +373,66 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	protected IResource lastReadResource;
 	protected boolean isOperational = false;
 	protected boolean readingAllTableInfo;
+
+	private final ArrayList<IUserGroupChangeListener> userGroupChangedChangeListeners = new ArrayList<IUserGroupChangeListener>();
+
+	/**
+	 * Creates a new user manager using a copy of the in-memory data of the given userManager.
+	 * @param userManager the userManager for initial population.
+	 */
+	public void copyDataFrom(WorkspaceUserManager userManager)
+	{
+		idToUUID.clear();
+		idToUUID.putAll(userManager.idToUUID);
+		UUIDToId.clear();
+		UUIDToId.putAll(userManager.UUIDToId);
+		idCounter = userManager.idCounter;
+
+		allDefinedUsers.clear();
+		deepCopyList(userManager.allDefinedUsers, allDefinedUsers);
+		groupInfos.clear();
+		deepCopyList(userManager.groupInfos, groupInfos);
+		userGroups.clear();
+		for (Entry<String, List<String>> element : userManager.userGroups.entrySet())
+		{
+			List<String> valCopy = null;
+			if (element.getValue() != null)
+			{
+				valCopy = new SortedList<String>(StringComparator.INSTANCE, element.getValue().size());
+				valCopy.addAll(element.getValue());
+			}
+			userGroups.put(element.getKey(), valCopy);
+		}
+
+		isOperational = userManager.isOperational;
+		writingResources = false;
+		writeMode = WRITE_MODE_MANUAL;
+		readingAllTableInfo = false;
+	}
+
+	public void addUserGroupChangeListener(IUserGroupChangeListener listener)
+	{
+		userGroupChangedChangeListeners.add(listener);
+	}
+
+	public void removeUserGroupChangeListener(IUserGroupChangeListener listener)
+	{
+		userGroupChangedChangeListeners.remove(listener);
+	}
+
+	private void fireUserGroupChanged()
+	{
+		for (IUserGroupChangeListener listener : userGroupChangedChangeListeners)
+			listener.userGroupChanged();
+	}
+
+	/** Check if user is administrator.
+	 */
+	@SuppressWarnings("unused")
+	protected void checkForAdminUser(String clientId, String ownerUserId) throws RepositoryException
+	{
+		// default implementation
+	}
 
 	protected void refreshLoadedAccessRights(Table table)
 	{
@@ -2887,4 +2954,23 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	{
 		// nothing here
 	}
+
+	/**
+	 * Performs a deep copy on the list's values. Both lists must be non-null.
+	 * @return destination array.
+	 */
+	private static <T extends PCloneable<T>, L extends List<T>> L deepCopyList(L toCopy, L destination)
+	{
+		for (PCloneable<T> element : toCopy)
+		{
+			destination.add(element != null ? element.clone() : null);
+		}
+		return destination;
+	}
+
+	private interface PCloneable<T> extends Cloneable
+	{
+		T clone();
+	}
+
 }

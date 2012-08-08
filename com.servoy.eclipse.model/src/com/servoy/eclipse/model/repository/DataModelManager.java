@@ -266,7 +266,7 @@ public class DataModelManager implements IColumnInfoManager
 			addMissingColumnMarkersIfNeeded = false; // no need adding missing column information markers if the file is missing altogether...
 			if (!clonedServerWithoutTableDbiInDeveloper)
 			{
-				addDifferenceMarker(new TableDifference(t, null, TableDifference.MISSING_DBI_FILE, null, null));
+				addMissingDBIMarker(t.getServerName(), t.getName(), false);
 			}
 		}
 
@@ -986,10 +986,17 @@ public class DataModelManager implements IColumnInfoManager
 		}
 	}
 
+	public void addMissingDBIMarker(String serverName, String tableName, boolean removeMarkersFirst)
+	{
+		if (removeMarkersFirst) removeErrorMarker(serverName, tableName);
+		addDifferenceMarker(new TableDifference(serverName, tableName, null, TableDifference.MISSING_DBI_FILE, null, null));
+	}
+
 	public void updateMarkerStatesForMissingTable(IResourceDelta fileRd, String serverName, String tableName)
 	{
-		if ((fileRd.getFlags() & IResourceDelta.MOVED_TO) != 0) // this is probably a delete
+		if (fileRd == null || (fileRd.getFlags() & IResourceDelta.MOVED_TO) != 0) // this is usually caused by a delete or by the synchronize with db wizard
 		{
+			// it's existence was noticed, not necessarily the first time (the dbi file) or
 			// it was moved somewhere - remove previous markers (this will clear the difference, but not the real marker, as file probably changed name/location)
 			removeErrorMarker(serverName, tableName);
 		}
@@ -999,7 +1006,7 @@ public class DataModelManager implements IColumnInfoManager
 			removeErrorMarker(serverName, tableName);
 		}
 
-		if (fileRd.getKind() == IResourceDelta.ADDED) // added or moved from somewhere
+		if (fileRd == null || fileRd.getKind() == IResourceDelta.ADDED) // added or moved from somewhere, or it's existence was just noticed
 		{
 			// a .dbi file was added for a table that does not exist - add problem marker
 			addDifferenceMarker(new TableDifference(serverName, tableName, null, TableDifference.MISSING_TABLE, null, null));
@@ -1523,7 +1530,7 @@ public class DataModelManager implements IColumnInfoManager
 			differences.clear();
 		}
 
-		public void removeDifferences(String serverName)
+		public synchronized void removeDifferences(String serverName)
 		{
 			Iterator<TableDifference> it = differences.iterator();
 			while (it.hasNext())
@@ -1537,7 +1544,7 @@ public class DataModelManager implements IColumnInfoManager
 			}
 		}
 
-		public void removeDifferences(String serverName, String tableName)
+		public synchronized void removeDifferences(String serverName, String tableName)
 		{
 			Iterator<TableDifference> it = differences.iterator();
 			while (it.hasNext())
