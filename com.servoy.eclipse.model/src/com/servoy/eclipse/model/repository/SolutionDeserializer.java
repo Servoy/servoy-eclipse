@@ -1228,6 +1228,10 @@ public class SolutionDeserializer
 							}
 							else
 							{
+								if (objectclass != null)
+								{
+									json.putOpt(JS_TYPE_JSON_ATTRIBUTE, objectclass);
+								}
 								json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
 							}
 						}
