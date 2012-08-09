@@ -62,6 +62,9 @@ import com.servoy.j2db.IMessagesCallback;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.property.I18NMessagesModel;
 import com.servoy.j2db.property.I18NMessagesModel.I18NMessagesModelEntry;
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.IApplicationServerSingleton;
+import com.servoy.j2db.util.Settings;
 
 public class I18nComposite extends Composite
 {
@@ -278,9 +281,10 @@ public class I18nComposite extends Composite
 
 		selectedLanguage = new Locale(application.getLocale().getLanguage(), "", application.getLocale().getVariant());
 
+		IApplicationServerSingleton appServer = ApplicationServerSingleton.get();
 		Solution appSolution = application.getSolution();
 		messagesModel = new I18NMessagesModel(i18nDatasource != null ? i18nDatasource : appSolution != null ? appSolution.getI18nDataSource() : null,
-			application.getClientID(), application.getSettings(), application.getDataServer(), application.getRepository());
+			appServer.getClientId(), Settings.getInstance(), appServer.getDataServer(), appServer.getLocalRepository());
 		messagesModel.setLanguage(selectedLanguage);
 
 		fill("".equals(initialFilter) ? null : initialFilter);
