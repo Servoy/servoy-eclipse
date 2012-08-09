@@ -3437,11 +3437,11 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				if (dec instanceof ASTNode)
 				{
 					int sourceEnd = ((ASTNode)dec).sourceEnd();
-					if (start != -1 && sourceEnd < start)
+					if (start != -1 && sourceEnd > start)
 					{
 						return false;
 					}
-					else if (line != -1 && sourceLineTracker.getLineNumberOfOffset(sourceEnd) < line)
+					else if (line != -1 && sourceLineTracker.getLineNumberOfOffset(sourceEnd) > line)
 					{
 						return false;
 					}
