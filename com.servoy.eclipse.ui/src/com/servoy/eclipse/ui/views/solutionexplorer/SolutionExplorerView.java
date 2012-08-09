@@ -17,6 +17,7 @@
 package com.servoy.eclipse.ui.views.solutionexplorer;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -46,6 +47,14 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dltk.core.builder.ISourceLineTracker;
+import org.eclipse.dltk.javascript.ast.FunctionStatement;
+import org.eclipse.dltk.javascript.ast.JSDeclaration;
+import org.eclipse.dltk.javascript.ast.Script;
+import org.eclipse.dltk.javascript.ast.VariableDeclaration;
+import org.eclipse.dltk.javascript.parser.JavaScriptParser;
+import org.eclipse.dltk.ui.DLTKPluginImages;
+import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.ControlContribution;
@@ -66,8 +75,12 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
+import org.eclipse.jface.viewers.DecoratingLabelProvider;
+import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IContentProvider;
+import org.eclipse.jface.viewers.IDecoration;
+import org.eclipse.jface.viewers.IDecorationContext;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.ILabelDecorator;
@@ -77,10 +90,12 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
+import org.eclipse.jface.viewers.LabelDecorator;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
@@ -161,6 +176,7 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.repository.StringResourceDeserializer;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
@@ -268,14 +284,18 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormEncapsulation;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerListener;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportDeprecatedAnnotation;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.Relation;
+import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
@@ -459,6 +479,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private ViewLabelProvider labelProvider;
 
+	private ViewLabelDecorator labelDecorator;
+
 	private MenuItem openModeToggleButton;
 
 	private MenuItem includeModulesToggleButton;
@@ -476,6 +498,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private IServerListener serverListener;
 
 	private ImportMediaFolderAction importMediaFolder;
+
+	private OpenWizardAction openNewSubFormWizardAction;
 
 	private RenameMediaAction renameMediaAction;
 	private RenameMediaFolderAction renameMediaFolderAction;
@@ -681,6 +705,21 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						? (MediaNode)((SimpleUserNode)selFirstEl).getRealObject() : null;
 					((SolutionExplorerListContentProvider)list.getContentProvider()).clearMediaCache();
 				}
+				if (selFirstEl instanceof PlatformSimpleUserNode && ((SimpleUserNode)selFirstEl).getType() == UserNodeType.FORM)
+				{
+					Form f = (Form)((PlatformSimpleUserNode)selFirstEl).getRealObject();
+					ImageDescriptor imgd = Activator.loadImageDescriptorFromBundle("designer_public.gif");
+					switch (f.getEncapsulation())
+					{
+						case FormEncapsulation.MODULE_PRIVATE :
+							imgd = Activator.loadImageDescriptorFromBundle("designer_protected.gif");
+							break;
+						case FormEncapsulation.PRIVATE :
+							imgd = Activator.loadImageDescriptorFromBundle("designer_private.gif");
+							break;
+					}
+					openNewSubFormWizardAction.setImageDescriptor(imgd);
+				}
 				list.setInput(selFirstEl);
 			}
 			else
@@ -698,6 +737,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		fParent = parent;
 
 		labelProvider = new ViewLabelProvider();
+		labelDecorator = new ViewLabelDecorator();
+
 		createSplitter(parent);
 //		createPersistListener();
 		createTreeViewer(fSplitter);
@@ -1272,7 +1313,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		list = new TableViewer(viewForm, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		ColumnViewerToolTipSupport.enableFor(list);
 		list.setContentProvider(new SolutionExplorerListContentProvider(this));
-		list.setLabelProvider(labelProvider);
+		list.setLabelProvider(new DecoratingLabelProvider(labelProvider, labelDecorator));
 		viewForm.setContent(list.getControl());
 
 		listToolBar = new ToolBar(viewForm, SWT.FLAT | SWT.WRAP);
@@ -1406,7 +1447,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					tree.refresh();
 				}
 			}
-
+			
 		};
 		decoratingLabelProvider.addListener(labelProviderListener);
 		tree.setLabelProvider(decoratingLabelProvider);
@@ -1766,6 +1807,14 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 						problemDecorator.fireChanged(changedProblemResources.toArray(new IResource[changedProblemResources.size()]));
 					}
+
+					Display.getDefault().asyncExec(new Runnable()
+					{
+						public void run()
+						{
+							if (list != null && list.getControl() != null && !list.getControl().isDisposed()) list.refresh();
+						}
+					});
 				}
 			}
 		};
@@ -2505,8 +2554,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		importMediaFolder = new ImportMediaFolderAction(this);
 		importMediaFolder.setEnabled(false);
 
-		newActionInTreeSecondary.registerAction(UserNodeType.FORM,
-			new OpenWizardAction(NewFormWizard.class, Activator.loadImageDescriptorFromBundle("designer.gif"), "Create new sub form")); //$NON-NLS-1$ //$NON-NLS-2$
+		openNewSubFormWizardAction = new OpenWizardAction(NewFormWizard.class, Activator.loadImageDescriptorFromBundle("designer.gif"), "Create new sub form"); //$NON-NLS-1$//$NON-NLS-2$
+		newActionInTreeSecondary.registerAction(UserNodeType.FORM, openNewSubFormWizardAction);
+
 		newActionInTreeSecondary.registerAction(UserNodeType.SOLUTION, newForm);
 
 		newActionInListPrimary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
@@ -3214,5 +3264,248 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	public void enableSybaseDBCreation()
 	{
 		newSybaseDatabase.setEnabledStatus();
+	}
+
+
+	class ViewLabelDecorator extends LabelDecorator
+	{
+		@Override
+		public Image decorateImage(Image image, Object element, IDecorationContext context)
+		{
+			Image resultImage = null;
+			ImageDescriptor imageDescriptor = null;
+
+			if (element != null && element instanceof UserNode)
+			{
+				UserNode unElem = (UserNode)element;
+				if (unElem.getRealObject() instanceof ScriptMethod || unElem.getRealObject() instanceof ScriptVariable)
+				{
+					//problem (warning/error) decoration
+					int severity = getProblemType(unElem);
+					if (severity == IMarker.SEVERITY_ERROR) imageDescriptor = DLTKPluginImages.DESC_OVR_ERROR;
+					else if (severity == IMarker.SEVERITY_WARNING) imageDescriptor = DLTKPluginImages.DESC_OVR_WARNING;
+
+					resultImage = (imageDescriptor != null ? new DecorationOverlayIcon(image, imageDescriptor, IDecoration.BOTTOM_LEFT).createImage() : image);
+
+					//deprecated decoration for vars/functions
+					if (unElem.getRealObject() instanceof ISupportDeprecatedAnnotation)
+					{
+						ISupportDeprecatedAnnotation isda = (ISupportDeprecatedAnnotation)unElem.getRealObject();
+						if (isda.isDeprecated())
+						{
+							resultImage = new DecorationOverlayIcon(resultImage, DLTKPluginImages.DESC_OVR_DEPRECATED, IDecoration.UNDERLAY).createImage();
+						}
+					}
+
+					//constructor decoration for functions
+					if (unElem.getRealObject() instanceof ScriptMethod)
+					{
+						ScriptMethod sm = (ScriptMethod)unElem.getRealObject();
+						if (sm.isConstructor())
+						{
+							resultImage = new DecorationOverlayIcon(resultImage, DLTKPluginImages.DESC_OVR_CONSTRUCTOR, IDecoration.TOP_RIGHT).createImage();
+						}
+					}
+				}
+			}
+			return resultImage;
+		}
+
+		private int getProblemType(SimpleUserNode element)
+		{
+			int problemLevel = -1;
+			SimpleUserNode parent = element.parent;
+
+			if (element.getRealObject() instanceof ScriptVariable)
+			{
+				//go deeper in parent hierarchy for vars
+				parent = parent.parent;
+			}
+
+			if (parent instanceof PlatformSimpleUserNode)
+			{
+				IResource resource = (IResource)((PlatformSimpleUserNode)(parent)).getAdapter(IResource.class);
+				if (resource != null && resource.getName().toLowerCase().endsWith(SolutionSerializer.FORM_FILE_EXTENSION))
+				{
+					try
+					{
+						IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+						String resourceName = resource.getName();
+						int extIdx = resourceName.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION);
+						if (extIdx > 0)
+						{
+							resourceName = resourceName.substring(0, extIdx);
+							IResource jsResource = resource.getParent().findMember(resourceName + SolutionSerializer.JS_FILE_EXTENSION);
+							if (jsResource != null)
+							{
+								IMarker[] jsMarkers = jsResource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+								if (jsMarkers.length > 0)
+								{
+									IMarker[] allMarkers = new IMarker[markers.length + jsMarkers.length];
+									System.arraycopy(markers, 0, allMarkers, 0, markers.length);
+									System.arraycopy(jsMarkers, 0, allMarkers, markers.length, jsMarkers.length);
+									markers = allMarkers;
+								}
+
+								try
+								{
+									String contents = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getUTF8Contents(jsResource.getFullPath().toString());
+									if (markers != null)
+									{
+										if (element.getRealObject() instanceof ScriptMethod)
+										{
+											ScriptMethod sm = (ScriptMethod)element.getRealObject();
+											for (IMarker marker : markers)
+											{
+												if (isProblemMarkerForMethod(contents, sm.getName(), marker))
+												{
+													//priority for error
+													if (marker.getAttribute(IMarker.SEVERITY, -1) > problemLevel)
+													{
+														problemLevel = marker.getAttribute(IMarker.SEVERITY, -1);
+													}
+												}
+											}
+										}
+										else if (element.getRealObject() instanceof ScriptVariable)
+										{
+											ScriptVariable sv = (ScriptVariable)element.getRealObject();
+											for (IMarker marker : markers)
+											{
+												if (isProblemMarkerForVariable(contents, sv.getName(), marker))
+												{
+													if (marker.getAttribute(IMarker.SEVERITY, -1) > problemLevel)
+													{
+														problemLevel = marker.getAttribute(IMarker.SEVERITY, -1);
+													}
+												}
+											}
+										}
+									}
+								}
+								catch (IOException e)
+								{
+									ServoyLog.logError(e);
+								}
+							}
+						}
+					}
+					catch (CoreException ex)
+					{
+						ServoyLog.logError(ex);
+					}
+				}
+			}
+			return problemLevel;
+		}
+
+		private boolean isProblemMarkerForMethod(String jsContent, String metName, IMarker marker)
+		{
+			JavaScriptParser parser = new JavaScriptParser();
+			Script script = parser.parse(jsContent, null);
+			for (JSDeclaration dec : script.getDeclarations())
+			{
+				if (dec instanceof FunctionStatement)
+				{
+					FunctionStatement fstmt = (FunctionStatement)dec;
+					if (fstmt.getFunctionName().equals(metName))
+					{
+						int line = marker.getAttribute(IMarker.LINE_NUMBER, -1);
+						if (line != -1)
+						{
+							ISourceLineTracker sourceLineTracker = TextUtils.createLineTracker(jsContent);
+							if (sourceLineTracker.getLineNumberOfOffset(fstmt.sourceStart()) <= line &&
+								line <= sourceLineTracker.getLineNumberOfOffset(fstmt.sourceEnd()))
+							{
+								return true;
+							}
+						}
+						else
+						{
+							int start = marker.getAttribute(IMarker.CHAR_START, -1);
+							if (start != -1 && fstmt.sourceStart() <= start && start <= fstmt.sourceEnd())
+							{
+								return true;
+							}
+						}
+					}
+				}
+			}
+			return false;
+		}
+
+		private boolean isProblemMarkerForVariable(String jsContent, String varName, IMarker marker)
+		{
+			JavaScriptParser parser = new JavaScriptParser();
+			Script script = parser.parse(jsContent, null);
+			for (JSDeclaration dec : script.getDeclarations())
+			{
+				if (dec instanceof VariableDeclaration)
+				{
+					VariableDeclaration varDec = (VariableDeclaration)dec;
+					if (varDec.getVariableName().equals(varName))
+					{
+						int line = marker.getAttribute(IMarker.LINE_NUMBER, -1); //line number is not ok here or below
+						if (line != -1)
+						{
+							ISourceLineTracker sourceLineTracker = TextUtils.createLineTracker(jsContent);
+							if (sourceLineTracker.getLineNumberOfOffset(varDec.sourceStart()) <= line &&
+								line <= sourceLineTracker.getLineNumberOfOffset(varDec.sourceEnd()))
+							{
+								return true;
+							}
+						}
+						// else
+						// special extra check for cases in which linenumber = sourceStartLine + 1 (variables)
+						// still not fully ok for duplicate vars due to linenumber difference with marker..
+						int start = marker.getAttribute(IMarker.CHAR_START, -1);
+						if (start != -1 && varDec.sourceStart() <= start && start <= varDec.sourceEnd())
+						{
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		}
+
+		public Image decorateImage(Image image, Object element)
+		{
+			return null;
+		}
+
+		public String decorateText(String text, Object element)
+		{
+			return null;
+		}
+
+		public void addListener(ILabelProviderListener listener)
+		{
+		}
+
+		public void dispose()
+		{
+		}
+
+		public boolean isLabelProperty(Object element, String property)
+		{
+			return false;
+		}
+
+		public void removeListener(ILabelProviderListener listener)
+		{
+		}
+
+		@Override
+		public String decorateText(String text, Object element, IDecorationContext context)
+		{
+			return null;
+		}
+
+		@Override
+		public boolean prepareDecoration(Object element, String originalText, IDecorationContext context)
+		{
+			return true;
+		}
 	}
 }

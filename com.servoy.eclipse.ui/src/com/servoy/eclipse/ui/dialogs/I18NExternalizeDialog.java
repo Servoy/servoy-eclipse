@@ -172,7 +172,6 @@ public class I18NExternalizeDialog extends Dialog
 
 	private final ContentSpec contentSpec = StaticContentSpecLoader.getContentSpec();
 	private final Image solutionImage = Activator.getDefault().loadImageFromBundle("solution.gif");
-	private final Image formImage = Activator.getDefault().loadImageFromBundle("designer.gif");
 	private final Image elementImage = Activator.getDefault().loadImageFromBundle("element.gif");
 	private final Image serverImage = Activator.getDefault().loadImageFromBundle("server.gif");
 	private final Image tableImage = Activator.getDefault().loadImageFromBundle("portal.gif");
@@ -1767,7 +1766,7 @@ public class I18NExternalizeDialog extends Dialog
 							case IRepository.SOLUTIONS :
 								return I18NExternalizeDialog.this.solutionImage;
 							case IRepository.FORMS :
-								return I18NExternalizeDialog.this.formImage;
+								return EditorUtil.getImageForFormEncapsulation((Form)data);
 							default :
 								return I18NExternalizeDialog.this.elementImage;
 						}

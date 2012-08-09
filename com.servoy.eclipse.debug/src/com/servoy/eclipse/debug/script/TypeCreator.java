@@ -226,17 +226,27 @@ public class TypeCreator extends TypeCache
 	protected final static ImageDescriptor SPECIAL_PROPERTY = ImageDescriptor.createFromURL(FileLocator.find(
 		com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/special_properties_icon.gif"), null));
 
-	protected final static ImageDescriptor GLOBAL_VAR_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path(
-		"/icons/global_variable.gif"), null));
-	protected final static ImageDescriptor GLOBAL_METHOD_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path(
-		"/icons/global_method.gif"), null));
+	protected final static ImageDescriptor PUBLIC_GLOBAL_VAR_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(),
+		new Path("/icons/variable_public.gif"), null));
+	protected final static ImageDescriptor PRIVATE_GLOBAL_VAR_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(),
+		new Path("/icons/variable_private.gif"), null));
+	protected final static ImageDescriptor PUBLIC_GLOBAL_METHOD_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(),
+		new Path("/icons/public_method.gif"), null));
+	protected final static ImageDescriptor PROTECTED_GLOBAL_METHOD_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(),
+		new Path("/icons/protected_method.gif"), null));
+	protected final static ImageDescriptor PRIVATE_GLOBAL_METHOD_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(),
+		new Path("/icons/private_method.gif"), null));
 
-	protected final static ImageDescriptor FORM_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(
-		com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/designer.gif"), null));
-	protected final static ImageDescriptor FORM_METHOD_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path(
-		"/icons/form_method.gif"), null));
-	protected final static ImageDescriptor FORM_VARIABLE_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path(
-		"/icons/form_variable.gif"), null));
+	protected final static ImageDescriptor FORM_PUBLIC_METHOD_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(),
+		new Path("/icons/public_method.gif"), null));
+	protected final static ImageDescriptor FORM_PROTECTED_METHOD_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(),
+		new Path("/icons/protected_method.gif"), null));
+	protected final static ImageDescriptor FORM_PRIVATE_METHOD_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(),
+		new Path("/icons/private_method.gif"), null));
+	protected final static ImageDescriptor FORM_PUBLIC_VARIABLE_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(),
+		new Path("/icons/variable_public.gif"), null));
+	protected final static ImageDescriptor FORM_PRIVATE_VARIABLE_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(),
+		new Path("/icons/variable_private.gif"), null));
 
 	protected final static ImageDescriptor FOUNDSET_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path(
 		"/icons/foundset.gif"), null));
@@ -1912,7 +1922,7 @@ public class TypeCreator extends TypeCache
 				{
 					Form form = forms.next();
 					Property formProperty = createProperty(form.getName(), true, getTypeRef(context, "RuntimeForm<" + form.getName() + '>'),
-						getDescription(form.getDataSource()), FORM_IMAGE);
+						getDescription(form.getDataSource()), getImageDescriptorForFormEncapsulation(form.getEncapsulation()));
 					formProperty.setAttribute(LAZY_VALUECOLLECTION, form);
 					if (FormEncapsulation.isPrivate(form, fs))
 					{
@@ -2278,7 +2288,8 @@ public class TypeCreator extends TypeCache
 				overwrittenMembers.add(clone);
 				clone.setVisible(!FormEncapsulation.hideElements(formToUse));
 
-				type = getCombinedType(fs, context, typeName, ds, overwrittenMembers, superForm, FORM_IMAGE, !FormEncapsulation.hideDataproviders(formToUse));
+				type = getCombinedType(fs, context, typeName, ds, overwrittenMembers, superForm,
+					getImageDescriptorForFormEncapsulation(form.getEncapsulation()), !FormEncapsulation.hideDataproviders(formToUse));
 				if (type != null) type.setAttribute(LAZY_VALUECOLLECTION, form);
 			}
 			return type;
@@ -3260,4 +3271,19 @@ public class TypeCreator extends TypeCache
 		}
 	}
 
+
+	protected static ImageDescriptor getImageDescriptorForFormEncapsulation(int enc)
+	{
+		String imgPath = "/icons/designer_public.gif";
+		switch (enc)
+		{
+			case FormEncapsulation.MODULE_PRIVATE :
+				imgPath = "/icons/designer_protected.gif";
+				break;
+			case FormEncapsulation.PRIVATE :
+				imgPath = "/icons/designer_private.gif";
+				break;
+		}
+		return ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path(imgPath), null));
+	}
 }

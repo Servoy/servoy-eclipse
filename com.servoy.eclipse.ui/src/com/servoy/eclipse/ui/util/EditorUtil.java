@@ -48,6 +48,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorDescriptor;
@@ -91,6 +92,7 @@ import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormEncapsulation;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
@@ -739,5 +741,31 @@ public class EditorUtil
 			return stringBuffer.toString().toLowerCase();
 		}
 		return null;
+	}
+
+	public static Image getImageForFormEncapsulation(Form form)
+	{
+		org.eclipse.swt.graphics.Image image = null;
+		int encapsulation = (form).getEncapsulation();
+		switch (encapsulation)
+		{
+			case FormEncapsulation.MODULE_PRIVATE :
+				image = Activator.getDefault().loadImageFromBundle("designer_protected.gif");
+				break;
+			case FormEncapsulation.PRIVATE :
+				image = Activator.getDefault().loadImageFromBundle("designer_private.gif");
+				break;
+			default :
+				image = Activator.getDefault().loadImageFromBundle("designer_public.gif");
+		}
+		return image;
+	}
+
+	public static String getImageRelPathForEncapsulation(Form f)
+	{
+		int encapsulation = f.getEncapsulation();
+		if (encapsulation == FormEncapsulation.MODULE_PRIVATE) return "icons/designer_protected.gif"; //$NON-NLS-1$
+		else if (encapsulation == FormEncapsulation.PRIVATE) return "icons/designer_private.gif"; //$NON-NLS-1$
+		return "icons/designer_public.gif"; //$NON-NLS-1$
 	}
 }

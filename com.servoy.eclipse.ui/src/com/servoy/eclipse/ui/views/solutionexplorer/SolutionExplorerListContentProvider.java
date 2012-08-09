@@ -1008,7 +1008,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		try
 		{
 			dlm.add(new UserNode(form.getName(), UserNodeType.FORM_FOUNDSET, form.getName(), form.getName(), form,
-				uiActivator.loadImageFromBundle("designer.gif"))); //$NON-NLS-1$
+				EditorUtil.getImageForFormEncapsulation(form)));
 			TreeBuilder.docToOneNode(com.servoy.j2db.documentation.scripting.docs.Form.class, this, UserNodeType.FOUNDSET_ITEM, null, dlm, "foundset", form,
 				uiActivator.loadImageFromBundle("foundset.gif"));
 			FlattenedSolution flatSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
@@ -1047,7 +1047,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 				else
 				{
-					icon = uiActivator.loadImageFromBundle("form_method.gif"); //$NON-NLS-1$
+					icon = uiActivator.loadImageFromBundle("public_method.gif"); //$NON-NLS-1$
 				}
 
 				String sampleCode = getScriptMethodSignature(sm, null, true, false, false, false);
@@ -1070,11 +1070,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		for (IPersist persist : persists)
 		{
 			ScriptVariable var = (ScriptVariable)persist;
-			SimpleUserNode node = new UserNode(
-				getDisplayName(var, pair.getLeft()),
-				UserNodeType.GLOBAL_VARIABLE_ITEM,
-				var.getDataProviderID(),
-				Column.getDisplayTypeString(var.getDataProviderType()) + " " + var.getDataProviderID(), var, uiActivator.loadImageFromBundle("global_variable.gif")); //$NON-NLS-1$ //$NON-NLS-2$
+			SimpleUserNode node = new UserNode(getDisplayName(var, pair.getLeft()), UserNodeType.GLOBAL_VARIABLE_ITEM, var.getDataProviderID(),
+				Column.getDisplayTypeString(var.getDataProviderType()) + " " + var.getDataProviderID(), var, getImageForVariableEncapsulation(var)); //$NON-NLS-1$ 
 			dlm.add(node);
 		}
 		return dlm.toArray();
@@ -1113,12 +1110,24 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					nodeText = var.getName() + " [" + ((Form)var.getParent()).getName() + "]";
 				}
 				dlm.add(new UserNode(nodeText, UserNodeType.FORM_VARIABLE_ITEM, var.getDataProviderID(), "%%prefix%%" + var.getDataProviderID(),
-					Column.getDisplayTypeString(var.getDataProviderType()) + " " + var.getDataProviderID(), var,
-					uiActivator.loadImageFromBundle("form_variable.gif")));
+					Column.getDisplayTypeString(var.getDataProviderType()) + " " + var.getDataProviderID(), var, getImageForVariableEncapsulation(var)));
 			}
 		}
 
 		return dlm.toArray();
+	}
+
+	private Image getImageForVariableEncapsulation(ScriptVariable sv)
+	{
+		if (sv.isPrivate()) return uiActivator.loadImageFromBundle("variable_private.gif"); //$NON-NLS-1$
+		else return uiActivator.loadImageFromBundle("variable_public.gif"); //$NON-NLS-1$
+	}
+
+	private Image getImageForMethodEncapsulation(ScriptMethod sm)
+	{
+		if (sm.isPrivate()) return uiActivator.loadImageFromBundle("private_method.gif"); //$NON-NLS-1$
+		else if (sm.isProtected()) return uiActivator.loadImageFromBundle("protected_method.gif"); //$NON-NLS-1$
+		else return uiActivator.loadImageFromBundle("public_method.gif"); //$NON-NLS-1$
 	}
 
 	private Object[] createGlobalScripts(SimpleUserNode un)
@@ -1142,8 +1151,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			String sampleCode = getScriptMethodSignature(sm, sm.getPrefixedName(), true, false, false, false);
 			String tooltipCode = getScriptMethodSignature(sm, null, true, true, true, false);
-			SimpleUserNode node = new UserNode(nodeName, UserNodeType.GLOBAL_METHOD_ITEM, sampleCode, tooltipCode, sm,
-				uiActivator.loadImageFromBundle("global_method.gif")); //$NON-NLS-1$
+			SimpleUserNode node = new UserNode(nodeName, UserNodeType.GLOBAL_METHOD_ITEM, sampleCode, tooltipCode, sm, getImageForMethodEncapsulation(sm));
 			dlm.add(node);
 		}
 		return dlm.toArray();

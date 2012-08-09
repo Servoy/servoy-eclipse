@@ -32,6 +32,8 @@ import org.eclipse.gef.commands.CommandStackEvent;
 import org.eclipse.gef.commands.CommandStackEventListener;
 import org.eclipse.gef.commands.CommandStackListener;
 import org.eclipse.gef.ui.actions.ActionRegistry;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -46,6 +48,7 @@ import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IActiveProjectListener;
@@ -58,6 +61,7 @@ import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.ITabbedEditor;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
@@ -121,6 +125,8 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 	private boolean closing = false;
 
 	private final CommandStackListener commandStackEventListener = new CommandStackListener();
+
+	private ImageDescriptor editorImgDescr = null;
 
 	@Override
 	public void init(IEditorSite site, IEditorInput editorInput) throws PartInitException
@@ -189,6 +195,10 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 			}
 			setPartName(form.getName());
 			servoyModel.addPersistChangeListener(false, this);
+
+			editorImgDescr = AbstractUIPlugin.imageDescriptorFromPlugin(com.servoy.eclipse.ui.Activator.PLUGIN_ID,
+				EditorUtil.getImageRelPathForEncapsulation(form));
+			setTitleImage(JFaceResources.getResources().createImageWithDefault(editorImgDescr));
 		}
 		catch (RepositoryException e)
 		{
@@ -222,6 +232,10 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 		if (dummyActionRegistry != null)
 		{
 			dummyActionRegistry.dispose();
+		}
+		if (editorImgDescr != null)
+		{
+			JFaceResources.getResources().destroyImage(editorImgDescr);
 		}
 		super.dispose();
 	}

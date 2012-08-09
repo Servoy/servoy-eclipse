@@ -40,6 +40,7 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormEncapsulation;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
@@ -155,7 +156,10 @@ public class ElementUtil
 		}
 		if (persist instanceof Form)
 		{
-			return "designer.gif";
+			int enc = ((Form)persist).getEncapsulation();
+			if (enc == FormEncapsulation.MODULE_PRIVATE) return "designer_protected.gif"; //$NON-NLS-1$
+			if (enc == FormEncapsulation.PRIVATE) return "designer_private.gif"; //$NON-NLS-1$
+			else return "designer_public.gif"; //$NON-NLS-1$
 		}
 		if (persist instanceof Bean)
 		{
@@ -183,19 +187,16 @@ public class ElementUtil
 		}
 		if (persist instanceof ScriptVariable)
 		{
-			if (persist.getParent() instanceof Form)
-			{
-				return "form_variable.gif";
-			}
-			return "global_variable.gif";
+			ScriptVariable sv = (ScriptVariable)persist;
+			if (sv.isPrivate()) return "variable_private.gif"; //$NON-NLS-1$
+			else return "variable_public.gif"; //$NON-NLS-1$
 		}
 		if (persist instanceof ScriptMethod)
 		{
-			if (persist.getParent() instanceof Form)
-			{
-				return "form_method.gif";
-			}
-			return "global_method.gif";
+			ScriptMethod sm = (ScriptMethod)persist;
+			if (sm.isPrivate()) return "private_method.gif"; //$NON-NLS-1$
+			else if (sm.isProtected()) return "protected_method.gif"; //$NON-NLS-1$
+			else return "public_method.gif"; //$NON-NLS-1$
 		}
 
 		return null;

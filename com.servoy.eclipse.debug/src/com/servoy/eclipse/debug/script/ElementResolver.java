@@ -328,7 +328,8 @@ public class ElementResolver implements IElementResolver
 			if (form != null && form.getExtendsID() > 0 && fs != null)
 			{
 				Form superForm = fs.getForm(form.getExtendsID());
-				Property property = TypeCreator.createProperty("_super", true, (JSType)null, null, TypeCreator.FORM_IMAGE);
+				Property property = TypeCreator.createProperty("_super", true, (JSType)null, null,
+					TypeCreator.getImageDescriptorForFormEncapsulation(superForm.getEncapsulation()));
 				property.setDescription(TypeCreator.getDoc("_super", com.servoy.j2db.documentation.scripting.docs.Form.class, null));
 				property.setAttribute(TypeCreator.LAZY_VALUECOLLECTION, superForm);
 				property.setAttribute(IReferenceAttributes.SUPER_SCOPE, Boolean.TRUE);
