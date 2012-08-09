@@ -60,7 +60,6 @@ import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.scripting.CalculationModeHandler;
-import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.eclipse.ui.util.MediaNode;
@@ -1138,9 +1137,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		while (it.hasNext())
 		{
 			Form f = it.next();
-			f.getEncapsulation();
 			PlatformSimpleUserNode node = new PlatformSimpleUserNode(f.getName(), UserNodeType.FORM, f.getName(), f.getDataSource() == null ? "No table"
-				: ("Server: " + f.getServerName() + ", Table: " + f.getTableName()), f, EditorUtil.getImageForFormEncapsulation(f));
+				: ("Server: " + f.getServerName() + ", Table: " + f.getTableName()), f, ElementUtil.getImageForFormEncapsulation(f));
 			nodes.add(node);
 			node.parent = formsNode;
 		}

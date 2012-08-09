@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
@@ -1008,7 +1009,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		try
 		{
 			dlm.add(new UserNode(form.getName(), UserNodeType.FORM_FOUNDSET, form.getName(), form.getName(), form,
-				EditorUtil.getImageForFormEncapsulation(form)));
+				ElementUtil.getImageForFormEncapsulation(form)));
 			TreeBuilder.docToOneNode(com.servoy.j2db.documentation.scripting.docs.Form.class, this, UserNodeType.FOUNDSET_ITEM, null, dlm, "foundset", form,
 				uiActivator.loadImageFromBundle("foundset.gif"));
 			FlattenedSolution flatSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
@@ -1119,15 +1120,16 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	private Image getImageForVariableEncapsulation(ScriptVariable sv)
 	{
-		if (sv.isPrivate()) return uiActivator.loadImageFromBundle("variable_private.gif"); //$NON-NLS-1$
-		else return uiActivator.loadImageFromBundle("variable_public.gif"); //$NON-NLS-1$
+		if (sv.isPrivate()) return uiActivator.getImage(DLTKPluginImages.DESC_FIELD_PRIVATE);
+		if (sv.isPublic()) return uiActivator.getImage(DLTKPluginImages.DESC_FIELD_PUBLIC);
+		return uiActivator.getImage(DLTKPluginImages.DESC_OBJS_FIELD); //dltk default handling
 	}
 
 	private Image getImageForMethodEncapsulation(ScriptMethod sm)
 	{
-		if (sm.isPrivate()) return uiActivator.loadImageFromBundle("private_method.gif"); //$NON-NLS-1$
-		else if (sm.isProtected()) return uiActivator.loadImageFromBundle("protected_method.gif"); //$NON-NLS-1$
-		else return uiActivator.loadImageFromBundle("public_method.gif"); //$NON-NLS-1$
+		if (sm.isPrivate()) return uiActivator.getImage(DLTKPluginImages.DESC_METHOD_PRIVATE);
+		else if (sm.isProtected()) return uiActivator.getImage(DLTKPluginImages.DESC_METHOD_PROTECTED);
+		else return uiActivator.getImage(DLTKPluginImages.DESC_METHOD_PUBLIC);
 	}
 
 	private Object[] createGlobalScripts(SimpleUserNode un)

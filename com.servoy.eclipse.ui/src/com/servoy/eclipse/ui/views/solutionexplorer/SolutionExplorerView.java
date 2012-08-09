@@ -95,7 +95,6 @@ import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
-import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
@@ -1447,7 +1446,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					tree.refresh();
 				}
 			}
-			
+
 		};
 		decoratingLabelProvider.addListener(labelProviderListener);
 		tree.setLabelProvider(decoratingLabelProvider);
@@ -3329,7 +3328,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				{
 					try
 					{
-						IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
 						String resourceName = resource.getName();
 						int extIdx = resourceName.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION);
 						if (extIdx > 0)
@@ -3339,23 +3337,15 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 							if (jsResource != null)
 							{
 								IMarker[] jsMarkers = jsResource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-								if (jsMarkers.length > 0)
-								{
-									IMarker[] allMarkers = new IMarker[markers.length + jsMarkers.length];
-									System.arraycopy(markers, 0, allMarkers, 0, markers.length);
-									System.arraycopy(jsMarkers, 0, allMarkers, markers.length, jsMarkers.length);
-									markers = allMarkers;
-								}
-
 								try
 								{
 									String contents = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getUTF8Contents(jsResource.getFullPath().toString());
-									if (markers != null)
+									if (jsMarkers != null)
 									{
 										if (element.getRealObject() instanceof ScriptMethod)
 										{
 											ScriptMethod sm = (ScriptMethod)element.getRealObject();
-											for (IMarker marker : markers)
+											for (IMarker marker : jsMarkers)
 											{
 												if (isProblemMarkerForMethod(contents, sm.getName(), marker))
 												{
@@ -3370,7 +3360,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 										else if (element.getRealObject() instanceof ScriptVariable)
 										{
 											ScriptVariable sv = (ScriptVariable)element.getRealObject();
-											for (IMarker marker : markers)
+											for (IMarker marker : jsMarkers)
 											{
 												if (isProblemMarkerForVariable(contents, sv.getName(), marker))
 												{

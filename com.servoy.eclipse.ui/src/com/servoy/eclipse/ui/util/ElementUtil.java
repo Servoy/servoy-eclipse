@@ -156,10 +156,7 @@ public class ElementUtil
 		}
 		if (persist instanceof Form)
 		{
-			int enc = ((Form)persist).getEncapsulation();
-			if (enc == FormEncapsulation.MODULE_PRIVATE) return "designer_protected.gif"; //$NON-NLS-1$
-			if (enc == FormEncapsulation.PRIVATE) return "designer_private.gif"; //$NON-NLS-1$
-			else return "designer_public.gif"; //$NON-NLS-1$
+			return getImageNameForFormEncapsulation((Form)persist);
 		}
 		if (persist instanceof Bean)
 		{
@@ -189,7 +186,8 @@ public class ElementUtil
 		{
 			ScriptVariable sv = (ScriptVariable)persist;
 			if (sv.isPrivate()) return "variable_private.gif"; //$NON-NLS-1$
-			else return "variable_public.gif"; //$NON-NLS-1$
+			if (sv.isPublic()) return "variable_public.gif"; //$NON-NLS-1$ 
+			else return "variable_default.gif"; //$NON-NLS-1$
 		}
 		if (persist instanceof ScriptMethod)
 		{
@@ -578,4 +576,37 @@ public class ElementUtil
 		return element1Rectangle.intersects(element2Rectangle);
 	}
 
+	public static String getImageRelPathForFormEncapsulation(Form f)
+	{
+		String relPath = null;
+		if (f != null)
+		{
+			int encapsulation = f.getEncapsulation();
+			if ((encapsulation & FormEncapsulation.MODULE_PRIVATE) == FormEncapsulation.MODULE_PRIVATE) relPath = "icons/designer_protected.gif"; //$NON-NLS-1$
+			else if ((encapsulation & FormEncapsulation.PRIVATE) == FormEncapsulation.PRIVATE) relPath = "icons/designer_private.gif"; //$NON-NLS-1$
+			else relPath = "icons/designer_public.gif"; //$NON-NLS-1$
+		}
+		return relPath;
+	}
+
+	public static String getImageNameForFormEncapsulation(Form form)
+	{
+		String relPath = getImageRelPathForFormEncapsulation(form);
+		return (relPath != null ? relPath.substring(6) : null);
+	}
+
+	public static Image getImageForFormEncapsulation(Form form)
+	{
+		Image image = null;
+		if (form != null)
+		{
+			int encapsulation = (form).getEncapsulation();
+			if ((encapsulation & FormEncapsulation.MODULE_PRIVATE) == FormEncapsulation.MODULE_PRIVATE) image = Activator.getDefault().loadImageFromBundle(
+				"designer_protected.gif"); //$NON-NLS-1$
+			else if ((encapsulation & FormEncapsulation.PRIVATE) == FormEncapsulation.PRIVATE) image = Activator.getDefault().loadImageFromBundle(
+				"designer_private.gif"); //$NON-NLS-1$
+			else image = Activator.getDefault().loadImageFromBundle("designer_public.gif"); //$NON-NLS-1$
+		}
+		return image;
+	}
 }

@@ -109,6 +109,7 @@ import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.quickfix.jsexternalize.StringLiteralVisitor;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.FilterDelayJob;
 import com.servoy.eclipse.ui.util.FilteredEntity;
 import com.servoy.j2db.persistence.Column;
@@ -1766,7 +1767,7 @@ public class I18NExternalizeDialog extends Dialog
 							case IRepository.SOLUTIONS :
 								return I18NExternalizeDialog.this.solutionImage;
 							case IRepository.FORMS :
-								return EditorUtil.getImageForFormEncapsulation((Form)data);
+								return ElementUtil.getImageForFormEncapsulation((Form)data);
 							default :
 								return I18NExternalizeDialog.this.elementImage;
 						}

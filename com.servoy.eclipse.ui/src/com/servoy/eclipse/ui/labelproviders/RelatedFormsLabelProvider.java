@@ -25,7 +25,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider;
-import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.UnresolvedValue;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -116,7 +116,7 @@ public class RelatedFormsLabelProvider extends LabelProvider implements IPersist
 			}
 			else if (element instanceof Form)
 			{
-				return EditorUtil.getImageForFormEncapsulation((Form)element);
+				return ElementUtil.getImageForFormEncapsulation((Form)element);
 			}
 			if (image != null) return image;
 		}
