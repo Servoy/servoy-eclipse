@@ -17,7 +17,6 @@
 package com.servoy.eclipse.ui.views.solutionexplorer;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -47,12 +46,15 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dltk.ast.ASTNode;
+import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.builder.ISourceLineTracker;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
 import org.eclipse.dltk.javascript.ast.JSDeclaration;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.ast.VariableDeclaration;
-import org.eclipse.dltk.javascript.parser.JavaScriptParser;
+import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.jface.action.Action;
@@ -175,7 +177,6 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.repository.StringResourceDeserializer;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
@@ -3313,86 +3314,58 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		private int getProblemType(SimpleUserNode element)
 		{
 			int problemLevel = -1;
-			SimpleUserNode parent = element.parent;
 
-			if (element.getRealObject() instanceof ScriptVariable)
+			Object realObject = element.getRealObject();
+			if (realObject instanceof ScriptVariable || realObject instanceof ScriptMethod)
 			{
-				//go deeper in parent hierarchy for vars
-				parent = parent.parent;
-			}
-
-			if (parent instanceof PlatformSimpleUserNode)
-			{
-				IResource resource = (IResource)((PlatformSimpleUserNode)(parent)).getAdapter(IResource.class);
-				if (resource != null && resource.getName().toLowerCase().endsWith(SolutionSerializer.FORM_FILE_EXTENSION))
+				String scriptPath = SolutionSerializer.getScriptPath((IPersist)realObject, false);
+				IFile jsResource = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
+				try
 				{
-					try
+					IMarker[] jsMarkers = jsResource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+					if (jsMarkers != null && jsMarkers.length > 0)
 					{
-						String resourceName = resource.getName();
-						int extIdx = resourceName.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION);
-						if (extIdx > 0)
+						ISourceModule sourceModule = DLTKCore.createSourceModuleFrom(jsResource);
+						ISourceLineTracker sourceLineTracker = TextUtils.createLineTracker(sourceModule.getSource());
+						Script script = JavaScriptParserUtil.parse(sourceModule);
+						if (realObject instanceof ScriptMethod)
 						{
-							resourceName = resourceName.substring(0, extIdx);
-							IResource jsResource = resource.getParent().findMember(resourceName + SolutionSerializer.JS_FILE_EXTENSION);
-							if (jsResource != null)
+							ScriptMethod sm = (ScriptMethod)realObject;
+							for (IMarker marker : jsMarkers)
 							{
-								IMarker[] jsMarkers = jsResource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-								try
+								if (marker.getAttribute(IMarker.SEVERITY, -1) > problemLevel &&
+									isProblemMarkerForMethod(script, sm.getName(), marker, sourceLineTracker))
 								{
-									String contents = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getUTF8Contents(jsResource.getFullPath().toString());
-									if (jsMarkers != null)
-									{
-										if (element.getRealObject() instanceof ScriptMethod)
-										{
-											ScriptMethod sm = (ScriptMethod)element.getRealObject();
-											for (IMarker marker : jsMarkers)
-											{
-												if (isProblemMarkerForMethod(contents, sm.getName(), marker))
-												{
-													//priority for error
-													if (marker.getAttribute(IMarker.SEVERITY, -1) > problemLevel)
-													{
-														problemLevel = marker.getAttribute(IMarker.SEVERITY, -1);
-													}
-												}
-											}
-										}
-										else if (element.getRealObject() instanceof ScriptVariable)
-										{
-											ScriptVariable sv = (ScriptVariable)element.getRealObject();
-											for (IMarker marker : jsMarkers)
-											{
-												if (isProblemMarkerForVariable(contents, sv.getName(), marker))
-												{
-													if (marker.getAttribute(IMarker.SEVERITY, -1) > problemLevel)
-													{
-														problemLevel = marker.getAttribute(IMarker.SEVERITY, -1);
-													}
-												}
-											}
-										}
-									}
+									problemLevel = marker.getAttribute(IMarker.SEVERITY, -1);
 								}
-								catch (IOException e)
+							}
+						}
+						else if (realObject instanceof ScriptVariable)
+						{
+							ScriptVariable sv = (ScriptVariable)realObject;
+							for (IMarker marker : jsMarkers)
+							{
+								if (marker.getAttribute(IMarker.SEVERITY, -1) > problemLevel &&
+									isProblemMarkerForVariable(script, sv.getName(), marker, sourceLineTracker))
 								{
-									ServoyLog.logError(e);
+									problemLevel = marker.getAttribute(IMarker.SEVERITY, -1);
 								}
 							}
 						}
 					}
-					catch (CoreException ex)
-					{
-						ServoyLog.logError(ex);
-					}
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
 				}
 			}
 			return problemLevel;
 		}
 
-		private boolean isProblemMarkerForMethod(String jsContent, String metName, IMarker marker)
+		private boolean isProblemMarkerForMethod(Script script, String metName, IMarker marker, ISourceLineTracker sourceLineTracker)
 		{
-			JavaScriptParser parser = new JavaScriptParser();
-			Script script = parser.parse(jsContent, null);
+			int line = marker.getAttribute(IMarker.LINE_NUMBER, -1);
+			int start = marker.getAttribute(IMarker.CHAR_START, -1);
 			for (JSDeclaration dec : script.getDeclarations())
 			{
 				if (dec instanceof FunctionStatement)
@@ -3400,10 +3373,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					FunctionStatement fstmt = (FunctionStatement)dec;
 					if (fstmt.getFunctionName().equals(metName))
 					{
-						int line = marker.getAttribute(IMarker.LINE_NUMBER, -1);
 						if (line != -1)
 						{
-							ISourceLineTracker sourceLineTracker = TextUtils.createLineTracker(jsContent);
 							if (sourceLineTracker.getLineNumberOfOffset(fstmt.sourceStart()) <= line &&
 								line <= sourceLineTracker.getLineNumberOfOffset(fstmt.sourceEnd()))
 							{
@@ -3412,7 +3383,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						}
 						else
 						{
-							int start = marker.getAttribute(IMarker.CHAR_START, -1);
 							if (start != -1 && fstmt.sourceStart() <= start && start <= fstmt.sourceEnd())
 							{
 								return true;
@@ -3420,14 +3390,26 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						}
 					}
 				}
+				if (dec instanceof ASTNode)
+				{
+					int sourceEnd = ((ASTNode)dec).sourceEnd();
+					if (start != -1 && sourceEnd > start)
+					{
+						return false;
+					}
+					else if (line != -1 && sourceLineTracker.getLineNumberOfOffset(sourceEnd) > line)
+					{
+						return false;
+					}
+				}
 			}
 			return false;
 		}
 
-		private boolean isProblemMarkerForVariable(String jsContent, String varName, IMarker marker)
+		private boolean isProblemMarkerForVariable(Script script, String varName, IMarker marker, ISourceLineTracker sourceLineTracker)
 		{
-			JavaScriptParser parser = new JavaScriptParser();
-			Script script = parser.parse(jsContent, null);
+			int line = marker.getAttribute(IMarker.LINE_NUMBER, -1); //line number is not ok here or below
+			int start = marker.getAttribute(IMarker.CHAR_START, -1);
 			for (JSDeclaration dec : script.getDeclarations())
 			{
 				if (dec instanceof VariableDeclaration)
@@ -3435,10 +3417,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					VariableDeclaration varDec = (VariableDeclaration)dec;
 					if (varDec.getVariableName().equals(varName))
 					{
-						int line = marker.getAttribute(IMarker.LINE_NUMBER, -1); //line number is not ok here or below
 						if (line != -1)
 						{
-							ISourceLineTracker sourceLineTracker = TextUtils.createLineTracker(jsContent);
 							if (sourceLineTracker.getLineNumberOfOffset(varDec.sourceStart()) <= line &&
 								line <= sourceLineTracker.getLineNumberOfOffset(varDec.sourceEnd()))
 							{
@@ -3448,11 +3428,22 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						// else
 						// special extra check for cases in which linenumber = sourceStartLine + 1 (variables)
 						// still not fully ok for duplicate vars due to linenumber difference with marker..
-						int start = marker.getAttribute(IMarker.CHAR_START, -1);
 						if (start != -1 && varDec.sourceStart() <= start && start <= varDec.sourceEnd())
 						{
 							return true;
 						}
+					}
+				}
+				if (dec instanceof ASTNode)
+				{
+					int sourceEnd = ((ASTNode)dec).sourceEnd();
+					if (start != -1 && sourceEnd < start)
+					{
+						return false;
+					}
+					else if (line != -1 && sourceLineTracker.getLineNumberOfOffset(sourceEnd) < line)
+					{
+						return false;
 					}
 				}
 			}
