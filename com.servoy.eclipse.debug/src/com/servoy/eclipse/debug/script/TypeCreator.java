@@ -39,6 +39,8 @@ import java.util.concurrent.ConcurrentMap;
 
 import javax.swing.Icon;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.internal.javascript.ti.IReferenceAttributes;
@@ -1843,9 +1845,11 @@ public class TypeCreator extends TypeCache
 
 				for (Pair<String, IRootObject> scope : fs.getScopes())
 				{
+					IFile resource = ResourcesPlugin.getWorkspace().getRoot().getFile(
+						Path.fromPortableString(scope.getRight().getName() + '/' + scope.getLeft() + ".js"));
 					Property scopeProperty = createProperty(scope.getLeft(), true,
 						getTypeRef(context, "Scope<" + scope.getRight().getRootObject().getName() + '/' + scope.getLeft() + '>'),
-						"Global scope " + scope.getLeft() + " defined in solution " + scope.getRight().getRootObject().getName(), SCOPES);
+						"Global scope " + scope.getLeft() + " defined in solution " + scope.getRight().getRootObject().getName(), SCOPES, resource);
 //					scopeProperty.setAttribute(LAZY_VALUECOLLECTION, persist); // currently not needed, solution name from config is used
 					members.add(scopeProperty);
 				}
