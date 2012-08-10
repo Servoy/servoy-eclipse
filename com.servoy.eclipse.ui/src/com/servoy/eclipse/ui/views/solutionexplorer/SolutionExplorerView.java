@@ -49,6 +49,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.builder.ISourceLineTracker;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
 import org.eclipse.dltk.javascript.ast.JSDeclaration;
@@ -3326,31 +3327,15 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					if (jsMarkers != null && jsMarkers.length > 0)
 					{
 						ISourceModule sourceModule = DLTKCore.createSourceModuleFrom(jsResource);
-						ISourceLineTracker sourceLineTracker = TextUtils.createLineTracker(sourceModule.getSource());
 						Script script = JavaScriptParserUtil.parse(sourceModule);
 						if (realObject instanceof ScriptMethod)
 						{
-							ScriptMethod sm = (ScriptMethod)realObject;
-							for (IMarker marker : jsMarkers)
-							{
-								if (marker.getAttribute(IMarker.SEVERITY, -1) > problemLevel &&
-									isProblemMarkerForMethod(script, sm.getName(), marker, sourceLineTracker))
-								{
-									problemLevel = marker.getAttribute(IMarker.SEVERITY, -1);
-								}
-							}
+							problemLevel = getProblemLevel(jsMarkers, sourceModule, getFunctionStatementForName(script, ((ScriptMethod)realObject).getName()));
 						}
 						else if (realObject instanceof ScriptVariable)
 						{
-							ScriptVariable sv = (ScriptVariable)realObject;
-							for (IMarker marker : jsMarkers)
-							{
-								if (marker.getAttribute(IMarker.SEVERITY, -1) > problemLevel &&
-									isProblemMarkerForVariable(script, sv.getName(), marker, sourceLineTracker))
-								{
-									problemLevel = marker.getAttribute(IMarker.SEVERITY, -1);
-								}
-							}
+							problemLevel = getProblemLevel(jsMarkers, sourceModule,
+								getVariableDeclarationForName(script, ((ScriptVariable)realObject).getName()));
 						}
 					}
 				}
@@ -3362,10 +3347,53 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			return problemLevel;
 		}
 
-		private boolean isProblemMarkerForMethod(Script script, String metName, IMarker marker, ISourceLineTracker sourceLineTracker)
+		/**
+		 * @param problemLevel
+		 * @param jsMarkers
+		 * @param sourceModule
+		 * @param node
+		 * @return
+		 * @throws ModelException
+		 */
+		public int getProblemLevel(IMarker[] jsMarkers, ISourceModule sourceModule, ASTNode node) throws ModelException
 		{
-			int line = marker.getAttribute(IMarker.LINE_NUMBER, -1);
-			int start = marker.getAttribute(IMarker.CHAR_START, -1);
+			int problemLevel = -1;
+			if (jsMarkers == null || node == null) return problemLevel;
+			ISourceLineTracker sourceLineTracker = null;
+			for (IMarker marker : jsMarkers)
+			{
+				if (marker.getAttribute(IMarker.SEVERITY, -1) > problemLevel)
+				{
+					int start = marker.getAttribute(IMarker.CHAR_START, -1);
+					if (start != -1)
+					{
+						if (node.sourceStart() <= start && start <= node.sourceEnd())
+						{
+							problemLevel = marker.getAttribute(IMarker.SEVERITY, -1);
+						}
+					}
+					else
+					{
+						int line = marker.getAttribute(IMarker.LINE_NUMBER, -1); // 1 based
+						if (line != -1)
+						{
+							if (sourceLineTracker == null) sourceLineTracker = TextUtils.createLineTracker(sourceModule.getSource());
+							// getLineNumberOfOffset == 0 based so +1 to match the markers line
+							if (sourceLineTracker.getLineNumberOfOffset(node.sourceStart()) + 1 <= line &&
+								line <= sourceLineTracker.getLineNumberOfOffset(node.sourceEnd()) + 1)
+							{
+								problemLevel = marker.getAttribute(IMarker.SEVERITY, -1);
+							}
+						}
+					}
+
+				}
+			}
+			return problemLevel;
+		}
+
+		private FunctionStatement getFunctionStatementForName(Script script, String metName)
+		{
 			for (JSDeclaration dec : script.getDeclarations())
 			{
 				if (dec instanceof FunctionStatement)
@@ -3373,43 +3401,15 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					FunctionStatement fstmt = (FunctionStatement)dec;
 					if (fstmt.getFunctionName().equals(metName))
 					{
-						if (line != -1)
-						{
-							if (sourceLineTracker.getLineNumberOfOffset(fstmt.sourceStart()) <= line &&
-								line <= sourceLineTracker.getLineNumberOfOffset(fstmt.sourceEnd()))
-							{
-								return true;
-							}
-						}
-						else
-						{
-							if (start != -1 && fstmt.sourceStart() <= start && start <= fstmt.sourceEnd())
-							{
-								return true;
-							}
-						}
-					}
-				}
-				if (dec instanceof ASTNode)
-				{
-					int sourceEnd = ((ASTNode)dec).sourceEnd();
-					if (start != -1 && sourceEnd > start)
-					{
-						return false;
-					}
-					else if (line != -1 && sourceLineTracker.getLineNumberOfOffset(sourceEnd) > line)
-					{
-						return false;
+						return fstmt;
 					}
 				}
 			}
-			return false;
+			return null;
 		}
 
-		private boolean isProblemMarkerForVariable(Script script, String varName, IMarker marker, ISourceLineTracker sourceLineTracker)
+		private VariableDeclaration getVariableDeclarationForName(Script script, String varName)
 		{
-			int line = marker.getAttribute(IMarker.LINE_NUMBER, -1); //line number is not ok here or below
-			int start = marker.getAttribute(IMarker.CHAR_START, -1);
 			for (JSDeclaration dec : script.getDeclarations())
 			{
 				if (dec instanceof VariableDeclaration)
@@ -3417,37 +3417,11 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					VariableDeclaration varDec = (VariableDeclaration)dec;
 					if (varDec.getVariableName().equals(varName))
 					{
-						if (line != -1)
-						{
-							if (sourceLineTracker.getLineNumberOfOffset(varDec.sourceStart()) <= line &&
-								line <= sourceLineTracker.getLineNumberOfOffset(varDec.sourceEnd()))
-							{
-								return true;
-							}
-						}
-						// else
-						// special extra check for cases in which linenumber = sourceStartLine + 1 (variables)
-						// still not fully ok for duplicate vars due to linenumber difference with marker..
-						if (start != -1 && varDec.sourceStart() <= start && start <= varDec.sourceEnd())
-						{
-							return true;
-						}
-					}
-				}
-				if (dec instanceof ASTNode)
-				{
-					int sourceEnd = ((ASTNode)dec).sourceEnd();
-					if (start != -1 && sourceEnd > start)
-					{
-						return false;
-					}
-					else if (line != -1 && sourceLineTracker.getLineNumberOfOffset(sourceEnd) > line)
-					{
-						return false;
+						return varDec;
 					}
 				}
 			}
-			return false;
+			return null;
 		}
 
 		public Image decorateImage(Image image, Object element)
