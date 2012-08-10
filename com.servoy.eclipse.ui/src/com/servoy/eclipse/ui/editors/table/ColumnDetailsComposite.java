@@ -68,6 +68,7 @@ import com.servoy.j2db.dataprocessing.ITypedColumnConverter;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumnTypes;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.Debug;
@@ -420,7 +421,8 @@ public class ColumnDetailsComposite extends Composite
 			new UpdateValueStrategy().setAfterGetValidator(new NotSameValidator(getCIDefaultFormatObserveValue)), null);
 		bindingContext.bindValue(foreignTypeTextObserveWidget, getCIForeignTypeObserveValue,
 			new UpdateValueStrategy().setConverter(TableWrapper2ForeignTypeConverter.INSTANCE),
-			new UpdateValueStrategy().setConverter(new ForeignType2TableWrapperConverter(c.getTable().getServerName())));
+			new UpdateValueStrategy().setConverter(new ForeignType2TableWrapperConverter(c.getTable().getServerName(),
+				c.getTable().getTableType() == ITable.VIEW)));
 
 		//bind the 'excluded' checkbox;
 		bindingContext.bindValue(excludedOtherFlagsTextObserveWidget, getCIOtherFlagsObserveValue1, null, null);
@@ -491,17 +493,19 @@ public class ColumnDetailsComposite extends Composite
 	public static class ForeignType2TableWrapperConverter extends Converter
 	{
 		private final String serverName;
+		private final boolean isView;
 
-		public ForeignType2TableWrapperConverter(String serverName)
+		public ForeignType2TableWrapperConverter(String serverName, boolean isView)
 		{
 			super(String.class, TableWrapper.class);
 			this.serverName = serverName;
+			this.isView = isView;
 		}
 
 		public Object convert(Object fromObject)
 		{
 			if (fromObject == null) return null;
-			return new TableWrapper(serverName, (String)fromObject);
+			return new TableWrapper(serverName, (String)fromObject, isView);
 		}
 	}
 	public static class NotSameValidator implements IValidator

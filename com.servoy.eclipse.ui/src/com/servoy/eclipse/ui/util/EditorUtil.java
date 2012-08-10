@@ -18,6 +18,7 @@ package com.servoy.eclipse.ui.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -96,6 +97,7 @@ import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
@@ -739,5 +741,28 @@ public class EditorUtil
 			return stringBuffer.toString().toLowerCase();
 		}
 		return null;
+	}
+
+	public static boolean isViewTypeTable(String serverName, String tableName)
+	{
+		boolean isView = false;
+		try
+		{
+			IServer s = ServoyModel.getServerManager().getServer(serverName);
+			if (s != null)
+			{
+				ITable t = s.getTable(tableName);
+				if (t != null) isView = (t.getTableType() == ITable.VIEW);
+			}
+		}
+		catch (RepositoryException repEx)
+		{
+			ServoyLog.logError(repEx);
+		}
+		catch (RemoteException remEx)
+		{
+			ServoyLog.logError(remEx);
+		}
+		return isView;
 	}
 }

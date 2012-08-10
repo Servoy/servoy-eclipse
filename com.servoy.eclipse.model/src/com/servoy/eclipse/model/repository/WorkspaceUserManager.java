@@ -2465,7 +2465,25 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		{
 			String serverName = st.nextToken();
 			String tableName = st.nextToken();
-			return new TableWrapper(serverName, tableName);
+			boolean isView = false;
+			try
+			{
+				IServer s = ApplicationServerSingleton.get().getServerManager().getServer(serverName);
+				if (s != null)
+				{
+					ITable t = s.getTable(tableName);
+					if (t != null) isView = (t.getTableType() == ITable.VIEW);
+				}
+			}
+			catch (RepositoryException repEx)
+			{
+				ServoyLog.logError(repEx);
+			}
+			catch (RemoteException remEx)
+			{
+				ServoyLog.logError(remEx);
+			}
+			return new TableWrapper(serverName, tableName, isView);
 		}
 		catch (NoSuchElementException e)
 		{

@@ -36,6 +36,7 @@ import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.editors.ListSelectCellEditor;
 import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.DataSourceUtils;
 
@@ -76,8 +77,8 @@ public class DatasourceController extends PropertyController<String, TableWrappe
 				{
 					return null;
 				}
-
-				return new TableWrapper(servernameTablename[0], servernameTablename[1]);
+				return new TableWrapper(servernameTablename[0], servernameTablename[1], EditorUtil.isViewTypeTable(servernameTablename[0],
+					servernameTablename[1]));
 			}
 		};
 	}

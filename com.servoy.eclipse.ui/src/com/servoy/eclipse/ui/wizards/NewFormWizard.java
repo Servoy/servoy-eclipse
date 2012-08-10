@@ -655,7 +655,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 				String tableName = settings.get("tablename");
 				if (!Utils.stringIsEmpty(serverName) && !Utils.stringIsEmpty(tableName) && dataSourceViewer.getSelection().isEmpty())
 				{
-					dataSourceViewer.setSelection(new StructuredSelection(new TableWrapper(serverName, tableName)));
+					dataSourceViewer.setSelection(new StructuredSelection(new TableWrapper(serverName, tableName, EditorUtil.isViewTypeTable(serverName,
+						tableName))));
 				}
 
 				String styleName = settings.get("style");
@@ -814,7 +815,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 			else
 			{
 				// if selected prefill table and style
-				dataSourceViewer.setSelection(new StructuredSelection(new TableWrapper(superForm.getServerName(), superForm.getTableName())));
+				dataSourceViewer.setSelection(new StructuredSelection(new TableWrapper(superForm.getServerName(), superForm.getTableName(),
+					EditorUtil.isViewTypeTable(superForm.getServerName(), superForm.getTableName()))));
 				dataSourceViewer.setEditable(false);
 				styleNameCombo.setSelection(new StructuredSelection(superForm.getStyleName() == null ? "" : superForm.getStyleName()));
 			}
@@ -840,7 +842,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 						String[] stn = DataSourceUtils.getDBServernameTablename(formObject.getString(StaticContentSpecLoader.PROPERTY_DATASOURCE.getPropertyName()));
 						if (stn != null)
 						{
-							dataSourceViewer.setSelection(new StructuredSelection(new TableWrapper(stn[0], stn[1])));
+							dataSourceViewer.setSelection(new StructuredSelection(new TableWrapper(stn[0], stn[1], EditorUtil.isViewTypeTable(stn[0], stn[1]))));
 						}
 					}
 

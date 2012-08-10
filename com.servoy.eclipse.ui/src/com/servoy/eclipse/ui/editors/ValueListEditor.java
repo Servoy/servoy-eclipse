@@ -93,6 +93,7 @@ import com.servoy.eclipse.ui.views.TreeSelectViewer;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -530,9 +531,10 @@ public class ValueListEditor extends PersistEditor
 				}
 				else
 				{
-					tableSelect.setSelection(new StructuredSelection(new TableWrapper(stn[0], stn[1])));
 					IServer server = flattenedSolution.getSolution().getServer(stn[0]);
 					if (server != null) table = (Table)server.getTable(stn[1]);
+					boolean isView = (table != null ? table.getTableType() == ITable.VIEW : false);
+					tableSelect.setSelection(new StructuredSelection(new TableWrapper(stn[0], stn[1], isView)));
 				}
 			}
 			else

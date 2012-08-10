@@ -103,6 +103,7 @@ import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.property.MethodWithArguments.UnresolvedMethodWithArguments;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IDefaultValue;
 import com.servoy.eclipse.ui.util.MediaNode;
@@ -2515,7 +2516,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					if (dbServernameTablename != null)
 					{
 						return new DatasourceController(id, displayName, "Select table", false,
-							new Object[] { TableContentProvider.TABLE_NONE, new TableWrapper(dbServernameTablename[0], dbServernameTablename[1]) },
+							new Object[] { TableContentProvider.TABLE_NONE, new TableWrapper(dbServernameTablename[0], dbServernameTablename[1],
+								EditorUtil.isViewTypeTable(dbServernameTablename[0], dbServernameTablename[1])) },
 							DatasourceLabelProvider.INSTANCE_NO_IMAGE_FULLY_QUALIFIED);
 					}
 				}

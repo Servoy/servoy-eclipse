@@ -89,6 +89,7 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ISupportName;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.NameComparator;
@@ -861,6 +862,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			tableNames = s.getTableNames(true).iterator();
 
 			List<String> hiddenTables = null;
+			boolean isView = false;
 			while (tableNames.hasNext())
 			{
 				String tableName = tableNames.next();
@@ -871,8 +873,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 				else
 				{
-					dlm.add(new UserNode(tableName, UserNodeType.TABLE, new TableFeedback(s.getName(), tableName), new TableWrapper(s.getName(), tableName),
-						uiActivator.loadImageFromBundle("portal.gif")));
+					isView = (s.getTable(tableName) != null ? s.getTable(tableName).getTableType() == ITable.VIEW : false);
+					dlm.add(new UserNode(tableName, UserNodeType.TABLE, new TableFeedback(s.getName(), tableName), new TableWrapper(s.getName(), tableName,
+						isView), uiActivator.loadImageFromBundle("portal.gif")));
 				}
 			}
 			if (hiddenTables != null)
@@ -880,8 +883,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				// tables and views that are marked by user as "hiddenInDeveloper" will only be shown in this sol. ex. list and grayed-out + at the bottom of this list
 				for (String name : hiddenTables)
 				{
-					UserNode node = new UserNode(name, UserNodeType.TABLE, new TableWrapper(s.getName(), name), uiActivator.loadImageFromBundle("portal.gif",
-						true));
+					isView = (s.getTable(name) != null ? s.getTable(name).getTableType() == ITable.VIEW : false);
+					UserNode node = new UserNode(name, UserNodeType.TABLE, new TableWrapper(s.getName(), name, isView), uiActivator.loadImageFromBundle(
+						"portal.gif", true));
 					node.setAppearenceFlags(SimpleUserNode.TEXT_GRAYED_OUT);
 					node.setToolTipText(Messages.SolutionExplorerListContentProvider_hidden);
 					dlm.add(node);
