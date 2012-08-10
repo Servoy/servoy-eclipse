@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
-import java.io.File;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,7 +23,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -45,11 +46,11 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ISetSelectionTarget;
 
-import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
@@ -63,6 +64,7 @@ import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
@@ -118,12 +120,19 @@ public class LinkWithEditorAction extends Action
 				}
 			}
 		}
+		String serverName = null;
+		String tableName = null;
 
 		if (persists.size() == 0)
 		{
 			// none found, go via the editor
 			IPersist persist = (IPersist)activeEditor.getAdapter(IPersist.class);
-			if (persist != null)
+			if (persist instanceof TableNode)
+			{
+				serverName = ((TableNode)persist).getServerName();
+				tableName = ((TableNode)persist).getTableName();
+			}
+			else if (persist != null)
 			{
 				persists.add(persist);
 			}
@@ -145,20 +154,36 @@ public class LinkWithEditorAction extends Action
 				}
 			}
 		}
-		else
+		else if (serverName == null)
 		{
 			IFile file = (IFile)activeEditor.getEditorInput().getAdapter(IFile.class);
 			if (file != null)
 			{
-				File f = file.getRawLocation().toFile();
-				File workspace = file.getWorkspace().getRoot().getLocation().toFile();
-				File parentFile = SolutionSerializer.getParentFile(workspace, f);
-				if (parentFile != null)
+				// globals, scope or foundset
+				if (file.getName().endsWith(".js")) //$NON-NLS-1$
 				{
-					UUID uuid = SolutionDeserializer.getUUID(parentFile);
-					if (uuid != null)
+					IContainer parent = file.getParent();
+					if (parent instanceof IProject)
 					{
-						files.put(uuid, file);
+						String name = file.getName().substring(0, file.getName().indexOf('.'));
+						// globals or scope
+						PlatformSimpleUserNode solutionNode = ((SolutionExplorerTreeContentProvider)contentProvider).getSolutionNode(parent.getName());
+						for (SimpleUserNode node : solutionNode.children)
+						{
+							if (node.getName().equals(Messages.TreeStrings_Scopes))
+							{
+
+								for (SimpleUserNode scopeChild : node.children)
+								{
+									if (scopeChild.getName().equals(name))
+									{
+										tree.setSelection(new StructuredSelection(new Object[] { scopeChild }), true);
+										break;
+									}
+								}
+								break;
+							}
+						}
 					}
 				}
 				else if (file.getName().endsWith(".css")) //$NON-NLS-1$
@@ -184,65 +209,62 @@ public class LinkWithEditorAction extends Action
 			}
 			else
 			{
-				String serverName = null;
-				Table table = null;
 				ServerConfig config = (ServerConfig)activeEditor.getAdapter(ServerConfig.class);
 				if (config == null)
 				{
-					table = (Table)activeEditor.getAdapter(Table.class);
+					Table table = (Table)activeEditor.getAdapter(Table.class);
 					if (table != null)
 					{
 						serverName = table.getServerName();
+						tableName = table.getName();
 					}
 				}
 				else
 				{
 					serverName = config.getServerName();
 				}
-
-				if (serverName != null)
+			}
+		}
+		if (serverName != null)
+		{
+			PlatformSimpleUserNode servers = ((SolutionExplorerTreeContentProvider)contentProvider).getServers();
+			SimpleUserNode[] children = (SimpleUserNode[])((SolutionExplorerTreeContentProvider)contentProvider).getChildren(servers);
+			if (children != null)
+			{
+				for (SimpleUserNode child : children)
 				{
-					PlatformSimpleUserNode servers = ((SolutionExplorerTreeContentProvider)contentProvider).getServers();
-					SimpleUserNode[] children = (SimpleUserNode[])((SolutionExplorerTreeContentProvider)contentProvider).getChildren(servers);
-					if (children != null)
+					try
 					{
-						for (SimpleUserNode child : children)
+						if (serverName.equals(((IServer)child.getRealObject()).getName()))
 						{
-							try
+							tree.setSelection(new TreeSelection(new TreePath(new Object[] { servers, child })), true);
+							if (tableName != null)
 							{
-								if (serverName.equals(((IServer)child.getRealObject()).getName()))
+								Object[] elements = ((IStructuredContentProvider)list.getContentProvider()).getElements(list.getInput());
+								if (elements != null)
 								{
-									tree.setSelection(new TreeSelection(new TreePath(new Object[] { servers, child })), true);
-									if (table != null)
+									for (Object element : elements)
 									{
-										Object[] elements = ((IStructuredContentProvider)list.getContentProvider()).getElements(list.getInput());
-										if (elements != null)
+										Object realObject = ((SimpleUserNode)element).getRealObject();
+										if (realObject instanceof TableWrapper && ((TableWrapper)realObject).getTableName().equals(tableName))
 										{
-											for (Object element : elements)
-											{
-												Object realObject = ((SimpleUserNode)element).getRealObject();
-												if (realObject instanceof TableWrapper && ((TableWrapper)realObject).getTableName().equals(table.getName()))
-												{
-													list.setSelection(new StructuredSelection(element), true);
-													break;
-												}
-											}
+											list.setSelection(new StructuredSelection(element), true);
+											break;
 										}
-
 									}
-									break;
 								}
+
 							}
-							catch (RemoteException e)
-							{
-								ServoyLog.logError(e);
-							}
+							break;
 						}
+					}
+					catch (RemoteException e)
+					{
+						ServoyLog.logError(e);
 					}
 				}
 			}
 		}
-
 		if (persists.size() == 1 && persists.get(0) instanceof Relation)
 		{
 			setProperSelection(persists.get(0), UserNodeType.ALL_RELATIONS, contentProvider);
@@ -254,13 +276,17 @@ public class LinkWithEditorAction extends Action
 		else if (files.size() > 0)
 		{
 			List<TreePath> paths = new ArrayList<TreePath>();
-			for (UUID uuid : files.keySet())
+			for (Map.Entry<UUID, IFile> entry : files.entrySet())
 			{
-				TreePath path = ((SolutionExplorerTreeContentProvider)contentProvider).getTreePath(uuid);
+				TreePath path = ((SolutionExplorerTreeContentProvider)contentProvider).getTreePath(entry.getKey());
 				if (path != null)
 				{
 					tree.expandToLevel(path, 1);
 					paths.add(path);
+				}
+				else
+				{
+					System.err.println(files);
 				}
 			}
 			tree.setSelection(new TreeSelection(paths.toArray(new TreePath[paths.size()])), true);
