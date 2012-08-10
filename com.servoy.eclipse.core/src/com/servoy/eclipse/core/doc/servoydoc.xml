@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <servoydoc>
   <runtime>
     <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT">
@@ -14041,7 +14041,7 @@ TIP: You can use the Copy button in the developer Select Sorting Fields dialog t
         <function name="sort">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="boolean"/>
+            <argumentType typecode="java.lang.Boolean"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sorts the foundset based on the given sort string.
@@ -14052,7 +14052,7 @@ TIP: You can use the Copy button in the developer Select Sorting Fields dialog t
             <parameter name="sortString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the specified columns (and sort order)]]></description>
             </parameter>
-            <parameter name="defer" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+            <parameter name="defer" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
               <description><![CDATA[when true, the "sortString" will be just stored, without performing a query on the database (the actual sorting will be deferred until the next data loading action).]]></description>
             </parameter>
           </parameters>
@@ -24900,7 +24900,7 @@ TIP: You can use the Copy button in the developer Select Sorting Fields dialog t
         <function name="sort">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="boolean"/>
+            <argumentType typecode="java.lang.Boolean"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sorts the foundset based on the given sort string.
@@ -24911,7 +24911,7 @@ TIP: You can use the Copy button in the developer Select Sorting Fields dialog t
             <parameter name="sortString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the specified columns (and sort order)]]></description>
             </parameter>
-            <parameter name="defer" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+            <parameter name="defer" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
               <description><![CDATA[when true, the "sortString" will be just stored, without performing a query on the database (the actual sorting will be deferred until the next data loading action).]]></description>
             </parameter>
           </parameters>
@@ -29790,10 +29790,10 @@ forms.company.elements.portal50.setScroll(x+10,y+10);]]></description>
         <function name="getSelectedText">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The selected text from the component.]]></return>
-          <description><![CDATA[Returns the currently selected text in the specified field. 
+          <description><![CDATA[Returns the currently selected text in the specified text field or text area. 
 
-NOTE: This function is for field elements only.]]></description>
-          <summary><![CDATA[Returns the currently selected text in the specified field.]]></summary>
+NOTE: This does not work for text fields in the Web Client.]]></description>
+          <summary><![CDATA[Returns the currently selected text in the specified text field or text area.]]></summary>
           <sample><![CDATA[var my_text = %%prefix%%%%elementName%%.getSelectedText();]]></sample>
         </function>
         <function name="getWidth">
@@ -33649,10 +33649,10 @@ forms.company.elements.portal50.setScroll(x+10,y+10);]]></description>
         <function name="getSelectedText">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The selected text from the component.]]></return>
-          <description><![CDATA[Returns the currently selected text in the specified field. 
+          <description><![CDATA[Returns the currently selected text in the specified text field or text area. 
 
-NOTE: This function is for field elements only.]]></description>
-          <summary><![CDATA[Returns the currently selected text in the specified field.]]></summary>
+NOTE: This does not work for text fields in the Web Client.]]></description>
+          <summary><![CDATA[Returns the currently selected text in the specified text field or text area.]]></summary>
           <sample><![CDATA[var my_text = %%prefix%%%%elementName%%.getSelectedText();]]></sample>
         </function>
         <function name="getWidth">
@@ -35611,10 +35611,10 @@ forms.company.elements.portal50.setScroll(x+10,y+10);]]></description>
         <function name="getSelectedText">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The selected text from the component.]]></return>
-          <description><![CDATA[Returns the currently selected text in the specified field. 
+          <description><![CDATA[Returns the currently selected text in the specified text field or text area. 
 
-NOTE: This function is for field elements only.]]></description>
-          <summary><![CDATA[Returns the currently selected text in the specified field.]]></summary>
+NOTE: This does not work for text fields in the Web Client.]]></description>
+          <summary><![CDATA[Returns the currently selected text in the specified text field or text area.]]></summary>
           <sample><![CDATA[var my_text = %%prefix%%%%elementName%%.getSelectedText();]]></sample>
         </function>
         <function name="getWidth">
@@ -36071,10 +36071,10 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
         <function name="getSelectedText">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The selected text from the component.]]></return>
-          <description><![CDATA[Returns the currently selected text in the specified field. 
+          <description><![CDATA[Returns the currently selected text in the specified text field or text area. 
 
-NOTE: This function is for field elements only.]]></description>
-          <summary><![CDATA[Returns the currently selected text in the specified field.]]></summary>
+NOTE: This does not work for text fields in the Web Client.]]></description>
+          <summary><![CDATA[Returns the currently selected text in the specified text field or text area.]]></summary>
           <sample><![CDATA[var my_text = %%prefix%%%%elementName%%.getSelectedText();]]></sample>
         </function>
         <function name="getValueListName">
