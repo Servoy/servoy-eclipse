@@ -148,6 +148,7 @@ import com.servoy.j2db.querybuilder.impl.QBSelect;
 import com.servoy.j2db.querybuilder.impl.QBSort;
 import com.servoy.j2db.querybuilder.impl.QBSorts;
 import com.servoy.j2db.querybuilder.impl.QBTableClause;
+import com.servoy.j2db.querybuilder.impl.QBWhereCondition;
 import com.servoy.j2db.scripting.IConstantsObject;
 import com.servoy.j2db.scripting.IDeprecated;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
@@ -349,6 +350,7 @@ public class TypeCreator extends TypeCache
 		addScopeType(QBJoin.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBJoins.class.getSimpleName(), new QueryBuilderJoinsCreator());
 		addScopeType(QBLogicalCondition.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBWhereCondition.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBResult.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBSelect.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBSort.class.getSimpleName(), new QueryBuilderCreator());
@@ -2318,6 +2320,7 @@ public class TypeCreator extends TypeCache
 			addClass(QBJoin.class);
 			addClass(QBJoins.class);
 			addClass(QBLogicalCondition.class);
+			addClass(QBWhereCondition.class);
 			addClass(QBResult.class);
 			addClass(QBSelect.class);
 			addClass(QBSort.class);
