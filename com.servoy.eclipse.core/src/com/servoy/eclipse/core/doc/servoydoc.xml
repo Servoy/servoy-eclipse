@@ -13549,7 +13549,7 @@ When in find mode, this will reload the records from before the find() call.]]><
 // dataset must match the table primary key columns (alphabetically ordered)
 %%prefix%%foundset.loadRecords(dataset);]]></sample>
           <parameters>
-            <parameter name="dataset" type="com.servoy.j2db.dataprocessing.IDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet">
+            <parameter name="dataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet">
               <description><![CDATA[pkdataset]]></description>
             </parameter>
           </parameters>
@@ -13565,7 +13565,7 @@ When in find mode, this will reload the records from before the find() call.]]><
           <deprecated><![CDATA[use loadRecords(JSDataSet)]]></deprecated>
           <sample/>
           <parameters>
-            <parameter name="dataset" type="com.servoy.j2db.dataprocessing.IDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet">
+            <parameter name="dataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet">
               <description><![CDATA[The dataset to load records from]]></description>
             </parameter>
             <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
@@ -16915,7 +16915,7 @@ childrenPortal.setIntercellSpacing(5,10);]]></sample>
     <object publicName="JSRecord" qualifiedName="com.servoy.j2db.dataprocessing.Record">
       <properties>
         <property name="exception">
-          <return type="com.servoy.j2db.util.ServoyException" typecode="java.lang.Exception"><![CDATA[The occurred exception.]]></return>
+          <return type="com.servoy.j2db.documentation.scripting.docs.ServoyException" typecode="java.lang.Exception"><![CDATA[The occurred exception.]]></return>
           <description><![CDATA[Returns last occurred exception on this record (or null).]]></description>
           <summary><![CDATA[Returns last occurred exception on this record (or null).]]></summary>
           <sample><![CDATA[var exception = record.exception;]]></sample>
@@ -20685,7 +20685,7 @@ Operator: like, with escape character]]></description>
             <parameter name="pattern" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the string value of the pattern]]></description>
             </parameter>
-            <parameter name="escape" type="char" typecode="char">
+            <parameter name="escape" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="char">
               <description><![CDATA[the escape char]]></description>
             </parameter>
           </parameters>
@@ -21230,7 +21230,7 @@ Operator: like, with escape character]]></description>
             <parameter name="pattern" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the string value of the pattern]]></description>
             </parameter>
-            <parameter name="escape" type="char" typecode="char">
+            <parameter name="escape" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="char">
               <description><![CDATA[the escape char]]></description>
             </parameter>
           </parameters>
@@ -21809,7 +21809,7 @@ Operator: like, with escape character]]></description>
             <parameter name="pattern" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the string value of the pattern]]></description>
             </parameter>
-            <parameter name="escape" type="char" typecode="char">
+            <parameter name="escape" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="char">
               <description><![CDATA[the escape char]]></description>
             </parameter>
           </parameters>
@@ -24408,7 +24408,7 @@ When in find mode, this will reload the records from before the find() call.]]><
 // dataset must match the table primary key columns (alphabetically ordered)
 %%prefix%%foundset.loadRecords(dataset);]]></sample>
           <parameters>
-            <parameter name="dataset" type="com.servoy.j2db.dataprocessing.IDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet">
+            <parameter name="dataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet">
               <description><![CDATA[pkdataset]]></description>
             </parameter>
           </parameters>
@@ -24424,7 +24424,7 @@ When in find mode, this will reload the records from before the find() call.]]><
           <deprecated><![CDATA[use loadRecords(JSDataSet)]]></deprecated>
           <sample/>
           <parameters>
-            <parameter name="dataset" type="com.servoy.j2db.dataprocessing.IDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet">
+            <parameter name="dataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet">
               <description><![CDATA[The dataset to load records from]]></description>
             </parameter>
             <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
@@ -42262,7 +42262,7 @@ The form will no longer share the default foundset with forms of the same dataso
 // dataset must match the table primary key columns (alphabetically ordered)
 %%prefix%%controller.loadRecords(dataset);]]></sample>
           <parameters>
-            <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.IDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet">
+            <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet">
               <description><![CDATA[to load]]></description>
             </parameter>
           </parameters>
@@ -42278,7 +42278,7 @@ The form will no longer share the default foundset with forms of the same dataso
           <deprecated><![CDATA[use loadRecords(JSDataSet)]]></deprecated>
           <sample/>
           <parameters>
-            <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.IDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet"/>
+            <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet"/>
             <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           </parameters>
         </function>
