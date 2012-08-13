@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <servoydoc>
   <runtime>
     <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT">
@@ -16915,7 +16915,7 @@ childrenPortal.setIntercellSpacing(5,10);]]></sample>
     <object publicName="JSRecord" qualifiedName="com.servoy.j2db.dataprocessing.Record">
       <properties>
         <property name="exception">
-          <return type="com.servoy.j2db.documentation.scripting.docs.ServoyException" typecode="java.lang.Exception"><![CDATA[The occurred exception.]]></return>
+          <return type="com.servoy.j2db.util.ServoyException" typecode="java.lang.Exception"><![CDATA[The occurred exception.]]></return>
           <description><![CDATA[Returns last occurred exception on this record (or null).]]></description>
           <summary><![CDATA[Returns last occurred exception on this record (or null).]]></summary>
           <sample><![CDATA[var exception = record.exception;]]></sample>
@@ -22570,6 +22570,16 @@ query.groupBy.addPk() // have to group by on pk when using having-conditions in 
 .root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
 foundset.loadRecords(query)]]></sample>
         </function>
+        <function name="clear">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.querybuilder.impl.QBGroupBy" typecode="com.servoy.j2db.querybuilder.impl.QBGroupBy"/>
+          <description><![CDATA[Clear the to group-by clause.]]></description>
+          <summary><![CDATA[Clear the to group-by clause.]]></summary>
+          <sample><![CDATA[var q = foundset.getQuery()
+q.where.add(q.columns.x.eq(100))
+query.groupBy.clear.root.clearHaving()
+foundset.loadRecords(q);]]></sample>
+        </function>
       </functions>
     </object>
     <object publicName="QBJoin" qualifiedName="com.servoy.j2db.querybuilder.impl.QBJoin">
@@ -23032,6 +23042,13 @@ query.result().addValue(new Integer(100)).add(query.getColumn("value2"));
           <summary><![CDATA[Add a fixed value to the query result.]]></summary>
           <sample><![CDATA[query.result.addValue(100)]]></sample>
         </function>
+        <function name="clear">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.querybuilder.impl.QBResult" typecode="com.servoy.j2db.querybuilder.impl.QBResult"/>
+          <description><![CDATA[Clear the columns in the query result.]]></description>
+          <summary><![CDATA[Clear the columns in the query result.]]></summary>
+          <sample><![CDATA[query.result.clear()]]></sample>
+        </function>
       </functions>
     </object>
     <object publicName="QBSelect" qualifiedName="com.servoy.j2db.querybuilder.impl.QBSelect">
@@ -23231,7 +23248,7 @@ query.sort
 foundset.loadRecords(query)]]></sample>
         </property>
         <property name="where">
-          <return type="com.servoy.j2db.querybuilder.impl.QBLogicalCondition" typecode="com.servoy.j2db.querybuilder.impl.QBLogicalCondition"/>
+          <return type="com.servoy.j2db.querybuilder.impl.QBWhereCondition" typecode="com.servoy.j2db.querybuilder.impl.QBWhereCondition"/>
           <description><![CDATA[Get the where-part of the query, used to add conditions.
 The conditions added here are AND-ed.
 <pre>
@@ -23243,6 +23260,16 @@ query.where.add(query.columns.flag.eq(1))]]></sample>
         </property>
       </properties>
       <functions>
+        <function name="clearHaving">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
+          <description><![CDATA[Clear the to group-by clause.]]></description>
+          <summary><![CDATA[Clear the to group-by clause.]]></summary>
+          <sample><![CDATA[var q = foundset.getQuery()
+q.where.add(q.columns.x.eq(100))
+query.groupBy.clear.root.clearHaving()
+foundset.loadRecords(q);]]></sample>
+        </function>
         <function name="exists">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
@@ -23481,6 +23508,13 @@ query.getParameter("myvar").setvalue(new Integer(1));
           <summary><![CDATA[Add the tables' primary pk columns in alphabetical order to the query sort.]]></summary>
           <sample><![CDATA[query.sort.addPk()]]></sample>
         </function>
+        <function name="clear">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.querybuilder.impl.QBSorts" typecode="com.servoy.j2db.querybuilder.impl.QBSorts"/>
+          <description><![CDATA[Clear the sorting clause for the query.]]></description>
+          <summary><![CDATA[Clear the sorting clause for the query.]]></summary>
+          <sample><![CDATA[query.sort.clear()]]></sample>
+        </function>
       </functions>
     </object>
     <object publicName="QBTableClause" qualifiedName="com.servoy.j2db.querybuilder.impl.QBTableClause">
@@ -23561,6 +23595,116 @@ query.getParameter("myvar").setvalue(new Integer(1));
               <description><![CDATA[the name of column to get]]></description>
             </parameter>
           </parameters>
+        </function>
+      </functions>
+    </object>
+    <object publicName="QBWhereCondition" qualifiedName="com.servoy.j2db.querybuilder.impl.QBWhereCondition">
+      <properties>
+        <property name="conditionnames">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"/>
+          <description><![CDATA[Get the names for the conditions in the query where-clause.]]></description>
+          <summary><![CDATA[Get the names for the conditions in the query where-clause.]]></summary>
+          <sample><![CDATA[var q = foundset.getQuery()
+for (var c in q.where.conditionnames)
+{
+	var cond = q.where.getCondition(c)
+}]]></sample>
+        </property>
+        <property name="parent">
+          <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
+          <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
+          <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
+	var query = databaseManager.createSelect('db:/example_data/person')
+	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
+	foundset.loadRecords(query)]]></sample>
+        </property>
+        <property name="root">
+          <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
+          <description><![CDATA[Get query builder parent.]]></description>
+          <summary><![CDATA[Get query builder parent.]]></summary>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
+	var subquery = databaseManager.createSelect('db:/example_data/order_details')
+	
+ /** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
+	query.where.add(query
+		.or 
+			.add(query.columns.order_id.not.isin([1, 2, 3]))
+			
+			.add(query.exists(
+					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
+			))
+		)
+		
+	foundset.loadRecords(query)]]></sample>
+        </property>
+      </properties>
+      <functions>
+        <function name="add">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.querybuilder.impl.QBWhereCondition" typecode="com.servoy.j2db.querybuilder.impl.QBWhereCondition"/>
+          <description><![CDATA[Add a condition to the AND or OR condition list.
+<pre>
+query.where().add(query.getColumn("flag").eq(new Integer(1))).add(query.getColumn("value").isNull());
+</pre>]]></description>
+          <summary><![CDATA[Add a condition to the AND or OR condition list.]]></summary>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders')
+query.where.add(query.columns.orderdate.isNull)]]></sample>
+        </function>
+        <function name="add">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.querybuilder.impl.QBWhereCondition" typecode="com.servoy.j2db.querybuilder.impl.QBWhereCondition"/>
+          <description><![CDATA[Add a named condition to the AND or OR condition list.
+<pre>
+query.where().add("mycond", query.getColumn("flag").eq(new Integer(1))).add(query.getColumn("value").isNull());
+</pre>]]></description>
+          <summary><![CDATA[Add a named condition to the AND or OR condition list.]]></summary>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders')
+query.where.add("mycond", query.columns.orderdate.isNull)]]></sample>
+        </function>
+        <function name="clear">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.querybuilder.impl.QBWhereCondition" typecode="com.servoy.j2db.querybuilder.impl.QBWhereCondition"/>
+          <description><![CDATA[Clear the conditions in the query where-clause.]]></description>
+          <summary><![CDATA[Clear the conditions in the query where-clause.]]></summary>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders')
+query.where.clear()]]></sample>
+        </function>
+        <function name="getCondition">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
+          <description><![CDATA[Get a named condition in the query where-clause.]]></description>
+          <summary><![CDATA[Get a named condition in the query where-clause.]]></summary>
+          <sample><![CDATA[var q = foundset.getQuery()
+for (var c in q.where.conditionnames)
+{
+	var cond = q.where.getCondition(c)
+}]]></sample>
+        </function>
+        <function name="remove">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.querybuilder.impl.QBWhereCondition" typecode="com.servoy.j2db.querybuilder.impl.QBWhereCondition"/>
+          <description><![CDATA[Remove a named condition from the AND or OR condition list.
+<pre>
+query.where().remove("mycond");
+</pre>]]></description>
+          <summary><![CDATA[Remove a named condition from the AND or OR condition list.]]></summary>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+var query = databaseManager.createSelect('db:/example_data/orders')
+query.where.remove("mycond")]]></sample>
         </function>
       </functions>
     </object>
