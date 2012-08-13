@@ -150,17 +150,20 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 						if (element == null || "".equals(element)) //$NON-NLS-1$
 						{
 							// argument is not set in method call in subform, show inherited value
-							List<Form> formHierarchy = ModelUtils.getEditingFlattenedSolution(context).getFormHierarchy(
-								(Form)context.getAncestor(IRepository.FORMS));
-							for (Form form : formHierarchy)
+							Form contextForm = (Form)context.getAncestor(IRepository.FORMS);
+							if (contextForm != null)
 							{
-								List<Object> instanceMethodArguments = form.getInstanceMethodArguments(methodKey);
-								if (instanceMethodArguments != null && instanceMethodArguments.size() > index)
+								List<Form> formHierarchy = ModelUtils.getEditingFlattenedSolution(context).getFormHierarchy(contextForm);
+								for (Form form : formHierarchy)
 								{
-									Object inherited = instanceMethodArguments.get(index);
-									if (inherited != null)
+									List<Object> instanceMethodArguments = form.getInstanceMethodArguments(methodKey);
+									if (instanceMethodArguments != null && instanceMethodArguments.size() > index)
 									{
-										return inherited.toString() + " [" + form.getName() + ']'; //$NON-NLS-1$
+										Object inherited = instanceMethodArguments.get(index);
+										if (inherited != null)
+										{
+											return inherited.toString() + " [" + form.getName() + ']'; //$NON-NLS-1$
+										}
 									}
 								}
 							}
