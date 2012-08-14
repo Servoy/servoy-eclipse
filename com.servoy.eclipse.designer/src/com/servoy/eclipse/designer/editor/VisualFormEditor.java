@@ -73,7 +73,6 @@ import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Style;
-import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
@@ -593,8 +592,7 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 						}
 
 						// is it a part of this form?
-						// or is it a tab in this form (tab figure is child of the form)
-						if ((changed instanceof Part || changed instanceof Tab))
+						if (changed instanceof Part)
 						{
 							full_refresh = true;
 						}
@@ -621,8 +619,7 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 						}
 
 						// is it a part of this form?
-						// or is it a tab in this form (tab figure is child of the form)
-						if (override instanceof Part || override instanceof Tab)
+						if (override instanceof Part)
 						{
 							full_refresh = true;
 						}
