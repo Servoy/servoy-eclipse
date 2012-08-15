@@ -1811,8 +1811,8 @@ public class TypeCreator extends TypeCache
 			}
 
 			Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
-			property.setName(propertyName);
-			property.setType(TypeUtil.ref(typeName));
+			property.setName(propertyName.trim());
+			property.setType(TypeUtil.ref(typeName.trim()));
 			members.add(property);
 		}
 		return t;
