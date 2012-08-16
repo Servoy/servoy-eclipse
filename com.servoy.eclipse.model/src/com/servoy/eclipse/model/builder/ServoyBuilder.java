@@ -1104,7 +1104,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				parents.add(new Pair<String, ISupportChilds>(null, persist.getParent()));
 			}
 			final Map<String, Set<IPersist>> formElementsByName = new HashMap<String, Set<IPersist>>();
-			Form flattenedForm = getServoyModel().getFlattenedSolution().getFlattenedForm(persist);
+			Form flattenedForm = ServoyBuilder.getPersistFlattenedSolution(persist, getServoyModel().getFlattenedSolution()).getFlattenedForm(persist);
 			flattenedForm.acceptVisitor(new IPersistVisitor()
 			{
 				public Object visit(IPersist o)
@@ -1721,7 +1721,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											{
 												Form parentForm = (Form)context;
 												Form methodForm = (Form)scriptMethod.getAncestor(IRepository.FORMS);
-												if (methodForm != null && !flattenedSolution.getFormHierarchy(parentForm).contains(methodForm))
+												if (methodForm != null &&
+													!ServoyBuilder.getPersistFlattenedSolution(parentForm, flattenedSolution).getFormHierarchy(parentForm).contains(
+														methodForm))
 												{
 													ServoyMarker mk;
 													if (!(o instanceof ISupportName) || o instanceof Form || ((ISupportName)o).getName() == null)
@@ -1741,7 +1743,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										}
 										else if (foundPersist instanceof Form &&
 											!StaticContentSpecLoader.PROPERTY_EXTENDSID.getPropertyName().equals(element.getName()) &&
-											!formCanBeInstantiated(((Form)foundPersist), flattenedSolution, formsAbstractChecked))
+											!formCanBeInstantiated(((Form)foundPersist),
+												ServoyBuilder.getPersistFlattenedSolution(foundPersist, flattenedSolution), formsAbstractChecked))
 										{
 											ServoyMarker mk = MarkerMessages.PropertyFormCannotBeInstantiated.fill(element.getName());
 											addMarker(project, mk.getType(), mk.getText(), -1, SOLUTION_PROPERTY_FORM_CANNOT_BE_INSTANTIATED,
@@ -1799,7 +1802,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						if (o instanceof ValueList && !missingServers.containsKey(((ValueList)o).getServerName()))
 						{
 							ValueList vl = (ValueList)o;
-							addMarkers(project, checkValuelist(vl, flattenedSolution, ApplicationServerSingleton.get().getServerManager(), false), vl);
+							addMarkers(
+								project,
+								checkValuelist(vl, ServoyBuilder.getPersistFlattenedSolution(vl, flattenedSolution),
+									ApplicationServerSingleton.get().getServerManager(), false), vl);
 						}
 						checkCancel();
 						if (o instanceof Media)
@@ -1829,8 +1835,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										Form parentForm = (Form)context;
 										if (!missingServers.containsKey(parentForm.getServerName()))
 										{
-											FlattenedSolution persistFlattenedSolution = ModelUtils.getEditingFlattenedSolution(o);
-											if (persistFlattenedSolution == null) persistFlattenedSolution = flattenedSolution;
+											FlattenedSolution persistFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution);
 											IDataProvider dataProvider = persistFlattenedSolution.getDataProviderForTable(parentForm.getTable(), id);
 											if (dataProvider == null)
 											{
@@ -1915,7 +1920,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												((Field)o).getValuelistID() > 0 && ((Field)o).getFormat() != null)
 											{
 												boolean showWarning = false;
-												ValueList vl = flattenedSolution.getValueList(((Field)o).getValuelistID());
+												ValueList vl = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution).getValueList(
+													((Field)o).getValuelistID());
 												if (vl != null && vl.getValueListType() == ValueList.CUSTOM_VALUES && vl.getCustomValues() != null &&
 													(vl.getCustomValues() == null || vl.getCustomValues().contains("|")))
 												{
@@ -2050,7 +2056,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						{
 							// check if not outside form
 							Form form = (Form)o.getAncestor(IRepository.FORMS);
-							form = flattenedSolution.getFlattenedForm(form);
+							form = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution).getFlattenedForm(form);
 							if (form != null)
 							{
 								Point location = ((BaseComponent)o).getLocation();
@@ -2202,6 +2208,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						if (o instanceof Form)
 						{
 							Form form = (Form)o;
+							FlattenedSolution formFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(form, flattenedSolution);
 							Table table = null;
 							String path = form.getSerializableRuntimeProperty(IScriptProvider.FILENAME);
 							if (path != null && !path.endsWith(SolutionSerializer.getFileName(form, false)))
@@ -2233,7 +2240,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									}
 									else if (table != null && form.getInitialSort() != null)
 									{
-										addMarkers(project, checkSortOptions(table, form.getInitialSort(), form, flattenedSolution), form);
+										addMarkers(project, checkSortOptions(table, form.getInitialSort(), form, formFlattenedSolution), form);
 									}
 									if (table != null && table.isMarkedAsHiddenInDeveloper())
 									{
@@ -2256,7 +2263,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								!namedFoundset.equals(Form.NAMED_FOUNDSET_SEPARATE))
 							{
 								// it must be a global relation then
-								Relation r = flattenedSolution.getRelation(form.getGlobalRelationNamedFoundset());
+								Relation r = formFlattenedSolution.getRelation(form.getGlobalRelationNamedFoundset());
 								if (r == null)
 								{
 									// what is this then?
@@ -2294,9 +2301,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								exceptionCount++;
 								if (exceptionCount < MAX_EXCEPTIONS) ServoyLog.logError(ex);
 							}
-							if (form.getExtendsID() > 0 && flattenedSolution != null)
+
+							if (form.getExtendsID() > 0 && formFlattenedSolution != null)
 							{
-								Form superForm = flattenedSolution.getForm(form.getExtendsID());
+								Form superForm = formFlattenedSolution.getForm(form.getExtendsID());
 								if (superForm != null)
 								{
 									if (form.getDataSource() != null && superForm.getDataSource() != null &&
@@ -2314,7 +2322,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									{
 										if (superForm.getExtendsID() > 0)
 										{
-											superForm = flattenedSolution.getForm(superForm.getExtendsID());
+											superForm = formFlattenedSolution.getForm(superForm.getExtendsID());
 											if (superForm != null)
 											{
 												if (forms.contains(Integer.valueOf(superForm.getID())))
@@ -2429,7 +2437,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								Pair<String, String> scope = ScopesUtils.getVariableScope(form.getRowBGColorCalculation());
 								if (scope.getLeft() != null)
 								{
-									scriptMethod = flattenedSolution.getScriptMethod(scope.getLeft(), scope.getRight());
+									scriptMethod = formFlattenedSolution.getScriptMethod(scope.getLeft(), scope.getRight());
 								}
 								if (scriptMethod == null)
 								{
@@ -2438,7 +2446,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										Iterator<TableNode> tableNodes = null;
 										try
 										{
-											tableNodes = flattenedSolution.getTableNodes(table);
+											tableNodes = formFlattenedSolution.getTableNodes(table);
 										}
 										catch (RepositoryException e)
 										{
@@ -2513,9 +2521,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						if (o instanceof Tab)
 						{
 							Tab tab = (Tab)o;
+							FlattenedSolution tabFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(tab, flattenedSolution);
 							if (tab.getRelationName() != null)
 							{
-								Relation[] relations = getServoyModel().getFlattenedSolution().getRelationSequence(tab.getRelationName());
+								Relation[] relations = tabFlattenedSolution.getRelationSequence(tab.getRelationName());
 								if (relations == null)
 								{
 									if (Utils.getAsUUID(tab.getRelationName(), false) != null)
@@ -2561,7 +2570,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									relation = relations[relations.length - 1];
 									if (!relation.isGlobal() && relation.getPrimaryServerName() != null && relation.getPrimaryTableName() != null)
 									{
-										Form form = getServoyModel().getFlattenedSolution().getForm(tab.getContainsFormID());
+										Form form = tabFlattenedSolution.getForm(tab.getContainsFormID());
 										if (form != null &&
 											(!relation.getForeignServerName().equals(form.getServerName()) || !relation.getForeignTableName().equals(
 												form.getTableName())))
@@ -2575,7 +2584,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 							if (tab.getImageMediaID() > 0)
 							{
-								Media media = getServoyModel().getFlattenedSolution().getMedia(tab.getImageMediaID());
+								Media media = tabFlattenedSolution.getMedia(tab.getImageMediaID());
 								ImageIcon mediaImageIcon = new ImageIcon(media.getMediaData());
 								if (mediaImageIcon.getIconWidth() > 20 || mediaImageIcon.getIconHeight() > 20)
 								{
@@ -2593,10 +2602,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						if (o instanceof Field)
 						{
 							Field field = (Field)o;
+							FlattenedSolution fieldFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(field, flattenedSolution);
 							int type = field.getDisplayType();
 							if (field.getValuelistID() > 0)
 							{
-								ValueList vl = flattenedSolution.getValueList(field.getValuelistID());
+								ValueList vl = fieldFlattenedSolution.getValueList(field.getValuelistID());
 								if (vl != null)
 								{
 									if (type == Field.COMBOBOX && field.getEditable())
@@ -2636,7 +2646,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											boolean errorFound = false;
 											if (vl.getDataProviderID1() != null)
 											{
-												calc = flattenedSolution.getScriptCalculation(vl.getDataProviderID1(), table);
+												calc = fieldFlattenedSolution.getScriptCalculation(vl.getDataProviderID1(), table);
 												if (calc != null)
 												{
 													Column column = table.getColumn(vl.getDataProviderID1());
@@ -2645,7 +2655,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											}
 											if (vl.getDataProviderID2() != null && !errorFound)
 											{
-												calc = flattenedSolution.getScriptCalculation(vl.getDataProviderID2(), table);
+												calc = fieldFlattenedSolution.getScriptCalculation(vl.getDataProviderID2(), table);
 												if (calc != null)
 												{
 													Column column = table.getColumn(vl.getDataProviderID2());
@@ -2654,7 +2664,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											}
 											if (vl.getDataProviderID3() != null && !errorFound)
 											{
-												calc = flattenedSolution.getScriptCalculation(vl.getDataProviderID3(), table);
+												calc = fieldFlattenedSolution.getScriptCalculation(vl.getDataProviderID3(), table);
 												if (calc != null)
 												{
 													Column column = table.getColumn(vl.getDataProviderID3());
@@ -2685,7 +2695,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									{
 										Form form = (Form)o.getAncestor(IRepository.FORMS);
 										String[] parts = vl.getRelationName().split("\\."); //$NON-NLS-1$
-										Relation relation = flattenedSolution.getRelation(parts[0]);
+										Relation relation = fieldFlattenedSolution.getRelation(parts[0]);
 										if (!relation.isGlobal() && !relation.getPrimaryDataSource().equals(form.getDataSource()))
 										{
 											ServoyMarker mk;
@@ -2703,12 +2713,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									}
 									if (vl.getFallbackValueListID() > 0)
 									{
-										ValueList fallback = flattenedSolution.getValueList(vl.getFallbackValueListID());
+										ValueList fallback = fieldFlattenedSolution.getValueList(vl.getFallbackValueListID());
 										if (fallback != null && fallback.getValueListType() == ValueList.DATABASE_VALUES && fallback.getRelationName() != null)
 										{
 											Form form = (Form)o.getAncestor(IRepository.FORMS);
 											String[] parts = fallback.getRelationName().split("\\."); //$NON-NLS-1$
-											Relation relation = flattenedSolution.getRelation(parts[0]);
+											Relation relation = fieldFlattenedSolution.getRelation(parts[0]);
 											if (!relation.isGlobal() && !relation.isLiteral() && !relation.getPrimaryDataSource().equals(form.getDataSource()))
 											{
 												ServoyMarker mk;
@@ -2741,7 +2751,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						if (o instanceof Portal && ((Portal)o).getRelationName() != null)
 						{
 							Portal portal = (Portal)o;
-							Relation[] relations = flattenedSolution.getRelationSequence(portal.getRelationName());
+							FlattenedSolution portalFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(portal, flattenedSolution);
+							Relation[] relations = portalFlattenedSolution.getRelationSequence(portal.getRelationName());
 							if (relations == null)
 							{
 								ServoyMarker mk;
@@ -2825,7 +2836,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							IPersist parent = null;
 							if (o.getParent() instanceof Form)
 							{
-								parent = flattenedSolution.getFlattenedForm(o);
+								parent = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution).getFlattenedForm(o);
 							}
 							else if (o.getParent() instanceof Portal)
 							{
@@ -4175,6 +4186,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				Relation element = it.next();
 				if (!missingServers.containsKey(element.getPrimaryServerName()) && !missingServers.containsKey(element.getForeignServerName()))
 				{
+					FlattenedSolution relationFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(element, getServoyModel().getFlattenedSolution());
 					element.setValid(true);//if is reload
 					try
 					{
@@ -4270,8 +4282,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 						if (element.getInitialSort() != null)
 						{
-							addMarkers(project, checkSortOptions((Table)ftable, element.getInitialSort(), element, getServoyModel().getFlattenedSolution()),
-								element);
+							addMarkers(project, checkSortOptions((Table)ftable, element.getInitialSort(), element, relationFlattenedSolution), element);
 						}
 						Iterator<RelationItem> items = element.getObjects(IRepository.RELATION_ITEMS);
 						boolean errorsFound = false;
@@ -4292,11 +4303,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							{
 								if (ScopesUtils.isVariableScope(primaryDataProvider))
 								{
-									dataProvider = getServoyModel().getFlattenedSolution().getGlobalDataProvider(primaryDataProvider);
+									dataProvider = relationFlattenedSolution.getGlobalDataProvider(primaryDataProvider);
 								}
 								else
 								{
-									dataProvider = getServoyModel().getFlattenedSolution().getDataProviderForTable((Table)ptable, primaryDataProvider);
+									dataProvider = relationFlattenedSolution.getDataProviderForTable((Table)ptable, primaryDataProvider);
 								}
 								if (dataProvider == null)
 								{
@@ -4314,7 +4325,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 							else
 							{
-								column = getServoyModel().getFlattenedSolution().getDataProviderForTable((Table)ftable, foreignColumn);
+								column = relationFlattenedSolution.getDataProviderForTable((Table)ftable, foreignColumn);
 								if (column == null)
 								{
 									mk = MarkerMessages.RelationItemForeignDataproviderNotFound.fill(element.getName(), foreignColumn);
@@ -4355,7 +4366,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 						if (getServoyModel().getActiveProject() == servoyProject)
 						{
-							String typeMismatchWarning = element.checkKeyTypes(getServoyModel().getFlattenedSolution());
+							String typeMismatchWarning = element.checkKeyTypes(relationFlattenedSolution);
 							if (typeMismatchWarning != null)
 							{
 								mk = MarkerMessages.RelationItemTypeProblem.fill(element.getName(), typeMismatchWarning);
@@ -4764,6 +4775,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			}
 		}
 		return false;
+	}
+
+	private static FlattenedSolution getPersistFlattenedSolution(IPersist persist, FlattenedSolution fallbackFlattenedSolution)
+	{
+		FlattenedSolution persistFlattenedSolution = null; //ModelUtils.getEditingFlattenedSolution(persist);
+		return persistFlattenedSolution != null ? persistFlattenedSolution : fallbackFlattenedSolution;
 	}
 
 	/**
