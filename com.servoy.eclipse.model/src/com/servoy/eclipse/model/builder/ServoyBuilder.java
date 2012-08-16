@@ -4779,7 +4779,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	private static FlattenedSolution getPersistFlattenedSolution(IPersist persist, FlattenedSolution fallbackFlattenedSolution)
 	{
-		FlattenedSolution persistFlattenedSolution = null; //ModelUtils.getEditingFlattenedSolution(persist);
+		FlattenedSolution persistFlattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
 		return persistFlattenedSolution != null ? persistFlattenedSolution : fallbackFlattenedSolution;
 	}
 
