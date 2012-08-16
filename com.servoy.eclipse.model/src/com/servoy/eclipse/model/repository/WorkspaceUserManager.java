@@ -2469,11 +2469,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			try
 			{
 				IServer s = ApplicationServerSingleton.get().getServerManager().getServer(serverName);
-				if (s != null)
-				{
-					ITable t = s.getTable(tableName);
-					if (t != null) isView = (t.getTableType() == ITable.VIEW);
-				}
+				isView = s != null && s.getTableType(tableName) == ITable.VIEW;
 			}
 			catch (RepositoryException repEx)
 			{

@@ -29,6 +29,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions.TableListType;
+import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -143,15 +144,7 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 							continue;
 						}
 					}
-					int tableType = server.getServerManager().getServer(serverName).getTableType(tableName);
-					if (tableType == ITable.VIEW)
-					{
-						lst.add(new TableWrapper(serverName, tableName, true));
-					}
-					else
-					{
-						lst.add(new TableWrapper(serverName, tableName));
-					}
+					lst.add(new TableWrapper(serverName, tableName, ((IServer)server).getTableType(tableName) == ITable.VIEW));
 				}
 			}
 			catch (RepositoryException e)
