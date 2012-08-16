@@ -749,11 +749,7 @@ public class EditorUtil
 		try
 		{
 			IServer s = ServoyModel.getServerManager().getServer(serverName);
-			if (s != null)
-			{
-				ITable t = s.getTable(tableName);
-				if (t != null) isView = (t.getTableType() == ITable.VIEW);
-			}
+			if (s != null) isView = (s.getTableType(tableName) == ITable.VIEW);
 		}
 		catch (RepositoryException repEx)
 		{
