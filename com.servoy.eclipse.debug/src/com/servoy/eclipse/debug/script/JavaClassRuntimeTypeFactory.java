@@ -61,6 +61,16 @@ public class JavaClassRuntimeTypeFactory implements IRTypeFactory
 		/*
 		 * (non-Javadoc)
 		 * 
+		 * @see org.eclipse.dltk.javascript.typeinfo.IRType#isExtensible()
+		 */
+		public boolean isExtensible()
+		{
+			return false;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
 		 * @see org.eclipse.dltk.javascript.typeinfo.JSType2#isAssignableFrom(org.eclipse.dltk.javascript.typeinfo.JSType2)
 		 */
 		public TypeCompatibility isAssignableFrom(IRType runtimeType)
