@@ -27,6 +27,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.Action;
@@ -286,7 +287,7 @@ public class LinkWithEditorAction extends Action
 				}
 				else
 				{
-					System.err.println(files);
+					ServoyLog.log(IStatus.WARNING, IStatus.OK, "Could not find tree path for : " + entry, null);
 				}
 			}
 			tree.setSelection(new TreeSelection(paths.toArray(new TreePath[paths.size()])), true);
