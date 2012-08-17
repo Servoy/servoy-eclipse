@@ -310,6 +310,17 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 		}
 	}
 
+	/**
+	 * This method does refresh() but without refreshChildren().
+	 * 
+	 */
+	public void refreshWithoutChildren()
+	{
+		refreshVisuals();
+		refreshSourceConnections();
+		refreshTargetConnections();
+	}
+
 	@Override
 	protected void refreshVisuals()
 	{

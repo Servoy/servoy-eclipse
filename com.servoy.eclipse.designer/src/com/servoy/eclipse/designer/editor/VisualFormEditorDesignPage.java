@@ -1063,7 +1063,16 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 
 		if (full_refresh)
 		{
-			rootEditPart.getContents().refresh();
+			EditPart ep = rootEditPart.getContents();
+			// if only the form has changed (a non-style related change) we won't refresh it's children as it's too slow  
+			if (ep instanceof FormGraphicalEditPart && persists.size() == 1 && editParts.size() == 0)
+			{
+				((FormGraphicalEditPart)ep).refreshWithoutChildren();
+			}
+			else
+			{
+				ep.refresh();
+			}
 		}
 
 		if (editParts != null)
