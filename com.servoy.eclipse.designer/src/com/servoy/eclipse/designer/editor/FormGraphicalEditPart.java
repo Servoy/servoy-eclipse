@@ -317,6 +317,16 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 		super.refreshVisuals();
 	}
 
+	/*
+	 * Added because refreshing forms with many children (specially tabpanels) leads to performance degradation (refresh takes too long).
+	 */
+	public void refreshWithoutChildren()
+	{
+		refreshVisuals();
+		refreshSourceConnections();
+		refreshTargetConnections();
+	}
+
 	public Form getPersist()
 	{
 		return (Form)getModel();
