@@ -523,10 +523,6 @@ public class TypeCreator extends TypeCache
 			{
 				return getTypeRef(context, ITypeNames.BOOLEAN);
 			}
-			else if (type == Byte.class || type == byte.class)
-			{
-				return getTypeRef(context, "byte");
-			}
 			else if (Number.class.isAssignableFrom(type) || type.isPrimitive())
 			{
 				return getTypeRef(context, ITypeNames.NUMBER);
