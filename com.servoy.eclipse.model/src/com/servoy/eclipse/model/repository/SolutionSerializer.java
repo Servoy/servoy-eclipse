@@ -500,7 +500,7 @@ public class SolutionSerializer
 		ServoyJSONObject obj;
 		try
 		{
-			obj = generateJSONObject(persist, false, false, repository);
+			obj = generateJSONObject(persist, false, false, repository, false);
 			obj.setNewLines(false);
 			obj.remove(StaticContentSpecLoader.PROPERTY_METHODCODE.getPropertyName());
 			obj.remove(StaticContentSpecLoader.PROPERTY_DECLARATION.getPropertyName());
@@ -588,7 +588,7 @@ public class SolutionSerializer
 			ServoyJSONObject obj;
 			try
 			{
-				obj = generateJSONObject(persist, forceRecursive, false, repository);
+				obj = generateJSONObject(persist, forceRecursive, false, repository, false);
 			}
 			catch (RepositoryException e)
 			{
@@ -821,8 +821,8 @@ public class SolutionSerializer
 	 * @return
 	 * @throws RepositoryException
 	 */
-	public static ServoyJSONObject generateJSONObject(IPersist persist, boolean forceRecursive, boolean makeFlattened, IDeveloperRepository repository)
-		throws RepositoryException
+	public static ServoyJSONObject generateJSONObject(IPersist persist, boolean forceRecursive, boolean makeFlattened, IDeveloperRepository repository,
+		boolean useQuotesForKey) throws RepositoryException
 	{
 		Map<String, Object> property_values = getPersistAsValueMap(persist, repository, makeFlattened);
 
@@ -874,7 +874,7 @@ public class SolutionSerializer
 			while (it.hasNext())
 			{
 				child = it.next();
-				if (!(child instanceof IScriptElement)) itemsArrayList.add(generateJSONObject(child, forceRecursive, makeFlattened, repository));
+				if (!(child instanceof IScriptElement)) itemsArrayList.add(generateJSONObject(child, forceRecursive, makeFlattened, repository, useQuotesForKey));
 			}
 			if (itemsArrayList.size() > 0)
 			{
@@ -906,7 +906,7 @@ public class SolutionSerializer
 			return new ServoyJSONObject(property_values, true, false);
 		}
 
-		return new ServoyJSONObject(property_values);
+		return new ServoyJSONObject(property_values, !useQuotesForKey, true);
 	}
 
 	/**

@@ -753,7 +753,7 @@ public class ElementFactory
 		if (templateType == StringResource.FORM_TEMPLATE)
 		{
 			json.put(Template.PROP_FORM,
-				cleanTemplateElement(repository, flattenedSolution, form, SolutionSerializer.generateJSONObject(form, false, false, repository), null));
+				cleanTemplateElement(repository, flattenedSolution, form, SolutionSerializer.generateJSONObject(form, false, false, repository, false), null));
 		}
 		json.put(Template.PROP_LOCATION, PersistHelper.createPointString(location));
 		JSONArray elements = new JSONArray();
@@ -764,7 +764,7 @@ public class ElementFactory
 
 		for (IPersist persist : array)
 		{
-			ServoyJSONObject object = SolutionSerializer.generateJSONObject(persist, true, true, repository);
+			ServoyJSONObject object = SolutionSerializer.generateJSONObject(persist, true, true, repository, false);
 			if (persist instanceof ISupportSize) // some objects have default size programmed in the getter
 			{
 				object.put(Template.PROP_SIZE, repository.convertObjectToArgumentString(IRepository.DIMENSION, ((ISupportSize)persist).getSize()));
