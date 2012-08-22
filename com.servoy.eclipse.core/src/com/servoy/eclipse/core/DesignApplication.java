@@ -1067,14 +1067,4 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	{
 		client.setValueListItems(name, displayValues, realValues, autoconvert);
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.servoy.j2db.IApplication#onSolutionOpen()
-	 */
-	public void onSolutionOpen()
-	{
-		//nop
-	}
 }
