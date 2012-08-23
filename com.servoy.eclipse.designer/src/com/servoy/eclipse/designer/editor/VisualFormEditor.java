@@ -585,8 +585,6 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 						if (child == null)
 						{
 							full_refresh = true;
-							// add it so it gets cleared (refreshed) as child of the form
-							changedChildren.add(changed);
 						}
 						else
 						{

@@ -140,7 +140,6 @@ import com.servoy.eclipse.ui.preferences.DesignerPreferences.CoolbarLayout;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
-import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
@@ -1064,16 +1063,7 @@ public class VisualFormEditorDesignPage extends GraphicalEditorWithFlyoutPalette
 
 		if (full_refresh)
 		{
-			EditPart ep = rootEditPart.getContents();
-			if (ep instanceof FormGraphicalEditPart && persists != null && persists.size() == 1 && persists.get(0) instanceof Form &&
-				(editParts != null && editParts.size() == 0))
-			{
-				((FormGraphicalEditPart)ep).refreshWithoutChildren();
-			}
-			else
-			{
-				ep.refresh();
-			}
+			rootEditPart.getContents().refresh();
 		}
 
 		if (editParts != null)
