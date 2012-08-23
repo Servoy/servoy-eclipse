@@ -487,6 +487,9 @@ public class MarkerMessages
 	public static ServoyMarker DBIGenericError = new ServoyMarker(
 		"Some kind of column difference between the DB and the DB information files for column \"{0}\".", ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker DBIBadDBInfo = new ServoyMarker("Bad database information: {0}", ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE); //$NON-NLS-1$
+	public static ServoyMarker DBIColumnSequenceTypeOverride = new ServoyMarker(
+		"The sequence type for column \"{0}\" in table \"{1}\" has been overriden to db_identity; dbi file needs to be updated.", //$NON-NLS-1$
+		ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE);
 
 	public static ServoyMarker ServerNotAccessibleFirstOccurence = new ServoyMarker(
 		"Solution \"{0}\" references server \"{1}\" which is not accessible (first occurrence error).", ServoyBuilder.MISSING_SERVER); //$NON-NLS-1$

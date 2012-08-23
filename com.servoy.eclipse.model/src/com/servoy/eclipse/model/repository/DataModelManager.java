@@ -1266,6 +1266,7 @@ public class DataModelManager implements IColumnInfoManager
 		public static final int DESERIALIZE_PROBLEM = 4;
 		public static final int MISSING_TABLE = 5;
 		public static final int MISSING_DBI_FILE = 6;
+		public static final int COLUMN_SEQ_TYPE_OVERRIDEN = 7;
 
 		private final String serverName;
 		private final String tableName;
@@ -1353,6 +1354,10 @@ public class DataModelManager implements IColumnInfoManager
 			else if (type == MISSING_DBI_FILE)
 			{
 				mk = MarkerMessages.DBIFileMissing.fill(serverName + "->" + tableName); //$NON-NLS-1$
+			}
+			else if (type == COLUMN_SEQ_TYPE_OVERRIDEN)
+			{
+				mk = MarkerMessages.DBIColumnSequenceTypeOverride.fill(columnName, tableName);
 			}
 			else
 			{
@@ -1488,6 +1493,10 @@ public class DataModelManager implements IColumnInfoManager
 					}
 				}
 			}
+			else if (type == COLUMN_SEQ_TYPE_OVERRIDEN)
+			{
+				severity = computeCustomSeverity(ServoyBuilder.DBI_COLUMN_INFO_SEQ_TYPE_OVERRIDE);
+			}
 			else
 			{
 				severity = computeCustomSeverity(ServoyBuilder.DBI_BAD_INFO);
@@ -1565,4 +1574,68 @@ public class DataModelManager implements IColumnInfoManager
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.j2db.persistence.IColumnInfoProvider#columInfoSequenceOverriden(com.servoy.j2db.persistence.Column)
+	 */
+	public void columInfoSequenceOverriden(Column c)
+	{
+		ColumnInfoDef dbCid = new ColumnInfoDef();
+		dbCid.name = c.getName();
+		dbCid.columnType = c.getColumnType();
+		dbCid.allowNull = c.getAllowNull();
+		dbCid.flags = c.getFlags();
+		dbCid.autoEnterSubType = c.getColumnInfo().getAutoEnterSubType();
+		dbCid.autoEnterType = c.getColumnInfo().getAutoEnterType();
+
+		try
+		{
+			IFile file = getDBIFile(c.getTable().getServerName(), c.getTable().getName());
+			if (file.exists())
+			{
+				InputStream is = file.getContents(true);
+				String dbiFileContent = null;
+				try
+				{
+					dbiFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
+				}
+				finally
+				{
+					Utils.closeInputStream(is);
+				}
+
+				if (dbiFileContent != null)
+				{
+					TableDef tableInfo = deserializeTableInfo(dbiFileContent);
+					if (!c.getTable().getName().equals(tableInfo.name))
+					{
+						throw new RepositoryException("Table name does not match dbi file name for " + c.getTable().getName());
+					}
+					ColumnInfoDef cid = null;
+					for (int i = tableInfo.columnInfoDefSet.size() - 1; i >= 0; i--)
+					{
+						cid = tableInfo.columnInfoDefSet.get(i);
+						if (cid.name.equals(c.getName()))
+						{
+							break;
+						}
+					}
+					addDifferenceMarker(new TableDifference(c.getTable(), c.getName(), TableDifference.COLUMN_SEQ_TYPE_OVERRIDEN, dbCid, cid));
+				}
+			}
+		}
+		catch (CoreException e)
+		{
+			ServoyLog.logError(e);
+		}
+		catch (JSONException e)
+		{
+			ServoyLog.logError(e);
+		}
+		catch (RepositoryException e)
+		{
+			ServoyLog.logError(e);
+		}
+	}
 }

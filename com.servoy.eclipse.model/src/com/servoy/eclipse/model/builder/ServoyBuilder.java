@@ -332,6 +332,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> DBI_COLUMN_CONFLICT = new Pair<String, ProblemSeverity>("DBIColumnConflict", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> DBI_TABLE_MISSING = new Pair<String, ProblemSeverity>("DBITableMissing", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> DBI_FILE_MISSING = new Pair<String, ProblemSeverity>("DBIFileMissing", ProblemSeverity.ERROR); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> DBI_COLUMN_INFO_SEQ_TYPE_OVERRIDE = new Pair<String, ProblemSeverity>(
+		"DBIColumnSequenceTypeOverride", ProblemSeverity.WARNING); //$NON-NLS-1$
 
 	// column problems
 	public final static Pair<String, ProblemSeverity> COLUMN_UUID_FLAG_NOT_SET = new Pair<String, ProblemSeverity>(

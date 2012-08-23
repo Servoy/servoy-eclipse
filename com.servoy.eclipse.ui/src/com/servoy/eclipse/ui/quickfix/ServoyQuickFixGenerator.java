@@ -25,6 +25,7 @@ import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolutionGenerator;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.quickfix.dbi.DBIQuickFixUpdateInfoFromColumn;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
@@ -194,6 +195,10 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 					if (difference.getType() == TableDifference.MISSING_DBI_FILE || difference.getType() == TableDifference.MISSING_TABLE)
 					{
 						fixes = new IMarkerResolution[] { new DBIQuickFixShowSyncWizard() };
+					}
+					if (difference.getType() == TableDifference.COLUMN_SEQ_TYPE_OVERRIDEN)
+					{
+						fixes = new IMarkerResolution[] { DBIQuickFixUpdateInfoFromColumn.getInstance() };
 					}
 				}
 				else

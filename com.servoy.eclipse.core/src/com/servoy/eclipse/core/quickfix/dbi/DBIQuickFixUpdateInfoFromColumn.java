@@ -33,6 +33,7 @@ import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.util.Utils;
@@ -164,6 +165,15 @@ public class DBIQuickFixUpdateInfoFromColumn extends TableDifferenceQuickFix
 								cid.flags = (cid.flags & (~Column.PK_COLUMN)) | (difference.getTableDefinition().flags & Column.PK_COLUMN);
 								// make sure that if it is marked as pk, it is not marked as user row id col. too
 								if ((cid.flags & Column.PK_COLUMN) != 0) cid.flags = cid.flags & (~Column.USER_ROWID_COLUMN);
+
+								// if it's an auto increment but the subtype is different in the db, use the one in the db
+								if ((cid.flags & Column.USER_ROWID_COLUMN) != 0 &&
+									difference.getTableDefinition().autoEnterType == ColumnInfo.SEQUENCE_AUTO_ENTER &&
+									cid.autoEnterType == difference.getTableDefinition().autoEnterType &&
+									cid.autoEnterSubType != difference.getTableDefinition().autoEnterSubType)
+								{
+									cid.autoEnterSubType = difference.getTableDefinition().autoEnterSubType;
+								}
 							}
 						}
 
