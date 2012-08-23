@@ -5463,8 +5463,8 @@ for (var i=0; i<allForms.length; i++)
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.String;"/>
           <description><![CDATA[Get all form names of the current solution.]]></description>
           <summary><![CDATA[Get all form names of the current solution.]]></summary>
-          <deprecated><![CDATA[use solutionModel.getForms() instead.
-(an exact replacement, if you need it would be 'solutionModel.getForms().map(function (jsForm) { return jsForm.name }').]]></deprecated>
+          <deprecated><![CDATA[use solutionModel.getForms() instead;
+an exact replacement, if you need it would be 'solutionModel.getForms().map(function (jsForm) { return jsForm.name } )'.]]></deprecated>
           <sample><![CDATA[var allFormNames = forms.allnames;
 application.output("There are " + allFormNames.length + " forms.");
 for (var i=0; i<allFormNames.length; i++) 
@@ -5487,8 +5487,8 @@ for (var i=0; i<allFormNames.length; i++)
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.String;"/>
           <description><![CDATA[Get all script names of this global scope.]]></description>
           <summary><![CDATA[Get all script names of this global scope.]]></summary>
-          <deprecated><![CDATA[use solutionModel.getGlobalMethods("scopeName") instead.
-(an exact replacement, if you need it would be 'solutionModel.getGlobalMethods("scopeName").map(function (jsMethod) { return jsMethod.getName() }').]]></deprecated>
+          <deprecated><![CDATA[use solutionModel.getGlobalMethods("scopeName") instead;
+an exact replacement, if you need it would be 'solutionModel.getGlobalMethods("scopeName").map(function (jsMethod) { return jsMethod.getName() } )'.]]></deprecated>
           <sample><![CDATA[var allMethodNames = scopes.globals.allmethods;
 application.output("There are " + allMethodNames.length + " global methods.");
 for (var i=0; i<allMethodNames.length; i++)
@@ -5498,8 +5498,8 @@ for (var i=0; i<allMethodNames.length; i++)
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.String;"/>
           <description><![CDATA[Get all global relation names of the current solution.]]></description>
           <summary><![CDATA[Get all global relation names of the current solution.]]></summary>
-          <deprecated><![CDATA[use solutionModel.getRelations(null) instead.
-(an exact replacement, if you need it would be 'solutionModel.getRelations(null).map(function (jsRelation) { return jsRelation.name }').]]></deprecated>
+          <deprecated><![CDATA[use solutionModel.getRelations(null) instead;
+an exact replacement, if you need it would be 'solutionModel.getRelations(null).map(function (jsRelation) { return jsRelation.name } )'.]]></deprecated>
           <sample><![CDATA[var allRelationNames = scopes.globals.allrelations;
 application.output("There are " + allRelationNames.length + " global relations.");
 for (var i=0; i<allRelationNames.length; i++)
@@ -5509,8 +5509,8 @@ for (var i=0; i<allRelationNames.length; i++)
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.String;"/>
           <description><![CDATA[Get all variable names of this global scope.]]></description>
           <summary><![CDATA[Get all variable names of this global scope.]]></summary>
-          <deprecated><![CDATA[use solutionModel.getGlobalVariables("scopeName") instead.
-(an exact replacement, if you need it would be 'solutionModel.getGlobalVariables("scopeName").map(function (jsVariable) { return jsVariable.name }').]]></deprecated>
+          <deprecated><![CDATA[use solutionModel.getGlobalVariables("scopeName") instead;
+an exact replacement, if you need it would be 'solutionModel.getGlobalVariables("scopeName").map(function (jsVariable) { return jsVariable.name } )'.]]></deprecated>
           <sample><![CDATA[var allVarNames = scopes.globals.allvariables;
 application.output("There are " + allVarNames.length + " global variables.");
 for (var i=0; i<allVarNames.length; i++)
@@ -29216,8 +29216,8 @@ for (var i=0; i<dataprovidersNames.length; i++)
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.String;"/>
           <description><![CDATA[Get all script names of the form.]]></description>
           <summary><![CDATA[Get all script names of the form.]]></summary>
-          <deprecated><![CDATA[use solutionModel - JSForm.getMethods(Boolean) or JSForm.getMethods() instead.
-(an exact replacement, if you need it would be 'solutionModel.getForm(controller.getName()).getMethods().map(function (jsMethod) { return jsMethod.getName() }').]]></deprecated>
+          <deprecated><![CDATA[use solutionModel - JSForm.getMethods(Boolean) or JSForm.getMethods() instead;
+an exact replacement, if you need it would be 'solutionModel.getForm(controller.getName()).getMethods().map(function (jsMethod) { return jsMethod.getName() } )'.]]></deprecated>
           <sample><![CDATA[var methodNames = %%prefix%%allmethods;
 application.output("This form has " + methodNames.length + " methods defined.")
 for (var i=0; i<methodNames.length; i++)
@@ -29237,8 +29237,8 @@ for (var i=0; i<names.length; i++)
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.String;"/>
           <description><![CDATA[Get all relation names of the form.]]></description>
           <summary><![CDATA[Get all relation names of the form.]]></summary>
-          <deprecated><![CDATA[use solutionModel.getRelations(dataSource) instead, where dataSource is provided by solution model's JSForm.dataSource or controller.getDataSource().
-(an exact replacement, if you need it would be 'solutionModel.getRelations(controller.getDataSource()).map(function (jsRelation) { return jsRelation.name }').]]></deprecated>
+          <deprecated><![CDATA[use solutionModel.getRelations(dataSource) instead, where dataSource is provided by solution model's JSForm.dataSource or controller.getDataSource();
+an exact replacement, if you need it would be 'solutionModel.getRelations(controller.getDataSource()).map(function (jsRelation) { return jsRelation.name } )'.]]></deprecated>
           <sample><![CDATA[var relationsNames = %%prefix%%allrelations;
 application.output("This form has " + relationsNames.length + " relations.")
 for (var i=0; i<relationsNames.length; i++)
@@ -29248,8 +29248,8 @@ for (var i=0; i<relationsNames.length; i++)
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.String;"/>
           <description><![CDATA[Get all form variable names.]]></description>
           <summary><![CDATA[Get all form variable names.]]></summary>
-          <deprecated><![CDATA[use solutionModel - JSForm.getVariables(Boolean) or JSForm.getVariables() instead.
-(an exact replacement, if you need it would be 'solutionModel.getForm(controller.getName()).getVariables().map(function (jsVariable) { return jsVariable.name }').]]></deprecated>
+          <deprecated><![CDATA[use solutionModel - JSForm.getVariables(Boolean) or JSForm.getVariables() instead;
+an exact replacement, if you need it would be 'solutionModel.getForm(controller.getName()).getVariables().map(function (jsVariable) { return jsVariable.name } )'.]]></deprecated>
           <sample><![CDATA[var varNames = %%prefix%%allvariables;
 application.output("This form has " + varNames.length + " variables defined.")
 for (var i=0; i<varNames.length; i++)
