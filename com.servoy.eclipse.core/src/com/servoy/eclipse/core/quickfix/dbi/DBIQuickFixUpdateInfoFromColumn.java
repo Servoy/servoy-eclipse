@@ -167,7 +167,7 @@ public class DBIQuickFixUpdateInfoFromColumn extends TableDifferenceQuickFix
 								if ((cid.flags & Column.PK_COLUMN) != 0) cid.flags = cid.flags & (~Column.USER_ROWID_COLUMN);
 
 								// if it's an auto increment but the subtype is different in the db, use the one in the db
-								if ((cid.flags & Column.USER_ROWID_COLUMN) != 0 &&
+								if (((cid.flags & Column.USER_ROWID_COLUMN) != 0 || (cid.flags & Column.PK_COLUMN) != 0) &&
 									difference.getTableDefinition().autoEnterType == ColumnInfo.SEQUENCE_AUTO_ENTER &&
 									cid.autoEnterType == difference.getTableDefinition().autoEnterType &&
 									cid.autoEnterSubType != difference.getTableDefinition().autoEnterSubType)
