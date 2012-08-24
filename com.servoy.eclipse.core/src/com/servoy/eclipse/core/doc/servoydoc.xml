@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <servoydoc>
   <runtime>
     <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT">
@@ -2853,8 +2853,24 @@ if(!success)
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the lock could be acquired.]]></return>
-          <description/>
-          <sample/>
+          <description><![CDATA[Request lock(s) for a foundset, can be a normal or related foundset.
+The record_index can be -1 to lock all rows, 0 to lock the current row, or a specific row of > 0 
+Optionally name the lock(s) so that it can be referenced it in releaseAllLocks()
+
+returns true if the lock could be acquired.]]></description>
+          <summary><![CDATA[Request lock(s) for a foundset, can be a normal or related foundset.]]></summary>
+          <sample><![CDATA[//locks the complete foundset
+databaseManager.acquireLock(foundset,-1);
+
+//locks the current row
+databaseManager.acquireLock(foundset,0);
+
+//locks all related orders for the current Customer
+var success = databaseManager.acquireLock(Cust_to_Orders,-1);
+if(!success)
+{
+	plugins.dialogs.showWarningDialog('Alert','Failed to get a lock','OK');
+}]]></sample>
           <parameters>
             <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.IFoundSetInternal">
               <description><![CDATA[The JSFoundset to get the lock for]]></description>
@@ -4450,8 +4466,20 @@ var firstViewName = viewNamesArray[0];]]></sample>
             <argumentType typecode="com.servoy.j2db.dataprocessing.IFoundSetInternal"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the JSFoundset has new records or JSRecord is a new record.]]></return>
-          <description/>
-          <sample/>
+          <description><![CDATA[Returns true if the argument (foundSet / record) has at least one row that was not yet saved in the database.]]></description>
+          <summary><![CDATA[Returns true if the argument (foundSet / record) has at least one row that was not yet saved in the database.]]></summary>
+          <sample><![CDATA[var fs = databaseManager.getFoundSet(databaseManager.getDataSourceServerName(controller.getDataSource()),'employees');
+databaseManager.startTransaction();
+var ridx = fs.newRecord();
+var record = fs.getRecord(ridx);
+record.emp_name = 'John';
+if (databaseManager.hasNewRecords(fs)) {
+	application.output("new records");
+} else {
+	application.output("no new records");
+}
+databaseManager.saveData();
+databaseManager.commitTransaction();]]></sample>
           <parameters>
             <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.IFoundSetInternal">
               <description><![CDATA[The JSFoundset to test.]]></description>
@@ -4492,9 +4520,21 @@ databaseManager.commitTransaction();]]></sample>
             <argumentType typecode="com.servoy.j2db.dataprocessing.IRecordInternal"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the JSFoundset has new records or JSRecord is a new record.]]></return>
-          <description/>
+          <description><![CDATA[Returns true if the argument (foundSet / record) has at least one row that was not yet saved in the database.]]></description>
+          <summary><![CDATA[Returns true if the argument (foundSet / record) has at least one row that was not yet saved in the database.]]></summary>
           <deprecated><![CDATA[use JSRecord#isNew() instead]]></deprecated>
-          <sample/>
+          <sample><![CDATA[var fs = databaseManager.getFoundSet(databaseManager.getDataSourceServerName(controller.getDataSource()),'employees');
+databaseManager.startTransaction();
+var ridx = fs.newRecord();
+var record = fs.getRecord(ridx);
+record.emp_name = 'John';
+if (databaseManager.hasNewRecords(fs)) {
+	application.output("new records");
+} else {
+	application.output("no new records");
+}
+databaseManager.saveData();
+databaseManager.commitTransaction();]]></sample>
           <parameters>
             <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.IRecordInternal">
               <description><![CDATA[The JSRecord to test.]]></description>
@@ -4506,8 +4546,14 @@ databaseManager.commitTransaction();]]></sample>
             <argumentType typecode="com.servoy.j2db.dataprocessing.IFoundSetInternal"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if there are changes in the JSFoundset or JSRecord.]]></return>
-          <description/>
-          <sample/>
+          <description><![CDATA[Returns true if the specified foundset, on a specific index or in any of its records, or the specified record has changes.
+
+NOTE: The fields focus may be lost in user interface in order to determine the edits.]]></description>
+          <summary><![CDATA[Returns true if the specified foundset, on a specific index or in any of its records, or the specified record has changes.]]></summary>
+          <sample><![CDATA[if (databaseManager.hasRecordChanges(foundset,2))
+{
+	//do save or something else
+}]]></sample>
           <parameters>
             <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.IFoundSetInternal">
               <description><![CDATA[The JSFoundset to test if it has changes.]]></description>
@@ -4542,9 +4588,15 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
             <argumentType typecode="com.servoy.j2db.dataprocessing.IRecordInternal"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if there are changes in the JSFoundset or JSRecord.]]></return>
-          <description/>
+          <description><![CDATA[Returns true if the specified foundset, on a specific index or in any of its records, or the specified record has changes.
+
+NOTE: The fields focus may be lost in user interface in order to determine the edits.]]></description>
+          <summary><![CDATA[Returns true if the specified foundset, on a specific index or in any of its records, or the specified record has changes.]]></summary>
           <deprecated><![CDATA[use JSRecord#hasChangedData() instead]]></deprecated>
-          <sample/>
+          <sample><![CDATA[if (databaseManager.hasRecordChanges(foundset,2))
+{
+	//do save or something else
+}]]></sample>
           <parameters>
             <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.IRecordInternal">
               <description><![CDATA[The JSRecord to test if it has changes.]]></description>
@@ -7445,7 +7497,25 @@ break;
 Note that when a column is added to an existing table, allowNull will always be set.
 For a primary key column, the allowNull flag will be always off, for other columns the flag is set by default.]]></description>
           <summary><![CDATA[Get or set the allow-null flag of a new column.]]></summary>
-          <sample/>
+          <sample><![CDATA[var server = plugins.maintenance.getServer("example_data");
+if (server)
+{
+	var table = server.createNewTable("users");
+	if (table)
+	{
+		var pk = table.createNewColumn("id", JSColumn.MEDIA, 16); // can also use (JSColumn.TEXT, 36) for UUIDs
+		pk.rowIdentifierType = JSColumn.PK_COLUMN;
+		pk.setFlag(JSColumn.UUID_COLUMN, true)
+		pk.sequenceType = JSColumn.UUID_GENERATOR
+		var c = table.createNewColumn("name", JSColumn.TEXT, 100);
+		c.allowNull = false
+		table.createNewColumn("age", JSColumn.INTEGER, 0);
+		table.createNewColumn("last_login", JSColumn.DATETIME, 0);
+		var result = server.synchronizeWithDB(table);
+		if (result) application.output("Table successfully created.");
+		else application.output("Table not created.");
+	}
+}]]></sample>
         </property>
         <property name="rowIdentifierType">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -7746,7 +7816,25 @@ The flags are a bit pattern consisting of 1 or more of the following bits:
  - JSColumn.UUID_COLUMN;
  - JSColumn.EXCLUDED_COLUMN;]]></description>
           <summary><![CDATA[Set or clear a flag of a new column.]]></summary>
-          <sample/>
+          <sample><![CDATA[var server = plugins.maintenance.getServer("example_data");
+if (server)
+{
+	var table = server.createNewTable("users");
+	if (table)
+	{
+		var pk = table.createNewColumn("id", JSColumn.MEDIA, 16); // can also use (JSColumn.TEXT, 36) for UUIDs
+		pk.rowIdentifierType = JSColumn.PK_COLUMN;
+		pk.setFlag(JSColumn.UUID_COLUMN, true)
+		pk.sequenceType = JSColumn.UUID_GENERATOR
+		var c = table.createNewColumn("name", JSColumn.TEXT, 100);
+		c.allowNull = false
+		table.createNewColumn("age", JSColumn.INTEGER, 0);
+		table.createNewColumn("last_login", JSColumn.DATETIME, 0);
+		var result = server.synchronizeWithDB(table);
+		if (result) application.output("Table successfully created.");
+		else application.output("Table not created.");
+	}
+}]]></sample>
           <parameters>
             <parameter name="flag" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[the flag to set]]></description>
@@ -8477,7 +8565,24 @@ var uri2 = ds2.createDataSource('mydata2'); // types are inferred from query res
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String html.]]></return>
           <description><![CDATA[Get the dataset as an html table, do not escape values or spaces, no multi_line_markup, do not add indentation, add column names.]]></description>
           <summary><![CDATA[Get the dataset as an html table, do not escape values or spaces, no multi_line_markup, do not add indentation, add column names.]]></summary>
-          <sample/>
+          <sample><![CDATA[//gets a dataset based on a query
+//useful to limit the number of rows
+var maxReturnedRows = 10;
+var query = 'select c1,c2,c3 from test_table where start_date = ?';
+
+//to access data by name, do not use '.' or special characters in names or aliases
+var args = new Array();
+args[0] = order_date //or new Date();
+var dataset = databaseManager.getDataSetByQuery(databaseManager.getDataSourceServerName(controller.getDataSource()),query,args,maxReturnedRows);
+
+// gets a dataset with escape values; escape spaces (lines will not wrap); no multi-line markup; with pretty indentation; shows column names
+var htmlTable = dataset.getAsHTML(true, true, false, true, true);
+
+//assigns the dataset to a field and sets the display type to HTML_AREA
+//assuming the html_field is a global text variable
+scopes.globals.html_field = '<html>'+dataset.getAsHTML()+'</html>';
+
+//Note: To display an HTML_AREA field as an HTML page, add HTML tags at the beginning '<html>' and at the end '</html>'.]]></sample>
         </function>
         <function name="getAsHTML">
           <argumentsTypes>
@@ -8486,7 +8591,24 @@ var uri2 = ds2.createDataSource('mydata2'); // types are inferred from query res
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String html.]]></return>
           <description><![CDATA[Get the dataset as an html table, do not escape spaces, no multi_line_markup, do not add indentation, add column names.]]></description>
           <summary><![CDATA[Get the dataset as an html table, do not escape spaces, no multi_line_markup, do not add indentation, add column names.]]></summary>
-          <sample/>
+          <sample><![CDATA[//gets a dataset based on a query
+//useful to limit the number of rows
+var maxReturnedRows = 10;
+var query = 'select c1,c2,c3 from test_table where start_date = ?';
+
+//to access data by name, do not use '.' or special characters in names or aliases
+var args = new Array();
+args[0] = order_date //or new Date();
+var dataset = databaseManager.getDataSetByQuery(databaseManager.getDataSourceServerName(controller.getDataSource()),query,args,maxReturnedRows);
+
+// gets a dataset with escape values; escape spaces (lines will not wrap); no multi-line markup; with pretty indentation; shows column names
+var htmlTable = dataset.getAsHTML(true, true, false, true, true);
+
+//assigns the dataset to a field and sets the display type to HTML_AREA
+//assuming the html_field is a global text variable
+scopes.globals.html_field = '<html>'+dataset.getAsHTML()+'</html>';
+
+//Note: To display an HTML_AREA field as an HTML page, add HTML tags at the beginning '<html>' and at the end '</html>'.]]></sample>
           <parameters>
             <parameter name="escape_values" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
               <description><![CDATA[if true, replaces illegal HTML characters with corresponding valid escape sequences.]]></description>
@@ -8501,7 +8623,24 @@ var uri2 = ds2.createDataSource('mydata2'); // types are inferred from query res
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String html.]]></return>
           <description><![CDATA[Get the dataset as an html table, no multi_line_markup, do not add indentation, add column names.]]></description>
           <summary><![CDATA[Get the dataset as an html table, no multi_line_markup, do not add indentation, add column names.]]></summary>
-          <sample/>
+          <sample><![CDATA[//gets a dataset based on a query
+//useful to limit the number of rows
+var maxReturnedRows = 10;
+var query = 'select c1,c2,c3 from test_table where start_date = ?';
+
+//to access data by name, do not use '.' or special characters in names or aliases
+var args = new Array();
+args[0] = order_date //or new Date();
+var dataset = databaseManager.getDataSetByQuery(databaseManager.getDataSourceServerName(controller.getDataSource()),query,args,maxReturnedRows);
+
+// gets a dataset with escape values; escape spaces (lines will not wrap); no multi-line markup; with pretty indentation; shows column names
+var htmlTable = dataset.getAsHTML(true, true, false, true, true);
+
+//assigns the dataset to a field and sets the display type to HTML_AREA
+//assuming the html_field is a global text variable
+scopes.globals.html_field = '<html>'+dataset.getAsHTML()+'</html>';
+
+//Note: To display an HTML_AREA field as an HTML page, add HTML tags at the beginning '<html>' and at the end '</html>'.]]></sample>
           <parameters>
             <parameter name="escape_values" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
               <description><![CDATA[if true, replaces illegal HTML characters with corresponding valid escape sequences.]]></description>
@@ -8520,7 +8659,24 @@ var uri2 = ds2.createDataSource('mydata2'); // types are inferred from query res
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String html.]]></return>
           <description><![CDATA[Get the dataset as an html table, do not add indentation, add column names.]]></description>
           <summary><![CDATA[Get the dataset as an html table, do not add indentation, add column names.]]></summary>
-          <sample/>
+          <sample><![CDATA[//gets a dataset based on a query
+//useful to limit the number of rows
+var maxReturnedRows = 10;
+var query = 'select c1,c2,c3 from test_table where start_date = ?';
+
+//to access data by name, do not use '.' or special characters in names or aliases
+var args = new Array();
+args[0] = order_date //or new Date();
+var dataset = databaseManager.getDataSetByQuery(databaseManager.getDataSourceServerName(controller.getDataSource()),query,args,maxReturnedRows);
+
+// gets a dataset with escape values; escape spaces (lines will not wrap); no multi-line markup; with pretty indentation; shows column names
+var htmlTable = dataset.getAsHTML(true, true, false, true, true);
+
+//assigns the dataset to a field and sets the display type to HTML_AREA
+//assuming the html_field is a global text variable
+scopes.globals.html_field = '<html>'+dataset.getAsHTML()+'</html>';
+
+//Note: To display an HTML_AREA field as an HTML page, add HTML tags at the beginning '<html>' and at the end '</html>'.]]></sample>
           <parameters>
             <parameter name="escape_values" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
               <description><![CDATA[if true, replaces illegal HTML characters with corresponding valid escape sequences.]]></description>
@@ -8543,7 +8699,24 @@ var uri2 = ds2.createDataSource('mydata2'); // types are inferred from query res
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String html.]]></return>
           <description><![CDATA[Get the dataset as an html table, add column names.]]></description>
           <summary><![CDATA[Get the dataset as an html table, add column names.]]></summary>
-          <sample/>
+          <sample><![CDATA[//gets a dataset based on a query
+//useful to limit the number of rows
+var maxReturnedRows = 10;
+var query = 'select c1,c2,c3 from test_table where start_date = ?';
+
+//to access data by name, do not use '.' or special characters in names or aliases
+var args = new Array();
+args[0] = order_date //or new Date();
+var dataset = databaseManager.getDataSetByQuery(databaseManager.getDataSourceServerName(controller.getDataSource()),query,args,maxReturnedRows);
+
+// gets a dataset with escape values; escape spaces (lines will not wrap); no multi-line markup; with pretty indentation; shows column names
+var htmlTable = dataset.getAsHTML(true, true, false, true, true);
+
+//assigns the dataset to a field and sets the display type to HTML_AREA
+//assuming the html_field is a global text variable
+scopes.globals.html_field = '<html>'+dataset.getAsHTML()+'</html>';
+
+//Note: To display an HTML_AREA field as an HTML page, add HTML tags at the beginning '<html>' and at the end '</html>'.]]></sample>
           <parameters>
             <parameter name="escape_values" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
               <description><![CDATA[if true, replaces illegal HTML characters with corresponding valid escape sequences.]]></description>
@@ -13036,7 +13209,11 @@ if (count == 0)
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[0 if record was not created or the record index if it was created.]]></return>
           <description><![CDATA[Duplicate current record, change selection to new record, place on top.]]></description>
           <summary><![CDATA[Duplicate current record, change selection to new record, place on top.]]></summary>
-          <sample/>
+          <sample><![CDATA[%%prefix%%foundset.duplicateRecord();
+%%prefix%%foundset.duplicateRecord(false); //duplicate the current record, adds at bottom
+%%prefix%%foundset.duplicateRecord(1,2); //duplicate the first record as second record
+//duplicates the record (record index 3), adds on top and selects the record
+%%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
         </function>
         <function name="duplicateRecord">
           <argumentsTypes>
@@ -13045,7 +13222,11 @@ if (count == 0)
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[0 if record was not created or the record index if it was created.]]></return>
           <description><![CDATA[Duplicate selected record, change selection to new record.]]></description>
           <summary><![CDATA[Duplicate selected record, change selection to new record.]]></summary>
-          <sample/>
+          <sample><![CDATA[%%prefix%%foundset.duplicateRecord();
+%%prefix%%foundset.duplicateRecord(false); //duplicate the current record, adds at bottom
+%%prefix%%foundset.duplicateRecord(1,2); //duplicate the first record as second record
+//duplicates the record (record index 3), adds on top and selects the record
+%%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
           <parameters>
             <parameter name="onTop" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
               <description><![CDATA[when true the new record is added as the topmost record.]]></description>
@@ -13060,7 +13241,11 @@ if (count == 0)
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[0 if record was not created or the record index if it was created.]]></return>
           <description><![CDATA[Duplicate selected record.]]></description>
           <summary><![CDATA[Duplicate selected record.]]></summary>
-          <sample/>
+          <sample><![CDATA[%%prefix%%foundset.duplicateRecord();
+%%prefix%%foundset.duplicateRecord(false); //duplicate the current record, adds at bottom
+%%prefix%%foundset.duplicateRecord(1,2); //duplicate the first record as second record
+//duplicates the record (record index 3), adds on top and selects the record
+%%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
           <parameters>
             <parameter name="onTop" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
               <description><![CDATA[when true the new record is added as the topmost record.]]></description>
@@ -13077,7 +13262,11 @@ if (count == 0)
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[0 if record was not created or the record index if it was created.]]></return>
           <description><![CDATA[Duplicate record at index in the foundset, change selection to new record, place on top.]]></description>
           <summary><![CDATA[Duplicate record at index in the foundset, change selection to new record, place on top.]]></summary>
-          <sample/>
+          <sample><![CDATA[%%prefix%%foundset.duplicateRecord();
+%%prefix%%foundset.duplicateRecord(false); //duplicate the current record, adds at bottom
+%%prefix%%foundset.duplicateRecord(1,2); //duplicate the first record as second record
+//duplicates the record (record index 3), adds on top and selects the record
+%%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[The index of the record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
@@ -13092,7 +13281,11 @@ if (count == 0)
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[0 if record was not created or the record index if it was created.]]></return>
           <description><![CDATA[Duplicate record at index in the foundset, change selection to new record.]]></description>
           <summary><![CDATA[Duplicate record at index in the foundset, change selection to new record.]]></summary>
-          <sample/>
+          <sample><![CDATA[%%prefix%%foundset.duplicateRecord();
+%%prefix%%foundset.duplicateRecord(false); //duplicate the current record, adds at bottom
+%%prefix%%foundset.duplicateRecord(1,2); //duplicate the first record as second record
+//duplicates the record (record index 3), adds on top and selects the record
+%%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[The index of the record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
@@ -13111,7 +13304,11 @@ if (count == 0)
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[0 if record was not created or the record index if it was created.]]></return>
           <description><![CDATA[Duplicate record at index in the foundset.]]></description>
           <summary><![CDATA[Duplicate record at index in the foundset.]]></summary>
-          <sample/>
+          <sample><![CDATA[%%prefix%%foundset.duplicateRecord();
+%%prefix%%foundset.duplicateRecord(false); //duplicate the current record, adds at bottom
+%%prefix%%foundset.duplicateRecord(1,2); //duplicate the first record as second record
+//duplicates the record (record index 3), adds on top and selects the record
+%%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[The index of the record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
@@ -13132,7 +13329,11 @@ if (count == 0)
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[0 if record was not created or the record index if it was created.]]></return>
           <description><![CDATA[Duplicate record at index in the foundset, change selection to new record.]]></description>
           <summary><![CDATA[Duplicate record at index in the foundset, change selection to new record.]]></summary>
-          <sample/>
+          <sample><![CDATA[%%prefix%%foundset.duplicateRecord();
+%%prefix%%foundset.duplicateRecord(false); //duplicate the current record, adds at bottom
+%%prefix%%foundset.duplicateRecord(1,2); //duplicate the first record as second record
+//duplicates the record (record index 3), adds on top and selects the record
+%%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[The index of the record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
@@ -13902,7 +14103,8 @@ Clear results from previous searches.
 
 Note: Omitted records are automatically excluded when performing a search - meaning that the foundset result by default will not include omitted records.]]></description>
           <summary><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.]]></summary>
-          <sample/>
+          <sample><![CDATA[var recordCount = %%prefix%%foundset.search();
+//var recordCount = %%prefix%%foundset.search(false,false); //to extend foundset]]></sample>
         </function>
         <function name="search">
           <argumentsTypes>
@@ -13914,7 +14116,8 @@ Reduce results from previous searches.
 
 Note: Omitted records are automatically excluded when performing a search - meaning that the foundset result by default will not include omitted records.]]></description>
           <summary><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.]]></summary>
-          <sample/>
+          <sample><![CDATA[var recordCount = %%prefix%%foundset.search();
+//var recordCount = %%prefix%%foundset.search(false,false); //to extend foundset]]></sample>
           <parameters>
             <parameter name="clearLastResults" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
               <description><![CDATA[boolean, clear previous search, default true]]></description>
@@ -18204,8 +18407,32 @@ var serverName = jsTable.getServerName()]]></sample>
             <argumentType typecode="java.lang.Number"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.dataprocessing.JSColumnObject" typecode="com.servoy.j2db.dataprocessing.JSColumnObject"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Creates a new column in this table. The name, type and length of the new column must be specified. For specifying the
+type of the column, use the JSColumn constants. The column is not actually created in the database until this
+table is synchronized with the database using the JSServer.synchronizeWithDB method. 
+
+The method returns a JSColumn instance that corresponds to the newly created column. If any error occurs and the column cannot be created, then the method
+returns null.]]></description>
+          <summary><![CDATA[Creates a new column in this table.]]></summary>
+          <sample><![CDATA[var server = plugins.maintenance.getServer("example_data");
+if (server)
+{
+	var table = server.createNewTable("users");
+	if (table)
+	{
+		var pk = table.createNewColumn("id", JSColumn.MEDIA, 16); // can also use (JSColumn.TEXT, 36) for UUIDs
+		pk.rowIdentifierType = JSColumn.PK_COLUMN;
+		pk.setFlag(JSColumn.UUID_COLUMN, true)
+		pk.sequenceType = JSColumn.UUID_GENERATOR
+		var c = table.createNewColumn("name", JSColumn.TEXT, 100);
+		c.allowNull = false
+		table.createNewColumn("age", JSColumn.INTEGER, 0);
+		table.createNewColumn("last_login", JSColumn.DATETIME, 0);
+		var result = server.synchronizeWithDB(table);
+		if (result) application.output("Table successfully created.");
+		else application.output("Table not created.");
+	}
+}]]></sample>
           <parameters>
             <parameter name="columnName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
             <parameter name="type" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number"/>
@@ -18220,8 +18447,32 @@ var serverName = jsTable.getServerName()]]></sample>
             <argumentType typecode="java.lang.Boolean"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.dataprocessing.JSColumnObject" typecode="com.servoy.j2db.dataprocessing.JSColumnObject"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Creates a new column in this table. The name, type and length of the new column must be specified. For specifying the
+type of the column, use the JSColumn constants. The column is not actually created in the database until this
+table is synchronized with the database using the JSServer.synchronizeWithDB method. 
+
+The method returns a JSColumn instance that corresponds to the newly created column. If any error occurs and the column cannot be created, then the method
+returns null.]]></description>
+          <summary><![CDATA[Creates a new column in this table.]]></summary>
+          <sample><![CDATA[var server = plugins.maintenance.getServer("example_data");
+if (server)
+{
+	var table = server.createNewTable("users");
+	if (table)
+	{
+		var pk = table.createNewColumn("id", JSColumn.MEDIA, 16); // can also use (JSColumn.TEXT, 36) for UUIDs
+		pk.rowIdentifierType = JSColumn.PK_COLUMN;
+		pk.setFlag(JSColumn.UUID_COLUMN, true)
+		pk.sequenceType = JSColumn.UUID_GENERATOR
+		var c = table.createNewColumn("name", JSColumn.TEXT, 100);
+		c.allowNull = false
+		table.createNewColumn("age", JSColumn.INTEGER, 0);
+		table.createNewColumn("last_login", JSColumn.DATETIME, 0);
+		var result = server.synchronizeWithDB(table);
+		if (result) application.output("Table successfully created.");
+		else application.output("Table not created.");
+	}
+}]]></sample>
           <parameters>
             <parameter name="columnName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
             <parameter name="type" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number"/>
@@ -22862,6 +23113,11 @@ query.where().add(query.getColumn("flag").eq(new Integer(1))).add(query.getColum
           <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders')
 query.where.add(query.columns.orderdate.isNull)]]></sample>
+          <parameters>
+            <parameter name="condition" type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition">
+              <description><![CDATA[the condition to add]]></description>
+            </parameter>
+          </parameters>
         </function>
       </functions>
     </object>
@@ -23654,6 +23910,11 @@ query.where().add(query.getColumn("flag").eq(new Integer(1))).add(query.getColum
           <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders')
 query.where.add(query.columns.orderdate.isNull)]]></sample>
+          <parameters>
+            <parameter name="condition" type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition">
+              <description><![CDATA[the condition to add]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function name="add">
           <argumentsTypes>
@@ -23669,6 +23930,14 @@ query.where().add("mycond", query.getColumn("flag").eq(new Integer(1))).add(quer
           <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders')
 query.where.add("mycond", query.columns.orderdate.isNull)]]></sample>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the name of the condition]]></description>
+            </parameter>
+            <parameter name="condition" type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition">
+              <description><![CDATA[the condition to add]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function name="clear">
           <argumentsTypes/>
@@ -24039,7 +24308,11 @@ if (count == 0)
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[0 if record was not created or the record index if it was created.]]></return>
           <description><![CDATA[Duplicate current record, change selection to new record, place on top.]]></description>
           <summary><![CDATA[Duplicate current record, change selection to new record, place on top.]]></summary>
-          <sample/>
+          <sample><![CDATA[%%prefix%%foundset.duplicateRecord();
+%%prefix%%foundset.duplicateRecord(false); //duplicate the current record, adds at bottom
+%%prefix%%foundset.duplicateRecord(1,2); //duplicate the first record as second record
+//duplicates the record (record index 3), adds on top and selects the record
+%%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
         </function>
         <function name="duplicateRecord">
           <argumentsTypes>
@@ -24048,7 +24321,11 @@ if (count == 0)
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[0 if record was not created or the record index if it was created.]]></return>
           <description><![CDATA[Duplicate selected record, change selection to new record.]]></description>
           <summary><![CDATA[Duplicate selected record, change selection to new record.]]></summary>
-          <sample/>
+          <sample><![CDATA[%%prefix%%foundset.duplicateRecord();
+%%prefix%%foundset.duplicateRecord(false); //duplicate the current record, adds at bottom
+%%prefix%%foundset.duplicateRecord(1,2); //duplicate the first record as second record
+//duplicates the record (record index 3), adds on top and selects the record
+%%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
           <parameters>
             <parameter name="onTop" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
               <description><![CDATA[when true the new record is added as the topmost record.]]></description>
@@ -24063,7 +24340,11 @@ if (count == 0)
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[0 if record was not created or the record index if it was created.]]></return>
           <description><![CDATA[Duplicate selected record.]]></description>
           <summary><![CDATA[Duplicate selected record.]]></summary>
-          <sample/>
+          <sample><![CDATA[%%prefix%%foundset.duplicateRecord();
+%%prefix%%foundset.duplicateRecord(false); //duplicate the current record, adds at bottom
+%%prefix%%foundset.duplicateRecord(1,2); //duplicate the first record as second record
+//duplicates the record (record index 3), adds on top and selects the record
+%%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
           <parameters>
             <parameter name="onTop" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
               <description><![CDATA[when true the new record is added as the topmost record.]]></description>
@@ -24080,7 +24361,11 @@ if (count == 0)
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[0 if record was not created or the record index if it was created.]]></return>
           <description><![CDATA[Duplicate record at index in the foundset, change selection to new record, place on top.]]></description>
           <summary><![CDATA[Duplicate record at index in the foundset, change selection to new record, place on top.]]></summary>
-          <sample/>
+          <sample><![CDATA[%%prefix%%foundset.duplicateRecord();
+%%prefix%%foundset.duplicateRecord(false); //duplicate the current record, adds at bottom
+%%prefix%%foundset.duplicateRecord(1,2); //duplicate the first record as second record
+//duplicates the record (record index 3), adds on top and selects the record
+%%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[The index of the record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
@@ -24095,7 +24380,11 @@ if (count == 0)
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[0 if record was not created or the record index if it was created.]]></return>
           <description><![CDATA[Duplicate record at index in the foundset, change selection to new record.]]></description>
           <summary><![CDATA[Duplicate record at index in the foundset, change selection to new record.]]></summary>
-          <sample/>
+          <sample><![CDATA[%%prefix%%foundset.duplicateRecord();
+%%prefix%%foundset.duplicateRecord(false); //duplicate the current record, adds at bottom
+%%prefix%%foundset.duplicateRecord(1,2); //duplicate the first record as second record
+//duplicates the record (record index 3), adds on top and selects the record
+%%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[The index of the record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
@@ -24114,7 +24403,11 @@ if (count == 0)
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[0 if record was not created or the record index if it was created.]]></return>
           <description><![CDATA[Duplicate record at index in the foundset.]]></description>
           <summary><![CDATA[Duplicate record at index in the foundset.]]></summary>
-          <sample/>
+          <sample><![CDATA[%%prefix%%foundset.duplicateRecord();
+%%prefix%%foundset.duplicateRecord(false); //duplicate the current record, adds at bottom
+%%prefix%%foundset.duplicateRecord(1,2); //duplicate the first record as second record
+//duplicates the record (record index 3), adds on top and selects the record
+%%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[The index of the record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
@@ -24135,7 +24428,11 @@ if (count == 0)
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[0 if record was not created or the record index if it was created.]]></return>
           <description><![CDATA[Duplicate record at index in the foundset, change selection to new record.]]></description>
           <summary><![CDATA[Duplicate record at index in the foundset, change selection to new record.]]></summary>
-          <sample/>
+          <sample><![CDATA[%%prefix%%foundset.duplicateRecord();
+%%prefix%%foundset.duplicateRecord(false); //duplicate the current record, adds at bottom
+%%prefix%%foundset.duplicateRecord(1,2); //duplicate the first record as second record
+//duplicates the record (record index 3), adds on top and selects the record
+%%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
           <parameters>
             <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[The index of the record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
@@ -24905,7 +25202,8 @@ Clear results from previous searches.
 
 Note: Omitted records are automatically excluded when performing a search - meaning that the foundset result by default will not include omitted records.]]></description>
           <summary><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.]]></summary>
-          <sample/>
+          <sample><![CDATA[var recordCount = %%prefix%%foundset.search();
+//var recordCount = %%prefix%%foundset.search(false,false); //to extend foundset]]></sample>
         </function>
         <function name="search">
           <argumentsTypes>
@@ -24917,7 +25215,8 @@ Reduce results from previous searches.
 
 Note: Omitted records are automatically excluded when performing a search - meaning that the foundset result by default will not include omitted records.]]></description>
           <summary><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.]]></summary>
-          <sample/>
+          <sample><![CDATA[var recordCount = %%prefix%%foundset.search();
+//var recordCount = %%prefix%%foundset.search(false,false); //to extend foundset]]></sample>
           <parameters>
             <parameter name="clearLastResults" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
               <description><![CDATA[boolean, clear previous search, default true]]></description>
@@ -42732,15 +43031,21 @@ Clear results from previous searches.
 
 Note: Omitted records are automatically excluded when performing a search - meaning that the foundset result by default will not include omitted records.]]></description>
           <summary><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.]]></summary>
-          <sample/>
+          <sample><![CDATA[var recordCount = %%prefix%%foundset.search();
+//var recordCount = %%prefix%%foundset.search(false,false); //to extend foundset]]></sample>
         </function>
         <function name="search">
           <argumentsTypes>
             <argumentType typecode="boolean"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[the recordCount]]></return>
-          <description/>
-          <sample/>
+          <description><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.
+Reduce results from previous searches.
+
+Note: Omitted records are automatically excluded when performing a search - meaning that the foundset result by default will not include omitted records.]]></description>
+          <summary><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.]]></summary>
+          <sample><![CDATA[var recordCount = %%prefix%%foundset.search();
+//var recordCount = %%prefix%%foundset.search(false,false); //to extend foundset]]></sample>
           <parameters>
             <parameter name="clearLastResults" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[boolean, clear previous search, default true]]></description>
@@ -42753,8 +43058,12 @@ Note: Omitted records are automatically excluded when performing a search - mean
             <argumentType typecode="boolean"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[the recordCount]]></return>
-          <description/>
-          <sample/>
+          <description><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.
+
+Note: Omitted records are automatically excluded when performing a search - meaning that the foundset result by default will not include omitted records.]]></description>
+          <summary><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.]]></summary>
+          <sample><![CDATA[var recordCount = %%prefix%%foundset.search();
+//var recordCount = %%prefix%%foundset.search(false,false); //to extend foundset]]></sample>
           <parameters>
             <parameter name="clearLastResults" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[boolean, clear previous search, default true]]></description>
