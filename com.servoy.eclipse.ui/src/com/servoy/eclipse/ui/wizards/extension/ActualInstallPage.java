@@ -456,6 +456,13 @@ public class ActualInstallPage extends WizardPage
 
 		monitor.beginTask("Installing extension" + (state.chosenPath.extensionPath.length > 1 ? "s" : ""), state.chosenPath.installSequence.length + 1);//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
 
+		LibChoiceHandler libHandler = null;
+		if (state.chosenPath.libChoices != null)
+		{
+			libHandler = new LibChoiceHandler(state.installedExtensionsProvider, state.extensionProvider, state);
+			libHandler.prepareChoices(state.chosenPath.libChoices, new MaxVersionLibChooser());
+		}
+
 		for (InstallStep step : state.chosenPath.installSequence)
 		{
 			DependencyMetadata dmd = state.extensionProvider.getDependencyMetadata(new ExtensionDependencyDeclaration(step.extension.id,
@@ -519,11 +526,10 @@ public class ActualInstallPage extends WizardPage
 
 		monitor.subTask("handling library dependencies..."); //$NON-NLS-1$
 
-		if (state.chosenPath.libChoices != null)
+		if (libHandler != null)
 		{
-			LibChoiceHandler libHandler = new LibChoiceHandler(state.installedExtensionsProvider, state.extensionProvider, state);
 			LibActivationHandler activator = new LibActivationHandler(state.installDir);
-			libHandler.handleChoices(state.chosenPath.libChoices, new MaxVersionLibChooser(), activator);
+			libHandler.handlePreparedChoices(activator);
 			allMessages.addAll(Arrays.asList(libHandler.getMessages()));
 			allMessages.addAll(Arrays.asList(activator.getMessages()));
 		}

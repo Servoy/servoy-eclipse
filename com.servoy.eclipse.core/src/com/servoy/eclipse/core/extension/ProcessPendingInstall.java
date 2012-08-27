@@ -131,6 +131,13 @@ public class ProcessPendingInstall implements Runnable
 
 	protected void doInstall(RestartState state)
 	{
+		LibChoiceHandler libHandler = null;
+		if (state.chosenPath.libChoices != null)
+		{
+			libHandler = new LibChoiceHandler(state.installedExtensionsProvider, state.extensionProvider, state);
+			libHandler.prepareChoices(state.chosenPath.libChoices, new MaxVersionLibChooser());
+		}
+
 		for (InstallStep step : state.chosenPath.installSequence)
 		{
 			if (step.type == InstallStep.INSTALL)
@@ -165,11 +172,10 @@ public class ProcessPendingInstall implements Runnable
 			}
 		}
 
-		if (state.chosenPath.libChoices != null)
+		if (libHandler != null)
 		{
-			LibChoiceHandler libHandler = new LibChoiceHandler(state.installedExtensionsProvider, state.extensionProvider, state);
 			LibActivationHandler activator = new LibActivationHandler(state.installDir);
-			libHandler.handleChoices(state.chosenPath.libChoices, new MaxVersionLibChooser(), activator);
+			libHandler.handlePreparedChoices(activator);
 			allMessages.addAll(Arrays.asList(libHandler.getMessages()));
 			allMessages.addAll(Arrays.asList(activator.getMessages()));
 		}
