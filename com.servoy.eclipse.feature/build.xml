@@ -12,87 +12,87 @@
 
 	<target name="all.plugins" depends="init">
 		<ant antfile="build.xml" dir="../org.eclipse.dltk.javascript.rhino" target="${target}">
-			<property name="arch" value="x86"/>
+			<property name="arch" value="x86_64"/>
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../servoy_shared" target="${target}">
-			<property name="arch" value="x86"/>
+			<property name="arch" value="x86_64"/>
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../servoy_smart_client" target="${target}">
-			<property name="arch" value="x86"/>
+			<property name="arch" value="x86_64"/>
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../servoy_headless_client" target="${target}">
-			<property name="arch" value="x86"/>
+			<property name="arch" value="x86_64"/>
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../servoy_debug" target="${target}">
-			<property name="arch" value="x86"/>
+			<property name="arch" value="x86_64"/>
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.appserver" target="${target}">
-			<property name="arch" value="x86"/>
+			<property name="arch" value="x86_64"/>
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../j2db_server" target="${target}">
-			<property name="arch" value="x86"/>
+			<property name="arch" value="x86_64"/>
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.core" target="${target}">
-			<property name="arch" value="x86"/>
+			<property name="arch" value="x86_64"/>
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../j2db_tunnel" target="${target}">
-			<property name="arch" value="x86"/>
+			<property name="arch" value="x86_64"/>
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.ui" target="${target}">
-			<property name="arch" value="x86"/>
+			<property name="arch" value="x86_64"/>
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.designer" target="${target}">
-			<property name="arch" value="x86"/>
-			<property name="ws" value="win32"/>
-			<property name="os" value="win32"/>
-		</ant>
-		<ant antfile="build.xml" dir="../com.servoy.eclipse.debug" target="${target}">
-			<property name="arch" value="x86"/>
-			<property name="ws" value="win32"/>
-			<property name="os" value="win32"/>
-		</ant>
-		<ant antfile="build.xml" dir="../j2db_documentation" target="${target}">
-			<property name="arch" value="x86"/>
+			<property name="arch" value="x86_64"/>
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.profiler" target="${target}">
-			<property name="arch" value="x86"/>
+			<property name="arch" value="x86_64"/>
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../j2db_runtime" target="${target}">
-			<property name="arch" value="x86"/>
+			<property name="arch" value="x86_64"/>
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.team" target="${target}">
-			<property name="arch" value="x86"/>
+			<property name="arch" value="x86_64"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
+		</ant>
+		<ant antfile="build.xml" dir="../com.servoy.eclipse.debug" target="${target}">
+			<property name="arch" value="x86_64"/>
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.jsunit" target="${target}">
-			<property name="arch" value="x86"/>
+			<property name="arch" value="x86_64"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
+		</ant>
+		<ant antfile="build.xml" dir="../j2db_documentation" target="${target}">
+			<property name="arch" value="x86_64"/>
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
 		</ant>
@@ -185,10 +185,10 @@
 		<antcall target="${rootTarget}"/>
 	</target>
 
-	<target name="rootFileswin32_win32_x86">
+	<target name="rootFileswin32_win32_x86_64">
 	</target>
 	<target name="rootFilesgroup_group_group">
-		<antcall target="rootFileswin32_win32_x86"/>
+		<antcall target="rootFileswin32_win32_x86_64"/>
 	</target>
 
 	<target name="zip.distribution" depends="init" description="Create a zip containing all the plug-ins and features for the feature: com.servoy.eclipse.feature.">
@@ -246,7 +246,7 @@
 	</target>
 
 	<target name="refresh" depends="init" if="eclipse.running" description="Refresh this folder.">
-		<eclipse.convertPath fileSystemPath="C:/Users/Administrator/dev_v52x_branch/com.servoy.eclipse.feature/" property="resourcePath"/>
+		<eclipse.convertPath fileSystemPath="E:/Workspaces/5_2/com.servoy.eclipse.feature/" property="resourcePath"/>
 		<eclipse.refreshLocal resource="${resourcePath}" depth="infinite"/>
 		<antcall target="all.children">
 			<param name="target" value="refresh"/>
