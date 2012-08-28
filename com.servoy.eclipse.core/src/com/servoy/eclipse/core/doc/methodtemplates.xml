@@ -400,7 +400,7 @@ return true]]></code>
   </event>
   <event name="onRecordEditStopMethodID">
     <methodtemplate addtodo="true" name="onRecordEditStop" type="Boolean">
-      <description><![CDATA[Callback method form when editing is stopped]]></description>
+      <description><![CDATA[Callback method form when editing is stopped, return false if the record fails to validate then the user cannot leave the record.]]></description>
       <code><![CDATA[return true]]></code>
       <arguments>
         <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record being saved]]></methodargument>

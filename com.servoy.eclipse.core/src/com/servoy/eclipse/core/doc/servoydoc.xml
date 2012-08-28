@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <servoydoc>
   <runtime>
     <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT">
@@ -10783,8 +10783,9 @@ form.onRecordSelection = form.newMethod('function onRecordSelection(event) { app
         <property name="onRecordEditStop">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"/>
           <description><![CDATA[The method that is triggered when a record is being saved. 
-A record is saved when a user clicks out of it (for example on an empty part of the layout or to another form); can return false (for example as part of a validation) where a condition must be changed to return true. 
-NOTE: The name of this property has been changed from onRecordSave.]]></description>
+A record is saved when a user clicks out of it (for example on an empty part of the layout or to another form).
+When the method returns false (for example as part of a validation), the user cannot leave the record, for example in
+a table view a user cannot move to another record when the callback returns false.]]></description>
           <summary><![CDATA[The method that is triggered when a record is being saved.]]></summary>
           <sample><![CDATA[form.onRecordEditStart = form.newMethod('function onRecordEditStart(event) { application.output("onRecordEditStart intercepted on " + event.getFormName()); }');
 form.onRecordEditStop = form.newMethod('function onRecordEditStop(record, event) { application.output("onRecordEditStop intercepted on " + event.getFormName() + ". record is: " + record); }');
