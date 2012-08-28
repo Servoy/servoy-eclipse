@@ -296,7 +296,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		return true;
 	}
 
-	private void handleExportException(final Exception ex, String extraMsg, IProgressMonitor monitor)
+	private void handleExportException(final Exception ex, final String extraMsg, IProgressMonitor monitor)
 	{
 		ServoyLog.logError("Failed to export solution. " + (extraMsg == null ? "" : extraMsg), ex); //$NON-NLS-1$ //$NON-NLS-2$
 		monitor.done();
@@ -308,7 +308,9 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 				String message;
 				if (ex.getCause() != null) message = ex.getCause().getMessage();
 				else message = ex.getMessage();
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Failed to export the active solution", message); //$NON-NLS-1$
+				if (message == null) message = ex.toString();
+				MessageDialog.openError(Display.getDefault().getActiveShell(),
+					"Failed to export the active solution", extraMsg == null ? message : (extraMsg + '\n' + message)); //$NON-NLS-1$
 			}
 		});
 	}

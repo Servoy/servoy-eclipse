@@ -85,7 +85,15 @@ public class EclipseExportUserChannel implements IXMLExportUserChannel
 			return null;
 		}
 
-		String wscontents = new WorkspaceFileAccess(ServoyModel.getWorkspace()).getUTF8Contents(dmm.getMetaDataFile(table.getDataSource()).getFullPath().toString());
+		WorkspaceFileAccess wsa = new WorkspaceFileAccess(ServoyModel.getWorkspace());
+		String metadatapath = dmm.getMetaDataFile(table.getDataSource()).getFullPath().toString();
+		if (!wsa.exists(metadatapath))
+		{
+			throw new IOException("Checking table meta data failed for table '" + table.getName() + "' in server '" + table.getServerName() +
+				"', current workspace does not have table meta data file.\n" + //
+				"Synchronize the meta data for this table first");
+		}
+		String wscontents = wsa.getUTF8Contents(metadatapath);
 
 		if (wscontents != null && exportModel.isCheckMetadataTables() && table instanceof Table)
 		{
