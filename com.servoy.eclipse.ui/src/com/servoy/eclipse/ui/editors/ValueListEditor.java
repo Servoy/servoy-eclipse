@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.ui.editors;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -92,6 +93,7 @@ import com.servoy.eclipse.ui.views.TreeSelectObservableValue;
 import com.servoy.eclipse.ui.views.TreeSelectViewer;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -530,6 +532,8 @@ public class ValueListEditor extends PersistEditor
 				else
 				{
 					tableSelect.setSelection(new StructuredSelection(new TableWrapper(stn[0], stn[1], EditorUtil.isViewTypeTable(stn[0], stn[1]))));
+					IServer server = flattenedSolution.getSolution().getServer(stn[0]);
+					if (server != null) table = (Table)server.getTable(stn[1]);
 				}
 			}
 			else
@@ -587,6 +591,10 @@ public class ValueListEditor extends PersistEditor
 			m_bindingContext.updateTargets();
 		}
 		catch (RepositoryException e)
+		{
+			ServoyLog.logError(e);
+		}
+		catch (RemoteException e)
 		{
 			ServoyLog.logError(e);
 		}
