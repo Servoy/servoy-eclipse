@@ -590,7 +590,7 @@ public class UIUtils
 		{
 			return false;
 		}
-		return pg.getColorModel().hasAlpha();
+		return pg.getColorModel() != null && pg.getColorModel().hasAlpha();
 	}
 
 
