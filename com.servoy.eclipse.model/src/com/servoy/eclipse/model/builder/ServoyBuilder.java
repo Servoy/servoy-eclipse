@@ -2639,58 +2639,80 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												IMarker.PRIORITY_NORMAL, null, field);
 										}
 									}
-									if ((type == Field.TEXT_FIELD || type == Field.TYPE_AHEAD) && vl.getValueListType() == ValueList.DATABASE_VALUES)
+									if (type == Field.TEXT_FIELD || type == Field.TYPE_AHEAD)
 									{
-										try
+										boolean vlWithUnstoredCalcError = false;
+										if (vl.getValueListType() == ValueList.DATABASE_VALUES)
 										{
-											Table table = (Table)vl.getTable();
-											ScriptCalculation calc = null;
-											boolean errorFound = false;
-											if (vl.getDataProviderID1() != null)
+											Table table = null;
+											try
 											{
-												calc = fieldFlattenedSolution.getScriptCalculation(vl.getDataProviderID1(), table);
-												if (calc != null)
+												if (vl.getDatabaseValuesType() == ValueList.TABLE_VALUES)
 												{
-													Column column = table.getColumn(vl.getDataProviderID1());
-													if (column == null) errorFound = true;
+													table = (Table)vl.getTable();
+												}
+												else if (vl.getDatabaseValuesType() == ValueList.RELATED_VALUES && vl.getRelationName() != null)
+												{
+													Relation[] relations = fieldFlattenedSolution.getRelationSequence(vl.getRelationName());
+													if (relations != null)
+													{
+														table = relations[relations.length - 1].getForeignTable();
+													}
 												}
 											}
-											if (vl.getDataProviderID2() != null && !errorFound)
+											catch (Exception e)
 											{
-												calc = fieldFlattenedSolution.getScriptCalculation(vl.getDataProviderID2(), table);
-												if (calc != null)
-												{
-													Column column = table.getColumn(vl.getDataProviderID2());
-													if (column == null) errorFound = true;
-												}
+												ServoyLog.logError(e);
 											}
-											if (vl.getDataProviderID3() != null && !errorFound)
+											vlWithUnstoredCalcError =
+											/**/isUnstoredCalc(vl.getDataProviderID1(), table, fieldFlattenedSolution) || //
+												isUnstoredCalc(vl.getDataProviderID2(), table, fieldFlattenedSolution) || //
+												isUnstoredCalc(vl.getDataProviderID3(), table, fieldFlattenedSolution);
+										}
+										if (!vlWithUnstoredCalcError && vl.getFallbackValueListID() > 0)
+										{
+											ValueList fallback = fieldFlattenedSolution.getValueList(vl.getFallbackValueListID());
+											if (fallback != null && fallback.getValueListType() == ValueList.DATABASE_VALUES)
 											{
-												calc = fieldFlattenedSolution.getScriptCalculation(vl.getDataProviderID3(), table);
-												if (calc != null)
+												Table table = null;
+												try
 												{
-													Column column = table.getColumn(vl.getDataProviderID3());
-													if (column == null) errorFound = true;
+													if (fallback.getDatabaseValuesType() == ValueList.TABLE_VALUES)
+													{
+														table = (Table)fallback.getTable();
+													}
+													else if (fallback.getDatabaseValuesType() == ValueList.RELATED_VALUES && fallback.getRelationName() != null)
+													{
+														Relation[] relations = fieldFlattenedSolution.getRelationSequence(fallback.getRelationName());
+														if (relations != null)
+														{
+															table = relations[relations.length - 1].getForeignTable();
+														}
+													}
 												}
-											}
-											if (errorFound)
-											{
-												ServoyMarker mk;
-												if (field.getName() != null)
+												catch (Exception e)
 												{
-													mk = MarkerMessages.FormTypeAheadNamedUnstoredCalculation.fill(field.getName());
+													ServoyLog.logError(e);
 												}
-												else
-												{
-													mk = MarkerMessages.FormTypeAheadUnnamedUnstoredCalculation;
-												}
-												addMarker(project, mk.getType(), mk.getText(), -1, FORM_TYPEAHEAD_UNSTORED_CALCULATION,
-													IMarker.PRIORITY_NORMAL, null, field);
+												vlWithUnstoredCalcError =
+												/**/isUnstoredCalc(fallback.getDataProviderID1(), table, fieldFlattenedSolution) || //
+													isUnstoredCalc(fallback.getDataProviderID2(), table, fieldFlattenedSolution) || //
+													isUnstoredCalc(fallback.getDataProviderID3(), table, fieldFlattenedSolution);
 											}
 										}
-										catch (Exception e)
+										if (vlWithUnstoredCalcError)
 										{
-											ServoyLog.logError(e);
+											ServoyMarker mk;
+											if (field.getName() != null)
+											{
+												mk = MarkerMessages.FormTypeAheadNamedUnstoredCalculation.fill(field.getName());
+											}
+											else
+											{
+												mk = MarkerMessages.FormTypeAheadUnnamedUnstoredCalculation;
+											}
+											addMarker(project, mk.getType(), mk.getText(), -1, FORM_TYPEAHEAD_UNSTORED_CALCULATION, IMarker.PRIORITY_NORMAL,
+												null, field);
 										}
 									}
 									if (vl.getValueListType() == ValueList.DATABASE_VALUES && vl.getRelationName() != null)
@@ -4777,6 +4799,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			}
 		}
 		return false;
+	}
+
+	private boolean isUnstoredCalc(String dpid, Table table, FlattenedSolution flattenedSolution)
+	{
+		return table != null && dpid != null && flattenedSolution.getScriptCalculation(dpid, table) != null && table.getColumn(dpid) == null;
 	}
 
 	private static FlattenedSolution getPersistFlattenedSolution(IPersist persist, FlattenedSolution fallbackFlattenedSolution)

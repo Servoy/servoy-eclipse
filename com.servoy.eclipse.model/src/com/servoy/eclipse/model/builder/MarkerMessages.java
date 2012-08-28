@@ -287,9 +287,9 @@ public class MarkerMessages
 	public static ServoyMarker FormNamedElementOutsideBoundsOfPart = new ServoyMarker(
 		"Element \"{0}\" in form \"{1}\" is outside the bounds of part {2}.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormTypeAheadNamedUnstoredCalculation = new ServoyMarker(
-		"Type ahead field \"{0}\" has attached a valuelist that contains unstored calculation(s). This is not supported.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Type ahead field \"{0}\" has attached a valuelist (or fallback valuelist) that contains unstored calculation(s). This is not supported.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormTypeAheadUnnamedUnstoredCalculation = new ServoyMarker(
-		"Type ahead field has attached a valuelist that contains unstored calculation(s). This is not supported.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Type ahead field has attached a valuelist (or fallback valuelist) that contains unstored calculation(s). This is not supported.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker FormEditableNamedComboboxCustomValuelist = new ServoyMarker(
 		"Editable combobox \"{0}\" has attached a valuelist that contains real values. This is not supported.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
