@@ -216,71 +216,71 @@
 			<pathelement path="../eclipse_build/eclipse_compile_target/install/plugins/org.eclipse.compare.core_3.5.0.I20090430-0408.jar"/>
 			<pathelement path="../eclipse_build/eclipse_compile_target/install/plugins/org.eclipse.core.filebuffers_3.5.0.v20090526-2000.jar"/>
 			<pathelement path="../servoy_shared/bin/"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/bin/"/>
+			
 			<pathelement path="${build.result.folder}/../servoy_shared/@dot"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/@dot"/>
+			
 			<pathelement path="../servoy_shared/bin"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/bin"/>
+			
 			<pathelement path="../servoy_shared/lib/annotations-1.0.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/lib/annotations-1.0.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/BrowserLauncher2.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/lib/BrowserLauncher2.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/commons-codec.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/lib/commons-codec.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/commons-collections.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/lib/commons-collections.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/commons-dbcp.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/lib/commons-dbcp.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/commons-httpclient.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/lib/commons-httpclient.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/commons-io-1.4.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/lib/commons-io-1.4.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/commons-logging.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/lib/commons-logging.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/dom4j.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/lib/dom4j.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/jabsorb.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/lib/jabsorb.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/joda-time.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/lib/joda-time.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/log4j.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/lib/log4j.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/servlet-api.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/lib/servlet-api.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/slf4j-api.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/lib/slf4j-api.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/slf4j-log4j.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/lib/slf4j-log4j.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/wicket-calendar.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/lib/wicket-calendar.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/wicket-extentions.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/lib/wicket-extentions.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/wicket.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/lib/wicket.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/commons-pool.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/lib/commons-pool.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/activation.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/lib/activation.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/mail.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/lib/mail.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/client/httpclient.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/lib/client/httpclient.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/client/httpcore.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_5.2.14.1027/lib/client/httpcore.jar"/>
+			
 			<pathelement path="../org.eclipse.dltk.javascript.rhino/bin/"/>
-			<pathelement path="${build.result.folder}/../org.eclipse.dltk.javascript.rhino_5.2.14.1027/bin/"/>
+			
 			<pathelement path="${build.result.folder}/../org.eclipse.dltk.javascript.rhino/@dot"/>
-			<pathelement path="${build.result.folder}/../org.eclipse.dltk.javascript.rhino_5.2.14.1027/@dot"/>
+			
 			<pathelement path="../servoy_smart_client/bin/"/>
-			<pathelement path="${build.result.folder}/../servoy_smart_client_5.2.14.1027/bin/"/>
+			
 			<pathelement path="${build.result.folder}/../servoy_smart_client/@dot"/>
-			<pathelement path="${build.result.folder}/../servoy_smart_client_5.2.14.1027/@dot"/>
+			
 			<pathelement path="../eclipse_build/eclipse_target_svn/org.eclipse.gef_3.5.1.v20090910-2020.jar"/>
 			<pathelement path="../eclipse_build/eclipse_target_svn/org.eclipse.draw2d_3.5.2.v20091126-1908.jar"/>
 			<pathelement path="../com.servoy.eclipse.core/bin"/>
-			<pathelement path="${build.result.folder}/../com.servoy.eclipse.core_5.2.14.1027/bin"/>
+			
 			<pathelement path="${build.result.folder}/../com.servoy.eclipse.core/@dot"/>
-			<pathelement path="${build.result.folder}/../com.servoy.eclipse.core_5.2.14.1027/@dot"/>
+			
 			<pathelement path="../eclipse_build/eclipse_ship_plugins/plugins/org.eclipse.dltk.javascript.core_2.0.0.201011082357.jar"/>
 			<pathelement path="../eclipse_build/eclipse_ship_plugins/plugins/org.eclipse.dltk.core_2.0.0.201011082357.jar"/>
 			<pathelement path="../eclipse_build/eclipse_ship_plugins/plugins/org.eclipse.emf.ecore_2.5.0.v200906151043.jar"/>
@@ -356,25 +356,25 @@
 			<pathelement path="../eclipse_build/eclipse_compile_target/optional/net.sourceforge.sqlexplorer_3.5.1.v20100211_SR3b/lib/poi-3.5-FINAL-20090928.jar"/>
 			<pathelement path="../eclipse_build/eclipse_compile_target/optional/net.sourceforge.sqlexplorer_3.5.1.v20100211_SR3b/lib/commons-logging.jar"/>
 			<pathelement path="../servoy_debug/bin/"/>
-			<pathelement path="${build.result.folder}/../servoy_debug_5.2.14.1027/bin/"/>
+			
 			<pathelement path="${build.result.folder}/../servoy_debug/@dot"/>
-			<pathelement path="${build.result.folder}/../servoy_debug_5.2.14.1027/@dot"/>
+			
 			<pathelement path="../servoy_headless_client/bin/"/>
-			<pathelement path="${build.result.folder}/../servoy_headless_client_5.2.14.1027/bin/"/>
+			
 			<pathelement path="${build.result.folder}/../servoy_headless_client/@dot"/>
-			<pathelement path="${build.result.folder}/../servoy_headless_client_5.2.14.1027/@dot"/>
+			
 			<pathelement path="../com.servoy.eclipse.appserver/bin/"/>
-			<pathelement path="${build.result.folder}/../com.servoy.eclipse.appserver_5.2.14.1027/bin/"/>
+			
 			<pathelement path="${build.result.folder}/../com.servoy.eclipse.appserver/@dot"/>
-			<pathelement path="${build.result.folder}/../com.servoy.eclipse.appserver_5.2.14.1027/@dot"/>
+			
 			<pathelement path="../com.servoy.eclipse.ui/bin"/>
-			<pathelement path="${build.result.folder}/../com.servoy.eclipse.ui_5.2.14.1027/bin"/>
+			
 			<pathelement path="${build.result.folder}/../com.servoy.eclipse.ui/@dot"/>
-			<pathelement path="${build.result.folder}/../com.servoy.eclipse.ui_5.2.14.1027/@dot"/>
+			
 			<pathelement path="../com.servoy.eclipse.ui/baseline.jar"/>
-			<pathelement path="${build.result.folder}/../com.servoy.eclipse.ui_5.2.14.1027/baseline.jar"/>
+			
 			<pathelement path="../com.servoy.eclipse.ui/swt-grouplayout.jar"/>
-			<pathelement path="${build.result.folder}/../com.servoy.eclipse.ui_5.2.14.1027/swt-grouplayout.jar"/>
+			
 			<pathelement path="../eclipse_build/eclipse_ship_plugins/plugins/org.eclipse.dltk.javascript.core.dom.support_1.0.0.201011082357.jar"/>
 			<pathelement path="../eclipse_build/eclipse_ship_plugins/plugins/org.eclipse.dltk.javascript.debug_1.0.0.201011082357.jar"/>
 			<pathelement path="../eclipse_build/eclipse_compile_target/install/plugins/org.eclipse.jdt.debug.ui_3.4.1.v20090811_r351.jar"/>
