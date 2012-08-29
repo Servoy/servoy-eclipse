@@ -1135,6 +1135,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		else return uiActivator.getImage(DLTKPluginImages.DESC_METHOD_PUBLIC);
 	}
 
+	@SuppressWarnings("nls")
 	private Object[] createGlobalScripts(SimpleUserNode un)
 	{
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
@@ -1152,10 +1153,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else
 			{
-				nodeName = getScriptMethodSignature(sm, ((ISupportName)persist).getName(), false, true, true, true) + " [" + persistSolution.getName() + ']'; //$NON-NLS-1$
+				nodeName = getScriptMethodSignature(sm, ((ISupportName)persist).getName(), false, true, true, true) + " [" + persistSolution.getName() + ']';
 			}
 			String sampleCode = getScriptMethodSignature(sm, sm.getPrefixedName(), true, false, false, false);
-			String tooltipCode = getScriptMethodSignature(sm, null, true, true, true, false);
+			String tooltipCode = "<html><body><b>" + HtmlUtils.escapeMarkup(getScriptMethodSignature(sm, null, true, true, true, false)) + "</b><body></html>";
+
 			SimpleUserNode node = new UserNode(nodeName, UserNodeType.GLOBAL_METHOD_ITEM, sampleCode, tooltipCode, sm, getImageForMethodEncapsulation(sm));
 			dlm.add(node);
 		}
