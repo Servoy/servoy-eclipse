@@ -120,6 +120,7 @@ import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.ITagResolver;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
@@ -1002,6 +1003,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return methodSignatureBuilder.toString();
 	}
 
+	@SuppressWarnings("nls")
 	private Object[] createFormScripts(Form f)
 	{
 		Form form = f;
@@ -1034,26 +1036,27 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				{
 					if (sm.isPrivate()) continue;
 
-					nodeText = getScriptMethodSignature(sm, null, false, true, true, true) + " [" + ((Form)sm.getParent()).getName() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+					nodeText = getScriptMethodSignature(sm, null, false, true, true, true) + " [" + ((Form)sm.getParent()).getName() + "]";
 				}
 
 				Image icon = null;
 				if (sm.isPrivate())
 				{
-					icon = uiActivator.loadImageFromBundle("private_method.gif"); //$NON-NLS-1$
+					icon = uiActivator.loadImageFromBundle("private_method.gif");
 				}
 				else if (sm.isProtected())
 				{
-					icon = uiActivator.loadImageFromBundle("protected_method.gif"); //$NON-NLS-1$
+					icon = uiActivator.loadImageFromBundle("protected_method.gif");
 				}
 				else
 				{
-					icon = uiActivator.loadImageFromBundle("public_method.gif"); //$NON-NLS-1$
+					icon = uiActivator.loadImageFromBundle("public_method.gif");
 				}
 
 				String sampleCode = getScriptMethodSignature(sm, null, true, false, false, false);
-				String tooltipCode = getScriptMethodSignature(sm, null, true, true, true, false);
-				dlm.add(new UserNode(nodeText, UserNodeType.FORM_METHOD, sampleCode, "//Method call\n%%prefix%%" + sampleCode, tooltipCode, sm, icon)); //$NON-NLS-1$
+				String tooltipCode = "<html><body><b>" + HtmlUtils.escapeMarkup(getScriptMethodSignature(sm, null, true, true, true, false)) +
+					"</b><body></html>";
+				dlm.add(new UserNode(nodeText, UserNodeType.FORM_METHOD, sampleCode, "//Method call\n%%prefix%%" + sampleCode, tooltipCode, sm, icon));
 			}
 		}
 		catch (Exception e)

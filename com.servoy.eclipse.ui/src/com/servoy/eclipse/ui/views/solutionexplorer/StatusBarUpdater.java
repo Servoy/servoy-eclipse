@@ -13,9 +13,8 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer;
-
 
 
 import org.eclipse.jface.action.ControlContribution;
@@ -35,7 +34,6 @@ import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ScriptVariable;
-import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -101,6 +99,7 @@ public class StatusBarUpdater implements ISelectionChangedListener
 	}
 
 
+	@SuppressWarnings("nls")
 	protected String formatMessage(ISelection sel)
 	{
 		String result = null;
@@ -124,20 +123,19 @@ public class StatusBarUpdater implements ISelectionChangedListener
 		}
 		if (result == null)
 		{
-			result = "<form></form>"; //$NON-NLS-1$
+			result = "<form></form>";
 		}
 		else
 		{
+			result = "<form><p>" + result + "</p></form>";
 			// as the SWT control uses XHTML, we must change the "<BR>" tags to "<BR/>" ("<BR>" alone is no longer valid in XHTML)
-			result = Utils.stringReplaceCaseInsensitiveSearch(result, "<pre>", " "); //$NON-NLS-1$ //$NON-NLS-2$
-			result = Utils.stringReplaceCaseInsensitiveSearch(result, "<br>", " "); //$NON-NLS-1$ //$NON-NLS-2$
-			result = Utils.stringReplaceCaseInsensitiveSearch(result, "</pre>", ""); //$NON-NLS-1$ //$NON-NLS-2$
-			result = Utils.stringReplaceCaseInsensitiveSearch(result, "<html>", ""); //$NON-NLS-1$ //$NON-NLS-2$
-			result = Utils.stringReplaceCaseInsensitiveSearch(result, "</html>", ""); //$NON-NLS-1$ //$NON-NLS-2$
-			result = Utils.stringReplaceCaseInsensitiveSearch(result, "<body>", ""); //$NON-NLS-1$ //$NON-NLS-2$
-			result = Utils.stringReplaceCaseInsensitiveSearch(result, "</body>", ""); //$NON-NLS-1$ //$NON-NLS-2$
-			result = HtmlUtils.escapeLessThanOrGreaterThanInHTML(result);
-			result = "<form><p>" + result + "</p></form>"; //$NON-NLS-1$ //$NON-NLS-2$
+			result = Utils.stringReplaceCaseInsensitiveSearch(result, "<pre>", " ");
+			result = Utils.stringReplaceCaseInsensitiveSearch(result, "<br>", " ");
+			result = Utils.stringReplaceCaseInsensitiveSearch(result, "</pre>", "");
+			result = Utils.stringReplaceCaseInsensitiveSearch(result, "<html>", "");
+			result = Utils.stringReplaceCaseInsensitiveSearch(result, "</html>", "");
+			result = Utils.stringReplaceCaseInsensitiveSearch(result, "<body>", "");
+			result = Utils.stringReplaceCaseInsensitiveSearch(result, "</body>", "");
 		}
 		return result;
 	}
