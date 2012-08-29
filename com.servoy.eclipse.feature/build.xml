@@ -66,6 +66,16 @@
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
 		</ant>
+		<ant antfile="build.xml" dir="../com.servoy.eclipse.debug" target="${target}">
+			<property name="arch" value="x86_64"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
+		</ant>
+		<ant antfile="build.xml" dir="../j2db_documentation" target="${target}">
+			<property name="arch" value="x86_64"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
+		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.profiler" target="${target}">
 			<property name="arch" value="x86_64"/>
 			<property name="ws" value="win32"/>
@@ -81,17 +91,7 @@
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
 		</ant>
-		<ant antfile="build.xml" dir="../com.servoy.eclipse.debug" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="win32"/>
-			<property name="os" value="win32"/>
-		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.jsunit" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="win32"/>
-			<property name="os" value="win32"/>
-		</ant>
-		<ant antfile="build.xml" dir="../j2db_documentation" target="${target}">
 			<property name="arch" value="x86_64"/>
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
