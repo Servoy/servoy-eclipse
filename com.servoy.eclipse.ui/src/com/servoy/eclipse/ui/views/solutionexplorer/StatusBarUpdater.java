@@ -35,6 +35,7 @@ import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ScriptVariable;
+import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -123,20 +124,21 @@ public class StatusBarUpdater implements ISelectionChangedListener
 		}
 		if (result == null)
 		{
-			result = "<form></form>";
+			result = "<form></form>"; //$NON-NLS-1$
 		}
 		else
 		{
-			result = "<form><p>" + result + "</p></form>";
+			// as the SWT control uses XHTML, we must change the "<BR>" tags to "<BR/>" ("<BR>" alone is no longer valid in XHTML)
+			result = Utils.stringReplaceCaseInsensitiveSearch(result, "<pre>", " "); //$NON-NLS-1$ //$NON-NLS-2$
+			result = Utils.stringReplaceCaseInsensitiveSearch(result, "<br>", " "); //$NON-NLS-1$ //$NON-NLS-2$
+			result = Utils.stringReplaceCaseInsensitiveSearch(result, "</pre>", ""); //$NON-NLS-1$ //$NON-NLS-2$
+			result = Utils.stringReplaceCaseInsensitiveSearch(result, "<html>", ""); //$NON-NLS-1$ //$NON-NLS-2$
+			result = Utils.stringReplaceCaseInsensitiveSearch(result, "</html>", ""); //$NON-NLS-1$ //$NON-NLS-2$
+			result = Utils.stringReplaceCaseInsensitiveSearch(result, "<body>", ""); //$NON-NLS-1$ //$NON-NLS-2$
+			result = Utils.stringReplaceCaseInsensitiveSearch(result, "</body>", ""); //$NON-NLS-1$ //$NON-NLS-2$
+			result = HtmlUtils.escapeLessThanOrGreaterThanInHTML(result);
+			result = "<form><p>" + result + "</p></form>"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		// as the SWT control uses XHTML, we must change the "<BR>" tags to "<BR/>" ("<BR>" alone is no longer valid in XHTML)
-		result = Utils.stringReplaceCaseInsensitiveSearch(result, "<pre>", " "); //$NON-NLS-1$ //$NON-NLS-2$
-		result = Utils.stringReplaceCaseInsensitiveSearch(result, "<br>", " "); //$NON-NLS-1$ //$NON-NLS-2$
-		result = Utils.stringReplaceCaseInsensitiveSearch(result, "</pre>", ""); //$NON-NLS-1$ //$NON-NLS-2$
-		result = Utils.stringReplaceCaseInsensitiveSearch(result, "<html>", ""); //$NON-NLS-1$ //$NON-NLS-2$
-		result = Utils.stringReplaceCaseInsensitiveSearch(result, "</html>", ""); //$NON-NLS-1$ //$NON-NLS-2$
-		result = Utils.stringReplaceCaseInsensitiveSearch(result, "<body>", ""); //$NON-NLS-1$ //$NON-NLS-2$
-		result = Utils.stringReplaceCaseInsensitiveSearch(result, "</body>", ""); //$NON-NLS-1$ //$NON-NLS-2$
 		return result;
 	}
 
