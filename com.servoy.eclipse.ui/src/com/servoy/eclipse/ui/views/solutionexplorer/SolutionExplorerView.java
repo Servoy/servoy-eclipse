@@ -78,7 +78,6 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
-import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IContentProvider;
@@ -1314,7 +1313,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		list = new TableViewer(viewForm, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		ColumnViewerToolTipSupport.enableFor(list);
 		list.setContentProvider(new SolutionExplorerListContentProvider(this));
-		list.setLabelProvider(new DecoratingLabelProvider(labelProvider, labelDecorator));
+		list.setLabelProvider(new DecoratingColumnLabelProvider(labelProvider, labelDecorator));
 		viewForm.setContent(list.getControl());
 
 		listToolBar = new ToolBar(viewForm, SWT.FLAT | SWT.WRAP);
