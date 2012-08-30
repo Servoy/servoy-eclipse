@@ -24,10 +24,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -59,7 +59,7 @@ import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.ide.FileStoreEditorInput;
+import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 
 import com.servoy.eclipse.core.ServoyModel;
@@ -105,6 +105,7 @@ import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -260,19 +261,18 @@ public class EditorUtil
 		{
 			IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 
-			String filePath = media.getSerializableRuntimeProperty(IScriptProvider.FILENAME) + System.getProperty("file.separator") + media.getName();
+			Pair<String, String> pathPair = SolutionSerializer.getFilePath(media, false);
+			Path path = new Path(pathPair.getLeft() + pathPair.getRight());
+			IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
 
-			File fileToOpen = new File(filePath);
-			IFileStore fileOnLocalDisk = org.eclipse.core.filesystem.EFS.getLocalFileSystem().getStore(fileToOpen.toURI());
-
-			IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(fileOnLocalDisk.getName());
+			IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(media.getName());
 			if (desc == null) desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
 				Platform.getContentTypeManager().getContentType(PersistEditorInput.MEDIA_RESOURCE_ID));
 			IEditorInput editorInput;
 
 			if (desc.getId().equals("com.servoy.eclipse.ui.editors.MediaViewer")) editorInput = new PersistEditorInput(media.getName(),
 				media.getRootObject().getName(), media.getUUID());
-			else editorInput = new FileStoreEditorInput(fileOnLocalDisk);
+			else editorInput = new FileEditorInput(file);
 			return page.openEditor(editorInput, desc.getId());
 		}
 		catch (PartInitException ex)
