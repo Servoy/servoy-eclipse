@@ -53,12 +53,13 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.editors.table.ColumnsSorter;
 import com.servoy.eclipse.ui.util.FilterDelayJob;
 import com.servoy.eclipse.ui.util.FilteredEntity;
 import com.servoy.j2db.IApplication;
-import com.servoy.j2db.IMessagesCallback;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.property.I18NMessagesModel;
 import com.servoy.j2db.property.I18NMessagesModel.I18NMessagesModelEntry;
@@ -282,7 +283,8 @@ public class I18nComposite extends Composite
 		selectedLanguage = new Locale(application.getLocale().getLanguage(), "", application.getLocale().getVariant());
 
 		IApplicationServerSingleton appServer = ApplicationServerSingleton.get();
-		Solution appSolution = application.getSolution();
+		ServoyProject ap = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+		Solution appSolution = ap != null ? ap.getEditingSolution() : null;
 		messagesModel = new I18NMessagesModel(i18nDatasource != null ? i18nDatasource : appSolution != null ? appSolution.getI18nDataSource() : null,
 			appServer.getClientId(), Settings.getInstance(), appServer.getDataServer(), appServer.getLocalRepository());
 		messagesModel.setLanguage(selectedLanguage);
@@ -357,15 +359,7 @@ public class I18nComposite extends Composite
 		countryComboViewer.addSelectionChangedListener(getCountrySelectionHandler());
 
 
-		String filterColumn = null;
-		String[] filterValue = null;
-		if (application instanceof IMessagesCallback)
-		{
-			filterColumn = ((IMessagesCallback)application).getI18NColumnNameFilter();
-			filterValue = ((IMessagesCallback)application).getI18NColumnValueFilter();
-		}
-
-		tableViewer.setInput(messagesModel.getMessages(filter, filterColumn, filterValue));
+		tableViewer.setInput(messagesModel.getMessages(filter, null, null));
 	}
 
 
@@ -446,15 +440,8 @@ public class I18nComposite extends Composite
 
 	public void refresh()
 	{
-		String filterColumn = null;
-		String[] filterValue = null;
-		if (application instanceof IMessagesCallback)
-		{
-			filterColumn = ((IMessagesCallback)application).getI18NColumnNameFilter();
-			filterValue = ((IMessagesCallback)application).getI18NColumnValueFilter();
-		}
 		String selection = getSelectedKey();
-		tableViewer.setInput(messagesModel.getMessages(filterText.getText(), filterColumn, filterValue));
+		tableViewer.setInput(messagesModel.getMessages(filterText.getText(), null, null));
 		if (selection != null) selectKey(selection);
 	}
 
