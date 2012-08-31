@@ -37,7 +37,6 @@
 			<pseudo-class name="link" enabled="false"/>
 			<pseudo-class name="visited" enabled="false"/>
 			<pseudo-class name="active" enabled="false"/>
-			<property name="background" enabled="false"/>
 			<property name="background-size"/>
 			<property name="border-radius"/>
 			<property name="border-top-style"/>
