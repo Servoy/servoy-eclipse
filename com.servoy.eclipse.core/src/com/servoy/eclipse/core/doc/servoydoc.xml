@@ -2919,7 +2919,7 @@ var success = databaseManager.addTableFilterParam('crm', 'companies', 'companyna
               <description><![CDATA[A specified dataprovider column name.]]></description>
             </parameter>
             <parameter name="operator" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[One of "=, <, >, >=, <=, !=, LIKE, or IN" optionally augmented with modifiers "#" (ignore case) or "||=" (or-is-null).]]></description>
+              <description><![CDATA[One of "=, <, >, >=, <=, !=, LIKE, or IN" optionally augmented with modifiers "#" (ignore case) or "^||" (or-is-null).]]></description>
             </parameter>
             <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[The specified filter value.]]></description>
@@ -2963,7 +2963,7 @@ var success = databaseManager.addTableFilterParam('crm', 'companies', 'companyna
               <description><![CDATA[A specified dataprovider column name.]]></description>
             </parameter>
             <parameter name="operator" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[One of "=, <, >, >=, <=, !=, LIKE, or IN" optionally augmented with modifiers "#" (ignore case) or "||=" (or-is-null).]]></description>
+              <description><![CDATA[One of "=, <, >, >=, <=, !=, LIKE, or IN" optionally augmented with modifiers "#" (ignore case) or "^||" (or-is-null).]]></description>
             </parameter>
             <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[The specified filter value.]]></description>
@@ -3013,7 +3013,7 @@ var success = databaseManager.addTableFilterParam('crm', 'companies', 'companyna
               <description><![CDATA[A specified dataprovider column name.]]></description>
             </parameter>
             <parameter name="operator" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[One of "=, <, >, >=, <=, !=, LIKE, or IN" optionally augmented with modifiers "#" (ignore case) or "||=" (or-is-null).]]></description>
+              <description><![CDATA[One of "=, <, >, >=, <=, !=, LIKE, or IN" optionally augmented with modifiers "#" (ignore case) or "^||" (or-is-null).]]></description>
             </parameter>
             <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[The specified filter value.]]></description>
@@ -3061,7 +3061,7 @@ var success = databaseManager.addTableFilterParam('crm', 'companies', 'companyna
               <description><![CDATA[A specified dataprovider column name.]]></description>
             </parameter>
             <parameter name="operator" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[One of "=, <, >, >=, <=, !=, LIKE, or IN" optionally augmented with modifiers "#" (ignore case) or "||=" (or-is-null).]]></description>
+              <description><![CDATA[One of "=, <, >, >=, <=, !=, LIKE, or IN" optionally augmented with modifiers "#" (ignore case) or "^||" (or-is-null).]]></description>
             </parameter>
             <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[The specified filter value.]]></description>
@@ -13087,7 +13087,7 @@ var success = %%prefix%%foundset.addFoundSetFilterParam('customerid', '=', 'BLON
               <description><![CDATA[String column to filter on.]]></description>
             </parameter>
             <parameter name="operator" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[String operator: =, <, >, >=, <=, !=, (NOT) LIKE, (NOT) IN, (NOT) BETWEEN and IS (NOT) NULL]]></description>
+              <description><![CDATA[String operator: =, <, >, >=, <=, !=, (NOT) LIKE, (NOT) IN, (NOT) BETWEEN and IS (NOT) NULL optionally augmented with modifiers "#" (ignore case) or "^||" (or-is-null).]]></description>
             </parameter>
             <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[Object filter value (for in array and between an array with 2 elements)]]></description>
@@ -13118,7 +13118,7 @@ var ok = %%prefix%%foundset.addFoundSetFilterParam('companyname', '#^||=', 'serv
               <description><![CDATA[String column to filter on.]]></description>
             </parameter>
             <parameter name="operator" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[String operator: =, <, >, >=, <=, !=, (NOT) LIKE, (NOT) IN, (NOT) BETWEEN and IS (NOT) NULL optionally augmented with modifiers "#" (ignore case) or "||=" (or-is-null).]]></description>
+              <description><![CDATA[String operator: =, <, >, >=, <=, !=, (NOT) LIKE, (NOT) IN, (NOT) BETWEEN and IS (NOT) NULL optionally augmented with modifiers "#" (ignore case) or "^||" (or-is-null).]]></description>
             </parameter>
             <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[Object filter value (for in array and between an array with 2 elements)]]></description>
@@ -24186,7 +24186,7 @@ var success = %%prefix%%foundset.addFoundSetFilterParam('customerid', '=', 'BLON
               <description><![CDATA[String column to filter on.]]></description>
             </parameter>
             <parameter name="operator" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[String operator: =, <, >, >=, <=, !=, (NOT) LIKE, (NOT) IN, (NOT) BETWEEN and IS (NOT) NULL]]></description>
+              <description><![CDATA[String operator: =, <, >, >=, <=, !=, (NOT) LIKE, (NOT) IN, (NOT) BETWEEN and IS (NOT) NULL optionally augmented with modifiers "#" (ignore case) or "^||" (or-is-null).]]></description>
             </parameter>
             <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[Object filter value (for in array and between an array with 2 elements)]]></description>
@@ -24217,7 +24217,7 @@ var ok = %%prefix%%foundset.addFoundSetFilterParam('companyname', '#^||=', 'serv
               <description><![CDATA[String column to filter on.]]></description>
             </parameter>
             <parameter name="operator" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[String operator: =, <, >, >=, <=, !=, (NOT) LIKE, (NOT) IN, (NOT) BETWEEN and IS (NOT) NULL optionally augmented with modifiers "#" (ignore case) or "||=" (or-is-null).]]></description>
+              <description><![CDATA[String operator: =, <, >, >=, <=, !=, (NOT) LIKE, (NOT) IN, (NOT) BETWEEN and IS (NOT) NULL optionally augmented with modifiers "#" (ignore case) or "^||" (or-is-null).]]></description>
             </parameter>
             <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[Object filter value (for in array and between an array with 2 elements)]]></description>
