@@ -111,6 +111,7 @@ import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
@@ -335,6 +336,17 @@ public class EditorUtil
 		if (form != null)
 		{
 			return openFormDesignEditor(form);
+		}
+		if (persist instanceof TableNode)
+		{
+			try
+			{
+				return openTableEditor(((TableNode)persist).getTable());
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError(e);
+			}
 		}
 		return openScriptEditor(persist, null, true);
 	}

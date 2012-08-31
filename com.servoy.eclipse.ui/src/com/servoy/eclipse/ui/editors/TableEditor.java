@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.editors;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
@@ -36,9 +37,12 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.eclipse.ui.views.properties.IPropertySource;
+import org.eclipse.ui.views.properties.IPropertySourceProvider;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IActiveProjectListener;
+import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.TableEditorInput;
@@ -55,6 +59,7 @@ import com.servoy.eclipse.ui.editors.table.EventsComposite;
 import com.servoy.eclipse.ui.editors.table.FoundsetMethodsComposite;
 import com.servoy.eclipse.ui.editors.table.PropertiesComposite;
 import com.servoy.eclipse.ui.editors.table.SecurityComposite;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.dataprocessing.IColumnConverter;
 import com.servoy.j2db.dataprocessing.IColumnValidator;
 import com.servoy.j2db.persistence.AggregateVariable;
@@ -106,6 +111,8 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	private IColumnListener columnListener;
 
 	private IServerListener serverListener;
+
+	private IPersistChangeListener persistListener;
 
 	public static int ColumnPageIndex = 0;
 
@@ -279,6 +286,10 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	public void dispose()
 	{
 		ServoyModelManager.getServoyModelManager().getServoyModel().removeActiveProjectListener(this);
+		if (persistListener != null)
+		{
+			ServoyModelManager.getServoyModelManager().getServoyModel().removePersistChangeListener(false, persistListener);
+		}
 		// seems that pages added by add(Control) are not disposed by default like
 		// the ones aded with add(editor)
 		// we must dispose of them - or they remain as listeners that want to
@@ -450,6 +461,20 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				}
 			};
 		}
+		if (adapter == IPropertySourceProvider.class)
+		{
+			return new IPropertySourceProvider()
+			{
+				public IPropertySource getPropertySource(Object object)
+				{
+					if (object instanceof TableNode)
+					{
+						return new PersistPropertySource((TableNode)object, (TableNode)object, false);
+					}
+					return null;
+				}
+			};
+		}
 		return super.getAdapter(adapter);
 	}
 
@@ -606,6 +631,37 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		};
 		table.addIColumnListener(columnListener);
 
+		persistListener = new IPersistChangeListener()
+		{
+
+			public void persistChanges(Collection<IPersist> changes)
+			{
+				for (IPersist persist : changes)
+				{
+					try
+					{
+						if (persist instanceof TableNode && table.equals(((TableNode)persist).getTable()))
+						{
+							final boolean changed = persist.isChanged();
+							UIUtils.runInUI(new Runnable()
+							{
+								public void run()
+								{
+									refresh();
+									flagModified(!changed);
+								}
+							}, false);
+						}
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
+			}
+		};
+
+		ServoyModelManager.getServoyModelManager().getServoyModel().addPersistChangeListener(false, persistListener);
 		// servoyProject =
 		// ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(persistInput.getSolutionName());
 		// persist = servoyProject.getEditingPersist(persistInput.getUuid(),
@@ -731,6 +787,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		flagModified(true);
 		if (propertiesComposite != null) propertiesComposite.refresh();
 		if (columnComposite != null) columnComposite.refreshViewer(table);
+		if (eventsComposite != null) eventsComposite.refreshViewer(table);
 	}
 
 	public void flagModified()

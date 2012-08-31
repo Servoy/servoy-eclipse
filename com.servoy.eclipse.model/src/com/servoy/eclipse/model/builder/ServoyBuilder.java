@@ -1660,6 +1660,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													if (context instanceof Form)
 													{
 														marker.setAttribute("DataSource", ((Form)context).getDataSource()); //$NON-NLS-1$
+														marker.setAttribute("ContextTypeId", context.getTypeID()); //$NON-NLS-1$
+													}
+													if (context instanceof TableNode)
+													{
+														marker.setAttribute("DataSource", ((TableNode)context).getDataSource()); //$NON-NLS-1$
+														marker.setAttribute("ContextTypeId", context.getTypeID()); //$NON-NLS-1$
 													}
 												}
 											}

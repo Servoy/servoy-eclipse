@@ -41,6 +41,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 
@@ -116,6 +117,13 @@ public class EventsComposite extends Composite
 			treeViewer.setExpandedElements(new Object[] { treeElements[0] });
 		}
 	}
+
+	public void refreshViewer(Table t)
+	{
+		setViewerInput(t, false);
+		treeViewer.refresh();
+	}
+
 
 	@Override
 	protected void checkSubclass()
@@ -195,6 +203,14 @@ public class EventsComposite extends Composite
 		treeViewer.setLabelProvider(new EventsLabelProvider());
 
 		treeViewer.setContentProvider(EventsContentProvider.INSTANCE);
+		setViewerInput(t, true);
+	}
+
+	/**
+	 * @param t
+	 */
+	private void setViewerInput(Table t, boolean initialExpand)
+	{
 		List<EventNode> rows = new ArrayList<EventNode>();
 		try
 		{
@@ -226,20 +242,34 @@ public class EventsComposite extends Composite
 			ServoyLog.logError(e);
 		}
 
+		Object[] expandedState = treeViewer.getExpandedElements();
 		treeViewer.setInput(rows);
-		List<EventNode> expandedRows = new ArrayList<EventNode>();
-		for (EventNode node : rows)
+		if (initialExpand)
 		{
-			for (EventNode methodNode : node.getChildren())
+			final HashSet<EventNode> expandedRows = new HashSet<EventNode>();
+			for (EventNode node : rows)
 			{
-				if (methodNode.getMethodWithArguments() != null && methodNode.getMethodWithArguments().methodId > 0)
+				for (EventNode methodNode : node.getChildren())
 				{
-					expandedRows.add(node);
-					break;
+					if (methodNode.getMethodWithArguments() != null && methodNode.getMethodWithArguments().methodId > 0)
+					{
+						expandedRows.add(node);
+						break;
+					}
 				}
 			}
+			Display.getDefault().asyncExec(new Runnable()
+			{
+				public void run()
+				{
+					treeViewer.setExpandedElements(expandedRows.toArray());
+				}
+			});
 		}
-		treeViewer.setExpandedElements(expandedRows.toArray());
+		else
+		{
+			treeViewer.setExpandedElements(expandedState);
+		}
 	}
 
 	private static class TreeViewerNodesComparator extends ViewerComparator
@@ -426,6 +456,39 @@ public class EventsComposite extends Composite
 		public List<EventNode> getChildren()
 		{
 			return children;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode()
+		{
+			int code = solution.hashCode();
+			if (isSolution) return code;
+			return code + type.hashCode();
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (obj instanceof EventNode)
+			{
+				EventNode node = (EventNode)obj;
+				if (node.solution.equals(solution))
+				{
+					if (isSolution == true) return node.isSolution;
+					return node.type == type;
+				}
+			}
+			return false;
 		}
 	}
 }

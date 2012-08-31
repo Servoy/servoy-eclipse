@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors.table;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -34,8 +34,11 @@ public class EventsContentProvider extends ArrayContentProvider implements ITree
 
 	public Object getParent(Object element)
 	{
-		EventNode node = (EventNode)element;
-		if (!node.isSolution()) return node.getSolution();
+		if (element instanceof EventNode)
+		{
+			EventNode node = (EventNode)element;
+			if (!node.isSolution()) return node.getSolution();
+		}
 		return null;
 	}
 

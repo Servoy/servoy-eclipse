@@ -108,13 +108,16 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				String eventName = (String)marker.getAttribute("EventName");
 				String uuid = (String)marker.getAttribute("Uuid");
 				String dataSource = (String)marker.getAttribute("DataSource");
+				int contextTypeId = marker.getAttribute("ContextTypeId", -1);
 
-				BaseSetPropertyQuickFix quickfix = type.equals(ServoyBuilder.INVALID_EVENT_METHOD) ? new SetPropertyQuickFix(solName, uuid, eventName,
-					eventName, MethodWithArguments.METHOD_NONE) : new ClearPropertyQuickFix(solName, uuid, eventName, eventName);
+				BaseSetPropertyQuickFix quickfix = type.equals(ServoyBuilder.INVALID_EVENT_METHOD) && contextTypeId == IRepository.FORMS
+					? new SetPropertyQuickFix(solName, uuid, eventName, eventName, MethodWithArguments.METHOD_NONE) : new ClearPropertyQuickFix(solName, uuid,
+						eventName, eventName);
 				quickfix.setLabel("Clear property " + quickfix.getDisplayName());
 				resolutions.add(quickfix);
-				resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, null, eventName, IRepository.FORMS, "form"));
-				resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, null, eventName, IRepository.SOLUTIONS, "global"));
+				if (contextTypeId == IRepository.FORMS) resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, dataSource, eventName,
+					IRepository.FORMS, "form"));
+				resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, dataSource, eventName, IRepository.SOLUTIONS, "global"));
 				if (dataSource != null) resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, dataSource, eventName, IRepository.TABLENODES,
 					"entity"));
 			}

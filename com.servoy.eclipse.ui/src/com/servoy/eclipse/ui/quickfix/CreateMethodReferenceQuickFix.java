@@ -18,6 +18,8 @@
 package com.servoy.eclipse.ui.quickfix;
 
 import java.beans.PropertyDescriptor;
+import java.util.Collections;
+import java.util.Map;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.ui.IMarkerResolution;
@@ -90,7 +92,9 @@ public class CreateMethodReferenceQuickFix implements IMarkerResolution
 			MethodArgument signature = template.getSignature();
 			if (signature == null) return;
 
-			ScriptMethod method = NewMethodAction.createNewMethod(UIUtils.getActiveShell(), parent, eventName, true, null, null);
+			Map<String, String> substitutions = null;
+			if (dataSource != null) substitutions = Collections.singletonMap("dataSource", dataSource); //$NON-NLS-1$
+			ScriptMethod method = NewMethodAction.createNewMethod(UIUtils.getActiveShell(), parent, eventName, true, null, null, substitutions, null);
 			if (method != null)
 			{
 				PropertyDescriptor descriptor = new PropertyDescriptor(eventName, persist.getClass());
