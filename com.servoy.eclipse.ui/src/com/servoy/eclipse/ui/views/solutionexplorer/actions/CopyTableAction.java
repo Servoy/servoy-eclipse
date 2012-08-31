@@ -16,8 +16,6 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
-import java.util.Iterator;
-
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
@@ -41,6 +39,7 @@ import org.eclipse.swt.widgets.Shell;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.Activator;
@@ -48,7 +47,6 @@ import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Column;
-import com.servoy.j2db.persistence.IColumnInfoManager;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
@@ -148,19 +146,14 @@ public class CopyTableAction extends Action implements ISelectionChangedListener
 
 				ServoyLog.logInfo("Table created successfully");
 
-				IColumnInfoManager[] cims = ServoyModel.getServerManager().getColumnInfoManagers(targetServer.getName());
-
-
 				if (copyColumnInfo)
 				{
-					Iterator<Column> it = newTable.getColumns().iterator();
-					while (it.hasNext())
+					DataModelManager dmm = DataModelManager.getColumnInfoManager(ServoyModel.getServerManager(), targetServer.getName());
+					if (dmm != null)
 					{
-						Column c = it.next();
-
-						if (cims != null)
+						for (Column c : newTable.getColumns())
 						{
-							cims[0].createNewColumnInfo(c, false); // Use supplied sequence info, don't assume anything!!
+							dmm.createNewColumnInfo(c, false); // Use supplied sequence info, don't assume anything!!
 							if (selectedTable != null)
 							{
 								Column templateCol = selectedTable.getColumn(c.getName());

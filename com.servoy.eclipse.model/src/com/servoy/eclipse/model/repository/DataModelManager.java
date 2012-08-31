@@ -1638,4 +1638,25 @@ public class DataModelManager implements IColumnInfoManager
 			ServoyLog.logError(e);
 		}
 	}
+
+	/** Get the DataModelManager installe as ColumnInfoManager in the servermanager.
+	 * @param serverManager
+	 * @param serverName 
+	 * @return
+	 */
+	public static DataModelManager getColumnInfoManager(IServerManagerInternal serverManager, String serverName)
+	{
+		IColumnInfoManager[] cims = serverManager.getColumnInfoManagers(serverName);
+		if (cims != null)
+		{
+			for (IColumnInfoManager cim : cims)
+			{
+				if (cim instanceof DataModelManager)
+				{
+					return (DataModelManager)cim;
+				}
+			}
+		}
+		return null;
+	}
 }

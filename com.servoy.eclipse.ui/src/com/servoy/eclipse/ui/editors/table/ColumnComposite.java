@@ -72,7 +72,6 @@ import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
-import com.servoy.j2db.persistence.IColumnInfoManager;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
@@ -146,12 +145,12 @@ public class ColumnComposite extends Composite
 							// info, because it will not be saved to disk unless the column exists in the DB;
 							// if we are using old table based column info provider, creating new column info would
 							// result in it being written into the database even if the column is not...
-							IColumnInfoManager[] cims = ServoyModel.getServerManager().getColumnInfoManagers(c.getTable().getServerName());
-							if (cims != null && cims.length == 1 && cims[0] instanceof DataModelManager)
+							DataModelManager dmm = DataModelManager.getColumnInfoManager(ServoyModel.getServerManager(), c.getTable().getServerName());
+							if (dmm != null)
 							{
 								try
 								{
-									cims[0].createNewColumnInfo(c, false);
+									dmm.createNewColumnInfo(c, false);
 									b = true;
 								}
 								catch (RepositoryException e)
