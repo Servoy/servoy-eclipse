@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.dialogs;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -35,7 +35,7 @@ public class FlatTreeContentProvider extends ArrayContentProvider implements ITr
 
 	public Object[] getChildren(Object parentElement)
 	{
-		return null;
+		return new Object[0];
 	}
 
 	public Object getParent(Object element)

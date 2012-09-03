@@ -346,19 +346,20 @@ public class EventsComposite extends Composite
 		}
 
 		private final Solution solution;
-		private final boolean isSolution;
 		private final List<EventNode> children;
 		private final EventNodeType type;
 		private MethodWithArguments mwa;
 		private final ILabelProvider methodLabelProvider;
+		private final Table table;
 
-		public EventNode(EventNodeType type, MethodWithArguments mwa, Solution solution, final Table table)
+		public EventNode(EventNodeType type, MethodWithArguments mwa, Solution solution, Table table)
 		{
+			if (type == null) throw new NullPointerException("Type can't be null"); //$NON-NLS-1$
 			this.type = type;
 			this.mwa = mwa;
 			this.solution = solution;
+			this.table = table;
 			this.children = null;
-			this.isSolution = false;
 
 			this.methodLabelProvider = new AccesCheckingContextDelegateLabelProvider(new SolutionContextDelegateLabelProvider(new MethodLabelProvider(
 				PersistContext.create(solution), true, true), solution), null)
@@ -369,7 +370,7 @@ public class EventsComposite extends Composite
 					// get the table node lazily, it may not exist yet when the label provider is created
 					try
 					{
-						Iterator<TableNode> it = EventNode.this.solution.getTableNodes(table);
+						Iterator<TableNode> it = EventNode.this.solution.getTableNodes(EventNode.this.table);
 						if (it.hasNext())
 						{
 							return it.next();
@@ -387,9 +388,9 @@ public class EventsComposite extends Composite
 		public EventNode(Solution solution, Table table)
 		{
 			this.solution = solution;
+			this.table = table;
 			this.type = null;
 			this.methodLabelProvider = null;
-			this.isSolution = true;
 			this.children = new ArrayList<EventNode>();
 			TableNode tableNode = null;
 			try
@@ -433,6 +434,12 @@ public class EventsComposite extends Composite
 			return type.toString();
 		}
 
+		public Table getTable()
+		{
+			return table;
+		}
+
+
 		public Solution getSolution()
 		{
 			return solution;
@@ -450,7 +457,7 @@ public class EventsComposite extends Composite
 
 		public boolean isSolution()
 		{
-			return isSolution;
+			return type == null;
 		}
 
 		public List<EventNode> getChildren()
@@ -467,7 +474,7 @@ public class EventsComposite extends Composite
 		public int hashCode()
 		{
 			int code = solution.hashCode();
-			if (isSolution) return code;
+			if (type == null) return code;
 			return code + type.hashCode();
 		}
 
@@ -482,11 +489,7 @@ public class EventsComposite extends Composite
 			if (obj instanceof EventNode)
 			{
 				EventNode node = (EventNode)obj;
-				if (node.solution.equals(solution))
-				{
-					if (isSolution == true) return node.isSolution;
-					return node.type == type;
-				}
+				return node.solution.equals(solution) && node.type == type;
 			}
 			return false;
 		}

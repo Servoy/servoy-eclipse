@@ -29,15 +29,15 @@ public class EventsContentProvider extends ArrayContentProvider implements ITree
 	{
 		EventNode node = (EventNode)parentElement;
 		if (node.isSolution()) return node.getChildren().toArray();
-		return null;
+		return new Object[0];
 	}
 
 	public Object getParent(Object element)
 	{
-		if (element instanceof EventNode)
+		EventNode node = (EventNode)element;
+		if (!node.isSolution())
 		{
-			EventNode node = (EventNode)element;
-			if (!node.isSolution()) return node.getSolution();
+			return new EventNode(node.getSolution(), node.getTable());
 		}
 		return null;
 	}
