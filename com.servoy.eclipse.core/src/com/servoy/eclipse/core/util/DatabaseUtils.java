@@ -101,6 +101,9 @@ public final class DatabaseUtils
 				}
 			};
 			Table table = server.createNewTable(validator, tableName, false);
+			table.setMarkedAsMetaData(tableInfo.isMetaData);
+			server.setTableMarkedAsHiddenInDeveloper(tableName, tableInfo.hiddenInDeveloper);
+
 			// Warn if the table types are different.
 			if (table.getTableType() != tableInfo.tableType)
 			{
