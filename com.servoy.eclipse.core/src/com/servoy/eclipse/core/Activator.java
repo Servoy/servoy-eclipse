@@ -268,7 +268,7 @@ public class Activator extends Plugin
 					if (!ApplicationServerSingleton.get().hasDeveloperLicense() ||
 						Utils.getAsBoolean(Settings.getInstance().getProperty("servoy.developer.showStartPage", "true")))
 					{
-						String[] actionIds = { "org.eclipse.debug.ui.launchActionSet", "org.eclipse.ui.externaltools.ExternalToolsSet" };
+						String[] actionIds = { "org.eclipse.debug.ui.launchActionSet" };
 						ApplicationWindow win = (ApplicationWindow)PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 						ICoolBarManager coolbarManager = win.getCoolBarManager2();
 						for (String id : actionIds)
