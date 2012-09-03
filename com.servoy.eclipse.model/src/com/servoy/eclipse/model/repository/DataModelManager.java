@@ -699,7 +699,7 @@ public class DataModelManager implements IColumnInfoManager
 			ColumnInfoDef dbCid = new ColumnInfoDef();
 			dbCid.columnType = c.getColumnType();
 			dbCid.allowNull = c.getAllowNull();
-			dbCid.flags = c.getFlags();
+			dbCid.flags = c.isDatabasePK() ? Column.PK_COLUMN : 0;
 			addDifferenceMarker(new TableDifference(t, columnName, TableDifference.COLUMN_CONFLICT, dbCid, cid));
 		}
 	}
