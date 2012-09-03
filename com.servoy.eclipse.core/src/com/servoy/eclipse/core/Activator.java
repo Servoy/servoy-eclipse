@@ -263,32 +263,33 @@ public class Activator extends Plugin
 
 			public void windowOpened(IWorkbenchWindow window)
 			{
+				/* remove the launch tool bar (run / debug) from the main tool bar and the related actions */
+				String[] actionIds = { "org.eclipse.debug.ui.launchActionSet" };
+				ApplicationWindow win = (ApplicationWindow)PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+				ICoolBarManager coolbarManager = win.getCoolBarManager2();
+				for (String id : actionIds)
+				{
+					coolbarManager.remove(id);
+				}
+				ActionSetRegistry reg = WorkbenchPlugin.getDefault().getActionSetRegistry();
+				IActionSetDescriptor[] actionSets = reg.getActionSets();
+				for (IActionSetDescriptor element : actionSets)
+				{
+					for (String actionSetId : actionIds)
+					{
+						if (Utils.stringSafeEquals(element.getId(), actionSetId))
+						{
+							IExtension ext = element.getConfigurationElement().getDeclaringExtension();
+							reg.removeExtension(ext, new Object[] { element });
+						}
+					}
+				}
+
 				try
 				{
 					if (!ApplicationServerSingleton.get().hasDeveloperLicense() ||
 						Utils.getAsBoolean(Settings.getInstance().getProperty("servoy.developer.showStartPage", "true")))
 					{
-						String[] actionIds = { "org.eclipse.debug.ui.launchActionSet" };
-						ApplicationWindow win = (ApplicationWindow)PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-						ICoolBarManager coolbarManager = win.getCoolBarManager2();
-						for (String id : actionIds)
-						{
-							coolbarManager.remove(id);
-						}
-						ActionSetRegistry reg = WorkbenchPlugin.getDefault().getActionSetRegistry();
-						IActionSetDescriptor[] actionSets = reg.getActionSets();
-						for (IActionSetDescriptor element : actionSets)
-						{
-							for (String actionSetId : actionIds)
-							{
-								if (Utils.stringSafeEquals(element.getId(), actionSetId))
-								{
-									IExtension ext = element.getConfigurationElement().getDeclaringExtension();
-									reg.removeExtension(ext, new Object[] { element });
-								}
-							}
-						}
-
 						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(StartPageBrowserEditor.INPUT,
 							StartPageBrowserEditor.STARTPAGE_BROWSER_EDITOR_ID);
 					}
