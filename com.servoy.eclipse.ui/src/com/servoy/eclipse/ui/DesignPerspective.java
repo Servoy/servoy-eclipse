@@ -21,9 +21,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.runtime.IExtension;
-import org.eclipse.jface.action.ICoolBarManager;
-import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
@@ -33,9 +30,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.activities.IActivityManager;
 import org.eclipse.ui.activities.IWorkbenchActivitySupport;
 import org.eclipse.ui.console.IConsoleConstants;
-import org.eclipse.ui.internal.WorkbenchPlugin;
-import org.eclipse.ui.internal.registry.ActionSetRegistry;
-import org.eclipse.ui.internal.registry.IActionSetDescriptor;
 
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.eclipse.ui.wizards.NewFormWizard;
@@ -45,7 +39,6 @@ import com.servoy.eclipse.ui.wizards.NewServerWizard;
 import com.servoy.eclipse.ui.wizards.NewSolutionWizard;
 import com.servoy.eclipse.ui.wizards.NewStyleWizard;
 import com.servoy.eclipse.ui.wizards.NewValueListWizard;
-import com.servoy.j2db.util.Utils;
 
 @SuppressWarnings("nls")
 public class DesignPerspective implements IPerspectiveFactory
@@ -95,27 +88,6 @@ public class DesignPerspective implements IPerspectiveFactory
 			if (!activitiesToDisable.contains(id)) keepEnabled.add(id);
 		}
 		was.setEnabledActivityIds(keepEnabled);
-
-		/* remove the launch tool bar (run / debug) from the main tool bar and also the related + some similar actions */
-		ApplicationWindow window = (ApplicationWindow)PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		ICoolBarManager coolbarManager = window.getCoolBarManager2();
-		for (String id : actionIds)
-		{
-			coolbarManager.remove(id);
-		}
-		ActionSetRegistry reg = WorkbenchPlugin.getDefault().getActionSetRegistry();
-		IActionSetDescriptor[] actionSets = reg.getActionSets();
-		for (IActionSetDescriptor element : actionSets)
-		{
-			for (String actionSetId : actionIds)
-			{
-				if (Utils.stringSafeEquals(element.getId(), actionSetId))
-				{
-					IExtension ext = element.getConfigurationElement().getDeclaringExtension();
-					reg.removeExtension(ext, new Object[] { element });
-				}
-			}
-		}
 
 		setContentsOfShowViewMenu(layout);
 		addNewWizards(layout);

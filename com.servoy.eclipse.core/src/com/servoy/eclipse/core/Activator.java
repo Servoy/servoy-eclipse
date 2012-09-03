@@ -45,7 +45,9 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.action.ICoolBarManager;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IViewReference;
@@ -266,6 +268,27 @@ public class Activator extends Plugin
 					if (!ApplicationServerSingleton.get().hasDeveloperLicense() ||
 						Utils.getAsBoolean(Settings.getInstance().getProperty("servoy.developer.showStartPage", "true")))
 					{
+						String[] actionIds = { "org.eclipse.debug.ui.launchActionSet", "org.eclipse.ui.externaltools.ExternalToolsSet" };
+						ApplicationWindow win = (ApplicationWindow)PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+						ICoolBarManager coolbarManager = win.getCoolBarManager2();
+						for (String id : actionIds)
+						{
+							coolbarManager.remove(id);
+						}
+						ActionSetRegistry reg = WorkbenchPlugin.getDefault().getActionSetRegistry();
+						IActionSetDescriptor[] actionSets = reg.getActionSets();
+						for (IActionSetDescriptor element : actionSets)
+						{
+							for (String actionSetId : actionIds)
+							{
+								if (Utils.stringSafeEquals(element.getId(), actionSetId))
+								{
+									IExtension ext = element.getConfigurationElement().getDeclaringExtension();
+									reg.removeExtension(ext, new Object[] { element });
+								}
+							}
+						}
+
 						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(StartPageBrowserEditor.INPUT,
 							StartPageBrowserEditor.STARTPAGE_BROWSER_EDITOR_ID);
 					}
