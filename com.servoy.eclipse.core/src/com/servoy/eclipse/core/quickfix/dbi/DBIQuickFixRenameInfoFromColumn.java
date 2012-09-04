@@ -67,8 +67,55 @@ public class DBIQuickFixRenameInfoFromColumn extends TableDifferenceQuickFix
 	@Override
 	public boolean canHandleDifference(TableDifference difference)
 	{
-		return difference != null &&
-			(difference.getType() == TableDifference.COLUMN_MISSING_FROM_DB || difference.getType() == TableDifference.COLUMN_MISSING_FROM_DBI_FILE);
+		if (difference == null) return false;
+		DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
+		if (dmm != null)
+		{
+			try
+			{
+				IFile file = dmm.getDBIFile(difference.getServerName(), difference.getTableName());
+				if (file.exists())
+				{
+					InputStream is = file.getContents(true);
+					String dbiFileContent = null;
+					try
+					{
+						dbiFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
+					}
+					finally
+					{
+						Utils.closeInputStream(is);
+					}
+					if (dbiFileContent != null)
+					{
+						TableDef tableInfo = dmm.deserializeTableInfo(dbiFileContent);
+
+						ArrayList<String> colNames = new ArrayList<String>();
+						Collection<Column> col = difference.getTable().getColumns();
+						for (Column column : col)
+						{
+							colNames.add(column.getName());
+						}
+						for (int i = tableInfo.columnInfoDefSet.size() - 1; i >= 0; i--)
+						{
+							ColumnInfoDef cid = tableInfo.columnInfoDefSet.get(i);
+							String dbiColumnName = Ident.RESERVED_NAME_PREFIX + cid.name;
+							if (dbiColumnName.equals(difference.getColumnName()))
+							{
+								return difference.getType() == TableDifference.COLUMN_MISSING_FROM_DB ||
+									difference.getType() == TableDifference.COLUMN_MISSING_FROM_DBI_FILE;
+							}
+						}
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+
+		return false;
 	}
 
 	@Override
