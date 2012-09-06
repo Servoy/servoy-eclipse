@@ -1225,14 +1225,17 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 				{
 					try
 					{
-						IProject moduleProject = ServoyModel.getWorkspace().getRoot().getProject(moduleName);
-						if (moduleProject.isAccessible())
+						if (!sp.getProject().getName().equals(moduleName)) // I did see a solution listing itself as a module, causing trouble (don't know how that happened...)
 						{
-							ServoyProject servoyModuleProject = (ServoyProject)moduleProject.getNature(ServoyProject.NATURE_ID);
-							if (servoyModuleProject != null && servoyModuleProject.getSolution() != null) // maybe it's not a valid solution project
+							IProject moduleProject = ServoyModel.getWorkspace().getRoot().getProject(moduleName);
+							if (moduleProject.isAccessible())
 							{
-								testBuildPaths(servoyModuleProject, processed);
-								buildPaths.add(DLTKCore.newProjectEntry(moduleProject.getFullPath(), true));
+								ServoyProject servoyModuleProject = (ServoyProject)moduleProject.getNature(ServoyProject.NATURE_ID);
+								if (servoyModuleProject != null && servoyModuleProject.getSolution() != null) // maybe it's not a valid solution project
+								{
+									testBuildPaths(servoyModuleProject, processed);
+									buildPaths.add(DLTKCore.newProjectEntry(moduleProject.getFullPath(), true));
+								}
 							}
 						}
 					}

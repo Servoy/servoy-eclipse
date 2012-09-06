@@ -200,7 +200,8 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 	public void dispose()
 	{
 		// stop listening
-		getCommandStack().removeCommandStackEventListener(commandStackEventListener);
+		CommandStack commandStack = getCommandStack();
+		if (commandStack != null) commandStack.removeCommandStackEventListener(commandStackEventListener);
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		servoyModel.removeActiveProjectListener(this);
 		servoyModel.removePersistChangeListener(false, this);
@@ -345,7 +346,7 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 
 	public CommandStack getCommandStack()
 	{
-		return (CommandStack)graphicaleditor.getAdapter(CommandStack.class);
+		return graphicaleditor != null ? (CommandStack)graphicaleditor.getAdapter(CommandStack.class) : null;
 	}
 
 	public void commandStackChanged(EventObject event)
@@ -743,10 +744,9 @@ public class VisualFormEditor extends MultiPageEditorPart implements CommandStac
 			}
 			createPartsPage();
 			createTabsPage();
+			getCommandStack().addCommandStackEventListener(commandStackEventListener);
 		}
 		createSecPage(); // MultiPageEditorPart wants at least 1 page
-
-		getCommandStack().addCommandStackEventListener(commandStackEventListener);
 	}
 
 	protected void createDesignPage() throws PartInitException
