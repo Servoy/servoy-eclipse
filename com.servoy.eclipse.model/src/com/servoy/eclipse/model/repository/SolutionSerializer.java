@@ -863,7 +863,10 @@ public class SolutionSerializer
 				String filteredValue = valueFilter.getFilteredValue(persist.getTypeID(), propertyName, propertyValue);
 				if (filteredValue != null)
 				{
-					property_values.put(propertyName, filteredValue);
+					if (!(filteredValue.equals(propertyValue) && (isBoolean || isNumber)))
+					{
+						property_values.put(propertyName, filteredValue);
+					}
 				}
 				else
 				{
