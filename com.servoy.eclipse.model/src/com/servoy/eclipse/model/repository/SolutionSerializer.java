@@ -34,6 +34,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import com.servoy.eclipse.model.util.IFileAccess;
+import com.servoy.eclipse.model.util.IValueFilter;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
@@ -500,7 +501,7 @@ public class SolutionSerializer
 		ServoyJSONObject obj;
 		try
 		{
-			obj = generateJSONObject(persist, false, false, repository, false);
+			obj = generateJSONObject(persist, false, false, repository, false, null);
 			obj.setNewLines(false);
 			obj.remove(StaticContentSpecLoader.PROPERTY_METHODCODE.getPropertyName());
 			obj.remove(StaticContentSpecLoader.PROPERTY_DECLARATION.getPropertyName());
@@ -588,7 +589,7 @@ public class SolutionSerializer
 			ServoyJSONObject obj;
 			try
 			{
-				obj = generateJSONObject(persist, forceRecursive, false, repository, false);
+				obj = generateJSONObject(persist, forceRecursive, false, repository, false, null);
 			}
 			catch (RepositoryException e)
 			{
@@ -822,7 +823,7 @@ public class SolutionSerializer
 	 * @throws RepositoryException
 	 */
 	public static ServoyJSONObject generateJSONObject(IPersist persist, boolean forceRecursive, boolean makeFlattened, IDeveloperRepository repository,
-		boolean useQuotesForKey) throws RepositoryException
+		boolean useQuotesForKey, IValueFilter valueFilter) throws RepositoryException
 	{
 		Map<String, Object> property_values = getPersistAsValueMap(persist, repository, makeFlattened);
 
@@ -857,10 +858,26 @@ public class SolutionSerializer
 				}
 			}
 
-			if (!isBoolean && !isNumber)
+			if (valueFilter != null)
 			{
-				property_values.put(propertyName, propertyValue);//replace with textual version
+				String filteredValue = valueFilter.getFilteredValue(persist.getTypeID(), propertyName, propertyValue);
+				if (filteredValue != null)
+				{
+					property_values.put(propertyName, filteredValue);
+				}
+				else
+				{
+					property_values.remove(propertyName);
+				}
 			}
+			else
+			{
+				if (!isBoolean && !isNumber)
+				{
+					property_values.put(propertyName, propertyValue);//replace with textual version
+				}
+			}
+
 		}
 
 		property_values.put(PROP_UUID, persist.getUUID().toString());
@@ -874,7 +891,8 @@ public class SolutionSerializer
 			while (it.hasNext())
 			{
 				child = it.next();
-				if (!(child instanceof IScriptElement)) itemsArrayList.add(generateJSONObject(child, forceRecursive, makeFlattened, repository, useQuotesForKey));
+				if (!(child instanceof IScriptElement)) itemsArrayList.add(generateJSONObject(child, forceRecursive, makeFlattened, repository,
+					useQuotesForKey, valueFilter));
 			}
 			if (itemsArrayList.size() > 0)
 			{
