@@ -546,29 +546,49 @@ public class SolutionSerializer
 		String jsType = variable.getSerializableRuntimeProperty(IScriptProvider.TYPE);
 		ArgumentType argumentType = ArgumentType.convertFromColumnType(type, jsType);
 		// don't replace object types see SolutionDeserializer.parseJSFile()
-		if (argumentType != ArgumentType.Object && (jsType == null || !jsType.startsWith("{{")))
+		if (jsType == null || !jsType.startsWith("{{"))
 		{
-			int index = sb.lastIndexOf(TYPEKEY);
-			if (index != -1)
+			if (argumentType != ArgumentType.Object)
 			{
-				int lineEnd = sb.indexOf("\n", index);
-				sb.replace(index + TYPEKEY.length() + 1, lineEnd, '{' + argumentType.getName() + '}');
+				int index = sb.lastIndexOf(TYPEKEY);
+				if (index != -1)
+				{
+					int lineEnd = sb.indexOf("\n", index);
+					sb.replace(index + TYPEKEY.length() + 1, lineEnd, '{' + argumentType.getName() + '}');
+				}
+				else
+				{
+					int lineEnd = -1;
+					int startProp = sb.indexOf(PROPERTIESKEY);
+					if (startProp != 1)
+					{
+						// insert just before @properties
+						lineEnd = sb.lastIndexOf("\n", startProp);
+					}
+					if (lineEnd == -1)
+					{
+						// else insert after comment start
+						lineEnd = sb.indexOf("\n", sb.indexOf(SV_COMMENT_START)); //$NON-NLS-1$
+					}
+					sb.insert(lineEnd, "\n * " + TYPEKEY + " {" + argumentType.getName() + "}\n *");
+				}
 			}
 			else
 			{
-				int lineEnd = -1;
-				int startProp = sb.indexOf(PROPERTIESKEY);
-				if (startProp != 1)
+				// remove existing object type
+				int index = sb.lastIndexOf(TYPEKEY);
+				if (index != -1)
 				{
-					// insert just before @properties
-					lineEnd = sb.lastIndexOf("\n", startProp);
+					int lineEnd = sb.indexOf("\n", index);
+					if (lineEnd != -1 && sb.substring(lineEnd + 1, lineEnd + 4).equals(" *\n"))
+					{
+						// delete next empty line as well
+						lineEnd += 2;
+					}
+
+					int lineStart = sb.lastIndexOf("\n", index);
+					sb.delete(lineStart == -1 ? index : lineStart, lineEnd == -1 ? sb.length() : lineEnd + 1);
 				}
-				if (lineEnd == -1)
-				{
-					// else insert after comment start
-					lineEnd = sb.indexOf("\n", sb.indexOf(SV_COMMENT_START)); //$NON-NLS-1$
-				}
-				sb.insert(lineEnd, "\n * " + TYPEKEY + " {" + argumentType.getName() + "}\n *");
 			}
 		}
 	}

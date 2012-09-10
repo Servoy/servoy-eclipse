@@ -46,6 +46,7 @@ import com.servoy.j2db.persistence.ArgumentType;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -191,7 +192,7 @@ public class AddMethodButtonsComposite extends Composite
 				ComponentFormat componentFormat = ComponentFormat.getComponentFormat(field.getFormat(), field.getDataProviderID(),
 					ModelUtils.getEditingFlattenedSolution(parent).getDataproviderLookup(null, persistContext.getContext()),
 					Activator.getDefault().getDesignClient());
-				if (componentFormat.dpType != -1 && componentFormat.dpType != -4)
+				if (componentFormat.dpType != -1 && componentFormat.dpType != IColumnTypes.MEDIA)
 				{
 					substitutions = new HashMap<String, String>();
 					substitutions.put("dataproviderType",
@@ -201,7 +202,7 @@ public class AddMethodButtonsComposite extends Composite
 		}
 		if (dataSource != null)
 		{
-			if (substitutions != null) substitutions.put("datasource", dataSource);
+			if (substitutions != null) substitutions.put("dataSource", dataSource);
 			else substitutions = Collections.singletonMap("dataSource", dataSource);
 		}
 		return NewMethodAction.createNewMethod(getShell(), parent, methodKey, false, null, scopeName, substitutions, persistContext.getPersist());
