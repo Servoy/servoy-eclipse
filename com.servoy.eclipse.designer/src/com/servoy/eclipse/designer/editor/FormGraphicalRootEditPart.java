@@ -74,8 +74,8 @@ public class FormGraphicalRootEditPart extends FreeformGraphicalRootEditPart
 	protected void createLayers(LayeredPane layeredPane)
 	{
 		layeredPane.add(new FormBackgroundLayer(editorPart), FORM_BACKGROUND_LAYER);
-		layeredPane.add(createGridLayer(), GRID_LAYER);
 		layeredPane.add(getPrintableLayers(), PRINTABLE_LAYERS);
+		layeredPane.add(createGridLayer(), GRID_LAYER);
 
 		FreeformLayer layer = new FreeformLayer();
 		layer.setEnabled(false);
