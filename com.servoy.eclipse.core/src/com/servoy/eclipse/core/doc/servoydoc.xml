@@ -8667,8 +8667,9 @@ form.onRecordSelection = form.newFormMethod('function onRecordSelection(event) {
         <property name="onRecordEditStop">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"/>
           <description><![CDATA[The method that is triggered when a record is being saved. 
-A record is saved when a user clicks out of it (for example on an empty part of the layout or to another form); can return false (for example as part of a validation) where a condition must be changed to return true. 
-NOTE: The name of this property has been changed from onRecordSave.]]></description>
+A record is saved when a user clicks out of it (for example on an empty part of the layout or to another form).
+When the method returns false (for example as part of a validation), the user cannot leave the record, for example in
+a table view a user cannot move to another record when the callback returns false.]]></description>
           <summary><![CDATA[The method that is triggered when a record is being saved.]]></summary>
           <sample><![CDATA[form.onRecordEditStart = form.newFormMethod('function onRecordEditStart(event) { application.output("onRecordEditStart intercepted on " + event.getFormName()); }');
 form.onRecordEditStop = form.newFormMethod('function onRecordEditStop(record, event) { application.output("onRecordEditStop intercepted on " + event.getFormName() + ". record is: " + record); }');
@@ -31128,6 +31129,25 @@ var retval = utils.stringToNumber('fg65gf567');]]></sample>
           <parameters>
             <parameter name="textString" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[the text to process]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="stringToNumber">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.Object"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double"><![CDATA[the resulting number]]></return>
+          <description><![CDATA[Filters characters out of from a string and leaves digits, returns the number. Decimal separator is specified as parameter.]]></description>
+          <summary><![CDATA[Filters characters out of from a string and leaves digits, returns the number.]]></summary>
+          <sample><![CDATA[//returns '65567'
+var retval = utils.stringToNumber('fg65gf567');]]></sample>
+          <parameters>
+            <parameter name="textString" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[the text to process]]></description>
+            </parameter>
+            <parameter name="decimalSeparator" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[decimal separator used at parsing]]></description>
             </parameter>
           </parameters>
         </function>
