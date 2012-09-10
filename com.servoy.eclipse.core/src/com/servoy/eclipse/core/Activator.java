@@ -18,11 +18,14 @@ package com.servoy.eclipse.core;
 
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Dictionary;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.SwingUtilities;
 
@@ -45,9 +48,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.action.ICoolBarManager;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IViewReference;
@@ -58,6 +59,8 @@ import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.activities.IActivityManager;
+import org.eclipse.ui.activities.IWorkbenchActivitySupport;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.cheatsheets.OpenCheatSheetAction;
@@ -263,14 +266,21 @@ public class Activator extends Plugin
 
 			public void windowOpened(IWorkbenchWindow window)
 			{
-				/* remove the launch tool bar (run / debug) from the main tool bar and the related actions */
-				String[] actionIds = { "org.eclipse.debug.ui.launchActionSet" };
-				ApplicationWindow win = (ApplicationWindow)PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-				ICoolBarManager coolbarManager = win.getCoolBarManager2();
-				for (String id : actionIds)
+				/* Remove redundant activities to reduce UI clutter. */
+				String[] activityIds = { "com.servoy.eclipse.activities.javaDevelopment", "org.eclipse.team.cvs", "org.eclipse.antDevelopment", "org.eclipse.javaDevelopment", "org.eclipse.plugInDevelopment", "com.servoy.eclipse.activities.html", "com.servoy.eclipse.activities.xml", "com.servoy.eclipse.activities.dltk", "com.servoy.eclipse.activities.edit", "org.eclipse.equinox.p2.ui.sdk.classicUpdate" };
+				IWorkbenchActivitySupport was = PlatformUI.getWorkbench().getActivitySupport();
+				IActivityManager wasAM = was.getActivityManager();
+				List<String> activitiesToDisable = Arrays.asList(activityIds);
+				Set<String> keepEnabled = new HashSet<String>();
+				for (Object o : wasAM.getDefinedActivityIds())
 				{
-					coolbarManager.remove(id);
+					String id = (String)o;
+					if (!activitiesToDisable.contains(id)) keepEnabled.add(id);
 				}
+				was.setEnabledActivityIds(keepEnabled);
+
+				/* Remove the run/debug actions */
+				String[] actionIds = { "org.eclipse.debug.ui.launchActionSet" };
 				ActionSetRegistry reg = WorkbenchPlugin.getDefault().getActionSetRegistry();
 				IActionSetDescriptor[] actionSets = reg.getActionSets();
 				for (IActionSetDescriptor element : actionSets)

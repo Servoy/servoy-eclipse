@@ -16,19 +16,12 @@
  */
 package com.servoy.eclipse.ui;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.activities.IActivityManager;
-import org.eclipse.ui.activities.IWorkbenchActivitySupport;
 import org.eclipse.ui.console.IConsoleConstants;
 
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
@@ -44,8 +37,6 @@ import com.servoy.eclipse.ui.wizards.NewValueListWizard;
 public class DesignPerspective implements IPerspectiveFactory
 {
 
-	protected static final String[] actionIds = { "org.eclipse.debug.ui.launchActionSet", "org.eclipse.ui.externaltools.ExternalToolsSet" };
-	protected static final String[] activityIds = { "com.servoy.eclipse.activities.javaDevelopment", "com.servoy.eclipse.activities.antDevelopment", "org.eclipse.team.cvs", "org.eclipse.antDevelopment", "org.eclipse.javaDevelopment", "org.eclipse.plugInDevelopment", "com.servoy.eclipse.activities.html", "com.servoy.eclipse.activities.xml", "com.servoy.eclipse.activities.dltk", "com.servoy.eclipse.activities.edit", "org.eclipse.equinox.p2.ui.sdk.classicUpdate" };
 	public static final String TestRunnerViewPart_NAME = "org.eclipse.jdt.junit.ResultView"; //this field is copied from TestRunnerViewPart.NAME which is an eclipse internal class and cannot be referenced.
 	public static final String CallHierarchyViewPart_ID = "org.eclipse.dltk.callhierarchy.view"; //this field is copied from CallHierarchyViewPart.ID_CALL_HIERARCHY
 
@@ -76,18 +67,6 @@ public class DesignPerspective implements IPerspectiveFactory
 		{
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().setMaximized(true);
 		}
-
-		/* Remove redundant activities (including fake ones created by us) to reduce UI clutter. */
-		IWorkbenchActivitySupport was = PlatformUI.getWorkbench().getActivitySupport();
-		IActivityManager wasAM = was.getActivityManager();
-		List<String> activitiesToDisable = Arrays.asList(activityIds);
-		Set<String> keepEnabled = new HashSet<String>();
-		for (Object o : wasAM.getDefinedActivityIds())
-		{
-			String id = (String)o;
-			if (!activitiesToDisable.contains(id)) keepEnabled.add(id);
-		}
-		was.setEnabledActivityIds(keepEnabled);
 
 		setContentsOfShowViewMenu(layout);
 		addNewWizards(layout);
