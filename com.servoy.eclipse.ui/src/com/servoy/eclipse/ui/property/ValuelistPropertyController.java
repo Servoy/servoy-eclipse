@@ -94,7 +94,7 @@ public class ValuelistPropertyController<P> extends PropertyController<P, Intege
 
 		public void openEditor(Integer value)
 		{
-			EditorUtil.openValueListEditor(flattenedEditingSolution, value.intValue());
+			EditorUtil.openValueListEditor(AbstractBase.selectById(flattenedEditingSolution.getValueLists(false), value.intValue()));
 		}
 
 		public boolean canEdit(Integer value)

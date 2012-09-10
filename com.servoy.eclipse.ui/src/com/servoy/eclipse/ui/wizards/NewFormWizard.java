@@ -322,7 +322,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			servoyModel.getDataModelManager().testTableAndCreateDBIFile(form.getTable());
 
 			// open newly created form in the editor (as new editor)
-			return EditorUtil.openFormDesignEditor(form, true) != null;
+			return EditorUtil.openFormDesignEditor(form, true, true) != null;
 		}
 		catch (RepositoryException e)
 		{

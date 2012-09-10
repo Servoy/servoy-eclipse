@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.core.runtime.IAdaptable;
@@ -102,7 +102,7 @@ public class RetargetToEditorPersistProperties implements IPropertySource, IAdap
 		IPersist persist = persistProperties.getPersist();
 
 		// find the editor of this persist and change the value in the editor
-		IEditorPart editor = EditorUtil.openPersistEditor(persist);
+		IEditorPart editor = EditorUtil.openPersistEditor(persist, false); // activate=false here otherwise the editor is activated too soon and the save editor button remains grayed out
 		if (editor == null)
 		{
 			return;

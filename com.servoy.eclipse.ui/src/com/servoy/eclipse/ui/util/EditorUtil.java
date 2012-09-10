@@ -85,8 +85,6 @@ import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.resource.FileEditorInputFactory;
-import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Column;
@@ -196,7 +194,7 @@ public class EditorUtil
 	 */
 	public static IEditorPart openFormDesignEditor(Form form)
 	{
-		return openFormDesignEditor(form, false);
+		return openFormDesignEditor(form, false, true);
 	}
 
 	/**
@@ -205,7 +203,7 @@ public class EditorUtil
 	 * 
 	 * @param formId
 	 */
-	public static IEditorPart openFormDesignEditor(Form form, boolean newForm)
+	public static IEditorPart openFormDesignEditor(Form form, boolean newForm, boolean activate)
 	{
 		if (form != null)
 		{
@@ -214,7 +212,7 @@ public class EditorUtil
 				return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
 					new PersistEditorInput(form.getName(), form.getSolution().getName(), form.getUUID()).setNew(newForm),
 					PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-						Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId());
+						Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId(), activate);
 			}
 			catch (PartInitException ex)
 			{
@@ -227,11 +225,21 @@ public class EditorUtil
 
 	public static IEditorPart openTableEditor(ITable table)
 	{
+		return openTableEditor(table, true);
+	}
+
+	public static IEditorPart openTableEditor(ITable table, boolean activate)
+	{
 		if (table == null) return null;
-		return openTableEditor(table.getServerName(), table.getName());
+		return openTableEditor(table.getServerName(), table.getName(), activate);
 	}
 
 	public static IEditorPart openTableEditor(String serverName, String tableName)
+	{
+		return openTableEditor(serverName, tableName, true);
+	}
+
+	public static IEditorPart openTableEditor(String serverName, String tableName, boolean activate)
 	{
 		if (serverName == null || tableName == null) return null;
 		try
@@ -239,7 +247,7 @@ public class EditorUtil
 			return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
 				new TableEditorInput(serverName, tableName),
 				PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-					Platform.getContentTypeManager().getContentType(TableEditorInput.TABLE_RESOURCE_ID)).getId());
+					Platform.getContentTypeManager().getContentType(TableEditorInput.TABLE_RESOURCE_ID)).getId(), activate);
 		}
 		catch (PartInitException ex)
 		{
@@ -248,12 +256,12 @@ public class EditorUtil
 		return null;
 	}
 
-	public static IEditorPart openValueListEditor(FlattenedSolution flattenedSolution, int valueListId)
+	public static IEditorPart openValueListEditor(ValueList valueList)
 	{
-		return openValueListEditor(AbstractBase.selectById(flattenedSolution.getValueLists(false), valueListId));
+		return openValueListEditor(valueList, true);
 	}
 
-	public static IEditorPart openValueListEditor(ValueList valueList)
+	public static IEditorPart openValueListEditor(ValueList valueList, boolean activate)
 	{
 		if (valueList == null) return null;
 		try
@@ -261,7 +269,7 @@ public class EditorUtil
 			return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
 				new PersistEditorInput(valueList.getName(), valueList.getRootObject().getName(), valueList.getUUID()),
 				PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-					Platform.getContentTypeManager().getContentType(PersistEditorInput.VALUELIST_RESOURCE_ID)).getId());
+					Platform.getContentTypeManager().getContentType(PersistEditorInput.VALUELIST_RESOURCE_ID)).getId(), activate);
 		}
 		catch (PartInitException ex)
 		{
@@ -271,6 +279,11 @@ public class EditorUtil
 	}
 
 	public static IEditorPart openMediaViewer(Media media)
+	{
+		return openMediaViewer(media, true);
+	}
+
+	public static IEditorPart openMediaViewer(Media media, boolean activate)
 	{
 		if (media == null) return null;
 		try
@@ -289,7 +302,7 @@ public class EditorUtil
 			if (desc.getId().equals("com.servoy.eclipse.ui.editors.MediaViewer")) editorInput = new PersistEditorInput(media.getName(),
 				media.getRootObject().getName(), media.getUUID());
 			else editorInput = new FileEditorInput(file);
-			return page.openEditor(editorInput, desc.getId());
+			return page.openEditor(editorInput, desc.getId(), activate);
 		}
 		catch (PartInitException ex)
 		{
@@ -300,55 +313,56 @@ public class EditorUtil
 
 	public static IEditorPart openPersistEditor(IPersist persist)
 	{
+		return openPersistEditor(persist, true);
+	}
+
+	public static IEditorPart openPersistEditor(IPersist persist, boolean activate)
+	{
 		if (persist == null)
 		{
 			return null;
 		}
 		if (persist instanceof IDataProvider)
 		{
-			return openDataProviderEditor((IDataProvider)persist);
+			return openDataProviderEditor((IDataProvider)persist, activate);
 		}
 		if (persist instanceof Relation)
 		{
-			return openRelationEditor((Relation)persist);
-		}
-		if (persist instanceof Relation)
-		{
-			return openRelationEditor((Relation)persist);
+			return openRelationEditor((Relation)persist, activate);
 		}
 		if (persist instanceof Style)
 		{
-			return openStyleEditor((Style)persist);
+			return openStyleEditor((Style)persist, activate);
 		}
 		if (persist instanceof ValueList)
 		{
-			return openValueListEditor((ValueList)persist);
+			return openValueListEditor((ValueList)persist, activate);
 		}
 		if (persist instanceof Media)
 		{
-			return openMediaViewer((Media)persist);
+			return openMediaViewer((Media)persist, activate);
 		}
 		if (persist instanceof IScriptProvider)
 		{
-			return openScriptEditor(persist, null, true);
+			return openScriptEditor(persist, null, activate);
 		}
 		Form form = (Form)persist.getAncestor(IRepository.FORMS);
 		if (form != null)
 		{
-			return openFormDesignEditor(form);
+			return openFormDesignEditor(form, false, activate);
 		}
 		if (persist instanceof TableNode)
 		{
 			try
 			{
-				return openTableEditor(((TableNode)persist).getTable());
+				return openTableEditor(((TableNode)persist).getTable(), activate);
 			}
 			catch (RepositoryException e)
 			{
 				ServoyLog.logError(e);
 			}
 		}
-		return openScriptEditor(persist, null, true);
+		return openScriptEditor(persist, null, activate);
 	}
 
 	public static IEditorPart openSecurityEditor(IFile f)
@@ -369,13 +383,18 @@ public class EditorUtil
 
 	public static IEditorPart openRelationEditor(Relation relation)
 	{
+		return openRelationEditor(relation, true);
+	}
+
+	public static IEditorPart openRelationEditor(Relation relation, boolean activate)
+	{
 		if (relation == null) return null;
 		try
 		{
 			return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
 				new PersistEditorInput(relation.getName(), relation.getRootObject().getName(), relation.getUUID()),
 				PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-					Platform.getContentTypeManager().getContentType(PersistEditorInput.RELATION_RESOURCE_ID)).getId());
+					Platform.getContentTypeManager().getContentType(PersistEditorInput.RELATION_RESOURCE_ID)).getId(), activate);
 		}
 		catch (PartInitException ex)
 		{
@@ -385,6 +404,11 @@ public class EditorUtil
 	}
 
 	public static IEditorPart openStyleEditor(Style style)
+	{
+		return openStyleEditor(style, true);
+	}
+
+	public static IEditorPart openStyleEditor(Style style, boolean activate)
 	{
 		IWorkspace workspace = ServoyModel.getWorkspace();
 		IFile styleFile = workspace.getRoot().getFile(
@@ -405,7 +429,7 @@ public class EditorUtil
 		try
 		{
 			return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(FileEditorInputFactory.createFileEditorInput(styleFile),
-				editorId);
+				editorId, activate);
 		}
 		catch (PartInitException ex)
 		{
@@ -416,7 +440,12 @@ public class EditorUtil
 
 	public static IEditorPart openStyleEditor(Style style, String lookup)
 	{
-		IEditorPart editor = openStyleEditor(style);
+		return openStyleEditor(style, lookup, true);
+	}
+
+	public static IEditorPart openStyleEditor(Style style, String lookup, boolean activate)
+	{
+		IEditorPart editor = openStyleEditor(style, activate);
 		if (editor instanceof StructuredTextEditor && lookup != null)
 		{
 			FindReplaceDocumentAdapter finder = new FindReplaceDocumentAdapter(((StructuredTextEditor)editor).getDocumentProvider().getDocument(
@@ -436,13 +465,18 @@ public class EditorUtil
 
 	public static IEditorPart openDataProviderEditor(IDataProvider dataProvider)
 	{
+		return openDataProviderEditor(dataProvider, true);
+	}
+
+	public static IEditorPart openDataProviderEditor(IDataProvider dataProvider, boolean activate)
+	{
 		if (dataProvider == null)
 		{
 			return null;
 		}
 		if (dataProvider instanceof ScriptCalculation || dataProvider instanceof ScriptVariable)
 		{
-			return openScriptEditor((IPersist)dataProvider, null, true);
+			return openScriptEditor((IPersist)dataProvider, null, activate);
 		}
 		ColumnWrapper cw = dataProvider.getColumnWrapper();
 		IEditorPart part = null;
@@ -451,7 +485,7 @@ public class EditorUtil
 		{
 			try
 			{
-				part = openTableEditor(cw.getColumn().getTable());
+				part = openTableEditor(cw.getColumn().getTable(), activate);
 				column = cw.getColumn();
 			}
 			catch (RepositoryException e)
@@ -463,7 +497,7 @@ public class EditorUtil
 		{
 			try
 			{
-				part = openTableEditor(((AggregateVariable)dataProvider).getTable());
+				part = openTableEditor(((AggregateVariable)dataProvider).getTable(), activate);
 				column = (AggregateVariable)dataProvider;
 			}
 			catch (RepositoryException e)
