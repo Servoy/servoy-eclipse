@@ -323,8 +323,34 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 	public void refreshWithoutChildren()
 	{
 		refreshVisuals();
+		refreshFormEditParts();
 		refreshSourceConnections();
 		refreshTargetConnections();
+	}
+
+	/**
+	 * Refresh edit parts that are based on the same form, not edit parts that are based on form children.
+	 */
+	protected void refreshFormEditParts()
+	{
+
+		List<EditPart> toRefresh = new ArrayList<EditPart>(2);
+
+		for (EditPart ep : (List<EditPart>)getChildren())
+		{
+			if (ep.getModel() instanceof BorderModel && getModel().equals(((BorderModel)ep.getModel()).flattenedForm))
+			{
+				toRefresh.add(ep);
+			}
+			else if (ep.getModel() instanceof PartpanelModel && getModel().equals(((PartpanelModel)ep.getModel()).context))
+			{
+				toRefresh.add(ep);
+			}
+		}
+		for (EditPart ep : toRefresh)
+		{
+			ep.refresh();
+		}
 	}
 
 	public Form getPersist()

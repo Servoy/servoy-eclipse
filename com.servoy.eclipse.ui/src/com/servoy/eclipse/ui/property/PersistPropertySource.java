@@ -2178,7 +2178,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			{
 				// fire persist change recursively if the style (or other ui related property) is changed
 				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persistContext.getPersist(),
-					"styleName".equals(id) || "extendsID".equals(id) || "width".equals(id));
+					"styleName".equals(id) || "extendsID".equals(id));
 			}
 		}
 	}
