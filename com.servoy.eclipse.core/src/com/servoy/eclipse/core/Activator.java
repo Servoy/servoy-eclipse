@@ -18,10 +18,14 @@ package com.servoy.eclipse.core;
 
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Dictionary;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.SwingUtilities;
 
@@ -55,6 +59,8 @@ import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.activities.IActivityManager;
+import org.eclipse.ui.activities.IWorkbenchActivitySupport;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.cheatsheets.OpenCheatSheetAction;
@@ -257,6 +263,35 @@ public class Activator extends Plugin
 
 			public void windowOpened(IWorkbenchWindow window)
 			{
+				/* Remove redundant activities to reduce UI clutter. */
+				String[] activityIds = { "com.servoy.eclipse.activities.javaDevelopment", "org.eclipse.team.cvs", "org.eclipse.antDevelopment", "org.eclipse.javaDevelopment", "org.eclipse.plugInDevelopment", "com.servoy.eclipse.activities.html", "com.servoy.eclipse.activities.xml", "com.servoy.eclipse.activities.dltk", "com.servoy.eclipse.activities.edit", "org.eclipse.equinox.p2.ui.sdk.classicUpdate" };
+				IWorkbenchActivitySupport was = PlatformUI.getWorkbench().getActivitySupport();
+				IActivityManager wasAM = was.getActivityManager();
+				List<String> activitiesToDisable = Arrays.asList(activityIds);
+				Set<String> keepEnabled = new HashSet<String>();
+				for (Object o : wasAM.getDefinedActivityIds())
+				{
+					String id = (String)o;
+					if (!activitiesToDisable.contains(id)) keepEnabled.add(id);
+				}
+				was.setEnabledActivityIds(keepEnabled);
+
+				/* Remove the run/debug actions */
+				String[] actionIds = { "org.eclipse.debug.ui.launchActionSet" };
+				ActionSetRegistry reg = WorkbenchPlugin.getDefault().getActionSetRegistry();
+				IActionSetDescriptor[] actionSets = reg.getActionSets();
+				for (IActionSetDescriptor element : actionSets)
+				{
+					for (String actionSetId : actionIds)
+					{
+						if (Utils.stringSafeEquals(element.getId(), actionSetId))
+						{
+							IExtension ext = element.getConfigurationElement().getDeclaringExtension();
+							reg.removeExtension(ext, new Object[] { element });
+						}
+					}
+				}
+
 				try
 				{
 					if (!ApplicationServerSingleton.get().hasDeveloperLicense() ||

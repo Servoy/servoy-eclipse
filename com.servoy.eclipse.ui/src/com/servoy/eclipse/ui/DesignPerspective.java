@@ -16,26 +16,13 @@
  */
 package com.servoy.eclipse.ui;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.eclipse.core.runtime.IExtension;
-import org.eclipse.jface.action.ICoolBarManager;
-import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.activities.IActivityManager;
-import org.eclipse.ui.activities.IWorkbenchActivitySupport;
 import org.eclipse.ui.console.IConsoleConstants;
-import org.eclipse.ui.internal.WorkbenchPlugin;
-import org.eclipse.ui.internal.registry.ActionSetRegistry;
-import org.eclipse.ui.internal.registry.IActionSetDescriptor;
 
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.eclipse.ui.wizards.NewFormWizard;
@@ -45,14 +32,11 @@ import com.servoy.eclipse.ui.wizards.NewServerWizard;
 import com.servoy.eclipse.ui.wizards.NewSolutionWizard;
 import com.servoy.eclipse.ui.wizards.NewStyleWizard;
 import com.servoy.eclipse.ui.wizards.NewValueListWizard;
-import com.servoy.j2db.util.Utils;
 
 @SuppressWarnings("nls")
 public class DesignPerspective implements IPerspectiveFactory
 {
 
-	protected static final String[] actionIds = { "org.eclipse.debug.ui.launchActionSet", "org.eclipse.ui.externaltools.ExternalToolsSet" };
-	protected static final String[] activityIds = { "com.servoy.eclipse.activities.javaDevelopment", "com.servoy.eclipse.activities.antDevelopment", "org.eclipse.team.cvs", "org.eclipse.antDevelopment", "org.eclipse.javaDevelopment", "org.eclipse.plugInDevelopment", "com.servoy.eclipse.activities.html", "com.servoy.eclipse.activities.xml", "com.servoy.eclipse.activities.dltk", "com.servoy.eclipse.activities.edit", "org.eclipse.equinox.p2.ui.sdk.classicUpdate" };
 	public static final String TestRunnerViewPart_NAME = "org.eclipse.jdt.junit.ResultView"; //this field is copied from TestRunnerViewPart.NAME which is an eclipse internal class and cannot be referenced.
 
 	@SuppressWarnings("restriction")
@@ -79,39 +63,6 @@ public class DesignPerspective implements IPerspectiveFactory
 		if (page == null || !page.getPerspective().getId().toString().equals("com.servoy.eclipse.ui.DesignPerspective"))
 		{
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().setMaximized(true);
-		}
-
-		/* Remove redundant activities (including fake ones created by us) to reduce UI clutter. */
-		IWorkbenchActivitySupport was = PlatformUI.getWorkbench().getActivitySupport();
-		IActivityManager wasAM = was.getActivityManager();
-		List<String> activitiesToDisable = Arrays.asList(activityIds);
-		Set<String> keepEnabled = new HashSet<String>();
-		for (Object o : wasAM.getDefinedActivityIds())
-		{
-			String id = (String)o;
-			if (!activitiesToDisable.contains(id)) keepEnabled.add(id);
-		}
-		was.setEnabledActivityIds(keepEnabled);
-
-		/* remove the launch tool bar (run / debug) from the main tool bar and also the related + some similar actions */
-		ApplicationWindow window = (ApplicationWindow)PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		ICoolBarManager coolbarManager = window.getCoolBarManager2();
-		for (String id : actionIds)
-		{
-			coolbarManager.remove(id);
-		}
-		ActionSetRegistry reg = WorkbenchPlugin.getDefault().getActionSetRegistry();
-		IActionSetDescriptor[] actionSets = reg.getActionSets();
-		for (IActionSetDescriptor element : actionSets)
-		{
-			for (String actionSetId : actionIds)
-			{
-				if (Utils.stringSafeEquals(element.getId(), actionSetId))
-				{
-					IExtension ext = element.getConfigurationElement().getDeclaringExtension();
-					reg.removeExtension(ext, new Object[] { element });
-				}
-			}
 		}
 
 		setContentsOfShowViewMenu(layout);
