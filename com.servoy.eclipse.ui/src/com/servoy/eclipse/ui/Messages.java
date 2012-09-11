@@ -233,6 +233,7 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_formInvalidTable;
 	public static String ErrorWarningPreferencePage_formTypeAheadUnstoredCalculation;
 	public static String ErrorWarningPreferencePage_formVariableTableCol;
+	public static String ErrorWarningPreferencePage_nonAccessibleFormInModuleUsedInParentSolutionForm;
 	public static String ErrorWarningPreferencePage_solutionElementNameInvalidIdentifier;
 	public static String ErrorWarningPreferencePage_solutionPropertyFormCannotBeInstantiated;
 	public static String ErrorWarningPreferencePage_solutionPropertyTargetNotFound;

@@ -97,6 +97,7 @@ import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.FlattenedPortal;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormEncapsulation;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
@@ -422,6 +423,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		"formVariableTableCol", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> FORM_PROPERTY_MULTIPLE_METHODS_ON_SAME_ELEMENT = new Pair<String, ProblemSeverity>(
 		"formPropertyMultipleMethodsOnSameElement", ProblemSeverity.INFO); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> NON_ACCESSIBLE_FORM_IN_MODULE_USED_IN_PARENT_SOLUTION = new Pair<String, ProblemSeverity>(
+		"nonAccessibleFormInModuleUsedInParentSolution", ProblemSeverity.WARNING); //$NON-NLS-1$
 
 	// relations related
 	public final static Pair<String, ProblemSeverity> RELATION_PRIMARY_SERVER_WITH_PROBLEMS = new Pair<String, ProblemSeverity>(
@@ -1749,14 +1752,26 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												}
 											}
 										}
-										else if (foundPersist instanceof Form &&
-											!StaticContentSpecLoader.PROPERTY_EXTENDSID.getPropertyName().equals(element.getName()) &&
-											!formCanBeInstantiated(((Form)foundPersist),
-												ServoyBuilder.getPersistFlattenedSolution(foundPersist, flattenedSolution), formsAbstractChecked))
+										else if (foundPersist instanceof Form)
 										{
-											ServoyMarker mk = MarkerMessages.PropertyFormCannotBeInstantiated.fill(element.getName());
-											addMarker(project, mk.getType(), mk.getText(), -1, SOLUTION_PROPERTY_FORM_CANNOT_BE_INSTANTIATED,
-												IMarker.PRIORITY_LOW, null, o);
+											if (!StaticContentSpecLoader.PROPERTY_EXTENDSID.getPropertyName().equals(element.getName()) &&
+												!formCanBeInstantiated(((Form)foundPersist),
+													ServoyBuilder.getPersistFlattenedSolution(foundPersist, flattenedSolution), formsAbstractChecked))
+											{
+												ServoyMarker mk = MarkerMessages.PropertyFormCannotBeInstantiated.fill(element.getName());
+												addMarker(project, mk.getType(), mk.getText(), -1, SOLUTION_PROPERTY_FORM_CANNOT_BE_INSTANTIATED,
+													IMarker.PRIORITY_LOW, null, o);
+											}
+											if (context instanceof Form &&
+												isFormInSolutionModule(getServoyProject(project), (Form)foundPersist) &&
+												(((Form)foundPersist).getEncapsulation() == FormEncapsulation.PRIVATE || ((Form)foundPersist).getEncapsulation() == FormEncapsulation.MODULE_PRIVATE))
+											{
+												ServoyMarker mk = MarkerMessages.NonAccessibleFormInModuleUsedInParentSolutionForm.fill(
+													((Form)foundPersist).getName(), ((Form)foundPersist).getSolution().getName(),
+													getServoyProject(project).getSolution().getName(), ((Form)context).getName());
+												addMarker(project, mk.getType(), mk.getText(), -1, NON_ACCESSIBLE_FORM_IN_MODULE_USED_IN_PARENT_SOLUTION,
+													IMarker.PRIORITY_LOW, null, o);
+											}
 										}
 										if (BaseComponent.isEventProperty(element.getName()) && !skipEventMethod(element.getName()) &&
 											(foundPersist instanceof ScriptMethod) && !methodsParsed.contains(foundPersist.getUUID()))
@@ -3452,6 +3467,23 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		List<ServoyProject> modules = new ArrayList<ServoyProject>();
 		addModules(modules, project);
 		return modules.toArray(new ServoyProject[] { });
+	}
+
+	private static boolean isFormInSolutionModule(ServoyProject project, Form form)
+	{
+		ServoyProject[] modules = getSolutionModules(project);
+		for (ServoyProject module : modules)
+		{
+			Iterator<Form> it = module.getSolution().getForms(null, false);
+			while (it.hasNext())
+			{
+				if (form.equals(it.next()))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	private static void addModules(List<ServoyProject> modules, ServoyProject servoyProject)

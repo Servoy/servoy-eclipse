@@ -247,6 +247,9 @@ public class MarkerMessages
 		"rowBGColorCalculation of form \"{0}\" is linked to an entity that does not exist.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormDuplicatePart = new ServoyMarker("Form \"{0}\" has multiple parts of type: \"{1}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
+	public static ServoyMarker NonAccessibleFormInModuleUsedInParentSolutionForm = new ServoyMarker(
+		"Non-public form \"{0}\" from module \"{1}\" is used in solution \"{2}\", in form \"{3}\". This is not allowed.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+
 	/** 
 	 * This means that the sam tab sequence position is assigned to more than one element on a form.
 	 */
