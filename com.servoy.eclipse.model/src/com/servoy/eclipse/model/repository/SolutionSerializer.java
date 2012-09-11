@@ -573,9 +573,9 @@ public class SolutionSerializer
 					sb.insert(lineEnd, "\n * " + TYPEKEY + " {" + argumentType.getName() + "}\n *");
 				}
 			}
-			else
+			else if (jsType != null && ArgumentType.isGeneratedType(jsType))
 			{
-				// remove existing object type
+				// remove existing object type when generated from columnn type, do not touch others
 				int index = sb.lastIndexOf(TYPEKEY);
 				if (index != -1)
 				{
