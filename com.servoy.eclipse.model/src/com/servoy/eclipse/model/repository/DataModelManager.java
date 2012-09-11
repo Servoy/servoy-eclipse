@@ -74,6 +74,7 @@ import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.XMLUtils;
+import com.servoy.j2db.util.keyword.Ident;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
 import com.servoy.j2db.util.xmlxport.TableDef;
 
@@ -212,8 +213,6 @@ public class DataModelManager implements IColumnInfoManager
 			it.next().removeColumnInfo();
 		}
 		IFile file = getDBIFile(t.getServerName(), t.getName());
-		int existingColumnInfo = 0;
-		boolean addMissingColumnMarkersIfNeeded = true;
 		if (file.exists())
 		{
 			InputStream is = null;
@@ -224,7 +223,7 @@ public class DataModelManager implements IColumnInfoManager
 				IServerInternal s = (IServerInternal)sm.getServer(t.getServerName());
 				if (s != null && s.getConfig().isEnabled() && s.isValid() && json_table != null)
 				{
-					existingColumnInfo = deserializeTable(s, t, json_table);
+					deserializeTable(s, t, json_table);
 				}
 			}
 			catch (JSONException e)
@@ -263,23 +262,9 @@ public class DataModelManager implements IColumnInfoManager
 				// checking if the server is a clone
 				if (s != null && s.getConfig() != null && s.getConfig().getDataModelCloneFrom() != null && s.getConfig().getDataModelCloneFrom().length() != 0) clonedServerWithoutTableDbiInDeveloper = true;
 			}
-			addMissingColumnMarkersIfNeeded = false; // no need adding missing column information markers if the file is missing altogether...
 			if (!clonedServerWithoutTableDbiInDeveloper)
 			{
 				addMissingDBIMarker(t.getServerName(), t.getName(), false);
-			}
-		}
-
-		Iterator<Column> columns = t.getColumns().iterator();
-		while (columns.hasNext())
-		{
-			Column c = columns.next();
-			if (c.getColumnInfo() == null)
-			{
-				if (addMissingColumnMarkersIfNeeded) addDifferenceMarker(new TableDifference(t, c.getName(), TableDifference.COLUMN_MISSING_FROM_DBI_FILE,
-					null, null));
-				// only create servoy sequences when this was a new table and there is only 1 pk column
-				createNewColumnInfo(c, existingColumnInfo == 0 && t.getPKColumnTypeRowIdentCount() == 1);//was missing - create automatic sequences if missing
 			}
 		}
 	}
@@ -619,7 +604,7 @@ public class DataModelManager implements IColumnInfoManager
 		return file.equals(writingMarkerFreeDBIFile);
 	}
 
-	private int deserializeTable(IServerInternal s, Table t, String json_table) throws RepositoryException, JSONException
+	private void deserializeTable(IServerInternal s, Table t, String json_table) throws RepositoryException, JSONException
 	{
 		int existingColumnInfo = 0;
 		TableDef tableInfo = deserializeTableInfo(json_table);
@@ -668,8 +653,32 @@ public class DataModelManager implements IColumnInfoManager
 					// let table editors and so on now that a column is loaded.
 					t.fireIColumnChanged(c);
 				}
-
 				addDifferenceMarkersIfNecessary(c, cid, t, cname);
+			}
+			Iterator<Column> columns = t.getColumns().iterator();
+			while (columns.hasNext())
+			{
+				Column c = columns.next();
+				if (c.getColumnInfo() == null)
+				{
+					boolean colExists = false;
+					for (int j = 0; j < tableInfo.columnInfoDefSet.size() && !colExists; j++)
+					{
+						ColumnInfoDef cid = tableInfo.columnInfoDefSet.get(j);
+						if (c.getDataProviderID().equals(Ident.RESERVED_NAME_PREFIX + cid.name))
+						{
+							addDifferenceMarker(new TableDifference(t, c.getName(), TableDifference.COLUMN_MISSING_FROM_DBI_FILE, null, null, true));
+							colExists = true;
+						}
+					}
+					if (!colExists)
+					{
+						addDifferenceMarker(new TableDifference(t, c.getName(), TableDifference.COLUMN_MISSING_FROM_DBI_FILE, null, null));
+					}
+					// only create servoy sequences when this was a new table and there is only 1 pk column
+					createNewColumnInfo(c, existingColumnInfo == 0 && t.getPKColumnTypeRowIdentCount() == 1);//was missing - create automatic sequences if missing
+				}
+
 			}
 		}
 
@@ -681,7 +690,6 @@ public class DataModelManager implements IColumnInfoManager
 		else s.setTableMarkedAsHiddenInDeveloper(t.getName(), tableInfo.hiddenInDeveloper);
 
 		t.setMarkedAsMetaData(tableInfo.isMetaData);
-		return existingColumnInfo;
 	}
 
 	private void addDifferenceMarkersIfNecessary(Column c, ColumnInfoDef cid, Table t, String columnName)
@@ -690,7 +698,11 @@ public class DataModelManager implements IColumnInfoManager
 		{
 			if (t.getExistInDB())
 			{
-				addDifferenceMarker(new TableDifference(t, columnName, TableDifference.COLUMN_MISSING_FROM_DB, null, cid)); // else table is probably being created as we speak - and it's save/sync with DB will reload/rewrite the column info anyway
+				if (t.getColumn(Ident.RESERVED_NAME_PREFIX + columnName) != null)
+				{
+					addDifferenceMarker(new TableDifference(t, columnName, TableDifference.COLUMN_MISSING_FROM_DB, null, cid, true));
+				}
+				else addDifferenceMarker(new TableDifference(t, columnName, TableDifference.COLUMN_MISSING_FROM_DB, null, cid)); // else table is probably being created as we speak - and it's save/sync with DB will reload/rewrite the column info anyway
 				// if we would add these markers even when table is being created, warnings for writing dbi files with error markers will appear
 			}
 		}
@@ -1275,6 +1287,7 @@ public class DataModelManager implements IColumnInfoManager
 		private final int type;
 		private final ColumnInfoDef tableDefinition;
 		private final ColumnInfoDef dbiFileDefinition;
+		private boolean renamable;
 
 		private TableDifference(Table table)
 		{
@@ -1295,6 +1308,12 @@ public class DataModelManager implements IColumnInfoManager
 		{
 			this(table.getServerName(), table.getName(), columnName, type, tableDefinition, dbiFileDefinition);
 			this.table = table;
+		}
+
+		private TableDifference(Table table, String columnName, int type, ColumnInfoDef tableDefinition, ColumnInfoDef dbiFileDefinition, boolean renamable)
+		{
+			this(table, columnName, type, tableDefinition, dbiFileDefinition);
+			this.renamable = renamable;
 		}
 
 		public String getTableName()
@@ -1330,6 +1349,11 @@ public class DataModelManager implements IColumnInfoManager
 		public ColumnInfoDef getDbiFileDefinition()
 		{
 			return dbiFileDefinition;
+		}
+
+		public boolean isRenamable()
+		{
+			return renamable;
 		}
 
 		public String getUserFriendlyMessage()

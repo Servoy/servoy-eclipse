@@ -21,8 +21,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collection;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -32,7 +30,6 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.keyword.Ident;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
@@ -67,55 +64,8 @@ public class DBIQuickFixRenameInfoFromColumn extends TableDifferenceQuickFix
 	@Override
 	public boolean canHandleDifference(TableDifference difference)
 	{
-		if (difference == null) return false;
-		DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
-		if (dmm != null)
-		{
-			try
-			{
-				IFile file = dmm.getDBIFile(difference.getServerName(), difference.getTableName());
-				if (file.exists())
-				{
-					InputStream is = file.getContents(true);
-					String dbiFileContent = null;
-					try
-					{
-						dbiFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
-					}
-					finally
-					{
-						Utils.closeInputStream(is);
-					}
-					if (dbiFileContent != null)
-					{
-						TableDef tableInfo = dmm.deserializeTableInfo(dbiFileContent);
-
-						ArrayList<String> colNames = new ArrayList<String>();
-						Collection<Column> col = difference.getTable().getColumns();
-						for (Column column : col)
-						{
-							colNames.add(column.getName());
-						}
-						for (int i = tableInfo.columnInfoDefSet.size() - 1; i >= 0; i--)
-						{
-							ColumnInfoDef cid = tableInfo.columnInfoDefSet.get(i);
-							String dbiColumnName = Ident.RESERVED_NAME_PREFIX + cid.name;
-							if (dbiColumnName.equals(difference.getColumnName()))
-							{
-								return difference.getType() == TableDifference.COLUMN_MISSING_FROM_DB ||
-									difference.getType() == TableDifference.COLUMN_MISSING_FROM_DBI_FILE;
-							}
-						}
-					}
-				}
-			}
-			catch (Exception e)
-			{
-				ServoyLog.logError(e);
-			}
-		}
-
-		return false;
+		return difference != null && difference.isRenamable() &&
+			(difference.getType() == TableDifference.COLUMN_MISSING_FROM_DB || difference.getType() == TableDifference.COLUMN_MISSING_FROM_DBI_FILE);
 	}
 
 	@Override
@@ -142,18 +92,11 @@ public class DBIQuickFixRenameInfoFromColumn extends TableDifferenceQuickFix
 					if (dbiFileContent != null)
 					{
 						TableDef tableInfo = dmm.deserializeTableInfo(dbiFileContent);
-
-						ArrayList<String> colNames = new ArrayList<String>();
-						Collection<Column> col = difference.getTable().getColumns();
-						for (Column column : col)
-						{
-							colNames.add(column.getName());
-						}
 						for (int i = tableInfo.columnInfoDefSet.size() - 1; i >= 0; i--)
 						{
 							ColumnInfoDef cid = tableInfo.columnInfoDefSet.get(i);
 							String dbiColumnName = Ident.RESERVED_NAME_PREFIX + cid.name;
-							if (dbiColumnName.equals(difference.getColumnName()))
+							if ((Ident.RESERVED_NAME_PREFIX + cid.name).equals(difference.getColumnName()) || cid.name.equals(difference.getColumnName()))
 							{
 								cid.name = dbiColumnName;
 								tableInfo.columnInfoDefSet.set(i, cid);
