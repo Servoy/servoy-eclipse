@@ -125,7 +125,7 @@ public class EclipseMessages implements ICustomMessageLoader
 			String[] dbServernameTablename = DataSourceUtils.getDBServernameTablename(i18nDatasource);
 			try
 			{
-				EclipseMessages.writeMessages(dbServernameTablename[0], dbServernameTablename[1], messages, workspaceDir);
+				save(dbServernameTablename[0], dbServernameTablename[1], messages);
 				clearUnsavedMessages(i18nDatasource);
 			}
 			catch (RepositoryException ex)
@@ -133,6 +133,16 @@ public class EclipseMessages implements ICustomMessageLoader
 				ServoyLog.logError(ex);
 			}
 		}
+	}
+
+	public void save(String serverName, String tableName, TreeMap<String, I18NUtil.MessageEntry> messages) throws RepositoryException
+	{
+		EclipseMessages.writeMessages(serverName, tableName, messages, workspaceDir);
+	}
+
+	public TreeMap<String, I18NUtil.MessageEntry> readMessages(String serverName, String tableName) throws RepositoryException
+	{
+		return EclipseMessages.readMessages(serverName, tableName, workspaceDir);
 	}
 
 	public void removeCachedMessages()
