@@ -655,30 +655,30 @@ public class DataModelManager implements IColumnInfoManager
 				}
 				addDifferenceMarkersIfNecessary(c, cid, t, cname);
 			}
-			Iterator<Column> columns = t.getColumns().iterator();
-			while (columns.hasNext())
-			{
-				Column c = columns.next();
-				if (c.getColumnInfo() == null)
-				{
-					boolean colExists = false;
-					for (int j = 0; j < tableInfo.columnInfoDefSet.size() && !colExists; j++)
-					{
-						ColumnInfoDef cid = tableInfo.columnInfoDefSet.get(j);
-						if (c.getDataProviderID().equals(Ident.RESERVED_NAME_PREFIX + cid.name))
-						{
-							addDifferenceMarker(new TableDifference(t, c.getName(), TableDifference.COLUMN_MISSING_FROM_DBI_FILE, null, null, true));
-							colExists = true;
-						}
-					}
-					if (!colExists)
-					{
-						addDifferenceMarker(new TableDifference(t, c.getName(), TableDifference.COLUMN_MISSING_FROM_DBI_FILE, null, null));
-					}
-					// only create servoy sequences when this was a new table and there is only 1 pk column
-					createNewColumnInfo(c, existingColumnInfo == 0 && t.getPKColumnTypeRowIdentCount() == 1);//was missing - create automatic sequences if missing
-				}
+		}
 
+		Iterator<Column> columns = t.getColumns().iterator();
+		while (columns.hasNext())
+		{
+			Column c = columns.next();
+			if (c.getColumnInfo() == null)
+			{
+				boolean colExists = false; //searching for keyword column name prefixed with '_' character
+				for (int j = 0; j < tableInfo.columnInfoDefSet.size() && !colExists; j++)
+				{
+					ColumnInfoDef cid = tableInfo.columnInfoDefSet.get(j);
+					if (c.getName().equals(Ident.RESERVED_NAME_PREFIX + cid.name))
+					{
+						addDifferenceMarker(new TableDifference(t, c.getName(), TableDifference.COLUMN_MISSING_FROM_DBI_FILE, null, null, true));
+						colExists = true;
+					}
+				}
+				if (!colExists)
+				{
+					addDifferenceMarker(new TableDifference(t, c.getName(), TableDifference.COLUMN_MISSING_FROM_DBI_FILE, null, null));
+				}
+				// only create servoy sequences when this was a new table and there is only 1 pk column
+				createNewColumnInfo(c, existingColumnInfo == 0 && t.getPKColumnTypeRowIdentCount() == 1);//was missing - create automatic sequences if missing
 			}
 		}
 
