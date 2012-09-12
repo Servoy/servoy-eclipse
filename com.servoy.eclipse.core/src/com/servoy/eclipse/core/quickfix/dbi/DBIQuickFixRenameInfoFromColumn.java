@@ -36,6 +36,8 @@ import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
 import com.servoy.j2db.util.xmlxport.TableDef;
 
 /**
+ * Quick fix for differences between column name in the dbi file and in the DB. It will rename the column in dbi file prefixing it with '_' character.
+ * 
  * @author hhardut
  *
  */
@@ -58,7 +60,7 @@ public class DBIQuickFixRenameInfoFromColumn extends TableDifferenceQuickFix
 
 	public String getLabel()
 	{
-		return "Rename column from database information file to match the DB table column name.";
+		return "Rename .dbi column whose name is a restricted keyword to match the auto-renamed DB table column.";
 	}
 
 	@Override
@@ -95,10 +97,10 @@ public class DBIQuickFixRenameInfoFromColumn extends TableDifferenceQuickFix
 						for (int i = tableInfo.columnInfoDefSet.size() - 1; i >= 0; i--)
 						{
 							ColumnInfoDef cid = tableInfo.columnInfoDefSet.get(i);
-							String dbiColumnName = Ident.RESERVED_NAME_PREFIX + cid.name;
-							if ((Ident.RESERVED_NAME_PREFIX + cid.name).equals(difference.getColumnName()) || cid.name.equals(difference.getColumnName()))
+							String renamedDBIColumnName = Ident.RESERVED_NAME_PREFIX + cid.name;
+							if (renamedDBIColumnName.equals(difference.getColumnName()) || cid.name.equals(difference.getColumnName()))
 							{
-								cid.name = dbiColumnName;
+								cid.name = renamedDBIColumnName;
 								tableInfo.columnInfoDefSet.set(i, cid);
 							}
 						}
@@ -111,7 +113,7 @@ public class DBIQuickFixRenameInfoFromColumn extends TableDifferenceQuickFix
 				}
 				else
 				{
-					ServoyLog.logError("DBI file does not exist - while trying to apply UpdateInfoFromColumn QuickFix", null);
+					ServoyLog.logError("DBI file does not exist - while trying to apply RenameInfoFromColumn QuickFix", null);
 				}
 			}
 			catch (JSONException e)
@@ -129,7 +131,7 @@ public class DBIQuickFixRenameInfoFromColumn extends TableDifferenceQuickFix
 		}
 		else
 		{
-			ServoyLog.logError("Null dmm while trying to apply UpdateInfoFromColumn QuickFix", null);
+			ServoyLog.logError("Null dmm while trying to apply RenameInfoFromColumn QuickFix", null);
 		}
 	}
 }
