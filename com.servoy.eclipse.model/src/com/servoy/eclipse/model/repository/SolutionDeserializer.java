@@ -1762,6 +1762,7 @@ public class SolutionDeserializer
 									paramType = paramIdToTypeMap.get(opName);
 								}
 							}
+							if (paramType == null || "*".equals(paramType)) paramType = "Any"; // if still null then it is the Any type. //$NON-NLS-1$
 							ArgumentType argumentType = ArgumentType.valueOf(paramType);
 							methodArguments[i] = new MethodArgument(name, argumentType, null, isOptional); // TODO: parse description
 						}
