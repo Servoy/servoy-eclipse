@@ -37,8 +37,6 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.dnd.IDragData;
 import com.servoy.eclipse.ui.Activator;
-import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.FormEncapsulation;
 import com.servoy.j2db.persistence.Media;
 
 /**
@@ -139,10 +137,6 @@ public class UserNodeListDragSourceListener implements DragSourceListener
 				Object real = ((SimpleUserNode)element).getRealObject();
 				if (real != null)
 				{
-					if (real instanceof Form)
-					{
-						if (((Form)real).getEncapsulation() == FormEncapsulation.MODULE_PRIVATE || ((Form)real).getEncapsulation() == FormEncapsulation.PRIVATE) continue;
-					}
 					IDragData dragObject = (IDragData)Platform.getAdapterManager().getAdapter(real, IDragData.class);
 					if (dragObject != null)
 					{
