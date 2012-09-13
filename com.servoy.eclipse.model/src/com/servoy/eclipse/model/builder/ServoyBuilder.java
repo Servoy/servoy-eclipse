@@ -1762,9 +1762,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												addMarker(project, mk.getType(), mk.getText(), -1, SOLUTION_PROPERTY_FORM_CANNOT_BE_INSTANTIATED,
 													IMarker.PRIORITY_LOW, null, o);
 											}
+											int encapsulation = ((Form)foundPersist).getEncapsulation();
 											if (context instanceof Form &&
-												isFormInSolutionModule(getServoyProject(project), (Form)foundPersist) &&
-												(((Form)foundPersist).getEncapsulation() == FormEncapsulation.PRIVATE || ((Form)foundPersist).getEncapsulation() == FormEncapsulation.MODULE_PRIVATE))
+												((encapsulation & FormEncapsulation.PRIVATE) == FormEncapsulation.PRIVATE || (encapsulation & FormEncapsulation.MODULE_PRIVATE) == FormEncapsulation.MODULE_PRIVATE) &&
+												!(((Form)context).getParent().equals(((Form)foundPersist).getParent())))
 											{
 												ServoyMarker mk = MarkerMessages.NonAccessibleFormInModuleUsedInParentSolutionForm.fill(
 													((Form)foundPersist).getName(), ((Form)foundPersist).getSolution().getName(),
@@ -3467,23 +3468,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		List<ServoyProject> modules = new ArrayList<ServoyProject>();
 		addModules(modules, project);
 		return modules.toArray(new ServoyProject[] { });
-	}
-
-	private static boolean isFormInSolutionModule(ServoyProject project, Form form)
-	{
-		ServoyProject[] modules = getSolutionModules(project);
-		for (ServoyProject module : modules)
-		{
-			Iterator<Form> it = module.getSolution().getForms(null, false);
-			while (it.hasNext())
-			{
-				if (form.equals(it.next()))
-				{
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	private static void addModules(List<ServoyProject> modules, ServoyProject servoyProject)

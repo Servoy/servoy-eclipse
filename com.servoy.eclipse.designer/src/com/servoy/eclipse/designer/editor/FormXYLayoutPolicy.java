@@ -36,6 +36,7 @@ import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.gef.requests.CreationFactory;
 
 import com.servoy.eclipse.designer.actions.DistributeRequest;
+import com.servoy.eclipse.designer.dnd.ElementTransferDropTarget;
 import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
 import com.servoy.eclipse.designer.editor.commands.ChangeBoundsCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
@@ -45,6 +46,7 @@ import com.servoy.eclipse.designer.editor.commands.SelectModelsCommandWrapper;
 import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.IApplication;
@@ -53,6 +55,7 @@ import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.persistence.Solution;
 
 /**
  * layout policy for move/resize in form designer.
@@ -395,10 +398,25 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 			{
 				for (Object o : (Object[])factory.getData())
 				{
-					if (o instanceof PersistDragData && ((IPersist)getHost().getModel()).getUUID().equals(((PersistDragData)o).uuid))
+					if (o instanceof PersistDragData)
 					{
 						// cannot drop form onto itself
-						return false;
+						if (((IPersist)getHost().getModel()).getUUID().equals(((PersistDragData)o).uuid)) return false;
+
+						// cannot drop a (module) private form outside its parent solution/module
+						IPersist realPersist = ServoyModelFinder.getServoyModel().getActiveProject().getSolution().getChild(((PersistDragData)o).uuid);
+						if (realPersist == null)
+						{
+							// the dragged form could be in a module.
+							Solution[] modules = ServoyModelFinder.getServoyModel().getActiveProject().getModules();
+							for (Solution module : modules)
+							{
+								realPersist = module.getChild(((PersistDragData)o).uuid);
+								if (realPersist != null) return ElementTransferDropTarget.isDropAllowed(((IPersist)getHost().getModel()).getParent(),
+									realPersist);
+							}
+						}
+						else return ElementTransferDropTarget.isDropAllowed(((IPersist)getHost().getModel()).getParent(), realPersist);
 					}
 				}
 			}
