@@ -238,6 +238,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String SERVOY_MARKER_TYPE = _PREFIX + ".servoyProblem"; //$NON-NLS-1$
 	public static final String SERVOY_BUILDER_MARKER_TYPE = _PREFIX + ".builderProblem"; //$NON-NLS-1$
 
+	/**
+	 * If you add a new type, do not forget to add the extension point also!!!
+	 */
 	public static final String XML_MARKER_TYPE = _PREFIX + ".xmlProblem"; //$NON-NLS-1$
 	public static final String PROJECT_DESERIALIZE_MARKER_TYPE = _PREFIX + ".deserializeProblem"; //$NON-NLS-1$
 	public static final String SOLUTION_PROBLEM_MARKER_TYPE = _PREFIX + ".solutionProblem"; //$NON-NLS-1$
@@ -1456,6 +1459,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, OBSOLETE_ELEMENT);
 		deleteMarkers(project, HIDDEN_TABLE_STILL_IN_USE);
 		deleteMarkers(project, MISSING_CONVERTER);
+		deleteMarkers(project, LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE);
 
 		final ServoyProject servoyProject = getServoyProject(project);
 		boolean active = servoyModel.isSolutionActive(project.getName());
@@ -4571,7 +4575,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			else if (type.equals(DUPLICATE_UUID) || type.equals(DUPLICATE_SIBLING_UUID) || type.equals(BAD_STRUCTURE_MARKER_TYPE) ||
 				type.equals(INVALID_SORT_OPTION) || type.equals(EVENT_METHOD_MARKER_TYPE) || type.equals(PORTAL_DIFFERENT_RELATION_NAME_MARKER_TYPE) ||
 				type.equals(INVALID_EVENT_METHOD) || type.equals(MISSING_STYLE) || type.equals(INVALID_COMMAND_METHOD) || type.equals(INVALID_DATAPROVIDERID) ||
-				type.equals(OBSOLETE_ELEMENT) || type.equals(HIDDEN_TABLE_STILL_IN_USE))
+				type.equals(OBSOLETE_ELEMENT) || type.equals(HIDDEN_TABLE_STILL_IN_USE) || type.equals(LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE))
 			{
 				marker.setAttribute("Uuid", persist.getUUID().toString()); //$NON-NLS-1$
 				marker.setAttribute("SolutionName", resource.getName()); //$NON-NLS-1$

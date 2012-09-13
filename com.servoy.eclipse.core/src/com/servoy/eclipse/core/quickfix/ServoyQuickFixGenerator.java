@@ -86,6 +86,9 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 
 	public IMarkerResolution[] getResolutions(IMarker marker)
 	{
+		/**
+		 * If you deal with a new marker type do not forget to also update the extention point.
+		 */
 		IMarkerResolution[] fixes = new IMarkerResolution[0];
 		try
 		{

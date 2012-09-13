@@ -276,6 +276,10 @@
       <markerResolutionGenerator
             class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
             markerType="com.servoy.eclipse.core.formProblem">
+      </markerResolutionGenerator>
+      <markerResolutionGenerator
+            class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
+            markerType="com.servoy.eclipse.core.labelForElementProblem">
       </markerResolutionGenerator>      
    </extension>
    <extension
