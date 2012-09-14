@@ -28,14 +28,13 @@ import org.eclipse.gef.EditPart;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
-import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormEncapsulation;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Part;
-import com.servoy.j2db.persistence.Solution;
 
 /**
  * Utility methods for form designer.
@@ -142,7 +141,7 @@ public class DesignerUtil
 
 	private static boolean isDropAllowed(IPersist dropTargetPersist, IPersist draggedPersist)
 	{
-		if (dropTargetPersist != null && dropTargetPersist.getParent() != null && draggedPersist instanceof Form)
+		if (dropTargetPersist.getParent() != null && draggedPersist instanceof Form)
 		{
 			Form f = (Form)draggedPersist;
 			int encapsulation = f.getEncapsulation();
@@ -164,18 +163,9 @@ public class DesignerUtil
 		}
 
 		// cannot drop a (module) private form on a non-accessible form or inside on of its container elements (tabpanel,tablesspanel,etc)
-		IPersist realPersist = ServoyModelFinder.getServoyModel().getActiveProject().getEditingSolution().getChild(dragData.uuid);
-		if (realPersist == null)
-		{
-			Solution[] modules = ServoyModelFinder.getServoyModel().getActiveProject().getModules();
-			for (Solution module : modules)
-			{
-				realPersist = module.getChild(dragData.uuid);
-				if (realPersist != null) return DesignerUtil.isDropAllowed(dropTargetForm, realPersist);
-			}
-		}
+		FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(dropTargetForm);
+		IPersist realPersist = fs.searchPersist(dragData.uuid);
+		if (realPersist == null) return false;
 		else return DesignerUtil.isDropAllowed(dropTargetForm, realPersist);
-
-		return true;
 	}
 }
