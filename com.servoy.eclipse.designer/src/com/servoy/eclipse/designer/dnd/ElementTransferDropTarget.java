@@ -26,7 +26,6 @@ import org.eclipse.gef.Request;
 import org.eclipse.gef.SnapToHelper;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.dnd.AbstractTransferDropTargetListener;
-import org.eclipse.gef.editparts.AbstractEditPart;
 import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
@@ -34,18 +33,8 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.designer.editor.CreateElementRequest;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
-import com.servoy.eclipse.designer.editor.commands.DataRequest;
 import com.servoy.eclipse.designer.editor.commands.SelectModelsCommandWrapper;
-import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
-import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
-import com.servoy.eclipse.model.ServoyModelFinder;
-import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.FormEncapsulation;
-import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.ISupportChilds;
-import com.servoy.j2db.persistence.Solution;
 
 /**
  * Base drop target for elements in the form editor.
@@ -74,79 +63,8 @@ public class ElementTransferDropTarget extends AbstractTransferDropTargetListene
 	@Override
 	protected void handleDragOver()
 	{
-		int dnd_operation = VisualFormEditor.REQ_DROP_LINK.equals(getTargetRequest().getType()) ? DND.DROP_LINK : DND.DROP_COPY;
-
-		Request targetRequest = getTargetRequest();
-		Object data = null;
-		if (targetRequest instanceof DataRequest)
-		{
-			data = ((DataRequest)targetRequest).getData();
-		}
-		else if (targetRequest instanceof CreateElementRequest)
-		{
-			RequestTypeCreationFactory factory = (RequestTypeCreationFactory)((CreateElementRequest)targetRequest).getFactory();
-			data = factory.getData();
-		}
-
-		if (data != null && data instanceof Object[] && getTargetEditPart() != null)
-		{
-			AbstractEditPart editPart = (AbstractEditPart)getTargetEditPart();
-			if (editPart.getModel() instanceof ISupportChilds)
-			{
-				ISupportChilds parentOfTarget = getRealParent((ISupportChilds)editPart.getModel());
-				for (Object o : (Object[])data)
-				{
-					if (o instanceof PersistDragData)
-					{
-						IPersist realPersist = ServoyModelFinder.getServoyModel().getActiveProject().getSolution().getChild(((PersistDragData)o).uuid);
-						if (realPersist == null)
-						{
-							Solution[] modules = ServoyModelFinder.getServoyModel().getActiveProject().getModules();
-							for (Solution module : modules)
-							{
-								realPersist = module.getChild(((PersistDragData)o).uuid);
-								if (realPersist != null)
-								{
-									if (!isDropAllowed(parentOfTarget, realPersist)) dnd_operation = DND.DROP_NONE;
-									break;
-								}
-								else continue;
-							}
-						}
-						else
-						{
-							if (!isDropAllowed(parentOfTarget, realPersist)) dnd_operation = DND.DROP_NONE;
-						}
-					}
-				}
-			}
-		}
-		getCurrentEvent().detail = dnd_operation;
+		getCurrentEvent().detail = VisualFormEditor.REQ_DROP_LINK.equals(getTargetRequest().getType()) ? DND.DROP_LINK : DND.DROP_COPY;
 		super.handleDragOver();
-	}
-
-	public static boolean isDropAllowed(ISupportChilds parentOfTarget, IPersist draggedPersist)
-	{
-		if (parentOfTarget != null && draggedPersist instanceof Form)
-		{
-			Form f = (Form)draggedPersist;
-			int encapsulation = f.getEncapsulation();
-			if (((encapsulation & FormEncapsulation.MODULE_PRIVATE) == FormEncapsulation.MODULE_PRIVATE || (encapsulation & FormEncapsulation.PRIVATE) == FormEncapsulation.PRIVATE) &&
-				!(parentOfTarget.equals(f.getParent())))
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-
-	private static ISupportChilds getRealParent(ISupportChilds isc)
-	{
-		if (isc instanceof Solution)
-		{
-			return isc;
-		}
-		else return getRealParent(isc.getParent());
 	}
 
 	@Override

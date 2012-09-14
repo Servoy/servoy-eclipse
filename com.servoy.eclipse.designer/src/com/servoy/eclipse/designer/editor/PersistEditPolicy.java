@@ -37,6 +37,7 @@ import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceFieldCommand;
 import com.servoy.eclipse.designer.property.SetValueCommand;
+import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.dnd.FormElementDragData.DataProviderDragData;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.dnd.IDragData;
@@ -204,7 +205,11 @@ class PersistEditPolicy extends ComponentEditPolicy
 					{
 						// drop form on tabpanel
 						IPersist form = ((IPersist)model).getAncestor(IRepository.FORMS);
-						return form != null && !form.getUUID().equals(((PersistDragData)dragData).uuid); // cannot drop form onto itself
+						if (form != null)
+						{
+							return DesignerUtil.isDropFormAllowed(form, (PersistDragData)dragData);
+						}
+
 					}
 				}
 

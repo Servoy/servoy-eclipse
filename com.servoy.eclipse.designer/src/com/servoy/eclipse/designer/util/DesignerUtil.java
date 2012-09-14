@@ -27,11 +27,15 @@ import org.eclipse.gef.EditPart;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
+import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormEncapsulation;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.persistence.Solution;
 
 /**
  * Utility methods for form designer.
@@ -134,5 +138,44 @@ public class DesignerUtil
 		}
 
 		return parents;
+	}
+
+	private static boolean isDropAllowed(IPersist dropTargetPersist, IPersist draggedPersist)
+	{
+		if (dropTargetPersist != null && dropTargetPersist.getParent() != null && draggedPersist instanceof Form)
+		{
+			Form f = (Form)draggedPersist;
+			int encapsulation = f.getEncapsulation();
+			if (((encapsulation & FormEncapsulation.MODULE_PRIVATE) == FormEncapsulation.MODULE_PRIVATE || (encapsulation & FormEncapsulation.PRIVATE) == FormEncapsulation.PRIVATE) &&
+				!(dropTargetPersist.getParent().equals(f.getParent())))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static boolean isDropFormAllowed(IPersist dropTargetForm, PersistDragData dragData)
+	{
+		// cannot drop form onto itself
+		if (dropTargetForm.getUUID().equals(dragData.uuid))
+		{
+			return false;
+		}
+
+		// cannot drop a (module) private form on a non-accessible form or inside on of its container elements (tabpanel,tablesspanel,etc)
+		IPersist realPersist = ServoyModelFinder.getServoyModel().getActiveProject().getEditingSolution().getChild(dragData.uuid);
+		if (realPersist == null)
+		{
+			Solution[] modules = ServoyModelFinder.getServoyModel().getActiveProject().getModules();
+			for (Solution module : modules)
+			{
+				realPersist = module.getChild(dragData.uuid);
+				if (realPersist != null) return DesignerUtil.isDropAllowed(dropTargetForm, realPersist);
+			}
+		}
+		else return DesignerUtil.isDropAllowed(dropTargetForm, realPersist);
+
+		return true;
 	}
 }
