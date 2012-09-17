@@ -212,7 +212,7 @@ public class EditorUtil
 				return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
 					new PersistEditorInput(form.getName(), form.getSolution().getName(), form.getUUID()).setNew(newForm),
 					PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-						Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId(), activate);
+						Platform.getContentTypeManager().getContentType(PersistEditorInput.getFormContentTypeIdentifier(form))).getId(), activate);
 			}
 			catch (PartInitException ex)
 			{

@@ -22,6 +22,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -127,6 +128,15 @@ public class PersistEditorInput implements IEditorInput
 	public IPersistableElement getPersistable()
 	{
 		return (IPersistableElement)getAdapter(IPersistableElement.class);
+	}
+
+	/**
+	 * @param form
+	 * @return
+	 */
+	public static String getFormContentTypeIdentifier(Form form)
+	{
+		return FORM_RESOURCE_ID;
 	}
 
 	/*
