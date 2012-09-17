@@ -672,9 +672,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					case RELATIONS :
 						it = module.getRelations(false);
 						break;
-					case MEDIA :
-						it = module.getMedias(false);
-						break;
 					case VALUELISTS :
 						it = module.getValueLists(false);
 						break;
