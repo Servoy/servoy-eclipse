@@ -1331,6 +1331,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			@Override
 			public void run()
 			{
+				List<SimpleUserNode> selected = getSelectedTreeNodes();
+				UserNodeType type = selected.size() == 1 ? selected.get(0).getRealType() : null;
+				includeModulesToggleButton.setEnabled(type == null || !(type == UserNodeType.MEDIA || type == UserNodeType.MEDIA_FOLDER));
 				Point pt = listMenuToolbar.toDisplay(0, listMenuToolbar.getSize().y);
 				listDropDownMenu.setLocation(pt.x, pt.y);
 				listDropDownMenu.setVisible(true);
