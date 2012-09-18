@@ -164,6 +164,7 @@ public class Messages extends NLS
 	public static String LabelJavaBeansPalette;
 
 	public static String LabelButtonsPalette;
+	public static String LabelPartsPalette;
 
 	public static String ErrorWarningPreferencePage_potentialDrawBacks;
 	public static String ErrorWarningPreferencePage_tooManyColumns;
