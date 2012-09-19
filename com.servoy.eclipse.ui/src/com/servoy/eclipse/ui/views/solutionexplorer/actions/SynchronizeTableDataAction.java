@@ -35,6 +35,7 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.core.util.UIUtils.YesYesToAllNoNoToAllAsker;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
@@ -261,6 +262,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 		}
 
 		StringBuilder sb = new StringBuilder();
+		YesYesToAllNoNoToAllAsker askYesYesToAllNoNoToAllAsker = new YesYesToAllNoNoToAllAsker(shell, "Table is not empty");
 		for (Table table : tables)
 		{
 			IFile dataFile = dmm.getMetaDataFile(table.getDataSource());
@@ -283,11 +285,10 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 				QuerySelect query = MetaDataUtils.createTableMetadataQuery(table, null);
 				IDataSet ds = ApplicationServerSingleton.get().getDataServer().performQuery(ApplicationServerSingleton.get().getClientId(),
 					table.getServerName(), null, query, null, false, 0, 1, IDataServer.META_DATA_QUERY, null);
-				if (ds.getRowCount() > 0 &&
-					!UIUtils.askQuestion(shell, "Table is not empty", "Table " + table.getName() + " in server " + table.getServerName() +
-						" is not empty, data synchronize will delete existing data, continue?"))
+				askYesYesToAllNoNoToAllAsker.setMessage("Table " + table.getName() + " in server " + table.getServerName() +
+					" is not empty, data synchronize will delete existing data, continue?");
+				if (ds.getRowCount() > 0 && !askYesYesToAllNoNoToAllAsker.userSaidYes())
 				{
-					// don't delete
 					continue;
 				}
 
@@ -316,7 +317,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 				UIUtils.reportWarning("Error synchronizing table", "Error synchronizing table: " + e.getMessage());
 			}
 		}
-		UIUtils.showInformation(shell, "Table synchronization", sb.toString());
+		if (sb.length() > 0) UIUtils.showInformation(shell, "Table synchronization", sb.toString());
 	}
 
 	private void generateTableDataFile(List<Table> tables)
