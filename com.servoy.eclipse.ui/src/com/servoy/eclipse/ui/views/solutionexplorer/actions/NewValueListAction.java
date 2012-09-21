@@ -37,9 +37,11 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
@@ -108,8 +110,28 @@ public class NewValueListAction extends Action implements ISelectionChangedListe
 		{
 			public String isValid(String newText)
 			{
-				boolean valid = IdentDocumentValidator.isJavaIdentifier(newText);
-				return valid ? null : (newText.length() == 0 ? "" : "Invalid value list name");
+				String message = null;
+				if (newText.length() == 0)
+				{
+					message = "";
+				}
+				else if (!IdentDocumentValidator.isJavaIdentifier(newText))
+				{
+					message = "Invalid value list name";
+				}
+				else
+				{
+					try
+					{
+						ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(newText, -1,
+							new ValidatorSearchContext(this, IRepository.VALUELISTS), false);
+					}
+					catch (RepositoryException e)
+					{
+						message = e.getMessage();
+					}
+				}
+				return message;
 			}
 		});
 		int res = nameDialog.open();
