@@ -18,6 +18,7 @@ package com.servoy.eclipse.core;
 
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Dictionary;
@@ -48,9 +49,12 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IPartListener;
+import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbenchPage;
@@ -58,13 +62,16 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PerspectiveAdapter;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.activities.IActivityManager;
 import org.eclipse.ui.activities.IWorkbenchActivitySupport;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.cheatsheets.OpenCheatSheetAction;
+import org.eclipse.ui.internal.Perspective;
 import org.eclipse.ui.internal.ViewIntroAdapterPart;
+import org.eclipse.ui.internal.WorkbenchPage;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.cheatsheets.ICheatSheetResource;
 import org.eclipse.ui.internal.registry.ActionSetRegistry;
@@ -74,6 +81,8 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.Scriptable;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.prefs.BackingStoreException;
+import org.osgi.service.prefs.Preferences;
 import org.osgi.service.url.URLConstants;
 import org.osgi.service.url.URLStreamHandlerService;
 
@@ -291,6 +300,97 @@ public class Activator extends Plugin
 						}
 					}
 				}
+
+				/* Hide the Enxternal Tools set */
+				final IEclipsePreferences eclipsePref = new InstanceScope().getNode(PLUGIN_ID);
+				final Preferences node = eclipsePref.node("perspectivesAlreadyActivated"); //the activated perspectives will be stored in this node
+				final IWorkbenchWindow workbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+
+				WorkbenchPage workbenchPage = (WorkbenchPage)workbenchWindow.getActivePage();
+				try
+				{
+					if (node.keys().length == 0)
+					{
+						//hide ExternalToolsSet if first time startup
+						workbenchPage.hideActionSet("org.eclipse.ui.externaltools.ExternalToolsSet");
+
+						//remove ExternalToolsSet from current perspective - if a restart occurs, the action set has to remain removed
+						IPerspectiveDescriptor perspectiveDescriptor = workbenchPage.getPerspective();
+						Perspective perspective = workbenchPage.findPerspective(perspectiveDescriptor);
+						ArrayList<IActionSetDescriptor> toRemove = new ArrayList<IActionSetDescriptor>(); // list of the action sets to be removed
+						if (perspective != null)
+						{
+							for (IActionSetDescriptor element : actionSets)
+							{
+								if (element.getId().indexOf("org.eclipse.ui.externaltools.ExternalToolsSet") > -1)
+								{
+									toRemove.add(element);
+								}
+							}
+							perspective.turnOffActionSets(toRemove.toArray(new IActionSetDescriptor[toRemove.size()]));
+							perspective.updateActionBars();
+						}
+
+						//add current perspective to the list of already activated perspectives
+						node.putBoolean(perspectiveDescriptor.getId(), false);
+						try
+						{
+							node.flush();
+						}
+						catch (BackingStoreException e)
+						{
+							ServoyLog.logError("Failed to persist changes.", e);
+						}
+
+					}
+				}
+				catch (BackingStoreException e)
+				{
+					ServoyLog.logError("Failed to access node keys.", e);
+				}
+
+				//add perspective activated listener to remove External Tools set from any activated perspective
+				workbenchWindow.addPerspectiveListener(new PerspectiveAdapter()
+				{
+
+					@Override
+					public void perspectiveActivated(IWorkbenchPage page, IPerspectiveDescriptor perspectiveDescriptor)
+					{
+						if (node.getBoolean(perspectiveDescriptor.getId(), true))
+						{
+							super.perspectiveActivated(page, perspectiveDescriptor);
+							if (workbenchWindow.getActivePage() instanceof WorkbenchPage)
+							{
+								WorkbenchPage worbenchPage = (WorkbenchPage)workbenchWindow.getActivePage();
+								Perspective perspective = worbenchPage.findPerspective(perspectiveDescriptor);
+								ArrayList<IActionSetDescriptor> toRemove = new ArrayList<IActionSetDescriptor>();
+								if (perspective != null)
+								{
+									ActionSetRegistry reg = WorkbenchPlugin.getDefault().getActionSetRegistry();
+									IActionSetDescriptor[] actionSets = reg.getActionSets();
+									for (IActionSetDescriptor actionSetDescriptor : actionSets)
+									{
+										if (actionSetDescriptor.getId().indexOf("org.eclipse.ui.externaltools.ExternalToolsSet") > -1)
+										{
+											toRemove.add(actionSetDescriptor);
+										}
+									}
+									perspective.turnOffActionSets(toRemove.toArray(new IActionSetDescriptor[toRemove.size()]));
+								}
+							}
+							node.putBoolean(perspectiveDescriptor.getId(), false);
+							try
+							{
+								node.flush();
+							}
+							catch (BackingStoreException e)
+							{
+								ServoyLog.logError("Failed to persist changes.", e);
+							}
+						}
+					}
+				});
+
 
 				try
 				{
