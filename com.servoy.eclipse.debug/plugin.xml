@@ -149,9 +149,10 @@
       <nodeHandler
             class="com.servoy.eclipse.debug.script.ServoyTypeInferenceFactory">
       </nodeHandler>
-      <runtimeTypeFactory
-            class="com.servoy.eclipse.debug.script.JavaClassRuntimeTypeFactory">
-      </runtimeTypeFactory>
+      <runtimeType
+            class="com.servoy.eclipse.debug.script.AnyType"
+            name="Any">
+      </runtimeType>
    </extension>
    <extension
          point="org.eclipse.dltk.javascript.ui.typeInfoLabelProvider">

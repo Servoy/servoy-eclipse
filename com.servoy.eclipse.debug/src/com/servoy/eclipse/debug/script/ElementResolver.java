@@ -24,7 +24,6 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.dltk.internal.javascript.ti.IReferenceAttributes;
 import org.eclipse.dltk.javascript.typeinfo.IElementResolver;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.ITypeNames;
@@ -332,7 +331,7 @@ public class ElementResolver implements IElementResolver
 					TypeCreator.getImageDescriptorForFormEncapsulation(superForm.getEncapsulation()));
 				property.setDescription(TypeCreator.getDoc("_super", com.servoy.j2db.documentation.scripting.docs.Form.class, null));
 				property.setAttribute(TypeCreator.LAZY_VALUECOLLECTION, superForm);
-				property.setAttribute(IReferenceAttributes.SUPER_SCOPE, Boolean.TRUE);
+				property.setAttribute(ValueCollectionProvider.SUPER_SCOPE, Boolean.TRUE);
 				return property;
 			}
 			return null;

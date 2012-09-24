@@ -17,13 +17,9 @@
 
 package com.servoy.eclipse.debug.script;
 
-import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.compiler.problem.IValidationStatus;
 import org.eclipse.dltk.compiler.problem.ValidationStatus;
 import org.eclipse.dltk.internal.javascript.ti.IReferenceAttributes;
-import org.eclipse.dltk.javascript.ast.Expression;
-import org.eclipse.dltk.javascript.ast.JSNode;
-import org.eclipse.dltk.javascript.ast.PropertyExpression;
 import org.eclipse.dltk.javascript.core.JavaScriptProblems;
 import org.eclipse.dltk.javascript.typeinference.IValueCollection;
 import org.eclipse.dltk.javascript.typeinference.IValueReference;
@@ -32,11 +28,13 @@ import org.eclipse.dltk.javascript.typeinfo.IRMethod;
 import org.eclipse.dltk.javascript.typeinfo.IRVariable;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInferencerVisitor;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
+import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
 import org.eclipse.dltk.javascript.typeinfo.model.Method;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.Visibility;
-import org.eclipse.dltk.javascript.validation.IValidatorExtension;
+import org.eclipse.dltk.javascript.validation.IMemberValidationEvent;
+import org.eclipse.dltk.javascript.validation.IValidatorExtension2;
 
 import com.servoy.eclipse.ui.search.ScriptVariableSearch;
 import com.servoy.j2db.persistence.Form;
@@ -46,7 +44,7 @@ import com.servoy.j2db.persistence.ScriptVariable;
  * @author jcompagner
  *
  */
-public class ServoyScriptValidator implements IValidatorExtension
+public class ServoyScriptValidator implements IValidatorExtension2
 {
 
 	private final ITypeInfoContext context;
@@ -60,6 +58,23 @@ public class ServoyScriptValidator implements IValidatorExtension
 	{
 		this.context = context;
 		this.visitor = visitor;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.dltk.javascript.validation.IValidatorExtension2#validateTypeExpression(org.eclipse.dltk.javascript.typeinfo.model.JSType)
+	 */
+	public IValidationStatus validateTypeExpression(JSType type)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public IValidationStatus validateAccessibility(Type type)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	/*
@@ -87,7 +102,7 @@ public class ServoyScriptValidator implements IValidatorExtension
 			IRVariable variable = (IRVariable)reference.getAttribute(IReferenceAttributes.R_VARIABLE);
 			if (variable != null)
 			{
-				if (variable.isPrivate())
+				if (variable.getVisibility() == Visibility.PRIVATE)
 				{
 					ScriptVariable scriptVariable = form.getScriptVariable(variable.getName());
 					if (scriptVariable != null)
@@ -107,28 +122,18 @@ public class ServoyScriptValidator implements IValidatorExtension
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.dltk.javascript.validation.IValidatorExtension#validateAccessibility(org.eclipse.dltk.ast.ASTNode,
-	 * org.eclipse.dltk.javascript.typeinfo.model.Member)
-	 */
-	public IValidationStatus validateAccessibility(ASTNode node, Member member)
+	public IValidationStatus validateAccessibility(Member member)
 	{
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.dltk.javascript.validation.IValidatorExtension#validateAccessibility(org.eclipse.dltk.javascript.ast.Expression,
-	 * org.eclipse.dltk.javascript.typeinference.IValueReference, org.eclipse.dltk.javascript.typeinfo.IRMember)
-	 */
-	public IValidationStatus validateAccessibility(Expression expression, IValueReference reference, IRMember member)
+	public IValidationStatus validateAccessibility(IMemberValidationEvent event)
 	{
 		Visibility visibility = null;
 		String name = null;
 		boolean method = false;
+		IRMember member = event.getRMember();
+		IValueReference reference = event.getReference();
 		if (member == null)
 		{
 			Object element = reference.getAttribute(IReferenceAttributes.ELEMENT);
@@ -147,6 +152,10 @@ public class ServoyScriptValidator implements IValidatorExtension
 					visibility = Visibility.PRIVATE;
 				}
 			}
+			else if (reference.getAttribute(ValueCollectionProvider.PRIVATE) == Boolean.TRUE)
+			{
+				return generateValidationStatus(name, member instanceof IRMethod);
+			}
 		}
 		else
 		{
@@ -156,16 +165,17 @@ public class ServoyScriptValidator implements IValidatorExtension
 		}
 		if (visibility == Visibility.PRIVATE)
 		{
-			if (reference.getParent() != null)
+			// private methods of a super form.. see ValueCollectionProvider.getSuperFormContext
+			if (reference.getParent() != null || reference.getAttribute(ValueCollectionProvider.PRIVATE) == Boolean.TRUE)
 			{
-				return generateValidationStatus(expression, name, method);
+				return generateValidationStatus(name, method);
 			}
 		}
 		else if (visibility == Visibility.PROTECTED)
 		{
-			if (reference.getParent() != null && reference.getParent().getAttribute(IReferenceAttributes.SUPER_SCOPE) == null)
+			if (reference.getParent() != null && reference.getParent().getAttribute(ValueCollectionProvider.SUPER_SCOPE) == null)
 			{
-				return generateValidationStatus(expression, name, method);
+				return generateValidationStatus(name, method);
 			}
 		}
 		return null;
@@ -175,20 +185,15 @@ public class ServoyScriptValidator implements IValidatorExtension
 	 * @param expression
 	 * @param member
 	 */
-	private ValidationStatus generateValidationStatus(Expression expression, String name, boolean isMethod)
+	private ValidationStatus generateValidationStatus(String name, boolean isMethod)
 	{
-		JSNode node = expression;
-		if (expression instanceof PropertyExpression)
-		{
-			node = ((PropertyExpression)expression).getProperty();
-		}
 		if (isMethod)
 		{
-			return new ValidationStatus(JavaScriptProblems.PRIVATE_FUNCTION, "The function " + name + "() is private", node.sourceStart(), node.sourceEnd());
+			return new ValidationStatus(JavaScriptProblems.PRIVATE_FUNCTION, "The function " + name + "() is private");
 		}
 		else
 		{
-			return new ValidationStatus(JavaScriptProblems.PRIVATE_VARIABLE, "The variable " + name + " is private", node.sourceStart(), node.sourceEnd());
+			return new ValidationStatus(JavaScriptProblems.PRIVATE_VARIABLE, "The variable " + name + " is private");
 		}
 	}
 

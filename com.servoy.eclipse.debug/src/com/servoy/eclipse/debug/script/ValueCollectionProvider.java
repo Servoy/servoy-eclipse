@@ -42,6 +42,7 @@ import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.model.Element;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
+import org.eclipse.dltk.javascript.typeinfo.model.Visibility;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -61,6 +62,9 @@ import com.servoy.j2db.util.Pair;
 @SuppressWarnings("nls")
 public class ValueCollectionProvider implements IMemberEvaluator
 {
+	public static final String PRIVATE = "PRIVATE";
+	public static final String SUPER_SCOPE = "SUPER_SCOPE";
+
 	private static final Map<IFile, SoftReference<Pair<Long, IValueCollection>>> scriptCache = new ConcurrentHashMap<IFile, SoftReference<Pair<Long, IValueCollection>>>();
 
 
@@ -79,9 +83,9 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				IValueCollection collection = ValueCollectionFactory.createValueCollection();
 				ValueCollectionFactory.copyInto(collection, valueCollection);
 				collection = getSuperFormContext(context, form, collection);
-				if (member.getAttribute(IReferenceAttributes.SUPER_SCOPE) != null)
+				if (member.getAttribute(SUPER_SCOPE) != null)
 				{
-					((IValueProvider)collection).getValue().setAttribute(IReferenceAttributes.SUPER_SCOPE, Boolean.TRUE);
+					((IValueProvider)collection).getValue().setAttribute(SUPER_SCOPE, Boolean.TRUE);
 				}
 				return collection;
 			}
@@ -228,9 +232,9 @@ public class ValueCollectionProvider implements IMemberEvaluator
 							{
 								Object attribute = chld.getAttribute(IReferenceAttributes.METHOD);
 								if (attribute == null) attribute = chld.getAttribute(IReferenceAttributes.VARIABLE);
-								if (attribute instanceof IMember && ((IMember)attribute).isPrivate())
+								if (attribute instanceof IMember && ((IMember)attribute).getVisibility() == Visibility.PRIVATE)
 								{
-									chld.setAttribute(IReferenceAttributes.PRIVATE, Boolean.TRUE);
+									chld.setAttribute(PRIVATE, Boolean.TRUE);
 								}
 							}
 						}

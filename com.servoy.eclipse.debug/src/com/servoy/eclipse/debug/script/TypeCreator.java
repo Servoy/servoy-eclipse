@@ -42,8 +42,11 @@ import javax.swing.Icon;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.dltk.internal.javascript.ti.IReferenceAttributes;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.ITypeNames;
@@ -113,17 +116,14 @@ import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRootObject;
-import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.LiteralDataprovider;
-import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
-import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.plugins.IBeanClassProvider;
 import com.servoy.j2db.plugins.IClientPlugin;
@@ -462,7 +462,8 @@ public class TypeCreator extends TypeCache
 		Type type = TypeInfoModelFactory.eINSTANCE.createType();
 		type.setName(name);
 		type.setKind(TypeKind.JAVA);
-		type.setAttribute(JavaClassRuntimeTypeFactory.JAVA_CLASS, clz);
+		type.setAttribute(JavaRuntimeType.JAVA_CLASS, clz);
+		type.setMetaType(JavaRuntimeType.JAVA_META_TYPE);
 
 		java.lang.reflect.Method[] methods = clz.getMethods();
 		Field[] fields = clz.getFields();
@@ -621,7 +622,18 @@ public class TypeCreator extends TypeCache
 					{
 						public void persistChanges(Collection<IPersist> changes)
 						{
-							flushCache();
+							Job job = new Job("clearing cache")
+							{
+
+								@Override
+								public IStatus run(IProgressMonitor monitor)
+								{
+									flushCache();
+									return Status.OK_STATUS;
+								}
+							};
+							job.setRule(ResourcesPlugin.getWorkspace().getRoot());
+							job.schedule();
 						}
 					});
 				}
@@ -1358,71 +1370,6 @@ public class TypeCreator extends TypeCache
 			buckets.put(bucket, bucket);
 		}
 		return super.addType(bucket, type);
-	}
-
-	protected Member createMethod(String context, ScriptMethod sm, ImageDescriptor image)
-	{
-		return createMethod(context, sm, image, null);
-	}
-
-	/**
-	 * @param sm
-	 * @return
-	 */
-	protected Member createMethod(String context, ScriptMethod sm, ImageDescriptor image, String fileName)
-	{
-		Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
-		method.setName(sm.getName());
-
-		MethodArgument[] arguments = sm.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
-		if (arguments != null && arguments.length > 0)
-		{
-			EList<Parameter> parameters = method.getParameters();
-			for (MethodArgument argument : arguments)
-			{
-				Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
-				parameter.setKind(ParameterKind.NORMAL);
-				parameter.setName(argument.getName());
-				parameter.setType(getTypeRef(context, argument.getType().getName()));
-				parameters.add(parameter);
-			}
-		}
-
-
-		String type = sm.getSerializableRuntimeProperty(IScriptProvider.TYPE);
-		if (type != null)
-		{
-			method.setType(getTypeRef(context, type));
-		}
-		String comment = sm.getRuntimeProperty(IScriptProvider.COMMENT);
-		if (comment == null)
-		{
-			String declaration = sm.getDeclaration();
-			int commentStart = declaration.indexOf("/**");
-			if (commentStart != -1)
-			{
-				int commentEnd = declaration.indexOf("*/", commentStart);
-				comment = declaration.substring(commentStart, commentEnd);
-			}
-		}
-		if (comment != null)
-		{
-			if (comment.lastIndexOf("@deprecated") != -1)
-			{
-				method.setDeprecated(true);
-			}
-
-			method.setDescription(getParsedComment(comment));
-		}
-		if (image != null)
-		{
-			method.setAttribute(IMAGE_DESCRIPTOR, image);
-		}
-		if (fileName != null)
-		{
-			method.setAttribute(RESOURCE, fileName);
-		}
-		return method;
 	}
 
 	public Property createProperty(String context, String name, boolean readonly, String typeName, String description, ImageDescriptor image)
@@ -2281,7 +2228,7 @@ public class TypeCreator extends TypeCache
 				if (extendsForm != null)
 				{
 					clone.setAttribute(TypeCreator.LAZY_VALUECOLLECTION, extendsForm);
-					clone.setAttribute(IReferenceAttributes.SUPER_SCOPE, Boolean.TRUE);
+					clone.setAttribute(ValueCollectionProvider.SUPER_SCOPE, Boolean.TRUE);
 				}
 				clone.setVisible(false);
 				overwrittenMembers.add(clone);
