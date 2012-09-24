@@ -796,9 +796,13 @@ public class SolutionSerializer
 			sb.append(" * // TODO generated, please specify type and doc for the params\n");
 			for (MethodArgument methodArgument : arguments)
 			{
-				sb.append(" * @param {");
-				sb.append(methodArgument.getType().toString());
-				sb.append("} ");
+				sb.append(" * @param ");
+				if (methodArgument.getType() != null && !methodArgument.getType().toString().endsWith("Any"))
+				{
+					sb.append("{");
+					sb.append(methodArgument.getType().toString());
+					sb.append("} ");
+				}
 				sb.append(methodArgument.getName());
 				if (methodArgument.getDescription() != null)
 				{
