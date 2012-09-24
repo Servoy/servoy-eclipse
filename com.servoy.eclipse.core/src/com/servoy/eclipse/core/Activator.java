@@ -309,42 +309,17 @@ public class Activator extends Plugin
 				final Preferences node = eclipsePref.node("perspectivesAlreadyActivated"); //the activated perspectives will be stored in this node
 				final IWorkbenchWindow workbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 
-				WorkbenchPage workbenchPage = (WorkbenchPage)workbenchWindow.getActivePage();
 				try
 				{
 					if (node.keys().length == 0)
 					{
 						//hide ExternalToolsSet if first time startup
+						WorkbenchPage workbenchPage = (WorkbenchPage)workbenchWindow.getActivePage();
 						workbenchPage.hideActionSet("org.eclipse.ui.externaltools.ExternalToolsSet");
 
 						//remove ExternalToolsSet from current perspective - if a restart occurs, the action set has to remain removed
 						IPerspectiveDescriptor perspectiveDescriptor = workbenchPage.getPerspective();
-						Perspective perspective = workbenchPage.findPerspective(perspectiveDescriptor);
-						ArrayList<IActionSetDescriptor> toRemove = new ArrayList<IActionSetDescriptor>(); // list of the action sets to be removed
-						if (perspective != null)
-						{
-							for (IActionSetDescriptor element : actionSets)
-							{
-								if (element.getId().indexOf("org.eclipse.ui.externaltools.ExternalToolsSet") > -1)
-								{
-									toRemove.add(element);
-								}
-							}
-							perspective.turnOffActionSets(toRemove.toArray(new IActionSetDescriptor[toRemove.size()]));
-							perspective.updateActionBars();
-						}
-
-						//add current perspective to the list of already activated perspectives
-						node.putBoolean(perspectiveDescriptor.getId(), false);
-						try
-						{
-							node.flush();
-						}
-						catch (BackingStoreException e)
-						{
-							ServoyLog.logError("Failed to persist changes.", e);
-						}
-
+						turnOffExternalToolsActionSet(workbenchWindow, perspectiveDescriptor, node);
 					}
 				}
 				catch (BackingStoreException e)
@@ -362,34 +337,7 @@ public class Activator extends Plugin
 						if (node.getBoolean(perspectiveDescriptor.getId(), true))
 						{
 							super.perspectiveActivated(page, perspectiveDescriptor);
-							if (workbenchWindow.getActivePage() instanceof WorkbenchPage)
-							{
-								WorkbenchPage worbenchPage = (WorkbenchPage)workbenchWindow.getActivePage();
-								Perspective perspective = worbenchPage.findPerspective(perspectiveDescriptor);
-								ArrayList<IActionSetDescriptor> toRemove = new ArrayList<IActionSetDescriptor>();
-								if (perspective != null)
-								{
-									ActionSetRegistry reg = WorkbenchPlugin.getDefault().getActionSetRegistry();
-									IActionSetDescriptor[] actionSets = reg.getActionSets();
-									for (IActionSetDescriptor actionSetDescriptor : actionSets)
-									{
-										if (actionSetDescriptor.getId().indexOf("org.eclipse.ui.externaltools.ExternalToolsSet") > -1)
-										{
-											toRemove.add(actionSetDescriptor);
-										}
-									}
-									perspective.turnOffActionSets(toRemove.toArray(new IActionSetDescriptor[toRemove.size()]));
-								}
-							}
-							node.putBoolean(perspectiveDescriptor.getId(), false);
-							try
-							{
-								node.flush();
-							}
-							catch (BackingStoreException e)
-							{
-								ServoyLog.logError("Failed to persist changes.", e);
-							}
+							turnOffExternalToolsActionSet(workbenchWindow, perspectiveDescriptor, node);
 						}
 					}
 				});
@@ -436,6 +384,39 @@ public class Activator extends Plugin
 				});
 			}
 		});
+	}
+
+	private void turnOffExternalToolsActionSet(IWorkbenchWindow workbenchWindow, IPerspectiveDescriptor perspectiveDescriptor, Preferences node)
+	{
+		if (workbenchWindow.getActivePage() instanceof WorkbenchPage)
+		{
+			WorkbenchPage worbenchPage = (WorkbenchPage)workbenchWindow.getActivePage();
+			Perspective perspective = worbenchPage.findPerspective(perspectiveDescriptor);
+			ArrayList<IActionSetDescriptor> toRemove = new ArrayList<IActionSetDescriptor>();
+			if (perspective != null)
+			{
+				ActionSetRegistry reg = WorkbenchPlugin.getDefault().getActionSetRegistry();
+				IActionSetDescriptor[] actionSets = reg.getActionSets();
+				for (IActionSetDescriptor actionSetDescriptor : actionSets)
+				{
+					if (actionSetDescriptor.getId().indexOf("org.eclipse.ui.externaltools.ExternalToolsSet") > -1)
+					{
+						toRemove.add(actionSetDescriptor);
+						break;
+					}
+				}
+				perspective.turnOffActionSets(toRemove.toArray(new IActionSetDescriptor[toRemove.size()]));
+			}
+		}
+		node.putBoolean(perspectiveDescriptor.getId(), false);
+		try
+		{
+			node.flush();
+		}
+		catch (BackingStoreException e)
+		{
+			ServoyLog.logError("Failed to persist changes.", e);
+		}
 	}
 
 	public boolean isSqlExplorerLoaded()
