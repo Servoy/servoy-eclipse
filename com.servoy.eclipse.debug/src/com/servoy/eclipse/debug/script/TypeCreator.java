@@ -493,7 +493,9 @@ public class TypeCreator extends TypeCache
 			{
 				Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
 				parameter.setName("arg" + i);
-				parameter.setType(getJSType(context, parameterTypes[i]));
+				JSType jsType = getJSType(context, parameterTypes[i]);
+				// don't set any type of it is just Object, so that everything is excepted
+				if (!jsType.getName().equals("java.lang.Object")) parameter.setType(jsType);
 				parameters.add(parameter);
 			}
 			if (Modifier.isStatic(method.getModifiers()))
@@ -509,7 +511,7 @@ public class TypeCreator extends TypeCache
 	{
 		if (type != null && type != Void.class && type != void.class)
 		{
-			if (type == Object.class) return getTypeRef(context, ITypeNames.OBJECT);
+			if (type == Object.class) return getTypeRef(context, "java.lang.Object");
 			if (type.isArray())
 			{
 				Class< ? > componentType = type.getComponentType();
@@ -973,7 +975,7 @@ public class TypeCreator extends TypeCache
 							method.setDescription(getDoc(name, scriptObjectClass, parameterTypes)); // TODO name should be of parent.
 							if (returnTypeClz != null)
 							{
-								method.setType(getMemberTypeName(context, name, returnTypeClz, typeName));
+								method.setType(getMemberTypeName(context, name, returnTypeClz, typeName, false));
 							}
 							method.setAttribute(IMAGE_DESCRIPTOR, METHOD);
 							method.setStatic(type == STATIC_METHOD);
@@ -994,7 +996,7 @@ public class TypeCreator extends TypeCache
 											Class< ? > componentType = paramType.getComponentType();
 											if (param.isVarArgs())
 											{
-												parameter.setType(getMemberTypeName(context, name, componentType, typeName));
+												parameter.setType(getMemberTypeName(context, name, componentType, typeName, true));
 											}
 											else if (componentType == Object.class)
 											{
@@ -1002,12 +1004,12 @@ public class TypeCreator extends TypeCache
 											}
 											else
 											{
-												parameter.setType(TypeUtil.arrayOf(getMemberTypeName(context, name, componentType, typeName)));
+												parameter.setType(TypeUtil.arrayOf(getMemberTypeName(context, name, componentType, typeName, true)));
 											}
 										}
 										else if (paramType != null)
 										{
-											parameter.setType(getMemberTypeName(context, name, paramType, typeName));
+											parameter.setType(getMemberTypeName(context, name, paramType, typeName, true));
 										}
 										else
 										{
@@ -1050,7 +1052,7 @@ public class TypeCreator extends TypeCache
 						JSType returnType = null;
 						if (returnTypeClz != null)
 						{
-							returnType = getMemberTypeName(context, name, returnTypeClz, typeName);
+							returnType = getMemberTypeName(context, name, returnTypeClz, typeName, false);
 						}
 
 						boolean xmlDocumentedProperty = (scriptObject instanceof ITypedScriptObject);
@@ -1112,7 +1114,7 @@ public class TypeCreator extends TypeCache
 		}
 	}
 
-	protected final JSType getMemberTypeName(String context, String memberName, Class< ? > memberReturnType, String objectTypeName)
+	protected final JSType getMemberTypeName(String context, String memberName, Class< ? > memberReturnType, String objectTypeName, boolean convertObjectToAny)
 	{
 		int index = objectTypeName.indexOf('<');
 		int index2;
@@ -1151,7 +1153,7 @@ public class TypeCreator extends TypeCache
 			Class< ? > returnType = getReturnType(memberReturnType.getComponentType());
 			if (returnType != null)
 			{
-				JSType componentJSType = getMemberTypeName(context, memberName, returnType, objectTypeName);
+				JSType componentJSType = getMemberTypeName(context, memberName, returnType, objectTypeName, convertObjectToAny);
 				if (componentJSType != null)
 				{
 					return TypeUtil.arrayOf(componentJSType);
@@ -1168,7 +1170,11 @@ public class TypeCreator extends TypeCache
 		else
 		{
 			typeName = DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(memberReturnType);
-			addAnonymousClassType(typeName, memberReturnType);
+			if (convertObjectToAny && "Object".equals(typeName))
+			{
+				return null;
+			}
+			else addAnonymousClassType(typeName, memberReturnType);
 		}
 		return getTypeRef(context, typeName);
 	}
