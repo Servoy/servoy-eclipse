@@ -3521,17 +3521,17 @@ Column types in the datasource are inferred from the query result.
           <summary><![CDATA[Performs a query and saves the result in a datasource.]]></summary>
           <sample><![CDATA[// select customer data for order 1234
 /** @type {QBSelect<db:/example_data/customers>} */
-var q = databaseManager.createSelect("db:/example_data/customers")
-q.result.add(q.columns.address).add(q.columns.city).add(q.columns.country)
-q.where.add(q.joins.customers_to_orders.columns.orderid.eq(1234))
+var q = databaseManager.createSelect("db:/example_data/customers");
+q.result.add(q.columns.address).add(q.columns.city).add(q.columns.country);
+q.where.add(q.joins.customers_to_orders.columns.orderid.eq(1234));
 var uri = databaseManager.createDataSourceByQuery('mydata', q, 999); // the uri can be used to create a form using solution model
 
 // the uri can be used to create a form using solution model
-var myForm = solutionModel.newForm('newForm', uri, 'myStyleName', false, 800, 600)
-myForm.newTextField('city', 140, 20, 140,20)
+var myForm = solutionModel.newForm('newForm', uri, 'myStyleName', false, 800, 600);
+myForm.newTextField('city', 140, 20, 140,20);
 
 // the uri can be used to acces a foundset directly
-var fs = databaseManager.getFoundSet(uri)
+var fs = databaseManager.getFoundSet(uri);
 fs.loadAllRecords();]]></sample>
           <parameters>
             <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
@@ -3542,6 +3542,49 @@ fs.loadAllRecords();]]></sample>
             </parameter>
             <parameter name="max_returned_rows" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[The maximum number of rows returned by the query.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="createDataSourceByQuery">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
+            <argumentType typecode="java.lang.Number"/>
+            <argumentType typecode="[I"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[datasource containing the results of the query or null if the parameters are wrong.]]></return>
+          <description><![CDATA[Performs a query and saves the result in a datasource.
+Will throw an exception if anything went wrong when executing the query.
+Column types in the datasource are sent explicitly.
+
+<br>Table filters on the involved tables in the query are applied.]]></description>
+          <summary><![CDATA[Performs a query and saves the result in a datasource.]]></summary>
+          <sample><![CDATA[// select customer data for order 1234
+/** @type {QBSelect<db:/example_data/customers>} */
+var q = databaseManager.createSelect("db:/example_data/customers");
+q.result.add(q.columns.address).add(q.columns.city).add(q.columns.country);
+q.where.add(q.joins.customers_to_orders.columns.orderid.eq(1234));
+var uri = databaseManager.createDataSourceByQuery('mydata', q, 999, [JSColumn.TEXT, JSColumn.TEXT, JSColumn.TEXT]); 
+
+// the uri can be used to create a form using solution model
+var myForm = solutionModel.newForm('newForm', uri, 'myStyleName', false, 800, 600);
+myForm.newTextField('city', 140, 20, 140,20);
+
+// the uri can be used to acces a foundset directly
+var fs = databaseManager.getFoundSet(uri);
+fs.loadAllRecords();]]></sample>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[Data source name]]></description>
+            </parameter>
+            <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
+              <description><![CDATA[The query builder to be executed.]]></description>
+            </parameter>
+            <parameter name="max_returned_rows" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
+              <description><![CDATA[The maximum number of rows returned by the query.]]></description>
+            </parameter>
+            <parameter name="types" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[I">
+              <description><![CDATA[The column types]]></description>
             </parameter>
           </parameters>
         </function>
@@ -12770,6 +12813,28 @@ forms['newFormX'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
+        <function name="removeMethod">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if method was removed successfully , false otherwise]]></return>
+          <description><![CDATA[Removes a  form JSMethod - based on the specified code.]]></description>
+          <summary><![CDATA[Removes a  form JSMethod - based on the specified code.]]></summary>
+          <sample><![CDATA[var form = solutionModel.newForm('newForm1', null, null, true, 800, 600);
+var hello = form.newMethod('function aMethod(event){application.output("Hello world!");}');
+var removeMethod = form.newMethod('function tempMethod(event){ \
+									solutionModel.getForm(event.getFormName()).removeMethod("aMethod"); \
+									forms[event.getFormName()].controller.recreateUI();\
+									}');
+var button1 = form.newButton('Call method!',50,50,120,30,hello);
+var button2 = form.newButton('Remove Mehtod!',200,50,120,30,removeMethod);
+forms['newForm1'].controller.show();]]></sample>
+          <parameters>
+            <parameter name="code">
+              <description><![CDATA[the specified code for the new method]]></description>
+            </parameter>
+          </parameters>
+        </function>
         <function name="removePart">
           <argumentsTypes>
             <argumentType typecode="int"/>
@@ -12851,6 +12916,26 @@ forms['newFormX'].controller.show();]]></sample>
           <parameters>
             <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the specified name of the JSTabPanel to be removed]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="removeVariable">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if removed, false otherwise (ex: no var with that name)]]></return>
+          <description><![CDATA[Removes a form JSVariable - based on the name of the variable object.]]></description>
+          <summary><![CDATA[Removes a form JSVariable - based on the name of the variable object.]]></summary>
+          <sample><![CDATA[var form = solutionModel.newForm('Form2', null, null, true, 800, 600);
+var variable = form.newVariable('myVar', JSVariable.TEXT);
+variable.defaultValue = "'This is a default value (with triple quotes)!'";
+application.output("var before deletion:"+ variable);
+form.removeVariable('myVar');
+var variableAfterDeletion = form.getVariable('myVar');
+application.output("var after deletion:"+ variableAfterDeletion);]]></sample>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified name of the variable]]></description>
             </parameter>
           </parameters>
         </function>
@@ -41987,11 +42072,30 @@ var retval = utils.stringRightWords('this is a test',3);]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double"><![CDATA[the resulting number]]></return>
           <description><![CDATA[Filters characters out of from a string and leaves digits, returns the number. Uses locale decimal separator.]]></description>
           <summary><![CDATA[Filters characters out of from a string and leaves digits, returns the number.]]></summary>
-          <sample><![CDATA[//returns '65567'
+          <sample><![CDATA[//returns 65567
 var retval = utils.stringToNumber('fg65gf567');]]></sample>
           <parameters>
             <parameter name="textString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the text to process]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="stringToNumber">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="double"><![CDATA[the resulting number]]></return>
+          <description><![CDATA[Filters characters out of from a string and leaves digits, returns the number. Decimal separator is specified as parameter.]]></description>
+          <summary><![CDATA[Filters characters out of from a string and leaves digits, returns the number.]]></summary>
+          <sample><![CDATA[//returns 65.567
+var retval = utils.stringToNumber('fg65gf.567','.');]]></sample>
+          <parameters>
+            <parameter name="textString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the text to process]]></description>
+            </parameter>
+            <parameter name="decimalSeparator" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[decimal separator]]></description>
             </parameter>
           </parameters>
         </function>
