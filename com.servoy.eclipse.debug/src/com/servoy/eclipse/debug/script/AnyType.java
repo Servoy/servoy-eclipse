@@ -8,7 +8,7 @@ public class AnyType implements IRType
 {
 	public String getName()
 	{
-		return "Any";
+		return "Object";
 	}
 
 	public TypeCompatibility isAssignableFrom(IRType type)

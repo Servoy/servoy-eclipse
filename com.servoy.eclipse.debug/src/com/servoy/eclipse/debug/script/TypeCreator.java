@@ -979,7 +979,7 @@ public class TypeCreator extends TypeCache
 							method.setDescription(getDoc(name, scriptObjectClass, parameterTypes)); // TODO name should be of parent.
 							if (returnTypeClz != null)
 							{
-								method.setType(getMemberTypeName(context, name, returnTypeClz, typeName, false));
+								method.setType(getMemberTypeName(context, name, returnTypeClz, typeName));
 							}
 							method.setAttribute(IMAGE_DESCRIPTOR, METHOD);
 							method.setStatic(type == STATIC_METHOD);
@@ -1000,7 +1000,7 @@ public class TypeCreator extends TypeCache
 											Class< ? > componentType = paramType.getComponentType();
 											if (param.isVarArgs())
 											{
-												parameter.setType(getMemberTypeName(context, name, componentType, typeName, true));
+												parameter.setType(getMemberTypeName(context, name, componentType, typeName));
 											}
 											else if (componentType == Object.class)
 											{
@@ -1008,12 +1008,12 @@ public class TypeCreator extends TypeCache
 											}
 											else
 											{
-												parameter.setType(TypeUtil.arrayOf(getMemberTypeName(context, name, componentType, typeName, true)));
+												parameter.setType(TypeUtil.arrayOf(getMemberTypeName(context, name, componentType, typeName)));
 											}
 										}
 										else if (paramType != null)
 										{
-											parameter.setType(getMemberTypeName(context, name, paramType, typeName, true));
+											parameter.setType(getMemberTypeName(context, name, paramType, typeName));
 										}
 										else
 										{
@@ -1056,7 +1056,7 @@ public class TypeCreator extends TypeCache
 						JSType returnType = null;
 						if (returnTypeClz != null)
 						{
-							returnType = getMemberTypeName(context, name, returnTypeClz, typeName, false);
+							returnType = getMemberTypeName(context, name, returnTypeClz, typeName);
 						}
 
 						boolean xmlDocumentedProperty = (scriptObject instanceof ITypedScriptObject);
@@ -1118,7 +1118,7 @@ public class TypeCreator extends TypeCache
 		}
 	}
 
-	protected final JSType getMemberTypeName(String context, String memberName, Class< ? > memberReturnType, String objectTypeName, boolean convertObjectToAny)
+	protected final JSType getMemberTypeName(String context, String memberName, Class< ? > memberReturnType, String objectTypeName)
 	{
 		int index = objectTypeName.indexOf('<');
 		int index2;
@@ -1155,9 +1155,9 @@ public class TypeCreator extends TypeCache
 		if (memberReturnType.isArray())
 		{
 			Class< ? > returnType = getReturnType(memberReturnType.getComponentType());
-			if (returnType != null)
+			if (returnType != null && returnType != Object.class)
 			{
-				JSType componentJSType = getMemberTypeName(context, memberName, returnType, objectTypeName, convertObjectToAny);
+				JSType componentJSType = getMemberTypeName(context, memberName, returnType, objectTypeName);
 				if (componentJSType != null)
 				{
 					return TypeUtil.arrayOf(componentJSType);
@@ -1174,9 +1174,10 @@ public class TypeCreator extends TypeCache
 		else
 		{
 			typeName = DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(memberReturnType);
-			if (convertObjectToAny && "Object".equals(typeName))
+			// always just convert plain Object to Any so that it will map on both js and java Object
+			if ("Object".equals(typeName))
 			{
-				return null;
+				typeName = "Any";
 			}
 			else addAnonymousClassType(typeName, memberReturnType);
 		}
@@ -1640,8 +1641,8 @@ public class TypeCreator extends TypeCache
 	 */
 	private static Class< ? > getReturnType(Class< ? > returnType)
 	{
-		if (returnType == Object.class || returnType == null) return null;
-		if (returnType.isArray()) return returnType;
+		if (returnType == null) return null;
+		if (returnType == Object.class || returnType.isArray()) return returnType;
 		if (!returnType.isAssignableFrom(Void.class) && !returnType.isAssignableFrom(void.class))
 		{
 			if (returnType.isAssignableFrom(Record.class))

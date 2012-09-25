@@ -19,6 +19,8 @@ package com.servoy.eclipse.debug.script;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.dltk.javascript.typeinfo.IRType;
+import org.eclipse.dltk.javascript.typeinfo.RTypes;
 import org.eclipse.dltk.javascript.typeinfo.model.Element;
 import org.eclipse.dltk.javascript.typeinfo.model.Method;
 import org.eclipse.dltk.javascript.typeinfo.model.Parameter;
@@ -118,7 +120,8 @@ public class ElementLabelProvider implements IElementLabelProvider
 			if (method.getType() != null)
 			{
 				nameBuffer.append(": ");
-				nameBuffer.append(method.getType().getName());
+				IRType type = RTypes.create(method.getType());
+				nameBuffer.append(type.getName());
 			}
 			return nameBuffer.toString();
 		}
