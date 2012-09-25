@@ -152,10 +152,6 @@ public class ServoyScriptValidator implements IValidatorExtension2
 					visibility = Visibility.PRIVATE;
 				}
 			}
-			else if (reference.getAttribute(ValueCollectionProvider.PRIVATE) == Boolean.TRUE)
-			{
-				return generateValidationStatus(name, member instanceof IRMethod);
-			}
 		}
 		else
 		{
