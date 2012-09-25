@@ -678,7 +678,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	 * @param t the table who's information is to be written.
 	 * @throws RepositoryException if the info cannot be created because of some reason.
 	 */
-	protected void writeSecurityInfo(String serverName, String tableName, boolean later) throws RepositoryException
+	public void writeSecurityInfo(String serverName, String tableName, boolean later) throws RepositoryException
 	{
 		IPath path = new Path(DataModelManager.getRelativeServerPath(serverName) + IPath.SEPARATOR + getFileName(tableName));
 		final IFile file = resourcesProject.getFile(path);

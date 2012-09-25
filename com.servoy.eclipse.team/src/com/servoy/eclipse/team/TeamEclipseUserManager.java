@@ -72,7 +72,7 @@ public class TeamEclipseUserManager extends WorkspaceUserManager
 	}
 
 	@Override
-	protected void writeSecurityInfo(String serverName, String tableName, boolean later) throws RepositoryException
+	public void writeSecurityInfo(String serverName, String tableName, boolean later) throws RepositoryException
 	{
 		try
 		{
