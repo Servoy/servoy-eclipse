@@ -34,6 +34,8 @@ import org.eclipse.swt.widgets.Label;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.repository.EclipseUserManager;
+import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager.SecurityInfo;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.TableEditor;
@@ -339,10 +341,21 @@ public class TableSettingsComposite extends Group
 				String group = groups.next();
 				Integer access = securityInfo.get(group);
 				Table t = tableEditor.getTable();
-				for (String columnName : t.getColumnNames())
+				EclipseUserManager userManager = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager();
+				int writeMode = userManager.getWriteMode();
+				try
 				{
-					ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().setTableSecurityAccess(
-						ApplicationServerSingleton.get().getClientId(), group, access, t.getServerName(), t.getName(), columnName);
+					userManager.setWriteMode(WorkspaceUserManager.WRITE_MODE_MANUAL);
+					for (String columnName : t.getColumnNames())
+					{
+						userManager.setTableSecurityAccess(ApplicationServerSingleton.get().getClientId(), group, access, t.getServerName(), t.getName(),
+							columnName);
+					}
+					userManager.writeSecurityInfo(t.getServerName(), t.getName(), false);
+				}
+				finally
+				{
+					userManager.setWriteMode(writeMode);
 				}
 			}
 			securityInfo.clear();

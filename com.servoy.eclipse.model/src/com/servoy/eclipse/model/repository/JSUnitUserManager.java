@@ -120,7 +120,7 @@ public final class JSUnitUserManager extends WorkspaceUserManager
 	 * @see com.servoy.eclipse.model.repository.WorkspaceUserManager#writeSecurityInfo(java.lang.String, java.lang.String, boolean)
 	 */
 	@Override
-	protected void writeSecurityInfo(String serverName, String tableName, boolean later) throws RepositoryException
+	public void writeSecurityInfo(String serverName, String tableName, boolean later) throws RepositoryException
 	{
 	}
 
