@@ -3515,7 +3515,7 @@ databaseManager.saveData();
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[datasource containing the results of the query or null if the parameters are wrong.]]></return>
           <description><![CDATA[Performs a query and saves the result in a datasource.
 Will throw an exception if anything went wrong when executing the query.
-Column types in the datasource are inferred from the query result.
+Column types in the datasource are inferred from the query result or can be explicitly specified.
 
 <br>Table filters on the involved tables in the query are applied.]]></description>
           <summary><![CDATA[Performs a query and saves the result in a datasource.]]></summary>
@@ -3524,7 +3524,8 @@ Column types in the datasource are inferred from the query result.
 var q = databaseManager.createSelect("db:/example_data/customers");
 q.result.add(q.columns.address).add(q.columns.city).add(q.columns.country);
 q.where.add(q.joins.customers_to_orders.columns.orderid.eq(1234));
-var uri = databaseManager.createDataSourceByQuery('mydata', q, 999); // the uri can be used to create a form using solution model
+var uri = databaseManager.createDataSourceByQuery('mydata', q, 999); 
+//var uri = databaseManager.createDataSourceByQuery('mydata', q, 999, [JSColumn.TEXT, JSColumn.TEXT, JSColumn.TEXT]); 
 
 // the uri can be used to create a form using solution model
 var myForm = solutionModel.newForm('newForm', uri, 'myStyleName', false, 800, 600);
@@ -3555,7 +3556,7 @@ fs.loadAllRecords();]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[datasource containing the results of the query or null if the parameters are wrong.]]></return>
           <description><![CDATA[Performs a query and saves the result in a datasource.
 Will throw an exception if anything went wrong when executing the query.
-Column types in the datasource are sent explicitly.
+Column types in the datasource are inferred from the query result or can be explicitly specified.
 
 <br>Table filters on the involved tables in the query are applied.]]></description>
           <summary><![CDATA[Performs a query and saves the result in a datasource.]]></summary>
@@ -3564,7 +3565,8 @@ Column types in the datasource are sent explicitly.
 var q = databaseManager.createSelect("db:/example_data/customers");
 q.result.add(q.columns.address).add(q.columns.city).add(q.columns.country);
 q.where.add(q.joins.customers_to_orders.columns.orderid.eq(1234));
-var uri = databaseManager.createDataSourceByQuery('mydata', q, 999, [JSColumn.TEXT, JSColumn.TEXT, JSColumn.TEXT]); 
+var uri = databaseManager.createDataSourceByQuery('mydata', q, 999); 
+//var uri = databaseManager.createDataSourceByQuery('mydata', q, 999, [JSColumn.TEXT, JSColumn.TEXT, JSColumn.TEXT]); 
 
 // the uri can be used to create a form using solution model
 var myForm = solutionModel.newForm('newForm', uri, 'myStyleName', false, 800, 600);
@@ -3599,10 +3601,11 @@ fs.loadAllRecords();]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[datasource containing the results of the query or null if the parameters are wrong.]]></return>
           <description><![CDATA[Performs a sql query on the specified server, saves the the result in a datasource.
 Will throw an exception if anything went wrong when executing the query.
-Column types in the datasource are inferred from the query result.]]></description>
+Column types in the datasource are inferred from the query result or can be explicitly specified.]]></description>
           <summary><![CDATA[Performs a sql query on the specified server, saves the the result in a datasource.]]></summary>
           <sample><![CDATA[var query = 'select address, city, country  from customers';
 var uri = databaseManager.createDataSourceByQuery('mydata', 'example_data', query, null, 999);
+//var uri = databaseManager.createDataSourceByQuery('mydata', 'example_data', query, null, 999, [JSColumn.TEXT, JSColumn.TEXT, JSColumn.TEXT]);
 
 // the uri can be used to create a form using solution model
 var myForm = solutionModel.newForm('newForm', uri, 'myStyleName', false, 800, 600)
@@ -3626,6 +3629,52 @@ fs.loadAllRecords();]]></sample>
             </parameter>
             <parameter name="max_returned_rows" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[The maximum number of rows returned by the query.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="createDataSourceByQuery">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="int"/>
+            <argumentType typecode="[I"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[datasource containing the results of the query or null if the parameters are wrong.]]></return>
+          <description><![CDATA[Performs a sql query on the specified server, saves the the result in a datasource.
+Will throw an exception if anything went wrong when executing the query.
+Column types in the datasource are inferred from the query result or can be explicitly specified.]]></description>
+          <summary><![CDATA[Performs a sql query on the specified server, saves the the result in a datasource.]]></summary>
+          <sample><![CDATA[var query = 'select address, city, country  from customers';
+var uri = databaseManager.createDataSourceByQuery('mydata', 'example_data', query, null, 999);
+//var uri = databaseManager.createDataSourceByQuery('mydata', 'example_data', query, null, 999, [JSColumn.TEXT, JSColumn.TEXT, JSColumn.TEXT]);
+
+// the uri can be used to create a form using solution model
+var myForm = solutionModel.newForm('newForm', uri, 'myStyleName', false, 800, 600)
+myForm.newTextField('city', 140, 20, 140,20)
+
+// the uri can be used to acces a foundset directly
+var fs = databaseManager.getFoundSet(uri)
+fs.loadAllRecords();]]></sample>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[data source name]]></description>
+            </parameter>
+            <parameter name="server_name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[The name of the server where the query should be executed.]]></description>
+            </parameter>
+            <parameter name="sql_query" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[The custom sql.]]></description>
+            </parameter>
+            <parameter name="arguments" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
+              <description><![CDATA[Specified arguments or null if there are no arguments.]]></description>
+            </parameter>
+            <parameter name="max_returned_rows" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The maximum number of rows returned by the query.]]></description>
+            </parameter>
+            <parameter name="types" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[I">
+              <description><![CDATA[The column types]]></description>
             </parameter>
           </parameters>
         </function>
@@ -5214,7 +5263,8 @@ if (cancel || !databaseManager.commitTransaction())
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the switch could be done.]]></return>
           <description><![CDATA[Switches a named server to another named server with the same datamodel (recommended to be used in an onOpen method for a solution).
-return true if successful.]]></description>
+return true if successful.
+Note that this only works if source and destination server are of the same database type.]]></description>
           <summary><![CDATA[Switches a named server to another named server with the same datamodel (recommended to be used in an onOpen method for a solution).]]></summary>
           <sample><![CDATA[//dynamically changes a server for the entire solution, destination database server must contain the same tables/columns!
 //will fail if there is a lock, transaction , if repository_server is used or if destination server is invalid
