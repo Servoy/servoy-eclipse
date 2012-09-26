@@ -767,6 +767,13 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		// save the metadata in the workspace
 		if (importInfo.metadataMap != null)
 		{
+			boolean importMetaData = x11handler.getUserChannel().askImportMetaData() == IXMLImportUserChannel.OK_ACTION;
+			if (!importMetaData)
+			{
+				x11handler.getUserChannel().info("Skipping meta data import", ILogLevel.INFO); //$NON-NLS-1$
+				// continue here to set the metadata flag for the table
+			}
+
 			DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
 			if (dmm == null)
 			{
@@ -776,70 +783,93 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 			WorkspaceFileAccess ws = new WorkspaceFileAccess(ServoyModel.getWorkspace());
 			for (Entry<String, Set<MetadataDef>> defs : importInfo.metadataMap.entrySet())
 			{
-				ServoyModelManager.getServoyModelManager().getServoyModel();
-				IServer server = ServoyModel.getServerManager().getServer(defs.getKey());
+				String serverName = defs.getKey();
+				Map<String, String> connectionMap = importInfo.substitutionMap.get(Integer.valueOf(IRepository.SERVERS));
+				if (connectionMap != null && connectionMap.containsKey(serverName))
+				{
+					serverName = connectionMap.get(serverName);
+				}
+				IServer server = ServoyModel.getServerManager().getServer(serverName);
 				if (server == null)
 				{
-					throw new RepositoryException("Error importing meta data table, Cannot find server '" + defs.getKey() + "'.");
+					throw new RepositoryException("Error importing meta data table, Cannot find server '" + serverName + "'.");
 				}
 
 				for (MetadataDef def : defs.getValue())
 				{
-					String[] stn = DataSourceUtils.getDBServernameTablename(def.dataSource);
-					if (stn == null)
-					{
-						throw new RepositoryException("Error importing meta data table, Cannot find table '" + def.dataSource + "'");
-					}
+					String dataSource = def.dataSource;
 					ITable table;
 					try
 					{
-						table = server.getTable(stn[1]);
-					}
-					catch (RemoteException e)
-					{
-						throw new RepositoryException("Error importing meta data table, Cannot find table '" + def.dataSource + "'", e);
-					}
-					if (!(table instanceof Table))
-					{
-						throw new RepositoryException("Error importing meta data table, Cannot find table '" + def.dataSource + "'.");
-					}
-
-					if (!((Table)table).isMarkedAsMetaData() && MetaDataUtils.canBeMarkedAsMetaData((Table)table))
-					{
-						// mark table as meta
-						((Table)table).setMarkedAsMetaData(true);
+						String[] stn = DataSourceUtils.getDBServernameTablename(dataSource);
+						if (stn == null)
+						{
+							throw new RepositoryException("Error importing meta data table, Cannot find table '" + dataSource + "'");
+						}
 						try
 						{
-							IFile dbi = dmm.getDBIFile(def.dataSource);
-							if (dbi == null)
+							String tableName = stn[1];
+							dataSource = DataSourceUtils.createDBTableDataSource(serverName, tableName); // server may be different from server in def.dataSource
+							table = server.getTable(tableName);
+						}
+						catch (RemoteException e)
+						{
+							throw new RepositoryException("Error importing meta data table, Cannot find table '" + dataSource + "'", e);
+						}
+						if (!(table instanceof Table))
+						{
+							throw new RepositoryException("Error importing meta data table, Cannot find table '" + dataSource + "'.");
+						}
+
+						if (!((Table)table).isMarkedAsMetaData() && MetaDataUtils.canBeMarkedAsMetaData((Table)table))
+						{
+							// mark table as meta, also if user said no to import meta data
+							((Table)table).setMarkedAsMetaData(true);
+							try
 							{
-								throw new RepositoryException("Error importing meta data table, Cannot find dbi file for datasource '" + def.dataSource + "'.");
+								IFile dbi = dmm.getDBIFile(dataSource);
+								if (dbi == null)
+								{
+									throw new RepositoryException("Error importing meta data table, Cannot find dbi file for datasource '" + dataSource + "'.");
+								}
+								ws.setUTF8Contents(dbi.getFullPath().toString(), dmm.serializeTable((Table)table));
 							}
-							ws.setUTF8Contents(dbi.getFullPath().toString(), dmm.serializeTable((Table)table));
-						}
-						catch (JSONException e)
-						{
-							ServoyLog.logError("Cannot save table dbi file", e);
-						}
-						catch (IOException e)
-						{
-							ServoyLog.logError("Cannot save table dbi file", e);
+							catch (JSONException e)
+							{
+								ServoyLog.logError("Cannot save table dbi file", e);
+							}
+							catch (IOException e)
+							{
+								ServoyLog.logError("Cannot save table dbi file", e);
+							}
 						}
 					}
+					catch (RepositoryException e)
+					{
+						if (importMetaData) throw e;
+						// do not fail on table errors when user said no to import meta data.
+						continue;
+					}
 
-					IFile mdf = dmm.getMetaDataFile(def.dataSource);
+					if (!importMetaData)
+					{
+						continue;
+					}
+
+					IFile mdf = dmm.getMetaDataFile(dataSource);
 					if (mdf == null)
 					{
-						throw new RepositoryException("Error importing meta data table, Cannot find meta data file for datasource '" + def.dataSource + "'.");
+						throw new RepositoryException("Error importing meta data table, Cannot find meta data file for datasource '" + dataSource + "'.");
 					}
 					try
 					{
 						ws.setUTF8Contents(mdf.getFullPath().toString(), def.tableMetaData);
+						x11handler.getUserChannel().info("Saved meta data for datasource '" + dataSource + "' in workspace.", ILogLevel.INFO); //$NON-NLS-1$
 					}
 					catch (IOException e)
 					{
-						ServoyLog.logError("Error saving meta data for datasource '" + def.dataSource + "'", e);
-						throw new RepositoryException("Error saving meta data for datasource '" + def.dataSource + "': " + e.getMessage());
+						ServoyLog.logError("Error saving meta data for datasource '" + dataSource + "'", e);
+						throw new RepositoryException("Error saving meta data for datasource '" + dataSource + "': " + e.getMessage());
 					}
 
 					// save it in the table when it is empty
@@ -851,6 +881,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 						if (ds.getRowCount() == 0)
 						{
 							MetaDataUtils.loadMetadataInTable((Table)table, def.tableMetaData);
+							x11handler.getUserChannel().info("Loaded meta data for datasource '" + dataSource + "' in database.", ILogLevel.INFO); //$NON-NLS-1$
 						}
 						else
 						{
@@ -861,8 +892,8 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					}
 					catch (Exception e)
 					{
-						ServoyLog.logError("Error loading meta data for datasource '" + def.dataSource + "'", e);
-						throw new RepositoryException("Error loading meta data for datasource '" + def.dataSource + "': " + e.getMessage());
+						ServoyLog.logError("Error loading meta data for datasource '" + dataSource + "'", e);
+						throw new RepositoryException("Error loading meta data for datasource '" + dataSource + "': " + e.getMessage());
 					}
 				}
 			}
