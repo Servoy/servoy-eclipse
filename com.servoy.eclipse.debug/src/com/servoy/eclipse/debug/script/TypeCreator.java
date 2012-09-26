@@ -383,7 +383,6 @@ public class TypeCreator extends TypeCache
 	{
 		if (BASE_TYPES.contains(typeName) || typeName.startsWith("Array<")) return null;
 		if (!initialized) initalize();
-
 		Type type = null;
 		if (typeName.startsWith("Packages.") || typeName.startsWith("java.") || typeName.startsWith("javax."))
 		{
@@ -1177,7 +1176,7 @@ public class TypeCreator extends TypeCache
 			// always just convert plain Object to Any so that it will map on both js and java Object
 			if ("Object".equals(typeName))
 			{
-				typeName = "Any";
+				return TypeInfoModelFactory.eINSTANCE.createAnyType();
 			}
 			else addAnonymousClassType(typeName, memberReturnType);
 		}
