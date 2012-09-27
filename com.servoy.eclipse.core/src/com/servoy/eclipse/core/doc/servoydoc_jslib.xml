@@ -3217,8 +3217,8 @@ application.output(patt.test(str)==true)]]></sample>
         <function name="typeof" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Returns the type of the given object, one of these get returned: number, string, boolean, object, function, undefined.]]></description>
-          <summary><![CDATA[Returns the type of the given object, one of these get returned: number, string, boolean, object, function, undefined.]]></summary>
+          <description><![CDATA[Returns the type of the given object, one of these strings get returned: "number", "string", "boolean", "object", "function" or undefined if the object doesn't exists.]]></description>
+          <summary><![CDATA[Returns the type of the given object, one of these strings get returned: "number", "string", "boolean", "object", "function" or undefined if the object doesn't exists.]]></summary>
           <sample><![CDATA[application.output(typeof "abc"); // string
 application.output(typeof 10); // number
 application.output(typeof 10.1); // number

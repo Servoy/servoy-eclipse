@@ -12872,7 +12872,7 @@ forms['newFormX'].controller.show();]]></sample>
           <summary><![CDATA[Removes a  form JSMethod - based on the specified code.]]></summary>
           <sample><![CDATA[var form = solutionModel.newForm('newForm1', null, null, true, 800, 600);
 var hello = form.newMethod('function aMethod(event){application.output("Hello world!");}');
-var removeMethod = form.newMethod('function tempMethod(event){ \
+var removeMethod = form.newMethod('function removeMethod(event){ \
 									solutionModel.getForm(event.getFormName()).removeMethod("aMethod"); \
 									forms[event.getFormName()].controller.recreateUI();\
 									}');
@@ -12976,13 +12976,16 @@ forms['newFormX'].controller.show();]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if removed, false otherwise (ex: no var with that name)]]></return>
           <description><![CDATA[Removes a form JSVariable - based on the name of the variable object.]]></description>
           <summary><![CDATA[Removes a form JSVariable - based on the name of the variable object.]]></summary>
-          <sample><![CDATA[var form = solutionModel.newForm('Form2', null, null, true, 800, 600);
+          <sample><![CDATA[var form = solutionModel.newForm('newForm1', null, null, true, 800, 600);
 var variable = form.newVariable('myVar', JSVariable.TEXT);
 variable.defaultValue = "'This is a default value (with triple quotes)!'";
-application.output("var before deletion:"+ variable);
-form.removeVariable('myVar');
-var variableAfterDeletion = form.getVariable('myVar');
-application.output("var after deletion:"+ variableAfterDeletion);]]></sample>
+//variable.defaultValue = "{a:'First letter',b:'Second letter'}"
+var field = form.newField(variable, JSField.TEXT_FIELD, 100, 100, 200, 200);
+forms['newForm1'].controller.show();
+
+variable = form.removeVariable('myVar');
+application.sleep(4000);
+forms['newForm1'].controller.recreateUI();]]></sample>
           <parameters>
             <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the specified name of the variable]]></description>
