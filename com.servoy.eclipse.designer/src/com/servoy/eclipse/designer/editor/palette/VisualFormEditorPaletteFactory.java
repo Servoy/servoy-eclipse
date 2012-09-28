@@ -37,6 +37,7 @@ import org.eclipse.gef.palette.PaletteDrawer;
 import org.eclipse.gef.palette.PaletteEntry;
 import org.eclipse.gef.palette.PaletteRoot;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.widgets.Display;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -631,7 +632,7 @@ public class VisualFormEditorPaletteFactory
 		}
 		else
 		{
-			iconSmall = UIUtils.createImageDescriptorFromAwtImage(smallIcon, true);
+			iconSmall = createImageDescriptorFromAwtImage(smallIcon);
 		}
 		if (largeIcon == smallIcon || largeIcon == null)
 		{
@@ -639,10 +640,25 @@ public class VisualFormEditorPaletteFactory
 		}
 		else
 		{
-			iconLarge = UIUtils.createImageDescriptorFromAwtImage(largeIcon, true);
+			iconLarge = createImageDescriptorFromAwtImage(largeIcon);
 		}
 
 		return new ElementCreationToolEntry("", "", factory, iconSmall, iconLarge);
+	}
+
+	private static ImageDescriptor createImageDescriptorFromAwtImage(final Image image)
+	{
+		final ImageDescriptor[] imageDescriptor = { null };
+		// do it via syncExec so we are not interrupted by another syncExec
+		Display.getDefault().syncExec(new Runnable()
+		{
+			public void run()
+			{
+				imageDescriptor[0] = UIUtils.createImageDescriptorFromAwtImage(image, true);
+			}
+		});
+
+		return imageDescriptor[0];
 	}
 
 	private static PaletteEntry createTemplatesEntry(String id)

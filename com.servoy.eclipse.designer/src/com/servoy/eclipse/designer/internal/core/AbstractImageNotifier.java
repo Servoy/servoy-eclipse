@@ -22,6 +22,7 @@ import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
 import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.DesignApplication;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -80,50 +81,58 @@ public abstract class AbstractImageNotifier implements IImageNotifier, IImageLis
 				return;
 			}
 			isWaitingStart = true;
-			SwingUtilities.invokeLater(new Runnable()
+
+			// do it via syncExec so we are not interrupted by another syncExec
+			Display.getDefault().syncExec(new Runnable()
 			{
 				public void run()
 				{
-					try
+					SwingUtilities.invokeLater(new Runnable()
 					{
-						Component component = createComponent();
-						if (component == null)
+						public void run()
 						{
-							imSupport.fireImageChanged(null);
-							return;
-						}
-
-						if (label == null)
-						{
-							label = new JLabel()
+							try
 							{
-								@Override
-								public boolean isShowing()
+								Component component = createComponent();
+								if (component == null)
 								{
-									// make sure all awt components will paint
-									return true;
+									imSupport.fireImageChanged(null);
+									return;
 								}
-							};
+
+								if (label == null)
+								{
+									label = new JLabel()
+									{
+										@Override
+										public boolean isShowing()
+										{
+											// make sure all awt components will paint
+											return true;
+										}
+									};
+								}
+								label.removeAll();
+								label.setOpaque(false);
+								label.setVisible(true);
+
+								((DesignApplication)application).getEditLabel().add(label);
+								isWaitingStart = false;
+								label.add(component);
+								label.setSize(component.getWidth(), component.getHeight());
+								component.setLocation(0, 0); // paint in left-upper corner
+								label.doLayout();
+
+								new ImageDataCollector(imSupport).start(label, component.getWidth(), component.getHeight(), handleAlpha(component));
+							}
+							catch (Exception e)
+							{
+								isWaitingStart = false;
+								ServoyLog.logError(e);
+								if (label != null) ((DesignApplication)application).getEditLabel().remove(label); // normally done in imageChanged()
+							}
 						}
-						label.removeAll();
-						label.setOpaque(false);
-						label.setVisible(true);
-
-						((DesignApplication)application).getEditLabel().add(label);
-						isWaitingStart = false;
-						label.add(component);
-						label.setSize(component.getWidth(), component.getHeight());
-						component.setLocation(0, 0); // paint in left-upper corner
-						label.doLayout();
-
-						new ImageDataCollector(imSupport).start(label, component.getWidth(), component.getHeight(), handleAlpha(component));
-					}
-					catch (Exception e)
-					{
-						isWaitingStart = false;
-						ServoyLog.logError(e);
-						if (label != null) ((DesignApplication)application).getEditLabel().remove(label); // normally done in imageChanged()
-					}
+					});
 				}
 			});
 		}
