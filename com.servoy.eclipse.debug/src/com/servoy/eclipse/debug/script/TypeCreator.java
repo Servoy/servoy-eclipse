@@ -422,7 +422,7 @@ public class TypeCreator extends TypeCache
 			type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(typeName);
 			type.setKind(TypeKind.JAVASCRIPT);
-			type.setSuperType(getType(context, "Object"));
+			type.setSuperType(getType(context, ITypeNames.NUMBER));
 		}
 		if (type != null)
 		{
@@ -1655,7 +1655,7 @@ public class TypeCreator extends TypeCache
 			else if (returnType.isPrimitive() || Number.class.isAssignableFrom(returnType))
 			{
 				if (returnType.isAssignableFrom(boolean.class)) return Boolean.class;
-				if (returnType.isAssignableFrom(byte.class))
+				if (returnType.isAssignableFrom(byte.class) || returnType == Byte.class)
 				{
 					return byte.class;
 				}
