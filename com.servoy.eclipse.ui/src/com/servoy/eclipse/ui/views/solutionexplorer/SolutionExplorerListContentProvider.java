@@ -987,6 +987,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			String returnType = sm.getRuntimeProperty(IScriptProvider.METHOD_RETURN_TYPE);
 			if (returnType == null) returnType = "void"; //$NON-NLS-1$
+			else if ("*".equals(returnType)) returnType = "Any"; //$NON-NLS-1$ //$NON-NLS-2$
 			if (showReturnTypeAtEnd)
 			{
 				methodSignatureBuilder.append(" - ").append(returnType); //$NON-NLS-1$		
