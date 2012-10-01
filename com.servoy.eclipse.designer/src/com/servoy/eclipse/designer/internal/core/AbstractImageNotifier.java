@@ -21,8 +21,11 @@ import java.awt.Component;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.graphics.ImageData;
-import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.DesignApplication;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -82,10 +85,11 @@ public abstract class AbstractImageNotifier implements IImageNotifier, IImageLis
 			}
 			isWaitingStart = true;
 
-			// do it via syncExec so we are not interrupted by another syncExec
-			Display.getDefault().syncExec(new Runnable()
+			// do it in a Job so we are not interrupted by a Display.synch
+			new Job("Refresh image")
 			{
-				public void run()
+				@Override
+				public IStatus run(IProgressMonitor monitor)
 				{
 					SwingUtilities.invokeLater(new Runnable()
 					{
@@ -133,8 +137,10 @@ public abstract class AbstractImageNotifier implements IImageNotifier, IImageLis
 							}
 						}
 					});
+
+					return Status.OK_STATUS;
 				}
-			});
+			}.schedule();
 		}
 		else
 		{

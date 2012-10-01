@@ -16,9 +16,11 @@
  */
 package com.servoy.eclipse.core.util;
 
+import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.GraphicsEnvironment;
 import java.awt.HeadlessException;
+import java.awt.MediaTracker;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.awt.image.PixelGrabber;
@@ -29,7 +31,6 @@ import java.io.PipedOutputStream;
 
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.WorkspaceJob;
@@ -601,30 +602,45 @@ public class UIUtils
 			return (BufferedImage)image;
 		}
 
-		// Ensure that all the pixels in the image are loaded 
-		java.awt.Image img = new ImageIcon(image).getImage();
+		// Ensure that all the pixels in the image are loaded
+		Component mtComp = new Component()
+		{
+		};
+		MediaTracker mt = new MediaTracker(mtComp);
+		mt.addImage(image, 0);
+		do
+		{
+			try
+			{
+				mt.waitForAll();
+			}
+			catch (InterruptedException ex)
+			{
+				// ignore
+			}
+		}
+		while (!mt.checkAll());
 
-		boolean hasAlpha = hasAlpha(img);
+		boolean hasAlpha = hasAlpha(image);
 		BufferedImage bimage = null;
 		try
 		{
 			bimage = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().createCompatibleImage(
-				img.getWidth(null), img.getHeight(null), hasAlpha ? Transparency.BITMASK : Transparency.OPAQUE);
+				image.getWidth(null), image.getHeight(null), hasAlpha ? Transparency.BITMASK : Transparency.OPAQUE);
 		}
 		catch (HeadlessException e)
 		{
 		}
 		if (bimage == null)
 		{
-			bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), hasAlpha ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB);
+			bimage = new BufferedImage(image.getWidth(null), image.getHeight(null), hasAlpha ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB);
 		}
 
 		Graphics g = bimage.createGraphics(); // Paint the image onto the buffered 
-		g.drawImage(img, 0, 0, null);
+		g.drawImage(image, 0, 0, null);
 		g.dispose();
 		return bimage;
 	}
-
 
 	/**
 	 * Shows an option dialog showing the options in a combo.
