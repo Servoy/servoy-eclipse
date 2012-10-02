@@ -57,6 +57,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
@@ -209,10 +210,14 @@ public class EditorUtil
 		{
 			try
 			{
-				return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
-					new PersistEditorInput(form.getName(), form.getSolution().getName(), form.getUUID()).setNew(newForm),
-					PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-						Platform.getContentTypeManager().getContentType(PersistEditorInput.getFormContentTypeIdentifier(form))).getId(), activate);
+				IWorkbenchPage activePage = getActivePage();
+				if (activePage != null)
+				{
+					return activePage.openEditor(
+						new PersistEditorInput(form.getName(), form.getSolution().getName(), form.getUUID()).setNew(newForm),
+						PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+							Platform.getContentTypeManager().getContentType(PersistEditorInput.getFormContentTypeIdentifier(form))).getId(), activate);
+				}
 			}
 			catch (PartInitException ex)
 			{
@@ -244,10 +249,14 @@ public class EditorUtil
 		if (serverName == null || tableName == null) return null;
 		try
 		{
-			return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
-				new TableEditorInput(serverName, tableName),
-				PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-					Platform.getContentTypeManager().getContentType(TableEditorInput.TABLE_RESOURCE_ID)).getId(), activate);
+			IWorkbenchPage activePage = getActivePage();
+			if (activePage != null)
+			{
+				return activePage.openEditor(
+					new TableEditorInput(serverName, tableName),
+					PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+						Platform.getContentTypeManager().getContentType(TableEditorInput.TABLE_RESOURCE_ID)).getId(), activate);
+			}
 		}
 		catch (PartInitException ex)
 		{
@@ -266,10 +275,14 @@ public class EditorUtil
 		if (valueList == null) return null;
 		try
 		{
-			return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
-				new PersistEditorInput(valueList.getName(), valueList.getRootObject().getName(), valueList.getUUID()),
-				PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-					Platform.getContentTypeManager().getContentType(PersistEditorInput.VALUELIST_RESOURCE_ID)).getId(), activate);
+			IWorkbenchPage activePage = getActivePage();
+			if (activePage != null)
+			{
+				return activePage.openEditor(
+					new PersistEditorInput(valueList.getName(), valueList.getRootObject().getName(), valueList.getUUID()),
+					PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+						Platform.getContentTypeManager().getContentType(PersistEditorInput.VALUELIST_RESOURCE_ID)).getId(), activate);
+			}
 		}
 		catch (PartInitException ex)
 		{
@@ -288,21 +301,24 @@ public class EditorUtil
 		if (media == null) return null;
 		try
 		{
-			IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+			IWorkbenchPage page = getActivePage();
+			if (page != null)
+			{
 
-			Pair<String, String> pathPair = SolutionSerializer.getFilePath(media, false);
-			Path path = new Path(pathPair.getLeft() + pathPair.getRight());
-			IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+				Pair<String, String> pathPair = SolutionSerializer.getFilePath(media, false);
+				Path path = new Path(pathPair.getLeft() + pathPair.getRight());
+				IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
 
-			IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(media.getName());
-			if (desc == null) desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-				Platform.getContentTypeManager().getContentType(PersistEditorInput.MEDIA_RESOURCE_ID));
-			IEditorInput editorInput;
+				IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(media.getName());
+				if (desc == null) desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+					Platform.getContentTypeManager().getContentType(PersistEditorInput.MEDIA_RESOURCE_ID));
+				IEditorInput editorInput;
 
-			if (desc.getId().equals("com.servoy.eclipse.ui.editors.MediaViewer")) editorInput = new PersistEditorInput(media.getName(),
-				media.getRootObject().getName(), media.getUUID());
-			else editorInput = new FileEditorInput(file);
-			return page.openEditor(editorInput, desc.getId(), activate);
+				if (desc.getId().equals("com.servoy.eclipse.ui.editors.MediaViewer")) editorInput = new PersistEditorInput(media.getName(),
+					media.getRootObject().getName(), media.getUUID());
+				else editorInput = new FileEditorInput(file);
+				return page.openEditor(editorInput, desc.getId(), activate);
+			}
 		}
 		catch (PartInitException ex)
 		{
@@ -369,10 +385,13 @@ public class EditorUtil
 	{
 		try
 		{
-			return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(FileEditorInputFactory.createFileEditorInput(f),
-				"com.servoy.eclipse.ui.editors.SecurityEditor");
+			IWorkbenchPage activePage = getActivePage();
+			if (activePage != null)
+			{
+				return activePage.openEditor(FileEditorInputFactory.createFileEditorInput(f), "com.servoy.eclipse.ui.editors.SecurityEditor");
 //				PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
 //					Platform.getContentTypeManager().getContentType(SecurityEditorInput.SECURITY_RESOURCE_ID)).getId());
+			}
 		}
 		catch (PartInitException ex)
 		{
@@ -391,10 +410,14 @@ public class EditorUtil
 		if (relation == null) return null;
 		try
 		{
-			return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
-				new PersistEditorInput(relation.getName(), relation.getRootObject().getName(), relation.getUUID()),
-				PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-					Platform.getContentTypeManager().getContentType(PersistEditorInput.RELATION_RESOURCE_ID)).getId(), activate);
+			IWorkbenchPage activePage = getActivePage();
+			if (activePage != null)
+			{
+				return activePage.openEditor(
+					new PersistEditorInput(relation.getName(), relation.getRootObject().getName(), relation.getUUID()),
+					PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+						Platform.getContentTypeManager().getContentType(PersistEditorInput.RELATION_RESOURCE_ID)).getId(), activate);
+			}
 		}
 		catch (PartInitException ex)
 		{
@@ -428,8 +451,11 @@ public class EditorUtil
 		}
 		try
 		{
-			return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(FileEditorInputFactory.createFileEditorInput(styleFile),
-				editorId, activate);
+			IWorkbenchPage activePage = getActivePage();
+			if (activePage != null)
+			{
+				return activePage.openEditor(FileEditorInputFactory.createFileEditorInput(styleFile), editorId, activate);
+			}
 		}
 		catch (PartInitException ex)
 		{
@@ -525,10 +551,14 @@ public class EditorUtil
 		{
 			ServerEditorInput sei = new ServerEditorInput(serverConfig);
 			sei.setIsNew(isNew);
-			return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
-				sei,
-				PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-					Platform.getContentTypeManager().getContentType(ServerEditorInput.SERVER_RESOURCE_ID)).getId());
+			IWorkbenchPage activePage = getActivePage();
+			if (activePage != null)
+			{
+				return activePage.openEditor(
+					sei,
+					PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+						Platform.getContentTypeManager().getContentType(ServerEditorInput.SERVER_RESOURCE_ID)).getId());
+			}
 		}
 		catch (PartInitException ex)
 		{
@@ -542,10 +572,14 @@ public class EditorUtil
 		if (i18nServer == null || i18nTable == null) return null;
 		try
 		{
-			return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
-				new I18NEditorInput(i18nServer, i18nTable),
-				PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-					Platform.getContentTypeManager().getContentType(I18NEditorInput.I18N_RESOURCE_ID)).getId());
+			IWorkbenchPage activePage = getActivePage();
+			if (activePage != null)
+			{
+				return activePage.openEditor(
+					new I18NEditorInput(i18nServer, i18nTable),
+					PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+						Platform.getContentTypeManager().getContentType(I18NEditorInput.I18N_RESOURCE_ID)).getId());
+			}
 		}
 		catch (PartInitException ex)
 		{
@@ -708,12 +742,7 @@ public class EditorUtil
 	 */
 	public static void setStatuslineMessage(String message)
 	{
-		IWorkbenchWindow activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		if (activeWorkbenchWindow == null)
-		{
-			return;
-		}
-		IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
+		IWorkbenchPage activePage = getActivePage();
 		if (activePage == null)
 		{
 			return;
@@ -806,5 +835,19 @@ public class EditorUtil
 			ServoyLog.logError(remEx);
 		}
 		return isView;
+	}
+
+	public static IWorkbenchPage getActivePage()
+	{
+		IWorkbench workbench = PlatformUI.getWorkbench();
+		if (workbench != null)
+		{
+			IWorkbenchWindow activeWorkbenchWindow = workbench.getActiveWorkbenchWindow();
+			if (activeWorkbenchWindow != null)
+			{
+				return activeWorkbenchWindow.getActivePage();
+			}
+		}
+		return null;
 	}
 }
