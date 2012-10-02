@@ -34,7 +34,6 @@ import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
@@ -62,7 +61,7 @@ import com.servoy.j2db.util.xmlxport.IXMLImportHandlerVersions11AndHigher;
 public class ImportSolutionWizard extends Wizard implements IImportWizard
 {
 	private ImportSolutionWizardPage page;
-	private SolutionImportedPage finishPage;
+	private FinishPage finishPage;
 	private String importMessageDetails;
 
 	@Override
@@ -87,7 +86,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	{
 		setNeedsProgressMonitor(true);
 		page = new ImportSolutionWizardPage(this, "Import solution"); //$NON-NLS-1$
-		finishPage = new SolutionImportedPage("Solution imported"); //$NON-NLS-1$
+		finishPage = new FinishPage("Solution imported"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -425,58 +424,4 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			return finishPage;
 		}
 	}
-
-	private class SolutionImportedPage extends WizardPage implements IValidator
-	{
-		private Text message;
-
-		protected SolutionImportedPage(String pageName)
-		{
-			super(pageName);
-			setTitle(pageName);
-		}
-
-		public void setTextMessage(String msg)
-		{
-			message.setText(msg);
-		}
-
-		public void createControl(Composite parent)
-		{
-			Composite container = new Composite(parent, SWT.NONE);
-			GridLayout layout = new GridLayout();
-			container.setLayout(layout);
-			layout.numColumns = 1;
-
-			message = new Text(container, SWT.WRAP | SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
-			GridData gridData = new GridData();
-			gridData.horizontalAlignment = GridData.FILL;
-			gridData.verticalAlignment = GridData.FILL;
-			gridData.grabExcessHorizontalSpace = true;
-			gridData.grabExcessVerticalSpace = true;
-			gridData.horizontalSpan = 1;
-			message.setLayoutData(gridData);
-			message.setEditable(false);
-
-			setControl(container);
-			setPageComplete(true);
-		}
-
-		public String validate()
-		{
-			return null;
-		}
-
-		public boolean canFinish()
-		{
-			return finishPage.isCurrentPage();
-		}
-
-		@Override
-		public IWizardPage getPreviousPage()
-		{
-			return null;
-		}
-	}
-
 }
