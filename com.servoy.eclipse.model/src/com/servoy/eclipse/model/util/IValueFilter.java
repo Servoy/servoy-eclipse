@@ -17,11 +17,13 @@
 
 package com.servoy.eclipse.model.util;
 
+import com.servoy.j2db.persistence.IPersist;
+
 /**
  * @author lvostinar
  *
  */
 public interface IValueFilter
 {
-	String getFilteredValue(int objectType, String key, String value);
+	String getFilteredValue(IPersist persist, String key, String value);
 }
