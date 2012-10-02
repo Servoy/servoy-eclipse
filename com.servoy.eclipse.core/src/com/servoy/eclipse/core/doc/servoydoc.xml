@@ -12727,6 +12727,35 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
+        <function name="newVariable">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="int"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSVariable" typecode="com.servoy.j2db.scripting.solutionmodel.JSVariable"><![CDATA[a JSVariable object]]></return>
+          <description><![CDATA[Creates a new form JSVariable - based on the name of the variable object , the  type  and it's default value , uses the SolutionModel JSVariable constants.
+
+<p>
+<b>This method does not require the form to be destroyed and recreated. Use this method if you want to change the form's model without destroying the runtime form</b>
+</p>]]></description>
+          <summary><![CDATA[Creates a new form JSVariable - based on the name of the variable object , the  type  and it's default value , uses the SolutionModel JSVariable constants.]]></summary>
+          <sample><![CDATA[var form = solutionModel.newForm('newForm1', myDatasource, null, true, 800, 600);
+var variable = form.newVariable('myVar', JSVariable.TEXT , "'This is a default value (with triple quotes)!'");
+var field = form.newField(variable, JSField.TEXT_FIELD, 100, 100, 200, 200);
+forms['newForm1'].controller.show();]]></sample>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified name of the variable]]></description>
+            </parameter>
+            <parameter name="type" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the specified type of the variable (see Solution Model -> JSVariable node constants)]]></description>
+            </parameter>
+            <parameter name="the">
+              <description><![CDATA[default value as a javascript expression string]]></description>
+            </parameter>
+          </parameters>
+        </function>
         <function name="putDesignTimeProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
@@ -12880,8 +12909,8 @@ var button1 = form.newButton('Call method!',50,50,120,30,hello);
 var button2 = form.newButton('Remove Mehtod!',200,50,120,30,removeMethod);
 forms['newForm1'].controller.show();]]></sample>
           <parameters>
-            <parameter name="code">
-              <description><![CDATA[the specified code for the new method]]></description>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified name of the method]]></description>
             </parameter>
           </parameters>
         </function>
@@ -19765,7 +19794,10 @@ application.output(scopes.globals.gText); // Prints 'some text' (without quotes)
           <description><![CDATA[The default value of the variable. 
 
 It is interpreted as a JS expression.
-
+<p>
+<b>For form variables ,setting this property requires the form instances to be destroyed (history.remove("formName")). 
+If you want to use a default value for a newly created variable  create the variable using the 3 paramaeter version newVariable(name,type,defaultValue)</b>
+</p>
 For INTEGER variables it can be an integer constant, like 10 for example.
 For NUMBER variables it can be a real constant, like 22.41. For DATETIME
 variables it can be "now", or a JS expression like "new Date()". For TEXT 
