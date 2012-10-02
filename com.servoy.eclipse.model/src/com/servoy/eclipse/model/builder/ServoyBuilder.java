@@ -3781,144 +3781,147 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			try
 			{
 				IServerInternal server = (IServerInternal)ApplicationServerSingleton.get().getServerManager().getServer(server_name, true, true);
-				List<String> tableNames = server.getTableAndViewNames(true);
-				Iterator<String> tables = tableNames.iterator();
-				while (tables.hasNext())
+				if (server != null) // server may have become invalid in the mean time
 				{
-					String tableName = tables.next();
-					if (server.isTableLoaded(tableName))
+					List<String> tableNames = server.getTableAndViewNames(true);
+					Iterator<String> tables = tableNames.iterator();
+					while (tables.hasNext())
 					{
-						Table table = server.getTable(tableName);
-						IResource res = project;
-						if (getServoyModel().getDataModelManager() != null &&
-							getServoyModel().getDataModelManager().getDBIFile(server_name, tableName).exists())
+						String tableName = tables.next();
+						if (server.isTableLoaded(tableName))
 						{
-							res = getServoyModel().getDataModelManager().getDBIFile(server_name, tableName);
-						}
-						Map<String, Column> columnsByName = new HashMap<String, Column>();
-						Map<String, Column> columnsByDataProviderID = new HashMap<String, Column>();
-						for (Column column : table.getColumns())
-						{
-							if (column.getColumnInfo() != null && column.getSequenceType() == ColumnInfo.UUID_GENERATOR &&
-								!column.getColumnInfo().hasFlag(Column.UUID_COLUMN))
+							Table table = server.getTable(tableName);
+							IResource res = project;
+							if (getServoyModel().getDataModelManager() != null &&
+								getServoyModel().getDataModelManager().getDBIFile(server_name, tableName).exists())
 							{
-								ServoyMarker mk = MarkerMessages.ColumnUUIDFlagNotSet.fill(tableName, column.getName());
-								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_UUID_FLAG_NOT_SET, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
-									"columnName", column.getName());
+								res = getServoyModel().getDataModelManager().getDBIFile(server_name, tableName);
 							}
-							// check type defined by column converter
-							int dataProviderType = getDataType(res, column, null, null);
-							if ((column.getSequenceType() == ColumnInfo.UUID_GENERATOR && (dataProviderType != IColumnTypes.TEXT && dataProviderType != IColumnTypes.MEDIA)) ||
-								(column.getSequenceType() == ColumnInfo.SERVOY_SEQUENCE && (dataProviderType != IColumnTypes.INTEGER && dataProviderType != IColumnTypes.NUMBER)))
+							Map<String, Column> columnsByName = new HashMap<String, Column>();
+							Map<String, Column> columnsByDataProviderID = new HashMap<String, Column>();
+							for (Column column : table.getColumns())
 							{
-								ServoyMarker mk = MarkerMessages.ColumnIncompatibleTypeForSequence.fill(tableName, column.getName());
-								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_INCOMPATIBLE_TYPE_FOR_SEQUENCE, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
-									"columnName", column.getName());
-							}
-							if (column.hasFlag(Column.UUID_COLUMN))
-							{
-								int length = columnHasConvertedType(column) ? 0 : column.getConfiguredColumnType().getLength();
-								boolean compatibleForUUID = false;
-								switch (dataProviderType)
+								if (column.getColumnInfo() != null && column.getSequenceType() == ColumnInfo.UUID_GENERATOR &&
+									!column.getColumnInfo().hasFlag(Column.UUID_COLUMN))
 								{
-									case IColumnTypes.MEDIA :
-										compatibleForUUID = length == 0 || length >= 16;
-										break;
-									case IColumnTypes.TEXT :
-										compatibleForUUID = length == 0 || length >= 36;
-										break;
-								}
-								if (!compatibleForUUID)
-								{
-									ServoyMarker mk = MarkerMessages.ColumnIncompatbleWithUUID.fill(tableName, column.getName());
-									addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_INCOMPATIBLE_WITH_UUID, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
+									ServoyMarker mk = MarkerMessages.ColumnUUIDFlagNotSet.fill(tableName, column.getName());
+									addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_UUID_FLAG_NOT_SET, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
 										"columnName", column.getName());
 								}
-							}
-							if (column.getSequenceType() == ColumnInfo.DATABASE_IDENTITY && !column.isDatabasePK())
-							{
-								ServoyMarker mk = MarkerMessages.ColumnDatabaseIdentityProblem.fill(tableName, column.getName());
-								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_DATABASE_IDENTITY_PROBLEM, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
-									"columnName", column.getName());
-							}
-							if (column.getColumnInfo() != null && column.getColumnInfo().getForeignType() != null &&
-								!tableNames.contains(column.getColumnInfo().getForeignType()))
-							{
-								ServoyMarker mk = MarkerMessages.ColumnForeignTypeProblem.fill(tableName, column.getName(),
-									column.getColumnInfo().getForeignType());
-								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_FOREIGN_TYPE_PROBLEM, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
-									"columnName", column.getName());
-							}
-							if (column.getColumnInfo() != null && column.getColumnInfo().getAutoEnterType() == ColumnInfo.LOOKUP_VALUE_AUTO_ENTER)
-							{
-								String lookup = column.getColumnInfo().getLookupValue();
-								if (lookup != null && !"".equals(lookup)) //$NON-NLS-1$
+								// check type defined by column converter
+								int dataProviderType = getDataType(res, column, null, null);
+								if ((column.getSequenceType() == ColumnInfo.UUID_GENERATOR && (dataProviderType != IColumnTypes.TEXT && dataProviderType != IColumnTypes.MEDIA)) ||
+									(column.getSequenceType() == ColumnInfo.SERVOY_SEQUENCE && (dataProviderType != IColumnTypes.INTEGER && dataProviderType != IColumnTypes.NUMBER)))
 								{
-									boolean invalid = false;
-									if (ScopesUtils.isVariableScope(lookup))
+									ServoyMarker mk = MarkerMessages.ColumnIncompatibleTypeForSequence.fill(tableName, column.getName());
+									addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_INCOMPATIBLE_TYPE_FOR_SEQUENCE, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
+										"columnName", column.getName());
+								}
+								if (column.hasFlag(Column.UUID_COLUMN))
+								{
+									int length = columnHasConvertedType(column) ? 0 : column.getConfiguredColumnType().getLength();
+									boolean compatibleForUUID = false;
+									switch (dataProviderType)
 									{
-										if (getServoyModel().getFlattenedSolution().getGlobalDataProvider(lookup) == null &&
-											getServoyModel().getFlattenedSolution().getScriptMethod(null, lookup) == null)
-										{
-											invalid = true;
-										}
+										case IColumnTypes.MEDIA :
+											compatibleForUUID = length == 0 || length >= 16;
+											break;
+										case IColumnTypes.TEXT :
+											compatibleForUUID = length == 0 || length >= 36;
+											break;
 									}
-									else
+									if (!compatibleForUUID)
 									{
-										Table lookupTable = table;
-										int indx = lookup.lastIndexOf('.');
-										if (indx > 0)
-										{
-											String rel_name = lookup.substring(0, indx);
-											Relation[] relations = getServoyModel().getFlattenedSolution().getRelationSequence(rel_name);
-											if (relations == null)
-											{
-												invalid = true;
-											}
-											else if (relations.length > 0)
-											{
-												Relation r = relations[relations.length - 1];
-												lookupTable = r.getForeignTable();
-											}
-										}
-										String col = lookup.substring(indx + 1);
-										if (lookupTable != null && lookupTable.getColumn(col) == null)
-										{
-											invalid = true;
-										}
-									}
-									if (invalid)
-									{
-										ServoyMarker mk = MarkerMessages.ColumnLookupInvalid.fill(tableName, column.getName());
-										addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_LOOKUP_INVALID, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
+										ServoyMarker mk = MarkerMessages.ColumnIncompatbleWithUUID.fill(tableName, column.getName());
+										addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_INCOMPATIBLE_WITH_UUID, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
 											"columnName", column.getName());
 									}
 								}
+								if (column.getSequenceType() == ColumnInfo.DATABASE_IDENTITY && !column.isDatabasePK())
+								{
+									ServoyMarker mk = MarkerMessages.ColumnDatabaseIdentityProblem.fill(tableName, column.getName());
+									addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_DATABASE_IDENTITY_PROBLEM, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
+										"columnName", column.getName());
+								}
+								if (column.getColumnInfo() != null && column.getColumnInfo().getForeignType() != null &&
+									!tableNames.contains(column.getColumnInfo().getForeignType()))
+								{
+									ServoyMarker mk = MarkerMessages.ColumnForeignTypeProblem.fill(tableName, column.getName(),
+										column.getColumnInfo().getForeignType());
+									addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_FOREIGN_TYPE_PROBLEM, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
+										"columnName", column.getName());
+								}
+								if (column.getColumnInfo() != null && column.getColumnInfo().getAutoEnterType() == ColumnInfo.LOOKUP_VALUE_AUTO_ENTER)
+								{
+									String lookup = column.getColumnInfo().getLookupValue();
+									if (lookup != null && !"".equals(lookup)) //$NON-NLS-1$
+									{
+										boolean invalid = false;
+										if (ScopesUtils.isVariableScope(lookup))
+										{
+											if (getServoyModel().getFlattenedSolution().getGlobalDataProvider(lookup) == null &&
+												getServoyModel().getFlattenedSolution().getScriptMethod(null, lookup) == null)
+											{
+												invalid = true;
+											}
+										}
+										else
+										{
+											Table lookupTable = table;
+											int indx = lookup.lastIndexOf('.');
+											if (indx > 0)
+											{
+												String rel_name = lookup.substring(0, indx);
+												Relation[] relations = getServoyModel().getFlattenedSolution().getRelationSequence(rel_name);
+												if (relations == null)
+												{
+													invalid = true;
+												}
+												else if (relations.length > 0)
+												{
+													Relation r = relations[relations.length - 1];
+													lookupTable = r.getForeignTable();
+												}
+											}
+											String col = lookup.substring(indx + 1);
+											if (lookupTable != null && lookupTable.getColumn(col) == null)
+											{
+												invalid = true;
+											}
+										}
+										if (invalid)
+										{
+											ServoyMarker mk = MarkerMessages.ColumnLookupInvalid.fill(tableName, column.getName());
+											addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_LOOKUP_INVALID, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
+												"columnName", column.getName());
+										}
+									}
+								}
+								String columnName = column.getName();
+								String columnDataProviderID = column.getDataProviderID();
+								if (columnsByName.containsKey(columnName) || columnsByName.containsKey(columnDataProviderID) ||
+									columnsByDataProviderID.containsKey(columnName) || columnsByDataProviderID.containsKey(columnDataProviderID))
+								{
+									Column otherColumn = columnsByName.get(columnName);
+									if (otherColumn == null)
+									{
+										otherColumn = columnsByName.get(columnDataProviderID);
+									}
+									if (otherColumn == null)
+									{
+										otherColumn = columnsByDataProviderID.get(columnDataProviderID);
+									}
+									if (otherColumn == null)
+									{
+										otherColumn = columnsByDataProviderID.get(columnName);
+									}
+									ServoyMarker mk = MarkerMessages.ColumnDuplicateNameDPID.fill(tableName, column.getName(), otherColumn.getName());
+									addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_DUPLICATE_NAME_DPID, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
+										"columnName", column.getName());
+								}
+								columnsByName.put(columnName, column);
+								columnsByDataProviderID.put(columnDataProviderID, column);
 							}
-							String columnName = column.getName();
-							String columnDataProviderID = column.getDataProviderID();
-							if (columnsByName.containsKey(columnName) || columnsByName.containsKey(columnDataProviderID) ||
-								columnsByDataProviderID.containsKey(columnName) || columnsByDataProviderID.containsKey(columnDataProviderID))
-							{
-								Column otherColumn = columnsByName.get(columnName);
-								if (otherColumn == null)
-								{
-									otherColumn = columnsByName.get(columnDataProviderID);
-								}
-								if (otherColumn == null)
-								{
-									otherColumn = columnsByDataProviderID.get(columnDataProviderID);
-								}
-								if (otherColumn == null)
-								{
-									otherColumn = columnsByDataProviderID.get(columnName);
-								}
-								ServoyMarker mk = MarkerMessages.ColumnDuplicateNameDPID.fill(tableName, column.getName(), otherColumn.getName());
-								addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_DUPLICATE_NAME_DPID, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
-									"columnName", column.getName());
-							}
-							columnsByName.put(columnName, column);
-							columnsByDataProviderID.put(columnDataProviderID, column);
 						}
 					}
 				}
