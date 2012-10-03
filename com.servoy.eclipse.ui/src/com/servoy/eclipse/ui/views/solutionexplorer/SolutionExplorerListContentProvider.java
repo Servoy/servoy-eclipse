@@ -118,7 +118,6 @@ import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
-import com.servoy.j2db.ui.IScriptTabPaneAlikeMethods;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HtmlUtils;
@@ -1807,6 +1806,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			String tooltip = null;
 			String[] paramNames = null;
+			boolean namesOnly = false;
 			if (scriptObject != null)
 			{
 				String description = "";
@@ -1826,6 +1826,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 				else
 				{
+					namesOnly = true;
 					description = scriptObject.getToolTip(name);
 					paramNames = scriptObject.getParameterNames(name);
 					tooltip = Text.processTags(description, resolver);
@@ -1833,7 +1834,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			if (tooltip == null) tooltip = ""; //$NON-NLS-1$
 
-			String tmp = "<html><body><b>" + getReturnTypeString(njm.getMethods()[0].getReturnType()) + " " + name + "(" + getPrettyParameterTypesString(paramNames, false) + ")</b>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			String tmp = "<html><body><b>" + getReturnTypeString(njm.getMethods()[0].getReturnType()) + " " + name + "(" + getPrettyParameterTypesString(paramNames, namesOnly) + ")</b>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			if ("".equals(tooltip)) //$NON-NLS-1$
 			{
 				tooltip = tmp + "</body></html>"; //$NON-NLS-1$
@@ -1852,21 +1853,15 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			StringBuilder paramTypes = new StringBuilder(32);
 			if (names == null || names.length != parameterTypes.length)
 			{
-
 				//Object[] varargs backward compatibility
-				boolean isTabPanelAddTab = (njm.getMethods()[0].getDeclaringClass().isAssignableFrom(IScriptTabPaneAlikeMethods.class) && name.equals("addTab"));
-				if (parameterTypes.length == 1 && parameterTypes[0].isArray() &&
-					Arrays.asList(parameterTypes[0]).get(0).getCanonicalName().endsWith("Object[]") && !isTabPanelAddTab)
+				if (parameterTypes.length == 1 && parameterTypes[0].isArray() && (parameterTypes[0].getComponentType() == Object.class))
 				{
 					if (names == null || names.length == 0) paramTypes.append("Object[]");
 					else
 					{
 						for (int k = 0; k < names.length; k++)
 						{
-							String parameName = names[k];
-							if (paramTypes.length() != 0) paramTypes.append(" "); //$NON-NLS-1$ 
-							if (parameName.startsWith("[")) paramTypes.append(parameName.substring(0, parameName.length() - 1) + ":Object]"); //$NON-NLS-1$
-							else paramTypes.append(parameName + ":Object"); //$NON-NLS-1$
+							paramTypes.append(names[k]);
 							if (k < names.length - 1) paramTypes.append(", "); //$NON-NLS-1$
 						}
 					}
