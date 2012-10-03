@@ -36,6 +36,7 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IImportWizard;
@@ -63,6 +64,17 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	private ImportSolutionWizardPage page;
 	private FinishPage finishPage;
 	private String importMessageDetails;
+	private String titleText;
+
+	public ImportSolutionWizard()
+	{
+		// default
+	}
+
+	public ImportSolutionWizard(String titleText)
+	{
+		this.titleText = titleText;
+	}
 
 	@Override
 	public boolean performFinish()
@@ -127,6 +139,11 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		return askForImportServerName;
 	}
 
+	protected String getFirstPageTitle()
+	{
+		return titleText;
+	}
+
 	public class ImportSolutionWizardPage extends WizardPage implements IValidator
 	{
 		private ResourcesProjectChooserComposite resourceProjectComposite;
@@ -143,7 +160,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		{
 			super(pageName);
 			this.wizard = wizard;
-			setTitle("Import a solution"); //$NON-NLS-1$
+			setTitle(wizard.getFirstPageTitle() == null ? "Import a solution" : wizard.getFirstPageTitle()); //$NON-NLS-1$
 			setDescription("A solution (with or without modules) will be imported into the workspace from a .servoy file."); //$NON-NLS-1$
 		}
 
@@ -166,9 +183,6 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 				}
 			});
 
-			String solutionFilePath = wizard.getSolutionFilePath();
-			if (solutionFilePath != null) filePath.setText(solutionFilePath);
-
 			browseButton = new Button(topLevel, SWT.NONE);
 			browseButton.setText("Browse"); //$NON-NLS-1$
 			browseButton.addSelectionListener(new SelectionAdapter()
@@ -186,6 +200,21 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 					}
 				}
 			});
+
+			final String solutionFilePath = wizard.getSolutionFilePath();
+			if (solutionFilePath != null)
+			{
+				Display.getCurrent().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						filePath.setText(solutionFilePath); // to avoid large dialog widths if path is long
+					}
+				});
+				filePath.setEditable(false);
+				browseButton.setEnabled(false);
+			}
+
 			cleanImport = new Button(topLevel, SWT.CHECK);
 			cleanImport.setText("Clean Import"); //$NON-NLS-1$
 

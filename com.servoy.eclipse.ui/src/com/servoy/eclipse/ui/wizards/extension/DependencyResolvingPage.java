@@ -21,8 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,9 +29,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ExpandEvent;
@@ -45,15 +41,10 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.ExpandBar;
 import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Link;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -81,10 +72,9 @@ import com.servoy.j2db.util.Debug;
  * When next is pressed, it will do the actual dependency resolve (with progress) and depending on it's results choose the next page to show.
  * @author acostescu
  */
-public class DependencyResolvingPage extends WizardPage
+public class DependencyResolvingPage extends ReviewOperationPage
 {
 
-	protected InstallExtensionState state;
 	protected InstallExtensionWizardOptions dialogOptions;
 
 	protected Object longRunningLock = new Object();
@@ -102,101 +92,14 @@ public class DependencyResolvingPage extends WizardPage
 	 */
 	public DependencyResolvingPage(String pageName, InstallExtensionState state, InstallExtensionWizardOptions dialogOptions, boolean fromFile)
 	{
-		super(pageName);
+		super(pageName, "Please review extension information", state); //$NON-NLS-1$
 		this.fromFile = fromFile;
-		this.state = state;
 		this.dialogOptions = dialogOptions;
-
-		setTitle("Please review extension information"); //$NON-NLS-1$
-		setDescription(""); //$NON-NLS-1$
 	}
 
-	public void createControl(Composite parent)
+	@Override
+	protected void addMoreContent(final Composite topLevel)
 	{
-		initializeDialogUnits(parent);
-
-		final Composite topLevel = new Composite(parent, SWT.NONE);
-		topLevel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
-		setControl(topLevel);
-
-		Composite infoComposite = new Composite(topLevel, SWT.NONE);
-		GridLayout gridLayout = new GridLayout(2, false);
-		gridLayout.horizontalSpacing = 15;
-		gridLayout.marginWidth = gridLayout.marginHeight = 0;
-		infoComposite.setLayout(gridLayout);
-
-		final Label imgLbl = new Label(infoComposite, SWT.NONE);
-		imgLbl.setImage(null); // will be set by a runnable that provides progress
-		imgLbl.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
-
-		final Composite textInfo = new Composite(infoComposite, SWT.NONE);
-		gridLayout = new GridLayout(2, false);
-		gridLayout.horizontalSpacing = 10;
-		gridLayout.verticalSpacing = 5;
-		gridLayout.marginHeight = gridLayout.marginWidth = 0;
-		textInfo.setLayout(gridLayout);
-		textInfo.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
-
-//		Label extensionName = new Label(textInfo, SWT.NONE);
-//		extensionName.setText("Name:"); //$NON-NLS-1$
-//		Text extensionNameText = new Text(textInfo, SWT.READ_ONLY | SWT.BORDER);
-
-//		extensionName.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-//		extensionNameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-
-		Label extensionID = new Label(textInfo, SWT.NONE);
-		extensionID.setText("Id"); //$NON-NLS-1$
-		Text extensionIDText = new Text(textInfo, SWT.READ_ONLY | SWT.BORDER);
-		extensionIDText.setText(state.extensionID);
-//		extensionIDText.setBackground(state.display.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-
-		extensionID.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		extensionIDText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-		Label version = new Label(textInfo, SWT.NONE);
-		version.setText("Version"); //$NON-NLS-1$
-		Text versionText = new Text(textInfo, SWT.READ_ONLY | SWT.BORDER);
-		versionText.setText(state.version);
-//		versionText.setBackground(state.display.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-
-		version.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		versionText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-		final Label productUrl = new Label(textInfo, SWT.NONE);
-		productUrl.setText("Product URL"); //$NON-NLS-1$
-		final Link productUrlLink = new Link(textInfo, SWT.NONE);
-		productUrlLink.addListener(SWT.Selection, new Listener()
-		{
-			public void handleEvent(Event event)
-			{
-				try
-				{
-					PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(event.text));
-				}
-				catch (PartInitException e)
-				{
-					ServoyLog.logError(e);
-				}
-				catch (MalformedURLException e)
-				{
-					ServoyLog.logError(e);
-				}
-			}
-		});
-
-		productUrl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		productUrl.setVisible(false);
-		productUrlLink.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		productUrlLink.setVisible(false);
-
-		ScrolledComposite descriptionComposite = new ScrolledComposite(topLevel, SWT.V_SCROLL);
-		descriptionComposite.setAlwaysShowScrollBars(false);
-		descriptionComposite.setExpandHorizontal(true);
-		descriptionComposite.setMinWidth(10);
-		final Label descriptionText = new Label(descriptionComposite, SWT.WRAP);
-		descriptionText.setText(""); //$NON-NLS-1$
-		descriptionComposite.setContent(descriptionText);
-
 		Label separator1 = new Label(topLevel, SWT.SEPARATOR | SWT.HORIZONTAL);
 		ExpandBar advancedResolvingCollapser = new ExpandBar(topLevel, SWT.V_SCROLL);
 		Label separator2 = new Label(topLevel, SWT.SEPARATOR | SWT.HORIZONTAL);
@@ -228,7 +131,7 @@ public class DependencyResolvingPage extends WizardPage
 		});
 
 		Composite advancedResolvingComposite = new Composite(advancedResolvingCollapser, SWT.NONE);
-		gridLayout = new GridLayout(2, false);
+		GridLayout gridLayout = new GridLayout(2, false);
 		gridLayout.marginWidth = gridLayout.marginHeight = 0;
 		gridLayout.marginBottom = 5;
 		gridLayout.verticalSpacing = 5;
@@ -338,28 +241,20 @@ public class DependencyResolvingPage extends WizardPage
 		gd.horizontalIndent = 30;
 		allowLibConflicts.setLayoutData(gd);
 
-
 		ExpandItem collapsableItem = new ExpandItem(advancedResolvingCollapser, SWT.NONE, 0);
 		collapsableItem.setControl(advancedResolvingComposite);
 		collapsableItem.setText("Advanced dependency resolve options"); //$NON-NLS-1$
 		collapsableItem.setHeight(advancedResolvingComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
 		collapsableItem.setImage(Activator.getDefault().loadImageFromBundle("dependency.gif")); //$NON-NLS-1$
 
-		// layout the page
-		gridLayout = new GridLayout(1, false);
-		gridLayout.horizontalSpacing = gridLayout.verticalSpacing = 0;
-		gridLayout.marginWidth = 10;
-		gridLayout.marginHeight = 10;
-		topLevel.setLayout(gridLayout);
-
-		infoComposite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gd.verticalIndent = 15;
-		descriptionComposite.setLayoutData(gd);
 		separator1.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
 		advancedResolvingCollapser.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
 		separator2.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+	}
 
+	@Override
+	protected void fillData()
+	{
 		// downloading the file & parsing it is long running; it's not necessary for dependency resolving, so it can be skipped by user,
 		// but would give a nice overview if it's ran completely
 		final IRunnableWithProgress toRun = new IRunnableWithProgress()
@@ -478,15 +373,11 @@ public class DependencyResolvingPage extends WizardPage
 								{
 									if (xml.getInfo().description != null)
 									{
-										descriptionText.setText(xml.getInfo().description.replace("\r\n", "\n").replace("\n", System.getProperty("line.separator"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-										descriptionText.setSize(descriptionText.computeSize(descriptionText.getParent().getSize().x, SWT.DEFAULT));
+										setExtensionDescription(xml.getInfo().description, true);
 									}
 									if (xml.getInfo().url != null)
 									{
-										productUrl.setVisible(true);
-										productUrlLink.setText("<a href=\"" + xml.getInfo().url + "\">" + xml.getInfo().url + "</a>"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-										productUrlLink.setVisible(true);
-										textInfo.layout(true, true);
+										setExtensionProductUrl("<a href=\"" + xml.getInfo().url + "\">" + xml.getInfo().url + "</a>", true); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 									}
 								}
 							});
@@ -513,8 +404,7 @@ public class DependencyResolvingPage extends WizardPage
 									{
 										public void run()
 										{
-											imgLbl.setImage(img);
-											topLevel.layout(true, true);
+											setExtensionIcon(img, true);
 										}
 									});
 								}
@@ -574,12 +464,6 @@ public class DependencyResolvingPage extends WizardPage
 		{
 			ServoyLog.logError(e);
 		}
-	}
-
-	@Override
-	public boolean canFlipToNextPage()
-	{
-		return true;
 	}
 
 	@Override
@@ -780,7 +664,7 @@ public class DependencyResolvingPage extends WizardPage
 			// dependency resolving succeeded
 
 			// prepare install page; afterwards, we might postpone it for after some dummy info/warning page
-			nextPage = new ActualInstallPage("DoInstall", state, false); //$NON-NLS-1$
+			nextPage = new ActualInstallPage("DoInstall", state); //$NON-NLS-1$
 			nextPage.setWizard(getWizard());
 
 			if (state.chosenPath.extensionPath.length > 1 ||

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -81,7 +82,7 @@ public class ContentInstaller
 			try
 			{
 				MarketplaceProgressMonitorDialog progressMonitorDialog = new MarketplaceProgressMonitorDialog(UIUtils.getActiveShell(), installItem.getName());
-				progressMonitorDialog.run(true, false, new IRunnableWithProgress()
+				progressMonitorDialog.run(true, true, new IRunnableWithProgress()
 				{
 
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
@@ -89,6 +90,10 @@ public class ContentInstaller
 						try
 						{
 							installItem.install(monitor);
+						}
+						catch (OperationCanceledException ex)
+						{
+							// canceled on purpose by the user
 						}
 						catch (final Exception ex)
 						{

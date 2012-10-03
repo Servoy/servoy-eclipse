@@ -44,7 +44,7 @@ public class ProcessPendingInstall implements Runnable
 
 		if (f.exists())
 		{
-			continueInstall(installDir);
+			continueOperation(installDir);
 		}
 	}
 
@@ -82,7 +82,7 @@ public class ProcessPendingInstall implements Runnable
 		throw ex;
 	}
 
-	public void continueInstall(File installDir)
+	public void continueOperation(File installDir)
 	{
 		RestartState state = new RestartState();
 		state.installDir = installDir;
@@ -102,14 +102,19 @@ public class ProcessPendingInstall implements Runnable
 
 				for (int i = 0; i < pendingDirs.length && error == null; i++) // ascending
 				{
-					error = state.recreateFromPending(pendingDirs[i]);
+					error = state.recreateFromPending(pendingDirs[i], true);
 
 					if (error == null)
 					{
-						// start installing!
-						doInstall(state);
+						// start installing/uninstalling!
+						doOperation(state);
 					}
 				}
+			}
+			catch (RuntimeException e)
+			{
+				error = "Failed to check for/install pending extension operations. Pending operations will be discarded. Check logs for more info. Reason: " + e.getMessage(); //$NON-NLS-1$
+				throw e;
 			}
 			finally
 			{
@@ -129,7 +134,7 @@ public class ProcessPendingInstall implements Runnable
 		}
 	}
 
-	protected void doInstall(RestartState state)
+	protected void doOperation(RestartState state)
 	{
 		LibChoiceHandler libHandler = null;
 		if (state.chosenPath.libChoices != null)

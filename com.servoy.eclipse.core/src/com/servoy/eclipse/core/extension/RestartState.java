@@ -26,7 +26,6 @@ import java.io.ObjectOutputStream;
 
 import org.eclipse.swt.widgets.Display;
 
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.extension.FileBasedExtensionProvider;
 import com.servoy.extension.IExtensionProvider;
 import com.servoy.extension.IFileBasedExtensionProvider;
@@ -34,6 +33,7 @@ import com.servoy.extension.dependency.DependencyPath;
 import com.servoy.extension.parser.EXPParser;
 import com.servoy.extension.parser.EXPParserPool;
 import com.servoy.extension.parser.IEXPParserPool;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -79,7 +79,7 @@ public class RestartState implements IEXPParserPool
 		catch (IOException e)
 		{
 			err = "Error persisting pending install: " + e.getMessage(); //$NON-NLS-1$
-			ServoyLog.logError(e);
+			Debug.error(e);
 		}
 		finally
 		{
@@ -93,7 +93,7 @@ public class RestartState implements IEXPParserPool
 	 * @param pendingDir the directory when the state is persisted.
 	 * @return null if all is ok, or an error message if the operation failed.
 	 */
-	public String recreateFromPending(File pendingDir)
+	public String recreateFromPending(File pendingDir, boolean recreateExtensionProvider)
 	{
 		chosenPath = null;
 		extensionProvider = null;
@@ -107,18 +107,18 @@ public class RestartState implements IEXPParserPool
 			chosenPath = (DependencyPath)in.readObject();
 
 			// recreate stuff needed to continue install but do not need persisting
-			extensionProvider = new FileBasedExtensionProvider(pendingDir, true, this);
-			installedExtensionsProvider.flushCache(); // after last pending dir was processed, the installed extensions dir probably changed
+			if (recreateExtensionProvider && !chosenPath.uninstall) extensionProvider = new FileBasedExtensionProvider(pendingDir, true, this); // else null
+			if (installedExtensionsProvider != null) installedExtensionsProvider.flushCache(); // after last pending dir was processed, the installed extensions dir probably changed
 		}
 		catch (IOException e)
 		{
 			err = "Error preparing pending install: " + e.getMessage(); //$NON-NLS-1$
-			ServoyLog.logError(e);
+			Debug.error(e);
 		}
 		catch (ClassNotFoundException e)
 		{
 			err = "Error preparing pending install: " + e.getMessage(); //$NON-NLS-1$
-			ServoyLog.logError(e);
+			Debug.error(e);
 		}
 		finally
 		{

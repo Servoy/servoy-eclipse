@@ -66,8 +66,7 @@ public class StylesInstall implements InstallItem
 			public void run()
 			{
 				// show resource project choice dialog
-				final ResourceProjectChoiceDialog dialog = new ResourceProjectChoiceDialog(UIUtils.getActiveShell(), "Import style" + //$NON-NLS-1$
-					(stylesFile.length > 1 ? "s" : "") + ": select resources project", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				final ResourceProjectChoiceDialog dialog = new ResourceProjectChoiceDialog(UIUtils.getActiveShell(), "Extension install - importing style(s)", //$NON-NLS-1$ 
 					ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject(), true);
 
 				if (dialog.open() == Window.OK)

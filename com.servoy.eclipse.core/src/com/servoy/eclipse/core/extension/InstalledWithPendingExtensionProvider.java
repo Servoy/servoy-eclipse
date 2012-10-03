@@ -21,19 +21,15 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import com.servoy.extension.DependencyMetadata;
 import com.servoy.extension.ExtensionDependencyDeclaration;
 import com.servoy.extension.FileBasedExtensionProvider;
-import com.servoy.extension.IExtensionProvider;
 import com.servoy.extension.IFileBasedExtensionProvider;
 import com.servoy.extension.IProgress;
 import com.servoy.extension.Message;
 import com.servoy.extension.MessageKeeper;
-import com.servoy.extension.VersionStringUtils;
 import com.servoy.extension.parser.IEXPParserPool;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.SortedList;
@@ -42,7 +38,8 @@ import com.servoy.j2db.util.SortedList;
  * This is a composed extension provider based on folder-based providers. It will be able to provide
  * only one version for each extension id (the one from the last provider in the list that has that extension id (any version of it)).<br><br>
  * 
- * It is meant to combine installed & pending folders in order to simulate an "already installed" set of extensions.
+ * It is meant to combine installed & pending folders in order to simulate an "already installed" set of extensions. It also takes into account pending
+ * uninstall operations, hiding those uninstalled extensions at the right level.
  * @author acostescu
  */
 public class InstalledWithPendingExtensionProvider implements IFileBasedExtensionProvider
@@ -52,11 +49,13 @@ public class InstalledWithPendingExtensionProvider implements IFileBasedExtensio
 
 	protected final static String DOT = "."; //$NON-NLS-1$
 
-	protected FileBasedExtensionProvider[] folderProviders;
+	protected IFileBasedExtensionProvider topMostProvider;
 	protected MessageKeeper messages = new MessageKeeper();
 
 	protected File extDir;
 	protected IEXPParserPool parserSource;
+
+	private int folderCount;
 
 	public InstalledWithPendingExtensionProvider(File extDir, IEXPParserPool parserSource)
 	{
@@ -69,12 +68,24 @@ public class InstalledWithPendingExtensionProvider implements IFileBasedExtensio
 	protected void createFolderProviderList()
 	{
 		File[] pendingDirs = getPendingDirsAscending(extDir);
-		folderProviders = new FileBasedExtensionProvider[pendingDirs.length + 1];
-		folderProviders[0] = new FileBasedExtensionProvider(extDir, true, parserSource);
-		for (int i = 0; i < pendingDirs.length; i++)
+		IFileBasedExtensionProvider current = new FileBasedExtensionProvider(extDir, true, parserSource);
+		folderCount = 1 + pendingDirs.length;
+		for (File pendingDir : pendingDirs)
 		{
-			folderProviders[i + 1] = new FileBasedExtensionProvider(pendingDirs[i], true, parserSource);
+			RestartState rs = new RestartState();
+			String e = rs.recreateFromPending(pendingDir, false);
+			if (e != null) messages.addError(e);
+
+			if (e == null && rs.chosenPath.uninstall)
+			{
+				current = new UninstallChainedFileBasedExtensionProvider(rs, current);
+			}
+			else
+			{
+				current = new ChainedFileBasedExtensionProvider(pendingDir, parserSource, current);
+			}
 		}
+		topMostProvider = current;
 	}
 
 	/**
@@ -161,78 +172,36 @@ public class InstalledWithPendingExtensionProvider implements IFileBasedExtensio
 
 	public int getFolderCount()
 	{
-		return folderProviders.length;
+		return folderCount;
 	}
 
 	public Message[] getMessages()
 	{
 		List<Message> allMsgs = new ArrayList<Message>();
-		for (IExtensionProvider exp : folderProviders)
-		{
-			allMsgs.addAll(Arrays.asList(exp.getMessages()));
-		}
+		allMsgs.addAll(Arrays.asList(topMostProvider.getMessages()));
 		allMsgs.addAll(Arrays.asList(messages.getMessages()));
 		return allMsgs.toArray(new Message[allMsgs.size()]);
 	}
 
 	public void clearMessages()
 	{
-		for (IExtensionProvider exp : folderProviders)
-		{
-			exp.clearMessages();
-		}
+		topMostProvider.clearMessages();
 		messages.clearMessages();
 	}
 
 	public DependencyMetadata[] getDependencyMetadata(ExtensionDependencyDeclaration extensionDependency)
 	{
-		ExtensionDependencyDeclaration toSearchFor = new ExtensionDependencyDeclaration(extensionDependency.id, VersionStringUtils.UNBOUNDED,
-			VersionStringUtils.UNBOUNDED);
-		DependencyMetadata[] dmds = null;
-		int folderProviderIdx = folderProviders.length - 1;
-
-		while (folderProviderIdx >= 0 && dmds == null)
-		{
-			DependencyMetadata[] tmps = folderProviders[folderProviderIdx].getDependencyMetadata(toSearchFor);
-			if (tmps != null && tmps.length > 0)
-			{
-				if (VersionStringUtils.belongsToInterval(tmps[0].version, extensionDependency.minVersion, extensionDependency.maxVersion))
-				{
-					dmds = tmps;
-					if (dmds.length > 1)
-					{
-						messages.addWarning("More then one extension with id='" + toSearchFor.id + "' marked as installed. This is not supported."); //$NON-NLS-1$//$NON-NLS-2$
-					}
-				}
-				else
-				{
-					folderProviderIdx = -1; // found it, but another version; this provider can only supply 1 version for each extension id (simulates installed)
-				}
-			}
-			folderProviderIdx--;
-		}
-		return dmds;
+		return topMostProvider.getDependencyMetadata(extensionDependency);
 	}
 
 	public File getEXPFile(String extensionId, String version, IProgress progressMonitor)
 	{
-		File f = null;
-		int folderProviderIdx = folderProviders.length - 1;
-
-		while (folderProviderIdx >= 0 && f == null)
-		{
-			f = folderProviders[folderProviderIdx].getEXPFile(extensionId, version, progressMonitor);
-			folderProviderIdx--;
-		}
-		return f;
+		return topMostProvider.getEXPFile(extensionId, version, null);
 	}
 
 	public void dispose()
 	{
-		for (IExtensionProvider exp : folderProviders)
-		{
-			exp.dispose();
-		}
+		topMostProvider.dispose();
 	}
 
 	public void flushCache()
@@ -243,28 +212,7 @@ public class InstalledWithPendingExtensionProvider implements IFileBasedExtensio
 
 	public DependencyMetadata[] getAllAvailableExtensions()
 	{
-		List<DependencyMetadata> dmds = new ArrayList<DependencyMetadata>();
-		Set<String> foundIds = new HashSet<String>();
-		int folderProviderIdx = folderProviders.length - 1;
-
-		while (folderProviderIdx >= 0)
-		{
-			DependencyMetadata[] tmp = folderProviders[folderProviderIdx].getAllAvailableExtensions();
-			if (tmp != null)
-			{
-				for (DependencyMetadata dmd : tmp)
-				{
-					if (!foundIds.contains(dmd.id))
-					{
-						foundIds.add(dmd.id);
-						dmds.add(dmd);
-					}
-				}
-			}
-			folderProviderIdx--;
-		}
-
-		return dmds.toArray(new DependencyMetadata[dmds.size()]);
+		return topMostProvider.getAllAvailableExtensions();
 	}
 
 }

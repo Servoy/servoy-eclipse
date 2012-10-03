@@ -42,9 +42,10 @@ public class RestartPage extends ShowMessagesPage
 	 * @param state the install state.
 	 * @param messages null or a list of messages to be presented to the user.
 	 */
-	public RestartPage(InstallExtensionState state, Message[] messages)
+	public RestartPage(InstallExtensionState state, Message[] messages, String operationTypeString)
 	{
-		super("InstRst", "Servoy Developer restart required", "A restart is needed in order to complete the install process.", null, messages, false, null); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+		super(
+			"InstRst", "Servoy Developer restart required", "A restart is needed in order to complete the " + operationTypeString.toLowerCase() + " process.", null, messages, false, null); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$ //$NON-NLS-4$
 		this.state = state;
 	}
 

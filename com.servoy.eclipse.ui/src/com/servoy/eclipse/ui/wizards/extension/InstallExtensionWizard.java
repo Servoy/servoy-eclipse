@@ -36,7 +36,7 @@ import com.servoy.j2db.util.Pair;
 
 
 /**
- * Wizard used to install extensions wither from local .exp files or from the Marketplace 
+ * Wizard used to install extensions either from local .exp files or from the Marketplace 
  * @author acostescu
  */
 public class InstallExtensionWizard extends Wizard implements IImportWizard
@@ -80,8 +80,9 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
-		setWindowTitle(TITLE);
-		setDefaultPageImageDescriptor(Activator.loadImageDescriptorFromBundle("marketplace_wizard.png")); //$NON-NLS-1$
+		setWindowTitle(errorAndMsgs == null ? TITLE : "Extension install/uninstall"); //$NON-NLS-1$
+		setDefaultPageImageDescriptor(idToInstallFromMP != null
+			? Activator.loadImageDescriptorFromBundle("marketplace_wizard.png") : Activator.loadImageDescriptorFromBundle("extension_wizard.png")); //$NON-NLS-1$ //$NON-NLS-2$
 		IDialogSettings workbenchSettings = Activator.getDefault().getDialogSettings();
 		IDialogSettings section = workbenchSettings.getSection(WIZARD_SETTINGS_SECTION);
 		if (section == null)
@@ -98,12 +99,13 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 	@Override
 	public void addPages()
 	{
+		// ApplicationServerSingleton.get() should never be called in this wizard elsewhere at restart, otherwise restart-install will not work correctly
 		if (errorAndMsgs != null)
 		{
 			state.canFinish = true;
-			state.disallowCancel = true; // install is over, it can't be cancelled
+			state.disallowCancel = true; // install/uninstall is over, it can't be cancelled
 			addPage(new ShowMessagesPage(
-				"Error page", "Extension install", errorAndMsgs.getLeft() != null ? errorAndMsgs.getLeft() : "Some items may need your attention.", null, errorAndMsgs.getRight(), false, null)); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+				"Error page", "Extension install/uninstall", errorAndMsgs.getLeft() != null ? errorAndMsgs.getLeft() : "Some items may need your attention.", null, errorAndMsgs.getRight(), false, null)); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 		}
 		else
 		{
@@ -111,7 +113,6 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 
 			if (state.installDir == null)
 			{
-				// ApplicationServerSingleton.get() should never be called in this wizard elsewhere at restart, otherwise restart-install will not work correctly
 				String appServerDir = ApplicationServerSingleton.get().getServoyApplicationServerDirectory();
 				if (appServerDir != null)
 				{
@@ -126,54 +127,60 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 				InstalledWithPendingExtensionProvider tmp = new InstalledWithPendingExtensionProvider(extDir, state);
 				state.mustRestart = (tmp.getFolderCount() > 1); // check if we already have pending install operations
 				state.installedExtensionsProvider = tmp;
-			}
 
-			if (idToInstallFromMP != null)
-			{
-				MarketPlaceExtensionProvider marketplaceProvider = null;
-
-				state.extensionID = idToInstallFromMP;
-				// only show first page if there is more then one version available for this extension in the MP
-				marketplaceProvider = new MarketPlaceExtensionProvider(state.installDir);
-				if (versionToInstallFromMP == null)
+				if (idToInstallFromMP != null)
 				{
-					String[] versions = marketplaceProvider.getAvailableVersions(idToInstallFromMP);
-					if (versions == null || versions.length == 0)
+					MarketPlaceExtensionProvider marketplaceProvider = null;
+
+					state.extensionID = idToInstallFromMP;
+					// only show first page if there is more then one version available for this extension in the MP
+					marketplaceProvider = new MarketPlaceExtensionProvider(state.installDir);
+					if (versionToInstallFromMP == null)
 					{
-						// this shouldn't happen in normal circumstances; maybe a network error caused this...
-						Message[] msgs = marketplaceProvider.getMessages();
-						if (msgs.length == 0)
+						String[] versions = marketplaceProvider.getAvailableVersions(idToInstallFromMP);
+						if (versions == null || versions.length == 0)
 						{
-							msgs = new Message[] { new Message("Unknown error", Message.ERROR) }; //$NON-NLS-1$
+							// this shouldn't happen in normal circumstances; maybe a network error caused this...
+							Message[] msgs = marketplaceProvider.getMessages();
+							if (msgs.length == 0)
+							{
+								msgs = new Message[] { new Message("Unknown error", Message.ERROR) }; //$NON-NLS-1$
+							}
+							addPage(new ShowMessagesPage(
+								"Error page", "Cannot install extension", "A problem was encountered during available versions lookup.", null, msgs, false, null)); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 						}
-						addPage(new ShowMessagesPage(
-							"Error page", "Cannot install extension", "A problem was encountered during available versions lookup.", null, msgs, false, null)); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+						else
+						{
+							state.extensionProvider = marketplaceProvider;
+							if (versions.length == 1)
+							{
+								state.version = versions[0];
+								addPage(new DependencyResolvingPage("DepResolver", state, dialogOptions, false)); //$NON-NLS-1$
+							}
+							else
+							{
+								// show a page that allows the user to choose a version and auto-selects the most appropriate one (highest compatible)
+								addPage(new ChooseMPExtensionVersion("MPver", state, dialogOptions, marketplaceProvider, versions)); //$NON-NLS-1$
+							}
+						}
 					}
 					else
 					{
 						state.extensionProvider = marketplaceProvider;
-						if (versions.length == 1)
-						{
-							state.version = versions[0];
-							addPage(new DependencyResolvingPage("DepResolver", state, dialogOptions, false)); //$NON-NLS-1$
-						}
-						else
-						{
-							// show a page that allows the user to choose a version and auto-selects the most appropriate one (highest compatible)
-							addPage(new ChooseMPExtensionVersion("MPver", state, dialogOptions, marketplaceProvider, versions)); //$NON-NLS-1$
-						}
+						state.version = versionToInstallFromMP;
+						addPage(new DependencyResolvingPage("DepResolver", state, dialogOptions, false)); //$NON-NLS-1$
 					}
 				}
 				else
 				{
-					state.extensionProvider = marketplaceProvider;
-					state.version = versionToInstallFromMP;
-					addPage(new DependencyResolvingPage("DepResolver", state, dialogOptions, false)); //$NON-NLS-1$
+					addPage(new ChooseEXPFilePage("EXPchooser", state, dialogOptions)); //$NON-NLS-1$
 				}
 			}
 			else
 			{
-				addPage(new ChooseEXPFilePage("EXPchooser", state, dialogOptions)); //$NON-NLS-1$
+				Message[] msgs = new Message[] { new Message("Cannot access directory '" + extDir.getAbsolutePath() + "'.", Message.ERROR) }; //$NON-NLS-1$ //$NON-NLS-2$
+				addPage(new ShowMessagesPage(
+					"Error page", "Cannot install extension", "A problem was encountered accessing the extension dir.", null, msgs, false, null)); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 			}
 		}
 

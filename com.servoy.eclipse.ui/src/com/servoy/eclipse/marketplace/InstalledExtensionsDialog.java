@@ -71,6 +71,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.util.GrabExcessSpaceIn1ColumnTableListener;
 import com.servoy.eclipse.ui.wizards.extension.InstallExtensionWizard;
+import com.servoy.eclipse.ui.wizards.extension.UninstallExtensionWizard;
 import com.servoy.extension.DependencyMetadata;
 import com.servoy.extension.ExtensionDependencyDeclaration;
 import com.servoy.extension.ExtensionUtils;
@@ -417,10 +418,19 @@ public class InstalledExtensionsDialog extends TrayDialog
 
 	protected void onUninstall(Pair<DependencyMetadata, DependencyMetadata> data)
 	{
-		DependencyMetadata dmd = data.getLeft();
-		// start uninstall process
-		// TODO
-		MessageDialog.openInformation(getShell(), "Feature unavailable", "Uninstall will be available in upcoming Servoy versions."); //$NON-NLS-1$ //$NON-NLS-2$
+		final DependencyMetadata dmd = data.getLeft();
+
+		UIUtils.runInUI(new Runnable()
+		{
+			public void run()
+			{
+				UninstallExtensionWizard uninstallExtensionWizard = new UninstallExtensionWizard(dmd.id);
+				uninstallExtensionWizard.init(PlatformUI.getWorkbench(), null);
+				WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), uninstallExtensionWizard);
+				dialog.open();
+			}
+		}, false);
+
 		refreshInstalledExtensions();
 	}
 
@@ -523,7 +533,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 				if (table == null || getShell().isDisposed()) return;
 
 				Image upgradeIcon = Activator.getDefault().loadImageFromBundle("upgrade.gif"); //$NON-NLS-1$
-				Image uninstallIcon = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ELCL_REMOVE);
+				Image uninstallIcon = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 
 				table.setVisible(false);
 				try

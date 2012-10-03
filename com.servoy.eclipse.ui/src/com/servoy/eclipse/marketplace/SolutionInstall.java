@@ -50,7 +50,7 @@ public class SolutionInstall implements InstallItem
 			public void run()
 			{
 				IStructuredSelection selection = StructuredSelection.EMPTY;
-				ImportSolutionWizard importSolutionWizard = new ImportSolutionWizard();
+				ImportSolutionWizard importSolutionWizard = new ImportSolutionWizard("Extension install - import solution"); //$NON-NLS-1$
 				importSolutionWizard.setSolutionFilePath(solutionFile.getAbsolutePath());
 				importSolutionWizard.setAskForImportServerName(true);
 				importSolutionWizard.init(PlatformUI.getWorkbench(), selection);
