@@ -118,6 +118,7 @@ import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
+import com.servoy.j2db.ui.IScriptTabPaneAlikeMethods;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HtmlUtils;
@@ -1851,7 +1852,27 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			StringBuilder paramTypes = new StringBuilder(32);
 			if (names == null || names.length != parameterTypes.length)
 			{
-				for (Class param : parameterTypes)
+
+				//Object[] varargs backward compatibility
+				boolean isTabPanelAddTab = (njm.getMethods()[0].getDeclaringClass().isAssignableFrom(IScriptTabPaneAlikeMethods.class) && name.equals("addTab"));
+				if (parameterTypes.length == 1 && parameterTypes[0].isArray() &&
+					Arrays.asList(parameterTypes[0]).get(0).getCanonicalName().endsWith("Object[]") && !isTabPanelAddTab)
+				{
+					if (names == null || names.length == 0) paramTypes.append("Object[]");
+					else
+					{
+						for (int k = 0; k < names.length; k++)
+						{
+							String parameName = names[k];
+							if (paramTypes.length() != 0) paramTypes.append(" "); //$NON-NLS-1$ 
+							if (parameName.startsWith("[")) paramTypes.append(parameName.substring(0, parameName.length() - 1) + ":Object]"); //$NON-NLS-1$
+							else paramTypes.append(parameName + ":Object"); //$NON-NLS-1$
+							if (k < names.length - 1) paramTypes.append(", "); //$NON-NLS-1$
+						}
+					}
+					return paramTypes.toString();
+				}
+				else for (Class param : parameterTypes)
 				{
 					paramTypes.append(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(param));
 					paramTypes.append(", ");
