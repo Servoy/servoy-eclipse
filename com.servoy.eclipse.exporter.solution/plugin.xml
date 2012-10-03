@@ -2,7 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         id="com.servoy.eclipse.exporter.application"
+         id="com.servoy.eclipse.exporter.solution.application"
          point="org.eclipse.core.runtime.applications">
       <application
             cardinality="singleton-global"

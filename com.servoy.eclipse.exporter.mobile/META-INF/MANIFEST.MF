@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Mobile Exporter Plug-in
-Bundle-SymbolicName: com.servoy.eclipse.mobile.exporter;singleton:=true
+Bundle-SymbolicName: com.servoy.eclipse.exporter.mobile;singleton:=true
 Bundle-Version: 6.1.2.1421
 Bundle-Activator: com.servoy.eclipse.mobileexporter.Activator
 Bundle-Vendor: Servoy

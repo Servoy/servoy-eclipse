@@ -836,13 +836,6 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          unpack="false"/>
 
    <plugin
-         id="com.servoy.eclipse.exporter"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.equinox.transforms.hook"
          download-size="0"
          install-size="0"
@@ -865,7 +858,14 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          unpack="false"/>
 
    <plugin
-         id="com.servoy.eclipse.warexporter"
+         id="com.servoy.eclipse.exporter.solution"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.servoy.eclipse.exporter.war"
          download-size="0"
          install-size="0"
          version="0.0.0"
