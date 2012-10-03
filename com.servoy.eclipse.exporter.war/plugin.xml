@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.exportWizards">
+      <wizard
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.warexporter.ui.wizard.ExportWarWizard"
+            icon="icons/add.gif"
+            id="com.servoy.eclipse.warexporter.ExportWarWizard"
+            name="Export War File">
+      </wizard>
+   </extension>
+
+</plugin>

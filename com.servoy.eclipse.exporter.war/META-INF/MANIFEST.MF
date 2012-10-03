@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Servoy War Exporter Plug-in
+Bundle-SymbolicName: com.servoy.eclipse.warexporter;singleton:=true
+Bundle-Version: 6.1.2.1421
+Bundle-Activator: com.servoy.eclipse.warexporter.Activator
+Bundle-Vendor: Servoy
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ servoy_shared,
+ org.eclipse.core.databinding,
+ org.eclipse.core.databinding.beans,
+ org.eclipse.core.databinding.observable,
+ org.eclipse.core.databinding.property,
+ org.eclipse.jface.databinding,
+ com.ibm.icu,
+ servoy_headless_client
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .,
+ swt-grouplayout.jar
