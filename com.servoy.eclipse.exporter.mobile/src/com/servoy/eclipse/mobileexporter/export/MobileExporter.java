@@ -239,36 +239,13 @@ public class MobileExporter
 				warStream = new ZipOutputStream(new FileOutputStream(new File(outputFolder, solutionName + ".war")));
 				ZipInputStream zipStream = new ZipInputStream(is);
 				ZipEntry entry = zipStream.getNextEntry();
-				boolean jsonAdded = false;
-				boolean jsAdded = false;
 				while (entry != null)
 				{
-					warStream.putNextEntry(new ZipEntry(entry.getName()));
-					if (entry.getName().endsWith("solution.json"))
-					{
-						Utils.streamCopy(new ByteArrayInputStream(formJson.getBytes("UTF8")), warStream);
-						jsonAdded = true;
-					}
-					else if (entry.getName().endsWith("solution.js"))
-					{
-						Utils.streamCopy(new ByteArrayInputStream(solutionJavascript.getBytes("UTF8")), warStream);
-						jsAdded = true;
-					}
-					else
-					{
-						Utils.streamCopy(zipStream, warStream);
-					}
-					warStream.closeEntry();
+					addZipEntry(entry.getName(), warStream, zipStream);
 					entry = zipStream.getNextEntry();
 				}
-				if (!jsonAdded)
-				{
-					addZipEntry("solution.json", warStream, formJson);
-				}
-				if (!jsAdded)
-				{
-					addZipEntry("solution.js", warStream, solutionJavascript);
-				}
+				addZipEntry("solution.json", warStream, new ByteArrayInputStream(formJson.getBytes("UTF8")));
+				addZipEntry("solution.js", warStream, new ByteArrayInputStream(solutionJavascript.getBytes("UTF8")));
 				Utils.closeInputStream(zipStream);
 			}
 			catch (IOException e)
@@ -286,10 +263,10 @@ public class MobileExporter
 		}
 	}
 
-	private void addZipEntry(String entryName, ZipOutputStream stream, String content) throws IOException
+	private void addZipEntry(String entryName, ZipOutputStream stream, InputStream inputStream) throws IOException
 	{
 		stream.putNextEntry(new ZipEntry(entryName));
-		Utils.streamCopy(new ByteArrayInputStream(content.getBytes("UTF8")), stream);
+		Utils.streamCopy(inputStream, stream);
 		stream.closeEntry();
 	}
 
