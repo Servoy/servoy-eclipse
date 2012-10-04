@@ -1702,7 +1702,13 @@ public class SolutionDeserializer
 							if ((JSDocTag.PARAM.equals(jsDocTagName) || JSDocTag.RETURNS.equals(jsDocTagName) || JSDocTag.RETURN.equals(jsDocTagName)))
 							{
 								String tagValueType = null;
-								if (jsDocTagValue.startsWith("{") && //$NON-NLS-1$
+								if (jsDocTagValue.startsWith("{{") && //$NON-NLS-1$
+									(endBracketIdx = jsDocTagValue.indexOf("}}", 1)) != -1)
+								{
+									endBracketIdx++;
+									tagValueType = jsDocTagValue.substring(1, endBracketIdx);
+								}
+								else if (jsDocTagValue.startsWith("{") && //$NON-NLS-1$
 									(endBracketIdx = jsDocTagValue.indexOf('}', 1)) != -1)
 								{
 									tagValueType = jsDocTagValue.substring(1, endBracketIdx);
