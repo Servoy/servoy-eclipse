@@ -218,7 +218,7 @@ public class MobileExporter
 		return null;
 	}
 
-	public void doExport(File outputFolder, String serverURL, String solutionName)
+	public File doExport(File outputFolder, String serverURL, String solutionName, boolean exportAsZip)
 	{
 		String formJson = doFormsExport(serverURL, solutionName);
 		String solutionJavascript = doScriptingExport(solutionName);
@@ -230,18 +230,25 @@ public class MobileExporter
 		outputFile = new File(outputFolder, "solution.json");
 		Utils.writeTXTFile(outputFile, formJson);
 
+		File exportedFile = null;
 		InputStream is = this.getClass().getResourceAsStream(RELATIVE_WAR_PATH);
 		if (is != null)
 		{
 			ZipOutputStream warStream = null;
 			try
 			{
-				warStream = new ZipOutputStream(new FileOutputStream(new File(outputFolder, solutionName + ".war")));
+				exportedFile = new File(outputFolder, solutionName + (exportAsZip ? ".zip" : ".war"));
+				warStream = new ZipOutputStream(new FileOutputStream(exportedFile));
 				ZipInputStream zipStream = new ZipInputStream(is);
 				ZipEntry entry = zipStream.getNextEntry();
 				while (entry != null)
 				{
-					addZipEntry(entry.getName(), warStream, zipStream);
+					String entryName = entry.getName();
+					if (entryName.equals("servoy_mobile.html"))
+					{
+						entryName = "index.html";
+					}
+					addZipEntry(entryName, warStream, zipStream);
 					entry = zipStream.getNextEntry();
 				}
 				addZipEntry("solution.json", warStream, new ByteArrayInputStream(formJson.getBytes("UTF8")));
@@ -261,6 +268,7 @@ public class MobileExporter
 		{
 			ServoyLog.logError("mobile.war file was not found in exporter project", null);
 		}
+		return exportedFile;
 	}
 
 	private void addZipEntry(String entryName, ZipOutputStream stream, InputStream inputStream) throws IOException

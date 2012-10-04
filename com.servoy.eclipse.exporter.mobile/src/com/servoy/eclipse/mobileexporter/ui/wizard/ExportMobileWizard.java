@@ -17,32 +17,32 @@
 
 package com.servoy.eclipse.mobileexporter.ui.wizard;
 
+import java.net.URL;
+
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.browser.IWebBrowser;
+import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.wizards.FinishPage;
 
 public class ExportMobileWizard extends Wizard implements IExportWizard
 {
 
-	private final FinishPage finishPage = new FinishPage("lastPage")
-	{
-		@Override
-		public boolean isPageComplete()
-		{
-			return super.isCurrentPage();
-		}
+	private final CustomizedFinishPage finishPage = new CustomizedFinishPage("lastPage");
 
-		@Override
-		public boolean canFlipToNextPage()
-		{
-			return false;
-		}
-	};
 	private final PhoneGapApplicationPage pgAppPage = new PhoneGapApplicationPage("PhoneGap Application", finishPage);
 
 	public ExportMobileWizard()
@@ -68,6 +68,19 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 	@Override
 	public boolean performFinish()
 	{
+		if (finishPage.getOpenUrl() != null)
+		{
+			try
+			{
+				IWorkbenchBrowserSupport support = PlatformUI.getWorkbench().getBrowserSupport();
+				IWebBrowser browser = support.getExternalBrowser();
+				browser.openURL(new URL(finishPage.getOpenUrl()));
+			}
+			catch (Exception ex)
+			{
+				ServoyLog.logError(ex);
+			}
+		}
 		return true;
 	}
 
@@ -79,4 +92,78 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 		addPage(pgAppPage);
 	}
 
+	public class CustomizedFinishPage extends FinishPage
+	{
+		private String url = null;
+		private Button openURL = null;
+
+		public CustomizedFinishPage(String pageName)
+		{
+			super(pageName);
+		}
+
+		@Override
+		public boolean isPageComplete()
+		{
+			return super.isCurrentPage();
+		}
+
+		@Override
+		public boolean canFlipToNextPage()
+		{
+			return false;
+		}
+
+		@Override
+		public void createControl(Composite parent)
+		{
+			if (url != null)
+			{
+				Composite container = new Composite(parent, SWT.NONE);
+				GridLayout layout = new GridLayout();
+				container.setLayout(layout);
+				layout.numColumns = 1;
+
+				openURL = new Button(container, SWT.CHECK);
+				openURL.setSelection(true);
+				openURL.setText("Open PhoneGap build page at finish.");
+				GridData gridData = new GridData();
+				gridData.grabExcessHorizontalSpace = true;
+				gridData.grabExcessVerticalSpace = false;
+				gridData.horizontalAlignment = GridData.FILL;
+				openURL.setLayoutData(gridData);
+
+				message = new Text(container, SWT.WRAP | SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
+				gridData = new GridData();
+				gridData.horizontalAlignment = GridData.FILL;
+				gridData.verticalAlignment = GridData.FILL;
+				gridData.grabExcessHorizontalSpace = true;
+				gridData.grabExcessVerticalSpace = true;
+				gridData.horizontalSpan = 1;
+				message.setLayoutData(gridData);
+				message.setEditable(false);
+
+				setControl(container);
+				setPageComplete(true);
+			}
+			else
+			{
+				super.createControl(parent);
+			}
+		}
+
+		public void setApplicationURL(String url)
+		{
+			this.url = url;
+		}
+
+		public String getOpenUrl()
+		{
+			if (openURL != null && openURL.getSelection())
+			{
+				return url;
+			}
+			return null;
+		}
+	}
 }

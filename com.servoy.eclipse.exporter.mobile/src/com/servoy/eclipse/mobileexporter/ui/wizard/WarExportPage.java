@@ -18,7 +18,10 @@
 package com.servoy.eclipse.mobileexporter.ui.wizard;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -39,6 +42,7 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.mobileexporter.export.MobileExporter;
@@ -269,6 +273,7 @@ public class WarExportPage extends WizardPage
 	@Override
 	public IWizardPage getNextPage()
 	{
+		super.setErrorMessage(null);
 		if (canFlipToNextPage())
 		{
 			if (isWarExport())
@@ -278,12 +283,32 @@ public class WarExportPage extends WizardPage
 			}
 			else
 			{
-				String errorMessage = pgAppPage.getConnector().loadPhoneGapAcount(phoneGapUsername.getText(), phoneGapPassword.getText());
-				if (errorMessage != null)
+				final String[] errorMessage = new String[1];
+				final String username = phoneGapUsername.getText();
+				final String password = phoneGapPassword.getText();
+				try
 				{
-					setErrorMessage(errorMessage);
+					PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress()
+					{
+						public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+						{
+							errorMessage[0] = pgAppPage.getConnector().loadPhoneGapAcount(username, password);
+						}
+					});
+				}
+				catch (Exception ex)
+				{
+					ServoyLog.logError(ex);
+					errorMessage[0] = ex.getMessage();
+				}
+				if (errorMessage[0] != null)
+				{
+					setErrorMessage(errorMessage[0]);
 					return null;
 				}
+				pgAppPage.setSolutionName(getSolution());
+				pgAppPage.setServerURL(getServerURL());
+				pgAppPage.setOutputFolder(getOutputFolder());
 				return pgAppPage;
 			}
 		}
@@ -293,7 +318,7 @@ public class WarExportPage extends WizardPage
 	private String doExport()
 	{
 		File outputFile = new File(getOutputFolder());
-		new MobileExporter().doExport(outputFile, getServerURL(), getSolution());
+		new MobileExporter().doExport(outputFile, getServerURL(), getSolution(), false);
 
 		getDialogSettings().put(WarExportPage.OUTPUT_PATH_KEY, getOutputFolder());
 		getDialogSettings().put(WarExportPage.SERVER_URL_KEY, getServerURL());

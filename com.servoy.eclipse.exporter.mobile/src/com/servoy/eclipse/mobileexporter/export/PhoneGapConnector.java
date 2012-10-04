@@ -17,12 +17,18 @@
 
 package com.servoy.eclipse.mobileexporter.export;
 
+import java.io.File;
 import java.net.URL;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
@@ -36,6 +42,8 @@ import com.servoy.j2db.util.ServoyJSONObject;
 public class PhoneGapConnector
 {
 	private ServoyJSONObject jsonContent;
+	private final DefaultHttpClient client = new DefaultHttpClient();
+	private final MobileExporter mobileExporter = new MobileExporter();
 
 	public String loadPhoneGapAcount(String username, String password)
 	{
@@ -43,11 +51,11 @@ public class PhoneGapConnector
 		{
 			String url = "https://build.phonegap.com/api/v1/me";
 
-			DefaultHttpClient client = new DefaultHttpClient();
 			BasicCredentialsProvider bcp = new BasicCredentialsProvider();
 			URL _url = new URL(url);
 			bcp.setCredentials(new AuthScope(_url.getHost(), _url.getPort()), new UsernamePasswordCredentials(username, password));
 			client.setCredentialsProvider(bcp);
+
 			HttpResponse response = client.execute(new HttpGet(url));
 			String content = EntityUtils.toString(response.getEntity());
 			jsonContent = new ServoyJSONObject(content, false);
@@ -59,6 +67,44 @@ public class PhoneGapConnector
 		catch (Exception ex)
 		{
 			return ex.getMessage();
+		}
+		return null;
+	}
+
+	public String createNewPhoneGapApplication(PhoneGapApplication application, String solutionName, String serverURL, String outputFolder)
+	{
+		File exportedFile = null;
+		try
+		{
+			String url = "https://build.phonegap.com/api/v1/apps";
+
+			HttpPost post = new HttpPost(url);
+			MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+			entity.addPart("data", new StringBody(application.getJSON()));
+
+			exportedFile = mobileExporter.doExport(new File(outputFolder), serverURL, solutionName, true);
+			entity.addPart("file", new FileBody(exportedFile));
+
+			post.setEntity(entity);
+
+			HttpResponse response = client.execute(post);
+			String content = EntityUtils.toString(response.getEntity());
+			ServoyJSONObject jsonResponse = new ServoyJSONObject(content, false);
+			if (jsonResponse.has("error") && jsonResponse.get("error") instanceof String)
+			{
+				return jsonResponse.getString("error");
+			}
+		}
+		catch (Exception ex)
+		{
+			return ex.getMessage();
+		}
+		finally
+		{
+			if (exportedFile != null)
+			{
+				exportedFile.delete();
+			}
 		}
 		return null;
 	}

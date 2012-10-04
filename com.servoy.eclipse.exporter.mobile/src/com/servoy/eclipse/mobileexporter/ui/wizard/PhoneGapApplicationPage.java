@@ -17,9 +17,15 @@
 
 package com.servoy.eclipse.mobileexporter.ui.wizard;
 
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
@@ -27,9 +33,12 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.mobileexporter.export.PhoneGapApplication;
 import com.servoy.eclipse.mobileexporter.export.PhoneGapConnector;
-import com.servoy.eclipse.ui.wizards.FinishPage;
+import com.servoy.eclipse.mobileexporter.ui.wizard.ExportMobileWizard.CustomizedFinishPage;
+import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
  * @author lvostinar
@@ -37,11 +46,18 @@ import com.servoy.eclipse.ui.wizards.FinishPage;
  */
 public class PhoneGapApplicationPage extends WizardPage
 {
-	private final FinishPage finishPage;
+	private final CustomizedFinishPage finishPage;
 	private final PhoneGapConnector connector;
 	private Combo applicationNameCombo;
+	private Text txtVersion;
+	private Text txtDescription;
+	private Button btnPublic;
 
-	public PhoneGapApplicationPage(String name, FinishPage finishPage)
+	private String solutionName;
+	private String serverURL;
+	private String outputFolder;
+
+	public PhoneGapApplicationPage(String name, CustomizedFinishPage finishPage)
 	{
 		super(name);
 		this.finishPage = finishPage;
@@ -62,14 +78,14 @@ public class PhoneGapApplicationPage extends WizardPage
 		Label lblVersion = new Label(container, SWT.NONE);
 		lblVersion.setText("Version");
 
-		Text txtVersion = new Text(container, SWT.BORDER);
+		txtVersion = new Text(container, SWT.BORDER);
 
 		Label lblDescription = new Label(container, SWT.NONE);
 		lblDescription.setText("Description");
 
-		Text txtDescription = new Text(container, SWT.MULTI | SWT.BORDER);
+		txtDescription = new Text(container, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 
-		Button btnPublic = new Button(container, SWT.CHECK);
+		btnPublic = new Button(container, SWT.CHECK);
 		btnPublic.setText("Public Application");
 
 		final GroupLayout groupLayout = new GroupLayout(container);
@@ -87,10 +103,21 @@ public class PhoneGapApplicationPage extends WizardPage
 					GroupLayout.PREFERRED_SIZE).add(lblApplicationName)).add(7).add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(txtVersion, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 					GroupLayout.PREFERRED_SIZE).add(lblVersion)).add(7).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(txtDescription, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(lblDescription)).add(10).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(btnPublic))));
+				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(txtDescription, 80, 80, 80).add(lblDescription)).add(10).add(
+				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(btnPublic))));
 
 		container.setLayout(groupLayout);
+
+		ModifyListener errorMessageDetecter = new ModifyListener()
+		{
+			public void modifyText(ModifyEvent e)
+			{
+				PhoneGapApplicationPage.this.setErrorMessage(null);
+				PhoneGapApplicationPage.this.getContainer().updateMessage();
+				PhoneGapApplicationPage.this.getContainer().updateButtons();
+			}
+		};
+		applicationNameCombo.addModifyListener(errorMessageDetecter);
 	}
 
 	@Override
@@ -102,11 +129,43 @@ public class PhoneGapApplicationPage extends WizardPage
 	@Override
 	public IWizardPage getNextPage()
 	{
+		super.setErrorMessage(null);
 		if (canFlipToNextPage())
 		{
+			final String[] errorMessage = new String[1];
+			final String appName = applicationNameCombo.getText();
+			final String appVersion = txtVersion.getText();
+			final String appDescription = txtDescription.getText();
+			final boolean appPublic = btnPublic.getSelection();
+			try
+			{
+				PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress()
+				{
+					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+					{
+						errorMessage[0] = getConnector().createNewPhoneGapApplication(new PhoneGapApplication(appName, appVersion, appDescription, appPublic),
+							solutionName, serverURL, outputFolder);
+
+					}
+				});
+			}
+			catch (Exception ex)
+			{
+				ServoyLog.logError(ex);
+				errorMessage[0] = ex.getMessage();
+			}
+			if (errorMessage[0] != null)
+			{
+				setErrorMessage(errorMessage[0]);
+				return null;
+			}
+			finishPage.setApplicationURL("https://build.phonegap.com/people/sign_in");
+			finishPage.createControl(PhoneGapApplicationPage.this.getControl().getParent());
 			finishPage.setTextMessage("Solution exported to PhoneGap application.");
+			finishPage.getControl().getParent().layout(true);
+			return finishPage;
 		}
-		return finishPage;
+		return null;
 	}
 
 	@Override
@@ -116,11 +175,35 @@ public class PhoneGapApplicationPage extends WizardPage
 		{
 			return "No PhoneGap application name specified.";
 		}
-		return null;
+		return super.getErrorMessage();
 	}
 
 	public PhoneGapConnector getConnector()
 	{
 		return connector;
+	}
+
+	/**
+	 * @param solutionName the solutionName to set
+	 */
+	public void setSolutionName(String solutionName)
+	{
+		this.solutionName = solutionName;
+	}
+
+	/**
+	 * @param serverURL the serverURL to set
+	 */
+	public void setServerURL(String serverURL)
+	{
+		this.serverURL = serverURL;
+	}
+
+	/**
+	 * @param outputFolder the outputFolder to set
+	 */
+	public void setOutputFolder(String outputFolder)
+	{
+		this.outputFolder = outputFolder;
 	}
 }

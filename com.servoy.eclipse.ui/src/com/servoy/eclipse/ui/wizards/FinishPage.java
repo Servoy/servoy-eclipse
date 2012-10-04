@@ -33,7 +33,7 @@ import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.IValidato
  */
 public class FinishPage extends WizardPage implements IValidator
 {
-	private Text message;
+	protected Text message;
 
 	public FinishPage(String pageName)
 	{
