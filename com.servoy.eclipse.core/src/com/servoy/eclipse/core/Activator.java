@@ -88,6 +88,7 @@ import org.osgi.service.url.URLStreamHandlerService;
 
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.JSUnitUserManager;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -696,7 +697,7 @@ public class Activator extends Plugin
 							}
 							// can this be really later? or should we wait?
 							// its much nice to do that later in the event thread.
-							SwingUtilities.invokeLater(new Runnable()
+							UIUtils.invokeLaterOnAWT(new Runnable()
 							{
 								public void run()
 								{
@@ -720,7 +721,7 @@ public class Activator extends Plugin
 							if (updateInfo == IActiveProjectListener.MODULES_UPDATED)
 							{
 								// in order to have a good module cache in the flattened solution
-								SwingUtilities.invokeLater(new Runnable()
+								UIUtils.invokeLaterOnAWT(new Runnable()
 								{
 									public void run()
 									{
@@ -732,7 +733,7 @@ public class Activator extends Plugin
 							}
 							else if (updateInfo == IActiveProjectListener.RESOURCES_UPDATED_ON_ACTIVE_PROJECT)
 							{
-								SwingUtilities.invokeLater(new Runnable()
+								UIUtils.invokeLaterOnAWT(new Runnable()
 								{
 									public void run()
 									{
@@ -744,7 +745,7 @@ public class Activator extends Plugin
 							}
 							else if (updateInfo == IActiveProjectListener.STYLES_ADDED_OR_REMOVED)
 							{
-								SwingUtilities.invokeLater(new Runnable()
+								UIUtils.invokeLaterOnAWT(new Runnable()
 								{
 									public void run()
 									{
@@ -755,7 +756,7 @@ public class Activator extends Plugin
 							}
 							else if (updateInfo == IActiveProjectListener.SECURITY_INFO_CHANGED)
 							{
-								SwingUtilities.invokeLater(new Runnable()
+								UIUtils.invokeLaterOnAWT(new Runnable()
 								{
 									public void run()
 									{
@@ -779,7 +780,7 @@ public class Activator extends Plugin
 					{
 						public void persistChanges(final Collection<IPersist> changes)
 						{
-							SwingUtilities.invokeLater(new Runnable()
+							UIUtils.invokeLaterOnAWT(new Runnable()
 							{
 								public void run()
 								{
@@ -814,7 +815,7 @@ public class Activator extends Plugin
 						public void i18nChanged()
 						{
 							servoyModel.getMessagesManager().removeCachedMessages();
-							SwingUtilities.invokeLater(new Runnable()
+							UIUtils.invokeLaterOnAWT(new Runnable()
 							{
 								public void run()
 								{

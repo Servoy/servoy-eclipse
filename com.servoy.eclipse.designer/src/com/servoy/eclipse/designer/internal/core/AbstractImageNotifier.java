@@ -19,15 +19,11 @@ package com.servoy.eclipse.designer.internal.core;
 import java.awt.Component;
 
 import javax.swing.JLabel;
-import javax.swing.SwingUtilities;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.graphics.ImageData;
 
 import com.servoy.eclipse.core.DesignApplication;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IApplication;
 
@@ -85,62 +81,52 @@ public abstract class AbstractImageNotifier implements IImageNotifier, IImageLis
 			}
 			isWaitingStart = true;
 
-			// do it in a Job so we are not interrupted by a Display.synch
-			new Job("Refresh image")
+			UIUtils.invokeLaterOnAWT(new Runnable()
 			{
-				@Override
-				public IStatus run(IProgressMonitor monitor)
+				public void run()
 				{
-					SwingUtilities.invokeLater(new Runnable()
+					try
 					{
-						public void run()
+						Component component = createComponent();
+						if (component == null)
 						{
-							try
-							{
-								Component component = createComponent();
-								if (component == null)
-								{
-									imSupport.fireImageChanged(null);
-									return;
-								}
-
-								if (label == null)
-								{
-									label = new JLabel()
-									{
-										@Override
-										public boolean isShowing()
-										{
-											// make sure all awt components will paint
-											return true;
-										}
-									};
-								}
-								label.removeAll();
-								label.setOpaque(false);
-								label.setVisible(true);
-
-								((DesignApplication)application).getEditLabel().add(label);
-								isWaitingStart = false;
-								label.add(component);
-								label.setSize(component.getWidth(), component.getHeight());
-								component.setLocation(0, 0); // paint in left-upper corner
-								label.doLayout();
-
-								new ImageDataCollector(imSupport).start(label, component.getWidth(), component.getHeight(), handleAlpha(component));
-							}
-							catch (Exception e)
-							{
-								isWaitingStart = false;
-								ServoyLog.logError(e);
-								if (label != null) ((DesignApplication)application).getEditLabel().remove(label); // normally done in imageChanged()
-							}
+							imSupport.fireImageChanged(null);
+							return;
 						}
-					});
 
-					return Status.OK_STATUS;
+						if (label == null)
+						{
+							label = new JLabel()
+							{
+								@Override
+								public boolean isShowing()
+								{
+									// make sure all awt components will paint
+									return true;
+								}
+							};
+						}
+						label.removeAll();
+						label.setOpaque(false);
+						label.setVisible(true);
+
+						((DesignApplication)application).getEditLabel().add(label);
+						isWaitingStart = false;
+						label.add(component);
+						label.setSize(component.getWidth(), component.getHeight());
+						component.setLocation(0, 0); // paint in left-upper corner
+						label.doLayout();
+
+						new ImageDataCollector(imSupport).start(label, component.getWidth(), component.getHeight(), handleAlpha(component));
+					}
+					catch (Exception e)
+					{
+						isWaitingStart = false;
+						ServoyLog.logError(e);
+						if (label != null) ((DesignApplication)application).getEditLabel().remove(label); // normally done in imageChanged()
+					}
 				}
-			}.schedule();
+			});
 		}
 		else
 		{
@@ -163,7 +149,7 @@ public abstract class AbstractImageNotifier implements IImageNotifier, IImageLis
 		imageData = data;
 		if (label != null)
 		{
-			SwingUtilities.invokeLater(new Runnable()
+			UIUtils.invokeLaterOnAWT(new Runnable()
 			{
 				public void run()
 				{

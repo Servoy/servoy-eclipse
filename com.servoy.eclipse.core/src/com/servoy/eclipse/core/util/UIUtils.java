@@ -31,9 +31,14 @@ import java.io.PipedOutputStream;
 
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
+import javax.swing.SwingUtilities;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -905,6 +910,47 @@ public class UIUtils
 		}
 
 		return false;
+	}
+
+	/**
+	 * Executes an invoke later on the AWT thread, but avoids (using a supplemental Job) InterruptedExceptions that could result when this is running on the SWT main thread because of
+	 * a Display.syncExec being executed on another thread - that interrupts the main thread and throws exceptions that end like this:
+	 * 
+	 * java.lang.InterruptedException
+	 * 	at java.lang.Object.wait(Native Method)
+	 * 	at java.lang.Object.wait(Object.java:503)
+	 * 	at sun.awt.AWTAutoShutdown.activateBlockerThread(AWTAutoShutdown.java:337)
+	 * 	at sun.awt.AWTAutoShutdown.notifyThreadBusy(AWTAutoShutdown.java:171)
+	 * 	at java.awt.EventQueue.initDispatchThread(EventQueue.java:1025)
+	 * 	at java.awt.EventQueue.postEventPrivate(EventQueue.java:250)
+	 * 	at java.awt.EventQueue.postEvent(EventQueue.java:225)
+	 * 	at java.awt.EventQueue.invokeLater(EventQueue.java:1192)
+	 * 	at javax.swing.SwingUtilities.invokeLater(SwingUtilities.java:1287)
+	 * 	(...)
+	 * 
+	 * @param r the runnable to execute.
+	 */
+	public static void invokeLaterOnAWT(final Runnable r)
+	{
+		if (Display.getCurrent() == null)
+		{
+			SwingUtilities.invokeLater(r);
+		}
+		else
+		{
+			Job j = new Job("Call later on AWT") //$NON-NLS-1$
+			{
+				@Override
+				protected IStatus run(IProgressMonitor monitor)
+				{
+					SwingUtilities.invokeLater(r);
+					return Status.OK_STATUS;
+				}
+			};
+			j.setSystem(true);
+			j.setUser(false);
+			j.schedule();
+		}
 	}
 
 }
