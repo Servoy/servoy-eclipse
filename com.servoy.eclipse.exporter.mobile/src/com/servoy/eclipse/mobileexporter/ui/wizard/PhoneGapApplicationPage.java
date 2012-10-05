@@ -26,6 +26,8 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
@@ -55,7 +57,6 @@ public class PhoneGapApplicationPage extends WizardPage
 
 	private String solutionName;
 	private String serverURL;
-	private String outputFolder;
 
 	public PhoneGapApplicationPage(String name, CustomizedFinishPage finishPage)
 	{
@@ -118,6 +119,20 @@ public class PhoneGapApplicationPage extends WizardPage
 			}
 		};
 		applicationNameCombo.addModifyListener(errorMessageDetecter);
+		applicationNameCombo.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				PhoneGapApplication app = connector.getApplication(applicationNameCombo.getText());
+				if (app != null)
+				{
+					txtDescription.setText(app.getDescription());
+					txtVersion.setText(app.getVersion());
+					btnPublic.setSelection(app.isPublicApplication());
+				}
+			}
+		});
 	}
 
 	@Override
@@ -144,7 +159,7 @@ public class PhoneGapApplicationPage extends WizardPage
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 					{
 						errorMessage[0] = getConnector().createNewPhoneGapApplication(new PhoneGapApplication(appName, appVersion, appDescription, appPublic),
-							solutionName, serverURL, outputFolder);
+							solutionName, serverURL);
 
 					}
 				});
@@ -199,11 +214,8 @@ public class PhoneGapApplicationPage extends WizardPage
 		this.serverURL = serverURL;
 	}
 
-	/**
-	 * @param outputFolder the outputFolder to set
-	 */
-	public void setOutputFolder(String outputFolder)
+	public void populateExistingApplications()
 	{
-		this.outputFolder = outputFolder;
+		applicationNameCombo.setItems(connector.getExistingApps());
 	}
 }

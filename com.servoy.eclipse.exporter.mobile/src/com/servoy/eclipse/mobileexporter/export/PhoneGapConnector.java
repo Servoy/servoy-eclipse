@@ -19,6 +19,8 @@ package com.servoy.eclipse.mobileexporter.export;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
@@ -32,7 +34,11 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
@@ -71,7 +77,64 @@ public class PhoneGapConnector
 		return null;
 	}
 
-	public String createNewPhoneGapApplication(PhoneGapApplication application, String solutionName, String serverURL, String outputFolder)
+	public String[] getExistingApps()
+	{
+		List<String> pgApps = new ArrayList<String>();
+		if (jsonContent.has("apps"))
+		{
+			try
+			{
+				JSONObject apps = (JSONObject)jsonContent.get("apps");
+				if (apps.has("all"))
+				{
+					JSONArray appArray = apps.getJSONArray("all");
+					for (int i = 0; i < appArray.length(); i++)
+					{
+						pgApps.add(appArray.getJSONObject(i).getString("title"));
+					}
+				}
+			}
+			catch (JSONException e)
+			{
+				ServoyLog.logError(e);
+			}
+
+		}
+		return pgApps.toArray(new String[0]);
+	}
+
+	public PhoneGapApplication getApplication(String title)
+	{
+		if (jsonContent.has("apps"))
+		{
+			try
+			{
+				JSONObject apps = (JSONObject)jsonContent.get("apps");
+				if (apps.has("all"))
+				{
+					JSONArray appArray = apps.getJSONArray("all");
+					for (int i = 0; i < appArray.length(); i++)
+					{
+						if (title.equals(appArray.getJSONObject(i).getString("title")))
+						{
+							String version = appArray.getJSONObject(i).has("version") ? appArray.getJSONObject(i).getString("version") : "";
+							String description = appArray.getJSONObject(i).has("description") ? appArray.getJSONObject(i).getString("description") : "";
+							boolean publicApplication = appArray.getJSONObject(i).has("private") ? !appArray.getJSONObject(i).getBoolean("private") : false;
+							return new PhoneGapApplication(title, version, description, publicApplication);
+						}
+					}
+				}
+			}
+			catch (JSONException e)
+			{
+				ServoyLog.logError(e);
+			}
+
+		}
+		return null;
+	}
+
+	public String createNewPhoneGapApplication(PhoneGapApplication application, String solutionName, String serverURL)
 	{
 		File exportedFile = null;
 		try
@@ -82,7 +145,7 @@ public class PhoneGapConnector
 			MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
 			entity.addPart("data", new StringBody(application.getJSON()));
 
-			exportedFile = mobileExporter.doExport(new File(outputFolder), serverURL, solutionName, true);
+			exportedFile = mobileExporter.doExport(new File(System.getProperty("java.io.tmpdir")), serverURL, solutionName, true);
 			entity.addPart("file", new FileBody(exportedFile));
 
 			post.setEntity(entity);

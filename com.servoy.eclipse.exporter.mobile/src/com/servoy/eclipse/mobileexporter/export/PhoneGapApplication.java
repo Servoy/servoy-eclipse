@@ -94,4 +94,28 @@ public class PhoneGapApplication
 		return json.toString();
 	}
 
+	/**
+	 * @return the version
+	 */
+	public String getVersion()
+	{
+		return version;
+	}
+
+	/**
+	 * @return the description
+	 */
+	public String getDescription()
+	{
+		return description;
+	}
+
+	/**
+	 * @return the publicApplication
+	 */
+	public boolean isPublicApplication()
+	{
+		return publicApplication;
+	}
+
 }

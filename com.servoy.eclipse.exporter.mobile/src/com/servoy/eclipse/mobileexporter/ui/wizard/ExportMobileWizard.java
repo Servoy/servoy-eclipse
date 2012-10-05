@@ -124,17 +124,8 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 				container.setLayout(layout);
 				layout.numColumns = 1;
 
-				openURL = new Button(container, SWT.CHECK);
-				openURL.setSelection(true);
-				openURL.setText("Open PhoneGap build page at finish.");
-				GridData gridData = new GridData();
-				gridData.grabExcessHorizontalSpace = true;
-				gridData.grabExcessVerticalSpace = false;
-				gridData.horizontalAlignment = GridData.FILL;
-				openURL.setLayoutData(gridData);
-
 				message = new Text(container, SWT.WRAP | SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
-				gridData = new GridData();
+				GridData gridData = new GridData();
 				gridData.horizontalAlignment = GridData.FILL;
 				gridData.verticalAlignment = GridData.FILL;
 				gridData.grabExcessHorizontalSpace = true;
@@ -142,6 +133,16 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 				gridData.horizontalSpan = 1;
 				message.setLayoutData(gridData);
 				message.setEditable(false);
+
+				openURL = new Button(container, SWT.CHECK);
+				openURL.setSelection(true);
+				openURL.setText("Open PhoneGap build page at finish.");
+				gridData = new GridData();
+				gridData.grabExcessHorizontalSpace = true;
+				gridData.grabExcessVerticalSpace = false;
+				gridData.horizontalAlignment = GridData.FILL;
+				openURL.setLayoutData(gridData);
+
 
 				setControl(container);
 				setPageComplete(true);
