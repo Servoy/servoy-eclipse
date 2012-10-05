@@ -12713,9 +12713,10 @@ forms['newForm1'].controller.show();]]></sample>
           <description><![CDATA[Creates a new form JSVariable - based on the name of the variable object and the number type, uses the SolutionModel JSVariable constants.]]></description>
           <summary><![CDATA[Creates a new form JSVariable - based on the name of the variable object and the number type, uses the SolutionModel JSVariable constants.]]></summary>
           <sample><![CDATA[var form = solutionModel.newForm('newForm1', myDatasource, null, true, 800, 600);
-var variable = form.newVariable('myVar', JSVariable.TEXT);
-variable.defaultValue = "'This is a default value (with triple quotes)!'";
-//variable.defaultValue = "{a:'First letter',b:'Second letter'}"
+var variable = form.newVariable('myVar', JSVariable.TEXT , "'This is a default value (with triple quotes)!'");
+//or variable = form.newVariable('myVar', JSVariable.TEXT)
+//variable.defaultValue = "'This is a default value (with triple quotes)!'" // setting the default value after the variable is created requires form recreation
+//variable.defaultValue = "{a:'First letter',b:'Second letter'}"   
 var field = form.newField(variable, JSField.TEXT_FIELD, 100, 100, 200, 200);
 forms['newForm1'].controller.show();]]></sample>
           <parameters>
@@ -12742,6 +12743,9 @@ forms['newForm1'].controller.show();]]></sample>
           <summary><![CDATA[Creates a new form JSVariable - based on the name of the variable object , the  type  and it's default value , uses the SolutionModel JSVariable constants.]]></summary>
           <sample><![CDATA[var form = solutionModel.newForm('newForm1', myDatasource, null, true, 800, 600);
 var variable = form.newVariable('myVar', JSVariable.TEXT , "'This is a default value (with triple quotes)!'");
+//or variable = form.newVariable('myVar', JSVariable.TEXT)
+//variable.defaultValue = "'This is a default value (with triple quotes)!'" // setting the default value after the variable is created requires form recreation
+//variable.defaultValue = "{a:'First letter',b:'Second letter'}"   
 var field = form.newField(variable, JSField.TEXT_FIELD, 100, 100, 200, 200);
 forms['newForm1'].controller.show();]]></sample>
           <parameters>
@@ -12751,8 +12755,8 @@ forms['newForm1'].controller.show();]]></sample>
             <parameter name="type" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[the specified type of the variable (see Solution Model -> JSVariable node constants)]]></description>
             </parameter>
-            <parameter name="the">
-              <description><![CDATA[default value as a javascript expression string]]></description>
+            <parameter name="defaultValue" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the default value as a javascript expression string]]></description>
             </parameter>
           </parameters>
         </function>
