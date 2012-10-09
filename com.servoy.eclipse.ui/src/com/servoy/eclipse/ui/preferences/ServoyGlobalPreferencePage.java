@@ -61,6 +61,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	private Label enhancedSecurityLabel;
 	private ComboViewer primaryKeySequenceTypeCombo;
 	private Button showNavigatorDefaultButton;
+	private ComboViewer encapsulationTypeCombo;
 
 	/*
 	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
@@ -181,6 +182,15 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		showNavigatorDefaultButton = new Button(formProperties, SWT.CHECK);
 		showNavigatorDefaultButton.setText("Set default navigator on new forms"); //$NON-NLS-1$
 
+		Group encapsulationProperties = new Group(formProperties, SWT.NONE);
+		encapsulationProperties.setText("Encapsulation Properties"); //$NON-NLS-1$
+		encapsulationProperties.setLayout(new GridLayout(1, true));
+
+		encapsulationTypeCombo = new ComboViewer(encapsulationProperties);
+		encapsulationTypeCombo.setContentProvider(new ArrayContentProvider());
+		encapsulationTypeCombo.setLabelProvider(new LabelProvider());
+		encapsulationTypeCombo.setInput(new ObjectWrapper[] { new ObjectWrapper("Default", new Integer(DesignerPreferences.ENCAPSULATION_DEFAULT)), new ObjectWrapper("None", new Integer(DesignerPreferences.ENCAPSULATION_NONE)) }); //$NON-NLS-1$ //$NON-NLS-2$
+
 		initializeFields();
 
 		return rootContainer;
@@ -197,6 +207,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		showColumnsInAlphabeticOrderButton.setSelection(!showColumnsInDbOrderButton.getSelection());
 		setPrimaryKeySequenceTypeValue(prefs.getPrimaryKeySequenceType());
 		showNavigatorDefaultButton.setSelection(prefs.getShowNavigatorDefault());
+		setEncapsulationTypeValue(prefs.getEncapsulationType());
 	}
 
 	@Override
@@ -210,6 +221,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		showColumnsInAlphabeticOrderButton.setSelection(!showColumnsInDbOrderButton.getSelection());
 		setPrimaryKeySequenceTypeValue(DesignerPreferences.PK_SEQUENCE_TYPE_DEFAULT);
 		showNavigatorDefaultButton.setSelection(DesignerPreferences.SHOW_NAVIGATOR_DEFAULT);
+		setEncapsulationTypeValue(DesignerPreferences.ENCAPSULATION_DEFAULT);
 
 		super.performDefaults();
 	}
@@ -226,6 +238,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		prefs.setShowColumnsInDbOrder(showColumnsInDbOrderButton.getSelection());
 		prefs.setPrimaryKeySequenceType(((Integer)((ObjectWrapper)((IStructuredSelection)primaryKeySequenceTypeCombo.getSelection()).getFirstElement()).getType()).intValue());
 		prefs.setShowNavigatorDefault(showNavigatorDefaultButton.getSelection());
+		prefs.setEncapsulationType(((Integer)((ObjectWrapper)((IStructuredSelection)encapsulationTypeCombo.getSelection()).getFirstElement()).getType()).intValue());
 		prefs.save();
 
 		return true;
@@ -239,6 +252,19 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 			if (ow.getType().equals(seqType))
 			{
 				primaryKeySequenceTypeCombo.setSelection(new StructuredSelection(ow));
+				return;
+			}
+		}
+	}
+
+	private void setEncapsulationTypeValue(int enc_type)
+	{
+		Integer encType = Integer.valueOf(enc_type);
+		for (ObjectWrapper ow : (ObjectWrapper[])encapsulationTypeCombo.getInput())
+		{
+			if (ow.getType().equals(encType))
+			{
+				encapsulationTypeCombo.setSelection(new StructuredSelection(ow));
 				return;
 			}
 		}

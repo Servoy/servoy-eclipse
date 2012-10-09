@@ -84,6 +84,7 @@ public class DesignerPreferences
 	public static final String LOADED_RELATIONS_NAMING_PATTERN_SETTING = "loadedRelationsNamingPattern";
 	public static final String PK_SEQUENCE_TYPE_SETTING = "primaryKeySequenceType";
 	public static final String SHOW_NAVIGATOR_DEFAULT_SETTING = "showNavigatorDefault";
+	public static final String ENCAPSULATION_TYPE = "encapsulationType";
 
 	public static final String SNAP_TO_ALIGMNENT = "alignment";
 	public static final String SNAP_TO_GRID = "grid";
@@ -128,6 +129,9 @@ public class DesignerPreferences
 	public static final boolean USE_DATABASE_SEQUENCE_DEFAULT = false;
 	public static final int PK_SEQUENCE_TYPE_DEFAULT = ColumnInfo.SERVOY_SEQUENCE;
 	public static final boolean SHOW_NAVIGATOR_DEFAULT = true;
+
+	public static final int ENCAPSULATION_DEFAULT = 0;
+	public static final int ENCAPSULATION_NONE = 1;
 
 	protected final IEclipsePreferences eclipsePreferences;
 
@@ -568,6 +572,16 @@ public class DesignerPreferences
 	public void setShowNavigatorDefault(boolean showNavigatorDefault)
 	{
 		setProperty(SHOW_NAVIGATOR_DEFAULT_SETTING, showNavigatorDefault);
+	}
+
+	public int getEncapsulationType()
+	{
+		return getProperty(ENCAPSULATION_TYPE, ENCAPSULATION_DEFAULT);
+	}
+
+	public void setEncapsulationType(int encType)
+	{
+		setProperty(ENCAPSULATION_TYPE, encType);
 	}
 
 	public static boolean isCoolbarSetting(String key)

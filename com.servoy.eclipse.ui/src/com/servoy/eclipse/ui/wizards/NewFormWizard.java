@@ -87,6 +87,7 @@ import com.servoy.eclipse.ui.views.TreeSelectViewer;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormEncapsulation;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -315,6 +316,12 @@ public class NewFormWizard extends Wizard implements INewWizard
 			}
 
 			if (form.getNavigatorID() == Form.NAVIGATOR_DEFAULT && !designerPreferences.getShowNavigatorDefault()) form.setNavigatorID(Form.NAVIGATOR_NONE);
+			if (form.getEncapsulation() == DesignerPreferences.ENCAPSULATION_DEFAULT &&
+				designerPreferences.getEncapsulationType() == DesignerPreferences.ENCAPSULATION_DEFAULT)
+			{
+				form.setEncapsulation(FormEncapsulation.HIDE_CONTROLLER | FormEncapsulation.HIDE_DATAPROVIDERS | FormEncapsulation.HIDE_ELEMENTS |
+					FormEncapsulation.HIDE_FOUNDSET);
+			}
 
 			// save
 			servoyProject.saveEditingSolutionNodes(new IPersist[] { form }, true);
