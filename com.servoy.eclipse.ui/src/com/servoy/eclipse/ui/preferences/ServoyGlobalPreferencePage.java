@@ -189,7 +189,8 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		encapsulationTypeCombo = new ComboViewer(encapsulationProperties);
 		encapsulationTypeCombo.setContentProvider(new ArrayContentProvider());
 		encapsulationTypeCombo.setLabelProvider(new LabelProvider());
-		encapsulationTypeCombo.setInput(new ObjectWrapper[] { new ObjectWrapper("Default", new Integer(DesignerPreferences.ENCAPSULATION_DEFAULT)), new ObjectWrapper("None", new Integer(DesignerPreferences.ENCAPSULATION_NONE)) }); //$NON-NLS-1$ //$NON-NLS-2$
+		encapsulationTypeCombo.setInput(new ObjectWrapper[] { new ObjectWrapper(
+			"Public, Hide All", new Integer(DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL)), new ObjectWrapper("Public", new Integer(DesignerPreferences.ENCAPSULATION_PUBLIC)) }); //$NON-NLS-1$ //$NON-NLS-2$
 
 		initializeFields();
 
@@ -221,7 +222,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		showColumnsInAlphabeticOrderButton.setSelection(!showColumnsInDbOrderButton.getSelection());
 		setPrimaryKeySequenceTypeValue(DesignerPreferences.PK_SEQUENCE_TYPE_DEFAULT);
 		showNavigatorDefaultButton.setSelection(DesignerPreferences.SHOW_NAVIGATOR_DEFAULT);
-		setEncapsulationTypeValue(DesignerPreferences.ENCAPSULATION_DEFAULT);
+		setEncapsulationTypeValue(DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL);
 
 		super.performDefaults();
 	}

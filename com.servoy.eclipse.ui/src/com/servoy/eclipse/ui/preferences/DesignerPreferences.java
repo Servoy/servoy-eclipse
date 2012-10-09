@@ -131,9 +131,9 @@ public class DesignerPreferences
 	public static final int PK_SEQUENCE_TYPE_DEFAULT = ColumnInfo.SERVOY_SEQUENCE;
 	public static final boolean SHOW_NAVIGATOR_DEFAULT = true;
 
-	public static final int ENCAPSULATION_DEFAULT = FormEncapsulation.HIDE_CONTROLLER | FormEncapsulation.HIDE_DATAPROVIDERS | FormEncapsulation.HIDE_ELEMENTS |
-		FormEncapsulation.HIDE_FOUNDSET;
-	public static final int ENCAPSULATION_NONE = FormEncapsulation.DEFAULT;
+	public static final int ENCAPSULATION_PUBLIC_HIDE_ALL = FormEncapsulation.HIDE_CONTROLLER | FormEncapsulation.HIDE_DATAPROVIDERS |
+		FormEncapsulation.HIDE_ELEMENTS | FormEncapsulation.HIDE_FOUNDSET;
+	public static final int ENCAPSULATION_PUBLIC = FormEncapsulation.DEFAULT;
 
 	protected final IEclipsePreferences eclipsePreferences;
 
@@ -578,7 +578,7 @@ public class DesignerPreferences
 
 	public int getEncapsulationType()
 	{
-		return getProperty(ENCAPSULATION_TYPE, ENCAPSULATION_DEFAULT);
+		return getProperty(ENCAPSULATION_TYPE, ENCAPSULATION_PUBLIC_HIDE_ALL);
 	}
 
 	public void setEncapsulationType(int encType)
