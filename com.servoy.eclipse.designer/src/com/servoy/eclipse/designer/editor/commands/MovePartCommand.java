@@ -72,7 +72,8 @@ public class MovePartCommand extends BaseRestorableCommand implements ISupportMo
 	@Override
 	public void execute()
 	{
-		setPropertyValue(new PersistPropertySource(part, context, false), StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName(), new Integer(newHeight));
+		setPropertyValue(PersistPropertySource.createPersistPropertySource(part, context, false), StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName(),
+			new Integer(newHeight));
 	}
 
 	public Object[] getModels()

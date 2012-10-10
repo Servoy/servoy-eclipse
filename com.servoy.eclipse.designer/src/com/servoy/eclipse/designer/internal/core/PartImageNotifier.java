@@ -55,7 +55,7 @@ public class PartImageNotifier extends AbstractImageNotifier
 	@Override
 	protected Component createComponent()
 	{
-		Form form = application.getFlattenedSolution().getFlattenedForm(context);
+		Form form = application.getFlattenedSolution().getFlattenedForm(context); // RAGTEST editing?
 
 		StyledEnablePanel comp = new StyledEnablePanel(application);
 		comp.setSize(form.getWidth(), part.getHeight() - form.getPartStartYPos(part.getID()));

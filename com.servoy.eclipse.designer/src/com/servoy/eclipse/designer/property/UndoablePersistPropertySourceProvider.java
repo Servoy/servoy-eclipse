@@ -43,7 +43,7 @@ public class UndoablePersistPropertySourceProvider implements IPropertySourcePro
 	{
 		if (object instanceof IPersist)
 		{
-			return new UndoablePropertySource(new PersistPropertySource(((IPersist)object), editorPart.getForm(), false), editorPart);
+			return new UndoablePropertySource(PersistPropertySource.createPersistPropertySource(((IPersist)object), editorPart.getForm(), false), editorPart);
 		}
 		return null;
 	}

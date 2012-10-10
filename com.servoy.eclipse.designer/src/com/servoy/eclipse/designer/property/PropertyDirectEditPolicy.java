@@ -51,8 +51,8 @@ public class PropertyDirectEditPolicy extends DirectEditPolicy
 	protected Command getDirectEditCommand(DirectEditRequest request)
 	{
 		IPropertyDescriptor propertyDescriptor = (IPropertyDescriptor)request.getDirectEditFeature();
-		return SetValueCommand.createSetvalueCommand("Direct edit", new PersistPropertySource(persist, form, false), (String)propertyDescriptor.getId(),
-			request.getCellEditor().getValue());
+		return SetValueCommand.createSetvalueCommand("Direct edit", PersistPropertySource.createPersistPropertySource(persist, form, false),
+			propertyDescriptor.getId(), request.getCellEditor().getValue());
 	}
 
 	@Override

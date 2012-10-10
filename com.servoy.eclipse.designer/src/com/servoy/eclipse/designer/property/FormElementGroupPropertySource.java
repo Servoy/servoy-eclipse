@@ -338,7 +338,8 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 
 	protected void setElementProperty(IPersist element, String propertyName, Object propertyValue)
 	{
-		PersistPropertySource elementPropertySource = new PersistPropertySource(element, context == null ? (IPersist)element : context, false);
+		PersistPropertySource elementPropertySource = PersistPropertySource.createPersistPropertySource(element, context == null ? (IPersist)element : context,
+			false);
 		elementPropertySource.setPropertyValue(propertyName, propertyValue);
 		IPersist newPersist = (IPersist)elementPropertySource.getSaveModel();
 		if (newPersist != element)

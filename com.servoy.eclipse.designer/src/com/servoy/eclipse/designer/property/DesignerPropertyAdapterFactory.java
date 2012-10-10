@@ -200,7 +200,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 			if (key == IPropertySource.class)
 			{
 				// for properties view
-				PersistPropertySource persistProperties = new PersistPropertySource(persist, context, isReadonlyPersist(persist));
+				PersistPropertySource persistProperties = new PersistPropertySource(PersistContext.create(persist, context), isReadonlyPersist(persist));
 				if (autoSave)
 				{
 					// all changes are saved immediately, on the persist node only (not recursive)

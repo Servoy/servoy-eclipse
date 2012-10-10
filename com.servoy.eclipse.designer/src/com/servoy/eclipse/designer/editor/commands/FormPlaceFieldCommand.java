@@ -103,7 +103,7 @@ public class FormPlaceFieldCommand extends FormPlaceElementCommand
 				if (same && relationName != null)
 				{
 					// don't set the relation name directly, use PersistPropertySource in case the portal is from a superform.
-					new PersistPropertySource(parent, formContext, false).setPersistPropertyValue(
+					PersistPropertySource.createPersistPropertySource(parent, formContext, false).setPersistPropertyValue(
 						StaticContentSpecLoader.PROPERTY_RELATIONNAME.getPropertyName(), relationName);
 				}
 			}
