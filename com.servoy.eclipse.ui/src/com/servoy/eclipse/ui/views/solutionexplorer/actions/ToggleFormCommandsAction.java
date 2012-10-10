@@ -72,7 +72,7 @@ public class ToggleFormCommandsAction extends Action implements ISelectionChange
 				Form form = (Form)activeProject.getEditingPersist(nodeForm.getUUID());
 				if (form != null)
 				{
-					PersistPropertySource persistProperties = new PersistPropertySource(form, form, false);
+					PersistPropertySource persistProperties = PersistPropertySource.createPersistPropertySource(form, form, false);
 					RetargetToEditorPersistProperties propertiesSource = new RetargetToEditorPersistProperties(persistProperties);
 					for (IPropertyDescriptor descriptor : propertiesSource.getPropertyDescriptors())
 					{

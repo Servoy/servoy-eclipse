@@ -469,7 +469,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				{
 					if (object instanceof TableNode)
 					{
-						return new PersistPropertySource((TableNode)object, (TableNode)object, false);
+						return PersistPropertySource.createPersistPropertySource((TableNode)object, (TableNode)object, false);
 					}
 					return null;
 				}

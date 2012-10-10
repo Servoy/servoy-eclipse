@@ -39,6 +39,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellEditorValidator;
@@ -430,22 +431,46 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	};
 
 	private PersistContext persistContext;
-	private final boolean readOnly;
+	private boolean readOnly;
 
 	// Property Descriptors
 	private Map<Object, IPropertyDescriptor> propertyDescriptors;
 	private Map<Object, IPropertyDescriptor> hiddenPropertyDescriptors;
 	private Map<Object, PropertyDescriptorWrapper> beansProperties;
 
-	public PersistPropertySource(IPersist persist, IPersist context, boolean readonly)
+	public static PersistPropertySource createPersistPropertySource(IPersist persist, IPersist context, boolean readonly)
 	{
-		this(PersistContext.create(persist, context), readonly);
+		return createPersistPropertySource(PersistContext.create(persist, context), readonly);
 	}
 
+	public static PersistPropertySource createPersistPropertySource(IPersist persist, boolean readonly)
+	{
+		return createPersistPropertySource(PersistContext.create(persist), readonly);
+	}
+
+	public static PersistPropertySource createPersistPropertySource(PersistContext persistContext, boolean readonly)
+	{
+		PersistPropertySource persistPropertySource = (PersistPropertySource)Platform.getAdapterManager().getAdapter(persistContext, IPropertySource.class);
+		persistPropertySource.setReadOnly(readonly);
+		return persistPropertySource;
+	}
+
+	/*
+	 * This constructor should only be called from the adapter factory, all other code should use createPersistPropertySource()
+	 */
 	public PersistPropertySource(PersistContext persistContext, boolean readonly)
 	{
 		this.persistContext = persistContext;
 		this.readOnly = readonly;
+	}
+
+	public void setReadOnly(boolean readOnly)
+	{
+		if (this.readOnly != readOnly)
+		{
+			this.readOnly = readOnly;
+			propertyDescriptors = null;
+		}
 	}
 
 	public IPersist getPersist()
@@ -587,7 +612,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		}
 	}
 
-	private static String[] getPseudoPropertyNames(Class clazz)
+	protected String[] getPseudoPropertyNames(Class< ? > clazz)
 	{
 		if (Solution.class == clazz)
 		{
@@ -603,7 +628,9 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	private void registerProperty(PropertyDescriptorWrapper propertyDescriptor, FlattenedSolution flattenedEditingSolution, Form form)
 		throws RepositoryException
 	{
-		if (!shouldShow(propertyDescriptor))
+		if (persistContext.getPersist() == propertyDescriptor.valueObject // for beans we show all
+			&&
+			!shouldShow(propertyDescriptor))
 		{
 			return;
 		}
@@ -1700,16 +1727,12 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	//remove some properties based on the 'known' name
 	protected boolean shouldShow(PropertyDescriptorWrapper propertyDescriptor) throws RepositoryException
 	{
-		if (persistContext.getPersist() != propertyDescriptor.valueObject) // for beans we show all
-		{
-			return true;
-		}
-
 		String name = propertyDescriptor.propertyDescriptor.getName();
 
 		// check for content spec element.
 		EclipseRepository repository = (EclipseRepository)persistContext.getPersist().getRootObject().getRepository();
 		Element element = repository.getContentSpec().getPropertyForObjectTypeByName(persistContext.getPersist().getTypeID(), name);
+
 
 		if (!RepositoryHelper.shouldShow(name, element, persistContext.getPersist().getClass()))
 		{

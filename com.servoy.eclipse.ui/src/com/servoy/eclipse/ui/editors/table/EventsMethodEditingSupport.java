@@ -98,8 +98,8 @@ public class EventsMethodEditingSupport extends EditingSupport
 		EventNode node = (EventNode)element;
 		try
 		{
-			PersistPropertySource persistProperties = new PersistPropertySource(node.getSolution().getOrCreateTableNode(table.getDataSource()),
-				node.getSolution(), false);
+			PersistPropertySource persistProperties = PersistPropertySource.createPersistPropertySource(
+				node.getSolution().getOrCreateTableNode(table.getDataSource()), node.getSolution(), false);
 			persistProperties.setPropertyValue(node.getType().getProperty().getPropertyName(), value);
 			if (persistProperties.getPersist().isChanged())
 			{

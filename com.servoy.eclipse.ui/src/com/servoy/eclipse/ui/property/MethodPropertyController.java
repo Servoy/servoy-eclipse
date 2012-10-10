@@ -255,7 +255,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 				{
 					// look for method in superform
 					Form flattenedForm = ModelUtils.getEditingFlattenedSolution(persist).getFlattenedForm(persist);
-					Object propertyValue = new PersistPropertySource(flattenedForm, null, false).getPropertyValue(methodKey);
+					Object propertyValue = PersistPropertySource.createPersistPropertySource(flattenedForm, null, false).getPropertyValue(methodKey);
 					methodId = ((ComplexProperty<MethodWithArguments>)propertyValue).getValue().methodId;
 				}
 				else

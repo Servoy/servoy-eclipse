@@ -76,7 +76,7 @@ public abstract class PersistEditor extends EditorPart implements IActiveProject
 			{
 				public IPropertySource getPropertySource(Object object)
 				{
-					return new PersistPropertySource(getPersist(), getPersist(), false/* readOnly */);
+					return PersistPropertySource.createPersistPropertySource(getPersist(), getPersist(), false/* readOnly */);
 				}
 			};
 		}
