@@ -67,7 +67,7 @@ public class FormPartpanelGraphicalEditPart extends AbstractGraphicalEditPart
 
 	protected IFigure updateFigure(IFigure fig)
 	{
-		Form flattenedForm = application.getFlattenedSolution().getFlattenedForm(getModel().context);
+		Form flattenedForm = application.getFlattenedSolution().getFlattenedForm(getModel().context);// RAGTEST editing?
 		int start = flattenedForm.getPartStartYPos(getModel().part.getID());
 		fig.setBounds(new Rectangle(0, start, flattenedForm.getWidth(), getModel().part.getHeight() - start));
 

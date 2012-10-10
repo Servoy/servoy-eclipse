@@ -79,8 +79,8 @@ public class ResizeFormCommand extends Command
 		if (delta != 0)
 		{
 			// resize form
-			resizeCommand.add(SetValueCommand.createSetvalueCommand("Resize form", new PersistPropertySource(form, form, false), PROPERTY_WIDTH, new Integer(
-				form.getWidth() + delta)));
+			resizeCommand.add(SetValueCommand.createSetvalueCommand("Resize form", PersistPropertySource.createPersistPropertySource(form, form, false),
+				PROPERTY_WIDTH, new Integer(form.getWidth() + delta)));
 
 			// move/resize all right-anchored elements, when control is pressed
 			List<EditPart> children = formEditPart.getChildren();

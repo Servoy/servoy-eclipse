@@ -123,7 +123,7 @@ public class PersistGraphicalEditPart extends BasePersistGraphicalEditPart
 	{
 		if (persistProperties == null)
 		{
-			persistProperties = new PersistPropertySource(getPersist(), form, false);
+			persistProperties = PersistPropertySource.createPersistPropertySource(getPersist(), form, false);
 		}
 		return persistProperties;
 	}

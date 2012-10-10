@@ -734,10 +734,10 @@ public class VisualFormEditorPartsPage extends Composite
 
 		CompoundCommand command = new CompoundCommand("Move Part " + (up ? "up" : "down"));
 
-		command.add(SetValueCommand.createSetvalueCommand("", new PersistPropertySource(partToMove, editor.getForm(), false),
+		command.add(SetValueCommand.createSetvalueCommand("", PersistPropertySource.createPersistPropertySource(partToMove, editor.getForm(), false),
 			StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName(), new Integer(switchPart.getHeight())));
 
-		command.add(SetValueCommand.createSetvalueCommand("", new PersistPropertySource(switchPart, editor.getForm(), false),
+		command.add(SetValueCommand.createSetvalueCommand("", PersistPropertySource.createPersistPropertySource(switchPart, editor.getForm(), false),
 			StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName(), new Integer(partToMove.getHeight())));
 
 		return command;
@@ -975,7 +975,7 @@ public class VisualFormEditorPartsPage extends Composite
 			}
 			if (propertySource == null)
 			{
-				propertySource = new PersistPropertySource(part, editor.getForm(), false);
+				propertySource = PersistPropertySource.createPersistPropertySource(part, editor.getForm(), false);
 			}
 			return propertySource.getPropertyValue(property);
 		}
@@ -991,8 +991,8 @@ public class VisualFormEditorPartsPage extends Composite
 			if (part != null)
 			{
 				// set the property via the command stack to support undo/redo
-				executeCommand(SetValueCommand.createSetvalueCommand("Edit Part Property", new PersistPropertySource(part, editor.getForm(), false), property,
-					value));
+				executeCommand(SetValueCommand.createSetvalueCommand("Edit Part Property",
+					PersistPropertySource.createPersistPropertySource(part, editor.getForm(), false), property, value));
 			}
 		}
 	}

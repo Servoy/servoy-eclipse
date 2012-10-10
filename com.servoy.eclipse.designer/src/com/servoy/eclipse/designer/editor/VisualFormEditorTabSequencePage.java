@@ -484,7 +484,7 @@ public class VisualFormEditorTabSequencePage extends Composite
 
 	protected Command getSetTabSeqCommand(IPersist persist, int tabSeq)
 	{
-		return SetValueCommand.createSetvalueCommand("", new PersistPropertySource(persist, editor.getForm(), false),
+		return SetValueCommand.createSetvalueCommand("", PersistPropertySource.createPersistPropertySource(persist, editor.getForm(), false),
 			StaticContentSpecLoader.PROPERTY_TABSEQ.getPropertyName(), new Integer(tabSeq));
 	}
 

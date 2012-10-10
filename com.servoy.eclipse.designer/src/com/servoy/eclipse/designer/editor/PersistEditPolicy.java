@@ -165,8 +165,9 @@ class PersistEditPolicy extends ComponentEditPolicy
 		else if ((VisualFormEditor.REQ_SET_PROPERTY.equals(request.getType()) && request instanceof SetPropertyRequest))
 		{
 			SetPropertyRequest setPropertyRequest = (SetPropertyRequest)request;
-			command = SetValueCommand.createSetvalueCommand(setPropertyRequest.getName(), new PersistPropertySource(persist, formEditPart != null
-				? (Form)formEditPart.getModel() : null, false), setPropertyRequest.getPropertyId(), setPropertyRequest.getValue());
+			command = SetValueCommand.createSetvalueCommand(setPropertyRequest.getName(),
+				PersistPropertySource.createPersistPropertySource(persist, formEditPart != null ? (Form)formEditPart.getModel() : null, false),
+				setPropertyRequest.getPropertyId(), setPropertyRequest.getValue());
 		}
 
 		if (command != null)
@@ -283,22 +284,22 @@ class PersistEditPolicy extends ComponentEditPolicy
 				IPersist persist = servoyProject.getEditingPersist(dragData.uuid);
 				if (persist instanceof ScriptMethod && (child instanceof Field || child instanceof GraphicalComponent))
 				{
-					return SetValueCommand.createSetvalueCommand("Drag-n-drop script method", new PersistPropertySource((IPersist)child,
-						(IPersist)(formEditPart == null ? null : formEditPart.getModel()), false),
+					return SetValueCommand.createSetvalueCommand("Drag-n-drop script method", PersistPropertySource.createPersistPropertySource(
+						(IPersist)child, (IPersist)(formEditPart == null ? null : formEditPart.getModel()), false),
 						StaticContentSpecLoader.PROPERTY_ONACTIONMETHODID.getPropertyName(), MethodWithArguments.create(persist, null));
 				}
 				if (persist instanceof Media && child instanceof ISupportMedia && child instanceof IPersist)
 				{
 					Media mediaPersist = (Media)persist;
 					String mediaPersistName = mediaPersist.getName();
-					return SetValueCommand.createSetvalueCommand("Drag-n-drop image", new PersistPropertySource((IPersist)child,
+					return SetValueCommand.createSetvalueCommand("Drag-n-drop image", PersistPropertySource.createPersistPropertySource((IPersist)child,
 						(IPersist)(formEditPart == null ? null : formEditPart.getModel()), false),
 						StaticContentSpecLoader.PROPERTY_IMAGEMEDIAID.getPropertyName(), new MediaNode(mediaPersistName, mediaPersistName,
 							MediaNode.TYPE.IMAGE, servoyProject.getEditingFlattenedSolution().getSolution(), null, mediaPersist));
 				}
 				if (persist instanceof ValueList && child instanceof Field)
 				{
-					return SetValueCommand.createSetvalueCommand("Drag-n-drop value list", new PersistPropertySource((IPersist)child,
+					return SetValueCommand.createSetvalueCommand("Drag-n-drop value list", PersistPropertySource.createPersistPropertySource((IPersist)child,
 						(IPersist)(formEditPart == null ? null : formEditPart.getModel()), false),
 						StaticContentSpecLoader.PROPERTY_VALUELISTID.getPropertyName(), new Integer(persist.getID()));
 				}
@@ -332,9 +333,9 @@ class PersistEditPolicy extends ComponentEditPolicy
 				if (!dataProviderDragData.serverName.equals(form.getServerName()) || !dataProviderDragData.baseTableName.equals(form.getTableName())) return null;
 			}
 			// else drop a form or global variable
-			return SetValueCommand.createSetvalueCommand("Drag-n-drop data provider", new PersistPropertySource((IPersist)child, form, false),
-				StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), dataProviderDragData.relationName == null
-					? dataProviderDragData.dataProviderId : (dataProviderDragData.relationName + '.' + dataProviderDragData.dataProviderId));
+			return SetValueCommand.createSetvalueCommand("Drag-n-drop data provider", PersistPropertySource.createPersistPropertySource((IPersist)child, form,
+				false), StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), dataProviderDragData.relationName == null
+				? dataProviderDragData.dataProviderId : (dataProviderDragData.relationName + '.' + dataProviderDragData.dataProviderId));
 		}
 		return null;
 	}
