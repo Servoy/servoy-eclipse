@@ -145,7 +145,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 
 	public static Scriptable getScope(ClientState state, boolean create)
 	{
-		GlobalScope ss = state.getScriptEngine().getScopesScope().getOrCreateGlobalScope(ScriptVariable.GLOBAL_SCOPE);
+		GlobalScope ss = state.getScriptEngine().getScopesScope().getGlobalScope(ScriptVariable.GLOBAL_SCOPE);
 		Scriptable scope = null;
 		if (ss.has(TEST_SCOPE, ss))
 		{
