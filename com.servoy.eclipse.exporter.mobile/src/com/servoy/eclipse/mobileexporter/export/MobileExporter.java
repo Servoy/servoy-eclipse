@@ -248,7 +248,10 @@ public class MobileExporter
 					{
 						entryName = "index.html";
 					}
-					addZipEntry(entryName, warStream, zipStream);
+					if (!exportAsZip || !entryName.startsWith("WEB-INF"))
+					{
+						addZipEntry(entryName, warStream, zipStream);
+					}
 					entry = zipStream.getNextEntry();
 				}
 				addZipEntry("solution.json", warStream, new ByteArrayInputStream(formJson.getBytes("UTF8")));

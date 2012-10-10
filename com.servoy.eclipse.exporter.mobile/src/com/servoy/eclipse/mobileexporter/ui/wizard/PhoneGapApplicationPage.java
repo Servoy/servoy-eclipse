@@ -17,10 +17,15 @@
 
 package com.servoy.eclipse.mobileexporter.ui.wizard;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -33,7 +38,9 @@ import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
@@ -54,6 +61,9 @@ public class PhoneGapApplicationPage extends WizardPage
 	private Text txtVersion;
 	private Text txtDescription;
 	private Button btnPublic;
+	private Text iconPath;
+	private Button iconBrowseButton;
+	private CheckboxTableViewer certificatesViewer;
 
 	private String solutionName;
 	private String serverURL;
@@ -86,17 +96,48 @@ public class PhoneGapApplicationPage extends WizardPage
 
 		txtDescription = new Text(container, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 
+		Label iconLabel = new Label(container, SWT.NONE);
+		iconLabel.setText("Icon");
+
+		iconPath = new Text(container, SWT.BORDER);
+		iconBrowseButton = new Button(container, SWT.NONE);
+		iconBrowseButton.setText("Browse");
+
+		final Shell outputBrowseShell = new Shell();
+		iconBrowseButton.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				FileDialog fileDialog = new FileDialog(outputBrowseShell, SWT.NONE);
+				fileDialog.setFilterExtensions(new String[] { "*.png" });
+				if (fileDialog.open() != null)
+				{
+					iconPath.setText(fileDialog.getFilterPath() + File.separator + fileDialog.getFileName());
+				}
+			}
+		});
+
+		Label certificatesLabel = new Label(container, SWT.NONE);
+		certificatesLabel.setText("Certificates");
+
+		certificatesViewer = CheckboxTableViewer.newCheckList(container, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+		certificatesViewer.setLabelProvider(new LabelProvider());
+		certificatesViewer.setContentProvider(new ArrayContentProvider());
+
 		btnPublic = new Button(container, SWT.CHECK);
 		btnPublic.setText("Public Application");
 
 		final GroupLayout groupLayout = new GroupLayout(container);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(lblApplicationName).add(lblVersion).add(lblDescription)).addPreferredGap(
-				LayoutStyle.RELATED).add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(lblApplicationName).add(lblVersion).add(lblDescription).add(iconLabel).add(
+					certificatesLabel)).addPreferredGap(LayoutStyle.RELATED).add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(applicationNameCombo, GroupLayout.DEFAULT_SIZE, 342, Short.MAX_VALUE).add(txtVersion,
-					GroupLayout.PREFERRED_SIZE, 276, Short.MAX_VALUE).add(txtDescription, GroupLayout.PREFERRED_SIZE, 276, Short.MAX_VALUE).add(btnPublic,
-					GroupLayout.PREFERRED_SIZE, 276, Short.MAX_VALUE)).addContainerGap()));
+					GroupLayout.PREFERRED_SIZE, 276, Short.MAX_VALUE).add(txtDescription, GroupLayout.PREFERRED_SIZE, 276, Short.MAX_VALUE).add(
+					groupLayout.createSequentialGroup().add(iconPath, GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE).add(iconBrowseButton,
+						GroupLayout.PREFERRED_SIZE, 80, GroupLayout.PREFERRED_SIZE)).add(certificatesViewer.getTable(), GroupLayout.DEFAULT_SIZE, 342,
+					Short.MAX_VALUE).add(btnPublic, GroupLayout.PREFERRED_SIZE, 276, Short.MAX_VALUE)).addContainerGap()));
 
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
@@ -104,7 +145,10 @@ public class PhoneGapApplicationPage extends WizardPage
 					GroupLayout.PREFERRED_SIZE).add(lblApplicationName)).add(7).add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(txtVersion, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 					GroupLayout.PREFERRED_SIZE).add(lblVersion)).add(7).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(txtDescription, 80, 80, 80).add(lblDescription)).add(10).add(
+				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(txtDescription, 80, 80, 80).add(lblDescription)).add(7).add(
+				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(iconBrowseButton).add(iconPath, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+					GroupLayout.PREFERRED_SIZE).add(iconLabel)).add(7).add(
+				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(certificatesViewer.getTable(), 80, 80, 80).add(certificatesLabel)).add(10).add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(btnPublic))));
 
 		container.setLayout(groupLayout);
@@ -130,6 +174,8 @@ public class PhoneGapApplicationPage extends WizardPage
 					txtDescription.setText(app.getDescription());
 					txtVersion.setText(app.getVersion());
 					btnPublic.setSelection(app.isPublicApplication());
+					iconPath.setText(app.getIconPath());
+					setSelectedCertificates(app.getCertificates());
 				}
 			}
 		});
@@ -152,14 +198,16 @@ public class PhoneGapApplicationPage extends WizardPage
 			final String appVersion = txtVersion.getText();
 			final String appDescription = txtDescription.getText();
 			final boolean appPublic = btnPublic.getSelection();
+			final String path = iconPath.getText();
+			final String[] selectedCertificates = getSelectedCerticates();
 			try
 			{
 				PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress()
 				{
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 					{
-						errorMessage[0] = getConnector().createNewPhoneGapApplication(new PhoneGapApplication(appName, appVersion, appDescription, appPublic),
-							solutionName, serverURL);
+						errorMessage[0] = getConnector().createOrUpdatePhoneGapApplication(
+							new PhoneGapApplication(appName, appVersion, appDescription, appPublic, path, selectedCertificates), solutionName, serverURL);
 
 					}
 				});
@@ -217,5 +265,16 @@ public class PhoneGapApplicationPage extends WizardPage
 	public void populateExistingApplications()
 	{
 		applicationNameCombo.setItems(connector.getExistingApps());
+		certificatesViewer.setInput(getConnector().getCertificates());
+	}
+
+	public String[] getSelectedCerticates()
+	{
+		return Arrays.asList(certificatesViewer.getCheckedElements()).toArray(new String[0]);
+	}
+
+	private void setSelectedCertificates(String[] certificates)
+	{
+		certificatesViewer.setCheckedElements((certificates != null) ? certificates : new String[] { });
 	}
 }

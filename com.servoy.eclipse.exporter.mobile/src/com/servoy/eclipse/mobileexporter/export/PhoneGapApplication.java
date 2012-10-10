@@ -20,6 +20,8 @@ package com.servoy.eclipse.mobileexporter.export;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.json.JSONObject;
+
 import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
@@ -32,6 +34,10 @@ public class PhoneGapApplication
 	private String version;
 	private String description;
 	private boolean publicApplication = false;
+	private int id = -1;
+	private String iconPath = null;
+	private final String[] certificates;
+	private JSONObject selectedCertificates;
 
 	/**
 	 * @param title
@@ -39,12 +45,20 @@ public class PhoneGapApplication
 	 * @param description
 	 * @param publicApplication
 	 */
-	public PhoneGapApplication(String title, String version, String description, boolean publicApplication)
+	public PhoneGapApplication(String title, String version, String description, boolean publicApplication, String iconPath, String[] certificates)
+	{
+		this(title, version, description, publicApplication, iconPath, certificates, -1);
+	}
+
+	public PhoneGapApplication(String title, String version, String description, boolean publicApplication, String iconPath, String[] certificates, int id)
 	{
 		this.title = title;
 		this.version = version;
 		this.description = description;
 		this.publicApplication = publicApplication;
+		this.iconPath = iconPath;
+		this.id = id;
+		this.certificates = certificates;
 	}
 
 	/**
@@ -89,10 +103,17 @@ public class PhoneGapApplication
 		properties.put("private", Boolean.toString(!publicApplication));
 		properties.put("version", version);
 		properties.put("description", description);
+		properties.put("keys", selectedCertificates != null ? selectedCertificates : new JSONObject());
 		ServoyJSONObject json = new ServoyJSONObject(properties, false, false);
 		json.setNoBrackets(false);
 		return json.toString();
 	}
+
+	public String getTitle()
+	{
+		return title;
+	}
+
 
 	/**
 	 * @return the version
@@ -118,4 +139,27 @@ public class PhoneGapApplication
 		return publicApplication;
 	}
 
+	/**
+	 * @return the id
+	 */
+	public int getId()
+	{
+		return id;
+	}
+
+
+	public String getIconPath()
+	{
+		return iconPath;
+	}
+
+	public String[] getCertificates()
+	{
+		return certificates;
+	}
+
+	public void setSelectedCertificates(JSONObject selectedCertificates)
+	{
+		this.selectedCertificates = selectedCertificates;
+	}
 }
