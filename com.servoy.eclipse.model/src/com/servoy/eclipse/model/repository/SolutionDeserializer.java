@@ -2027,12 +2027,10 @@ public class SolutionDeserializer
 			int objectTypeId = obj.getInt(SolutionSerializer.PROP_TYPEID);
 //			String name = obj.getString(SolutionSerializer.PROP_NAME);
 			int solutionType = obj.getInt("solutionType"); //$NON-NLS-1$
-			String protectionPassword = obj.getString("protectionPassword"); //$NON-NLS-1$
 			boolean mustAuthenticate = obj.getBoolean("mustAuthenticate"); //$NON-NLS-1$
 			//int id = repository.getNewElementID(rootObjectUuid);
 			int id = repository.getElementIdForUUID(rootObjectUuid);
 			SolutionMetaData metadata = (SolutionMetaData)repository.createRootObjectMetaData(id, rootObjectUuid, name, objectTypeId, 1, 1);
-			metadata.setProtectionPassword(protectionPassword);
 			metadata.setMustAuthenticate(mustAuthenticate);
 			metadata.setSolutionType(solutionType);
 			metadata.setFileVersion(fileVersion);
