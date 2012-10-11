@@ -29,28 +29,26 @@ ${endloop_scopes}
 		},
 		
 		forms: {
-${loop_forms}		
-				_$${formName}$: function(_$form$) {
+${loop_forms}					_$${formName}$: function(_$form$) {
 ${loop_functions}					var ${functionName} = _ServoyUtils_.wrapFunction(${functionCode},_$form$);
-			        _$form$.${functionName} = ${functionName};
+					_$form$.${functionName} = ${functionName};
 ${endloop_functions}					
-${loop_variables}			        _ServoyUtils_.defineVariable(_$form$,"${variableName}",${defaultValue},${variableType});
+${loop_variables}				_ServoyUtils_.defineVariable(_$form$,"${variableName}",${defaultValue},${variableType});
 ${endloop_variables}
 					// define standard things (controller,foundset,elements)
 					_ServoyUtils_.defineStandardFormVariables(_$form$);
-			     }
+				},
 ${endloop_forms}			     
 		},
 		
 		scopes: {
-${loop_scopes}		
-				_$${scopeName}$: function(_$scope$) {		
-${loop_functions}				var ${functionName} = _ServoyUtils_.wrapFunction( ${functionCode} ,_$scope$);
-				_$scope$.${functionName} = ${functionName};
+${loop_scopes}				_$${scopeName}$: function(_$scope$) {		
+${loop_functions}					var ${functionName} = _ServoyUtils_.wrapFunction( ${functionCode} ,_$scope$);
+					_$scope$.${functionName} = ${functionName};
 ${endloop_functions}				
-${loop_variables}				_ServoyUtils_.defineVariable(_$scope$,"${variableName}",${defaultValue},${variableType});
+${loop_variables}					_ServoyUtils_.defineVariable(_$scope$,"${variableName}",${defaultValue},${variableType});
 ${endloop_variables}				
-			};
+			},
 ${endloop_scopes}			
 		
 		}

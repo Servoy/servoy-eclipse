@@ -431,7 +431,7 @@ public class MobileExporter
 		String scripting = method.getDeclaration();
 		scripting = scripting.replaceAll("function " + method.getName(), "function ");
 		int index = scripting.indexOf("function ");
-		scripting = scripting.substring(index);
+		scripting = scripting.substring(index).trim();
 		return scripting;
 	}
 
