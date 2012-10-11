@@ -212,7 +212,17 @@ public class MobileExporter
 			builder.append(replaceVariablesScripting(template.substring(allVariablesLoopStartIndex + VARIABLES_LOOP_START.length(), allVariablesLoopEndIndex),
 				project.getSolution(), null));
 
-			builder.append(template.substring(allVariablesLoopEndIndex + VARIABLES_LOOP_END.length()));
+			formsLoopStartIndex = template.indexOf(FORM_LOOP_START, allVariablesLoopEndIndex);
+			formsLoopEndIndex = template.indexOf(FORM_LOOP_END, allVariablesLoopEndIndex);
+			builder.append(template.substring(allVariablesLoopEndIndex + VARIABLES_LOOP_END.length(), formsLoopStartIndex));
+			builder.append(replaceFormsScripting(template.substring(formsLoopStartIndex + FORM_LOOP_START.length(), formsLoopEndIndex)));
+
+			scopesLoopStartIndex = template.indexOf(SCOPES_LOOP_START, formsLoopStartIndex);
+			scopesLoopEndIndex = template.indexOf(SCOPES_LOOP_END, formsLoopStartIndex);
+			builder.append(template.substring(formsLoopEndIndex + FORM_LOOP_END.length(), scopesLoopStartIndex));
+			builder.append(replaceScopesScripting(template.substring(scopesLoopStartIndex + SCOPES_LOOP_START.length(), scopesLoopEndIndex)));
+
+			builder.append(template.substring(scopesLoopEndIndex + SCOPES_LOOP_END.length()));
 			return builder.toString();
 		}
 		return null;
@@ -305,17 +315,22 @@ public class MobileExporter
 	{
 		int functionsLoopStartIndex = template.indexOf(FUNCTIONS_LOOP_START);
 		int functionsLoopEndIndex = template.indexOf(FUNCTIONS_LOOP_END);
-		appender.append(template.substring(0, functionsLoopStartIndex));
-		appender.append(replaceFunctionsScripting(template.substring(functionsLoopStartIndex + FUNCTIONS_LOOP_START.length(), functionsLoopEndIndex), parent,
-			scopeName));
+		if (functionsLoopStartIndex >= 0)
+		{
+			appender.append(template.substring(0, functionsLoopStartIndex));
+			appender.append(replaceFunctionsScripting(template.substring(functionsLoopStartIndex + FUNCTIONS_LOOP_START.length(), functionsLoopEndIndex),
+				parent, scopeName));
+		}
 
 		int variablesLoopStartIndex = template.indexOf(VARIABLES_LOOP_START, functionsLoopEndIndex);
 		int variablesLoopEndIndex = template.indexOf(VARIABLES_LOOP_END, functionsLoopEndIndex);
-		appender.append(template.substring(functionsLoopEndIndex + FUNCTIONS_LOOP_END.length(), variablesLoopStartIndex));
-		appender.append(replaceVariablesScripting(template.substring(variablesLoopStartIndex + VARIABLES_LOOP_START.length(), variablesLoopEndIndex), parent,
-			scopeName));
-
-		appender.append(template.substring(variablesLoopEndIndex + VARIABLES_LOOP_END.length()));
+		if (variablesLoopStartIndex >= 0)
+		{
+			appender.append(template.substring(functionsLoopEndIndex + FUNCTIONS_LOOP_END.length(), variablesLoopStartIndex));
+			appender.append(replaceVariablesScripting(template.substring(variablesLoopStartIndex + VARIABLES_LOOP_START.length(), variablesLoopEndIndex),
+				parent, scopeName));
+		}
+		appender.append(variablesLoopEndIndex >= 0 ? template.substring(variablesLoopEndIndex + VARIABLES_LOOP_END.length()) : template);
 	}
 
 	private String replaceScopesScripting(String template)
