@@ -34,17 +34,16 @@ import java.util.jar.JarFile;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.javascript.core.JavaScriptNature;
 import org.json.JSONException;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.RunInWorkspaceJob;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
@@ -152,13 +151,11 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 			final IFileAccess wsa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
 
 			// the following jobs will be executed backwards (starting from 1 not from 3)
-			final WorkspaceJob importJob3 = new WorkspaceJob("Finalizing import and activating solution")
+			final IWorkspaceRunnable importJob3 = new IWorkspaceRunnable()
 			{
-
-				@Override
-				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+				public void run(IProgressMonitor monitor) throws CoreException
 				{
-					m.setTaskName(getName());
+					m.setTaskName("Finalizing import and activating solution");
 					m.worked(1);
 					try
 					{
@@ -191,19 +188,16 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					}
 					m.setTaskName("Finished... updating workbench state");
 					m.worked(1);
-					return Status.OK_STATUS;
 				}
 
 			};
-			final WorkspaceJob importJob2 = new WorkspaceJob("Reading solution & modules, updating tables")
+			final IWorkspaceRunnable importJob2 = new IWorkspaceRunnable()
 			{
-
-				@Override
-				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+				public void run(IProgressMonitor monitor) throws CoreException
 				{
-					m.setTaskName(getName());
+					m.setTaskName("Reading solution & modules, updating tables");
 					m.worked(1);
-					boolean nextJobWillStart = false;
+					RunInWorkspaceJob job = null;
 					try
 					{
 						// activate dummy
@@ -279,10 +273,11 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 						}
 
 						m.setTaskName("Updating workbench state");
-						importJob3.setRule(ServoyModel.getWorkspace().getRoot());
-						importJob3.setUser(false);
-						importJob3.setSystem(true);
-						nextJobWillStart = true;
+
+						job = new RunInWorkspaceJob(importJob3);
+						job.setRule(ServoyModel.getWorkspace().getRoot());
+						job.setUser(false);
+						job.setSystem(true);
 					}
 					catch (Exception e)
 					{
@@ -292,33 +287,30 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					{
 						try
 						{
-							if (!nextJobWillStart && dummySolProject[0] != null) dummySolProject[0].delete(true, true, null);
+							if (job == null && dummySolProject[0] != null) dummySolProject[0].delete(true, true, null);
 						}
 						finally
 						{
 							synchronized (finishedFlag)
 							{
-								finishedFlag[0] = !nextJobWillStart;
+								finishedFlag[0] = job == null;
 								if (finishedFlag[0] == true) finishedFlag.notify();
 							}
 						}
 					}
-					if (nextJobWillStart) importJob3.schedule();
-					return Status.OK_STATUS;
+					if (job != null) job.schedule();
 				}
 
 			};
-			// need to call following code in a set of jobs because some operations need the resource listeners to update stuff before running other stuff;
-			// otherwise we will end up with multiple threads running in the same time (as WorkspaceJobs allow from time to time a resource change event to be triggered)
-			WorkspaceJob importJob1 = new WorkspaceJob("Preparing for import (activating needed resources project)")
+			// need to call following code in a set of jobs through an IWorkspaceRunnable because some operations need the resource listeners to update stuff before running other stuff;
+			// by doing it through IWorkspaceRunnable we really make sure that there are no concurrent threads/jobs running in the workspace (Eclipse Notification Manager)
+			final IWorkspaceRunnable importJob1 = new IWorkspaceRunnable()
 			{
-
-				@Override
-				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+				public void run(IProgressMonitor monitor) throws CoreException
 				{
-					m.setTaskName(getName());
+					m.setTaskName("Preparing for import (activating needed resources project)");
 					m.worked(1);
-					boolean nextJobWillStart = false;
+					RunInWorkspaceJob job = null;
 					try
 					{
 						// create/use resources project - and make sure it is active before super.importFromJarFile(...) is called because that changes .dbi files - and those changes
@@ -362,10 +354,10 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 						SolutionSerializer.writePersist(dummySolution, wsa, repository, true, false, true);
 
 						m.setTaskName("Updating workbench state");
-						importJob2.setRule(ServoyModel.getWorkspace().getRoot());
-						importJob2.setUser(false);
-						importJob2.setSystem(true);
-						nextJobWillStart = true;
+						job = new RunInWorkspaceJob(importJob2);
+						job.setRule(ServoyModel.getWorkspace().getRoot());
+						job.setUser(false);
+						job.setSystem(true);
 					}
 					catch (Exception e)
 					{
@@ -375,26 +367,27 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					{
 						try
 						{
-							if (!nextJobWillStart && dummySolProject[0] != null) dummySolProject[0].delete(true, true, null);
+							if (job == null && dummySolProject[0] != null) dummySolProject[0].delete(true, true, null);
 						}
 						finally
 						{
 							synchronized (finishedFlag)
 							{
-								finishedFlag[0] = !nextJobWillStart;
+								finishedFlag[0] = job == null;
 								if (finishedFlag[0] == true) finishedFlag.notify();
 							}
 						}
 					}
-					if (nextJobWillStart) importJob2.schedule();
-					return Status.OK_STATUS;
+					if (job != null) job.schedule();
 				}
 
 			};
-			importJob1.setRule(ServoyModel.getWorkspace().getRoot());
-			importJob1.setUser(false);
-			importJob1.setSystem(true);
-			importJob1.schedule();
+
+			RunInWorkspaceJob job = new RunInWorkspaceJob(importJob1);
+			job.setRule(ServoyModel.getWorkspace().getRoot());
+			job.setUser(false);
+			job.setSystem(true);
+			job.schedule();
 
 			synchronized (finishedFlag)
 			{
