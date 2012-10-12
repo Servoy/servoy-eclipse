@@ -17,7 +17,19 @@
 package com.servoy.eclipse.ui.wizards;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.security.MessageDigest;
+import java.util.jar.JarFile;
+import java.util.zip.ZipException;
+
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -48,6 +60,7 @@ import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.IValidato
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectChooserComposite;
 import com.servoy.eclipse.core.repository.EclipseImportUserChannel;
 import com.servoy.eclipse.core.repository.XMLEclipseWorkspaceImportHandlerVersions11AndHigher;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -55,6 +68,7 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.xmlxport.IXMLImportEngine;
 import com.servoy.j2db.util.xmlxport.IXMLImportHandlerVersions11AndHigher;
@@ -322,7 +336,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 					IApplicationServerSingleton as = ApplicationServerSingleton.get();
 					try
 					{
-						IXMLImportEngine importEngine = as.createXMLImportEngine(file, (EclipseRepository)ServoyModel.getDeveloperRepository(),
+						IXMLImportEngine importEngine = as.createXMLImportEngine(fileDecryption(file), (EclipseRepository)ServoyModel.getDeveloperRepository(),
 							as.getDataServer(), as.getClientId(), userChannel);
 
 						IXMLImportHandlerVersions11AndHigher x11handler = as.createXMLInMemoryImportHandler(importEngine.getVersionInfo(), as.getDataServer(),
@@ -399,6 +413,95 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			else if (resourceProjectComposite != null) error = resourceProjectComposite.validate();
 			setErrorMessage(error);
 			return error;
+		}
+
+		/**
+		 * Check is the specified file is under encryption or not
+		 * 
+		 * @param file
+		 * @return boolean
+		 * 
+		 */
+		private boolean checkEncryption(File file)
+		{
+			boolean encrypted = false;
+			try
+			{
+				JarFile jarFile = new JarFile(file, true);
+				jarFile.close();
+			}
+			catch (ZipException e)
+			{
+				encrypted = true;
+			}
+			catch (IOException e)
+			{
+				encrypted = true;
+			}
+			return encrypted;
+		}
+
+		/**
+		 * AES Decryption of the specified file and write the output in a temporary file.
+		 * 
+		 * @param password
+		 * @return file
+		 * 
+		 */
+		private File fileDecryption(File file)
+		{
+			String password = null;
+			if (checkEncryption(file))
+			{
+				password = UIUtils.showPasswordDialog(getShell(), "This solution is password protected", "Please enter protection password:", "", null); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+			else return file;
+
+			File tempFile = null;
+			try
+			{
+				InputStream is = new FileInputStream(file);
+				CipherInputStream cis = new CipherInputStream(is, decrypt(password));
+				tempFile = File.createTempFile("import", ".tmp"); //$NON-NLS-1$ //$NON-NLS-2$
+				OutputStream out = new FileOutputStream(tempFile);
+
+				int read = 0;
+				byte[] bytes = new byte[1024];
+
+				while ((read = cis.read(bytes)) != -1)
+				{
+					out.write(bytes, 0, read);
+				}
+
+				cis.close();
+				out.flush();
+				out.close();
+			}
+			catch (Exception e)
+			{
+				Debug.error(e);
+			}
+			tempFile.deleteOnExit();
+			return tempFile;
+		}
+
+		/**
+		 * Create an AES Cipher DECRYPT_MODE by a specified password.
+		 * 
+		 * @param password
+		 * @return cipher
+		 * 
+		 * @throws Exception if an error occurs in the encryption
+		 */
+		private Cipher decrypt(String passwd) throws Exception
+		{
+			MessageDigest md = MessageDigest.getInstance("MD5"); //$NON-NLS-1$
+			byte[] hash = md.digest(passwd.getBytes("UTF-8")); //$NON-NLS-1$
+
+			SecretKeySpec skeySpec = new SecretKeySpec(hash, "AES"); //$NON-NLS-1$
+			Cipher cipher = Cipher.getInstance("AES"); //$NON-NLS-1$
+			cipher.init(Cipher.DECRYPT_MODE, skeySpec);
+			return cipher;
 		}
 
 		public String getPath()
