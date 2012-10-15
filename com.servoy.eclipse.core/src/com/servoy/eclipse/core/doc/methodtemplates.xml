@@ -222,7 +222,7 @@ Return true if drop has been performed successfully, otherwise false.]]></descri
   </event>
   <event name="onErrorMethodID">
     <methodtemplate addtodo="true" name="onError" type="Boolean">
-      <description><![CDATA[Callback method for when an error occurred]]></description>
+      <description><![CDATA[Callback method for when an error occurred (the error can be a JavaScript or Servoy Java error).]]></description>
       <code><![CDATA[application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
@@ -231,7 +231,7 @@ if (ex instanceof ServoyException)
  var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
- var trace = servoyException.getStackTrace();
+ //var trace = servoyException.getStackTrace();
 	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
 	{
  		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
@@ -257,7 +257,7 @@ if (ex instanceof ServoyException)
 //by default error report means logging the error, in smart client an error dialog will also show up
 return true]]></code>
       <arguments>
-        <methodargument name="ex" type="Exception"><![CDATA[exception to handle]]></methodargument>
+        <methodargument name="ex" type="*"><![CDATA[exception to handle]]></methodargument>
       </arguments>
     </methodtemplate>
   </event>
