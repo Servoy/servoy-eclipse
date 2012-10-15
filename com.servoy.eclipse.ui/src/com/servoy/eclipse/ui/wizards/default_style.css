@@ -69,23 +69,21 @@ selected {
 
 /* 
  * Example of additional grid styling (Portals and TableViews)
- * The gridheader and gridcell style classes needs to be set on resp. the header labels and the cell elements of TableView's and Portals
+ * The grid style class needs to be set on form; grid_header selector works if there are no 'label for' labels defined to style the header.
  */
-label.gridheader,
-field.gridcell,
-check.gridcell,
-radio.gridcell,
-listbox.gridcell,
-spinner.gridcell,
-combobox.gridcell,
-label.gridcell,
-button.gridcell {
+form.grid odd,
+form.grid even,
+form.grid selected,
+form.grid grid_header {
 	border: 0px solid #C9CACA;
 	border-right-width: 1px;
 	margin-left: 5px;
 	margin-right: 3px;
 }
 
+/*
+ *	The grid header can also be styled using 'label for' label. In order for this example to work you need to set the label style class to gridheader.
+ */
 label.gridheader {
 	text-align: left;
 	color: #5C5C5D;
