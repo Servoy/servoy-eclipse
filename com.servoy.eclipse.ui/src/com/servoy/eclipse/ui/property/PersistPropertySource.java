@@ -451,7 +451,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	public static PersistPropertySource createPersistPropertySource(PersistContext persistContext, boolean readonly)
 	{
 		PersistPropertySource persistPropertySource = (PersistPropertySource)Platform.getAdapterManager().getAdapter(persistContext, IPropertySource.class);
-		persistPropertySource.setReadOnly(readonly);
+		if (persistPropertySource != null) persistPropertySource.setReadOnly(readonly);
 		return persistPropertySource;
 	}
 
