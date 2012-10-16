@@ -372,7 +372,7 @@ public class SolutionDeserializer
 									// old structure parsing
 									if (!readAll)
 									{
-										testDuplicates(parent, scriptObjects);
+										testDuplicates(f, parent, scriptObjects);
 									}
 									if (scriptObjects != null)
 									{
@@ -463,7 +463,7 @@ public class SolutionDeserializer
 						List<JSONObject> childrenJSObjects = childrenJSObjectMapEntry.getValue();
 						if (!readAll)
 						{
-							testDuplicates(scriptParent, childrenJSObjects);
+							testDuplicates(jsonFile, scriptParent, childrenJSObjects);
 						}
 						if (childrenJSObjects != null)
 						{
@@ -608,7 +608,7 @@ public class SolutionDeserializer
 	 * @param parent
 	 * @param scriptObjects
 	 */
-	private void testDuplicates(final ISupportChilds parent, List<JSONObject> scriptObjects)
+	private void testDuplicates(File file, final ISupportChilds parent, List<JSONObject> scriptObjects)
 	{
 		if (scriptObjects != null && scriptObjects.size() > 0)
 		{
@@ -619,10 +619,10 @@ public class SolutionDeserializer
 				if (object.has(SolutionSerializer.PROP_UUID) && object.has(SolutionSerializer.PROP_NAME))
 				{
 					String uuid = object.optString(SolutionSerializer.PROP_UUID);
+					UUID uuidObject = UUID.fromString(uuid);
 					JSONObject duplicate = uuidToJson.put(uuid, object);
 					if (duplicate != null)
 					{
-						UUID uuidObject = UUID.fromString(uuid);
 						noParentDuplicates.remove(uuidObject);
 						try
 						{
@@ -655,48 +655,64 @@ public class SolutionDeserializer
 					}
 					else
 					{
-						noParentDuplicates.put(UUID.fromString(uuid), object);
+						// search for duplicates for same parent in other files (same uuid in other global scope)
+						IPersist child = parent.getChild(uuidObject);
+						if (child != null && !SolutionSerializer.getFileName(child, false).equals(file.getName()))
+						{
+							// Found another child from different file, generate a new uuid for this one.
+							uuidToJson.remove(uuid);
+							uuidObject = UUID.randomUUID();
+							uuidToJson.put(uuid = uuidObject.toString(), object);
+							try
+							{
+								object.put(SolutionSerializer.PROP_UUID, uuid);
+							}
+							catch (JSONException e)
+							{
+								ServoyLog.logError(e);
+							}
+						}
+						else
+						{
+							noParentDuplicates.put(uuidObject, object);
+						}
 					}
 				}
 			}
 			if (noParentDuplicates.size() > 0 && ServoyModelFinder.getServoyModel().getActiveProject() != null)
 			{
-				ServoyProject[] projects = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
-				if (projects.length > 0)
+				for (ServoyProject servoyProject : ServoyModelFinder.getServoyModel().getModulesOfActiveProject())
 				{
-					for (ServoyProject servoyProject : projects)
+					Solution solution = servoyProject.getSolution();
+					if (solution == null) continue;
+					solution.acceptVisitor(new IPersistVisitor()
 					{
-						Solution solution = servoyProject.getSolution();
-						if (solution == null) continue;
-						solution.acceptVisitor(new IPersistVisitor()
+						public Object visit(IPersist o)
 						{
-							public Object visit(IPersist o)
+							if (o instanceof IScriptElement && !o.getParent().equals(parent))
 							{
-								if (o instanceof IScriptElement && !o.getParent().equals(parent))
+								JSONObject jsonObject = noParentDuplicates.get(o.getUUID());
+								if (jsonObject != null)
 								{
-									JSONObject jsonObject = noParentDuplicates.get(o.getUUID());
-									if (jsonObject != null)
+									try
 									{
-										try
-										{
-											jsonObject.put(SolutionSerializer.PROP_UUID, UUID.randomUUID().toString());
-											noParentDuplicates.remove(o.getUUID());
-										}
-										catch (JSONException e)
-										{
-											ServoyLog.logError(e);
-										}
+										jsonObject.put(SolutionSerializer.PROP_UUID, UUID.randomUUID().toString());
+										noParentDuplicates.remove(o.getUUID());
+									}
+									catch (JSONException e)
+									{
+										ServoyLog.logError(e);
 									}
 								}
-								else if (o instanceof Solution || o instanceof Form || o instanceof TableNode)
-								{
-									return noParentDuplicates.size() == 0 ? null : IPersistVisitor.CONTINUE_TRAVERSAL;
-								}
-								return noParentDuplicates.size() == 0 ? null : IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
 							}
-						});
-						if (noParentDuplicates.size() == 0) break;
-					}
+							else if (o instanceof Solution || o instanceof Form || o instanceof TableNode)
+							{
+								return noParentDuplicates.size() == 0 ? null : IPersistVisitor.CONTINUE_TRAVERSAL;
+							}
+							return noParentDuplicates.size() == 0 ? null : IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
+						}
+					});
+					if (noParentDuplicates.size() == 0) break;
 				}
 			}
 		}
@@ -1528,8 +1544,10 @@ public class SolutionDeserializer
 				{
 					IPersist persist = allObjects.next();
 					if (persist.getTypeID() == objectTypeId && persist instanceof ISupportName && name.equals(((ISupportName)persist).getName()) &&
-						!persist_json_map.containsKey(persist))
+						!persist_json_map.containsKey(persist) && SolutionSerializer.getFileName(persist, false).equals(file.getPath()))
 					{
+						// object with same name and other uuid found in same file
+						// when found in other file (like different scope.js file), the uuid should not be reused because the found persist is defined in another scope.
 						retval = persist;
 						if (scriptUUIDNotFound)
 						{
