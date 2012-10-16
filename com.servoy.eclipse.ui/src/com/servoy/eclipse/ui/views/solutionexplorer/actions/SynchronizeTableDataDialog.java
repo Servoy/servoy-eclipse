@@ -80,7 +80,7 @@ public class SynchronizeTableDataDialog extends Dialog
 		import2db.setText("-->");
 
 		Button save2ws = new Button(composite, SWT.NONE);
-		save2ws.setToolTipText("Save data from database table in workspace");
+		save2ws.setToolTipText("save data from database table in workspace");
 		save2ws.setText("<--");
 		save2ws.addSelectionListener(new SelectionAdapter()
 		{
