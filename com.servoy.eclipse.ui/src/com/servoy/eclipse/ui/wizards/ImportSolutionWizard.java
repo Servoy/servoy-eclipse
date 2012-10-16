@@ -17,15 +17,7 @@
 package com.servoy.eclipse.ui.wizards;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
-
-import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -65,9 +57,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.util.CryptUtils;
-import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ServoyException;
-import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.IXMLImportEngine;
 import com.servoy.j2db.util.xmlxport.IXMLImportHandlerVersions11AndHigher;
 
@@ -416,7 +406,6 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		/**
 		 * AES Decryption of the specified file and write the output in a temporary file.
 		 * 
-		 * @param password
 		 * @return file
 		 * 
 		 */
@@ -429,36 +418,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			}
 			else return file;
 
-			File tempFile = null;
-			CipherInputStream cis = null;
-			OutputStream out = null;
-			try
-			{
-				InputStream is = new FileInputStream(file);
-				cis = new CipherInputStream(is, CryptUtils.createCipher(password, Cipher.DECRYPT_MODE));
-				tempFile = File.createTempFile("import", ".tmp"); //$NON-NLS-1$ //$NON-NLS-2$
-				tempFile.deleteOnExit();
-				out = new FileOutputStream(tempFile);
-				Utils.streamCopy(cis, out);
-			}
-			catch (Exception e)
-			{
-				Debug.error(e);
-			}
-			finally
-			{
-				try
-				{
-					cis.close();
-					out.flush();
-					out.close();
-				}
-				catch (IOException e)
-				{
-					Debug.error(e);
-				}
-			}
-			return tempFile;
+			return CryptUtils.fileDecryption(file, password);
 		}
 
 		public String getPath()
