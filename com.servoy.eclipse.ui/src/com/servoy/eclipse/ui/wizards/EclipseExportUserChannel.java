@@ -91,7 +91,7 @@ public class EclipseExportUserChannel implements IXMLExportUserChannel
 		{
 			throw new IOException("Checking table meta data failed for table '" + table.getName() + "' in server '" + table.getServerName() +
 				"', current workspace does not have table meta data file.\n" + //
-				"Synchronize the meta data for this table first");
+				"Update the meta data for this table first");
 		}
 		String wscontents = wsa.getUTF8Contents(metadatapath);
 
@@ -112,7 +112,7 @@ public class EclipseExportUserChannel implements IXMLExportUserChannel
 			{
 				throw new IOException("Checking table meta data failed for table '" + table.getName() + "' in server '" + table.getServerName() +
 					"', current workspace contents does not match current database contents.\n" + //
-					"Synchronize the meta data for this table first");
+					"Update the meta data for this table first");
 			}
 		}
 

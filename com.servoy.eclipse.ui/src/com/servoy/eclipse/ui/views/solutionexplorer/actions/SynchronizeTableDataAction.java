@@ -61,7 +61,7 @@ import com.servoy.j2db.util.Debug;
 
 /**
  * 
- * Action to synchronize data for tables that are marked as meta data tables.
+ * Action to update data for tables that are marked as meta data tables.
  * The data can be copied from workspace to database table, or from table to workspace.
  *  
  * @author rgansevles
@@ -80,8 +80,8 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 		// it appears right next to another action with the same icon - it's a bit confusing
 //		setImageDescriptor(Activator.loadImageDescriptorFromBundle("sync_tables.png")); //$NON-NLS-1$
 
-		setToolTipText("Synchronize meta data for table marked as meta data table between database and workspace");
-		setText("Synchronize Meta Data ...");
+		setToolTipText("update meta data for table marked as meta data table between database and workspace");
+		setText("Update Meta Data ...");
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)
@@ -182,7 +182,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 
 			if (dataSources.size() == 0)
 			{
-				UIUtils.showInformation(shell, "Metadata Synchronize", "The server you selected does not have any metadata tables."); //$NON-NLS-1$ //$NON-NLS-2$
+				UIUtils.showInformation(shell, "Metadata update", "The server you selected does not have any metadata tables."); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 
@@ -209,7 +209,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 
 			if (table == null)
 			{
-				UIUtils.reportWarning("Error synchronizing table", "Cannot find selected table for datasource '" + dataSource + "'.");
+				UIUtils.reportWarning("Error updating table", "Cannot find selected table for datasource '" + dataSource + "'.");
 				continue;
 			}
 
@@ -257,7 +257,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 		DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
 		if (dmm == null)
 		{
-			UIUtils.reportWarning("Error synchronizing table(s)", "Cannot find internal data model manager.");
+			UIUtils.reportWarning("Error updating table(s)", "Cannot find internal data model manager.");
 			return;
 		}
 
@@ -268,14 +268,14 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 			IFile dataFile = dmm.getMetaDataFile(table.getDataSource());
 			if (dataFile == null)
 			{
-				UIUtils.reportWarning("Error synchronizing table", "Cannot find data file for datasource '" + table.getDataSource() + "'.");
+				UIUtils.reportWarning("Error updating table", "Cannot find data file for datasource '" + table.getDataSource() + "'.");
 				continue;
 			}
 
 			// import file into table
 			if (!dataFile.exists())
 			{
-				UIUtils.reportWarning("Error synchronizing table", "Data file for datasource '" + table.getDataSource() + "' does not exist.");
+				UIUtils.reportWarning("Error updating table", "Data file for datasource '" + table.getDataSource() + "' does not exist.");
 				continue;
 			}
 
@@ -286,7 +286,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 				IDataSet ds = ApplicationServerSingleton.get().getDataServer().performQuery(ApplicationServerSingleton.get().getClientId(),
 					table.getServerName(), null, query, null, false, 0, 1, IDataServer.META_DATA_QUERY, null);
 				askYesYesToAllNoNoToAllAsker.setMessage("Table " + table.getName() + " in server " + table.getServerName() +
-					" is not empty, data synchronize will delete existing data, continue?");
+					" is not empty, data updating will delete existing data, continue?");
 				if (ds.getRowCount() > 0 && !askYesYesToAllNoNoToAllAsker.userSaidYes())
 				{
 					continue;
@@ -313,11 +313,11 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 			}
 			catch (Exception e)
 			{
-				ServoyLog.logError("Error synchronizing table", e);
-				UIUtils.reportWarning("Error synchronizing table", "Error synchronizing table: " + e.getMessage());
+				ServoyLog.logError("Error updating table", e);
+				UIUtils.reportWarning("Error updating table", "Error updating table: " + e.getMessage());
 			}
 		}
-		if (sb.length() > 0) UIUtils.showInformation(shell, "Table synchronization", sb.toString());
+		if (sb.length() > 0) UIUtils.showInformation(shell, "Table updating", sb.toString());
 	}
 
 	private void generateTableDataFile(List<Table> tables)
@@ -325,7 +325,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 		DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
 		if (dmm == null)
 		{
-			UIUtils.reportWarning("Error synchronizing table(s)", "Cannot find internal data model manager.");
+			UIUtils.reportWarning("Error updating table(s)", "Cannot find internal data model manager.");
 			return;
 		}
 
@@ -356,7 +356,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 				IFile dataFile = dmm.getMetaDataFile(table.getDataSource());
 				if (dataFile == null)
 				{
-					UIUtils.reportWarning("Error synchronizing table", "Cannot find data file for datasource '" + table.getDataSource() + "'.");
+					UIUtils.reportWarning("Error updating table", "Cannot find data file for datasource '" + table.getDataSource() + "'.");
 					continue;
 				}
 				// if file doesn't exist, this creates the file and its parent directories
@@ -367,11 +367,11 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 			}
 			catch (Exception e)
 			{
-				ServoyLog.logError("Error synchronizing table", e);
-				UIUtils.reportWarning("Error synchronizing table", "Error synchronizing table: " + e.getMessage());
+				ServoyLog.logError("Error updating table", e);
+				UIUtils.reportWarning("Error updating table", "Error updating table: " + e.getMessage());
 			}
 		}
-		UIUtils.showInformation(shell, "Table synchronization", sb.toString());
+		UIUtils.showInformation(shell, "Table updating", sb.toString());
 	}
 
 }

@@ -880,7 +880,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 						{
 							x11handler.getUserChannel().info(
 								"Meta data for table '" + table.getName() + "' in server '" + server.getName() +
-									"' was not loaded (table not empty), please synchronize table meta data", ILogLevel.INFO);
+									"' was not loaded (table not empty), please update table meta data", ILogLevel.INFO);
 						}
 					}
 					catch (Exception e)

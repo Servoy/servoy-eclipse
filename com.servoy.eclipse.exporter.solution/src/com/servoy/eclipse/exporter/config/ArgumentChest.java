@@ -423,7 +423,7 @@ public class ArgumentChest implements IXMLExportUserChannel
 		{
 			throw new IOException("Checking table meta data failed for table '" + table.getName() + "' in server '" + table.getServerName() +
 				"', current workspace contents does not match current database contents.\n" + //
-				"Synchronize the meta data for this table first");
+				"update the meta data for this table first");
 		}
 
 		return wscontents;

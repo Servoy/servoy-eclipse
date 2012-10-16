@@ -43,7 +43,7 @@ public class SynchronizeTableDataDialog extends Dialog
 	protected void configureShell(Shell shell)
 	{
 		super.configureShell(shell);
-		shell.setText("Choose synchronization action");
+		shell.setText("Choose update action");
 	}
 
 	@Override
