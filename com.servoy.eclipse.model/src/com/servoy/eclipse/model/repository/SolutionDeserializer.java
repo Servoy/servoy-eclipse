@@ -463,7 +463,7 @@ public class SolutionDeserializer
 						List<JSONObject> childrenJSObjects = childrenJSObjectMapEntry.getValue();
 						if (!readAll)
 						{
-							testDuplicates(jsonFile, scriptParent, childrenJSObjects);
+							testDuplicates(jsFile, scriptParent, childrenJSObjects);
 						}
 						if (childrenJSObjects != null)
 						{
@@ -657,7 +657,7 @@ public class SolutionDeserializer
 					{
 						// search for duplicates for same parent in other files (same uuid in other global scope)
 						IPersist child = parent.getChild(uuidObject);
-						if (child != null && !SolutionSerializer.getFileName(child, false).equals(file.getName()))
+						if (child != null && !SolutionSerializer.isPersistWorkspaceFile(child, false, file))
 						{
 							// Found another child from different file, generate a new uuid for this one.
 							uuidToJson.remove(uuid);
@@ -1544,7 +1544,7 @@ public class SolutionDeserializer
 				{
 					IPersist persist = allObjects.next();
 					if (persist.getTypeID() == objectTypeId && persist instanceof ISupportName && name.equals(((ISupportName)persist).getName()) &&
-						!persist_json_map.containsKey(persist) && SolutionSerializer.getFileName(persist, false).equals(file.getPath()))
+						!persist_json_map.containsKey(persist) && SolutionSerializer.isPersistWorkspaceFile(persist, false, file))
 					{
 						// object with same name and other uuid found in same file
 						// when found in other file (like different scope.js file), the uuid should not be reused because the found persist is defined in another scope.

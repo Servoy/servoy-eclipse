@@ -28,8 +28,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -1078,7 +1081,8 @@ public class SolutionSerializer
 		{
 			name = ((Solution)persist).getName();
 		}
-		return getRelativePath(persist.getParent(), useOldName) + name + '/';
+		String relativePath = getRelativePath(persist.getParent(), useOldName) + name;
+		return relativePath.endsWith("/") ? relativePath : (relativePath + '/');
 	}
 
 	public static Pair<String, String> getFilePath(IPersist persist, boolean useOldName)
@@ -1165,6 +1169,7 @@ public class SolutionSerializer
 		String path = getScriptPath(persist, useOldName);
 		return path == null ? null : new String[] { path };
 	}
+
 
 	/**
 	 * Get the file that contains the parent of the persist saved in file.
@@ -1306,6 +1311,21 @@ public class SolutionSerializer
 			}
 		}
 		return retval;
+	}
+
+	/**
+	 * check if the file is for the persist
+	 * 
+	 */
+	public static boolean isPersistWorkspaceFile(IPersist persist, boolean useOldName, File file)
+	{
+		if (persist == null) return false;
+
+		IFile fileForLocation = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(new Path(file.getPath()));
+		if (fileForLocation == null) return false; // not a workspace file
+
+		Pair<String, String> filePath = getFilePath(persist, useOldName);
+		return fileForLocation.getFullPath().toPortableString().equals(IPath.SEPARATOR + filePath.getLeft() + filePath.getRight());
 	}
 
 	private static String[] getServerNameTableName(TableNode tableNode, boolean useOldName)
