@@ -266,6 +266,12 @@ public class DataModelManager implements IColumnInfoManager
 			{
 				addMissingDBIMarker(t.getServerName(), t.getName(), false);
 			}
+			Iterator<Column> columns = t.getColumns().iterator();
+			while (columns.hasNext())
+			{
+				Column c = columns.next();
+				createNewColumnInfo(c, t.getPKColumnTypeRowIdentCount() == 1);//was missing - create automatic sequences if missing
+			}
 		}
 	}
 
