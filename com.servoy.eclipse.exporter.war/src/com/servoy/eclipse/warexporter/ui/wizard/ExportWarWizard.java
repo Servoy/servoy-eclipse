@@ -64,6 +64,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 
 	private DirectorySelectionPage lafSelectionPage;
 
+	private ServoyPropertiesConfigurationPage servoyPropertiesConfigurationPage;
+
 	public ExportWarWizard()
 	{
 		setWindowTitle("War Export"); //$NON-NLS-1$
@@ -137,7 +139,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 
 		serversSelectionPage = new ServersSelectionPage("serverspage", "Choose the database servernames to export",
 			"Select the database server names that will be used on the application server", exportModel.getSelectedServerNames(), serverConfigurationPages);
-		servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel, serversSelectionPage);
+		servoyPropertiesConfigurationPage = new ServoyPropertiesConfigurationPage("propertiespage", exportModel, serversSelectionPage);
+		servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel, servoyPropertiesConfigurationPage);
 		driverSelectionPage = new DirectorySelectionPage("driverpage", "Choose the jdbc drivers to export",
 			"Select the jdbc drivers that you want to use in the war (if the app server doesn't provide them)",
 			ApplicationServerSingleton.get().getServerManager().getDriverDir(), exportModel.getDrivers(), servoyPropertiesSelectionPage);
@@ -154,6 +157,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		addPage(lafSelectionPage);
 		addPage(driverSelectionPage);
 		addPage(servoyPropertiesSelectionPage);
+		addPage(servoyPropertiesConfigurationPage);
 		addPage(serversSelectionPage);
 
 		String[] serverNames = ApplicationServerSingleton.get().getServerManager().getServerNames(true, true, true, false);
