@@ -84,6 +84,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.j2db.FlattenedSolution;
@@ -3232,18 +3233,12 @@ public class TypeCreator extends TypeCache
 	}
 
 
-	protected static ImageDescriptor getImageDescriptorForFormEncapsulation(int enc)
+	protected static ImageDescriptor getImageDescriptorForFormEncapsulation(int encapsulation)
 	{
-		String imgPath = "/icons/designer_public.gif";
-		switch (enc)
-		{
-			case FormEncapsulation.MODULE_PRIVATE :
-				imgPath = "/icons/designer_protected.gif";
-				break;
-			case FormEncapsulation.PRIVATE :
-				imgPath = "/icons/designer_private.gif";
-				break;
-		}
+		String imgPath = "/icons/designer.gif";
+		if ((encapsulation & FormEncapsulation.MODULE_PRIVATE) == FormEncapsulation.MODULE_PRIVATE) imgPath = "/icons/designer_protected.gif";
+		else if ((encapsulation & FormEncapsulation.PRIVATE) == FormEncapsulation.PRIVATE) imgPath = "/icons/designer_private.gif";
+		else if ((encapsulation & DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) == DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) imgPath = "/icons/designer_public.gif";
 		return ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path(imgPath), null));
 	}
 }

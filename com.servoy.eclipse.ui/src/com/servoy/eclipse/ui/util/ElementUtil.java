@@ -29,6 +29,7 @@ import org.eclipse.swt.graphics.Image;
 
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
@@ -581,10 +582,12 @@ public class ElementUtil
 		String relPath = null;
 		if (f != null)
 		{
+			//designer.gif
 			int encapsulation = f.getEncapsulation();
 			if ((encapsulation & FormEncapsulation.MODULE_PRIVATE) == FormEncapsulation.MODULE_PRIVATE) relPath = "icons/designer_protected.gif"; //$NON-NLS-1$
 			else if ((encapsulation & FormEncapsulation.PRIVATE) == FormEncapsulation.PRIVATE) relPath = "icons/designer_private.gif"; //$NON-NLS-1$
-			else relPath = "icons/designer_public.gif"; //$NON-NLS-1$
+			else if ((encapsulation & DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) == DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) relPath = "icons/designer_public.gif"; //$NON-NLS-1$
+			else relPath = "icons/designer.gif"; //$NON-NLS-1$
 		}
 		return relPath;
 	}
@@ -605,7 +608,9 @@ public class ElementUtil
 				"designer_protected.gif"); //$NON-NLS-1$
 			else if ((encapsulation & FormEncapsulation.PRIVATE) == FormEncapsulation.PRIVATE) image = Activator.getDefault().loadImageFromBundle(
 				"designer_private.gif"); //$NON-NLS-1$
-			else image = Activator.getDefault().loadImageFromBundle("designer_public.gif"); //$NON-NLS-1$
+			else if ((encapsulation & DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) == DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) image = Activator.getDefault().loadImageFromBundle(
+				"designer_public.gif"); //$NON-NLS-1$
+			else image = Activator.getDefault().loadImageFromBundle("designer.gif"); //$NON-NLS-1$
 		}
 		return image;
 	}
