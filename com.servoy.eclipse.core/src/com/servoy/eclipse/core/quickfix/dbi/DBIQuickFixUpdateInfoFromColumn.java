@@ -122,7 +122,7 @@ public class DBIQuickFixUpdateInfoFromColumn extends TableDifferenceQuickFix
 							{
 								// if the types are the same or compatible, we will keep the rest of the database information intact;
 								// otherwise create default column information for this column
-								if (!Column.isColumnInfoCompatible(difference.getTableDefinition().columnType, cid.columnType))
+								if (!Column.isColumnInfoCompatible(difference.getTableDefinition().columnType, cid.columnType, false))
 								{
 									// create defaults
 									Column c = difference.getTable().getColumn(difference.getColumnName());
