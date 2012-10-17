@@ -799,7 +799,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	private void checkDuplicateScopes(IFile scriptFile)
 	{
-		if (scriptFile.getParent() == scriptFile.getProject() && scriptFile.getName().endsWith(SolutionSerializer.JS_FILE_EXTENSION))
+		if (scriptFile.getParent() == scriptFile.getProject() && scriptFile.getName().endsWith(SolutionSerializer.JS_FILE_EXTENSION) &&
+			servoyModel.isSolutionActive(scriptFile.getProject().getName()))
 		{
 			String scopeName = scriptFile.getName().substring(0, scriptFile.getName().length() - SolutionSerializer.JS_FILE_EXTENSION.length());
 			String lowerCaseScopeName = scopeName.toLowerCase();
@@ -4479,14 +4480,17 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	void checkXML(IFile file)
 	{
-		deleteMarkers(file, XML_MARKER_TYPE);
-		XMLErrorHandler reporter = new XMLErrorHandler(file);
-		try
+		if (servoyModel.isSolutionActive(file.getProject().getName()))
 		{
-			getParser().parse(file.getContents(true), reporter);
-		}
-		catch (Exception e)
-		{
+			deleteMarkers(file, XML_MARKER_TYPE);
+			XMLErrorHandler reporter = new XMLErrorHandler(file);
+			try
+			{
+				getParser().parse(file.getContents(true), reporter);
+			}
+			catch (Exception e)
+			{
+			}
 		}
 	}
 
