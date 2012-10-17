@@ -66,6 +66,7 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 		gd.horizontalSpan = 3;
 		usedRMIRegistryPortText.setLayoutData(gd);
 		usedRMIRegistryPortText.setText("1099"); //$NON-NLS-1$
+		exportModel.setUsedRMIRegistryPort("1099"); //$NON-NLS-1$
 		usedRMIRegistryPortText.addListener(SWT.KeyUp, this);
 
 		setControl(composite);
