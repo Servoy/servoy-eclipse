@@ -1079,7 +1079,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		@Override
 		public boolean canFlipToNextPage()
 		{
-			return (projectProblemsType == HAS_NO_MARKERS) && super.canFlipToNextPage();
+			return (projectProblemsType == HAS_NO_MARKERS || projectProblemsType == HAS_WARNING_MARKERS) && super.canFlipToNextPage();
 		}
 	}
 
