@@ -393,7 +393,7 @@ public class Exporter
 			properties.setProperty("servoy.use.client.timezone", "true");
 
 			// TODO ask for all kinds of other stuff like branding?
-			properties.setProperty("servoy.rmiStartPort", exportModel.getUsedRMIRegistryPort());
+			properties.setProperty("servoy.rmiStartPort", exportModel.getStartRMIPort());
 
 			// store the servers
 			SortedSet<String> selectedServerNames = exportModel.getSelectedServerNames();

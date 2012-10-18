@@ -47,7 +47,7 @@ public class ExportWarModel
 	private final TreeMap<String, ServerConfiguration> servers = new TreeMap<String, ServerConfiguration>();
 	private final SortedSet<String> selectedServerNames = new TreeSet<String>();
 	private String servoyPropertiesFileName;
-	private String usedRMIRegistryPort;
+	private String startRMIPort;
 
 	/**
 	 * @param dialogSettings
@@ -284,14 +284,14 @@ public class ExportWarModel
 		return serverConfiguration;
 	}
 
-	public String getUsedRMIRegistryPort()
+	public String getStartRMIPort()
 	{
-		return usedRMIRegistryPort;
+		return startRMIPort;
 	}
 
-	public void setUsedRMIRegistryPort(String port)
+	public void setStartRMIPort(String port)
 	{
-		usedRMIRegistryPort = port;
+		startRMIPort = port;
 	}
 
 }

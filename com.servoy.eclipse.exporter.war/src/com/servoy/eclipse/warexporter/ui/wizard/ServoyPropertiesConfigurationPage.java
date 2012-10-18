@@ -41,7 +41,7 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 {
 	private final ExportWarModel exportModel;
 	private final IWizardPage nextPage;
-	private Text usedRMIRegistryPortText;
+	private Text startRMIPortText;
 
 	public ServoyPropertiesConfigurationPage(String title, ExportWarModel exportModel, IWizardPage nextPage)
 	{
@@ -61,23 +61,23 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 		Label label = new Label(composite, SWT.NONE);
 		label.setText("Port used by RMI Registry "); //$NON-NLS-1$
 
-		usedRMIRegistryPortText = new Text(composite, SWT.BORDER);
+		startRMIPortText = new Text(composite, SWT.BORDER);
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 3;
-		usedRMIRegistryPortText.setLayoutData(gd);
-		usedRMIRegistryPortText.setText("1099"); //$NON-NLS-1$
-		exportModel.setUsedRMIRegistryPort("1099"); //$NON-NLS-1$
-		usedRMIRegistryPortText.addListener(SWT.KeyUp, this);
+		startRMIPortText.setLayoutData(gd);
+		startRMIPortText.setText("1099"); //$NON-NLS-1$
+		exportModel.setStartRMIPort("1099"); //$NON-NLS-1$
+		startRMIPortText.addListener(SWT.KeyUp, this);
 
 		setControl(composite);
 	}
 
 	public void handleEvent(Event event)
 	{
-		if (event.widget == usedRMIRegistryPortText)
+		if (event.widget == startRMIPortText)
 		{
-			String rmiPort = usedRMIRegistryPortText.getText();
-			exportModel.setUsedRMIRegistryPort(rmiPort);
+			String rmiPort = startRMIPortText.getText();
+			exportModel.setStartRMIPort(rmiPort);
 		}
 
 		canFlipToNextPage();
@@ -88,7 +88,7 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 	@Override
 	public boolean canFlipToNextPage()
 	{
-		return (usedRMIRegistryPortText.getText() != null && usedRMIRegistryPortText.getText().length() > 0);
+		return (startRMIPortText.getText() != null && startRMIPortText.getText().length() > 0);
 	}
 
 	@Override
