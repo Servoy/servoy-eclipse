@@ -48,6 +48,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
+import org.eclipse.dltk.javascript.typeinfo.DefaultMetaType;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.ITypeNames;
 import org.eclipse.dltk.javascript.typeinfo.TypeCache;
@@ -634,7 +635,9 @@ public class TypeCreator extends TypeCache
 								@Override
 								public IStatus run(IProgressMonitor monitor)
 								{
+									long time = System.currentTimeMillis();
 									flushCache();
+									System.err.println("total time taken " + (System.currentTimeMillis() - time));
 									return Status.OK_STATUS;
 								}
 							};
@@ -1366,7 +1369,12 @@ public class TypeCreator extends TypeCache
 			clear(bucket);
 		}
 		relationCache.clear();
+		ServoyDynamicMetaType.SHARED_TYPE_SYSTEM.reset();
 	}
+
+//	final Set<String> staticTypes = Collections.synchronizedSet(new TreeSet<String>());
+//	final Set<String> javaTypes = Collections.synchronizedSet(new TreeSet<String>());
+//	final ConcurrentHashMap<String, Set<String>> dynamicTypes = new ConcurrentHashMap<String, Set<String>>();
 
 	/*
 	 * (non-Javadoc)
@@ -1379,9 +1387,69 @@ public class TypeCreator extends TypeCache
 		if (bucket != null && !bucket.equals(""))
 		{
 			buckets.put(bucket, bucket);
+			type.setMetaType(new ServoyDynamicMetaType());
+//			Set<String> set = dynamicTypes.get(bucket);
+//			if (set == null)
+//			{
+//				set = Collections.synchronizedSet(new TreeSet<String>());
+//				Set<String> realValue = dynamicTypes.putIfAbsent(bucket, set);
+//				if (realValue != null) set = realValue;
+//			}
+//			set.add(type.getName());
 		}
+		else if (type.getMetaType() == null || type.getMetaType() == DefaultMetaType.DEFAULT)
+		{
+			type.setMetaType(new ServoyStaticMetaType());
+//			staticTypes.add(type.getName());
+		}
+//		else
+//		{
+//			javaTypes.add(type.getName());
+//		}
 		return super.addType(bucket, type);
 	}
+
+//	private void log()
+//	{
+//		StringBuilder sb = new StringBuilder();
+//		sb.append("\njava types: ");
+//		sb.append(javaTypes.size());
+//		sb.append("\n\n");
+//		for (String type : javaTypes)
+//		{
+//			sb.append(type);
+//			sb.append("\n");
+//		}
+//		sb.append("\nstatic types: ");
+//		sb.append(staticTypes.size());
+//		sb.append("\n\n");
+//		for (String type : staticTypes)
+//		{
+//			sb.append(type);
+//			sb.append("\n");
+//		}
+//		sb.append("dynamic types: ");
+//		sb.append(dynamicTypes.size());
+//		sb.append("\n");
+//		int size = 0;
+//		for (Entry<String, Set<String>> entry : dynamicTypes.entrySet())
+//		{
+//			sb.append("\nbucket: ");
+//			sb.append(entry.getKey());
+//			sb.append(": ");
+//			sb.append(entry.getValue().size());
+//			sb.append("\n");
+//			size += entry.getValue().size();
+//			for (String type : entry.getValue())
+//			{
+//				sb.append(type);
+//				sb.append("\n");
+//			}
+//		}
+//		sb.append("\nTotal Dynamic Size: ");
+//		sb.append(size);
+//		Debug.error(sb.toString());
+//	}
 
 	public Property createProperty(String context, String name, boolean readonly, String typeName, String description, ImageDescriptor image)
 	{
@@ -1793,6 +1861,7 @@ public class TypeCreator extends TypeCache
 				arrayProp.setVisible(false);
 				type.getMembers().add(arrayProp);
 				// quickly add this one to the static types. context.markInvariant(type); 
+				return addType(null, type);
 			}
 			else
 			{
@@ -1844,6 +1913,10 @@ public class TypeCreator extends TypeCache
 				{
 					type.setSuperType(getType(context, "Relations<" + config + '>')); // Relations<solutionName/scopeName>
 				}
+			}
+			else
+			{
+				return addType(null, type);
 			}
 
 			return type;
@@ -2325,7 +2398,8 @@ public class TypeCreator extends TypeCache
 			type.setKind(TypeKind.JAVA);
 //			type.setAttribute(IMAGE_DESCRIPTOR, imageDescriptor);
 			type.setSuperType(getType(context, superTypeName));
-			return type;
+			// these types don't contain solution specific members or properties, they only have 
+			return addType(SCOPE_QBCOLUMNS, type);
 		}
 
 		/**
@@ -2406,34 +2480,45 @@ public class TypeCreator extends TypeCache
 			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 			if (fsAndTable != null && fs != null && fsAndTable.table != null)
 			{
-				try
+				String traitsConfig = fs.getSolution().getName() + ';' + fsAndTable.table.getDataSource();
+				String relationsType = "Relations<" + traitsConfig + '>';
+
+				EList<Type> traits = type.getTraits();
+				traits.add(getType(context, relationsType));
+
+				if (fsAndTable.table.isMarkedAsHiddenInDeveloper())
 				{
-					Iterator<Relation> relations = fs.getRelations(fsAndTable.table, true, false, false, false, false);
-					while (relations.hasNext())
-					{
-						try
-						{
-							Relation relation = relations.next();
-							if (relation.isValid())
-							{
-								Property property = createProperty(relation.getName(), true,
-									getTypeRef(context, QBJoin.class.getSimpleName() + '<' + relation.getForeignDataSource() + '>'),
-									getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()), RELATION_IMAGE,
-									relation);
-								property.setVisible(true);
-								type.getMembers().add(property);
-							}
-						}
-						catch (Exception e)
-						{
-							ServoyLog.logError(e);
-						}
-					}
+					type.setDescription("<b>Based on a table that is marked as HIDDEN in developer</b>");
+					type.setDeprecated(true);
 				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError(e);
-				}
+//				try
+//				{
+//					Iterator<Relation> relations = fs.getRelations(fsAndTable.table, true, false, false, false, false);
+//					while (relations.hasNext())
+//					{
+//						try
+//						{
+//							Relation relation = relations.next();
+//							if (relation.isValid())
+//							{
+//								Property property = createProperty(relation.getName(), true,
+//									getTypeRef(context, QBJoin.class.getSimpleName() + '<' + relation.getForeignDataSource() + '>'),
+//									getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()), RELATION_IMAGE,
+//									relation);
+//								property.setVisible(true);
+//								type.getMembers().add(property);
+//							}
+//						}
+//						catch (Exception e)
+//						{
+//							ServoyLog.logError(e);
+//						}
+//					}
+//				}
+//				catch (RepositoryException e)
+//				{
+//					ServoyLog.logError(e);
+//				}
 			}
 
 			return type;

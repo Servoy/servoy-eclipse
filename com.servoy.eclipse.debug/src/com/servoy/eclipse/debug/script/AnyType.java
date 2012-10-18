@@ -1,6 +1,7 @@
 package com.servoy.eclipse.debug.script;
 
 import org.eclipse.dltk.javascript.typeinfo.IRType;
+import org.eclipse.dltk.javascript.typeinfo.IRTypeTransformer;
 import org.eclipse.dltk.javascript.typeinfo.ITypeSystem;
 import org.eclipse.dltk.javascript.typeinfo.TypeCompatibility;
 
@@ -29,5 +30,15 @@ public class AnyType implements IRType
 	public boolean isJavaScriptObject()
 	{
 		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.dltk.javascript.typeinfo.IRType#transform(org.eclipse.dltk.javascript.typeinfo.IRTypeTransformer)
+	 */
+	public IRType transform(IRTypeTransformer function)
+	{
+		return this;
 	}
 }

@@ -19,6 +19,7 @@ package com.servoy.eclipse.debug.script;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.dltk.core.CompletionProposal;
 import org.eclipse.dltk.javascript.typeinfo.IRType;
 import org.eclipse.dltk.javascript.typeinfo.RTypes;
 import org.eclipse.dltk.javascript.typeinfo.model.Element;
@@ -28,6 +29,9 @@ import org.eclipse.dltk.javascript.typeinfo.model.ParameterKind;
 import org.eclipse.dltk.javascript.typeinfo.model.Property;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.ui.typeinfo.IElementLabelProvider;
+import org.eclipse.dltk.javascript.ui.typeinfo.IElementLabelProviderExtension;
+import org.eclipse.dltk.ui.text.completion.ScriptCompletionProposalCollector;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import com.servoy.j2db.persistence.ScriptVariable;
@@ -40,7 +44,7 @@ import com.servoy.j2db.persistence.ScriptVariable;
  * @since 6.0
  */
 @SuppressWarnings("nls")
-public class ElementLabelProvider implements IElementLabelProvider
+public class ElementLabelProvider implements IElementLabelProviderExtension
 {
 	private final Set<String> propertyNames = new HashSet<String>();
 
@@ -69,10 +73,10 @@ public class ElementLabelProvider implements IElementLabelProvider
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.dltk.javascript.ui.typeinfo.IElementLabelProvider#getLabel(org.eclipse.dltk.javascript.typeinfo.model.Element,
-	 * org.eclipse.dltk.javascript.ui.typeinfo.IElementLabelProvider.Mode)
+	 * @see org.eclipse.dltk.javascript.ui.typeinfo.IElementLabelProviderExtension#getLabel(org.eclipse.dltk.javascript.typeinfo.model.Element,
+	 * org.eclipse.dltk.javascript.ui.typeinfo.IElementLabelProvider.Mode, java.lang.Object)
 	 */
-	public String getLabel(Element element, Mode mode)
+	public String getLabel(Element element, Mode mode, Object context)
 	{
 		if (element instanceof Property)
 		{
@@ -95,24 +99,50 @@ public class ElementLabelProvider implements IElementLabelProvider
 			// method name
 			nameBuffer.append(method.getName());
 
+			int paramCount = Integer.MAX_VALUE;
+			if (context instanceof CompletionProposal)
+			{
+				Integer paramLimit = (Integer)((CompletionProposal)context).getAttribute(ScriptCompletionProposalCollector.ATTR_PARAM_LIMIT);
+				if (paramLimit != null)
+				{
+					paramCount = paramLimit.intValue();
+				}
+			}
 			// parameters
 			nameBuffer.append('(');
-			for (Parameter parameter : method.getParameters())
+			if (paramCount != Integer.MAX_VALUE)
 			{
-				if (nameBuffer.charAt(nameBuffer.length() - 1) != '(') nameBuffer.append(", ");
-				if (parameter.getKind() == ParameterKind.OPTIONAL)
+				EList<Parameter> parameters = method.getParameters();
+				for (int i = 0; i < paramCount; i++)
 				{
-					nameBuffer.append('[');
+					Parameter parameter = parameters.get(i);
+					if (nameBuffer.charAt(nameBuffer.length() - 1) != '(') nameBuffer.append(", ");
+					nameBuffer.append(parameter.getName());
+					if (parameter.getKind() == ParameterKind.VARARGS)
+					{
+						nameBuffer.append("...");
+					}
 				}
-				nameBuffer.append(parameter.getName());
-				if (parameter.getKind() == ParameterKind.VARARGS)
+			}
+			else
+			{
+				for (Parameter parameter : method.getParameters())
 				{
-					nameBuffer.append("...");
-				}
+					if (nameBuffer.charAt(nameBuffer.length() - 1) != '(') nameBuffer.append(", ");
+					if (parameter.getKind() == ParameterKind.OPTIONAL)
+					{
+						nameBuffer.append('[');
+					}
+					nameBuffer.append(parameter.getName());
+					if (parameter.getKind() == ParameterKind.VARARGS)
+					{
+						nameBuffer.append("...");
+					}
 
-				if (parameter.getKind() == ParameterKind.OPTIONAL)
-				{
-					nameBuffer.append(']');
+					if (parameter.getKind() == ParameterKind.OPTIONAL)
+					{
+						nameBuffer.append(']');
+					}
 				}
 			}
 			nameBuffer.append(')');
@@ -135,5 +165,16 @@ public class ElementLabelProvider implements IElementLabelProvider
 			}
 		}
 		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.dltk.javascript.ui.typeinfo.IElementLabelProvider#getLabel(org.eclipse.dltk.javascript.typeinfo.model.Element,
+	 * org.eclipse.dltk.javascript.ui.typeinfo.IElementLabelProvider.Mode)
+	 */
+	public String getLabel(Element element, Mode mode)
+	{
+		return getLabel(element, mode, null);
 	}
 }

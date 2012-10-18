@@ -17,8 +17,11 @@
 
 package com.servoy.eclipse.debug.script;
 
+import org.eclipse.dltk.javascript.typeinfo.DefaultMetaType;
 import org.eclipse.dltk.javascript.typeinfo.IRSimpleType;
 import org.eclipse.dltk.javascript.typeinfo.IRType;
+import org.eclipse.dltk.javascript.typeinfo.IRTypeDeclaration;
+import org.eclipse.dltk.javascript.typeinfo.IRTypeTransformer;
 import org.eclipse.dltk.javascript.typeinfo.ITypeSystem;
 import org.eclipse.dltk.javascript.typeinfo.MetaType;
 import org.eclipse.dltk.javascript.typeinfo.TypeCompatibility;
@@ -31,27 +34,70 @@ class JavaRuntimeType implements IRSimpleType
 {
 	public static final String JAVA_CLASS = "JAVA_CLASS";
 
-	public static final MetaType JAVA_META_TYPE = new MetaType()
+	public static final MetaType JAVA_META_TYPE = new DefaultMetaType()
 	{
+		@Override
 		public IRType toRType(ITypeSystem typeSystem, Type type)
 		{
-			return new JavaRuntimeType(type);
+			return new JavaRuntimeType(typeSystem, type);
 		}
 
 		public String getId()
 		{
 			return "JavaType";
 		}
+
+		@Override
+		public IRType toRType(ITypeSystem typeSystem, IRTypeDeclaration declaration)
+		{
+			return new JavaRuntimeType(typeSystem, declaration);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.dltk.javascript.typeinfo.DefaultMetaType#getPreferredTypeSystem(org.eclipse.dltk.javascript.typeinfo.model.Type)
+		 */
+		@Override
+		public ITypeSystem getPreferredTypeSystem(Type type)
+		{
+			// TODO Auto-generated method stub
+			return super.getPreferredTypeSystem(type);
+		}
 	};
 
 	private final Type type;
 
+	private final ITypeSystem typeSystem;
+
+	private final IRTypeDeclaration typeDeclaration;
+
 	/**
+	 * @param typeSystem 
 	 * @param type
 	 */
-	public JavaRuntimeType(Type type)
+	public JavaRuntimeType(ITypeSystem typeSystem, Type type)
 	{
+		this.typeSystem = typeSystem;
 		this.type = type;
+		this.typeDeclaration = convert(type);
+	}
+
+	/**
+	 * @param typeSystem2
+	 * @param declaration
+	 */
+	public JavaRuntimeType(ITypeSystem typeSystem, IRTypeDeclaration declaration)
+	{
+		this.typeSystem = typeSystem;
+		this.type = declaration.getSource();
+		this.typeDeclaration = declaration;
+
+	}
+
+	protected final IRTypeDeclaration convert(Type type)
+	{
+		return typeSystem != null ? typeSystem.convert(type) : null;
 	}
 
 	/*
@@ -152,7 +198,27 @@ class JavaRuntimeType implements IRSimpleType
 	 */
 	public ITypeSystem activeTypeSystem()
 	{
-		return null;
+		return typeSystem;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.dltk.javascript.typeinfo.IRType#transform(org.eclipse.dltk.javascript.typeinfo.IRTypeTransformer)
+	 */
+	public IRType transform(IRTypeTransformer function)
+	{
+		return this;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.dltk.javascript.typeinfo.IRSimpleType#getDeclaration()
+	 */
+	public IRTypeDeclaration getDeclaration()
+	{
+		return typeDeclaration;
 	}
 
 }
