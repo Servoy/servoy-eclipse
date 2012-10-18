@@ -17,6 +17,7 @@
 package com.servoy.eclipse.core.quickfix;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.IMarker;
@@ -27,6 +28,7 @@ import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -58,6 +60,7 @@ import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -102,10 +105,9 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 						newResourcesProject = dialog.getResourceProjectData().getExistingResourceProject().getProject();
 					}
 					// ok now associate the selected(create if necessary) resources project with the solution resources project
-					WorkspaceJob job;
 					// create new resource project if necessary and reference it from selected solution
-					job = new ResourcesProjectSetupJob("Setting up resources project for solution '" + servoyProject.getProject().getName() + "'",
-						newResourcesProject, null, servoyProject, true);
+					WorkspaceJob job = new ResourcesProjectSetupJob("Setting up resources project for solution '" + servoyProject.getProject().getName() + "'",
+						newResourcesProject, null, servoyProject.getProject(), true);
 					job.setRule(servoyProject.getProject().getWorkspace().getRoot());
 					job.setUser(true);
 					job.schedule();
@@ -242,13 +244,15 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 	 */
 	public static class ResourcesProjectSetupJob extends WorkspaceJob
 	{
+		public final static String CLOSED_DELETED_RESOURCES_PROJECT_KEY = "c_D_R"; //$NON-NLS-1$
+		public final static String CLOSED_DELETED_RESOURCES_PROJECT_DELIM = ">"; //$NON-NLS-1$ some illegal char for project names
 
 		private final IProject newResourcesProject;
-		private final ServoyProject solutionProject;
+		private final IProject solutionProject;
 		private final boolean checkForExistingResourcesProject;
 		private final IProject projectToRemoveFromReferences;
 
-		public ResourcesProjectSetupJob(String name, IProject newResourcesProject, IProject projectToRemoveFromReferences, ServoyProject solutionProject,
+		public ResourcesProjectSetupJob(String name, IProject newResourcesProject, IProject projectToRemoveFromReferences, IProject solutionProject,
 			boolean checkForExistingResourcesProject)
 		{
 			super(name);
@@ -263,25 +267,34 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 		{
 			monitor.beginTask(getName(), 2);
 			// create Resource project if needed
-			monitor.setTaskName("Creating new resources project");
-			createResourcesProject(newResourcesProject);
+			monitor.setTaskName("Creating new resources project if needed"); //$NON-NLS-1$
+			createResourcesProjectIfNeeded(newResourcesProject);
 			monitor.worked(1);
 
 			// link active solution project to the resource project; store project description
-			monitor.setTaskName("Linking active solution project to the resource project");
-			IProjectDescription description = solutionProject.getProject().getDescription();
+			monitor.setTaskName("Linking solution project to the resource project"); //$NON-NLS-1$
+			IProjectDescription description = solutionProject.getDescription();
 			IProject[] oldReferences = description.getReferencedProjects();
-			if (checkForExistingResourcesProject)
+
+			QualifiedName qn = new QualifiedName(Activator.PLUGIN_ID, ResourcesProjectSetupJob.CLOSED_DELETED_RESOURCES_PROJECT_KEY);
+			String closedOrDeletedResourceReferences = solutionProject.getPersistentProperty(qn);
+			solutionProject.setPersistentProperty(qn, null);
+
+			if (checkForExistingResourcesProject || closedOrDeletedResourceReferences != null)
 			{
-				List<IProject> old = new ArrayList<IProject>();
+				List<IProject> oldToKeep = new ArrayList<IProject>();
+
+				List<String> closedOrDeletedRP = closedOrDeletedResourceReferences != null
+					? Arrays.asList(closedOrDeletedResourceReferences.split(ResourcesProjectSetupJob.CLOSED_DELETED_RESOURCES_PROJECT_DELIM)) : null;
 				for (IProject p : oldReferences)
 				{
-					if (!(p.exists() && p.isOpen() && p.hasNature(ServoyResourcesProject.NATURE_ID)) && (p != projectToRemoveFromReferences))
+					if (!(p.exists() && p.isOpen() && p.hasNature(ServoyResourcesProject.NATURE_ID)) && (p != projectToRemoveFromReferences) &&
+						(closedOrDeletedRP == null || !closedOrDeletedRP.contains(p.getName())))
 					{
-						old.add(p);
+						oldToKeep.add(p);
 					}
 				}
-				oldReferences = old.toArray(new IProject[old.size()]);
+				oldReferences = oldToKeep.toArray(new IProject[oldToKeep.size()]);
 			}
 			ArrayList<IProject> newReferences = new ArrayList<IProject>(oldReferences.length + 1);
 			newReferences.add(newResourcesProject);
@@ -293,14 +306,14 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 				}
 			}
 			description.setReferencedProjects(newReferences.toArray(new IProject[newReferences.size()]));
-			solutionProject.getProject().setDescription(description, null);
+			solutionProject.setDescription(description, null);
 			monitor.worked(1);
 
 			monitor.done();
 			return Status.OK_STATUS;
 		}
 
-		public static void createResourcesProject(IProject newResourcesProject) throws CoreException
+		public static void createResourcesProjectIfNeeded(IProject newResourcesProject) throws CoreException
 		{
 			if (!newResourcesProject.exists())
 			{

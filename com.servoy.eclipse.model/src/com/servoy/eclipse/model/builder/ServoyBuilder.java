@@ -3765,7 +3765,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				for (IProject referenced : project.getReferencedProjects())
 				{
-					if (referenced.hasNature(ServoyResourcesProject.NATURE_ID))
+					if (referenced.exists() && referenced.isOpen() && referenced.hasNature(ServoyResourcesProject.NATURE_ID))
 					{
 						deleteMarkers(referenced, COLUMN_MARKER_TYPE);
 					}

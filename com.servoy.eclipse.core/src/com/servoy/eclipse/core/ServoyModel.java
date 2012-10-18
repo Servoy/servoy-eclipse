@@ -191,6 +191,11 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 
 	private final IServerConfigListener serverConfigSyncer;
 
+	private IValidateName nameValidator;
+
+	private IResourceChangeListener postChangeListener;
+
+	private IResourceChangeListener preChangeListener;
 
 	private final Boolean initRepAsTeamProvider;
 
@@ -334,6 +339,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 				}
 				else if (updateInfo == IActiveProjectListener.RESOURCES_UPDATED_ON_ACTIVE_PROJECT)
 				{
+					updateWorkingSet();
 					try
 					{
 						EclipseMessages.writeProjectI18NFiles(activeProject, false, false);
@@ -1607,7 +1613,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		return ResourcesPlugin.getWorkspace();
 	}
 
-	private void projectChanged(IResourceChangeEvent event)
+	private void resourcesPostChanged(IResourceChangeEvent event)
 	{
 		if (getDeveloperRepository() == null)
 		{
@@ -1920,7 +1926,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 							WorkspaceJob job;
 							// create new resource project if necessary and reference it from selected solution
 							job = new ResourcesProjectSetupJob("Updating resources project for solution '" + sp.getProject().getName() +
-								"' due to resources project rename.", project, p, sp, true);
+								"' due to resources project rename.", project, p, sp.getProject(), true);
 							job.setRule(sp.getProject().getWorkspace().getRoot());
 							job.setSystem(true);
 							job.schedule();
@@ -2635,8 +2641,6 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		return super.getFlattenedSolution();
 	}
 
-	private IValidateName nameValidator;
-
 	public IValidateName getNameValidator()
 	{
 		if (nameValidator == null)
@@ -2662,13 +2666,17 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		// first auto select active project
 		autoSelectActiveProjectIfNull(false);
 		// then start listen to changes. Else a deadlock can happen
-		getWorkspace().addResourceChangeListener(new IResourceChangeListener()
+		postChangeListener = new IResourceChangeListener()
 		{
 			public void resourceChanged(final IResourceChangeEvent event)
 			{
-				projectChanged(event);
+				resourcesPostChanged(event);
 			}
-		}, IResourceChangeEvent.POST_CHANGE);
+		};
+		preChangeListener = new ModelPreChangeListener(this);
+		getWorkspace().addResourceChangeListener(postChangeListener, IResourceChangeEvent.POST_CHANGE);
+		getWorkspace().addResourceChangeListener(preChangeListener, IResourceChangeEvent.PRE_CLOSE);
+		getWorkspace().addResourceChangeListener(preChangeListener, IResourceChangeEvent.PRE_DELETE);
 
 		((EclipseRepository)getDeveloperRepository()).addWorkspaceSaveListener(this);
 	}
@@ -2699,6 +2707,8 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		// TODO add more cleanup to this method
 		removeActiveProjectListener(backgroundTableLoader);
 		getServerManager().removeServerConfigListener(serverConfigSyncer);
+		getWorkspace().removeResourceChangeListener(preChangeListener);
+		getWorkspace().removeResourceChangeListener(postChangeListener);
 	}
 
 	public void testBuildPathsAndBuild(final ServoyProject project, final boolean buildProject)

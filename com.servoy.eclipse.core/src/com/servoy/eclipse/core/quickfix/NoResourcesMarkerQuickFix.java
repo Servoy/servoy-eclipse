@@ -32,7 +32,7 @@ public class NoResourcesMarkerQuickFix extends ChooseResourcesProjectQuickFix
 	{
 		super(
 			"Choose one of the workspace's resources projects.",
-			"does not reference any Servoy resources projects.This in incorrect.\n\nPlease choose one of the resources projects from the workspace. A reference will be created to the selected project.");
+			"does not reference any Servoy resources projects. This in incorrect.\n\nPlease choose one of the resources projects from the workspace. A reference will be created to the selected project.");
 	}
 
 	@Override

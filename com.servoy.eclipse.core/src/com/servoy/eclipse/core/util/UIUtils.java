@@ -901,8 +901,8 @@ public class UIUtils
 			// ok now associate the selected(create if necessary) resources project with the solution resources project
 			WorkspaceJob job;
 			// create new resource project if necessary and reference it from selected solution
-			job = new ResourcesProjectSetupJob("Setting up resources project for solution '" + sp.getProject().getName() + "'", newResourcesProject, null, sp,
-				true);
+			job = new ResourcesProjectSetupJob("Setting up resources project for solution '" + sp.getProject().getName() + "'", newResourcesProject, null,
+				sp.getProject(), true);
 			job.setRule(ServoyModel.getWorkspace().getRoot());
 			job.setUser(true);
 			job.schedule();

@@ -102,7 +102,7 @@ public class StylesInstall implements InstallItem
 										try
 										{
 											// if it's a new resources project, create it
-											if (!resourcesProject.exists()) ResourcesProjectSetupJob.createResourcesProject(resourcesProject);
+											if (!resourcesProject.exists()) ResourcesProjectSetupJob.createResourcesProjectIfNeeded(resourcesProject);
 
 											// create a style object without caching it or adding it to the rep., because it might be for another resources project
 											// not for the active one

@@ -193,7 +193,8 @@ public class NewStyleWizard extends Wizard implements INewWizard
 					newResourcesProject = page1.getResourceProjectData().getExistingResourceProject().getProject();
 				}
 				// create new resource project if necessary and reference it from active project
-				job = new ResourcesProjectSetupJob("Setting up resources project for active solution", newResourcesProject, null, activeProject, false);
+				job = new ResourcesProjectSetupJob("Setting up resources project for active solution", newResourcesProject, null, activeProject.getProject(),
+					false);
 				job.setRule(SerialRule.INSTANCE);
 				job.setUser(true);
 				job.schedule();

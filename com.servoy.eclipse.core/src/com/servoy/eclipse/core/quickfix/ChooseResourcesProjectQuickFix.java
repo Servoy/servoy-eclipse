@@ -22,6 +22,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.IInputValidator;
@@ -31,6 +32,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IMarkerResolution;
 
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -41,6 +43,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
  * 
  * @author acostescu
  */
+// TODO I think this whole class is obsolete; it could be removed as ChangeResourcesProjectQuickFix should provide (or could be made to provide) the same functionality
 public abstract class ChooseResourcesProjectQuickFix implements IMarkerResolution
 {
 
@@ -74,7 +77,7 @@ public abstract class ChooseResourcesProjectQuickFix implements IMarkerResolutio
 			final ArrayList<ServoyResourcesProject> resourcesProjects = new ArrayList<ServoyResourcesProject>();
 			for (IProject p : projectList)
 			{
-				if (p.hasNature(ServoyResourcesProject.NATURE_ID))
+				if (p.exists() && p.isOpen() && p.hasNature(ServoyResourcesProject.NATURE_ID))
 				{
 					resourcesProjects.add((ServoyResourcesProject)p.getNature(ServoyResourcesProject.NATURE_ID));
 				}
@@ -181,28 +184,13 @@ public abstract class ChooseResourcesProjectQuickFix implements IMarkerResolutio
 
 	private void setReferencedResourcesProject(IProject servoyProject, IProject servoyResourcesProject)
 	{
-		try
-		{
-			IProjectDescription description = servoyProject.getDescription();
-			IProject[] oldProjectReferences = description.getReferencedProjects();
-			ArrayList<IProject> newProjectReferences = new ArrayList<IProject>();
-
-			for (IProject p : oldProjectReferences)
-			{
-				if (!(p.exists() && p.isOpen() && p.hasNature(ServoyResourcesProject.NATURE_ID)))
-				{
-					newProjectReferences.add(p);
-				}
-			}
-			newProjectReferences.add(servoyResourcesProject);
-
-			description.setReferencedProjects(newProjectReferences.toArray(new IProject[newProjectReferences.size()]));
-			servoyProject.setDescription(description, null);
-		}
-		catch (CoreException e)
-		{
-			ServoyLog.logError(e);
-		}
+		// ok now associate the selected(create if necessary) resources project with the solution resources project
+		// create new resource project if necessary and reference it from selected solution
+		WorkspaceJob job = new ResourcesProjectSetupJob("Setting up resources project for solution '" + servoyProject.getName() + "'", servoyResourcesProject, //$NON-NLS-1$ //$NON-NLS-2$
+			null, servoyProject, true);
+		job.setRule(servoyProject.getWorkspace().getRoot());
+		job.setUser(true);
+		job.schedule();
 	}
 
 	/**
