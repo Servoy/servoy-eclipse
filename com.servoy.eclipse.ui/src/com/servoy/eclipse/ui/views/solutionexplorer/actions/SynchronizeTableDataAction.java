@@ -23,11 +23,17 @@ import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
@@ -35,27 +41,21 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
-import com.servoy.eclipse.core.util.UIUtils.YesYesToAllNoNoToAllAsker;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
-import com.servoy.j2db.IDebugJ2DBClient;
-import com.servoy.j2db.IDebugWebClient;
-import com.servoy.j2db.dataprocessing.FoundSetManager;
-import com.servoy.j2db.dataprocessing.IDataServer;
-import com.servoy.j2db.dataprocessing.IDataSet;
+import com.servoy.eclipse.ui.wizards.UpdateMetaDataWziard;
 import com.servoy.j2db.dataprocessing.MetaDataUtils;
 import com.servoy.j2db.dataprocessing.MetaDataUtils.TooManyRowsException;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
-import com.servoy.j2db.query.QuerySelect;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 
@@ -185,12 +185,13 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 				UIUtils.showInformation(shell, "Metadata update", "The server you selected does not have any metadata tables."); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
-
+		MultiStatus warnings = new MultiStatus(Activator.PLUGIN_ID, 0, "For more information please click 'Details'.", null);
 		List<Table> tables = new ArrayList<Table>();
 		for (String dataSource : dataSources)
 		{
 			String[] stn = DataSourceUtils.getDBServernameTablename(dataSource);
 			Table table = null;
+
 			if (stn != null)
 			{
 				IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(stn[0], true, true);
@@ -209,17 +210,20 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 
 			if (table == null)
 			{
-				UIUtils.reportWarning("Error updating table", "Cannot find selected table for datasource '" + dataSource + "'.");
+				warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Error updating table  " + "Cannot find selected table for datasource '" +
+					dataSource + "'."));
 				continue;
 			}
 
+
 			if (!MetaDataUtils.canBeMarkedAsMetaData(table))
 			{
-				UIUtils.showInformation(shell, "Table not marked as metadata table", "Table '" + table.getName() +
+				warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Table not marked as metadata table " + "Table '" + table.getName() +
 					"' can't be a metadata table because it must have a UUID primary key, a " + MetaDataUtils.METADATA_MODIFICATION_COLUMN + " and a " +
-					MetaDataUtils.METADATA_DELETION_COLUMN + " date column.");
+					MetaDataUtils.METADATA_DELETION_COLUMN + " date column."));
 				continue;
 			}
+			//the folowing "if" is very rare in practice because when you define : 2 columns of type date with the name modification_date and deletion_date and id of type UUID you usually think about metadata tables 
 			if (!table.isMarkedAsMetaData())
 			{
 				if (!UIUtils.askQuestion(shell, "Table not marked as metadata table", "Table " + table.getName() + " in server " + table.getServerName() +
@@ -237,6 +241,19 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 			}
 			tables.add(table);
 		}
+		// show warning multi Status
+		if (warnings.getChildren().length > 0)
+		{
+			final MultiStatus fw = warnings;
+			UIUtils.runInUI(new Runnable()
+			{
+				public void run()
+				{
+					ErrorDialog.openError(shell, null, null, fw);
+				}
+			}, false);
+		}
+
 		if (tables.size() > 0)
 		{
 			switch (new SynchronizeTableDataDialog(shell).open())
@@ -260,64 +277,8 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 			UIUtils.reportWarning("Error updating table(s)", "Cannot find internal data model manager.");
 			return;
 		}
-
-		StringBuilder sb = new StringBuilder();
-		YesYesToAllNoNoToAllAsker askYesYesToAllNoNoToAllAsker = new YesYesToAllNoNoToAllAsker(shell, "Table is not empty");
-		for (Table table : tables)
-		{
-			IFile dataFile = dmm.getMetaDataFile(table.getDataSource());
-			if (dataFile == null)
-			{
-				UIUtils.reportWarning("Error updating table", "Cannot find data file for datasource '" + table.getDataSource() + "'.");
-				continue;
-			}
-
-			// import file into table
-			if (!dataFile.exists())
-			{
-				UIUtils.reportWarning("Error updating table", "Data file for datasource '" + table.getDataSource() + "' does not exist.");
-				continue;
-			}
-
-			try
-			{
-				// check for existing data
-				QuerySelect query = MetaDataUtils.createTableMetadataQuery(table, null);
-				IDataSet ds = ApplicationServerSingleton.get().getDataServer().performQuery(ApplicationServerSingleton.get().getClientId(),
-					table.getServerName(), null, query, null, false, 0, 1, IDataServer.META_DATA_QUERY, null);
-				askYesYesToAllNoNoToAllAsker.setMessage("Table " + table.getName() + " in server " + table.getServerName() +
-					" is not empty, data updating will delete existing data, continue?");
-				if (ds.getRowCount() > 0 && !askYesYesToAllNoNoToAllAsker.userSaidYes())
-				{
-					continue;
-				}
-
-				// read the json
-				String contents = new WorkspaceFileAccess(ServoyModel.getWorkspace()).getUTF8Contents(dataFile.getFullPath().toString());
-
-				int ninserted = MetaDataUtils.loadMetadataInTable(table, contents);
-
-				// flush developer clients
-				IDebugJ2DBClient debugJ2DBClient = com.servoy.eclipse.core.Activator.getDefault().getDebugJ2DBClient();
-				if (debugJ2DBClient != null)
-				{
-					((FoundSetManager)debugJ2DBClient.getFoundSetManager()).flushCachedDatabaseData(table.getDataSource());
-				}
-				IDebugWebClient debugWebClient = com.servoy.eclipse.core.Activator.getDefault().getDebugWebClient();
-				if (debugWebClient != null)
-				{
-					((FoundSetManager)debugWebClient.getFoundSetManager()).flushCachedDatabaseData(table.getDataSource());
-				}
-				sb.append("Successfully saved " + ninserted + " records from workspace in table " + table.getName() + " in server " + table.getServerName());
-				sb.append('\n');
-			}
-			catch (Exception e)
-			{
-				ServoyLog.logError("Error updating table", e);
-				UIUtils.reportWarning("Error updating table", "Error updating table: " + e.getMessage());
-			}
-		}
-		if (sb.length() > 0) UIUtils.showInformation(shell, "Table updating", sb.toString());
+		WizardDialog dialog = new WizardDialog(shell, new UpdateMetaDataWziard(tables, shell));
+		dialog.open();
 	}
 
 	private void generateTableDataFile(List<Table> tables)
@@ -330,6 +291,8 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 		}
 
 		StringBuilder sb = new StringBuilder();
+		MultiStatus warnings = new MultiStatus(Activator.PLUGIN_ID, 0, "For more information please click 'Details'.", null);
+
 		for (Table table : tables)
 		{
 			try
@@ -356,7 +319,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 				IFile dataFile = dmm.getMetaDataFile(table.getDataSource());
 				if (dataFile == null)
 				{
-					UIUtils.reportWarning("Error updating table", "Cannot find data file for datasource '" + table.getDataSource() + "'.");
+					warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Cannot find data file for datasource '" + table.getDataSource() + "'."));
 					continue;
 				}
 				// if file doesn't exist, this creates the file and its parent directories
@@ -368,10 +331,36 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 			catch (Exception e)
 			{
 				ServoyLog.logError("Error updating table", e);
-				UIUtils.reportWarning("Error updating table", "Error updating table: " + e.getMessage());
+				warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Error updating table", e));
 			}
 		}
-		UIUtils.showInformation(shell, "Table updating", sb.toString());
+
+		/*
+		 * handle the updating result
+		 */
+		// show warning status messages in eclipse Platform UI way 
+		if (warnings.getChildren().length > 0)
+		{
+			final MultiStatus fw = warnings;
+			UIUtils.runInUI(new Runnable()
+			{
+				public void run()
+				{
+					ErrorDialog.openError(shell, null, null, fw);
+				}
+			}, false);
+		}
+
+		if (sb.length() > 1)
+		{
+			UIUtils.showScrollableDialog(shell, IMessageProvider.INFORMATION, "Workspace Update status", "The folowing workspace table data were updated:",
+				sb.toString());
+		}
+		else
+		{
+			UIUtils.showInformation(shell, "No tables were updated", "No tables in the workspace were updated.");
+		}
+
 	}
 
 }

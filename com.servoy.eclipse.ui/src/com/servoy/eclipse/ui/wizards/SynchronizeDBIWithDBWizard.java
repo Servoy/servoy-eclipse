@@ -1087,7 +1087,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			}
 		}
 
-		private static class RadioEditingSupport<T1, T2> extends EditingSupport
+		public static class RadioEditingSupport<T1, T2> extends EditingSupport
 		{
 
 			private final int value;
@@ -1129,7 +1129,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			}
 		}
 
-		private static class PairTreeContentProvider<T1, T2> implements ITreeContentProvider
+		public static class PairTreeContentProvider<T1, T2> implements ITreeContentProvider
 		{
 			private List<Pair<T1, T2>> list;
 			private final Hashtable<Object, Integer> choices = new Hashtable<Object, Integer>();

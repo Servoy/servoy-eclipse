@@ -42,6 +42,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -70,6 +71,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
@@ -477,6 +479,98 @@ public class UIUtils
 			}
 			return yes;
 		}
+	}
+
+
+	public static class ScrollableDialog extends TitleAreaDialog
+	{
+		private final String title;
+		private final String text;
+		private final String scrollableText;
+		//ex IMessageProvider.ERROR
+		private final int messageIcon;
+
+		public ScrollableDialog(Shell parentShell, int messageIcon, String title, String text, String scrollableText)
+		{
+			super(parentShell);
+			this.messageIcon = messageIcon;
+			this.title = title;
+			this.text = text;
+			this.scrollableText = scrollableText;
+		}
+
+		@Override
+		protected Control createDialogArea(Composite parent)
+		{
+			Composite composite = (Composite)super.createDialogArea(parent); // Let the dialog create the parent composite
+
+			GridData gridData = new GridData();
+			gridData.grabExcessHorizontalSpace = true;
+			gridData.horizontalAlignment = GridData.FILL;
+			gridData.grabExcessVerticalSpace = true; // Layout vertically, too! 
+			gridData.verticalAlignment = GridData.FILL;
+
+			Text scrollable = new Text(composite, SWT.BORDER | SWT.V_SCROLL | SWT.READ_ONLY);
+			scrollable.setLayoutData(gridData);
+			scrollable.setText(scrollableText);
+
+			return composite;
+		}
+
+		@Override
+		public void create()
+		{
+			super.create();
+
+			// This is not necessary; the dialog will become bigger as the text grows but at the same time,
+			// the user will be able to see all (or at least more) of the error message at once
+			//getShell ().setSize (300, 300);
+			setTitle(title);
+			setMessage(text, messageIcon);
+
+		}
+
+		@Override
+		protected void createButtonsForButtonBar(Composite parent)
+		{
+			Button okButton = createButton(parent, OK, "OK", true);
+			okButton.addSelectionListener(new SelectionAdapter()
+			{
+
+				@Override
+				public void widgetSelected(SelectionEvent e)
+				{
+					close();
+				}
+			});
+		}
+
+		@Override
+		protected boolean isResizable()
+		{
+			return true; // Allow the user to change the dialog size!
+		}
+	}
+
+	/**
+	 * grows automatically until screen height - taskbar , if the shell size is not set
+	 * @param shell
+	 * @param messageIcon the icon to display in the info description,  ex IMessageProvider.ERORR
+	 * @param title
+	 * @param description
+	 * @param text
+	 */
+	public static void showScrollableDialog(final Shell shell, final int messageIcon, final String title, final String description, final String text)
+	{
+		runInUI(new Runnable()
+		{
+			public void run()
+			{
+				ScrollableDialog dialog = new ScrollableDialog(shell, messageIcon, title, description, text);
+				//shell.setSize(400, 500);
+				dialog.open();
+			}
+		}, true);
 	}
 
 	/**
