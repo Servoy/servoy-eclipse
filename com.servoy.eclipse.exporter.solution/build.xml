@@ -7,7 +7,7 @@
 	<property name="basearch" value="${arch}"/>
 	<property name="basenl" value="${nl}"/>
 	<property name="bundleId" value="com.servoy.eclipse.exporter.solution"/>
-	<property name="bundleVersion" value="6.1.2.1421"/>
+	<property name="bundleVersion" value="7.0.0.2000"/>
 	<property name="p2.publishonerror" value="false"/>
 
 	<!-- Compiler settings. -->
@@ -47,7 +47,7 @@
 			<isset property="buildTempFolder"/>
 		</condition>
 		<property name="pluginTemp" value="${basedir}"/>
-		<condition property="build.result.folder" value="${pluginTemp}/com.servoy.eclipse.exporter.solution_6.1.2.1421"		>
+		<condition property="build.result.folder" value="${pluginTemp}/com.servoy.eclipse.exporter.solution_7.0.0.2000"		>
 			<isset property="buildTempFolder"/>
 		</condition>
 		<property name="build.result.folder" value="${basedir}"/>
@@ -77,7 +77,7 @@
 		<antcall target="gather.bin.parts">
 			<param name="destination.temp.folder" value="${temp.folder}/"/>
 		</antcall>
-		<jar destfile="${plugin.destination}/com.servoy.eclipse.exporter.solution_6.1.2.1421.jar" basedir="${temp.folder}/com.servoy.eclipse.exporter.solution_6.1.2.1421" filesetmanifest="merge"/>
+		<jar destfile="${plugin.destination}/com.servoy.eclipse.exporter.solution_7.0.0.2000.jar" basedir="${temp.folder}/com.servoy.eclipse.exporter.solution_7.0.0.2000" filesetmanifest="merge"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
@@ -96,7 +96,7 @@
 		<mkdir dir="${build.result.folder}/@dot"/>
 		<path id="@dot.classpath">
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.resources_3.7.101.v20120125-1505.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.resources.win32.x86_3.5.100.v20110423-0524.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.resources.win32.x86_3.5.100.v20110423-0524.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ant.core_3.2.302.v20120110-1739.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.variables_3.2.500.v20110928-1503.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.runtime_3.7.0.v20110110.jar"/>
@@ -116,94 +116,94 @@
 			<pathelement path="../eclipse_target/compile_target/install/plugins/javax.servlet_2.5.0.v201103041518.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.expressions_3.4.300.v20110228.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.filesystem_1.3.100.v20110423-0524.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.filesystem.win32.x86_1.1.300.v20110423-0524.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.aix.ppc_1.1.0.v20110423-0524.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.hpux.ia64_32_1.0.100.v20110423-0524.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.linux.x86_1.4.0.v20110423-0524.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.linux.x86_64_1.2.0.v20110423-0524.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.macosx_1.3.0.v20110423-0524.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.solaris.sparc_1.2.0.v20110423-0524.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.win32.x86_64_1.1.300.v20110423-0524.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.linux.x86_64_1.2.0.v20110423-0524.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.win32.x86_1.1.300.v20110423-0524.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.solaris.sparc_1.2.0.v20110423-0524.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.macosx_1.3.0.v20110423-0524.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.linux.x86_1.4.0.v20110423-0524.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.hpux.ia64_32_1.0.100.v20110423-0524.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.aix.ppc_1.1.0.v20110423-0524.jar"/>
 			<pathelement path="../servoy_shared/bin/"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/bin/"/>
 			<pathelement path="${build.result.folder}/../servoy_shared/@dot"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/@dot"/>
 			<pathelement path="../servoy_shared/bin"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/bin"/>
 			<pathelement path="../servoy_shared/lib/annotations-1.0.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/annotations-1.0.jar"/>
 			<pathelement path="../servoy_shared/lib/BrowserLauncher2.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/BrowserLauncher2.jar"/>
 			<pathelement path="../servoy_shared/lib/commons-codec.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/commons-codec.jar"/>
 			<pathelement path="../servoy_shared/lib/commons-collections.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/commons-collections.jar"/>
 			<pathelement path="../servoy_shared/lib/commons-dbcp.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/commons-dbcp.jar"/>
 			<pathelement path="../servoy_shared/lib/commons-io.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/commons-io.jar"/>
 			<pathelement path="../servoy_shared/lib/commons-logging.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/commons-logging.jar"/>
 			<pathelement path="../servoy_shared/lib/dom4j.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/dom4j.jar"/>
 			<pathelement path="../servoy_shared/lib/jabsorb.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/jabsorb.jar"/>
 			<pathelement path="../servoy_shared/lib/joda-time.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/joda-time.jar"/>
 			<pathelement path="../servoy_shared/lib/log4j.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/log4j.jar"/>
 			<pathelement path="../servoy_shared/lib/servlet-api.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/servlet-api.jar"/>
 			<pathelement path="../servoy_shared/lib/slf4j-api.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/slf4j-api.jar"/>
 			<pathelement path="../servoy_shared/lib/slf4j-log4j.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/slf4j-log4j.jar"/>
 			<pathelement path="../servoy_shared/lib/wicket-calendar.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/wicket-calendar.jar"/>
 			<pathelement path="../servoy_shared/lib/wicket-extentions.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/wicket-extentions.jar"/>
 			<pathelement path="../servoy_shared/lib/wicket.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/wicket.jar"/>
 			<pathelement path="../servoy_shared/lib/commons-pool.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/commons-pool.jar"/>
 			<pathelement path="../servoy_shared/lib/activation.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/activation.jar"/>
 			<pathelement path="../servoy_shared/lib/mail.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/mail.jar"/>
 			<pathelement path="../servoy_shared/lib/httpclient.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/httpclient.jar"/>
 			<pathelement path="../servoy_shared/lib/httpcore.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/httpcore.jar"/>
 			<pathelement path="../servoy_shared/lib/jcifs.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/jcifs.jar"/>
 			<pathelement path="../servoy_shared/lib/apache-mime4j.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/apache-mime4j.jar"/>
 			<pathelement path="../servoy_shared/lib/httpmime.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/httpmime.jar"/>
 			<pathelement path="../servoy_shared/lib/antlr.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/antlr.jar"/>
 			<pathelement path="../servoy_shared/lib/l2fprod-common-outlookbar.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/l2fprod-common-outlookbar.jar"/>
 			<pathelement path="../servoy_shared/lib/wiquery.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/wiquery.jar"/>
 			<pathelement path="../servoy_shared/lib/fs-parser.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/fs-parser.jar"/>
 			<pathelement path="../servoy_shared/lib/fs-commons.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/fs-commons.jar"/>
 			<pathelement path="../servoy_shared/lib/PBKDF2.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/PBKDF2.jar"/>
 			<pathelement path="../servoy_shared/lib/minis.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/minis.jar"/>
 			<pathelement path="../servoy_shared/lib/xstream.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/lib/xstream.jar"/>
 			<pathelement path="../org.eclipse.dltk.javascript.rhino/bin/"/>
-			
+			<pathelement path="${build.result.folder}/../org.eclipse.dltk.javascript.rhino_7.0.0.2000/bin/"/>
 			<pathelement path="${build.result.folder}/../org.eclipse.dltk.javascript.rhino/@dot"/>
-			
+			<pathelement path="${build.result.folder}/../org.eclipse.dltk.javascript.rhino_7.0.0.2000/@dot"/>
 			<pathelement path="../com.servoy.eclipse.model/bin/"/>
-			
+			<pathelement path="${build.result.folder}/../com.servoy.eclipse.model_7.0.0.2000/bin/"/>
 			<pathelement path="${build.result.folder}/../com.servoy.eclipse.model/@dot"/>
-			
+			<pathelement path="${build.result.folder}/../com.servoy.eclipse.model_7.0.0.2000/@dot"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.wst.css.core_1.1.401.v201008161749.jar"/>
 			<pathelement path="${buildDirectory}/nestedJars/com.ibm.icu_4.4.2.v20110823/icu-data.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/com.ibm.icu_4.4.2.v20110823.jar"/>
@@ -279,14 +279,14 @@
 	</target>
 
 	<target name="checkCompilationResults" if="compilation.error.occured">
-		<echo file="${compilation.problem.marker}" message="com.servoy.eclipse.exporter.solution_6.1.2.1421${line.separator}compilation.error.occured=${compilation.error.occured}"/>
-		<eclipse.logCompileError bundle="com.servoy.eclipse.exporter.solution_6.1.2.1421" log="${compilation.prereq.log}">
+		<echo file="${compilation.problem.marker}" message="com.servoy.eclipse.exporter.solution_7.0.0.2000${line.separator}compilation.error.occured=${compilation.error.occured}"/>
+		<eclipse.logCompileError bundle="com.servoy.eclipse.exporter.solution_7.0.0.2000" log="${compilation.prereq.log}">
 			<include name="C:/Users/Administrator/dev_trunk/com.servoy.eclipse.model/compilation.problem"/>
-			<include name="${pluginTemp}/com.servoy.eclipse.model_6.1.2.1421/compilation.problem"/>
+			<include name="${pluginTemp}/com.servoy.eclipse.model_7.0.0.2000/compilation.problem"/>
 			<include name="C:/Users/Administrator/dev_trunk/org.eclipse.dltk.javascript.rhino/compilation.problem"/>
-			<include name="${pluginTemp}/org.eclipse.dltk.javascript.rhino_6.1.2.1421/compilation.problem"/>
+			<include name="${pluginTemp}/org.eclipse.dltk.javascript.rhino_7.0.0.2000/compilation.problem"/>
 			<include name="C:/Users/Administrator/dev_trunk/servoy_shared/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_shared_6.1.2.1421/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_shared_7.0.0.2000/compilation.problem"/>
 		</eclipse.logCompileError>
 	</target>
 
@@ -296,7 +296,7 @@
 	</target>
 
 	<target name="publish.bin.parts" depends="init" if="p2.publish.parts" unless="compilation.problem.marker.exists">
-		<mkdir dir="${build.result.folder}/com.servoy.eclipse.exporter.solution_6.1.2.1421"/>
+		<mkdir dir="${build.result.folder}/com.servoy.eclipse.exporter.solution_7.0.0.2000"/>
 		<copy todir="${build.result.folder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}">
 				<include name="META-INF/MANIFEST.MF"/>
@@ -320,20 +320,20 @@
 	</target>
 
 	<target name="gather.bin.parts" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_6.1.2.1421"/>
-		<copy todir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_6.1.2.1421" failonerror="true" overwrite="false">
+		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.0.0.2000"/>
+		<copy todir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.0.0.2000" failonerror="true" overwrite="false">
 			<fileset dir="${build.result.folder}/@dot">
 				<include name="**"/>
 			</fileset>
 		</copy>
-		<copy todir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_6.1.2.1421" failonerror="true" overwrite="true">
+		<copy todir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.0.0.2000" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}">
 				<include name="META-INF/"/>
 				<include name="plugin.xml"/>
 			</fileset>
 		</copy>
 		<antcall target="apitools.generation">
-			<param name="target.folder" value="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_6.1.2.1421"/>
+			<param name="target.folder" value="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.0.0.2000"/>
 			<param name="projectLocation" value="${basedir}"/>
 			<param name="binary.folders" value="${build.result.folder}/@dot"/>
 			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
@@ -344,10 +344,10 @@
 	</target>
 
 	<target name="gather.sources" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_6.1.2.1421"/>
-		<copy file="${build.result.folder}/src.zip" todir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_6.1.2.1421" failonerror="false" overwrite="false"/>
+		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.0.0.2000"/>
+		<copy file="${build.result.folder}/src.zip" todir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.0.0.2000" failonerror="false" overwrite="false"/>
 		<antcall target="copy.src.includes">
-			<param name="source.destination.folder" value="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_6.1.2.1421"/>
+			<param name="source.destination.folder" value="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.0.0.2000"/>
 		</antcall>
 	</target>
 
@@ -364,8 +364,8 @@
 	</target>
 
 	<target name="gather.logs" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_6.1.2.1421"/>
-		<copy todir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_6.1.2.1421" failonerror="false" overwrite="false">
+		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.0.0.2000"/>
+		<copy todir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.0.0.2000" failonerror="false" overwrite="false">
 			<fileset dir="${build.result.folder}">
 				<include name="@dot${logExtension}"/>
 			</fileset>
@@ -375,8 +375,8 @@
 	<target name="clean" depends="init" description="Clean the plug-in: com.servoy.eclipse.exporter.solution of all the zips, jars and logs created.">
 		<delete dir="${build.result.folder}/@dot"/>
 		<delete file="${build.result.folder}/src.zip"/>
-		<delete file="${plugin.destination}/com.servoy.eclipse.exporter.solution_6.1.2.1421.jar"/>
-		<delete file="${plugin.destination}/com.servoy.eclipse.exporter.solution_6.1.2.1421.zip"/>
+		<delete file="${plugin.destination}/com.servoy.eclipse.exporter.solution_7.0.0.2000.jar"/>
+		<delete file="${plugin.destination}/com.servoy.eclipse.exporter.solution_7.0.0.2000.zip"/>
 		<delete dir="${temp.folder}"/>
 		<delete file="${compilation.problem.marker}" quiet="true"/>
 	</target>
@@ -402,7 +402,7 @@
 				<include name="**/*.bin${logExtension}"/>
 			</fileset>
 		</delete>
-		<zip destfile="${plugin.destination}/com.servoy.eclipse.exporter.solution_6.1.2.1421.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
+		<zip destfile="${plugin.destination}/com.servoy.eclipse.exporter.solution_7.0.0.2000.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
