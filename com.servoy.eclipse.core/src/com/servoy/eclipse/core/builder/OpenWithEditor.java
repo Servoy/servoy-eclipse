@@ -23,12 +23,14 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
+import com.servoy.eclipse.core.resource.FormDescriber;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.resource.ServerEditorInput;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.extensions.IMarkerAttributeContributor;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ScriptMethod;
@@ -50,9 +52,9 @@ public class OpenWithEditor implements IMarkerAttributeContributor
 			{
 				contentTypeIdentifier = ServerEditorInput.SERVER_RESOURCE_ID;
 			}
-			else if (persist.getAncestor(IRepository.FORMS) != null && !(persist instanceof ScriptVariable) && !(persist instanceof ScriptMethod))
+			else if (persist.getAncestor(IRepository.FORMS) instanceof Form && !(persist instanceof ScriptVariable) && !(persist instanceof ScriptMethod))
 			{
-				contentTypeIdentifier = PersistEditorInput.FORM_RESOURCE_ID;
+				contentTypeIdentifier = FormDescriber.getFormContentTypeIdentifier((Form)persist.getAncestor(IRepository.FORMS));
 			}
 			else if (persist.getAncestor(IRepository.RELATIONS) != null)
 			{

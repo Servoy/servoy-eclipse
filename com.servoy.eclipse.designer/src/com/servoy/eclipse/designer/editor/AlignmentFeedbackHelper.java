@@ -148,7 +148,12 @@ public class AlignmentFeedbackHelper
 
 	protected String getCreateFeedbackMessage(CreateRequest request)
 	{
-		Point location = request.getLocation().getCopy();
+		Point location = request.getLocation();
+		if (location == null)
+		{
+			return "";
+		}
+		location = location.getCopy();
 		feedbackLayer.translateToRelative(location);
 		Dimension size = request.getSize();
 		return new StringBuilder().append('(')//

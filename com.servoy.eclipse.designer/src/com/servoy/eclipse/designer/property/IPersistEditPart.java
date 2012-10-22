@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.designer.property;
 
-import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.j2db.persistence.IPersist;
 
 /**
@@ -30,7 +29,5 @@ public interface IPersistEditPart
 	IPersist getPersist();
 
 	boolean isInherited();
-
-	public IFieldPositioner getFieldPositioner();
 
 }

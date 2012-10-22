@@ -16,47 +16,27 @@
  */
 package com.servoy.eclipse.designer.editor;
 
-import java.awt.Color;
-import java.util.Collections;
-import java.util.List;
-
-import javax.swing.border.EmptyBorder;
-
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.FigureUtilities;
-import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.IImageFigure.ImageChangedListener;
-import org.eclipse.draw2d.ImageFigure;
-import org.eclipse.draw2d.geometry.Dimension;
-import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.tools.DirectEditManager;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.widgets.Display;
 
-import com.servoy.eclipse.designer.internal.core.IImageNotifier;
-import com.servoy.eclipse.designer.internal.core.ImageFigureController;
-import com.servoy.eclipse.designer.internal.core.OutlineBorder;
-import com.servoy.eclipse.designer.internal.core.PersistImageNotifier;
 import com.servoy.eclipse.designer.property.PropertyDirectEditManager;
 import com.servoy.eclipse.designer.property.PropertyDirectEditManager.PropertyCellEditorLocator;
 import com.servoy.eclipse.designer.property.PropertyDirectEditPolicy;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
-import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.j2db.IApplication;
-import com.servoy.j2db.component.ComponentFactory;
-import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportBounds;
-import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.persistence.StaticContentSpecLoader.TypedProperty;
 
 /**
  * Graphical editpart for a IPersist.
@@ -65,49 +45,28 @@ import com.servoy.j2db.persistence.Part;
  */
 public class PersistGraphicalEditPart extends BasePersistGraphicalEditPart
 {
-	protected ImageFigureController imageFigureController;
 	private DirectEditManager directEditManager;
 	private PersistPropertySource persistProperties;
-	private PersistImageNotifier persistImageNotifier;
-	private final Form form;
 
-	public PersistGraphicalEditPart(IApplication application, IPersist model, Form form, boolean inherited)
+	private final Form form;
+	private final IFigureFactory< ? extends PersistImageFigure> figureFactory;
+
+	public PersistGraphicalEditPart(IApplication application, IPersist model, Form form, boolean inherited,
+		IFigureFactory< ? extends PersistImageFigure> figureFactory)
 	{
 		super(application, model, inherited);
 		this.form = form;
+		this.figureFactory = figureFactory;
 		setModel(model);
-	}
-
-	@Override
-	protected List getModelChildren()
-	{
-		return Collections.EMPTY_LIST;
-	}
-
-	@Override
-	public void activate()
-	{
-		super.activate();
-		imageFigureController.setImageNotifier(getFieldImageNotifier());
-	}
-
-	protected IImageNotifier getFieldImageNotifier()
-	{
-		if (persistImageNotifier == null)
-		{
-			persistImageNotifier = new PersistImageNotifier(application, getPersist(), form);
-		}
-		return persistImageNotifier;
 	}
 
 	@Override
 	public void deactivate()
 	{
-		if (imageFigureController != null)
+		if (figure != null)
 		{
-			imageFigureController.deactivate();
+			getFigure().deactivate();
 		}
-//		errorNotifier.dispose();
 		super.deactivate();
 	}
 
@@ -139,72 +98,15 @@ public class PersistGraphicalEditPart extends BasePersistGraphicalEditPart
 	}
 
 	@Override
-	protected IFigure createFigure()
+	public PersistImageFigure getFigure()
 	{
-		IPersist model = getPersist();
-		ImageFigure fig = new ImageFigure()
-		{
-			@Override
-			public void paint(Graphics graphics)
-			{
-				super.paint(graphics);
-				String drawName = PersistPropertySource.getActualComponentName(getPersist());
-				if (drawName != null)
-				{
-					drawName(this, drawName, FontResource.getDefaultFont(SWT.NORMAL, -1), graphics);
-				}
-			}
-		};
+		return (PersistImageFigure)super.getFigure();
+	}
 
-		fig.setBorder(new OutlineBorder(125, isInherited() ? ColorConstants.red : ColorConstants.gray, null, Graphics.LINE_DOT));
-
-		// show the border only when you cannot see the elment from its background
-		fig.addImageChangedListener(new ImageChangedListener()
-		{
-			public void imageChanged()
-			{
-				Color paintedBackground = null;
-				if (getPersist() instanceof AbstractBase)
-				{
-					paintedBackground = ((AbstractBase)getPersist()).getRuntimeProperty(PersistPropertySource.LastPaintedBackgroundProperty);
-				}
-
-				boolean borderDisabled;
-				if (paintedBackground == null)
-				{
-					// element is transparent
-					borderDisabled = false;
-				}
-				else
-				{
-					// is there a border?
-					Object border = getPersistPropertyValue("borderType");
-					if (border != null && !(border instanceof EmptyBorder))
-					{
-						borderDisabled = true;
-					}
-					else
-					{
-						// compare colors form and painted
-						Part part = form.getPartAt(getFigure().getBounds().y);
-						if (part == null)
-						{
-							borderDisabled = false;
-						}
-						else
-						{
-							borderDisabled = !paintedBackground.equals(ComponentFactory.getPartBackground(application, part, form));
-						}
-					}
-				}
-				((OutlineBorder)getFigure().getBorder()).setBorderDisabled(borderDisabled);
-			}
-		});
-		imageFigureController = new ImageFigureController();
-		imageFigureController.setImageFigure(fig);
-		applyBounds(model, fig);
-
-		return fig;
+	@Override
+	protected PersistImageFigure createFigure()
+	{
+		return figureFactory.createFigure(this);
 	}
 
 	protected void applyBounds(Object model, IFigure fig)
@@ -231,27 +133,6 @@ public class PersistGraphicalEditPart extends BasePersistGraphicalEditPart
 		}
 	}
 
-
-	/**
-	 * @param drawName
-	 * @param graphics
-	 */
-	private static void drawName(IFigure figure, String name, Font font, Graphics graphics)
-	{
-		Font saveFont = graphics.getFont();
-		try
-		{
-			graphics.setFont(font);
-			Point bottomLeft = figure.getBounds().getBottomLeft();
-			Dimension dim = FigureUtilities.getStringExtents(name, font);
-			graphics.drawString(name, bottomLeft.x + 2, bottomLeft.y - dim.height);
-		}
-		finally
-		{
-			graphics.setFont(saveFont);
-		}
-	}
-
 	@Override
 	public void performRequest(Request request)
 	{
@@ -263,18 +144,18 @@ public class PersistGraphicalEditPart extends BasePersistGraphicalEditPart
 	{
 		if (directEditManager == null)
 		{
-			String prop = null;
+			TypedProperty<String> prop;
 			if ((getPersist()).getTypeID() == IRepository.FIELDS)
 			{
-				prop = "dataProviderID";
+				prop = StaticContentSpecLoader.PROPERTY_DATAPROVIDERID;
 			}
 			else
 			{
-				prop = "text";
+				prop = StaticContentSpecLoader.PROPERTY_TEXT;
 			}
-			if (getPersistProperties().getPropertyDescriptor(prop) != null)
+			if (getPersistProperties().getPropertyDescriptor(prop.getPropertyName()) != null)
 			{
-				directEditManager = new PropertyDirectEditManager(this, new PropertyCellEditorLocator(this), prop);
+				directEditManager = new PropertyDirectEditManager(this, new PropertyCellEditorLocator(this), prop.getPropertyName());
 			}
 		}
 		if (directEditManager != null)
@@ -297,6 +178,13 @@ public class PersistGraphicalEditPart extends BasePersistGraphicalEditPart
 	{
 		super.refreshVisuals();
 		applyBounds(getModel(), getFigure());
-		imageFigureController.setImageNotifier(getFieldImageNotifier());
+
+		Display.getCurrent().asyncExec(new Runnable()
+		{
+			public void run()
+			{
+				getFigure().refresh();
+			}
+		});
 	}
 }

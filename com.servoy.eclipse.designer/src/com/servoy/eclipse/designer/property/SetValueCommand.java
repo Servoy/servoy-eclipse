@@ -115,7 +115,7 @@ public class SetValueCommand extends Command
 		return new SetValueCommand(label, target, propertyId, propertyValue);
 	}
 
-	public static Command createSetPropertiesComnmand(IPropertySource target, Map<Object, Object> extendedData)
+	public static Command createSetPropertiesCommand(IPropertySource target, Map<Object, Object> extendedData)
 	{
 		if (target == null || extendedData == null)
 		{

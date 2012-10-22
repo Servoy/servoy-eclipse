@@ -24,8 +24,8 @@ import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.designer.actions.DistributeRequest.Distribution;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
-import com.servoy.eclipse.designer.editor.commands.MultipleSelectionAction;
 import com.servoy.eclipse.designer.editor.commands.DesignerActionFactory;
+import com.servoy.eclipse.designer.editor.commands.MultipleSelectionAction;
 
 /**
  * An action to distribute objects.

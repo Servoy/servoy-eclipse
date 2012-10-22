@@ -30,7 +30,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.dnd.ElementTransferDropTarget;
 import com.servoy.eclipse.designer.editor.CreateElementRequest;
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.DataRequest;
 
 /**
@@ -75,7 +75,7 @@ public class PaletteItemTransferDropTargetListener extends ElementTransferDropTa
 			{
 				editPart = getViewer().getContents();
 			}
-			DataRequest dropReq = new DataRequest(VisualFormEditor.REQ_DROP_LINK, point, template);
+			DataRequest dropReq = new DataRequest(BaseVisualFormEditor.REQ_DROP_LINK, point, template);
 			if (editPart.understandsRequest(dropReq))
 			{
 				// link template to existing element

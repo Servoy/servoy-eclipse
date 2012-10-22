@@ -89,7 +89,7 @@ public class VisualFormEditorTabSequencePage extends Composite
 	public static final ILabelProvider LABELPROVIDER = new LabelProvider();
 	public static final IContentProvider CONTENTPROVIDER = new ArrayContentProvider();
 
-	private final VisualFormEditor editor;
+	private final BaseVisualFormEditor editor;
 	private IndexedListViewer availableListViewer;
 	private TableViewer selectedTableViewer;
 	private Button upButton;
@@ -101,7 +101,7 @@ public class VisualFormEditorTabSequencePage extends Composite
 	private boolean doRefresh;
 
 
-	public VisualFormEditorTabSequencePage(VisualFormEditor editor, Composite parent, int style)
+	public VisualFormEditorTabSequencePage(BaseVisualFormEditor editor, Composite parent, int style)
 	{
 		super(parent, style);
 		this.editor = editor;

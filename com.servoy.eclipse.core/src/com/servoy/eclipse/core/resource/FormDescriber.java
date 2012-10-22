@@ -16,7 +16,16 @@
  */
 package com.servoy.eclipse.core.resource;
 
-import com.servoy.j2db.persistence.IRepository;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+import org.eclipse.core.runtime.QualifiedName;
+import org.eclipse.core.runtime.content.IContentDescriber;
+import org.eclipse.core.runtime.content.IContentDescription;
+
+import com.servoy.j2db.persistence.Form;
 
 /**
  * IContentDescriber for form files.
@@ -24,13 +33,70 @@ import com.servoy.j2db.persistence.IRepository;
  * @author rgansevles
  */
 
-public class FormDescriber extends PersistDescriber
+public class FormDescriber implements IContentDescriber
 {
-	@Override
-	protected boolean isValidType(int typeId)
+	protected int defaultResult = VALID;
+
+	public int describe(InputStream contents, IContentDescription description)
 	{
-		return typeId == IRepository.FORMS || typeId == IRepository.FIELDS || typeId == IRepository.PORTALS || typeId == IRepository.GRAPHICALCOMPONENTS ||
-			typeId == IRepository.BEANS || typeId == IRepository.TABS || typeId == IRepository.TABPANELS || typeId == IRepository.LINES ||
-			typeId == IRepository.SHAPES || typeId == IRepository.PARTS || typeId == IRepository.RECTSHAPES;
+		BufferedReader reader = null;
+		try
+		{
+			reader = new BufferedReader(new InputStreamReader(contents, "UTF8"));
+			String line;
+			for (int count = 0; count < 1000 && (line = reader.readLine()) != null; count++)
+			{
+				int describeLine = describeLine(line);
+				if (describeLine != defaultResult)
+				{
+					return describeLine;
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			return INDETERMINATE;
+		}
+		finally
+		{
+			if (reader != null)
+			{
+				try
+				{
+					reader.close();
+				}
+				catch (IOException e)
+				{
+				}
+			}
+		}
+		return defaultResult;
+	}
+
+	public QualifiedName[] getSupportedOptions()
+	{
+		return new QualifiedName[0];
+	}
+
+	/**
+	 * @param line
+	 */
+	protected int describeLine(String line)
+	{
+		if (line.startsWith("mobileform:"))
+		{
+			return INVALID;
+		}
+		return INDETERMINATE;
+	}
+
+
+	/**
+	 * @param testForm
+	 * @return
+	 */
+	public static String getFormContentTypeIdentifier(Form form)
+	{
+		return form.getCustomMobileProperty("mobileform") == null ? PersistEditorInput.FORM_RESOURCE_ID : PersistEditorInput.MOBILE_FORM_RESOURCE_ID;
 	}
 }

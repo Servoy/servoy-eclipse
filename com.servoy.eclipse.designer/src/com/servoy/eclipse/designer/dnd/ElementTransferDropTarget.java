@@ -33,7 +33,7 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.SelectModelsCommandWrapper;
 
 /**
@@ -63,7 +63,7 @@ public class ElementTransferDropTarget extends AbstractTransferDropTargetListene
 	@Override
 	protected void handleDragOver()
 	{
-		getCurrentEvent().detail = VisualFormEditor.REQ_DROP_LINK.equals(getTargetRequest().getType()) ? DND.DROP_LINK : DND.DROP_COPY;
+		getCurrentEvent().detail = BaseVisualFormEditor.REQ_DROP_LINK.equals(getTargetRequest().getType()) ? DND.DROP_LINK : DND.DROP_COPY;
 		super.handleDragOver();
 	}
 
@@ -113,7 +113,7 @@ public class ElementTransferDropTarget extends AbstractTransferDropTargetListene
 		if (helper == null && getTargetEditPart() != null)
 		{
 			EditPart editPart = getTargetEditPart();
-			while (helper == null)
+			while (editPart != null && helper == null)
 			{
 				helper = (SnapToHelper)editPart.getAdapter(SnapToHelper.class);
 				if (helper == null)

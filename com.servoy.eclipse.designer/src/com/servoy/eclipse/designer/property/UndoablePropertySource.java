@@ -20,7 +20,7 @@ import org.eclipse.gef.commands.Command;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 
 /**
  * set properties via the editor's command stack
@@ -31,9 +31,9 @@ import com.servoy.eclipse.designer.editor.VisualFormEditor;
 public class UndoablePropertySource implements IPropertySource
 {
 	private final IPropertySource propertySource;
-	private final VisualFormEditor editorPart;
+	private final BaseVisualFormEditor editorPart;
 
-	public UndoablePropertySource(IPropertySource propertySource, VisualFormEditor editorPart)
+	public UndoablePropertySource(IPropertySource propertySource, BaseVisualFormEditor editorPart)
 	{
 		this.propertySource = propertySource;
 		this.editorPart = editorPart;

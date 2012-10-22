@@ -25,7 +25,7 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.designer.editor.CreateElementRequest;
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.DataRequest;
 import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
 import com.servoy.eclipse.dnd.FormElementTransfer;
@@ -65,17 +65,17 @@ public class FormElementTransferDropTarget extends ElementTransferDropTarget
 			if ((getCurrentEvent().operations & DND.DROP_LINK) != 0)
 			{
 				// note. if setDropObject() call can be avoided, we do not need the UserNodeListDragSourceListener.dragObjects hack!
-				DataRequest dropReq = new DataRequest(VisualFormEditor.REQ_DROP_LINK, point, UserNodeListDragSourceListener.dragObjects);
+				DataRequest dropReq = new DataRequest(BaseVisualFormEditor.REQ_DROP_LINK, point, UserNodeListDragSourceListener.dragObjects);
 				if (editPart.understandsRequest(dropReq))
 				{
 					return dropReq;
 				}
 			}
 
-			RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_DROP_COPY);
+			RequestTypeCreationFactory factory = new RequestTypeCreationFactory(BaseVisualFormEditor.REQ_DROP_COPY);
 			factory.setData(UserNodeListDragSourceListener.dragObjects);
 			CreateElementRequest createRequest = new CreateElementRequest(factory);
-			createRequest.setType(VisualFormEditor.REQ_DROP_COPY);
+			createRequest.setType(BaseVisualFormEditor.REQ_DROP_COPY);
 			createRequest.setLocation(point);
 			createRequest.setSize(RequestTypeCreationFactory.getDefaultElementSize(UserNodeListDragSourceListener.dragObjects[0]));
 			return createRequest;

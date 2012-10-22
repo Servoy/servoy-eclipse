@@ -1,5 +1,5 @@
 /*
- This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2010 Servoy BV
+ This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2012 Servoy BV
 
  This program is free software; you can redistribute it and/or modify it under
  the terms of the GNU Affero General Public License as published by the Free
@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.gef.palette.PaletteRoot;
-import org.eclipse.gef.ui.palette.PaletteCustomizer;
 import org.eclipse.gef.ui.palette.customize.PaletteEntryFactory;
 import org.eclipse.gef.ui.palette.customize.PaletteSeparatorFactory;
 import org.eclipse.gef.ui.palette.customize.PaletteStackFactory;
@@ -35,22 +34,17 @@ import com.servoy.eclipse.ui.preferences.DesignerPreferences.PaletteCustomizatio
  * @author rgansevles
  *
  */
-public class VisualFormEditorPaletteCustomizer extends PaletteCustomizer
+public class VisualFormEditorPaletteCustomizer extends BaseVisualFormEditorPaletteCustomizer
 {
-	private final PaletteRoot paletteRoot;
-	private PaletteCustomization savedPaletteCustomization;
-
-	/**
-	 * @param paletteRoot
-	 */
-	public VisualFormEditorPaletteCustomizer(PaletteRoot paletteRoot)
+	public VisualFormEditorPaletteCustomizer(VisualFormEditorPaletteFactory paletteFactory, PaletteRoot paletteRoot)
 	{
-		this.paletteRoot = paletteRoot;
+		super(paletteFactory, paletteRoot);
 	}
 
-	public void initialize()
+	@Override
+	public VisualFormEditorPaletteFactory getPaletteFactory()
 	{
-		savedPaletteCustomization = new DesignerPreferences().getPaletteCustomization();
+		return (VisualFormEditorPaletteFactory)super.getPaletteFactory();
 	}
 
 	@Override
@@ -59,26 +53,20 @@ public class VisualFormEditorPaletteCustomizer extends PaletteCustomizer
 		List<PaletteEntryFactory> list = new ArrayList<PaletteEntryFactory>(3);
 		list.add(new PaletteSeparatorFactory());
 		list.add(new PaletteStackFactory());
-		list.add(new PaletteTemplateElementsFactory());
+		list.add(new PaletteTemplateElementsFactory(getPaletteFactory()));
 		return list;
 	}
 
 	@Override
-	public void revertToSaved()
+	protected PaletteCustomization createSavedPaletteCustomization()
 	{
-		new DesignerPreferences().setPaletteCustomization(savedPaletteCustomization);
+		return new DesignerPreferences().getPaletteCustomization();
 	}
 
 	@Override
-	public void save()
+	protected void savePaletteCustomization(PaletteCustomization paletteCustomization)
 	{
-		VisualFormEditorPaletteFactory.savePaletteCustomization(paletteRoot);
-		initialize();
-	}
-
-	public void revertToDefaults()
-	{
-		new DesignerPreferences().setPaletteCustomization(null);
+		new DesignerPreferences().setPaletteCustomization(paletteCustomization);
 	}
 
 }

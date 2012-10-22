@@ -44,10 +44,9 @@ import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.Activator;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor.RequestType;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
-import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
 import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory.IGetSize;
-import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -66,7 +65,6 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RectShape;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
-import com.servoy.j2db.persistence.StaticContentSpecLoader.TypedProperty;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.util.Utils;
@@ -79,7 +77,7 @@ import com.servoy.j2db.util.gui.SpecialMatteBorder;
  * @author rgansevles
  * @since 6.0
  */
-public class VisualFormEditorPaletteFactory
+public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteFactory
 {
 	private static final String ELEMENTS_ID = "elements";
 	private static final String ELEMENTS_LABEL_ID = "label";
@@ -155,14 +153,22 @@ public class VisualFormEditorPaletteFactory
 	/* */CONTAINERS_ACCORDION_PANEL_ID
 	/* */};
 
-	private static PaletteCustomization getDefaultPaletteCustomization()
+	@Override
+	protected PaletteCustomization getDefaultPaletteCustomization()
 	{
 		List<String> drawers = new ArrayList<String>();
 		Map<String, List<String>> drawerEntries = new HashMap<String, List<String>>();
 		Map<String, Object> entryProperties = new HashMap<String, Object>();
 
 		// add elements
-		addFixedEntries(ELEMENTS_ID, Messages.LabelElementsPalette, ELEMENTS_IDS, drawers, drawerEntries, entryProperties);
+		drawers.add(ELEMENTS_ID);
+		entryProperties.put(ELEMENTS_ID + '.' + PaletteCustomization.PROPERTY_LABEL, Messages.LabelElementsPalette);
+		drawerEntries.put(ELEMENTS_ID, Arrays.asList(ELEMENTS_IDS));
+		for (String itemId : ELEMENTS_IDS)
+		{
+			entryProperties.put(ELEMENTS_ID + '.' + itemId + '.' + PaletteCustomization.PROPERTY_LABEL, Utils.stringInitCap(itemId));
+			entryProperties.put(ELEMENTS_ID + '.' + itemId + '.' + PaletteCustomization.PROPERTY_DESCRIPTION, "Create a " + itemId);
+		}
 
 		// add containers
 		addFixedEntries(CONTAINERS_ID, Messages.LabelContainersPalette, CONTAINERS_IDS, drawers, drawerEntries, entryProperties);
@@ -180,19 +186,6 @@ public class VisualFormEditorPaletteFactory
 		addFixedEntries(SHAPES_ID, Messages.LabelShapesPalette, SHAPES_IDS, drawers, drawerEntries, entryProperties);
 
 		return new PaletteCustomization(drawers, drawerEntries, entryProperties);
-	}
-
-	private static void addFixedEntries(String id, String label, String[] entries, List<String> drawers, Map<String, List<String>> drawerEntries,
-		Map<String, Object> entryProperties)
-	{
-		drawers.add(id);
-		entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_LABEL, label);
-		drawerEntries.put(id, Arrays.asList(entries));
-		for (String itemId : entries)
-		{
-			entryProperties.put(id + '.' + itemId + '.' + PaletteCustomization.PROPERTY_LABEL, Utils.stringInitCap(itemId));
-			entryProperties.put(id + '.' + itemId + '.' + PaletteCustomization.PROPERTY_DESCRIPTION, "Create a " + itemId);
-		}
 	}
 
 	private static void addTemplates(List<String> drawers, Map<String, List<String>> drawerEntries, Map<String, Object> entryProperties)
@@ -262,7 +255,7 @@ public class VisualFormEditorPaletteFactory
 		}
 	}
 
-	private static PaletteEntry createPaletteEntry(String drawerId, String id)
+	private PaletteEntry createPaletteEntry(String drawerId, String id)
 	{
 		if (ELEMENTS_ID.equals(drawerId))
 		{
@@ -308,7 +301,7 @@ public class VisualFormEditorPaletteFactory
 		return null;
 	}
 
-	private static PaletteEntry createElementsEntry(String id)
+	private PaletteEntry createElementsEntry(String id)
 	{
 		ImageDescriptor icon = null;
 		Dimension size = new Dimension(140, 20);
@@ -445,7 +438,7 @@ public class VisualFormEditorPaletteFactory
 		return null;
 	}
 
-	private static PaletteEntry createShapesEntry(String id)
+	private PaletteEntry createShapesEntry(String id)
 	{
 		ImageDescriptor icon = null;
 		Dimension size = new Dimension(70, 70);
@@ -530,7 +523,7 @@ public class VisualFormEditorPaletteFactory
 		return null;
 	}
 
-	private static PaletteEntry createContainersEntry(String id)
+	private PaletteEntry createContainersEntry(String id)
 	{
 		ImageDescriptor icon = null;
 		RequestTypeCreationFactory factory = null;
@@ -666,7 +659,7 @@ public class VisualFormEditorPaletteFactory
 		return new ElementCreationToolEntry("", "", factory, icon, icon);
 	}
 
-	private static PaletteEntry createTemplateToolEntry(String templateName, int element)
+	private PaletteEntry createTemplateToolEntry(String templateName, int element)
 	{
 		Template template = (Template)ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObject(templateName, IRepository.TEMPLATES);
 		if (template == null)
@@ -677,7 +670,7 @@ public class VisualFormEditorPaletteFactory
 		List<JSONObject> templateElements = ElementFactory.getTemplateElements(template, element);
 		if (templateElements != null && templateElements.size() > 0)
 		{
-			return VisualFormEditorPaletteFactory.createTemplateToolEntry(template, templateElements.get(0), null, element);
+			return createTemplateToolEntry(template, templateElements.get(0), null, element);
 		}
 
 		return null;
@@ -687,7 +680,7 @@ public class VisualFormEditorPaletteFactory
 	 * @param json
 	 * @return
 	 */
-	public static PaletteEntry createTemplateToolEntry(Template template, JSONObject json, String displayName, int element)
+	public PaletteEntry createTemplateToolEntry(Template template, JSONObject json, String displayName, int element)
 	{
 		TemplateElementHolder data = new TemplateElementHolder(template, element);
 		RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_TEMPLATE,
@@ -700,11 +693,6 @@ public class VisualFormEditorPaletteFactory
 			icon = Activator.loadImageDescriptorFromBundle("template.gif");
 		}
 		return new ElementCreationToolEntry(Utils.stringInitCap(displayName), "Create/apply template " + displayName, factory, icon, icon);
-	}
-
-	static void setProperty(Map<String, Object> map, TypedProperty< ? > property, Object value)
-	{
-		map.put(SetValueCommand.REQUEST_PROPERTY_PREFIX + property.getPropertyName(), value);
 	}
 
 	static ImageDescriptor getTemplateIcon(TemplateElementHolder templateHolder)
@@ -787,20 +775,8 @@ public class VisualFormEditorPaletteFactory
 	}
 
 
-	/**
-	 * Creates the PaletteRoot and adds all palette elements. Use this factory
-	 * method to create a new palette for your graphical editor.
-	 * 
-	 * @return a new PaletteRoot
-	 */
-	static public PaletteRoot createPalette()
-	{
-		PaletteRoot palette = new PaletteRoot();
-		fillPalette(palette);
-		return palette;
-	}
-
-	private static void fillPalette(PaletteRoot palette)
+	@Override
+	protected void fillPalette(PaletteRoot palette)
 	{
 		PaletteCustomization defaultPaletteCustomization = getDefaultPaletteCustomization();
 		PaletteCustomization savedPaletteCustomization = new DesignerPreferences().getPaletteCustomization();
@@ -868,104 +844,6 @@ public class VisualFormEditorPaletteFactory
 					}
 				}
 			}
-		}
-	}
-
-	private static void applyPaletteCustomization(Map<String, Object> map, String key, PaletteEntry entry, Map<String, Object> defaults)
-	{
-		entry.setVisible(!getValueWithDefaults(map, key + '.' + PaletteCustomization.PROPERTY_HIDDEN, defaults, Boolean.FALSE).booleanValue());
-		entry.setLabel(getValueWithDefaults(map, key + '.' + PaletteCustomization.PROPERTY_LABEL, defaults, ""));
-		entry.setDescription(getValueWithDefaults(map, key + '.' + PaletteCustomization.PROPERTY_DESCRIPTION, defaults, ""));
-
-		if (entry instanceof PaletteDrawer)
-		{
-			((PaletteDrawer)entry).setInitialState(getValueWithDefaults(map, key + '.' + PaletteCustomization.PROPERTY_INITIAL_STATE, defaults,
-				Integer.valueOf(PaletteDrawer.INITIAL_STATE_OPEN)).intValue());
-		}
-	}
-
-	private static <T> T getValueWithDefaults(Map<String, Object> map, String key, Map<String, Object> defaults, T defval)
-	{
-		if (map != null && map.containsKey(key))
-		{
-			return (T)map.get(key);
-		}
-		if (defaults != null && defaults.containsKey(key))
-		{
-			return (T)defaults.get(key);
-		}
-		return defval;
-	}
-
-	public static void refreshPalette(PaletteRoot palette)
-	{
-		palette.setChildren(new ArrayList<PaletteEntry>());
-		fillPalette(palette);
-	}
-
-	public static void savePaletteCustomization(PaletteRoot palette)
-	{
-		// get the current and the default drawers and entries, save where they differ
-		PaletteCustomization defaultPaletteCustomization = getDefaultPaletteCustomization();
-
-		Map<String, List<String>> drawerEntries = new HashMap<String, List<String>>();
-		Map<String, Object> entryProperties = new HashMap<String, Object>();
-		List<String> drawerIds = new ArrayList<String>();
-
-		for (PaletteEntry drawer : ((List<PaletteEntry>)palette.getChildren()))
-		{
-			if (drawer instanceof PaletteDrawer)
-			{
-				String drawerId = drawer.getId();
-				drawerIds.add(drawerId);
-				addPaletteEntryProperties(entryProperties, drawerId, drawer, defaultPaletteCustomization.entryProperties);
-
-				List<String> itemIds = new ArrayList<String>();
-				for (PaletteEntry entry : (List<PaletteEntry>)((PaletteDrawer)drawer).getChildren())
-				{
-					itemIds.add(entry.getId());
-					addPaletteEntryProperties(entryProperties, drawerId + '.' + entry.getId(), entry, defaultPaletteCustomization.entryProperties);
-				}
-				List<String> defaultItemIds = defaultPaletteCustomization.drawerEntries.get(drawerId);
-				if (!itemIds.equals(defaultItemIds))
-				{
-					drawerEntries.put(drawerId, itemIds);
-				}
-				// else do not save
-			}
-		}
-
-		if (defaultPaletteCustomization.drawers.equals(drawerIds))
-		{
-			drawerIds = null; // do not save
-		}
-
-		new DesignerPreferences().setPaletteCustomization(new PaletteCustomization(drawerIds, drawerEntries, entryProperties));
-	}
-
-	/**
-	 * @param entryProperties
-	 * @param id
-	 * @param entry
-	 */
-	private static void addPaletteEntryProperties(Map<String, Object> map, String key, PaletteEntry entry, Map<String, Object> defaults)
-	{
-		putIfNotDefault(map, key + '.' + PaletteCustomization.PROPERTY_HIDDEN, Boolean.valueOf(!entry.isVisible()), defaults, Boolean.FALSE);
-		putIfNotDefault(map, key + '.' + PaletteCustomization.PROPERTY_LABEL, entry.getLabel(), defaults, null);
-		putIfNotDefault(map, key + '.' + PaletteCustomization.PROPERTY_DESCRIPTION, entry.getDescription(), defaults, "");
-		if (entry instanceof PaletteDrawer)
-		{
-			putIfNotDefault(map, key + '.' + PaletteCustomization.PROPERTY_INITIAL_STATE, Integer.valueOf(((PaletteDrawer)entry).getInitialState()), defaults,
-				Integer.valueOf(PaletteDrawer.INITIAL_STATE_OPEN));
-		}
-	}
-
-	private static void putIfNotDefault(Map<String, Object> map, String key, Object value, Map<String, Object> defaults, Object defval)
-	{
-		Object def = defaults.containsKey(key) ? defaults.get(key) : defval;
-		if (def != null ? !def.equals(value) : value != null)
-		{
-			map.put(key, value);
 		}
 	}
 }

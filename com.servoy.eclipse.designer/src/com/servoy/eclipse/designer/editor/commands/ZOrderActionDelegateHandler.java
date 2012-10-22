@@ -25,7 +25,7 @@ import org.eclipse.gef.Request;
 import com.servoy.eclipse.designer.actions.ZOrderAction;
 import com.servoy.eclipse.designer.editor.BasePersistGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.GroupGraphicalEditPart;
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 
 /**
@@ -39,7 +39,7 @@ public abstract class ZOrderActionDelegateHandler extends DesignerSelectionActio
 
 	public ZOrderActionDelegateHandler(String zOrderId)
 	{
-		super(VisualFormEditor.REQ_SET_PROPERTY);
+		super(BaseVisualFormEditor.REQ_SET_PROPERTY);
 		this.zOrderId = zOrderId;
 	}
 

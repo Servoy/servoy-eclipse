@@ -23,7 +23,7 @@ import java.util.Map;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.gef.requests.CreationFactory;
 
-import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor.RequestType;
 import com.servoy.eclipse.dnd.FormElementDragData.DataProviderDragData;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.dnd.IDragData;

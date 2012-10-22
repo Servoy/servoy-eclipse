@@ -34,7 +34,7 @@ import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.designer.editor.BasePersistGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.GroupGraphicalEditPart;
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.DesignerActionFactory;
 import com.servoy.eclipse.designer.editor.commands.DesignerSelectionAction;
 import com.servoy.eclipse.designer.util.DesignerUtil;
@@ -419,29 +419,18 @@ public class ZOrderAction extends DesignerSelectionAction
 				{
 					requests = new HashMap<EditPart, Request>();
 				}
-				if (oe.element instanceof IFormElement) requests.put(editPartMap.get(oe.element), new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY,
+				if (oe.element instanceof IFormElement) requests.put(editPartMap.get(oe.element), new SetPropertyRequest(BaseVisualFormEditor.REQ_SET_PROPERTY,
 					StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), Integer.valueOf(oe.zIndex), "")); //$NON-NLS-1$
 				else
 				{
 					ArrayList<IFormElement> groupElements = new ArrayList<IFormElement>(oe.getElements().values());
-					Collections.sort(groupElements, new Comparator<IFormElement>()
-					{
-						/*
-						 * (non-Javadoc)
-						 * 
-						 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-						 */
-						public int compare(IFormElement o1, IFormElement o2)
-						{
-							return o1.getFormIndex() - o2.getFormIndex();
-						}
-					});
+					Collections.sort(groupElements, Form.FORM_INDEX_COMPARATOR);
 					int index = oe.zIndex - oe.nrOfSubElements + 1;
 					for (IFormElement bc : groupElements)
 					{
 						requests.put(
 							editPartMap.get(bc),
-							new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(),
+							new SetPropertyRequest(BaseVisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(),
 								Integer.valueOf(index++), "")); //$NON-NLS-1$
 					}
 				}

@@ -25,7 +25,7 @@ import org.osgi.framework.BundleContext;
 
 import com.servoy.eclipse.core.I18NChangeListener;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -71,9 +71,9 @@ public class Activator extends AbstractUIPlugin
 					for (IEditorReference editorRef : editorRefs)
 					{
 						IEditorPart editor = editorRef.getEditor(false);
-						if (editor instanceof VisualFormEditor)
+						if (editor instanceof BaseVisualFormEditor)
 						{
-							((VisualFormEditor)editor).refreshGraphicalEditor();
+							((BaseVisualFormEditor)editor).refreshGraphicalEditor();
 						}
 					}
 				}

@@ -124,6 +124,14 @@
       </content-type>
       <content-type
             default-charset="UTF8"
+            describer="com.servoy.eclipse.core.resource.MobileFormDescriber"
+            file-extensions="frm"
+            id="com.servoy.eclipse.core.resource.mobileform"
+            name="Mobile Servoy Form"
+            priority="normal">
+      </content-type>
+      <content-type
+            default-charset="UTF8"
             describer="com.servoy.eclipse.core.resource.FormDescriber"
             file-extensions="frm"
             id="com.servoy.eclipse.core.resource.form"

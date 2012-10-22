@@ -28,7 +28,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 
 /**
  * An action to paste the clipboard contents.
@@ -70,7 +70,7 @@ public class PasteAction extends SelectionAction
 		}
 
 		EditPart editPart = ((EditPart)objects.get(0));
-		return new SelectModelsCommandWrapper(editPart.getViewer(), editPart, editPart.getCommand(new Request(VisualFormEditor.REQ_PASTE)));
+		return new SelectModelsCommandWrapper(editPart.getViewer(), editPart, editPart.getCommand(new Request(BaseVisualFormEditor.REQ_PASTE)));
 	}
 
 	/**
@@ -101,9 +101,9 @@ public class PasteAction extends SelectionAction
 	@Override
 	public boolean isHandled()
 	{
-		if (getWorkbenchPart() instanceof VisualFormEditor)
+		if (getWorkbenchPart() instanceof BaseVisualFormEditor)
 		{
-			return ((VisualFormEditor)getWorkbenchPart()).isDesignerContextActive();
+			return ((BaseVisualFormEditor)getWorkbenchPart()).isDesignerContextActive();
 		}
 		return true;
 	}

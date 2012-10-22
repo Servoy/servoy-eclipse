@@ -28,7 +28,7 @@ import org.eclipse.gef.Request;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.designer.actions.SetPropertyRequest;
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 
 /**
  * Base action to set the same width or height to selected elements.
@@ -88,7 +88,7 @@ public abstract class SameSizeAction extends DesignerSelectionAction
 					{
 						value = new Dimension(((GraphicalEditPart)editPart).getFigure().getBounds().width, bounds.height);
 					}
-					requests.put(editPart, new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY, "size", value, "set same " +
+					requests.put(editPart, new SetPropertyRequest(BaseVisualFormEditor.REQ_SET_PROPERTY, "size", value, "set same " +
 						(sameWidth ? "width" : "height")));
 				}
 			}

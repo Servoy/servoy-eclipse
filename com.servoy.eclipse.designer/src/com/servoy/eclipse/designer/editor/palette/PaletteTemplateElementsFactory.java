@@ -39,11 +39,15 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 public class PaletteTemplateElementsFactory extends PaletteContainerFactory
 {
 
+	private final VisualFormEditorPaletteFactory paletteFactory;
+
 	/**
 	 * Constructor
+	 * @param paletteFactory 
 	 */
-	public PaletteTemplateElementsFactory()
+	public PaletteTemplateElementsFactory(VisualFormEditorPaletteFactory paletteFactory)
 	{
+		this.paletteFactory = paletteFactory;
 		setLabel("Form template drawer");
 	}
 
@@ -98,7 +102,7 @@ public class PaletteTemplateElementsFactory extends PaletteContainerFactory
 			JSONObject jsonObject = templateElements.get(i);
 			String name = jsonObject.optString(SolutionSerializer.PROP_NAME);
 			String displayName = (name == null || name.length() == 0) ? "item " + (i + 1) : name;
-			PaletteEntry toolEntry = VisualFormEditorPaletteFactory.createTemplateToolEntry(templateHolder.template, jsonObject, displayName, i);
+			PaletteEntry toolEntry = paletteFactory.createTemplateToolEntry(templateHolder.template, jsonObject, displayName, i);
 			if (toolEntry != null)
 			{
 				toolEntry.setId(Integer.toString(i));

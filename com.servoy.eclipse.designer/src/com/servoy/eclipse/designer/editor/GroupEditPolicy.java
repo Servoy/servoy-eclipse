@@ -53,7 +53,7 @@ public class GroupEditPolicy extends AbstractEditPolicy
 				// subelements of the group because PasteToSupportChildsEditPolicy responsible
 				// for creating the PasteCommand will create it passing the Form as the persist 
 				// object. This is similar to the situation in PasteAction.createPasteCommand
-				if (request.getType() == VisualFormEditor.REQ_PASTE) break;
+				if (request.getType() == BaseVisualFormEditor.REQ_PASTE) break;
 			}
 		}
 

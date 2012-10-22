@@ -21,7 +21,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.designer.actions.AbstractEditorActionDelegateHandler;
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 
 /**
  * An action to revert the form editor when dirty.
@@ -33,7 +33,7 @@ public class RevertFormActionDelegateHandler extends AbstractEditorActionDelegat
 	@Override
 	public void run()
 	{
-		((VisualFormEditor)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor()).revert(false);
+		((BaseVisualFormEditor)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor()).revert(false);
 	}
 
 	@Override
@@ -42,6 +42,6 @@ public class RevertFormActionDelegateHandler extends AbstractEditorActionDelegat
 		IWorkbenchPage activePage = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 		if (activePage == null) return false;
 		IEditorPart activeEditor = activePage.getActiveEditor();
-		return activeEditor instanceof VisualFormEditor && activeEditor.isDirty();
+		return activeEditor instanceof BaseVisualFormEditor && activeEditor.isDirty();
 	}
 }

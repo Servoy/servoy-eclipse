@@ -97,7 +97,7 @@ public class VisualFormEditorPartsPage extends Composite
 	private final DataBindingContext m_bindingContext;
 	private Text pageBreakAfterText;
 	private final PartBean currentPartBean = new PartBean();
-	private final VisualFormEditor editor;
+	private final BaseVisualFormEditor editor;
 	private ListViewer availableParts;
 	private ListViewer currentParts;
 	private Button upButton;
@@ -110,7 +110,7 @@ public class VisualFormEditorPartsPage extends Composite
 	private Button addGroupByButton;
 	private boolean doRefresh;
 
-	public VisualFormEditorPartsPage(VisualFormEditor editor, Composite parent, int style)
+	public VisualFormEditorPartsPage(BaseVisualFormEditor editor, Composite parent, int style)
 	{
 		super(parent, style);
 		this.editor = editor;
@@ -647,7 +647,13 @@ public class VisualFormEditorPartsPage extends Composite
 		final StructuredSelection currentSelection = (StructuredSelection)availableParts.getSelection();
 		if (currentSelection.size() > 0)
 		{
-			final AddPartsCommand addPartsCommand = new AddPartsCommand(editor.getForm(), currentSelection.toArray());
+			int[] partTypeIds = new int[currentSelection.size()];
+			Iterator<Integer> sel = currentSelection.iterator();
+			for (int i = 0; sel.hasNext(); i++)
+			{
+				partTypeIds[i] = sel.next().intValue();
+			}
+			final AddPartsCommand addPartsCommand = new AddPartsCommand(editor.getForm(), partTypeIds);
 			executeCommand(new RefreshingCommand(addPartsCommand)
 			{
 				@Override
@@ -993,99 +999,6 @@ public class VisualFormEditorPartsPage extends Composite
 				// set the property via the command stack to support undo/redo
 				executeCommand(SetValueCommand.createSetvalueCommand("Edit Part Property",
 					PersistPropertySource.createPersistPropertySource(part, editor.getForm(), false), property, value));
-			}
-		}
-	}
-
-	public class AddPartsCommand extends Command
-	{
-		private final Form form;
-		private final Object[] partTypeIds;
-		List<Part> createdParts = null;
-
-		public AddPartsCommand(Form form, Object[] partTypeIds)
-		{
-			this.form = form;
-			this.partTypeIds = partTypeIds;
-			setLabel("Add part(s)");
-		}
-
-		@Override
-		public void execute()
-		{
-			try
-			{
-				List<Part> list = new ArrayList<Part>();
-				for (Object partTypeId : partTypeIds)
-				{
-					Part part = form.createNewPart(((Integer)partTypeId).intValue(), Integer.MAX_VALUE); // is used in sorting in form.getParts()
-					list.add(part);
-					int prevHeight = -1;
-					int nextHeight = 0;
-
-					// flattened form for this form does not contain new part yet
-					Iterator<Part> it = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form, false).getParts();
-					while (it.hasNext())
-					{
-						Part element = it.next();
-						if (element == part)
-						{
-							if (it.hasNext())
-							{
-								nextHeight = it.next().getHeight();
-								if (prevHeight == -1)
-								{
-									// first part
-									prevHeight = 0;
-								}
-							}
-							else
-							{
-								if (prevHeight == -1)
-								{
-									// only part
-									prevHeight = 90;// new height will become 100
-								}
-								//else: last part
-								nextHeight = prevHeight + 20;
-							}
-							break;
-						}
-						prevHeight = element.getHeight();
-					}
-					part.setHeight((prevHeight + nextHeight) / 2);
-					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, part, false);
-				}
-				createdParts = list;
-			}
-			catch (Exception e)
-			{
-				ServoyLog.logError("Cannot create part", e);
-			}
-		}
-
-		@Override
-		public boolean canUndo()
-		{
-			return createdParts != null;
-		}
-
-		@Override
-		public void undo()
-		{
-			List<Part> list = createdParts;
-			createdParts = null;
-			for (Part part : list)
-			{
-				try
-				{
-					((IDeveloperRepository)part.getRootObject().getRepository()).deleteObject(part);
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError("Could not undo create part " + part, e);
-				}
-				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, part, false);
 			}
 		}
 	}

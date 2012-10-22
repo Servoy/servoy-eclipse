@@ -17,30 +17,22 @@
 package com.servoy.eclipse.designer.editor;
 
 
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.LineBorder;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.DragTracker;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.Request;
-import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
-import org.eclipse.swt.widgets.Display;
 
-import com.servoy.eclipse.core.IPersistChangeListener;
-import com.servoy.eclipse.core.ServoyModel;
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
-import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -49,34 +41,18 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  * 
  */
-public class GroupGraphicalEditPart extends AbstractGraphicalEditPart implements IPersistChangeListener
+public class GroupGraphicalEditPart extends BaseGroupGraphicalEditPart
 {
-	protected IApplication application;
-
-	private final VisualFormEditor editorPart;
-	private final Form form;
-
-	public GroupGraphicalEditPart(IApplication application, VisualFormEditor editorPart, Form form, FormElementGroup group)
+	public GroupGraphicalEditPart(IApplication application, BaseVisualFormEditor editorPart, Form form, FormElementGroup group)
 	{
-		this.application = application;
-		this.editorPart = editorPart;
-		this.form = form;
-		setModel(group);
+		super(application, editorPart, form, group);
 	}
 
 	@Override
 	protected List<IFormElement> getModelChildren()
 	{
 		List<IFormElement> returnList = Utils.asList(getGroup().getElements());
-		Collections.sort(returnList, new Comparator<IFormElement>()
-		{
-
-			public int compare(IFormElement o1, IFormElement o2)
-			{
-				return o1.getFormIndex() - o2.getFormIndex();
-			}
-
-		});
+		Collections.sort(returnList, Form.FORM_INDEX_COMPARATOR);
 		return returnList;
 	}
 
@@ -90,8 +66,15 @@ public class GroupGraphicalEditPart extends AbstractGraphicalEditPart implements
 	protected IFigure createFigure()
 	{
 		GroupFigure fig = new GroupFigure();
+		fig.setBorder(new LineBorder());
 		updateFigure(fig);
 		return fig;
+	}
+
+	@Override
+	protected void doRefresh()
+	{
+		updateFigure((GroupFigure)getFigure());
 	}
 
 	protected void updateFigure(Figure fig)
@@ -106,7 +89,7 @@ public class GroupGraphicalEditPart extends AbstractGraphicalEditPart implements
 	@Override
 	protected EditPart createChild(Object child)
 	{
-		EditPart editPart = FormGraphicalEditPart.createChild(application, editorPart, form, child);
+		EditPart editPart = FormGraphicalEditPart.createChild(getApplication(), getEditorPart(), getForm(), child);
 		if (editPart instanceof BasePersistGraphicalEditPart)
 		{
 			((BasePersistGraphicalEditPart)editPart).setSelectable(false);
@@ -122,57 +105,9 @@ public class GroupGraphicalEditPart extends AbstractGraphicalEditPart implements
 	}
 
 	@Override
-	public void activate()
-	{
-		// listen to changes to the elements
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		servoyModel.addPersistChangeListener(false, this);
-
-		super.activate();
-	}
-
-	@Override
-	public void deactivate()
-	{
-		// stop listening to changes to the elements
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		servoyModel.removePersistChangeListener(false, this);
-
-		super.deactivate();
-	}
-
-	// If the form changed width we have to refresh
-	public void persistChanges(Collection<IPersist> changes)
-	{
-		String groupId = getGroup().getGroupID();
-		boolean found = false;
-		Iterator<IPersist> iterator = changes.iterator();
-		while (groupId != null && !found && iterator.hasNext())
-		{
-			IPersist persist = iterator.next();
-			found = persist instanceof IFormElement && groupId.equals(((IFormElement)persist).getGroupID());
-		}
-		if (found)
-		{
-			Display.getDefault().asyncExec(new Runnable()
-			{
-				public void run()
-				{
-					updateFigure((GroupFigure)getFigure());
-				}
-			});
-		}
-	}
-
-	@Override
 	public DragTracker getDragTracker(Request request)
 	{
 		return BasePersistGraphicalEditPart.createDragTracker(this, request);
-	}
-
-	public FormElementGroup getGroup()
-	{
-		return (FormElementGroup)getModel();
 	}
 
 }

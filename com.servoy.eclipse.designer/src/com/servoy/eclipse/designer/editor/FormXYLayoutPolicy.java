@@ -36,7 +36,7 @@ import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.gef.requests.CreationFactory;
 
 import com.servoy.eclipse.designer.actions.DistributeRequest;
-import com.servoy.eclipse.designer.editor.VisualFormEditor.RequestType;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor.RequestType;
 import com.servoy.eclipse.designer.editor.commands.ChangeBoundsCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceFieldCommand;
@@ -95,7 +95,7 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 				if (childEditPart.getModel() instanceof IPersist && objectProperties != null && objectProperties.size() > 0)
 				{
 					IPersist persist = (IPersist)childEditPart.getModel();
-					compoundCommand.add(SetValueCommand.createSetPropertiesComnmand(
+					compoundCommand.add(SetValueCommand.createSetPropertiesCommand(
 						PersistPropertySource.createPersistPropertySource(persist, parent.getPersist(), false), objectProperties));
 				}
 				return compoundCommand.unwrap();
@@ -131,7 +131,12 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 				}
 			}
 
-			Point loc = request.getLocation().getCopy();
+			Point loc = request.getLocation();
+			if (loc == null)
+			{
+				return null;
+			}
+			loc = loc.getCopy();
 			getHostFigure().translateToRelative(loc);
 			Dimension size = request.getSize();
 			if (size != null)
@@ -181,7 +186,7 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 			return getDistributeChildrenCommand((DistributeRequest)request);
 		}
 
-		if (VisualFormEditor.REQ_DROP_COPY.equals(request.getType()) && request instanceof CreateElementRequest &&
+		if (BaseVisualFormEditor.REQ_DROP_COPY.equals(request.getType()) && request instanceof CreateElementRequest &&
 			((CreateRequest)request).getLocation() != null)
 		{
 			RequestTypeCreationFactory factory = (RequestTypeCreationFactory)((CreateElementRequest)request).getFactory();
@@ -389,7 +394,7 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 	@Override
 	public boolean understandsRequest(Request request)
 	{
-		if (VisualFormEditor.REQ_DROP_COPY.equals(request.getType()) && request instanceof CreateElementRequest)
+		if (BaseVisualFormEditor.REQ_DROP_COPY.equals(request.getType()) && request instanceof CreateElementRequest)
 		{
 			RequestTypeCreationFactory factory = (RequestTypeCreationFactory)((CreateElementRequest)request).getFactory();
 			if (factory.getData() instanceof Object[])
@@ -412,7 +417,7 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 	public void showTargetFeedback(Request request)
 	{
 		super.showTargetFeedback(request);
-		if (VisualFormEditor.REQ_DROP_COPY.equals(request.getType()))
+		if (BaseVisualFormEditor.REQ_DROP_COPY.equals(request.getType()))
 		{
 			CreateRequest createReq = (CreateRequest)request;
 			if (createReq.getSize() != null)

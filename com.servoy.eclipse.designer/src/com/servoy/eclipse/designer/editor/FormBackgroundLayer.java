@@ -57,9 +57,9 @@ public class FormBackgroundLayer extends FreeformLayer
 	public static final int TRANSPARENT_PATTERN_SIZE = 14;
 
 
-	protected final VisualFormEditor editorPart;
+	protected final BaseVisualFormEditor editorPart;
 
-	public FormBackgroundLayer(VisualFormEditor editorPart)
+	public FormBackgroundLayer(BaseVisualFormEditor editorPart)
 	{
 		this.editorPart = editorPart;
 	}

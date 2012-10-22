@@ -27,7 +27,7 @@ import org.eclipse.gef.Request;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.designer.actions.SetPropertyRequest;
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportTabSeq;
@@ -101,7 +101,7 @@ public class SetTabSequenceAction extends DesignerSelectionAction
 			int index = selected.indexOf(editPart);
 			requests.put(
 				editPart,
-				new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_TABSEQ.getPropertyName(), Integer.valueOf(index < 0
+				new SetPropertyRequest(BaseVisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_TABSEQ.getPropertyName(), Integer.valueOf(index < 0
 					? ISupportTabSeq.SKIP : index + 1), "set tab sequence"));
 		}
 

@@ -93,7 +93,8 @@ public class FormEditPolicy extends ComponentEditPolicy
 					: dataFieldRequest.getlocation().getSWTPoint(), null, dataFieldRequest.placeAsLabels, dataFieldRequest.placeWithLabels,
 				dataFieldRequest.placeHorizontal, dataFieldRequest.fillText, dataFieldRequest.fillName, form);
 		}
-		else if ((VisualFormEditor.REQ_COPY.equals(request.getType()) || VisualFormEditor.REQ_CUT.equals(request.getType())) && request instanceof GroupRequest)
+		else if ((BaseVisualFormEditor.REQ_COPY.equals(request.getType()) || BaseVisualFormEditor.REQ_CUT.equals(request.getType())) &&
+			request instanceof GroupRequest)
 		{
 			List<IPersist> models = new ArrayList<IPersist>();
 			for (Object editPart : ((GroupRequest)request).getEditParts())
@@ -145,7 +146,7 @@ public class FormEditPolicy extends ComponentEditPolicy
 						{
 							// set the location to copy for next paste
 							fieldPositioner.setDefaultLocation(point);
-							if (VisualFormEditor.REQ_COPY.equals(request.getType()))
+							if (BaseVisualFormEditor.REQ_COPY.equals(request.getType()))
 							{
 								fieldPositioner.getNextLocation(null); // move a bit according to the copy/paste offset
 							}
@@ -153,12 +154,12 @@ public class FormEditPolicy extends ComponentEditPolicy
 					});
 				}
 				Command copyCommand = new FormElementCopyCommand(models.toArray());
-				if (VisualFormEditor.REQ_COPY.equals(request.getType()))
+				if (BaseVisualFormEditor.REQ_COPY.equals(request.getType()))
 				{
 					compoundCommand.add(copyCommand);
 					compoundCommand.setLabel("Copy objects");
 				}
-				else if (VisualFormEditor.REQ_CUT.equals(request.getType()))
+				else if (BaseVisualFormEditor.REQ_CUT.equals(request.getType()))
 				{
 					final CompoundCommand deleteCommand = new CompoundCommand();
 					for (IPersist persist : models)
@@ -203,8 +204,8 @@ public class FormEditPolicy extends ComponentEditPolicy
 			VisualFormEditor.REQ_PLACE_MEDIA.equals(request.getType()) || VisualFormEditor.REQ_PLACE_BEAN.equals(request.getType()) ||
 			VisualFormEditor.REQ_PLACE_BUTTON.equals(request.getType()) || VisualFormEditor.REQ_PLACE_LABEL.equals(request.getType()) ||
 			VisualFormEditor.REQ_PLACE_RECT_SHAPE.equals(request.getType()) || VisualFormEditor.REQ_PLACE_FIELD.equals(request.getType()) ||
-			VisualFormEditor.REQ_PLACE_TEMPLATE.equals(request.getType()) || VisualFormEditor.REQ_COPY.equals(request.getType()) ||
-			VisualFormEditor.REQ_CUT.equals(request.getType()) || super.understandsRequest(request);
+			VisualFormEditor.REQ_PLACE_TEMPLATE.equals(request.getType()) || BaseVisualFormEditor.REQ_COPY.equals(request.getType()) ||
+			BaseVisualFormEditor.REQ_CUT.equals(request.getType()) || super.understandsRequest(request);
 	}
 
 	public static Object getClipboardContents()

@@ -18,7 +18,6 @@ package com.servoy.eclipse.designer.editor.commands;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,7 +36,7 @@ import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.designer.actions.SetPropertyRequest;
 import com.servoy.eclipse.designer.editor.GroupGraphicalEditPart;
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -52,21 +51,6 @@ import com.servoy.j2db.util.UUID;
  */
 public class GroupAction extends DesignerSelectionAction
 {
-	private static final class FormElementComparator implements Comparator<IFormElement>
-	{
-		public final static FormElementComparator INSTANCE = new FormElementComparator();
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-		 */
-		public int compare(IFormElement o1, IFormElement o2)
-		{
-			return o1.getFormIndex() - o2.getFormIndex();
-		}
-	}
-
 	public GroupAction(IWorkbenchPart part)
 	{
 		super(part, null);
@@ -125,7 +109,7 @@ public class GroupAction extends DesignerSelectionAction
 		Map<EditPart, Request> requests = new HashMap<EditPart, Request>(affectedEditparts.size());
 		for (EditPart editPart : affectedEditparts)
 		{
-			requests.put(editPart, new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName(),
+			requests.put(editPart, new SetPropertyRequest(BaseVisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName(),
 				groupID, "group"));
 		}
 
@@ -226,7 +210,7 @@ public class GroupAction extends DesignerSelectionAction
 		if (groupModels == null) return null;
 		if (groupModels.size() > 1)
 		{
-			Collections.sort(groupModels, FormElementComparator.INSTANCE);
+			Collections.sort(groupModels, Form.FORM_INDEX_COMPARATOR);
 		}
 
 		List<IFormElement> higherModels = null;
@@ -275,7 +259,7 @@ public class GroupAction extends DesignerSelectionAction
 		{
 			if (lowerModels.size() > 1)
 			{
-				Collections.sort(lowerModels, FormElementComparator.INSTANCE);
+				Collections.sort(lowerModels, Form.FORM_INDEX_COMPARATOR);
 			}
 
 			for (IFormElement bc : lowerModels)
@@ -287,7 +271,7 @@ public class GroupAction extends DesignerSelectionAction
 				}
 				requests.put(
 					editPartMap.get(bc),
-					new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(),
+					new SetPropertyRequest(BaseVisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(),
 						Integer.valueOf(index++), "")); //$NON-NLS-1$
 			}
 		}
@@ -301,7 +285,7 @@ public class GroupAction extends DesignerSelectionAction
 			}
 			requests.put(
 				editPartMap.get(bc),
-				new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(),
+				new SetPropertyRequest(BaseVisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(),
 					Integer.valueOf(index++), "")); //$NON-NLS-1$
 		}
 
@@ -309,7 +293,7 @@ public class GroupAction extends DesignerSelectionAction
 		{
 			if (higherModels.size() > 1)
 			{
-				Collections.sort(higherModels, FormElementComparator.INSTANCE);
+				Collections.sort(higherModels, Form.FORM_INDEX_COMPARATOR);
 			}
 			for (IFormElement bc : higherModels)
 			{
@@ -320,7 +304,7 @@ public class GroupAction extends DesignerSelectionAction
 				}
 				requests.put(
 					editPartMap.get(bc),
-					new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(),
+					new SetPropertyRequest(BaseVisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(),
 						Integer.valueOf(index++), "")); //$NON-NLS-1$
 			}
 		}

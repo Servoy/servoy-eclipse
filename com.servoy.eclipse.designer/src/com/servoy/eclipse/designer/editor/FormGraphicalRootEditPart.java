@@ -22,12 +22,9 @@ import java.beans.PropertyChangeListener;
 import org.eclipse.draw2d.FreeformLayer;
 import org.eclipse.draw2d.LayeredPane;
 import org.eclipse.draw2d.MarginBorder;
-import org.eclipse.draw2d.geometry.Insets;
-import org.eclipse.gef.AutoexposeHelper;
 import org.eclipse.gef.DragTracker;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.editparts.AbstractEditPart;
-import org.eclipse.gef.editparts.FreeformGraphicalRootEditPart;
 import org.eclipse.gef.editparts.GridLayer;
 import org.eclipse.gef.editparts.GuideLayer;
 
@@ -39,7 +36,7 @@ import com.servoy.eclipse.designer.internal.MarqueeDragTracker;
  * @author rgansevles
  * 
  */
-public class FormGraphicalRootEditPart extends FreeformGraphicalRootEditPart
+public class FormGraphicalRootEditPart extends BaseFormGraphicalRootEditPart
 {
 	/**
 	 * The layer containing feedback for the selected element, this layer is below the handle layer and above the layers with the elements.
@@ -50,8 +47,6 @@ public class FormGraphicalRootEditPart extends FreeformGraphicalRootEditPart
 	 * The layer that prints the form background.
 	 */
 	public static final String FORM_BACKGROUND_LAYER = "Layer for form background"; //$NON-NLS-1$
-
-	private final VisualFormEditor editorPart;
 
 	private final PropertyChangeListener viewerPropertyChangeListener = new PropertyChangeListener()
 	{
@@ -65,15 +60,15 @@ public class FormGraphicalRootEditPart extends FreeformGraphicalRootEditPart
 		}
 	};
 
-	public FormGraphicalRootEditPart(VisualFormEditor editorPart)
+	public FormGraphicalRootEditPart(BaseVisualFormEditor editorPart)
 	{
-		this.editorPart = editorPart;
+		super(editorPart);
 	}
 
 	@Override
 	protected void createLayers(LayeredPane layeredPane)
 	{
-		layeredPane.add(new FormBackgroundLayer(editorPart), FORM_BACKGROUND_LAYER);
+		layeredPane.add(new FormBackgroundLayer(getEditorPart()), FORM_BACKGROUND_LAYER);
 		layeredPane.add(getPrintableLayers(), PRINTABLE_LAYERS);
 		layeredPane.add(createGridLayer(), GRID_LAYER);
 
@@ -95,7 +90,7 @@ public class FormGraphicalRootEditPart extends FreeformGraphicalRootEditPart
 	@Override
 	protected GridLayer createGridLayer()
 	{
-		return new DottedGridLayer(editorPart);
+		return new DottedGridLayer(getEditorPart());
 	}
 
 	@Override
@@ -124,15 +119,4 @@ public class FormGraphicalRootEditPart extends FreeformGraphicalRootEditPart
 		super.unregister();
 	}
 
-	@Override
-	public Object getAdapter(Class adapter)
-	{
-		if (adapter == AutoexposeHelper.class) return new CustomViewportAutoexposeHelper(this, new Insets(100), true);
-		return super.getAdapter(adapter);
-	}
-
-	public VisualFormEditor getEditorPart()
-	{
-		return editorPart;
-	}
 }

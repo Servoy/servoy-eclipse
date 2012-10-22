@@ -52,12 +52,12 @@ import com.servoy.j2db.persistence.Tab;
 
 public class FormSelectionTool extends PanningSelectionTool
 {
-	private final VisualFormEditor editorPart;
+	private final BaseVisualFormEditor editorPart;
 
 	/**
 	 * @param editorPart
 	 */
-	public FormSelectionTool(VisualFormEditor editorPart)
+	public FormSelectionTool(BaseVisualFormEditor editorPart)
 	{
 		this.editorPart = editorPart;
 	}

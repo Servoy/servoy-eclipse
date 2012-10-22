@@ -39,7 +39,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
  * @author rgansevles
  */
 
-public class FormPlaceFieldCommand extends FormPlaceElementCommand
+public class FormPlaceFieldCommand extends BaseFormPlaceElementCommand
 {
 	private final boolean placeAsLabels;
 	private final boolean placeWithLabels;

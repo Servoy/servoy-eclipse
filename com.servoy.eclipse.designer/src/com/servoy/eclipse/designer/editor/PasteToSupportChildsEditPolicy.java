@@ -81,7 +81,7 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 		{
 			formEditPart = formEditPart.getParent();
 		}
-		if (VisualFormEditor.REQ_PASTE.equals(request.getType()) && persist instanceof ISupportChilds)
+		if (BaseVisualFormEditor.REQ_PASTE.equals(request.getType()) && persist instanceof ISupportChilds)
 		{
 			return new PasteCommand(application, (ISupportChilds)persist, request, getHost().getViewer(), (IPersist)(formEditPart == null ? null
 				: formEditPart.getModel()), fieldPositioner);
@@ -137,7 +137,7 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 	@Override
 	public boolean understandsRequest(Request request)
 	{
-		return VisualFormEditor.REQ_PASTE.equals(request.getType()) || RequestConstants.REQ_CLONE.equals(request.getType());
+		return BaseVisualFormEditor.REQ_PASTE.equals(request.getType()) || RequestConstants.REQ_CLONE.equals(request.getType());
 	}
 
 	public static Object getClipboardContents()

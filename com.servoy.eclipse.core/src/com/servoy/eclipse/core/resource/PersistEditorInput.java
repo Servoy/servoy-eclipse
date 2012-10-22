@@ -32,6 +32,7 @@ import com.servoy.j2db.util.UUID;
 public class PersistEditorInput implements IEditorInput
 {
 	public static final String FORM_RESOURCE_ID = "com.servoy.eclipse.core.resource.form";
+	public static final String MOBILE_FORM_RESOURCE_ID = "com.servoy.eclipse.core.resource.mobileform";
 	public static final String VALUELIST_RESOURCE_ID = "com.servoy.eclipse.core.resource.valuelist";
 	public static final String RELATION_RESOURCE_ID = "com.servoy.eclipse.core.resource.relation";
 	public static final String MEDIA_RESOURCE_ID = "com.servoy.eclipse.core.resource.media";
@@ -136,7 +137,7 @@ public class PersistEditorInput implements IEditorInput
 	 */
 	public static String getFormContentTypeIdentifier(Form form)
 	{
-		return FORM_RESOURCE_ID;
+		return form.getCustomMobileProperty("mobileform") == null ? FORM_RESOURCE_ID : MOBILE_FORM_RESOURCE_ID;
 	}
 
 	/*

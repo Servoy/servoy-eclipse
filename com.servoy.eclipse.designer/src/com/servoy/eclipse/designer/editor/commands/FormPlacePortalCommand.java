@@ -33,7 +33,7 @@ import com.servoy.j2db.persistence.RepositoryException;
  * 
  * @author rgansevles
  */
-public class FormPlacePortalCommand extends FormPlaceElementCommand
+public class FormPlacePortalCommand extends BaseFormPlaceElementCommand
 {
 	private final boolean fillText;
 	private final boolean fillName;

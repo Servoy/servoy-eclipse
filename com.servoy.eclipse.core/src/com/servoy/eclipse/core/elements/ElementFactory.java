@@ -129,7 +129,7 @@ public class ElementFactory
 		return label;
 	}
 
-	public static IPersist createButton(ISupportFormElements parent, ScriptMethod method, String text, Point location) throws RepositoryException
+	public static GraphicalComponent createButton(ISupportFormElements parent, ScriptMethod method, String text, Point location) throws RepositoryException
 	{
 		GraphicalComponent button = parent.createNewGraphicalComponent(new java.awt.Point(location == null ? 0 : location.x, location == null ? 0 : location.y));
 		button.setOnActionMethodID(method == null ? -1 : method.getID());

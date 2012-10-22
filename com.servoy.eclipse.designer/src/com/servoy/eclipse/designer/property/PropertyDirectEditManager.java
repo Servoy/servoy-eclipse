@@ -37,8 +37,8 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
-import com.servoy.eclipse.designer.editor.FormGraphicalRootEditPart;
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseFormGraphicalRootEditPart;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.ui.editors.IDialogDirectCellEditor;
 import com.servoy.eclipse.ui.editors.TextDialogCellEditor;
 
@@ -81,8 +81,8 @@ public class PropertyDirectEditManager extends DirectEditManager
 		super.bringDown();
 		if (disposeFont != null) disposeFont.dispose();
 
-		FormGraphicalRootEditPart root = (FormGraphicalRootEditPart)getEditPart().getRoot();
-		VisualFormEditor formEditor = root.getEditorPart();
+		BaseFormGraphicalRootEditPart root = (BaseFormGraphicalRootEditPart)getEditPart().getRoot();
+		BaseVisualFormEditor formEditor = root.getEditorPart();
 		formEditor.activateEditorContext();
 	}
 
@@ -134,7 +134,7 @@ public class PropertyDirectEditManager extends DirectEditManager
 	 */
 	protected void setErrorText()
 	{
-		((FormGraphicalRootEditPart)getEditPart().getRoot()).getEditorPart().getEditorSite().getActionBars().getStatusLineManager().setErrorMessage(
+		((BaseFormGraphicalRootEditPart)getEditPart().getRoot()).getEditorPart().getEditorSite().getActionBars().getStatusLineManager().setErrorMessage(
 			getCellEditor().isValueValid() ? null : getCellEditor().getErrorMessage());
 	}
 
@@ -157,8 +157,8 @@ public class PropertyDirectEditManager extends DirectEditManager
 		}
 		else
 		{
-			FormGraphicalRootEditPart root = (FormGraphicalRootEditPart)getEditPart().getRoot();
-			VisualFormEditor formEditor = root.getEditorPart();
+			BaseFormGraphicalRootEditPart root = (BaseFormGraphicalRootEditPart)getEditPart().getRoot();
+			BaseVisualFormEditor formEditor = root.getEditorPart();
 			formEditor.deactivateEditorContext();
 
 			getCellEditor().activate();

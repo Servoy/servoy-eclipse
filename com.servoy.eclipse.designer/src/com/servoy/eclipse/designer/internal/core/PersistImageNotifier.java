@@ -24,6 +24,9 @@ import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.ListCellRenderer;
 
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.geometry.Dimension;
+
 import com.servoy.eclipse.core.DesignComponentFactory;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
@@ -45,12 +48,14 @@ public class PersistImageNotifier extends AbstractImageNotifier
 {
 	private final IPersist persist;
 	private final Form form;
+	private final IFigure figure;
 
-	public PersistImageNotifier(IApplication application, IPersist persist, Form form)
+	public PersistImageNotifier(IApplication application, IPersist persist, Form form, IFigure figure)
 	{
 		super(application);
 		this.persist = persist;
 		this.form = form;
+		this.figure = figure;
 	}
 
 	@Override
@@ -93,6 +98,12 @@ public class PersistImageNotifier extends AbstractImageNotifier
 			}
 			((AbstractBase)persist).setRuntimeProperty(PersistPropertySource.LastPaintedBackgroundProperty, background);
 			((AbstractBase)persist).setRuntimeProperty(PersistPropertySource.LastPaintedFontProperty, comp.getFont());
+		}
+
+		if (comp != null)
+		{
+			Dimension size = figure.getSize();
+			comp.setSize(size.width, size.height);
 		}
 
 		return comp;

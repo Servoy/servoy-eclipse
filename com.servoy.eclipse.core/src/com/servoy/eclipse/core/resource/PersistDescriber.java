@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core.resource;
 
 import java.io.BufferedReader;
@@ -40,21 +40,12 @@ public abstract class PersistDescriber implements IContentDescriber
 		{
 			reader = new BufferedReader(new InputStreamReader(contents, "UTF8"));
 			String line;
-			for (int count = 0; count < 100 && (line = reader.readLine()) != null; count++)
+			for (int count = 0; count < 1000 && (line = reader.readLine()) != null; count++)
 			{
-				if (line.startsWith("typeid:"))
+				int describeLine = describeLine(line);
+				if (describeLine != INDETERMINATE)
 				{
-					String typeStr = line.substring("typeid:".length());
-					if (typeStr.endsWith(","))
-					{
-						typeStr = typeStr.substring(0, typeStr.length() - 1);
-					}
-					if (isValidType(Integer.parseInt(typeStr)))
-					{
-						return VALID;
-					}
-					// other type, no need to look any further
-					return INVALID;
+					return describeLine;
 				}
 			}
 		}
@@ -76,6 +67,28 @@ public abstract class PersistDescriber implements IContentDescriber
 			}
 		}
 		return INVALID;
+	}
+
+	/**
+	 * @param line
+	 */
+	protected int describeLine(String line)
+	{
+		if (line.startsWith("typeid:"))
+		{
+			String typeStr = line.substring("typeid:".length());
+			if (typeStr.endsWith(","))
+			{
+				typeStr = typeStr.substring(0, typeStr.length() - 1);
+			}
+			if (isValidType(Integer.parseInt(typeStr)))
+			{
+				return VALID;
+			}
+			// other type, no need to look any further
+			return INVALID;
+		}
+		return INDETERMINATE;
 	}
 
 	protected abstract boolean isValidType(int typeId);

@@ -102,18 +102,18 @@ public class SelectModelsCommandWrapper extends CompoundCommand
 			{
 				public void run()
 				{
-					List<Object> parts = new ArrayList<Object>(models.size());
+					List<Object> editParts = new ArrayList<Object>(models.size());
 					for (Object model : models)
 					{
-						Object editPart = viewer.getEditPartRegistry().get(model);
-						if (editPart != null)
+						EditPart editPart = (EditPart)viewer.getEditPartRegistry().get(model);
+						if (editPart != null && editPart.isSelectable())
 						{
-							parts.add(editPart);
+							editParts.add(editPart);
 						}
 					}
-					if (parts.size() > 0)
+					if (editParts.size() > 0)
 					{
-						viewer.setSelection(new StructuredSelection(parts));
+						viewer.setSelection(new StructuredSelection(editParts));
 					}
 				}
 			});

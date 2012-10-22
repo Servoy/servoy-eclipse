@@ -26,7 +26,7 @@ import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.designer.editor.GroupGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.PersistGraphicalEditPart;
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -112,9 +112,9 @@ public class FixedSelectAllAction extends SelectAllAction
 	@Override
 	public boolean isHandled()
 	{
-		if (part instanceof VisualFormEditor)
+		if (part instanceof BaseVisualFormEditor)
 		{
-			return ((VisualFormEditor)part).isDesignerContextActive();
+			return ((BaseVisualFormEditor)part).isDesignerContextActive();
 		}
 		return true;
 	}

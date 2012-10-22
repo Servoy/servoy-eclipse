@@ -27,8 +27,10 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.designer.editor.FormGraphicalEditPart;
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.mobile.editparts.MobileListModel;
+import com.servoy.eclipse.designer.mobile.property.MobileListPropertySource;
+import com.servoy.eclipse.designer.mobile.property.MobilePersistPropertySource;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -43,8 +45,10 @@ import com.servoy.eclipse.ui.property.PointPropertySource;
 import com.servoy.eclipse.ui.property.RetargetToEditorPersistProperties;
 import com.servoy.eclipse.ui.property.SavingPersistPropertySource;
 import com.servoy.j2db.persistence.AbstractRepository;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Solution;
@@ -96,9 +100,9 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 			return new FormElementGroupPropertySource((FormElementGroup)obj, null);
 		}
 
-		if (obj instanceof VisualFormEditor)
+		if (obj instanceof BaseVisualFormEditor)
 		{
-			persist = ((VisualFormEditor)obj).getForm();
+			persist = ((BaseVisualFormEditor)obj).getForm();
 			retargetToEditor = false;
 		}
 		else if (obj instanceof SimpleUserNode)
@@ -131,13 +135,20 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 		else if (obj instanceof EditPart)
 		{
 			EditPart editPart = (EditPart)obj;
+			Form contextForm = getEditpartFormContext(editPart);
+			context = contextForm;
 			Object model = editPart.getModel();
+
+			if (model instanceof MobileListModel && key == IPropertySource.class)
+			{
+				return MobileListPropertySource.getMobileListPropertySource((MobileListModel)model, contextForm);
+			}
+
 			if (model instanceof IPersist)
 			{
 				persist = (IPersist)model;
 				retargetToEditor = false;
 			}
-			context = getEditpartFormContext(((EditPart)obj));
 		}
 		else if (obj instanceof PersistEditor)
 		{
@@ -200,7 +211,21 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 			if (key == IPropertySource.class)
 			{
 				// for properties view
-				PersistPropertySource persistProperties = new PersistPropertySource(PersistContext.create(persist, context), isReadonlyPersist(persist));
+				PersistContext persistContext = PersistContext.create(persist, context);
+				boolean readonlyPersist = isReadonlyPersist(persist);
+				PersistPropertySource persistProperties;
+				Form form = (Form)persistContext.getContext().getAncestor(IRepository.FORMS);
+				if (form != null && form.getCustomMobileProperty("mobileform") != null)
+				{
+					// mobile form
+					persistProperties = new MobilePersistPropertySource(persistContext, readonlyPersist);
+				}
+				else
+				{
+					// regular
+					persistProperties = new PersistPropertySource(persistContext, readonlyPersist);
+				}
+
 				if (autoSave)
 				{
 					// all changes are saved immediately, on the persist node only (not recursive)
@@ -231,16 +256,20 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 	 * @param editPart
 	 * @return
 	 */
-	private IPersist getEditpartFormContext(EditPart editPart)
+	private Form getEditpartFormContext(EditPart editPart)
 	{
 		EditPart formEditPart = editPart;
-		while (formEditPart != null && !(formEditPart instanceof FormGraphicalEditPart))
+		while (formEditPart != null)
 		{
+			if (formEditPart instanceof IPersistEditPart)
+			{
+				IPersist persist = ((IPersistEditPart)formEditPart).getPersist();
+				if (persist instanceof Form)
+				{
+					return (Form)persist;
+				}
+			}
 			formEditPart = formEditPart.getParent();
-		}
-		if (formEditPart instanceof FormGraphicalEditPart)
-		{
-			return (IPersist)formEditPart.getModel();
 		}
 		return null;
 	}

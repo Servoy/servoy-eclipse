@@ -32,7 +32,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
@@ -50,7 +50,7 @@ public class CopyAction extends MultipleSelectionAction
 	 */
 	public CopyAction(IWorkbenchPart part)
 	{
-		super(part, VisualFormEditor.REQ_COPY);
+		super(part, BaseVisualFormEditor.REQ_COPY);
 	}
 
 	/**

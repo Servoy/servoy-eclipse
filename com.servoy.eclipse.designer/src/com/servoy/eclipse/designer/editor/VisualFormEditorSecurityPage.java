@@ -60,7 +60,7 @@ import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
 public class VisualFormEditorSecurityPage extends Composite
 {
-	private final VisualFormEditor editor;
+	private final BaseVisualFormEditor editor;
 	private boolean initialised = false;
 	private final TableViewer groupViewer;
 	private final TableViewer elementsViewer;
@@ -69,7 +69,7 @@ public class VisualFormEditorSecurityPage extends Composite
 	final ElementSettingsModel model;
 	private boolean doRefresh;
 
-	public VisualFormEditorSecurityPage(VisualFormEditor formEditor, Composite parent, int style)
+	public VisualFormEditorSecurityPage(BaseVisualFormEditor formEditor, Composite parent, int style)
 	{
 		super(parent, style);
 		setLayout(new FillLayout());

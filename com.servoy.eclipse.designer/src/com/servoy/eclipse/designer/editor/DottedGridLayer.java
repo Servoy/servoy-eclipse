@@ -35,9 +35,9 @@ import com.servoy.j2db.persistence.Form;
  */
 public class DottedGridLayer extends GridLayer
 {
-	private final VisualFormEditor editorPart;
+	private final BaseVisualFormEditor editorPart;
 
-	public DottedGridLayer(VisualFormEditor editorPart)
+	public DottedGridLayer(BaseVisualFormEditor editorPart)
 	{
 		this.editorPart = editorPart;
 	}

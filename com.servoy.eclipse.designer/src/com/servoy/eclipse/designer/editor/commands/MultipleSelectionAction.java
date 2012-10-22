@@ -29,7 +29,7 @@ import org.eclipse.gef.requests.GroupRequest;
 import org.eclipse.gef.ui.actions.SelectionAction;
 import org.eclipse.ui.IWorkbenchPart;
 
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 
 /**
  * An action to be performed on multiple elements as a single action.
@@ -121,9 +121,9 @@ public abstract class MultipleSelectionAction extends SelectionAction
 	@Override
 	public boolean isHandled()
 	{
-		if (getWorkbenchPart() instanceof VisualFormEditor)
+		if (getWorkbenchPart() instanceof BaseVisualFormEditor)
 		{
-			return ((VisualFormEditor)getWorkbenchPart()).isDesignerContextActive();
+			return ((BaseVisualFormEditor)getWorkbenchPart()).isDesignerContextActive();
 		}
 		return true;
 	}

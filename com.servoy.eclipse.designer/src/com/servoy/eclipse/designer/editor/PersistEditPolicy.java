@@ -81,16 +81,6 @@ class PersistEditPolicy extends ComponentEditPolicy
 	}
 
 	@Override
-	public EditPart getTargetEditPart(Request request)
-	{
-		if (understandsRequest(request))
-		{
-			return getHost();
-		}
-		return super.getTargetEditPart(request);
-	}
-
-	@Override
 	public Command getCommand(Request request)
 	{
 		IPersist persist = (IPersist)getHost().getModel();
@@ -100,7 +90,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 			formEditPart = formEditPart.getParent();
 		}
 
-		if (VisualFormEditor.REQ_DROP_LINK.equals(request.getType()) && request instanceof DataRequest)
+		if (BaseVisualFormEditor.REQ_DROP_LINK.equals(request.getType()) && request instanceof DataRequest)
 		{
 			if (((DataRequest)request).getData() instanceof IDragData[] && ((IDragData[])((DataRequest)request).getData()).length > 0)
 			{
@@ -123,7 +113,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 
 		Command command = null;
 		if (persist instanceof Portal &&
-			(VisualFormEditor.REQ_DROP_COPY.equals(request.getType()) || VisualFormEditor.REQ_PLACE_FIELD.equals(request.getType()) ||
+			(BaseVisualFormEditor.REQ_DROP_COPY.equals(request.getType()) || VisualFormEditor.REQ_PLACE_FIELD.equals(request.getType()) ||
 				VisualFormEditor.REQ_PLACE_MEDIA.equals(request.getType()) || VisualFormEditor.REQ_PLACE_BUTTON.equals(request.getType()) ||
 				VisualFormEditor.REQ_PLACE_LABEL.equals(request.getType()) || VisualFormEditor.REQ_PLACE_RECT_SHAPE.equals(request.getType())))
 		{
@@ -162,7 +152,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 			command = new FormPlaceElementCommand(application, (TabPanel)persist, ((DataRequest)request).getData(), request.getType(),
 				request.getExtendedData(), null, null, null, (IPersist)(formEditPart == null ? null : formEditPart.getModel()));
 		}
-		else if ((VisualFormEditor.REQ_SET_PROPERTY.equals(request.getType()) && request instanceof SetPropertyRequest))
+		else if ((BaseVisualFormEditor.REQ_SET_PROPERTY.equals(request.getType()) && request instanceof SetPropertyRequest))
 		{
 			SetPropertyRequest setPropertyRequest = (SetPropertyRequest)request;
 			command = SetValueCommand.createSetvalueCommand(setPropertyRequest.getName(),
@@ -182,7 +172,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 	public boolean understandsRequest(Request request)
 	{
 		Object model = getHost().getModel();
-		if (VisualFormEditor.REQ_DROP_LINK.equals(request.getType()) && request instanceof DataRequest)
+		if (BaseVisualFormEditor.REQ_DROP_LINK.equals(request.getType()) && request instanceof DataRequest)
 		{
 			if (((DataRequest)request).getData() instanceof IDragData[] && ((IDragData[])((DataRequest)request).getData()).length > 0)
 			{
@@ -229,7 +219,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 			}
 		}
 		if (model instanceof Portal &&
-			(VisualFormEditor.REQ_DROP_COPY.equals(request.getType()) || VisualFormEditor.REQ_PLACE_FIELD.equals(request.getType()) ||
+			(BaseVisualFormEditor.REQ_DROP_COPY.equals(request.getType()) || VisualFormEditor.REQ_PLACE_FIELD.equals(request.getType()) ||
 				VisualFormEditor.REQ_PLACE_MEDIA.equals(request.getType()) || VisualFormEditor.REQ_PLACE_BUTTON.equals(request.getType()) ||
 				VisualFormEditor.REQ_PLACE_LABEL.equals(request.getType()) || VisualFormEditor.REQ_PLACE_RECT_SHAPE.equals(request.getType())))
 		{
@@ -239,7 +229,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 		{
 			return true;
 		}
-		if (VisualFormEditor.REQ_SET_PROPERTY.equals(request.getType()) && request instanceof SetPropertyRequest)
+		if (BaseVisualFormEditor.REQ_SET_PROPERTY.equals(request.getType()) && request instanceof SetPropertyRequest)
 		{
 			return true;
 		}

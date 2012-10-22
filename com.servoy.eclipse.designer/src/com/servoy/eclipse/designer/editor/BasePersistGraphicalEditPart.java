@@ -37,6 +37,7 @@ import org.eclipse.gef.tools.DragEditPartsTracker;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.designer.editor.commands.SelectModelsCommandWrapper;
 import com.servoy.eclipse.designer.internal.MarqueeDragTracker;
+import com.servoy.eclipse.designer.property.IFieldPositionerProvider;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
@@ -52,7 +53,7 @@ import com.servoy.j2db.persistence.TabPanel;
  * @author rgansevles
  */
 
-public abstract class BasePersistGraphicalEditPart extends AbstractGraphicalEditPart implements IPersistEditPart
+public abstract class BasePersistGraphicalEditPart extends AbstractGraphicalEditPart implements IPersistEditPart, IFieldPositionerProvider
 {
 	protected final IApplication application;
 	private final boolean inherited;
@@ -300,9 +301,9 @@ public abstract class BasePersistGraphicalEditPart extends AbstractGraphicalEdit
 
 	public IFieldPositioner getFieldPositioner()
 	{
-		if (getParent() instanceof IPersistEditPart)
+		if (getParent() instanceof IFieldPositionerProvider)
 		{
-			return ((IPersistEditPart)getParent()).getFieldPositioner();
+			return ((IFieldPositionerProvider)getParent()).getFieldPositioner();
 		}
 		return null;
 	}

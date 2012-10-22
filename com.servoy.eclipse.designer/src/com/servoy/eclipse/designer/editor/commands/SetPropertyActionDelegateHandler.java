@@ -24,7 +24,7 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.Request;
 
 import com.servoy.eclipse.designer.actions.SetPropertyRequest;
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 
 /**
  * Base action class to toggle change a boolean property of selected objects.
@@ -39,7 +39,7 @@ public abstract class SetPropertyActionDelegateHandler extends DesignerSelection
 
 	public SetPropertyActionDelegateHandler(String propertyId, String name, Object value)
 	{
-		super(VisualFormEditor.REQ_SET_PROPERTY);
+		super(BaseVisualFormEditor.REQ_SET_PROPERTY);
 		this.propertyId = propertyId;
 		this.name = name;
 		this.value = value;

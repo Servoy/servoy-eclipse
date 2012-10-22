@@ -22,15 +22,10 @@ import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PrecisionRectangle;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.gef.EditPart;
-import org.eclipse.gef.LayerConstants;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.SnapToHelper;
-import org.eclipse.gef.editparts.LayerManager;
 import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.gef.requests.CreationFactory;
-import org.eclipse.gef.tools.CreationTool;
-import org.eclipse.swt.SWT;
 
 import com.servoy.eclipse.designer.editor.AlignmentFeedbackHelper;
 import com.servoy.eclipse.designer.editor.CreateElementRequest;
@@ -41,7 +36,7 @@ import com.servoy.eclipse.designer.editor.CreateElementRequest;
  * @author rgansevles
  *
  */
-public class ElementCreationTool extends CreationTool
+public class ElementCreationTool extends BaseElementCreationTool
 {
 	private AlignmentFeedbackHelper alignmentFeedbackHelper;
 	private SnapToHelper snapToHelper;
@@ -62,16 +57,6 @@ public class ElementCreationTool extends CreationTool
 		return alignmentFeedbackHelper;
 	}
 
-	protected IFigure getFeedbackLayer()
-	{
-		EditPart targetEditPart = getTargetEditPart();
-		if (targetEditPart == null || targetEditPart.getViewer() == null)
-		{
-			return null;
-		}
-		return LayerManager.Helper.find(targetEditPart).getLayer(LayerConstants.FEEDBACK_LAYER);
-	}
-
 	@Override
 	protected void showTargetFeedback()
 	{
@@ -80,19 +65,6 @@ public class ElementCreationTool extends CreationTool
 		if (helper != null)
 		{
 			helper.showElementAlignmentFeedback(getTargetRequest());
-		}
-	}
-
-	@Override
-	protected void handleFinished()
-	{
-		if (getCurrentInput().isModKeyDown(SWT.MOD1))
-		{
-			reactivate();
-		}
-		else
-		{
-			super.handleFinished();
 		}
 	}
 

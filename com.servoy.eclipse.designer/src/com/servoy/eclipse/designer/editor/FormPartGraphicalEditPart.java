@@ -49,6 +49,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.designer.internal.MarqueeDragTracker;
+import com.servoy.eclipse.designer.property.IFieldPositionerProvider;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
 import com.servoy.eclipse.designer.property.PropertyDirectEditManager;
 import com.servoy.eclipse.designer.property.PropertyDirectEditManager.PropertyCellEditorLocator;
@@ -67,15 +68,15 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
  * @author rgansevles
  */
 
-public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart implements IPersistEditPart, IPersistChangeListener
+public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart implements IPersistEditPart, IFieldPositionerProvider, IPersistChangeListener
 {
 	protected IApplication application;
 	private DirectEditManager directEditManager;
 
 	private final boolean inherited;
-	private final VisualFormEditor editorPart;
+	private final BaseVisualFormEditor editorPart;
 
-	public FormPartGraphicalEditPart(IApplication application, VisualFormEditor editorPart, Part part, boolean inherited)
+	public FormPartGraphicalEditPart(IApplication application, BaseVisualFormEditor editorPart, Part part, boolean inherited)
 	{
 		this.application = application;
 		this.editorPart = editorPart;
@@ -92,7 +93,7 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 	@Override
 	protected void createEditPolicies()
 	{
-		installEditPolicy(EditPolicy.COMPONENT_ROLE, new FormPartEditPolicy());
+		installEditPolicy(EditPolicy.COMPONENT_ROLE, new ComponentDeleteEditPolicy());
 		installEditPolicy(EditPolicy.DIRECT_EDIT_ROLE, new PropertyDirectEditPolicy(getPersist(), editorPart.getForm()));
 	}
 
@@ -198,9 +199,9 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 
 	public IFieldPositioner getFieldPositioner()
 	{
-		if (getParent() instanceof IPersistEditPart)
+		if (getParent() instanceof IFieldPositionerProvider)
 		{
-			return ((IPersistEditPart)getParent()).getFieldPositioner();
+			return ((IFieldPositionerProvider)getParent()).getFieldPositioner();
 		}
 		return null;
 	}

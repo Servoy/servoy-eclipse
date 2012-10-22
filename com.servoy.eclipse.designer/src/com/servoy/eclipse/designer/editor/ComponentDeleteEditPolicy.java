@@ -23,12 +23,12 @@ import org.eclipse.gef.requests.ForwardedRequest;
 import org.eclipse.gef.requests.GroupRequest;
 
 /**
- * Edit policy for form parts.
+ * Edit policy for allowing delete of elements.
  * 
  * @author rgansevles
  */
 
-public class FormPartEditPolicy extends ComponentEditPolicy
+public class ComponentDeleteEditPolicy extends ComponentEditPolicy
 {
 
 	/**

@@ -25,7 +25,7 @@ import org.eclipse.gef.ui.actions.WorkbenchPartAction;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.views.properties.IPropertySource;
 
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 
 /**
@@ -78,7 +78,7 @@ public class SetPropertyAction extends WorkbenchPartAction
 
 	protected Request createRequest()
 	{
-		return new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY, propertyId, getNewValue(), name);
+		return new SetPropertyRequest(BaseVisualFormEditor.REQ_SET_PROPERTY, propertyId, getNewValue(), name);
 	}
 
 	@Override

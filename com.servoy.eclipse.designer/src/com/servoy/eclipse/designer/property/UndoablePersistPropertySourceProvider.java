@@ -19,7 +19,7 @@ package com.servoy.eclipse.designer.property;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.IPropertySourceProvider;
 
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.IPersist;
 
@@ -32,9 +32,9 @@ import com.servoy.j2db.persistence.IPersist;
 
 public class UndoablePersistPropertySourceProvider implements IPropertySourceProvider
 {
-	private final VisualFormEditor editorPart;
+	private final BaseVisualFormEditor editorPart;
 
-	public UndoablePersistPropertySourceProvider(VisualFormEditor editorPart)
+	public UndoablePersistPropertySourceProvider(BaseVisualFormEditor editorPart)
 	{
 		this.editorPart = editorPart;
 	}

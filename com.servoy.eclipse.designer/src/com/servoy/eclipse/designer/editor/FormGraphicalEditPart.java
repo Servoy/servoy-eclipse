@@ -32,14 +32,13 @@ import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.SnapToGrid;
 import org.eclipse.gef.SnapToHelper;
-import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Point;
 
 import com.servoy.eclipse.designer.editor.FormBorderGraphicalEditPart.BorderModel;
 import com.servoy.eclipse.designer.editor.FormPartpanelGraphicalEditPart.PartpanelModel;
-import com.servoy.eclipse.designer.property.IPersistEditPart;
+import com.servoy.eclipse.designer.property.IFieldPositionerProvider;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.SnapToGridFieldPositioner;
@@ -62,39 +61,27 @@ import com.servoy.j2db.util.Utils;
  * 
  * @author rgansevles
  */
-public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements IPersistEditPart
+public class FormGraphicalEditPart extends BaseFormGraphicalEditPart implements IFieldPositionerProvider
 {
-	private final IApplication application;
 	private final LastClickMouseListener mouseListener = new LastClickMouseListener();
-	private final VisualFormEditor editorPart;
 	private SnapToGridFieldPositioner snapToGridIFieldPositioner;
 
-	public FormGraphicalEditPart(IApplication application, VisualFormEditor editorPart)
+	public FormGraphicalEditPart(IApplication application, BaseVisualFormEditor editorPart)
 	{
-		this.application = application;
-		this.editorPart = editorPart;
-		setModel(editorPart.getForm());
-	}
-
-	/**
-	 * @return the editorPart
-	 */
-	public VisualFormEditor getEditorPart()
-	{
-		return editorPart;
+		super(application, editorPart);
 	}
 
 	@Override
 	protected List<Object> getModelChildren()
 	{
-		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm());
+		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(getPersist()).getFlattenedForm(getPersist());
 		List<Object> list = new ArrayList<Object>();
 
 		list.add(new BorderModel(flattenedForm)); // A separate editpart to show the form border and resize handles
 		for (Part part : Utils.iterate(flattenedForm.getParts()))
 		{
 			// separate editparts for painting part backgrounds
-			list.add(new PartpanelModel(part, editorPart.getForm()));
+			list.add(new PartpanelModel(part, getPersist()));
 		}
 
 		Set<FormElementGroup> groups = new HashSet<FormElementGroup>();
@@ -102,8 +89,7 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 		{
 			for (IFormElement o : Utils.iterate(flattenedForm.getFormElementsSortedByFormIndex()))
 			{
-				if (Boolean.TRUE.equals(getViewer().getProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED)) &&
-					!editorPart.getForm().equals(o.getParent()))
+				if (Boolean.TRUE.equals(getViewer().getProperty(BaseVisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED)) && !getPersist().equals(o.getParent()))
 				{
 					// Hide inherited elements 
 					continue;
@@ -164,6 +150,7 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 		return list;
 	}
 
+
 	@Override
 	protected IFigure createFigure()
 	{
@@ -190,9 +177,9 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 	@Override
 	protected void createEditPolicies()
 	{
-		installEditPolicy(PasteToSupportChildsEditPolicy.PASTE_ROLE, new PasteToSupportChildsEditPolicy(application, getFieldPositioner()));
-		installEditPolicy(EditPolicy.LAYOUT_ROLE, new FormXYLayoutPolicy(application, this));
-		installEditPolicy(EditPolicy.COMPONENT_ROLE, new FormEditPolicy(application, getFieldPositioner()));
+		installEditPolicy(PasteToSupportChildsEditPolicy.PASTE_ROLE, new PasteToSupportChildsEditPolicy(getApplication(), getFieldPositioner()));
+		installEditPolicy(EditPolicy.LAYOUT_ROLE, new FormXYLayoutPolicy(getApplication(), this));
+		installEditPolicy(EditPolicy.COMPONENT_ROLE, new FormEditPolicy(getApplication(), getFieldPositioner()));
 	}
 
 	/**
@@ -201,13 +188,13 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 	@Override
 	protected EditPart createChild(Object child)
 	{
-		return createChild(application, editorPart, (Form)getModel(), child);
+		return createChild(getApplication(), getEditorPart(), (Form)getModel(), child);
 	}
 
 	/**
 	 * Create the child edit part.
 	 */
-	protected static EditPart createChild(IApplication application, VisualFormEditor editorPart, Form form, Object child)
+	public static EditPart createChild(IApplication application, BaseVisualFormEditor editorPart, Form form, Object child)
 	{
 		if (child instanceof BorderModel)
 		{
@@ -229,7 +216,8 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 		{
 			return new GroupGraphicalEditPart(application, editorPart, form, (FormElementGroup)child);
 		}
-		return new PersistGraphicalEditPart(application, (IPersist)child, form, ModelUtils.isInheritedFormElement(child, form));
+		return new PersistGraphicalEditPart(application, (IPersist)child, form, ModelUtils.isInheritedFormElement(child, form),
+			new PersistGraphicalEditPartFigureFactory(application, form));
 	}
 
 	@Override
@@ -320,6 +308,7 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 	/*
 	 * Added because refreshing forms with many children (specially tabpanels) leads to performance degradation (refresh takes too long).
 	 */
+	@Override
 	public void refreshWithoutChildren()
 	{
 		refreshVisuals();
@@ -353,11 +342,13 @@ public class FormGraphicalEditPart extends AbstractGraphicalEditPart implements 
 		}
 	}
 
+	@Override
 	public Form getPersist()
 	{
 		return (Form)getModel();
 	}
 
+	@Override
 	public boolean isInherited()
 	{
 		return false;
