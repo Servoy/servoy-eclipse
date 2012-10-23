@@ -137,8 +137,10 @@ public class SuggestForeignTypesWizard extends Wizard
 	private IServer server = null;
 	private ForeignTypeSuggestionData data;
 
-	boolean showOnlyChangedColumns = true;
-	boolean showOnlyRelevantColumns = true;
+	boolean listOnlyChangedColumns = true;
+	boolean listOnlyColumnsWithoutCurrentType = true;
+	boolean skipDatetimeAndMedia = true;
+	boolean skipText = true;
 	boolean groupByColumns = false;
 	boolean hasServer;
 
@@ -390,10 +392,81 @@ public class SuggestForeignTypesWizard extends Wizard
 			// Row four, further buttons and checks. We put it before row three,
 			// because row three will occupy all space in the middle of the form,
 			// so it depends on this.
+			// We bind the checks from bottom to top and then bind the buttons to the checks
+			final Button skipTextButton = new Button(parent, SWT.CHECK);
+			skipTextButton.setText("Skip Text"); //$NON-NLS-1$
+			fd = new FormData();
+			fd.bottom = new FormAttachment(100);
+			fd.left = new FormAttachment(0);
+			skipTextButton.setLayoutData(fd);
+			skipTextButton.setSelection(skipText);
+			skipTextButton.addListener(SWT.Selection, new Listener()
+			{
+				public void handleEvent(Event event)
+				{
+					skipText = skipTextButton.getSelection();
+					updateContent(false);
+					suggestionTree.getTree().setFocus();
+				}
+			});
+
+			final Button skipDatetimeAndMediaButton = new Button(parent, SWT.CHECK);
+			skipDatetimeAndMediaButton.setText("Skip DATETIME and MEDIA"); //$NON-NLS-1$
+			fd = new FormData();
+			fd.bottom = new FormAttachment(skipTextButton, -space);
+			fd.left = new FormAttachment(skipTextButton, 0, SWT.LEFT);
+			skipDatetimeAndMediaButton.setLayoutData(fd);
+			skipDatetimeAndMediaButton.setSelection(skipDatetimeAndMedia);
+			skipDatetimeAndMediaButton.addListener(SWT.Selection, new Listener()
+			{
+				public void handleEvent(Event event)
+				{
+					skipDatetimeAndMedia = skipDatetimeAndMediaButton.getSelection();
+					updateContent(false);
+					suggestionTree.getTree().setFocus();
+				}
+			});
+
+			final Button listOnlyColumnsWithoutCurrentTypeButton = new Button(parent, SWT.CHECK);
+			listOnlyColumnsWithoutCurrentTypeButton.setText("List only columns without current type"); //$NON-NLS-1$
+			fd = new FormData();
+
+			fd.bottom = new FormAttachment(skipDatetimeAndMediaButton, -space);
+			fd.left = new FormAttachment(skipDatetimeAndMediaButton, 0, SWT.LEFT);
+			listOnlyColumnsWithoutCurrentTypeButton.setLayoutData(fd);
+			listOnlyColumnsWithoutCurrentTypeButton.setSelection(listOnlyColumnsWithoutCurrentType);
+			listOnlyColumnsWithoutCurrentTypeButton.addListener(SWT.Selection, new Listener()
+			{
+				public void handleEvent(Event event)
+				{
+					listOnlyColumnsWithoutCurrentType = listOnlyColumnsWithoutCurrentTypeButton.getSelection();
+					updateContent(false);
+					suggestionTree.getTree().setFocus();
+				}
+			});
+
+			final Button listOnlyChangesButton = new Button(parent, SWT.CHECK);
+			listOnlyChangesButton.setText("List only columns that change"); //$NON-NLS-1$
+			fd = new FormData();
+
+			fd.bottom = new FormAttachment(listOnlyColumnsWithoutCurrentTypeButton, -space);
+			fd.left = new FormAttachment(listOnlyColumnsWithoutCurrentTypeButton, 0, SWT.LEFT);
+			listOnlyChangesButton.setLayoutData(fd);
+			listOnlyChangesButton.setSelection(listOnlyChangedColumns);
+			listOnlyChangesButton.addListener(SWT.Selection, new Listener()
+			{
+				public void handleEvent(Event event)
+				{
+					listOnlyChangedColumns = listOnlyChangesButton.getSelection();
+					updateContent(false);
+					suggestionTree.getTree().setFocus();
+				}
+			});
+
 			Button selectNoneForSaving = new Button(parent, SWT.PUSH);
 			selectNoneForSaving.setText("Select none for saving"); //$NON-NLS-1$
 			fd = new FormData();
-			fd.bottom = new FormAttachment(100);
+			fd.top = new FormAttachment(listOnlyChangesButton, 0, SWT.TOP);
 			fd.right = new FormAttachment(100);
 			selectNoneForSaving.setLayoutData(fd);
 			selectNoneForSaving.setSelection(true);
@@ -424,49 +497,13 @@ public class SuggestForeignTypesWizard extends Wizard
 				}
 			});
 
-			final Button showOnlyChangesButton = new Button(parent, SWT.CHECK);
-			showOnlyChangesButton.setText("Show only columns that change"); //$NON-NLS-1$
-			fd = new FormData();
-			fd.top = new FormAttachment(selectNoneForSaving, 0, SWT.TOP);
-			fd.bottom = new FormAttachment(selectNoneForSaving, 0, SWT.BOTTOM);
-			fd.left = new FormAttachment(0);
-			showOnlyChangesButton.setLayoutData(fd);
-			showOnlyChangesButton.setSelection(showOnlyChangedColumns);
-			showOnlyChangesButton.addListener(SWT.Selection, new Listener()
-			{
-				public void handleEvent(Event event)
-				{
-					showOnlyChangedColumns = showOnlyChangesButton.getSelection();
-					updateContent(false);
-					suggestionTree.getTree().setFocus();
-				}
-			});
-
-			final Button showOnlyRelevantColumnsButton = new Button(parent, SWT.CHECK);
-			showOnlyRelevantColumnsButton.setText("Show only relevant columns (no DATETIME and MEDIA)"); //$NON-NLS-1$
-			fd = new FormData();
-			fd.top = new FormAttachment(selectNoneForSaving, 0, SWT.TOP);
-			fd.bottom = new FormAttachment(selectNoneForSaving, 0, SWT.BOTTOM);
-			fd.left = new FormAttachment(showOnlyChangesButton, space);
-			showOnlyRelevantColumnsButton.setLayoutData(fd);
-			showOnlyRelevantColumnsButton.setSelection(showOnlyRelevantColumns);
-			showOnlyRelevantColumnsButton.addListener(SWT.Selection, new Listener()
-			{
-				public void handleEvent(Event event)
-				{
-					showOnlyRelevantColumns = showOnlyRelevantColumnsButton.getSelection();
-					updateContent(false);
-					suggestionTree.getTree().setFocus();
-				}
-			});
-
 			// Row three, the tree editor.
 			Composite suggestionTreeHolder = new Composite(parent, SWT.NONE);
 			fd = new FormData();
 			fd.top = new FormAttachment(collapseAllButton, space);
 			fd.left = new FormAttachment(0);
 			fd.right = new FormAttachment(100);
-			fd.bottom = new FormAttachment(showOnlyChangesButton, -space);
+			fd.bottom = new FormAttachment(listOnlyChangesButton, -space);
 			fd.height = 400;
 			suggestionTreeHolder.setLayoutData(fd);
 
@@ -937,13 +974,31 @@ public class SuggestForeignTypesWizard extends Wizard
 			this.doSave = isChanged();
 		}
 
-		public boolean isRelevant()
+		public boolean isWithoutCurrentType()
 		{
 			if (isGroupingEntry())
 			{
 				for (ForeignTypeSuggestionEntry child : children)
 				{
-					if (child.isRelevant())
+					if (child.isWithoutCurrentType())
+					{
+						return true;
+					}
+				}
+				return true;
+			}
+
+			ColumnInfo ci = ((Column)parentColumn).getColumnInfo();
+			return ci == null || ci.getForeignType() == null;
+		}
+
+		public boolean isNotDatatimeAndMedia()
+		{
+			if (isGroupingEntry())
+			{
+				for (ForeignTypeSuggestionEntry child : children)
+				{
+					if (child.isNotDatatimeAndMedia())
 					{
 						return true;
 					}
@@ -955,6 +1010,26 @@ public class SuggestForeignTypesWizard extends Wizard
 			ComponentFormat componentFormat = ComponentFormat.getComponentFormat(null, parentColumn, Activator.getDefault().getDesignClient());
 			return componentFormat.dpType == IColumnTypes.INTEGER || componentFormat.dpType == IColumnTypes.NUMBER ||
 				componentFormat.dpType == IColumnTypes.TEXT;
+		}
+
+		public boolean isNotText()
+		{
+			if (isGroupingEntry())
+			{
+				for (ForeignTypeSuggestionEntry child : children)
+				{
+					if (child.isNotText())
+					{
+						return true;
+					}
+				}
+				return false;
+			}
+
+			// use dataprovider type as defined by converter
+			ComponentFormat componentFormat = ComponentFormat.getComponentFormat(null, parentColumn, Activator.getDefault().getDesignClient());
+			return componentFormat.dpType == IColumnTypes.INTEGER || componentFormat.dpType == IColumnTypes.NUMBER ||
+				componentFormat.dpType == IColumnTypes.DATETIME || componentFormat.dpType == IColumnTypes.MEDIA;
 		}
 
 		public boolean isChanged()
@@ -1036,8 +1111,9 @@ public class SuggestForeignTypesWizard extends Wizard
 
 		public boolean shouldShow()
 		{
-			return (!showOnlyChangedColumns || (showOnlyChangedColumns && isChanged())) &&
-				(!showOnlyRelevantColumns || (showOnlyRelevantColumns && isRelevant()));
+			return (!listOnlyChangedColumns || (listOnlyChangedColumns && isChanged())) &&
+				(!listOnlyColumnsWithoutCurrentType || (listOnlyColumnsWithoutCurrentType && isWithoutCurrentType())) &&
+				(!skipDatetimeAndMedia || (skipDatetimeAndMedia && isNotDatatimeAndMedia())) && (!skipText || (skipText && isNotText()));
 		}
 
 		public String getRelevantName()
