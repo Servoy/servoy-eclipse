@@ -19,22 +19,45 @@ package com.servoy.eclipse.designer.editor.mobile.editparts;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JRadioButton;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.border.Border;
+import javax.swing.plaf.basic.BasicComboBoxUI;
 
 import org.eclipse.gef.GraphicalEditPart;
+import org.eclipse.swt.widgets.Display;
 
+import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.IFigureFactory;
 import com.servoy.eclipse.designer.editor.PersistImageFigure;
 import com.servoy.eclipse.designer.editor.SetBoundsToSupportBoundsFigureListener;
 import com.servoy.eclipse.designer.internal.core.IImageNotifier;
+import com.servoy.eclipse.designer.internal.core.ImageDataCollector;
+import com.servoy.eclipse.designer.internal.core.ImageNotifierSupport;
 import com.servoy.eclipse.designer.internal.core.PersistImageNotifier;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.dataprocessing.CustomValueList;
+import com.servoy.j2db.dataprocessing.IValueList;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
+import com.servoy.j2db.smart.dataui.DataCheckBox;
+import com.servoy.j2db.smart.dataui.DataChoice;
+import com.servoy.j2db.smart.dataui.DataComboBox;
+import com.servoy.j2db.smart.dataui.DataField;
 import com.servoy.j2db.util.gui.RoundedBorder;
 
 /**
@@ -45,10 +68,14 @@ import com.servoy.j2db.util.gui.RoundedBorder;
  */
 public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFactory<PersistImageFigure>
 {
-	public final static Color BUTTON_BG = new Color(59, 59, 59); // TODO: use theme
-	public final static Color BUTTON_BORDER = new Color(135, 135, 135); // TODO: use theme
-	public final static Color LABEL_FG = new Color(119, 119, 97); // TODO: use theme
-
+	private final static Color BUTTON_BG = new Color(64, 116, 165); // TODO: use theme
+	private final static Color BUTTON_BORDER = new Color(20, 80, 114); // TODO: use theme
+	private final static Color TEXT_BG = new Color(240, 240, 240); // TODO: use theme
+	private final static Color LABEL_FG = new Color(68, 68, 68); // TODO: use theme
+	private final static Color COMBO_BG = new Color(246, 246, 246); // TODO: use theme
+	private final static Color RADIOS_BG = new Color(246, 246, 246); // TODO: use theme
+	private final static Color CHECKS_BG = new Color(246, 246, 246); // TODO: use theme
+	private final static Color HEADER_LABEL_FG = Color.white; // TODO: use theme
 
 	private final IApplication application;
 	private final Form form;
@@ -73,22 +100,134 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 					protected Component createComponent()
 					{
 						Component component = super.createComponent();
+						component.setFont(component.getFont().deriveFont(12f)); // 12 pt font
+
+						if (component instanceof JButton || component instanceof DataComboBox || component instanceof DataField ||
+							component instanceof DataChoice || component instanceof DataCheckBox)
+						{
+							RoundedBorder rborder = new RoundedBorder(1, 1, 1, 1, BUTTON_BORDER, BUTTON_BORDER, BUTTON_BORDER, BUTTON_BORDER);
+							rborder.setRoundingRadius(new float[] { 15, 15, 15, 15 });
+							((JComponent)component).setBorder(rborder);
+						}
+
 						if (component instanceof JButton)
 						{
 							((JButton)component).setBackground(BUTTON_BG);
 							((JButton)component).setForeground(Color.white);
-							RoundedBorder rborder = new RoundedBorder(1, 1, 1, 1, BUTTON_BORDER, BUTTON_BORDER, BUTTON_BORDER, BUTTON_BORDER);
-							((JButton)component).setBorder(rborder);
+							component.setFont(component.getFont().deriveFont(Font.BOLD));
 						}
-						else if (component instanceof JLabel && persist instanceof AbstractBase &&
-							((AbstractBase)persist).getCustomMobileProperty("headerText") != null)
+						else if (component instanceof JLabel)
 						{
-							((JLabel)component).setForeground(LABEL_FG);
+							((JLabel)component).setOpaque(false);
+							boolean headerText = persist instanceof AbstractBase && ((AbstractBase)persist).getCustomMobileProperty("headerText") != null;
+							((JLabel)component).setForeground(headerText ? HEADER_LABEL_FG : LABEL_FG);
+							if (headerText) component.setFont(component.getFont().deriveFont(Font.BOLD));
 						}
-						component.setFont(component.getFont().deriveFont(12f)); // 12 pt font
+						else if (component instanceof DataComboBox)
+						{
+							((DataComboBox)component).setEditable(false);
+							component.setBackground(COMBO_BG);
+							((DataComboBox)component).setUI(new BasicComboBoxUI()
+							{
+								@Override
+								protected JButton createArrowButton()
+								{
+									JButton button = new JButton(Activator.getDefault().loadImageIconFromBundle("mobile_combo_button.png"));
+									button.setBorder(null);
+									button.setOpaque(false);
+									return button;
+								}
+							});
+						}
+						else if (component instanceof DataField)
+						{
+							component.setBackground(TEXT_BG);
+						}
+						else if (component instanceof DataChoice &&
+							(((DataChoice)component).getChoiceType() == Field.RADIOS || ((DataChoice)component).getChoiceType() == Field.CHECKS))
+						{
+							DataChoice dataChoice = (DataChoice)component;
+
+							component.setFont(component.getFont().deriveFont(Font.BOLD));
+							if (dataChoice.getChoiceType() == Field.RADIOS)
+							{
+								component.setBackground(RADIOS_BG);
+								((JRadioButton)dataChoice.getRendererComponent()).setIcon(Activator.getDefault().loadImageIconFromBundle("mobile_radio_off.png"));
+								((JRadioButton)dataChoice.getRendererComponent()).setSelectedIcon(Activator.getDefault().loadImageIconFromBundle(
+									"mobile_radio_on.png"));
+							}
+							else
+							{
+								component.setBackground(CHECKS_BG);
+								((JCheckBox)dataChoice.getRendererComponent()).setIcon(Activator.getDefault().loadImageIconFromBundle("mobile_check_off.png"));
+								((JCheckBox)dataChoice.getRendererComponent()).setSelectedIcon(Activator.getDefault().loadImageIconFromBundle(
+									"mobile_check_on.png"));
+							}
+
+							IValueList valueList = dataChoice.getValueList();
+							if (valueList.getSize() == 0)
+							{
+								// some sample values
+								dataChoice.setValueList(valueList = new CustomValueList(application, null, "One\nTwo\nThree", false, IColumnTypes.TEXT, null));
+							}
+							// select first item
+							dataChoice.setValueObject(valueList.getRealElementAt(0));
+							dataChoice.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+							dataChoice.getEnclosedComponent().setVisibleRowCount(valueList.getSize());
+							dataChoice.getEnclosedComponent().setLayoutOrientation(JList.VERTICAL);
+							Dimension compPrefsize = component.getPreferredSize();
+							// set prefSize directly, setPreferredSize() throws illegal-thread-access in revalidate
+							prefSize = new org.eclipse.draw2d.geometry.Dimension(compPrefsize.width, compPrefsize.height);
+							Display.getDefault().asyncExec(new Runnable()
+							{
+								public void run()
+								{
+									revalidate();
+								}
+							});
+						}
+						else if (component instanceof DataCheckBox)
+						{
+							component.setBackground(CHECKS_BG);
+							((DataCheckBox)component).setIcon(Activator.getDefault().loadImageIconFromBundle("mobile_check_on.png"));
+						}
+
 						return component;
 					}
+
+					@Override
+					protected ImageDataCollector createImageDataCollector(ImageNotifierSupport imageNotifierSupport)
+					{
+						return new ImageDataCollector(imageNotifierSupport)
+						{
+							@Override
+							protected void setGraphicsClip(Graphics graphics, Component component, int width, int height)
+							{
+								if (graphics instanceof Graphics2D && component instanceof JLabel && ((JLabel)component).getComponentCount() == 1)
+								{
+									Component comp = ((JLabel)component).getComponent(0);
+									if (comp instanceof JComponent)
+									{
+										Border compBorder = ((JComponent)comp).getBorder();
+										if (compBorder instanceof RoundedBorder)
+										{
+											graphics.setClip(((RoundedBorder)compBorder).createRoundedShape(width, height));
+											return;
+										}
+									}
+								}
+
+								super.setGraphicsClip(graphics, component, width, height);
+							}
+						};
+					}
 				};
+			}
+
+			@Override
+			public org.eclipse.draw2d.geometry.Dimension getPreferredSize(int wHint, int hHint)
+			{
+				return prefSize != null ? prefSize : super.getPreferredSize(wHint, hHint);
 			}
 		};
 

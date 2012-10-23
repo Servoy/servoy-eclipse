@@ -171,7 +171,8 @@ public class ImageDataCollector implements ImageConsumer
 						{
 							((Graphics2D)graphics).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
 						}
-						graphics.setClip(0, 0, iWidth, iHeight);
+
+						setGraphicsClip(graphics, component, iWidth, iHeight);
 						component.printAll(graphics);
 
 						if (Utils.isAppleMacOS())
@@ -225,6 +226,17 @@ public class ImageDataCollector implements ImageConsumer
 		return true;
 	}
 
+	/**
+	 * set clipping area to graphics for the component
+	 * @param graphics
+	 * @param component
+	 * @param width
+	 * @param height
+	 */
+	protected void setGraphicsClip(Graphics graphics, Component component, int width, int height)
+	{
+		graphics.setClip(0, 0, width, height);
+	}
 
 	/**
 	 * Start production with the producer.

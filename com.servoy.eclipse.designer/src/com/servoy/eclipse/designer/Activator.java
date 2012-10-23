@@ -16,11 +16,21 @@
  */
 package com.servoy.eclipse.designer;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.swing.ImageIcon;
+
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.internal.util.BundleUtility;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 import com.servoy.eclipse.core.I18NChangeListener;
@@ -40,6 +50,8 @@ public class Activator extends AbstractUIPlugin
 	private static Activator plugin;
 
 	private I18NChangeListener i18nChangeListener;
+
+	private final Map<String, ImageIcon> imageIcons = new HashMap<String, ImageIcon>();
 
 	/**
 	 * The constructor
@@ -91,6 +103,7 @@ public class Activator extends AbstractUIPlugin
 	{
 		plugin = null;
 		ServoyModelManager.getServoyModelManager().getServoyModel().removeI18NChangeListener(i18nChangeListener);
+		imageIcons.clear();
 		super.stop(context);
 	}
 
@@ -105,19 +118,6 @@ public class Activator extends AbstractUIPlugin
 	}
 
 	/**
-	 * Returns an image descriptor for the image file at the given
-	 * plug-in relative path
-	 *
-	 * @param path the path
-	 * @return the image descriptor
-	 */
-	public static ImageDescriptor getImageDescriptor(String path)
-	{
-		return imageDescriptorFromPlugin(PLUGIN_ID, path);
-	}
-
-
-	/**
 	 * Get an image with the given name from this plugin's bundle.
 	 * 
 	 * @param name the name of the image file.
@@ -125,7 +125,51 @@ public class Activator extends AbstractUIPlugin
 	 */
 	public static ImageDescriptor loadImageDescriptorFromBundle(String name)
 	{
-		return getImageDescriptor("$nl$/icons/" + name);
+		return imageDescriptorFromPlugin(PLUGIN_ID, "$nl$/icons/" + name);
+	}
+
+	/**
+	 * Get an swing image icon with the given name from this plugin's bundle.
+	 * 
+	 * @param name the name of the image file.
+	 * @return the image icon for the file.
+	 */
+	public ImageIcon loadImageIconFromBundle(String name)
+	{
+		if (name == null)
+		{
+			throw new IllegalArgumentException();
+		}
+
+		ImageIcon imageIcon = imageIcons.get(name);
+		if (imageIcon == null)
+		{
+			// if the bundle is not ready then there is no image
+			Bundle bundle = Platform.getBundle(PLUGIN_ID);
+			if (!BundleUtility.isReady(bundle))
+			{
+				return null;
+			}
+
+			String imageFilePath = "$nl$/icons/" + name;
+			// look for the image (this will check both the plugin and fragment folders
+			URL fullPathString = BundleUtility.find(bundle, imageFilePath);
+
+			if (fullPathString == null)
+			{
+				try
+				{
+					fullPathString = new URL(imageFilePath);
+				}
+				catch (MalformedURLException e)
+				{
+					return null;
+				}
+			}
+
+			imageIcons.put(name, imageIcon = new ImageIcon(fullPathString, fullPathString.toExternalForm().intern()));
+		}
+		return imageIcon;
 	}
 
 }

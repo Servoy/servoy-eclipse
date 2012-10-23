@@ -20,11 +20,14 @@ import org.eclipse.gef.Request;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.editpolicies.ComponentEditPolicy;
 import org.eclipse.gef.requests.CreateRequest;
+import org.eclipse.gef.requests.CreationFactory;
 
 import com.servoy.eclipse.designer.editor.AddPartsCommand;
+import com.servoy.eclipse.designer.editor.CreateElementRequest;
+import com.servoy.eclipse.designer.editor.mobile.commands.AddFieldCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.AddFormListCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.AddInsetListCommand;
-import com.servoy.eclipse.designer.editor.mobile.commands.AddTextInputCommand;
+import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Part;
@@ -51,6 +54,15 @@ public class MobileFormEditPolicy extends ComponentEditPolicy
 
 		if (request instanceof CreateRequest)
 		{
+			if (request instanceof CreateElementRequest)
+			{
+				CreationFactory factory = ((CreateElementRequest)request).getFactory();
+				if (factory instanceof RequestTypeCreationFactory)
+				{
+					request.getExtendedData().putAll(((RequestTypeCreationFactory)factory).getExtendedData());
+				}
+			}
+
 			Form form = (Form)getHost().getModel();
 
 			Object createType = ((CreateRequest)request).getNewObjectType();
@@ -62,9 +74,9 @@ public class MobileFormEditPolicy extends ComponentEditPolicy
 			{
 				command = new AddPartsCommand(form, new int[] { Part.FOOTER });
 			}
-			else if (createType == MobileVisualFormEditor.REQ_PLACE_TEXT)
+			else if (createType == MobileVisualFormEditor.REQ_PLACE_FIELD)
 			{
-				command = new AddTextInputCommand(application, form, (CreateRequest)request);
+				command = new AddFieldCommand(application, form, (CreateRequest)request);
 			}
 			else if (createType == MobileVisualFormEditor.REQ_PLACE_INSET_LIST)
 			{

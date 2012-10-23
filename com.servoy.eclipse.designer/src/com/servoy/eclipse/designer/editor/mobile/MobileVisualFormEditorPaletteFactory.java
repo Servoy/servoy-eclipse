@@ -37,6 +37,9 @@ import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences.PaletteCustomization;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.j2db.persistence.Field;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
  * Palette items for mobile form editor.
@@ -66,11 +69,17 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 
 	private static final String ELEMENTS_ID = "elements";
 	private static final String ELEMENTS_TEXT_FIELD_ID = "text field";
-	private static final String ELEMENTS_TOGGLE_SWITCH_ID = "toggle switch";
+	private static final String ELEMENTS_TEXTAREA_ID = "text area";
+	private static final String ELEMENTS_COMBOBOX_ID = "combobox";
+	private static final String ELEMENTS_CHECKBOXES_ID = "checkboxes";
+	private static final String ELEMENTS_RADIOBUTTONS_ID = "radio buttons";
 
 	private static final String[] ELEMENTS_IDS = new String[] {
 	/* */ELEMENTS_TEXT_FIELD_ID
-	/* */, ELEMENTS_TOGGLE_SWITCH_ID
+	/* */, ELEMENTS_TEXTAREA_ID
+	/* */, ELEMENTS_COMBOBOX_ID
+	/* */, ELEMENTS_CHECKBOXES_ID
+	/* */, ELEMENTS_RADIOBUTTONS_ID
 	/* */};
 
 	private static final String LISTS_ID = "lists";
@@ -244,18 +253,36 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 	private PaletteEntry createElementsEntry(String id)
 	{
 		ImageDescriptor icon;
-		RequestType requestType;
+		RequestType requestType = MobileVisualFormEditor.REQ_PLACE_FIELD;
+		int displayType = -1;
 
 		if (ELEMENTS_TEXT_FIELD_ID.equals(id))
 		{
 			icon = Activator.loadImageDescriptorFromBundle("textinput.png"); // RAGTEST icon
-			requestType = MobileVisualFormEditor.REQ_PLACE_TEXT;
 		}
 
-		else if (ELEMENTS_TOGGLE_SWITCH_ID.equals(id))
+		else if (ELEMENTS_TEXTAREA_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("TEXTAREA16.png"); // RAGTEST icon
+			displayType = Field.TEXT_AREA;
+		}
+
+		else if (ELEMENTS_COMBOBOX_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("SELECT16.png");// RAGTEST icon
+			displayType = Field.COMBOBOX;
+		}
+
+		else if (ELEMENTS_CHECKBOXES_ID.equals(id))
 		{
 			icon = Activator.loadImageDescriptorFromBundle("text.gif");// RAGTEST icon
-			requestType = MobileVisualFormEditor.REQ_PLACE_TOGGLE;
+			displayType = Field.CHECKS;
+		}
+
+		else if (ELEMENTS_RADIOBUTTONS_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("text.gif");// RAGTEST icon
+			displayType = Field.RADIOS;
 		}
 
 		else
@@ -264,7 +291,19 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 			return null;
 		}
 
-		return new ElementCreationToolEntry("", "", new RequestTypeCreationFactory(requestType), icon, icon);
+		Map<String, Object> extendedData = new HashMap<String, Object>();
+		if (displayType != -1)
+		{
+			setProperty(
+				extendedData,
+				StaticContentSpecLoader.PROPERTY_DISPLAYTYPE,
+				PersistPropertySource.DISPLAY_TYPE_CONTOLLER.getConverter().convertProperty(StaticContentSpecLoader.PROPERTY_DISPLAYTYPE.getPropertyName(),
+					Integer.valueOf(displayType)));
+		}
+
+		RequestTypeCreationFactory factory = new RequestTypeCreationFactory(requestType);
+		factory.setExtendedData(extendedData);
+		return new ElementCreationToolEntry("", "", factory, icon, icon);
 	}
 
 	private PaletteEntry createListsEntry(String id)

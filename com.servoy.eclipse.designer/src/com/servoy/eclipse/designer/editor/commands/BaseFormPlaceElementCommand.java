@@ -166,19 +166,7 @@ public abstract class BaseFormPlaceElementCommand extends Command implements ISu
 					// resize all created models relative to the current bounding box
 					applySizeToModels(size, models);
 				}
-				for (Object model : models)
-				{
-					if (objectProperties != null && objectProperties.size() > 0)
-					{
-						Command setPropertiesCommand = SetValueCommand.createSetPropertiesCommand(
-							(IPropertySource)Platform.getAdapterManager().getAdapter(model, IPropertySource.class), objectProperties);
-						if (setPropertiesCommand != null)//FIXME: why size?
-						{
-							setPropertiesCommand.execute();
-						}
-					}
-					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, model, true);
-				}
+				setPropertiesOnModels();
 			}
 			else
 			{
@@ -189,6 +177,29 @@ public abstract class BaseFormPlaceElementCommand extends Command implements ISu
 		{
 			ServoyLog.logError(ex);
 		}
+	}
+
+	protected void setPropertiesOnModels()
+	{
+		if (objectProperties != null && objectProperties.size() > 0)
+		{
+			for (Object model : models)
+			{
+				setProperiesOnModel(model, objectProperties);
+			}
+		}
+	}
+
+	public static void setProperiesOnModel(Object model, Map<Object, Object> objectProperties)
+	{
+		Command setPropertiesCommand = SetValueCommand.createSetPropertiesCommand(
+			(IPropertySource)Platform.getAdapterManager().getAdapter(model, IPropertySource.class), objectProperties);
+		if (setPropertiesCommand != null)
+		{
+			setPropertiesCommand.execute();
+			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, model, true);
+		}
+
 	}
 
 	/**

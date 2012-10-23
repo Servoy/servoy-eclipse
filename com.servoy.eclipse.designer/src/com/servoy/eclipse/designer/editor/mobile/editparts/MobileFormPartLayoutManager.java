@@ -64,11 +64,11 @@ public class MobileFormPartLayoutManager extends AbstractLayout
 		Rectangle containerBounds = container.getBounds();
 		// children are based on model order as created in editPart.getModelChildren()
 		Rectangle.SINGLETON.y = containerBounds.y + 6;
-		Rectangle.SINGLETON.height = Math.min(40, containerBounds.height - 10);
+		Rectangle.SINGLETON.height = Math.min(35, containerBounds.height - 10);
 
 		for (IFigure child : (List<IFigure>)container.getChildren())
 		{
-			Rectangle.SINGLETON.width = Math.min(40, containerBounds.width / 5);
+			Rectangle.SINGLETON.width = Math.min(50, containerBounds.width / 5);
 			if (child instanceof PersistImageFigure)
 			{
 				IPersist persist = ((PersistImageFigure)child).getPersist();

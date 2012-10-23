@@ -19,6 +19,7 @@ package com.servoy.eclipse.designer.mobile.property;
 
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.scripting.annotations.ServoyMobile;
 
@@ -46,6 +47,12 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			propertyDescriptor.propertyDescriptor.getReadMethod().getAnnotation(ServoyMobile.class) == null)
 		{
 			// do not show the property if the read-method is not flagged
+			return false;
+		}
+
+		if (propertyDescriptor.propertyDescriptor.getName().equals("editable") && getPersist() instanceof Field &&
+			((Field)getPersist()).getDisplayType() == Field.COMBOBOX)
+		{
 			return false;
 		}
 

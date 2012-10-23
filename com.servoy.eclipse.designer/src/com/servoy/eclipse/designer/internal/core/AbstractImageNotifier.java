@@ -117,7 +117,7 @@ public abstract class AbstractImageNotifier implements IImageNotifier, IImageLis
 						component.setLocation(0, 0); // paint in left-upper corner
 						label.doLayout();
 
-						new ImageDataCollector(imSupport).start(label, component.getWidth(), component.getHeight(), handleAlpha(component));
+						createImageDataCollector(imSupport).start(label, component.getWidth(), component.getHeight(), handleAlpha(component));
 					}
 					catch (Exception e)
 					{
@@ -163,5 +163,10 @@ public abstract class AbstractImageNotifier implements IImageNotifier, IImageLis
 	public boolean hasImageListeners()
 	{
 		return true; // not used
+	}
+
+	protected ImageDataCollector createImageDataCollector(ImageNotifierSupport imageNotifierSupport)
+	{
+		return new ImageDataCollector(imageNotifierSupport);
 	}
 }

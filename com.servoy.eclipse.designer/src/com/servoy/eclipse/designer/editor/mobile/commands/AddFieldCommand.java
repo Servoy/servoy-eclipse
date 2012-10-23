@@ -17,13 +17,21 @@
 
 package com.servoy.eclipse.designer.editor.mobile.commands;
 
+import java.util.Map;
+
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.ui.views.properties.IPropertySource;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.designer.editor.commands.BaseFormPlaceElementCommand;
+import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -35,11 +43,11 @@ import com.servoy.j2db.util.UUID;
  * @author rgansevles
  *
  */
-public class AddTextInputCommand extends BaseFormPlaceElementCommand
+public class AddFieldCommand extends BaseFormPlaceElementCommand
 {
-	public AddTextInputCommand(IApplication application, Form form, CreateRequest request)
+	public AddFieldCommand(IApplication application, Form form, CreateRequest request)
 	{
-		super(application, form, null, request.getType(), null, null, request.getLocation().getSWTPoint(), null, form);
+		super(application, form, null, request.getType(), request.getExtendedData(), null, request.getLocation().getSWTPoint(), null, form);
 	}
 
 	@Override
@@ -52,11 +60,33 @@ public class AddTextInputCommand extends BaseFormPlaceElementCommand
 			// create a label and a text field in a group
 			String groupID = UUID.randomUUID().toString();
 			ElementFactory.createLabel(form, "Title", location).setGroupID(groupID);
-			ElementFactory.createField(form, null, location).setGroupID(groupID);
+			Field field = ElementFactory.createField(form, null, location);
+			field.setGroupID(groupID);
+			if (objectProperties != null && objectProperties.size() > 0) setProperiesOnModel(field, objectProperties);
 
 			return new Object[] { new FormElementGroup(groupID, ModelUtils.getEditingFlattenedSolution(parent), form) };
 		}
 
 		return null;
 	}
+
+	@Override
+	protected void setPropertiesOnModels()
+	{
+		// should only be done on field
+	}
+
+	public static void setProperiesOnModel(Object model, Map<Object, Object> objectProperties)
+	{
+		Command setPropertiesCommand = SetValueCommand.createSetPropertiesCommand(
+			(IPropertySource)Platform.getAdapterManager().getAdapter(model, IPropertySource.class), objectProperties);
+		if (setPropertiesCommand != null)
+		{
+			setPropertiesCommand.execute();
+			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, model, true);
+		}
+
+	}
+
+
 }

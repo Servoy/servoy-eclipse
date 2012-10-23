@@ -37,37 +37,31 @@ public class MobileGroupLayoutManager extends AbstractLayout
 		Rectangle containerBounds = container.getBounds();
 		// children are based on model order as created in editPart.getModelChildren()
 
-		Rectangle.SINGLETON.height = (containerBounds.height - 4) / 2;
+		Rectangle.SINGLETON.x = containerBounds.x + 2;
+		Rectangle.SINGLETON.y = containerBounds.y + 2;
+		Rectangle.SINGLETON.width = containerBounds.width - 4;
 
-
-		int i = 0;
-		List<IFigure> children = container.getChildren();
-		for (IFigure child : children)
+		for (IFigure child : (List<IFigure>)container.getChildren())
 		{
-			if (i == 0)
-			{
-				// first child is Title
-				Rectangle.SINGLETON.x = containerBounds.x + 2;
-				Rectangle.SINGLETON.y = containerBounds.y + 2;
-				Rectangle.SINGLETON.width = containerBounds.width - 4;
-			}
-			else
-			{
-				// distribute other children over line 2
-				Rectangle.SINGLETON.width = (containerBounds.width - 4) / (children.size() - 1);
-				Rectangle.SINGLETON.x = containerBounds.x + 2 + ((i - 1) * Rectangle.SINGLETON.width);
-				Rectangle.SINGLETON.y = containerBounds.y + 4 + Rectangle.SINGLETON.height;
-			}
+			Dimension childPrefSize = child.getPreferredSize();
+			Rectangle.SINGLETON.height = (childPrefSize.height > 0 ? childPrefSize.height : 38);
 
 			child.setBounds(Rectangle.SINGLETON);
-			i++;
+
+			Rectangle.SINGLETON.y += Rectangle.SINGLETON.height + 2;
 		}
 	}
 
 	@Override
 	protected Dimension calculatePreferredSize(IFigure container, int wHint, int hHint)
 	{
-		// Title above input
-		return new Dimension(wHint, 80);
+		int height = 0;
+		for (IFigure child : (List<IFigure>)container.getChildren())
+		{
+			Dimension childPrefSize = child.getPreferredSize();
+			height += (childPrefSize.height > 0 ? childPrefSize.height : 38) + 2;
+		}
+
+		return new Dimension(wHint, height);
 	}
 }

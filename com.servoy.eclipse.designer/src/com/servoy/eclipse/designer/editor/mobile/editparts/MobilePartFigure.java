@@ -37,7 +37,7 @@ public class MobilePartFigure extends Figure implements HandleBounds
 	public MobilePartFigure()
 	{
 		setOpaque(true);
-		setBackgroundColor(ColorResource.INSTANCE.getColor(new RGB(36, 36, 36))); // grey14 // TODO: use theme
+		setBackgroundColor(ColorResource.INSTANCE.getColor(new RGB(110, 150, 190))); // TODO: use theme
 	}
 
 	public Rectangle getHandleBounds()
