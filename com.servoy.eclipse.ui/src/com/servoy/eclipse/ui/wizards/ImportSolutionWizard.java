@@ -48,7 +48,6 @@ import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.IValidato
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectChooserComposite;
 import com.servoy.eclipse.core.repository.EclipseImportUserChannel;
 import com.servoy.eclipse.core.repository.XMLEclipseWorkspaceImportHandlerVersions11AndHigher;
-import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -56,7 +55,6 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
-import com.servoy.j2db.util.CryptUtils;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.xmlxport.IXMLImportEngine;
 import com.servoy.j2db.util.xmlxport.IXMLImportHandlerVersions11AndHigher;
@@ -324,7 +322,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 					IApplicationServerSingleton as = ApplicationServerSingleton.get();
 					try
 					{
-						IXMLImportEngine importEngine = as.createXMLImportEngine(fileDecryption(file), (EclipseRepository)ServoyModel.getDeveloperRepository(),
+						IXMLImportEngine importEngine = as.createXMLImportEngine(file, (EclipseRepository)ServoyModel.getDeveloperRepository(),
 							as.getDataServer(), as.getClientId(), userChannel);
 
 						IXMLImportHandlerVersions11AndHigher x11handler = as.createXMLInMemoryImportHandler(importEngine.getVersionInfo(), as.getDataServer(),
@@ -401,24 +399,6 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			else if (resourceProjectComposite != null) error = resourceProjectComposite.validate();
 			setErrorMessage(error);
 			return error;
-		}
-
-		/**
-		 * AES Decryption of the specified file and write the output in a temporary file.
-		 * 
-		 * @return file
-		 * 
-		 */
-		private File fileDecryption(File file)
-		{
-			String password = null;
-			if (CryptUtils.checkEncryption(file))
-			{
-				password = UIUtils.showPasswordDialog(getShell(), "This solution is password protected", "Please enter protection password:", "", null); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			}
-			else return file;
-
-			return CryptUtils.fileDecryption(file, password);
 		}
 
 		public String getPath()
