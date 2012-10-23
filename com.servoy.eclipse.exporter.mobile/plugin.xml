@@ -11,5 +11,13 @@
             name="Export Mobile File">
       </wizard>
    </extension>
+   <extension
+         point="com.servoy.eclipse.ui.exportSolutionProvider">
+      <provider
+            class="com.servoy.eclipse.mobileexporter.ui.wizard.MobileExportProvider"
+            id="com.servoy.eclipse.exporter.mobile.exportSolutionProvider"
+            name="Provides Solution Mobile Export">
+      </provider>
+   </extension>
 
 </plugin>

@@ -11,5 +11,13 @@
             name="Export War File">
       </wizard>
    </extension>
+    <extension
+         point="com.servoy.eclipse.ui.exportSolutionProvider">
+      <provider
+            class="com.servoy.eclipse.warexporter.ui.wizard.WarExportProvider"
+            id="com.servoy.eclipse.exporter.war.exportSolutionProvider"
+            name="Provides Solution War Export">
+      </provider>
+   </extension>
 
 </plugin>

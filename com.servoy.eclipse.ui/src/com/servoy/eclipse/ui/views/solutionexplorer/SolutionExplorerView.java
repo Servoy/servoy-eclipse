@@ -39,10 +39,15 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -275,6 +280,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.ToggleFormCommandsAc
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.TreeHandlingToggleAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.UpdateServoySequencesAction;
 import com.servoy.eclipse.ui.wizards.ExportSolutionWizard;
+import com.servoy.eclipse.ui.wizards.IExportSolutionWizardProvider;
 import com.servoy.eclipse.ui.wizards.ImportSolutionWizard;
 import com.servoy.eclipse.ui.wizards.NewFormWizard;
 import com.servoy.eclipse.ui.wizards.NewModuleWizard;
@@ -2142,6 +2148,41 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		viewMenu.add(treeHandlingToggleAction);
 	}
 
+	private IAction getExportSolutionAction()
+	{
+		IExtensionRegistry reg = Platform.getExtensionRegistry();
+		IExtensionPoint ep = reg.getExtensionPoint(IExportSolutionWizardProvider.EXTENSION_ID);
+		IExtension[] extensions = ep.getExtensions();
+
+		if (extensions == null || extensions.length == 0)
+		{
+			return null;
+		}
+		for (IExtension extension : extensions)
+		{
+			IConfigurationElement[] ce = extension.getConfigurationElements();
+			if (ce == null || ce.length == 0)
+			{
+				return null;
+			}
+			try
+			{
+				IExportSolutionWizardProvider exportProvider = (IExportSolutionWizardProvider)ce[0].createExecutableExtension("class"); //$NON-NLS-1$
+				IAction action = exportProvider.getExportAction();
+				if (action != null)
+				{
+					return action;
+				}
+			}
+			catch (CoreException e)
+			{
+				ServoyLog.logWarning("Could not create solution export provider (extension point " + IExportSolutionWizardProvider.EXTENSION_ID + ")", e); //$NON-NLS-1$ //$NON-NLS-2$
+				return null;
+			}
+		}
+		return null;
+	}
+
 	private void fillTreeContextMenu(IMenuManager manager)
 	{
 		SimpleUserNode selectedTreeNode = getSelectedTreeNode();
@@ -2207,7 +2248,23 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			selectedTreeNode.getRealObject() != null)
 		{
 			manager.add(new Separator());
-			manager.add(exportActiveSolutionAction);
+			final MenuManager menuManager = new MenuManager("Export Solution");
+			menuManager.add(exportActiveSolutionAction);
+			manager.add(menuManager);
+
+			menuManager.addMenuListener(new IMenuListener()
+			{
+				public void menuAboutToShow(IMenuManager manager)
+				{
+					manager.removeAll();
+					manager.add(exportActiveSolutionAction);
+					IAction exportAction = getExportSolutionAction();
+					if (exportAction != null)
+					{
+						manager.add(exportAction);
+					}
+				}
+			});
 		}
 
 		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.ALL_SOLUTIONS && importSolutionAction.isEnabled())
@@ -2511,7 +2568,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadImageDescriptorFromBundle("solution_module_m.gif"), "Create new module"); //$NON-NLS-1$ //$NON-NLS-2$
 		IAction newStyle = new OpenWizardAction(NewStyleWizard.class, Activator.loadImageDescriptorFromBundle("styles.gif"), "Create new style"); //$NON-NLS-1$//$NON-NLS-2$
 		exportActiveSolutionAction = new OpenWizardAction(ExportSolutionWizard.class, Activator.loadImageDescriptorFromOldLocations("export_wiz.gif"), //$NON-NLS-1$
-			"Export solution"); //$NON-NLS-1$
+			"File Export"); //$NON-NLS-1$
 		importSolutionAction = new OpenWizardAction(ImportSolutionWizard.class, Activator.loadImageDescriptorFromOldLocations("import_wiz.gif"), //$NON-NLS-1$
 			"Import solution"); //$NON-NLS-1$
 		i18nExternalizeAction = new I18NExternalizeAction();
