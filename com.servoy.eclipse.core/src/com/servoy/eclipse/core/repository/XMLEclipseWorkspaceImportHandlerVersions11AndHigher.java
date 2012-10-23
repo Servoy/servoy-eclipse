@@ -568,6 +568,18 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 	public void getRootObjectIdForImport(ImportInfo importInfo, RootObjectImportInfo rootObjectImportInfo) throws RepositoryException
 	{
 		x11handler.getRootObjectIdForImport(importInfo, rootObjectImportInfo);
+		if (rootObjectImportInfo.info.elementInfo.typeId == IRepository.SOLUTIONS && importInfo.main.equals(rootObjectImportInfo))
+		{
+			if (ApplicationServerSingleton.get().checkSolutionProtection(rootObjectImportInfo))
+			{
+				// ask for protection password
+				String protectionPassword = x11handler.getUserChannel().askProtectionPassword(rootObjectImportInfo.info.name);
+				if (protectionPassword == null || ApplicationServerSingleton.get().checkSolutionPassword(rootObjectImportInfo, protectionPassword))
+				{
+					throw new RepositoryException("Wrong password, cannot import solution.");
+				}
+			}
+		}
 	}
 
 	public IRootObject importRootObject(RootObjectImportInfo rootObjectImportInfo) throws IllegalAccessException, IntrospectionException,
