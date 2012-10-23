@@ -96,7 +96,7 @@
 		<mkdir dir="${build.result.folder}/@dot"/>
 		<path id="@dot.classpath">
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.resources_3.7.101.v20120125-1505.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.resources.win32.x86_3.5.100.v20110423-0524.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.resources.win32.x86_3.5.100.v20110423-0524.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ant.core_3.2.302.v20120110-1739.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.variables_3.2.500.v20110928-1503.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.runtime_3.7.0.v20110110.jar"/>
@@ -116,14 +116,14 @@
 			<pathelement path="../eclipse_target/compile_target/install/plugins/javax.servlet_2.5.0.v201103041518.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.expressions_3.4.300.v20110228.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.filesystem_1.3.100.v20110423-0524.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.filesystem.win32.x86_1.1.300.v20110423-0524.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.aix.ppc_1.1.0.v20110423-0524.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.hpux.ia64_32_1.0.100.v20110423-0524.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.linux.x86_1.4.0.v20110423-0524.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.linux.x86_64_1.2.0.v20110423-0524.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.macosx_1.3.0.v20110423-0524.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.solaris.sparc_1.2.0.v20110423-0524.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.win32.x86_64_1.1.300.v20110423-0524.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.linux.x86_64_1.2.0.v20110423-0524.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.win32.x86_1.1.300.v20110423-0524.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.solaris.sparc_1.2.0.v20110423-0524.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.macosx_1.3.0.v20110423-0524.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.linux.x86_1.4.0.v20110423-0524.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.hpux.ia64_32_1.0.100.v20110423-0524.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.aix.ppc_1.1.0.v20110423-0524.jar"/>
 			<pathelement path="../servoy_shared/bin/"/>
 			<pathelement path="${build.result.folder}/../servoy_shared_7.0.0.2000/bin/"/>
 			<pathelement path="${build.result.folder}/../servoy_shared/@dot"/>
@@ -201,7 +201,9 @@
 			<pathelement path="${build.result.folder}/../org.eclipse.dltk.javascript.rhino/@dot"/>
 			<pathelement path="${build.result.folder}/../org.eclipse.dltk.javascript.rhino_7.0.0.2000/@dot"/>
 			<pathelement path="../servoy_base/bin/"/>
-			<pathelement path="../servoy_base/@dot"/>
+			
+			<pathelement path="${build.result.folder}/../servoy_base/@dot"/>
+			
 			<pathelement path="../com.servoy.eclipse.model/bin/"/>
 			<pathelement path="${build.result.folder}/../com.servoy.eclipse.model_7.0.0.2000/bin/"/>
 			<pathelement path="${build.result.folder}/../com.servoy.eclipse.model/@dot"/>
