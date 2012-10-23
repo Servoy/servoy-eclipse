@@ -176,15 +176,7 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 							dataChoice.getEnclosedComponent().setVisibleRowCount(valueList.getSize());
 							dataChoice.getEnclosedComponent().setLayoutOrientation(JList.VERTICAL);
 							Dimension compPrefsize = component.getPreferredSize();
-							// set prefSize directly, setPreferredSize() throws illegal-thread-access in revalidate
-							prefSize = new org.eclipse.draw2d.geometry.Dimension(compPrefsize.width, compPrefsize.height);
-							Display.getDefault().asyncExec(new Runnable()
-							{
-								public void run()
-								{
-									revalidate();
-								}
-							});
+							setPreferredSize(compPrefsize.width, compPrefsize.height);
 						}
 						else if (component instanceof DataCheckBox)
 						{
@@ -222,6 +214,22 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 						};
 					}
 				};
+			}
+
+			@Override
+			public void setPreferredSize(org.eclipse.draw2d.geometry.Dimension size)
+			{
+				if (prefSize == null || !prefSize.equals(size))
+				{
+					prefSize = size;
+					Display.getDefault().asyncExec(new Runnable()
+					{
+						public void run()
+						{
+							revalidate();
+						}
+					});
+				}
 			}
 
 			@Override

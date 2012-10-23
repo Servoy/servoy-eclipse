@@ -63,6 +63,10 @@ public class MobileListGraphicalEditPart extends AbstractGraphicalEditPart
 	{
 		MobileListModel model = getModel();
 		List<BaseComponent> modelChildren = new ArrayList<BaseComponent>(4);
+		if (model.header != null)
+		{
+			modelChildren.add(model.header);
+		}
 		if (model.image != null)
 		{
 			modelChildren.add(model.image);
@@ -117,7 +121,11 @@ public class MobileListGraphicalEditPart extends AbstractGraphicalEditPart
 	{
 		MobileListElementType type;
 		MobileListModel model = getModel();
-		if (child == model.button)
+		if (child == model.header)
+		{
+			type = MobileListElementType.Header;
+		}
+		else if (child == model.button)
 		{
 			type = MobileListElementType.Button;
 		}

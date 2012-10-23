@@ -98,6 +98,23 @@ public class MobileListPropertySource implements IPropertySource
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_RELATIONNAME);
 			}
 
+			if (model.tabPanel != null)
+			{
+				// inset list
+				elementPropertySources.put(prefix = "containedForm",
+					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.containedForm, model.containedForm, false));
+				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATASOURCE);
+			}
+
+			// list item header
+			if (model.header != null)
+			{
+				elementPropertySources.put(prefix = "listitemHeader",
+					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.header, model.containedForm, false));
+				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID, "headerDataProvider");
+				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT, "headerText");
+			}
+
 			// list item button
 			if (model.button != null)
 			{

@@ -45,7 +45,7 @@ public class MobileListFigure extends ImageFigure implements HandleBounds
 	{
 		super(ARROW_IMAGE, PositionConstants.EAST);
 		setOpaque(false); // border handles all
-		setBackgroundColor(ColorResource.INSTANCE.getColor(new RGB(245, 245, 245)));
+		setBackgroundColor(ColorResource.INSTANCE.getColor(new RGB(245, 245, 245))); // TODO use scheme
 		setBorder(new MobileListBackgroundBorder(new Insets(0, 0, 0, 10), isInset));
 	}
 
@@ -53,7 +53,13 @@ public class MobileListFigure extends ImageFigure implements HandleBounds
 	@Override
 	public Dimension getPreferredSize(int wHint, int hHint)
 	{
-		return new Dimension(wHint, 60);
+		if (prefSize != null) return prefSize;
+		if (getLayoutManager() != null)
+		{
+			Dimension d = getLayoutManager().getPreferredSize(this, wHint, hHint);
+			if (d != null) return d;
+		}
+		return super.getPreferredSize(wHint, hHint);
 	}
 
 	public Rectangle getHandleBounds()

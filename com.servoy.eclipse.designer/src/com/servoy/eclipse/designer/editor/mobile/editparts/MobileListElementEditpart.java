@@ -53,7 +53,7 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 
 	public static enum MobileListElementType
 	{
-		Button, Aside, CountBubble, Image
+		Header, Button, Aside, CountBubble, Image
 	}
 
 	protected IApplication application;
@@ -99,14 +99,23 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 				fig = new ImageFigure(IMAGE_IMAGE);
 				((ImageFigure)fig).setAlignment(PositionConstants.WEST);
 				break;
+
+			case Header :
+				fig = new Label();
+				((Label)fig).setLabelAlignment(PositionConstants.CENTER);
+				fig.setBackgroundColor(MobilePartFigure.HEADER_COLOR);// TODO: use scheme
+				break;
+
 			case Button :
 				fig = new Label();
 				((Label)fig).setLabelAlignment(PositionConstants.LEFT);
 				break;
+
 			case Aside :
 				fig = new Label();
 				((Label)fig).setLabelAlignment(PositionConstants.RIGHT);
 				break;
+
 			case CountBubble :
 				fig = new ImageFigure(COUNTBUBBLE_IMAGE);
 				((ImageFigure)fig).setAlignment(PositionConstants.EAST);
@@ -116,7 +125,7 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 				return null;
 		}
 
-		fig.setOpaque(false);
+		fig.setOpaque(type == MobileListElementType.Header);
 
 //		LineBorder border = new LineBorder(1);
 //		border.setColor(ColorConstants.white);
@@ -137,6 +146,10 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 	{
 		switch (type)
 		{
+			case Header :
+				updateFigureForGC(fig, (GraphicalComponent)getModel(), "<header>");
+				break;
+
 			case Button :
 				updateFigureForGC(fig, (GraphicalComponent)getModel(), "<button>");
 				break;

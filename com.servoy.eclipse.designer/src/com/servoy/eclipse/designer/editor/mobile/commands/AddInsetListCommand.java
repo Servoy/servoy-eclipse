@@ -29,6 +29,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FormController;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IValidateName;
@@ -105,6 +106,10 @@ public class AddInsetListCommand extends BaseFormPlaceElementCommand
 
 			// add items for properties
 			AddFormListCommand.addlistItems(tabForm);
+
+			// add header
+			GraphicalComponent header = ElementFactory.createLabel(tabForm, null, null);
+			header.putCustomMobileProperty("listitemHeader", Boolean.TRUE);
 
 			// add tab
 			createTabs = ElementFactory.createTabs(application, tabPanel, new Object[] { new ElementFactory.RelatedForm(null, tabForm) }, null,

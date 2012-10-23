@@ -19,6 +19,7 @@ package com.servoy.eclipse.designer.editor.mobile.editparts;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.handles.HandleBounds;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 
 import com.servoy.eclipse.ui.resource.ColorResource;
@@ -31,13 +32,15 @@ import com.servoy.eclipse.ui.resource.ColorResource;
  */
 public class MobilePartFigure extends Figure implements HandleBounds
 {
+	public static Color HEADER_COLOR = ColorResource.INSTANCE.getColor(new RGB(110, 150, 190));// TODO: use theme
+
 	/**
 	 * Construct an empty group figure.
 	 */
 	public MobilePartFigure()
 	{
 		setOpaque(true);
-		setBackgroundColor(ColorResource.INSTANCE.getColor(new RGB(110, 150, 190))); // TODO: use theme
+		setBackgroundColor(HEADER_COLOR);
 	}
 
 	public Rectangle getHandleBounds()

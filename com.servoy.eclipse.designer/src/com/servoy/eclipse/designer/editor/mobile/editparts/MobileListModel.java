@@ -42,6 +42,7 @@ public class MobileListModel implements ISupportBounds
 	public final TabPanel tabPanel;
 	public final Tab tab;
 	public final Form containedForm;
+	public final GraphicalComponent header;
 	public final GraphicalComponent button;
 	public final GraphicalComponent aside;
 	public final Field countBubble;
@@ -52,18 +53,20 @@ public class MobileListModel implements ISupportBounds
 	 * @param tabPanel
 	 * @param tab
 	 * @param containedForm
+	 * @param header
 	 * @param button
 	 * @param aside
 	 * @param countBubble
 	 * @param image
 	 */
-	public MobileListModel(Form form, TabPanel tabPanel, Tab tab, Form containedForm, GraphicalComponent button, GraphicalComponent aside, Field countBubble,
-		Field image)
+	public MobileListModel(Form form, TabPanel tabPanel, Tab tab, Form containedForm, GraphicalComponent header, GraphicalComponent button,
+		GraphicalComponent aside, Field countBubble, Field image)
 	{
 		this.form = form;
 		this.tabPanel = tabPanel;
 		this.tab = tab;
 		this.containedForm = containedForm;
+		this.header = header;
 		this.button = button;
 		this.aside = aside;
 		this.countBubble = countBubble;
@@ -83,6 +86,7 @@ public class MobileListModel implements ISupportBounds
 		this.tabPanel = null;
 		this.tab = null;
 		this.containedForm = null;
+		this.header = null;
 		this.button = button;
 		this.aside = aside;
 		this.countBubble = countBubble;
@@ -111,13 +115,18 @@ public class MobileListModel implements ISupportBounds
 
 	public static MobileListModel create(IApplication application, Form form, TabPanel tabPanel, Tab tab, Form containedForm)
 	{
+		GraphicalComponent header = null;
 		GraphicalComponent button = null;
 		GraphicalComponent aside = null;
 		Field countBubble = null;
 		Field image = null;
 		for (IPersist elem : application.getFlattenedSolution().getFlattenedForm(containedForm).getAllObjectsAsList())
 		{
-			if (elem instanceof GraphicalComponent && ((GraphicalComponent)elem).getCustomMobileProperty("listitemButton") != null)
+			if (elem instanceof GraphicalComponent && ((GraphicalComponent)elem).getCustomMobileProperty("listitemHeader") != null)
+			{
+				header = (GraphicalComponent)elem;
+			}
+			else if (elem instanceof GraphicalComponent && ((GraphicalComponent)elem).getCustomMobileProperty("listitemButton") != null)
 			{
 				button = (GraphicalComponent)elem;
 			}
@@ -135,7 +144,7 @@ public class MobileListModel implements ISupportBounds
 			}
 		}
 
-		return new MobileListModel(form, tabPanel, tab, containedForm, button, aside, countBubble, image);
+		return new MobileListModel(form, tabPanel, tab, containedForm, header, button, aside, countBubble, image);
 
 	}
 }

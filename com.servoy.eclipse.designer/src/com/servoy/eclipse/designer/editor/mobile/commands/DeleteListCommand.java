@@ -97,6 +97,11 @@ public class DeleteListCommand extends CompoundCommand
 						repository.deleteObject(model.button);
 						changes.add(model.button);
 					}
+					if (model.header != null)
+					{
+						repository.deleteObject(model.header);
+						changes.add(model.header);
+					}
 					if (model.aside != null)
 					{
 						repository.deleteObject(model.aside);
@@ -140,6 +145,11 @@ public class DeleteListCommand extends CompoundCommand
 				else
 				{
 					// form list
+					if (model.header != null)
+					{
+						repository.undeleteObject(model.form, model.header);
+						changes.add(model.header);
+					}
 					if (model.button != null)
 					{
 						repository.undeleteObject(model.form, model.button);
