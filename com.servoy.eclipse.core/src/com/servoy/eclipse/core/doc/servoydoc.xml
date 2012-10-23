@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <servoydoc>
   <runtime>
     <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT">
@@ -22450,7 +22450,8 @@ foundset.loadRecords(query);]]></sample>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.querybuilder.impl.QBFunction" typecode="com.servoy.j2db.querybuilder.impl.QBFunction"/>
-          <description/>
+          <description><![CDATA[Create concat(args, arg2) expression]]></description>
+          <summary><![CDATA[Create concat(args, arg2) expression]]></summary>
           <sample><![CDATA[/** @type {QBSelect<db:/udm/contacts>} */
 	var query = databaseManager.createSelect('db:/udm/contacts') //$NON-NLS-1$
 	query.result.add(query.columns.name_first.concat(' ').concat(query.columns.name_last))
