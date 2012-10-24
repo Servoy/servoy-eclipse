@@ -201,9 +201,9 @@
 			<pathelement path="${build.result.folder}/../org.eclipse.dltk.javascript.rhino/@dot"/>
 			<pathelement path="${build.result.folder}/../org.eclipse.dltk.javascript.rhino_7.0.0.2000/@dot"/>
 			<pathelement path="../servoy_base/bin/"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_base_7.0.0.2000/bin/"/>
 			<pathelement path="${build.result.folder}/../servoy_base/@dot"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_base_7.0.0.2000/@dot"/>
 			<pathelement path="../com.servoy.eclipse.model/bin/"/>
 			<pathelement path="${build.result.folder}/../com.servoy.eclipse.model_7.0.0.2000/bin/"/>
 			<pathelement path="${build.result.folder}/../com.servoy.eclipse.model/@dot"/>
@@ -286,7 +286,7 @@
 		<echo file="${compilation.problem.marker}" message="com.servoy.eclipse.exporter.solution_7.0.0.2000${line.separator}compilation.error.occured=${compilation.error.occured}"/>
 		<eclipse.logCompileError bundle="com.servoy.eclipse.exporter.solution_7.0.0.2000" log="${compilation.prereq.log}">
 			<include name="C:/Users/Administrator/dev_trunk/servoy_base/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_base_6.1.2.1421/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_base_7.0.0.2000/compilation.problem"/>
 			<include name="C:/Users/Administrator/dev_trunk/com.servoy.eclipse.model/compilation.problem"/>
 			<include name="${pluginTemp}/com.servoy.eclipse.model_7.0.0.2000/compilation.problem"/>
 			<include name="C:/Users/Administrator/dev_trunk/org.eclipse.dltk.javascript.rhino/compilation.problem"/>

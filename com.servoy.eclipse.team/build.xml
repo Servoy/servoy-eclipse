@@ -315,9 +315,9 @@
 			<pathelement path="${build.result.folder}/../org.eclipse.dltk.javascript.rhino/@dot"/>
 			<pathelement path="${build.result.folder}/../org.eclipse.dltk.javascript.rhino_7.0.0.2000/@dot"/>
 			<pathelement path="../servoy_base/bin/"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_base_7.0.0.2000/bin/"/>
 			<pathelement path="${build.result.folder}/../servoy_base/@dot"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_base_7.0.0.2000/@dot"/>
 			<pathelement path="../com.servoy.eclipse.core/bin"/>
 			<pathelement path="${build.result.folder}/../com.servoy.eclipse.core_7.0.0.2000/bin"/>
 			<pathelement path="${build.result.folder}/../com.servoy.eclipse.core/@dot"/>
@@ -490,7 +490,7 @@
 			<include name="C:/Users/Administrator/dev_trunk/com.servoy.eclipse.appserver/compilation.problem"/>
 			<include name="${pluginTemp}/com.servoy.eclipse.appserver_7.0.0.2000/compilation.problem"/>
 			<include name="C:/Users/Administrator/dev_trunk/servoy_base/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_base_6.1.2.1421/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_base_7.0.0.2000/compilation.problem"/>
 			<include name="C:/Users/Administrator/dev_trunk/servoy_smart_client/compilation.problem"/>
 			<include name="${pluginTemp}/servoy_smart_client_7.0.0.2000/compilation.problem"/>
 			<include name="C:/Users/Administrator/dev_trunk/com.servoy.eclipse.ui/compilation.problem"/>
