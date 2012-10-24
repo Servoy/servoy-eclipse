@@ -94,6 +94,7 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Table;
@@ -289,6 +290,13 @@ public class NewFormWizard extends Wizard implements INewWizard
 				form.setName(newFormWizardPage.getFormName());
 				form.setDataSource(dataSource);
 				form.setStyleName(style == null ? null : style.getName());
+			}
+
+
+			if (servoyProject.getSolution().getSolutionType() == SolutionMetaData.MOBILE)
+			{
+				// mobile solution, make the form mobile
+				form.putCustomMobileProperty("mobileform", Boolean.TRUE);
 			}
 
 			if (superForm != null && template == null)
