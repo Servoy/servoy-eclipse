@@ -17,13 +17,12 @@
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
-import org.eclipse.ui.views.properties.IPropertySource;
 
 /**
  * Property descriptor wrapper that implements IPropertySetter.
  * 
  */
-public abstract class PropertySetterDelegatePropertyController<P, E, S extends IPropertySource> extends DelegatePropertySetterController<P, E, S>
+public abstract class PropertySetterDelegatePropertyController<P, E, S extends PersistPropertySource> extends DelegatePropertySetterController<P, E, S>
 {
 	public PropertySetterDelegatePropertyController(IPropertyDescriptor propertyDescriptor, Object id)
 	{
@@ -31,24 +30,22 @@ public abstract class PropertySetterDelegatePropertyController<P, E, S extends I
 	}
 
 	@SuppressWarnings("unchecked")
-	public E getProperty(IPropertySource propertySource)
+	public E getProperty(S propertySource)
 	{
-		return (E)((PersistPropertySource)propertySource).getPersistPropertyValue(getId());
+		return (E)propertySource.getPersistPropertyValue(getId());
 	}
 
 	@Override
 	public void resetPropertyValue(S propertySource)
 	{
-		PersistPropertySource pp = (PersistPropertySource)propertySource;
-		pp.setPersistPropertyValue(getId(), pp.getDefaultPersistValue(getId()));
+		propertySource.setPersistPropertyValue(getId(), propertySource.getDefaultPersistValue(getId()));
 	}
 
 	@Override
 	public boolean isPropertySet(S propertySource)
 	{
-		PersistPropertySource pp = (PersistPropertySource)propertySource;
-		Object defaultValue = pp.getDefaultPersistValue(getId());
-		Object propertyValue = pp.getPersistPropertyValue(getId());
+		Object defaultValue = propertySource.getDefaultPersistValue(getId());
+		Object propertyValue = propertySource.getPersistPropertyValue(getId());
 		return defaultValue != propertyValue && (defaultValue == null || !defaultValue.equals(propertyValue));
 	}
 }
