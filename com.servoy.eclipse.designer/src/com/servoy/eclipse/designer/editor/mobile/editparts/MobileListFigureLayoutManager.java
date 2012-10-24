@@ -48,15 +48,14 @@ public class MobileListFigureLayoutManager extends AbstractLayout
 			MobileListElementType constraint = getConstraint(child);
 			if (constraint != null)
 			{
-				Rectangle.SINGLETON.y = containerBounds.y + 32;
-				Rectangle.SINGLETON.height = containerBounds.height - 64;
+				Rectangle.SINGLETON.y = containerBounds.y + 43;
+				Rectangle.SINGLETON.height = 30;
 				switch (constraint)
 				{
 					case Header :
 						Rectangle.SINGLETON.y = containerBounds.y + 2;
 						Rectangle.SINGLETON.x = containerBounds.x;
 						Rectangle.SINGLETON.width = containerBounds.width;
-						Rectangle.SINGLETON.height = 30;
 						break;
 
 					case Image :
@@ -70,16 +69,16 @@ public class MobileListFigureLayoutManager extends AbstractLayout
 						break;
 
 					case Subtext :
-						Rectangle.SINGLETON.x = containerBounds.x + containerBounds.width - 160;
-						Rectangle.SINGLETON.width = 125;
-						Rectangle.SINGLETON.height = (containerBounds.height - 30) / 2;
+						Rectangle.SINGLETON.y = containerBounds.y + 75;
+						Rectangle.SINGLETON.x = containerBounds.x + 34;
+						Rectangle.SINGLETON.width = 200;
+						Rectangle.SINGLETON.height = 20;
 						break;
 
 					case CountBubble :
-						Rectangle.SINGLETON.x = containerBounds.x + containerBounds.width - 160;
-						Rectangle.SINGLETON.width = 125;
+						Rectangle.SINGLETON.x = containerBounds.x + containerBounds.width - 80;
+						Rectangle.SINGLETON.width = 30;
 						Rectangle.SINGLETON.height = (containerBounds.height - 30) / 2;
-						Rectangle.SINGLETON.y += Rectangle.SINGLETON.height + 1;
 						break;
 
 					default :
@@ -117,6 +116,6 @@ public class MobileListFigureLayoutManager extends AbstractLayout
 	@Override
 	protected Dimension calculatePreferredSize(IFigure container, int wHint, int hHint)
 	{
-		return new Dimension(wHint, 90);
+		return new Dimension(wHint, 100);
 	}
 }

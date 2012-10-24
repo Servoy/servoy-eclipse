@@ -46,9 +46,21 @@ public class MobileListFigure extends ImageFigure implements HandleBounds
 		super(ARROW_IMAGE, PositionConstants.EAST);
 		setOpaque(false); // border handles all
 		setBackgroundColor(ColorResource.INSTANCE.getColor(new RGB(245, 245, 245))); // TODO use scheme
-		setBorder(new MobileListBackgroundBorder(new Insets(0, 0, 0, 10), isInset));
+		setBorder(new MobileListBackgroundBorder(isInset));
 	}
 
+	@Override
+	public Rectangle getBounds()
+	{
+		return new Rectangle(super.getBounds())
+		{
+			@Override
+			public Rectangle getShrinked(Insets insets)
+			{
+				return super.getShrinked(new Insets(23, 0, 0, 15)); // for placing arrow image
+			}
+		};
+	}
 
 	@Override
 	public Dimension getPreferredSize(int wHint, int hHint)
@@ -70,22 +82,14 @@ public class MobileListFigure extends ImageFigure implements HandleBounds
 
 	public static class MobileListBackgroundBorder extends AbstractBackground
 	{
-		private final Insets insets;
 		private final boolean isInset;
 
 		/**
 		 * @param isInset
 		 */
-		public MobileListBackgroundBorder(Insets insets, boolean isInset)
+		public MobileListBackgroundBorder(boolean isInset)
 		{
-			this.insets = insets;
 			this.isInset = isInset;
-		}
-
-		@Override
-		public Insets getInsets(IFigure figure)
-		{
-			return insets;
 		}
 
 		@Override

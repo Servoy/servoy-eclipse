@@ -131,7 +131,7 @@ public class MobileListPropertySource implements IPropertySource
 				elementPropertySources.put(prefix = "listitemSubtext",
 					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.subtext, model.containedForm, false));
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID, "subtextDataProvider");
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT, "subtextText");
+				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT, "subText");
 			}
 
 			// countBubble

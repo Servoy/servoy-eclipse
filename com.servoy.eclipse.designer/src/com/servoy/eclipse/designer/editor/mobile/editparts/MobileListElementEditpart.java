@@ -113,7 +113,7 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 
 			case Subtext :
 				fig = new Label();
-				((Label)fig).setLabelAlignment(PositionConstants.RIGHT);
+				((Label)fig).setLabelAlignment(PositionConstants.LEFT);
 				break;
 
 			case CountBubble :

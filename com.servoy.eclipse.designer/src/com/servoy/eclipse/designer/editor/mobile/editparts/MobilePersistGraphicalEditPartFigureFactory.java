@@ -36,6 +36,7 @@ import javax.swing.border.Border;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 
 import org.eclipse.gef.GraphicalEditPart;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.designer.Activator;
@@ -46,6 +47,7 @@ import com.servoy.eclipse.designer.internal.core.IImageNotifier;
 import com.servoy.eclipse.designer.internal.core.ImageDataCollector;
 import com.servoy.eclipse.designer.internal.core.ImageNotifierSupport;
 import com.servoy.eclipse.designer.internal.core.PersistImageNotifier;
+import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.CustomValueList;
 import com.servoy.j2db.dataprocessing.IValueList;
@@ -248,6 +250,12 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 						};
 					}
 				};
+			}
+
+			@Override
+			protected org.eclipse.swt.graphics.Font createDrawnameFont()
+			{
+				return FontResource.getDefaultFont(SWT.NORMAL, 1);
 			}
 
 			@Override

@@ -78,6 +78,11 @@ public class PersistImageFigure extends ImageFigure
 		return new PersistImageNotifier(application, persist, form, this);
 	}
 
+	protected Font createDrawnameFont()
+	{
+		return FontResource.getDefaultFont(SWT.NORMAL, -1);
+	}
+
 	@Override
 	public void paint(Graphics graphics)
 	{
@@ -85,7 +90,7 @@ public class PersistImageFigure extends ImageFigure
 		String drawName = PersistPropertySource.getActualComponentName(getPersist());
 		if (drawName != null)
 		{
-			Font nameFont = FontResource.getDefaultFont(SWT.NORMAL, -1);
+			Font nameFont = createDrawnameFont();
 			Font saveFont = graphics.getFont();
 			try
 			{

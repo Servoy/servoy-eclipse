@@ -18,6 +18,7 @@
 package com.servoy.eclipse.designer.editor.mobile.editparts;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.draw2d.IFigure;
@@ -25,13 +26,18 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
+import org.eclipse.swt.widgets.Display;
 
+import com.servoy.eclipse.core.IPersistChangeListener;
+import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.ComponentDeleteEditPolicy;
 import com.servoy.eclipse.designer.editor.SetBoundsToSupportBoundsFigureListener;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileListElementEditpart.MobileListElementType;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.IPersist;
 
 /**
  * Edit part for Lists in mobile form editor.
@@ -40,7 +46,7 @@ import com.servoy.j2db.persistence.BaseComponent;
  * @author rgansevles
  *
  */
-public class MobileListGraphicalEditPart extends AbstractGraphicalEditPart
+public class MobileListGraphicalEditPart extends AbstractGraphicalEditPart implements IPersistChangeListener
 {
 	private final IApplication application;
 	private final BaseVisualFormEditor editorPart;
@@ -67,7 +73,7 @@ public class MobileListGraphicalEditPart extends AbstractGraphicalEditPart
 		{
 			modelChildren.add(model.header);
 		}
-		if (model.image != null)
+		if (model.image != null && model.image.getDataProviderID() != null)
 		{
 			modelChildren.add(model.image);
 		}
@@ -79,7 +85,7 @@ public class MobileListGraphicalEditPart extends AbstractGraphicalEditPart
 		{
 			modelChildren.add(model.subtext);
 		}
-		if (model.countBubble != null)
+		if (model.countBubble != null && model.countBubble.getDataProviderID() != null)
 		{
 			modelChildren.add(model.countBubble);
 		}
@@ -146,25 +152,44 @@ public class MobileListGraphicalEditPart extends AbstractGraphicalEditPart
 		return new MobileListElementEditpart(application, editorPart, child, type);
 	}
 
-//	@Override
-//	public void activate()
-//	{
-//		// listen to changes to the elements
-//		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-//		servoyModel.addPersistChangeListener(false, this);
-//
-//		super.activate();
-//	}
-//
-//	@Override
-//	public void deactivate()
-//	{
-//		// stop listening to changes to the elements
-//		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-//		servoyModel.removePersistChangeListener(false, this);
-//
-//		super.deactivate();
-//	}
-//	
+	@Override
+	public void activate()
+	{
+		// listen to changes to the elements
+		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		servoyModel.addPersistChangeListener(false, this);
+
+		super.activate();
+	}
+
+	@Override
+	public void deactivate()
+	{
+		// stop listening to changes to the elements
+		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		servoyModel.removePersistChangeListener(false, this);
+
+		super.deactivate();
+	}
+
+	public void persistChanges(Collection<IPersist> changes)
+	{
+		MobileListModel m = getModel();
+		for (IPersist persist : changes)
+		{
+			if (persist == m.button || persist == m.containedForm || persist == m.countBubble || persist == m.form || persist == m.header ||
+				persist == m.image || persist == m.subtext || persist == m.tab || persist == m.tabPanel)
+			{
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						refresh();
+					}
+				});
+				return;
+			}
+		}
+	}
 
 }
