@@ -34,16 +34,24 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
+import com.servoy.eclipse.mobileexporter.export.MobileExporter;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.wizards.FinishPage;
 
 public class ExportMobileWizard extends Wizard implements IExportWizard
 {
+	private final MobileExporter mobileExporter = new MobileExporter();
 
 	private final CustomizedFinishPage finishPage = new CustomizedFinishPage("lastPage");
 
 	private final PhoneGapApplicationPage pgAppPage = new PhoneGapApplicationPage("PhoneGap Application", finishPage);
+
+	private final WarExportPage warExportPage = new WarExportPage("outputPage", "Choose output", null, finishPage, pgAppPage, mobileExporter);
+
+	private final LicensePage licensePage = new LicensePage("licensePage", warExportPage, mobileExporter);
+
+	private final ExportOptionsPage optionsPage = new ExportOptionsPage("optionsPage", licensePage, mobileExporter);
 
 	public ExportMobileWizard()
 	{
@@ -58,11 +66,8 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 		setWindowTitle("Mobile Export");
 	}
 
-	private WarExportPage selectionPage;
-
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
-		selectionPage = new WarExportPage("outputPage", "Choose output", null, finishPage, pgAppPage);
 	}
 
 	@Override
@@ -87,9 +92,11 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 	@Override
 	public void addPages()
 	{
-		addPage(selectionPage);
+		addPage(optionsPage);
+		addPage(warExportPage);
 		addPage(finishPage);
 		addPage(pgAppPage);
+		addPage(licensePage);
 	}
 
 	public class CustomizedFinishPage extends FinishPage

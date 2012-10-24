@@ -181,6 +181,7 @@ public class MobileExporter
 			solutionModel.put("forms", flattenedJSon);
 			solutionModel.put("solutionName", project.getSolution().getName());
 			solutionModel.put("serverURL", serverURL);
+			solutionModel.put("skipConnect", skipConnect);
 			ServoyJSONObject jsonObject = new ServoyJSONObject(solutionModel);
 			jsonObject.setNoQuotes(false);
 			return ("var _solutiondata_ = " + jsonObject.toString());
@@ -228,7 +229,11 @@ public class MobileExporter
 		return null;
 	}
 
-	public File doExport(File outputFolder, String serverURL, String solutionName, boolean exportAsZip)
+	private File outputFolder;
+	private String serverURL;
+	private String solutionName;
+
+	public File doExport(boolean exportAsZip)
 	{
 		String formJson = doFormsExport(serverURL, solutionName);
 		String solutionJavascript = doScriptingExport(solutionName);
@@ -433,6 +438,53 @@ public class MobileExporter
 		int index = scripting.indexOf("function ");
 		scripting = scripting.substring(index).trim();
 		return scripting;
+	}
+
+	/**
+	 * @param outputFolder the outputFolder to set
+	 */
+	public void setOutputFolder(File outputFolder)
+	{
+		this.outputFolder = outputFolder;
+	}
+
+	/**
+	 * @param serverURL the serverURL to set
+	 */
+	public void setServerURL(String serverURL)
+	{
+		this.serverURL = serverURL;
+	}
+
+	/**
+	 * @param solutionName the solutionName to set
+	 */
+	public void setSolutionName(String solutionName)
+	{
+		this.solutionName = solutionName;
+	}
+
+	/**
+	 * @return the serverURL
+	 */
+	public String getServerURL()
+	{
+		return serverURL;
+	}
+
+	/**
+	 * @return the solutionName
+	 */
+	public String getSolutionName()
+	{
+		return solutionName;
+	}
+
+	private boolean skipConnect = false;
+
+	public void setSkipConnect(boolean connect)
+	{
+		this.skipConnect = connect;
 	}
 
 }

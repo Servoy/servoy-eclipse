@@ -247,7 +247,10 @@ public class PhoneGapConnector
 			MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
 			entity.addPart("data", new StringBody(application.getJSON()));
 
-			exportedFile = mobileExporter.doExport(new File(System.getProperty("java.io.tmpdir")), serverURL, solutionName, true);
+			mobileExporter.setServerURL(serverURL);
+			mobileExporter.setSolutionName(solutionName);
+			mobileExporter.setOutputFolder(new File(System.getProperty("java.io.tmpdir")));
+			exportedFile = mobileExporter.doExport(true);
 			entity.addPart("file", new FileBody(exportedFile));
 
 			request.setEntity(entity);

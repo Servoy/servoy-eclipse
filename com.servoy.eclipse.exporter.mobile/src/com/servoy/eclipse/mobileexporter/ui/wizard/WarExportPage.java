@@ -24,8 +24,6 @@ import java.net.URL;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -38,7 +36,6 @@ import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
@@ -48,17 +45,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.mobileexporter.export.MobileExporter;
-import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
-import com.servoy.eclipse.ui.labelproviders.SupportNameLabelProvider;
-import com.servoy.eclipse.ui.views.TreeSelectViewer;
 import com.servoy.eclipse.ui.wizards.FinishPage;
-import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.RootObjectMetaData;
-import com.servoy.j2db.persistence.SolutionMetaData;
 
 /**
  * @author lvostinar
@@ -67,23 +56,23 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 public class WarExportPage extends WizardPage
 {
 	public static String OUTPUT_PATH_KEY = "initialOutputPath";
-	public static String SERVER_URL_KEY = "serverURL";
 
 	private Text outputText;
 	private Button outputBrowseButton;
-	private Text serverURL;
-	private TreeSelectViewer solutionSelectViewer;
 	private Button exportAsWar;
 	private Text phoneGapUsername;
 	private Text phoneGapPassword;
 	private final FinishPage finishPage;
 	private final PhoneGapApplicationPage pgAppPage;
+	private final MobileExporter mobileExporter;
 
-	public WarExportPage(String pageName, String title, ImageDescriptor titleImage, FinishPage finishPage, PhoneGapApplicationPage pgAppPage)
+	public WarExportPage(String pageName, String title, ImageDescriptor titleImage, FinishPage finishPage, PhoneGapApplicationPage pgAppPage,
+		MobileExporter mobileExporter)
 	{
 		super(pageName, title, titleImage);
 		this.finishPage = finishPage;
 		this.pgAppPage = pgAppPage;
+		this.mobileExporter = mobileExporter;
 	}
 
 	public void createControl(Composite parent)
@@ -97,12 +86,6 @@ public class WarExportPage extends WizardPage
 		outputText = new Text(container, SWT.BORDER);
 		outputBrowseButton = new Button(container, SWT.NONE);
 		outputBrowseButton.setText("Browse");
-
-		Label serverURLLabel = new Label(container, SWT.NONE);
-		serverURLLabel.setText("Application Server URL");
-
-		serverURL = new Text(container, SWT.BORDER);
-		serverURL.setToolTipText("This is the URL of Servoy Application Server used by mobile client to synchronize data");
 
 		final Shell outputBrowseShell = new Shell();
 		outputBrowseButton.addSelectionListener(new SelectionAdapter()
@@ -118,35 +101,6 @@ public class WarExportPage extends WizardPage
 				}
 			}
 		});
-
-		Label solutionLabel = new Label(container, SWT.NONE);
-		solutionLabel.setText("Solution");
-
-		solutionSelectViewer = new TreeSelectViewer(container, SWT.None);
-		solutionSelectViewer.setButtonText("Browse");
-		solutionSelectViewer.setTitleText("Select solution");
-		solutionSelectViewer.setName("warExportDialog");
-		solutionSelectViewer.setContentProvider(FlatTreeContentProvider.INSTANCE);
-		solutionSelectViewer.setLabelProvider(SupportNameLabelProvider.INSTANCE_DEFAULT_NONE);
-
-		try
-		{
-			solutionSelectViewer.setInput(ServoyModel.getDeveloperRepository().getRootObjectMetaDatasForType(IRepository.SOLUTIONS));
-		}
-		catch (Exception e)
-		{
-			ServoyLog.logError(e);
-		}
-
-		if (ServoyModelFinder.getServoyModel().getActiveProject() != null)
-		{
-			SolutionMetaData activeSolution = ServoyModelFinder.getServoyModel().getActiveProject().getSolutionMetaData();
-			if (activeSolution != null)
-			{
-				solutionSelectViewer.setSelection(new StructuredSelection(activeSolution));
-			}
-		}
-		Control solutionSelectControl = solutionSelectViewer.getControl();
 
 		Label typeLabel = new Label(container, SWT.NONE);
 		typeLabel.setText("Export type"); //$NON-NLS-1$
@@ -190,11 +144,9 @@ public class WarExportPage extends WizardPage
 
 		final GroupLayout groupLayout = new GroupLayout(container);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(solutionLabel).add(serverURLLabel).add(typeLabel)).addPreferredGap(
+			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(typeLabel)).addPreferredGap(
 				LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(solutionSelectControl, GroupLayout.DEFAULT_SIZE, 480, Short.MAX_VALUE).add(serverURL,
-					GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE).add(exportAsWar, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE).add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(exportAsWar, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE).add(
 					groupLayout.createSequentialGroup().add(18).add(outputLabel).addPreferredGap(LayoutStyle.RELATED).add(outputText, GroupLayout.DEFAULT_SIZE,
 						130, Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(outputBrowseButton, GroupLayout.PREFERRED_SIZE, 80,
 						GroupLayout.PREFERRED_SIZE)).add(
@@ -208,10 +160,6 @@ public class WarExportPage extends WizardPage
 
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(solutionSelectControl, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(solutionLabel)).add(7).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(serverURL, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(serverURLLabel)).add(10).add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(
 					groupLayout.createSequentialGroup().add(exportAsWar, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(
 						10).add(
@@ -232,12 +180,6 @@ public class WarExportPage extends WizardPage
 		{
 			outputText.setText(defaultPath);
 		}
-		String defaultServerURL = getDialogSettings().get(SERVER_URL_KEY);
-		if (defaultServerURL == null)
-		{
-			defaultServerURL = "http://127.0.0.1:8080";
-		}
-		serverURL.setText(defaultServerURL);
 		ModifyListener errorMessageDetecter = new ModifyListener()
 		{
 			public void modifyText(ModifyEvent e)
@@ -246,7 +188,6 @@ public class WarExportPage extends WizardPage
 			}
 		};
 		outputText.addModifyListener(errorMessageDetecter);
-		serverURL.addModifyListener(errorMessageDetecter);
 		phoneGapUsername.addModifyListener(errorMessageDetecter);
 		phoneGapPassword.addModifyListener(errorMessageDetecter);
 		SelectionListener selectionListener = new SelectionAdapter()
@@ -290,23 +231,12 @@ public class WarExportPage extends WizardPage
 		phoneGapPassword.setEnabled(!enabled);
 	}
 
-	public String getOutputFolder()
+	private String getOutputFolder()
 	{
 		return outputText.getText();
 	}
 
-	public String getServerURL()
-	{
-		return serverURL.getText();
-	}
-
-	public String getSolution()
-	{
-		IStructuredSelection selection = (IStructuredSelection)solutionSelectViewer.getSelection();
-		return selection.isEmpty() ? null : ((RootObjectMetaData)selection.getFirstElement()).getName();
-	}
-
-	public boolean isWarExport()
+	private boolean isWarExport()
 	{
 		return exportAsWar.getSelection();
 	}
@@ -360,8 +290,8 @@ public class WarExportPage extends WizardPage
 					return null;
 				}
 				pgAppPage.populateExistingApplications();
-				pgAppPage.setSolutionName(getSolution());
-				pgAppPage.setServerURL(getServerURL());
+				pgAppPage.setSolutionName(mobileExporter.getSolutionName());
+				pgAppPage.setServerURL(mobileExporter.getServerURL());
 				return pgAppPage;
 			}
 		}
@@ -371,24 +301,17 @@ public class WarExportPage extends WizardPage
 	private String doExport()
 	{
 		File outputFile = new File(getOutputFolder());
-		new MobileExporter().doExport(outputFile, getServerURL(), getSolution(), false);
+		mobileExporter.setOutputFolder(outputFile);
+		mobileExporter.doExport(false);
 
 		getDialogSettings().put(WarExportPage.OUTPUT_PATH_KEY, getOutputFolder());
-		getDialogSettings().put(WarExportPage.SERVER_URL_KEY, getServerURL());
-		return "War file was successfully exported to: " + new File(outputFile.getAbsolutePath(), getSolution() + ".war").getAbsolutePath();
+		getDialogSettings().put(ExportOptionsPage.SERVER_URL_KEY, mobileExporter.getServerURL());
+		return "War file was successfully exported to: " + new File(outputFile.getAbsolutePath(), mobileExporter.getSolutionName() + ".war").getAbsolutePath();
 	}
 
 	@Override
 	public String getErrorMessage()
 	{
-		if (getSolution() == null || "".equals(getSolution()))
-		{
-			return "No solution specified";
-		}
-		if (getServerURL() == null || "".equals(getServerURL()))
-		{
-			return "No server URL specified";
-		}
 		if (isWarExport())
 		{
 			if (getOutputFolder() == null || "".equals(getOutputFolder()))
@@ -422,4 +345,5 @@ public class WarExportPage extends WizardPage
 		}
 		return super.getErrorMessage();
 	}
+
 }
