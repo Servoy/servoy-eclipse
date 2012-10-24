@@ -44,7 +44,7 @@ public class MobileListModel implements ISupportBounds
 	public final Form containedForm;
 	public final GraphicalComponent header;
 	public final GraphicalComponent button;
-	public final GraphicalComponent aside;
+	public final GraphicalComponent subtext;
 	public final Field countBubble;
 	public final Field image;
 
@@ -55,12 +55,12 @@ public class MobileListModel implements ISupportBounds
 	 * @param containedForm
 	 * @param header
 	 * @param button
-	 * @param aside
+	 * @param subtext
 	 * @param countBubble
 	 * @param image
 	 */
 	public MobileListModel(Form form, TabPanel tabPanel, Tab tab, Form containedForm, GraphicalComponent header, GraphicalComponent button,
-		GraphicalComponent aside, Field countBubble, Field image)
+		GraphicalComponent subtext, Field countBubble, Field image)
 	{
 		this.form = form;
 		this.tabPanel = tabPanel;
@@ -68,7 +68,7 @@ public class MobileListModel implements ISupportBounds
 		this.containedForm = containedForm;
 		this.header = header;
 		this.button = button;
-		this.aside = aside;
+		this.subtext = subtext;
 		this.countBubble = countBubble;
 		this.image = image;
 	}
@@ -76,11 +76,11 @@ public class MobileListModel implements ISupportBounds
 	/**
 	 * For Form Lists
 	 * @param button
-	 * @param aside
+	 * @param subtext
 	 * @param countBubble
 	 * @param image
 	 */
-	public MobileListModel(Form form, GraphicalComponent button, GraphicalComponent aside, Field countBubble, Field image)
+	public MobileListModel(Form form, GraphicalComponent button, GraphicalComponent subtext, Field countBubble, Field image)
 	{
 		this.form = form;
 		this.tabPanel = null;
@@ -88,7 +88,7 @@ public class MobileListModel implements ISupportBounds
 		this.containedForm = null;
 		this.header = null;
 		this.button = button;
-		this.aside = aside;
+		this.subtext = subtext;
 		this.countBubble = countBubble;
 		this.image = image;
 	}
@@ -117,7 +117,7 @@ public class MobileListModel implements ISupportBounds
 	{
 		GraphicalComponent header = null;
 		GraphicalComponent button = null;
-		GraphicalComponent aside = null;
+		GraphicalComponent subtext = null;
 		Field countBubble = null;
 		Field image = null;
 		for (IPersist elem : application.getFlattenedSolution().getFlattenedForm(containedForm).getAllObjectsAsList())
@@ -130,9 +130,9 @@ public class MobileListModel implements ISupportBounds
 			{
 				button = (GraphicalComponent)elem;
 			}
-			else if (elem instanceof GraphicalComponent && ((GraphicalComponent)elem).getCustomMobileProperty("listitemAside") != null)
+			else if (elem instanceof GraphicalComponent && ((GraphicalComponent)elem).getCustomMobileProperty("listitemSubtext") != null)
 			{
-				aside = (GraphicalComponent)elem;
+				subtext = (GraphicalComponent)elem;
 			}
 			else if (elem instanceof Field && ((Field)elem).getCustomMobileProperty("listitemCount") != null)
 			{
@@ -144,7 +144,7 @@ public class MobileListModel implements ISupportBounds
 			}
 		}
 
-		return new MobileListModel(form, tabPanel, tab, containedForm, header, button, aside, countBubble, image);
+		return new MobileListModel(form, tabPanel, tab, containedForm, header, button, subtext, countBubble, image);
 
 	}
 }

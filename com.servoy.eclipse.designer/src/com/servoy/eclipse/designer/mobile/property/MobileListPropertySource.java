@@ -125,13 +125,13 @@ public class MobileListPropertySource implements IPropertySource
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT);
 			}
 
-			// aside
-			if (model.aside != null)
+			// subtext
+			if (model.subtext != null)
 			{
-				elementPropertySources.put(prefix = "listitemAside",
-					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.aside, model.containedForm, false));
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID, "asideDataProvider");
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT, "asideText");
+				elementPropertySources.put(prefix = "listitemSubtext",
+					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.subtext, model.containedForm, false));
+				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID, "subtextDataProvider");
+				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT, "subtextText");
 			}
 
 			// countBubble

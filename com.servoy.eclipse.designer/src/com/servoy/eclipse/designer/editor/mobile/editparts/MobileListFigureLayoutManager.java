@@ -69,7 +69,7 @@ public class MobileListFigureLayoutManager extends AbstractLayout
 						Rectangle.SINGLETON.width = containerBounds.width - 200;
 						break;
 
-					case Aside :
+					case Subtext :
 						Rectangle.SINGLETON.x = containerBounds.x + containerBounds.width - 160;
 						Rectangle.SINGLETON.width = 125;
 						Rectangle.SINGLETON.height = (containerBounds.height - 30) / 2;

@@ -68,7 +68,7 @@ public class AddFormListCommand extends CompoundCommand
 				// add items for properties
 
 				MobileListModel model = addlistItems((Form)parent);
-				return new Object[] { model.button, model.aside, model.countBubble, model.image };
+				return new Object[] { model.button, model.subtext, model.countBubble, model.image };
 			}
 
 			return null;
@@ -81,9 +81,9 @@ public class AddFormListCommand extends CompoundCommand
 		GraphicalComponent button = ElementFactory.createButton(form, null, "list", null);
 		button.putCustomMobileProperty("listitemButton", Boolean.TRUE);
 
-		// aside
-		GraphicalComponent aside = ElementFactory.createLabel(form, null, null);
-		aside.putCustomMobileProperty("listitemAside", Boolean.TRUE);
+		// subtext
+		GraphicalComponent subtext = ElementFactory.createLabel(form, null, null);
+		subtext.putCustomMobileProperty("listitemSubtext", Boolean.TRUE);
 
 		// countBubble
 		Field countBubble = ElementFactory.createField(form, null, null);
@@ -93,6 +93,6 @@ public class AddFormListCommand extends CompoundCommand
 		Field image = ElementFactory.createField(form, null, null);
 		image.putCustomMobileProperty("listitemImage", Boolean.TRUE);
 
-		return new MobileListModel(form, button, aside, countBubble, image);
+		return new MobileListModel(form, button, subtext, countBubble, image);
 	}
 }

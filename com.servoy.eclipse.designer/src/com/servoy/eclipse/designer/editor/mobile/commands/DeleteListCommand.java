@@ -102,10 +102,10 @@ public class DeleteListCommand extends CompoundCommand
 						repository.deleteObject(model.header);
 						changes.add(model.header);
 					}
-					if (model.aside != null)
+					if (model.subtext != null)
 					{
-						repository.deleteObject(model.aside);
-						changes.add(model.aside);
+						repository.deleteObject(model.subtext);
+						changes.add(model.subtext);
 					}
 					if (model.countBubble != null)
 					{
@@ -155,10 +155,10 @@ public class DeleteListCommand extends CompoundCommand
 						repository.undeleteObject(model.form, model.button);
 						changes.add(model.button);
 					}
-					if (model.aside != null)
+					if (model.subtext != null)
 					{
-						repository.undeleteObject(model.form, model.aside);
-						changes.add(model.aside);
+						repository.undeleteObject(model.form, model.subtext);
+						changes.add(model.subtext);
 					}
 					if (model.countBubble != null)
 					{

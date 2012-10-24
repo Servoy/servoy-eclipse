@@ -75,9 +75,9 @@ public class MobileListGraphicalEditPart extends AbstractGraphicalEditPart
 		{
 			modelChildren.add(model.button);
 		}
-		if (model.aside != null)
+		if (model.subtext != null)
 		{
-			modelChildren.add(model.aside);
+			modelChildren.add(model.subtext);
 		}
 		if (model.countBubble != null)
 		{
@@ -129,9 +129,9 @@ public class MobileListGraphicalEditPart extends AbstractGraphicalEditPart
 		{
 			type = MobileListElementType.Button;
 		}
-		else if (child == model.aside)
+		else if (child == model.subtext)
 		{
-			type = MobileListElementType.Aside;
+			type = MobileListElementType.Subtext;
 		}
 		else if (child == model.countBubble)
 		{

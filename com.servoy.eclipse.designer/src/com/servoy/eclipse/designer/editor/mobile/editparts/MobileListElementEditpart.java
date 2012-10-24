@@ -53,7 +53,7 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 
 	public static enum MobileListElementType
 	{
-		Header, Button, Aside, CountBubble, Image
+		Header, Button, Subtext, CountBubble, Image
 	}
 
 	protected IApplication application;
@@ -111,7 +111,7 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 				((Label)fig).setLabelAlignment(PositionConstants.LEFT);
 				break;
 
-			case Aside :
+			case Subtext :
 				fig = new Label();
 				((Label)fig).setLabelAlignment(PositionConstants.RIGHT);
 				break;
@@ -154,8 +154,8 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 				updateFigureForGC(fig, (GraphicalComponent)getModel(), "<button>");
 				break;
 
-			case Aside :
-				updateFigureForGC(fig, (GraphicalComponent)getModel(), "<aside>");
+			case Subtext :
+				updateFigureForGC(fig, (GraphicalComponent)getModel(), "<subtext>");
 				break;
 
 			default :
