@@ -31,6 +31,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JRadioButton;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 
@@ -124,6 +125,7 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 							if (headerText)
 							{
 								component.setFont(component.getFont().deriveFont(Font.BOLD));
+								((JLabel)component).setHorizontalAlignment(SwingConstants.CENTER);
 							}
 							else
 							{
