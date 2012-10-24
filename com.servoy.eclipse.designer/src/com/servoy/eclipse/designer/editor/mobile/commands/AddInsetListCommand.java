@@ -98,7 +98,9 @@ public class AddInsetListCommand extends BaseFormPlaceElementCommand
 
 			ServoyProject servoyProject = servoyModel.getServoyProject(solution.getName());
 			Form tabForm = servoyProject.getEditingSolution().createNewForm(nameValidator, null, tabFormName, null, true, null);
-			tabForm.createNewPart(Part.HEADER, Integer.MAX_VALUE); // add a part, so builder won't complain
+			// add parts so it looks nice wil developing in webclient
+			tabForm.createNewPart(Part.HEADER, 40);
+			tabForm.createNewPart(Part.BODY, 600);
 			tabForm.setView(FormController.LOCKED_TABLE_VIEW);
 
 			// mark target form as contained in this form
@@ -110,7 +112,7 @@ public class AddInsetListCommand extends BaseFormPlaceElementCommand
 			AddFormListCommand.addlistItems(tabForm);
 
 			// add header
-			GraphicalComponent header = ElementFactory.createLabel(tabForm, null, null);
+			GraphicalComponent header = ElementFactory.createLabel(tabForm, null, new Point(0, 0));
 			header.putCustomMobileProperty("listitemHeader", Boolean.TRUE);
 
 			// add tab

@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.designer.editor.mobile.commands;
 
+import java.awt.Dimension;
+
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.swt.graphics.Point;
@@ -66,7 +68,6 @@ public class AddFormListCommand extends CompoundCommand
 			if (parent instanceof Form)
 			{
 				// add items for properties
-
 				MobileListModel model = addlistItems((Form)parent);
 				return new Object[] { model.button, model.subtext, model.countBubble, model.image };
 			}
@@ -77,21 +78,25 @@ public class AddFormListCommand extends CompoundCommand
 
 	public static MobileListModel addlistItems(Form form) throws RepositoryException
 	{
+		// image
+		Field image = ElementFactory.createField(form, null, new Point(0, 40));
+		image.setSize(new Dimension(10, 10));
+		image.putCustomMobileProperty("listitemImage", Boolean.TRUE);
+
 		// button
-		GraphicalComponent button = ElementFactory.createButton(form, null, "list", null);
+		GraphicalComponent button = ElementFactory.createButton(form, null, "list", new Point(10, 40));
+		image.setSize(new Dimension(30, 10));
 		button.putCustomMobileProperty("listitemButton", Boolean.TRUE);
 
 		// subtext
-		GraphicalComponent subtext = ElementFactory.createLabel(form, null, null);
+		GraphicalComponent subtext = ElementFactory.createLabel(form, null, new Point(40, 40));
+		image.setSize(new Dimension(20, 10));
 		subtext.putCustomMobileProperty("listitemSubtext", Boolean.TRUE);
 
 		// countBubble
-		Field countBubble = ElementFactory.createField(form, null, null);
+		Field countBubble = ElementFactory.createField(form, null, new Point(60, 40));
+		image.setSize(new Dimension(10, 10));
 		countBubble.putCustomMobileProperty("listitemCount", Boolean.TRUE);
-
-		// image
-		Field image = ElementFactory.createField(form, null, null);
-		image.putCustomMobileProperty("listitemImage", Boolean.TRUE);
 
 		return new MobileListModel(form, button, subtext, countBubble, image);
 	}
