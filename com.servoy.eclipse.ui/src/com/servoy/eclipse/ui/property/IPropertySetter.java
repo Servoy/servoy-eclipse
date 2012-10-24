@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -25,13 +25,13 @@ import org.eclipse.ui.views.properties.IPropertySource;
  * 
  * @param <T>
  */
-public interface IPropertySetter<T>
+public interface IPropertySetter<T, S extends IPropertySource>
 {
-	void setProperty(IPropertySource propertySource, T value);
+	void setProperty(S propertySource, T value);
 
-	T getProperty(IPropertySource propertySource);
+	T getProperty(S propertySource);
 
-	boolean isPropertySet(IPropertySource propertySource);
+	boolean isPropertySet(S propertySource);
 
-	void resetPropertyValue(IPropertySource propertySource);
+	void resetPropertyValue(S propertySource);
 }

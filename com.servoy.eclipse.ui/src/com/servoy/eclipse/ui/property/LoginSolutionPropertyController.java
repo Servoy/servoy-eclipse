@@ -19,7 +19,6 @@ package com.servoy.eclipse.ui.property;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.SolutionContentProvider;
@@ -36,8 +35,15 @@ import com.servoy.j2db.persistence.SolutionMetaData;
  *
  */
 
-public class LoginSolutionPropertyController extends PropertyController<String, String> implements IPropertySetter<String>
+public class LoginSolutionPropertyController extends PropertySetterController<String, String, PersistPropertySource>
 {
+	/**
+	 * @param id
+	 * @param displayName
+	 * @param propertyConverter
+	 * @param labelProvider
+	 * @param cellEditorFactory
+	 */
 	public LoginSolutionPropertyController(Object id, String displayName)
 	{
 		super(id, displayName, PersistPropertySource.NULL_STRING_CONVERTER, PersistPropertySource.NullDefaultLabelProvider.LABEL_NONE, null);
@@ -53,56 +59,36 @@ public class LoginSolutionPropertyController extends PropertyController<String, 
 	/**
 	 * Remove all modules that are login-solutions and add the new value as module
 	 */
-	public void setProperty(IPropertySource propertySource, String value)
+	public void setProperty(PersistPropertySource propertySource, String value)
 	{
-		if (propertySource instanceof PersistPropertySource)
+		IPersist persist = propertySource.getPersist();
+		if (persist instanceof Solution)
 		{
-			IPersist persist = ((PersistPropertySource)propertySource).getPersist();
-			if (persist instanceof Solution)
+			try
 			{
-				try
-				{
-					((Solution)persist).setLoginSolutionName(value);
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError(e);
-				}
+				((Solution)persist).setLoginSolutionName(value);
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError(e);
 			}
 		}
 	}
 
-
-	public String getProperty(IPropertySource propertySource)
+	public String getProperty(PersistPropertySource propertySource)
 	{
-		if (propertySource instanceof PersistPropertySource)
+		IPersist persist = propertySource.getPersist();
+		if (persist instanceof Solution)
 		{
-			IPersist persist = ((PersistPropertySource)propertySource).getPersist();
-			if (persist instanceof Solution)
+			try
 			{
-				try
-				{
-					return ((Solution)persist).getLoginSolutionName();
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError(e);
-				}
+				return ((Solution)persist).getLoginSolutionName();
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError(e);
 			}
 		}
 		return null;
 	}
-
-	public boolean isPropertySet(IPropertySource propertySource)
-	{
-		return getProperty(propertySource) != null;
-	}
-
-	public void resetPropertyValue(IPropertySource propertySource)
-	{
-		setProperty(propertySource, null);
-
-	}
-
-
 }

@@ -73,6 +73,7 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 	private static final String ELEMENTS_COMBOBOX_ID = "combobox";
 	private static final String ELEMENTS_CHECKBOXES_ID = "checkboxes";
 	private static final String ELEMENTS_RADIOBUTTONS_ID = "radio buttons";
+	private static final String ELEMENTS_LABEL_ID = "label";
 
 	private static final String[] ELEMENTS_IDS = new String[] {
 	/* */ELEMENTS_TEXT_FIELD_ID
@@ -80,6 +81,7 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 	/* */, ELEMENTS_COMBOBOX_ID
 	/* */, ELEMENTS_CHECKBOXES_ID
 	/* */, ELEMENTS_RADIOBUTTONS_ID
+	/* */, ELEMENTS_LABEL_ID
 	/* */};
 
 	private static final String LISTS_ID = "lists";
@@ -283,6 +285,12 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 		{
 			icon = Activator.loadImageDescriptorFromBundle("text.gif");// RAGTEST icon
 			displayType = Field.RADIOS;
+		}
+
+		else if (ELEMENTS_LABEL_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("text.gif");// RAGTEST icon
+			requestType = MobileVisualFormEditor.REQ_PLACE_LABEL;
 		}
 
 		else

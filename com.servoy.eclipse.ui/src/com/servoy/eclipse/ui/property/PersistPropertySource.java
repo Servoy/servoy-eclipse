@@ -335,32 +335,26 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		LOGIN_SOLUTION_CONTROLLER = new LoginSolutionPropertyController("loginSolutionName", RepositoryHelper.getDisplayName("loginSolutionName",
 			Solution.class));
 
-		DESIGN_PROPERTIES_CONTROLLER = new PropertySetterDelegatePropertyController<Map<String, Object>, Map<String, Object>>(new MapEntriesPropertyController(
-			"designTimeProperties", RepositoryHelper.getDisplayName("designTimeProperties", Form.class)), "designTimeProperties")
+		DESIGN_PROPERTIES_CONTROLLER = new PropertySetterDelegatePropertyController<Map<String, Object>, Map<String, Object>, PersistPropertySource>(
+			new MapEntriesPropertyController("designTimeProperties", RepositoryHelper.getDisplayName("designTimeProperties", Form.class)),
+			"designTimeProperties")
 		{
-			@Override
-			public Map<String, Object> getProperty(IPropertySource propSource)
+			public Map<String, Object> getProperty(PersistPropertySource propSource)
 			{
-				if (propSource instanceof PersistPropertySource)
+				IPersist persist = propSource.getPersist();
+				if (persist instanceof AbstractBase)
 				{
-					IPersist persist = ((PersistPropertySource)propSource).getPersist();
-					if (persist instanceof AbstractBase)
-					{
-						return ((AbstractBase)persist).getMergedCustomDesignTimeProperties(); // returns non-null map with copied/merged values, may be written to
-					}
+					return ((AbstractBase)persist).getMergedCustomDesignTimeProperties(); // returns non-null map with copied/merged values, may be written to
 				}
 				return null;
 			}
 
-			public void setProperty(IPropertySource propSource, Map<String, Object> value)
+			public void setProperty(PersistPropertySource propSource, Map<String, Object> value)
 			{
-				if (propSource instanceof PersistPropertySource)
+				IPersist persist = propSource.getPersist();
+				if (persist instanceof AbstractBase)
 				{
-					IPersist persist = ((PersistPropertySource)propSource).getPersist();
-					if (persist instanceof AbstractBase)
-					{
-						((AbstractBase)persist).setUnmergedCustomDesignTimeProperties(value);
-					}
+					((AbstractBase)persist).setUnmergedCustomDesignTimeProperties(value);
 				}
 			}
 		};
@@ -567,8 +561,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 						IPropertyDescriptor desc;
 						try
 						{
-							desc = getPropertiesPropertyDescriptor(this, persistContext, readOnly, propName, getDisplayName(propName), propName,
-								flattenedEditingSolution, form);
+							desc = getPropertiesPropertyDescriptor(this, propName, getDisplayName(propName), propName, flattenedEditingSolution, form);
 							if (desc != null)
 							{
 								setCategory(desc, PropertyCategory.createPropertyCategory(propName));
@@ -2596,6 +2589,12 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		return null;
 	}
 
+	protected IPropertyDescriptor getPropertiesPropertyDescriptor(IPropertySource propertySource, String id, String displayName, String name,
+		FlattenedSolution flattenedEditingSolution, Form form) throws RepositoryException
+	{
+		return getPropertiesPropertyDescriptor(propertySource, persistContext, readOnly, id, displayName, name, flattenedEditingSolution, form);
+	}
+
 	private static IPropertyDescriptor getPropertiesPropertyDescriptor(IPropertySource propertySource, final PersistContext persistContext,
 		final boolean readOnly, final String id, String displayName, String name, final FlattenedSolution flattenedEditingSolution, final Form form)
 		throws RepositoryException
@@ -2801,16 +2800,16 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				integerTypes[i] = Integer.valueOf(iTypes[i]);
 				stringTypes[i] = Column.getDisplayTypeString(iTypes[i]);
 			}
-			return new PropertySetterDelegatePropertyController<Integer, Integer>(new ComboboxPropertyController<Integer>(id, displayName,
-				new ComboboxPropertyModel<Integer>(integerTypes, stringTypes), Messages.LabelUnresolved), id)
+			return new PropertySetterDelegatePropertyController<Integer, Integer, PersistPropertySource>(new ComboboxPropertyController<Integer>(id,
+				displayName, new ComboboxPropertyModel<Integer>(integerTypes, stringTypes), Messages.LabelUnresolved), id)
 			{
 				// handle setting of this property via a IPropertySetter so that we can do additional stuff when the property is set.
-				public void setProperty(IPropertySource propertySource, Integer value)
+				public void setProperty(PersistPropertySource propertySource, Integer value)
 				{
-					((PersistPropertySource)propertySource).setPersistPropertyValue(id, value);
+					propertySource.setPersistPropertyValue(id, value);
 
 					// the variable type is being set; the default value should change if incompatible
-					ScriptVariable variable = (ScriptVariable)((PersistPropertySource)propertySource).getPersist();
+					ScriptVariable variable = (ScriptVariable)propertySource.getPersist();
 					String defaultValue = variable.getDefaultValue();
 					if (defaultValue != null)
 					{

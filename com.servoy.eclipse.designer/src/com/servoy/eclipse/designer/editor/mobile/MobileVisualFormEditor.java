@@ -39,6 +39,7 @@ public class MobileVisualFormEditor extends BaseVisualFormEditor
 	public static final RequestType REQ_PLACE_HEADER = new RequestType(RequestType.TYPE_PART);
 	public static final RequestType REQ_PLACE_FOOTER = new RequestType(RequestType.TYPE_PART);
 	public static final RequestType REQ_PLACE_FIELD = new RequestType(RequestType.TYPE_FIELD);
+	public static final RequestType REQ_PLACE_LABEL = new RequestType(RequestType.TYPE_LABEL);
 	public static final RequestType REQ_PLACE_INSET_LIST = new RequestType(RequestType.TYPE_TAB);
 	public static final RequestType REQ_PLACE_FORM_LIST = new RequestType(RequestType.TYPE_TAB);
 	public static final RequestType REQ_PLACE_TOGGLE = new RequestType(RequestType.TYPE_FIELD);

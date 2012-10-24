@@ -27,6 +27,7 @@ import com.servoy.eclipse.designer.editor.CreateElementRequest;
 import com.servoy.eclipse.designer.editor.mobile.commands.AddFieldCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.AddFormListCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.AddInsetListCommand;
+import com.servoy.eclipse.designer.editor.mobile.commands.AddLabelCommand;
 import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
@@ -77,6 +78,10 @@ public class MobileFormEditPolicy extends ComponentEditPolicy
 			else if (createType == MobileVisualFormEditor.REQ_PLACE_FIELD)
 			{
 				command = new AddFieldCommand(application, form, (CreateRequest)request);
+			}
+			else if (createType == MobileVisualFormEditor.REQ_PLACE_LABEL)
+			{
+				command = new AddLabelCommand(application, form, (CreateRequest)request);
 			}
 			else if (createType == MobileVisualFormEditor.REQ_PLACE_INSET_LIST)
 			{

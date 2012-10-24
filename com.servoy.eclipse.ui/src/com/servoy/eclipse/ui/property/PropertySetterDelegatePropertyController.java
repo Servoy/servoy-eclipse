@@ -23,7 +23,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
  * Property descriptor wrapper that implements IPropertySetter.
  * 
  */
-public abstract class PropertySetterDelegatePropertyController<P, E> extends DelegatePropertyController<P, E> implements IPropertySetter<E>
+public abstract class PropertySetterDelegatePropertyController<P, E, S extends IPropertySource> extends DelegatePropertySetterController<P, E, S>
 {
 	public PropertySetterDelegatePropertyController(IPropertyDescriptor propertyDescriptor, Object id)
 	{
@@ -36,13 +36,15 @@ public abstract class PropertySetterDelegatePropertyController<P, E> extends Del
 		return (E)((PersistPropertySource)propertySource).getPersistPropertyValue(getId());
 	}
 
-	public void resetPropertyValue(IPropertySource propertySource)
+	@Override
+	public void resetPropertyValue(S propertySource)
 	{
 		PersistPropertySource pp = (PersistPropertySource)propertySource;
 		pp.setPersistPropertyValue(getId(), pp.getDefaultPersistValue(getId()));
 	}
 
-	public boolean isPropertySet(IPropertySource propertySource)
+	@Override
+	public boolean isPropertySet(S propertySource)
 	{
 		PersistPropertySource pp = (PersistPropertySource)propertySource;
 		Object defaultValue = pp.getDefaultPersistValue(getId());

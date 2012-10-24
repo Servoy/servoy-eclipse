@@ -37,7 +37,7 @@ import com.servoy.j2db.persistence.Form;
  * 
  * @author rgansevles
  */
-public class RelatedTabController extends PropertyController<String, Object> implements IPropertySetter<Object>
+public class RelatedTabController extends PropertyController<String, Object> implements IPropertySetter<Object, IPropertySource>
 {
 	private final String title;
 	private final Form form;
