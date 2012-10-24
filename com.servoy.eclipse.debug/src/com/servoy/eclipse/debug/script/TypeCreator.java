@@ -1717,6 +1717,10 @@ public class TypeCreator extends TypeCache
 			{
 				return Record.class;
 			}
+			else if (returnType.isAssignableFrom(JSDataSet.class))
+			{
+				return JSDataSet.class;
+			}
 			else if (returnType.isAssignableFrom(FoundSet.class))
 			{
 				return FoundSet.class;
