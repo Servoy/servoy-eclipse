@@ -121,7 +121,39 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 							((JLabel)component).setOpaque(false);
 							boolean headerText = persist instanceof AbstractBase && ((AbstractBase)persist).getCustomMobileProperty("headerText") != null;
 							((JLabel)component).setForeground(headerText ? HEADER_LABEL_FG : LABEL_FG);
-							if (headerText) component.setFont(component.getFont().deriveFont(Font.BOLD));
+							if (headerText)
+							{
+								component.setFont(component.getFont().deriveFont(Font.BOLD));
+							}
+							else
+							{
+								Object headerSizeProp = ((AbstractBase)persist).getCustomMobileProperty("headerSize");
+								int headerSize = headerSizeProp instanceof Integer ? Math.max(1, Math.min(6, ((Integer)headerSizeProp).intValue())) : 4;
+
+								float fontsize;
+								switch (headerSize)
+								{
+									case 1 :
+										fontsize = 24f;
+										break;
+									case 2 :
+										fontsize = 18f;
+										break;
+									case 3 :
+										fontsize = 14f;
+										break;
+									case 5 :
+										fontsize = 10f;
+										break;
+									case 6 :
+										fontsize = 8f;
+										break;
+									default : // 4
+										fontsize = 12f;
+										break;
+								}
+								component.setFont(component.getFont().deriveFont(fontsize));
+							}
 						}
 						else if (component instanceof DataComboBox)
 						{

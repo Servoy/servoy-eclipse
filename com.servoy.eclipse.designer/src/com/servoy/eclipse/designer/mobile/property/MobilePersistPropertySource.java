@@ -20,6 +20,7 @@ package com.servoy.eclipse.designer.mobile.property;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.property.ComboboxPropertyController;
 import com.servoy.eclipse.ui.property.ComboboxPropertyModel;
@@ -55,6 +56,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		public void setProperty(MobilePersistPropertySource propertySource, Integer value)
 		{
 			((AbstractBase)propertySource.getPersist()).putCustomMobileProperty(HEADER_SIZE_PROPERTY, value);
+			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, propertySource.getPersist(), false);
 		}
 
 		public Integer getProperty(MobilePersistPropertySource propertySource)
