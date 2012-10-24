@@ -33,6 +33,7 @@ import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IValidateName;
+import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TabPanel;
@@ -97,6 +98,7 @@ public class AddInsetListCommand extends BaseFormPlaceElementCommand
 
 			ServoyProject servoyProject = servoyModel.getServoyProject(solution.getName());
 			Form tabForm = servoyProject.getEditingSolution().createNewForm(nameValidator, null, tabFormName, null, true, null);
+			tabForm.createNewPart(Part.HEADER, Integer.MAX_VALUE); // add a part, so builder won't complain
 			tabForm.setView(FormController.LOCKED_TABLE_VIEW);
 
 			// mark target form as contained in this form
