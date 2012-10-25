@@ -361,7 +361,15 @@ public class ElementResolver implements IElementResolver
 				{
 					Type type = context.getType("RuntimeForm<" + form.getName() + '>');
 					Member m = TypeCreator.getMember(name, type);
-					if (m != null) return m;
+					if (m != null)
+					{
+						if (!m.isVisible())
+						{
+							m = TypeCreator.clone(m, null);
+							m.setVisible(true);
+						}
+						return m;
+					}
 				}
 			}
 			else if (path.segmentCount() == 3 && path.segment(0).equals(SolutionSerializer.DATASOURCES_DIR_NAME))
