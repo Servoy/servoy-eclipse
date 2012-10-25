@@ -79,6 +79,7 @@ import com.servoy.eclipse.core.DesignApplication;
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.JSDeveloperSolutionModel;
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.debug.Activator;
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -126,6 +127,7 @@ import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.plugins.IBeanClassProvider;
 import com.servoy.j2db.plugins.IClientPlugin;
@@ -170,6 +172,7 @@ import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.annotations.AnnotationManager;
 import com.servoy.j2db.scripting.annotations.JSReadonlyProperty;
+import com.servoy.j2db.scripting.annotations.ServoyMobile;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.ui.IScriptAccordionPanelMethods;
 import com.servoy.j2db.ui.IScriptDataLabelMethods;
@@ -306,6 +309,7 @@ public class TypeCreator extends TypeCache
 	private final ConcurrentMap<String, IScopeTypeCreator> scopeTypes = new ConcurrentHashMap<String, IScopeTypeCreator>();
 	protected final ConcurrentMap<Class< ? >, Class< ? >[]> linkedTypes = new ConcurrentHashMap<Class< ? >, Class< ? >[]>();
 	protected final ConcurrentMap<Class< ? >, String> prefixedTypes = new ConcurrentHashMap<Class< ? >, String>();
+	private final ConcurrentMap<String, Boolean> mobileAllowedTypes = new ConcurrentHashMap<String, Boolean>();
 	private volatile boolean initialized;
 	protected static final List<String> objectMethods = Arrays.asList(new String[] { "wait", "toString", "hashCode", "equals", "notify", "notifyAll", "getClass" });
 
@@ -456,6 +460,63 @@ public class TypeCreator extends TypeCache
 			}
 		}
 		return type;
+	}
+
+	private boolean isServoyMobileSolutionType()
+	{
+		boolean isServoyMobileSolution = false;
+		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		ServoyProject activeProject = servoyModel.getActiveProject();
+		if (activeProject != null && activeProject.getSolution() != null)
+		{
+			isServoyMobileSolution = (activeProject.getSolution().getSolutionType() == SolutionMetaData.MOBILE);
+		}
+		return isServoyMobileSolution;
+	}
+
+	private boolean isTypeAllowedForMobile(Class< ? > cls)
+	{
+		if (cls != null)
+		{
+			if (cls.isAnnotationPresent(ServoyMobile.class)) return true;
+			if (cls.getSuperclass() != null && isTypeAllowedForMobile(cls.getSuperclass())) return true;
+			if (cls.getInterfaces() != null)
+			{
+				for (Class< ? > intf : cls.getInterfaces())
+				{
+					if (isTypeAllowedForMobile(intf)) return true;
+				}
+			}
+		}
+		return false;
+	}
+
+
+	private boolean isMethodAllowedForMobile(Class< ? > cls, MemberBox method)
+	{
+		if (cls != null)
+		{
+			if (cls.isAnnotationPresent(ServoyMobile.class))
+			{
+				try
+				{
+					cls.getMethod(method.method().getName(), method.getParameterTypes());
+					return true;
+				}
+				catch (NoSuchMethodException e)
+				{
+				}
+			}
+			if (cls.getSuperclass() != null && isMethodAllowedForMobile(cls.getSuperclass(), method)) return true;
+			if (cls.getInterfaces() != null)
+			{
+				for (Class< ? > intf : cls.getInterfaces())
+				{
+					if (isMethodAllowedForMobile(intf, method)) return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	private Type getClassType(String context, Class< ? > clz, String name)
@@ -979,6 +1040,19 @@ public class TypeCreator extends TypeCache
 								method.setDeprecated(true);
 								method.setVisible(false);
 							}
+
+							if (isServoyMobileSolutionType())
+							{
+								Boolean visibleType = mobileAllowedTypes.get(typeName);
+								boolean viz = false;
+								if (visibleType != null)
+								{
+									Class< ? > auxCls = memberbox[i].getDeclaringClass();
+									if (auxCls != null) viz = isMethodAllowedForMobile(auxCls, memberbox[i]);
+								}
+								method.setVisible(viz);
+							}
+
 							method.setDescription(getDoc(name, scriptObjectClass, parameterTypes)); // TODO name should be of parent.
 							if (returnTypeClz != null)
 							{
@@ -1190,6 +1264,7 @@ public class TypeCreator extends TypeCache
 	public final void addType(String name, Class< ? > cls)
 	{
 		classTypes.put(name, cls);
+		mobileAllowedTypes.put(name, Boolean.valueOf(isTypeAllowedForMobile(cls)));
 	}
 
 	protected void addAnonymousClassType(String name, Class< ? > cls)
@@ -1197,12 +1272,14 @@ public class TypeCreator extends TypeCache
 		if (!classTypes.containsKey(name) && !scopeTypes.containsKey(name) && !BASE_TYPES.contains(name))
 		{
 			anonymousClassTypes.put(name, cls);
+			mobileAllowedTypes.put(name, Boolean.valueOf(isTypeAllowedForMobile(cls)));
 		}
 	}
 
 	public final void addScopeType(String name, IScopeTypeCreator creator)
 	{
 		scopeTypes.put(name, creator);
+		mobileAllowedTypes.put(name, Boolean.TRUE);
 	}
 
 	/**
@@ -1250,6 +1327,8 @@ public class TypeCreator extends TypeCache
 	protected interface IScopeTypeCreator
 	{
 		Type createType(String context, String fullTypeName);
+
+		boolean isTypeAllowedForMobile();
 	}
 
 	@SuppressWarnings("deprecation")
@@ -1406,6 +1485,25 @@ public class TypeCreator extends TypeCache
 //		{
 //			javaTypes.add(type.getName());
 //		}
+		if (isServoyMobileSolutionType())
+		{
+			if (type.getMetaType() != null && type.getMetaType() == JavaRuntimeType.JAVA_META_TYPE)
+			{
+				type.setVisible(false);
+			}
+			else
+			{
+				String properTypeName = type.getName();
+				int index = properTypeName.indexOf("<");
+				if (index != -1)
+				{
+					properTypeName = properTypeName.substring(0, index);
+				}
+				Boolean visible = mobileAllowedTypes.get(properTypeName);
+				if (visible != null) type.setVisible(visible.booleanValue());
+				else type.setVisible(false);
+			}
+		}
 		return super.addType(bucket, type);
 	}
 
@@ -1885,6 +1983,11 @@ public class TypeCreator extends TypeCache
 			}
 			return type;
 		}
+
+		public boolean isTypeAllowedForMobile()
+		{
+			return true;
+		}
 	}
 
 	private class ScopeScopeCreator implements IScopeTypeCreator
@@ -1924,6 +2027,11 @@ public class TypeCreator extends TypeCache
 			}
 
 			return type;
+		}
+
+		public boolean isTypeAllowedForMobile()
+		{
+			return true;
 		}
 	}
 
@@ -1988,6 +2096,10 @@ public class TypeCreator extends TypeCache
 			return description;
 		}
 
+		public boolean isTypeAllowedForMobile()
+		{
+			return true;
+		}
 	}
 
 	private class FoundSetCreator implements IScopeTypeCreator
@@ -2078,6 +2190,11 @@ public class TypeCreator extends TypeCache
 			type.getMembers().add(makeDeprected(selectedIndex));
 			return type;
 		}
+
+		public boolean isTypeAllowedForMobile()
+		{
+			return true;
+		}
 	}
 
 	private class JSDataSetCreator implements IScopeTypeCreator
@@ -2104,6 +2221,10 @@ public class TypeCreator extends TypeCache
 			return type;
 		}
 
+		public boolean isTypeAllowedForMobile()
+		{
+			return false;
+		}
 	}
 
 
@@ -2249,6 +2370,11 @@ public class TypeCreator extends TypeCache
 			// quickly add this one to the static types.
 			return addType(null, type);
 		}
+
+		public boolean isTypeAllowedForMobile()
+		{
+			return false;
+		}
 	}
 
 	private class FormScopeCreator implements IScopeTypeCreator
@@ -2330,6 +2456,11 @@ public class TypeCreator extends TypeCache
 				if (type != null) type.setAttribute(LAZY_VALUECOLLECTION, form);
 			}
 			return type;
+		}
+
+		public boolean isTypeAllowedForMobile()
+		{
+			return true;
 		}
 	}
 
@@ -2423,6 +2554,11 @@ public class TypeCreator extends TypeCache
 			return type;
 
 		}
+
+		public boolean isTypeAllowedForMobile()
+		{
+			return false;
+		}
 	}
 
 	private class QueryBuilderColumnsCreator implements IScopeTypeCreator
@@ -2470,6 +2606,11 @@ public class TypeCreator extends TypeCache
 				property.setDescription(description.intern());
 				members.add(property);
 			}
+		}
+
+		public boolean isTypeAllowedForMobile()
+		{
+			return false;
 		}
 	}
 
@@ -2571,6 +2712,11 @@ public class TypeCreator extends TypeCache
 		}
 
 		protected boolean isVisible()
+		{
+			return true;
+		}
+
+		public boolean isTypeAllowedForMobile()
 		{
 			return true;
 		}
@@ -2712,6 +2858,11 @@ public class TypeCreator extends TypeCache
 		}
 
 		protected boolean isVisible()
+		{
+			return true;
+		}
+
+		public boolean isTypeAllowedForMobile()
 		{
 			return true;
 		}
@@ -3000,6 +3151,10 @@ public class TypeCreator extends TypeCache
 			return getTypeRef(context, name);
 		}
 
+		public boolean isTypeAllowedForMobile()
+		{
+			return false;
+		}
 	}
 
 	/**
