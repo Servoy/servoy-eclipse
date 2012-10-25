@@ -3266,7 +3266,7 @@ public class TypeCreator extends TypeCache
 	 * @param config
 	 * @return
 	 */
-	private static Member clone(Member member, JSType type)
+	public static Member clone(Member member, JSType type)
 	{
 		Member clone = null;
 		if (member instanceof Property)
