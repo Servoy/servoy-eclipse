@@ -1116,6 +1116,12 @@ public class TypeCreator extends TypeCache
 						if (!visible) property.setVisible(false);
 						property.setStatic(type == STATIC_FIELD);
 
+						if (isServoyMobileSolutionType() && object instanceof BeanProperty)
+						{
+							property.setVisible(mobileAllowedTypes.get(typeName) != null ? AnnotationManager.getInstance().isAnnotationPresent(
+								((BeanProperty)object).getGetter(), ServoyMobile.class) : false);
+						}
+
 						if (scriptObject != null && scriptObject.isDeprecated(name))
 						{
 							property.setDeprecated(true);
