@@ -5148,7 +5148,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
         </function>
         <function name="saveData">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.dataprocessing.IFoundSetInternal"/>
+            <argumentType typecode="com.servoy.j2db.scripting.api.IJSFoundSet"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the save was done without an error.]]></return>
           <description><![CDATA[Saves all outstanding (unsaved) data and exits the current record. 
@@ -5169,14 +5169,14 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
 //		if (recordIndex % 10 == 0) databaseManager.saveData();
 // }]]></sample>
           <parameters>
-            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.IFoundSetInternal">
+            <parameter name="foundset" type="com.servoy.j2db.scripting.api.IJSFoundSet" typecode="com.servoy.j2db.scripting.api.IJSFoundSet">
               <description><![CDATA[The JSFoundset to save.]]></description>
             </parameter>
           </parameters>
         </function>
         <function name="saveData">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.dataprocessing.IRecordInternal"/>
+            <argumentType typecode="com.servoy.j2db.scripting.api.IJSRecord"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the save was done without an error.]]></return>
           <description><![CDATA[Saves all outstanding (unsaved) data and exits the current record. 
@@ -5197,7 +5197,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
 //		if (recordIndex % 10 == 0) databaseManager.saveData();
 // }]]></sample>
           <parameters>
-            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.IRecordInternal">
+            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.scripting.api.IJSRecord">
               <description><![CDATA[The JSRecord to save.]]></description>
             </parameter>
           </parameters>
@@ -8224,41 +8224,25 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant for the ALT modifier that can be returned by JSDNDEvent.getModifiers();]]></description>
           <summary><![CDATA[Constant for the ALT modifier that can be returned by JSDNDEvent.]]></summary>
-          <sample><![CDATA[//test if the SHIFT modifier is used.
-if (event.getModifiers() & JSDNDEvent.MODIFIER_SHIFT)
-{
-	//do shift action
-}]]></sample>
+          <sample/>
         </constant>
         <constant name="MODIFIER_CTRL">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant for the CTRL modifier that can be returned by JSDNDEvent.getModifiers();]]></description>
           <summary><![CDATA[Constant for the CTRL modifier that can be returned by JSDNDEvent.]]></summary>
-          <sample><![CDATA[//test if the SHIFT modifier is used.
-if (event.getModifiers() & JSDNDEvent.MODIFIER_SHIFT)
-{
-	//do shift action
-}]]></sample>
+          <sample/>
         </constant>
         <constant name="MODIFIER_META">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant for the META modifier that can be returned by JSDNDEvent.getModifiers();]]></description>
           <summary><![CDATA[Constant for the META modifier that can be returned by JSDNDEvent.]]></summary>
-          <sample><![CDATA[//test if the SHIFT modifier is used.
-if (event.getModifiers() & JSDNDEvent.MODIFIER_SHIFT)
-{
-	//do shift action
-}]]></sample>
+          <sample/>
         </constant>
         <constant name="MODIFIER_SHIFT">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant for the SHIFT modifier that can be returned by JSDNDEvent.getModifiers();]]></description>
           <summary><![CDATA[Constant for the SHIFT modifier that can be returned by JSDNDEvent.]]></summary>
-          <sample><![CDATA[//test if the SHIFT modifier is used.
-if (event.getModifiers() & JSDNDEvent.MODIFIER_SHIFT)
-{
-	//do shift action
-}]]></sample>
+          <sample/>
         </constant>
         <constant name="ONDRAG">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -8384,17 +8368,6 @@ function onDragOver(event)
           <summary><![CDATA[returns the name of the form the element was placed on.]]></summary>
           <sample><![CDATA[forms[event.getFormName()].myFormMethod();]]></sample>
         </function>
-        <function name="getModifiers">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[an int which holds the modifiers as a bitset.]]></return>
-          <description><![CDATA[Returns the modifiers of the event, see JSDNDEvent.MODIFIER_XXXX for the modifiers that can be returned.]]></description>
-          <summary><![CDATA[Returns the modifiers of the event, see JSDNDEvent.]]></summary>
-          <sample><![CDATA[//test if the SHIFT modifier is used.
-if (event.getModifiers() & JSDNDEvent.MODIFIER_SHIFT)
-{
-	//do shift action
-}]]></sample>
-        </function>
         <function name="getRecord">
           <argumentsTypes/>
           <return type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.Record"><![CDATA[Record of the event]]></return>
@@ -8419,16 +8392,6 @@ var sourceDataProvider = source.getDataProviderID();]]></sample>
           <description><![CDATA[Returns the time the event occurred.]]></description>
           <summary><![CDATA[Returns the time the event occurred.]]></summary>
           <sample><![CDATA[event.getTimestamp();]]></sample>
-        </function>
-        <function name="getType">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[a String representing the type of this event.]]></return>
-          <description><![CDATA[returns the dnd event type see the JSDNDEvents constants what it can return.]]></description>
-          <summary><![CDATA[returns the dnd event type see the JSDNDEvents constants what it can return.]]></summary>
-          <sample><![CDATA[if (event.getType() == JSDNDEvent.ONDROP) 
-{
-	// it's a drop
-}]]></sample>
         </function>
         <function name="getX">
           <argumentsTypes/>
@@ -9346,120 +9309,6 @@ for (var i = 0; i < allMethods; i++)
       </functions>
     </object>
     <object publicName="JSEvent" qualifiedName="com.servoy.j2db.scripting.JSEvent">
-      <constants>
-        <constant name="ACTION">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onAction event.]]></description>
-          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
-          <sample><![CDATA[if (event.getType() == JSEvent.ACTION) 
-{
-	// its an action event.
-}]]></sample>
-        </constant>
-        <constant name="DATACHANGE">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onDataChange event.]]></description>
-          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
-          <sample><![CDATA[if (event.getType() == JSEvent.DATACHANGE) 
-{
-	// its a data change event
-}]]></sample>
-        </constant>
-        <constant name="DOUBLECLICK">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onDoubleClick event.]]></description>
-          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
-          <sample><![CDATA[if (event.getType() == JSEvent.DOUBLECLICK) 
-{
-	// its a double click event.
-}]]></sample>
-        </constant>
-        <constant name="FOCUSGAINED">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onFocusGained or the forms onElementFocusGained event.]]></description>
-          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
-          <sample><![CDATA[if (event.getType() == JSEvent.FOCUSGAINED) 
-{
-	// its a focus gained event.
-}]]></sample>
-        </constant>
-        <constant name="FOCUSLOST">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onFocusLost or the forms onElementFocusLost event.]]></description>
-          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
-          <sample><![CDATA[if (event.getType() == JSEvent.FOCUSLOST) 
-{
-	// its a focus lost event.
-}]]></sample>
-        </constant>
-        <constant name="FORM">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to a form event (like onShow) or command (like onDeleteRecord)]]></description>
-          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
-          <sample><![CDATA[if (event.getType() == JSEvent.FORM) 
-{
-	// its a form event or command
-}]]></sample>
-        </constant>
-        <constant name="MODIFIER_ALT">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for the ALT modifier that can be returned by JSEvent.getModifiers();]]></description>
-          <summary><![CDATA[Constant for the ALT modifier that can be returned by JSEvent.]]></summary>
-          <sample><![CDATA[//test if the SHIFT modifier is used.
-if (event.getModifiers() & JSEvent.MODIFIER_SHIFT)
-{
-	//do shift action
-}]]></sample>
-        </constant>
-        <constant name="MODIFIER_CTRL">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for the CTRL modifier that can be returned by JSEvent.getModifiers();]]></description>
-          <summary><![CDATA[Constant for the CTRL modifier that can be returned by JSEvent.]]></summary>
-          <sample><![CDATA[//test if the SHIFT modifier is used.
-if (event.getModifiers() & JSEvent.MODIFIER_SHIFT)
-{
-	//do shift action
-}]]></sample>
-        </constant>
-        <constant name="MODIFIER_META">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for the META modifier that can be returned by JSEvent.getModifiers();]]></description>
-          <summary><![CDATA[Constant for the META modifier that can be returned by JSEvent.]]></summary>
-          <sample><![CDATA[//test if the SHIFT modifier is used.
-if (event.getModifiers() & JSEvent.MODIFIER_SHIFT)
-{
-	//do shift action
-}]]></sample>
-        </constant>
-        <constant name="MODIFIER_SHIFT">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for the SHIFT modifier that can be returned by JSEvent.getModifiers();]]></description>
-          <summary><![CDATA[Constant for the SHIFT modifier that can be returned by JSEvent.]]></summary>
-          <sample><![CDATA[//test if the SHIFT modifier is used.
-if (event.getModifiers() & JSEvent.MODIFIER_SHIFT)
-{
-	//do shift action
-}]]></sample>
-        </constant>
-        <constant name="NONE">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Constant returned by JSEvent.getType() if the event is not used in a known event or command.]]></description>
-          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
-          <sample><![CDATA[if (event.getType() == JSEvent.NONE) 
-{
-	// type is not set.
-}]]></sample>
-        </constant>
-        <constant name="RIGHTCLICK">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onRightClick event.]]></description>
-          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
-          <sample><![CDATA[if (event.getType() == JSEvent.RIGHTCLICK) 
-{
-	// its a right click event.
-}]]></sample>
-        </constant>
-      </constants>
       <properties>
         <property name="data">
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
@@ -13715,7 +13564,7 @@ foundset.loadRecords(q);]]></sample>
           <argumentsTypes>
             <argumentType typecode="int"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.IRecordInternal"><![CDATA[Record record.]]></return>
+          <return type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.scripting.api.IJSRecord"><![CDATA[Record record.]]></return>
           <description><![CDATA[Get the record object at the index.]]></description>
           <summary><![CDATA[Get the record object at the index.]]></summary>
           <sample><![CDATA[var record = %%prefix%%foundset.getRecord(index);]]></sample>
@@ -13774,7 +13623,7 @@ if (current.length > 1)
         </function>
         <function name="getSelectedRecord">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.IRecordInternal"><![CDATA[Record record.]]></return>
+          <return type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.scripting.api.IJSRecord"><![CDATA[Record record.]]></return>
           <description><![CDATA[Get the selected record.]]></description>
           <summary><![CDATA[Get the selected record.]]></summary>
           <sample><![CDATA[var selectedRecord = %%prefix%%foundset.getSelectedRecord();]]></sample>
@@ -17296,7 +17145,7 @@ childrenPortal.setIntercellSpacing(5,10);]]></sample>
           <sample><![CDATA[var exception = record.exception;]]></sample>
         </property>
         <property name="foundset">
-          <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.IFoundSetInternal"><![CDATA[The parent foundset of the record.]]></return>
+          <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.scripting.IJSFoundSetNormal"><![CDATA[The parent foundset of the record.]]></return>
           <description><![CDATA[Returns parent foundset of the record.]]></description>
           <summary><![CDATA[Returns parent foundset of the record.]]></summary>
           <sample><![CDATA[var parent = record.foundset;]]></sample>
@@ -17314,7 +17163,7 @@ record.deleteRecord();]]></sample>
         </function>
         <function name="getChangedData">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet"><![CDATA[a JSDataSet with the changed data of this record.]]></return>
+          <return type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.scripting.api.IJSDataSet"><![CDATA[a JSDataSet with the changed data of this record.]]></return>
           <description><![CDATA[Returns a JSDataSet with outstanding (not saved) changed data of this record.
 column1 is the column name, colum2 is the old data and column3 is the new data.
 
@@ -22450,7 +22299,8 @@ foundset.loadRecords(query);]]></sample>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.querybuilder.impl.QBFunction" typecode="com.servoy.j2db.querybuilder.impl.QBFunction"/>
-          <description/>
+          <description><![CDATA[Create concat(args, arg2) expression]]></description>
+          <summary><![CDATA[Create concat(args, arg2) expression]]></summary>
           <sample><![CDATA[/** @type {QBSelect<db:/udm/contacts>} */
 	var query = databaseManager.createSelect('db:/udm/contacts') //$NON-NLS-1$
 	query.result.add(query.columns.name_first.concat(' ').concat(query.columns.name_last))
@@ -24667,7 +24517,7 @@ foundset.loadRecords(q);]]></sample>
           <argumentsTypes>
             <argumentType typecode="int"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.IRecordInternal"><![CDATA[Record record.]]></return>
+          <return type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.scripting.api.IJSRecord"><![CDATA[Record record.]]></return>
           <description><![CDATA[Get the record object at the index.]]></description>
           <summary><![CDATA[Get the record object at the index.]]></summary>
           <sample><![CDATA[var record = %%prefix%%foundset.getRecord(index);]]></sample>
@@ -24726,7 +24576,7 @@ if (current.length > 1)
         </function>
         <function name="getSelectedRecord">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.IRecordInternal"><![CDATA[Record record.]]></return>
+          <return type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.scripting.api.IJSRecord"><![CDATA[Record record.]]></return>
           <description><![CDATA[Get the selected record.]]></description>
           <summary><![CDATA[Get the selected record.]]></summary>
           <sample><![CDATA[var selectedRecord = %%prefix%%foundset.getSelectedRecord();]]></sample>
