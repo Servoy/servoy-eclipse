@@ -5169,7 +5169,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
 //		if (recordIndex % 10 == 0) databaseManager.saveData();
 // }]]></sample>
           <parameters>
-            <parameter name="foundset" type="com.servoy.j2db.scripting.api.IJSFoundSet" typecode="com.servoy.j2db.scripting.api.IJSFoundSet">
+            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.scripting.api.IJSFoundSet">
               <description><![CDATA[The JSFoundset to save.]]></description>
             </parameter>
           </parameters>
@@ -17145,7 +17145,7 @@ childrenPortal.setIntercellSpacing(5,10);]]></sample>
           <sample><![CDATA[var exception = record.exception;]]></sample>
         </property>
         <property name="foundset">
-          <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.scripting.IJSFoundSetNormal"><![CDATA[The parent foundset of the record.]]></return>
+          <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.scripting.api.IJSFoundSet"><![CDATA[The parent foundset of the record.]]></return>
           <description><![CDATA[Returns parent foundset of the record.]]></description>
           <summary><![CDATA[Returns parent foundset of the record.]]></summary>
           <sample><![CDATA[var parent = record.foundset;]]></sample>
@@ -19234,21 +19234,32 @@ In find mode the record with be the FindRecord which is just like a normal JSRec
           <summary><![CDATA[A global method that provides the data for the valuelist.]]></summary>
           <sample><![CDATA[var listProvider = solutionModel.newGlobalMethod('globals', 'function getDataSetForValueList(displayValue, realValue, record, valueListName, findMode) {' +
 		'	' +
+		'var args = null;' +
+		'/** @type QBSelect<db:/example_data/employees> */' +
+		'var query = databaseManager.createSelect('db:/example_data/employees');' + 
+		'/** @type  {JSDataSet} */' + 
+		'var result = null;' + 
 		'if (displayValue == null && realValue == null) {' +
 		'  // TODO think about caching this result. can be called often!' +
 		'  // return the complete list' +
-		'  return databaseManager.getDataSetByQuery("example_data", "select firstname || \' \' || lastname, employeeid from employees", null, 100);' +
+		'  query.result.add(query.columns.firstname.concat(' ').concat(query.columns.lastname)).add(query.columns.employeeid);' +
+		'  result = databaseManager.getDataSetByQuery(query,100);' + 
 		'} else if (displayValue != null) {' +
 		'  // TYPE_AHEAD filter call, return a filtered list' +
-		'  var args = [displayValue + "%", displayValue + "%"]' +
-		'  return databaseManager.getDataSetByQuery("example_data", "select firstname || \' \' || lastname, employeeid from employees where firstname like ? or lastname like ?", args, 100);' +
+		'  args = [displayValue + "%", displayValue + "%"]' +
+		'  query.result.add(query.columns.firstname.concat(' ').concat(query.columns.lastname)).add(query.columns.employeeid).' +
+		'  root.where.add(query.or.add(query.columns.firstname.lower.like(args[0] + '%')).add(query.columns.lastname.lower.like(args[1] + '%')));' +
+		'  result = databaseManager.getDataSetByQuery(query,100);' +  
 		'} else if (realValue != null) {' +
 		'  // TODO think about caching this result. can be called often!' +
 		'  // real object not found in the current list, return 1 row with display,realvalue that will be added to the current list' +
 		'  // dont return a complete list in this mode because that will be added to the list that is already there' +
 		'  args = [realValue];' +
-		'  return databaseManager.getDataSetByQuery("example_data", "select firstname || \' \' || lastname, employeeid from employees where employeeid = ?", args, 1);' +
+		'  query.result.add(query.columns.firstname.concat(' ').concat(query.columns.lastname)).add(query.columns.employeeid).' +
+		'  root.where.add(query.columns.employeeid.eq(args[0]));' + 
+		'  result = databaseManager.getDataSetByQuery(query,1);' + 
 		'}' +
+		'return result;' + 
 		'}');
 var vlist = solutionModel.newValueList('vlist', JSValueList.CUSTOM_VALUES);
 vlist.globalMethod = listProvider;]]></sample>
@@ -43539,40 +43550,11 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
         <function name="showRecords">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
-          </argumentsTypes>
-          <return type="void" typecode="void"/>
-          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
-          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
-          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
-// load foundset & show the form in newly created named modal dialog
-var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
-%%prefix%%controller.showRecords(foundset, w);
-// load foundset & show the form in an existing window/dialog
-var w = application.getWindow("mydialog"); // use null name for main app. window
-%%prefix%%controller.showRecords(foundset, w);
-//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
-          <parameters>
-            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
-              <description><![CDATA[the foundset to load before showing the form.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="showRecords">
-          <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
             <argumentType typecode="com.servoy.j2db.scripting.JSWindow"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
-          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
-          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
-// load foundset & show the form in newly created named modal dialog
-var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
-%%prefix%%controller.showRecords(foundset, w);
-// load foundset & show the form in an existing window/dialog
-var w = application.getWindow("mydialog"); // use null name for main app. window
-%%prefix%%controller.showRecords(foundset, w);
-//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
+          <description/>
+          <sample/>
           <parameters>
             <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
               <description><![CDATA[the foundset to load before showing the form.]]></description>
@@ -43588,16 +43570,8 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
-          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
-          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
-// load foundset & show the form in newly created named modal dialog
-var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
-%%prefix%%controller.showRecords(foundset, w);
-// load foundset & show the form in an existing window/dialog
-var w = application.getWindow("mydialog"); // use null name for main app. window
-%%prefix%%controller.showRecords(foundset, w);
-//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
+          <description/>
+          <sample/>
           <parameters>
             <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
               <description><![CDATA[the foundset to load before showing the form.]]></description>
@@ -43612,16 +43586,8 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="com.servoy.j2db.dataprocessing.JSDataSet"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
-          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
-          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
-// load foundset & show the form in newly created named modal dialog
-var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
-%%prefix%%controller.showRecords(foundset, w);
-// load foundset & show the form in an existing window/dialog
-var w = application.getWindow("mydialog"); // use null name for main app. window
-%%prefix%%controller.showRecords(foundset, w);
-//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
+          <description/>
+          <sample/>
           <parameters>
             <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet">
               <description><![CDATA[the pkdataset to load before showing the form.]]></description>
@@ -43634,16 +43600,8 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="com.servoy.j2db.scripting.JSWindow"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
-          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
-          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
-// load foundset & show the form in newly created named modal dialog
-var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
-%%prefix%%controller.showRecords(foundset, w);
-// load foundset & show the form in an existing window/dialog
-var w = application.getWindow("mydialog"); // use null name for main app. window
-%%prefix%%controller.showRecords(foundset, w);
-//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
+          <description/>
+          <sample/>
           <parameters>
             <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet">
               <description><![CDATA[the pkdataset to load before showing the form.]]></description>
@@ -43659,16 +43617,8 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
-          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
-          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
-// load foundset & show the form in newly created named modal dialog
-var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
-%%prefix%%controller.showRecords(foundset, w);
-// load foundset & show the form in an existing window/dialog
-var w = application.getWindow("mydialog"); // use null name for main app. window
-%%prefix%%controller.showRecords(foundset, w);
-//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
+          <description/>
+          <sample/>
           <parameters>
             <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet">
               <description><![CDATA[the pkdataset to load before showing the form.]]></description>
@@ -43683,16 +43633,8 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
-          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
-          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
-// load foundset & show the form in newly created named modal dialog
-var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
-%%prefix%%controller.showRecords(foundset, w);
-// load foundset & show the form in an existing window/dialog
-var w = application.getWindow("mydialog"); // use null name for main app. window
-%%prefix%%controller.showRecords(foundset, w);
-//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
+          <description/>
+          <sample/>
           <parameters>
             <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
               <description><![CDATA[the query to load before showing the form.]]></description>
@@ -43705,16 +43647,8 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="com.servoy.j2db.scripting.JSWindow"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
-          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
-          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
-// load foundset & show the form in newly created named modal dialog
-var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
-%%prefix%%controller.showRecords(foundset, w);
-// load foundset & show the form in an existing window/dialog
-var w = application.getWindow("mydialog"); // use null name for main app. window
-%%prefix%%controller.showRecords(foundset, w);
-//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
+          <description/>
+          <sample/>
           <parameters>
             <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
               <description><![CDATA[the query to load before showing the form.]]></description>
@@ -43730,16 +43664,8 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
-          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
-          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
-// load foundset & show the form in newly created named modal dialog
-var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
-%%prefix%%controller.showRecords(foundset, w);
-// load foundset & show the form in an existing window/dialog
-var w = application.getWindow("mydialog"); // use null name for main app. window
-%%prefix%%controller.showRecords(foundset, w);
-//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
+          <description/>
+          <sample/>
           <parameters>
             <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
               <description><![CDATA[the query to load before showing the form.]]></description>
@@ -43751,7 +43677,7 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
         </function>
         <function name="showRecords">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.util.UUID"/>
+            <argumentType typecode="com.servoy.j2db.scripting.api.IJSFoundSet"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
@@ -43765,6 +43691,19 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
 %%prefix%%controller.showRecords(foundset, w);
 //%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
           <parameters>
+            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.scripting.api.IJSFoundSet">
+              <description><![CDATA[the foundset to load before showing the form.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="showRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.util.UUID"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description/>
+          <sample/>
+          <parameters>
             <parameter name="UUIDpk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID">
               <description><![CDATA[the UUIDpk to load before showing the form.]]></description>
             </parameter>
@@ -43776,16 +43715,8 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="com.servoy.j2db.scripting.JSWindow"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
-          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
-          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
-// load foundset & show the form in newly created named modal dialog
-var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
-%%prefix%%controller.showRecords(foundset, w);
-// load foundset & show the form in an existing window/dialog
-var w = application.getWindow("mydialog"); // use null name for main app. window
-%%prefix%%controller.showRecords(foundset, w);
-//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
+          <description/>
+          <sample/>
           <parameters>
             <parameter name="UUIDpk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID">
               <description><![CDATA[the UUIDpk to load before showing the form.]]></description>
@@ -43801,16 +43732,8 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
-          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
-          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
-// load foundset & show the form in newly created named modal dialog
-var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
-%%prefix%%controller.showRecords(foundset, w);
-// load foundset & show the form in an existing window/dialog
-var w = application.getWindow("mydialog"); // use null name for main app. window
-%%prefix%%controller.showRecords(foundset, w);
-//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
+          <description/>
+          <sample/>
           <parameters>
             <parameter name="UUIDpk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID">
               <description><![CDATA[the UUIDpk to load before showing the form.]]></description>
@@ -43825,16 +43748,8 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="java.lang.Number"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
-          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
-          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
-// load foundset & show the form in newly created named modal dialog
-var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
-%%prefix%%controller.showRecords(foundset, w);
-// load foundset & show the form in an existing window/dialog
-var w = application.getWindow("mydialog"); // use null name for main app. window
-%%prefix%%controller.showRecords(foundset, w);
-//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
+          <description/>
+          <sample/>
           <parameters>
             <parameter name="singleNumber_pk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[the singleNumber_pk to load before showing the form.]]></description>
@@ -43847,16 +43762,8 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="com.servoy.j2db.scripting.JSWindow"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
-          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
-          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
-// load foundset & show the form in newly created named modal dialog
-var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
-%%prefix%%controller.showRecords(foundset, w);
-// load foundset & show the form in an existing window/dialog
-var w = application.getWindow("mydialog"); // use null name for main app. window
-%%prefix%%controller.showRecords(foundset, w);
-//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
+          <description/>
+          <sample/>
           <parameters>
             <parameter name="singleNumber_pk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[the singleNumber_pk to load before showing the form.]]></description>
@@ -43872,16 +43779,8 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
-          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
-          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
-// load foundset & show the form in newly created named modal dialog
-var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
-%%prefix%%controller.showRecords(foundset, w);
-// load foundset & show the form in an existing window/dialog
-var w = application.getWindow("mydialog"); // use null name for main app. window
-%%prefix%%controller.showRecords(foundset, w);
-//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
+          <description/>
+          <sample/>
           <parameters>
             <parameter name="singleNumber_pk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[the singleNumber_pk to load before showing the form.]]></description>
@@ -43898,17 +43797,9 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
-          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <description/>
           <deprecated><![CDATA[see showRecords(FoundSet, String) or showRecords(FoundSet, JSWindow)]]></deprecated>
-          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
-// load foundset & show the form in newly created named modal dialog
-var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
-%%prefix%%controller.showRecords(foundset, w);
-// load foundset & show the form in an existing window/dialog
-var w = application.getWindow("mydialog"); // use null name for main app. window
-%%prefix%%controller.showRecords(foundset, w);
-//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
+          <sample/>
           <parameters>
             <parameter name="foundset" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[the foundset to load before showing the form]]></description>
@@ -43926,16 +43817,8 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
-          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
-          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
-// load foundset & show the form in newly created named modal dialog
-var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
-%%prefix%%controller.showRecords(foundset, w);
-// load foundset & show the form in an existing window/dialog
-var w = application.getWindow("mydialog"); // use null name for main app. window
-%%prefix%%controller.showRecords(foundset, w);
-//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
+          <description/>
+          <sample/>
           <parameters>
             <parameter name="query" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the query to load before showing the form.]]></description>
@@ -43948,16 +43831,8 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="com.servoy.j2db.scripting.JSWindow"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
-          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
-          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
-// load foundset & show the form in newly created named modal dialog
-var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
-%%prefix%%controller.showRecords(foundset, w);
-// load foundset & show the form in an existing window/dialog
-var w = application.getWindow("mydialog"); // use null name for main app. window
-%%prefix%%controller.showRecords(foundset, w);
-//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
+          <description/>
+          <sample/>
           <parameters>
             <parameter name="query" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the query to load before showing the form.]]></description>
@@ -43973,16 +43848,8 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="[Ljava.lang.Object;"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
-          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
-          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
-// load foundset & show the form in newly created named modal dialog
-var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
-%%prefix%%controller.showRecords(foundset, w);
-// load foundset & show the form in an existing window/dialog
-var w = application.getWindow("mydialog"); // use null name for main app. window
-%%prefix%%controller.showRecords(foundset, w);
-//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
+          <description/>
+          <sample/>
           <parameters>
             <parameter name="query" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the query to load before showing the form.]]></description>
@@ -43999,16 +43866,8 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="com.servoy.j2db.scripting.JSWindow"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
-          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
-          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
-// load foundset & show the form in newly created named modal dialog
-var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
-%%prefix%%controller.showRecords(foundset, w);
-// load foundset & show the form in an existing window/dialog
-var w = application.getWindow("mydialog"); // use null name for main app. window
-%%prefix%%controller.showRecords(foundset, w);
-//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
+          <description/>
+          <sample/>
           <parameters>
             <parameter name="query" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the query to load before showing the form.]]></description>
@@ -44028,16 +43887,8 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
-          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
-          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
-// load foundset & show the form in newly created named modal dialog
-var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
-%%prefix%%controller.showRecords(foundset, w);
-// load foundset & show the form in an existing window/dialog
-var w = application.getWindow("mydialog"); // use null name for main app. window
-%%prefix%%controller.showRecords(foundset, w);
-//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
+          <description/>
+          <sample/>
           <parameters>
             <parameter name="query" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the query to load before showing the form.]]></description>
@@ -44056,16 +43907,8 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
-          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
-          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
-// load foundset & show the form in newly created named modal dialog
-var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
-%%prefix%%controller.showRecords(foundset, w);
-// load foundset & show the form in an existing window/dialog
-var w = application.getWindow("mydialog"); // use null name for main app. window
-%%prefix%%controller.showRecords(foundset, w);
-//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
+          <description/>
+          <sample/>
           <parameters>
             <parameter name="query" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the query to load before showing the form.]]></description>
