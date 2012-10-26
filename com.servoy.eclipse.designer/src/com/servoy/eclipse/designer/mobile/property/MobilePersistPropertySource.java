@@ -22,6 +22,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.property.CheckboxPropertyDescriptor;
 import com.servoy.eclipse.ui.property.ComboboxPropertyController;
 import com.servoy.eclipse.ui.property.ComboboxPropertyModel;
 import com.servoy.eclipse.ui.property.DelegatePropertySetterController;
@@ -46,7 +47,6 @@ import com.servoy.j2db.scripting.annotations.ServoyMobile;
 public class MobilePersistPropertySource extends PersistPropertySource
 {
 	public static final String HEADER_SIZE_PROPERTY = "headerSize"; //$NON-NLS-1$
-
 	public static final PropertyController<Integer, Integer> MOBILE_LABEL_HEADERSIZE_CONTROLLER = new DelegatePropertySetterController<Integer, Integer, MobilePersistPropertySource>(
 		new ComboboxPropertyController<Integer>(HEADER_SIZE_PROPERTY, HEADER_SIZE_PROPERTY, new ComboboxPropertyModel<Integer>(
 			new Integer[] { Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3), Integer.valueOf(4), Integer.valueOf(5), Integer.valueOf(6) }),
@@ -62,6 +62,27 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		public Integer getProperty(MobilePersistPropertySource propertySource)
 		{
 			return (Integer)((AbstractBase)propertySource.getPersist()).getCustomMobileProperty(HEADER_SIZE_PROPERTY);
+		}
+	};
+
+	public static final String RADIO_STYLE_PROPERTY = "horizontal"; //$NON-NLS-1$
+	public static final Integer RADIO_STYLE_HORIZONTAL = Integer.valueOf(1);
+	public static final PropertyController<Boolean, Boolean> MOBILE_RADIO_STYLE_CONTROLLER = new DelegatePropertySetterController<Boolean, Boolean, MobilePersistPropertySource>(
+		new CheckboxPropertyDescriptor(RADIO_STYLE_PROPERTY, RADIO_STYLE_PROPERTY), RADIO_STYLE_PROPERTY)
+	{
+		// 0: vertical (default)
+		// 1: horizontal
+		// ... future
+		public void setProperty(MobilePersistPropertySource propertySource, Boolean value)
+		{
+			((AbstractBase)propertySource.getPersist()).putCustomMobileProperty(RADIO_STYLE_PROPERTY, Boolean.TRUE.equals(value) ? RADIO_STYLE_HORIZONTAL
+				: null);
+			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, propertySource.getPersist(), false);
+		}
+
+		public Boolean getProperty(MobilePersistPropertySource propertySource)
+		{
+			return Boolean.valueOf(RADIO_STYLE_HORIZONTAL.equals(((AbstractBase)propertySource.getPersist()).getCustomMobileProperty(RADIO_STYLE_PROPERTY)));
 		}
 	};
 
@@ -105,6 +126,15 @@ public class MobilePersistPropertySource extends PersistPropertySource
 				return new String[] { HEADER_SIZE_PROPERTY };
 			}
 		}
+		else if (Field.class == clazz)
+		{
+			Field field = (Field)getPersist();
+			if (field.getDisplayType() == Field.RADIOS)
+			{
+				// radios check
+				return new String[] { RADIO_STYLE_PROPERTY };
+			}
+		}
 		return null;
 	}
 
@@ -115,6 +145,11 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		if (name.equals(HEADER_SIZE_PROPERTY))
 		{
 			return MOBILE_LABEL_HEADERSIZE_CONTROLLER;
+		}
+
+		if (name.equals(RADIO_STYLE_PROPERTY))
+		{
+			return MOBILE_RADIO_STYLE_CONTROLLER;
 		}
 
 		return super.getPropertiesPropertyDescriptor(propertySource, id, displayName, name, flattenedEditingSolution, form);
