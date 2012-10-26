@@ -36,7 +36,8 @@ public class AddLabelCommand extends BaseFormPlaceElementCommand
 {
 	public AddLabelCommand(IApplication application, Form form, CreateRequest request)
 	{
-		super(application, form, null, request.getType(), request.getExtendedData(), null, request.getLocation().getSWTPoint(), null, form);
+		super(application, form, null, request.getType(), request.getExtendedData(), null, request.getLocation() == null ? null
+			: request.getLocation().getSWTPoint(), null, form);
 	}
 
 	@Override
