@@ -65,24 +65,23 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		}
 	};
 
-	public static final String RADIO_STYLE_PROPERTY = "horizontal"; //$NON-NLS-1$
+	public static final String RADIO_STYLE_NAME = "horizontal"; //$NON-NLS-1$
 	public static final Integer RADIO_STYLE_HORIZONTAL = Integer.valueOf(1);
 	public static final PropertyController<Boolean, Boolean> MOBILE_RADIO_STYLE_CONTROLLER = new DelegatePropertySetterController<Boolean, Boolean, MobilePersistPropertySource>(
-		new CheckboxPropertyDescriptor(RADIO_STYLE_PROPERTY, RADIO_STYLE_PROPERTY), RADIO_STYLE_PROPERTY)
+		new CheckboxPropertyDescriptor(RADIO_STYLE_NAME, RADIO_STYLE_NAME), RADIO_STYLE_NAME)
 	{
 		// 0: vertical (default)
 		// 1: horizontal
 		// ... future
 		public void setProperty(MobilePersistPropertySource propertySource, Boolean value)
 		{
-			((AbstractBase)propertySource.getPersist()).putCustomMobileProperty(RADIO_STYLE_PROPERTY, Boolean.TRUE.equals(value) ? RADIO_STYLE_HORIZONTAL
-				: null);
+			((AbstractBase)propertySource.getPersist()).putCustomMobileProperty("radioStyle", Boolean.TRUE.equals(value) ? RADIO_STYLE_HORIZONTAL : null);
 			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, propertySource.getPersist(), false);
 		}
 
 		public Boolean getProperty(MobilePersistPropertySource propertySource)
 		{
-			return Boolean.valueOf(RADIO_STYLE_HORIZONTAL.equals(((AbstractBase)propertySource.getPersist()).getCustomMobileProperty(RADIO_STYLE_PROPERTY)));
+			return Boolean.valueOf(RADIO_STYLE_HORIZONTAL.equals(((AbstractBase)propertySource.getPersist()).getCustomMobileProperty("radioStyle")));
 		}
 	};
 
@@ -132,7 +131,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			if (field.getDisplayType() == Field.RADIOS)
 			{
 				// radios check
-				return new String[] { RADIO_STYLE_PROPERTY };
+				return new String[] { RADIO_STYLE_NAME };
 			}
 		}
 		return null;
@@ -147,7 +146,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			return MOBILE_LABEL_HEADERSIZE_CONTROLLER;
 		}
 
-		if (name.equals(RADIO_STYLE_PROPERTY))
+		if (name.equals(RADIO_STYLE_NAME))
 		{
 			return MOBILE_RADIO_STYLE_CONTROLLER;
 		}
