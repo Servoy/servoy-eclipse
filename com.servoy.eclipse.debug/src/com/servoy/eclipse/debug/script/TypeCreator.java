@@ -474,51 +474,6 @@ public class TypeCreator extends TypeCache
 		return isServoyMobileSolution;
 	}
 
-	private boolean isTypeAllowedForMobile(Class< ? > cls)
-	{
-		if (cls != null)
-		{
-			if (cls.isAnnotationPresent(ServoyMobile.class)) return true;
-			if (cls.getSuperclass() != null && isTypeAllowedForMobile(cls.getSuperclass())) return true;
-			if (cls.getInterfaces() != null)
-			{
-				for (Class< ? > intf : cls.getInterfaces())
-				{
-					if (isTypeAllowedForMobile(intf)) return true;
-				}
-			}
-		}
-		return false;
-	}
-
-
-	private boolean isMethodAllowedForMobile(Class< ? > cls, MemberBox method)
-	{
-		if (cls != null)
-		{
-			if (cls.isAnnotationPresent(ServoyMobile.class))
-			{
-				try
-				{
-					cls.getMethod(method.method().getName(), method.getParameterTypes());
-					return true;
-				}
-				catch (NoSuchMethodException e)
-				{
-				}
-			}
-			if (cls.getSuperclass() != null && isMethodAllowedForMobile(cls.getSuperclass(), method)) return true;
-			if (cls.getInterfaces() != null)
-			{
-				for (Class< ? > intf : cls.getInterfaces())
-				{
-					if (isMethodAllowedForMobile(intf, method)) return true;
-				}
-			}
-		}
-		return false;
-	}
-
 	private Type getClassType(String context, Class< ? > clz, String name)
 	{
 		Type type = TypeInfoModelFactory.eINSTANCE.createType();
@@ -1043,14 +998,8 @@ public class TypeCreator extends TypeCache
 
 							if (isServoyMobileSolutionType())
 							{
-								Boolean visibleType = mobileAllowedTypes.get(typeName);
-								boolean viz = false;
-								if (visibleType != null)
-								{
-									Class< ? > auxCls = memberbox[i].getDeclaringClass();
-									if (auxCls != null) viz = isMethodAllowedForMobile(auxCls, memberbox[i]);
-								}
-								method.setVisible(viz);
+								method.setVisible(mobileAllowedTypes.get(typeName) != null ? AnnotationManager.getInstance().isAnnotationPresent(
+									memberbox[i].method(), ServoyMobile.class) : false);
 							}
 
 							method.setDescription(getDoc(name, scriptObjectClass, parameterTypes)); // TODO name should be of parent.
@@ -1264,7 +1213,7 @@ public class TypeCreator extends TypeCache
 	public final void addType(String name, Class< ? > cls)
 	{
 		classTypes.put(name, cls);
-		mobileAllowedTypes.put(name, Boolean.valueOf(isTypeAllowedForMobile(cls)));
+		mobileAllowedTypes.put(name, Boolean.valueOf(AnnotationManager.getInstance().isAnnotationPresent(cls, ServoyMobile.class)));
 	}
 
 	protected void addAnonymousClassType(String name, Class< ? > cls)
@@ -1272,7 +1221,7 @@ public class TypeCreator extends TypeCache
 		if (!classTypes.containsKey(name) && !scopeTypes.containsKey(name) && !BASE_TYPES.contains(name))
 		{
 			anonymousClassTypes.put(name, cls);
-			mobileAllowedTypes.put(name, Boolean.valueOf(isTypeAllowedForMobile(cls)));
+			mobileAllowedTypes.put(name, Boolean.valueOf(AnnotationManager.getInstance().isAnnotationPresent(cls, ServoyMobile.class)));
 		}
 	}
 
