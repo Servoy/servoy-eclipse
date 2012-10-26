@@ -192,11 +192,10 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 	{
 		ImageDescriptor icon;
 		RequestType requestType;
-//		int displayType = -1;
 
 		if (BUTTON_BUTTON_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("headerbutton.png");
+			icon = Activator.loadImageDescriptorFromBundle("button.gif");
 			requestType = MobileVisualFormEditor.REQ_PLACE_BUTTON;
 		}
 
@@ -212,18 +211,7 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 			return null;
 		}
 
-		Map<String, Object> extendedData = new HashMap<String, Object>();
-//		if (displayType != -1)
-//		{
-//			setProperty(
-//				extendedData,
-//				StaticContentSpecLoader.PROPERTY_DISPLAYTYPE,
-//				PersistPropertySource.DISPLAY_TYPE_CONTOLLER.getConverter().convertProperty(StaticContentSpecLoader.PROPERTY_DISPLAYTYPE.getPropertyName(),
-//					Integer.valueOf(displayType)));
-//		}
-		RequestTypeCreationFactory factory = new RequestTypeCreationFactory(requestType);
-		factory.setExtendedData(extendedData);
-		return new MobileElementCreationToolEntry("", "", factory, icon, icon);
+		return new MobileElementCreationToolEntry("", "", new RequestTypeCreationFactory(requestType), icon, icon);
 	}
 
 	private PaletteEntry createPartsEntry(String id)
@@ -234,13 +222,13 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 		if (PARTS_HEADER_ID.equals(id))
 		{
 			requestType = MobileVisualFormEditor.REQ_PLACE_HEADER;
-			icon = Activator.loadImageDescriptorFromBundle("button.gif"); // RAGTEST header.gif
+			icon = null; // TODO
 		}
 
 		else if (PARTS_FOOTER_ID.equals(id))
 		{
 			requestType = MobileVisualFormEditor.REQ_PLACE_FOOTER;
-			icon = Activator.loadImageDescriptorFromBundle("text.gif"); // RAGTEST footer.gif
+			icon = null; // TODO
 		}
 
 		else
@@ -260,36 +248,36 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 
 		if (ELEMENTS_TEXT_FIELD_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("textinput.png"); // RAGTEST icon
+			icon = Activator.loadImageDescriptorFromBundle("field.gif");
 		}
 
 		else if (ELEMENTS_TEXTAREA_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("TEXTAREA16.png"); // RAGTEST icon
+			icon = Activator.loadImageDescriptorFromBundle("TEXTAREA16.png");
 			displayType = Field.TEXT_AREA;
 		}
 
 		else if (ELEMENTS_COMBOBOX_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("SELECT16.png");// RAGTEST icon
+			icon = Activator.loadImageDescriptorFromBundle("SELECT16.png");
 			displayType = Field.COMBOBOX;
 		}
 
 		else if (ELEMENTS_CHECKBOXES_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("text.gif");// RAGTEST icon
+			icon = Activator.loadImageDescriptorFromBundle("CHECKBOX16.png");
 			displayType = Field.CHECKS;
 		}
 
 		else if (ELEMENTS_RADIOBUTTONS_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("text.gif");// RAGTEST icon
+			icon = Activator.loadImageDescriptorFromBundle("RADIO16.png");
 			displayType = Field.RADIOS;
 		}
 
 		else if (ELEMENTS_LABEL_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("text.gif");// RAGTEST icon
+			icon = Activator.loadImageDescriptorFromBundle("text.gif");
 			requestType = MobileVisualFormEditor.REQ_PLACE_LABEL;
 		}
 
@@ -321,13 +309,13 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 
 		if (LISTS_INSET_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("textinput.png"); // RAGTEST icon
+			icon = null; // TODO
 			requestType = MobileVisualFormEditor.REQ_PLACE_INSET_LIST;
 		}
 
 		else if (LISTS_FORM_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("text.gif");// RAGTEST icon
+			icon = null; // TODO
 			requestType = MobileVisualFormEditor.REQ_PLACE_FORM_LIST;
 		}
 
