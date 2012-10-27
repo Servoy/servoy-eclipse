@@ -1,4 +1,4 @@
-instructions.configure=addRepository(type:0,name:Servoy update site,location:https${#58}//www.servoy.com/developer/61x_updates);addRepository(type:1,name:Servoy update site,location:https${#58}//www.servoy.com/developer/61x_updates);\
+instructions.configure=addRepository(type:0,name:Servoy update site,location:https${#58}//www.servoy.com/developer/70x_updates);addRepository(type:1,name:Servoy update site,location:https${#58}//www.servoy.com/developer/70x_updates);\
 addRepository(type:0,name:SQLExplorer Updates,location:http${#58}//eclipsesql.sourceforge.net/);addRepository(type:1,name:SQLExplorer Updates,location:http${#58}//eclipsesql.sourceforge.net/);\
 addRepository(type:0,name:Indigo,location:http${#58}//download.eclipse.org/releases/indigo);addRepository(type:1,name:Indigo,location:http${#58}//download.eclipse.org/releases/indigo);\
 addRepository(type:0,name:The Eclipse Project Updates,location:http${#58}//download.eclipse.org/eclipse/updates/3.7);addRepository(type:1,name:The Eclipse Project Updates,location:http${#58}//download.eclipse.org/eclipse/updates/3.7);\
