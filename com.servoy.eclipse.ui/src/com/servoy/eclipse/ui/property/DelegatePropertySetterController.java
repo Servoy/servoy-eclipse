@@ -23,8 +23,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
  * Property descriptor wrapper that implements IPropertySetter.
  * 
  */
-public abstract class DelegatePropertySetterController<P, E, S extends IPropertySource> extends DelegatePropertyController<P, E> implements
-	IPropertySetter<E, S>
+public abstract class DelegatePropertySetterController<P, S extends IPropertySource> extends DelegatePropertyController<P, P> implements IPropertySetter<P, S>
 {
 	public DelegatePropertySetterController(IPropertyDescriptor propertyDescriptor, Object id)
 	{

@@ -335,7 +335,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		LOGIN_SOLUTION_CONTROLLER = new LoginSolutionPropertyController("loginSolutionName", RepositoryHelper.getDisplayName("loginSolutionName",
 			Solution.class));
 
-		DESIGN_PROPERTIES_CONTROLLER = new PropertySetterDelegatePropertyController<Map<String, Object>, Map<String, Object>, PersistPropertySource>(
+		DESIGN_PROPERTIES_CONTROLLER = new PropertySetterDelegatePropertyController<Map<String, Object>, PersistPropertySource>(
 			new MapEntriesPropertyController("designTimeProperties", RepositoryHelper.getDisplayName("designTimeProperties", Form.class)),
 			"designTimeProperties")
 		{
@@ -2800,8 +2800,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				integerTypes[i] = Integer.valueOf(iTypes[i]);
 				stringTypes[i] = Column.getDisplayTypeString(iTypes[i]);
 			}
-			return new PropertySetterDelegatePropertyController<Integer, Integer, PersistPropertySource>(new ComboboxPropertyController<Integer>(id,
-				displayName, new ComboboxPropertyModel<Integer>(integerTypes, stringTypes), Messages.LabelUnresolved), id)
+			return new PropertySetterDelegatePropertyController<Integer, PersistPropertySource>(new ComboboxPropertyController<Integer>(id, displayName,
+				new ComboboxPropertyModel<Integer>(integerTypes, stringTypes), Messages.LabelUnresolved), id)
 			{
 				// handle setting of this property via a IPropertySetter so that we can do additional stuff when the property is set.
 				public void setProperty(PersistPropertySource propertySource, Integer value)

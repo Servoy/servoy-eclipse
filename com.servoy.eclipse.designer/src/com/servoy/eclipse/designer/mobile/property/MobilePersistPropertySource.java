@@ -48,7 +48,7 @@ import com.servoy.j2db.scripting.annotations.ServoyMobile;
 public class MobilePersistPropertySource extends PersistPropertySource
 {
 	public static final String HEADER_SIZE_PROPERTY = "headerSize"; //$NON-NLS-1$
-	public static final PropertyController<Integer, Integer> MOBILE_LABEL_HEADERSIZE_CONTROLLER = new DelegatePropertySetterController<Integer, Integer, MobilePersistPropertySource>(
+	public static final PropertyController<Integer, Integer> MOBILE_LABEL_HEADERSIZE_CONTROLLER = new DelegatePropertySetterController<Integer, MobilePersistPropertySource>(
 		new ComboboxPropertyController<Integer>(HEADER_SIZE_PROPERTY, HEADER_SIZE_PROPERTY, new ComboboxPropertyModel<Integer>(
 			new Integer[] { Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3), Integer.valueOf(4), Integer.valueOf(5), Integer.valueOf(6) }),
 			Messages.LabelDefault), HEADER_SIZE_PROPERTY)
@@ -68,7 +68,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 
 	public static final String RADIO_STYLE_NAME = "horizontal"; //$NON-NLS-1$
 	public static final Integer RADIO_STYLE_HORIZONTAL = Integer.valueOf(1);
-	public static final PropertyController<Boolean, Boolean> MOBILE_RADIO_STYLE_CONTROLLER = new DelegatePropertySetterController<Boolean, Boolean, MobilePersistPropertySource>(
+	public static final PropertyController<Boolean, Boolean> MOBILE_RADIO_STYLE_CONTROLLER = new DelegatePropertySetterController<Boolean, MobilePersistPropertySource>(
 		new CheckboxPropertyDescriptor(RADIO_STYLE_NAME, RADIO_STYLE_NAME), RADIO_STYLE_NAME)
 	{
 		// 0: vertical (default)

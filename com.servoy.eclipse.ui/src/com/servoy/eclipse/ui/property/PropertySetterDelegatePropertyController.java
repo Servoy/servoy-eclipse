@@ -22,7 +22,7 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
  * Property descriptor wrapper that implements IPropertySetter.
  * 
  */
-public abstract class PropertySetterDelegatePropertyController<P, E, S extends PersistPropertySource> extends DelegatePropertySetterController<P, E, S>
+public abstract class PropertySetterDelegatePropertyController<P, S extends PersistPropertySource> extends DelegatePropertySetterController<P, S>
 {
 	public PropertySetterDelegatePropertyController(IPropertyDescriptor propertyDescriptor, Object id)
 	{
@@ -30,9 +30,9 @@ public abstract class PropertySetterDelegatePropertyController<P, E, S extends P
 	}
 
 	@SuppressWarnings("unchecked")
-	public E getProperty(S propertySource)
+	public P getProperty(S propertySource)
 	{
-		return (E)propertySource.getPersistPropertyValue(getId());
+		return (P)propertySource.getPersistPropertyValue(getId());
 	}
 
 	@Override
