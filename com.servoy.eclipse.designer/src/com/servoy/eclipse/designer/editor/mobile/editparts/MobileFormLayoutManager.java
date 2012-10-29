@@ -66,7 +66,7 @@ public class MobileFormLayoutManager extends AbstractLayout
 			Rectangle.SINGLETON.y = Rectangle.SINGLETON.y + Rectangle.SINGLETON.height;
 
 			Dimension childSize = child.getPreferredSize(Rectangle.SINGLETON.width, -1);
-			Rectangle.SINGLETON.height = childSize.height == 0 ? 50 : childSize.height;
+			Rectangle.SINGLETON.height = childSize.height == 0 ? 55 : childSize.height;
 			child.setBounds(Rectangle.SINGLETON);
 		}
 	}

@@ -109,7 +109,7 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 							component instanceof DataChoice || component instanceof DataCheckBox)
 						{
 							RoundedBorder rborder = new RoundedBorder(1, 1, 1, 1, BUTTON_BORDER, BUTTON_BORDER, BUTTON_BORDER, BUTTON_BORDER);
-							rborder.setRoundingRadius(new float[] { 15, 15, 15, 15 });
+							rborder.setRoundingRadius(new float[] { 10, 10, 10, 10 });
 							((JComponent)component).setBorder(rborder);
 						}
 
@@ -122,11 +122,11 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 						else if (component instanceof JLabel)
 						{
 							((JLabel)component).setOpaque(false);
+							component.setFont(component.getFont().deriveFont(Font.BOLD));
 							boolean headerText = persist instanceof AbstractBase && ((AbstractBase)persist).getCustomMobileProperty("headerText") != null;
 							((JLabel)component).setForeground(headerText ? HEADER_LABEL_FG : LABEL_FG);
 							if (headerText)
 							{
-								component.setFont(component.getFont().deriveFont(Font.BOLD));
 								((JLabel)component).setHorizontalAlignment(SwingConstants.CENTER);
 							}
 							else

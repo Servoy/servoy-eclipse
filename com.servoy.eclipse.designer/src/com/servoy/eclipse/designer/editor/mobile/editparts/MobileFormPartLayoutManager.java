@@ -63,8 +63,8 @@ public class MobileFormPartLayoutManager extends AbstractLayout
 	{
 		Rectangle containerBounds = container.getBounds();
 		// children are based on model order as created in editPart.getModelChildren()
-		Rectangle.SINGLETON.y = containerBounds.y + 6;
-		Rectangle.SINGLETON.height = 35;
+		Rectangle.SINGLETON.y = containerBounds.y + 8;
+		Rectangle.SINGLETON.height = 28;
 
 		for (IFigure child : (List<IFigure>)container.getChildren())
 		{
@@ -124,11 +124,11 @@ public class MobileFormPartLayoutManager extends AbstractLayout
 		int height;
 		if (partType == Part.HEADER)
 		{
-			height = 50; // always 1 row
+			height = 40; // always 1 row
 		}
 		else
 		{
-			height = 50; // TODO: layout multiple rows if there are many footer items
+			height = 40; // TODO: layout multiple rows if there are many footer items
 		}
 		return new Dimension(wHint, height);
 	}
