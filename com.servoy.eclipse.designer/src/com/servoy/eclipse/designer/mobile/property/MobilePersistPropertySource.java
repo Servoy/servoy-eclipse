@@ -34,6 +34,7 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.scripting.annotations.ServoyMobile;
@@ -110,20 +111,22 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			return false;
 		}
 
+		if (propertyDescriptor.propertyDescriptor.getName().equals(StaticContentSpecLoader.PROPERTY_ONACTIONMETHODID.getPropertyName()) &&
+			isLabel(getPersist()))
+		{
+			return false;
+		}
+
 		return super.shouldShow(propertyDescriptor);
 	}
 
 	@Override
 	protected String[] getPseudoPropertyNames(Class< ? > clazz)
 	{
-		if (GraphicalComponent.class == clazz)
+		if (GraphicalComponent.class == clazz && isLabel(getPersist()))
 		{
-			GraphicalComponent label = (GraphicalComponent)getPersist();
-			if ((label.getOnActionMethodID() == 0 || !label.getShowClick()) && label.getDataProviderID() == null && !label.getDisplaysTags())
-			{
-				// script label
-				return new String[] { HEADER_SIZE_PROPERTY };
-			}
+			// script label
+			return new String[] { HEADER_SIZE_PROPERTY };
 		}
 		else if (Field.class == clazz)
 		{
@@ -135,6 +138,17 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * @param persist
+	 * @return
+	 */
+	private static boolean isLabel(IPersist persist)
+	{
+		return persist instanceof GraphicalComponent &&
+			(((GraphicalComponent)persist).getOnActionMethodID() == 0 || !((GraphicalComponent)persist).getShowClick()) &&
+			((GraphicalComponent)persist).getDataProviderID() == null && !((GraphicalComponent)persist).getDisplaysTags();
 	}
 
 	@Override
@@ -153,5 +167,4 @@ public class MobilePersistPropertySource extends PersistPropertySource
 
 		return super.getPropertiesPropertyDescriptor(propertySource, id, displayName, name, flattenedEditingSolution, form);
 	}
-
 }

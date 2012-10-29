@@ -245,6 +245,7 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 		ImageDescriptor icon;
 		RequestType requestType = MobileVisualFormEditor.REQ_PLACE_FIELD;
 		int displayType = -1;
+		String text = null;
 
 		if (ELEMENTS_TEXT_FIELD_ID.equals(id))
 		{
@@ -267,6 +268,7 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 		{
 			icon = Activator.loadImageDescriptorFromBundle("CHECKBOX16.png");
 			displayType = Field.CHECKS;
+			text = "check";
 		}
 
 		else if (ELEMENTS_RADIOBUTTONS_ID.equals(id))
@@ -295,6 +297,10 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 				StaticContentSpecLoader.PROPERTY_DISPLAYTYPE,
 				PersistPropertySource.DISPLAY_TYPE_CONTOLLER.getConverter().convertProperty(StaticContentSpecLoader.PROPERTY_DISPLAYTYPE.getPropertyName(),
 					Integer.valueOf(displayType)));
+		}
+		if (text != null)
+		{
+			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_TEXT, text);
 		}
 
 		RequestTypeCreationFactory factory = new RequestTypeCreationFactory(requestType);
