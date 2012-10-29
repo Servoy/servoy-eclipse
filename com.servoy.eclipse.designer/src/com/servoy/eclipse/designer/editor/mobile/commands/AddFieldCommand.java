@@ -59,8 +59,9 @@ public class AddFieldCommand extends BaseFormPlaceElementCommand
 
 			// create a label and a text field in a group
 			String groupID = UUID.randomUUID().toString();
-			ElementFactory.createLabel(form, "Title", location).setGroupID(groupID);
-			Field field = ElementFactory.createField(form, null, location);
+			Point loc = location == null ? new Point(0, 0) : location;
+			ElementFactory.createLabel(form, "Title", loc).setGroupID(groupID);
+			Field field = ElementFactory.createField(form, null, new Point(loc.x, loc.y + 1)); // enforce order by y-pos
 			field.setGroupID(groupID);
 			if (objectProperties != null && objectProperties.size() > 0) setProperiesOnModel(field, objectProperties);
 

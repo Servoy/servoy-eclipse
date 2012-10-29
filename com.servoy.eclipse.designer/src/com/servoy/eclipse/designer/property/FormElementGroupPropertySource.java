@@ -53,11 +53,13 @@ import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IValidateName;
+import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.StaticContentSpecLoader.TypedProperty;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.util.UUID;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Property source for form element groups.
@@ -89,7 +91,8 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 	public IPropertyDescriptor[] getPropertyDescriptors()
 	{
 		List<PropertyDescriptor> lst = new ArrayList<PropertyDescriptor>();
-		Iterator<IFormElement> elements = group.getElements();
+		// get elements, order by y-position
+		Iterator<IFormElement> elements = Utils.asSortedIterator(group.getElements(), PositionComparator.XY_PERSIST_COMPARATOR);
 		for (int i = 0; elements.hasNext(); i++)
 		{
 			IFormElement element = elements.next();
@@ -99,35 +102,15 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 				name = Messages.LabelAnonymous;
 			}
 
-			PropertyDescriptor desc = new PropertyDescriptor(new Integer(i), name.toString());
+			PropertyDescriptor desc = new PropertyDescriptor(Integer.valueOf(i), name.toString());
 			desc.setCategory(PropertyCategory.Elements.name());
 			lst.add(desc);
 		}
 
-		// size property
-		lst.add(new PropertyController<java.awt.Dimension, Object>(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), "size",
-			new ComplexPropertyConverter<java.awt.Dimension>()
-			{
-				@Override
-				public Object convertProperty(Object id, java.awt.Dimension value)
-				{
-					return new ComplexProperty<java.awt.Dimension>(value)
-					{
-						@Override
-						public IPropertySource getPropertySource()
-						{
-							return new DimensionPropertySource(this, null);
-						}
-					};
-				}
+		// Note: list other properties in alphabetic order here, they are not sorted, see PropertyController.applySequencePropertyComparator()
 
-			}, DimensionPropertySource.getLabelProvider(), new ICellEditorFactory()
-			{
-				public CellEditor createPropertyEditor(Composite parent)
-				{
-					return DimensionPropertySource.createPropertyEditor(parent);
-				}
-			}));
+		// enabled property
+		lst.add(new CheckboxPropertyDescriptor(StaticContentSpecLoader.PROPERTY_ENABLED.getPropertyName(), "enabled"));
 
 		// location property
 		lst.add(new PropertyController<java.awt.Point, Object>(StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), "location",
@@ -152,12 +135,6 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 					return PointPropertySource.createPropertyEditor(parent);
 				}
 			}));
-
-		// enabled property
-		lst.add(new CheckboxPropertyDescriptor(StaticContentSpecLoader.PROPERTY_ENABLED.getPropertyName(), "enabled"));
-
-		// visible property
-		lst.add(new CheckboxPropertyDescriptor(StaticContentSpecLoader.PROPERTY_VISIBLE.getPropertyName(), "visible"));
 
 		// name property
 		lst.add(new PropertyDescriptor(StaticContentSpecLoader.PROPERTY_NAME.getPropertyName(), "name")
@@ -191,6 +168,34 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 			}
 		});
 
+		// size property
+		lst.add(new PropertyController<java.awt.Dimension, Object>(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), "size",
+			new ComplexPropertyConverter<java.awt.Dimension>()
+			{
+				@Override
+				public Object convertProperty(Object id, java.awt.Dimension value)
+				{
+					return new ComplexProperty<java.awt.Dimension>(value)
+					{
+						@Override
+						public IPropertySource getPropertySource()
+						{
+							return new DimensionPropertySource(this, null);
+						}
+					};
+				}
+
+			}, DimensionPropertySource.getLabelProvider(), new ICellEditorFactory()
+			{
+				public CellEditor createPropertyEditor(Composite parent)
+				{
+					return DimensionPropertySource.createPropertyEditor(parent);
+				}
+			}));
+
+		// visible property
+		lst.add(new CheckboxPropertyDescriptor(StaticContentSpecLoader.PROPERTY_VISIBLE.getPropertyName(), "visible"));
+
 		// all prop descs that do not have a category yet belong to category PropertyCategory.Properties
 		for (PropertyDescriptor desc : lst)
 		{
@@ -200,7 +205,7 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 			}
 		}
 
-		return lst.toArray(new IPropertyDescriptor[lst.size()]);
+		return PropertyController.applySequencePropertyComparator(lst.toArray(new IPropertyDescriptor[lst.size()]));
 	}
 
 	public Object getPropertyValue(Object id)
