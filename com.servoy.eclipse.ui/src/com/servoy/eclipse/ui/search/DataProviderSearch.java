@@ -18,7 +18,6 @@
 package com.servoy.eclipse.ui.search;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -31,9 +30,7 @@ import org.eclipse.dltk.codeassist.ISelectionEngine;
 import org.eclipse.dltk.codeassist.ISelectionRequestor;
 import org.eclipse.dltk.compiler.env.IModuleSource;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.javascript.core.JavaScriptNature;
 import org.eclipse.dltk.javascript.typeinfo.model.Element;
 import org.eclipse.search.core.text.TextSearchEngine;
 import org.eclipse.search.core.text.TextSearchMatchAccess;
@@ -63,11 +60,28 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 {
 	private final IColumn dataprovider;
 	private FlattenedSolution flattenedSolution = null;
+	private Set<String> relationReferences = null;
+	private Set<String> valueListReferences = null;
+	private Set<String> formReferences = null;
+	private StringBuilder regexStrPattern = null;
 
 	public DataProviderSearch(IColumn dataprovider)
 	{
 		this.dataprovider = dataprovider;
 		flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
+
+		relationReferences = getRelationRefferences();
+		valueListReferences = getValueListRefferences();
+		formReferences = getFormRefferences();
+
+		regexStrPattern = new StringBuilder();
+		for (String rel : relationReferences)
+		{
+			regexStrPattern.append("(dataProviderID\\s*\\:\\s*" + "[\"']" + rel + "\\." + dataprovider.getDataProviderID() + ")|");
+		}
+		regexStrPattern.append("(dataProviderID\\s*\\:\\s*" + "[\"']" + dataprovider.getDataProviderID() + ")|");
+		regexStrPattern.append("(\\b" + dataprovider.getDataProviderID() + "\\b)");
+
 	}
 
 	/*
@@ -82,11 +96,14 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 		IResource[] scopes = getScopes(activeProject.getSolution());
 		TextSearchRequestor collector = getResultCollector();
 
-		searchServoyResourceFiles(monitor, scopes, collector);
+		//search servoy  resources
+		FileTextSearchScope servoyResourceScope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.val", "*.frm", "*.rel" }, true);
+		TextSearchEngine.create().search(servoyResourceScope, collector, Pattern.compile(regexStrPattern.toString()), monitor);
 
-		((DataProviderSearchCollector)collector).setEngine(DLTKLanguageManager.getSelectionEngine(JavaScriptNature.NATURE_ID));
-		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.js" }, true); //$NON-NLS-1$ 
-		TextSearchEngine.create().search(scope, collector, Pattern.compile("\\b" + dataprovider.getName() + "\\b"), monitor); //$NON-NLS-1$ //$NON-NLS-2$
+		//search js files
+		//((DataProviderSearchCollector)collector).setEngine(DLTKLanguageManager.getSelectionEngine(JavaScriptNature.NATURE_ID));
+		//FileTextSearchScope scriptScope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.js" }, true); //$NON-NLS-1$ 
+		//TextSearchEngine.create().search(scriptScope, collector, Pattern.compile("\\b" + dataprovider.getName() + "\\b"), monitor); //$NON-NLS-1$ //$NON-NLS-2$
 
 		return Status.OK_STATUS;
 	}
@@ -107,92 +124,9 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 		return "Searching references to dataprovider '" + dataprovider.getName() + "'"; //$NON-NLS-1$//$NON-NLS-2$
 	}
 
-
-	/**
-	 * This function searches for refferences of the given dataproviderId  in Relations ValueLists and Forms 
-	 * @param monitor
-	 * @param scopes
-	 * @param collector
-	 */
-	private void searchServoyResourceFiles(IProgressMonitor monitor, IResource[] scopes, TextSearchRequestor collector)
+	private Set<String> getRelationRefferences()
 	{
-		Set<Relation> matchPrimaryDataproviderIds = new HashSet<Relation>();
-		Set<Relation> matchForeignDataproviderIds = new HashSet<Relation>();
-		getRelationRefferences(matchPrimaryDataproviderIds, matchForeignDataproviderIds);
-
-//search relations
-		//search for foreign  reference in relation
-		Pattern foreignPattern = Pattern.compile("foreignColumnName\\s*\\:\\s*" + "[\"']" + dataprovider.getDataProviderID());
-		Pattern commonPattern = Pattern.compile("\\b" + dataprovider.getDataProviderID() + "\\b");
-		Pattern pattern = foreignPattern;
-		for (Relation rel : matchForeignDataproviderIds)
-		{
-			if (!matchPrimaryDataproviderIds.contains(rel))
-			{
-				pattern = foreignPattern;
-			}
-			else
-			{ // both primary and foreign refferece the same datasource
-				pattern = commonPattern;
-			}
-			FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { rel.getName() + ".rel" }, true);
-			TextSearchEngine.create().search(scope, collector, foreignPattern, monitor);
-
-		}
-		// search for primary dataprovider id references in relations
-		Pattern primaryPattern = Pattern.compile("primaryDataProviderID\\s*\\:\\s*" + "[\"']" + dataprovider.getDataProviderID());
-		for (Relation rel : matchPrimaryDataproviderIds)
-		{
-			if (matchForeignDataproviderIds.contains(rel))
-			{
-				continue;//relation already searched
-			}
-			FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { rel.getName() + ".rel" }, true);
-			TextSearchEngine.create().search(scope, collector, primaryPattern, monitor);
-		}
-
-
-// search in valueLists
-		Set<ValueList> vls = getValueListRefferences();
-		Pattern vlPattern = Pattern.compile("dataProviderID\\d\\s*\\:\\s*" + "[\"']" + dataprovider.getDataProviderID());
-		for (ValueList vl : vls)
-		{
-			FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { vl.getName() + ".val" }, true);
-			TextSearchEngine.create().search(scope, collector, vlPattern, monitor);
-		}
-
-//search in forms
-		//prepare possible relation refferences regex pattern
-		StringBuilder sb = new StringBuilder();
-		Iterator<Relation> it = matchForeignDataproviderIds.iterator();
-		while (it.hasNext())
-		{
-			Relation rel = it.next();
-			sb.append("(dataProviderID\\s*\\:\\s*" + "[\"']" + rel.getName() + "\\." + dataprovider.getDataProviderID() + ")" + (it.hasNext() ? "|" : ""));
-		}
-		Pattern formRelationPattern = Pattern.compile(sb.toString());
-		Pattern formWithRelationOnSameDatasource = Pattern.compile("(dataProviderID\\s*\\:\\s*" + "[\"']" + dataprovider.getDataProviderID() + ")|" +
-			sb.toString());
-
-
-		Set<Form> formsRefferencingDatasource = getFormRefferences();
-		for (Form frm : com.servoy.j2db.util.Utils.iterate(flattenedSolution.getForms(false)))
-		{
-			if (formsRefferencingDatasource.contains(frm))
-			{
-				pattern = formWithRelationOnSameDatasource;
-			}
-			else
-			{
-				pattern = formRelationPattern;
-			}
-			FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { frm.getName() + ".frm" }, true);
-			TextSearchEngine.create().search(scope, collector, pattern, monitor);
-		}
-	}
-
-	private void getRelationRefferences(Set<Relation> matchPrimaryDataproviderId, Set<Relation> matchForeignDataproviderId)
-	{
+		Set<String> relRef = new HashSet<String>();
 		if (flattenedSolution != null)
 		{
 
@@ -211,7 +145,7 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 						{
 							if (dataProvider.getDataProviderID().equals(dataproviderId))
 							{
-								matchPrimaryDataproviderId.add(rel);
+								relRef.add(rel.getName());
 								break;
 							}
 						}
@@ -226,7 +160,7 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 					{
 						if (dataProvider.getDataProviderID().equals(dataproviderId))
 						{
-							matchForeignDataproviderId.add(rel);
+							relRef.add(rel.getName());
 							break;
 						}
 					}
@@ -238,21 +172,22 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 				Debug.log("Exception while trying to get relations", e);
 			}
 		}
+		return relRef;
 	}
 
 	/**
 	 * @return Set<Form> a set of forms whose datasource is the dataprovider's table
 	 */
-	private Set<Form> getFormRefferences()
+	private Set<String> getFormRefferences()
 	{
-		Set<Form> forms = new HashSet<Form>();
+		Set<String> forms = new HashSet<String>();
 		if (flattenedSolution != null)
 		{
 			try
 			{
 				for (Form frm : com.servoy.j2db.util.Utils.iterate(flattenedSolution.getSolution().getForms(dataprovider.getTable(), false)))
 				{
-					forms.add(frm);
+					forms.add(frm.getName());
 				}
 			}
 			catch (RepositoryException e)
@@ -263,9 +198,9 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 		return forms;
 	}
 
-	private Set<ValueList> getValueListRefferences()
+	private Set<String> getValueListRefferences()
 	{
-		Set<ValueList> valueLists = new HashSet<ValueList>();
+		Set<String> valueLists = new HashSet<String>();
 		if (flattenedSolution != null)
 		{
 			try
@@ -282,7 +217,7 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 						{
 							if (dataproviderId.equals(id))
 							{
-								valueLists.add(vl);
+								valueLists.add(vl.getName());
 								break;
 							}
 						}
@@ -299,7 +234,7 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 								{
 									if (dataproviderId.equals(id))
 									{
-										valueLists.add(vl);
+										valueLists.add(vl.getName());
 										break;
 									}
 								}
@@ -319,7 +254,7 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 		return valueLists;
 	}
 
-	private static class DataProviderSearchCollector extends TextSearchResultCollector
+	private class DataProviderSearchCollector extends TextSearchResultCollector
 	{
 		private ISelectionEngine engine;
 		private final IColumn dataprovider;
@@ -368,6 +303,40 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 				if (!found)
 				{
 					match.setPossibleMatch(true);
+				}
+			}
+			else
+			{// search in servoy resources
+				String fileName = matchRequestor.getFile().getName();
+				String[] tokens = fileName.split("\\.(?=[^\\.]+$)");
+				if (tokens.length > 1)
+				{
+					if (tokens[1].equals("rel"))
+					{
+						if (!DataProviderSearch.this.relationReferences.contains(tokens[0]))
+						{
+							return null;
+						}
+					}
+					else if (tokens[1].equals("val"))
+					{
+						if (!DataProviderSearch.this.valueListReferences.contains(tokens[0]))
+						{
+							return null;
+						}
+					}
+					else if (tokens[1].equals("frm"))
+					{
+						//if form's datasource does not reference dataprovider's table
+						if (!DataProviderSearch.this.formReferences.contains(tokens[0]))
+						{ //if matches the name of the dataprovider  (can't be this table )
+							if (matchRequestor.getMatchLength() == dataprovider.getDataProviderID().length())
+							{
+								return null;
+							}
+						}
+					}
+
 				}
 			}
 			return match;
