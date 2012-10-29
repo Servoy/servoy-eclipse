@@ -167,6 +167,10 @@ public abstract class BaseFormPlaceElementCommand extends Command implements ISu
 					applySizeToModels(size, models);
 				}
 				setPropertiesOnModels();
+				for (Object model : models)
+				{
+					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, model, false);
+				}
 			}
 			else
 			{
@@ -197,7 +201,6 @@ public abstract class BaseFormPlaceElementCommand extends Command implements ISu
 		if (setPropertiesCommand != null)
 		{
 			setPropertiesCommand.execute();
-			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, model, true);
 		}
 
 	}
