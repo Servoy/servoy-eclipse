@@ -70,7 +70,7 @@ public class RelationSearch extends AbstractPersistSearch
 		IResource[] scopes = getScopes((Solution)relation.getRootObject());
 		TextSearchRequestor collector = getResultCollector();
 
-		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm" }, true);
+		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm", "*.val" }, true);
 		TextSearchEngine.create().search(scope, collector, Pattern.compile("\\b" + relation.getName() + "\\b"), monitor);
 		TextSearchEngine.create().search(scope, collector, Pattern.compile("\\b" + Form.NAMED_FOUNDSET_GLOBAL_RELATION_PREFIX + relation.getName() + "\\b"),
 			monitor);
