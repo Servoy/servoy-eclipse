@@ -33,6 +33,7 @@ import org.eclipse.ui.IMarkerResolutionGenerator;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.actions.ShowI18NDialogActionDelegate;
 import com.servoy.eclipse.ui.quickfix.jsexternalize.JSFileExternalizeProblem;
+import com.servoy.eclipse.ui.resource.ImageResource;
 
 /**
  * Quick fix that starts the I18N externalize wizard
@@ -111,7 +112,7 @@ public class StartI18NExternalizeWizard implements IMarkerResolutionGenerator, I
 		 */
 		public Image getImage()
 		{
-			return Activator.getDefault().getImage(Activator.loadImageDescriptorFromBundle("correction_change.gif"));
+			return ImageResource.INSTANCE.getImage(Activator.loadImageDescriptorFromBundle("correction_change.gif"));
 		}
 
 		/*

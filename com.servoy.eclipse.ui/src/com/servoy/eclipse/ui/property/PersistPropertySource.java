@@ -339,6 +339,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			new MapEntriesPropertyController("designTimeProperties", RepositoryHelper.getDisplayName("designTimeProperties", Form.class)),
 			"designTimeProperties")
 		{
+			@Override
 			public Map<String, Object> getProperty(PersistPropertySource propSource)
 			{
 				IPersist persist = propSource.getPersist();
@@ -641,9 +642,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			id = BEAN_PROPERTY_PREFIX_DOT + propertyDescriptor.propertyDescriptor.getName();
 		}
 
-		IPropertyDescriptor pd = createPropertyDescriptor(this, id, persistContext, readOnly, propertyDescriptor,
-			RepositoryHelper.getDisplayName(propertyDescriptor.propertyDescriptor.getName(), persistContext.getPersist().getClass()), category,
-			flattenedEditingSolution, form);
+		IPropertyDescriptor pd = createPropertyDescriptor(propertyDescriptor, flattenedEditingSolution, form, category, id);
 		IPropertyDescriptor combinedPropertyDesciptor = null;
 		if (propertyDescriptor.valueObject == persistContext.getPersist())
 		{
@@ -682,6 +681,23 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				propertyDescriptors.put(combinedPropertyDesciptor.getId(), combinedPropertyDesciptor);
 			}
 		}
+	}
+
+	/**
+	 * @param propertyDescriptor
+	 * @param flattenedEditingSolution
+	 * @param form
+	 * @param category
+	 * @param id
+	 * @return
+	 * @throws RepositoryException
+	 */
+	protected IPropertyDescriptor createPropertyDescriptor(PropertyDescriptorWrapper propertyDescriptor, FlattenedSolution flattenedEditingSolution, Form form,
+		PropertyCategory category, String id) throws RepositoryException
+	{
+		return createPropertyDescriptor(this, id, persistContext, readOnly, propertyDescriptor,
+			RepositoryHelper.getDisplayName(propertyDescriptor.propertyDescriptor.getName(), persistContext.getPersist().getClass()), category,
+			flattenedEditingSolution, form);
 	}
 
 	public IPropertyDescriptor[] getPropertyDescriptors()

@@ -29,6 +29,7 @@ import org.eclipse.text.edits.InsertEdit;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.resource.ImageResource;
 
 /**
  * Resolution to add missing NLS to the source line
@@ -56,7 +57,7 @@ public class AddMissingNLSResolution extends TextFileEditResolution
 	 */
 	public Image getImage()
 	{
-		return Activator.getDefault().getImage(Activator.loadImageDescriptorFromBundle("never_translate.gif"));
+		return ImageResource.INSTANCE.getImage(Activator.loadImageDescriptorFromBundle("never_translate.gif"));
 	}
 
 	/*

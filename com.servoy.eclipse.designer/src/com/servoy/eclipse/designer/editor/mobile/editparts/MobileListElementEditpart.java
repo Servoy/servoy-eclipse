@@ -26,6 +26,7 @@ import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.IPersistChangeListener;
@@ -34,11 +35,14 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.SetBoundsToSupportBoundsFigureListener;
+import com.servoy.eclipse.designer.mobile.property.MobilePersistPropertySource;
 import com.servoy.eclipse.ui.resource.FontResource;
+import com.servoy.eclipse.ui.resource.ImageResource;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.ISupportBounds;
+import com.servoy.j2db.util.Pair;
 
 /**
  * Edit part for items inside the inset list in mobile form editor.
@@ -48,24 +52,28 @@ import com.servoy.j2db.persistence.ISupportBounds;
  */
 public class MobileListElementEditpart extends AbstractGraphicalEditPart implements IPersistChangeListener
 {
-	public static final Image COUNTBUBBLE_IMAGE = Activator.loadImageDescriptorFromBundle("list_countbubble.png").createImage(); //$NON-NLS-1$
+	public static final Image COUNTBUBBLE_IMAGE = Activator.loadImageDescriptorFromBundle("mobile/list_countbubble.png").createImage(); //$NON-NLS-1$
 	public static final Image IMAGE_IMAGE = Activator.loadImageDescriptorFromBundle("image.gif").createImage(); //$NON-NLS-1$
 
 	public static enum MobileListElementType
 	{
-		Header, Button, Subtext, CountBubble, Image
+		Header, Button, Subtext, CountBubble, DynamicImage, FixedImage
 	}
 
 	protected IApplication application;
 	private final BaseVisualFormEditor editorPart;
-	private final MobileListElementType type;
 
-	public MobileListElementEditpart(IApplication application, BaseVisualFormEditor editorPart, Object model, MobileListElementType type)
+	public MobileListElementEditpart(IApplication application, BaseVisualFormEditor editorPart, Pair<BaseComponent, MobileListElementType> model)
 	{
 		this.application = application;
 		this.editorPart = editorPart;
-		this.type = type;
 		setModel(model);
+	}
+
+	@Override
+	public Pair<BaseComponent, MobileListElementType> getModel()
+	{
+		return (Pair<BaseComponent, MobileListElementType>)super.getModel();
 	}
 
 	/**
@@ -73,7 +81,7 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 	 */
 	public MobileListElementType getType()
 	{
-		return type;
+		return getModel().getRight();
 	}
 
 	/**
@@ -93,9 +101,11 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 	protected IFigure createFigure()
 	{
 		IFigure fig;
+		MobileListElementType type = getType();
 		switch (type)
 		{
-			case Image :
+			case DynamicImage :
+			case FixedImage :
 				fig = new ImageFigure(IMAGE_IMAGE);
 				((ImageFigure)fig).setAlignment(PositionConstants.WEST);
 				break;
@@ -132,10 +142,7 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 //		border.setStyle(Graphics.LINE_DASH);
 //		fig.setBorder(border);
 
-		if (getModel() instanceof ISupportBounds)
-		{
-			fig.addFigureListener(new SetBoundsToSupportBoundsFigureListener((ISupportBounds)getModel()));
-		}
+		fig.addFigureListener(new SetBoundsToSupportBoundsFigureListener(getModel().getLeft()));
 		return fig;
 	}
 
@@ -144,18 +151,23 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 	 */
 	public void updateFigure(IFigure fig)
 	{
-		switch (type)
+		switch (getType())
 		{
 			case Header :
-				updateFigureForGC(fig, (GraphicalComponent)getModel(), "<header>");
+				updateFigureForGC(fig, (GraphicalComponent)getModel().getLeft(), "<header>");
 				break;
 
 			case Button :
-				updateFigureForGC(fig, (GraphicalComponent)getModel(), "<button>");
+				updateFigureForGC(fig, (GraphicalComponent)getModel().getLeft(), "<button>");
 				break;
 
 			case Subtext :
-				updateFigureForGC(fig, (GraphicalComponent)getModel(), "<subtext>");
+				updateFigureForGC(fig, (GraphicalComponent)getModel().getLeft(), "<subtext>");
+				break;
+
+			case DynamicImage :
+			case FixedImage :
+				updateImage((ImageFigure)fig, (GraphicalComponent)getModel().getLeft());
 				break;
 
 			default :
@@ -180,6 +192,25 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 			((Label)fig).setFont(FontResource.getDefaultFont(text == null ? SWT.ITALIC : SWT.NORMAL, 0));
 		}
 	}
+
+	private void updateImage(ImageFigure fig, GraphicalComponent button)
+	{
+		Image image = null;
+		if (getType() == MobileListElementType.FixedImage)
+		{
+			String dataIcon = (String)getModel().getLeft().getCustomMobileProperty(MobilePersistPropertySource.DATA_ICON_PROPERTY);
+			if (dataIcon != null)
+			{
+				image = ImageResource.INSTANCE.getImageWithRoundBackground(
+					Activator.loadImageDescriptorFromBundle("mobile/icons-18-white-" + dataIcon + ".png"),
+					new RGB(IconWithRoundBackground.DATA_ICON_BG.getRed(), IconWithRoundBackground.DATA_ICON_BG.getGreen(),
+						IconWithRoundBackground.DATA_ICON_BG.getBlue()));
+			}
+		}
+
+		fig.setImage(image == null ? IMAGE_IMAGE : image);
+	}
+
 
 	@Override
 	public void refresh()

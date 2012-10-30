@@ -26,6 +26,7 @@ import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.resource.ImageResource;
 import com.servoy.eclipse.ui.wizards.SynchronizeDBIWithDBWizard;
 
 public class DBIQuickFixShowSyncWizard implements IMarkerResolution2
@@ -43,7 +44,7 @@ public class DBIQuickFixShowSyncWizard implements IMarkerResolution2
 	 */
 	public Image getImage()
 	{
-		return Activator.getDefault().getImage(Activator.loadImageDescriptorFromBundle("correction_change.gif"));
+		return ImageResource.INSTANCE.getImage(Activator.loadImageDescriptorFromBundle("correction_change.gif"));
 	}
 
 	/*

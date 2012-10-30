@@ -59,6 +59,7 @@ import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.TreeBuilder;
 import com.servoy.eclipse.ui.node.UserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.eclipse.ui.resource.ImageResource;
 import com.servoy.eclipse.ui.scripting.CalculationModeHandler;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.ElementUtil;
@@ -1121,16 +1122,16 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	private Image getImageForVariableEncapsulation(ScriptVariable sv)
 	{
-		if (sv.isPrivate()) return uiActivator.getImage(DLTKPluginImages.DESC_FIELD_PRIVATE);
-		if (sv.isPublic()) return uiActivator.getImage(DLTKPluginImages.DESC_FIELD_PUBLIC);
-		return uiActivator.getImage(DLTKPluginImages.DESC_OBJS_FIELD); //dltk default handling
+		if (sv.isPrivate()) return ImageResource.INSTANCE.getImage(DLTKPluginImages.DESC_FIELD_PRIVATE);
+		if (sv.isPublic()) return ImageResource.INSTANCE.getImage(DLTKPluginImages.DESC_FIELD_PUBLIC);
+		return ImageResource.INSTANCE.getImage(DLTKPluginImages.DESC_OBJS_FIELD); //dltk default handling
 	}
 
 	private Image getImageForMethodEncapsulation(ScriptMethod sm)
 	{
-		if (sm.isPrivate()) return uiActivator.getImage(DLTKPluginImages.DESC_METHOD_PRIVATE);
-		else if (sm.isProtected()) return uiActivator.getImage(DLTKPluginImages.DESC_METHOD_PROTECTED);
-		else return uiActivator.getImage(DLTKPluginImages.DESC_METHOD_PUBLIC);
+		if (sm.isPrivate()) return ImageResource.INSTANCE.getImage(DLTKPluginImages.DESC_METHOD_PRIVATE);
+		if (sm.isProtected()) return ImageResource.INSTANCE.getImage(DLTKPluginImages.DESC_METHOD_PROTECTED);
+		return ImageResource.INSTANCE.getImage(DLTKPluginImages.DESC_METHOD_PUBLIC);
 	}
 
 	@SuppressWarnings("nls")

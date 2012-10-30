@@ -29,7 +29,6 @@ import com.servoy.eclipse.ui.property.DelegatePropertyController;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
-import com.servoy.j2db.persistence.StaticContentSpecLoader.TypedProperty;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -95,7 +94,7 @@ public class MobileListPropertySource implements IPropertySource
 			{
 				elementPropertySources.put(prefix = "listitemTab",
 					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.tab, context, false));
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_RELATIONNAME);
+				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_RELATIONNAME.getPropertyName());
 			}
 
 			if (model.tabPanel != null)
@@ -103,7 +102,7 @@ public class MobileListPropertySource implements IPropertySource
 				// inset list
 				elementPropertySources.put(prefix = "containedForm",
 					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.containedForm, model.containedForm, false));
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATASOURCE);
+				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATASOURCE.getPropertyName());
 			}
 
 			// list item header
@@ -111,8 +110,9 @@ public class MobileListPropertySource implements IPropertySource
 			{
 				elementPropertySources.put(prefix = "listitemHeader",
 					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.header, model.containedForm, false));
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID, "headerDataProvider");
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT, "headerText");
+				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
+					"headerDataProvider");
+				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName(), "headerText");
 			}
 
 			// list item button
@@ -120,9 +120,11 @@ public class MobileListPropertySource implements IPropertySource
 			{
 				elementPropertySources.put(prefix = "listitemButton",
 					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.button, model.containedForm, false));
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_ONACTIONMETHODID);
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID, "textDataProvider");
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT);
+				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_ONACTIONMETHODID.getPropertyName());
+				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
+					"textDataProvider");
+				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName());
+				addMethodPropertyDescriptor(elementPropertySource, prefix, MobilePersistPropertySource.DATA_ICON_PROPERTY);
 			}
 
 			// subtext
@@ -130,8 +132,9 @@ public class MobileListPropertySource implements IPropertySource
 			{
 				elementPropertySources.put(prefix = "listitemSubtext",
 					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.subtext, model.containedForm, false));
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID, "subtextDataProvider");
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT, "subText");
+				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
+					"subtextDataProvider");
+				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName(), "subText");
 			}
 
 			// countBubble
@@ -139,7 +142,8 @@ public class MobileListPropertySource implements IPropertySource
 			{
 				elementPropertySources.put(prefix = "listitemCount",
 					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.countBubble, model.containedForm, false));
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID, "countDataProvider");
+				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
+					"countDataProvider");
 			}
 
 			// image
@@ -147,20 +151,21 @@ public class MobileListPropertySource implements IPropertySource
 			{
 				elementPropertySources.put(prefix = "listitemImage",
 					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.image, model.containedForm, false));
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID, "imageDataProvider");
+				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
+					"imageDataProvider");
 			}
 		}
 	}
 
-	private void addMethodPropertyDescriptor(PersistPropertySource elementPropertySource, String prefix, TypedProperty< ? > property)
+	private void addMethodPropertyDescriptor(PersistPropertySource elementPropertySource, String prefix, String propertyName)
 	{
-		addMethodPropertyDescriptor(elementPropertySource, prefix, property, null);
+		addMethodPropertyDescriptor(elementPropertySource, prefix, propertyName, null);
 	}
 
-	private void addMethodPropertyDescriptor(PersistPropertySource elementPropertySource, String prefix, TypedProperty< ? > property, String displayName)
+	private void addMethodPropertyDescriptor(PersistPropertySource elementPropertySource, String prefix, String propertyName, String displayName)
 	{
-		String id = prefix + '.' + property.getPropertyName();
-		IPropertyDescriptor propertyDescriptor = elementPropertySource.getPropertyDescriptor(property.getPropertyName());
+		String id = prefix + '.' + propertyName;
+		IPropertyDescriptor propertyDescriptor = elementPropertySource.getPropertyDescriptor(propertyName);
 		if (propertyDescriptor != null)
 		{
 			propertyDescriptors.put(id,

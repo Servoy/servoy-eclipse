@@ -24,6 +24,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -62,6 +63,7 @@ import com.servoy.j2db.smart.dataui.DataCheckBox;
 import com.servoy.j2db.smart.dataui.DataChoice;
 import com.servoy.j2db.smart.dataui.DataComboBox;
 import com.servoy.j2db.smart.dataui.DataField;
+import com.servoy.j2db.smart.dataui.ScriptButton;
 import com.servoy.j2db.util.gui.RoundedBorder;
 
 /**
@@ -119,6 +121,24 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 							((JButton)component).setBackground(BUTTON_BG);
 							((JButton)component).setForeground(Color.white);
 							component.setFont(component.getFont().deriveFont(Font.BOLD));
+							if (persist instanceof AbstractBase)
+							{
+								String dataIcon = (String)((AbstractBase)persist).getCustomMobileProperty(MobilePersistPropertySource.DATA_ICON_PROPERTY);
+								if (dataIcon != null)
+								{
+									ImageIcon icon = Activator.getDefault().loadImageIconFromBundle("mobile/icons-18-white-" + dataIcon + ".png");
+									if (icon != null)
+									{
+										if (component instanceof ScriptButton)
+										{
+											((ScriptButton)component).setMediaOption(1);
+										}
+//										((JButton)component).setHorizontalTextPosition(SwingConstants.CENTER); // TODO: how to center the text and keep icon left?
+										((JButton)component).setHorizontalAlignment(SwingConstants.LEFT);
+										((JButton)component).setIcon(new IconWithRoundBackground(icon));
+									}
+								}
+							}
 						}
 						else if (component instanceof JLabel)
 						{
@@ -132,7 +152,7 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 							}
 							else
 							{
-								Object headerSizeProp = ((AbstractBase)persist).getCustomMobileProperty("headerSize");
+								Object headerSizeProp = ((AbstractBase)persist).getCustomMobileProperty(MobilePersistPropertySource.HEADER_SIZE_PROPERTY);
 								int headerSize = headerSizeProp instanceof Integer ? Math.max(1, Math.min(6, ((Integer)headerSizeProp).intValue())) : 4;
 
 								float fontsize;
@@ -169,7 +189,8 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 								@Override
 								protected JButton createArrowButton()
 								{
-									JButton button = new JButton(Activator.getDefault().loadImageIconFromBundle("mobile_combo_button.png"));
+									JButton button = new JButton(new IconWithRoundBackground(Activator.getDefault().loadImageIconFromBundle(
+										"mobile/icons-18-white-arrow-d.png")));
 									button.setBorder(null);
 									button.setOpaque(false);
 									return button;
@@ -191,16 +212,16 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 							{
 								component.setBackground(RADIOS_BG);
 								((JRadioButton)dataChoice.getRendererComponent()).setIcon(Activator.getDefault().loadImageIconFromBundle(
-									horizontal ? "empty_18x18.png" : "mobile_radio_off.png"));
+									horizontal ? "empty_18x18.png" : "mobile/radio_off.png"));
 								((JRadioButton)dataChoice.getRendererComponent()).setSelectedIcon(Activator.getDefault().loadImageIconFromBundle(
-									horizontal ? "empty_18x18.png" : "mobile_radio_on.png"));
+									horizontal ? "empty_18x18.png" : "mobile/radio_on.png"));
 							}
 							else
 							{
 								component.setBackground(CHECKS_BG);
-								((JCheckBox)dataChoice.getRendererComponent()).setIcon(Activator.getDefault().loadImageIconFromBundle("mobile_check_off.png"));
+								((JCheckBox)dataChoice.getRendererComponent()).setIcon(Activator.getDefault().loadImageIconFromBundle("mobile/check_off.png"));
 								((JCheckBox)dataChoice.getRendererComponent()).setSelectedIcon(Activator.getDefault().loadImageIconFromBundle(
-									"mobile_check_on.png"));
+									"mobile/check_on.png"));
 							}
 
 							IValueList valueList = dataChoice.getValueList();
@@ -223,7 +244,7 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 						else if (component instanceof DataCheckBox)
 						{
 							component.setBackground(CHECKS_BG);
-							((DataCheckBox)component).setIcon(Activator.getDefault().loadImageIconFromBundle("mobile_check_on.png"));
+							((DataCheckBox)component).setIcon(Activator.getDefault().loadImageIconFromBundle("mobile/check_on.png"));
 						}
 
 						return component;

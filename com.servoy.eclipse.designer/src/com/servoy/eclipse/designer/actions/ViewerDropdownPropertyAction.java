@@ -31,6 +31,8 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ToolItem;
 
+import com.servoy.eclipse.ui.resource.ImageResource;
+
 /** 
  * Base class for actions that show a dropdown menu in form designer toolbar.
  * 
@@ -96,7 +98,7 @@ public abstract class ViewerDropdownPropertyAction extends Action implements Dis
 		menuItem.setText(action.getText());
 		menuItem.setEnabled(action.isEnabled());
 		menuItem.setSelection(action.isChecked());
-		menuItem.setImage(com.servoy.eclipse.ui.Activator.getDefault().getImage(action.getImageDescriptor()));
+		menuItem.setImage(ImageResource.INSTANCE.getImage(action.getImageDescriptor()));
 		menuItem.addSelectionListener(new SelectionAdapter()
 		{
 			@Override

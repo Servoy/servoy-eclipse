@@ -35,9 +35,11 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.ComponentDeleteEditPolicy;
 import com.servoy.eclipse.designer.editor.SetBoundsToSupportBoundsFigureListener;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileListElementEditpart.MobileListElementType;
+import com.servoy.eclipse.designer.mobile.property.MobilePersistPropertySource;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.util.Pair;
 
 /**
  * Edit part for Lists in mobile form editor.
@@ -65,31 +67,36 @@ public class MobileListGraphicalEditPart extends AbstractGraphicalEditPart imple
 	}
 
 	@Override
-	protected List<BaseComponent> getModelChildren()
+	protected List<Pair<BaseComponent, MobileListElementType>> getModelChildren()
 	{
 		MobileListModel model = getModel();
-		List<BaseComponent> modelChildren = new ArrayList<BaseComponent>(4);
+		List<Pair<BaseComponent, MobileListElementType>> modelChildren = new ArrayList<Pair<BaseComponent, MobileListElementType>>(4);
 		if (model.header != null)
 		{
-			modelChildren.add(model.header);
+			modelChildren.add(new Pair<BaseComponent, MobileListElementType>(model.header, MobileListElementType.Header));
 		}
 		if (model.image != null && model.image.getDataProviderID() != null)
 		{
-			modelChildren.add(model.image);
+			modelChildren.add(new Pair<BaseComponent, MobileListElementType>(model.image, MobileListElementType.DynamicImage));
+		}
+		else if (model.button != null && model.button.getCustomMobileProperty(MobilePersistPropertySource.DATA_ICON_PROPERTY) != null)
+		{
+			modelChildren.add(new Pair<BaseComponent, MobileListElementType>(model.button, MobileListElementType.FixedImage));
 		}
 		if (model.button != null)
 		{
-			modelChildren.add(model.button);
+			modelChildren.add(new Pair<BaseComponent, MobileListElementType>(model.button, MobileListElementType.Button));
 		}
 		if (model.subtext != null)
 		{
-			modelChildren.add(model.subtext);
+			modelChildren.add(new Pair<BaseComponent, MobileListElementType>(model.subtext, MobileListElementType.Subtext));
 		}
 		if (model.countBubble != null && model.countBubble.getDataProviderID() != null)
 		{
-			modelChildren.add(model.countBubble);
+			modelChildren.add(new Pair<BaseComponent, MobileListElementType>(model.countBubble, MobileListElementType.CountBubble));
 		}
 		return modelChildren;
+
 	}
 
 	@Override
@@ -125,31 +132,7 @@ public class MobileListGraphicalEditPart extends AbstractGraphicalEditPart imple
 	@Override
 	protected EditPart createChild(Object child)
 	{
-		MobileListElementType type;
-		MobileListModel model = getModel();
-		if (child == model.header)
-		{
-			type = MobileListElementType.Header;
-		}
-		else if (child == model.button)
-		{
-			type = MobileListElementType.Button;
-		}
-		else if (child == model.subtext)
-		{
-			type = MobileListElementType.Subtext;
-		}
-		else if (child == model.countBubble)
-		{
-			type = MobileListElementType.CountBubble;
-		}
-		else if (child == model.image)
-		{
-			type = MobileListElementType.Image;
-		}
-		else return null;
-
-		return new MobileListElementEditpart(application, editorPart, child, type);
+		return new MobileListElementEditpart(application, editorPart, (Pair<BaseComponent, MobileListElementType>)child);
 	}
 
 	@Override

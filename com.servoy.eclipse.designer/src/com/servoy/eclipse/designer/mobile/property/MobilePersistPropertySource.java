@@ -88,6 +88,45 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		}
 	};
 
+	public static final String DATA_ICON_PROPERTY = "dataIcon"; //$NON-NLS-1$
+	public static String[] DATA_ICONS = new String[] { //
+	"alert", //$NON-NLS-1$
+	"arrow-d", //$NON-NLS-1$
+	"arrow-l", //$NON-NLS-1$
+	"arrow-r", //$NON-NLS-1$
+	"arrow-u", //$NON-NLS-1$
+	"back", //$NON-NLS-1$
+	"check", //$NON-NLS-1$
+//	"custom", //$NON-NLS-1$
+	"delete", //$NON-NLS-1$
+	"forward", //$NON-NLS-1$
+	"gear", //$NON-NLS-1$
+	"grid", //$NON-NLS-1$
+	"home", //$NON-NLS-1$
+	"info", //$NON-NLS-1$
+	"minus", //$NON-NLS-1$
+	"plus", //$NON-NLS-1$
+	"refresh", //$NON-NLS-1$
+	"search", //$NON-NLS-1$
+	"star" //$NON-NLS-1$
+	};
+
+	public static final PropertyController<String, String> MOBILE_ICONS_CONTROLLER = new DelegatePropertySetterController<String, MobilePersistPropertySource>(
+		new ComboboxPropertyController<String>(DATA_ICON_PROPERTY, DATA_ICON_PROPERTY, new ComboboxPropertyModel<String>(DATA_ICONS), Messages.LabelDefault),
+		DATA_ICON_PROPERTY)
+	{
+		public void setProperty(MobilePersistPropertySource propertySource, String value)
+		{
+			((AbstractBase)propertySource.getPersist()).putCustomMobileProperty(DATA_ICON_PROPERTY, value);
+			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, propertySource.getPersist(), false);
+		}
+
+		public String getProperty(MobilePersistPropertySource propertySource)
+		{
+			return (String)((AbstractBase)propertySource.getPersist()).getCustomMobileProperty(DATA_ICON_PROPERTY);
+		}
+	};
+
 	/**
 	 * @param persistContext
 	 * @param readonly
@@ -125,12 +164,17 @@ public class MobilePersistPropertySource extends PersistPropertySource
 	@Override
 	protected String[] getPseudoPropertyNames(Class< ? > clazz)
 	{
+		if (GraphicalComponent.class == clazz && isButton(getPersist()))
+		{
+			// button
+			return new String[] { DATA_ICON_PROPERTY };
+		}
 		if (GraphicalComponent.class == clazz && isLabel(getPersist()))
 		{
 			// script label
 			return new String[] { HEADER_SIZE_PROPERTY };
 		}
-		else if (Field.class == clazz)
+		if (Field.class == clazz)
 		{
 			Field field = (Field)getPersist();
 			if (field.getDisplayType() == Field.RADIOS)
@@ -148,9 +192,18 @@ public class MobilePersistPropertySource extends PersistPropertySource
 	 */
 	private static boolean isLabel(IPersist persist)
 	{
-		return persist instanceof GraphicalComponent &&
-			(((GraphicalComponent)persist).getOnActionMethodID() == 0 || !((GraphicalComponent)persist).getShowClick()) &&
-			((GraphicalComponent)persist).getDataProviderID() == null && !((GraphicalComponent)persist).getDisplaysTags();
+		return !isButton(persist) && persist instanceof GraphicalComponent && ((GraphicalComponent)persist).getDataProviderID() == null &&
+			!((GraphicalComponent)persist).getDisplaysTags();
+	}
+
+	/**
+	 * @param persist
+	 * @return
+	 */
+	private static boolean isButton(IPersist persist)
+	{
+		return persist instanceof GraphicalComponent && ((GraphicalComponent)persist).getOnActionMethodID() != 0 &&
+			((GraphicalComponent)persist).getShowClick();
 	}
 
 	@Override
@@ -167,6 +220,12 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			return MOBILE_RADIO_STYLE_CONTROLLER;
 		}
 
+		if (name.equals(DATA_ICON_PROPERTY))
+		{
+			return MOBILE_ICONS_CONTROLLER;
+		}
+
 		return super.getPropertiesPropertyDescriptor(propertySource, id, displayName, name, flattenedEditingSolution, form);
 	}
+
 }

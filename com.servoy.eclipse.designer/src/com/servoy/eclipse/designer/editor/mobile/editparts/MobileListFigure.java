@@ -39,7 +39,7 @@ import com.servoy.eclipse.ui.resource.ColorResource;
  */
 public class MobileListFigure extends ImageFigure implements HandleBounds
 {
-	public static final Image ARROW_IMAGE = Activator.loadImageDescriptorFromBundle("list_arrow.png").createImage();
+	public static final Image ARROW_IMAGE = Activator.loadImageDescriptorFromBundle("mobile/list_arrow.png").createImage();
 
 	public MobileListFigure(boolean isInset)
 	{
