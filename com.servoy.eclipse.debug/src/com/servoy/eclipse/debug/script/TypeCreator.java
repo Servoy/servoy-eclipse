@@ -637,7 +637,6 @@ public class TypeCreator extends TypeCache
 								{
 									long time = System.currentTimeMillis();
 									flushCache();
-									System.err.println("total time taken " + (System.currentTimeMillis() - time));
 									return Status.OK_STATUS;
 								}
 							};
