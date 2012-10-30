@@ -651,9 +651,7 @@ public class TypeCreator extends TypeCache
 								@Override
 								public IStatus run(IProgressMonitor monitor)
 								{
-									long time = System.currentTimeMillis();
 									flushCache();
-									System.err.println("total time taken " + (System.currentTimeMillis() - time));
 									return Status.OK_STATUS;
 								}
 							};
