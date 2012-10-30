@@ -578,7 +578,7 @@ public class DesignerPreferences
 
 	public int getEncapsulationType()
 	{
-		return getProperty(ENCAPSULATION_TYPE, ENCAPSULATION_PUBLIC_HIDE_ALL);
+		return getProperty(ENCAPSULATION_TYPE, ENCAPSULATION_PUBLIC);
 	}
 
 	public void setEncapsulationType(int encType)
