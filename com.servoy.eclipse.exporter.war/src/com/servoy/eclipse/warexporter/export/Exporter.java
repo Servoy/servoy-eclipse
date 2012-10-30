@@ -29,6 +29,8 @@ import java.io.StringReader;
 import java.io.Writer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -36,6 +38,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -377,8 +380,15 @@ public class Exporter
 
 		if (exportModel.getServoyPropertiesFileName() == null)
 		{
-			// create the properties file.
-			Properties properties = new Properties();
+			// create the (sorted) properties file.
+			Properties properties = new Properties()
+			{
+				@Override
+				public synchronized Enumeration<Object> keys()
+				{
+					return Collections.enumeration(new TreeSet<Object>(super.keySet()));
+				}
+			};
 			properties.setProperty("SocketFactory.rmiServerFactory", "com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory");
 			properties.setProperty("SocketFactory.tunnelConnectionMode", "http&socket");
 			properties.setProperty("SocketFactory.compress", "true");
