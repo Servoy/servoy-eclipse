@@ -628,24 +628,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	{
 		if (project.getSolutionMetaData() != null)
 		{
-			switch (project.getSolutionMetaData().getSolutionType())
+			for (int i = 0; i < SolutionMetaData.solutionTypes.length; i++)
 			{
-				case SolutionMetaData.SOLUTION :
-					return SolutionMetaData.solutionTypeNames[0];
-				case SolutionMetaData.MODULE :
-					return SolutionMetaData.solutionTypeNames[1];
-				case SolutionMetaData.WEB_CLIENT_ONLY :
-					return SolutionMetaData.solutionTypeNames[2];
-				case SolutionMetaData.SMART_CLIENT_ONLY :
-					return SolutionMetaData.solutionTypeNames[3];
-				case SolutionMetaData.LOGIN_SOLUTION :
-					return SolutionMetaData.solutionTypeNames[4];
-				case SolutionMetaData.AUTHENTICATOR :
-					return SolutionMetaData.solutionTypeNames[5];
-				case SolutionMetaData.PRE_IMPORT_HOOK :
-					return SolutionMetaData.solutionTypeNames[6];
-				case SolutionMetaData.POST_IMPORT_HOOK :
-					return SolutionMetaData.solutionTypeNames[7];
+				if (project.getSolutionMetaData().getSolutionType() == SolutionMetaData.solutionTypes[i]) return SolutionMetaData.solutionTypeNames[i];
 			}
 		}
 

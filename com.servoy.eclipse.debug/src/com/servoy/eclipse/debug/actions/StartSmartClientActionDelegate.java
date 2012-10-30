@@ -204,7 +204,7 @@ public class StartSmartClientActionDelegate extends StartDebugAction implements 
 		if (activeProject != null && activeProject.getSolution() != null)
 		{
 			final Solution solution = activeProject.getSolution();
-			if (solution.getSolutionType() == SolutionMetaData.WEB_CLIENT_ONLY) enabled = false;
+			if (solution.getSolutionType() == SolutionMetaData.WEB_CLIENT_ONLY || solution.getSolutionType() == SolutionMetaData.MOBILE) enabled = false;
 		}
 		else
 		{
