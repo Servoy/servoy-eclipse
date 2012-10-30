@@ -47,6 +47,7 @@ import com.servoy.eclipse.designer.internal.core.IImageNotifier;
 import com.servoy.eclipse.designer.internal.core.ImageDataCollector;
 import com.servoy.eclipse.designer.internal.core.ImageNotifierSupport;
 import com.servoy.eclipse.designer.internal.core.PersistImageNotifier;
+import com.servoy.eclipse.designer.mobile.property.MobilePersistPropertySource;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.CustomValueList;
@@ -183,14 +184,16 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 							(((DataChoice)component).getChoiceType() == Field.RADIOS || ((DataChoice)component).getChoiceType() == Field.CHECKS))
 						{
 							DataChoice dataChoice = (DataChoice)component;
+							boolean horizontal = MobilePersistPropertySource.RADIO_STYLE_HORIZONTAL.equals(((AbstractBase)persist).getCustomMobileProperty(MobilePersistPropertySource.RADIO_STYLE_PROPERTY));
 
 							component.setFont(component.getFont().deriveFont(Font.BOLD));
 							if (dataChoice.getChoiceType() == Field.RADIOS)
 							{
 								component.setBackground(RADIOS_BG);
-								((JRadioButton)dataChoice.getRendererComponent()).setIcon(Activator.getDefault().loadImageIconFromBundle("mobile_radio_off.png"));
+								((JRadioButton)dataChoice.getRendererComponent()).setIcon(Activator.getDefault().loadImageIconFromBundle(
+									horizontal ? "empty_18x18.png" : "mobile_radio_off.png"));
 								((JRadioButton)dataChoice.getRendererComponent()).setSelectedIcon(Activator.getDefault().loadImageIconFromBundle(
-									"mobile_radio_on.png"));
+									horizontal ? "empty_18x18.png" : "mobile_radio_on.png"));
 							}
 							else
 							{
@@ -209,8 +212,11 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 							// select first item
 							dataChoice.setValueObject(valueList.getRealElementAt(0));
 							dataChoice.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-							dataChoice.getEnclosedComponent().setVisibleRowCount(valueList.getSize());
-							dataChoice.getEnclosedComponent().setLayoutOrientation(JList.VERTICAL);
+							if (!horizontal)
+							{
+								dataChoice.getEnclosedComponent().setVisibleRowCount(valueList.getSize());
+								dataChoice.getEnclosedComponent().setLayoutOrientation(JList.VERTICAL);
+							}
 							Dimension compPrefsize = component.getPreferredSize();
 							setPreferredSize(compPrefsize.width, compPrefsize.height);
 						}

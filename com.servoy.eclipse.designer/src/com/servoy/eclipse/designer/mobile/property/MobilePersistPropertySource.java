@@ -67,6 +67,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 	};
 
 	public static final String RADIO_STYLE_NAME = "horizontal"; //$NON-NLS-1$
+	public static final String RADIO_STYLE_PROPERTY = "radioStyle"; //$NON-NLS-1$
 	public static final Integer RADIO_STYLE_HORIZONTAL = Integer.valueOf(1);
 	public static final PropertyController<Boolean, Boolean> MOBILE_RADIO_STYLE_CONTROLLER = new DelegatePropertySetterController<Boolean, MobilePersistPropertySource>(
 		new CheckboxPropertyDescriptor(RADIO_STYLE_NAME, RADIO_STYLE_NAME), RADIO_STYLE_NAME)
@@ -76,13 +77,14 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		// ... future
 		public void setProperty(MobilePersistPropertySource propertySource, Boolean value)
 		{
-			((AbstractBase)propertySource.getPersist()).putCustomMobileProperty("radioStyle", Boolean.TRUE.equals(value) ? RADIO_STYLE_HORIZONTAL : null);
+			((AbstractBase)propertySource.getPersist()).putCustomMobileProperty(RADIO_STYLE_PROPERTY, Boolean.TRUE.equals(value) ? RADIO_STYLE_HORIZONTAL
+				: null);
 			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, propertySource.getPersist(), false);
 		}
 
 		public Boolean getProperty(MobilePersistPropertySource propertySource)
 		{
-			return Boolean.valueOf(RADIO_STYLE_HORIZONTAL.equals(((AbstractBase)propertySource.getPersist()).getCustomMobileProperty("radioStyle")));
+			return Boolean.valueOf(RADIO_STYLE_HORIZONTAL.equals(((AbstractBase)propertySource.getPersist()).getCustomMobileProperty(RADIO_STYLE_PROPERTY)));
 		}
 	};
 
