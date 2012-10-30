@@ -47,6 +47,7 @@ import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
@@ -89,7 +90,7 @@ public class MobileExporter
 	private static final String PROPERTY_VARIABLE_TYPE = "${variableType}";
 
 	@SuppressWarnings("restriction")
-	private String doFormsExport()
+	private String doPersistExport()
 	{
 		ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(solutionName);
 		if (project != null)
@@ -186,9 +187,27 @@ public class MobileExporter
 					ServoyLog.logError(e);
 				}
 			}
+			Iterator<Relation> relationIterator = project.getSolution().getRelations(true);
+			List<ServoyJSONObject> relationJSons = new ArrayList<ServoyJSONObject>();
+			while (relationIterator.hasNext())
+			{
+				final Relation relation = relationIterator.next();
+				try
+				{
+					ServoyJSONObject relationJSON = SolutionSerializer.generateJSONObject(relation, true, true,
+						ApplicationServerSingleton.get().getDeveloperRepository(), true, null);
+					relationJSons.add(relationJSON);
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
 			ServoyJSONArray flattenedJSon = new ServoyJSONArray(formJSons);
 			Map<String, Object> solutionModel = new HashMap<String, Object>();
 			solutionModel.put("forms", flattenedJSon);
+			flattenedJSon = new ServoyJSONArray(relationJSons);
+			solutionModel.put("relations", flattenedJSon);
 			solutionModel.put("solutionName", project.getSolution().getName());
 			solutionModel.put("serverURL", serverURL);
 			solutionModel.put("skipConnect", skipConnect);
@@ -245,7 +264,7 @@ public class MobileExporter
 
 	public File doExport(boolean exportAsZip)
 	{
-		String formJson = doFormsExport();
+		String formJson = doPersistExport();
 		String solutionJavascript = doScriptingExport(solutionName);
 
 		//TODO remove these lines
