@@ -886,7 +886,7 @@ public class SolutionSerializer
 
 			if (valueFilter != null)
 			{
-				String filteredValue = valueFilter.getFilteredValue(persist, propertyName, propertyValue);
+				String filteredValue = valueFilter.getFilteredValue(persist, property_values, propertyName, propertyValue);
 				if (filteredValue != null)
 				{
 					if (!(filteredValue.equals(propertyValue) && (isBoolean || isNumber)))

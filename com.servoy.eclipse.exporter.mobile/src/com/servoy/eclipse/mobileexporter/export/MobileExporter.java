@@ -43,6 +43,7 @@ import com.servoy.j2db.persistence.AbstractScriptProvider;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
@@ -88,7 +89,7 @@ public class MobileExporter
 	private static final String PROPERTY_VARIABLE_TYPE = "${variableType}";
 
 	@SuppressWarnings("restriction")
-	private String doFormsExport(String serverURL, String solutionName)
+	private String doFormsExport()
 	{
 		ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(solutionName);
 		if (project != null)
@@ -104,7 +105,7 @@ public class MobileExporter
 						ApplicationServerSingleton.get().getDeveloperRepository(), true, new IValueFilter()
 						{
 
-							public String getFilteredValue(IPersist persist, String key, String value)
+							public String getFilteredValue(IPersist persist, Map<String, Object> property_values, String key, String value)
 							{
 								Element contentSpec = StaticContentSpecLoader.getContentSpec().getPropertyForObjectTypeByName(persist.getTypeID(), key);
 								if (contentSpec != null && contentSpec.getTypeID() == IRepository.ELEMENTS &&
@@ -145,6 +146,15 @@ public class MobileExporter
 									{
 										ServoyLog.logError(e);
 									}
+								}
+								if (persist instanceof GraphicalComponent && !property_values.containsKey("viewType"))
+								{
+									String labelViewType = "label";
+									if (((GraphicalComponent)persist).getOnActionMethodID() != 0 && ((GraphicalComponent)persist).getShowClick())
+									{
+										labelViewType = "button";
+									}
+									property_values.put("viewType", labelViewType);
 								}
 								if (value != null && contentSpec != null &&
 									contentSpec.getName().equals(StaticContentSpecLoader.PROPERTY_CUSTOMPROPERTIES.getPropertyName()))
@@ -235,7 +245,7 @@ public class MobileExporter
 
 	public File doExport(boolean exportAsZip)
 	{
-		String formJson = doFormsExport(serverURL, solutionName);
+		String formJson = doFormsExport();
 		String solutionJavascript = doScriptingExport(solutionName);
 
 		//TODO remove these lines
