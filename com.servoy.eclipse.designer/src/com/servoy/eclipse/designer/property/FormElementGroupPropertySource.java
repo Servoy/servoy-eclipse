@@ -47,6 +47,8 @@ import com.servoy.eclipse.ui.property.PropertyCategory;
 import com.servoy.eclipse.ui.property.PropertyController;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.VerifyingTextCellEditor;
+import com.servoy.j2db.component.ComponentFactory;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
@@ -99,7 +101,14 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 			Object name = element.getName();
 			if (name == null)
 			{
-				name = Messages.LabelAnonymous;
+				if (element instanceof AbstractBase)
+				{
+					name = ComponentFactory.getLookupName((AbstractBase)element);
+				}
+				else
+				{
+					name = Messages.LabelAnonymous;
+				}
 			}
 
 			PropertyDescriptor desc = new PropertyDescriptor(Integer.valueOf(i), name.toString());
