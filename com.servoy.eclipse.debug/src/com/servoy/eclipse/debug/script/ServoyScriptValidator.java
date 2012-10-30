@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.debug.script;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.dltk.compiler.problem.IValidationStatus;
 import org.eclipse.dltk.compiler.problem.ValidationStatus;
 import org.eclipse.dltk.internal.javascript.ti.IReferenceAttributes;
@@ -26,8 +27,7 @@ import org.eclipse.dltk.javascript.typeinference.IValueReference;
 import org.eclipse.dltk.javascript.typeinfo.IRMember;
 import org.eclipse.dltk.javascript.typeinfo.IRMethod;
 import org.eclipse.dltk.javascript.typeinfo.IRVariable;
-import org.eclipse.dltk.javascript.typeinfo.ITypeInferencerVisitor;
-import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
+import org.eclipse.dltk.javascript.typeinfo.ReferenceSource;
 import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
 import org.eclipse.dltk.javascript.typeinfo.model.Method;
@@ -36,7 +36,9 @@ import org.eclipse.dltk.javascript.typeinfo.model.Visibility;
 import org.eclipse.dltk.javascript.validation.IMemberValidationEvent;
 import org.eclipse.dltk.javascript.validation.IValidatorExtension2;
 
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.ui.search.ScriptVariableSearch;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.ScriptVariable;
 
@@ -46,18 +48,15 @@ import com.servoy.j2db.persistence.ScriptVariable;
  */
 public class ServoyScriptValidator implements IValidatorExtension2
 {
-
-	private final ITypeInfoContext context;
-	private final ITypeInferencerVisitor visitor;
+	private final ReferenceSource context;
 
 	/**
-	 * @param context
-	 * @param visitor
+	 * @param rs
+	 * @param visitor2
 	 */
-	public ServoyScriptValidator(ITypeInfoContext context, ITypeInferencerVisitor visitor)
+	public ServoyScriptValidator(ReferenceSource rs)
 	{
-		this.context = context;
-		this.visitor = visitor;
+		this.context = rs;
 	}
 
 	/*
@@ -96,7 +95,7 @@ public class ServoyScriptValidator implements IValidatorExtension2
 	 */
 	public UnusedVariableValidation canValidateUnusedVariable(IValueCollection collection, IValueReference reference)
 	{
-		Form form = ElementResolver.getForm(context);
+		Form form = getForm();
 		if (form != null)
 		{
 			IRVariable variable = (IRVariable)reference.getAttribute(IReferenceAttributes.R_VARIABLE);
@@ -193,4 +192,31 @@ public class ServoyScriptValidator implements IValidatorExtension2
 		}
 	}
 
+	private Form getForm()
+	{
+		String formName = SolutionSerializer.getFormNameForJSFile((IResource)context.getAdapter(IResource.class));
+		if (formName != null)
+		{
+			FlattenedSolution fs = getFlattenedSolution(context);
+			if (fs != null)
+			{
+				return fs.getForm(formName);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * @param context2
+	 * @return
+	 */
+	private FlattenedSolution getFlattenedSolution(ReferenceSource rs)
+	{
+		IResource resource = rs.getSourceModule().getResource();
+		if (resource != null)
+		{
+			ElementResolver.getFlattenedSolution(resource.getProject().getName());
+		}
+		return null;
+	}
 }

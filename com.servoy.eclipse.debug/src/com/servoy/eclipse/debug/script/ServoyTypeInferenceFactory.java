@@ -57,7 +57,7 @@ public class ServoyTypeInferenceFactory implements ITypeInferenceHandlerFactory,
 	{
 		if (extensionClass == IValidatorExtension.class)
 		{
-			return new ServoyScriptValidator(context, visitor);
+			return new ServoyScriptValidator(context.getSource());
 		}
 		return null;
 	}
@@ -71,11 +71,18 @@ public class ServoyTypeInferenceFactory implements ITypeInferenceHandlerFactory,
 	public Object createExtension(IAdaptable context, Class< ? > extensionClass, Object visitor)
 	{
 		ReferenceSource rs = (ReferenceSource)context.getAdapter(ReferenceSource.class);
-		if (rs != null && extensionClass == IStructureHandler.class)
+		if (rs != null)
 		{
-			if (SolutionSerializer.getDataSourceForCalculationJSFile(rs.getModelElement().getResource()) != null)
+			if (extensionClass == IStructureHandler.class)
 			{
-				return new CalculationsTypeStructureHandler(rs, (IStructureVisitor)visitor);
+				if (SolutionSerializer.getDataSourceForCalculationJSFile(rs.getModelElement().getResource()) != null)
+				{
+					return new CalculationsTypeStructureHandler(rs, (IStructureVisitor)visitor);
+				}
+			}
+			else if (extensionClass == IValidatorExtension.class)
+			{
+				return new ServoyScriptValidator(rs);
 			}
 		}
 		return null;
