@@ -447,6 +447,12 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						break;
 					case SolutionMetaData.WEB_CLIENT_ONLY :
 						imgName = isModule ? IMG_SOLUTION_WEB_ONLY_M : IMG_SOLUTION_WEB_ONLY;
+						break;
+					case SolutionMetaData.PRE_IMPORT_HOOK :
+						imgName = isModule ? IMG_SOLUTION_MODULE_M : IMG_SOLUTION_MODULE;
+						break;
+					case SolutionMetaData.POST_IMPORT_HOOK :
+						imgName = isModule ? IMG_SOLUTION_MODULE_M : IMG_SOLUTION_MODULE;
 				}
 			}
 		}
