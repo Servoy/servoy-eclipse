@@ -44,8 +44,10 @@ import org.eclipse.search.ui.text.FileTextSearchScope;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumn;
+import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValueList;
@@ -122,7 +124,8 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 		private ISelectionEngine engine;
 		private final IColumn dataprovider;
 		private boolean found;
-		Pattern relatedDataproviderPattern; // matches related pattern 
+		Pattern dataproviderIDPattern = null;
+		Pattern relatedDataproviderIDPattern; // matches related pattern 
 		private ISourceModule cachedJSModule = null;
 		private String currentJSFile = "";
 
@@ -130,7 +133,23 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 		{
 			super(result);
 			this.dataprovider = dataprovider;
-			relatedDataproviderPattern = Pattern.compile(".*dataProviderID\\s*\\:\\s*" + "[\"']" + "(\\w*)\\." + dataprovider.getDataProviderID());
+			/*
+			 * an explenation of this regex can be fond here:
+			 * http://rick.measham.id.au/paste/explain.pl?regex=.*dataProviderID%5Cs*%5C%3A%5Cs*%5B%22%27%5DmyDataprovider
+			 * 
+			 * Matches the last occurrence of dataProviderID:"my_dataprovider in a multiline string. !Importat!: at the begining of the regex there is this
+			 * pattern [.\\s]* , we cannot use only dot "." because it matches everything except new lines . We needed to add \s because \s matches also
+			 * newlines
+			 */
+			dataproviderIDPattern = Pattern.compile("[.\\s]*dataProviderID\\s*\\:\\s*[\"']" + dataprovider.getDataProviderID(), Pattern.MULTILINE);
+
+			/*
+			 * This regex is mostly the same as the previews one except in with the relation name, capturing the relation name in a group . Ex
+			 * dataProviderID:"my_relation.my_dataprovider
+			 */
+			relatedDataproviderIDPattern = Pattern.compile("[.\\s]*dataProviderID\\s*\\:\\s*[\"']" + "(\\w*)\\." + dataprovider.getDataProviderID(),
+				Pattern.MULTILINE);
+
 		}
 
 		/**
@@ -186,7 +205,7 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 				{
 					if (tokens[1].equals("rel"))
 					{
-						if (isDataSourceReferencedInRelation(tokens[0], false))
+						if (isMatchRefferencedInRelation(tokens[0], false))
 						{
 							return match;
 						}
@@ -206,7 +225,7 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 							}
 							else
 							{ //test if it is a related value list
-								if (isDataSourceReferencedInRelation(vl.getRelationName(), true))
+								if (isMatchRefferencedInRelation(vl.getRelationName(), true))
 								{
 									return match;
 								}
@@ -222,19 +241,21 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 						Form form = flattenedSolution.getForm(tokens[0]);
 						if (form != null)
 						{
-							String previewsMatchContent = matchRequestor.getFileContent(matchOffset - 40, 40 + matchRequestor.getMatchLength());
+							String previewsMatchContent = matchRequestor.getFileContent(matchOffset - 50, 50 + matchRequestor.getMatchLength());
 							if (datasource.equals(form.getDataSource()))
 							{ // form has the datasource
-								if (previewsMatchContent.matches(".*dataProviderID\\s*\\:\\s*" + "[\"']" + dataprovider.getDataProviderID()))
+								{
+								}
+								if (dataproviderIDPattern.matcher(previewsMatchContent).find())
 								{
 									return match;
 								}
 								else
 								{ // form may reference the dataprovider via self relation
-									Matcher matcher = relatedDataproviderPattern.matcher(previewsMatchContent);
+									Matcher matcher = relatedDataproviderIDPattern.matcher(previewsMatchContent);
 									if (matcher.find())
 									{
-										if (isDataSourceReferencedInRelation(matcher.group(1), true))
+										if (isMatchRefferencedInRelation(matcher.group(1), true))
 										{
 											return match;
 										}
@@ -247,10 +268,10 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 							}
 							else
 							{ // may reference dataproviderid via relation
-								Matcher matcher = relatedDataproviderPattern.matcher(previewsMatchContent);
+								Matcher matcher = relatedDataproviderIDPattern.matcher(previewsMatchContent);
 								if (matcher.find())
 								{
-									if (isDataSourceReferencedInRelation(matcher.group(1), true))
+									if (isMatchRefferencedInRelation(matcher.group(1), true))
 									{
 										return match;
 									}
@@ -271,7 +292,7 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 			return match;
 		}
 
-		private boolean isDataSourceReferencedInRelation(String relName, boolean onlyInForeignDatasource)
+		private boolean isMatchRefferencedInRelation(String relName, boolean onlyInForeignDatasource)
 		{
 			if (relName != null)
 			{
@@ -282,12 +303,36 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 					{
 						if (datasource.equals(rel.getForeignDataSource()))
 						{
-							return true;
+							try
+							{
+								for (Column col : rel.getForeignColumns())
+								{
+									if (dataprovider.getDataProviderID().equals(col.getDataProviderID())) return true;
+								}
+							}
+							catch (RepositoryException e)
+							{
+								Debug.log("Exception while getting foreign columns for relation: " + relName, e);
+							}
 						}
 					}
 					else if (datasource.equals(rel.getPrimaryDataSource()) || datasource.equals(rel.getForeignDataSource()))
 					{
-						return true;
+						try
+						{
+							for (Column col : rel.getForeignColumns())
+							{
+								if (dataprovider.getDataProviderID().equals(col.getDataProviderID())) return true;
+							}
+							for (IDataProvider col : rel.getPrimaryDataProviders(flattenedSolution))
+							{
+								if (dataprovider.getDataProviderID().equals(col.getDataProviderID())) return true;
+							}
+						}
+						catch (RepositoryException e)
+						{
+							Debug.log("Exception while getting foreign columns for relation: " + relName, e);
+						}
 					}
 				}
 			}
