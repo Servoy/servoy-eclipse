@@ -242,7 +242,7 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 					fixes = new IMarkerResolution[] { new RenamePersistQuickFix(uuid, solName) };
 				}
 			}
-			else if (type.equals(ServoyBuilder.PROJECT_FORM_MARKER_TYPE))
+			else if (type.equals(ServoyBuilder.LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE))
 			{
 				String uuid = (String)marker.getAttribute("elementUuid"); //$NON-NLS-1$
 				String solName = (String)marker.getAttribute("SolutionName"); //$NON-NLS-1$
