@@ -474,8 +474,17 @@ public class DataModelManager implements IColumnInfoManager
 
 		try
 		{
-			// create file contents as string
-			String out = serializeTable(t);
+			String out = null;
+			try
+			{
+				// create file contents as string
+				t.acquireReadLock();
+				out = serializeTable(t);
+			}
+			finally
+			{
+				t.releaseReadLock();
+			}
 			try
 			{
 				InputStream source = new ByteArrayInputStream(out.getBytes("UTF8"));
@@ -514,18 +523,18 @@ public class DataModelManager implements IColumnInfoManager
 					ResourcesUtils.createFileAndParentContainers(file, source, true);
 				}
 			}
+			catch (UnsupportedEncodingException e)
+			{
+				throw new RepositoryException(e);
+			}
+			catch (CoreException e)
+			{
+				throw new RepositoryException(e);
+			}
 			finally
 			{
 				writingMarkerFreeDBIFile = null;
 			}
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			throw new RepositoryException(e);
-		}
-		catch (CoreException e)
-		{
-			throw new RepositoryException(e);
 		}
 		catch (JSONException e)
 		{
