@@ -227,8 +227,9 @@
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.wst.common.emfworkbench.integration_1.2.2.v201008242000.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.emf.edit_2.8.0.v20120917-0436.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.emf.ecore.change_2.8.0.v20120911-0500.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.parser_4.0.0.201210221357.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.core_4.0.0.201210221357.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.parser_4.0.0.201211011536.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.core_4.0.0.201211011536.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.annotations_4.0.0.201211011536.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.antlr.runtime_3.0.0.v200803061811.jar"/>
 		</path>
 		<!-- compile the source code -->
@@ -277,9 +278,9 @@
 	<target name="checkCompilationResults" if="compilation.error.occured">
 		<echo file="${compilation.problem.marker}" message="com.servoy.eclipse.model_6.1.2.1422${line.separator}compilation.error.occured=${compilation.error.occured}"/>
 		<eclipse.logCompileError bundle="com.servoy.eclipse.model_6.1.2.1422" log="${compilation.prereq.log}">
-			<include name="S:/Dev/dev_v61x/org.eclipse.dltk.javascript.rhino/compilation.problem"/>
+			<include name="C:/Users/Administrator/dev_v61x_branch/org.eclipse.dltk.javascript.rhino/compilation.problem"/>
 			<include name="${pluginTemp}/org.eclipse.dltk.javascript.rhino_6.1.2.1422/compilation.problem"/>
-			<include name="S:/Dev/dev_v61x/servoy_shared/compilation.problem"/>
+			<include name="C:/Users/Administrator/dev_v61x_branch/servoy_shared/compilation.problem"/>
 			<include name="${pluginTemp}/servoy_shared_6.1.2.1422/compilation.problem"/>
 		</eclipse.logCompileError>
 	</target>
@@ -376,7 +377,7 @@
 	</target>
 
 	<target name="refresh" depends="init" if="eclipse.running" description="Refresh this folder.">
-		<eclipse.convertPath fileSystemPath="S:/Dev/dev_v61x/com.servoy.eclipse.model" property="resourcePath"/>
+		<eclipse.convertPath fileSystemPath="C:/Users/Administrator/dev_v61x_branch/com.servoy.eclipse.model" property="resourcePath"/>
 		<eclipse.refreshLocal resource="${resourcePath}" depth="infinite"/>
 	</target>
 
