@@ -211,6 +211,7 @@ public class MobileExporter
 			solutionModel.put("solutionName", project.getSolution().getName());
 			solutionModel.put("serverURL", serverURL);
 			solutionModel.put("skipConnect", skipConnect);
+			solutionModel.put("mustAuthenticate", project.getSolution().getMustAuthenticate());
 			ServoyJSONObject jsonObject = new ServoyJSONObject(solutionModel);
 			jsonObject.setNoQuotes(false);
 			return ("var _solutiondata_ = " + jsonObject.toString());
