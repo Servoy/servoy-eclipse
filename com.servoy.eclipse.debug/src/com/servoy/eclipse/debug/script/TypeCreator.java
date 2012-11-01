@@ -997,7 +997,7 @@ public class TypeCreator extends TypeCache
 							if (isServoyMobileSolutionType())
 							{
 								method.setVisible(mobileAllowedTypes.get(typeName) != null ? AnnotationManager.getInstance().isAnnotationPresent(
-									memberbox[i].method(), ServoyMobile.class) : false);
+									memberbox[i].method(), ServoyMobile.class, true) : false);
 							}
 
 							method.setDescription(getDoc(name, scriptObjectClass, parameterTypes)); // TODO name should be of parent.
@@ -1232,7 +1232,7 @@ public class TypeCreator extends TypeCache
 	public final void addScopeType(String name, IScopeTypeCreator creator)
 	{
 		scopeTypes.put(name, creator);
-		mobileAllowedTypes.put(name, Boolean.TRUE);
+		mobileAllowedTypes.put(name, Boolean.valueOf(creator.isTypeAllowedForMobile()));
 	}
 
 	/**
@@ -2261,6 +2261,8 @@ public class TypeCreator extends TypeCache
 				}
 				if (scriptObject != null)
 				{
+					if (isServoyMobileSolutionType() && !AnnotationManager.getInstance().isAnnotationPresent(scriptObject.getClass(), ServoyMobile.class)) continue;
+
 					ScriptObjectRegistry.registerScriptObjectForClass(scriptObject.getClass(), scriptObject);
 					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 					property.setName(clientPlugin.getName());
@@ -2326,7 +2328,7 @@ public class TypeCreator extends TypeCache
 
 		public boolean isTypeAllowedForMobile()
 		{
-			return false;
+			return true;
 		}
 	}
 
