@@ -196,6 +196,7 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 				{
 					match.setPossibleMatch(true);
 				}
+				return match;
 			}
 			else
 			{// search in servoy resources
@@ -209,87 +210,88 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 						{
 							return match;
 						}
-						else
-						{
-							return null;
-						}
 					}
 					else if (tokens[1].equals("val"))
 					{
-						ValueList vl = flattenedSolution.getValueList(tokens[0]);
-						if (vl != null)
+						if (isValueListMatch(tokens[0]))
 						{
-							if (datasource.equals(vl.getDataSource()))
-							{ // table value list
-								return match;
-							}
-							else
-							{ //test if it is a related value list
-								if (isMatchRefferencedInRelation(vl.getRelationName(), true))
-								{
-									return match;
-								}
-								else
-								{
-									return null;
-								}
-							}
+							return match;
 						}
 					}
 					else if (tokens[1].equals("frm"))
 					{
-						Form form = flattenedSolution.getForm(tokens[0]);
-						if (form != null)
+						if (isFormMatch(tokens[0], matchRequestor, matchOffset))
 						{
-							String previewsMatchContent = matchRequestor.getFileContent(matchOffset - 50, 50 + matchRequestor.getMatchLength());
-							if (datasource.equals(form.getDataSource()))
-							{ // form has the datasource
-								{
-								}
-								if (dataproviderIDPattern.matcher(previewsMatchContent).find())
-								{
-									return match;
-								}
-								else
-								{ // form may reference the dataprovider via self relation
-									Matcher matcher = relatedDataproviderIDPattern.matcher(previewsMatchContent);
-									if (matcher.find())
-									{
-										if (isMatchRefferencedInRelation(matcher.group(1), true))
-										{
-											return match;
-										}
-									}
-									else
-									{
-										return null;
-									}
-								}
-							}
-							else
-							{ // may reference dataproviderid via relation
-								Matcher matcher = relatedDataproviderIDPattern.matcher(previewsMatchContent);
-								if (matcher.find())
-								{
-									if (isMatchRefferencedInRelation(matcher.group(1), true))
-									{
-										return match;
-									}
-								}
-								else
-								{
-									return null;
-								}
+							return match;
+						}
+					}
+				}
+				//no valid match found in servoy resources
+				return null;
+			}
+		}
+
+		private boolean isValueListMatch(String valueListName)
+		{
+			ValueList vl = flattenedSolution.getValueList(valueListName);
+			if (vl != null)
+			{
+				if (datasource.equals(vl.getDataSource()))
+				{ // table value list
+					return true;
+				}
+				else
+				{ //test if it is a related value list
+					if (isMatchRefferencedInRelation(vl.getRelationName(), true))
+					{
+						return true;
+					}
+
+				}
+			}
+			return false;
+		}
+
+		private boolean isFormMatch(String formName, TextSearchMatchAccess matchRequestor, int matchOffset)
+		{
+			Form form = flattenedSolution.getForm(formName);
+			if (form != null)
+			{
+				// get the whole string before the match , that is matchOffset - delta
+				//needed because ex: dataProviderID:"my_relation.my_dataprovider ,  to get the relation name and verify if it is in that relation
+				int delta = (matchOffset - 100) < 0 ? matchOffset : 100;
+				String previewsMatchContent = matchRequestor.getFileContent(matchOffset - delta, delta + matchRequestor.getMatchLength());
+				if (datasource.equals(form.getDataSource()))
+				{ // form has the datasource
+					if (dataproviderIDPattern.matcher(previewsMatchContent).find())
+					{
+						return true;
+					}
+					else
+					{ // form may reference the dataprovider via self relation
+						Matcher matcher = relatedDataproviderIDPattern.matcher(previewsMatchContent);
+						if (matcher.find())
+						{
+							if (isMatchRefferencedInRelation(matcher.group(1), true))
+							{
+								return true;
 							}
 						}
-						else
+					}
+				}
+				else
+				{ //form doesn't have the datasource but may reference dataproviderid via relation
+					Matcher matcher = relatedDataproviderIDPattern.matcher(previewsMatchContent);
+					if (matcher.find())
+					{
+						if (isMatchRefferencedInRelation(matcher.group(1), true))
 						{
-							return null;
+							return true;
 						}
 					}
 				}
 			}
-			return match;
+			return false;
 		}
 
 		private boolean isMatchRefferencedInRelation(String relName, boolean onlyInForeignDatasource)
