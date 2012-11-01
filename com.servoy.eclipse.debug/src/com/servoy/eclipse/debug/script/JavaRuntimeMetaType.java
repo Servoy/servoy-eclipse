@@ -19,6 +19,8 @@ package com.servoy.eclipse.debug.script;
 
 import org.eclipse.dltk.internal.javascript.ti.TypeSystemImpl;
 import org.eclipse.dltk.javascript.typeinfo.DefaultMetaType;
+import org.eclipse.dltk.javascript.typeinfo.IRType;
+import org.eclipse.dltk.javascript.typeinfo.IRTypeDeclaration;
 import org.eclipse.dltk.javascript.typeinfo.ITypeSystem;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 
@@ -26,18 +28,25 @@ import org.eclipse.dltk.javascript.typeinfo.model.Type;
  * @author jcompagner
  *
  */
-public class ServoyStaticMetaType extends DefaultMetaType
+final class JavaRuntimeMetaType extends DefaultMetaType
 {
 	static TypeSystemImpl SHARED_TYPE_SYSTEM = new TypeSystemImpl();
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.dltk.javascript.typeinfo.MetaType#getId()
-	 */
+	@Override
+	public IRType toRType(ITypeSystem typeSystem, Type type)
+	{
+		return new JavaRuntimeType(typeSystem, type);
+	}
+
 	public String getId()
 	{
-		return "ServoyStaticType";
+		return "JavaType";
+	}
+
+	@Override
+	public IRType toRType(ITypeSystem typeSystem, IRTypeDeclaration declaration)
+	{
+		return new JavaRuntimeType(typeSystem, declaration);
 	}
 
 	/*

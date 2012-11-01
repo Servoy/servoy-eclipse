@@ -34,6 +34,7 @@ import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
 import org.eclipse.dltk.javascript.typeinfo.model.Method;
 import org.eclipse.dltk.javascript.typeinfo.model.Property;
+import org.eclipse.dltk.javascript.typeinfo.model.SimpleType;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -363,10 +364,21 @@ public class ElementResolver implements IElementResolver
 					Member m = TypeCreator.getMember(name, type);
 					if (m != null)
 					{
-						if (!m.isVisible())
+						boolean memberTypeVisible = true;
+						JSType memberType = m.getType();
+						if (memberType instanceof SimpleType)
+						{
+							memberTypeVisible = ((SimpleType)memberType).getTarget().isVisible();
+						}
+						if (!m.isVisible() && memberTypeVisible)
 						{
 							m = TypeCreator.clone(m, null);
 							m.setVisible(true);
+						}
+						else if (!memberTypeVisible && m.isVisible())
+						{
+							m = TypeCreator.clone(m, null);
+							m.setVisible(false);
 						}
 						return m;
 					}

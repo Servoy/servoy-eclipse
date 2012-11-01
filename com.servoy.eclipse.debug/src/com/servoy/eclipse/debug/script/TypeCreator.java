@@ -64,6 +64,7 @@ import org.eclipse.dltk.javascript.typeinfo.model.SimpleType;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeKind;
+import org.eclipse.dltk.javascript.typeinfo.model.Visibility;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.EMap;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -76,6 +77,7 @@ import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.Scriptable;
 
 import com.servoy.eclipse.core.DesignApplication;
+import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.JSDeveloperSolutionModel;
 import com.servoy.eclipse.core.ServoyModel;
@@ -659,6 +661,37 @@ public class TypeCreator extends TypeCache
 							job.schedule();
 						}
 					});
+					((ServoyModel)servoyModel).addActiveProjectListener(new IActiveProjectListener()
+					{
+						public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
+						{
+							return true;
+						}
+
+						public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
+						{
+							// todo maybe fush on certain things?
+						}
+
+						public void activeProjectChanged(ServoyProject activeProject)
+						{
+							Job job = new Job("clearing cache")
+							{
+								@Override
+								public IStatus run(IProgressMonitor monitor)
+								{
+
+									ServoyStaticMetaType.SHARED_TYPE_SYSTEM.reset();
+									JavaRuntimeMetaType.SHARED_TYPE_SYSTEM.reset();
+									clear(null);
+									flushCache();
+									return Status.OK_STATUS;
+								}
+							};
+							job.setRule(ResourcesPlugin.getWorkspace().getRoot());
+							job.schedule();
+						}
+					});
 				}
 			}
 		}
@@ -996,8 +1029,12 @@ public class TypeCreator extends TypeCache
 
 							if (isServoyMobileSolutionType())
 							{
-								method.setVisible(mobileAllowedTypes.get(typeName) != null ? AnnotationManager.getInstance().isAnnotationPresent(
-									memberbox[i].method(), ServoyMobile.class, true) : false);
+								boolean visible = mobileAllowedTypes.get(typeName) != null ? AnnotationManager.getInstance().isAnnotationPresent(
+									memberbox[i].method(), ServoyMobile.class, true) : false;
+								if (!visible)
+								{
+									method.setVisibility(Visibility.INTERNAL);
+								}
 							}
 
 							method.setDescription(getDoc(name, scriptObjectClass, parameterTypes)); // TODO name should be of parent.
@@ -1116,8 +1153,12 @@ public class TypeCreator extends TypeCache
 
 						if (isServoyMobileSolutionType() && object instanceof BeanProperty)
 						{
-							property.setVisible(mobileAllowedTypes.get(typeName) != null ? AnnotationManager.getInstance().isAnnotationPresent(
-								((BeanProperty)object).getGetter(), ServoyMobile.class) : false);
+							boolean visibility = mobileAllowedTypes.get(typeName) != null ? AnnotationManager.getInstance().isAnnotationPresent(
+								((BeanProperty)object).getGetter(), ServoyMobile.class) : false;
+							if (!visibility)
+							{
+								property.setVisibility(Visibility.INTERNAL);
+							}
 						}
 
 						if (scriptObject != null && scriptObject.isDeprecated(name))

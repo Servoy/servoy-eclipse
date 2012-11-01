@@ -26,6 +26,7 @@ import org.eclipse.dltk.javascript.typeinference.IValueCollection;
 import org.eclipse.dltk.javascript.typeinference.IValueReference;
 import org.eclipse.dltk.javascript.typeinfo.IRMember;
 import org.eclipse.dltk.javascript.typeinfo.IRMethod;
+import org.eclipse.dltk.javascript.typeinfo.IRProperty;
 import org.eclipse.dltk.javascript.typeinfo.IRVariable;
 import org.eclipse.dltk.javascript.typeinfo.ReferenceSource;
 import org.eclipse.dltk.javascript.typeinfo.model.JSType;
@@ -123,6 +124,15 @@ public class ServoyScriptValidator implements IValidatorExtension2
 
 	public IValidationStatus validateAccessibility(Member member)
 	{
+		Visibility visibility = member.getVisibility();
+		if (visibility == Visibility.PRIVATE)
+		{
+			return generateValidationStatus(member.getName(), member instanceof Method);
+		}
+		else if (visibility == Visibility.INTERNAL)
+		{
+			return generateValidationStatusForMobile(member.getName(), member instanceof Method);
+		}
 		return null;
 	}
 
@@ -151,6 +161,16 @@ public class ServoyScriptValidator implements IValidatorExtension2
 					visibility = Visibility.PRIVATE;
 				}
 			}
+			else if (element instanceof IRProperty)
+			{
+				name = ((IRProperty)element).getName();
+				visibility = ((IRProperty)element).getVisibility();
+				if (!((IRProperty)element).isVisible())
+				{
+					visibility = Visibility.INTERNAL; // Assume that this is hidden because of mobile 
+				}
+				method = false;
+			}
 		}
 		else
 		{
@@ -173,6 +193,10 @@ public class ServoyScriptValidator implements IValidatorExtension2
 				return generateValidationStatus(name, method);
 			}
 		}
+		else if (visibility == Visibility.INTERNAL)
+		{
+			return generateValidationStatusForMobile(name, method);
+		}
 		return null;
 	}
 
@@ -180,6 +204,7 @@ public class ServoyScriptValidator implements IValidatorExtension2
 	 * @param expression
 	 * @param member
 	 */
+	@SuppressWarnings("nls")
 	private ValidationStatus generateValidationStatus(String name, boolean isMethod)
 	{
 		if (isMethod)
@@ -189,6 +214,19 @@ public class ServoyScriptValidator implements IValidatorExtension2
 		else
 		{
 			return new ValidationStatus(JavaScriptProblems.PRIVATE_VARIABLE, "The variable " + name + " is private");
+		}
+	}
+
+	@SuppressWarnings("nls")
+	private ValidationStatus generateValidationStatusForMobile(String name, boolean isMethod)
+	{
+		if (isMethod)
+		{
+			return new ValidationStatus(JavaScriptProblems.PRIVATE_FUNCTION, "The function " + name + "() is not visible in mobile");
+		}
+		else
+		{
+			return new ValidationStatus(JavaScriptProblems.PRIVATE_VARIABLE, "The variable " + name + " is not visible in mobile");
 		}
 	}
 

@@ -17,7 +17,6 @@
 
 package com.servoy.eclipse.debug.script;
 
-import org.eclipse.dltk.javascript.typeinfo.DefaultMetaType;
 import org.eclipse.dltk.javascript.typeinfo.IRSimpleType;
 import org.eclipse.dltk.javascript.typeinfo.IRType;
 import org.eclipse.dltk.javascript.typeinfo.IRTypeDeclaration;
@@ -34,37 +33,7 @@ class JavaRuntimeType implements IRSimpleType
 {
 	public static final String JAVA_CLASS = "JAVA_CLASS";
 
-	public static final MetaType JAVA_META_TYPE = new DefaultMetaType()
-	{
-		@Override
-		public IRType toRType(ITypeSystem typeSystem, Type type)
-		{
-			return new JavaRuntimeType(typeSystem, type);
-		}
-
-		public String getId()
-		{
-			return "JavaType";
-		}
-
-		@Override
-		public IRType toRType(ITypeSystem typeSystem, IRTypeDeclaration declaration)
-		{
-			return new JavaRuntimeType(typeSystem, declaration);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.dltk.javascript.typeinfo.DefaultMetaType#getPreferredTypeSystem(org.eclipse.dltk.javascript.typeinfo.model.Type)
-		 */
-		@Override
-		public ITypeSystem getPreferredTypeSystem(Type type)
-		{
-			// TODO Auto-generated method stub
-			return super.getPreferredTypeSystem(type);
-		}
-	};
+	public static final MetaType JAVA_META_TYPE = new JavaRuntimeMetaType();
 
 	private final Type type;
 
