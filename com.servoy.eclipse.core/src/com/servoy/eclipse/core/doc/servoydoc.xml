@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <servoydoc>
   <runtime>
     <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT">
@@ -5393,7 +5393,18 @@ if (etype == ELEMENT_TYPES.LABEL)
      // element is a Label component
 }]]></sample>
         </constant>
-        <constant name="LIST_BOX">
+        <constant name="LISTBOX">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant representing a listbox element.]]></description>
+          <summary><![CDATA[Constant representing a listbox element.]]></summary>
+          <sample><![CDATA[//the return value for an element of the ListBox type, as returned by the following code
+var etype = elements.elementName.getElementType();
+if (etype == ELEMENT_TYPES.LISTBOX)
+{
+     // element is a LISTBOX element
+}]]></sample>
+        </constant>
+        <constant deprecated="true" name="LIST_BOX">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant representing a listbox element.]]></description>
           <summary><![CDATA[Constant representing a listbox element.]]></summary>
@@ -9612,7 +9623,17 @@ field to image. The field will display images.]]></description>
           <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
           <sample><![CDATA[var img = form.newField('my_table_image', JSField.IMAGE_MEDIA, 10, 190, 100, 50);]]></sample>
         </constant>
-        <constant name="LIST_BOX">
+        <constant name="LISTBOX">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
+field to list box. The field will show a selection list with single choice selection.]]></description>
+          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.customValues = "one\ntwo\nthree\nfour";
+var list = form.newField('my_table_list', JSField.LISTBOX, 10, 280, 100, 50);
+list.valuelist = vlist;]]></sample>
+        </constant>
+        <constant deprecated="true" name="LIST_BOX">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
 field to list box. The field will show a selection list with single choice selection.]]></description>
@@ -12250,9 +12271,9 @@ forms['newForm1'].controller.show();]]></sample>
             <argumentType typecode="int"/>
             <argumentType typecode="int"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSField" typecode="com.servoy.j2db.scripting.solutionmodel.JSField"><![CDATA[a new JSField object on the form with the displayType of LIST_BOX]]></return>
-          <description><![CDATA[Creates a new JSField object on the form with the displayType of LIST_BOX - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></description>
-          <summary><![CDATA[Creates a new JSField object on the form with the displayType of LIST_BOX - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></summary>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSField" typecode="com.servoy.j2db.scripting.solutionmodel.JSField"><![CDATA[a new JSField object on the form with the displayType of LISTBOX]]></return>
+          <description><![CDATA[Creates a new JSField object on the form with the displayType of LISTBOX - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></description>
+          <summary><![CDATA[Creates a new JSField object on the form with the displayType of LISTBOX - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></summary>
           <sample><![CDATA[var form = solutionModel.newForm('newForm1', 'myServer', 'myTable', null, true, 800, 600);
 var list = form.newListBox(myDataProvider, 100, 100, 200, 200);
 forms['newForm1'].controller.show();]]></sample>
