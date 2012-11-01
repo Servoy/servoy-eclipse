@@ -518,7 +518,13 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 		{
 			public void handleChange(ChangeEvent event)
 			{
-				c.flagColumnInfoChanged();
+				getShell().getDisplay().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						c.flagColumnInfoChanged();
+					}
+				});
 			}
 		});
 
