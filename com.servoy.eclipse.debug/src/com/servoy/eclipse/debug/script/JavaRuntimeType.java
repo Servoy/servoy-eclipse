@@ -23,23 +23,18 @@ import org.eclipse.dltk.javascript.typeinfo.IRTypeDeclaration;
 import org.eclipse.dltk.javascript.typeinfo.IRTypeTransformer;
 import org.eclipse.dltk.javascript.typeinfo.ITypeSystem;
 import org.eclipse.dltk.javascript.typeinfo.MetaType;
+import org.eclipse.dltk.javascript.typeinfo.RSimpleType;
 import org.eclipse.dltk.javascript.typeinfo.TypeCompatibility;
 import org.eclipse.dltk.javascript.typeinfo.TypeQuery;
 import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 
 @SuppressWarnings("nls")
-class JavaRuntimeType implements IRSimpleType
+class JavaRuntimeType extends RSimpleType
 {
 	public static final String JAVA_CLASS = "JAVA_CLASS";
 
 	public static final MetaType JAVA_META_TYPE = new JavaRuntimeMetaType();
-
-	private final Type type;
-
-	private final ITypeSystem typeSystem;
-
-	private final IRTypeDeclaration typeDeclaration;
 
 	/**
 	 * @param typeSystem 
@@ -47,9 +42,7 @@ class JavaRuntimeType implements IRSimpleType
 	 */
 	public JavaRuntimeType(ITypeSystem typeSystem, Type type)
 	{
-		this.typeSystem = typeSystem;
-		this.type = type;
-		this.typeDeclaration = convert(type);
+		super(typeSystem, type);
 	}
 
 	/**
@@ -58,35 +51,12 @@ class JavaRuntimeType implements IRSimpleType
 	 */
 	public JavaRuntimeType(ITypeSystem typeSystem, IRTypeDeclaration declaration)
 	{
-		this.typeSystem = typeSystem;
-		this.type = declaration.getSource();
-		this.typeDeclaration = declaration;
-
+		super(typeSystem, declaration);
 	}
 
-	protected final IRTypeDeclaration convert(Type type)
+	public JavaRuntimeType(IRTypeDeclaration declaration)
 	{
-		return typeSystem != null ? typeSystem.convert(type) : null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.dltk.javascript.typeinfo.model.JSType#getName()
-	 */
-	public String getName()
-	{
-		return type.getName();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.dltk.javascript.typeinfo.IRType#isExtensible()
-	 */
-	public boolean isExtensible()
-	{
-		return false;
+		super(declaration);
 	}
 
 	/*
@@ -94,6 +64,7 @@ class JavaRuntimeType implements IRSimpleType
 	 * 
 	 * @see org.eclipse.dltk.javascript.typeinfo.IRType#isJavaScriptObject()
 	 */
+	@Override
 	public boolean isJavaScriptObject()
 	{
 		return false;
@@ -104,34 +75,25 @@ class JavaRuntimeType implements IRSimpleType
 	 * 
 	 * @see org.eclipse.dltk.javascript.typeinfo.JSType2#isAssignableFrom(org.eclipse.dltk.javascript.typeinfo.JSType2)
 	 */
+	@Override
 	public TypeCompatibility isAssignableFrom(IRType runtimeType)
 	{
 		if (runtimeType instanceof JavaRuntimeType)
 		{
-			Class< ? > cls = (Class< ? >)type.getAttribute(JavaRuntimeType.JAVA_CLASS);
-			Class< ? > other = (Class< ? >)((JavaRuntimeType)runtimeType).type.getAttribute(JavaRuntimeType.JAVA_CLASS);
+			Class< ? > cls = (Class< ? >)getTarget().getAttribute(JavaRuntimeType.JAVA_CLASS);
+			Class< ? > other = (Class< ? >)((JavaRuntimeType)runtimeType).getTarget().getAttribute(JavaRuntimeType.JAVA_CLASS);
 			return cls.isAssignableFrom(other) ? TypeCompatibility.TRUE : TypeCompatibility.FALSE;
 		}
 		if (runtimeType instanceof IRSimpleType)
 		{
 			Type src = ((IRSimpleType)runtimeType).getTarget();
-			final String localName = TypeUtil.getName(type);
+			final String localName = TypeUtil.getName(getTarget());
 			for (Type t : new TypeQuery(src).getHierarchy())
 			{
 				if (localName.equals(TypeUtil.getName(t))) return TypeCompatibility.TRUE;
 			}
 		}
 		return TypeCompatibility.FALSE;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.dltk.javascript.typeinfo.model.ClassType#getTarget()
-	 */
-	public Type getTarget()
-	{
-		return type;
 	}
 
 	/*
@@ -144,7 +106,7 @@ class JavaRuntimeType implements IRSimpleType
 	{
 		if (obj.getClass() == JavaRuntimeType.class)
 		{
-			return ((JavaRuntimeType)obj).type.equals(type);
+			return ((JavaRuntimeType)obj).getTarget().equals(getTarget());
 		}
 		return false;
 	}
@@ -152,42 +114,20 @@ class JavaRuntimeType implements IRSimpleType
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode()
-	{
-		return type.hashCode();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.dltk.javascript.typeinfo.IRType#activeTypeSystem()
-	 */
-	public ITypeSystem activeTypeSystem()
-	{
-		return typeSystem;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see org.eclipse.dltk.javascript.typeinfo.IRType#transform(org.eclipse.dltk.javascript.typeinfo.IRTypeTransformer)
 	 */
+	@Override
 	public IRType transform(IRTypeTransformer function)
+	{
+		final IRTypeDeclaration value = function.transform(getDeclaration());
+		if (value != getDeclaration())
+	{
+			return new JavaRuntimeType(value);
+	}
+		else
 	{
 		return this;
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.dltk.javascript.typeinfo.IRSimpleType#getDeclaration()
-	 */
-	public IRTypeDeclaration getDeclaration()
-	{
-		return typeDeclaration;
 	}
 
 }
