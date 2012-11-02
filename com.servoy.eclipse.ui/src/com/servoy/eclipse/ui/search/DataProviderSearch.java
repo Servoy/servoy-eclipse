@@ -88,7 +88,7 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 	{
 		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 		if (activeProject == null) return Status.OK_STATUS;
-		IResource[] scopes = getScopes(activeProject.getSolution());
+		IResource[] scopes = getAllScopes();
 		TextSearchRequestor collector = getResultCollector();
 
 		//search servoy  resources
@@ -135,19 +135,19 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 			this.dataprovider = dataprovider;
 			/*
 			 * an explenation of this regex can be fond here:
-			 * http://rick.measham.id.au/paste/explain.pl?regex=.*dataProviderID%5Cs*%5C%3A%5Cs*%5B%22%27%5DmyDataprovider
+			 * http://rick.measham.id.au/paste/explain.pl?regex=.*dataProviderID%5Cs*%5C%3A%5Cs*%5B%22%27%5DmyDataprovider%24
 			 * 
 			 * Matches the last occurrence of dataProviderID:"my_dataprovider in a multiline string. !Importat!: at the begining of the regex there is this
 			 * pattern [.\\s]* , we cannot use only dot "." because it matches everything except new lines . We needed to add \s because \s matches also
 			 * newlines
 			 */
-			dataproviderIDPattern = Pattern.compile("[.\\s]*dataProviderID\\s*\\:\\s*[\"']" + dataprovider.getDataProviderID(), Pattern.MULTILINE);
+			dataproviderIDPattern = Pattern.compile("[.\\s]*dataProviderID\\s*\\:\\s*[\"']" + dataprovider.getDataProviderID() + "$", Pattern.MULTILINE);
 
 			/*
 			 * This regex is mostly the same as the previews one except in with the relation name, capturing the relation name in a group . Ex
 			 * dataProviderID:"my_relation.my_dataprovider
 			 */
-			relatedDataproviderIDPattern = Pattern.compile("[.\\s]*dataProviderID\\s*\\:\\s*[\"']" + "(\\w*)\\." + dataprovider.getDataProviderID(),
+			relatedDataproviderIDPattern = Pattern.compile("[.\\s]*dataProviderID\\s*\\:\\s*[\"']" + "(\\w+)\\." + dataprovider.getDataProviderID() + "$",
 				Pattern.MULTILINE);
 
 		}
@@ -263,16 +263,17 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 				String previewsMatchContent = matchRequestor.getFileContent(matchOffset - delta, delta + matchRequestor.getMatchLength());
 				if (datasource.equals(form.getDataSource()))
 				{ // form has the datasource
-					if (dataproviderIDPattern.matcher(previewsMatchContent).find())
+					Matcher matcher = dataproviderIDPattern.matcher(previewsMatchContent);
+					if (matcher.find())
 					{
 						return true;
 					}
 					else
 					{ // form may reference the dataprovider via self relation
-						Matcher matcher = relatedDataproviderIDPattern.matcher(previewsMatchContent);
-						if (matcher.find())
+						Matcher matcherRelated = relatedDataproviderIDPattern.matcher(previewsMatchContent);
+						if (matcherRelated.find())
 						{
-							if (isMatchRefferencedInRelation(matcher.group(1), true))
+							if (isMatchRefferencedInRelation(matcherRelated.group(1), true))
 							{
 								return true;
 							}
@@ -318,17 +319,23 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 							}
 						}
 					}
-					else if (datasource.equals(rel.getPrimaryDataSource()) || datasource.equals(rel.getForeignDataSource()))
+					else
 					{
 						try
 						{
-							for (Column col : rel.getForeignColumns())
+							if (datasource.equals(rel.getForeignDataSource()))
 							{
-								if (dataprovider.getDataProviderID().equals(col.getDataProviderID())) return true;
+								for (Column col : rel.getForeignColumns())
+								{
+									if (dataprovider.getDataProviderID().equals(col.getDataProviderID())) return true;
+								}
 							}
-							for (IDataProvider col : rel.getPrimaryDataProviders(flattenedSolution))
+							if (datasource.equals(rel.getPrimaryDataSource()))
 							{
-								if (dataprovider.getDataProviderID().equals(col.getDataProviderID())) return true;
+								for (IDataProvider col : rel.getPrimaryDataProviders(flattenedSolution))
+								{
+									if (dataprovider.getDataProviderID().equals(col.getDataProviderID())) return true;
+								}
 							}
 						}
 						catch (RepositoryException e)
