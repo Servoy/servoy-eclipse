@@ -35,7 +35,6 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.ComponentDeleteEditPolicy;
 import com.servoy.eclipse.designer.editor.SetBoundsToSupportBoundsFigureListener;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileListElementEditpart.MobileListElementType;
-import com.servoy.eclipse.designer.mobile.property.MobilePersistPropertySource;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.IPersist;
@@ -77,11 +76,11 @@ public class MobileListGraphicalEditPart extends AbstractGraphicalEditPart imple
 		}
 		if (model.image != null && model.image.getDataProviderID() != null)
 		{
-			modelChildren.add(new Pair<BaseComponent, MobileListElementType>(model.image, MobileListElementType.DynamicImage));
+			modelChildren.add(new Pair<BaseComponent, MobileListElementType>(model.image, MobileListElementType.Image));
 		}
-		else if (model.button != null && model.button.getCustomMobileProperty(MobilePersistPropertySource.DATA_ICON_PROPERTY) != null)
+		else if (model.button != null)
 		{
-			modelChildren.add(new Pair<BaseComponent, MobileListElementType>(model.button, MobileListElementType.FixedImage));
+			modelChildren.add(new Pair<BaseComponent, MobileListElementType>(model.button, MobileListElementType.Icon));
 		}
 		if (model.button != null)
 		{

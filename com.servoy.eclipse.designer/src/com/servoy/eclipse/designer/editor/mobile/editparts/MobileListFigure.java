@@ -17,18 +17,14 @@
 package com.servoy.eclipse.designer.editor.mobile.editparts;
 
 import org.eclipse.draw2d.AbstractBackground;
+import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.ImageFigure;
-import org.eclipse.draw2d.PositionConstants;
-import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Insets;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.handles.HandleBounds;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
 
-import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.ui.resource.ColorResource;
 
 /**
@@ -37,41 +33,13 @@ import com.servoy.eclipse.ui.resource.ColorResource;
  * @author rgansevles
  * 
  */
-public class MobileListFigure extends ImageFigure implements HandleBounds
+public class MobileListFigure extends Figure implements HandleBounds
 {
-	public static final Image ARROW_IMAGE = Activator.loadImageDescriptorFromBundle("mobile/list_arrow.png").createImage();
-
 	public MobileListFigure(boolean isInset)
 	{
-		super(ARROW_IMAGE, PositionConstants.EAST);
 		setOpaque(false); // border handles all
 		setBackgroundColor(ColorResource.INSTANCE.getColor(new RGB(245, 245, 245))); // TODO use scheme
 		setBorder(new MobileListBackgroundBorder(isInset));
-	}
-
-	@Override
-	public Rectangle getBounds()
-	{
-		return new Rectangle(super.getBounds())
-		{
-			@Override
-			public Rectangle getShrinked(Insets insets)
-			{
-				return super.getShrinked(new Insets(23, 0, 0, 15)); // for placing arrow image
-			}
-		};
-	}
-
-	@Override
-	public Dimension getPreferredSize(int wHint, int hHint)
-	{
-		if (prefSize != null) return prefSize;
-		if (getLayoutManager() != null)
-		{
-			Dimension d = getLayoutManager().getPreferredSize(this, wHint, hHint);
-			if (d != null) return d;
-		}
-		return super.getPreferredSize(wHint, hHint);
 	}
 
 	public Rectangle getHandleBounds()

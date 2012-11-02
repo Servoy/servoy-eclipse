@@ -57,7 +57,7 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 
 	public static enum MobileListElementType
 	{
-		Header, Button, Subtext, CountBubble, DynamicImage, FixedImage
+		Header, Button, Subtext, CountBubble, Image, Icon
 	}
 
 	protected IApplication application;
@@ -104,8 +104,8 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 		MobileListElementType type = getType();
 		switch (type)
 		{
-			case DynamicImage :
-			case FixedImage :
+			case Image :
+			case Icon :
 				fig = new ImageFigure(IMAGE_IMAGE);
 				((ImageFigure)fig).setAlignment(PositionConstants.WEST);
 				break;
@@ -165,8 +165,7 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 				updateFigureForGC(fig, (GraphicalComponent)getModel().getLeft(), "<subtext>");
 				break;
 
-			case DynamicImage :
-			case FixedImage :
+			case Icon :
 				updateImage((ImageFigure)fig, (GraphicalComponent)getModel().getLeft());
 				break;
 
@@ -195,20 +194,20 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 
 	private void updateImage(ImageFigure fig, GraphicalComponent button)
 	{
-		Image image = null;
-		if (getType() == MobileListElementType.FixedImage)
+		if (getType() == MobileListElementType.Icon)
 		{
-			String dataIcon = (String)getModel().getLeft().getCustomMobileProperty(MobilePersistPropertySource.DATA_ICON_PROPERTY);
-			if (dataIcon != null)
+			Image image = null;
+			String dataIcon = (String)button.getCustomMobileProperty(MobilePersistPropertySource.DATA_ICON_PROPERTY);
+			if (dataIcon == null)
 			{
-				image = ImageResource.INSTANCE.getImageWithRoundBackground(
-					Activator.loadImageDescriptorFromBundle("mobile/icons-18-white-" + dataIcon + ".png"),
-					new RGB(IconWithRoundBackground.DATA_ICON_BG.getRed(), IconWithRoundBackground.DATA_ICON_BG.getGreen(),
-						IconWithRoundBackground.DATA_ICON_BG.getBlue()));
+				dataIcon = "arrow-r"; // default
 			}
+			image = ImageResource.INSTANCE.getImageWithRoundBackground(
+				Activator.loadImageDescriptorFromBundle("mobile/icons-18-white-" + dataIcon + ".png"),
+				new RGB(IconWithRoundBackground.DATA_ICON_BG.getRed(), IconWithRoundBackground.DATA_ICON_BG.getGreen(),
+					IconWithRoundBackground.DATA_ICON_BG.getBlue()));
+			fig.setImage(image);
 		}
-
-		fig.setImage(image == null ? IMAGE_IMAGE : image);
 	}
 
 

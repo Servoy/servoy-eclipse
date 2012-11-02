@@ -58,10 +58,14 @@ public class MobileListFigureLayoutManager extends AbstractLayout
 						Rectangle.SINGLETON.width = containerBounds.width;
 						break;
 
-					case FixedImage :
-					case DynamicImage :
+					case Image :
 						Rectangle.SINGLETON.x = containerBounds.x + 2;
 						Rectangle.SINGLETON.width = 30;
+						break;
+
+					case Icon :
+						Rectangle.SINGLETON.width = 30;
+						Rectangle.SINGLETON.x = containerBounds.x + containerBounds.width - 2 - Rectangle.SINGLETON.width;
 						break;
 
 					case Button :
