@@ -37,6 +37,7 @@ import org.eclipse.dltk.javascript.typeinfo.model.Property;
 import org.eclipse.dltk.javascript.typeinfo.model.SimpleType;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
+import org.eclipse.dltk.javascript.typeinfo.model.Visibility;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -374,11 +375,13 @@ public class ElementResolver implements IElementResolver
 						{
 							m = TypeCreator.clone(m, null);
 							m.setVisible(true);
+							m.setVisibility(Visibility.PUBLIC);
 						}
 						else if (!memberTypeVisible && m.isVisible())
 						{
 							m = TypeCreator.clone(m, null);
 							m.setVisible(false);
+							m.setVisibility(Visibility.INTERNAL);
 						}
 						return m;
 					}

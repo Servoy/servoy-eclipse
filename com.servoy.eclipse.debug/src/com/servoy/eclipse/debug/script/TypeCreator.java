@@ -3294,6 +3294,7 @@ public class TypeCreator extends TypeCache
 		clone.setDeprecated(member.isDeprecated());
 		clone.setStatic(member.isStatic());
 		clone.setVisible(member.isVisible());
+		clone.setVisibility(member.getVisibility());
 		clone.setDescription(member.getDescription());
 		clone.setName(member.getName());
 		if (type == null)
