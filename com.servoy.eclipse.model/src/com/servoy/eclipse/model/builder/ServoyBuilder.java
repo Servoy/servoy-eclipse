@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1918,9 +1919,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 															}
 															else if (dataType == IColumnTypes.INTEGER || dataType == IColumnTypes.NUMBER)
 															{
-																new RoundHalfUpDecimalFormat(parsedFormat.getDisplayFormat(), Locale.getDefault());
-																if (parsedFormat.getEditFormat() != null) new RoundHalfUpDecimalFormat(
-																	parsedFormat.getEditFormat(), Locale.getDefault());
+																new DecimalFormat(parsedFormat.getDisplayFormat(),
+																	RoundHalfUpDecimalFormat.getDecimalFormatSymbols(Locale.getDefault()));
+																if (parsedFormat.getEditFormat() != null) new DecimalFormat(parsedFormat.getEditFormat(),
+																	RoundHalfUpDecimalFormat.getDecimalFormatSymbols(Locale.getDefault()));
 															}
 														}
 														catch (Exception ex)
