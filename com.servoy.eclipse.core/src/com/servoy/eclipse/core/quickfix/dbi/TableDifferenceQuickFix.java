@@ -85,7 +85,7 @@ public abstract class TableDifferenceQuickFix extends WorkbenchMarkerResolution
 			if (marker == current) continue;
 			try
 			{
-				if (marker.getType().equals(ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE))
+				if (marker.exists() && marker.getType().equals(ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE))
 				{
 					TableDifference difference = getTableDifference(marker);
 

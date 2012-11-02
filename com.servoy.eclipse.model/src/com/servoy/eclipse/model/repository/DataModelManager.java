@@ -664,7 +664,7 @@ public class DataModelManager implements IColumnInfoManager
 					ci.setConfiguredColumnType(cid.columnType);
 					ci.setCompatibleColumnTypes(cid.compatibleColumnTypes);
 					c.setColumnInfo(ci);
-					c.setFlags(cid.flags); // updates rowident columns in Table as well
+
 					// let table editors and so on now that a column is loaded.
 					t.fireIColumnChanged(c);
 				}
@@ -1519,7 +1519,7 @@ public class DataModelManager implements IColumnInfoManager
 					boolean columnInfoIsPk = ((dbiFileDefinition.flags & Column.PK_COLUMN) != 0);
 					if (c.isDatabasePK() != columnInfoIsPk)
 					{
-						if ((c.isDatabasePK() && ((dbiFileDefinition.flags & Column.IDENT_COLUMNS) == 0)) || columnInfoIsPk)
+						if ((c.isDatabasePK() && (dbiFileDefinition.flags & Column.IDENT_COLUMNS) == 0) || columnInfoIsPk)
 						{
 							// column is pk, but columninfo knows it as normal column, or column is not pk and columninfo knows it as pk
 							severity = computeCustomSeverity(ServoyBuilder.DBI_COLUMN_CONFLICT);
@@ -1613,11 +1613,6 @@ public class DataModelManager implements IColumnInfoManager
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.servoy.j2db.persistence.IColumnInfoProvider#columInfoSequenceOverriden(com.servoy.j2db.persistence.Column)
-	 */
 	public void columInfoSequenceOverriden(Column c)
 	{
 		ColumnInfoDef dbCid = new ColumnInfoDef();

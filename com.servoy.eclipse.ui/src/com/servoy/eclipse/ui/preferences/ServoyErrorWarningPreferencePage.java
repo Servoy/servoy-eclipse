@@ -118,7 +118,7 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 	private final String ERROR_WARNING_DEPRECATED_PROPERTIES_USAGE_PROBLEMS = "Deprecated properties usage problems"; //$NON-NLS-1$
 	private final String ERROR_WARNING_MODULES_PROBLEMS = "Module problems"; //$NON-NLS-1$
 	private final String ERROR_WARNING_FORM_PROBLEMS = "Form problems"; //$NON-NLS-1$
-	private final String ERROR_WARNING_COLUMNS_PROBLEMS = "Columns problems"; //$NON-NLS-1$
+	private final String ERROR_WARNING_COLUMNS_PROBLEMS = "Column problems"; //$NON-NLS-1$
 	private final String ERROR_WARNING_SORT_PROBLEMS = "Sort problems"; //$NON-NLS-1$
 	private final String ERROR_WARNING_SOLUTION_PROBLEMS = "Servoy solution problems"; //$NON-NLS-1$
 

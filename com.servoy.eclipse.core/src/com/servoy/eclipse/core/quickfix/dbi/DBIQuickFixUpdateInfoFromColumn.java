@@ -71,11 +71,11 @@ public class DBIQuickFixUpdateInfoFromColumn extends TableDifferenceQuickFix
 	@Override
 	public boolean canHandleDifference(TableDifference difference)
 	{
-		return difference != null && difference.getType() == TableDifference.COLUMN_CONFLICT && (//
+		return difference != null && ((difference.getType() == TableDifference.COLUMN_CONFLICT && (//
 			(!difference.getDbiFileDefinition().columnType.equals(difference.getTableDefinition().columnType)) || //
 				(difference.getDbiFileDefinition().allowNull != difference.getTableDefinition().allowNull) || //
 			((difference.getDbiFileDefinition().flags & Column.PK_COLUMN) != (difference.getTableDefinition().flags & Column.PK_COLUMN))//
-			);
+			)) || (difference.getType() == TableDifference.COLUMN_SEQ_TYPE_OVERRIDEN));
 	}
 
 	@Override
