@@ -22,7 +22,9 @@ import java.util.Map;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Display;
 
 import com.servoy.j2db.util.Pair;
 
@@ -60,10 +62,14 @@ public class ImageResource
 			{
 				// draw round background
 				Image plainImage = getImage(imageDescriptor);
-				image = new Image(plainImage.getDevice(), plainImage.getBounds().width + 2, plainImage.getBounds().height + 2);
+
+				ImageData imageData = plainImage.getImageData().scaledTo(plainImage.getBounds().width + 2, plainImage.getBounds().height + 2);
+				imageData.transparentPixel = imageData.palette.getPixel(new RGB(255, 255, 255)); // whitePixel
+				image = new Image(Display.getCurrent(), imageData);
+
 				GC gc = new GC(image);
 				gc.setBackground(ColorResource.INSTANCE.getColor(rgb));
-				gc.fillOval(0, 0, plainImage.getBounds().width + 2, plainImage.getBounds().height + 2);
+				gc.fillOval(0, 0, imageData.width, imageData.height);
 				gc.drawImage(plainImage, 1, 1);
 				gc.dispose();
 			}

@@ -166,7 +166,7 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 				break;
 
 			case Icon :
-				updateImage((ImageFigure)fig, (GraphicalComponent)getModel().getLeft());
+				updateIcon((ImageFigure)fig, (GraphicalComponent)getModel().getLeft());
 				break;
 
 			default :
@@ -192,7 +192,7 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 		}
 	}
 
-	private void updateImage(ImageFigure fig, GraphicalComponent button)
+	private void updateIcon(ImageFigure fig, GraphicalComponent button)
 	{
 		if (getType() == MobileListElementType.Icon)
 		{
