@@ -213,7 +213,7 @@ public class ServoyScriptValidator implements IValidatorExtension2
 		}
 		else
 		{
-			return new ValidationStatus(JavaScriptProblems.PRIVATE_VARIABLE, "The variable " + name + " is private");
+			return new ValidationStatus(JavaScriptProblems.PRIVATE_VARIABLE, "The property " + name + " is private");
 		}
 	}
 
@@ -226,7 +226,7 @@ public class ServoyScriptValidator implements IValidatorExtension2
 		}
 		else
 		{
-			return new ValidationStatus(JavaScriptProblems.PRIVATE_VARIABLE, "The variable " + name + " is not visible in mobile");
+			return new ValidationStatus(JavaScriptProblems.PRIVATE_VARIABLE, "The property " + name + " is not visible in mobile");
 		}
 	}
 
