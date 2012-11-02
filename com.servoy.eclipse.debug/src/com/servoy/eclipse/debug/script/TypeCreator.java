@@ -2302,14 +2302,17 @@ public class TypeCreator extends TypeCache
 				}
 				if (scriptObject != null)
 				{
-					if (isServoyMobileSolutionType() && !AnnotationManager.getInstance().isAnnotationPresent(scriptObject.getClass(), ServoyMobile.class)) continue;
-
 					ScriptObjectRegistry.registerScriptObjectForClass(scriptObject.getClass(), scriptObject);
 					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 					property.setName(clientPlugin.getName());
 					property.setReadOnly(true);
 					addAnonymousClassType("Plugin<" + clientPlugin.getName() + '>', scriptObject.getClass());
 					property.setType(getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'));
+
+					if (isServoyMobileSolutionType() && !AnnotationManager.getInstance().isAnnotationPresent(scriptObject.getClass(), ServoyMobile.class))
+					{
+						property.setVisibility(Visibility.INTERNAL);
+					}
 
 					if (clientPlugin.getName().equals("window"))
 					{
