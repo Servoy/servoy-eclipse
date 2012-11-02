@@ -494,7 +494,16 @@ public class TypeCreator extends TypeCache
 			{
 				Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
 				parameter.setName("arg" + i);
-				JSType jsType = getJSType(context, parameterTypes[i]);
+				JSType jsType = null;
+				if (i == (parameterTypes.length - 1) && method.isVarArgs() && parameterTypes[i].isArray())
+				{
+					jsType = getJSType(context, parameterTypes[i].getComponentType());
+					parameter.setKind(ParameterKind.VARARGS);
+				}
+				else
+				{
+					jsType = getJSType(context, parameterTypes[i]);
+				}
 				// don't set any type of it is just Object, so that everything is excepted
 				if (!jsType.getName().equals("java.lang.Object")) parameter.setType(jsType);
 				parameters.add(parameter);
