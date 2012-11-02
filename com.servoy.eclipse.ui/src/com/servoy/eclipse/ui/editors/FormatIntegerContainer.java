@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.ui.editors;
 
+import java.text.DecimalFormat;
 import java.util.Locale;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -221,11 +222,11 @@ public class FormatIntegerContainer extends Composite implements IFormatTextCont
 	{
 		String format = displayFormat.getText();
 		// test it
-		new RoundHalfUpDecimalFormat(format, Locale.getDefault()).format(1);
+		new DecimalFormat(format, RoundHalfUpDecimalFormat.getDecimalFormatSymbols(Locale.getDefault())).format(1);
 		if (format.length() > 0 && editFormat.getText().length() > 0)
 		{
 			// test it
-			new RoundHalfUpDecimalFormat(editFormat.getText(), Locale.getDefault()).format(1);
+			new DecimalFormat(editFormat.getText(), RoundHalfUpDecimalFormat.getDecimalFormatSymbols(Locale.getDefault())).format(1);
 			format = format + '|' + editFormat.getText();
 		}
 		if (maxLength.getText().length() > 0)
