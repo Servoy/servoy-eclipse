@@ -165,7 +165,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	protected void createPages()
 	{
 		createColumnPage();
-		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() != null)
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null)
 		{
 			createCalculationsPage();
 			createFoundsSetMethodsPage();

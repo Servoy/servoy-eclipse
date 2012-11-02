@@ -16,48 +16,74 @@
  */
 package com.servoy.eclipse.ui.quickfix;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.IMarkerResolution2;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.views.markers.WorkbenchMarkerResolution;
 
+import com.servoy.eclipse.core.quickfix.dbi.TableDifferenceQuickFix;
+import com.servoy.eclipse.model.builder.ServoyBuilder;
+import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.resource.ImageResource;
 import com.servoy.eclipse.ui.wizards.SynchronizeDBIWithDBWizard;
 
-public class DBIQuickFixShowSyncWizard implements IMarkerResolution2
+public class DBIQuickFixShowSyncWizard extends WorkbenchMarkerResolution
 {
+
+	private IMarker current = null; // avoid duplicate listings in quick-fix dialog (for choosing multiple markers to fix)
+
+	private static DBIQuickFixShowSyncWizard instance;
+
+	private DBIQuickFixShowSyncWizard()
+	{
+	}
+
+	public static DBIQuickFixShowSyncWizard getInstance()
+	{
+		if (instance == null)
+		{
+			instance = new DBIQuickFixShowSyncWizard();
+		}
+		return instance;
+	}
+
+	public void setCurrentMarker(IMarker marker)
+	{
+		current = marker;
+	}
 
 	public String getLabel()
 	{
-		return "Open synchronize with database wizard";
+		return "Open 'Synchronize DB tables with DB information' wizard"; //$NON-NLS-1$
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.IMarkerResolution2#getImage()
-	 */
 	public Image getImage()
 	{
 		return ImageResource.INSTANCE.getImage(Activator.loadImageDescriptorFromBundle("correction_change.gif"));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.IMarkerResolution2#getDescription()
-	 */
 	public String getDescription()
 	{
 		return getLabel();
 	}
 
 	public void run(IMarker marker)
+	{
+		runInternal();
+	}
+
+	private void runInternal()
 	{
 		IWorkbenchWizard wizard = new SynchronizeDBIWithDBWizard();
 
@@ -69,6 +95,47 @@ public class DBIQuickFixShowSyncWizard implements IMarkerResolution2
 		dialog.create();
 		dialog.open();
 		wizard.dispose();
+	}
+
+	@Override
+	public IMarker[] findOtherMarkers(IMarker[] markers)
+	{
+		List<IMarker> solvableMarkers = new ArrayList<IMarker>();
+		for (IMarker marker : markers)
+		{
+			if (marker == current) continue;
+			try
+			{
+				if (marker.exists() && marker.getType().equals(ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE))
+				{
+					TableDifference difference = TableDifferenceQuickFix.getTableDifference(marker);
+
+					if (difference.getType() == TableDifference.MISSING_DBI_FILE || difference.getType() == TableDifference.MISSING_TABLE)
+					{
+						solvableMarkers.add(marker);
+					}
+				}
+			}
+			catch (CoreException e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+		return solvableMarkers.toArray(new IMarker[solvableMarkers.size()]);
+	}
+
+	@Override
+	public void run(IMarker[] markers, IProgressMonitor monitor)
+	{
+		monitor.beginTask("Running 'Synchronize DB tables with DB information' wizard", IProgressMonitor.UNKNOWN); //$NON-NLS-1$
+		try
+		{
+			runInternal();
+		}
+		finally
+		{
+			monitor.done();
+		}
 	}
 
 }

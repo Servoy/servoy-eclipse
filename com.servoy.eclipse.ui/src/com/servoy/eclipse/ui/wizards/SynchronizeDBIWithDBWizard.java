@@ -405,7 +405,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 	{
 		try
 		{
-			getContainer().run(true, false, new IRunnableWithProgress()
+			getContainer().run(true, true, new IRunnableWithProgress()
 			{
 				public void run(IProgressMonitor m) throws InvocationTargetException, InterruptedException
 				{
@@ -423,17 +423,17 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 								try
 								{
 									MultiStatus warnings = new MultiStatus(Activator.PLUGIN_ID, 0, "For more information please click 'Details'.", null);
-									if (page1 != null)
+									if (page1 != null && !monitor.isCanceled())
 									{
 										monitor.subTask("- handling missing tables");
 										handleMissingTables(page1.getSet2(), page1.getSet3(), new SubProgressMonitor(monitor, work1), warnings, work1);
 									}
-									if (page2 != null)
+									if (page2 != null && !monitor.isCanceled())
 									{
 										monitor.subTask("- handling supplemental tables");
 										handleSupplementalTables(page2.getSet2(), page2.getSet3(), new SubProgressMonitor(monitor, work2), warnings, work2);
 									}
-									if (page3 != null && page3.isChecked())
+									if (page3 != null && page3.isChecked() && !monitor.isCanceled())
 									{
 										monitor.subTask("- read and check database information");
 										readAndCheckDatabaseInformation(new SubProgressMonitor(monitor, work3), work3);
@@ -504,6 +504,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 						monitor.subTask("- creating missing tables");
 						for (Pair<IServerInternal, String> tableToCreate : tablesToCreate)
 						{
+							if (monitor.isCanceled()) break;
 							IFile file = dmm.getDBIFile(tableToCreate.getLeft().getName(), tableToCreate.getRight());
 							if (file.exists())
 							{
@@ -538,23 +539,27 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 							monitor.worked(1);
 						}
 
-						monitor.subTask("- delete database information files for missing tables");
-						for (Pair<IServerInternal, String> dbiFileToDelete : dbiFilesToDelete)
+						if (!monitor.isCanceled())
 						{
-							IFile file = dmm.getDBIFile(dbiFileToDelete.getLeft().getName(), dbiFileToDelete.getRight());
-							if (file.exists())
+							monitor.subTask("- delete database information files for missing tables");
+							for (Pair<IServerInternal, String> dbiFileToDelete : dbiFilesToDelete)
 							{
-								try
+								if (monitor.isCanceled()) break;
+								IFile file = dmm.getDBIFile(dbiFileToDelete.getLeft().getName(), dbiFileToDelete.getRight());
+								if (file.exists())
 								{
-									file.delete(true, null);
+									try
+									{
+										file.delete(true, null);
+									}
+									catch (CoreException e)
+									{
+										ServoyLog.logError(e);
+										warnings.add(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage()));
+									}
 								}
-								catch (CoreException e)
-								{
-									ServoyLog.logError(e);
-									warnings.add(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage()));
-								}
+								monitor.worked(1);
 							}
-							monitor.worked(1);
 						}
 					}
 					finally
@@ -573,6 +578,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 						monitor.subTask("- deleting tables with missing database information files");
 						for (Pair<IServerInternal, String> tableToDelete : tablesToDelete)
 						{
+							if (monitor.isCanceled()) break;
 							try
 							{
 								tableToDelete.getLeft().removeTable(tableToDelete.getRight());
@@ -589,23 +595,27 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 							}
 							monitor.worked(1);
 						}
-						monitor.subTask("- creating missing .dbi files");
-						for (Pair<IServerInternal, String> dbiFileToCreate : dbiFilesToCreate)
+						if (!monitor.isCanceled())
 						{
-							try
+							monitor.subTask("- creating missing .dbi files");
+							for (Pair<IServerInternal, String> dbiFileToCreate : dbiFilesToCreate)
 							{
-								// make sure the table is loaded
-								Table t = dbiFileToCreate.getLeft().getTable(dbiFileToCreate.getRight());
+								if (monitor.isCanceled()) break;
+								try
+								{
+									// make sure the table is loaded
+									Table t = dbiFileToCreate.getLeft().getTable(dbiFileToCreate.getRight());
 
-								// write the file
-								dmm.updateAllColumnInfo(t);
+									// write the file
+									dmm.updateAllColumnInfo(t);
+								}
+								catch (RepositoryException e)
+								{
+									ServoyLog.logError(e);
+									warnings.add(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage()));
+								}
+								monitor.worked(1);
 							}
-							catch (RepositoryException e)
-							{
-								ServoyLog.logError(e);
-								warnings.add(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage()));
-							}
-							monitor.worked(1);
 						}
 					}
 					finally
@@ -623,8 +633,10 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 					{
 						for (IServerInternal s : servers)
 						{
+							if (monitor.isCanceled()) break;
 							for (String tableName : s.getTableAndViewNames(true))
 							{
+								if (monitor.isCanceled()) break;
 								monitor.worked(1);
 								s.refreshTable(tableName);
 							}
