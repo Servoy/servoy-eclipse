@@ -38,6 +38,9 @@ import com.servoy.j2db.server.shared.ApplicationServerSingleton;
  */
 public class LicensePage extends WizardPage
 {
+	public static String COMPANY_KEY = "company";
+	public static String LICENSE_KEY = "license";
+
 	private Text companyText;
 	private Text licenseText;
 	private final WizardPage nextPage;
@@ -94,23 +97,44 @@ public class LicensePage extends WizardPage
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				validationLabel.setVisible(true);
-				if (ApplicationServerSingleton.get().checkMobileLicense(companyText.getText(), licenseText.getText()))
-				{
-					validationLabel.setText("License OK");
-				}
-				else
-				{
-					validationLabel.setText("License invalid");
-				}
-				container.layout();
+				checkLicense(container, validationLabel);
 			}
 		});
+
+		String company = getDialogSettings().get(COMPANY_KEY);
+		if (company != null)
+		{
+			companyText.setText(company);
+		}
+		String license = getDialogSettings().get(LICENSE_KEY);
+		if (license != null)
+		{
+			licenseText.setText(license);
+		}
+		if (company != null && !"".equals(company))
+		{
+			checkLicense(container, validationLabel);
+		}
+	}
+
+	private void checkLicense(Composite container, Label validationLabel)
+	{
+		if (ApplicationServerSingleton.get().checkMobileLicense(companyText.getText(), licenseText.getText()))
+		{
+			validationLabel.setText("License OK");
+		}
+		else
+		{
+			validationLabel.setText("License invalid");
+		}
+		container.layout();
 	}
 
 	@Override
 	public IWizardPage getNextPage()
 	{
+		getDialogSettings().put(COMPANY_KEY, companyText.getText());
+		getDialogSettings().put(LICENSE_KEY, licenseText.getText());
 		if (ApplicationServerSingleton.get().checkMobileLicense(companyText.getText(), licenseText.getText()))
 		{
 			mobileExporter.setSkipConnect(true);
