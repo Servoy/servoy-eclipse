@@ -34725,6 +34725,21 @@ Specifically, the left/top component gets (weight * diff) extra space and the ri
           <summary><![CDATA[Gets or sets right form minimum size in pixels.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.rightFormMinSize = 100;]]></sample>
         </property>
+        <property name="tabIndex">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+          <description><![CDATA[Gets or sets the selected tab index for the specified tabpanel.
+When setting the value either the tab index or the tab name can be used.
+When getting the value, the tab index (not the name) will be returned all the time.]]></description>
+          <summary><![CDATA[Gets or sets the selected tab index for the specified tabpanel.]]></summary>
+          <sample><![CDATA[//gets the selected tab index of the tabpanel
+var current = %%prefix%%%%elementName%%.tabIndex;
+
+//sets (goes to) the selected tabIndex of the tabpanel
+%%prefix%%%%elementName%%.tabIndex = current + 1;
+
+//or sets (goes to) the tab with the specified name
+%%prefix%%%%elementName%%.tabIndex = 'tab_name';]]></sample>
+        </property>
         <property name="toolTipText">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Gets or sets the tool tip text of an element; text displays when the mouse cursor hovers over an element. 
@@ -34769,6 +34784,44 @@ forms.company.elements.faxBtn.visible = !currentState;]]></sample>
         </property>
       </properties>
       <functions>
+        <function name="addTab">
+          <argumentsTypes>
+            <argumentType typecode="[Ljava.lang.Object;"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[a boolean value indicating if tab was successfully added]]></return>
+          <description><![CDATA[Adds a relationless or related form as a tab in a specified tabpanel.]]></description>
+          <summary><![CDATA[Adds a relationless or related form as a tab in a specified tabpanel.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.addTab(forms.orders,'ordersTab','Orders',null,null,'#000000','#BBCCEE');]]></sample>
+          <parameters>
+            <parameter name="form/formname">
+              <description><![CDATA[the specified form/form name you wish to add as a tab]]></description>
+            </parameter>
+            <parameter name="name" optional="true">
+              <description><![CDATA[the specified name for the tab or NULL (default is null)]]></description>
+            </parameter>
+            <parameter name="tabText" optional="true">
+              <description><![CDATA[the specified text for the tab (default is null)]]></description>
+            </parameter>
+            <parameter name="tooltip" optional="true">
+              <description><![CDATA[a specified tooltip for the tab (default is null)]]></description>
+            </parameter>
+            <parameter name="iconURL" optional="true">
+              <description><![CDATA[a specified icon image or icon URL for the tab (default is null)]]></description>
+            </parameter>
+            <parameter name="fg" optional="true">
+              <description><![CDATA[the HTML RGB Hexadecimal foreground color for the tab (default is null)]]></description>
+            </parameter>
+            <parameter name="bg" optional="true">
+              <description><![CDATA[the HTML RGB Hexadecimal background color for the tab (default is null)]]></description>
+            </parameter>
+            <parameter name="relatedfoundset/relationname" optional="true">
+              <description><![CDATA[the specified name of the related foundset (default is null)]]></description>
+            </parameter>
+            <parameter name="index" optional="true">
+              <description><![CDATA[the specified index of a tab, default is -1, will add tab to the end]]></description>
+            </parameter>
+          </parameters>
+        </function>
         <function name="getAbsoluteFormLocationY">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the form in pixels.]]></return>
@@ -34865,6 +34918,27 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
+        <function name="getMaxTabIndex">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[maximum tab index (number)]]></return>
+          <description><![CDATA[Returns the maximum tab index for a specified tabpanel.]]></description>
+          <summary><![CDATA[Returns the maximum tab index for a specified tabpanel.]]></summary>
+          <sample><![CDATA[var max = %%prefix%%%%elementName%%.getMaxTabIndex();]]></sample>
+        </function>
+        <function name="getMnemonicAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The mnemonic.]]></return>
+          <description><![CDATA[Returns the mnemonic for a specified tab of a tabpanel.]]></description>
+          <summary><![CDATA[Returns the mnemonic for a specified tab of a tabpanel.]]></summary>
+          <sample><![CDATA[var mnemonic = %%prefix%%%%elementName%%.getMnemonicAt(3);]]></sample>
+          <parameters>
+            <parameter name="i" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The number of the specified tab.]]></description>
+            </parameter>
+          </parameters>
+        </function>
         <function name="getName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
@@ -34878,6 +34952,76 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <description><![CDATA[Returns the right form of the split pane.]]></description>
           <summary><![CDATA[Returns the right form of the split pane.]]></summary>
           <sample><![CDATA[var rightForm = %%prefix%%%%elementName%%.getRightForm();]]></sample>
+        </function>
+        <function name="getTabFGColorAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[color as hexadecimal RGB string]]></return>
+          <description><![CDATA[Returns the foreground color for a specified tab of a tabpanel.]]></description>
+          <summary><![CDATA[Returns the foreground color for a specified tab of a tabpanel.]]></summary>
+          <sample><![CDATA[var color = %%prefix%%%%elementName%%.getTabFGColorAt(3);]]></sample>
+          <parameters>
+            <parameter name="i" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the number of the specified tab]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="getTabFormNameAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the name of the form]]></return>
+          <description><![CDATA[Returns the form name for a specified tab of a tabpanel.]]></description>
+          <summary><![CDATA[Returns the form name for a specified tab of a tabpanel.]]></summary>
+          <sample><![CDATA[var formName = %%prefix%%%%elementName%%.getSelectedTabFormName(3);]]></sample>
+          <parameters>
+            <parameter name="i" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[index of the tab]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="getTabNameAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The tab name]]></return>
+          <description><![CDATA[Returns the name - the "name" design time property value - for a specified tab of a tabpanel.]]></description>
+          <summary><![CDATA[Returns the name - the "name" design time property value - for a specified tab of a tabpanel.]]></summary>
+          <sample><![CDATA[var tabName = %%prefix%%%%elementName%%.getTabNameAt(3);]]></sample>
+          <parameters>
+            <parameter name="i" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The number of the specified tab.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="getTabRelationNameAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[relation name]]></return>
+          <description><![CDATA[Returns the relation name for a specified tab of a tabpanel.]]></description>
+          <summary><![CDATA[Returns the relation name for a specified tab of a tabpanel.]]></summary>
+          <sample><![CDATA[var relName = %%prefix%%%%elementName%%.getTabRelationNameAt(3);]]></sample>
+          <parameters>
+            <parameter name="i" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[index of the tab]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="getTabTextAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The tab text.]]></return>
+          <description><![CDATA[Returns the text for a specified tab of a tabpanel.]]></description>
+          <summary><![CDATA[Returns the text for a specified tab of a tabpanel.]]></summary>
+          <sample><![CDATA[var tabText = %%prefix%%%%elementName%%.getTabTextAt(3);]]></sample>
+          <parameters>
+            <parameter name="i" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The number of the specified tab.]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function name="getWidth">
           <argumentsTypes/>
@@ -34898,6 +35042,20 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <summary><![CDATA[Returns the width of the current element.]]></summary>
           <sample><![CDATA[var w = %%prefix%%%%elementName%%.getWidth();]]></sample>
         </function>
+        <function name="isTabEnabledAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[True if tab is enabled, false otherwise.]]></return>
+          <description><![CDATA[Returns the enabled status of a specified tab in a tabpanel.]]></description>
+          <summary><![CDATA[Returns the enabled status of a specified tab in a tabpanel.]]></summary>
+          <sample><![CDATA[var status = %%prefix%%%%elementName%%.isTabEnabledAt(3);]]></sample>
+          <parameters>
+            <parameter name="i" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the number of the specified tab.]]></description>
+            </parameter>
+          </parameters>
+        </function>
         <function name="putClientProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
@@ -34915,6 +35073,29 @@ NOTE: Depending on the operating system, a user interface property name may be a
             </parameter>
             <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[a predefined value for the key]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="removeAllTabs">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[a boolean value indicating if tabs were successfully removed]]></return>
+          <description><![CDATA[Removes all tabs for a specified tabpanel.]]></description>
+          <summary><![CDATA[Removes all tabs for a specified tabpanel.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.removeAllTabs();]]></sample>
+        </function>
+        <function name="removeTabAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[a boolean value indicating if tab was successfully removed]]></return>
+          <description><![CDATA[Removes a specified tab in a tabpanel; can be based on a relation or relationless.
+
+NOTE: In Servoy 4.x (and higher), the addTab function applies to relationless or related tabs in a tabpanel.]]></description>
+          <summary><![CDATA[Removes a specified tab in a tabpanel; can be based on a relation or relationless.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.removeTabAt(3);]]></sample>
+          <parameters>
+            <parameter name="index">
+              <description><![CDATA[The index of the tab to remove.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -34977,6 +35158,24 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             </parameter>
           </parameters>
         </function>
+        <function name="setMnemonicAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the mnemonic for a specified tab in a tabpanel.]]></description>
+          <summary><![CDATA[Sets the mnemonic for a specified tab in a tabpanel.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.setMnemonicAt(3,'a');]]></sample>
+          <parameters>
+            <parameter name="index">
+              <description><![CDATA[the number of the specified tab]]></description>
+            </parameter>
+            <parameter name="text">
+              <description><![CDATA[the text to be set for the specified tab]]></description>
+            </parameter>
+          </parameters>
+        </function>
         <function name="setRightForm">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
@@ -35036,6 +35235,60 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
             </parameter>
             <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[the height of the element in pixels.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setTabEnabledAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the status of a specified tab in a tabpanel.]]></description>
+          <summary><![CDATA[Sets the status of a specified tab in a tabpanel.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.setTabEnabledAt(3,true);]]></sample>
+          <parameters>
+            <parameter name="i" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the number of the specified tab.]]></description>
+            </parameter>
+            <parameter name="b" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[true if enabled; or false if disabled.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setTabFGColorAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the foreground color for a specified tab in a tabpanel.]]></description>
+          <summary><![CDATA[Sets the foreground color for a specified tab in a tabpanel.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.setTabFGColorAt(3,'#000000');]]></sample>
+          <parameters>
+            <parameter name="i" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the number of the specified tab]]></description>
+            </parameter>
+            <parameter name="s" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the hexadecimal RGB color value to be set.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setTabTextAt">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the text for a specified tab in a tabpanel.]]></description>
+          <summary><![CDATA[Sets the text for a specified tab in a tabpanel.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.setTabTextAt(3,'newTitle');]]></sample>
+          <parameters>
+            <parameter name="index">
+              <description><![CDATA[the number of the specified tab]]></description>
+            </parameter>
+            <parameter name="text">
+              <description><![CDATA[the text to be set for the specified tab]]></description>
             </parameter>
           </parameters>
         </function>
