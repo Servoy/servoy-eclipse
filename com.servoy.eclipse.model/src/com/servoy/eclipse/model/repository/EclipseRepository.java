@@ -65,6 +65,7 @@ import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.RootObjectCache;
 import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -163,6 +164,20 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 		int element_id = last_element_id++;
 		if (new_uuid != null) uuid_element_id_map.put(new_uuid, new Integer(element_id));
 		return element_id;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.j2db.persistence.AbstractRepository#getRootObjectCache()
+	 */
+	@Override
+	protected RootObjectCache getRootObjectCache() throws RepositoryException
+	{
+		// first just call the servoy model so that we don't get sync block in RootObjectCache 
+		// that again calls loadRootObject below that wants to load the ServoyModel
+		ServoyModelFinder.getServoyModel();
+		return super.getRootObjectCache();
 	}
 
 	@Override
