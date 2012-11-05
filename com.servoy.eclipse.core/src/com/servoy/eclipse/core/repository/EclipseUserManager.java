@@ -117,7 +117,6 @@ public class EclipseUserManager extends WorkspaceUserManager
 	 */
 	public void setFormAndTableChangeAware()
 	{
-		ServoyModelManager.getServoyModelManager().getServoyModel();
 		// listen for TABLE / COLUMN changes
 		IServerManagerInternal serverManager = ServoyModel.getServerManager();
 		columnListener = new IColumnListener()
@@ -403,14 +402,12 @@ public class EclipseUserManager extends WorkspaceUserManager
 	{
 		if (serverListener != null)
 		{
-			ServoyModelManager.getServoyModelManager().getServoyModel();
 			ServoyModel.getServerManager().removeServerListener(serverListener);
 			serverListener = null;
 		}
 
 		if (tableListener != null)
 		{
-			ServoyModelManager.getServoyModelManager().getServoyModel();
 			IServerManagerInternal serverManager = ServoyModel.getServerManager();
 			// add listeners to initial server list
 			String[] array = serverManager.getServerNames(false, false, true, true);
@@ -441,7 +438,11 @@ public class EclipseUserManager extends WorkspaceUserManager
 			columnListener = null;
 		}
 
-		ServoyModelManager.getServoyModelManager().getServoyModel().removePersistChangeListener(true, persistChangeListener);
+		if (persistChangeListener != null)
+		{
+			ServoyModelManager.getServoyModelManager().getServoyModel().removePersistChangeListener(true, persistChangeListener);
+			persistChangeListener = null;
+		}
 	}
 
 }

@@ -90,7 +90,10 @@ public class Activator extends AbstractUIPlugin
 	public void stop(BundleContext context) throws Exception
 	{
 		plugin = null;
-		ServoyModelManager.getServoyModelManager().getServoyModel().removeI18NChangeListener(i18nChangeListener);
+		if (ServoyModelManager.getServoyModelManager().isServoyModelCreated())
+		{
+			ServoyModelManager.getServoyModelManager().getServoyModel().removeI18NChangeListener(i18nChangeListener);
+		}
 		super.stop(context);
 	}
 

@@ -67,9 +67,15 @@ public class ServoyModelManager
 					{
 						if (servoyModel == null)
 						{
-							servoyModel = new ServoyModel();
-							servoyModel.initialize();
-							latch.countDown();
+							try
+							{
+								servoyModel = new ServoyModel();
+								servoyModel.initialize();
+							}
+							finally
+							{
+								latch.countDown();
+							}
 						}
 					}
 				}
