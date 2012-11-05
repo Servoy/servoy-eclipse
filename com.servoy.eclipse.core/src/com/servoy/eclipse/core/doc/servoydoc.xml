@@ -9848,7 +9848,8 @@ fieldAbove.formIndex = 20;]]></sample>
         <property name="format">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The format that should be applied when displaying the data in the component.
-Some examples are "#%", "dd-MM-yyyy", "MM-dd-yyyy", etc.]]></description>
+Some examples are "#%", "dd-MM-yyyy", "MM-dd-yyyy", etc.
+This property is applicable only for types: TEXT_FIELD, COMBOBOX, TYPE_AHEAD, CALLENDAR and SPINNER.]]></description>
           <summary><![CDATA[The format that should be applied when displaying the data in the component.]]></summary>
           <sample><![CDATA[var field = form.newField('my_table_number', JSField.TEXT_FIELD, 10, 10, 100, 20);
 field.format = '$#.00';]]></sample>
