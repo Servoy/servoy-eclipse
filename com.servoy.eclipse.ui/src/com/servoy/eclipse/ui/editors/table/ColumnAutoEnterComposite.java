@@ -115,6 +115,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 	private final TabFolder tabFolder;
 	private final Label databaseDefaultValue;
 	private Column column;
+	private ColumnInfoBean columnInfoBean;
 	private final IObservable observable;
 
 	private final ColumnAutoEnterServoySeqComposite columnAutoEnterServoySeqComposite;
@@ -500,7 +501,14 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 
 		refreshComboValue();
 
-		ColumnInfoBean columnInfoBean = new ColumnInfoBean(c.getColumnInfo());
+		if (columnInfoBean == null)
+		{
+			columnInfoBean = new ColumnInfoBean(c.getColumnInfo());
+		}
+		else
+		{
+			columnInfoBean.setColumnInfo(c.getColumnInfo());
+		}
 		IObservableValue getCICustomValueObserveValue = PojoObservables.observeValue(columnInfoBean, "defaultValue");
 		IObservableValue customValueTextObserveWidget = SWTObservables.observeText(customValueText, SWT.Modify);
 		IObservableValue getCILookUpValueObserveValue = PojoObservables.observeValue(columnInfoBean, "lookupValue");
@@ -541,6 +549,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 		if (e.getSource() instanceof Button && ((Button)e.getSource()).getSelection())
 		{
 			setAutoEnterValue();
+			bindingContext.updateTargets();
 			enableControls();
 		}
 		else if (e.getSource().equals(sequenceCombo))
@@ -552,7 +561,10 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 			setComboValue();
 		}
 		if (column != null) column.flagColumnInfoChanged();
+
 	}
+
+	private String oldAutoEnterSubTypeString = null;
 
 	private void setAutoEnterValue()
 	{
@@ -560,9 +572,23 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 		if (column != null)
 		{
 			ColumnInfo columnInfo = column.getColumnInfo();
+			if (customValueButton.getSelection() || lookupValueButton.getSelection() || databaseDefaultButton.getSelection() &&
+				columnInfo.getAutoEnterSubType() > 0)
+			{
+				if (columnInfo.getAutoEnterType() == ColumnInfo.SEQUENCE_AUTO_ENTER)
+				{
+					oldAutoEnterSubTypeString = ColumnInfo.getSeqDisplayTypeString(columnInfo.getAutoEnterSubType());
+				}
+				else
+				{
+					oldAutoEnterSubTypeString = columnInfo.getAutoEnterSubTypeString(columnInfo.getAutoEnterType(), columnInfo.getAutoEnterSubType());
+				}
+			}
+			columnInfo.setAutoEnterSubType(ColumnInfo.NO_SEQUENCE_SELECTED);
 			if (systemValueButton.getSelection())
 			{
-				columnInfo.setAutoEnterType(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER);
+				columnInfoBean.setAutoEnterType(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER);
+				if (oldAutoEnterSubTypeString != null) systemValueCombo.setText(oldAutoEnterSubTypeString);
 				if (systemValueCombo.getSelectionIndex() > 0)
 				{
 					String type = systemValueCombo.getText();
@@ -580,18 +606,19 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 				{
 					columnInfo.setAutoEnterSubType(ColumnInfo.NO_SYSTEM_VALUE);
 				}
-				refreshComboValue();
 			}
 			else if (customValueButton.getSelection())
 			{
-				columnInfo.setAutoEnterType(ColumnInfo.CUSTOM_VALUE_AUTO_ENTER);
+				columnInfoBean.setAutoEnterType(ColumnInfo.CUSTOM_VALUE_AUTO_ENTER);
 			}
 			else if (lookupValueButton.getSelection())
 			{
-				columnInfo.setAutoEnterType(ColumnInfo.LOOKUP_VALUE_AUTO_ENTER);
+				columnInfoBean.setAutoEnterType(ColumnInfo.LOOKUP_VALUE_AUTO_ENTER);
 			}
 			else if (sequenceButton.getSelection())
 			{
+				columnInfoBean.setAutoEnterType(ColumnInfo.SEQUENCE_AUTO_ENTER);
+				if (oldAutoEnterSubTypeString != null) sequenceCombo.setText(oldAutoEnterSubTypeString);
 				if (sequenceCombo.getSelectionIndex() > 0)
 				{
 					String type = sequenceCombo.getText();
@@ -612,12 +639,12 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 					column.setSequenceType(ColumnInfo.NO_SEQUENCE_SELECTED);
 				}
 
-				refreshComboValue();
 			}
 			else if (databaseDefaultButton.getSelection())
 			{
-				columnInfo.setAutoEnterType(ColumnInfo.NO_AUTO_ENTER);
+				columnInfoBean.setAutoEnterType(ColumnInfo.NO_AUTO_ENTER);
 			}
+			refreshComboValue();
 		}
 	}
 
@@ -691,6 +718,11 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 				sequenceCombo.setText(type);
 				enableSequenceTab();
 			}
+		}
+		else
+		{
+			systemValueCombo.select(0);
+			sequenceCombo.select(0);
 		}
 	}
 

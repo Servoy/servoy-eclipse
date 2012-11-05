@@ -26,13 +26,18 @@ import com.servoy.j2db.persistence.ColumnInfo;
  */
 public class ColumnInfoBean
 {
-	protected final ColumnInfo columnInfo;
+	protected ColumnInfo columnInfo;
 
 	public ColumnInfoBean(ColumnInfo columnInfo)
 	{
 		this.columnInfo = columnInfo;
 	}
 
+
+	public void setColumnInfo(ColumnInfo columnInfo)
+	{
+		this.columnInfo = columnInfo;
+	}
 
 	public int getAutoEnterSubType()
 	{
@@ -74,6 +79,8 @@ public class ColumnInfoBean
 		return columnInfo.getDefaultFormat();
 	}
 
+	private String oldDefaultValue = null;
+
 	public String getDefaultValue()
 	{
 		return columnInfo.getDefaultValue();
@@ -103,6 +110,8 @@ public class ColumnInfoBean
 	{
 		return columnInfo.getID();
 	}
+
+	private String oldLookupValue = null;
 
 	public String getLookupValue()
 	{
@@ -192,6 +201,24 @@ public class ColumnInfoBean
 	public void setAutoEnterType(int t)
 	{
 		columnInfo.setAutoEnterType(t);
+		if (columnInfo.getAutoEnterType() != ColumnInfo.LOOKUP_VALUE_AUTO_ENTER && columnInfo.getLookupValue() != null)
+		{
+			oldLookupValue = columnInfo.getLookupValue();
+			setLookupValue(null);
+		}
+		if (columnInfo.getAutoEnterType() == ColumnInfo.LOOKUP_VALUE_AUTO_ENTER && columnInfo.getLookupValue() == null && oldLookupValue != null)
+		{
+			setLookupValue(oldLookupValue);
+		}
+		if (columnInfo.getAutoEnterType() != ColumnInfo.CUSTOM_VALUE_AUTO_ENTER && columnInfo.getDefaultValue() != null)
+		{
+			oldDefaultValue = columnInfo.getDefaultValue();
+			setDefaultValue(null);
+		}
+		if (columnInfo.getAutoEnterType() == ColumnInfo.CUSTOM_VALUE_AUTO_ENTER && columnInfo.getDefaultValue() == null && oldDefaultValue != null)
+		{
+			setDefaultValue(oldDefaultValue);
+		}
 	}
 
 	public void setConverterName(String s)
