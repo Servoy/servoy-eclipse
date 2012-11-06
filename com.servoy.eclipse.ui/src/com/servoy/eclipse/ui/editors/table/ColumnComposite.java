@@ -72,6 +72,7 @@ import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
@@ -601,9 +602,20 @@ public class ColumnComposite extends Composite
 			String colname = tname.substring(0, Math.min(tname.length(), Column.MAX_SQL_OBJECT_NAME_LENGTH - 3)) + "_id"; //$NON-NLS-1$
 			try
 			{
-				Column id = t.createNewColumn(nameValidator, colname, IColumnTypes.INTEGER, 0);
-				id.setDatabasePK(true);
-				id.setSequenceType(getDefaultFirstColumnSequenceType());
+				int defaultFirstColumnSequenceType = getDefaultFirstColumnSequenceType();
+				if (defaultFirstColumnSequenceType == ColumnInfo.UUID_GENERATOR)
+				{
+					Column id = t.createNewColumn(nameValidator, colname, IColumnTypes.TEXT, 0);
+					id.setDatabasePK(true);
+					id.setSequenceType(defaultFirstColumnSequenceType);
+					id.setFlag(Column.UUID_COLUMN, true);
+				}
+				else
+				{
+					Column id = t.createNewColumn(nameValidator, colname, IColumnTypes.INTEGER, 0);
+					id.setDatabasePK(true);
+					id.setSequenceType(defaultFirstColumnSequenceType);
+				}
 			}
 			catch (RepositoryException e)
 			{
