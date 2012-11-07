@@ -1763,6 +1763,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	private SimpleUserNode findChildNode(SimpleUserNode node, String name)
 	{
 		SimpleUserNode result = null;
+		if (node.children == null)
+		{
+			// children are lazy-loaded
+			getChildren(node);
+		}
 		if (node.children != null)
 		{
 			for (int i = node.children.length - 1; i >= 0; i--)
@@ -1774,6 +1779,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					break;
 				}
 			}
+		}
+		if (result != null && result.children == null)
+		{
+			// children are lazy-loaded
+			getChildren(result);
 		}
 		return result;
 	}
@@ -1835,10 +1845,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		{
 			return activeSolutionNode;
 		}
-		else
-		{
-			return (PlatformSimpleUserNode)findChildNode(modulesOfActiveSolution, solutionName);
-		}
+		return (PlatformSimpleUserNode)findChildNode(modulesOfActiveSolution, solutionName);
 	}
 
 	/**
