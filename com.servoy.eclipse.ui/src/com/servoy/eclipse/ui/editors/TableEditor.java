@@ -596,7 +596,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 		columnListener = new IColumnListener()
 		{
-			public void iColumnChanged(IColumn column)
+			public void iColumnsChanged(Collection<IColumn> columns)
 			{
 				UIUtils.runInUI(new Runnable()
 				{

@@ -47,6 +47,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerListener;
 import com.servoy.j2db.persistence.IServerManagerInternal;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
@@ -121,11 +122,15 @@ public class EclipseUserManager extends WorkspaceUserManager
 		IServerManagerInternal serverManager = ServoyModel.getServerManager();
 		columnListener = new IColumnListener()
 		{
-			public void iColumnChanged(IColumn column)
+			public void iColumnsChanged(Collection<IColumn> columns)
 			{
 				try
 				{
-					refreshLoadedAccessRights(column.getTable());
+					Set<ITable> set = new HashSet<ITable>();
+					for (IColumn col : columns)
+					{
+						if (set.add(col.getTable())) refreshLoadedAccessRights(col.getTable());
+					}
 				}
 				catch (RepositoryException e)
 				{
