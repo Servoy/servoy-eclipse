@@ -663,8 +663,8 @@ public class DataModelManager implements IColumnInfoManager
 					ci.setContainsMetaData(cid.containsMetaData);
 					ci.setConfiguredColumnType(cid.columnType);
 					ci.setCompatibleColumnTypes(cid.compatibleColumnTypes);
+					ci.setFlags(cid.flags);
 					c.setColumnInfo(ci);
-
 					// let table editors and so on now that a column is loaded.
 					t.fireIColumnChanged(c);
 				}
