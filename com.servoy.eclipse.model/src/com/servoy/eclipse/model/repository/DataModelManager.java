@@ -58,6 +58,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.UpdateMarkersJob;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnInfoManager;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -628,8 +629,11 @@ public class DataModelManager implements IColumnInfoManager
 			throw new RepositoryException("Table name does not match dbi file name for " + t.getName());
 		}
 
+		List<IColumn> changedColumns = null;
+
 		if (tableInfo.columnInfoDefSet.size() > 0)
 		{
+			changedColumns = new ArrayList<IColumn>(tableInfo.columnInfoDefSet.size());
 			for (int j = 0; j < tableInfo.columnInfoDefSet.size(); j++)
 			{
 				ColumnInfoDef cid = tableInfo.columnInfoDefSet.get(j);
@@ -665,8 +669,7 @@ public class DataModelManager implements IColumnInfoManager
 					ci.setCompatibleColumnTypes(cid.compatibleColumnTypes);
 					ci.setFlags(cid.flags);
 					c.setColumnInfo(ci);
-					// let table editors and so on now that a column is loaded.
-					t.fireIColumnChanged(c);
+					changedColumns.add(c);
 				}
 				addDifferenceMarkersIfNecessary(c, cid, t, cname);
 			}
@@ -705,6 +708,9 @@ public class DataModelManager implements IColumnInfoManager
 		else s.setTableMarkedAsHiddenInDeveloper(t.getName(), tableInfo.hiddenInDeveloper);
 
 		t.setMarkedAsMetaData(tableInfo.isMetaData);
+
+		// let table editors and so on now that a columns are loaded
+		t.fireIColumnsChanged(changedColumns);
 	}
 
 	private void addDifferenceMarkersIfNecessary(Column c, ColumnInfoDef cid, Table t, String columnName)

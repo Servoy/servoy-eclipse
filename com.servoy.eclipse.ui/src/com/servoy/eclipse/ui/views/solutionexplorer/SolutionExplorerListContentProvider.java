@@ -1659,17 +1659,20 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 
 	/**
-	 * @see com.servoy.j2db.persistence.IColumnListener#iColumnChanged(com.servoy.j2db.persistence.IColumn)
+	 * @see com.servoy.j2db.persistence.IColumnListener#iColumnsChanged(java.util.Collection)
 	 */
-	public void iColumnChanged(IColumn column)
+	public void iColumnsChanged(Collection<IColumn> columns)
 	{
-		try
+		for (IColumn column : columns)
 		{
-			flushTable(column.getTable());
-		}
-		catch (RepositoryException e)
-		{
-			ServoyLog.logError(e);
+			try
+			{
+				flushTable(column.getTable());
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError(e);
+			}
 		}
 	}
 

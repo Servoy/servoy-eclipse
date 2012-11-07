@@ -957,9 +957,12 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 		refreshTable(column);
 	}
 
-	public void iColumnChanged(IColumn column)
+	public void iColumnsChanged(Collection<IColumn> columns)
 	{
-		refreshTable(column);
+		for (IColumn column : columns)
+		{
+			refreshTable(column);
+		}
 	}
 
 	private void refreshTable(IColumn column)
