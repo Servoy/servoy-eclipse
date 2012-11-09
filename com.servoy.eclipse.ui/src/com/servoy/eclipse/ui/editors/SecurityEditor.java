@@ -345,9 +345,6 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 						text.setText("");
 					}
 
-					text.selectAll();
-					text.setFocus();
-
 					text.addFocusListener(new FocusAdapter()
 					{
 						@Override
@@ -385,6 +382,8 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 					});
 
 					editor.setEditor(text, item, columnCount);
+					text.selectAll();
+					text.setFocus();
 				}
 			}
 		});
