@@ -78,6 +78,10 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			String scriptPath = SolutionSerializer.getScriptPath(form, false);
 			IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
 			IValueCollection valueCollection = getValueCollection(file);
+			if (valueCollection == null && form.getExtendsID() > 0)
+			{
+				valueCollection = ValueCollectionFactory.createValueCollection();
+			}
 			if (valueCollection != null)
 			{
 				IValueCollection collection = ValueCollectionFactory.createValueCollection();
