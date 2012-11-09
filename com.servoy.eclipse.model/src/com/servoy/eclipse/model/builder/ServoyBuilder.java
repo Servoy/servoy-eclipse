@@ -2616,16 +2616,20 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							if (tab.getImageMediaID() > 0)
 							{
 								Media media = tabFlattenedSolution.getMedia(tab.getImageMediaID());
-								ImageIcon mediaImageIcon = new ImageIcon(media.getMediaData());
-								if (mediaImageIcon.getIconWidth() > 20 || mediaImageIcon.getIconHeight() > 20)
+								if (media != null)
 								{
-									String formName = ((Form)tab.getAncestor(IRepository.FORMS)).getName();
-									String tabPanelName = ((TabPanel)tab.getAncestor(IRepository.TABPANELS)).getName();
-									String tabName = tab.getName();
+									ImageIcon mediaImageIcon = new ImageIcon(media.getMediaData());
+									if (mediaImageIcon.getIconWidth() > 20 || mediaImageIcon.getIconHeight() > 20)
+									{
+										String formName = ((Form)tab.getAncestor(IRepository.FORMS)).getName();
+										String tabPanelName = ((TabPanel)tab.getAncestor(IRepository.TABPANELS)).getName();
+										String tabName = tab.getName();
 
-									ServoyMarker mk = MarkerMessages.FormTabPanelTabImageTooLarge.fill(tabName != null ? tabName : "", tabPanelName != null //$NON-NLS-1$
-										? tabPanelName : "", formName != null ? formName : ""); //$NON-NLS-1$ //$NON-NLS-2$
-									addMarker(project, mk.getType(), mk.getText(), -1, FORM_TABPANEL_TAB_IMAGE_TOO_LARGE, IMarker.PRIORITY_NORMAL, null, tab);
+										ServoyMarker mk = MarkerMessages.FormTabPanelTabImageTooLarge.fill(tabName != null ? tabName : "", tabPanelName != null //$NON-NLS-1$
+											? tabPanelName : "", formName != null ? formName : ""); //$NON-NLS-1$ //$NON-NLS-2$
+										addMarker(project, mk.getType(), mk.getText(), -1, FORM_TABPANEL_TAB_IMAGE_TOO_LARGE, IMarker.PRIORITY_NORMAL, null,
+											tab);
+									}
 								}
 							}
 						}
