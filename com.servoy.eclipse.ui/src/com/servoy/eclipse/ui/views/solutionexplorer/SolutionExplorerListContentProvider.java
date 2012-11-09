@@ -1663,11 +1663,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	 */
 	public void iColumnsChanged(Collection<IColumn> columns)
 	{
-		for (IColumn column : columns)
+		if (columns != null && columns.size() > 0)
 		{
 			try
 			{
-				flushTable(column.getTable());
+				flushTable(columns.iterator().next().getTable());
 			}
 			catch (RepositoryException e)
 			{
