@@ -202,12 +202,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 
 	protected FlattenedSolution createFlattenedSolution()
 	{
-		return createFlattenedSolution(false);
-	}
-
-	protected FlattenedSolution createFlattenedSolution(boolean filterImportHooks)
-	{
-		return new DeveloperFlattenedSolution(filterImportHooks);
+		return new FlattenedSolution();
 	}
 
 	public FlattenedSolution getFlattenedSolution()
@@ -219,7 +214,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 	{
 		if (flattenedSolution == null)
 		{
-			flattenedSolution = createFlattenedSolution(filterImportHooks);
+			flattenedSolution = (filterImportHooks ? new DeveloperFlattenedSolution(true) : createFlattenedSolution());
 
 			if (getActiveProject() != null && getActiveProject().getSolution() != null)
 			{

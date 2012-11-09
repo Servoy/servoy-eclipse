@@ -117,7 +117,6 @@ import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.DeveloperFlattenedSolution;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.Messages;
 import com.servoy.j2db.component.ComponentFactory;
@@ -1441,8 +1440,6 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 	@Override
 	protected FlattenedSolution createFlattenedSolution()
 	{
-		if (ApplicationServerSingleton.get().isDeveloperStartup()) return new DeveloperFlattenedSolution(false);
-
 		return new FlattenedSolution(true); // flattened form cache will be flushed when persists changes
 	}
 
