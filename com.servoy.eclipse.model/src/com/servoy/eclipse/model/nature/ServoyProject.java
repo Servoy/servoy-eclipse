@@ -43,6 +43,7 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.AbstractActiveSolutionHandler;
+import com.servoy.j2db.DeveloperFlattenedSolution;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
@@ -527,7 +528,8 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 			if (editingFlattenedSolution == null)
 			{
 				if (getEditingSolution() == null) return null;
-				editingFlattenedSolution = new FlattenedSolution(true); // flattened form cache will be flushed by ServoyModel when persists change.model
+				editingFlattenedSolution = (ApplicationServerSingleton.get().isDeveloperStartup() ? new DeveloperFlattenedSolution(true)
+					: new FlattenedSolution(true)); // flattened form cache will be flushed by ServoyModel when persists change.model
 			}
 			if (editingFlattenedSolution.getSolution() == null)
 			{

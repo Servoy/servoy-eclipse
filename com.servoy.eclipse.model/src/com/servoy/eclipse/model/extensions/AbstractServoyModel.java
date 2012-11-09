@@ -36,6 +36,7 @@ import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.AbstractActiveSolutionHandler;
+import com.servoy.j2db.DeveloperFlattenedSolution;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IActiveSolutionHandler;
 import com.servoy.j2db.persistence.IRepository;
@@ -92,13 +93,18 @@ public abstract class AbstractServoyModel implements IServoyModel
 		return servoyProjectCache.get(name);
 	}
 
+	public ServoyProject[] getModulesOfActiveProject()
+	{
+		return getModulesOfActiveProject(false);
+	}
+
 	/**
 	 * Returns an array containing the modules of the active project (including the active project). If there is no active project, will return an array of size
 	 * 0.
 	 * 
 	 * @return an array containing the modules of the active project.
 	 */
-	public ServoyProject[] getModulesOfActiveProject()
+	public ServoyProject[] getModulesOfActiveProject(boolean filterImportHooks)
 	{
 		// the set of solutions a user can work with at a given time is determined by the active solution;
 		// this means that the only expandable solution nodes will be the active solution and it's referenced modules;
@@ -106,7 +112,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 
 		List<ServoyProject> moduleProjects = new ArrayList<ServoyProject>();
 		// get all modules of the active solution (related solutions)
-		FlattenedSolution flatActiveSolution = getFlattenedSolution();
+		FlattenedSolution flatActiveSolution = getFlattenedSolution(filterImportHooks);
 		if (flatActiveSolution != null)
 		{
 			Solution[] relatedSolutions = flatActiveSolution.getModules();
@@ -196,14 +202,24 @@ public abstract class AbstractServoyModel implements IServoyModel
 
 	protected FlattenedSolution createFlattenedSolution()
 	{
-		return new FlattenedSolution();
+		return createFlattenedSolution(false);
+	}
+
+	protected FlattenedSolution createFlattenedSolution(boolean filterImportHooks)
+	{
+		return new DeveloperFlattenedSolution(filterImportHooks);
 	}
 
 	public FlattenedSolution getFlattenedSolution()
 	{
+		return getFlattenedSolution(false);
+	}
+
+	public FlattenedSolution getFlattenedSolution(boolean filterImportHooks)
+	{
 		if (flattenedSolution == null)
 		{
-			flattenedSolution = createFlattenedSolution();
+			flattenedSolution = createFlattenedSolution(filterImportHooks);
 
 			if (getActiveProject() != null && getActiveProject().getSolution() != null)
 			{
