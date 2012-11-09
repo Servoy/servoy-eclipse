@@ -423,6 +423,7 @@ public class SolutionSerializer
 		obj.put(PROP_NAME, smd.getName());
 		obj.put(PROP_FILE_VERSION, AbstractRepository.repository_version);
 		obj.put("solutionType", new Integer(smd.getSolutionType())); //$NON-NLS-1$
+		obj.put("protectionPassword", smd.getProtectionPassword()); //$NON-NLS-1$
 		obj.put("mustAuthenticate", Boolean.valueOf(smd.getMustAuthenticate())); //$NON-NLS-1$
 		return obj.toString(true);
 	}
