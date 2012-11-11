@@ -34,6 +34,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 
+import com.servoy.eclipse.model.DeveloperFlattenedSolution;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ErrorKeeper;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
@@ -43,7 +44,6 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.AbstractActiveSolutionHandler;
-import com.servoy.j2db.DeveloperFlattenedSolution;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
@@ -183,9 +183,9 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 		IProjectDescription desc = project.getDescription();
 		ICommand[] commands = desc.getBuildSpec();
 
-		for (int i = 0; i < commands.length; ++i)
+		for (ICommand command : commands)
 		{
-			if (commands[i].getBuilderName().equals(ServoyBuilder.BUILDER_ID))
+			if (command.getBuilderName().equals(ServoyBuilder.BUILDER_ID))
 			{
 				return;
 			}
@@ -528,8 +528,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 			if (editingFlattenedSolution == null)
 			{
 				if (getEditingSolution() == null) return null;
-				editingFlattenedSolution = (ApplicationServerSingleton.get().isDeveloperStartup() ? new DeveloperFlattenedSolution(true)
-					: new FlattenedSolution(true)); // flattened form cache will be flushed by ServoyModel when persists change.model
+				editingFlattenedSolution = new DeveloperFlattenedSolution(true); // flattened form cache will be flushed by ServoyModel when persists change.model
 			}
 			if (editingFlattenedSolution.getSolution() == null)
 			{

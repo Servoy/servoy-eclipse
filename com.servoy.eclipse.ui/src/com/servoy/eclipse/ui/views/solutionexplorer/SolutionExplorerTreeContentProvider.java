@@ -476,7 +476,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		// by the active solution and active editor (in case of a calculation
 		// being edited);
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		ServoyProject[] modules = servoyModel.getModulesOfActiveProject(true);
+		ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
 		Collection<Solution> modulesForCalculation = null;
 		if (solutionOfCalculation != null)
 		{
