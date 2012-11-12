@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <servoydoc>
   <runtime>
     <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT">
@@ -4279,7 +4279,8 @@ Make sure to set the applicable filters when the sql is used in a loadRecords() 
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String representing the sql of the JSFoundset.]]></return>
           <description><![CDATA[Returns the internal SQL which defines the specified (related)foundset.
 Optionally, the foundset and table filter params can be excluded in the sql (includeFilters=false).
-Make sure to set the applicable filters when the sql is used in a loadRecords() call.]]></description>
+Make sure to set the applicable filters when the sql is used in a loadRecords() call.
+When the founset is in find mode, the find conditions are included in the resulting query.]]></description>
           <summary><![CDATA[Returns the internal SQL which defines the specified (related)foundset.]]></summary>
           <sample><![CDATA[var sql = databaseManager.getSQL(foundset)]]></sample>
           <parameters>
@@ -4312,7 +4313,8 @@ Parameters for the filters are included.]]></description>
             <argumentType typecode="boolean"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;"><![CDATA[An Array with the sql parameter values.]]></return>
-          <description><![CDATA[Returns the internal SQL parameters, as an array, that are used to define the specified (related)foundset.]]></description>
+          <description><![CDATA[Returns the internal SQL parameters, as an array, that are used to define the specified (related)foundset.
+When the founset is in find mode, the arguments for the find conditions are included in the result.]]></description>
           <summary><![CDATA[Returns the internal SQL parameters, as an array, that are used to define the specified (related)foundset.]]></summary>
           <sample><![CDATA[var sqlParameterArray = databaseManager.getSQLParameters(foundset,false)]]></sample>
           <parameters>
@@ -9848,7 +9850,8 @@ fieldAbove.formIndex = 20;]]></sample>
         <property name="format">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The format that should be applied when displaying the data in the component.
-Some examples are "#%", "dd-MM-yyyy", "MM-dd-yyyy", etc.]]></description>
+Some examples are "#%", "dd-MM-yyyy", "MM-dd-yyyy", etc.
+This property is applicable only for types: TEXT_FIELD, COMBOBOX, TYPE_AHEAD, CALLENDAR and SPINNER.]]></description>
           <summary><![CDATA[The format that should be applied when displaying the data in the component.]]></summary>
           <sample><![CDATA[var field = form.newField('my_table_number', JSField.TEXT_FIELD, 10, 10, 100, 20);
 field.format = '$#.00';]]></sample>
@@ -13726,7 +13729,10 @@ for (var i = 0; params != null && i < params.length; i++)
         <function name="getQuery">
           <argumentsTypes/>
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"><![CDATA[query.]]></return>
-          <description><![CDATA[Get the query that the foundset is currently using.]]></description>
+          <description><![CDATA[Get the query that the foundset is currently using.
+When the founset is in find mode, the find conditions are included in the resulting query. 
+So the query that would be used when just calling search() (or search(true,true)) is returned.
+Note that foundset filters are included and table filters are not included in the query.]]></description>
           <summary><![CDATA[Get the query that the foundset is currently using.]]></summary>
           <sample><![CDATA[var q = foundset.getQuery()
 q.where.add(q.columns.x.eq(100))
@@ -13978,8 +13984,9 @@ of records are updated or added that belong to that relation. It will only be a 
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.]]></description>
-          <summary><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
+          <description><![CDATA[Loads records into form foundset based on a query builder object (also known as 'Form by query').
+When the founset is in find mode, the find states are discarded, the foundset will go out of find mode and the foundset will be loaded using the query.]]></description>
+          <summary><![CDATA[Loads records into form foundset based on a query builder object (also known as 'Form by query').]]></summary>
           <sample><![CDATA[%%prefix%%foundset.loadRecords(qbselect);]]></sample>
           <parameters>
             <parameter name="querybuilder" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
@@ -24696,7 +24703,10 @@ for (var i = 0; params != null && i < params.length; i++)
         <function name="getQuery">
           <argumentsTypes/>
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"><![CDATA[query.]]></return>
-          <description><![CDATA[Get the query that the foundset is currently using.]]></description>
+          <description><![CDATA[Get the query that the foundset is currently using.
+When the founset is in find mode, the find conditions are included in the resulting query. 
+So the query that would be used when just calling search() (or search(true,true)) is returned.
+Note that foundset filters are included and table filters are not included in the query.]]></description>
           <summary><![CDATA[Get the query that the foundset is currently using.]]></summary>
           <sample><![CDATA[var q = foundset.getQuery()
 q.where.add(q.columns.x.eq(100))
@@ -24948,8 +24958,9 @@ of records are updated or added that belong to that relation. It will only be a 
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.]]></description>
-          <summary><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
+          <description><![CDATA[Loads records into form foundset based on a query builder object (also known as 'Form by query').
+When the founset is in find mode, the find states are discarded, the foundset will go out of find mode and the foundset will be loaded using the query.]]></description>
+          <summary><![CDATA[Loads records into form foundset based on a query builder object (also known as 'Form by query').]]></summary>
           <sample><![CDATA[%%prefix%%foundset.loadRecords(qbselect);]]></sample>
           <parameters>
             <parameter name="querybuilder" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
