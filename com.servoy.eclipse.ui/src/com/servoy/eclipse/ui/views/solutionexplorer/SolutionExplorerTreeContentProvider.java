@@ -1748,11 +1748,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	private SimpleUserNode findChildNode(SimpleUserNode node, String name)
 	{
 		SimpleUserNode result = null;
-		if (node.children == null)
-		{
-			// children are lazy-loaded
-			getChildren(node);
-		}
+//		if (node.children == null) commented out because this causes a refresh issue when creating first form in a solution
+//		{
+//			// children are lazy-loaded
+//			getChildren(node);
+//		}
 		if (node.children != null)
 		{
 			for (int i = node.children.length - 1; i >= 0; i--)
@@ -1765,11 +1765,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 			}
 		}
-		if (result != null && result.children == null)
-		{
-			// children are lazy-loaded
-			getChildren(result);
-		}
+//		if (result != null && result.children == null) commented out because this causes a refresh issue when creating first form in a solution
+//		{
+//			// children are lazy-loaded
+//			getChildren(result);
+//		}
 		return result;
 	}
 
