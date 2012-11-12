@@ -2118,6 +2118,7 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 	public Set<IPersist> handleChangedFiles(IProject project, Solution solution, List<File> changedFiles, final ServoyProject servoyProject,
 		final IContainer workspace, SolutionDeserializer sd) throws RepositoryException
 	{
+		// TODO refresh modules when solution type was changed
 		List<IPersist> strayCats = new ArrayList<IPersist>();
 		String oldModules = solution.getModulesNames();
 		List<File> nonvistedFiles = sd.updateSolution(project.getLocation().toFile(), solution, changedFiles, strayCats, false, false);
