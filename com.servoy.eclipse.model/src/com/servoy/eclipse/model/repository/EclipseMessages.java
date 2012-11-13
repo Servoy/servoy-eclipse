@@ -316,7 +316,7 @@ public class EclipseMessages implements ICustomMessageLoader
 								String[] serverTableNames = DataSourceUtils.getDBServernameTablename(i18nDataSource);
 								TreeMap<String, I18NUtil.MessageEntry> messages = I18NUtil.loadSortedMessagesFromRepository(
 									ApplicationServerSingleton.get().getDeveloperRepository(), ApplicationServerSingleton.get().getDataServer(),
-									ApplicationServerSingleton.get().getClientId(), serverTableNames[0], serverTableNames[1]);
+									ApplicationServerSingleton.get().getClientId(), serverTableNames[0], serverTableNames[1], null, null);
 								writeMessages(serverTableNames[0], serverTableNames[1], messages, new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()),
 									resourceProject.getProject(), false, overwriteExisting, deleteNonExistingKeys);
 							}
