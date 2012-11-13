@@ -75,12 +75,8 @@ import com.servoy.eclipse.ui.wizards.SynchronizeDBIWithDBWizard.SplitInThreeWiza
 import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.IDebugWebClient;
 import com.servoy.j2db.dataprocessing.FoundSetManager;
-import com.servoy.j2db.dataprocessing.IDataServer;
-import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.dataprocessing.MetaDataUtils;
 import com.servoy.j2db.persistence.Table;
-import com.servoy.j2db.query.QuerySelect;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.SortedList;
 
@@ -99,73 +95,22 @@ public class UpdateMetaDataWziard extends Wizard
 	private Shell shell = null;
 	private DataModelManager dmm = null;
 
-	public UpdateMetaDataWziard(List<Table> tables, Shell shell)
+	public UpdateMetaDataWziard(List<Table> tablesWithDataInDB, List<Table> tablesWithoutDataInDB, Shell shell)
 	{
 		super();
 		setNeedsProgressMonitor(true);
 		this.tablesWithDataInDB = new ArrayList<Pair<String, Table>>();
-		tablesWithoutDataInDB = new ArrayList<Pair<String, Table>>();
-		Pair<List<Table>, List<Table>> result = getTablesThatContainDataInDb(tables);
-		for (Table t : result.getLeft())
+		this.tablesWithoutDataInDB = new ArrayList<Pair<String, Table>>();
+		for (Table t : tablesWithDataInDB)
 		{
 			this.tablesWithDataInDB.add(new Pair<String, Table>(t.getServerName(), t));
 		}
-		for (Table t : result.getRight())
+		for (Table t : tablesWithoutDataInDB)
 		{
 			this.tablesWithoutDataInDB.add(new Pair<String, Table>(t.getServerName(), t));
 		}
 		this.shell = shell;//this.getShell();
 		this.dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
-	}
-
-	/**
-	 * @param tables  - list of mixed tables (tables with data in DB and tables without data in DB)
-	 * @return List of tables that contain data in DB
-	 */
-	private Pair<List<Table>, List<Table>> getTablesThatContainDataInDb(List<Table> tables)
-	{
-		//tables that contain data in the database
-		List<Table> tablesWithDataInDB = new ArrayList<Table>();
-		List<Table> tablesWithoutDataInDB = new ArrayList<Table>();
-
-		MultiStatus warnings = new MultiStatus(Activator.PLUGIN_ID, 0, "For more information please click 'Details'.", null);
-		//filter only tables that contain data in their corresponding database
-		for (Table table : tables)
-		{
-			try
-			{ // check for existing data
-				QuerySelect query = MetaDataUtils.createTableMetadataQuery(table, null);
-				IDataSet ds = ApplicationServerSingleton.get().getDataServer().performQuery(ApplicationServerSingleton.get().getClientId(),
-					table.getServerName(), null, query, null, false, 0, 1, IDataServer.META_DATA_QUERY, null);
-				if (ds.getRowCount() > 0)
-				{
-					tablesWithDataInDB.add(table);
-				}
-				else
-				{
-					tablesWithoutDataInDB.add(table);
-				}
-			}
-			catch (Exception e)
-			{
-				ServoyLog.logError("Error while checking for existing data in DB ", e);
-				warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Error while checking for existing data in DB " + e.getMessage()));
-				e.printStackTrace();
-			}
-		}
-		// show warning dialog
-		if (warnings.getChildren().length > 0)
-		{
-			final MultiStatus fw = warnings;
-			UIUtils.runInUI(new Runnable()
-			{
-				public void run()
-				{
-					ErrorDialog.openError(getShell(), null, null, fw);
-				}
-			}, false);
-		}
-		return new Pair<List<Table>, List<Table>>(tablesWithDataInDB, tablesWithoutDataInDB);
 	}
 
 	@Override
@@ -191,8 +136,8 @@ public class UpdateMetaDataWziard extends Wizard
 		};
 		Image serverImage = Activator.getDefault().loadImageFromBundle("server.gif");
 		Image tableImage = Activator.getDefault().loadImageFromBundle("portal.gif");
-		overwriteSelectionPage = new SplitInTwoWizardPage<String, Table>("The folowing tables are not emty",
-			"Data synchronize will overwrite existing data , continue?", "Skip", "Overwrite data", "Skip all/multiselection", "Overwrite all/multiselection",
+		overwriteSelectionPage = new SplitInTwoWizardPage<String, Table>("The following tables are not empty",
+			"Data synchronize will overwrite existing data, continue?", "Skip", "Overwrite data", "Skip all/multiselection", "Overwrite all/multiselection",
 			tablesWithDataInDB, comparator, serverImage, tableImage);
 
 		addPage(overwriteSelectionPage);
