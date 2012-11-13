@@ -19,6 +19,8 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.action.Action;
@@ -55,6 +57,7 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 	private final SolutionExplorerView viewer;
 	private Solution solution;
 	private SimpleUserNode selection;
+	private String folderPathWithoutSelectedFolder = null;
 
 	public RenameMediaFolderAction(SolutionExplorerView viewer)
 	{
@@ -82,7 +85,11 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 				// make sure you have the in-memory version of the solution
 				solution = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(((Solution)solutionNode.getRealObject()).getName()).getEditingSolution();
 				selection = node;
+				//get the full path of the folder
+				String folder = getMediaFolderPathPath(selection);
+				folderPathWithoutSelectedFolder = folder.substring(0, folder.lastIndexOf('/') == -1 ? 0 : folder.lastIndexOf('/'));
 			}
+
 		}
 		setEnabled(solution != null);
 	}
@@ -92,14 +99,36 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 	{
 		if (solution == null || selection == null) return;
 
-
 		InputDialog renameFolderNameDlg = new InputDialog(viewer.getSite().getShell(), "Rename media folder", "Specify a new folder name", selection.getName(),
 			new IInputValidator()
 			{
 				public String isValid(String newText)
 				{
-					return newText.length() < 1 ? "Name cannot be empty" : newText.equalsIgnoreCase(selection.getName()) ? "Please enter a different name"
-						: null;
+					if (newText.length() < 1)
+					{
+						return "Name cannot be empty";
+					}
+					else if (newText.indexOf('\\') >= 0 || newText.indexOf('/') >= 0 || newText.indexOf(' ') >= 0)
+					{
+						return "Invalid new media name";
+					}
+					else if (newText.equalsIgnoreCase(selection.getName()))
+					{
+						return "Please enter a different name";
+					}
+					else
+					{
+						SimpleUserNode solutionNode = selection.getAncestorOfType(ServoyProject.class);
+						String newFolderPath = folderPathWithoutSelectedFolder.length() == 0 ? newText : folderPathWithoutSelectedFolder + '/' + newText;
+						if (checkForDuplicates(solutionNode, newFolderPath) != null)
+						{
+							return "Media folder " + newFolderPath + " already exists";
+						}
+						else
+						{
+							return null;
+						}
+					}
 				}
 			});
 
@@ -170,5 +199,56 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 				ServoyLog.logError(ex);
 			}
 		}
+	}
+
+	/**
+	 * Does a breadth first search in the solex solution tree for media and media folders  (also goes through modules)
+	 * @param root
+	 * @param newFolderPath
+	 * @return
+	 */
+	public static SimpleUserNode checkForDuplicates(SimpleUserNode root, String newFolderPath)
+	{
+		Queue<SimpleUserNode> queue = new LinkedList<SimpleUserNode>();
+		queue.add(root);
+		while (queue.size() > 0)
+		{
+			// Take the next node from the front of the queue
+			SimpleUserNode node = queue.poll();
+			// Process the node 'node'
+			if (node.getType() == UserNodeType.MEDIA_FOLDER)
+			{
+				String currentSearchFolder = getMediaFolderPathPath(node);
+				if (currentSearchFolder.equalsIgnoreCase(newFolderPath))
+				{
+					return node;
+				}
+			}
+			if (node.children != null)
+			{
+				// Add the node’s children to the back of the queue
+				for (SimpleUserNode childNode : node.children)
+				{
+					if (childNode.getType() == UserNodeType.MODULES || childNode.getType() == UserNodeType.MEDIA ||
+						childNode.getType() == UserNodeType.MEDIA_FOLDER || childNode.getType() == UserNodeType.SOLUTION_ITEM) queue.add(childNode);
+				}
+			}
+		}
+		// None of the nodes matched the specified predicate.
+		return null;
+	}
+
+	public static String getMediaFolderPathPath(SimpleUserNode node)
+	{
+		StringBuilder _folderPath = new StringBuilder(node.getName());
+		SimpleUserNode parent = node.parent;
+		while (parent != null && parent.getType() != UserNodeType.MEDIA && parent.getType() != UserNodeType.SOLUTION_ITEM &&
+			parent.getType() != UserNodeType.SOLUTION)
+		{
+			//add the folder path at the beginning
+			_folderPath.insert(0, '/').insert(0, parent.getName());
+			parent = parent.parent;
+		}
+		return _folderPath.toString();
 	}
 }

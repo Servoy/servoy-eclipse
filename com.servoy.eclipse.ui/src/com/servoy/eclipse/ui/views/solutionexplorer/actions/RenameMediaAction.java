@@ -33,9 +33,11 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.MediaNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.ValidatorSearchContext;
 
 /**
  * Action to rename media.
@@ -104,6 +106,15 @@ public class RenameMediaAction extends Action implements ISelectionChangedListen
 						return "Invalid new media name";
 					}
 
+					try
+					{
+						ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(newText, -1,
+							new ValidatorSearchContext(this, IRepository.MEDIA), false);
+					}
+					catch (RepositoryException e)
+					{
+						return e.getMessage();
+					}
 					// ok
 					return null;
 				}
@@ -111,10 +122,11 @@ public class RenameMediaAction extends Action implements ISelectionChangedListen
 		int res = nameDialog.open();
 		if (res == Window.OK)
 		{
+			String newName = nameDialog.getValue();
 			ServoyProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solution.getName());
 			Media selectedMediaItem = project.getEditingSolution().getMedia(
 				selectedMediaPath != null ? selectedMediaPath + selectedMediaName : selectedMediaName);
-			selectedMediaItem.setName(selectedMediaPath != null ? selectedMediaPath + nameDialog.getValue() : nameDialog.getValue());
+			selectedMediaItem.setName(selectedMediaPath != null ? selectedMediaPath + newName : newName);
 			try
 			{
 				project.saveEditingSolutionNodes(new IPersist[] { selectedMediaItem }, true);
