@@ -81,6 +81,16 @@ class PersistEditPolicy extends ComponentEditPolicy
 	}
 
 	@Override
+	public EditPart getTargetEditPart(Request request)
+	{
+		if (understandsRequest(request))
+		{
+			return getHost();
+		}
+		return super.getTargetEditPart(request);
+	}
+
+	@Override
 	public Command getCommand(Request request)
 	{
 		IPersist persist = (IPersist)getHost().getModel();
