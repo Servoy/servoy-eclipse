@@ -51,13 +51,18 @@ import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.wizards.UpdateMetaDataWziard;
+import com.servoy.j2db.dataprocessing.IDataServer;
+import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.dataprocessing.MetaDataUtils;
 import com.servoy.j2db.dataprocessing.MetaDataUtils.TooManyRowsException;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.query.QuerySelect;
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Pair;
 
 /**
  * 
@@ -277,8 +282,66 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 			UIUtils.reportWarning("Error updating table(s)", "Cannot find internal data model manager.");
 			return;
 		}
-		WizardDialog dialog = new WizardDialog(shell, new UpdateMetaDataWziard(tables, shell));
-		dialog.open();
+		Pair<List<Table>, List<Table>> result = getTablesThatContainDataInDb(tables);
+		if (!result.getLeft().isEmpty())
+		{
+			WizardDialog dialog = new WizardDialog(shell, new UpdateMetaDataWziard(result.getLeft(), result.getRight(), shell));
+			dialog.open();
+		}
+		else
+		{
+			UIUtils.reportWarning("Info", "There is no meta data to be imported in the DB.");
+		}
+	}
+
+	/**
+	 * @param tables  - list of mixed tables (tables with data in DB and tables without data in DB)
+	 * @return List of tables that contain data in DB
+	 */
+	private Pair<List<Table>, List<Table>> getTablesThatContainDataInDb(List<Table> tables)
+	{
+		//tables that contain data in the database
+		List<Table> tablesWithDataInDB = new ArrayList<Table>();
+		List<Table> tablesWithoutDataInDB = new ArrayList<Table>();
+
+		MultiStatus warnings = new MultiStatus(Activator.PLUGIN_ID, 0, "For more information please click 'Details'.", null);
+		//filter only tables that contain data in their corresponding database
+		for (Table table : tables)
+		{
+			try
+			{ // check for existing data
+				QuerySelect query = MetaDataUtils.createTableMetadataQuery(table, null);
+				IDataSet ds = ApplicationServerSingleton.get().getDataServer().performQuery(ApplicationServerSingleton.get().getClientId(),
+					table.getServerName(), null, query, null, false, 0, 1, IDataServer.META_DATA_QUERY, null);
+				if (ds.getRowCount() > 0)
+				{
+					tablesWithDataInDB.add(table);
+				}
+				else
+				{
+					tablesWithoutDataInDB.add(table);
+				}
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError("Error while checking for existing data in DB ", e);
+				warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Error while checking for existing data in DB " + e.getMessage()));
+				e.printStackTrace();
+			}
+		}
+		// show warning dialog
+		if (warnings.getChildren().length > 0)
+		{
+			final MultiStatus fw = warnings;
+			UIUtils.runInUI(new Runnable()
+			{
+				public void run()
+				{
+					ErrorDialog.openError(shell, null, null, fw);
+				}
+			}, false);
+		}
+		return new Pair<List<Table>, List<Table>>(tablesWithDataInDB, tablesWithoutDataInDB);
 	}
 
 	private void generateTableDataFile(List<Table> tables)
