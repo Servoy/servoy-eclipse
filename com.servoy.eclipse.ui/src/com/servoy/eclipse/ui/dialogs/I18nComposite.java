@@ -359,7 +359,7 @@ public class I18nComposite extends Composite
 		countryComboViewer.addSelectionChangedListener(getCountrySelectionHandler());
 
 
-		tableViewer.setInput(messagesModel.getMessages(filter, null, null));
+		tableViewer.setInput(messagesModel.getMessages(filter, null, null, null));
 	}
 
 
@@ -441,7 +441,7 @@ public class I18nComposite extends Composite
 	public void refresh()
 	{
 		String selection = getSelectedKey();
-		tableViewer.setInput(messagesModel.getMessages(filterText.getText(), null, null));
+		tableViewer.setInput(messagesModel.getMessages(filterText.getText(), null, null, null));
 		if (selection != null) selectKey(selection);
 	}
 

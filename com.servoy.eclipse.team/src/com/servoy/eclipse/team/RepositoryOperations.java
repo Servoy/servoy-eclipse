@@ -1066,7 +1066,7 @@ public class RepositoryOperations
 		IDataServer dataServer = repositoryAccessPoint.getDataServer();
 		String clientID = repositoryAccessPoint.getClientID();
 
-		return I18NUtil.loadSortedMessagesFromRepository(repository, dataServer, clientID, i18NServerName, i18NTableName, null, null);
+		return I18NUtil.loadSortedMessagesFromRepository(repository, dataServer, clientID, i18NServerName, i18NTableName, null, null, null);
 	}
 
 
@@ -1104,7 +1104,7 @@ public class RepositoryOperations
 		}
 		if (i18NTable == null) throw new Exception("Remote repository does not have an i18n table named : " + i18NServerName + "." + i18NTableName +
 			"\nYou should create one manually if you want to be able to commit i18n messages.");
-		I18NUtil.writeMessagesToRepository(i18NServerName, i18NTableName, repository, dataServer, clientID, messages, false, false, null, null);
+		I18NUtil.writeMessagesToRepository(i18NServerName, i18NTableName, repository, dataServer, clientID, messages, false, false, null, null, null);
 	}
 
 	/**

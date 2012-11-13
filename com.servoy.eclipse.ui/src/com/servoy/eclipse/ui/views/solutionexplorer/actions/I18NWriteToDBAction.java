@@ -108,7 +108,7 @@ public class I18NWriteToDBAction extends Action
 					{
 						TreeMap<String, I18NUtil.MessageEntry> messages = EclipseMessages.readMessages(serverTableNames[0], serverTableNames[1], workspace);
 						I18NUtil.writeMessagesToRepository(serverTableNames[0], serverTableNames[1], repository, dataServer, clientID, messages, false,
-							!deleteNonExistingKeys, null, null);
+							!deleteNonExistingKeys, null, null, null);
 					}
 					catch (final Exception ex)
 					{

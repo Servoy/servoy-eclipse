@@ -447,10 +447,11 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 			if (properties == null)
 			{
 				properties = new Properties();
-				Messages.loadMessagesFromDatabaseInternal(null, null, getSettings(), null, null, properties, locale);
+				Messages.loadMessagesFromDatabaseInternal(null, null, getSettings(), null, null, properties, locale, getFoundSetManager());
 				if (getSolution() != null) //must be sure that solution is loaded, app might retrieve system messages, before solution loaded!
 				{
-					Messages.loadMessagesFromDatabaseInternal(getSolution().getI18nDataSource(), null, getSettings(), null, null, properties, locale);
+					Messages.loadMessagesFromDatabaseInternal(getSolution().getI18nDataSource(), null, getSettings(), null, null, properties, locale,
+						getFoundSetManager());
 					messages.put(locale, properties);
 				}
 			}
