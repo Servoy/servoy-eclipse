@@ -28,7 +28,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 
-import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
@@ -49,7 +48,6 @@ public class CreateMediaFolderAction extends Action implements ISelectionChanged
 {
 	private final SolutionExplorerView viewer;
 	private SimpleUserNode selectedFolder;
-	private String folderPathWithoutSelectedFolder;
 
 	public CreateMediaFolderAction(SolutionExplorerView viewer)
 	{
@@ -71,8 +69,6 @@ public class CreateMediaFolderAction extends Action implements ISelectionChanged
 			((((SimpleUserNode)sel.getFirstElement()).getType() == UserNodeType.MEDIA) || (((SimpleUserNode)sel.getFirstElement()).getType() == UserNodeType.MEDIA_FOLDER)))
 		{
 			selectedFolder = ((SimpleUserNode)sel.getFirstElement());
-			String folder = RenameMediaFolderAction.getMediaFolderPathPath(selectedFolder);
-			folderPathWithoutSelectedFolder = folder.substring(0, folder.lastIndexOf('/') == -1 ? 0 : folder.lastIndexOf('/'));
 		}
 		setEnabled(selectedFolder != null);
 	}
@@ -96,16 +92,7 @@ public class CreateMediaFolderAction extends Action implements ISelectionChanged
 				}
 				else
 				{
-					SimpleUserNode solutionNode = selectedFolder.getAncestorOfType(ServoyProject.class);
-					String newFolderPath = folderPathWithoutSelectedFolder.length() == 0 ? newText : folderPathWithoutSelectedFolder + '/' + newText;
-					if (RenameMediaFolderAction.checkForDuplicates(solutionNode, newFolderPath) != null)
-					{
-						return "Media folder " + newFolderPath + " already exists";
-					}
-					else
-					{
-						return null;
-					}
+					return RenameMediaFolderAction.checkForMediaFolderDuplicates(newText, selectedFolder);
 				}
 			}
 		});
