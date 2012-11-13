@@ -99,6 +99,7 @@ import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
@@ -118,6 +119,8 @@ import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
+import com.servoy.j2db.scripting.annotations.AnnotationManager;
+import com.servoy.j2db.scripting.annotations.ServoyMobile;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
@@ -1383,10 +1386,40 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return getJSMethodsViaJavaMembers(ijm, o, elementName, prefix, actionType, real, excludeMethodNames);
 	}
 
+	private List<String> filterMethodsForMobile(JavaMembers ijm)
+	{
+		List<String> filteredList = new ArrayList<String>();
+		for (String id : ijm.getMethodIds(false))
+		{
+			NativeJavaMethod njm = ijm.getMethod(id, false);
+			if (AnnotationManager.getInstance().isAnnotationPresent(njm.getMethods()[0].method(), ServoyMobile.class, true))
+			{
+				filteredList.add(id);
+			}
+		}
+		return filteredList;
+	}
+
+	private List<String> filterPropertiesForMobile(JavaMembers ijm)
+	{
+		List<String> filteredPropertiesList = new ArrayList<String>();
+		for (String id : ijm.getFieldIds(false))
+		{
+			Object beanProp = ijm.getField(id, false);
+			if (beanProp instanceof JavaMembers.BeanProperty &&
+				AnnotationManager.getInstance().isAnnotationPresent(((JavaMembers.BeanProperty)beanProp).getGetter(), ServoyMobile.class, true))
+			{
+				filteredPropertiesList.add(id);
+			}
+		}
+		return filteredPropertiesList;
+	}
+
 	private SimpleUserNode[] getJSMethodsViaJavaMembers(JavaMembers ijm, IScriptObject scriptObject, String elementName, String prefix,
 		UserNodeType actionType, Object real, String[] excludeMethodNames)
 	{
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
+		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 
 		IScriptObject adapter = ScriptObjectRegistry.getAdapterIfAny(scriptObject);
 
@@ -1440,7 +1473,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		if (!elementName.endsWith(".")) elementName = elementName + ".";
 
 
-		List fields = ijm.getFieldIds(false);
+		List fields = (SolutionMetaData.isServoyMobileSolution(activeProject != null ? activeProject.getSolution() : null) ? filterPropertiesForMobile(ijm)
+			: ijm.getFieldIds(false));
 
 		if (excludeMethodNames != null) fields.removeAll(Arrays.asList(excludeMethodNames));
 
@@ -1470,7 +1504,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			dlm.add(new UserNode(name, actionType, new FieldFeedback(name, elementName, resolver, scriptObject, ijm), real, pIcon));
 		}
 
-		List names = ijm.getMethodIds(false);
+		List names = (SolutionMetaData.isServoyMobileSolution(activeProject != null ? activeProject.getSolution() : null) ? filterMethodsForMobile(ijm)
+			: ijm.getMethodIds(false));
 
 		if (ijm instanceof InstanceJavaMembers)
 		{

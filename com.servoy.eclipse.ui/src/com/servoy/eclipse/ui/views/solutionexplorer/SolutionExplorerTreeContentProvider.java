@@ -103,6 +103,8 @@ import com.servoy.j2db.scripting.JSSecurity;
 import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
+import com.servoy.j2db.scripting.annotations.AnnotationManager;
+import com.servoy.j2db.scripting.annotations.ServoyMobile;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
@@ -159,9 +161,16 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private final PlatformSimpleUserNode i18n;
 
+	private final PlatformSimpleUserNode plugins;
+
 	private final PlatformSimpleUserNode[] scriptingNodes;
 
+	private final PlatformSimpleUserNode[] mobileScriptingNodes;
+
 	private final PlatformSimpleUserNode[] resourceNodes;
+
+	private SimpleUserNode[] cachedMobileChildrenNodes;
+	private SimpleUserNode[] cachedNormalChildrenNodes;
 
 	private final SolutionExplorerView view;
 
@@ -179,13 +188,16 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private final List<Image> imagesConvertedFromSwing = new ArrayList<Image>();
 
+	private PlatformSimpleUserNode[] dbMgrChildren;
+	private PlatformSimpleUserNode[] dbMgrMobileAllowedChildren;
+
 	SolutionExplorerTreeContentProvider(SolutionExplorerView v)
 	{
 		view = v;
 		invisibleRootNode = new PlatformSimpleUserNode("root", UserNodeType.ARRAY); //$NON-NLS-1$
 
 		PlatformSimpleUserNode jslib = new PlatformSimpleUserNode(Messages.TreeStrings_JSLib, UserNodeType.JSLIB, null, IconProvider.instance().image(
-			JSLib.class));
+			JSLib.class), false);
 
 		PlatformSimpleUserNode jsarray = new PlatformSimpleUserNode(Messages.TreeStrings_Array, UserNodeType.ARRAY, null, IconProvider.instance().image(
 			com.servoy.j2db.documentation.scripting.docs.Array.class));
@@ -221,9 +233,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		jsxml.parent = jslib;
 		jsxmllist.parent = jslib;
 
-
+		// special case for mobile is application (because of filtering its returned types)
 		PlatformSimpleUserNode application = new PlatformSimpleUserNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, null,
-			IconProvider.instance().image(JSApplication.class));
+			IconProvider.instance().image(JSApplication.class), true);
+		PlatformSimpleUserNode applicationForMobile = new PlatformSimpleUserNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, null,
+			IconProvider.instance().image(JSApplication.class), true);
 
 		Class< ? >[] applicationClasses1 = ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class).getAllReturnedTypes();
 		Class< ? >[] applicationClasses2 = new ServoyException(0).getAllReturnedTypes();
@@ -231,8 +245,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		System.arraycopy(applicationClasses1, 0, applicationClasses, 0, applicationClasses1.length);
 		System.arraycopy(applicationClasses2, 0, applicationClasses, applicationClasses1.length, applicationClasses2.length);
 		addReturnTypeNodes(application, applicationClasses);
+		addReturnTypeNodes(applicationForMobile, applicationClasses, true);
 
-		resources = new PlatformSimpleUserNode(Messages.TreeStrings_Resources, UserNodeType.RESOURCES, null, uiActivator.loadImageFromBundle("resources.png")); //$NON-NLS-1$
+		resources = new PlatformSimpleUserNode(Messages.TreeStrings_Resources, UserNodeType.RESOURCES, null,
+			uiActivator.loadImageFromBundle("resources.png"), true); //$NON-NLS-1$
 
 		stylesNode = new PlatformSimpleUserNode(Messages.TreeStrings_Styles, UserNodeType.STYLES, null, uiActivator.loadImageFromBundle("styles.gif")); //$NON-NLS-1$
 		stylesNode.parent = resources;
@@ -249,68 +265,98 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		templatesNode.parent = resources;
 
 		activeSolutionNode = new PlatformSimpleUserNode(Messages.TreeStrings_NoActiveSolution, UserNodeType.SOLUTION, null,
-			Messages.SolutionExplorerView_activeSolution, null, uiActivator.loadImageFromBundle("solution.gif")); //$NON-NLS-1$
+			Messages.SolutionExplorerView_activeSolution, null, uiActivator.loadImageFromBundle("solution.gif"), true); //$NON-NLS-1$
 		modulesOfActiveSolution = new PlatformSimpleUserNode(Messages.TreeStrings_Modules, UserNodeType.MODULES, null,
-			uiActivator.loadImageFromBundle("modules.gif")); //$NON-NLS-1$
+			uiActivator.loadImageFromBundle("modules.gif"), true); //$NON-NLS-1$
 
 		allSolutionsNode = new PlatformSimpleUserNode(Messages.TreeStrings_AllSolutions, UserNodeType.ALL_SOLUTIONS, null,
-			PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER));
+			PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER), true);
 
 		databaseManager = new PlatformSimpleUserNode(Messages.TreeStrings_DatabaseManager, UserNodeType.FOUNDSET_MANAGER, null, IconProvider.instance().image(
-			JSDatabaseManager.class));
+			JSDatabaseManager.class), true);
 		addReturnTypeNodes(databaseManager, ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class).getAllReturnedTypes());
 		PlatformSimpleUserNode[] children = (PlatformSimpleUserNode[])databaseManager.children;
-		PlatformSimpleUserNode[] newChildren = new PlatformSimpleUserNode[children.length];
+		dbMgrChildren = new PlatformSimpleUserNode[children.length];
+		List<PlatformSimpleUserNode> dbMgrAux = new ArrayList<PlatformSimpleUserNode>();
 		for (int i = 0; i < children.length; i++)
 		{
 			if (FoundSet.class.equals(children[i].getRealObject()))
 			{
-				newChildren[i] = new PlatformSimpleUserNode(FoundSet.JS_FOUNDSET, UserNodeType.RETURNTYPE, FoundSet.class, null);
-				newChildren[i].parent = databaseManager;
+				dbMgrChildren[i] = new PlatformSimpleUserNode(FoundSet.JS_FOUNDSET, UserNodeType.RETURNTYPE, FoundSet.class, null);
+				dbMgrChildren[i].parent = databaseManager;
+				dbMgrAux.add(dbMgrChildren[i]); // allowed in mobile
 			}
 			else if (Record.class.equals(children[i].getRealObject()))
 			{
-				newChildren[i] = new PlatformSimpleUserNode(Record.JS_RECORD, UserNodeType.RETURNTYPE, Record.class, null);
-				newChildren[i].parent = databaseManager;
+				dbMgrChildren[i] = new PlatformSimpleUserNode(Record.JS_RECORD, UserNodeType.RETURNTYPE, Record.class, null);
+				dbMgrChildren[i].parent = databaseManager;
+				dbMgrAux.add(dbMgrChildren[i]); // allowed in mobile
 			}
-			else newChildren[i] = children[i];
+			else
+			{
+				if (children[i].getRealObject() != null &&
+					AnnotationManager.getInstance().isAnnotationPresent((Class< ? >)children[i].getRealObject(), ServoyMobile.class))
+				{
+					dbMgrAux.add(children[i]);
+				}
+				dbMgrChildren[i] = children[i];
+			}
 		}
-		Arrays.sort(newChildren, new Comparator<PlatformSimpleUserNode>()
+		Arrays.sort(dbMgrChildren, new Comparator<PlatformSimpleUserNode>()
 		{
 			public int compare(PlatformSimpleUserNode o1, PlatformSimpleUserNode o2)
 			{
 				return o1.getName().compareTo(o2.getName());
 			}
 		});
-		databaseManager.children = newChildren;
+		dbMgrMobileAllowedChildren = dbMgrAux.toArray(new PlatformSimpleUserNode[dbMgrAux.size()]);
+
+		if (SolutionMetaData.isServoyMobileSolution(getCurrentlyActiveSolution())) databaseManager.children = dbMgrMobileAllowedChildren;
+		else databaseManager.children = dbMgrChildren;
 
 		PlatformSimpleUserNode utils = new PlatformSimpleUserNode(Messages.TreeStrings_Utils, UserNodeType.UTILS, null, IconProvider.instance().image(
-			JSUtils.class));
+			JSUtils.class), false);
 
 		PlatformSimpleUserNode jsunit = new PlatformSimpleUserNode(Messages.TreeStrings_JSUnit, UserNodeType.JSUNIT, null, IconProvider.instance().image(
 			JSUnitAssertFunctions.class));
 
 		solutionModel = new PlatformSimpleUserNode(Messages.TreeStrings_SolutionModel, UserNodeType.SOLUTION_MODEL, null, IconProvider.instance().image(
-			JSSolutionModel.class));
+			JSSolutionModel.class), false);
 
 		addReturnTypeNodes(solutionModel, ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class).getAllReturnedTypes());
 
-		history = new PlatformSimpleUserNode(Messages.TreeStrings_History, UserNodeType.HISTORY, null, IconProvider.instance().image(HistoryProvider.class));
+		history = new PlatformSimpleUserNode(Messages.TreeStrings_History, UserNodeType.HISTORY, null, IconProvider.instance().image(HistoryProvider.class),
+			false);
 
-		security = new PlatformSimpleUserNode(Messages.TreeStrings_Security, UserNodeType.SECURITY, null, IconProvider.instance().image(JSSecurity.class));
+		security = new PlatformSimpleUserNode(Messages.TreeStrings_Security, UserNodeType.SECURITY, null, IconProvider.instance().image(JSSecurity.class),
+			false);
 		addReturnTypeNodes(security, ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class).getAllReturnedTypes());
 
-		i18n = new PlatformSimpleUserNode(Messages.TreeStrings_i18n, UserNodeType.I18N, null, IconProvider.instance().image(JSI18N.class));
+		i18n = new PlatformSimpleUserNode(Messages.TreeStrings_i18n, UserNodeType.I18N, null, IconProvider.instance().image(JSI18N.class), false);
 		addReturnTypeNodes(i18n, ScriptObjectRegistry.getScriptObjectForClass(JSI18N.class).getAllReturnedTypes());
 
 		servers = new PlatformSimpleUserNode(Messages.TreeStrings_DBServers, UserNodeType.SERVERS, null, uiActivator.loadImageFromBundle("database_srv.gif")); //$NON-NLS-1$
-		final PlatformSimpleUserNode plugins = new PlatformSimpleUserNode(Messages.TreeStrings_Plugins, UserNodeType.PLUGINS, null,
-			uiActivator.loadImageFromBundle("plugin.gif")); //$NON-NLS-1$
+		plugins = new PlatformSimpleUserNode(Messages.TreeStrings_Plugins, UserNodeType.PLUGINS, null, uiActivator.loadImageFromBundle("plugin.gif"), true); //$NON-NLS-1$
 
 
 		resources.children = new PlatformSimpleUserNode[] { servers, stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode };
 
-		invisibleRootNode.children = new PlatformSimpleUserNode[] { resources, allSolutionsNode, activeSolutionNode, jslib, application, solutionModel, databaseManager, utils, history, security, i18n, jsunit, plugins };
+		PlatformSimpleUserNode[] temp = new PlatformSimpleUserNode[] { resources, allSolutionsNode, activeSolutionNode, jslib, application, solutionModel, databaseManager, utils, history, security, i18n, jsunit, plugins };
+		List<PlatformSimpleUserNode> mobileSolutionTreeNodes = new ArrayList<PlatformSimpleUserNode>();
+		List<PlatformSimpleUserNode> normalSolutionTreeNodes = new ArrayList<PlatformSimpleUserNode>();
+		for (PlatformSimpleUserNode psun : temp)
+		{
+			if (psun.isVisibleForMobile() && psun.getType() != UserNodeType.APPLICATION) mobileSolutionTreeNodes.add(psun);
+			if (psun.getType() == UserNodeType.APPLICATION) mobileSolutionTreeNodes.add(applicationForMobile);
+		}
+		normalSolutionTreeNodes.addAll(Arrays.asList(temp));
+
+		cachedMobileChildrenNodes = mobileSolutionTreeNodes.toArray(new PlatformSimpleUserNode[mobileSolutionTreeNodes.size()]);
+		cachedNormalChildrenNodes = normalSolutionTreeNodes.toArray(new PlatformSimpleUserNode[normalSolutionTreeNodes.size()]);
+
+		if (SolutionMetaData.isServoyMobileSolution(getCurrentlyActiveSolution())) invisibleRootNode.children = cachedMobileChildrenNodes;
+		else invisibleRootNode.children = cachedNormalChildrenNodes;
+
 		jslib.parent = invisibleRootNode;
 		application.parent = invisibleRootNode;
 		resources.parent = invisibleRootNode;
@@ -328,6 +374,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		modulesOfActiveSolution.parent = activeSolutionNode;
 
 		scriptingNodes = new PlatformSimpleUserNode[] { jslib, application, solutionModel, databaseManager, utils, history, security, i18n, /* exceptions, */jsunit, plugins };
+		mobileScriptingNodes = new PlatformSimpleUserNode[] { application, databaseManager, plugins };
 		resourceNodes = new PlatformSimpleUserNode[] { stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode };
 
 		// we want to load the plugins node in a background low prio job so that it will expand fast
@@ -380,7 +427,23 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	public void setScriptingNodesEnabled(boolean isEnabled)
 	{
-		setNodesEnabled(scriptingNodes, isEnabled);
+		ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
+		Solution s = sm.getActiveProject().getSolution();
+
+		if (SolutionMetaData.isServoyMobileSolution(s))
+		{
+			databaseManager.children = dbMgrMobileAllowedChildren;
+			invisibleRootNode.children = cachedMobileChildrenNodes;
+			setNodesEnabled(mobileScriptingNodes, isEnabled, true);
+		}
+		else
+		{
+			databaseManager.children = dbMgrChildren;
+			invisibleRootNode.children = cachedNormalChildrenNodes;
+			setNodesEnabled(scriptingNodes, isEnabled, true);
+		}
+		if (plugins.children != null) refreshPlugins();
+		view.refreshTreeNodeFromModel(null);
 	}
 
 	public void setResourceNodesEnabled(boolean isEnabled)
@@ -398,6 +461,17 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		}
 	}
 
+	private void setNodesEnabled(PlatformSimpleUserNode[] nodes, boolean isEnabled, boolean fullRefresh)
+	{
+		for (PlatformSimpleUserNode n : nodes)
+		{
+			if (isEnabled) n.unhide();
+			else n.hide();
+
+			if (!fullRefresh) view.refreshTreeNodeFromModel(n);
+		}
+	}
+
 	// called by setInput & other SWT tree related behaviors (for example during
 	// filtering)
 	public Object[] getElements(Object parent)
@@ -405,14 +479,17 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		Object[] result;
 		if (parent instanceof ServoyProject[])
 		{
+			Solution activeSolution = getCurrentlyActiveSolution();
 			if (allSolutionsNode.children != null)
 			{
+				if (SolutionMetaData.isServoyMobileSolution(activeSolution)) return cachedMobileChildrenNodes;
 				return invisibleRootNode.children;
 			}
 			else
 			{
 				addSolutionProjects((ServoyProject[])parent);
-				result = invisibleRootNode.children;
+				if (SolutionMetaData.isServoyMobileSolution(activeSolution)) result = cachedMobileChildrenNodes;
+				else result = invisibleRootNode.children;
 			}
 		}
 		else
@@ -848,13 +925,28 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		}
 	}
 
+	private ArrayList<PlatformSimpleUserNode> cachedMobileAllowedPluginNodes;
+	private ArrayList<PlatformSimpleUserNode> cachedNormalAllowedPluginNodes;
+
+	private void refreshPlugins()
+	{
+		if (SolutionMetaData.isServoyMobileSolution(getCurrentlyActiveSolution())) plugins.children = cachedMobileAllowedPluginNodes.toArray(new PlatformSimpleUserNode[cachedMobileAllowedPluginNodes.size()]);
+		else plugins.children = cachedNormalAllowedPluginNodes.toArray(new PlatformSimpleUserNode[cachedNormalAllowedPluginNodes.size()]);
+		view.refreshTreeNodeFromModel(plugins);
+	}
+
 	private void addPluginsNodeChildren(PlatformSimpleUserNode pluginNode)
 	{
 		synchronized (pluginsBackgroundLoadLock)
 		{
-			if (pluginNode.children != null) return;
+			if (pluginNode.children != null)
+			{
+				refreshPlugins();
+				return;
+			}
 
-			ArrayList<PlatformSimpleUserNode> plugins = new ArrayList<PlatformSimpleUserNode>();
+			cachedMobileAllowedPluginNodes = new ArrayList<PlatformSimpleUserNode>();
+			cachedNormalAllowedPluginNodes = new ArrayList<PlatformSimpleUserNode>();
 			Iterator<IClientPlugin> it = Activator.getDefault().getDesignClient().getPluginManager().getPlugins(IClientPlugin.class).iterator();
 			while (it.hasNext())
 			{
@@ -884,7 +976,12 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						PlatformSimpleUserNode node = new PlatformSimpleUserNode(plugin.getName(), UserNodeType.PLUGIN, scriptObject, image);
 						if (view.isNonEmptyPlugin(node))
 						{
-							plugins.add(node);
+							if (AnnotationManager.getInstance().isAnnotationPresent(scriptObject.getClass(), ServoyMobile.class))
+							{
+								cachedMobileAllowedPluginNodes.add(node);
+							}
+
+							cachedNormalAllowedPluginNodes.add(node);
 							node.parent = pluginNode;
 							if (scriptObject instanceof IReturnedTypesProvider)
 							{
@@ -899,11 +996,14 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					ServoyLog.logError("Error loading plugin " + plugin.getName() + " exception: ", e); //$NON-NLS-1$ //$NON-NLS-2$
 					PlatformSimpleUserNode node = new PlatformSimpleUserNode(plugin.getName() + " (not loaded!)", UserNodeType.PLUGIN, null, null,
 						e.toString(), null, uiActivator.loadImageFromBundle("warning.gif")); //$NON-NLS-1$
-					plugins.add(node);
+					cachedNormalAllowedPluginNodes.add(node);
 					node.parent = pluginNode;
 				}
 			}
-			pluginNode.children = plugins.toArray(new PlatformSimpleUserNode[plugins.size()]);
+
+			if (SolutionMetaData.isServoyMobileSolution(getCurrentlyActiveSolution())) pluginNode.children = cachedMobileAllowedPluginNodes.toArray(new PlatformSimpleUserNode[cachedMobileAllowedPluginNodes.size()]);
+			else pluginNode.children = cachedNormalAllowedPluginNodes.toArray(new PlatformSimpleUserNode[cachedNormalAllowedPluginNodes.size()]);
+
 			// It may happen that the Plugins node was disabled before its children were added.
 			if (pluginNode.isHidden()) pluginNode.hide();
 			else pluginNode.unhide();
@@ -912,6 +1012,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	}
 
 	private void addReturnTypeNodes(PlatformSimpleUserNode node, Class< ? >[] clss)
+	{
+		addReturnTypeNodes(node, clss, false);
+	}
+
+	private void addReturnTypeNodes(PlatformSimpleUserNode node, Class< ? >[] clss, boolean checkReturnTypesForMobile)
 	{
 		if (clss != null)
 		{
@@ -922,6 +1027,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			{
 				if (cls != null && !IDeprecated.class.isAssignableFrom(cls))
 				{
+					if (checkReturnTypesForMobile && !AnnotationManager.getInstance().isAnnotationPresent(cls, ServoyMobile.class))
+					{
+						continue;
+					}
+
 					String nodeName = null;
 					if (cls.isAnnotationPresent(ServoyDocumented.class))
 					{
@@ -2129,4 +2239,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		return relations.toArray();
 	}
 
+	private Solution getCurrentlyActiveSolution()
+	{
+		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		ServoyProject svyPrj = servoyModel.getActiveProject();
+		return svyPrj.getSolution();
+	}
 }

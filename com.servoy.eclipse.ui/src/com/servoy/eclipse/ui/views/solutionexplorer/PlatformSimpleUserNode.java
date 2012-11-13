@@ -36,6 +36,16 @@ public class PlatformSimpleUserNode extends SimpleUserNode implements IAdaptable
 		super(displayName, type);
 	}
 
+	public PlatformSimpleUserNode(String displayName, UserNodeType type, boolean isVisibleForMobile)
+	{
+		super(displayName, type, isVisibleForMobile);
+	}
+
+	public PlatformSimpleUserNode(String displayName, UserNodeType type, Object realObject, Object icon, boolean isVisibleForMobile)
+	{
+		super(displayName, type, realObject, icon, isVisibleForMobile);
+	}
+
 	public PlatformSimpleUserNode(String displayName, UserNodeType type, Object realObject, Object icon)
 	{
 		super(displayName, type, realObject, icon);
@@ -43,7 +53,13 @@ public class PlatformSimpleUserNode extends SimpleUserNode implements IAdaptable
 
 	public PlatformSimpleUserNode(String displayName, UserNodeType type, String codeFragment, String toolTip, Object realObject, Object icon)
 	{
-		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, null, toolTip), realObject, icon);
+		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, null, toolTip), realObject, icon, false);
+	}
+
+	public PlatformSimpleUserNode(String displayName, UserNodeType type, String codeFragment, String toolTip, Object realObject, Object icon,
+		boolean isVisibleForMobile)
+	{
+		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, null, toolTip), realObject, icon, isVisibleForMobile);
 	}
 
 	public PlatformSimpleUserNode(String displayName, UserNodeType type, Object realObject, IPersist containingPersist, Object icon)
@@ -53,7 +69,7 @@ public class PlatformSimpleUserNode extends SimpleUserNode implements IAdaptable
 
 	public PlatformSimpleUserNode(String displayName, UserNodeType type, String codeFragment, String sampleCode, String toolTip, Object realObject, Object icon)
 	{
-		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, sampleCode, toolTip), realObject, icon);
+		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, sampleCode, toolTip), realObject, icon, false);
 	}
 
 	/**

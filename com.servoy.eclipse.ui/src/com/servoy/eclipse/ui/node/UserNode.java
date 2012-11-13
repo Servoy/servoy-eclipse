@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.node;
 
 import com.servoy.j2db.persistence.Form;
@@ -35,22 +35,22 @@ public class UserNode extends SimpleUserNode
 
 	public UserNode(String displayName, UserNodeType type, String codeFragment, String toolTip, Object realObject, Object icon)
 	{
-		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, null, toolTip), realObject, icon);
+		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, null, toolTip), realObject, icon, false);
 	}
 
 	public UserNode(String displayName, UserNodeType type, String codeFragment, String sampleCode, String toolTip, Object realObject, Object icon)
 	{
-		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, sampleCode, toolTip), realObject, icon);
+		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, sampleCode, toolTip), realObject, icon, false);
 	}
 
 	public UserNode(String displayName, UserNodeType type, IDeveloperFeedback developerFeedback, Object realObject, Object icon)
 	{
-		super(displayName, type, developerFeedback, realObject, icon);
+		super(displayName, type, developerFeedback, realObject, icon, false);
 	}
 
 	public UserNode(String displayName, UserNodeType type, String codeFragment, String toolTip)
 	{
-		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, null, toolTip), (Object)null, null);
+		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, null, toolTip), (Object)null, null, false);
 	}
 
 	public UserNode(String displayName, UserNodeType type)

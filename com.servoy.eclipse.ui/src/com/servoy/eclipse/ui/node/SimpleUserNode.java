@@ -49,10 +49,19 @@ public class SimpleUserNode
 
 	protected boolean hidden = false;
 
+	protected boolean visibleForMobile = false;
+
 	public SimpleUserNode(String displayName, UserNodeType type)
 	{
 		this.name = displayName;
 		this.type = type;
+	}
+
+	public SimpleUserNode(String displayName, UserNodeType type, boolean isVisibleForMobile)
+	{
+		this.name = displayName;
+		this.type = type;
+		this.visibleForMobile = isVisibleForMobile;
 	}
 
 	public SimpleUserNode(String displayName, UserNodeType type, Object realObject, Object icon)
@@ -63,6 +72,15 @@ public class SimpleUserNode
 		this.icon = icon;
 	}
 
+	public SimpleUserNode(String displayName, UserNodeType type, Object realObject, Object icon, boolean isVisibleForMobile)
+	{
+		this(displayName, type);
+		this._realObject = realObject;
+		storeContainingPersistIfNeeded(_realObject);
+		this.icon = icon;
+		this.visibleForMobile = isVisibleForMobile;
+	}
+
 	public SimpleUserNode(String displayName, UserNodeType type, Object realObject, IPersist containingPersist, Object icon)
 	{
 		this(displayName, type);
@@ -71,12 +89,14 @@ public class SimpleUserNode
 		this.containingPersist = containingPersist;
 	}
 
-	public SimpleUserNode(String displayName, UserNodeType type, IDeveloperFeedback developerFeedback, Object realObject, Object icon)
+	public SimpleUserNode(String displayName, UserNodeType type, IDeveloperFeedback developerFeedback, Object realObject, Object icon,
+		boolean isVisibleForMobile)
 	{
 		this(displayName, type);
 		this._realObject = realObject;
 		this.icon = icon;
 		this.developerFeedback = developerFeedback;
+		this.visibleForMobile = isVisibleForMobile;
 	}
 
 	public void setChildren(SimpleUserNode[] children)
@@ -226,6 +246,11 @@ public class SimpleUserNode
 			}
 			hidden = false;
 		}
+	}
+
+	public boolean isVisibleForMobile()
+	{
+		return visibleForMobile;
 	}
 
 	/**
