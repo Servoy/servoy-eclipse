@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.dialogs;
 
 import java.awt.print.PageFormat;
@@ -544,7 +544,7 @@ public class PageFormatDialog extends Dialog
 				@Override
 				public void widgetSelected(SelectionEvent e)
 				{
-					if (portraitButton.getSelection()) setOrientation(PageFormat.PORTRAIT);
+					if (portraitButton.getSelection()) PageFormatDialog.this.setOrientation(PageFormat.PORTRAIT);
 					paperComposite.updateDimensions();
 				}
 			});
@@ -556,7 +556,7 @@ public class PageFormatDialog extends Dialog
 				@Override
 				public void widgetSelected(SelectionEvent e)
 				{
-					if (landscapeButton.getSelection()) setOrientation(PageFormat.LANDSCAPE);
+					if (landscapeButton.getSelection()) PageFormatDialog.this.setOrientation(PageFormat.LANDSCAPE);
 					paperComposite.updateDimensions();
 				}
 			});
@@ -579,7 +579,7 @@ public class PageFormatDialog extends Dialog
 				@Override
 				public void widgetSelected(SelectionEvent e)
 				{
-					if (reversedLandscapeButton.getSelection()) setOrientation(PageFormat.REVERSE_LANDSCAPE);
+					if (reversedLandscapeButton.getSelection()) PageFormatDialog.this.setOrientation(PageFormat.REVERSE_LANDSCAPE);
 					paperComposite.updateDimensions();
 				}
 
