@@ -2237,6 +2237,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	{
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject svyPrj = servoyModel.getActiveProject();
-		return svyPrj.getSolution();
+		return (svyPrj != null ? svyPrj.getSolution() : null);
 	}
 }
