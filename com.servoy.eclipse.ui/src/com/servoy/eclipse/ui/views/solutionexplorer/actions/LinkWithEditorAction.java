@@ -169,6 +169,12 @@ public class LinkWithEditorAction extends Action
 						String name = file.getName().substring(0, file.getName().indexOf('.'));
 						// globals or scope
 						PlatformSimpleUserNode solutionNode = ((SolutionExplorerTreeContentProvider)contentProvider).getSolutionNode(parent.getName());
+						if (solutionNode.children == null)
+						{
+							// subtree is lazy loaded and currently oppened js file in editor might not be loaded in the Solex tree
+							// load modules subtree
+							((SolutionExplorerTreeContentProvider)contentProvider).getChildren(solutionNode);
+						}
 						for (SimpleUserNode node : solutionNode.children)
 						{
 							if (node.getName().equals(Messages.TreeStrings_Scopes))
