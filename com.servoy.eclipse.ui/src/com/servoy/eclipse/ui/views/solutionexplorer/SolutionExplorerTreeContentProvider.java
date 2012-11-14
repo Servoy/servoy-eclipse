@@ -442,7 +442,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			invisibleRootNode.children = cachedNormalChildrenNodes;
 			setNodesEnabled(scriptingNodes, isEnabled, true);
 		}
-		if (plugins.children != null) refreshPlugins();
+		if (plugins.children != null && pluginsInit) refreshPlugins();
 		view.refreshTreeNodeFromModel(null);
 	}
 
@@ -928,6 +928,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	private ArrayList<PlatformSimpleUserNode> cachedMobileAllowedPluginNodes;
 	private ArrayList<PlatformSimpleUserNode> cachedNormalAllowedPluginNodes;
 
+	private boolean pluginsInit = false;
+
 	private void refreshPlugins()
 	{
 		if (SolutionMetaData.isServoyMobileSolution(getCurrentlyActiveSolution())) plugins.children = cachedMobileAllowedPluginNodes.toArray(new PlatformSimpleUserNode[cachedMobileAllowedPluginNodes.size()]);
@@ -1008,6 +1010,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			if (pluginNode.isHidden()) pluginNode.hide();
 			else pluginNode.unhide();
 			view.refreshTreeNodeFromModel(pluginNode);
+
+			pluginsInit = true;
 		}
 	}
 
