@@ -292,7 +292,6 @@ public class EclipseMessages implements ICustomMessageLoader
 	// write project solution & its modules i18n files to the resource project
 	public static void writeProjectI18NFiles(final ServoyProject servoyProject, final boolean overwriteExisting, final boolean deleteNonExistingKeys)
 	{
-
 		WorkspaceJob writingI18NJob = new WorkspaceJob("Writing project I18N files")
 		{
 			@Override
@@ -336,6 +335,7 @@ public class EclipseMessages implements ICustomMessageLoader
 			}
 		};
 		writingI18NJob.setUser(false);
+		writingI18NJob.setRule(ResourcesPlugin.getWorkspace().getRoot()); // prevent from running at the same time as builder that may be reading the messages
 		writingI18NJob.schedule();
 	}
 

@@ -1676,6 +1676,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 								};
 								// we are already in UI thread here but sometimes under a pretty big stack already
 								// made it work later in a job because it would generate an exception due to locking in AWT stuff happening in form editor at import
+								j.setRule(ResourcesPlugin.getWorkspace().getRoot()); // don't display until builder is complete
 								j.schedule();
 							}
 						}
