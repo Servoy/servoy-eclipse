@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
+import java.io.File;
+
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,6 +32,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.DirectoryDialog;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -84,6 +87,15 @@ public class ImportMediaFolderAction extends ImportMediaAction implements ISelec
 
 		DirectoryDialog dd = new DirectoryDialog(viewer.getSite().getShell(), SWT.OPEN | SWT.MULTI);
 		final String folderName = dd.open();
+
+		SimpleUserNode selection = (SimpleUserNode)viewer.getTreeSelection().getFirstElement();
+		String retCheckForDuplicates = RenameMediaFolderAction.checkForMediaFolderDuplicates(
+			folderName.substring(folderName.lastIndexOf(File.separator) + 1, folderName.length()), selection, viewer.getTreeContentProvider());
+		if (retCheckForDuplicates != null)
+		{
+			UIUtils.reportError("Floder already exists in the solution tree", retCheckForDuplicates);
+			return;
+		}
 
 		if (folderName != null && folderName.equals("") == false)
 		{

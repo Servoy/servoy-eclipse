@@ -41,6 +41,7 @@ import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.MediaNode;
+import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerTreeContentProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Media;
@@ -114,7 +115,7 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 					}
 					else
 					{
-						return checkForMediaFolderDuplicates(newText, selection);
+						return checkForMediaFolderDuplicates(newText, selection, viewer.getTreeContentProvider());
 					}
 				}
 			});
@@ -191,18 +192,25 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 	/**
 	 * @param newText
 	 * @param currentselection
+	 * @param contentProvider TODO
 	 * @return
 	 */
-	public static String checkForMediaFolderDuplicates(String newText, SimpleUserNode currentselection)
+	public static String checkForMediaFolderDuplicates(String newText, SimpleUserNode currentselection, SolutionExplorerTreeContentProvider treeContentProvider)
 	{
-		SimpleUserNode solutionNode = currentselection.getAncestorOfType(ServoyProject.class);
+		SimpleUserNode rootSolution = currentselection;
+		while (rootSolution.parent != null && rootSolution.getType() != UserNodeType.SOLUTION)
+		{
+			rootSolution = rootSolution.parent;
+		}
+		//SimpleUserNode solutionNode = currentselection.getAncestorOfType(ServoyProject.class);
 		String folder = getMediaFolderPath(currentselection);
 		String folderPathWithoutSelectedFolder = folder.substring(0, folder.lastIndexOf('/') == -1 ? 0 : folder.lastIndexOf('/'));
 
 		String newFolderPath = folderPathWithoutSelectedFolder.length() == 0 ? newText : folderPathWithoutSelectedFolder + '/' + newText;
-		if (checkForDuplicates(solutionNode, newFolderPath) != null)
+		SimpleUserNode existingNode = checkForDuplicates(rootSolution, newFolderPath, treeContentProvider);
+		if (existingNode != null)
 		{
-			return "Media folder " + newFolderPath + " already exists";
+			return "Media folder " + newFolderPath + " already exists in " + existingNode.getAncestorOfType(ServoyProject.class).getName();
 		}
 		else
 		{
@@ -214,9 +222,10 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 	 * Does a breadth first search in the solex solution tree for media and media folders  (also goes through modules)
 	 * @param root
 	 * @param newFolderPath
+	 * @param treeContentProvider TODO
 	 * @return
 	 */
-	private static SimpleUserNode checkForDuplicates(SimpleUserNode root, String newFolderPath)
+	private static SimpleUserNode checkForDuplicates(SimpleUserNode root, String newFolderPath, SolutionExplorerTreeContentProvider treeContentProvider)
 	{
 		Queue<SimpleUserNode> queue = new LinkedList<SimpleUserNode>();
 		queue.add(root);
@@ -233,6 +242,10 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 					return node;
 				}
 			}
+			if (node.children == null)
+			{ //lazy load modules
+				treeContentProvider.getChildren(node);
+			}
 			if (node.children != null)
 			{
 				// Add the node’s children to the back of the queue
@@ -242,6 +255,7 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 						childNode.getType() == UserNodeType.MEDIA_FOLDER || childNode.getType() == UserNodeType.SOLUTION_ITEM) queue.add(childNode);
 				}
 			}
+
 		}
 		// None of the nodes matched the specified predicate.
 		return null;
