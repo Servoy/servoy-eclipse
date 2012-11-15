@@ -4279,7 +4279,8 @@ Make sure to set the applicable filters when the sql is used in a loadRecords() 
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String representing the sql of the JSFoundset.]]></return>
           <description><![CDATA[Returns the internal SQL which defines the specified (related)foundset.
 Optionally, the foundset and table filter params can be excluded in the sql (includeFilters=false).
-Make sure to set the applicable filters when the sql is used in a loadRecords() call.]]></description>
+Make sure to set the applicable filters when the sql is used in a loadRecords() call.
+When the founset is in find mode, the find conditions are included in the resulting query.]]></description>
           <summary><![CDATA[Returns the internal SQL which defines the specified (related)foundset.]]></summary>
           <sample><![CDATA[var sql = databaseManager.getSQL(foundset)]]></sample>
           <parameters>
@@ -4312,7 +4313,8 @@ Parameters for the filters are included.]]></description>
             <argumentType typecode="boolean"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;"><![CDATA[An Array with the sql parameter values.]]></return>
-          <description><![CDATA[Returns the internal SQL parameters, as an array, that are used to define the specified (related)foundset.]]></description>
+          <description><![CDATA[Returns the internal SQL parameters, as an array, that are used to define the specified (related)foundset.
+When the founset is in find mode, the arguments for the find conditions are included in the result.]]></description>
           <summary><![CDATA[Returns the internal SQL parameters, as an array, that are used to define the specified (related)foundset.]]></summary>
           <sample><![CDATA[var sqlParameterArray = databaseManager.getSQLParameters(foundset,false)]]></sample>
           <parameters>
@@ -13576,7 +13578,10 @@ for (var i = 0; params != null && i < params.length; i++)
         <function name="getQuery">
           <argumentsTypes/>
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"><![CDATA[query.]]></return>
-          <description><![CDATA[Get the query that the foundset is currently using.]]></description>
+          <description><![CDATA[Get the query that the foundset is currently using.
+When the founset is in find mode, the find conditions are included in the resulting query. 
+So the query that would be used when just calling search() (or search(true,true)) is returned.
+Note that foundset filters are included and table filters are not included in the query.]]></description>
           <summary><![CDATA[Get the query that the foundset is currently using.]]></summary>
           <sample><![CDATA[var q = foundset.getQuery()
 q.where.add(q.columns.x.eq(100))
@@ -13752,7 +13757,13 @@ When in find mode, this will reload the records from before the find() call.]]><
             <argumentType typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Copies foundset data from another foundset.]]></description>
+          <description><![CDATA[Copies foundset data from another foundset.
+This will alter the foundset state to the state of the foundset that is given.
+If you really just want to use the given foundset on the form itself, then you need to use controller.loadRecords(foundset)
+that will change the instance of the foundset that is used for this form. Not just update an existing form.
+
+If you copy over a relation into this foundset, then this foundset will not be a related foundset, it will not automatically update its state 
+of records are updated or added that belong to that relation. It will only be a snapshot of that related foundsets state.]]></description>
           <summary><![CDATA[Copies foundset data from another foundset.]]></summary>
           <sample><![CDATA[//Copies foundset data from another foundset
 %%prefix%%foundset.loadRecords(fs);]]></sample>
@@ -13822,8 +13833,9 @@ When in find mode, this will reload the records from before the find() call.]]><
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.]]></description>
-          <summary><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
+          <description><![CDATA[Loads records into form foundset based on a query builder object (also known as 'Form by query').
+When the founset is in find mode, the find states are discarded, the foundset will go out of find mode and the foundset will be loaded using the query.]]></description>
+          <summary><![CDATA[Loads records into form foundset based on a query builder object (also known as 'Form by query').]]></summary>
           <sample><![CDATA[%%prefix%%foundset.loadRecords(qbselect);]]></sample>
           <parameters>
             <parameter name="querybuilder" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
@@ -17265,19 +17277,51 @@ record.save();]]></sample>
     </object>
     <object publicName="JSRelation" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSRelation">
       <constants>
+        <constant name="FULL_JOIN">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for the joinType of a Query Builder join.]]></description>
+          <summary><![CDATA[Constant for the joinType of a Query Builder join.]]></summary>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
+ /** @type {QBJoin<db:/example_data/order_details>} */
+	var join = query.joins.add('db:/example_data/order_details', JSRelation.RIGHT_OUTER_JOIN, 'odetail')
+	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
+        </constant>
         <constant name="INNER_JOIN">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for set/get the joinType of a JSRelation. It is also used in solutionModel.newRelation(...).]]></description>
-          <summary><![CDATA[Constant for set/get the joinType of a JSRelation.]]></summary>
+          <description><![CDATA[Constant for the joinType of a JSRelation. It is also used in solutionModel.newRelation(...) and in the QueryBuilder.]]></description>
+          <summary><![CDATA[Constant for the joinType of a JSRelation.]]></summary>
           <sample><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
-relation.joinType = JSRelation.LEFT_OUTER_JOIN;]]></sample>
+relation.joinType = JSRelation.LEFT_OUTER_JOIN;
+
+ /** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
+ /** @type {QBJoin<db:/example_data/order_details>} */
+	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
+	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
         </constant>
         <constant name="LEFT_OUTER_JOIN">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for set/get the joinType of a JSRelation. It is also used in solutionModel.newRelation(...).]]></description>
-          <summary><![CDATA[Constant for set/get the joinType of a JSRelation.]]></summary>
+          <description><![CDATA[Constant for the joinType of a JSRelation. It is also used in solutionModel.newRelation(...) and in the QueryBuilder.]]></description>
+          <summary><![CDATA[Constant for the joinType of a JSRelation.]]></summary>
           <sample><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
-relation.joinType = JSRelation.LEFT_OUTER_JOIN;]]></sample>
+relation.joinType = JSRelation.LEFT_OUTER_JOIN;
+
+ /** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
+ /** @type {QBJoin<db:/example_data/order_details>} */
+	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
+	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
+        </constant>
+        <constant name="RIGHT_OUTER_JOIN">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for the joinType of a Query Builder join.]]></description>
+          <summary><![CDATA[Constant for the joinType of a Query Builder join.]]></summary>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
+ /** @type {QBJoin<db:/example_data/order_details>} */
+	var join = query.joins.add('db:/example_data/order_details', JSRelation.RIGHT_OUTER_JOIN, 'odetail')
+	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
         </constant>
       </constants>
       <properties>
@@ -17348,7 +17392,13 @@ relation.initialSort = 'another_child_table_text asc';]]></sample>
 Can be "inner join" or "left outer join".]]></description>
           <summary><![CDATA[The join type that is performed between the primary table and the foreign table.]]></summary>
           <sample><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
-relation.joinType = JSRelation.LEFT_OUTER_JOIN;]]></sample>
+relation.joinType = JSRelation.LEFT_OUTER_JOIN;
+
+ /** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
+ /** @type {QBJoin<db:/example_data/order_details>} */
+	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
+	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
         </property>
         <property name="name">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -23024,7 +23074,7 @@ foundset.loadRecords(query)]]></sample>
               <description><![CDATA[data source]]></description>
             </parameter>
             <parameter name="joinType" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
-              <description><![CDATA[join type, one of IQueryBuilderJoin#LEFT_OUTER_JOIN, IQueryBuilderJoin#INNER_JOIN, IQueryBuilderJoin#RIGHT_OUTER_JOIN, IQueryBuilderJoin#FULL_JOIN]]></description>
+              <description><![CDATA[join type, one of JSRelation.LEFT_OUTER_JOIN, JSRelation.INNER_JOIN, JSRelation.RIGHT_OUTER_JOIN, JSRelation.FULL_JOIN]]></description>
             </parameter>
           </parameters>
         </function>
@@ -24540,7 +24590,10 @@ for (var i = 0; params != null && i < params.length; i++)
         <function name="getQuery">
           <argumentsTypes/>
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"><![CDATA[query.]]></return>
-          <description><![CDATA[Get the query that the foundset is currently using.]]></description>
+          <description><![CDATA[Get the query that the foundset is currently using.
+When the founset is in find mode, the find conditions are included in the resulting query. 
+So the query that would be used when just calling search() (or search(true,true)) is returned.
+Note that foundset filters are included and table filters are not included in the query.]]></description>
           <summary><![CDATA[Get the query that the foundset is currently using.]]></summary>
           <sample><![CDATA[var q = foundset.getQuery()
 q.where.add(q.columns.x.eq(100))
@@ -24716,7 +24769,13 @@ When in find mode, this will reload the records from before the find() call.]]><
             <argumentType typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Copies foundset data from another foundset.]]></description>
+          <description><![CDATA[Copies foundset data from another foundset.
+This will alter the foundset state to the state of the foundset that is given.
+If you really just want to use the given foundset on the form itself, then you need to use controller.loadRecords(foundset)
+that will change the instance of the foundset that is used for this form. Not just update an existing form.
+
+If you copy over a relation into this foundset, then this foundset will not be a related foundset, it will not automatically update its state 
+of records are updated or added that belong to that relation. It will only be a snapshot of that related foundsets state.]]></description>
           <summary><![CDATA[Copies foundset data from another foundset.]]></summary>
           <sample><![CDATA[//Copies foundset data from another foundset
 %%prefix%%foundset.loadRecords(fs);]]></sample>
@@ -24786,8 +24845,9 @@ When in find mode, this will reload the records from before the find() call.]]><
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.]]></description>
-          <summary><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
+          <description><![CDATA[Loads records into form foundset based on a query builder object (also known as 'Form by query').
+When the founset is in find mode, the find states are discarded, the foundset will go out of find mode and the foundset will be loaded using the query.]]></description>
+          <summary><![CDATA[Loads records into form foundset based on a query builder object (also known as 'Form by query').]]></summary>
           <sample><![CDATA[%%prefix%%foundset.loadRecords(qbselect);]]></sample>
           <parameters>
             <parameter name="querybuilder" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
@@ -42846,8 +42906,12 @@ The difference to loadAllRecords() is that related foundset will load related re
             <argumentType typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Loads a (related) foundset into the form.
-The form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset.]]></description>
+          <description><![CDATA[Loads a (related) foundset into the form. 
+The form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset.
+
+This will really update the foundset instance itself of the form, so now existing foundset is altered just the new foundset is shown.
+This is different then doing foundset.loadRecords(foundset) because that just alters the current foundset and doesn't do anything with the foundset
+that is given.]]></description>
           <summary><![CDATA[Loads a (related) foundset into the form.]]></summary>
           <sample><![CDATA[//to load a (related)foundset into the form.
 //the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
@@ -44491,15 +44555,17 @@ i18n.setI18NMessage('mykey.username.text','my_name')]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="setI18NMessagesFilter">
+        <function deprecated="true" name="setI18NMessagesFilter">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Call this if you want to add a filter for a column (created by you) in the i18n table.
-So that you can have multiple default values and multiple values per locale for one key.]]></description>
+So that you can have multiple default values and multiple values per locale for one key.
+// NOTE: this function is only working on runtime clients when the i18n values are read from the database]]></description>
           <summary><![CDATA[Call this if you want to add a filter for a column (created by you) in the i18n table.]]></summary>
+          <deprecated><![CDATA[use table filters on the i18n table using databaseManager.addTableFilterParam]]></deprecated>
           <sample><![CDATA[// Puts i18n in filter mode - this allows you to have multiple default/per locale
 // values for one key and to use one of them based on the filter parameters.
 // Let's say you added a new column "message_variant" to your i18n table.
@@ -44525,7 +44591,7 @@ i18n.setI18NMessagesFilter('message_variant', filterValue)
             </parameter>
           </parameters>
         </function>
-        <function name="setI18NMessagesFilter">
+        <function deprecated="true" name="setI18NMessagesFilter">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="[Ljava.lang.String;"/>
@@ -44533,8 +44599,10 @@ i18n.setI18NMessagesFilter('message_variant', filterValue)
           <return type="void" typecode="void"/>
           <description><![CDATA[Call this if you want to add a filter for a column (created by you) in the i18n table.
 So that you can have multiple default values and multiple values per locale for one key.
-You can use filter fall back by setting the filter value as an array of strings.]]></description>
+You can use filter fall back by setting the filter value as an array of strings.
+// NOTE: this function is only working on runtime clients when the i18n values are read from the database]]></description>
           <summary><![CDATA[Call this if you want to add a filter for a column (created by you) in the i18n table.]]></summary>
+          <deprecated><![CDATA[use table filters on the i18n table using databaseManager.addTableFilterParam]]></deprecated>
           <sample><![CDATA[// Puts i18n in filter mode - this allows you to have multiple default/per locale
 // values for one key and to use one of them based on the filter parameters.
 // Let's say you added a new column "message_variant" to your i18n table.
