@@ -427,10 +427,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	public void setScriptingNodesEnabled(boolean isEnabled)
 	{
-		ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
-		Solution s = sm.getActiveProject().getSolution();
-
-		if (SolutionMetaData.isServoyMobileSolution(s))
+		if (SolutionMetaData.isServoyMobileSolution(getCurrentlyActiveSolution()))
 		{
 			databaseManager.children = dbMgrMobileAllowedChildren;
 			invisibleRootNode.children = cachedMobileChildrenNodes;
