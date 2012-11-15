@@ -873,6 +873,23 @@ public class UIUtils
 	}
 
 	/**
+	 * Shows a error dialog, but switches to UI thread if needed.
+	 * 
+	 * @param title the title of the dialog.
+	 * @param message the message in the dialog.
+	 */
+	public static void reportError(final String title, final String message)
+	{
+		runInUI(new Runnable()
+		{
+			public void run()
+			{
+				MessageDialog.openError(getActiveShell(), title, message);
+			}
+		}, false);
+	}
+
+	/**
 	 * Tries to get the active shell. If this is a thread with an associated Display, then that display is used to get the active shell. If not,
 	 * Display.getDefault().getActiveShell() is used, but called from the UI thread so as not to cause an exception.
 	 * 

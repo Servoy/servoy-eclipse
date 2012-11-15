@@ -92,7 +92,7 @@ public class CreateMediaFolderAction extends Action implements ISelectionChanged
 				}
 				else
 				{
-					return RenameMediaFolderAction.checkForMediaFolderDuplicates(newText, selectedFolder);
+					return RenameMediaFolderAction.checkForMediaFolderDuplicates(newText, selectedFolder, viewer.getTreeContentProvider());
 				}
 			}
 		});

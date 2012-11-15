@@ -553,6 +553,18 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private MediaNode currentMediaFolder;
 
+	public SolutionExplorerTreeContentProvider getTreeContentProvider()
+	{
+		if (tree != null)
+		{
+			return (SolutionExplorerTreeContentProvider)tree.getContentProvider();
+		}
+		else
+		{
+			return null;
+		}
+	}
+
 	public void setCurrentMediaFolder(MediaNode currentMediaFolder)
 	{
 		this.currentMediaFolder = currentMediaFolder;
