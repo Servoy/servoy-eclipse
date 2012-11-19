@@ -160,7 +160,7 @@ public class EclipseMessages implements ICustomMessageLoader
 			i18nDatasourceMessages.remove(i18nDSKey);
 	}
 
-	private TreeMap<String, I18NUtil.MessageEntry> getDatasourceMessages(String i18nDatasource)
+	public TreeMap<String, I18NUtil.MessageEntry> getDatasourceMessages(String i18nDatasource)
 	{
 		TreeMap<String, I18NUtil.MessageEntry> messages = null;
 		if (i18nDatasource != null)

@@ -28,12 +28,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.IValueFilter;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -44,6 +47,7 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
+import com.servoy.j2db.persistence.I18NUtil;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
@@ -203,15 +207,25 @@ public class MobileExporter
 					ServoyLog.logError(e);
 				}
 			}
+			Solution solution = project.getSolution();
 			ServoyJSONArray flattenedJSon = new ServoyJSONArray(formJSons);
 			Map<String, Object> solutionModel = new HashMap<String, Object>();
 			solutionModel.put("forms", flattenedJSon);
 			flattenedJSon = new ServoyJSONArray(relationJSons);
 			solutionModel.put("relations", flattenedJSon);
-			solutionModel.put("solutionName", project.getSolution().getName());
+			solutionModel.put("solutionName", solution.getName());
 			solutionModel.put("serverURL", serverURL);
 			solutionModel.put("skipConnect", skipConnect);
-			solutionModel.put("mustAuthenticate", project.getSolution().getMustAuthenticate());
+			solutionModel.put("mustAuthenticate", solution.getMustAuthenticate());
+			if (project.getSolution().getI18nDataSource() != null)
+			{
+				EclipseMessages messagesManager = ServoyModelManager.getServoyModelManager().getServoyModel().getMessagesManager();
+				TreeMap<String, I18NUtil.MessageEntry> i18nData = messagesManager.getDatasourceMessages(solution.getI18nDataSource());
+				if (i18nData.size() > 0)
+				{
+					solutionModel.put("i18n", i18nData);
+				}
+			}
 			ServoyJSONObject jsonObject = new ServoyJSONObject(solutionModel);
 			jsonObject.setNoQuotes(false);
 			return ("var _solutiondata_ = " + jsonObject.toString());
