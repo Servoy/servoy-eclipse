@@ -19,12 +19,11 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Queue;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IInputValidator;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -32,6 +31,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -41,9 +41,9 @@ import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.MediaNode;
-import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerTreeContentProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
@@ -113,10 +113,7 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 					{
 						return "Please enter a different name";
 					}
-					else
-					{
-						return checkForMediaFolderDuplicates(newText, selection, viewer.getTreeContentProvider());
-					}
+					return null;
 				}
 			});
 
@@ -136,6 +133,7 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 			ArrayList<Media> createdMedias = new ArrayList<Media>();
 			ArrayList<IPersist> newMedias = new ArrayList<IPersist>();
 			ArrayList<IPersist> removedMedias = new ArrayList<IPersist>();
+			ArrayList<IPersist> conflictingMedias = new ArrayList<IPersist>();
 			Iterator<Media> mediaIte = solution.getMedias(false);
 			Media media, movedMedia;
 
@@ -144,6 +142,11 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 				while (mediaIte.hasNext())
 				{
 					media = mediaIte.next();
+					String newMediaName = media.getName().substring(media.getName().lastIndexOf('/') + 1, media.getName().length());
+					if (media.getName().equals(newName + newMediaName))
+					{
+						conflictingMedias.add(media);
+					}
 					if (media.getName().startsWith(replaceName))
 					{
 						createdMedias.add(media);
@@ -151,6 +154,19 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 					}
 				}
 
+				//abort operation if duplicate medias are found
+				if (conflictingMedias.size() > 0)
+				{
+					StringBuilder sb = new StringBuilder();
+					for (IPersist conflictedMedia : conflictingMedias)
+					{
+						sb.append(((Media)conflictedMedia).getAncestor(IRepository.SOLUTIONS)).append("  ->  ").append(((Media)conflictedMedia).getName()).append(
+							"\n");
+					}
+					UIUtils.showScrollableDialog(UIUtils.getActiveShell(), IMessageProvider.ERROR, "Error",
+						"Cannot rename folder becasue the folowing media items already present in the solution", sb.toString());
+					return;
+				}
 				for (Media m : createdMedias)
 				{
 					movedMedia = solution.createNewMedia(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(),
@@ -180,6 +196,7 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 			}
 			catch (RepositoryException ex)
 			{
+				UIUtils.reportError("Error", ex.getMessage());
 				ServoyLog.logError(ex);
 			}
 			catch (Exception ex)
@@ -187,91 +204,5 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 				ServoyLog.logError(ex);
 			}
 		}
-	}
-
-	/**
-	 * @param newText
-	 * @param currentselection
-	 * @param contentProvider TODO
-	 * @return
-	 */
-	public static String checkForMediaFolderDuplicates(String newText, SimpleUserNode currentselection, SolutionExplorerTreeContentProvider treeContentProvider)
-	{
-		SimpleUserNode rootSolution = currentselection;
-		while (rootSolution.parent != null && rootSolution.getType() != UserNodeType.SOLUTION)
-		{
-			rootSolution = rootSolution.parent;
-		}
-		//SimpleUserNode solutionNode = currentselection.getAncestorOfType(ServoyProject.class);
-		String folder = getMediaFolderPath(currentselection);
-		String folderPathWithoutSelectedFolder = folder.substring(0, folder.lastIndexOf('/') == -1 ? 0 : folder.lastIndexOf('/'));
-
-		String newFolderPath = folderPathWithoutSelectedFolder.length() == 0 ? newText : folderPathWithoutSelectedFolder + '/' + newText;
-		SimpleUserNode existingNode = checkForDuplicates(rootSolution, newFolderPath, treeContentProvider);
-		if (existingNode != null)
-		{
-			return "Media folder " + newFolderPath + " already exists in " + existingNode.getAncestorOfType(ServoyProject.class).getName();
-		}
-		else
-		{
-			return null;
-		}
-	}
-
-	/**
-	 * Does a breadth first search in the solex solution tree for media and media folders  (also goes through modules)
-	 * @param root
-	 * @param newFolderPath
-	 * @param treeContentProvider TODO
-	 * @return
-	 */
-	private static SimpleUserNode checkForDuplicates(SimpleUserNode root, String newFolderPath, SolutionExplorerTreeContentProvider treeContentProvider)
-	{
-		Queue<SimpleUserNode> queue = new LinkedList<SimpleUserNode>();
-		queue.add(root);
-		while (queue.size() > 0)
-		{
-			// Take the next node from the front of the queue
-			SimpleUserNode node = queue.poll();
-			// Process the node 'node'
-			if (node.getType() == UserNodeType.MEDIA_FOLDER)
-			{
-				String currentSearchFolder = getMediaFolderPath(node);
-				if (currentSearchFolder.equalsIgnoreCase(newFolderPath))
-				{
-					return node;
-				}
-			}
-			if (node.children == null)
-			{ //lazy load modules
-				treeContentProvider.getChildren(node);
-			}
-			if (node.children != null)
-			{
-				// Add the node’s children to the back of the queue
-				for (SimpleUserNode childNode : node.children)
-				{
-					if (childNode.getType() == UserNodeType.MODULES || childNode.getType() == UserNodeType.MEDIA ||
-						childNode.getType() == UserNodeType.MEDIA_FOLDER || childNode.getType() == UserNodeType.SOLUTION_ITEM) queue.add(childNode);
-				}
-			}
-
-		}
-		// None of the nodes matched the specified predicate.
-		return null;
-	}
-
-	private static String getMediaFolderPath(SimpleUserNode node)
-	{
-		StringBuilder _folderPath = new StringBuilder(node.getName());
-		SimpleUserNode parent = node.parent;
-		while (parent != null && parent.getType() != UserNodeType.MEDIA && parent.getType() != UserNodeType.SOLUTION_ITEM &&
-			parent.getType() != UserNodeType.SOLUTION)
-		{
-			//add the folder path at the beginning
-			_folderPath.insert(0, '/').insert(0, parent.getName());
-			parent = parent.parent;
-		}
-		return _folderPath.toString();
 	}
 }

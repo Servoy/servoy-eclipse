@@ -21,11 +21,14 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -34,17 +37,21 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.core.util.UIUtils.ScrollableDialog;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.ImageLoader;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -56,6 +63,7 @@ public class ImportMediaAction extends Action implements ISelectionChangedListen
 {
 	private final SolutionExplorerView viewer;
 	private Solution solution;
+	private static volatile int overwriteReturnCode = IDialogConstants.YES_TO_ALL_ID;
 
 	/**
 	 * Creates a new "create new method" action for the given solution view.
@@ -129,20 +137,59 @@ public class ImportMediaAction extends Action implements ISelectionChangedListen
 	public static void addMediaFiles(Solution editingSolution, String directory, String[] fileNames, String targetParentPath) throws IOException,
 		RepositoryException
 	{
-		List<IPersist> nodesToSave = new ArrayList<IPersist>(fileNames.length + 1);
+		List<Pair<File, String>> filesToSave = new ArrayList<Pair<File, String>>(fileNames.length + 1);
+		List<Media> existingMediasInCurrentSolution = new ArrayList<Media>();
 		EclipseRepository repository = (EclipseRepository)editingSolution.getRepository();
 		for (String fileName : fileNames)
 		{
 			File file = directory == null ? new File(fileName) : new File(directory, fileName);
-			addFiles(nodesToSave, repository, editingSolution, file, targetParentPath);
+			getFiles(filesToSave, existingMediasInCurrentSolution, repository, editingSolution, file, (targetParentPath == null ? "" : targetParentPath));
 		}
-		nodesToSave.add(editingSolution);
-		ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(editingSolution.getName()).saveEditingSolutionNodes(
-			nodesToSave.toArray(new IPersist[nodesToSave.size()]), false);
+
+		//check if conflicted media
+		//if no conflicted media the import proceeds as in the case with Overwrite all
+		// if conflicting media from another module , throws RepositoryException
+		//IMPORTANT!!: an example use case for this "Override All , Cancel" Dialog is when a user works with an external directory ,
+		//imports the directory , content gets added/images modified in the external directory , the user reimports the directory to get the latest version of the directory
+		overwriteReturnCode = IDialogConstants.YES_TO_ALL_ID;
+		if (existingMediasInCurrentSolution.size() > 0)
+		{
+			StringBuilder sb = new StringBuilder();
+			for (IPersist conflictedMedia : existingMediasInCurrentSolution)
+			{
+				sb.append(((Media)conflictedMedia).getName()).append("\n");
+			}
+			final String text = sb.toString();
+			final String editingSolutionName = editingSolution.getName();
+			UIUtils.runInUI(new Runnable()
+			{
+				public void run()
+				{
+					ScrollableDialog dialog = new ScrollableDialog(UIUtils.getActiveShell(), IMessageProvider.ERROR, "Error",
+						"The folowing media files already exist in the current solution: " + editingSolutionName, text);
+					List<Pair<Integer, String>> buttonsAndLabels = new ArrayList<Pair<Integer, String>>();
+					buttonsAndLabels.add(new Pair<Integer, String>(IDialogConstants.YES_TO_ALL_ID, "Overwrite all"));
+					buttonsAndLabels.add(new Pair<Integer, String>(IDialogConstants.CANCEL_ID, "Cancel"));
+					dialog.setCustomBottomBarButtons(buttonsAndLabels);
+					//shell.setSize(400, 500);
+					overwriteReturnCode = dialog.open();
+				}
+			}, true);
+		}
+		if (overwriteReturnCode == IDialogConstants.YES_TO_ALL_ID)
+		{
+			List<IPersist> nodesToSave = saveFiles(repository, editingSolution, filesToSave);
+			nodesToSave.add(editingSolution);
+			ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(editingSolution.getName()).saveEditingSolutionNodes(
+				nodesToSave.toArray(new IPersist[nodesToSave.size()]), false);
+		}
 	}
 
-	private static void addFiles(List<IPersist> nodesToSave, EclipseRepository repository, Solution editingSolution, File file, String targetParentPath)
-		throws IOException, RepositoryException
+	/**
+	 * fails fast on first duplicate in another module (throw RepositoryException)
+	 */
+	private static void getFiles(List<Pair<File, String>> filesToSave, List<Media> conflictingMedia, EclipseRepository repository, Solution editingSolution,
+		File file, String targetParentPath) throws IOException, RepositoryException
 	{
 		if (file == null || !file.exists())
 		{
@@ -157,39 +204,77 @@ public class ImportMediaAction extends Action implements ISelectionChangedListen
 				String newParentPath = targetParentPath == null ? file.getName() + '/' : targetParentPath + file.getName() + '/';
 				for (String fileName : fileNames)
 				{
-					addFiles(nodesToSave, repository, editingSolution, new File(file, fileName), newParentPath);
+					getFiles(filesToSave, conflictingMedia, repository, editingSolution, new File(file, fileName), newParentPath);
 				}
 			}
 			return;
 		}
 
-		// a plain file
-		ByteArrayOutputStream baos = new ByteArrayOutputStream((int)file.length());
-		FileInputStream fis = new FileInputStream(file);
-		BufferedInputStream bis = new BufferedInputStream(fis);
-		Utils.streamCopy(bis, baos);
-		byte[] media_data = baos.toByteArray();
-
-		Utils.closeInputStream(bis);
-		Utils.closeInputStream(fis);
-		Utils.closeOutputStream(baos);
-
-		String mime = ImageLoader.getContentType(media_data, file.getName());
-		if (mime == null)
+		FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
+		Media media = flattenedSolution.getMedia(targetParentPath + Utils.stringReplace(file.getName(), " ", "_"));
+		if (media != null)
 		{
-			mime = repository.getContentType(file.getName());
+			//if duplicate media is not from current editing solution fail fast
+			if (!((Solution)media.getRootObject()).getName().equals(editingSolution.getName()))
+			{
+				throw new RepositoryException("The name '" + media.getName() + "' already exists as media in " + media.getRootObject().getName()); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			else
+			{
+				conflictingMedia.add(media);
+			}
 		}
-		String name = Utils.stringReplace(targetParentPath != null ? targetParentPath + file.getName() : file.getName(), " ", "_");
-		Media media = editingSolution.getMedia(name);
-		if (media == null)
+		filesToSave.add(new Pair<File, String>(file, targetParentPath));
+
+	}
+
+	/**
+	 * @param repository
+	 * @param editingSolution
+	 * @param file
+	 * @param targetParentPath
+	 * 
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 * @throws RepositoryException
+	 */
+	private static List<IPersist> saveFiles(EclipseRepository repository, Solution editingSolution, List<Pair<File, String>> filesToSave)
+		throws FileNotFoundException, IOException, RepositoryException
+	{
+		List<IPersist> nodesToSave = new ArrayList<IPersist>();
+		for (Pair<File, String> pair : filesToSave)
 		{
-			media = editingSolution.createNewMedia(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), name);
+			File file = pair.getLeft();
+			String targetParentPath = pair.getRight();
+			// a plain file
+			ByteArrayOutputStream baos = new ByteArrayOutputStream((int)file.length());
+			FileInputStream fis = new FileInputStream(file);
+			BufferedInputStream bis = new BufferedInputStream(fis);
+			Utils.streamCopy(bis, baos);
+			byte[] media_data = baos.toByteArray();
+
+			Utils.closeInputStream(bis);
+			Utils.closeInputStream(fis);
+			Utils.closeOutputStream(baos);
+
+			String mime = ImageLoader.getContentType(media_data, file.getName());
+			if (mime == null)
+			{
+				mime = repository.getContentType(file.getName());
+			}
+			String name = Utils.stringReplace(targetParentPath != null ? targetParentPath + file.getName() : file.getName(), " ", "_");
+			Media media = editingSolution.getMedia(name);
+			if (media == null)
+			{
+				media = editingSolution.createNewMedia(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), name);
+			}
+			// Save the media in the repository.
+			media.setMimeType(mime);
+			media.setPermMediaData(media_data);
+			media.flagChanged();
+			repository.copyPersistIntoSolution(media, editingSolution, true);
+			nodesToSave.add(media);
 		}
-		// Save the media in the repository.
-		media.setMimeType(mime);
-		media.setPermMediaData(media_data);
-		media.flagChanged();
-		repository.copyPersistIntoSolution(media, editingSolution, true);
-		nodesToSave.add(media);
+		return nodesToSave;
 	}
 }

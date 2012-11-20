@@ -77,7 +77,14 @@ public class RenameMediaAction extends Action implements ISelectionChangedListen
 			if (solutionNode != null)
 			{
 				//get media folder for further usage
-				if (node.parent.getRealObject() instanceof MediaNode) selectedMediaPath = ((MediaNode)node.parent.getRealObject()).getPath();
+				if (node.parent.getRealObject() instanceof Solution)
+				{
+					selectedMediaPath = "";
+				}
+				else if ((node.parent.getRealObject() instanceof MediaNode))
+				{
+					selectedMediaPath = ((MediaNode)node.parent.getRealObject()).getPath();
+				}
 				selectedMediaName = node.getName();
 
 				// make sure you have the in-memory version of the solution
@@ -108,8 +115,8 @@ public class RenameMediaAction extends Action implements ISelectionChangedListen
 
 					try
 					{
-						ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(newText, -1,
-							new ValidatorSearchContext(this, IRepository.MEDIA), false);
+						ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(selectedMediaPath + newText, -1,
+							new ValidatorSearchContext(IRepository.MEDIA), false);
 					}
 					catch (RepositoryException e)
 					{

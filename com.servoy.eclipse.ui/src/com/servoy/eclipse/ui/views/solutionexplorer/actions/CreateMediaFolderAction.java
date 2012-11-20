@@ -90,10 +90,8 @@ public class CreateMediaFolderAction extends Action implements ISelectionChanged
 				{
 					return "Invalid new media name";
 				}
-				else
-				{
-					return RenameMediaFolderAction.checkForMediaFolderDuplicates(newText, selectedFolder, viewer.getTreeContentProvider());
-				}
+
+				return null;
 			}
 		});
 

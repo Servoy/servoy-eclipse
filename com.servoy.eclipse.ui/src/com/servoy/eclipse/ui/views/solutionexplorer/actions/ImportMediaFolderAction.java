@@ -16,15 +16,12 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
-import java.io.File;
-
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -88,14 +85,6 @@ public class ImportMediaFolderAction extends ImportMediaAction implements ISelec
 		DirectoryDialog dd = new DirectoryDialog(viewer.getSite().getShell(), SWT.OPEN | SWT.MULTI);
 		final String folderName = dd.open();
 
-		SimpleUserNode selection = (SimpleUserNode)viewer.getTreeSelection().getFirstElement();
-		String retCheckForDuplicates = RenameMediaFolderAction.checkForMediaFolderDuplicates(
-			folderName.substring(folderName.lastIndexOf(File.separator) + 1, folderName.length()), selection, viewer.getTreeContentProvider());
-		if (retCheckForDuplicates != null)
-		{
-			UIUtils.reportError("Floder already exists in the solution tree", retCheckForDuplicates);
-			return;
-		}
 
 		if (folderName != null && folderName.equals("") == false)
 		{
@@ -113,7 +102,7 @@ public class ImportMediaFolderAction extends ImportMediaAction implements ISelec
 					}
 					catch (RepositoryException e)
 					{
-						MessageDialog.openError(viewer.getSite().getShell(), "Error", "Could not import media files: " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+						UIUtils.reportError("Error", "Could not import media files: " + e.getMessage());
 						ServoyLog.logError("Could not import media files", e); //$NON-NLS-1$
 					}
 					catch (Exception e)
