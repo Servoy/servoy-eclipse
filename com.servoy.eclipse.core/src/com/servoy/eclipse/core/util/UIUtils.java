@@ -28,6 +28,8 @@ import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
@@ -82,6 +84,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Pair;
 
 /**
  * Utility class that offers all kinds of utilities (UI related functionality).
@@ -489,6 +492,7 @@ public class UIUtils
 		private final String scrollableText;
 		//ex IMessageProvider.ERROR
 		private final int messageIcon;
+		private List<Pair<Integer, String>> buttonsAndLabels = new ArrayList<Pair<Integer, String>>();
 
 		public ScrollableDialog(Shell parentShell, int messageIcon, String title, String text, String scrollableText)
 		{
@@ -497,6 +501,17 @@ public class UIUtils
 			this.title = title;
 			this.text = text;
 			this.scrollableText = scrollableText;
+			// add default ok button
+			buttonsAndLabels.add(new Pair<Integer, String>(OK, "OK"));
+		}
+
+		/**
+		 * Use this function if you want extra buttons besides standard OK button
+		 * @param buttonsAndLabels alist of pairs of Button ID and label , for ex: IDialogConstants.YES_TO_ALL_ID  , "Overwrite all" , this code will be returned code for myDlgVar.open()
+		 */
+		public void setCustomBottomBarButtons(List<Pair<Integer, String>> buttonsAndLabels)
+		{
+			this.buttonsAndLabels = buttonsAndLabels;
 		}
 
 		@Override
@@ -533,16 +548,21 @@ public class UIUtils
 		@Override
 		protected void createButtonsForButtonBar(Composite parent)
 		{
-			Button okButton = createButton(parent, OK, "OK", true);
-			okButton.addSelectionListener(new SelectionAdapter()
+			for (Pair<Integer, String> buttonAndLabel : buttonsAndLabels)
 			{
-
-				@Override
-				public void widgetSelected(SelectionEvent e)
+				Button button = createButton(parent, buttonAndLabel.getLeft(), buttonAndLabel.getRight(), true);
+				final int dialogReturnCode = buttonAndLabel.getLeft();
+				button.addSelectionListener(new SelectionAdapter()
 				{
-					close();
-				}
-			});
+
+					@Override
+					public void widgetSelected(SelectionEvent e)
+					{
+						setReturnCode(dialogReturnCode);
+						close();
+					}
+				});
+			}
 		}
 
 		@Override
