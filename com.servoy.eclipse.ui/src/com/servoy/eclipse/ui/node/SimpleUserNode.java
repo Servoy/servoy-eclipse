@@ -22,6 +22,8 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ISupportHTMLToolTipText;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.scripting.annotations.AnnotationManager;
+import com.servoy.j2db.scripting.annotations.ServoyMobile;
 
 /**
  * Universal class to use in tree nodes and as list item.
@@ -57,13 +59,6 @@ public class SimpleUserNode
 		this.type = type;
 	}
 
-	public SimpleUserNode(String displayName, UserNodeType type, boolean isVisibleForMobile)
-	{
-		this.name = displayName;
-		this.type = type;
-		this.visibleForMobile = isVisibleForMobile;
-	}
-
 	public SimpleUserNode(String displayName, UserNodeType type, Object realObject, Object icon)
 	{
 		this(displayName, type);
@@ -72,13 +67,13 @@ public class SimpleUserNode
 		this.icon = icon;
 	}
 
-	public SimpleUserNode(String displayName, UserNodeType type, Object realObject, Object icon, boolean isVisibleForMobile)
+	public SimpleUserNode(String displayName, UserNodeType type, Object realObject, Object icon, Class< ? > realType)
 	{
 		this(displayName, type);
 		this._realObject = realObject;
 		storeContainingPersistIfNeeded(_realObject);
 		this.icon = icon;
-		this.visibleForMobile = isVisibleForMobile;
+		this.visibleForMobile = AnnotationManager.getInstance().isAnnotationPresent(realType, ServoyMobile.class);
 	}
 
 	public SimpleUserNode(String displayName, UserNodeType type, Object realObject, IPersist containingPersist, Object icon)
@@ -89,14 +84,12 @@ public class SimpleUserNode
 		this.containingPersist = containingPersist;
 	}
 
-	public SimpleUserNode(String displayName, UserNodeType type, IDeveloperFeedback developerFeedback, Object realObject, Object icon,
-		boolean isVisibleForMobile)
+	public SimpleUserNode(String displayName, UserNodeType type, IDeveloperFeedback developerFeedback, Object realObject, Object icon)
 	{
 		this(displayName, type);
 		this._realObject = realObject;
 		this.icon = icon;
 		this.developerFeedback = developerFeedback;
-		this.visibleForMobile = isVisibleForMobile;
 	}
 
 	public void setChildren(SimpleUserNode[] children)

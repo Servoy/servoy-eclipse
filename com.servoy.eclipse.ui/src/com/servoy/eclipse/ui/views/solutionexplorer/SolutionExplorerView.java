@@ -106,7 +106,6 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
@@ -304,6 +303,7 @@ import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
@@ -1405,9 +1405,24 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		});
 	}
 
+	private MobileViewerFilter mobileViewerFilter;
+
 	private void createTreeViewer(Composite parent)
 	{
 		tree = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+
+		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+		Solution s = (activeProject != null ? activeProject.getSolution() : null);
+		if (SolutionMetaData.isServoyMobileSolution(s))
+		{
+			if (mobileViewerFilter == null) mobileViewerFilter = new MobileViewerFilter();
+			tree.addFilter(mobileViewerFilter);
+		}
+		else
+		{
+			if (mobileViewerFilter != null) tree.removeFilter(mobileViewerFilter);
+		}
+
 		tree.setUseHashlookup(true);
 		ColumnViewerToolTipSupport.enableFor(tree);
 		drillDownAdapter = new DrillDownAdapter(tree);
@@ -2498,7 +2513,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			public void run()
 			{
 				ISelection selection = tree.getSelection();
-				if (wasNull) tree.setFilters(new ViewerFilter[] { treeFilter });
+				if (wasNull) tree.addFilter(treeFilter);
 				else tree.refresh();
 				if (text != null && text.trim().length() > 0)
 				{
@@ -3016,6 +3031,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		ServoyModelManager.getServoyModelManager().getServoyModel().removeSolutionMetaDataChangeListener(solutionMetaDataChangeListener);
 //		ServoyProject[] currentRoots = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
 //		registerPersistListener(currentRoots, null);
+
+		if (mobileViewerFilter != null) mobileViewerFilter = null;
 
 		yellow.dispose();
 

@@ -35,22 +35,22 @@ public class UserNode extends SimpleUserNode
 
 	public UserNode(String displayName, UserNodeType type, String codeFragment, String toolTip, Object realObject, Object icon)
 	{
-		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, null, toolTip), realObject, icon, false);
+		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, null, toolTip), realObject, icon);
 	}
 
 	public UserNode(String displayName, UserNodeType type, String codeFragment, String sampleCode, String toolTip, Object realObject, Object icon)
 	{
-		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, sampleCode, toolTip), realObject, icon, false);
+		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, sampleCode, toolTip), realObject, icon);
 	}
 
 	public UserNode(String displayName, UserNodeType type, IDeveloperFeedback developerFeedback, Object realObject, Object icon)
 	{
-		super(displayName, type, developerFeedback, realObject, icon, false);
+		super(displayName, type, developerFeedback, realObject, icon);
 	}
 
 	public UserNode(String displayName, UserNodeType type, String codeFragment, String toolTip)
 	{
-		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, null, toolTip), (Object)null, null, false);
+		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, null, toolTip), (Object)null, (Object)null);
 	}
 
 	public UserNode(String displayName, UserNodeType type)
