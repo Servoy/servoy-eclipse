@@ -33,6 +33,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.layout.grouplayout.GroupLayout;
@@ -221,6 +222,7 @@ public class ServerConfigurationPage extends WizardPage
 					GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
 				gl_container.createParallelGroup(GroupLayout.BASELINE).add(lblNewLabel_11).add(skip)).addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
 		container.setLayout(gl_container);
+		container.setTabList(new Control[] { url, driver, username, password, catalog, schema, maxActive, maxIdle, statementsIdle, validationType, validationQuery, clone, skip });
 		m_bindingContext = initDataBindings();
 	}
 
