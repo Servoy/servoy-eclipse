@@ -106,6 +106,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
@@ -1584,6 +1585,19 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 			};
 			servoyModel.addSolutionMetaDataChangeListener(solutionMetaDataChangeListener);
+		}
+
+		ServoyProject activeProject = servoyModel.getActiveProject();
+		Solution s = (activeProject != null ? activeProject.getSolution() : null);
+		List<ViewerFilter> vf = Arrays.asList(tree.getFilters());
+		if (SolutionMetaData.isServoyMobileSolution(s))
+		{
+			if (mobileViewerFilter == null) mobileViewerFilter = new MobileViewerFilter();
+			if (!vf.contains(mobileViewerFilter)) tree.addFilter(mobileViewerFilter);
+		}
+		else
+		{
+			if (mobileViewerFilter != null && vf.contains(mobileViewerFilter)) tree.removeFilter(mobileViewerFilter);
 		}
 
 		tree.setInput(roots);
