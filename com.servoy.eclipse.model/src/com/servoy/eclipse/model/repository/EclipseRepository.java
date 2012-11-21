@@ -819,6 +819,38 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 		}
 	}
 
+	public HashMap<IPersist, List<String>> getAllFilesForPersists(List<IPersist> persists)
+	{
+		HashMap<IPersist, List<String>> allFiles = new HashMap<IPersist, List<String>>();
+		for (IPersist persist : persists)
+		{
+			ArrayList<String> files = new ArrayList<String>();
+			Pair<String, String> filePath = SolutionSerializer.getFilePath(persist, true);
+			if (filePath != null)
+			{
+				String fileRelativePath = filePath.getLeft() + filePath.getRight();
+				if (wsa.exists(fileRelativePath))
+				{
+					files.add(fileRelativePath);
+					if (SolutionSerializer.isJSONFile(fileRelativePath))
+					{
+						String[] scriptPaths = SolutionSerializer.getScriptPaths(persist, true);
+
+						if (scriptPaths != null)
+						{
+							for (String scriptPath : scriptPaths)
+							{
+								if (wsa.exists(scriptPath)) files.add(scriptPath);
+							}
+						}
+					}
+				}
+			}
+			allFiles.put(persist, files);
+		}
+		return allFiles;
+	}
+
 	@Override
 	public Map<String, Method> getGettersViaIntrospection(Object obj) throws IntrospectionException
 	{

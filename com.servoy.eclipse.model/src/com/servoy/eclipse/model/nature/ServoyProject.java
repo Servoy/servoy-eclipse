@@ -404,7 +404,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 		for (IPersist node : nodes)
 		{
 			IPersist searchNode = AbstractRepository.searchPersist(getEditingSolution(), node);
-			if (searchNode != null /* object was deleted */&& searchNode != node)
+			if (searchNode != null /* object was not deleted */&& searchNode != node)
 			{
 				throw new RepositoryException("Object to save is out of sync"); //$NON-NLS-1$
 			}

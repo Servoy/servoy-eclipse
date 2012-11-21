@@ -23,13 +23,19 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.ltk.internal.ui.refactoring.RefactoringUIMessages;
+import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
+import org.eclipse.ltk.ui.refactoring.resource.DeleteResourcesWizard;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
@@ -125,19 +131,31 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 		{
 			if (toDelete.size() > 0)
 			{
+				List<IPersist> formsToDelete = new ArrayList<IPersist>();
 				for (IPersist persist : refItems)
 				{
+					boolean closeEditor = true;
 					IRootObject rootObject = persist.getRootObject();
 
 					if (rootObject instanceof Solution)
 					{
-						ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(rootObject.getName());
-						EclipseRepository repository = (EclipseRepository)rootObject.getRepository();
+						if (persist instanceof Form)
+						{
+							//make a list of forms to delete them all at once using Delete Resources Wizard
+							formsToDelete.add(persist);
+							closeEditor = false;
+						}
+						else
+						{
+							ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(rootObject.getName());
+							EclipseRepository repository = (EclipseRepository)rootObject.getRepository();
 
-						IPersist editingNode = servoyProject.getEditingPersist(persist.getUUID());
-						repository.deleteObject(editingNode);
+							IPersist editingNode = servoyProject.getEditingPersist(persist.getUUID());
 
-						servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
+							repository.deleteObject(editingNode);
+
+							servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
+						}
 					}
 					else if (rootObject instanceof StringResource)
 					{
@@ -168,7 +186,37 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 							ServoyLog.logError("Cannot delete resources when no resources project is active", null); //$NON-NLS-1$
 						}
 					}
-					EditorUtil.closeEditor(persist);
+					if (closeEditor) EditorUtil.closeEditor(persist);
+				}
+
+				if (!formsToDelete.isEmpty())
+				{
+					EclipseRepository rep = (EclipseRepository)ServoyModel.getDeveloperRepository();
+					HashMap<IPersist, List<String>> persists = rep.getAllFilesForPersists(formsToDelete);
+
+					Set<IPersist> keys = persists.keySet();
+					Iterator it = keys.iterator();
+					ArrayList<IFile> resources = new ArrayList<IFile>();
+					while (it.hasNext())
+					{
+						List<String> filePaths = persists.get(it.next());
+						for (String path : filePaths)
+						{
+							resources.add(ServoyModel.getWorkspace().getRoot().getFile(new Path(path)));
+						}
+					}
+
+					DeleteResourcesWizard wizard = new DeleteResourcesWizard(resources.toArray(new IFile[resources.size()]));
+
+					RefactoringWizardOpenOperation op = new RefactoringWizardOpenOperation(wizard);
+					try
+					{
+						op.run(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), RefactoringUIMessages.DeleteResourcesHandler_title);
+					}
+					catch (InterruptedException e)
+					{
+						// do nothing
+					}
 				}
 			}
 		}
@@ -337,11 +385,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 			{
 				if (allFormsAreInTheSameSet(deleteItems))
 				{
-					if (MessageDialog.openConfirm(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getText(),
-						"Are you sure you want to delete?")) //$NON-NLS-1$
-					{
-						performDeletion(selectedPersists);
-					}
+					performDeletion(selectedPersists);
 				}
 				else
 				{
@@ -350,7 +394,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 						"You are not allowed to delete!"); //$NON-NLS-1$
 				}
 			}
-			else if (MessageDialog.openConfirm(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getText(), "Are you sure you want to delete?")) //$NON-NLS-1$
+			else
 			{
 				performDeletion(selectedPersists);
 			}
