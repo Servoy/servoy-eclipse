@@ -3559,15 +3559,31 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
+	private static DataSourceCollectorVisitor dataSourceCollectorVisitor;
+
+	public static DataSourceCollectorVisitor getDataSourceCollectorVisitor()
+	{
+		if (dataSourceCollectorVisitor == null)
+		{
+			dataSourceCollectorVisitor = new DataSourceCollectorVisitor();
+			for (ServoyProject sp : ServoyModelFinder.getServoyModel().getModulesOfActiveProject())
+			{
+				sp.getSolution().acceptVisitor(dataSourceCollectorVisitor);
+			}
+		}
+		return dataSourceCollectorVisitor;
+	}
+
 	public void refreshDBIMarkers()
 	{
 		// do not delete or add dbi marker here
-		DataSourceCollectorVisitor datasourceCollector = new DataSourceCollectorVisitor();
-		for (ServoyProject sp : getServoyModel().getModulesOfActiveProject())
-		{
-			sp.getSolution().acceptVisitor(datasourceCollector);
-		}
 
+		// refresh also the dataSourceCollectorVisitor
+		if (dataSourceCollectorVisitor == null) dataSourceCollectorVisitor = new DataSourceCollectorVisitor();
+		for (ServoyProject sp : ServoyModelFinder.getServoyModel().getModulesOfActiveProject())
+		{
+			sp.getSolution().acceptVisitor(dataSourceCollectorVisitor);
+		}
 
 		ServoyResourcesProject resourcesProject = getServoyModel().getActiveResourcesProject();
 		if (resourcesProject != null && resourcesProject.getProject() != null)
@@ -3584,7 +3600,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						if (serverName != null && tableName != null)
 						{
 							String datasource = DataSourceUtils.createDBTableDataSource(serverName, tableName);
-							if (!datasourceCollector.getDataSources().contains(datasource))
+							if (!dataSourceCollectorVisitor.getDataSources().contains(datasource))
 							{
 								Object markerSeverity = marker.getAttribute(IMarker.SEVERITY);
 								if (markerSeverity == null || (markerSeverity != null && ((Integer)markerSeverity).intValue() > IMarker.SEVERITY_WARNING))
