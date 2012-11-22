@@ -578,6 +578,10 @@
 		 	class="com.servoy.eclipse.ui.quickfix.jsexternalize.JSFileExternalizeQuickFixGenerator"
 		 	markerType="org.eclipse.dltk.javascript.core.jsproblem">
 		</markerResolutionGenerator>
+		<markerResolutionGenerator
+			class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
+			markerType="com.servoy.eclipse.core.solutionProblem">
+		</markerResolutionGenerator>
   <markerResolutionGenerator
         class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
         markerType="com.servoy.eclipse.core.duplicateScopeNameProblem">
