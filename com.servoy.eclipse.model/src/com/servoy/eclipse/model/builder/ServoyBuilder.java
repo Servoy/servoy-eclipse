@@ -3586,7 +3586,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							String datasource = DataSourceUtils.createDBTableDataSource(serverName, tableName);
 							if (!datasourceCollector.getDataSources().contains(datasource))
 							{
-								marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
+								Object markerSeverity = marker.getAttribute(IMarker.SEVERITY);
+								if (markerSeverity == null || (markerSeverity != null && ((Integer)markerSeverity).intValue() > IMarker.SEVERITY_WARNING))
+								{
+									marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
+								}
 							}
 							else
 							{
