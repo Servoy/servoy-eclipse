@@ -94,6 +94,7 @@ import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.ContentSpec;
+import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.FlattenedPortal;
 import com.servoy.j2db.persistence.Form;
@@ -3561,6 +3562,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public void refreshDBIMarkers()
 	{
 		// do not delete or add dbi marker here
+		DataSourceCollectorVisitor datasourceCollector = new DataSourceCollectorVisitor();
+		for (ServoyProject sp : getServoyModel().getModulesOfActiveProject())
+		{
+			sp.getSolution().acceptVisitor(datasourceCollector);
+		}
+
 		ServoyResourcesProject resourcesProject = getServoyModel().getActiveResourcesProject();
 		if (resourcesProject != null && resourcesProject.getProject() != null)
 		{
@@ -3575,16 +3582,25 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						String tableName = marker.getAttribute(TableDifference.ATTRIBUTE_TABLENAME, null);
 						if (serverName != null && tableName != null)
 						{
-							String columnName = marker.getAttribute(TableDifference.ATTRIBUTE_COLUMNNAME, null);
-							if (getServoyModel().getDataModelManager() != null)
+							String datasource = DataSourceUtils.createDBTableDataSource(serverName, tableName);
+							if (!datasourceCollector.getDataSources().contains(datasource))
 							{
-								TableDifference tableDifference = getServoyModel().getDataModelManager().getColumnDifference(serverName, tableName, columnName);
-								if (tableDifference != null)
+								marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
+							}
+							else
+							{
+								String columnName = marker.getAttribute(TableDifference.ATTRIBUTE_COLUMNNAME, null);
+								if (getServoyModel().getDataModelManager() != null)
 								{
-									int severity = tableDifference.getSeverity();
-									if (severity >= 0)
+									TableDifference tableDifference = getServoyModel().getDataModelManager().getColumnDifference(serverName, tableName,
+										columnName);
+									if (tableDifference != null)
 									{
-										marker.setAttribute(IMarker.SEVERITY, severity);
+										int severity = tableDifference.getSeverity();
+										if (severity >= 0)
+										{
+											marker.setAttribute(IMarker.SEVERITY, severity);
+										}
 									}
 								}
 							}
