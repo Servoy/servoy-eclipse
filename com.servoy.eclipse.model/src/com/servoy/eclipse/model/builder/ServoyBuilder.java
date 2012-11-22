@@ -1631,6 +1631,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											if (context instanceof Form) inForm = ((Form)context).getName();
 											ServoyMarker mk;
 											Pair<String, ProblemSeverity> problemPair;
+											boolean addMarker = true;
 											if (elementName == null)
 											{
 												if (inForm == null)
@@ -1650,6 +1651,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												{
 													mk = MarkerMessages.PropertyOnElementTargetNotFound.fill(element.getName(), elementName);
 													problemPair = SOLUTION_PROPERTY_TARGET_NOT_FOUND;
+													IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, problemPair, IMarker.PRIORITY_LOW,
+														null, o);
+													marker.setAttribute("Uuid", o.getUUID().toString()); //$NON-NLS-1$
+													marker.setAttribute("SolutionName", elementName); //$NON-NLS-1$
+													marker.setAttribute("PropertyName", element.getName()); //$NON-NLS-1$ 
+													marker.setAttribute("DisplayName", RepositoryHelper.getDisplayName(element.getName(), o.getClass())); //$NON-NLS-1$ 
+													addMarker = false;
 												}
 												else
 												{
@@ -1677,7 +1685,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													}
 												}
 											}
-											else
+											else if (addMarker)
 											{
 												addMarker(project, mk.getType(), mk.getText(), -1, problemPair, IMarker.PRIORITY_LOW, null, o);
 											}

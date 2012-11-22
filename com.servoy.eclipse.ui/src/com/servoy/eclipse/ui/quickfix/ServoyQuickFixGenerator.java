@@ -101,6 +101,19 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				}
 			}
 
+			else if (type.equals(ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE))
+			{
+				String propertyName = (String)marker.getAttribute("PropertyName");
+				String displayName = (String)marker.getAttribute("DisplayName");
+				String solName = (String)marker.getAttribute("SolutionName");
+				String uuid = (String)marker.getAttribute("Uuid");
+
+				if (StaticContentSpecLoader.PROPERTY_FIRSTFORMID.getPropertyName().equals(propertyName))
+				{
+					resolutions.add(new ClearPropertyQuickFix(solName, uuid, propertyName, displayName));
+				}
+			}
+
 			else if (type.equals(ServoyBuilder.INVALID_EVENT_METHOD) || type.equals(ServoyBuilder.INVALID_COMMAND_METHOD))
 			{
 				String solName = (String)marker.getAttribute("SolutionName");
