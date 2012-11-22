@@ -52,12 +52,14 @@ import com.servoy.eclipse.model.builder.MarkerMessages;
 import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.extensions.IUnexpectedSituationHandler;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.UpdateMarkersJob;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnInfoManager;
 import com.servoy.j2db.persistence.IColumnTypes;
@@ -1048,8 +1050,22 @@ public class DataModelManager implements IColumnInfoManager
 
 	private void addDifferenceMarker(final TableDifference columnDifference)
 	{
-		final int severity = columnDifference.getSeverity();
-		if (severity < 0) return;
+		int markerSeverity = columnDifference.getSeverity();
+		if (markerSeverity < 0) return;
+		else
+		{
+			DataSourceCollectorVisitor datasourceCollector = new DataSourceCollectorVisitor();
+			for (ServoyProject sp : ServoyModelFinder.getServoyModel().getModulesOfActiveProject())
+			{
+				sp.getSolution().acceptVisitor(datasourceCollector);
+			}
+			String datasource = DataSourceUtils.createDBTableDataSource(columnDifference.getServerName(), columnDifference.getTableName());
+			if ((!datasourceCollector.getDataSources().contains(datasource)) && markerSeverity > IMarker.SEVERITY_WARNING)
+			{
+				markerSeverity = IMarker.SEVERITY_WARNING;
+			}
+		}
+		final int severity = markerSeverity;
 
 		differences.addDifference(columnDifference);
 		final IResource resource;
