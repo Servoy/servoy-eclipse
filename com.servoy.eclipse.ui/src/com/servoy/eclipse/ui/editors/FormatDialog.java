@@ -80,9 +80,9 @@ public class FormatDialog extends Dialog
 	/**
 	 * @param value
 	 */
-	public String getFormatProperty()
+	public String getFormatString()
 	{
-		return parsedFormat.toFormatProperty();
+		return parsedFormat.getFormatString();
 	}
 
 	@Override
@@ -298,8 +298,7 @@ public class FormatDialog extends Dialog
 	@Override
 	protected void okPressed()
 	{
-		parsedFormat = FormatParser.parseFormatString(formatComposite.getFormatString(), parsedFormat.getUIConverterName(),
-			parsedFormat.getUIConverterProperties());
+		parsedFormat = formatComposite.getParsedFormat().getCopy(parsedFormat.getUIConverterName(), parsedFormat.getUIConverterProperties());
 		super.okPressed();
 	}
 
@@ -311,7 +310,7 @@ public class FormatDialog extends Dialog
 
 	public static interface IFormatTextContainer
 	{
-		String getFormatString();
+		ParsedFormat getParsedFormat();
 
 		void setParsedFormat(ParsedFormat parsedFormat);
 	}

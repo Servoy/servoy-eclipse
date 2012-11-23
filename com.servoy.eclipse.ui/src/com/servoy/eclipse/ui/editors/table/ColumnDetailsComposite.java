@@ -148,7 +148,7 @@ public class ColumnDetailsComposite extends Composite
 					fd.open();
 					if (fd.getReturnCode() != Window.CANCEL)
 					{
-						String property = fd.getFormatProperty();
+						String property = fd.getFormatString();
 						defaultFormat.setText(property == null ? "" : property); // TODO: use label provider to hide json format
 					}
 				}

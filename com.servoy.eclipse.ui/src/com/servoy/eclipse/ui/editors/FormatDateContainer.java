@@ -233,28 +233,25 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 	 * @see com.servoy.eclipse.ui.editors.FormatCellEditor.IFormatTextContainer#getFormat()
 	 */
 	@SuppressWarnings("nls")
-	public String getFormatString()
+	public ParsedFormat getParsedFormat()
 	{
-		String format = displayFormat.getText();
-		if (format.length() > 0)
+		String dispformat = displayFormat.getText();
+		String editOrPlaceholder = null;
+		if (dispformat.length() > 0)
 		{
-			new SimpleDateFormat(format);
 			if (useMask.getSelection())
 			{
-				if (placeholder.getText().length() > 0)
-				{
-					format = format + "|" + placeholder.getText().charAt(0);
-				}
-				format = format + "|mask";
+				new SimpleDateFormat(dispformat); // test
+				if (placeholder.getText().length() > 0) editOrPlaceholder = placeholder.getText().substring(0, 1);
 			}
 			else if (editFormat.getText().length() > 0)
 			{
-				new SimpleDateFormat(editFormat.getText());
-				format = format + "|" + editFormat.getText();
+				new SimpleDateFormat(editFormat.getText()); // test
+				editOrPlaceholder = editFormat.getText();
 			}
 		}
-		return format;
 
+		return new ParsedFormat(false, false, false, false, useMask.getSelection(), editOrPlaceholder, displayFormat.getText(), null, null, null, null);
 	}
 
 	/**

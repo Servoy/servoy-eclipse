@@ -1940,12 +1940,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 															ServoyMarker mk;
 															if (elementName == null)
 															{
-																mk = MarkerMessages.FormFormatInvalid.fill(inForm, parsedFormat.toFormatProperty());
+																mk = MarkerMessages.FormFormatInvalid.fill(inForm, parsedFormat.getFormatString());
 															}
 															else
 															{
 																mk = MarkerMessages.FormFormatOnElementInvalid.fill(elementName, inForm,
-																	parsedFormat.toFormatProperty());
+																	parsedFormat.getFormatString());
 															}
 															addMarker(project, mk.getType(), mk.getText(), -1, FORM_FORMAT_INVALID, IMarker.PRIORITY_NORMAL,
 																null, o);

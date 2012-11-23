@@ -109,6 +109,6 @@ public class FormatCellEditor extends TextDialogCellEditor
 		{
 			return TextDialogCellEditor.CANCELVALUE;
 		}
-		return dialog.getFormatProperty();
+		return dialog.getFormatString();
 	}
 }

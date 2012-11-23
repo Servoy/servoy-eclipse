@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.ui.editors.FormatDialog.IFormatTextContainer;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.FormatParser.ParsedFormat;
 import com.servoy.j2db.util.RoundHalfUpDecimalFormat;
 
@@ -218,7 +219,7 @@ public class FormatIntegerContainer extends Composite implements IFormatTextCont
 	/**
 	 * @see com.servoy.eclipse.ui.editors.FormatCellEditor.IFormatTextContainer#getFormat()
 	 */
-	public String getFormatString()
+	public ParsedFormat getParsedFormat()
 	{
 		String format = displayFormat.getText();
 		// test it
@@ -227,13 +228,19 @@ public class FormatIntegerContainer extends Composite implements IFormatTextCont
 		{
 			// test it
 			new DecimalFormat(editFormat.getText(), RoundHalfUpDecimalFormat.getDecimalFormatSymbols(Locale.getDefault())).format(1);
-			format = format + '|' + editFormat.getText();
 		}
-		if (maxLength.getText().length() > 0)
+
+		Integer len = null;
+		try
 		{
-			format = format + "|#(" + maxLength.getText() + ')'; //$NON-NLS-1$
+			len = Integer.valueOf(maxLength.getText());
 		}
-		return format;
+		catch (NumberFormatException e)
+		{
+			Debug.log(e);
+		}
+
+		return new ParsedFormat(false, false, false, false, false, editFormat.getText(), displayFormat.getText(), len, null, null, null);
 
 	}
 

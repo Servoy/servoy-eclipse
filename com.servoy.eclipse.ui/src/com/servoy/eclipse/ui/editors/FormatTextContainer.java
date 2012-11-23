@@ -78,6 +78,7 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 	protected boolean ignoreTextChanges;
 	private final Button displayFormatRadio;
 	private Point caret = null;
+	private final Text allowedCharacters;
 
 	/**
 	 * @param parent
@@ -194,6 +195,13 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 		placeHolder = new Text(this, SWT.BORDER);
 		placeHolder.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		placeHolder.addModifyListener(textListener);
+
+		Label lblAllowedCharFormat = new Label(this, SWT.NONE);
+		lblAllowedCharFormat.setText("Allowed Characters for '*'");
+
+		allowedCharacters = new Text(this, SWT.BORDER);
+		allowedCharacters.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		allowedCharacters.addModifyListener(textListener);
 		new Label(this, SWT.NONE);
 
 		useRaw = new Button(this, SWT.CHECK);
@@ -256,26 +264,10 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 	 * @see com.servoy.eclipse.ui.editors.FormatCellEditor.IFormatTextContainer#getFormat()
 	 */
 	@SuppressWarnings("nls")
-	public String getFormatString()
+	public ParsedFormat getParsedFormat()
 	{
-		if (upperCase.getSelection()) return "|U";
-		if (lowerCase.getSelection()) return "|L";
-		if (numberInput.getSelection()) return "|#";
-
-		String format = displayFormat.getText();
-		if (format.length() > 0)
-		{
-			if (placeHolder.getText().length() > 0)
-			{
-				format = format + "|" + placeHolder.getText();
-			}
-			if (useRaw.getSelection())
-			{
-				format = format + "|raw";
-			}
-		}
-		return format;
-
+		return new ParsedFormat(upperCase.getSelection(), lowerCase.getSelection(), numberInput.getSelection(), useRaw.getSelection(), false,
+			placeHolder.getText(), displayFormat.getText(), null, null, null, allowedCharacters.getText());
 	}
 
 	/**
@@ -303,6 +295,7 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 			else
 			{
 				displayFormat.setText(parsedFormat.getDisplayFormat() != null ? parsedFormat.getDisplayFormat() : "");
+				allowedCharacters.setText(parsedFormat.getAllowedCharacters() != null ? parsedFormat.getAllowedCharacters() : "");
 				useRaw.setSelection(parsedFormat.isRaw());
 				if (parsedFormat.getPlaceHolderString() != null)
 				{
@@ -325,6 +318,7 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 		ignoreTextChanges = true;
 		placeHolder.setText("");
 		displayFormat.setText("");
+		allowedCharacters.setText("");
 		caret = null;
 		useRaw.setSelection(false);
 		ignoreTextChanges = false;
