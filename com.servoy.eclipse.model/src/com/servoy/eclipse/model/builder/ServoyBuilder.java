@@ -3583,12 +3583,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	{
 		// do not delete or add dbi marker here
 		createAndRefreshDataSourceCollectorVisitor();
-		if (dataSourceCollectorVisitor == null) dataSourceCollectorVisitor = new DataSourceCollectorVisitor();
-		for (ServoyProject sp : ServoyModelFinder.getServoyModel().getModulesOfActiveProject())
-		{
-			sp.getSolution().acceptVisitor(dataSourceCollectorVisitor);
-		}
-
 		ServoyResourcesProject resourcesProject = getServoyModel().getActiveResourcesProject();
 		if (resourcesProject != null && resourcesProject.getProject() != null)
 		{
