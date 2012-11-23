@@ -3561,15 +3561,20 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	private static DataSourceCollectorVisitor dataSourceCollectorVisitor;
 
+	private static void createAndRefreshDataSourceCollectorVisitor()
+	{
+		dataSourceCollectorVisitor = new DataSourceCollectorVisitor();
+		for (ServoyProject sp : ServoyModelFinder.getServoyModel().getModulesOfActiveProject())
+		{
+			sp.getSolution().acceptVisitor(dataSourceCollectorVisitor);
+		}
+	}
+
 	public static DataSourceCollectorVisitor getDataSourceCollectorVisitor()
 	{
 		if (dataSourceCollectorVisitor == null)
 		{
-			dataSourceCollectorVisitor = new DataSourceCollectorVisitor();
-			for (ServoyProject sp : ServoyModelFinder.getServoyModel().getModulesOfActiveProject())
-			{
-				sp.getSolution().acceptVisitor(dataSourceCollectorVisitor);
-			}
+			createAndRefreshDataSourceCollectorVisitor();
 		}
 		return dataSourceCollectorVisitor;
 	}
@@ -3577,8 +3582,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public void refreshDBIMarkers()
 	{
 		// do not delete or add dbi marker here
-
-		// refresh also the dataSourceCollectorVisitor
+		createAndRefreshDataSourceCollectorVisitor();
 		if (dataSourceCollectorVisitor == null) dataSourceCollectorVisitor = new DataSourceCollectorVisitor();
 		for (ServoyProject sp : ServoyModelFinder.getServoyModel().getModulesOfActiveProject())
 		{
