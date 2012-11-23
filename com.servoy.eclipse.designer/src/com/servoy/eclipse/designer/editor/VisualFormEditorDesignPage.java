@@ -382,8 +382,6 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage
 
 		addToolbarAction(COOLBAR_PREFS, getActionRegistry().getAction(DesignerActionFactory.TOGGLE_HIDE_INHERITED.getId()));
 
-		refreshToolBars();
-
 		GraphicalViewer viewer = getGraphicalViewer();
 
 		if (getEditorPart().getForm() != null)
@@ -420,6 +418,8 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage
 
 		addToolbarAction(COOLBAR_PREFS, getActionRegistry().getAction(DesignerActionFactory.SELECT_FEEDBACK.getId()));
 		addToolbarAction(COOLBAR_PREFS, getActionRegistry().getAction(DesignerActionFactory.SELECT_SNAPMODE.getId()));
+
+		refreshToolBars();
 	}
 
 	@Override
