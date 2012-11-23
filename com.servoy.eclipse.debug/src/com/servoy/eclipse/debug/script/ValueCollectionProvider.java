@@ -19,6 +19,7 @@ package com.servoy.eclipse.debug.script;
 
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -44,14 +45,17 @@ import org.eclipse.dltk.javascript.typeinfo.model.Member;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.Visibility;
 
+import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
@@ -67,6 +71,21 @@ public class ValueCollectionProvider implements IMemberEvaluator
 
 	private static final Map<IFile, SoftReference<Pair<Long, IValueCollection>>> scriptCache = new ConcurrentHashMap<IFile, SoftReference<Pair<Long, IValueCollection>>>();
 
+	public ValueCollectionProvider()
+	{
+		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
+		if (servoyModel instanceof ServoyModel)
+		{
+			((ServoyModel)servoyModel).addPersistChangeListener(true, new IPersistChangeListener()
+			{
+				public void persistChanges(Collection<IPersist> changes)
+				{
+					// CHECK if something changes here (partial flushing) then it must also be changed in the TypeCreator.flushCache();
+					scriptCache.clear();
+				}
+			});
+		}
+	}
 
 	@SuppressWarnings("restriction")
 	public IValueCollection valueOf(ITypeInfoContext context, Element member)

@@ -1445,6 +1445,8 @@ public class TypeCreator extends TypeCache
 	 */
 	protected void flushCache()
 	{
+		// CHECK if something changes here (partial flushing) then it must also be changed in the ValueCollectionProvider
+
 		// TODO, maybe only flush solution buckets and SCOPE_TABLES only when a table change?
 		for (String bucket : buckets.keySet())
 		{
