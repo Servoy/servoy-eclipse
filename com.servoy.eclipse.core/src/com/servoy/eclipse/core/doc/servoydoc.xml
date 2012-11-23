@@ -3148,7 +3148,7 @@ if (cancel || !databaseManager.commitTransaction())
 }]]></sample>
           <parameters>
             <parameter name="saveFirst" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
-              <description><![CDATA[save edited records to the database first (default true)\]]></description>
+              <description><![CDATA[save edited records to the database first (default true)]]></description>
             </parameter>
             <parameter name="revertSavedRecords" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[if a commit fails and a rollback is done, the when given false the records are not reverted to the database state (and are in edited records again)]]></description>
@@ -3733,7 +3733,8 @@ var dataset2 = databaseManager.createEmptyDataSet(10,new Array ('a','b','c','d')
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"><![CDATA[query builder]]></return>
           <description><![CDATA[Create a QueryBuilder object for a datasource.]]></description>
           <summary><![CDATA[Create a QueryBuilder object for a datasource.]]></summary>
-          <sample><![CDATA[var q = databaseManager.createSelect('db:/example_data/book_nodes')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/book_nodes>} */
+var q = databaseManager.createSelect('db:/example_data/book_nodes')
 q.result.addPk()
 q.where.add(q.columns.label_text.not.isin(null))
 databaseManager.getFoundSet('db:/example_data/book_nodes').loadRecords(q)]]></sample>
