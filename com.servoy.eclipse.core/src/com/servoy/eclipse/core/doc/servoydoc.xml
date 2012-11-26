@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <servoydoc>
   <runtime>
     <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT">
@@ -3733,7 +3733,8 @@ var dataset2 = databaseManager.createEmptyDataSet(10,new Array ('a','b','c','d')
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"><![CDATA[query builder]]></return>
           <description><![CDATA[Create a QueryBuilder object for a datasource.]]></description>
           <summary><![CDATA[Create a QueryBuilder object for a datasource.]]></summary>
-          <sample><![CDATA[var q = databaseManager.createSelect('db:/example_data/book_nodes')
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/book_nodes>} */
+var q = databaseManager.createSelect('db:/example_data/book_nodes')
 q.result.addPk()
 q.where.add(q.columns.label_text.not.isin(null))
 databaseManager.getFoundSet('db:/example_data/book_nodes').loadRecords(q)]]></sample>
@@ -17428,19 +17429,51 @@ record.save();]]></sample>
     </object>
     <object publicName="JSRelation" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSRelation">
       <constants>
+        <constant name="FULL_JOIN">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for the joinType of a Query Builder join.]]></description>
+          <summary><![CDATA[Constant for the joinType of a Query Builder join.]]></summary>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
+ /** @type {QBJoin<db:/example_data/order_details>} */
+	var join = query.joins.add('db:/example_data/order_details', JSRelation.RIGHT_OUTER_JOIN, 'odetail')
+	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
+        </constant>
         <constant name="INNER_JOIN">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for set/get the joinType of a JSRelation. It is also used in solutionModel.newRelation(...).]]></description>
-          <summary><![CDATA[Constant for set/get the joinType of a JSRelation.]]></summary>
+          <description><![CDATA[Constant for the joinType of a JSRelation. It is also used in solutionModel.newRelation(...) and in the QueryBuilder.]]></description>
+          <summary><![CDATA[Constant for the joinType of a JSRelation.]]></summary>
           <sample><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
-relation.joinType = JSRelation.LEFT_OUTER_JOIN;]]></sample>
+relation.joinType = JSRelation.LEFT_OUTER_JOIN;
+
+ /** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
+ /** @type {QBJoin<db:/example_data/order_details>} */
+	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
+	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
         </constant>
         <constant name="LEFT_OUTER_JOIN">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for set/get the joinType of a JSRelation. It is also used in solutionModel.newRelation(...).]]></description>
-          <summary><![CDATA[Constant for set/get the joinType of a JSRelation.]]></summary>
+          <description><![CDATA[Constant for the joinType of a JSRelation. It is also used in solutionModel.newRelation(...) and in the QueryBuilder.]]></description>
+          <summary><![CDATA[Constant for the joinType of a JSRelation.]]></summary>
           <sample><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
-relation.joinType = JSRelation.LEFT_OUTER_JOIN;]]></sample>
+relation.joinType = JSRelation.LEFT_OUTER_JOIN;
+
+ /** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
+ /** @type {QBJoin<db:/example_data/order_details>} */
+	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
+	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
+        </constant>
+        <constant name="RIGHT_OUTER_JOIN">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for the joinType of a Query Builder join.]]></description>
+          <summary><![CDATA[Constant for the joinType of a Query Builder join.]]></summary>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
+ /** @type {QBJoin<db:/example_data/order_details>} */
+	var join = query.joins.add('db:/example_data/order_details', JSRelation.RIGHT_OUTER_JOIN, 'odetail')
+	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
         </constant>
       </constants>
       <properties>
@@ -17511,7 +17544,13 @@ relation.initialSort = 'another_child_table_text asc';]]></sample>
 Can be "inner join" or "left outer join".]]></description>
           <summary><![CDATA[The join type that is performed between the primary table and the foreign table.]]></summary>
           <sample><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
-relation.joinType = JSRelation.LEFT_OUTER_JOIN;]]></sample>
+relation.joinType = JSRelation.LEFT_OUTER_JOIN;
+
+ /** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
+ /** @type {QBJoin<db:/example_data/order_details>} */
+	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
+	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
         </property>
         <property name="name">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -17585,7 +17624,9 @@ application.output(relation.getUUID().toString())]]></sample>
 and one relation operators (like '=' '!=' '>' '<') must be provided.]]></description>
           <summary><![CDATA[Creates a new relation item for this relation.]]></summary>
           <sample><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
-relation.newRelationItem('another_parent_table_id', '=', 'another_child_table_parent_id');]]></sample>
+relation.newRelationItem('another_parent_table_id', '=', 'another_child_table_parent_id');
+// for literals use a prefix
+relation.newRelationItem(JSRelationItem.LITERAL_PREFIX + "'hello'",'=', 'mytextfield');]]></sample>
           <parameters>
             <parameter name="dataprovider" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The name of the primary dataprovider.]]></description>
@@ -17633,6 +17674,15 @@ for (var i = 0; i < criteria.length; i++) {
       </functions>
     </object>
     <object publicName="JSRelationItem" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSRelationItem">
+      <constants>
+        <constant name="LITERAL_PREFIX">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant for using literals in solution model in relations.
+Strings must be passed as quoted value to make a distinction between string '5' and number 5.]]></description>
+          <summary><![CDATA[Constant for using literals in solution model in relations.]]></summary>
+          <sample><![CDATA[relation.newRelationItem(JSRelationItem.LITERAL_PREFIX + "'hello'",'=', 'mytextfield');]]></sample>
+        </constant>
+      </constants>
       <properties>
         <property name="foreignColumnName">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -23187,7 +23237,7 @@ foundset.loadRecords(query)]]></sample>
               <description><![CDATA[data source]]></description>
             </parameter>
             <parameter name="joinType" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
-              <description><![CDATA[join type, one of IQueryBuilderJoin#LEFT_OUTER_JOIN, IQueryBuilderJoin#INNER_JOIN, IQueryBuilderJoin#RIGHT_OUTER_JOIN, IQueryBuilderJoin#FULL_JOIN]]></description>
+              <description><![CDATA[join type, one of JSRelation.LEFT_OUTER_JOIN, JSRelation.INNER_JOIN, JSRelation.RIGHT_OUTER_JOIN, JSRelation.FULL_JOIN]]></description>
             </parameter>
           </parameters>
         </function>
@@ -43022,8 +43072,8 @@ The difference to loadAllRecords() is that related foundset will load related re
           <description><![CDATA[Loads a (related) foundset into the form. 
 The form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset.
 
-This will really update the foundset instance itself of the form, so now existing foundst is altered just the new foundset is shown.
-This is different then doing foundset.loadRecords(foundset) because that just alteres the current foundset and doesn't do anything with the foundset
+This will really update the foundset instance itself of the form, so now existing foundset is altered just the new foundset is shown.
+This is different then doing foundset.loadRecords(foundset) because that just alters the current foundset and doesn't do anything with the foundset
 that is given.]]></description>
           <summary><![CDATA[Loads a (related) foundset into the form.]]></summary>
           <sample><![CDATA[//to load a (related)foundset into the form.
