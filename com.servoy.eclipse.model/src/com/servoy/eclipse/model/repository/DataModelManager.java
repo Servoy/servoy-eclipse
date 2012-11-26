@@ -1278,7 +1278,7 @@ public class DataModelManager implements IColumnInfoManager
 						// this check is for -1 and big value lengths
 						if (!compatibleLengths)
 						{
-							severity = getErrorSeverity(tableName);
+							severity = IMarker.SEVERITY_WARNING;
 						}
 					}
 				}
