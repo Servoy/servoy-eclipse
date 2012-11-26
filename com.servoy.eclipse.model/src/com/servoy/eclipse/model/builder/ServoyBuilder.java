@@ -334,7 +334,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		"DBIColumnMissingFromDB", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> DBI_COLUMN_MISSING_FROM_DB_FILE = new Pair<String, ProblemSeverity>(
 		"DBIColumnMissingFromDBIFile", ProblemSeverity.ERROR); //$NON-NLS-1$
-	public final static Pair<String, ProblemSeverity> DBI_COLUMN_CONFLICT = new Pair<String, ProblemSeverity>("DBIColumnConflict", ProblemSeverity.ERROR); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> DBI_COLUMN_CONFLICT = new Pair<String, ProblemSeverity>("DBIColumnConflict", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> DBI_TABLE_MISSING = new Pair<String, ProblemSeverity>("DBITableMissing", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> DBI_FILE_MISSING = new Pair<String, ProblemSeverity>("DBIFileMissing", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> DBI_COLUMN_INFO_SEQ_TYPE_OVERRIDE = new Pair<String, ProblemSeverity>(
