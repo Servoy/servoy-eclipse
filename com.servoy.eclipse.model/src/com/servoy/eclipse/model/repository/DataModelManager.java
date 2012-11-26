@@ -1537,7 +1537,7 @@ public class DataModelManager implements IColumnInfoManager
 						if ((c.isDatabasePK() && (dbiFileDefinition.flags & Column.IDENT_COLUMNS) == 0) || columnInfoIsPk)
 						{
 							// column is pk, but columninfo knows it as normal column, or column is not pk and columninfo knows it as pk
-							severity = computeCustomSeverity(ServoyBuilder.DBI_COLUMN_CONFLICT);
+							severity = getErrorSeverity(tableName);
 						}
 						else if (c.isDatabasePK() && ((dbiFileDefinition.flags & Column.USER_ROWID_COLUMN) != 0))
 						{
