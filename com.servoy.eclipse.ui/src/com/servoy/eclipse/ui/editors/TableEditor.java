@@ -708,7 +708,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 						{
 							IColumnValidator validator = ApplicationServerSingleton.get().getPluginManager().getColumnValidatorManager().getValidator(
 								column.getColumnInfo().getValidatorName());
-							if (validator != null && validator.getDefaultProperties() != null)
+							if (validator != null && validator.getDefaultProperties() != null && validator.getDefaultProperties().size() > 0)
 							{
 								throw new RepositoryException(
 									"Column " + column.getName() + " has validator " + validator.getName() + " that doesn't have properties filled in."); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
