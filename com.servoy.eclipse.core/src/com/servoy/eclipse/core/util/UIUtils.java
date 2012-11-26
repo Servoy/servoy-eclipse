@@ -704,7 +704,7 @@ public class UIUtils
 		PixelGrabber pg = new PixelGrabber(image, 0, 0, 1, 1, false);
 		try
 		{
-			pg.grabPixels();
+			pg.grabPixels(30000); //workaround for case SVY-3024, import image loading hang up.
 		}
 		catch (InterruptedException e)
 		{
