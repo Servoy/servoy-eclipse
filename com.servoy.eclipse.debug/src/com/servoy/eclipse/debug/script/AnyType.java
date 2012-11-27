@@ -41,4 +41,24 @@ public class AnyType implements IRType
 	{
 		return this;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.dltk.javascript.typeinfo.IRType#isSynthetic()
+	 */
+	public boolean isSynthetic()
+	{
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.dltk.javascript.typeinfo.IRType#normalize()
+	 */
+	public IRType normalize()
+	{
+		return this;
+	}
 }

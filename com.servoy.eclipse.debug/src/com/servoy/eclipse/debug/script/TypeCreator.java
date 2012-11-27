@@ -47,10 +47,12 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dltk.internal.javascript.ti.TypeSystemImpl;
 import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
 import org.eclipse.dltk.javascript.typeinfo.DefaultMetaType;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.ITypeNames;
+import org.eclipse.dltk.javascript.typeinfo.MetaType;
 import org.eclipse.dltk.javascript.typeinfo.TypeCache;
 import org.eclipse.dltk.javascript.typeinfo.TypeMemberQuery;
 import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
@@ -67,6 +69,8 @@ import org.eclipse.dltk.javascript.typeinfo.model.TypeKind;
 import org.eclipse.dltk.javascript.typeinfo.model.Visibility;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.EMap;
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
@@ -315,6 +319,27 @@ public class TypeCreator extends TypeCache
 	private volatile boolean initialized;
 	protected static final List<String> objectMethods = Arrays.asList(new String[] { "wait", "toString", "hashCode", "equals", "notify", "notifyAll", "getClass" });
 
+
+	private final TypeSystemImpl servoyStaticTypeSystem = new TypeSystemImpl()
+	{
+		@Override
+		protected Type doResolveType(Type type)
+		{
+			Type resolved = super.doResolveType(type);
+			if (resolved.isProxy())
+			{
+				final String typeName = URI.decode(((InternalEObject)type).eProxyURI().fragment());
+				resolved = findType(null, typeName);
+			}
+			return resolved;
+		}
+	};
+
+	private final ServoyStaticMetaType staticMetaType = new ServoyStaticMetaType(servoyStaticTypeSystem);
+
+	private final MetaType javaMetaType = new JavaRuntimeMetaType(servoyStaticTypeSystem);
+
+
 	public TypeCreator()
 	{
 		super("servoy", "javascript");
@@ -482,7 +507,7 @@ public class TypeCreator extends TypeCache
 		type.setName(name);
 		type.setKind(TypeKind.JAVA);
 		type.setAttribute(JavaRuntimeType.JAVA_CLASS, clz);
-		type.setMetaType(JavaRuntimeType.JAVA_META_TYPE);
+		type.setMetaType(javaMetaType);
 
 		java.lang.reflect.Method[] methods = clz.getMethods();
 		Field[] fields = clz.getFields();
@@ -689,9 +714,7 @@ public class TypeCreator extends TypeCache
 								@Override
 								public IStatus run(IProgressMonitor monitor)
 								{
-
-									ServoyStaticMetaType.SHARED_TYPE_SYSTEM.reset();
-									JavaRuntimeMetaType.SHARED_TYPE_SYSTEM.reset();
+									servoyStaticTypeSystem.reset();
 									clear(null);
 									flushCache();
 									return Status.OK_STATUS;
@@ -1445,15 +1468,13 @@ public class TypeCreator extends TypeCache
 	 */
 	protected void flushCache()
 	{
-		// CHECK if something changes here (partial flushing) then it must also be changed in the ValueCollectionProvider
-
 		// TODO, maybe only flush solution buckets and SCOPE_TABLES only when a table change?
 		for (String bucket : buckets.keySet())
 		{
 			clear(bucket);
 		}
 		relationCache.clear();
-		ServoyDynamicMetaType.SHARED_TYPE_SYSTEM.reset();
+		ValueCollectionProvider.clear();
 	}
 
 //	final Set<String> staticTypes = Collections.synchronizedSet(new TreeSet<String>());
@@ -1471,7 +1492,7 @@ public class TypeCreator extends TypeCache
 		if (bucket != null && !bucket.equals(""))
 		{
 			buckets.put(bucket, bucket);
-			type.setMetaType(new ServoyDynamicMetaType());
+			type.setMetaType(ServoyDynamicMetaType.META_TYPE);
 //			Set<String> set = dynamicTypes.get(bucket);
 //			if (set == null)
 //			{
@@ -1483,7 +1504,7 @@ public class TypeCreator extends TypeCache
 		}
 		else if (type.getMetaType() == null || type.getMetaType() == DefaultMetaType.DEFAULT)
 		{
-			type.setMetaType(new ServoyStaticMetaType());
+			type.setMetaType(staticMetaType);
 //			staticTypes.add(type.getName());
 		}
 //		else
@@ -1492,7 +1513,7 @@ public class TypeCreator extends TypeCache
 //		}
 		if (isServoyMobileSolutionType())
 		{
-			if (type.getMetaType() != null && type.getMetaType() == JavaRuntimeType.JAVA_META_TYPE)
+			if (type.getMetaType() != null && type.getMetaType() == javaMetaType)
 			{
 				type.setVisible(false);
 			}
@@ -3486,7 +3507,6 @@ public class TypeCreator extends TypeCache
 			this(null, null, table);
 		}
 	}
-
 
 	protected static ImageDescriptor getImageDescriptorForFormEncapsulation(int encapsulation)
 	{

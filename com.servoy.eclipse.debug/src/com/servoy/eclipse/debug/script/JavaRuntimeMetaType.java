@@ -17,7 +17,6 @@
 
 package com.servoy.eclipse.debug.script;
 
-import org.eclipse.dltk.internal.javascript.ti.TypeSystemImpl;
 import org.eclipse.dltk.javascript.typeinfo.DefaultMetaType;
 import org.eclipse.dltk.javascript.typeinfo.IRType;
 import org.eclipse.dltk.javascript.typeinfo.IRTypeDeclaration;
@@ -30,7 +29,12 @@ import org.eclipse.dltk.javascript.typeinfo.model.Type;
  */
 final class JavaRuntimeMetaType extends DefaultMetaType
 {
-	static TypeSystemImpl SHARED_TYPE_SYSTEM = new TypeSystemImpl();
+	private final ITypeSystem typeSystem;
+
+	public JavaRuntimeMetaType(ITypeSystem typeSystem)
+	{
+		this.typeSystem = typeSystem;
+	}
 
 	@Override
 	public IRType toRType(ITypeSystem typeSystem, Type type)
@@ -57,6 +61,6 @@ final class JavaRuntimeMetaType extends DefaultMetaType
 	@Override
 	public ITypeSystem getPreferredTypeSystem(Type type)
 	{
-		return SHARED_TYPE_SYSTEM;
+		return typeSystem;
 	}
 }

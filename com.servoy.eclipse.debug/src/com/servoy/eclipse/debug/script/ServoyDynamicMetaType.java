@@ -17,8 +17,9 @@
 
 package com.servoy.eclipse.debug.script;
 
-import org.eclipse.dltk.internal.javascript.ti.TypeSystemImpl;
 import org.eclipse.dltk.javascript.typeinfo.DefaultMetaType;
+import org.eclipse.dltk.javascript.typeinfo.IRType;
+import org.eclipse.dltk.javascript.typeinfo.IRTypeDeclaration;
 import org.eclipse.dltk.javascript.typeinfo.ITypeSystem;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 
@@ -28,7 +29,23 @@ import org.eclipse.dltk.javascript.typeinfo.model.Type;
  */
 public class ServoyDynamicMetaType extends DefaultMetaType
 {
-	static TypeSystemImpl SHARED_TYPE_SYSTEM = new TypeSystemImpl();
+	public static final ServoyDynamicMetaType META_TYPE = new ServoyDynamicMetaType();
+
+	private ServoyDynamicMetaType()
+	{
+	}
+
+	@Override
+	public IRType toRType(ITypeSystem typeSystem, IRTypeDeclaration declaration)
+	{
+		return new ServoyDynamicRuntimeType(typeSystem, declaration);
+	}
+
+	@Override
+	public IRType toRType(ITypeSystem typeSystem, Type type)
+	{
+		return new ServoyDynamicRuntimeType(typeSystem, type);
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -38,16 +55,5 @@ public class ServoyDynamicMetaType extends DefaultMetaType
 	public String getId()
 	{
 		return "ServoyDynamicType";
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.dltk.javascript.typeinfo.DefaultMetaType#getPreferredTypeSystem(org.eclipse.dltk.javascript.typeinfo.model.Type)
-	 */
-	@Override
-	public ITypeSystem getPreferredTypeSystem(Type type)
-	{
-		return SHARED_TYPE_SYSTEM;
 	}
 }

@@ -17,7 +17,6 @@
 
 package com.servoy.eclipse.debug.script;
 
-import org.eclipse.dltk.internal.javascript.ti.TypeSystemImpl;
 import org.eclipse.dltk.javascript.typeinfo.DefaultMetaType;
 import org.eclipse.dltk.javascript.typeinfo.ITypeSystem;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
@@ -28,7 +27,13 @@ import org.eclipse.dltk.javascript.typeinfo.model.Type;
  */
 public class ServoyStaticMetaType extends DefaultMetaType
 {
-	static TypeSystemImpl SHARED_TYPE_SYSTEM = new TypeSystemImpl();
+	private final ITypeSystem typeSystem;
+
+	public ServoyStaticMetaType(ITypeSystem typeSystem)
+	{
+		this.typeSystem = typeSystem;
+	}
+
 
 	/*
 	 * (non-Javadoc)
@@ -48,6 +53,6 @@ public class ServoyStaticMetaType extends DefaultMetaType
 	@Override
 	public ITypeSystem getPreferredTypeSystem(Type type)
 	{
-		return SHARED_TYPE_SYSTEM;
+		return typeSystem;
 	}
 }

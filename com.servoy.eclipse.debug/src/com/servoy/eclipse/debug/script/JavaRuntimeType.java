@@ -22,7 +22,6 @@ import org.eclipse.dltk.javascript.typeinfo.IRType;
 import org.eclipse.dltk.javascript.typeinfo.IRTypeDeclaration;
 import org.eclipse.dltk.javascript.typeinfo.IRTypeTransformer;
 import org.eclipse.dltk.javascript.typeinfo.ITypeSystem;
-import org.eclipse.dltk.javascript.typeinfo.MetaType;
 import org.eclipse.dltk.javascript.typeinfo.RSimpleType;
 import org.eclipse.dltk.javascript.typeinfo.TypeCompatibility;
 import org.eclipse.dltk.javascript.typeinfo.TypeQuery;
@@ -33,8 +32,6 @@ import org.eclipse.dltk.javascript.typeinfo.model.Type;
 class JavaRuntimeType extends RSimpleType
 {
 	public static final String JAVA_CLASS = "JAVA_CLASS";
-
-	public static final MetaType JAVA_META_TYPE = new JavaRuntimeMetaType();
 
 	/**
 	 * @param typeSystem 
@@ -121,13 +118,13 @@ class JavaRuntimeType extends RSimpleType
 	{
 		final IRTypeDeclaration value = function.transform(getDeclaration());
 		if (value != getDeclaration())
-	{
+		{
 			return new JavaRuntimeType(value);
-	}
+		}
 		else
-	{
-		return this;
-	}
+		{
+			return this;
+		}
 	}
 
 }
