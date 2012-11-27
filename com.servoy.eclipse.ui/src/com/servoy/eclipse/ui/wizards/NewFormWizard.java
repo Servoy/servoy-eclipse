@@ -145,7 +145,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 		{
 			// add pages to this wizard
 			addPage(newFormWizardPage);
-			addPage(dataProviderWizardPage);
+			if (dataProviderWizardPage != null) addPage(dataProviderWizardPage);
 		}
 	}
 
@@ -191,6 +191,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 		}
 
+		dataProviderWizardPage = null;
 		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() == null)
 		{
 			errorPage = new WizardPage("No active Servoy solution project found")
@@ -206,7 +207,6 @@ public class NewFormWizard extends Wizard implements INewWizard
 			errorPage.setErrorMessage("Please activate a Servoy solution project before trying to create a new form");
 			errorPage.setPageComplete(false);
 			newFormWizardPage = null;
-			dataProviderWizardPage = null;
 		}
 		else
 		{
@@ -219,7 +219,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 			{
 				newFormWizardPage = new NewFormWizardPage("New form", selectedForm);
 			}
-			dataProviderWizardPage = new DataProviderWizardPage("Data Providers");
+			if (servoyProject.getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE)
+			{
+				dataProviderWizardPage = new DataProviderWizardPage("Data Providers");
+			}
 		}
 	}
 
@@ -238,11 +241,14 @@ public class NewFormWizard extends Wizard implements INewWizard
 	public boolean performFinish()
 	{
 		IDialogSettings settings = getDialogSettings();
-		settings.put("placeHorizontal", dataProviderWizardPage.optionsGroup.isPlaceHorizontal()); //$NON-NLS-1$
-		settings.put("placeAsLabels", dataProviderWizardPage.optionsGroup.isPlaceAsLabels()); //$NON-NLS-1$
-		settings.put("placeLabels", dataProviderWizardPage.optionsGroup.isPlaceWithLabels()); //$NON-NLS-1$
-		settings.put("fillText", dataProviderWizardPage.optionsGroup.isFillText()); //$NON-NLS-1$
-		settings.put("fillName", dataProviderWizardPage.optionsGroup.isFillName()); //$NON-NLS-1$
+		if (dataProviderWizardPage != null)
+		{
+			settings.put("placeHorizontal", dataProviderWizardPage.optionsGroup.isPlaceHorizontal()); //$NON-NLS-1$
+			settings.put("placeAsLabels", dataProviderWizardPage.optionsGroup.isPlaceAsLabels()); //$NON-NLS-1$
+			settings.put("placeLabels", dataProviderWizardPage.optionsGroup.isPlaceWithLabels()); //$NON-NLS-1$
+			settings.put("fillText", dataProviderWizardPage.optionsGroup.isFillText()); //$NON-NLS-1$
+			settings.put("fillName", dataProviderWizardPage.optionsGroup.isFillName()); //$NON-NLS-1$
+		}
 
 		TableWrapper tw = newFormWizardPage.getTableWrapper();
 		settings.put("servername", tw == null ? null : tw.getServerName()); //$NON-NLS-1$
@@ -306,19 +312,22 @@ public class NewFormWizard extends Wizard implements INewWizard
 			}
 			if (superForm != null) form.setExtendsID(superForm.getID());
 			// add selected data providers
-			Object[] dataProviders = dataProviderWizardPage.getDataProviders();
 			DesignerPreferences designerPreferences = new DesignerPreferences();
-			if (dataProviders != null && dataProviders.length > 0)
+			if (dataProviderWizardPage != null)
 			{
-				ElementFactory.createFields(form, dataProviders, dataProviderWizardPage.optionsGroup.isPlaceAsLabels(),
-					dataProviderWizardPage.optionsGroup.isPlaceWithLabels(), dataProviderWizardPage.optionsGroup.isPlaceHorizontal(),
-					dataProviderWizardPage.optionsGroup.isFillText(), dataProviderWizardPage.optionsGroup.isFillName(), designerPreferences.getGridSnapTo()
-						? new SnapToGridFieldPositioner(designerPreferences) : null, dataProviderWizardPage.optionsGroup.isPlaceHorizontal() ? new Point(0, 0)
-						: new Point(60, 70));
-
-				if (dataProviderWizardPage.optionsGroup.isPlaceHorizontal())
+				Object[] dataProviders = dataProviderWizardPage.getDataProviders();
+				if (dataProviders != null && dataProviders.length > 0)
 				{
-					form.setView(FormController.LOCKED_TABLE_VIEW);
+					ElementFactory.createFields(form, dataProviders, dataProviderWizardPage.optionsGroup.isPlaceAsLabels(),
+						dataProviderWizardPage.optionsGroup.isPlaceWithLabels(), dataProviderWizardPage.optionsGroup.isPlaceHorizontal(),
+						dataProviderWizardPage.optionsGroup.isFillText(), dataProviderWizardPage.optionsGroup.isFillName(), designerPreferences.getGridSnapTo()
+							? new SnapToGridFieldPositioner(designerPreferences) : null, dataProviderWizardPage.optionsGroup.isPlaceHorizontal() ? new Point(0,
+							0) : new Point(60, 70));
+
+					if (dataProviderWizardPage.optionsGroup.isPlaceHorizontal())
+					{
+						form.setView(FormController.LOCKED_TABLE_VIEW);
+					}
 				}
 			}
 
