@@ -195,13 +195,13 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 
 		if (BUTTON_BUTTON_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("button.gif");
+			icon = Activator.loadImageDescriptorFromBundle("mobile/button.png");
 			requestType = MobileVisualFormEditor.REQ_PLACE_BUTTON;
 		}
 
 		else if (BUTTONS_HEADER_TITLE_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("text.gif");
+			icon = Activator.loadImageDescriptorFromBundle("mobile/headertitle.png");
 			requestType = MobileVisualFormEditor.REQ_PLACE_HEADER_TITLE;
 		}
 
@@ -222,13 +222,13 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 		if (PARTS_HEADER_ID.equals(id))
 		{
 			requestType = MobileVisualFormEditor.REQ_PLACE_HEADER;
-			icon = null; // TODO
+			icon = Activator.loadImageDescriptorFromBundle("mobile/header.png");
 		}
 
 		else if (PARTS_FOOTER_ID.equals(id))
 		{
 			requestType = MobileVisualFormEditor.REQ_PLACE_FOOTER;
-			icon = null; // TODO
+			icon = Activator.loadImageDescriptorFromBundle("mobile/footer.png");
 		}
 
 		else
@@ -249,37 +249,37 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 
 		if (ELEMENTS_TEXT_FIELD_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("field.gif");
+			icon = Activator.loadImageDescriptorFromBundle("mobile/text.png");
 		}
 
 		else if (ELEMENTS_TEXTAREA_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("TEXTAREA16.png");
+			icon = Activator.loadImageDescriptorFromBundle("mobile/textarea.png");
 			displayType = Field.TEXT_AREA;
 		}
 
 		else if (ELEMENTS_COMBOBOX_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("SELECT16.png");
+			icon = Activator.loadImageDescriptorFromBundle("mobile/combo.png");
 			displayType = Field.COMBOBOX;
 		}
 
 		else if (ELEMENTS_CHECKBOXES_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("CHECKBOX16.png");
+			icon = Activator.loadImageDescriptorFromBundle("mobile/checks.png");
 			displayType = Field.CHECKS;
 			text = "check";
 		}
 
 		else if (ELEMENTS_RADIOBUTTONS_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("RADIO16.png");
+			icon = Activator.loadImageDescriptorFromBundle("mobile/radios.png");
 			displayType = Field.RADIOS;
 		}
 
 		else if (ELEMENTS_LABEL_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("text.gif");
+			icon = Activator.loadImageDescriptorFromBundle("mobile/label.png");
 			requestType = MobileVisualFormEditor.REQ_PLACE_LABEL;
 		}
 
@@ -315,13 +315,13 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 
 		if (LISTS_INSET_ID.equals(id))
 		{
-			icon = null; // TODO
+			icon = Activator.loadImageDescriptorFromBundle("mobile/insetlist.png");
 			requestType = MobileVisualFormEditor.REQ_PLACE_INSET_LIST;
 		}
 
 		else if (LISTS_FORM_ID.equals(id))
 		{
-			icon = null; // TODO
+			icon = Activator.loadImageDescriptorFromBundle("mobile/listform.png");
 			requestType = MobileVisualFormEditor.REQ_PLACE_FORM_LIST;
 		}
 
