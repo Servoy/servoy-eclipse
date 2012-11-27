@@ -17,13 +17,11 @@
 
 package com.servoy.eclipse.debug.script;
 
-import org.eclipse.dltk.javascript.typeinfo.DefaultMetaType;
 import org.eclipse.dltk.javascript.typeinfo.IRSimpleType;
 import org.eclipse.dltk.javascript.typeinfo.IRType;
 import org.eclipse.dltk.javascript.typeinfo.IRTypeDeclaration;
 import org.eclipse.dltk.javascript.typeinfo.IRTypeTransformer;
 import org.eclipse.dltk.javascript.typeinfo.ITypeSystem;
-import org.eclipse.dltk.javascript.typeinfo.MetaType;
 import org.eclipse.dltk.javascript.typeinfo.RSimpleType;
 import org.eclipse.dltk.javascript.typeinfo.TypeCompatibility;
 import org.eclipse.dltk.javascript.typeinfo.TypeQuery;
@@ -34,37 +32,6 @@ import org.eclipse.dltk.javascript.typeinfo.model.Type;
 class JavaRuntimeType extends RSimpleType
 {
 	public static final String JAVA_CLASS = "JAVA_CLASS";
-
-	public static final MetaType JAVA_META_TYPE = new DefaultMetaType()
-	{
-		@Override
-		public IRType toRType(ITypeSystem typeSystem, Type type)
-		{
-			return new JavaRuntimeType(typeSystem, type);
-		}
-
-		public String getId()
-		{
-			return "JavaType";
-		}
-
-		@Override
-		public IRType toRType(ITypeSystem typeSystem, IRTypeDeclaration declaration)
-		{
-			return new JavaRuntimeType(typeSystem, declaration);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.dltk.javascript.typeinfo.DefaultMetaType#getPreferredTypeSystem(org.eclipse.dltk.javascript.typeinfo.model.Type)
-		 */
-		@Override
-		public ITypeSystem getPreferredTypeSystem(Type type)
-		{
-			return super.getPreferredTypeSystem(type);
-		}
-	};
 
 	/**
 	 * @param typeSystem 

@@ -27,33 +27,40 @@ import org.eclipse.dltk.javascript.typeinfo.model.Type;
  * @author jcompagner
  *
  */
-public class ServoyDynamicMetaType extends DefaultMetaType
+final class JavaRuntimeMetaType extends DefaultMetaType
 {
-	public static final ServoyDynamicMetaType META_TYPE = new ServoyDynamicMetaType();
+	private final ITypeSystem typeSystem;
 
-	private ServoyDynamicMetaType()
+	public JavaRuntimeMetaType(ITypeSystem typeSystem)
 	{
-	}
-
-	@Override
-	public IRType toRType(ITypeSystem typeSystem, IRTypeDeclaration declaration)
-	{
-		return new ServoyDynamicRuntimeType(typeSystem, declaration);
+		this.typeSystem = typeSystem;
 	}
 
 	@Override
 	public IRType toRType(ITypeSystem typeSystem, Type type)
 	{
-		return new ServoyDynamicRuntimeType(typeSystem, type);
+		return new JavaRuntimeType(typeSystem, type);
+	}
+
+	public String getId()
+	{
+		return "JavaType";
+	}
+
+	@Override
+	public IRType toRType(ITypeSystem typeSystem, IRTypeDeclaration declaration)
+	{
+		return new JavaRuntimeType(typeSystem, declaration);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.dltk.javascript.typeinfo.MetaType#getId()
+	 * @see org.eclipse.dltk.javascript.typeinfo.DefaultMetaType#getPreferredTypeSystem(org.eclipse.dltk.javascript.typeinfo.model.Type)
 	 */
-	public String getId()
+	@Override
+	public ITypeSystem getPreferredTypeSystem(Type type)
 	{
-		return "ServoyDynamicType";
+		return typeSystem;
 	}
 }
