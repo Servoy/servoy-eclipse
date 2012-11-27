@@ -862,7 +862,7 @@ public class TypeCreator extends TypeCache
 			ImageDescriptor desc = IconProvider.instance().descriptor(cls);
 			type.setAttribute(IMAGE_DESCRIPTOR, desc);
 		}
-		if (IDeprecated.class.isAssignableFrom(cls) || (prefixedTypes.containsKey(cls) && !typeName.equals(prefixedTypes.get(cls) + cls.getSimpleName())))
+		if (IDeprecated.class.isAssignableFrom(cls) || (prefixedTypes.containsKey(cls) && typeName.equals(cls.getSimpleName())))
 		{
 			type.setDeprecated(true);
 			type.setVisible(false);
