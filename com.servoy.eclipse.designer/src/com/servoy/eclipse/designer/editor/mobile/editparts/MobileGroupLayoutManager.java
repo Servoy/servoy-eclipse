@@ -37,18 +37,18 @@ public class MobileGroupLayoutManager extends AbstractLayout
 		Rectangle containerBounds = container.getBounds();
 		// children are based on model order as created in editPart.getModelChildren()
 
-		Rectangle.SINGLETON.x = containerBounds.x + 2;
-		Rectangle.SINGLETON.y = containerBounds.y + 2;
-		Rectangle.SINGLETON.width = containerBounds.width - 4;
+		int x = containerBounds.x + 2;
+		int y = containerBounds.y + 2;
+		int width = containerBounds.width - 4;
 
 		for (IFigure child : (List<IFigure>)container.getChildren())
 		{
 			Dimension childPrefSize = child.getPreferredSize();
-			Rectangle.SINGLETON.height = (childPrefSize.height > 0 ? childPrefSize.height : 38);
+			int height = (childPrefSize.height > 0 ? childPrefSize.height : 38);
 
-			child.setBounds(Rectangle.SINGLETON);
+			child.setBounds(new Rectangle(x, y, width, height));
 
-			Rectangle.SINGLETON.y += Rectangle.SINGLETON.height + 2;
+			y += height + 2;
 		}
 	}
 

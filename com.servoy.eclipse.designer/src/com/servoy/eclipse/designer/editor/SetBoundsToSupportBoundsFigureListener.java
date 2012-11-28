@@ -36,15 +36,24 @@ import com.servoy.j2db.persistence.ISupportBounds;
 public class SetBoundsToSupportBoundsFigureListener implements FigureListener
 {
 	private final ISupportBounds element;
+	private final boolean relativeToParent;
 
-	public SetBoundsToSupportBoundsFigureListener(ISupportBounds element)
+	public SetBoundsToSupportBoundsFigureListener(ISupportBounds element, boolean relativeToParent)
 	{
 		this.element = element;
+		this.relativeToParent = relativeToParent;
 	}
 
 	public void figureMoved(IFigure figure)
 	{
 		Rectangle bounds = figure.getBounds();
+
+		if (relativeToParent)
+		{
+			bounds = Rectangle.SINGLETON.setBounds(bounds); // copy
+			Rectangle parentBounds = figure.getParent().getBounds();
+			bounds.translate(-parentBounds.x, -parentBounds.y);
+		}
 
 		Point loc = element.getLocation();
 		if (loc == null || loc.x != bounds.x || loc.y != bounds.y)

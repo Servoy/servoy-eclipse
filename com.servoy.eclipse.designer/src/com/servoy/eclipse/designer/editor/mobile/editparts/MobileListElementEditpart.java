@@ -142,7 +142,7 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 //		border.setStyle(Graphics.LINE_DASH);
 //		fig.setBorder(border);
 
-		fig.addFigureListener(new SetBoundsToSupportBoundsFigureListener(getModel().getLeft()));
+		fig.addFigureListener(new SetBoundsToSupportBoundsFigureListener(getModel().getLeft(), true));
 		return fig;
 	}
 

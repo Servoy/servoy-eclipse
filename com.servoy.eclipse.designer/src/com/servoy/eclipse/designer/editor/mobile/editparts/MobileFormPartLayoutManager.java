@@ -63,34 +63,35 @@ public class MobileFormPartLayoutManager extends AbstractLayout
 	{
 		Rectangle containerBounds = container.getBounds();
 		// children are based on model order as created in editPart.getModelChildren()
-		Rectangle.SINGLETON.y = containerBounds.y + 8;
-		Rectangle.SINGLETON.height = 28;
+		int y = containerBounds.y + 8;
+		int height = 28;
 
 		for (IFigure child : (List<IFigure>)container.getChildren())
 		{
-			Rectangle.SINGLETON.width = 50;
+			int width = 50;
 			if (child instanceof PersistImageFigure)
 			{
 				IPersist persist = ((PersistImageFigure)child).getPersist();
 				if (persist instanceof AbstractBase)
 				{
+					int x;
 					if (((AbstractBase)persist).getCustomMobileProperty("headerLeftButton") != null)
 					{
-						Rectangle.SINGLETON.x = containerBounds.x + 20;
+						x = containerBounds.x + 20;
 					}
 					else if (((AbstractBase)persist).getCustomMobileProperty("headerText") != null)
 					{
-						Rectangle.SINGLETON.width = containerBounds.width - 150;
-						Rectangle.SINGLETON.x = containerBounds.x + (containerBounds.width - Rectangle.SINGLETON.width) / 2;
+						width = containerBounds.width - 150;
+						x = containerBounds.x + (containerBounds.width - width) / 2;
 					}
 					else if (((AbstractBase)persist).getCustomMobileProperty("headerRightButton") != null)
 					{
-						Rectangle.SINGLETON.x = containerBounds.x + containerBounds.width - Rectangle.SINGLETON.width - 20;
+						x = containerBounds.x + containerBounds.width - width - 20;
 					}
 					else continue;
-				}
 
-				child.setBounds(Rectangle.SINGLETON);
+					child.setBounds(new Rectangle(x, y, width, height));
+				}
 			}
 		}
 	}
@@ -99,21 +100,21 @@ public class MobileFormPartLayoutManager extends AbstractLayout
 	{
 		Rectangle containerBounds = container.getBounds();
 		// children are based on model order as created in editPart.getModelChildren()
-		Rectangle.SINGLETON.x = containerBounds.x + 2;
-		Rectangle.SINGLETON.y = containerBounds.y + 2;
-		Rectangle.SINGLETON.width = 50;
-		Rectangle.SINGLETON.height = 40;
+		int x = containerBounds.x + 2;
+		int y = containerBounds.y + 2;
+		int width = 50;
+		int height = 40;
 
 		for (IFigure child : (List<IFigure>)container.getChildren())
 		{
-			child.setBounds(Rectangle.SINGLETON);
+			child.setBounds(new Rectangle(x, y, width, height));
 
-			Rectangle.SINGLETON.x += Rectangle.SINGLETON.width + 2;
-			if (Rectangle.SINGLETON.x + Rectangle.SINGLETON.width > containerBounds.width)
+			x += width + 2;
+			if (x + width > containerBounds.width)
 			{
 				// next line
-				Rectangle.SINGLETON.x = containerBounds.x + 2;
-				Rectangle.SINGLETON.y += Rectangle.SINGLETON.height + 2;
+				x = containerBounds.x + 2;
+				y += height + 2;
 			}
 		}
 	}

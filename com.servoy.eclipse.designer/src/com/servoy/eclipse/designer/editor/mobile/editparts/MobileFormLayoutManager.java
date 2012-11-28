@@ -44,30 +44,30 @@ public class MobileFormLayoutManager extends AbstractLayout
 
 	public void layout(IFigure container)
 	{
-		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form);
-
 		// children are based on model order as created in editPart.getModelChildren()
-		int formWidth = flattenedForm.getWidth();
-		Rectangle.SINGLETON.y = 0;
-		Rectangle.SINGLETON.height = 0;
+		int formWidth = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form).getWidth();
+		int y = 0;
+		int height = 0;
 
 		for (IFigure child : (List<IFigure>)container.getChildren())
 		{
+			int x;
 			if (child instanceof MobilePartFigure)
 			{
-				Rectangle.SINGLETON.x = 0;
+				x = 0;
 			}
 			else
 			{
-				Rectangle.SINGLETON.x = 10;
-				Rectangle.SINGLETON.y = Rectangle.SINGLETON.y + 1;
+				x = 10;
+				y++;
 			}
-			Rectangle.SINGLETON.width = formWidth - (2 * Rectangle.SINGLETON.x);
-			Rectangle.SINGLETON.y = Rectangle.SINGLETON.y + Rectangle.SINGLETON.height;
+			int width = formWidth - (2 * x);
+			y += height;
 
-			Dimension childSize = child.getPreferredSize(Rectangle.SINGLETON.width, -1);
-			Rectangle.SINGLETON.height = childSize.height == 0 ? 55 : childSize.height;
-			child.setBounds(Rectangle.SINGLETON);
+			Dimension childSize = child.getPreferredSize(width, -1);
+			height = childSize.height == 0 ? 55 : childSize.height;
+
+			child.setBounds(new Rectangle(x, y, width, height));
 		}
 	}
 

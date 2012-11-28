@@ -48,50 +48,52 @@ public class MobileListFigureLayoutManager extends AbstractLayout
 			MobileListElementType constraint = getConstraint(child);
 			if (constraint != null)
 			{
-				Rectangle.SINGLETON.y = containerBounds.y + 43;
-				Rectangle.SINGLETON.height = 30;
+				int y = containerBounds.y + 43;
+				int height = 30;
+				int x;
+				int width;
 				switch (constraint)
 				{
 					case Header :
-						Rectangle.SINGLETON.y = containerBounds.y + 2;
-						Rectangle.SINGLETON.x = containerBounds.x;
-						Rectangle.SINGLETON.width = containerBounds.width;
+						y = containerBounds.y + 2;
+						x = containerBounds.x;
+						width = containerBounds.width;
 						break;
 
 					case Image :
-						Rectangle.SINGLETON.x = containerBounds.x + 2;
-						Rectangle.SINGLETON.width = 30;
+						x = containerBounds.x + 2;
+						width = 30;
 						break;
 
 					case Icon :
-						Rectangle.SINGLETON.width = 30;
-						Rectangle.SINGLETON.x = containerBounds.x + containerBounds.width - 2 - Rectangle.SINGLETON.width;
+						width = 30;
+						x = containerBounds.x + containerBounds.width - 2 - width;
 						break;
 
 					case Button :
-						Rectangle.SINGLETON.x = containerBounds.x + 34;
-						Rectangle.SINGLETON.width = containerBounds.width - 200;
+						x = containerBounds.x + 34;
+						width = containerBounds.width - 200;
 						break;
 
 					case Subtext :
-						Rectangle.SINGLETON.y = containerBounds.y + 75;
-						Rectangle.SINGLETON.x = containerBounds.x + 34;
-						Rectangle.SINGLETON.width = 200;
-						Rectangle.SINGLETON.height = 20;
+						y = containerBounds.y + 75;
+						x = containerBounds.x + 34;
+						width = 200;
+						height = 20;
 						break;
 
 					case CountBubble :
-						Rectangle.SINGLETON.x = containerBounds.x + containerBounds.width - 80;
-						Rectangle.SINGLETON.width = 30;
-						Rectangle.SINGLETON.height = (containerBounds.height - 30) / 2;
+						x = containerBounds.x + containerBounds.width - 80;
+						width = 30;
+						height = (containerBounds.height - 30) / 2;
 						break;
 
 					default :
 						continue;
 				}
-			}
 
-			child.setBounds(Rectangle.SINGLETON);
+				child.setBounds(new Rectangle(x, y, width, height));
+			}
 		}
 	}
 

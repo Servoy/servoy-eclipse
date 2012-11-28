@@ -308,7 +308,7 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 			}
 		};
 
-		figure.addFigureListener(new SetBoundsToSupportBoundsFigureListener((ISupportBounds)editPart.getModel()));
+		figure.addFigureListener(new SetBoundsToSupportBoundsFigureListener((ISupportBounds)editPart.getModel(), false));
 		return figure;
 	}
 }
