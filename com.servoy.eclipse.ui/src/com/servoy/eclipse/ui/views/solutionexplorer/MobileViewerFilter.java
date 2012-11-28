@@ -49,7 +49,7 @@ public class MobileViewerFilter extends ViewerFilter
 	private SimpleUserNode getFirstParent(SimpleUserNode node)
 	{
 		if (node == null || node.parent == null) return null;
-		if (node.parent != null && node.parent.getType() == UserNodeType.ARRAY && "root".equals(node.parent.getName())) return node; //$NON-NLS-1$
+		if (node.parent != null && node.parent.getRealType() == UserNodeType.ARRAY && "root".equals(node.parent.getName())) return node; //$NON-NLS-1$
 		else return getFirstParent(node.parent);
 	}
 
@@ -63,19 +63,19 @@ public class MobileViewerFilter extends ViewerFilter
 			else
 			{
 				// special case for plugins: this is a plugin that is not allowed in mobile
-				if (sun.parent != null && sun.parent.getType() == UserNodeType.PLUGINS)
+				if (sun.parent != null && sun.parent.getRealType() == UserNodeType.PLUGINS)
 				{
 					return false;
 				}
 
-				if (allowedParentNodes.contains(sun.getType()))
+				if (allowedParentNodes.contains(sun.getRealType()))
 				{
 					return true;
 				}
 				else
 				{
 					SimpleUserNode p = getFirstParent(sun);
-					if (p != null && allowedParentNodes.contains(p.getType())) return true;
+					if (p != null && allowedParentNodes.contains(p.getRealType())) return true;
 				}
 			}
 		}
