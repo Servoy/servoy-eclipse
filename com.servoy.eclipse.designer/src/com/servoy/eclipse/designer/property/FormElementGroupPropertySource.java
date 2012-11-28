@@ -20,6 +20,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -90,14 +91,24 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 		return group;
 	}
 
+	/**
+	 * get elements, order by y-position
+	 */
+	public IFormElement[] getSortedElements()
+	{
+		IFormElement[] asArray = Utils.asArray(group.getElements(), IFormElement.class);
+		Arrays.sort(asArray, PositionComparator.XY_PERSIST_COMPARATOR);
+		return asArray;
+	}
+
 	public IPropertyDescriptor[] getPropertyDescriptors()
 	{
-		List<PropertyDescriptor> lst = new ArrayList<PropertyDescriptor>();
 		// get elements, order by y-position
-		Iterator<IFormElement> elements = Utils.asSortedIterator(group.getElements(), PositionComparator.XY_PERSIST_COMPARATOR);
-		for (int i = 0; elements.hasNext(); i++)
+		IFormElement[] sortedElements = getSortedElements();
+		List<PropertyDescriptor> lst = new ArrayList<PropertyDescriptor>(sortedElements.length + 10);
+		for (int i = 0; i < sortedElements.length; i++)
 		{
-			IFormElement element = elements.next();
+			IFormElement element = sortedElements[i];
 			Object name = element.getName();
 			if (name == null)
 			{
@@ -225,9 +236,13 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 		if (StaticContentSpecLoader.PROPERTY_ENABLED.getPropertyName().equals(id)) return Boolean.valueOf(group.getEnabled());
 		if (StaticContentSpecLoader.PROPERTY_NAME.getPropertyName().equals(id)) return PersistPropertySource.NULL_STRING_CONVERTER.convertProperty(id,
 			group.getName());
-		if (id instanceof Integer)
+		if (id instanceof Integer && ((Integer)id).intValue() >= 0)
 		{
-			return PersistContext.create(group.getElement(((Integer)id).intValue()));
+			IFormElement[] sortedElements = getSortedElements();
+			if (((Integer)id).intValue() < sortedElements.length)
+			{
+				return PersistContext.create(sortedElements[((Integer)id).intValue()]);
+			}
 		}
 		return null;
 	}
