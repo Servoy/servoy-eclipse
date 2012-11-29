@@ -120,7 +120,6 @@ import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.annotations.AnnotationManager;
-import com.servoy.j2db.scripting.annotations.ServoyMobile;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
@@ -1392,7 +1391,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		for (String id : ijm.getMethodIds(false))
 		{
 			NativeJavaMethod njm = ijm.getMethod(id, false);
-			if (AnnotationManager.getInstance().isAnnotationPresent(njm.getMethods()[0].method(), ServoyMobile.class, true))
+			if (AnnotationManager.getInstance().isMobileAnnotationPresent(njm.getMethods()[0].method()))
 			{
 				filteredList.add(id);
 			}
@@ -1407,7 +1406,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			Object beanProp = ijm.getField(id, false);
 			if (beanProp instanceof JavaMembers.BeanProperty &&
-				AnnotationManager.getInstance().isAnnotationPresent(((JavaMembers.BeanProperty)beanProp).getGetter(), ServoyMobile.class, true))
+				AnnotationManager.getInstance().isMobileAnnotationPresent(((JavaMembers.BeanProperty)beanProp).getGetter()))
 			{
 				filteredPropertiesList.add(id);
 			}

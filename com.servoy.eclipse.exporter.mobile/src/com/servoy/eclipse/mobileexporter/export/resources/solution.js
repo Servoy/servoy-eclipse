@@ -29,28 +29,40 @@ ${endloop_scopes}
 		},
 		
 		forms: {
-${loop_forms}					_$${formName}$: function(_$form$) {
-${loop_functions}					var ${functionName} = _ServoyUtils_.wrapFunction(${functionCode},_$form$);
-					_$form$.${functionName} = ${functionName};
-${endloop_functions}					
-${loop_variables}				_ServoyUtils_.defineVariable(_$form$,"${variableName}",${defaultValue},${variableType});
-${endloop_variables}
-					// define standard things (controller,foundset,elements)
-					_ServoyUtils_.defineStandardFormVariables(_$form$);
+${loop_forms}			${formName} : {
+				fncs: {
+${loop_functions}					${functionName} : ${functionCode}${endloop_functions}
 				},
-${endloop_forms}			     
+				vrbs: {
+${loop_variables}					${variableName} : ["${defaultValue}", ${variableType}]${endloop_variables}
+				}
+			}${endloop_forms}			     
 		},
 		
 		scopes: {
-${loop_scopes}				_$${scopeName}$: function(_$scope$) {		
-${loop_functions}					var ${functionName} = _ServoyUtils_.wrapFunction( ${functionCode} ,_$scope$);
-					_$scope$.${functionName} = ${functionName};
-${endloop_functions}				
-${loop_variables}					_ServoyUtils_.defineVariable(_$scope$,"${variableName}",${defaultValue},${variableType});
-${endloop_variables}				
-			},
-${endloop_scopes}			
+${loop_scopes}			${scopeName} : {
+				fncs: {
+${loop_functions}					 ${functionName} : ${functionCode}${endloop_functions}
+				},
+				vrbs: {
+${loop_variables}					${variableName} : ["${defaultValue}",${variableType}]${endloop_variables}
+				}
+			}${endloop_scopes}			
+		},
 		
+		initScope : function (containerName, subscope, scopeObject) {
+			var subs = this[containerName][subscope];
+
+			var fncs = subs.fncs;
+			for (var key in fncs) {
+			   scopeObject[key] = _ServoyUtils_.wrapFunction(fncs[key], scopeObject);
+			}
+
+			var vrbs = subs.vrbs;
+			for (var key in vrbs) {
+				var val = vrbs[key];
+			   _ServoyUtils_.defineVariable(scopeObject, key, eval("(" + val[0] + ")"), val[1]);
+			}
 		}
 	}
 }

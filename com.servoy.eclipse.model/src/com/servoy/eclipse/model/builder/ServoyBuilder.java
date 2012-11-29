@@ -138,6 +138,7 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.constants.IValueListConstants;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
@@ -1961,12 +1962,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												boolean showWarning = false;
 												ValueList vl = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution).getValueList(
 													((Field)o).getValuelistID());
-												if (vl != null && vl.getValueListType() == ValueList.CUSTOM_VALUES && vl.getCustomValues() != null &&
+												if (vl != null && vl.getValueListType() == IValueListConstants.CUSTOM_VALUES && vl.getCustomValues() != null &&
 													(vl.getCustomValues() == null || vl.getCustomValues().contains("|")))
 												{
 													showWarning = true;
 												}
-												if (vl != null && vl.getValueListType() == ValueList.DATABASE_VALUES &&
+												if (vl != null && vl.getValueListType() == IValueListConstants.DATABASE_VALUES &&
 													vl.getReturnDataProviders() != vl.getShowDataProviders())
 												{
 													showWarning = true;
@@ -2656,11 +2657,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									{
 
 										boolean showWarning = false;
-										if (vl.getValueListType() == ValueList.DATABASE_VALUES && vl.getReturnDataProviders() != vl.getShowDataProviders())
+										if (vl.getValueListType() == IValueListConstants.DATABASE_VALUES &&
+											vl.getReturnDataProviders() != vl.getShowDataProviders())
 										{
 											showWarning = true;
 										}
-										if (vl.getValueListType() == ValueList.CUSTOM_VALUES && vl.getCustomValues() != null &&
+										if (vl.getValueListType() == IValueListConstants.CUSTOM_VALUES && vl.getCustomValues() != null &&
 											vl.getCustomValues().contains("|"))
 										{
 											showWarning = true;
@@ -2683,16 +2685,16 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									if (type == Field.TEXT_FIELD || type == Field.TYPE_AHEAD)
 									{
 										boolean vlWithUnstoredCalcError = false;
-										if (vl.getValueListType() == ValueList.DATABASE_VALUES)
+										if (vl.getValueListType() == IValueListConstants.DATABASE_VALUES)
 										{
 											Table table = null;
 											try
 											{
-												if (vl.getDatabaseValuesType() == ValueList.TABLE_VALUES)
+												if (vl.getDatabaseValuesType() == IValueListConstants.TABLE_VALUES)
 												{
 													table = (Table)vl.getTable();
 												}
-												else if (vl.getDatabaseValuesType() == ValueList.RELATED_VALUES && vl.getRelationName() != null)
+												else if (vl.getDatabaseValuesType() == IValueListConstants.RELATED_VALUES && vl.getRelationName() != null)
 												{
 													Relation[] relations = fieldFlattenedSolution.getRelationSequence(vl.getRelationName());
 													if (relations != null)
@@ -2713,16 +2715,17 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										if (!vlWithUnstoredCalcError && vl.getFallbackValueListID() > 0)
 										{
 											ValueList fallback = fieldFlattenedSolution.getValueList(vl.getFallbackValueListID());
-											if (fallback != null && fallback.getValueListType() == ValueList.DATABASE_VALUES)
+											if (fallback != null && fallback.getValueListType() == IValueListConstants.DATABASE_VALUES)
 											{
 												Table table = null;
 												try
 												{
-													if (fallback.getDatabaseValuesType() == ValueList.TABLE_VALUES)
+													if (fallback.getDatabaseValuesType() == IValueListConstants.TABLE_VALUES)
 													{
 														table = (Table)fallback.getTable();
 													}
-													else if (fallback.getDatabaseValuesType() == ValueList.RELATED_VALUES && fallback.getRelationName() != null)
+													else if (fallback.getDatabaseValuesType() == IValueListConstants.RELATED_VALUES &&
+														fallback.getRelationName() != null)
 													{
 														Relation[] relations = fieldFlattenedSolution.getRelationSequence(fallback.getRelationName());
 														if (relations != null)
@@ -2756,7 +2759,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												null, field);
 										}
 									}
-									if (vl.getValueListType() == ValueList.DATABASE_VALUES && vl.getRelationName() != null)
+									if (vl.getValueListType() == IValueListConstants.DATABASE_VALUES && vl.getRelationName() != null)
 									{
 										Form form = (Form)o.getAncestor(IRepository.FORMS);
 										String[] parts = vl.getRelationName().split("\\."); //$NON-NLS-1$
@@ -2779,7 +2782,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									if (vl.getFallbackValueListID() > 0)
 									{
 										ValueList fallback = fieldFlattenedSolution.getValueList(vl.getFallbackValueListID());
-										if (fallback != null && fallback.getValueListType() == ValueList.DATABASE_VALUES && fallback.getRelationName() != null)
+										if (fallback != null && fallback.getValueListType() == IValueListConstants.DATABASE_VALUES &&
+											fallback.getRelationName() != null)
 										{
 											Form form = (Form)o.getAncestor(IRepository.FORMS);
 											String[] parts = fallback.getRelationName().split("\\."); //$NON-NLS-1$
@@ -3131,7 +3135,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		List<Problem> problems = new ArrayList<Problem>();
 		try
 		{
-			if (vl.getValueListType() == ValueList.DATABASE_VALUES)
+			if (vl.getValueListType() == IValueListConstants.DATABASE_VALUES)
 			{
 				if (vl.getCustomValues() != null)
 				{
@@ -3360,7 +3364,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 						}
 					}
-					if (vl.getUseTableFilter() && vl.getValueListType() == ValueList.DATABASE_VALUES && vl.getDatabaseValuesType() == ValueList.TABLE_VALUES)
+					if (vl.getUseTableFilter() && vl.getValueListType() == IValueListConstants.DATABASE_VALUES &&
+						vl.getDatabaseValuesType() == IValueListConstants.TABLE_VALUES)
 					{
 						Column column = table.getColumn(DBValueList.NAME_COLUMN);
 						if (column == null)
@@ -3385,7 +3390,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					}
 				}
 			}
-			else if (vl.getValueListType() == ValueList.CUSTOM_VALUES || vl.getValueListType() == ValueList.GLOBAL_METHOD_VALUES)
+			else if (vl.getValueListType() == IValueListConstants.CUSTOM_VALUES || vl.getValueListType() == IValueListConstants.GLOBAL_METHOD_VALUES)
 			{
 				// custom value list; make sure it does not specify table/server/relation
 				if (vl.getTableName() != null || vl.getServerName() != null || vl.getRelationName() != null)
@@ -3404,7 +3409,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						vl.setRelationName(null);
 					}
 				}
-				if (vl.getValueListType() == ValueList.GLOBAL_METHOD_VALUES)
+				if (vl.getValueListType() == IValueListConstants.GLOBAL_METHOD_VALUES)
 				{
 					ScriptMethod scriptMethod = flattenedSolution.getScriptMethod(vl.getCustomValues());
 					if (scriptMethod == null)
@@ -3426,7 +3431,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 					}
 				}
-				if (vl.getValueListType() == ValueList.CUSTOM_VALUES)
+				if (vl.getValueListType() == IValueListConstants.CUSTOM_VALUES)
 				{
 					String values = vl.getCustomValues();
 					boolean invalidValues = false;
@@ -3463,7 +3468,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					ServoyMarker mk = MarkerMessages.ValuelistTypeUnknown.fill(vl.getName(), vl.getValueListType());
 					problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_TYPE_UNKNOWN.getRight()), mk.getText()));
 				}
-				if (fixIfPossible) vl.setValueListType(ValueList.CUSTOM_VALUES);
+				if (fixIfPossible) vl.setValueListType(IValueListConstants.CUSTOM_VALUES);
 			}
 		}
 		catch (Exception ex)

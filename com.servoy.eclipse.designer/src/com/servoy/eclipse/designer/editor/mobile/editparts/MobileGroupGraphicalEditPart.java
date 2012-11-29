@@ -24,7 +24,6 @@ import java.util.List;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
-import org.eclipse.gef.tools.DirectEditManager;
 
 import com.servoy.eclipse.designer.editor.BaseGroupGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.BasePersistGraphicalEditPart;

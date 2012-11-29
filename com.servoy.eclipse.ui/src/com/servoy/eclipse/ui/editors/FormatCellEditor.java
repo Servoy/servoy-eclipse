@@ -27,13 +27,13 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IDataProviderLookup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.IColumnTypes;
 
 /**
  * @author jcompagner

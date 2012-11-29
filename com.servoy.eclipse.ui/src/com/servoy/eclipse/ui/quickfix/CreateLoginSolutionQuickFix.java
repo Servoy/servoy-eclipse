@@ -33,13 +33,13 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.MovePersistAction;
+import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
-import com.servoy.j2db.persistence.ContentSpec.Element;
 
 public class CreateLoginSolutionQuickFix implements IMarkerResolution
 {
@@ -112,8 +112,8 @@ public class CreateLoginSolutionQuickFix implements IMarkerResolution
 									servoyProject.saveEditingSolutionNodes(new IPersist[] { solution }, false);
 
 									// move the login form to the login solution
-									new MoveForm().move(loginForm, ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
-										loginSolutionName));
+									new MoveForm().move(loginForm,
+										ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(loginSolutionName));
 								}
 							}
 							catch (Exception ex)

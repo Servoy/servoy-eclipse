@@ -244,12 +244,12 @@ public class MobileExporter
 			int formsLoopStartIndex = template.indexOf(FORM_LOOP_START);
 			int formsLoopEndIndex = template.indexOf(FORM_LOOP_END);
 			builder.append(template.substring(0, formsLoopStartIndex));
-			builder.append(replaceFormsScripting(template.substring(formsLoopStartIndex + FORM_LOOP_START.length(), formsLoopEndIndex)));
+			builder.append(replaceFormsScripting(template.substring(formsLoopStartIndex + FORM_LOOP_START.length(), formsLoopEndIndex), null));
 
 			int scopesLoopStartIndex = template.indexOf(SCOPES_LOOP_START);
 			int scopesLoopEndIndex = template.indexOf(SCOPES_LOOP_END);
 			builder.append(template.substring(formsLoopEndIndex + FORM_LOOP_END.length(), scopesLoopStartIndex));
-			builder.append(replaceScopesScripting(template.substring(scopesLoopStartIndex + SCOPES_LOOP_START.length(), scopesLoopEndIndex)));
+			builder.append(replaceScopesScripting(template.substring(scopesLoopStartIndex + SCOPES_LOOP_START.length(), scopesLoopEndIndex), null));
 
 			int allVariablesLoopStartIndex = template.indexOf(VARIABLES_LOOP_START, scopesLoopEndIndex);
 			int allVariablesLoopEndIndex = template.indexOf(VARIABLES_LOOP_END, scopesLoopEndIndex);
@@ -260,12 +260,12 @@ public class MobileExporter
 			formsLoopStartIndex = template.indexOf(FORM_LOOP_START, allVariablesLoopEndIndex);
 			formsLoopEndIndex = template.indexOf(FORM_LOOP_END, allVariablesLoopEndIndex);
 			builder.append(template.substring(allVariablesLoopEndIndex + VARIABLES_LOOP_END.length(), formsLoopStartIndex));
-			builder.append(replaceFormsScripting(template.substring(formsLoopStartIndex + FORM_LOOP_START.length(), formsLoopEndIndex)));
+			builder.append(replaceFormsScripting(template.substring(formsLoopStartIndex + FORM_LOOP_START.length(), formsLoopEndIndex), ",\n"));
 
 			scopesLoopStartIndex = template.indexOf(SCOPES_LOOP_START, formsLoopStartIndex);
 			scopesLoopEndIndex = template.indexOf(SCOPES_LOOP_END, formsLoopStartIndex);
 			builder.append(template.substring(formsLoopEndIndex + FORM_LOOP_END.length(), scopesLoopStartIndex));
-			builder.append(replaceScopesScripting(template.substring(scopesLoopStartIndex + SCOPES_LOOP_START.length(), scopesLoopEndIndex)));
+			builder.append(replaceScopesScripting(template.substring(scopesLoopStartIndex + SCOPES_LOOP_START.length(), scopesLoopEndIndex), ",\n"));
 
 			builder.append(template.substring(scopesLoopEndIndex + SCOPES_LOOP_END.length()));
 			return builder.toString();
@@ -340,7 +340,7 @@ public class MobileExporter
 		stream.closeEntry();
 	}
 
-	private String replaceFormsScripting(String template)
+	private String replaceFormsScripting(String template, String separator)
 	{
 		StringBuffer formsScript = new StringBuffer();
 		ServoyProject project = ServoyModelFinder.getServoyModel().getActiveProject();
@@ -351,9 +351,9 @@ public class MobileExporter
 			{
 				Form form = formIterator.next();
 				addVariablesAndFunctionsScripting(template.replace(PROPERTY_FORM_NAME, form.getName()), formsScript, form, null);
-				if (formIterator.hasNext())
+				if (separator != null && formIterator.hasNext())
 				{
-					formsScript.append("\n"); //$NON-NLS-1$
+					formsScript.append(separator);
 				}
 			}
 		}
@@ -382,7 +382,7 @@ public class MobileExporter
 		appender.append(variablesLoopEndIndex >= 0 ? template.substring(variablesLoopEndIndex + VARIABLES_LOOP_END.length()) : template);
 	}
 
-	private String replaceScopesScripting(String template)
+	private String replaceScopesScripting(String template, String separator)
 	{
 		StringBuffer scopesScript = new StringBuffer();
 		ServoyProject project = ServoyModelFinder.getServoyModel().getActiveProject();
@@ -393,7 +393,7 @@ public class MobileExporter
 			{
 				String scopeName = scopeIterator.next();
 				addVariablesAndFunctionsScripting(template.replace(PROPERTY_SCOPE_NAME, scopeName), scopesScript, project.getSolution(), scopeName);
-				if (scopeIterator.hasNext()) scopesScript.append("\n"); //$NON-NLS-1$
+				if (separator != null && scopeIterator.hasNext()) scopesScript.append(separator);
 			}
 		}
 		return scopesScript.toString();
@@ -404,13 +404,13 @@ public class MobileExporter
 		StringBuffer variablesScript = new StringBuffer();
 		if (parent instanceof Form)
 		{
-			variablesScript.append(buildVariablesScripting(template, ((Form)parent).getScriptVariables(true)));
+			variablesScript.append(buildVariablesScripting(template, ((Form)parent).getScriptVariables(true), ",\n")); //$NON-NLS-1$
 		}
 		if (parent instanceof Solution)
 		{
 			if (scopeName != null)
 			{
-				variablesScript.append(buildVariablesScripting(template, ((Solution)parent).getScriptVariables(scopeName, true)));
+				variablesScript.append(buildVariablesScripting(template, ((Solution)parent).getScriptVariables(scopeName, true), ",\n")); //$NON-NLS-1$
 			}
 			else
 			{
@@ -419,15 +419,15 @@ public class MobileExporter
 				while (formIterator.hasNext())
 				{
 					Form form = formIterator.next();
-					variablesScript.append(buildVariablesScripting(template, form.getScriptVariables(true)));
+					variablesScript.append(buildVariablesScripting(template, form.getScriptVariables(true), null));
 				}
-				variablesScript.append(buildVariablesScripting(template, ((Solution)parent).getScriptVariables(true)));
+				variablesScript.append(buildVariablesScripting(template, ((Solution)parent).getScriptVariables(true), null));
 			}
 		}
 		return variablesScript.toString();
 	}
 
-	private String buildVariablesScripting(String template, Iterator<ScriptVariable> variableIterator)
+	private String buildVariablesScripting(String template, Iterator<ScriptVariable> variableIterator, String separator)
 	{
 		StringBuffer variablesScript = new StringBuffer();
 		if (variableIterator != null)
@@ -440,6 +440,7 @@ public class MobileExporter
 				variableScripting = variableScripting.replace(PROPERTY_VARIABLE_DEFAULT_VALUE, "" + variable.getDefaultValue());
 				variableScripting = variableScripting.replace(PROPERTY_VARIABLE_TYPE, String.valueOf(variable.getTypeID()));
 				variablesScript.append(variableScripting);
+				if (separator != null && variableIterator.hasNext()) variablesScript.append(separator);
 			}
 		}
 		return variablesScript.toString();
@@ -468,7 +469,7 @@ public class MobileExporter
 				functionsScript.append(methodScripting);
 				if (methodIterator.hasNext())
 				{
-					functionsScript.append("\n"); //$NON-NLS-1$
+					functionsScript.append(",\n"); //$NON-NLS-1$
 				}
 			}
 		}

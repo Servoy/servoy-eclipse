@@ -971,6 +971,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			if (constants != null)
 			{
 				constants.children = constantsChildren.toArray(new PlatformSimpleUserNode[constantsChildren.size()]);
+				for (SimpleUserNode c : constants.children)
+				{
+					c.parent = constants;
+				}
+				constants.checkVisibleForMobileInChildren();
 			}
 
 			PlatformSimpleUserNode exceptions = null;

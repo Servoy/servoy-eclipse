@@ -23,7 +23,6 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ISupportHTMLToolTipText;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.scripting.annotations.AnnotationManager;
-import com.servoy.j2db.scripting.annotations.ServoyMobile;
 
 /**
  * Universal class to use in tree nodes and as list item.
@@ -73,7 +72,7 @@ public class SimpleUserNode
 		this._realObject = realObject;
 		storeContainingPersistIfNeeded(_realObject);
 		this.icon = icon;
-		this.visibleForMobile = AnnotationManager.getInstance().isAnnotationPresent(realType, ServoyMobile.class);
+		this.visibleForMobile = AnnotationManager.getInstance().isMobileAnnotationPresent(realType);
 	}
 
 	public SimpleUserNode(String displayName, UserNodeType type, Object realObject, IPersist containingPersist, Object icon)
@@ -216,6 +215,18 @@ public class SimpleUserNode
 	public boolean isHidden()
 	{
 		return hidden;
+	}
+
+	public void checkVisibleForMobileInChildren()
+	{
+		if (!visibleForMobile)
+		{
+			for (SimpleUserNode c : children)
+			{
+				visibleForMobile = c.isVisibleForMobile();
+				if (visibleForMobile) break;
+			}
+		}
 	}
 
 	public void hide()

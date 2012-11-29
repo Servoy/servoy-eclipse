@@ -43,6 +43,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.constants.IValueListConstants;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
@@ -153,7 +154,7 @@ public class NewValueListAction extends Action implements ISelectionChangedListe
 			{
 				IValidateName validator = servoyModel.getNameValidator();
 				vl = editingSolution.createNewValueList(validator, valueListName);
-				vl.setAddEmptyValue(ValueList.EMPTY_VALUE_NEVER);
+				vl.setAddEmptyValue(IValueListConstants.EMPTY_VALUE_NEVER);
 			}
 			EditorUtil.openValueListEditor(vl);
 			return vl;

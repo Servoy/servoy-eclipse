@@ -59,6 +59,7 @@ import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.constants.IValueListConstants;
 import com.servoy.j2db.plugins.IClientPluginAccess;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
@@ -412,8 +413,8 @@ public class ElementUtil
 			ValueList valuelist = flattenedSolution != null ? flattenedSolution.getValueList(field.getValuelistID()) : null;
 			if (valuelist == null) return true;
 
-			if (!(valuelist.getValueListType() == ValueList.DATABASE_VALUES && valuelist.getDatabaseValuesType() == ValueList.RELATED_VALUES) &&
-				(valuelist.getAddEmptyValue() != ValueList.EMPTY_VALUE_ALWAYS))
+			if (!(valuelist.getValueListType() == IValueListConstants.DATABASE_VALUES && valuelist.getDatabaseValuesType() == IValueListConstants.RELATED_VALUES) &&
+				(valuelist.getAddEmptyValue() != IValueListConstants.EMPTY_VALUE_ALWAYS))
 			{
 				IValueList realValueList = ComponentFactory.getRealValueList(application, valuelist, false, 0, null, null);
 				if (realValueList != null && realValueList.getSize() == 1)
