@@ -1,84 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <servoydoc>
   <runtime>
-    <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT">
-      <constants>
-        <constant name="ACCORDION_PANEL">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant used for creating accordion panel from tab panel, by setting its tabOrientation.]]></description>
-          <summary><![CDATA[Constant used for creating accordion panel from tab panel, by setting its tabOrientation.]]></summary>
-          <sample><![CDATA[var accordion = myForm.newTabPanel('accordion', 10, 10, 620, 460);
-accordion.tabOrientation = SM_ALIGNMENT.ACCORDION_PANEL;]]></sample>
-        </constant>
-        <constant name="BOTTOM">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant used for setting vertical alignment for components.
-It makes the text inside the component be bottom aligned vertically.]]></description>
-          <summary><![CDATA[Constant used for setting vertical alignment for components.]]></summary>
-          <sample><![CDATA[var bottomAlignedLabel = form.newLabel('BOTTOM', 520, 10, 50, 300);
-bottomAlignedLabel.verticalAlignment = SM_ALIGNMENT.BOTTOM;]]></sample>
-        </constant>
-        <constant name="CENTER">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant used for setting horizontal and vertical alignment
-for components. If used for horizontal alignment,
-then the text of the component will be horizontally centered.
-Similarly, if used for vertical alignment, then the text
-of the component will be vertically centered.]]></description>
-          <summary><![CDATA[Constant used for setting horizontal and vertical alignment
-for components.]]></summary>
-          <sample><![CDATA[var hCenteredLabel = form.newLabel('CENTER', 10, 40, 300, 20);
-hCenteredLabel.horizontalAlignment = SM_ALIGNMENT.CENTER;
-var vCenterAlignedLabel = form.newLabel('CENTER', 460, 10, 50, 300);
-vCenterAlignedLabel.verticalAlignment = SM_ALIGNMENT.CENTER]]></sample>
-        </constant>
-        <constant name="DEFAULT">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant used for setting horizontal and vertical alignment. DEFAULT value makes the alignment behave as if it was not changed before.]]></description>
-          <summary><![CDATA[Constant used for setting horizontal and vertical alignment.]]></summary>
-          <sample><![CDATA[var hLabel = myJSForm.getLabel('label_name');
-if (hLabel.horizontalAlignment == SM_ALIGNMENT.LEFT) hLabel.horizontalAlignment = SM_ALIGNMENT.DEFAULT;]]></sample>
-        </constant>
-        <constant name="LEFT">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant used for setting horizontal alignment for components.
-It makes the text inside the component be left aligned horizontally.]]></description>
-          <summary><![CDATA[Constant used for setting horizontal alignment for components.]]></summary>
-          <sample><![CDATA[var leftAlignedLabel = form.newLabel('LEFT', 10, 10, 300, 20);
-leftAlignedLabel.horizontalAlignment = SM_ALIGNMENT.LEFT;]]></sample>
-        </constant>
-        <constant name="RIGHT">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant used for setting horizontal alignment for components.
-It makes the text inside the component be right aligned vertically.]]></description>
-          <summary><![CDATA[Constant used for setting horizontal alignment for components.]]></summary>
-          <sample><![CDATA[var rightAlignedLabel = form.newLabel('RIGHT', 10, 70, 300, 20);
-rightAlignedLabel.horizontalAlignment = SM_ALIGNMENT.RIGHT;]]></sample>
-        </constant>
-        <constant name="SPLIT_HORIZONTAL">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant used for creating horizontal split pane from tab panel, by setting its tabOrientation.]]></description>
-          <summary><![CDATA[Constant used for creating horizontal split pane from tab panel, by setting its tabOrientation.]]></summary>
-          <sample><![CDATA[var splitPane = myForm.newTabPanel('splitPane', 10, 10, 620, 460);
-splitPane.tabOrientation = SM_ALIGNMENT.SPLIT_HORIZONTAL;]]></sample>
-        </constant>
-        <constant name="SPLIT_VERTICAL">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant used for creating vertical split pane from tab panel, by setting its tabOrientation.]]></description>
-          <summary><![CDATA[Constant used for creating vertical split pane from tab panel, by setting its tabOrientation.]]></summary>
-          <sample><![CDATA[var splitPane = myForm.newTabPanel('splitPane', 10, 10, 620, 460);
-splitPane.tabOrientation = SM_ALIGNMENT.SPLIT_VERTICAL;]]></sample>
-        </constant>
-        <constant name="TOP">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant used for setting vertical alignment for components.
-It makes the text inside the component be top aligned vertically.]]></description>
-          <summary><![CDATA[Constant used for setting vertical alignment for components.]]></summary>
-          <sample><![CDATA[var topAlignedLabel = form.newLabel('TOP', 400, 10, 50, 300);
-topAlignedLabel.verticalAlignment = SM_ALIGNMENT.TOP;]]></sample>
-        </constant>
-      </constants>
-    </object>
+    <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT"/>
     <object publicName="ANCHOR" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ANCHOR">
       <constants>
         <constant name="ALL">
@@ -2366,42 +2289,6 @@ label.rolloverCursor = SM_CURSOR.HAND_CURSOR;]]></sample>
           <summary><![CDATA[Constants used for setting commands to "default".]]></summary>
           <sample><![CDATA[var form = solutionModel.newForm('parentForm', 'db:/example_data/parent_table', null, false, 1200, 800);
 form.onFindCmd = SM_DEFAULTS.COMMAND_DEFAULT; // This makes the find work like it does by default.]]></sample>
-        </constant>
-        <constant name="COMMAND_NONE">
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"/>
-          <description><![CDATA[Constant used for setting commands to "none".]]></description>
-          <summary><![CDATA[Constant used for setting commands to "none".]]></summary>
-          <sample><![CDATA[var form = solutionModel.newForm('parentForm', 'db:/example_data/parent_table', null, false, 1200, 800);
-form.onFindCmd = SM_DEFAULTS.COMMAND_NONE; // This disables the find on the form.]]></sample>
-        </constant>
-        <constant name="DEFAULT">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant used in various places to set properties to their default value.]]></description>
-          <summary><![CDATA[Constant used in various places to set properties to their default value.]]></summary>
-          <sample><![CDATA[var form = solutionModel.newForm('parentForm', 'db:/example_data/parent_table', null, false, 1200, 800);
-form.navigator = SM_DEFAULTS.DEFAULT; // Show the default navigator on the form.]]></sample>
-        </constant>
-        <constant name="IGNORE">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant used to remove a component from the tab sequence.]]></description>
-          <summary><![CDATA[Constant used to remove a component from the tab sequence.]]></summary>
-          <sample><![CDATA[// Create three fields. Based on how they are placed, by default they will come one
-// after another in the tab sequence.
-var fieldOne = form.newField('parent_table_id', JSField.TEXT_FIELD, 10, 10, 100, 20);
-var fieldTwo = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
-var fieldThree = form.newField('parent_table_id', JSField.TEXT_FIELD, 10, 70, 100, 20);
-// Set the third field come before the first in the tab sequence, and remove the 
-// second field from the tab sequence.
-fieldOne.tabSeq = 2;
-fieldTwo.tabSeq = SM_DEFAULTS.IGNORE;
-fieldThree.tabSeq = 1;]]></sample>
-        </constant>
-        <constant name="NONE">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant used in various places to set properties to "none".]]></description>
-          <summary><![CDATA[Constant used in various places to set properties to "none".]]></summary>
-          <sample><![CDATA[var form = solutionModel.newForm('parentForm', 'db:/example_data/parent_table', null, false, 1200, 800);
-form.navigator = SM_DEFAULTS.NONE; // Hide the navigator on the form.]]></sample>
         </constant>
       </constants>
     </object>
@@ -9431,142 +9318,6 @@ var movedYPixels = y -yPrevious;]]></sample>
       </functions>
     </object>
     <object extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSField" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSField">
-      <constants>
-        <constant name="CALENDAR">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the 
-field to calendar. The field will show a formatted date and will have a button which
-pops up a calendar for date selection.]]></description>
-          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
-          <sample><![CDATA[var cal = form.newField('my_table_date', JSField.CALENDAR, 10, 10, 100, 20);]]></sample>
-        </constant>
-        <constant name="CHECKS">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
-field to checkbox. The field will show a checkbox, or a list of checkboxes if the valuelist
-property is also set.]]></description>
-          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.customValues = "one\ntwo\nthree\nfour";
-var chk = form.newField('my_table_options', JSField.CHECKS, 10, 40, 100, 50);
-chk.valuelist = vlist;]]></sample>
-        </constant>
-        <constant name="COMBOBOX">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
-field to combobox.]]></description>
-          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.customValues = "one\ntwo\nthree\nfour";
-var cmb = form.newField('my_table_options', JSField.COMBOBOX, 10, 100, 100, 20);
-cmb.valuelist = vlist;]]></sample>
-        </constant>
-        <constant name="HTML_AREA">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
-field to HTML area. The field will display formatted HTML content.]]></description>
-          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
-          <sample><![CDATA[var html = form.newField('my_table_html', JSField.HTML_AREA, 10, 130, 100, 50);]]></sample>
-        </constant>
-        <constant name="IMAGE_MEDIA">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
-field to image. The field will display images.]]></description>
-          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
-          <sample><![CDATA[var img = form.newField('my_table_image', JSField.IMAGE_MEDIA, 10, 190, 100, 50);]]></sample>
-        </constant>
-        <constant name="LISTBOX">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
-field to list box. The field will show a selection list with single choice selection.]]></description>
-          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.customValues = "one\ntwo\nthree\nfour";
-var list = form.newField('my_table_list', JSField.LISTBOX, 10, 280, 100, 50);
-list.valuelist = vlist;]]></sample>
-        </constant>
-        <constant deprecated="true" name="LIST_BOX">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
-field to list box. The field will show a selection list with single choice selection.]]></description>
-          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.customValues = "one\ntwo\nthree\nfour";
-var list = form.newField('my_table_list', JSField.LIST_BOX, 10, 280, 100, 50);
-list.valuelist = vlist;]]></sample>
-        </constant>
-        <constant name="MULTISELECT_LISTBOX">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
-field to list box. The field will show a selection list with multiple choice selection.]]></description>
-          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.customValues = "one\ntwo\nthree\nfour";
-var list = form.newField('my_table_options', JSField.MULTISELECT_LISTBOX, 10, 280, 100, 50);
-list.valuelist = vlist;]]></sample>
-        </constant>
-        <constant name="PASSWORD">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
-fiels to password. The field will allow the user to enter passwords, masking the typed
-characters.]]></description>
-          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
-          <sample><![CDATA[var pwd = form.newField('my_table_text', JSField.PASSWORD, 10, 250, 100, 20);]]></sample>
-        </constant>
-        <constant name="RADIOS">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
-field to radio buttons. The field will show a radio button, or a list of them if 
-the valuelist property is also set.]]></description>
-          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.customValues = "one\ntwo\nthree\nfour";
-var radio = form.newField('my_table_options', JSField.RADIOS, 10, 280, 100, 50);
-radio.valuelist = vlist;]]></sample>
-        </constant>
-        <constant name="RTF_AREA">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the 
-field to RTF area. The field will display formatted RTF content.]]></description>
-          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
-          <sample><![CDATA[var rtf = form.newField('my_table_rtf', JSField.RTF_AREA, 10, 340, 100, 50);]]></sample>
-        </constant>
-        <constant name="SPINNER">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
-field to spinner. The field will show a spinner.]]></description>
-          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.customValues = "one\ntwo\nthree\nfour";
-var spinner = form.newField('my_spinner', JSField.SPINNER, 10, 460, 100, 20);
-spinner.valuelist = vlist;]]></sample>
-        </constant>
-        <constant name="TEXT_AREA">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
-field to text area. The field will show text on multiple lines.]]></description>
-          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
-          <sample><![CDATA[var tarea = form.newField('my_table_text', JSField.TEXT_AREA, 10, 400, 100, 50);]]></sample>
-        </constant>
-        <constant name="TEXT_FIELD">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
-field to text field. The field will show regular text on a single line.]]></description>
-          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
-          <sample><![CDATA[var tfield = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 460, 100, 20);]]></sample>
-        </constant>
-        <constant name="TYPE_AHEAD">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
-field to type ahead. The field will show regular text, but will have type ahead 
-capabilities.]]></description>
-          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.customValues = "one\ntwo\nthree\nfour";
-var tahead = form.newField('my_table_text', JSField.TYPE_AHEAD, 10, 490, 100, 20);
-tahead.valuelist = vlist;]]></sample>
-        </constant>
-      </constants>
       <properties>
         <property name="anchors">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -10124,32 +9875,6 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
     </object>
     <object publicName="JSForm" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSForm">
       <constants>
-        <constant name="DEFAULT_ENCAPSULATION">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[The constants to set or get the encapsulation property of a JSForm. 
-They are as follows: JSForm.DEFAULT_ENCAPSULATION, JSForm.PRIVATE_ENCAPSULATION, JSForm.MODULE_PRIVATE_ENCAPSULATION, JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION, JSForm.HIDE_FOUNDSET_ENCAPSULATION, JSForm.HIDE_CONTROLLER_ENCAPSULATION, JSForm.HIDE_ELEMENTS_ENCAPSULATION]]></description>
-          <summary><![CDATA[The constants to set or get the encapsulation property of a JSForm.]]></summary>
-          <sample><![CDATA[var myDefaultForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
-myDefaultForm.encapsulation = JSForm.DEFAULT_ENCAPSULATION;
-
-var myPrivateForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);
-myPrivateForm.encapsulation = JSForm.PRIVATE_ENCAPSULATION;
-
-var myModulePrivateForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
-myModulePrivateForm.encapsulation = JSForm.MODULE_PRIVATE_ENCAPSULATION;
-
-var myHideDataprovidersForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
-myHideDataprovidersForm.encapsulation = JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION;
-
-var myHideFoundsetForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
-myHideFoundsetForm.encapsulation = JSForm.HIDE_FOUNDSET_ENCAPSULATION;
-
-var myHideControllerForm = solutionModel.newForm('newForm6', myDatasource, myStyleName, false, 800, 600);
-myHideControllerForm.encapsulation = JSForm.HIDE_CONTROLLER_ENCAPSULATION;
-
-var myHideElementsForm = solutionModel.newForm('newForm7', myDatasource, myStyleName, false, 800, 600);
-myHideElementsForm.encapsulation = JSForm.HIDE_ELEMENTS_ENCAPSULATION;]]></sample>
-        </constant>
         <constant name="EMPTY_FOUNDSET">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant used for form namedFoundset property. The form that uses empty namedFoundset will initially have an empty (cleared) foundset.]]></description>
@@ -10160,262 +9885,6 @@ frmEmpty.newLabel("Empty FoundSet",10,10,200,20);
 frmEmpty.newField('categoryid',JSField.TEXT_FIELD,10,40,200,20);
 frmEmpty.newField('productname',JSField.TEXT_FIELD,10,70,200,20);
 frmEmpty.namedFoundSet = JSForm.EMPTY_FOUNDSET;]]></sample>
-        </constant>
-        <constant name="HIDE_CONTROLLER_ENCAPSULATION">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[The constants to set or get the encapsulation property of a JSForm. 
-They are as follows: JSForm.DEFAULT_ENCAPSULATION, JSForm.PRIVATE_ENCAPSULATION, JSForm.MODULE_PRIVATE_ENCAPSULATION, JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION, JSForm.HIDE_FOUNDSET_ENCAPSULATION, JSForm.HIDE_CONTROLLER_ENCAPSULATION, JSForm.HIDE_ELEMENTS_ENCAPSULATION]]></description>
-          <summary><![CDATA[The constants to set or get the encapsulation property of a JSForm.]]></summary>
-          <sample><![CDATA[var myDefaultForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
-myDefaultForm.encapsulation = JSForm.DEFAULT_ENCAPSULATION;
-
-var myPrivateForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);
-myPrivateForm.encapsulation = JSForm.PRIVATE_ENCAPSULATION;
-
-var myModulePrivateForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
-myModulePrivateForm.encapsulation = JSForm.MODULE_PRIVATE_ENCAPSULATION;
-
-var myHideDataprovidersForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
-myHideDataprovidersForm.encapsulation = JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION;
-
-var myHideFoundsetForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
-myHideFoundsetForm.encapsulation = JSForm.HIDE_FOUNDSET_ENCAPSULATION;
-
-var myHideControllerForm = solutionModel.newForm('newForm6', myDatasource, myStyleName, false, 800, 600);
-myHideControllerForm.encapsulation = JSForm.HIDE_CONTROLLER_ENCAPSULATION;
-
-var myHideElementsForm = solutionModel.newForm('newForm7', myDatasource, myStyleName, false, 800, 600);
-myHideElementsForm.encapsulation = JSForm.HIDE_ELEMENTS_ENCAPSULATION;]]></sample>
-        </constant>
-        <constant name="HIDE_DATAPROVIDERS_ENCAPSULATION">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[The constants to set or get the encapsulation property of a JSForm. 
-They are as follows: JSForm.DEFAULT_ENCAPSULATION, JSForm.PRIVATE_ENCAPSULATION, JSForm.MODULE_PRIVATE_ENCAPSULATION, JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION, JSForm.HIDE_FOUNDSET_ENCAPSULATION, JSForm.HIDE_CONTROLLER_ENCAPSULATION, JSForm.HIDE_ELEMENTS_ENCAPSULATION]]></description>
-          <summary><![CDATA[The constants to set or get the encapsulation property of a JSForm.]]></summary>
-          <sample><![CDATA[var myDefaultForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
-myDefaultForm.encapsulation = JSForm.DEFAULT_ENCAPSULATION;
-
-var myPrivateForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);
-myPrivateForm.encapsulation = JSForm.PRIVATE_ENCAPSULATION;
-
-var myModulePrivateForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
-myModulePrivateForm.encapsulation = JSForm.MODULE_PRIVATE_ENCAPSULATION;
-
-var myHideDataprovidersForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
-myHideDataprovidersForm.encapsulation = JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION;
-
-var myHideFoundsetForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
-myHideFoundsetForm.encapsulation = JSForm.HIDE_FOUNDSET_ENCAPSULATION;
-
-var myHideControllerForm = solutionModel.newForm('newForm6', myDatasource, myStyleName, false, 800, 600);
-myHideControllerForm.encapsulation = JSForm.HIDE_CONTROLLER_ENCAPSULATION;
-
-var myHideElementsForm = solutionModel.newForm('newForm7', myDatasource, myStyleName, false, 800, 600);
-myHideElementsForm.encapsulation = JSForm.HIDE_ELEMENTS_ENCAPSULATION;]]></sample>
-        </constant>
-        <constant name="HIDE_ELEMENTS_ENCAPSULATION">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[The constants to set or get the encapsulation property of a JSForm. 
-They are as follows: JSForm.DEFAULT_ENCAPSULATION, JSForm.PRIVATE_ENCAPSULATION, JSForm.MODULE_PRIVATE_ENCAPSULATION, JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION, JSForm.HIDE_FOUNDSET_ENCAPSULATION, JSForm.HIDE_CONTROLLER_ENCAPSULATION, JSForm.HIDE_ELEMENTS_ENCAPSULATION]]></description>
-          <summary><![CDATA[The constants to set or get the encapsulation property of a JSForm.]]></summary>
-          <sample><![CDATA[var myDefaultForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
-myDefaultForm.encapsulation = JSForm.DEFAULT_ENCAPSULATION;
-
-var myPrivateForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);
-myPrivateForm.encapsulation = JSForm.PRIVATE_ENCAPSULATION;
-
-var myModulePrivateForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
-myModulePrivateForm.encapsulation = JSForm.MODULE_PRIVATE_ENCAPSULATION;
-
-var myHideDataprovidersForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
-myHideDataprovidersForm.encapsulation = JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION;
-
-var myHideFoundsetForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
-myHideFoundsetForm.encapsulation = JSForm.HIDE_FOUNDSET_ENCAPSULATION;
-
-var myHideControllerForm = solutionModel.newForm('newForm6', myDatasource, myStyleName, false, 800, 600);
-myHideControllerForm.encapsulation = JSForm.HIDE_CONTROLLER_ENCAPSULATION;
-
-var myHideElementsForm = solutionModel.newForm('newForm7', myDatasource, myStyleName, false, 800, 600);
-myHideElementsForm.encapsulation = JSForm.HIDE_ELEMENTS_ENCAPSULATION;]]></sample>
-        </constant>
-        <constant name="HIDE_FOUNDSET_ENCAPSULATION">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[The constants to set or get the encapsulation property of a JSForm. 
-They are as follows: JSForm.DEFAULT_ENCAPSULATION, JSForm.PRIVATE_ENCAPSULATION, JSForm.MODULE_PRIVATE_ENCAPSULATION, JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION, JSForm.HIDE_FOUNDSET_ENCAPSULATION, JSForm.HIDE_CONTROLLER_ENCAPSULATION, JSForm.HIDE_ELEMENTS_ENCAPSULATION]]></description>
-          <summary><![CDATA[The constants to set or get the encapsulation property of a JSForm.]]></summary>
-          <sample><![CDATA[var myDefaultForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
-myDefaultForm.encapsulation = JSForm.DEFAULT_ENCAPSULATION;
-
-var myPrivateForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);
-myPrivateForm.encapsulation = JSForm.PRIVATE_ENCAPSULATION;
-
-var myModulePrivateForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
-myModulePrivateForm.encapsulation = JSForm.MODULE_PRIVATE_ENCAPSULATION;
-
-var myHideDataprovidersForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
-myHideDataprovidersForm.encapsulation = JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION;
-
-var myHideFoundsetForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
-myHideFoundsetForm.encapsulation = JSForm.HIDE_FOUNDSET_ENCAPSULATION;
-
-var myHideControllerForm = solutionModel.newForm('newForm6', myDatasource, myStyleName, false, 800, 600);
-myHideControllerForm.encapsulation = JSForm.HIDE_CONTROLLER_ENCAPSULATION;
-
-var myHideElementsForm = solutionModel.newForm('newForm7', myDatasource, myStyleName, false, 800, 600);
-myHideElementsForm.encapsulation = JSForm.HIDE_ELEMENTS_ENCAPSULATION;]]></sample>
-        </constant>
-        <constant name="LIST_VIEW">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[The constants to set or get the view property of a JSForm. 
-They are as follows: JSForm.LIST_VIEW, JSForm.LOCKED_LIST_VIEW, JSForm.LOCKED_RECORD_VIEW, JSForm.LOCKED_TABLE_VIEW, JSForm.RECORD_VIEW.]]></description>
-          <summary><![CDATA[The constants to set or get the view property of a JSForm.]]></summary>
-          <sample><![CDATA[var myListViewForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
-myListViewForm.view = JSForm.LIST_VIEW;
-
-var myLockedListViewForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);	
-myLockedListViewForm.view = JSForm.LOCKED_LIST_VIEW;
-
-var myLockedRecordViewForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
-myLockedRecordViewForm.view = JSForm.LOCKED_RECORD_VIEW;
-
-var myLockedTableViewForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
-myLockedTableViewForm.view = JSForm.LOCKED_TABLE_VIEW;
-
-var myRecordViewForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
-myRecordViewForm.view = JSForm.RECORD_VIEW;]]></sample>
-        </constant>
-        <constant name="LOCKED_LIST_VIEW">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[The constants to set or get the view property of a JSForm. 
-They are as follows: JSForm.LIST_VIEW, JSForm.LOCKED_LIST_VIEW, JSForm.LOCKED_RECORD_VIEW, JSForm.LOCKED_TABLE_VIEW, JSForm.RECORD_VIEW.]]></description>
-          <summary><![CDATA[The constants to set or get the view property of a JSForm.]]></summary>
-          <sample><![CDATA[var myListViewForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
-myListViewForm.view = JSForm.LIST_VIEW;
-
-var myLockedListViewForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);	
-myLockedListViewForm.view = JSForm.LOCKED_LIST_VIEW;
-
-var myLockedRecordViewForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
-myLockedRecordViewForm.view = JSForm.LOCKED_RECORD_VIEW;
-
-var myLockedTableViewForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
-myLockedTableViewForm.view = JSForm.LOCKED_TABLE_VIEW;
-
-var myRecordViewForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
-myRecordViewForm.view = JSForm.RECORD_VIEW;]]></sample>
-        </constant>
-        <constant name="LOCKED_RECORD_VIEW">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[The constants to set or get the view property of a JSForm. 
-They are as follows: JSForm.LIST_VIEW, JSForm.LOCKED_LIST_VIEW, JSForm.LOCKED_RECORD_VIEW, JSForm.LOCKED_TABLE_VIEW, JSForm.RECORD_VIEW.]]></description>
-          <summary><![CDATA[The constants to set or get the view property of a JSForm.]]></summary>
-          <sample><![CDATA[var myListViewForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
-myListViewForm.view = JSForm.LIST_VIEW;
-
-var myLockedListViewForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);	
-myLockedListViewForm.view = JSForm.LOCKED_LIST_VIEW;
-
-var myLockedRecordViewForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
-myLockedRecordViewForm.view = JSForm.LOCKED_RECORD_VIEW;
-
-var myLockedTableViewForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
-myLockedTableViewForm.view = JSForm.LOCKED_TABLE_VIEW;
-
-var myRecordViewForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
-myRecordViewForm.view = JSForm.RECORD_VIEW;]]></sample>
-        </constant>
-        <constant name="LOCKED_TABLE_VIEW">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[The constants to set or get the view property of a JSForm. 
-They are as follows: JSForm.LIST_VIEW, JSForm.LOCKED_LIST_VIEW, JSForm.LOCKED_RECORD_VIEW, JSForm.LOCKED_TABLE_VIEW, JSForm.RECORD_VIEW.]]></description>
-          <summary><![CDATA[The constants to set or get the view property of a JSForm.]]></summary>
-          <sample><![CDATA[var myListViewForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
-myListViewForm.view = JSForm.LIST_VIEW;
-
-var myLockedListViewForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);	
-myLockedListViewForm.view = JSForm.LOCKED_LIST_VIEW;
-
-var myLockedRecordViewForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
-myLockedRecordViewForm.view = JSForm.LOCKED_RECORD_VIEW;
-
-var myLockedTableViewForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
-myLockedTableViewForm.view = JSForm.LOCKED_TABLE_VIEW;
-
-var myRecordViewForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
-myRecordViewForm.view = JSForm.RECORD_VIEW;]]></sample>
-        </constant>
-        <constant name="MODULE_PRIVATE_ENCAPSULATION">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[The constants to set or get the encapsulation property of a JSForm. 
-They are as follows: JSForm.DEFAULT_ENCAPSULATION, JSForm.PRIVATE_ENCAPSULATION, JSForm.MODULE_PRIVATE_ENCAPSULATION, JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION, JSForm.HIDE_FOUNDSET_ENCAPSULATION, JSForm.HIDE_CONTROLLER_ENCAPSULATION, JSForm.HIDE_ELEMENTS_ENCAPSULATION]]></description>
-          <summary><![CDATA[The constants to set or get the encapsulation property of a JSForm.]]></summary>
-          <sample><![CDATA[var myDefaultForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
-myDefaultForm.encapsulation = JSForm.DEFAULT_ENCAPSULATION;
-
-var myPrivateForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);
-myPrivateForm.encapsulation = JSForm.PRIVATE_ENCAPSULATION;
-
-var myModulePrivateForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
-myModulePrivateForm.encapsulation = JSForm.MODULE_PRIVATE_ENCAPSULATION;
-
-var myHideDataprovidersForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
-myHideDataprovidersForm.encapsulation = JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION;
-
-var myHideFoundsetForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
-myHideFoundsetForm.encapsulation = JSForm.HIDE_FOUNDSET_ENCAPSULATION;
-
-var myHideControllerForm = solutionModel.newForm('newForm6', myDatasource, myStyleName, false, 800, 600);
-myHideControllerForm.encapsulation = JSForm.HIDE_CONTROLLER_ENCAPSULATION;
-
-var myHideElementsForm = solutionModel.newForm('newForm7', myDatasource, myStyleName, false, 800, 600);
-myHideElementsForm.encapsulation = JSForm.HIDE_ELEMENTS_ENCAPSULATION;]]></sample>
-        </constant>
-        <constant name="PRIVATE_ENCAPSULATION">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[The constants to set or get the encapsulation property of a JSForm. 
-They are as follows: JSForm.DEFAULT_ENCAPSULATION, JSForm.PRIVATE_ENCAPSULATION, JSForm.MODULE_PRIVATE_ENCAPSULATION, JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION, JSForm.HIDE_FOUNDSET_ENCAPSULATION, JSForm.HIDE_CONTROLLER_ENCAPSULATION, JSForm.HIDE_ELEMENTS_ENCAPSULATION]]></description>
-          <summary><![CDATA[The constants to set or get the encapsulation property of a JSForm.]]></summary>
-          <sample><![CDATA[var myDefaultForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
-myDefaultForm.encapsulation = JSForm.DEFAULT_ENCAPSULATION;
-
-var myPrivateForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);
-myPrivateForm.encapsulation = JSForm.PRIVATE_ENCAPSULATION;
-
-var myModulePrivateForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
-myModulePrivateForm.encapsulation = JSForm.MODULE_PRIVATE_ENCAPSULATION;
-
-var myHideDataprovidersForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
-myHideDataprovidersForm.encapsulation = JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION;
-
-var myHideFoundsetForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
-myHideFoundsetForm.encapsulation = JSForm.HIDE_FOUNDSET_ENCAPSULATION;
-
-var myHideControllerForm = solutionModel.newForm('newForm6', myDatasource, myStyleName, false, 800, 600);
-myHideControllerForm.encapsulation = JSForm.HIDE_CONTROLLER_ENCAPSULATION;
-
-var myHideElementsForm = solutionModel.newForm('newForm7', myDatasource, myStyleName, false, 800, 600);
-myHideElementsForm.encapsulation = JSForm.HIDE_ELEMENTS_ENCAPSULATION;]]></sample>
-        </constant>
-        <constant name="RECORD_VIEW">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[The constants to set or get the view property of a JSForm. 
-They are as follows: JSForm.LIST_VIEW, JSForm.LOCKED_LIST_VIEW, JSForm.LOCKED_RECORD_VIEW, JSForm.LOCKED_TABLE_VIEW, JSForm.RECORD_VIEW.]]></description>
-          <summary><![CDATA[The constants to set or get the view property of a JSForm.]]></summary>
-          <sample><![CDATA[var myListViewForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
-myListViewForm.view = JSForm.LIST_VIEW;
-
-var myLockedListViewForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);	
-myLockedListViewForm.view = JSForm.LOCKED_LIST_VIEW;
-
-var myLockedRecordViewForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
-myLockedRecordViewForm.view = JSForm.LOCKED_RECORD_VIEW;
-
-var myLockedTableViewForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
-myLockedTableViewForm.view = JSForm.LOCKED_TABLE_VIEW;
-
-var myRecordViewForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
-myRecordViewForm.view = JSForm.RECORD_VIEW;]]></sample>
         </constant>
         <constant name="SELECTION_MODE_DEFAULT">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -14284,6 +13753,41 @@ if (current.length > 1)
         </function>
         <function name="sort">
           <argumentsTypes>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sorts the foundset based on the given record comparator function.
+The comparator function is called to compare
+two records, that are passed as arguments, and
+it will return -1/0/1 if the first record is less/equal/greater
+then the second record.
+
+The function based sorting does not work with printing.
+It is just a temporary in-memory sort.]]></description>
+          <summary><![CDATA[Sorts the foundset based on the given record comparator function.]]></summary>
+          <sample><![CDATA[%%prefix%%foundset.sort(mySortFunction);
+
+function mySortFunction(r1, r2)
+{
+	var o = 0;
+	if(r1.id < r2.id)
+	{
+		o = -1;
+	}
+	else if(r1.id > r2.id)
+	{
+		o = 1;
+	}
+	return o;
+}]]></sample>
+          <parameters>
+            <parameter name="comparator" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[record comparator function]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="sort">
+          <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
@@ -14313,41 +13817,6 @@ TIP: You can use the Copy button in the developer Select Sorting Fields dialog t
             </parameter>
             <parameter name="defer" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
               <description><![CDATA[when true, the "sortString" will be just stored, without performing a query on the database (the actual sorting will be deferred until the next data loading action).]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="sort">
-          <argumentsTypes>
-            <argumentType typecode="org.mozilla.javascript.Function"/>
-          </argumentsTypes>
-          <return type="void" typecode="void"/>
-          <description><![CDATA[Sorts the foundset based on the given record comparator function.
-The comparator function is called to compare
-two records, that are passed as arguments, and
-it will return -1/0/1 if the first record is less/equal/greater
-then the second record.
-
-The function based sorting does not work with printing.
-It is just a temporary in-memory sort.]]></description>
-          <summary><![CDATA[Sorts the foundset based on the given record comparator function.]]></summary>
-          <sample><![CDATA[%%prefix%%foundset.sort(mySortFunction);
-
-function mySortFunction(r1, r2)
-{
-	var o = 0;
-	if(r1.id < r2.id)
-	{
-		o = -1;
-	}
-	else if(r1.id > r2.id)
-	{
-		o = 1;
-	}
-	return o;
-}]]></sample>
-          <parameters>
-            <parameter name="comparator" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
-              <description><![CDATA[record comparator function]]></description>
             </parameter>
           </parameters>
         </function>
@@ -17277,54 +16746,6 @@ record.save();]]></sample>
       </functions>
     </object>
     <object publicName="JSRelation" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSRelation">
-      <constants>
-        <constant name="FULL_JOIN">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for the joinType of a Query Builder join.]]></description>
-          <summary><![CDATA[Constant for the joinType of a Query Builder join.]]></summary>
-          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
- /** @type {QBJoin<db:/example_data/order_details>} */
-	var join = query.joins.add('db:/example_data/order_details', JSRelation.RIGHT_OUTER_JOIN, 'odetail')
-	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
-        </constant>
-        <constant name="INNER_JOIN">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for the joinType of a JSRelation. It is also used in solutionModel.newRelation(...) and in the QueryBuilder.]]></description>
-          <summary><![CDATA[Constant for the joinType of a JSRelation.]]></summary>
-          <sample><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
-relation.joinType = JSRelation.LEFT_OUTER_JOIN;
-
- /** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
- /** @type {QBJoin<db:/example_data/order_details>} */
-	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
-	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
-        </constant>
-        <constant name="LEFT_OUTER_JOIN">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for the joinType of a JSRelation. It is also used in solutionModel.newRelation(...) and in the QueryBuilder.]]></description>
-          <summary><![CDATA[Constant for the joinType of a JSRelation.]]></summary>
-          <sample><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
-relation.joinType = JSRelation.LEFT_OUTER_JOIN;
-
- /** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
- /** @type {QBJoin<db:/example_data/order_details>} */
-	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
-	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
-        </constant>
-        <constant name="RIGHT_OUTER_JOIN">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for the joinType of a Query Builder join.]]></description>
-          <summary><![CDATA[Constant for the joinType of a Query Builder join.]]></summary>
-          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
- /** @type {QBJoin<db:/example_data/order_details>} */
-	var join = query.joins.add('db:/example_data/order_details', JSRelation.RIGHT_OUTER_JOIN, 'odetail')
-	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
-        </constant>
-      </constants>
       <properties>
         <property name="allowCreationRelatedRecords">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -17392,14 +16813,7 @@ relation.initialSort = 'another_child_table_text asc';]]></sample>
           <description><![CDATA[The join type that is performed between the primary table and the foreign table.
 Can be "inner join" or "left outer join".]]></description>
           <summary><![CDATA[The join type that is performed between the primary table and the foreign table.]]></summary>
-          <sample><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
-relation.joinType = JSRelation.LEFT_OUTER_JOIN;
-
- /** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
- /** @type {QBJoin<db:/example_data/order_details>} */
-	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
-	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
+          <sample/>
         </property>
         <property name="name">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -18309,7 +17723,7 @@ application.output(button_uuid.toString());]]></sample>
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="com.servoy.j2db.solutionmodel.ISMForm"/>
+            <argumentType typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMForm"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSTab" typecode="com.servoy.j2db.scripting.solutionmodel.JSTab"><![CDATA[A JSTab instance representing the newly created and added tab.]]></return>
           <description><![CDATA[Adds a new tab with the text label and JSForm.]]></description>
@@ -18336,7 +17750,7 @@ tabPanel.newTab('tab2', 'Child Two', childTwo);]]></sample>
             <parameter name="text" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The text to be displayed on the new tab.]]></description>
             </parameter>
-            <parameter name="form" type="com.servoy.j2db.scripting.solutionmodel.JSForm" typecode="com.servoy.j2db.solutionmodel.ISMForm">
+            <parameter name="form" type="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMForm" typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMForm">
               <description><![CDATA[The JSForm instance that should be displayed in the new tab.]]></description>
             </parameter>
           </parameters>
@@ -18345,7 +17759,7 @@ tabPanel.newTab('tab2', 'Child Two', childTwo);]]></sample>
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="com.servoy.j2db.solutionmodel.ISMForm"/>
+            <argumentType typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMForm"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSTab" typecode="com.servoy.j2db.scripting.solutionmodel.JSTab"><![CDATA[A JSTab instance representing the newly created and added tab.]]></return>
@@ -18373,7 +17787,7 @@ tabPanel.newTab('tab2', 'Child Two', childTwo);]]></sample>
             <parameter name="text" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The text to be displayed on the new tab.]]></description>
             </parameter>
-            <parameter name="form" type="com.servoy.j2db.scripting.solutionmodel.JSForm" typecode="com.servoy.j2db.solutionmodel.ISMForm">
+            <parameter name="form" type="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMForm" typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMForm">
               <description><![CDATA[The JSForm instance that should be displayed in the new tab.]]></description>
             </parameter>
             <parameter name="relation" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
@@ -19219,52 +18633,6 @@ jsunit.fail("test", null, "Fail"); // 2nd param is not used in Servoy, params 3 
       </functions>
     </object>
     <object publicName="JSValueList" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSValueList">
-      <constants>
-        <constant name="CUSTOM_VALUES">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant to set the valueListType of a JSValueList.
-Sets the value list to use a custom list of values.
-Also used in solutionModel.newValueList(...) to create new valuelists]]></description>
-          <summary><![CDATA[Constant to set the valueListType of a JSValueList.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.DATABASE_VALUES);
-vlist.valueListType = JSValueList.CUSTOM_VALUES; // Change the type to custom values.
-vlist.customValues = "one\ntwo\nthree\nfour";]]></sample>
-        </constant>
-        <constant name="DATABASE_VALUES">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant to set the valueListType of a JSValueList.
-Sets the value list to use values loaded from a database.
-Also used in solutionModel.newValueList(...) to create new valuelists]]></description>
-          <summary><![CDATA[Constant to set the valueListType of a JSValueList.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
-vlist.dataSource = 'db:/example_data/parent_table';
-vlist.setDisplayDataProviderIds('parent_table_text');
-vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
-vlist.separator = ' ## ';
-vlist.sortOptions = 'parent_table_text desc';]]></sample>
-        </constant>
-        <constant name="EMPTY_VALUE_ALWAYS">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant to set/get the addEmptyValue property of a JSValueList.]]></description>
-          <summary><![CDATA[Constant to set/get the addEmptyValue property of a JSValueList.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.customValues = "one\ntwo\nthree\nfour";
-vlist.addEmptyValue = JSValueList.EMPTY_VALUE_ALWAYS;
-var cmb = form.newComboBox('my_table_text', 10, 10, 100, 20);
-cmb.valuelist = vlist;]]></sample>
-        </constant>
-        <constant name="EMPTY_VALUE_NEVER">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant to set/get the addEmptyValue property of a JSValueList.]]></description>
-          <summary><![CDATA[Constant to set/get the addEmptyValue property of a JSValueList.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.customValues = "one\ntwo\nthree\nfour";
-vlist.addEmptyValue = JSValueList.EMPTY_VALUE_NEVER;
-var cmb = form.newComboBox('my_table_text', 10, 10, 100, 20);
-cmb.valuelist = vlist;]]></sample>
-        </constant>
-      </constants>
       <properties>
         <property name="addEmptyValue">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -19388,13 +18756,7 @@ database values.]]></description>
           <summary><![CDATA[A String representing the separator that should be used when multiple
 display dataproviders are set, when the value list has the type set to
 database values.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
-vlist.dataSource = 'db:/example_data/parent_table';
-vlist.setDisplayDataProviderIds('parent_table_text');
-vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
-vlist.separator = ' ## ';
-vlist.sortOptions = 'parent_table_text desc';]]></sample>
+          <sample/>
         </property>
         <property name="serverName">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -19402,13 +18764,7 @@ vlist.sortOptions = 'parent_table_text desc';]]></sample>
 the value list has the type set to database values.]]></description>
           <summary><![CDATA[The name of the database server that is used for loading the values when 
 the value list has the type set to database values.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
-vlist.dataSource = 'db:/example_data/parent_table';
-vlist.setDisplayDataProviderIds('parent_table_text');
-vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
-vlist.separator = ' ## ';
-vlist.sortOptions = 'parent_table_text desc';]]></sample>
+          <sample/>
         </property>
         <property name="sortOptions">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -19416,13 +18772,7 @@ vlist.sortOptions = 'parent_table_text desc';]]></sample>
 from the database.]]></description>
           <summary><![CDATA[Sort options that are applied when the valuelist loads its data
 from the database.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
-vlist.dataSource = 'db:/example_data/parent_table';
-vlist.setDisplayDataProviderIds('parent_table_text');
-vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
-vlist.separator = ' ## ';
-vlist.sortOptions = 'parent_table_text desc';]]></sample>
+          <sample/>
         </property>
         <property name="tableName">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -19430,13 +18780,7 @@ vlist.sortOptions = 'parent_table_text desc';]]></sample>
 the value list has the type set to database values.]]></description>
           <summary><![CDATA[The name of the database table that is used for loading the values when 
 the value list has the type set to database values.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
-vlist.dataSource = 'db:/example_data/parent_table';
-vlist.setDisplayDataProviderIds('parent_table_text');
-vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
-vlist.separator = ' ## ';
-vlist.sortOptions = 'parent_table_text desc';]]></sample>
+          <sample/>
         </property>
         <property name="useTableFilter">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -19455,13 +18799,7 @@ vlist.name = 'two';]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The type of the valuelist. Can be either custom values or database values.]]></description>
           <summary><![CDATA[The type of the valuelist.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
-vlist.dataSource = 'db:/example_data/parent_table';
-vlist.setDisplayDataProviderIds('parent_table_text');
-vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
-vlist.separator = ' ## ';
-vlist.sortOptions = 'parent_table_text desc';]]></sample>
+          <sample/>
         </property>
       </properties>
       <functions>
@@ -19512,13 +18850,7 @@ application.output(vlist.getUUID().toString());]]></sample>
 The values taken from these dataproviders, in order, separated by the separator, will be displayed
 by the valuelist.]]></description>
           <summary><![CDATA[Set the display dataproviders.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
-vlist.dataSource = 'db:/example_data/parent_table';
-vlist.setDisplayDataProviderIds('parent_table_text');
-vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
-vlist.separator = ' ## ';
-vlist.sortOptions = 'parent_table_text desc';]]></sample>
+          <sample/>
         </function>
         <function name="setDisplayDataProviderIds">
           <argumentsTypes>
@@ -19529,13 +18861,7 @@ vlist.sortOptions = 'parent_table_text desc';]]></sample>
 The values taken from these dataproviders, in order, separated by the separator, will be displayed
 by the valuelist.]]></description>
           <summary><![CDATA[Set the display dataproviders.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
-vlist.dataSource = 'db:/example_data/parent_table';
-vlist.setDisplayDataProviderIds('parent_table_text');
-vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
-vlist.separator = ' ## ';
-vlist.sortOptions = 'parent_table_text desc';]]></sample>
+          <sample/>
           <parameters>
             <parameter name="dataprovider1" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The first display dataprovider.]]></description>
@@ -19552,13 +18878,7 @@ vlist.sortOptions = 'parent_table_text desc';]]></sample>
 The values taken from these dataproviders, in order, separated by the separator, will be displayed
 by the valuelist.]]></description>
           <summary><![CDATA[Set the display dataproviders.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
-vlist.dataSource = 'db:/example_data/parent_table';
-vlist.setDisplayDataProviderIds('parent_table_text');
-vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
-vlist.separator = ' ## ';
-vlist.sortOptions = 'parent_table_text desc';]]></sample>
+          <sample/>
           <parameters>
             <parameter name="dataprovider1" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The first display dataprovider.]]></description>
@@ -19579,13 +18899,7 @@ vlist.sortOptions = 'parent_table_text desc';]]></sample>
 The values taken from these dataproviders, in order, separated by the separator, will be displayed
 by the valuelist.]]></description>
           <summary><![CDATA[Set the display dataproviders.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
-vlist.dataSource = 'db:/example_data/parent_table';
-vlist.setDisplayDataProviderIds('parent_table_text');
-vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
-vlist.separator = ' ## ';
-vlist.sortOptions = 'parent_table_text desc';]]></sample>
+          <sample/>
           <parameters>
             <parameter name="dataprovider1" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The first display dataprovider.]]></description>
@@ -19605,13 +18919,7 @@ vlist.sortOptions = 'parent_table_text desc';]]></sample>
 The values taken from these dataproviders, in order, separated by the separator, will be returned
 by the valuelist.]]></description>
           <summary><![CDATA[Set the return dataproviders.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
-vlist.dataSource = 'db:/example_data/parent_table';
-vlist.setDisplayDataProviderIds('parent_table_text');
-vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
-vlist.separator = ' ## ';
-vlist.sortOptions = 'parent_table_text desc';]]></sample>
+          <sample/>
         </function>
         <function name="setReturnDataProviderIds">
           <argumentsTypes>
@@ -19622,13 +18930,7 @@ vlist.sortOptions = 'parent_table_text desc';]]></sample>
 The values taken from these dataproviders, in order, separated by the separator, will be returned
 by the valuelist.]]></description>
           <summary><![CDATA[Set the return dataproviders.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
-vlist.dataSource = 'db:/example_data/parent_table';
-vlist.setDisplayDataProviderIds('parent_table_text');
-vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
-vlist.separator = ' ## ';
-vlist.sortOptions = 'parent_table_text desc';]]></sample>
+          <sample/>
           <parameters>
             <parameter name="dataprovider1" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The first return dataprovider.]]></description>
@@ -19645,13 +18947,7 @@ vlist.sortOptions = 'parent_table_text desc';]]></sample>
 The values taken from these dataproviders, in order, separated by the separator, will be returned
 by the valuelist.]]></description>
           <summary><![CDATA[Set the return dataproviders.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
-vlist.dataSource = 'db:/example_data/parent_table';
-vlist.setDisplayDataProviderIds('parent_table_text');
-vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
-vlist.separator = ' ## ';
-vlist.sortOptions = 'parent_table_text desc';]]></sample>
+          <sample/>
           <parameters>
             <parameter name="dataprovider1" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The first return dataprovider.]]></description>
@@ -19672,13 +18968,7 @@ vlist.sortOptions = 'parent_table_text desc';]]></sample>
 The values taken from these dataproviders, in order, separated by the separator, will be returned
 by the valuelist.]]></description>
           <summary><![CDATA[Set the return dataproviders.]]></summary>
-          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
-vlist.dataSource = 'db:/example_data/parent_table';
-vlist.setDisplayDataProviderIds('parent_table_text');
-vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
-vlist.separator = ' ## ';
-vlist.sortOptions = 'parent_table_text desc';]]></sample>
+          <sample/>
           <parameters>
             <parameter name="dataprovider1" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The first return dataprovider.]]></description>
@@ -19694,48 +18984,6 @@ vlist.sortOptions = 'parent_table_text desc';]]></sample>
       </functions>
     </object>
     <object publicName="JSVariable" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSVariable">
-      <constants>
-        <constant name="DATETIME">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></description>
-          <summary><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></summary>
-          <sample><![CDATA[var dateVar = solutionModel.newGlobalVariable('globals', 'gDate', JSVariable.DATETIME);
-dateVar.defaultValue = 'now';
-application.output(scopes.globals.gDate); // Prints the current date and time.]]></sample>
-        </constant>
-        <constant name="INTEGER">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></description>
-          <summary><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></summary>
-          <sample><![CDATA[var intVar = solutionModel.newGlobalVariable('globals', 'gInt', JSVariable.INTEGER);
-intVar.defaultValue = 997;
-application.output(scopes.globals.gInt); // Prints 997]]></sample>
-        </constant>
-        <constant name="MEDIA">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></description>
-          <summary><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></summary>
-          <sample><![CDATA[var mediaVar = solutionModel.newGlobalVariable('globals', 'gMedia', JSVariable.MEDIA);
-mediaVar.defaultValue = 'new Array(1, 2, 3, 4)';
-application.output(scopes.globals.gMedia); // Prints out the array with four elements.]]></sample>
-        </constant>
-        <constant name="NUMBER">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></description>
-          <summary><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></summary>
-          <sample><![CDATA[var numberVar = solutionModel.newGlobalVariable('globals', 'gNumber', JSVariable.NUMBER);
-numberVar.defaultValue = 192.334;
-application.output(scopes.globals.gNumber); // Prints 192.334]]></sample>
-        </constant>
-        <constant name="TEXT">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></description>
-          <summary><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></summary>
-          <sample><![CDATA[var txtVar = solutionModel.newGlobalVariable('globals', 'gText', JSVariable.TEXT);
-txtVar.defaultValue = '"some text"'; // Use two pairs of quotes if you want to assign a String as default value.
-application.output(scopes.globals.gText); // Prints 'some text' (without quotes).]]></sample>
-        </constant>
-      </constants>
       <properties>
         <property name="defaultValue">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -24695,21 +23943,6 @@ When the founset is in multiSelect mode (see property multiSelect), selection ca
           <deprecated><![CDATA[As of release 5.0, replaced by #getDataSource().]]></deprecated>
           <sample/>
         </function>
-        <function name="getSize">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int current size.]]></return>
-          <description><![CDATA[Get the number of records in this foundset.
-This is the number of records loaded, note that when looping over a foundset, size() may
-increase as more records are loaded.]]></description>
-          <summary><![CDATA[Get the number of records in this foundset.]]></summary>
-          <sample><![CDATA[var nrRecords = %%prefix%%foundset.getSize()
-
-// to loop over foundset, recalculate size for each record
-for (var i = 1; i <= %%prefix%%foundset.getSize(); i++)
-{
-	var rec = %%prefix%%foundset.getRecord(i);
-}]]></sample>
-        </function>
         <function deprecated="true" name="getTableName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -25307,6 +24540,41 @@ if (current.length > 1)
         </function>
         <function name="sort">
           <argumentsTypes>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sorts the foundset based on the given record comparator function.
+The comparator function is called to compare
+two records, that are passed as arguments, and
+it will return -1/0/1 if the first record is less/equal/greater
+then the second record.
+
+The function based sorting does not work with printing.
+It is just a temporary in-memory sort.]]></description>
+          <summary><![CDATA[Sorts the foundset based on the given record comparator function.]]></summary>
+          <sample><![CDATA[%%prefix%%foundset.sort(mySortFunction);
+
+function mySortFunction(r1, r2)
+{
+	var o = 0;
+	if(r1.id < r2.id)
+	{
+		o = -1;
+	}
+	else if(r1.id > r2.id)
+	{
+		o = 1;
+	}
+	return o;
+}]]></sample>
+          <parameters>
+            <parameter name="comparator" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[record comparator function]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="sort">
+          <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
@@ -25336,41 +24604,6 @@ TIP: You can use the Copy button in the developer Select Sorting Fields dialog t
             </parameter>
             <parameter name="defer" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
               <description><![CDATA[when true, the "sortString" will be just stored, without performing a query on the database (the actual sorting will be deferred until the next data loading action).]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="sort">
-          <argumentsTypes>
-            <argumentType typecode="org.mozilla.javascript.Function"/>
-          </argumentsTypes>
-          <return type="void" typecode="void"/>
-          <description><![CDATA[Sorts the foundset based on the given record comparator function.
-The comparator function is called to compare
-two records, that are passed as arguments, and
-it will return -1/0/1 if the first record is less/equal/greater
-then the second record.
-
-The function based sorting does not work with printing.
-It is just a temporary in-memory sort.]]></description>
-          <summary><![CDATA[Sorts the foundset based on the given record comparator function.]]></summary>
-          <sample><![CDATA[%%prefix%%foundset.sort(mySortFunction);
-
-function mySortFunction(r1, r2)
-{
-	var o = 0;
-	if(r1.id < r2.id)
-	{
-		o = -1;
-	}
-	else if(r1.id > r2.id)
-	{
-		o = 1;
-	}
-	return o;
-}]]></sample>
-          <parameters>
-            <parameter name="comparator" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
-              <description><![CDATA[record comparator function]]></description>
             </parameter>
           </parameters>
         </function>
@@ -39668,7 +38901,7 @@ return true]]></sample>
         <function name="cloneComponent">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="com.servoy.j2db.solutionmodel.ISMComponent"/>
+            <argumentType typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMComponent"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSComponent" typecode="com.servoy.j2db.scripting.solutionmodel.JSComponent"><![CDATA[the exact copy of the given component]]></return>
           <description><![CDATA[Makes an exact copy of the given component (JSComponent/JSField/JSLabel) and gives it a new name.]]></description>
@@ -39681,7 +38914,7 @@ var clone = solutionModel.cloneComponent("clonedField",field);]]></sample>
             <parameter name="newName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the new name of the cloned component]]></description>
             </parameter>
-            <parameter name="component" type="com.servoy.j2db.scripting.solutionmodel.JSComponent" typecode="com.servoy.j2db.solutionmodel.ISMComponent">
+            <parameter name="component" type="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMComponent" typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMComponent">
               <description><![CDATA[the component to clone]]></description>
             </parameter>
           </parameters>
@@ -39689,8 +38922,8 @@ var clone = solutionModel.cloneComponent("clonedField",field);]]></sample>
         <function name="cloneComponent">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="com.servoy.j2db.solutionmodel.ISMComponent"/>
-            <argumentType typecode="com.servoy.j2db.solutionmodel.ISMForm"/>
+            <argumentType typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMComponent"/>
+            <argumentType typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMForm"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSComponent" typecode="com.servoy.j2db.scripting.solutionmodel.JSComponent"><![CDATA[the exact copy of the given component]]></return>
           <description><![CDATA[Makes an exact copy of the given component (JSComponent/JSField/JSLabel), gives it a new name and moves it to a new parent form, specified as a parameter.]]></description>
@@ -39707,10 +38940,10 @@ forms["targetForm"].controller.show();]]></sample>
             <parameter name="newName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the new name of the cloned component]]></description>
             </parameter>
-            <parameter name="component" type="com.servoy.j2db.scripting.solutionmodel.JSComponent" typecode="com.servoy.j2db.solutionmodel.ISMComponent">
+            <parameter name="component" type="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMComponent" typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMComponent">
               <description><![CDATA[the component to clone]]></description>
             </parameter>
-            <parameter name="newParentForm" type="com.servoy.j2db.scripting.solutionmodel.JSForm" typecode="com.servoy.j2db.solutionmodel.ISMForm">
+            <parameter name="newParentForm" type="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMForm" typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMForm">
               <description><![CDATA[the new parent form]]></description>
             </parameter>
           </parameters>
@@ -39718,7 +38951,7 @@ forms["targetForm"].controller.show();]]></sample>
         <function name="cloneForm">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="com.servoy.j2db.solutionmodel.ISMForm"/>
+            <argumentType typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMForm"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSForm" typecode="com.servoy.j2db.scripting.solutionmodel.JSForm"><![CDATA[a JSForm]]></return>
           <description><![CDATA[Makes an exact copy of the given form and gives it the new name.]]></description>
@@ -39735,7 +38968,7 @@ forms["clonedForm"].controller.show();]]></sample>
             <parameter name="newName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the new name for the form clone]]></description>
             </parameter>
-            <parameter name="jsForm" type="com.servoy.j2db.scripting.solutionmodel.JSForm" typecode="com.servoy.j2db.solutionmodel.ISMForm">
+            <parameter name="jsForm" type="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMForm" typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMForm">
               <description><![CDATA[the form to be cloned]]></description>
             </parameter>
           </parameters>
@@ -41165,7 +40398,7 @@ forms.myForm.controller.recreateUI();]]></sample>
         </function>
         <function name="wrapMethodWithArguments" varargs="true">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.solutionmodel.ISMMethod"/>
+            <argumentType typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMMethod"/>
             <argumentType typecode="[Ljava.lang.Object;"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"><![CDATA[a JSMethod]]></return>
@@ -41180,7 +40413,7 @@ var quotedString = "'"+utils.stringReplace(str, "'", "\\'")+"'"
 // list all arguments the method has, use nulls for fixed arguments (like event)
 button.onAction = solutionModel.wrapMethodWithArguments(method, [null, true, 42, quotedString])]]></sample>
           <parameters>
-            <parameter name="method" type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.solutionmodel.ISMMethod">
+            <parameter name="method" type="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMMethod" typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMMethod">
               <description><![CDATA[JSMethod to be assigned to an event]]></description>
             </parameter>
             <parameter name="args" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
