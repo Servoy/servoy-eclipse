@@ -363,17 +363,20 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			for (Solution module : modules)
 			{
 				ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(module.getName());
-				IFolder folder = project.getProject().getFolder(SolutionSerializer.DATASOURCES_DIR_NAME);
-				if (folder.exists())
+				if (project != null && project.getProject() != null)
 				{
-					IFolder serverFolder = folder.getFolder(serverName);
-					if (serverFolder.exists())
+					IFolder folder = project.getProject().getFolder(SolutionSerializer.DATASOURCES_DIR_NAME);
+					if (folder.exists())
 					{
-						IValueCollection moduleCollection = getValueCollection(serverFolder.getFile(tableName +
-							(calcs ? SolutionSerializer.CALCULATIONS_POSTFIX : SolutionSerializer.FOUNDSET_POSTFIX)));
-						if (moduleCollection != null)
+						IFolder serverFolder = folder.getFolder(serverName);
+						if (serverFolder.exists())
 						{
-							ValueCollectionFactory.copyInto(collection, moduleCollection);
+							IValueCollection moduleCollection = getValueCollection(serverFolder.getFile(tableName +
+								(calcs ? SolutionSerializer.CALCULATIONS_POSTFIX : SolutionSerializer.FOUNDSET_POSTFIX)));
+							if (moduleCollection != null)
+							{
+								ValueCollectionFactory.copyInto(collection, moduleCollection);
+							}
 						}
 					}
 				}

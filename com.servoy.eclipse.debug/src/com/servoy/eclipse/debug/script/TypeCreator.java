@@ -1340,12 +1340,10 @@ public class TypeCreator extends TypeCache
 				return context.getType("String");
 
 			default :
-				// for now don't return a type (so that anything is valid)
-				// maybe we should return Array<byte>
+				// Return the Any type because Media can be anything.
 				// should be in sync with TypeProvider.DataprovidersScopeCreator
-//				return context.getType("Object");
+				return context.getType("Any");
 		}
-		return null;
 	}
 
 
@@ -2846,10 +2844,9 @@ public class TypeCreator extends TypeCache
 						break;
 
 					case IColumnTypes.MEDIA :
-						// for now don't return a type (so that anything is valid)
-						// mamybe we should return Array<byte> but then we also have to check column converters.
+						// Just return the Any type, because a media can hold anything.
 						// should be in sync with TypeCreater.getDataProviderType
-//						property.setType(TypeUtil.arrayOf("byte"));
+						property.setType(TypeInfoModelFactory.eINSTANCE.createAnyType());
 						break;
 				}
 				if (uuid)
