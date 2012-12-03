@@ -104,7 +104,7 @@ public class WorkspaceExporter implements IApplication
 			ArgumentChest configuration = new ArgumentChest((String[])context.getArguments().get(IApplicationContext.APPLICATION_ARGS));
 			if (configuration.isInvalid())
 			{
-				output(configuration.getHelpMessage());
+				outputError(configuration.getHelpMessage());
 				exitCode = EXIT_INVALID_ARGS;
 			}
 			else if (configuration.mustShowHelp())
@@ -131,7 +131,7 @@ public class WorkspaceExporter implements IApplication
 						catch (IOException e)
 						{
 							ServoyLog.logError(e);
-							output("Failed to load settings: " + e.getMessage()); //$NON-NLS-1$
+							outputError("Failed to load settings: " + e.getMessage() + ". Check workspace log."); //$NON-NLS-1$ //$NON-NLS-2$
 						}
 					}
 				}
@@ -168,7 +168,7 @@ public class WorkspaceExporter implements IApplication
 							{
 								ServoyLog.logError(e);
 								// continuing would only lead to potential deadlock, if auto-build cannot be turned off
-								output("Cannot export solution '" + configuration.getSolutionName() + "'; unable to turn off auto-build."); //$NON-NLS-1$//$NON-NLS-2$
+								outputError("Cannot export solution '" + configuration.getSolutionName() + "'; unable to turn off auto-build. Check workspace log."); //$NON-NLS-1$//$NON-NLS-2$
 								exitCode = EXIT_EXPORT_FAILED;
 							}
 						}
@@ -234,7 +234,7 @@ public class WorkspaceExporter implements IApplication
 			catch (BackingStoreException e)
 			{
 				ServoyLog.logError(e);
-				output("Cannot restore auto-build flag."); //$NON-NLS-1$
+				outputError("Cannot restore auto-build flag. Check workspace log."); //$NON-NLS-1$
 			}
 		}
 	}
@@ -275,7 +275,7 @@ public class WorkspaceExporter implements IApplication
 						catch (CoreException e)
 						{
 							ServoyLog.logError(e);
-							output("Cannot import and open project '" + f.getName() + "' into workspace."); //$NON-NLS-1$//$NON-NLS-2$
+							outputError("Cannot import and open project '" + f.getName() + "' into workspace. Check workspace log."); //$NON-NLS-1$//$NON-NLS-2$
 						}
 					}
 				}
@@ -297,7 +297,7 @@ public class WorkspaceExporter implements IApplication
 			catch (CoreException e)
 			{
 				ServoyLog.logError(e);
-				output("Refresh project roots encountered a problem."); //$NON-NLS-1$
+				outputError("Refresh project roots encountered a problem. Check workspace log."); //$NON-NLS-1$
 			}
 
 			ExportServoyModel sm = ServoyModelProvider.getModel();
@@ -327,7 +327,7 @@ public class WorkspaceExporter implements IApplication
 						if (errors.size() > 0)
 						{
 							exitCode = EXIT_EXPORT_FAILED;
-							output("Found error markers in projects for solution '" + configuration.getSolutionName() + "'."); //$NON-NLS-1$//$NON-NLS-2$
+							outputError("Found error markers in projects for solution '" + configuration.getSolutionName() + "'."); //$NON-NLS-1$//$NON-NLS-2$
 							if (verbose)
 							{
 								for (IMarker marker : errors)
@@ -335,7 +335,7 @@ public class WorkspaceExporter implements IApplication
 									outputExtra(marker.getAttribute(IMarker.MESSAGE, "Unknown marker message.")); //$NON-NLS-1$
 								}
 							}
-							output("EXPORT FAILED."); //$NON-NLS-1$
+							outputError("EXPORT FAILED."); //$NON-NLS-1$
 						}
 						else if (!mustStop)
 						{
@@ -358,7 +358,7 @@ public class WorkspaceExporter implements IApplication
 				}
 				else
 				{
-					output("Solution '" + configuration.getSolutionName() + "' will NOT be exported."); //$NON-NLS-1$//$NON-NLS-2$
+					outputError("Solution '" + configuration.getSolutionName() + "' will NOT be exported."); //$NON-NLS-1$//$NON-NLS-2$
 					exitCode = EXIT_EXPORT_FAILED;
 				}
 			}
@@ -375,7 +375,7 @@ public class WorkspaceExporter implements IApplication
 				catch (CoreException e)
 				{
 					ServoyLog.logError(e);
-					output("Cannot restore project " + p.getName() + " to it's closed state after export."); //$NON-NLS-1$ //$NON-NLS-2$
+					outputError("Cannot restore project " + p.getName() + " to it's closed state after export. Check workspace log."); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 			outputExtra("Removing imported projects from workspace (without removing content)."); //$NON-NLS-1$ 
@@ -388,7 +388,7 @@ public class WorkspaceExporter implements IApplication
 				catch (CoreException e)
 				{
 					ServoyLog.logError(e);
-					output("Cannot restore project " + p.getName() + " to it's closed state after export."); //$NON-NLS-1$ //$NON-NLS-2$
+					outputError("Cannot restore project " + p.getName() + " to it's closed state after export. Check workspace log."); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 		}
@@ -417,13 +417,13 @@ public class WorkspaceExporter implements IApplication
 			catch (final RepositoryException e)
 			{
 				ServoyLog.logError("Failed to export solution.", e); //$NON-NLS-1$
-				output("Exception while exporting solution. EXPORT FAILED for this solution."); //$NON-NLS-1$
+				outputError("Exception while exporting solution. EXPORT FAILED for this solution. Check workspace log."); //$NON-NLS-1$
 				exitCode = EXIT_EXPORT_FAILED;
 			}
 		}
 		else
 		{
-			output("Solution in project '" + activeProject.getProject().getName() + "' is not valid. EXPORT FAILED for this solution."); //$NON-NLS-1$//$NON-NLS-2$
+			outputError("Solution in project '" + activeProject.getProject().getName() + "' is not valid. EXPORT FAILED for this solution."); //$NON-NLS-1$//$NON-NLS-2$
 			exitCode = EXIT_EXPORT_FAILED;
 		}
 	}
@@ -453,7 +453,7 @@ public class WorkspaceExporter implements IApplication
 		catch (CoreException e)
 		{
 			ServoyLog.logError(e);
-			output("Marker check encountered a problem."); //$NON-NLS-1$
+			outputError("Marker check encountered a problem. Check workspace log."); //$NON-NLS-1$
 		}
 	}
 
@@ -508,7 +508,7 @@ public class WorkspaceExporter implements IApplication
 			catch (Exception e)
 			{
 				ServoyLog.logError(e);
-				output("Cannot initialize app. server. EXPORT FAILED."); //$NON-NLS-1$
+				outputError("Cannot initialize app. server. EXPORT FAILED. Check workspace log."); //$NON-NLS-1$
 				exitCode = EXIT_EXPORT_FAILED;
 			}
 
@@ -516,7 +516,7 @@ public class WorkspaceExporter implements IApplication
 		}
 		else
 		{
-			output("Cannot initialize exporter due to missing app. server starter extension. EXPORT FAILED."); //$NON-NLS-1$
+			outputError("Cannot initialize exporter due to missing app. server starter extension. EXPORT FAILED."); //$NON-NLS-1$
 			exitCode = EXIT_EXPORT_FAILED;
 		}
 	}
@@ -577,6 +577,11 @@ public class WorkspaceExporter implements IApplication
 	public void output(String msg)
 	{
 		System.out.println(msg);
+	}
+
+	public void outputError(String msg)
+	{
+		System.err.println(msg);
 	}
 
 }
