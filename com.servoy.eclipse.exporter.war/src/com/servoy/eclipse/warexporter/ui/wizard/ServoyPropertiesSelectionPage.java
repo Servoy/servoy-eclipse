@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -78,6 +79,7 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 		browseButton.setText("Browse..."); //$NON-NLS-1$
 		browseButton.addListener(SWT.Selection, this);
 
+		new Label(composite, SWT.NONE).setText("If an existing servoy.properties file is specified, please make sure that 'SocketFactory.tunnelConnectionMode' is set to 'http&socket'\nCheck the admin page after installing the war"); //$NON-NLS-1$
 		setControl(composite);
 	}
 
