@@ -21,53 +21,35 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ProjectScope;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.compiler.problem.ProblemSeverity;
-import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.ui.dialogs.StatusUtil;
-import org.eclipse.dltk.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.dltk.internal.ui.wizards.dialogfields.IDialogFieldListener;
-import org.eclipse.dltk.internal.ui.wizards.dialogfields.LayoutUtil;
-import org.eclipse.dltk.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
-import org.eclipse.dltk.ui.dialogs.ProjectSelectionDialog;
 import org.eclipse.dltk.ui.dialogs.StatusInfo;
-import org.eclipse.dltk.ui.preferences.PreferencesMessages;
 import org.eclipse.dltk.ui.util.SWTFactory;
 import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.jface.layout.PixelConverter;
-import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.IWorkbenchPropertyPage;
-import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
@@ -90,7 +72,7 @@ import com.servoy.j2db.util.Pair;
  * 
  * @author acostescu
  */
-public class ServoyErrorWarningPreferencePage extends PreferencePage implements IWorkbenchPreferencePage, IWorkbenchPropertyPage
+public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferencePage implements IWorkbenchPreferencePage, IWorkbenchPropertyPage
 {
 
 	private IEclipsePreferences settingsNode;
@@ -100,13 +82,9 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 	private boolean defaultsPerformed = false;
 	private final List<String> problemSections = new ArrayList<String>();
 	private final IStatus fBlockStatus;
-	private SelectionButtonDialogField fUseProjectSettings;
 	private ControlEnableState fBlockEnableState;
 	private Control fConfigurationBlockControl;
-	private IProject fProject; // project or null
-	private final Map fData; // page data
-	public static final String DATA_NO_LINK = "PropertyAndPreferencePage.nolink"; //$NON-NLS-1$
-	private Link fChangeWorkspaceSettings;
+
 
 	private final String ERROR_WARNING_POTENTIAL_DRAWBACKS = Messages.ErrorWarningPreferencePage_potentialDrawBacks;
 	private final String ERROR_WARNING_DEVELOPER_PROBLEMS = "Developer problems"; //$NON-NLS-1$
@@ -125,9 +103,9 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 
 	public ServoyErrorWarningPreferencePage()
 	{
+		super();
 		settingsNode = InstanceScope.INSTANCE.getNode(ServoyBuilder.ERROR_WARNING_PREFERENCES_NODE);
-		fProject = null;
-		fData = null;
+
 		fBlockEnableState = null;
 		fBlockStatus = new StatusInfo();
 
@@ -147,28 +125,6 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 		}
 	}
 
-	protected boolean offerLink()
-	{
-		return fData == null || !Boolean.TRUE.equals(fData.get(DATA_NO_LINK));
-	}
-
-	private void updateLinkVisibility()
-	{
-		if (fChangeWorkspaceSettings == null || fChangeWorkspaceSettings.isDisposed())
-		{
-			return;
-		}
-
-		if (isProjectPreferencePage())
-		{
-			fChangeWorkspaceSettings.setEnabled(!useProjectSettings());
-		}
-	}
-
-	protected boolean useProjectSettings()
-	{
-		return isProjectPreferencePage() && fUseProjectSettings != null && fUseProjectSettings.isSelected();
-	}
 
 	private void updateStatus(IStatus status)
 	{
@@ -188,16 +144,6 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 		}
 	}
 
-	private boolean projectSpecificSetting = false;
-
-	protected void enableProjectSpecificSettings(boolean useProjectSpecificSettings)
-	{
-		projectSpecificSetting = useProjectSpecificSettings;
-		fUseProjectSettings.setSelection(useProjectSpecificSettings);
-		enablePreferenceContent(useProjectSpecificSettings);
-		updateLinkVisibility();
-		doStatusChanged();
-	}
 
 	protected void enablePreferenceContent(boolean enable)
 	{
@@ -218,88 +164,14 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 		}
 	}
 
-	protected boolean supportsProjectSpecificOptions()
-	{
-		return getPropertyPageId() != null;
-	}
-
-	public IAdaptable getElement()
-	{
-		return fProject;
-	}
-
-	/*
-	 * @see IWorkbenchPropertyPage#setElement(IAdaptable)
-	 */
-	public void setElement(IAdaptable element)
-	{
-		fProject = (IProject)element.getAdapter(IResource.class);
-		if (fProject != null)
-		{
-			settingsNode = new ProjectScope(fProject).getNode(ServoyBuilder.ERROR_WARNING_PREFERENCES_NODE);
-		}
-	}
-
-	protected boolean isProjectPreferencePage()
-	{
-		return fProject != null;
-	}
-
-	protected IProject getProject()
-	{
-		return fProject;
-	}
-
 	@Override
-	protected Label createDescriptionLabel(Composite parent)
+	protected void enablePreferencePageContent(boolean useProjectSpecificSettings)
 	{
-		if (isProjectPreferencePage())
-		{
-			Composite composite = new Composite(parent, SWT.NONE);
-			composite.setFont(parent.getFont());
-			GridLayout layout = new GridLayout();
-			layout.marginHeight = 0;
-			layout.marginWidth = 0;
-			layout.numColumns = 2;
-			composite.setLayout(layout);
-			composite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-
-			IDialogFieldListener listener = new IDialogFieldListener()
-			{
-				public void dialogFieldChanged(DialogField field)
-				{
-					enableProjectSpecificSettings(((SelectionButtonDialogField)field).isSelected());
-				}
-			};
-
-			fUseProjectSettings = new SelectionButtonDialogField(SWT.CHECK);
-			fUseProjectSettings.setDialogFieldListener(listener);
-			fUseProjectSettings.setLabelText(PreferencesMessages.PropertyAndPreferencePage_useprojectsettings_label);
-			fUseProjectSettings.doFillIntoGrid(composite, 1);
-			LayoutUtil.setHorizontalGrabbing(fUseProjectSettings.getSelectionButton(null));
-
-			if (offerLink())
-			{
-				fChangeWorkspaceSettings = createLink(composite, PreferencesMessages.PropertyAndPreferencePage_useworkspacesettings_change);
-				fChangeWorkspaceSettings.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
-			}
-			else
-			{
-				LayoutUtil.setHorizontalSpan(fUseProjectSettings.getSelectionButton(null), 2);
-			}
-
-			Label horizontalLine = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
-			horizontalLine.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 2, 1));
-			horizontalLine.setFont(composite.getFont());
-		}
-		else if (supportsProjectSpecificOptions() && offerLink())
-		{
-			fChangeWorkspaceSettings = createLink(parent, PreferencesMessages.PropertyAndPreferencePage_showprojectspecificsettings_label);
-			fChangeWorkspaceSettings.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, false));
-		}
-
-		return super.createDescriptionLabel(parent);
+		enablePreferenceContent(useProjectSpecificSettings);
+		getfUseProjectSettings().setSelection(useProjectSpecificSettings);
+		doStatusChanged();
 	}
+
 
 	@Override
 	public Control createContents(Composite parent)
@@ -367,7 +239,7 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 		if (isProjectPreferencePage())
 		{
 			boolean useProjectSettings = hasProjectSpecificOptions(getProject());
-			enableProjectSpecificSettings(useProjectSettings);
+			enablePreferencePageContent(useProjectSettings);
 		}
 
 		return fConfigurationBlockControl;
@@ -707,7 +579,7 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 	{
 		try
 		{
-			if (isProjectPreferencePage() && !projectSpecificSetting && hasProjectSpecificOptions(fProject))
+			if (isProjectPreferencePage() && !isProjectSpecificSettingsChecked() && hasProjectSpecificOptions(getProject()))
 			{
 				settingsNode.clear();
 				doBuild = true;
@@ -745,29 +617,27 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 		// not used
 	}
 
-	private Link createLink(Composite composite, String text)
+	public IAdaptable getElement()
 	{
-		Link link = new Link(composite, SWT.NONE);
-		link.setFont(composite.getFont());
-		link.setText("<A>" + text + "</A>"); //$NON-NLS-1$//$NON-NLS-2$
-		link.addSelectionListener(new SelectionListener()
-		{
-			public void widgetSelected(SelectionEvent e)
-			{
-				doLinkActivated((Link)e.widget);
-			}
+		return getProject();
+	}
 
-			public void widgetDefaultSelected(SelectionEvent e)
-			{
-				doLinkActivated((Link)e.widget);
-			}
-		});
-		return link;
+	/*
+	 * @see IWorkbenchPropertyPage#setElement(IAdaptable)
+	 */
+	public void setElement(IAdaptable element)
+	{
+		setProject((IProject)element.getAdapter(IResource.class));
+		if (getProject() != null)
+		{
+			settingsNode = new ProjectScope(getProject()).getNode(ServoyBuilder.ERROR_WARNING_PREFERENCES_NODE);
+		}
 	}
 
 	/*
 	 * from boolean org.eclipse.dltk.internal.ui.preferences.OptionsConfigurationBlock.hasProjectSpecificOptions(IProject project)
 	 */
+	@Override
 	public boolean hasProjectSpecificOptions(IProject project)
 	{
 		try
@@ -781,62 +651,14 @@ public class ServoyErrorWarningPreferencePage extends PreferencePage implements 
 		return false;
 	}
 
-	final void doLinkActivated(Link link)
-	{
-		Map data = new HashMap();
-		data.put(DATA_NO_LINK, Boolean.TRUE);
 
-		if (isProjectPreferencePage())
-		{
-			openWorkspacePreferences(data);
-		}
-		else
-		{
-			HashSet projectsWithSpecifics = new HashSet();
-			try
-			{
-				IScriptProject[] projects = DLTKCore.create(ResourcesPlugin.getWorkspace().getRoot()).getScriptProjects();
-				for (IScriptProject curr : projects)
-				{
-					if (hasProjectSpecificOptions(curr.getProject()))
-					{
-						projectsWithSpecifics.add(curr);
-					}
-				}
-			}
-			catch (ModelException e)
-			{
-				// ignore
-			}
-			ProjectSelectionDialog dialog = new ProjectSelectionDialog(getShell(), projectsWithSpecifics, null);
-			if (dialog.open() == Window.OK)
-			{
-				IScriptProject res = (IScriptProject)dialog.getFirstResult();
-				openProjectProperties(res.getProject(), data);
-			}
-		}
-	}
-
-	protected final void openWorkspacePreferences(Object data)
-	{
-		String id = getPreferencePageId();
-		PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { id }, data).open();
-	}
-
-	protected final void openProjectProperties(IProject project, Object data)
-	{
-		String id = getPropertyPageId();
-		if (id != null)
-		{
-			PreferencesUtil.createPropertyDialogOn(getShell(), project, id, new String[] { id }, data).open();
-		}
-	}
-
+	@Override
 	protected String getPreferencePageId()
 	{
 		return "com.servoy.eclipse.ui.preferences.error.warning";
 	}
 
+	@Override
 	protected String getPropertyPageId()
 	{
 		return "com.servoy.eclipse.ui.propertyPage.error.warning";

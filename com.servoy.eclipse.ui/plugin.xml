@@ -186,6 +186,20 @@
                </adapt>
             </enabledWhen>
         </page>
+         <page
+            class="com.servoy.eclipse.ui.preferences.JSDocScriptTemplatesPreferencePage"
+            id="com.servoy.eclipse.ui.propertyPage.jsDocTemplates"
+            name="JSDoc Method/Variable Templates">
+            <enabledWhen>
+               <adapt
+                     type="org.eclipse.core.resources.IProject">
+                  <test
+                        property="org.eclipse.core.resources.projectNature"
+                        value="org.eclipse.dltk.javascript.core.nature">
+                  </test>
+               </adapt>
+            </enabledWhen>
+        </page>
 		<page
 			category="org.eclipse.dltk.javascript.editor.propertyPage"
 			name="Externalize Strings"
@@ -335,7 +349,7 @@
       <page
             category="com.servoy.eclipse.ui.preference"
             class="com.servoy.eclipse.ui.preferences.JSDocScriptTemplatesPreferencePage"
-            id="com.servoy.eclipse.ui.jsDocTemplates"
+            id="com.servoy.eclipse.ui.preferences.jsDocTemplates"
             name="JSDoc Method/Variable Templates">
       </page>
       <page
