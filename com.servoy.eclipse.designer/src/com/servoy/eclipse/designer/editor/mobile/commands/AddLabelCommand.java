@@ -22,11 +22,14 @@ import org.eclipse.swt.graphics.Point;
 
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.designer.editor.commands.BaseFormPlaceElementCommand;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.IAnchorConstants;
+import com.servoy.j2db.util.UUID;
 
 /**
  * Command to add a text input with label to the form
@@ -45,13 +48,29 @@ public class AddLabelCommand extends BaseFormPlaceElementCommand
 	@Override
 	protected Object[] placeElements(Point location) throws RepositoryException
 	{
+		/*
+		 * if (parent instanceof Form) { return new Object[] { ElementFactory.createLabel((Form)parent, "Text", location) }; }
+		 * 
+		 * return null;
+		 */
 		if (parent instanceof Form)
 		{
-			GraphicalComponent label = ElementFactory.createLabel((Form)parent, "Text", location);
+			Form form = (Form)parent;
+
+			// create a label and a text field in a group
+			String groupID = UUID.randomUUID().toString();
+			Point loc = location == null ? new Point(0, 0) : location;
+			GraphicalComponent label = ElementFactory.createLabel(form, "Title", loc);
+			label.setGroupID(groupID);
 			label.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST);
-			return new Object[] { label };
+			GraphicalComponent textLabel = ElementFactory.createLabel(form, "Text", new Point(loc.x + 1, loc.y)); // enforce order by x-pos
+			textLabel.setGroupID(groupID);
+			textLabel.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST);
+
+			return new Object[] { new FormElementGroup(groupID, ModelUtils.getEditingFlattenedSolution(parent), form) };
 		}
 
 		return null;
+
 	}
 }
