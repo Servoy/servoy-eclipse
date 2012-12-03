@@ -94,6 +94,6 @@ public class ServoyDynamicRuntimeType extends RSimpleType
 				}
 			}
 		}
-		return null;
+		return TypeCompatibility.FALSE;
 	}
 }
