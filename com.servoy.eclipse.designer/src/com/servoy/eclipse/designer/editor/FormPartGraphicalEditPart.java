@@ -186,7 +186,7 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 			{
 				public void run()
 				{
-					refresh();
+					if (getParent() != null) refresh();
 				}
 			});
 		}

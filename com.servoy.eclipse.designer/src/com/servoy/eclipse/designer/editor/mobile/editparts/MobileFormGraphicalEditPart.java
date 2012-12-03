@@ -143,7 +143,7 @@ public class MobileFormGraphicalEditPart extends BaseFormGraphicalEditPart imple
 						}
 					}
 
-					// RAGTEST tabpanel: list elements or navtab
+					// tabpanel: list elements or navtab
 					else if (((AbstractBase)persist).getCustomMobileProperty("headeritem") == null &&
 						((AbstractBase)persist).getCustomMobileProperty("footeritem") == null)
 					{
@@ -202,7 +202,7 @@ public class MobileFormGraphicalEditPart extends BaseFormGraphicalEditPart imple
 				{
 					public void run()
 					{
-						refresh();
+						if (getParent() != null) refresh();
 					}
 				});
 				return;
@@ -210,12 +210,11 @@ public class MobileFormGraphicalEditPart extends BaseFormGraphicalEditPart imple
 		}
 	}
 
-
 	@Override
 	protected IFigure createFigure()
 	{
 		FreeformLayer formLayer = new FreeformLayer();
-		formLayer.setLayoutManager(new MobileFormLayoutManager(getPersist()));
+		formLayer.setLayoutManager(new SetHeightToBodyPartLayoutManager(new MobileFormLayoutManager(getPersist()), getPersist()));
 		return formLayer;
 	}
 

@@ -34,7 +34,9 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.util.IAnchorConstants;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -60,9 +62,12 @@ public class AddFieldCommand extends BaseFormPlaceElementCommand
 			// create a label and a text field in a group
 			String groupID = UUID.randomUUID().toString();
 			Point loc = location == null ? new Point(0, 0) : location;
-			ElementFactory.createLabel(form, "Title", loc).setGroupID(groupID);
+			GraphicalComponent label = ElementFactory.createLabel(form, "Title", loc);
+			label.setGroupID(groupID);
+			label.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST);
 			Field field = ElementFactory.createField(form, null, new Point(loc.x, loc.y + 1)); // enforce order by y-pos
 			field.setGroupID(groupID);
+			field.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST);
 			if (objectProperties != null && objectProperties.size() > 0) setProperiesOnModel(field, objectProperties);
 
 			return new Object[] { new FormElementGroup(groupID, ModelUtils.getEditingFlattenedSolution(parent), form) };

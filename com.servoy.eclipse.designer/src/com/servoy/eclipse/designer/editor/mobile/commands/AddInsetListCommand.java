@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.designer.editor.mobile.commands;
 
+import java.awt.Dimension;
+
 import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.swt.graphics.Point;
 
@@ -30,15 +32,17 @@ import com.servoy.j2db.FormController;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
+import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportTextSetup;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
-import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.IAnchorConstants;
 
 /**
  * Command to add a inset list to the form.
@@ -49,6 +53,8 @@ import com.servoy.j2db.util.Utils;
  */
 public class AddInsetListCommand extends BaseFormPlaceElementCommand
 {
+	private Form tabForm;
+
 	public AddInsetListCommand(IApplication application, Form form, CreateRequest request)
 	{
 		super(application, form, null, request.getType(), null, null, request.getLocation().getSWTPoint(), null, form);
@@ -62,15 +68,18 @@ public class AddInsetListCommand extends BaseFormPlaceElementCommand
 			Form form = (Form)parent;
 
 			// create a tabpanel
-			IPersist[] createTabs = ElementFactory.createTabs(application, form, null, location, TabPanel.DEFAULT, "list"); //$NON-NLS-1$
-			if (createTabs == null || createTabs.length != 1 || !(createTabs[0] instanceof TabPanel))
+			IPersist[] createdTabPanel = ElementFactory.createTabs(application, form, null, location, TabPanel.DEFAULT, "list"); //$NON-NLS-1$
+			if (createdTabPanel == null || createdTabPanel.length != 1 || !(createdTabPanel[0] instanceof TabPanel))
 			{
 				ServoyLog.logError("Could not create tabpanel for inset list", null);
 				return null;
 			}
 
-			TabPanel tabPanel = (TabPanel)createTabs[0];
+			TabPanel tabPanel = (TabPanel)createdTabPanel[0];
 			tabPanel.putCustomMobileProperty("list", Boolean.TRUE);
+			// for debug in developer
+			tabPanel.setSize(new Dimension(((Form)parent).getWidth(), 300));
+			tabPanel.setAnchors(IAnchorConstants.ALL);
 
 			// create target form
 			Solution solution = (Solution)form.getAncestor(IRepository.SOLUTIONS);
@@ -97,8 +106,8 @@ public class AddInsetListCommand extends BaseFormPlaceElementCommand
 			}
 
 			ServoyProject servoyProject = servoyModel.getServoyProject(solution.getName());
-			Form tabForm = servoyProject.getEditingSolution().createNewForm(nameValidator, null, tabFormName, null, true, null);
-			// add parts so it looks nice wil developing in webclient
+			tabForm = servoyProject.getEditingSolution().createNewForm(nameValidator, null, tabFormName, null, true, null);
+			// add parts so it looks nice while developing in webclient
 			tabForm.createNewPart(Part.HEADER, 40);
 			tabForm.createNewPart(Part.BODY, 600);
 			tabForm.setView(FormController.LOCKED_TABLE_VIEW);
@@ -114,18 +123,37 @@ public class AddInsetListCommand extends BaseFormPlaceElementCommand
 			// add header
 			GraphicalComponent header = ElementFactory.createLabel(tabForm, null, new Point(0, 0));
 			header.putCustomMobileProperty("listitemHeader", Boolean.TRUE);
+			// for debug in developer
+			header.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST);
+			header.setHorizontalAlignment(ISupportTextSetup.CENTER);
 
 			// add tab
-			createTabs = ElementFactory.createTabs(application, tabPanel, new Object[] { new ElementFactory.RelatedForm(null, tabForm) }, null,
-				TabPanel.DEFAULT, null);
+			ElementFactory.createTabs(application, tabPanel, new Object[] { new ElementFactory.RelatedForm(null, tabForm) }, null, TabPanel.DEFAULT, null);
 
 			// save the tabForm, it cannot be saved from the form editor
 			servoyProject.saveEditingSolutionNodes(new IPersist[] { tabForm }, true);
 
-			// models is tabs and containing form
-			return Utils.arrayAdd(createTabs, tabForm, false);
+			// models is tabpanel and containing form
+			return new IPersist[] { tabPanel, tabForm };
 		}
 
 		return null;
+	}
+
+	@Override
+	protected void deleteForUndo(IPersist persist) throws RepositoryException
+	{
+		if (tabForm == persist)
+		{
+			// delete the saved form
+			((IDeveloperRepository)persist.getRootObject().getRepository()).deleteObject(persist);
+			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(persist.getRootObject().getName());
+			servoyProject.saveEditingSolutionNodes(new IPersist[] { tabForm }, true);
+			tabForm = null;
+		}
+		else
+		{
+			super.deleteForUndo(persist);
+		}
 	}
 }

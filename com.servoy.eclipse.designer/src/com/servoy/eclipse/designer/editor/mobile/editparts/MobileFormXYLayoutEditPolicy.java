@@ -82,7 +82,7 @@ public class MobileFormXYLayoutEditPolicy extends XYLayoutEditPolicy
 		// TODO check drop target
 		if (snapType == MobileSnapType.HeaderText && request.getNewObjectType() == MobileVisualFormEditor.REQ_PLACE_HEADER_TITLE)
 		{
-			return new MobileAddHeaderTitleCommand(form);
+			return new MobileAddHeaderTitleCommand(application, form, request);
 		}
 
 //		if (snapData.snapType == MobileSnapType.FooterItem)

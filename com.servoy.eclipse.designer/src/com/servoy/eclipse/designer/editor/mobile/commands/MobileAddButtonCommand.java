@@ -27,6 +27,7 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.util.IAnchorConstants;
 
 /**
  * Command to add a button in mobile form editor.
@@ -60,6 +61,7 @@ public class MobileAddButtonCommand extends BaseFormPlaceElementCommand
 				button.setText(snapType == MobileSnapType.HeaderLeftButton ? "left" : "right");
 				button.putCustomMobileProperty("headeritem", Boolean.TRUE);
 				button.putCustomMobileProperty(snapType == MobileSnapType.HeaderLeftButton ? "headerLeftButton" : "headerRightButton", Boolean.TRUE);
+				button.setAnchors(snapType == MobileSnapType.HeaderLeftButton ? IAnchorConstants.WEST : IAnchorConstants.EAST);
 			}
 			else if (snapType == MobileSnapType.FooterItem)
 			{

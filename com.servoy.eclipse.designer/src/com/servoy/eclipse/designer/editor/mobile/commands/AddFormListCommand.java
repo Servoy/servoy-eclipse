@@ -17,8 +17,6 @@
 
 package com.servoy.eclipse.designer.editor.mobile.commands;
 
-import java.awt.Dimension;
-
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.swt.graphics.Point;
@@ -35,6 +33,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.util.IAnchorConstants;
 
 /**
  * Command to modify the current form as a list form.
@@ -80,23 +79,23 @@ public class AddFormListCommand extends CompoundCommand
 	{
 		// image
 		Field image = ElementFactory.createField(form, null, new Point(0, 40));
-		image.setSize(new Dimension(10, 10));
 		image.putCustomMobileProperty("listitemImage", Boolean.TRUE);
+		image.setEditable(false); // for debug in developer
 
 		// button
 		GraphicalComponent button = ElementFactory.createButton(form, null, "list", new Point(10, 40));
-		image.setSize(new Dimension(30, 10));
 		button.putCustomMobileProperty("listitemButton", Boolean.TRUE);
+		button.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST);
 
 		// subtext
 		GraphicalComponent subtext = ElementFactory.createLabel(form, null, new Point(40, 40));
-		image.setSize(new Dimension(20, 10));
 		subtext.putCustomMobileProperty("listitemSubtext", Boolean.TRUE);
 
 		// countBubble
 		Field countBubble = ElementFactory.createField(form, null, new Point(60, 40));
-		image.setSize(new Dimension(10, 10));
 		countBubble.putCustomMobileProperty("listitemCount", Boolean.TRUE);
+		countBubble.setEditable(false); // for debug in developer
+		countBubble.setAnchors(IAnchorConstants.EAST);
 
 		return new MobileListModel(form, button, subtext, countBubble, image);
 	}

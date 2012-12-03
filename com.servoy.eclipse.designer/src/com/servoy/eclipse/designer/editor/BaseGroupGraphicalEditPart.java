@@ -116,7 +116,7 @@ public abstract class BaseGroupGraphicalEditPart extends AbstractGraphicalEditPa
 			{
 				public void run()
 				{
-					doRefresh();
+					if (getParent() != null) doRefresh();
 				}
 			});
 		}

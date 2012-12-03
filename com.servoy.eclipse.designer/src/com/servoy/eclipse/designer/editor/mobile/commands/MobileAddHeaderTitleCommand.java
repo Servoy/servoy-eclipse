@@ -17,16 +17,17 @@
 
 package com.servoy.eclipse.designer.editor.mobile.commands;
 
-import org.eclipse.gef.commands.Command;
+import org.eclipse.gef.requests.CreateRequest;
+import org.eclipse.swt.graphics.Point;
 
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
-import com.servoy.eclipse.designer.editor.commands.ISupportModels;
-import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.designer.editor.commands.BaseFormPlaceElementCommand;
+import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
-import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportTextSetup;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.util.IAnchorConstants;
 
 /**
  * Command to add title to header in mobile form editor.
@@ -34,39 +35,30 @@ import com.servoy.j2db.persistence.RepositoryException;
  * @author rgansevles
  *
  */
-public class MobileAddHeaderTitleCommand extends Command implements ISupportModels
+public class MobileAddHeaderTitleCommand extends BaseFormPlaceElementCommand
 {
-	private final Form form;
-
-	protected Object[] models;
-
-	public MobileAddHeaderTitleCommand(Form form)
+	public MobileAddHeaderTitleCommand(IApplication application, Form form, CreateRequest request)
 	{
-		this.form = form;
-	}
-
-	public Object[] getModels()
-	{
-		return models;
+		super(application, form, null, request.getType(), request.getExtendedData(), null, request.getLocation() == null ? null
+			: request.getLocation().getSWTPoint(), null, form);
 	}
 
 	@Override
-	public void execute()
+	protected Object[] placeElements(Point location) throws RepositoryException
 	{
-		models = null;
-		try
+		if (parent instanceof Form)
 		{
 			setLabel("place header text");
-			GraphicalComponent label = ElementFactory.createLabel(form, "Title", null);
+			GraphicalComponent label = ElementFactory.createLabel((Form)parent, "Title", null);
 			label.putCustomMobileProperty("headeritem", Boolean.TRUE);
 			label.putCustomMobileProperty("headerText", Boolean.TRUE);
+			// for debug in developer
+			label.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST);
+			label.setHorizontalAlignment(ISupportTextSetup.CENTER);
 
-			models = new IPersist[] { label };
-			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, label, true);
+			return new Object[] { label };
 		}
-		catch (RepositoryException ex)
-		{
-			ServoyLog.logError(ex);
-		}
+
+		return null;
 	}
 }

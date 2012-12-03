@@ -24,6 +24,8 @@ import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Rectangle;
 
+import com.servoy.eclipse.designer.property.FormElementGroupPropertySource;
+import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.ISupportBounds;
 
 /**
@@ -58,12 +60,30 @@ public class SetBoundsToSupportBoundsFigureListener implements FigureListener
 		Point loc = element.getLocation();
 		if (loc == null || loc.x != bounds.x || loc.y != bounds.y)
 		{
-			element.setLocation(new Point(bounds.x, bounds.y));
+			Point newLocation = new Point(bounds.x, bounds.y);
+			if (element instanceof FormElementGroup)
+			{
+				FormElementGroupPropertySource formElementGroupPropertySource = new FormElementGroupPropertySource((FormElementGroup)element, null);
+				formElementGroupPropertySource.setLocation(newLocation);
+			}
+			else
+			{
+				element.setLocation(newLocation);
+			}
 		}
 		Dimension dim = element.getSize();
 		if (dim == null || dim.width != bounds.width || dim.height != bounds.height)
 		{
-			element.setSize(new Dimension(bounds.width, bounds.height));
+			Dimension newSize = new Dimension(bounds.width, bounds.height);
+			if (element instanceof FormElementGroup)
+			{
+				FormElementGroupPropertySource formElementGroupPropertySource = new FormElementGroupPropertySource((FormElementGroup)element, null);
+				formElementGroupPropertySource.setSize(newSize);
+			}
+			else
+			{
+				element.setSize(newSize);
+			}
 		}
 	}
 }

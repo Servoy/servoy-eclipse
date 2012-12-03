@@ -665,9 +665,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				pd = new DelegatePropertyController(pd, pd.getId());
 			}
 
-			if (propertyDescriptor.valueObject == persistContext.getPersist() &&
-				RepositoryHelper.hideForProperties(propertyDescriptor.propertyDescriptor.getName(), persistContext.getPersist().getClass(),
-					persistContext.getPersist()))
+			if (propertyDescriptor.valueObject == persistContext.getPersist() && hideForProperties(propertyDescriptor))
 			{
 				hiddenPropertyDescriptors.put(pd.getId(), pd);
 			}
@@ -1787,6 +1785,12 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 
 		return true;
+	}
+
+	protected boolean hideForProperties(PropertyDescriptorWrapper propertyDescriptor)
+	{
+		return RepositoryHelper.hideForProperties(propertyDescriptor.propertyDescriptor.getName(), persistContext.getPersist().getClass(),
+			persistContext.getPersist());
 	}
 
 	public Object getPersistPropertyValue(Object id)

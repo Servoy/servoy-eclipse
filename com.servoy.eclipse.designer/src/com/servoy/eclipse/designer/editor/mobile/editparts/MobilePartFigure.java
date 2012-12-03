@@ -33,14 +33,25 @@ import com.servoy.eclipse.ui.resource.ColorResource;
 public class MobilePartFigure extends Figure implements HandleBounds
 {
 	public static Color HEADER_COLOR = ColorResource.INSTANCE.getColor(new RGB(110, 150, 190));// TODO: use theme
+	private final int partType;
 
 	/**
 	 * Construct an empty group figure.
+	 * @param partType 
 	 */
-	public MobilePartFigure()
+	public MobilePartFigure(int partType)
 	{
+		this.partType = partType;
 		setOpaque(true);
 		setBackgroundColor(HEADER_COLOR);
+	}
+
+	/**
+	 * @return the partType
+	 */
+	public int getPartType()
+	{
+		return partType;
 	}
 
 	public Rectangle getHandleBounds()

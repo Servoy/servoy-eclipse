@@ -24,7 +24,9 @@ import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.designer.editor.commands.BaseFormPlaceElementCommand;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.util.IAnchorConstants;
 
 /**
  * Command to add a text input with label to the form
@@ -45,7 +47,9 @@ public class AddLabelCommand extends BaseFormPlaceElementCommand
 	{
 		if (parent instanceof Form)
 		{
-			return new Object[] { ElementFactory.createLabel((Form)parent, "Text", location) };
+			GraphicalComponent label = ElementFactory.createLabel((Form)parent, "Text", location);
+			label.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST);
+			return new Object[] { label };
 		}
 
 		return null;

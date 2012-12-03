@@ -30,6 +30,7 @@ import com.servoy.eclipse.designer.editor.BasePersistGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.ComponentDeleteEditPolicy;
 import com.servoy.eclipse.designer.editor.GroupFigure;
+import com.servoy.eclipse.designer.editor.SetBoundsToSupportBoundsFigureListener;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -81,6 +82,7 @@ public class MobileGroupGraphicalEditPart extends BaseGroupGraphicalEditPart
 	{
 		IFigure fig = new GroupFigure();
 		fig.setLayoutManager(new MobileGroupLayoutManager());
+		fig.addFigureListener(new SetBoundsToSupportBoundsFigureListener(getGroup(), false));
 		return fig;
 	}
 

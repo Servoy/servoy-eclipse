@@ -67,11 +67,11 @@ public class MobileFormEditPolicy extends ComponentEditPolicy
 			Form form = (Form)getHost().getModel();
 
 			Object createType = ((CreateRequest)request).getNewObjectType();
-			if (createType == MobileVisualFormEditor.REQ_PLACE_HEADER)
+			if (createType == MobileVisualFormEditor.REQ_PLACE_HEADER && !form.hasPart(Part.HEADER))
 			{
 				command = new AddPartsCommand(form, new int[] { Part.HEADER });
 			}
-			else if (createType == MobileVisualFormEditor.REQ_PLACE_FOOTER)
+			else if (createType == MobileVisualFormEditor.REQ_PLACE_FOOTER && !form.hasPart(Part.FOOTER))
 			{
 				command = new AddPartsCommand(form, new int[] { Part.FOOTER });
 			}

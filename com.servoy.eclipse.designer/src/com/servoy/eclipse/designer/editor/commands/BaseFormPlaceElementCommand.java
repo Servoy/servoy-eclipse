@@ -662,8 +662,7 @@ public abstract class BaseFormPlaceElementCommand extends Command implements ISu
 		{
 			for (IPersist del : toDelete)
 			{
-				((IDeveloperRepository)del.getRootObject().getRepository()).deleteObject(del);
-				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, del, true);
+				deleteForUndo(del);
 			}
 		}
 		catch (RepositoryException e)
@@ -672,5 +671,15 @@ public abstract class BaseFormPlaceElementCommand extends Command implements ISu
 		}
 
 		models = null;
+	}
+
+	/**
+	 * @param persist
+	 * @throws RepositoryException
+	 */
+	protected void deleteForUndo(IPersist persist) throws RepositoryException
+	{
+		((IDeveloperRepository)persist.getRootObject().getRepository()).deleteObject(persist);
+		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persist, true);
 	}
 }

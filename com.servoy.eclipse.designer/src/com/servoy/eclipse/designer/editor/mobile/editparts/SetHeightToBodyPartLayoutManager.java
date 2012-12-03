@@ -19,69 +19,59 @@ package com.servoy.eclipse.designer.editor.mobile.editparts;
 
 import java.util.List;
 
-import org.eclipse.draw2d.AbstractLayout;
 import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.geometry.Dimension;
+import org.eclipse.draw2d.LayoutManager;
 import org.eclipse.draw2d.geometry.Rectangle;
 
-import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.designer.util.DelegateLayoutManager;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.util.Utils;
 
-/** 
- * Layout for form elements in mobile form editor.
+/**
+ * Calculate the body part height after delegate layout.
+ * Used for debugging mobile forms in developer web client.
  * 
  * @author rgansevles
  *
  */
-public class MobileFormLayoutManager extends AbstractLayout
+public class SetHeightToBodyPartLayoutManager extends DelegateLayoutManager
 {
-	private static final int MIN_FORM_HEIGHT = 250;
-
 	private final Form form;
 
-	public MobileFormLayoutManager(Form form)
+	public SetHeightToBodyPartLayoutManager(LayoutManager layoutManager, Form form)
 	{
+		super(layoutManager);
 		this.form = form;
 	}
 
+	@Override
 	public void layout(IFigure container)
 	{
-		// children are based on model order as created in editPart.getModelChildren()
-		int formWidth = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form).getWidth();
-		int y = 0;
-		int height = 0;
+		super.layout(container);
 
+		// use created layout to adjust body part
+		int max = 0;
 		for (IFigure child : (List<IFigure>)container.getChildren())
 		{
-			int x;
 			if (child instanceof MobilePartFigure)
 			{
-				x = 0;
-			}
-			else
-			{
-				x = 10;
-				y++;
-			}
-			int width = formWidth - (2 * x);
-			y += height;
-
-			Dimension childSize = child.getPreferredSize(width, -1);
-			height = childSize.height == 0 ? 55 : childSize.height;
-
-			if (y + height < MIN_FORM_HEIGHT && child instanceof MobilePartFigure && ((MobilePartFigure)child).getPartType() == Part.FOOTER)
-			{
-				y = MIN_FORM_HEIGHT - height;
+				continue;
 			}
 
-			child.setBounds(new Rectangle(x, y, width, height));
+			Rectangle bounds = child.getBounds();
+			max = Math.max(max, bounds.y + bounds.height);
 		}
-	}
 
-	@Override
-	protected Dimension calculatePreferredSize(IFigure container, int wHint, int hHint)
-	{
-		return new Dimension(wHint, hHint);
+		if (max != 0)
+		{
+			for (Part part : Utils.iterate(form.getParts()))
+			{
+				if (part.getPartType() == Part.BODY)
+				{
+					part.setHeight(max);
+				}
+			}
+		}
 	}
 }

@@ -100,16 +100,16 @@ public class MobileFormPartLayoutManager extends AbstractLayout
 	{
 		Rectangle containerBounds = container.getBounds();
 		// children are based on model order as created in editPart.getModelChildren()
-		int x = containerBounds.x + 2;
-		int y = containerBounds.y + 2;
-		int width = 50;
-		int height = 40;
+		int x = containerBounds.x + 1;
+		int y = containerBounds.y + 1;
+		int width = 49;
+		int height = 38;
 
 		for (IFigure child : (List<IFigure>)container.getChildren())
 		{
 			child.setBounds(new Rectangle(x, y, width, height));
 
-			x += width + 2;
+			x += width + 1;
 			if (x + width > containerBounds.width)
 			{
 				// next line
@@ -129,7 +129,8 @@ public class MobileFormPartLayoutManager extends AbstractLayout
 		}
 		else
 		{
-			height = 40; // TODO: layout multiple rows if there are many footer items
+			height = (1 + (50 * container.getChildren().size() / wHint)) * 40;
+			// layout multiple rows if there are many footer items
 		}
 		return new Dimension(wHint, height);
 	}

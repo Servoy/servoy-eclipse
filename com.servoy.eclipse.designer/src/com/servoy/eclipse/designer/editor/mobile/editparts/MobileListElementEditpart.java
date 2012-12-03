@@ -259,7 +259,7 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 				{
 					public void run()
 					{
-						refresh();
+						if (getParent() != null) refresh();
 					}
 				});
 				return;

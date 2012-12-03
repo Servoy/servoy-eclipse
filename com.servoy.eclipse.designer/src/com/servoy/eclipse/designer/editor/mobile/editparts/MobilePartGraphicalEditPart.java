@@ -79,7 +79,7 @@ public abstract class MobilePartGraphicalEditPart extends AbstractGraphicalEditP
 	@Override
 	protected IFigure createFigure()
 	{
-		IFigure fig = new MobilePartFigure();
+		IFigure fig = new MobilePartFigure(getModel().getPartType());
 		fig.addFigureListener(new SetBoundsToPartFigureListener(getModel()));
 		fig.setLayoutManager(new MobileFormPartLayoutManager(getModel().getPartType()));
 		return fig;
@@ -122,7 +122,7 @@ public abstract class MobilePartGraphicalEditPart extends AbstractGraphicalEditP
 				{
 					public void run()
 					{
-						refresh();
+						if (getParent() != null) refresh();
 					}
 				});
 				return;

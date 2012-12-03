@@ -166,7 +166,7 @@ public class MobileListGraphicalEditPart extends AbstractGraphicalEditPart imple
 				{
 					public void run()
 					{
-						refresh();
+						if (getParent() != null) refresh();
 					}
 				});
 				return;

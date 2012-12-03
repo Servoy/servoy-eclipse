@@ -146,19 +146,30 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			return false;
 		}
 
+		return super.shouldShow(propertyDescriptor);
+	}
+
+	@Override
+	protected boolean hideForProperties(PropertyDescriptorWrapper propertyDescriptor)
+	{
 		if (propertyDescriptor.propertyDescriptor.getName().equals(StaticContentSpecLoader.PROPERTY_EDITABLE.getPropertyName()) &&
 			getPersist() instanceof Field && ((Field)getPersist()).getDisplayType() == Field.COMBOBOX)
 		{
-			return false;
+			return true;
 		}
 
 		if (propertyDescriptor.propertyDescriptor.getName().equals(StaticContentSpecLoader.PROPERTY_ONACTIONMETHODID.getPropertyName()) &&
 			isLabel(getPersist()))
 		{
-			return false;
+			return true;
 		}
 
-		return super.shouldShow(propertyDescriptor);
+		if (propertyDescriptor.propertyDescriptor.getName().equals(StaticContentSpecLoader.PROPERTY_VIEW.getPropertyName()) && getPersist() instanceof Form)
+		{
+			return true;
+		}
+
+		return super.hideForProperties(propertyDescriptor);
 	}
 
 	@Override
@@ -169,11 +180,13 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			// button
 			return new String[] { DATA_ICON_PROPERTY };
 		}
+
 		if (GraphicalComponent.class == clazz && isLabel(getPersist()))
 		{
 			// script label
 			return new String[] { HEADER_SIZE_PROPERTY };
 		}
+
 		if (Field.class == clazz)
 		{
 			Field field = (Field)getPersist();
@@ -183,6 +196,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 				return new String[] { RADIO_STYLE_NAME };
 			}
 		}
+
 		return null;
 	}
 
