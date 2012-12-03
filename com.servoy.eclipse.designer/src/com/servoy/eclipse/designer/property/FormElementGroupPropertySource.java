@@ -254,6 +254,18 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 
 	public void resetPropertyValue(Object id)
 	{
+		Object reset;
+		if (StaticContentSpecLoader.PROPERTY_VISIBLE.getPropertyName().equals(id) || StaticContentSpecLoader.PROPERTY_ENABLED.getPropertyName().equals(id))
+		{
+			reset = Boolean.TRUE;
+		}
+		else if (StaticContentSpecLoader.PROPERTY_NAME.getPropertyName().equals(id))
+		{
+			reset = null;
+		}
+		else return; // no default for location and size
+
+		setPropertyValue(id, reset);
 	}
 
 	public void setPropertyValue(Object id, Object value)
