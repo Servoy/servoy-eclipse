@@ -657,7 +657,15 @@ public class SolutionDeserializer
 					{
 						// search for duplicates for same parent in other files (same uuid in other global scope)
 						IPersist child = parent.getChild(uuidObject);
-						if (child != null && !SolutionSerializer.isPersistWorkspaceFile(child, false, file))
+						boolean updateUuid = child != null && !SolutionSerializer.isPersistWorkspaceFile(child, false, file);
+						if (updateUuid)
+						{
+							Pair<String, String> pathPair = SolutionSerializer.getFilePath(child, false);
+							Path path = new Path(pathPair.getLeft() + pathPair.getRight());
+							// when old file does not exist this is a file rename, not a script method copy
+							updateUuid = ResourcesPlugin.getWorkspace().getRoot().getFile(path).exists();
+						}
+						if (updateUuid)
 						{
 							// Found another child from different file, generate a new uuid for this one.
 							uuidToJson.remove(uuid);
