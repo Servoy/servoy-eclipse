@@ -53,8 +53,13 @@ public class JSDocScriptTemplates
 	 */
 	public static JSDocScriptTemplates getTemplates()
 	{
-		IProject project = ServoyModelFinder.getServoyModel().getActiveProject().getProject();
+		IProject project = null;
+		if (ServoyModelFinder.getServoyModel().getActiveProject() != null)
+		{
+			project = ServoyModelFinder.getServoyModel().getActiveProject().getProject();
+		}
 		return getTemplates(project, true);
+
 	}
 
 	/**
