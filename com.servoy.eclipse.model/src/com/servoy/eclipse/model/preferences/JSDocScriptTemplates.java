@@ -20,6 +20,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.osgi.service.prefs.BackingStoreException;
+
+import com.servoy.eclipse.model.Activator;
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
  * Preferences for templates in jsdoc for new methods and variables.
@@ -30,14 +38,52 @@ import org.eclipse.core.resources.IProject;
  * @since 6.1
  * 
  */
-public class JSDocScriptTemplates extends ProjectPreferences
+public class JSDocScriptTemplates
 {
+	private final IEclipsePreferences settingsNode;
+
+	public final static String JSDOC_SCRIPT_TEMPLATES_NODE = Activator.PLUGIN_ID + "/jsdoctemplates"; //$NON-NLS-1$
 	public static final String METHOD_TEMPLATE_SETTING = "methodTemplate";
 	public static final String VARIABLE_TEMPLATE_SETTING = "variableTemplate";
 
-	public JSDocScriptTemplates(IProject project)
+	/**
+	 * Can be called from anywhere , returns the JSdocScriptTemplates of the active project 
+	 * or of the workspace if the active project doesn't have project specific templates defined
+	 * @return  JSDocScriptTemplates 
+	 */
+	public static JSDocScriptTemplates getTemplates()
 	{
-		super(project, "jsdoctemplates");
+		IProject project = ServoyModelFinder.getServoyModel().getActiveProject().getProject();
+		return getTemplates(project, true);
+	}
+
+	/**
+	 * 
+	 * @param project the project specific templates to return  or <b>null</b> if workspace settings is desired
+	 * @param inherit this parameter is used to search for templates in the workspace settings
+	 * @return 
+	 */
+	public static JSDocScriptTemplates getTemplates(IProject project, boolean inherit)
+	{
+		if (project != null)
+		{ //project specific preferences
+			IEclipsePreferences preferences = new ProjectScope(project).getNode(JSDOC_SCRIPT_TEMPLATES_NODE);
+			try
+			{
+				if (preferences.keys().length > 0 || !inherit) return new JSDocScriptTemplates(preferences);
+			}
+			catch (BackingStoreException e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+		//get the workspace preferences
+		return new JSDocScriptTemplates(InstanceScope.INSTANCE.getNode(JSDOC_SCRIPT_TEMPLATES_NODE));
+	}
+
+	private JSDocScriptTemplates(IEclipsePreferences eclipsePrefferences)
+	{
+		settingsNode = eclipsePrefferences;
 	}
 
 	public String getMethodTemplate()
@@ -52,7 +98,7 @@ public class JSDocScriptTemplates extends ProjectPreferences
 
 	public String getMethodTemplateProperty()
 	{
-		return getProperty(METHOD_TEMPLATE_SETTING, "");
+		return settingsNode.get(METHOD_TEMPLATE_SETTING, "");
 	}
 
 	public void setMethodTemplateProperty(String template)
@@ -62,7 +108,7 @@ public class JSDocScriptTemplates extends ProjectPreferences
 
 	public String getVariableTemplateProperty()
 	{
-		return getProperty(VARIABLE_TEMPLATE_SETTING, "");
+		return settingsNode.get(VARIABLE_TEMPLATE_SETTING, "");
 	}
 
 	public void setVariableTemplateProperty(String template)
@@ -99,5 +145,47 @@ public class JSDocScriptTemplates extends ProjectPreferences
 		}
 		matcher.appendTail(stringBuffer);
 		return stringBuffer.toString();
+	}
+
+
+	protected void setProperty(String key, String value)
+	{
+		if (value == null || value.length() == 0)
+		{
+			settingsNode.remove(key);
+		}
+		else
+		{
+			settingsNode.put(key, value);
+		}
+	}
+
+	public void save()
+	{
+		try
+		{
+			settingsNode.flush();
+		}
+		catch (BackingStoreException e)
+		{
+			ServoyLog.logError(e);
+		}
+	}
+
+	public void clear()
+	{
+		try
+		{
+			settingsNode.clear();
+		}
+		catch (BackingStoreException e)
+		{
+			ServoyLog.logError(e);
+		}
+	}
+
+	public IEclipsePreferences getSettingsNode()
+	{
+		return settingsNode;
 	}
 }

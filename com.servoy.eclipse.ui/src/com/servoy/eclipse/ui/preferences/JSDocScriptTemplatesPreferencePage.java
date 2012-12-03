@@ -17,7 +17,10 @@
 
 package com.servoy.eclipse.ui.preferences;
 
-import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -26,9 +29,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.IWorkbenchPropertyPage;
+import org.osgi.service.prefs.BackingStoreException;
 
-import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.preferences.JSDocScriptTemplates;
+import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
  * Preference page method and variable jsdoc templates.
@@ -37,15 +42,25 @@ import com.servoy.eclipse.model.preferences.JSDocScriptTemplates;
  *
  * @since 6.1
  */
-public class JSDocScriptTemplatesPreferencePage extends PreferencePage implements IWorkbenchPreferencePage
+public class JSDocScriptTemplatesPreferencePage extends WorkspaceOrProjectPreferencePage implements IWorkbenchPreferencePage, IWorkbenchPropertyPage
 {
+
 	private JSDocScriptTemplates jsDocScriptTemplates;
 	private Text newVarJsDoc;
 	private Text newMethodJsDoc;
+	ControlEnableState rootPannelEnabledState = null;
+	Composite rootPanel = null;
+
+	public JSDocScriptTemplatesPreferencePage()
+	{
+		super();
+	}
 
 	public void init(IWorkbench workbench)
 	{
-		jsDocScriptTemplates = new JSDocScriptTemplates(ServoyModelFinder.getServoyModel().getActiveProject().getProject());
+
+		setProject(null);
+		jsDocScriptTemplates = JSDocScriptTemplates.getTemplates(null, false);
 	}
 
 	@Override
@@ -53,7 +68,7 @@ public class JSDocScriptTemplatesPreferencePage extends PreferencePage implement
 	{
 		initializeDialogUnits(parent);
 
-		Composite rootPanel = new Composite(parent, SWT.NONE);
+		rootPanel = new Composite(parent, SWT.NONE);
 		rootPanel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 		rootPanel.setLayout(null);
 
@@ -72,6 +87,19 @@ public class JSDocScriptTemplatesPreferencePage extends PreferencePage implement
 		lblNewVariableJavadoc.setBounds(10, 165, 290, 17);
 
 		initializeFields();
+		if (isProjectPreferencePage())
+		{
+			if (hasProjectSpecificOptions(getProject()))
+			{
+				enablePreferencePageContent(true);
+				getfUseProjectSettings().setSelection(true);
+			}
+			else
+			{
+				enablePreferencePageContent(false);
+				getfUseProjectSettings().setSelection(false);
+			}
+		}
 
 		return rootPanel;
 	}
@@ -94,11 +122,93 @@ public class JSDocScriptTemplatesPreferencePage extends PreferencePage implement
 	@Override
 	public boolean performOk()
 	{
-		jsDocScriptTemplates.setMethodTemplateProperty(newMethodJsDoc.getText());
-		jsDocScriptTemplates.setVariableTemplateProperty(newVarJsDoc.getText());
+		String method = newMethodJsDoc.getText();
+		String var = newVarJsDoc.getText();
 
+		if (!isProjectSpecificSettingsChecked() && isProjectPreferencePage())
+		{
+			// delete settings
+			jsDocScriptTemplates.clear();
+			jsDocScriptTemplates.save();
+			return true;
+		}
+		jsDocScriptTemplates.setMethodTemplateProperty(method);
+		jsDocScriptTemplates.setVariableTemplateProperty(var);
 		jsDocScriptTemplates.save();
-
 		return true;
 	}
+
+
+	public IAdaptable getElement()
+	{
+		return getProject();
+	}
+
+
+	public void setElement(IAdaptable element)
+	{
+		setProject((IProject)element.getAdapter(IResource.class));
+		if (getProject() != null)
+		{
+			jsDocScriptTemplates = JSDocScriptTemplates.getTemplates(getProject(), false);
+		}
+	}
+
+	@Override
+	protected String getPreferencePageId()
+	{
+		return "com.servoy.eclipse.ui.preferences.jsDocTemplates";
+	}
+
+
+	@Override
+	protected String getPropertyPageId()
+	{
+		return "com.servoy.eclipse.ui.propertyPage.jsDocTemplates";
+	}
+
+
+	@Override
+	protected boolean hasProjectSpecificOptions(IProject project)
+	{
+		try
+		{
+			JSDocScriptTemplates templatesemplates = JSDocScriptTemplates.getTemplates(project, false);
+			if (templatesemplates != null)
+			{
+				if (templatesemplates.getSettingsNode().keys().length > 0)
+				{
+					return true;
+				}
+			}
+		}
+		catch (BackingStoreException e)
+		{
+			ServoyLog.logError(e);
+		}
+		return false;
+	}
+
+
+	@Override
+	protected void enablePreferencePageContent(boolean enable)
+	{
+		if (enable)
+		{
+			if (rootPannelEnabledState != null)
+			{
+				rootPannelEnabledState.restore();
+				rootPannelEnabledState = null;
+			}
+		}
+		else
+		{
+			if (rootPannelEnabledState == null)
+			{
+				rootPannelEnabledState = ControlEnableState.disable(rootPanel);
+			}
+		}
+
+	}
+
 }

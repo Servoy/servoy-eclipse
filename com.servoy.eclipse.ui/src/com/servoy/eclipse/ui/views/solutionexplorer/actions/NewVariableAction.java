@@ -59,7 +59,6 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
-import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.preferences.JSDocScriptTemplates;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -224,7 +223,7 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 			}
 			var.setDefaultValue(defaultValue);
 
-			String userTemplate = new JSDocScriptTemplates(ServoyModelFinder.getServoyModel().getActiveProject().getProject()).getVariableTemplate();
+			String userTemplate = JSDocScriptTemplates.getTemplates().getVariableTemplate();
 
 			String code = SolutionSerializer.serializePersist(var, true, ServoyModel.getDeveloperRepository(), userTemplate).toString();
 			((ISupportChilds)parent).removeChild(var);

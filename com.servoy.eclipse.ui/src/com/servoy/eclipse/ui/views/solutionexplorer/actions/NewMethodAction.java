@@ -64,7 +64,6 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils.InputAndListDialog;
-import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.preferences.JSDocScriptTemplates;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -313,7 +312,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 						new WorkspaceFileAccess(ServoyModel.getWorkspace()).setContents(scriptPath, new byte[0]);
 					}
 
-					String userTemplate = new JSDocScriptTemplates(ServoyModelFinder.getServoyModel().getActiveProject().getProject()).getMethodTemplate();
+					String userTemplate = JSDocScriptTemplates.getTemplates().getMethodTemplate();
 					String declaration = template.getMethodDeclaration(met.getName(), null, tagToOutput, userTemplate, substitutions);
 
 					declaration = format(declaration, file, 0);
