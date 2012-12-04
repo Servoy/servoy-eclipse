@@ -33,6 +33,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import org.json.JSONObject;
+
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -490,7 +492,9 @@ public class MobileExporter
 			String historyDefinition = "\n\tvar history = _ServoyUtils_.history;"; //$NON-NLS-1$
 			scripting = code1 + historyDefinition + code2;
 		}
-		return scripting;
+
+		// convert to JSON escaped string
+		return JSONObject.quote(scripting);
 	}
 
 	/**

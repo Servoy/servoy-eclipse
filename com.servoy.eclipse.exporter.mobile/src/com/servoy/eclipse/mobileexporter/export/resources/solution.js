@@ -55,7 +55,7 @@ ${loop_variables}					${variableName} : ["${defaultValue}",${variableType}]${end
 
 			var fncs = subs.fncs;
 			for (var key in fncs) {
-			   scopeObject[key] = _ServoyUtils_.wrapFunction(eval("(" + fncs[key].toString() + ")"), scopeObject);
+			   scopeObject[key] = _ServoyUtils_.wrapFunction(eval("(" + fncs[key] + ")"), scopeObject);
 			   eval("var " + key + " = scopeObject[key];");
 			}
 
