@@ -218,31 +218,38 @@ public class TableSettingsComposite extends Group
 		explicitButton.setEnabled(true);
 		implicitLabel.setEnabled(true);
 		currentGroup = group;
-		if (this.securityInfo.containsKey(currentGroup))
+		if (currentGroup != null)
 		{
-			int i_access = securityInfo.get(currentGroup);
-			if (i_access == IRepository.IMPLICIT_TABLE_ACCESS)
+			if (this.securityInfo.containsKey(currentGroup))
 			{
-				setDefaultValues();
+				int i_access = securityInfo.get(currentGroup);
+				if (i_access == IRepository.IMPLICIT_TABLE_ACCESS)
+				{
+					setDefaultValues();
+				}
+				else
+				{
+					setRights(i_access);
+				}
 			}
 			else
 			{
-				setRights(i_access);
+				List<SecurityInfo> securityInfo = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getSecurityInfos(group,
+					tableEditor.getTable());
+				if (securityInfo == null || securityInfo.size() == 0)
+				{
+					setDefaultValues();
+				}
+				else
+				{
+					int i_access = securityInfo.get(0).access;
+					setRights(i_access);
+				}
 			}
 		}
 		else
 		{
-			List<SecurityInfo> securityInfo = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getSecurityInfos(group,
-				tableEditor.getTable());
-			if (securityInfo == null || securityInfo.size() == 0)
-			{
-				setDefaultValues();
-			}
-			else
-			{
-				int i_access = securityInfo.get(0).access;
-				setRights(i_access);
-			}
+			setDefaultValues();
 		}
 	}
 
@@ -327,8 +334,11 @@ public class TableSettingsComposite extends Group
 				access += IRepository.TRACKING_VIEWS;
 			}
 		}
-		if (securityInfo.containsKey(currentGroup)) securityInfo.remove(currentGroup);
-		securityInfo.put(currentGroup, new Integer(access));
+		if (currentGroup != null)
+		{
+			if (securityInfo.containsKey(currentGroup)) securityInfo.remove(currentGroup);
+			securityInfo.put(currentGroup, new Integer(access));
+		}
 	}
 
 	public void saveValues()
