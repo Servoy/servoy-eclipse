@@ -401,46 +401,55 @@ public class EclipseUserManager extends WorkspaceUserManager
 	@Override
 	public void dispose()
 	{
-		if (serverListener != null)
+		if (ApplicationServerSingleton.get() == null)
 		{
-			ServoyModelManager.getServoyModelManager().getServoyModel();
-			ServoyModel.getServerManager().removeServerListener(serverListener);
+			// don't start app server again
 			serverListener = null;
-		}
-
-		if (tableListener != null)
-		{
-			ServoyModelManager.getServoyModelManager().getServoyModel();
-			IServerManagerInternal serverManager = ServoyModel.getServerManager();
-			// add listeners to initial server list
-			String[] array = serverManager.getServerNames(false, false, true, true);
-			for (String server_name : array)
-			{
-				IServerInternal server = (IServerInternal)serverManager.getServer(server_name, false, false);
-				server.removeTableListener(tableListener);
-
-				if (server.getConfig().isEnabled() && server.isValid())
-				{
-					try
-					{
-						for (String tableName : server.getTableNames(false))
-						{
-							if (server.isTableLoaded(tableName))
-							{
-								(server.getTable(tableName)).removeIColumnListener(columnListener);
-							}
-						}
-					}
-					catch (RepositoryException e)
-					{
-						ServoyLog.logError(e);
-					}
-				}
-			}
 			tableListener = null;
 			columnListener = null;
 		}
+		else
+		{
+			if (serverListener != null)
+			{
+				ServoyModelManager.getServoyModelManager().getServoyModel();
+				ServoyModel.getServerManager().removeServerListener(serverListener);
+				serverListener = null;
+			}
 
+			if (tableListener != null)
+			{
+				ServoyModelManager.getServoyModelManager().getServoyModel();
+				IServerManagerInternal serverManager = ServoyModel.getServerManager();
+				// add listeners to initial server list
+				String[] array = serverManager.getServerNames(false, false, true, true);
+				for (String server_name : array)
+				{
+					IServerInternal server = (IServerInternal)serverManager.getServer(server_name, false, false);
+					server.removeTableListener(tableListener);
+
+					if (server.getConfig().isEnabled() && server.isValid())
+					{
+						try
+						{
+							for (String tableName : server.getTableNames(false))
+							{
+								if (server.isTableLoaded(tableName))
+								{
+									(server.getTable(tableName)).removeIColumnListener(columnListener);
+								}
+							}
+						}
+						catch (RepositoryException e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+				}
+				tableListener = null;
+				columnListener = null;
+			}
+		}
 		ServoyModelManager.getServoyModelManager().getServoyModel().removePersistChangeListener(true, persistChangeListener);
 	}
 

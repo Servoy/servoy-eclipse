@@ -113,7 +113,8 @@ public class ServoyLog
 	public static IStatus createStatus(int severity, int code, String message, Throwable exception)
 	{
 
-		return new Status(severity, Activator.getDefault().getBundle().getSymbolicName(), code, message, exception);
+		return new Status(severity, Activator.getDefault() != null ? Activator.getDefault().getBundle().getSymbolicName() : "com.servoy.eclipse.model", code,
+			message, exception);
 	}
 
 	/**
@@ -123,6 +124,13 @@ public class ServoyLog
 	 */
 	public static void log(IStatus status)
 	{
-		Activator.getDefault().getLog().log(status);
+		if (Activator.getDefault() != null)
+		{
+			Activator.getDefault().getLog().log(status);
+		}
+		else
+		{
+			System.err.println("Cannot log message, plugin is disposed:" + status.getMessage());
+		}
 	}
 }
