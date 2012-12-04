@@ -75,7 +75,7 @@ public class SecurityComposite extends Composite implements EclipseUserManager.I
 				if (sel instanceof IStructuredSelection)
 				{
 					Object first = ((IStructuredSelection)sel).getFirstElement();
-					settingsComposite.setValues(first.toString());
+					settingsComposite.setValues(first != null ? first.toString() : null);
 				}
 
 			}
