@@ -113,6 +113,5 @@ public class DeleteScopeAction extends Action implements ISelectionChangedListen
 				ServoyLog.logError("Could not delete scope '" + scopeName + "' from project '" + project.getName() + "'", e);
 			}
 		}
-		viewer.refreshTreeCompletely();
 	}
 }

@@ -890,25 +890,29 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	 */
 	public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
 	{
-		// avoid invalid thread access exceptions
-		getSite().getShell().getDisplay().syncExec(new Runnable()
+		if (updateInfo == IActiveProjectListener.MODULES_UPDATED || updateInfo == IActiveProjectListener.RESOURCES_UPDATED_ON_ACTIVE_PROJECT ||
+			updateInfo == IActiveProjectListener.RESOURCES_UPDATED_BECAUSE_ACTIVE_PROJECT_CHANGED || updateInfo == IActiveProjectListener.COLUMN_INFO_CHANGED ||
+			updateInfo == IActiveProjectListener.SECURITY_INFO_CHANGED || updateInfo == IActiveProjectListener.MODULES_UPDATED)
 		{
-			public void run()
+			// avoid invalid thread access exceptions
+			getSite().getShell().getDisplay().syncExec(new Runnable()
 			{
-				int activePage = getActivePage();
-				disposePages();
-				createCalculationsPage();
-				createFoundsSetMethodsPage();
-				createAggregationsPage();
-				createEventsPage();
-				createDataPage();
-				if (activePage >= 0)
+				public void run()
 				{
-					setActivePage(activePage);
+					int activePage = getActivePage();
+					disposePages();
+					createCalculationsPage();
+					createFoundsSetMethodsPage();
+					createAggregationsPage();
+					createEventsPage();
+					createDataPage();
+					if (activePage >= 0)
+					{
+						setActivePage(activePage);
+					}
 				}
-
-			}
-		});
+			});
+		}
 	}
 
 	/**

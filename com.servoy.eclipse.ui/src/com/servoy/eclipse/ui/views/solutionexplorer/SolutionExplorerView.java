@@ -1702,7 +1702,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 			public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
 			{
-				if (updateInfo == IActiveProjectListener.MODULES_UPDATED)
+				if (updateInfo == IActiveProjectListener.MODULES_UPDATED || updateInfo == IActiveProjectListener.SCOPE_NAMES_CHANGED)
 				{
 					refreshTreeCompletely();
 				}

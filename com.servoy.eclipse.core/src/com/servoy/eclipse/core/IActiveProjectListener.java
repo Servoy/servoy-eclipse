@@ -63,6 +63,11 @@ public interface IActiveProjectListener
 	public static final int TEMPLATES_ADDED_OR_REMOVED = 6;
 
 	/**
+	 * Used by activeProjectUpdated(...) to notify that scope names were added/removed from one of the active solutions/modules.
+	 */
+	public static final int SCOPE_NAMES_CHANGED = 7;
+
+	/**
 	 * Notifies the change of the active project - another project (or null) becomes active.
 	 * 
 	 * @param activeProject The current active project
