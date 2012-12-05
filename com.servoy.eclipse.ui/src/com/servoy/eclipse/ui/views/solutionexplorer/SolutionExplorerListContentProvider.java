@@ -1385,38 +1385,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return getJSMethodsViaJavaMembers(ijm, o, elementName, prefix, actionType, real, excludeMethodNames);
 	}
 
-	private List<String> filterMethodsForMobile(JavaMembers ijm)
-	{
-		Set<String> filteredSet = new HashSet<String>();
-		for (String id : ijm.getMethodIds(false))
-		{
-			NativeJavaMethod njm = ijm.getMethod(id, false);
-			for (MemberBox m : njm.getMethods())
-			{
-				if (AnnotationManager.getInstance().isMobileAnnotationPresent(m.method()))
-				{
-					filteredSet.add(id);
-				}
-			}
-		}
-		return new ArrayList<String>(filteredSet);
-	}
-
-	private List<String> filterPropertiesForMobile(JavaMembers ijm)
-	{
-		Set<String> filteredPropertiesSet = new HashSet<String>();
-		for (String id : ijm.getFieldIds(false))
-		{
-			Object beanProp = ijm.getField(id, false);
-			if (beanProp instanceof JavaMembers.BeanProperty &&
-				AnnotationManager.getInstance().isMobileAnnotationPresent(((JavaMembers.BeanProperty)beanProp).getGetter()))
-			{
-				filteredPropertiesSet.add(id);
-			}
-		}
-		return new ArrayList<String>(filteredPropertiesSet);
-	}
-
 	private SimpleUserNode[] getJSMethodsViaJavaMembers(JavaMembers ijm, IScriptObject scriptObject, String elementName, String prefix,
 		UserNodeType actionType, Object real, String[] excludeMethodNames)
 	{
@@ -1476,7 +1444,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		if (!elementName.endsWith(".")) elementName = elementName + ".";
 
 
-		List fields = (isForMobileSolution ? filterPropertiesForMobile(ijm) : ijm.getFieldIds(false));
+		List fields = ijm.getFieldIds(false);
 
 		if (excludeMethodNames != null) fields.removeAll(Arrays.asList(excludeMethodNames));
 
@@ -1511,7 +1479,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			dlm.add(new UserNode(name, actionType, new FieldFeedback(name, elementName, resolver, scriptObject, ijm), real, pIcon));
 		}
 
-		List names = (isForMobileSolution ? filterMethodsForMobile(ijm) : ijm.getMethodIds(false));
+		List names = ijm.getMethodIds(false);
 
 		if (ijm instanceof InstanceJavaMembers)
 		{
