@@ -20,6 +20,7 @@ package com.servoy.eclipse.model.extensions;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.util.AtomicIntegerWithListener;
 import com.servoy.j2db.FlattenedSolution;
 
 /**
@@ -66,4 +67,10 @@ public interface IServoyModel
 	 */
 	boolean shouldBeModuleOfActiveSolution(String searchForName);
 
+	void reportSaveError(Exception ex);
+
+	/**
+	 * Handler for collecting changes, delay picking up of changes until handler goes to zero.
+	 */
+	AtomicIntegerWithListener getResourceChangesHandlerCounter();
 }
