@@ -415,9 +415,6 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 		}
 	}
 
-	private boolean savingInWorkspace = false;
-	private final List<IWorkspaceSaveListener> workspaceSaveListeners = new ArrayList<IWorkspaceSaveListener>();
-
 	public void updateNodesInWorkspace(final IPersist[] nodes, final boolean recursive)
 	{
 		updateNodesInWorkspace(nodes, recursive, true);
@@ -438,32 +435,28 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 			{
-				boolean wasSavingInWorkspace = savingInWorkspace;
-				savingInWorkspace = true;
+				final IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
+				int collectingChangesValue = servoyModel.getResourceChangesHandlerCounter().increment(); // new value, so 1 if we are the first
 				try
 				{
 					updateNodes(nodes, recursive);
 				}
 				finally
 				{
-					if (wasSavingInWorkspace)
+					if (collectingChangesValue > 1)
 					{
+						servoyModel.getResourceChangesHandlerCounter().decrement();
 						latch.countDown();
 					}
 					else
 					{
-						savingInWorkspace = false;
 						// notify work done in separate job in case not all changes have been processed yet.
 						WorkspaceJob fireDoneJob = new WorkspaceJob("Save solution data")
 						{
 							@Override
 							public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 							{
-								try
-								{
-									fireSavingInWorkspaceDone();
-								}
-								finally
+								if (servoyModel.getResourceChangesHandlerCounter().decrement() == 0)
 								{
 									latch.countDown();
 								}
@@ -507,41 +500,8 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 			}
 			catch (RepositoryException e)
 			{
-				reportSaveError(e);
+				ServoyModelFinder.getServoyModel().reportSaveError(e);
 			}
-		}
-	}
-
-	public boolean isSavingInWorkspace()
-	{
-		return savingInWorkspace;
-	}
-
-	public void addWorkspaceSaveListener(IWorkspaceSaveListener listener)
-	{
-		workspaceSaveListeners.add(listener);
-	}
-
-	public void removeWorkspaceSaveListener(IWorkspaceSaveListener listener)
-	{
-		workspaceSaveListeners.remove(listener);
-	}
-
-	protected void fireSavingInWorkspaceDone()
-	{
-		List<IWorkspaceSaveListener> clone = new ArrayList<IWorkspaceSaveListener>(workspaceSaveListeners);
-		for (IWorkspaceSaveListener listener : clone)
-		{
-			listener.savingInWorkspaceDone();
-		}
-	}
-
-	protected void reportSaveError(Exception ex)
-	{
-		List<IWorkspaceSaveListener> clone = new ArrayList<IWorkspaceSaveListener>(workspaceSaveListeners);
-		for (IWorkspaceSaveListener listener : clone)
-		{
-			listener.reportSaveError(ex);
 		}
 	}
 

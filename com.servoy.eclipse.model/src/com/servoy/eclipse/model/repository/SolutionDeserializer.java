@@ -699,17 +699,22 @@ public class SolutionDeserializer
 						{
 							if (o instanceof IScriptElement && !o.getParent().equals(parent))
 							{
-								JSONObject jsonObject = noParentDuplicates.get(o.getUUID());
+								JSONObject jsonObject = noParentDuplicates.remove(o.getUUID());
 								if (jsonObject != null)
 								{
-									try
+									Pair<String, String> pathPair = SolutionSerializer.getFilePath(o, false);
+									Path path = new Path(pathPair.getLeft() + pathPair.getRight());
+									// when old file does not exist this is a file rename, not a script method copy
+									if (ResourcesPlugin.getWorkspace().getRoot().getFile(path).exists())
 									{
-										jsonObject.put(SolutionSerializer.PROP_UUID, UUID.randomUUID().toString());
-										noParentDuplicates.remove(o.getUUID());
-									}
-									catch (JSONException e)
-									{
-										ServoyLog.logError(e);
+										try
+										{
+											jsonObject.put(SolutionSerializer.PROP_UUID, UUID.randomUUID().toString());
+										}
+										catch (JSONException e)
+										{
+											ServoyLog.logError(e);
+										}
 									}
 								}
 							}

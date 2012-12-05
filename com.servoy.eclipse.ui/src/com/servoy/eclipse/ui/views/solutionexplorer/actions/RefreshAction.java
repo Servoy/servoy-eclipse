@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.lang.reflect.InvocationTargetException;
@@ -32,16 +32,12 @@ import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
-import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 
 
 public class RefreshAction extends Action
 {
-	private final SolutionExplorerView fPart;
-
-	public RefreshAction(SolutionExplorerView part)
+	public RefreshAction()
 	{
-		fPart = part;
 		setText(Messages.RefreshAction_refresh);
 		setImageDescriptor(Activator.loadImageDescriptorFromBundle("refresh.gif"));//$NON-NLS-1$
 		setActionDefinitionId("org.eclipse.ui.file.refresh"); //$NON-NLS-1$
@@ -65,7 +61,8 @@ public class RefreshAction extends Action
 						ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel().refreshServoyProjects();
 						ServoyProject[] sp = servoyModel.getServoyProjects();
 						ServoyResourcesProject[] rp = servoyModel.getResourceProjects();
-						monitor.beginTask("Refreshing", sp.length + rp.length + 1);
+						monitor.beginTask("Refreshing", sp.length + rp.length);
+						servoyModel.getResourceChangesHandlerCounter().increment();
 						try
 						{
 							for (ServoyProject servoyProject : sp)
@@ -85,9 +82,10 @@ public class RefreshAction extends Action
 						{
 							ServoyLog.logError("refresh", e);
 						}
-						monitor.subTask("Solution explorer view...");
-						fPart.refreshView();
-						monitor.worked(1);
+						finally
+						{
+							servoyModel.getResourceChangesHandlerCounter().decrement();
+						}
 					}
 					finally
 					{
