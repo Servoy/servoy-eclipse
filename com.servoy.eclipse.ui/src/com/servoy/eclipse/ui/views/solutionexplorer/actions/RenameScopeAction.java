@@ -103,7 +103,6 @@ public class RenameScopeAction extends Action implements ISelectionChangedListen
 				{
 					ServoyLog.logError("Could not rename global scope " + scopeName + " in project  " + project, e);
 				}
-				viewer.refreshTreeCompletely();
 			}
 		}
 	}

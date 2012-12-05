@@ -1281,7 +1281,7 @@ public class ServoyModel extends AbstractServoyModel
 
 	private void fireActiveProjectChanged()
 	{
-		refreshGlobalScopes();
+		refreshGlobalScopes(false);
 
 		List<IActiveProjectListener> clone = new ArrayList<IActiveProjectListener>(activeProjectListeners);
 		for (IActiveProjectListener listener : clone)
@@ -1307,7 +1307,10 @@ public class ServoyModel extends AbstractServoyModel
 
 	private void fireActiveProjectUpdated(int updateInfo)
 	{
-		refreshGlobalScopes();
+		if (updateInfo == IActiveProjectListener.MODULES_UPDATED)
+		{
+			refreshGlobalScopes(false);
+		}
 
 		List<IActiveProjectListener> clone = new ArrayList<IActiveProjectListener>(activeProjectListeners);
 		for (IActiveProjectListener listener : clone)
@@ -1832,7 +1835,7 @@ public class ServoyModel extends AbstractServoyModel
 			lst.addAll(newChanges);
 		}
 
-		refreshGlobalScopes();
+		refreshGlobalScopes(true);
 
 		// get deltas per project
 		Map<IProject, List<IResourceDelta>> projectChanges = new HashMap<IProject, List<IResourceDelta>>();
@@ -1866,8 +1869,9 @@ public class ServoyModel extends AbstractServoyModel
 	 * Refresh the runtime property Solution.SCOPE_NAMES in solutions.
 	 * This will include empty scopes (that have to method or variable yet)
 	 */
-	private void refreshGlobalScopes()
+	private void refreshGlobalScopes(boolean fireChange)
 	{
+		boolean realSolutionScopnamesChanged = false;
 		for (ServoyProject project : getModulesOfActiveProject())
 		{
 			List<String> globalScopenames = project.getGlobalScopenames();
@@ -1882,8 +1886,17 @@ public class ServoyModel extends AbstractServoyModel
 			solution = project.getSolution();
 			if (solution != null)
 			{
+				if (fireChange && !realSolutionScopnamesChanged)
+				{
+					realSolutionScopnamesChanged = !Utils.equalObjects(solution.getRuntimeProperty(Solution.SCOPE_NAMES), scopeNames);
+				}
 				solution.setRuntimeProperty(Solution.SCOPE_NAMES, scopeNames);
 			}
+		}
+
+		if (fireChange && realSolutionScopnamesChanged)
+		{
+			fireActiveProjectUpdated(IActiveProjectListener.SCOPE_NAMES_CHANGED);
 		}
 	}
 

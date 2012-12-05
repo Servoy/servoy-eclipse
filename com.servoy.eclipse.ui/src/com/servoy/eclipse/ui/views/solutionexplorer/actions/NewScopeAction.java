@@ -108,7 +108,6 @@ public class NewScopeAction extends Action implements ISelectionChangedListener
 				{
 					ServoyLog.logError("Could not create global scope " + scopeName + " in project  " + project, e);
 				}
-				viewer.refreshTreeCompletely();
 			}
 		}
 	}
