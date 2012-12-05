@@ -3579,6 +3579,51 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		return dataSourceCollectorVisitor;
 	}
 
+	public static void removeRelatedDBIFileMarkers(Set<IPersist> formsToDelete)
+	{
+		// remove these markers because they are added to the resources project directly
+		// if the form that references a table without a dbi file is removed, 
+		// the marker would stay there; therefore we remove them (when deleting a form, as they are no generated at build time)
+		ServoyResourcesProject resourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
+		if (resourcesProject != null && resourcesProject.getProject() != null)
+		{
+			try
+			{
+				IMarker[] markers = resourcesProject.getProject().findMarkers(DATABASE_INFORMATION_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
+				if (markers != null && markers.length > 0)
+				{
+					Iterator<IPersist> it = formsToDelete.iterator();
+					while (it.hasNext())
+					{
+						IPersist f = it.next();
+						Form form = (f instanceof Form ? (Form)f : null);
+						if (form != null)
+						{
+							for (IMarker marker : markers)
+							{
+								String serverName = marker.getAttribute(TableDifference.ATTRIBUTE_SERVERNAME, null);
+								String tableName = marker.getAttribute(TableDifference.ATTRIBUTE_TABLENAME, null);
+								if (serverName != null && tableName != null)
+								{
+									String datasource = DataSourceUtils.createDBTableDataSource(serverName, tableName);
+									if (form.getDataSource() != null && form.getDataSource().equals(datasource) &&
+										marker.getAttribute(TableDifference.ATTRIBUTE_ISMISSINGDBIFILEMARKER, false))
+									{
+										marker.delete();
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+	}
+
 	public void refreshDBIMarkers()
 	{
 		// do not delete or add dbi marker here

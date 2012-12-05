@@ -1108,6 +1108,7 @@ public class DataModelManager implements IColumnInfoManager
 						// and we need to keep track of them individually - so remember the ID of the marker for each table
 						if (columnDifference.type == TableDifference.MISSING_DBI_FILE)
 						{
+							marker.setAttribute(TableDifference.ATTRIBUTE_ISMISSINGDBIFILEMARKER, true);
 							missingDbiFileMarkerIds.put(columnDifference.getServerName() + '.' + columnDifference.getTableName(), Long.valueOf(marker.getId()));
 						}
 					}
@@ -1301,6 +1302,7 @@ public class DataModelManager implements IColumnInfoManager
 		public static final String ATTRIBUTE_SERVERNAME = "CDServerNameAttribute";
 		public static final String ATTRIBUTE_TABLENAME = "CDTableNameAttribute";
 		public static final String ATTRIBUTE_COLUMNNAME = "CDColumnNameAttribute";
+		public static final String ATTRIBUTE_ISMISSINGDBIFILEMARKER = "CDIsDBIFileMissingMarker";
 
 		public static final int COLUMN_MISSING_FROM_DB = 1;
 		public static final int COLUMN_MISSING_FROM_DBI_FILE = 2;

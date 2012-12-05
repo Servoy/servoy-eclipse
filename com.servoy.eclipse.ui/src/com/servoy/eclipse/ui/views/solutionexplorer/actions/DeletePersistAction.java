@@ -41,6 +41,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
@@ -212,6 +213,10 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 					try
 					{
 						op.run(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), RefactoringUIMessages.DeleteResourcesHandler_title);
+						if (op.getInitialConditionCheckingStatus().isOK())
+						{
+							ServoyBuilder.removeRelatedDBIFileMarkers(keys);
+						}
 					}
 					catch (InterruptedException e)
 					{
