@@ -1888,7 +1888,7 @@ public class ServoyModel extends AbstractServoyModel
 			{
 				if (fireChange && !realSolutionScopnamesChanged)
 				{
-					realSolutionScopnamesChanged = Utils.equalObjects(solution.getRuntimeProperty(Solution.SCOPE_NAMES), scopeNames);
+					realSolutionScopnamesChanged = !Utils.equalObjects(solution.getRuntimeProperty(Solution.SCOPE_NAMES), scopeNames);
 				}
 				solution.setRuntimeProperty(Solution.SCOPE_NAMES, scopeNames);
 			}
