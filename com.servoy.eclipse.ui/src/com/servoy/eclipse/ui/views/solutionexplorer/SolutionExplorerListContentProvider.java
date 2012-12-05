@@ -1387,31 +1387,34 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	private List<String> filterMethodsForMobile(JavaMembers ijm)
 	{
-		List<String> filteredList = new ArrayList<String>();
+		Set<String> filteredSet = new HashSet<String>();
 		for (String id : ijm.getMethodIds(false))
 		{
 			NativeJavaMethod njm = ijm.getMethod(id, false);
-			if (AnnotationManager.getInstance().isMobileAnnotationPresent(njm.getMethods()[0].method()))
+			for (MemberBox m : njm.getMethods())
 			{
-				filteredList.add(id);
+				if (AnnotationManager.getInstance().isMobileAnnotationPresent(m.method()))
+				{
+					filteredSet.add(id);
+				}
 			}
 		}
-		return filteredList;
+		return new ArrayList<String>(filteredSet);
 	}
 
 	private List<String> filterPropertiesForMobile(JavaMembers ijm)
 	{
-		List<String> filteredPropertiesList = new ArrayList<String>();
+		Set<String> filteredPropertiesSet = new HashSet<String>();
 		for (String id : ijm.getFieldIds(false))
 		{
 			Object beanProp = ijm.getField(id, false);
 			if (beanProp instanceof JavaMembers.BeanProperty &&
 				AnnotationManager.getInstance().isMobileAnnotationPresent(((JavaMembers.BeanProperty)beanProp).getGetter()))
 			{
-				filteredPropertiesList.add(id);
+				filteredPropertiesSet.add(id);
 			}
 		}
-		return filteredPropertiesList;
+		return new ArrayList<String>(filteredPropertiesSet);
 	}
 
 	private SimpleUserNode[] getJSMethodsViaJavaMembers(JavaMembers ijm, IScriptObject scriptObject, String elementName, String prefix,
@@ -1419,6 +1422,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	{
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
 		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+		boolean isForMobileSolution = SolutionMetaData.isServoyMobileSolution(activeProject != null ? activeProject.getSolution() : null);
 
 		IScriptObject adapter = ScriptObjectRegistry.getAdapterIfAny(scriptObject);
 
@@ -1472,8 +1476,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		if (!elementName.endsWith(".")) elementName = elementName + ".";
 
 
-		List fields = (SolutionMetaData.isServoyMobileSolution(activeProject != null ? activeProject.getSolution() : null) ? filterPropertiesForMobile(ijm)
-			: ijm.getFieldIds(false));
+		List fields = (isForMobileSolution ? filterPropertiesForMobile(ijm) : ijm.getFieldIds(false));
 
 		if (excludeMethodNames != null) fields.removeAll(Arrays.asList(excludeMethodNames));
 
@@ -1500,11 +1503,15 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			Object bp = ijm.getField(name, false);
 			if (bp == null) continue;
+			if (isForMobileSolution && !(bp instanceof JavaMembers.BeanProperty) ||
+				!AnnotationManager.getInstance().isMobileAnnotationPresent(((JavaMembers.BeanProperty)bp).getGetter()))
+			{
+				continue;
+			}
 			dlm.add(new UserNode(name, actionType, new FieldFeedback(name, elementName, resolver, scriptObject, ijm), real, pIcon));
 		}
 
-		List names = (SolutionMetaData.isServoyMobileSolution(activeProject != null ? activeProject.getSolution() : null) ? filterMethodsForMobile(ijm)
-			: ijm.getMethodIds(false));
+		List names = (isForMobileSolution ? filterMethodsForMobile(ijm) : ijm.getMethodIds(false));
 
 		if (ijm instanceof InstanceJavaMembers)
 		{
@@ -1536,6 +1543,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 			for (MemberBox method : njm.getMethods())
 			{
+				if (isForMobileSolution && !AnnotationManager.getInstance().isMobileAnnotationPresent(method.method())) continue;
+
 				String displayName = null;
 
 				if (adapter != null)
