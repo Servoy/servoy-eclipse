@@ -122,7 +122,7 @@ public class ExportOptionsPage extends WizardPage
 		String defaultServerURL = getDialogSettings().get(SERVER_URL_KEY);
 		if (defaultServerURL == null)
 		{
-			defaultServerURL = "http://127.0.0.1:8080";
+			defaultServerURL = "http://localhost:8080";
 		}
 		serverURL.setText(defaultServerURL);
 
