@@ -55,7 +55,7 @@ public class ArgumentChest implements IXMLExportUserChannel
 	private String exportFileName = null;
 
 	private boolean exportSampleData = false;
-	private int metadataSource = META_DATA_BOTH;
+	private int metadataSource = META_DATA_WS;
 	private int sampleDataCount = 10000;
 	private boolean exportI18N = false;
 	private boolean exportUsers = false;
@@ -151,7 +151,11 @@ public class ArgumentChest implements IXMLExportUserChannel
 						{
 							metadataSource = META_DATA_NONE;
 						}
-						else if (!"both".equals(mdarg))
+						else if ("both".equals(mdarg))
+						{
+							metadataSource = META_DATA_BOTH;
+						}
+						else
 						{
 							info("unknown meta data source '" + mdarg + "'", ILogLevel.ERROR);
 							invalidArguments = true;
@@ -258,25 +262,35 @@ public class ArgumentChest implements IXMLExportUserChannel
 	@SuppressWarnings("nls")
 	public String getHelpMessage()
 	{
+		// @formatter:off
 		return "USAGE:\n\n"
 			+ "    -help or -? or /? or no arguments ... shows current help message.\n\n"
 			+ "                  OR\n\n"
-			+ "    -s <name_of_solution_to_export> -o <output_dir> -data <workspace_location_that_contains_solution> [optional_arguments]\n\n"
-			+ "        Optional arguments:\n"
+			+ "    -s <name_of_solution_to_export> -o <out_dir> -data <workspace_location> [optional_args]\n\n"
+			+ "        Optional arguments:\n\n"
 			+ "        -verbose ... prints more info to console\n"
-			+ "        -p <properties_file> ... path and name of properties file. By default the 'servoy.properties' file from 'application_server' will be used\n"
-			+ "        -as <app_server_dir> ... specifies where to find the 'application_server' directory. Default: '../../application_server'\n\n"
-			+ "        -md ws|db|none|both ... take table metadata from workspace or database, by default both are used and compared\n"
-			+ "        -sd ... exports sample data. IMPORTANT: when exporting sample data all needed DB servers must already be started\n"
-			+ "        -sdcount <count> ... number of rows to export per table. Only makes sense when -sd is also present. Can be 'all' (without the '). Default: 10000\n"
+			+ "        -p <properties_file> ... path and name of properties file.\n"
+			+ "             Default: the 'servoy.properties' file  from 'application_server'  will be  used\n"
+			+ "        -as <app_server_dir> ... specifies where to find the 'application_server' directory.\n"
+			+ "             Default: '../../application_server'\n\n"
+			+ "        -md ws|db|none|both ... take table  metadata from workspace / database / both+check.\n"
+			+ "             Default: ws\n"
+			+ "        -sd ... exports sample data. IMPORTANT: all needed DB\n"
+			+ "             servers must already be started\n"
+			+ "        -sdcount <count> ... number of rows to  export per table. Only  makes sense when -sd\n"
+			+ "             is also present. Can be 'all' (without the '). Default: 10000\n"
 			+ "        -i18n ... exports i18n data\n"
 			+ "        -users ... exports users\n"
-			+ "        -tables ... export all table information about tables from referenced servers. IMPORTANT: when exporting table information all needed DB servers must already be started\n"
-			+ "        -pwd <protection_password> ... protect the exported solution with given password.\n"
-			+ "        -modules [<module1_name> <module2_name> ... <moduleN_name>] ... MUST be last argument specified in command line.\n"
-			+ "                                                                        Includes all or part of referenced modules in export. If only '-modules' is used, it will export all referenced modules.\n"
-			+ "                                                                        If a list of modules is also included, it will export only modules from this list, provided they are referenced by exported solution.\n\n"
-			+ "EXIT codes: 0 - normal, 1 - export stopped by user, 2 - export failed, 3 - invalid arguments.";
+			+ "        -tables ... export  all table  information  about  tables from  referenced  servers.\n"
+			+ "             IMPORTANT: all needed DB servers must already be started\n"
+			+ "        -pwd <protection_password> ... protect  the exported  solution with given  password.\n"
+			+ "        -modules [<module1_name> <module2_name> ... <moduleN_name>] ... MUST   be  the  last\n"
+			+ "             argument  specified in command line. Includes all or part of referenced modules\n"
+			+ "             in export. If only '-modules' is used,  it will export all  referenced modules.\n"
+			+ "             If a list of  modules is also included, it  will export only  modules from this\n"
+			+ "             list, provided they are referenced by exported solution.\n\n"
+			+ "EXIT codes: 0 - normal, 1 - export stopped by user, 2 - export failed, 3 - invalid arguments";
+		// @formatter:on
 	}
 
 	public String getAppServerDir()
