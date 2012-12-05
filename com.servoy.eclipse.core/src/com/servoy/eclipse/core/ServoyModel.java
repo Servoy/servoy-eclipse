@@ -109,11 +109,11 @@ import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.EclipseRepositoryFactory;
 import com.servoy.eclipse.model.repository.EclipseSequenceProvider;
-import com.servoy.eclipse.model.repository.IWorkspaceSaveListener;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.repository.StringResourceDeserializer;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.util.AtomicIntegerWithListener;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -167,7 +167,7 @@ import com.servoy.j2db.util.Utils;
  * @author jblok
  */
 @SuppressWarnings("nls")
-public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveListener
+public class ServoyModel extends AbstractServoyModel
 {
 	private static final String SERVOY_ACTIVE_PROJECT = "SERVOY_ACTIVE_PROJECT"; //$NON-NLS-1$
 
@@ -1689,14 +1689,11 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 								// do nothing if no file was really changed
 								if (al == null || al.size() == 0) continue;
 								// there is already a solution, update solution resources only after a complete save in case of multiple resources
-								if (eclipseRepository.isSavingInWorkspace())
+								if (getResourceChangesHandlerCounter().getValue() > 0)
 								{
-									if (al.size() > 0)
+									synchronized (outstandingChangedFiles)
 									{
-										synchronized (outstandingChangedFiles)
-										{
-											outstandingChangedFiles.addAll(al);
-										}
+										outstandingChangedFiles.addAll(al);
 									}
 								}
 								else
@@ -1818,11 +1815,14 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 	 */
 	protected void handleOutstandingChangedFiles(List<IResourceDelta> newChanges)
 	{
-		refreshGlobalScopes();
-
 		List<IResourceDelta> lst;
 		synchronized (outstandingChangedFiles)
 		{
+			if (outstandingChangedFiles.isEmpty() && (newChanges == null || newChanges.isEmpty()))
+			{
+				// nothing to do
+				return;
+			}
 			lst = new ArrayList<IResourceDelta>(outstandingChangedFiles);
 			outstandingChangedFiles.clear();
 		}
@@ -1831,6 +1831,8 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		{
 			lst.addAll(newChanges);
 		}
+
+		refreshGlobalScopes();
 
 		// get deltas per project
 		Map<IProject, List<IResourceDelta>> projectChanges = new HashMap<IProject, List<IResourceDelta>>();
@@ -1885,16 +1887,10 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		}
 	}
 
-	/**
-	 * saving in WS is done, handle all outstanding file changes.
-	 */
-	public void savingInWorkspaceDone()
-	{
-		handleOutstandingChangedFiles(null);
-	}
-
+	@Override
 	public void reportSaveError(final Exception ex)
 	{
+		super.reportSaveError(ex);
 		Display.getDefault().asyncExec(new Runnable()
 		{
 			public void run()
@@ -2671,7 +2667,15 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		{
 			public void resourceChanged(final IResourceChangeEvent event)
 			{
-				resourcesPostChanged(event);
+				getResourceChangesHandlerCounter().increment();
+				try
+				{
+					resourcesPostChanged(event);
+				}
+				finally
+				{
+					getResourceChangesHandlerCounter().decrement();
+				}
 			}
 		};
 		preChangeListener = new ModelPreChangeListener(this);
@@ -2679,7 +2683,20 @@ public class ServoyModel extends AbstractServoyModel implements IWorkspaceSaveLi
 		getWorkspace().addResourceChangeListener(preChangeListener, IResourceChangeEvent.PRE_CLOSE);
 		getWorkspace().addResourceChangeListener(preChangeListener, IResourceChangeEvent.PRE_DELETE);
 
-		((EclipseRepository)getDeveloperRepository()).addWorkspaceSaveListener(this);
+		getResourceChangesHandlerCounter().addValueListener(new AtomicIntegerWithListener.IValueListener()
+		{
+			// handle outstanding files in display thread so that never 2 of these are running at the same time
+			public void valueSetToZero()
+			{
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						handleOutstandingChangedFiles(null);
+					}
+				});
+			}
+		});
 	}
 
 	/**
