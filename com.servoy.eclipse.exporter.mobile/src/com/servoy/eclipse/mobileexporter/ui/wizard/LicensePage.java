@@ -66,7 +66,6 @@ public class LicensePage extends WizardPage
 		licenseLabel.setText("License code");
 
 		final Label validationLabel = new Label(container, SWT.NONE);
-		validationLabel.setForeground(container.getDisplay().getSystemColor(SWT.COLOR_RED));
 		validationLabel.setText("No license key entered, mobile solution will run in trial mode.");
 
 		companyText = new Text(container, SWT.BORDER);
@@ -121,10 +120,12 @@ public class LicensePage extends WizardPage
 	{
 		if (ApplicationServerSingleton.get().checkMobileLicense(companyText.getText(), licenseText.getText()))
 		{
+			validationLabel.setForeground(container.getDisplay().getSystemColor(SWT.COLOR_BLACK));
 			validationLabel.setText("License OK");
 		}
 		else
 		{
+			validationLabel.setForeground(container.getDisplay().getSystemColor(SWT.COLOR_RED));
 			validationLabel.setText("License invalid");
 		}
 		container.layout();
