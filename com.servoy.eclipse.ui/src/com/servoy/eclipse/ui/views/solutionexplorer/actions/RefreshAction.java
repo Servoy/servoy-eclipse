@@ -32,12 +32,16 @@ import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 
 
 public class RefreshAction extends Action
 {
-	public RefreshAction()
+	private final SolutionExplorerView fPart;
+
+	public RefreshAction(SolutionExplorerView part)
 	{
+		fPart = part;
 		setText(Messages.RefreshAction_refresh);
 		setImageDescriptor(Activator.loadImageDescriptorFromBundle("refresh.gif"));//$NON-NLS-1$
 		setActionDefinitionId("org.eclipse.ui.file.refresh"); //$NON-NLS-1$
@@ -61,7 +65,7 @@ public class RefreshAction extends Action
 						ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel().refreshServoyProjects();
 						ServoyProject[] sp = servoyModel.getServoyProjects();
 						ServoyResourcesProject[] rp = servoyModel.getResourceProjects();
-						monitor.beginTask("Refreshing", sp.length + rp.length);
+						monitor.beginTask("Refreshing", sp.length + rp.length + 1);
 						servoyModel.getResourceChangesHandlerCounter().increment();
 						try
 						{
@@ -86,6 +90,9 @@ public class RefreshAction extends Action
 						{
 							servoyModel.getResourceChangesHandlerCounter().decrement();
 						}
+						monitor.subTask("Solution explorer view...");
+						fPart.refreshView();
+						monitor.worked(1);
 					}
 					finally
 					{

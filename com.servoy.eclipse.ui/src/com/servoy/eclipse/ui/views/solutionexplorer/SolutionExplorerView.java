@@ -176,7 +176,6 @@ import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.repository.StringResourceDeserializer;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
-import com.servoy.eclipse.model.util.AtomicIntegerWithListener.IValueListener;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
@@ -554,8 +553,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private MediaNode currentMediaFolder;
 
-	private IValueListener changesCollectingListener;
-
 	public SolutionExplorerTreeContentProvider getTreeContentProvider()
 	{
 		if (tree != null)
@@ -814,8 +811,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 
 				//expand the solution node after startup
-				ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-				ServoyProject servoyProject = servoyModel.getActiveProject();
+				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 				if (servoyProject != null)
 				{
 					String activeProjectName = servoyProject.getProject().getName();
@@ -841,21 +837,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						break;
 					}
 				}
-
-				// When ServoyModel has processed resource changes refresh tree
-				servoyModel.getResourceChangesHandlerCounter().addValueListener(changesCollectingListener = new IValueListener()
-				{
-					public void valueSetToZero()
-					{
-						Display.getDefault().asyncExec(new Runnable()
-						{
-							public void run()
-							{
-								refreshView();
-							}
-						});
-					}
-				});
 
 				return Status.OK_STATUS;
 			}
@@ -2768,7 +2749,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		addTreeSelectionChangedListener(createMediaFolderAction);
 		addTreeSelectionChangedListener(renameMediaFolderAction);
 
-		fRefreshAction = new RefreshAction();
+		fRefreshAction = new RefreshAction(this);
 		collapseTreeAction = new CollapseTreeAction(tree);
 		collapseTreeAction.setId("collapseTreeAction"); //$NON-NLS-1$
 		selectAllActionInTree = new SelectAllAction(tree);
@@ -2922,10 +2903,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	{
 		beanCache.clear();
 
-		if (changesCollectingListener != null)
-		{
-			ServoyModelManager.getServoyModelManager().getServoyModel().getResourceChangesHandlerCounter().removeValueListener(changesCollectingListener);
-		}
 		if (resourceChangeListener != null)
 		{
 			ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
