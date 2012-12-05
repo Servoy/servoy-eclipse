@@ -48,11 +48,6 @@ public class AddLabelCommand extends BaseFormPlaceElementCommand
 	@Override
 	protected Object[] placeElements(Point location) throws RepositoryException
 	{
-		/*
-		 * if (parent instanceof Form) { return new Object[] { ElementFactory.createLabel((Form)parent, "Text", location) }; }
-		 * 
-		 * return null;
-		 */
 		if (parent instanceof Form)
 		{
 			Form form = (Form)parent;
@@ -63,7 +58,7 @@ public class AddLabelCommand extends BaseFormPlaceElementCommand
 			GraphicalComponent label = ElementFactory.createLabel(form, "Title", loc);
 			label.setGroupID(groupID);
 			label.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST);
-			GraphicalComponent textLabel = ElementFactory.createLabel(form, "Text", new Point(loc.x + 1, loc.y)); // enforce order by x-pos
+			GraphicalComponent textLabel = ElementFactory.createLabel(form, "Text", new Point(loc.x, loc.y + 1)); // enforce order by y-pos
 			textLabel.setGroupID(groupID);
 			textLabel.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST);
 
