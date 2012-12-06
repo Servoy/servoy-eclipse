@@ -795,7 +795,7 @@ public class SolutionSerializer
 		MethodArgument[] arguments = abstractScriptProvider.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
 		if (arguments != null && arguments.length > 0)
 		{
-			sb.append(" * // TODO generated, please specify type and doc for the params\n");
+			sb.append(" * TODO generated, please specify type and doc for the params\n");
 			for (MethodArgument methodArgument : arguments)
 			{
 				sb.append(" * @param ");
