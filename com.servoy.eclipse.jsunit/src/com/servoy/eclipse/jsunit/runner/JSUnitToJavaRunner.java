@@ -33,6 +33,7 @@ import org.mozilla.javascript.JavaScriptException;
 import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.debug.Debugger;
 
 import de.berlios.jsunit.JsUnitException;
 import de.berlios.jsunit.JsUnitRuntimeException;
@@ -55,6 +56,19 @@ public class JSUnitToJavaRunner
 	private static final String jsUnit;
 	private static final String jsUtil;
 	private static final String jsUnitToJava;
+	private static String curentlyExecutingTest = null;
+
+
+	public static String getCurentlyExecutingTest()
+	{
+		return curentlyExecutingTest;
+	}
+
+	public static void setCurentlyExecutingTest(String curentlyExecutingTest)
+	{
+		JSUnitToJavaRunner.curentlyExecutingTest = curentlyExecutingTest;
+	}
+
 	static
 	{
 		StringWriter writer = new StringWriter(125 * 1024);
@@ -105,7 +119,7 @@ public class JSUnitToJavaRunner
 		}
 	}
 
-	private class TestScope extends ScriptableObject
+	public static class TestScope extends ScriptableObject
 	{
 
 		public TestScope(Scriptable parentScope)
@@ -284,6 +298,8 @@ public class JSUnitToJavaRunner
 
 		try
 		{
+			Debugger debugger = context.getDebugger();
+			context.setDebugger(new JSUnitDebugger(debugger), null);
 			try
 			{
 				context.evaluateString(testCodeScope, "var result = new TestResult();\n" + TEST_LISTENER_NAME + ".setResult(result);\nresult.addListener(" +
@@ -296,6 +312,10 @@ public class JSUnitToJavaRunner
 			catch (final JavaScriptException e)
 			{
 				throw new JsUnitRuntimeException("Cannot evaluate internal JavaScript code", e);
+			}
+			finally
+			{
+				context.setDebugger(debugger, null);
 			}
 		}
 		finally
