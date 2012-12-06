@@ -48,6 +48,7 @@ import org.eclipse.swt.widgets.TreeItem;
 
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.preferences.JSDocScriptTemplates;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -321,8 +322,8 @@ public class CalculationsComposite extends Composite
 						calc = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(solution).getScriptCalculation(calcName,
 							te.getTable());
 					}
-
-					String userTemplate = JSDocScriptTemplates.getTemplates().getMethodTemplate();
+					ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(solution.getName());
+					String userTemplate = JSDocScriptTemplates.getTemplates(project.getProject(), true).getMethodTemplate();
 					ScriptCalculation s = solution.createNewScriptCalculation(nameValidator, te.getTable().getDataSource(), calcName, userTemplate);
 					s.setType(Column.allDefinedTypes[0]);
 					treeViewer.refresh(solution);
