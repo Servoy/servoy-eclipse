@@ -1265,7 +1265,7 @@ public class TypeCreator extends TypeCache
 					return TypeUtil.arrayOf(componentJSType);
 				}
 			}
-			return getTypeRef(context, ITypeNames.ARRAY);
+			return TypeUtil.arrayOf(TypeInfoModelFactory.eINSTANCE.createAnyType());
 		}
 
 		String typeName = null;
