@@ -58,11 +58,11 @@ public class AddLabelCommand extends BaseFormPlaceElementCommand
 			GraphicalComponent label = ElementFactory.createLabel(form, "Title", loc);
 			label.setDisplaysTags(true);
 			label.setGroupID(groupID);
-			label.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST);
+			label.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST | IAnchorConstants.NORTH);
 			GraphicalComponent textLabel = ElementFactory.createLabel(form, "Text", new Point(loc.x, loc.y + 1)); // enforce order by y-pos
 			textLabel.setDisplaysTags(true);
 			textLabel.setGroupID(groupID);
-			textLabel.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST);
+			textLabel.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST | IAnchorConstants.NORTH);
 
 			return new Object[] { new FormElementGroup(groupID, ModelUtils.getEditingFlattenedSolution(parent), form) };
 		}

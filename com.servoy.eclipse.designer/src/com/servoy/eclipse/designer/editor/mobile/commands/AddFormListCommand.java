@@ -86,7 +86,7 @@ public class AddFormListCommand extends CompoundCommand
 		GraphicalComponent button = ElementFactory.createButton(form, null, "list", new Point(10, 40));
 		button.setDisplaysTags(true);
 		button.putCustomMobileProperty("listitemButton", Boolean.TRUE);
-		button.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST);
+		button.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST | IAnchorConstants.NORTH);
 
 		// subtext
 		GraphicalComponent subtext = ElementFactory.createLabel(form, null, new Point(40, 40));

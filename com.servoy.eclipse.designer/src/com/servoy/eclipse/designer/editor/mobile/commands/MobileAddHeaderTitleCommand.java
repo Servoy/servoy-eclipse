@@ -54,7 +54,7 @@ public class MobileAddHeaderTitleCommand extends BaseFormPlaceElementCommand
 			label.putCustomMobileProperty("headeritem", Boolean.TRUE);
 			label.putCustomMobileProperty("headerText", Boolean.TRUE);
 			// for debug in developer
-			label.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST);
+			label.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST | IAnchorConstants.NORTH);
 			label.setHorizontalAlignment(ISupportTextSetup.CENTER);
 
 			return new Object[] { label };

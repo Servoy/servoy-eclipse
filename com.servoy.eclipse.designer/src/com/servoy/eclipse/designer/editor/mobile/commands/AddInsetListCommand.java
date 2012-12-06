@@ -125,7 +125,7 @@ public class AddInsetListCommand extends BaseFormPlaceElementCommand
 			header.setDisplaysTags(true);
 			header.putCustomMobileProperty("listitemHeader", Boolean.TRUE);
 			// for debug in developer
-			header.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST);
+			header.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST | IAnchorConstants.NORTH);
 			header.setHorizontalAlignment(ISupportTextSetup.CENTER);
 
 			// add tab

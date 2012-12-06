@@ -65,10 +65,10 @@ public class AddFieldCommand extends BaseFormPlaceElementCommand
 			GraphicalComponent label = ElementFactory.createLabel(form, "Title", loc);
 			label.setDisplaysTags(true);
 			label.setGroupID(groupID);
-			label.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST);
+			label.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST | IAnchorConstants.NORTH);
 			Field field = ElementFactory.createField(form, null, new Point(loc.x, loc.y + 1)); // enforce order by y-pos
 			field.setGroupID(groupID);
-			field.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST);
+			field.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST | IAnchorConstants.NORTH);
 			if (objectProperties != null && objectProperties.size() > 0) setProperiesOnModel(field, objectProperties);
 
 			return new Object[] { new FormElementGroup(groupID, ModelUtils.getEditingFlattenedSolution(parent), form) };

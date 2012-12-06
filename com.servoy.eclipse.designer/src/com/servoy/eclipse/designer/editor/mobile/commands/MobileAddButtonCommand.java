@@ -62,14 +62,19 @@ public class MobileAddButtonCommand extends BaseFormPlaceElementCommand
 				button.setText(snapType == MobileSnapType.HeaderLeftButton ? "left" : "right");
 				button.putCustomMobileProperty("headeritem", Boolean.TRUE);
 				button.putCustomMobileProperty(snapType == MobileSnapType.HeaderLeftButton ? "headerLeftButton" : "headerRightButton", Boolean.TRUE);
-				button.setAnchors(snapType == MobileSnapType.HeaderLeftButton ? IAnchorConstants.WEST : IAnchorConstants.EAST);
+				button.setAnchors((snapType == MobileSnapType.HeaderLeftButton ? IAnchorConstants.WEST : IAnchorConstants.EAST) | IAnchorConstants.NORTH);
 			}
 			else if (snapType == MobileSnapType.FooterItem)
 			{
 				// footer button
 				button.putCustomMobileProperty("footeritem", Boolean.TRUE);
+				button.setAnchors(IAnchorConstants.WEST | IAnchorConstants.SOUTH);
 			}
-			// else regular button
+			else
+			{
+				// regular button
+				button.setAnchors(IAnchorConstants.WEST | IAnchorConstants.EAST | IAnchorConstants.NORTH);
+			}
 
 			return toArrAy(button);
 		}
