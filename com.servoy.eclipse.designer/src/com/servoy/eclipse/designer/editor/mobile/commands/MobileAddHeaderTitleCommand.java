@@ -50,6 +50,7 @@ public class MobileAddHeaderTitleCommand extends BaseFormPlaceElementCommand
 		{
 			setLabel("place header text");
 			GraphicalComponent label = ElementFactory.createLabel((Form)parent, "Title", null);
+			label.setDisplaysTags(true);
 			label.putCustomMobileProperty("headeritem", Boolean.TRUE);
 			label.putCustomMobileProperty("headerText", Boolean.TRUE);
 			// for debug in developer

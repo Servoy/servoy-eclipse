@@ -55,6 +55,7 @@ public class MobileAddButtonCommand extends BaseFormPlaceElementCommand
 			setLabel("place button");
 
 			GraphicalComponent button = ElementFactory.createButton(form, null, "button", null);
+			button.setDisplaysTags(true);
 			if (snapType == MobileSnapType.HeaderLeftButton || snapType == MobileSnapType.HeaderRightButton)
 			{
 				// header button

@@ -84,11 +84,13 @@ public class AddFormListCommand extends CompoundCommand
 
 		// button
 		GraphicalComponent button = ElementFactory.createButton(form, null, "list", new Point(10, 40));
+		button.setDisplaysTags(true);
 		button.putCustomMobileProperty("listitemButton", Boolean.TRUE);
 		button.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST);
 
 		// subtext
 		GraphicalComponent subtext = ElementFactory.createLabel(form, null, new Point(40, 40));
+		subtext.setDisplaysTags(true);
 		subtext.putCustomMobileProperty("listitemSubtext", Boolean.TRUE);
 
 		// countBubble

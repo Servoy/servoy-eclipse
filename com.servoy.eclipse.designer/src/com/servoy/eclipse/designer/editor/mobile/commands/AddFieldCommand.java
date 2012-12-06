@@ -63,6 +63,7 @@ public class AddFieldCommand extends BaseFormPlaceElementCommand
 			String groupID = UUID.randomUUID().toString();
 			Point loc = location == null ? new Point(0, 0) : location;
 			GraphicalComponent label = ElementFactory.createLabel(form, "Title", loc);
+			label.setDisplaysTags(true);
 			label.setGroupID(groupID);
 			label.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST);
 			Field field = ElementFactory.createField(form, null, new Point(loc.x, loc.y + 1)); // enforce order by y-pos

@@ -122,6 +122,7 @@ public class AddInsetListCommand extends BaseFormPlaceElementCommand
 
 			// add header
 			GraphicalComponent header = ElementFactory.createLabel(tabForm, null, new Point(0, 0));
+			header.setDisplaysTags(true);
 			header.putCustomMobileProperty("listitemHeader", Boolean.TRUE);
 			// for debug in developer
 			header.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST);
