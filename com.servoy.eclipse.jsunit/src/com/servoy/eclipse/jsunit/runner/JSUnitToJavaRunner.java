@@ -300,6 +300,8 @@ public class JSUnitToJavaRunner
 		{
 			Debugger debugger = context.getDebugger();
 			context.setDebugger(new JSUnitDebugger(debugger), null);
+			context.setGeneratingDebug(true);
+			context.setOptimizationLevel(-1);
 			try
 			{
 				context.evaluateString(testCodeScope, "var result = new TestResult();\n" + TEST_LISTENER_NAME + ".setResult(result);\nresult.addListener(" +
