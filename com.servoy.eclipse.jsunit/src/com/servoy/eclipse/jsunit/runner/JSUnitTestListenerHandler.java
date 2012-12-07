@@ -103,16 +103,20 @@ public class JSUnitTestListenerHandler
 			{
 				testName = context.evaluateString((Scriptable)test, "this.getName()", "Get test name", 1, null).toString();
 			}
-			Object exception = ((JSUnitDebugger)context.getDebugger()).getException(testName);
-			if (exception instanceof Scriptable)
+			JSUnitDebugger jsUnitDebugger = (JSUnitDebugger)context.getDebugger();
+			if (jsUnitDebugger != null)
 			{
-				errorMsg = getMessage(context, (Scriptable)exception);
-				stackTrace = getStackTrace(context, (Scriptable)exception);
-			}
-			else if (exception instanceof RhinoException)
-			{
-				errorMsg = ((RhinoException)exception).getMessage();
-				stackTrace = getRhinoExceptionStackTrace((RhinoException)exception);
+				Object exception = jsUnitDebugger.getException(testName);
+				if (exception instanceof Scriptable)
+				{
+					errorMsg = getMessage(context, (Scriptable)exception);
+					stackTrace = getStackTrace(context, (Scriptable)exception);
+				}
+				else if (exception instanceof RhinoException)
+				{
+					errorMsg = ((RhinoException)exception).getMessage();
+					stackTrace = getRhinoExceptionStackTrace((RhinoException)exception);
+				}
 			}
 			if ((stackTrace == null || stackTrace.length == 0) && throwable instanceof Scriptable)
 			{
