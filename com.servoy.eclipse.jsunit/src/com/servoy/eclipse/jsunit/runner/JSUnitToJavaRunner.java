@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.EcmaError;
 import org.mozilla.javascript.JavaScriptException;
 import org.mozilla.javascript.NativeArray;
@@ -89,33 +88,8 @@ public class JSUnitToJavaRunner
 		writer.append("\n}");
 		jsUnitToJava = writer.toString();
 
-
-		// try to see if a context created already has a debugger.
-		Context context = Context.enter();
-		try
-		{
-			if (context.getDebugger() == null)
-			{
-				// if that is not the case then add our own. (we are the only debug instance)
-				ContextFactory.getGlobal().addListener(new ContextFactory.Listener()
-				{
-					public void contextReleased(Context cx)
-					{
-					}
-
-					public void contextCreated(Context cx)
-					{
-						cx.setDebugger(new JSUnitDebugger(null), null);
-//						cx.setGeneratingDebug(true);
-						cx.setOptimizationLevel(-1);
-					}
-				});
-			}
-		}
-		finally
-		{
-			Context.exit();
-		}
+		// make sure that the script are compiled in interpreted mode
+		System.setProperty("servoy.disableScriptCompile", "true");
 	}
 
 	private static void loadScriptFromResource(Class locatorClass, final String name, final Writer writer)
@@ -329,9 +303,9 @@ public class JSUnitToJavaRunner
 			Debugger debugger = context.getDebugger();
 			if (!(debugger instanceof JSUnitDebugger))
 			{
-//				context.setDebugger(new JSUnitDebugger(debugger), null);
-//				context.setGeneratingDebug(true);
+				context.setGeneratingDebug(true);
 				context.setOptimizationLevel(-1);
+				context.setDebugger(new JSUnitDebugger(debugger), null);
 			}
 			try
 			{
