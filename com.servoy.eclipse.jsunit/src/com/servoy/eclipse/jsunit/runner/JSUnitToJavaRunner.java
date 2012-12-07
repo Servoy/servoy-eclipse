@@ -105,7 +105,7 @@ public class JSUnitToJavaRunner
 
 					public void contextCreated(Context cx)
 					{
-//						cx.setDebugger(new JSUnitDebugger(null), null);
+						cx.setDebugger(new JSUnitDebugger(null), null);
 //						cx.setGeneratingDebug(true);
 						cx.setOptimizationLevel(-1);
 					}
