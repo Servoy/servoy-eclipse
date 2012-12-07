@@ -13850,7 +13850,8 @@ while(fsUpdater.next())
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if succeeded, false if failed.]]></return>
           <description><![CDATA[Do the actual update in the database, returns true if successful.
 There are 3 types of possible use with the foundset updater
-1) update entire foundset, not possible when the table of the foundset has tracking enabled, will fall back to 3.
+1) update entire foundset, not possible when the table of the foundset has tracking enabled, will fall back to 3. 
+   This will not update any modification columns, because it does the update directly in the database, without getting the records.
 2) update part of foundset, for example the first 4 row (starts with selected row)
 3) safely loop through foundset (starts with selected row)]]></description>
           <summary><![CDATA[Do the actual update in the database, returns true if successful.]]></summary>
