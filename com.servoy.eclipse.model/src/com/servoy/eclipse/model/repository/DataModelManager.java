@@ -24,8 +24,11 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.commons.dbcp.DbcpException;
@@ -61,6 +64,7 @@ import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnInfoManager;
 import com.servoy.j2db.persistence.IColumnTypes;
+import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerListener;
 import com.servoy.j2db.persistence.IServerManagerInternal;
@@ -1195,6 +1199,33 @@ public class DataModelManager implements IColumnInfoManager
 		});
 	}
 
+	public void removeAllMissingDBIFileMarkers()
+	{
+		if (resourceProject != null)
+		{
+			try
+			{
+				IMarker[] markers = resourceProject.findMarkers(ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
+				if (markers != null && markers.length > 0)
+				{
+					for (IMarker marker : markers)
+					{
+						String serverName = marker.getAttribute(TableDifference.ATTRIBUTE_SERVERNAME, null);
+						String tableName = marker.getAttribute(TableDifference.ATTRIBUTE_TABLENAME, null);
+						if (serverName != null && tableName != null)
+						{
+							deleteMissingDBIFileMarkerIfNeeded(serverName, tableName);
+						}
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+	}
+
 	private void deleteMissingDBIFileMarkerIfNeeded(String serverName, String tableName) throws CoreException
 	{
 		// missing .dbi file markers are set to the resources project directly - see if such a marker exists for the table
@@ -1709,5 +1740,44 @@ public class DataModelManager implements IColumnInfoManager
 			}
 		}
 		return null;
+	}
+
+	public void addAllMissingDBIFileMarkersForDataSources(Set<String> dataSources)
+	{
+		Set<String> serverNames = new HashSet<String>();
+		Map<String, List<String>> serversTables = new HashMap<String, List<String>>();
+		for (String dataSource : dataSources)
+		{
+			String[] ds = DataSourceUtils.getDBServernameTablename(dataSource);
+			if (serverNames.add(ds[0]))
+			{
+				serversTables.put(ds[0], DataSourceUtils.getServerTablenames(dataSources, ds[0]));
+			}
+		}
+
+		for (String serverName : serverNames)
+		{
+			try
+			{
+				IServer server = ApplicationServerSingleton.get().getServerManager().getServer(serverName);
+				if (server != null)
+				{
+					List<String> tableNames = serversTables.get(serverName);
+					IFolder serverInformationFolder = getDBIFileContainer(server.getName());
+					for (String tableName : server.getTableAndViewNames(true))
+					{
+						if (!tableNames.contains(tableName)) continue;
+						if (!serverInformationFolder.getFile(tableName + DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT).exists())
+						{
+							addMissingDBIMarker(server.getName(), tableName, true);
+						}
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
 	}
 }
