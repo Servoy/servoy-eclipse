@@ -105,8 +105,8 @@ public class JSUnitToJavaRunner
 
 					public void contextCreated(Context cx)
 					{
-						cx.setDebugger(new JSUnitDebugger(null), null);
-						cx.setGeneratingDebug(true);
+//						cx.setDebugger(new JSUnitDebugger(null), null);
+//						cx.setGeneratingDebug(true);
 						cx.setOptimizationLevel(-1);
 					}
 				});
@@ -329,8 +329,8 @@ public class JSUnitToJavaRunner
 			Debugger debugger = context.getDebugger();
 			if (!(debugger instanceof JSUnitDebugger))
 			{
-				context.setDebugger(new JSUnitDebugger(debugger), null);
-				context.setGeneratingDebug(true);
+//				context.setDebugger(new JSUnitDebugger(debugger), null);
+//				context.setGeneratingDebug(true);
 				context.setOptimizationLevel(-1);
 			}
 			try
