@@ -16,17 +16,15 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.RunInWorkspaceJob;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -54,60 +52,53 @@ public class RefreshAction extends Action
 	@Override
 	public void run()
 	{
-		try
+		RunInWorkspaceJob job = new RunInWorkspaceJob(new IWorkspaceRunnable()
 		{
-			PlatformUI.getWorkbench().getProgressService().run(true, false, new IRunnableWithProgress()
+			public void run(IProgressMonitor monitor) throws CoreException
 			{
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+				try
 				{
+					ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel().refreshServoyProjects();
+					ServoyProject[] sp = servoyModel.getServoyProjects();
+					ServoyResourcesProject[] rp = servoyModel.getResourceProjects();
+					monitor.beginTask("Refreshing", sp.length + rp.length + 1);
+					servoyModel.getResourceChangesHandlerCounter().increment();
 					try
 					{
-						ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel().refreshServoyProjects();
-						ServoyProject[] sp = servoyModel.getServoyProjects();
-						ServoyResourcesProject[] rp = servoyModel.getResourceProjects();
-						monitor.beginTask("Refreshing", sp.length + rp.length + 1);
-						servoyModel.getResourceChangesHandlerCounter().increment();
-						try
+						for (ServoyProject servoyProject : sp)
 						{
-							for (ServoyProject servoyProject : sp)
-							{
-								monitor.subTask("Solution ... " + servoyProject.getProject().getName());
-								servoyProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
-								monitor.worked(1);
-							}
-							for (ServoyResourcesProject servoyResourcesProject : rp)
-							{
-								monitor.subTask("Resources project ... " + servoyResourcesProject.getProject().getName());
-								servoyResourcesProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
-								monitor.worked(1);
-							}
+							monitor.subTask("Solution ... " + servoyProject.getProject().getName());
+							servoyProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
+							monitor.worked(1);
 						}
-						catch (CoreException e)
+						for (ServoyResourcesProject servoyResourcesProject : rp)
 						{
-							ServoyLog.logError("refresh", e);
+							monitor.subTask("Resources project ... " + servoyResourcesProject.getProject().getName());
+							servoyResourcesProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
+							monitor.worked(1);
 						}
-						finally
-						{
-							servoyModel.getResourceChangesHandlerCounter().decrement();
-						}
-						monitor.subTask("Solution explorer view...");
-						fPart.refreshView();
-						monitor.worked(1);
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError("refresh", e);
 					}
 					finally
 					{
-						monitor.done();
+						servoyModel.getResourceChangesHandlerCounter().decrement();
 					}
+					monitor.subTask("Solution explorer view...");
+					fPart.refreshView();
+					monitor.worked(1);
 				}
-			});
-		}
-		catch (InvocationTargetException e)
-		{
-			ServoyLog.logError(e);
-		}
-		catch (InterruptedException e)
-		{
-			ServoyLog.logError(e);
-		}
+				finally
+				{
+					monitor.done();
+				}
+			}
+		});
+		job.setRule(ServoyModel.getWorkspace().getRoot());
+		job.setUser(false);
+		job.setSystem(true);
+		job.schedule();
 	}
 }

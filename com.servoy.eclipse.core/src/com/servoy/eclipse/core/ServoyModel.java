@@ -2698,16 +2698,10 @@ public class ServoyModel extends AbstractServoyModel
 
 		getResourceChangesHandlerCounter().addValueListener(new AtomicIntegerWithListener.IValueListener()
 		{
-			// handle outstanding files in display thread so that never 2 of these are running at the same time
+			// handle outstanding files immediately (not using Display.getDefault().asyncExec), callers may depend on them being processed
 			public void valueSetToZero()
 			{
-				Display.getDefault().asyncExec(new Runnable()
-				{
-					public void run()
-					{
-						handleOutstandingChangedFiles(null);
-					}
-				});
+				handleOutstandingChangedFiles(null);
 			}
 		});
 	}
