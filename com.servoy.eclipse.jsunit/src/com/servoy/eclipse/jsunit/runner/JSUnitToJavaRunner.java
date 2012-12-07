@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.mozilla.javascript.Context;
+import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.EcmaError;
 import org.mozilla.javascript.JavaScriptException;
 import org.mozilla.javascript.NativeArray;
@@ -46,7 +47,6 @@ import de.berlios.jsunit.JsUnitRuntimeException;
 @SuppressWarnings("nls")
 public class JSUnitToJavaRunner
 {
-
 	public final static Object NEXT_CHILD_GROUP = null;
 	public final static String ASSERTION_EXCEPTION_MESSAGE = "just for stack";
 	private final static String TEST_LISTENER_NAME = "javaTestListener";
@@ -88,6 +88,34 @@ public class JSUnitToJavaRunner
 		loadScriptFromResource(JSUnitToJavaRunner.class, "JsUnitToJava.js", writer);
 		writer.append("\n}");
 		jsUnitToJava = writer.toString();
+
+
+		// try to see if a context created already has a debugger.
+		Context context = Context.enter();
+		try
+		{
+			if (context.getDebugger() == null)
+			{
+				// if that is not the case then add our own. (we are the only debug instance)
+				ContextFactory.getGlobal().addListener(new ContextFactory.Listener()
+				{
+					public void contextReleased(Context cx)
+					{
+					}
+
+					public void contextCreated(Context cx)
+					{
+						cx.setDebugger(new JSUnitDebugger(null), null);
+						cx.setGeneratingDebug(true);
+						cx.setOptimizationLevel(-1);
+					}
+				});
+			}
+		}
+		finally
+		{
+			Context.exit();
+		}
 	}
 
 	private static void loadScriptFromResource(Class locatorClass, final String name, final Writer writer)
@@ -299,9 +327,12 @@ public class JSUnitToJavaRunner
 		try
 		{
 			Debugger debugger = context.getDebugger();
-//			context.setDebugger(new JSUnitDebugger(debugger), null);
-//			context.setGeneratingDebug(true);
-//			context.setOptimizationLevel(-1);
+			if (!(debugger instanceof JSUnitDebugger))
+			{
+				context.setDebugger(new JSUnitDebugger(debugger), null);
+				context.setGeneratingDebug(true);
+				context.setOptimizationLevel(-1);
+			}
 			try
 			{
 				context.evaluateString(testCodeScope, "var result = new TestResult();\n" + TEST_LISTENER_NAME + ".setResult(result);\nresult.addListener(" +
