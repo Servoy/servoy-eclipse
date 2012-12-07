@@ -88,6 +88,9 @@ public class JSUnitToJavaRunner
 		loadScriptFromResource(JSUnitToJavaRunner.class, "JsUnitToJava.js", writer);
 		writer.append("\n}");
 		jsUnitToJava = writer.toString();
+
+		// make sure that the script are compiled in interpreted mode
+		System.setProperty("servoy.disableScriptCompile", "true");
 	}
 
 	private static void loadScriptFromResource(Class locatorClass, final String name, final Writer writer)
@@ -299,9 +302,9 @@ public class JSUnitToJavaRunner
 		try
 		{
 			Debugger debugger = context.getDebugger();
-//			context.setDebugger(new JSUnitDebugger(debugger), null);
-//			context.setGeneratingDebug(true);
-//			context.setOptimizationLevel(-1);
+			context.setDebugger(new JSUnitDebugger(debugger), null);
+			context.setGeneratingDebug(true);
+			context.setOptimizationLevel(-1);
 			try
 			{
 				context.evaluateString(testCodeScope, "var result = new TestResult();\n" + TEST_LISTENER_NAME + ".setResult(result);\nresult.addListener(" +
