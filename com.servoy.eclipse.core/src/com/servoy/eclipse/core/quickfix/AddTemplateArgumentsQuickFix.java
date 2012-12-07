@@ -21,6 +21,7 @@ import org.eclipse.ui.IMarkerResolution;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.preferences.JSDocScriptTemplates;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -87,7 +88,8 @@ public class AddTemplateArgumentsQuickFix implements IMarkerResolution
 							MethodTemplate template = MethodTemplate.getTemplate(method.getClass(), eventName);
 							MethodTemplate mixedTemplate = new MethodTemplate(template.getDescription(), new MethodArgument(method.getName(),
 								template.getSignature().getType(), template.getSignature().getDescription()), template.getArguments(), source, false);
-							JSDocScriptTemplates prefs = JSDocScriptTemplates.getTemplates();
+							ServoyProject solutionServoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solutionName);
+							JSDocScriptTemplates prefs = JSDocScriptTemplates.getTemplates(solutionServoyProject.getProject(), true);
 							String userTemplate = prefs.getMethodTemplate();
 							String comment = SolutionSerializer.getComment(method, null, ServoyModel.getDeveloperRepository());
 							String methodDeclaration = mixedTemplate.getMethodDeclaration(null, null, userTemplate);
