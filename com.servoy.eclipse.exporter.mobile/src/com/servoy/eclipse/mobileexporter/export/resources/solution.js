@@ -50,19 +50,19 @@ ${loop_variables}					${variableName} : ["${defaultValue}",${variableType}]${end
 			}${endloop_scopes}			
 		},
 		
-		initScope : function (containerName, subscope, scopeObject) {
+		initScope : function (containerName, subscope, scopeToInit, oldScope) {
 			var subs = this[containerName][subscope];
 
 			var fncs = subs.fncs;
 			for (var key in fncs) {
-			   scopeObject[key] = _ServoyUtils_.wrapFunction(eval("(" + fncs[key] + ")"), scopeObject);
-			   eval("var " + key + " = scopeObject[key];");
+				scopeToInit[key] = _ServoyUtils_.wrapFunction(eval("(" + fncs[key] + ")"), scopeToInit);
+				eval("var " + key + " = scopeToInit[key];");
 			}
 
 			var vrbs = subs.vrbs;
 			for (var key in vrbs) {
 				var val = vrbs[key];
-			   _ServoyUtils_.defineVariable(scopeObject, key, eval("(" + val[0] + ")"), val[1]);
+			   _ServoyUtils_.defineVariable(scopeToInit, key, oldScope ? oldScope[key] : eval("(" + val[0] + ")"), val[1]);
 			}
 		}
 	}
