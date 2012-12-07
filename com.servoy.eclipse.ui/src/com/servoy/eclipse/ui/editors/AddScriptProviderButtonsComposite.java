@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.preferences.JSDocScriptTemplates;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -143,13 +144,15 @@ public class AddScriptProviderButtonsComposite extends Composite
 					MethodTemplate template = MethodTemplate.getTemplate(calc.getClass(), methodKey);
 					String calcCode = template.getDefaultMethodCode();
 					if (calcCode == null || calcCode.trim().length() == 0) calcCode = "\treturn \"\";"; //$NON-NLS-1$
-					String userTemplate = JSDocScriptTemplates.getTemplates().getMethodTemplate();
+
+					ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solution.getName());
+					String userTemplate = JSDocScriptTemplates.getTemplates(servoyProject.getProject(), true).getMethodTemplate();
 					calc.setDeclaration(template.getMethodDeclaration(calcName, calcCode, userTemplate));
 
-					ServoyProject servoyProject = servoyModel.getActiveProject();
+					ServoyProject servoyActiveProject = servoyModel.getActiveProject();
 					if (servoyProject != null)
 					{
-						servoyProject.saveEditingSolutionNodes(Utils.asArray(solution.getTableNodes(table), IPersist.class), true);
+						servoyActiveProject.saveEditingSolutionNodes(Utils.asArray(solution.getTableNodes(table), IPersist.class), true);
 					}
 				}
 

@@ -50,6 +50,7 @@ import org.eclipse.swt.widgets.TreeItem;
 
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.preferences.JSDocScriptTemplates;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -168,7 +169,8 @@ public class FoundsetMethodsComposite extends Composite
 								method = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(solution).getFoundsetMethod(
 									methodName, t.getDataSource());
 							}
-							String userTemplate = JSDocScriptTemplates.getTemplates().getMethodTemplate();
+							ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solution.getName());
+							String userTemplate = JSDocScriptTemplates.getTemplates(servoyProject.getProject(), true).getMethodTemplate();
 							ScriptMethod s = solution.createNewFoundsetMethod(nameValidator, t.getDataSource(), methodName, userTemplate);
 							treeViewer.refresh(solution);
 							treeViewer.editElement(s, 0);
