@@ -202,7 +202,7 @@ import com.servoy.j2db.ui.runtime.IRuntimeRtfArea;
 import com.servoy.j2db.ui.runtime.IRuntimeSpinner;
 import com.servoy.j2db.ui.runtime.IRuntimeTextArea;
 import com.servoy.j2db.ui.runtime.IRuntimeTextField;
-import com.servoy.j2db.util.DataSourceUtils;
+import com.servoy.j2db.util.DataSourceUtilsBase;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.Pair;
@@ -2926,7 +2926,7 @@ public class TypeCreator extends TypeCache
 						try
 						{
 							FlattenedSolution fs = servoyProject.getEditingFlattenedSolution();
-							String[] dbServernameTablename = DataSourceUtils.getDBServernameTablename(config.substring(sep + 1));
+							String[] dbServernameTablename = DataSourceUtilsBase.getDBServernameTablename(config.substring(sep + 1));
 							if (dbServernameTablename != null)
 							{
 								IServer server = fs.getSolution().getRepository().getServer(dbServernameTablename[0]);
@@ -2951,7 +2951,7 @@ public class TypeCreator extends TypeCache
 					// this is only dataSource or solutionname[/scope]
 					if (servoyModel.getFlattenedSolution().getSolution() != null)
 					{
-						String[] dbServernameTablename = DataSourceUtils.getDBServernameTablename(config);
+						String[] dbServernameTablename = DataSourceUtilsBase.getDBServernameTablename(config);
 						if (dbServernameTablename != null)
 						{
 							try
@@ -3180,7 +3180,7 @@ public class TypeCreator extends TypeCache
 
 		public boolean isTypeAllowedForMobile()
 		{
-			return false;
+			return true;
 		}
 	}
 
@@ -3378,7 +3378,7 @@ public class TypeCreator extends TypeCache
 
 		String serverName = null;
 		String tableName = null;
-		String[] serverAndTableName = DataSourceUtils.getDBServernameTablename(config);
+		String[] serverAndTableName = DataSourceUtilsBase.getDBServernameTablename(config);
 		if (serverAndTableName != null)
 		{
 			serverName = serverAndTableName[0];
