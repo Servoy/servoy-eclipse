@@ -1338,6 +1338,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				marker.setAttribute("SolutionName", project.getName()); //$NON-NLS-1$
 				marker.setAttribute("PropertyName", propertyName); //$NON-NLS-1$
 				marker.setAttribute("DisplayName", RepositoryHelper.getDisplayName(propertyName, persist.getClass())); //$NON-NLS-1$
+				if (StaticContentSpecLoader.PROPERTY_ROWBGCOLORCALCULATION.getPropertyName().equals(propertyName))
+				{
+					// making rowbgcolor deprecation an error: only deprecated property marker which must be error by default
+					marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+				}
 			}
 		}
 	}
