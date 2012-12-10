@@ -48,6 +48,7 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import com.servoy.eclipse.mobileexporter.export.MobileExporter;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.wizards.FinishPage;
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
 /**
  * @author lvostinar
@@ -179,6 +180,11 @@ public class WarExportPage extends WizardPage
 		if (defaultPath != null)
 		{
 			outputText.setText(defaultPath);
+		}
+		else
+		{
+			File webappsFolder = new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory(), "server/webapps");
+			outputText.setText(webappsFolder.getAbsolutePath());
 		}
 		ModifyListener errorMessageDetecter = new ModifyListener()
 		{
