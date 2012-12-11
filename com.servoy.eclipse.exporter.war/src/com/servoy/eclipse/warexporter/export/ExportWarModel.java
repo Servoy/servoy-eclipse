@@ -100,21 +100,24 @@ public class ExportWarModel
 			while (st.hasMoreTokens())
 			{
 				String name = st.nextToken();
-				selectedServerNames.add(name);
 				ServerConfiguration sc = getServerConfiguration(name);
-				sc.setCatalog(settings.get("export.servers." + name + ".catalog"));
-				sc.setDataModelCloneFrom(settings.get("export.servers." + name + ".clone"));
-				sc.setDriver(settings.get("export.servers." + name + ".driver"));
-				sc.setPassword(settings.get("export.servers." + name + ".password"));
-				sc.setSchema(settings.get("export.servers." + name + ".schema"));
-				sc.setServerUrl(settings.get("export.servers." + name + ".serverurl"));
-				sc.setUserName(settings.get("export.servers." + name + ".username"));
-				sc.setValidationQuery(settings.get("export.servers." + name + ".validationquery"));
-				sc.setConnectionValidationType(Utils.getAsInteger(settings.get("export.servers." + name + ".validationtype")));
-				sc.setMaxActive(Utils.getAsInteger(settings.get("export.servers." + name + ".maxactive")));
-				sc.setMaxIdle(Utils.getAsInteger(settings.get("export.servers." + name + ".maxidle")));
-				sc.setMaxPreparedStatementsIdle(Utils.getAsInteger(settings.get("export.servers." + name + ".maxstatements")));
-				sc.setSkipSysTables(Utils.getAsBoolean(settings.get("export.servers." + name + ".skipsystables")));
+				if (sc != null)
+				{
+					selectedServerNames.add(name);
+					sc.setCatalog(settings.get("export.servers." + name + ".catalog"));
+					sc.setDataModelCloneFrom(settings.get("export.servers." + name + ".clone"));
+					sc.setDriver(settings.get("export.servers." + name + ".driver"));
+					sc.setPassword(settings.get("export.servers." + name + ".password"));
+					sc.setSchema(settings.get("export.servers." + name + ".schema"));
+					sc.setServerUrl(settings.get("export.servers." + name + ".serverurl"));
+					sc.setUserName(settings.get("export.servers." + name + ".username"));
+					sc.setValidationQuery(settings.get("export.servers." + name + ".validationquery"));
+					sc.setConnectionValidationType(Utils.getAsInteger(settings.get("export.servers." + name + ".validationtype")));
+					sc.setMaxActive(Utils.getAsInteger(settings.get("export.servers." + name + ".maxactive")));
+					sc.setMaxIdle(Utils.getAsInteger(settings.get("export.servers." + name + ".maxidle")));
+					sc.setMaxPreparedStatementsIdle(Utils.getAsInteger(settings.get("export.servers." + name + ".maxstatements")));
+					sc.setSkipSysTables(Utils.getAsBoolean(settings.get("export.servers." + name + ".skipsystables")));
+				}
 			}
 		}
 	}
