@@ -2595,7 +2595,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newPostgresqlDatabase.setEnabledStatus();
 		newSybaseDatabase = new NewSybaseDbAction(this);
 		newSybaseDatabase.setEnabledStatus();
-		ServoyModel.getServerManager().addServerConfigListener(new SoltuionExplorerServerConfigSync());
+		ServoyModel.getServerManager().addServerConfigListener(new SolutionExplorerServerConfigSync());
 		duplicateServer = new DuplicateServerAction(this);
 		enableServer = new EnableServerAction(getSite().getShell());
 		toggleFormCommandsActions = new ToggleFormCommandsAction(this);

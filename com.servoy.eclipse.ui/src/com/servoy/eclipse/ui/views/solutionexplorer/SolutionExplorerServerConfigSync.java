@@ -29,7 +29,7 @@ import com.servoy.j2db.persistence.ServerConfig;
  * @author alorincz
  *
  */
-public class SoltuionExplorerServerConfigSync implements IServerConfigListener
+public class SolutionExplorerServerConfigSync implements IServerConfigListener // RAGTEST del in solex tree dispose
 {
 
 	/*
@@ -40,19 +40,13 @@ public class SoltuionExplorerServerConfigSync implements IServerConfigListener
 	 */
 	public void serverConfigurationChanged(ServerConfig oldServerConfig, ServerConfig newServerConfig)
 	{
-		try
+		IViewReference solexRef = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findViewReference(SolutionExplorerView.PART_ID);
+		SolutionExplorerView solexView = null;
+		if (solexRef != null)
 		{
-			IViewReference solexRef = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findViewReference(SolutionExplorerView.PART_ID);
-			SolutionExplorerView solexView = null;
-			if (solexRef != null)
-			{
-				solexView = (SolutionExplorerView)solexRef.getView(false);
-				solexView.enablePostgresDBCreation();
-				solexView.enableSybaseDBCreation();
-			}
-		}
-		catch (Exception e)
-		{
+			solexView = (SolutionExplorerView)solexRef.getView(false);
+			solexView.enablePostgresDBCreation();
+			solexView.enableSybaseDBCreation();
 		}
 	}
 }
