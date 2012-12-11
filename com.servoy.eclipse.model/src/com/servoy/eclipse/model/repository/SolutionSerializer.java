@@ -189,56 +189,52 @@ public class SolutionSerializer
 	public static final String PROPERTIESKEY = "@properties="; //$NON-NLS-1$
 	public static final String TYPEKEY = "@type"; //$NON-NLS-1$
 
-	public static String generateScriptFile(final ISupportChilds parent, final String scopeName, final IDeveloperRepository repository,
+	/**
+	 * 
+	 * @param parent
+	 * @param scriptPath file path to generate
+	 * @param repository
+	 * @param userTemplate
+	 * @return
+	 */
+	public static String generateScriptFile(final ISupportChilds parent, final String scriptPath, final IDeveloperRepository repository,
 		final String userTemplate)
 	{
-		final Map<Pair<String, String>, Map<IPersist, Object>> projectContents = new HashMap<Pair<String, String>, Map<IPersist, Object>>();//filepathname -> map(persist -> contents)
+		final Map<IPersist, Object> fileContents = new HashMap<IPersist, Object>(); // map(persist -> contents)
 		parent.acceptVisitor(new IPersistVisitor()
 		{
 			public Object visit(IPersist p)
 			{
 				if (p == parent) return CONTINUE_TRAVERSAL;
 
-				if (p instanceof IScriptElement)
+				if (p instanceof IScriptElement && scriptPath.equals(getScriptPath(p, false)))
 				{
-					if (scopeName == null || scopeName.equals(((IScriptElement)p).getScopeName()))
-					{
-						Pair<String, String> filepathname = getFilePath(p, false);
-						Map<IPersist, Object> fileContents = projectContents.get(filepathname);
-						if (fileContents == null)
-						{
-							fileContents = new HashMap<IPersist, Object>();
-							projectContents.put(filepathname, fileContents);
-						}
-						Object val = serializePersist(p, true, repository, userTemplate);
-						if (val != null) fileContents.put(p, val);
-					}
+					Object val = serializePersist(p, true, repository, userTemplate);
+					if (val != null) fileContents.put(p, val);
 				}
 				return CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
 			}
 		});
 
-		//write all object files
-		for (Map<IPersist, Object> fileContents : projectContents.values())
+		// write all objects for the target file to the string
+		if (fileContents.size() > 0)
 		{
 			AbstractBase[] persistArray = fileContents.keySet().toArray(new AbstractBase[fileContents.size()]);
 			Arrays.sort(persistArray, VARS_METHODS);
 
-			if (persistArray.length > 0)
+			StringBuilder sb = new StringBuilder();
+			for (AbstractBase persist : persistArray)
 			{
-				StringBuilder sb = new StringBuilder();
-				for (int i = 0; i < persistArray.length; i++)
+				if (sb.length() > 0) sb.append('\n');
+
+				Object content = fileContents.get(persist);
+				if (content instanceof CharSequence)
 				{
-					Object content = fileContents.get(persistArray[i]);
-					if (content instanceof CharSequence)
-					{
-						String val = ((CharSequence)content).toString();
-						sb.append(val);
-						if (i < persistArray.length - 1) sb.append('\n');
-					}
+					sb.append(((CharSequence)content).toString());
 				}
-				return sb.toString();
 			}
+
+			return sb.toString();
 		}
 
 		return ""; //$NON-NLS-1$

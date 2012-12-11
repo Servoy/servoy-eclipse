@@ -739,16 +739,16 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 		}
 
 		// regenerate the script files for parents that have deleted scripts
-		Set<IFile> scriptFiles = new HashSet<IFile>();
+		Set<String> scriptPaths = new HashSet<String>();
 		for (IScriptElement scriptToRegenerate : scriptsToRegenerate)
 		{
-			final IFile scriptFile = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(SolutionSerializer.getScriptPath(scriptToRegenerate, false)));
-			if (scriptFiles.add(scriptFile))
+			String scriptPath = SolutionSerializer.getScriptPath(scriptToRegenerate, false);
+			if (scriptPaths.add(scriptPath))
 			{
-				final String fileContent = SolutionSerializer.generateScriptFile(scriptToRegenerate.getParent(), scriptToRegenerate.getScopeName(), repository,
-					null);
+				final IFile scriptFile = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(scriptPath));
 				if (scriptFile.exists())
 				{
+					String fileContent = SolutionSerializer.generateScriptFile(scriptToRegenerate.getParent(), scriptPath, repository, null);
 					if (fileContent.trim().length() > 0)
 					{
 						List<IUnexpectedSituationHandler> l = ResourcesUtils.getExtensions(IUnexpectedSituationHandler.EXTENSION_ID);

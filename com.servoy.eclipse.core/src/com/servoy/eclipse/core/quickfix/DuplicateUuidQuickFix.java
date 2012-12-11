@@ -100,7 +100,7 @@ public class DuplicateUuidQuickFix implements IMarkerResolution
 					Object content = null;
 					if (persist instanceof IScriptElement)
 					{
-						content = SolutionSerializer.generateScriptFile(persist.getParent(), ((IScriptElement)persist).getScopeName(), repository, null);
+						content = SolutionSerializer.generateScriptFile(persist.getParent(), SolutionSerializer.getScriptPath(persist, false), repository, null);
 					}
 					else
 					{
