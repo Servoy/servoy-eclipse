@@ -155,11 +155,9 @@ public class AlignmentFeedbackHelper
 		}
 		location = location.getCopy();
 		feedbackLayer.translateToRelative(location);
+		StringBuilder sb = new StringBuilder().append('(').append(location.x).append(',').append(location.y);
 		Dimension size = request.getSize();
-		return new StringBuilder().append('(')//
-		.append(location.x).append(',').append(location.y)//
-		.append(' ')//
-		.append(size.width).append('x').append(size.height)//
-		.append(')').toString();
+		if (size != null) sb.append(' ').append(size.width).append('x').append(size.height);
+		return sb.append(')').toString();
 	}
 }

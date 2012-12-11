@@ -154,6 +154,8 @@ public class ElementCreationTool extends BaseElementCreationTool
 			req.setSize(result.getSize());
 		}
 
+		if (req.getLocation() == null) req.setLocation(getLocation()); // set location from mouse move
+
 		if (getCreateRequest() instanceof CreateElementRequest)
 		{
 			((CreateElementRequest)getCreateRequest()).setResizable(isInState(STATE_DRAG_IN_PROGRESS));
