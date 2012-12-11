@@ -1277,13 +1277,15 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					if (solution.getLoginSolutionName() != null)
 					{
 						// login form will be ignored
-						addDeprecatedPropertyUsageMarker(persist, project, StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName(), "Solution '" +
-							solution.getName() + "' has a loginForm property set which is overridden by the loginSolutionName property.");
+						addDeprecatedPropertyUsageMarker(persist, project, DEPRECATED_PROPERTY_USAGE_PROBLEM,
+							StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName(), "Solution '" + solution.getName() +
+								"' has a loginForm property set which is overridden by the loginSolutionName property.");
 					}
 					else if (solution.getSolutionType() != SolutionMetaData.WEB_CLIENT_ONLY)
 					{
 						// loginForm is deprecated
-						addDeprecatedPropertyUsageMarker(persist, project, StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName(),
+						addDeprecatedPropertyUsageMarker(persist, project, DEPRECATED_PROPERTY_USAGE_PROBLEM,
+							StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName(),
 							"Solution '" + solution.getName() + "' has a loginForm property set which is deprecated, use loginSolutionName property instead."); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 				}
@@ -1311,9 +1313,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				try
 				{
-					addDeprecatedPropertyUsageMarker(
-						persist,
+					//only rowBGColorCalculation deprecated property usage marker is error by default
+					addDeprecatedPropertyUsageMarker(persist,
 						project,
+						new Pair<String, ProblemSeverity>("deprecatedPropertyUsage", ProblemSeverity.ERROR), //$NON-NLS-1$
 						StaticContentSpecLoader.PROPERTY_ROWBGCOLORCALCULATION.getPropertyName(),
 						type +
 							" '" + ((ISupportName)persist).getName() + "' has rowBGColorCalculation property set which is deprecated, use CSS (odd/even/selected) or onRender event instead."); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1326,23 +1329,18 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
-	private void addDeprecatedPropertyUsageMarker(IPersist persist, IProject project, String propertyName, String message) throws CoreException
+	private void addDeprecatedPropertyUsageMarker(IPersist persist, IProject project, Pair<String, ProblemSeverity> serverityPair, String propertyName,
+		String message) throws CoreException
 	{
 		if (message != null)
 		{
-			IMarker marker = addMarker(project, DEPRECATED_PROPERTY_USAGE, message, -1, DEPRECATED_PROPERTY_USAGE_PROBLEM, IMarker.PRIORITY_NORMAL, null,
-				persist);
+			IMarker marker = addMarker(project, DEPRECATED_PROPERTY_USAGE, message, -1, serverityPair, IMarker.PRIORITY_NORMAL, null, persist);
 			if (marker != null)
 			{
 				marker.setAttribute("Uuid", persist.getUUID().toString()); //$NON-NLS-1$
 				marker.setAttribute("SolutionName", project.getName()); //$NON-NLS-1$
 				marker.setAttribute("PropertyName", propertyName); //$NON-NLS-1$
 				marker.setAttribute("DisplayName", RepositoryHelper.getDisplayName(propertyName, persist.getClass())); //$NON-NLS-1$
-				if (StaticContentSpecLoader.PROPERTY_ROWBGCOLORCALCULATION.getPropertyName().equals(propertyName))
-				{
-					// making rowbgcolor deprecation an error: only deprecated property marker which must be error by default
-					marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-				}
 			}
 		}
 	}
