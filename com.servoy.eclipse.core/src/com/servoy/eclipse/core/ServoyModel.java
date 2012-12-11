@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.core;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
@@ -1974,7 +1975,7 @@ public class ServoyModel extends AbstractServoyModel
 	 * @param al
 	 * @throws RepositoryException
 	 */
-	private void handleChangedFilesInSolutionProject(IProject project, Solution solution, List<IResourceDelta> al) throws RepositoryException
+	private void handleChangedFilesInSolutionProject(final IProject project, Solution solution, List<IResourceDelta> al) throws RepositoryException
 	{
 		final SolutionDeserializer.ObjBeforeJSExtensionComparator stringComparer = new SolutionDeserializer.ObjBeforeJSExtensionComparator();
 		Collections.sort(al, new Comparator<IResourceDelta>()
@@ -1995,122 +1996,146 @@ public class ServoyModel extends AbstractServoyModel
 
 		changedFiles.removeAll(ignoreOnceFiles);
 		ignoreOnceFiles.clear();
-		if (changedFiles.size() == 0)
+		if (changedFiles.size() > 0)
 		{
-			return;
-		}
+			final ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solution.getName());
+			final IContainer workspace = project.getParent();
 
-		final ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solution.getName());
-		final IContainer workspace = project.getParent();
-
-		SolutionDeserializer sd = new SolutionDeserializer(getDeveloperRepository(), servoyProject);
-		final Set<IPersist> changedScriptElements = handleChangedFiles(project, solution, changedFiles, servoyProject, workspace, sd);
-		// Regenerate script files for parents that have changed script elements.
-		if (changedScriptElements.size() > 0)
-		{
-			final Job job = new UIJob("Check changed script files")
+			SolutionDeserializer sd = new SolutionDeserializer(getDeveloperRepository(), servoyProject);
+			final Set<IPersist> changedScriptElements = handleChangedFiles(project, solution, changedFiles, servoyProject, workspace, sd);
+			// Regenerate script files for parents that have changed script elements.
+			if (changedScriptElements.size() > 0)
 			{
-
-				@Override
-				public IStatus runInUIThread(IProgressMonitor monitor)
+				final Job job = new UIJob("Check changed script files")
 				{
-					//if (true) return Status.OK_STATUS;
-					Set<IFile> recreatedFiles = new HashSet<IFile>();
-					for (IPersist persist : changedScriptElements)
+					@Override
+					public IStatus runInUIThread(IProgressMonitor monitor)
 					{
-						IFile scriptFile = workspace.getFile(new Path(SolutionSerializer.getScriptPath(persist, false)));
-						if (!recreatedFiles.add(scriptFile))
+						//if (true) return Status.OK_STATUS;
+						Set<IFile> recreatedFiles = new HashSet<IFile>();
+						for (IPersist persist : changedScriptElements)
 						{
-							continue;
-						}
-						MultiTextEdit textEdit = getScriptFileChanges(persist, scriptFile);
-
-						if (textEdit.getChildrenSize() > 0)
-						{
-							// ignore the next time once. So that it won't be parsed again.
-							addIgnoreFile(scriptFile.getLocation().toFile());
-
-							ITextFileBufferManager textFileBufferManager = FileBuffers.getTextFileBufferManager();
-							try
+							IFile scriptFile = workspace.getFile(new Path(SolutionSerializer.getScriptPath(persist, false)));
+							if (!recreatedFiles.add(scriptFile))
 							{
-								textFileBufferManager.connect(scriptFile.getFullPath(), LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
-							}
-							catch (CoreException e)
-							{
-								ServoyLog.logError(e);
 								continue;
 							}
+							MultiTextEdit textEdit = getScriptFileChanges(persist, scriptFile);
 
-							try
+							if (textEdit.getChildrenSize() > 0)
 							{
-								ITextFileBuffer textFileBuffer = textFileBufferManager.getTextFileBuffer(scriptFile.getFullPath(), LocationKind.IFILE);
-								IDocument document = textFileBuffer.getDocument();
+								// ignore the next time once. So that it won't be parsed again.
+								addIgnoreFile(scriptFile.getLocation().toFile());
 
-								FileEditorInput editorInput = new FileEditorInput(scriptFile);
-								final IEditorPart openEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow() == null ? null
-									: PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findEditor(editorInput);
-
-								boolean dirty = openEditor != null ? openEditor.isDirty() : textFileBuffer.isDirty();
-
+								ITextFileBufferManager textFileBufferManager = FileBuffers.getTextFileBufferManager();
 								try
 								{
-									textEdit.apply(document);
-								}
-								catch (Exception e)
-								{
-									ServoyLog.logError(e);
-								}
-
-								if (!dirty)
-								{
-									if (openEditor != null)
-									{
-										openEditor.doSave(monitor);
-									}
-									else
-									{
-										try
-										{
-											textFileBuffer.commit(monitor, true);
-										}
-										catch (CoreException e)
-										{
-											ServoyLog.logError(e);
-										}
-									}
-								}
-							}
-							finally
-							{
-								try
-								{
-									textFileBufferManager.disconnect(scriptFile.getFullPath(), LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
+									textFileBufferManager.connect(scriptFile.getFullPath(), LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
 								}
 								catch (CoreException e)
 								{
 									ServoyLog.logError(e);
+									continue;
+								}
+
+								try
+								{
+									ITextFileBuffer textFileBuffer = textFileBufferManager.getTextFileBuffer(scriptFile.getFullPath(), LocationKind.IFILE);
+									IDocument document = textFileBuffer.getDocument();
+
+									FileEditorInput editorInput = new FileEditorInput(scriptFile);
+									final IEditorPart openEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow() == null ? null
+										: PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findEditor(editorInput);
+
+									boolean dirty = openEditor != null ? openEditor.isDirty() : textFileBuffer.isDirty();
+
+									try
+									{
+										textEdit.apply(document);
+									}
+									catch (Exception e)
+									{
+										ServoyLog.logError(e);
+									}
+
+									if (!dirty)
+									{
+										if (openEditor != null)
+										{
+											openEditor.doSave(monitor);
+										}
+										else
+										{
+											try
+											{
+												textFileBuffer.commit(monitor, true);
+											}
+											catch (CoreException e)
+											{
+												ServoyLog.logError(e);
+											}
+										}
+									}
+								}
+								finally
+								{
+									try
+									{
+										textFileBufferManager.disconnect(scriptFile.getFullPath(), LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
+									}
+									catch (CoreException e)
+									{
+										ServoyLog.logError(e);
+									}
 								}
 							}
 						}
+						return Status.OK_STATUS;
+					}
+				};
+
+				job.setUser(false);
+				job.setSystem(true);
+				job.setRule(getWorkspace().getRoot());
+				// Schedule the job in the UI thread, the job is only scheduled when the UI thread is released (may be held by
+				// EclipseRepository.updateNodesInWorkspace())
+				// deadlock situation: scriptjob is waits for UI thread but keeps workspace rule, second job in EclipseRepository.updateNodesInWorkspace
+				// is not started because of rule conflicting and main thread (in EclipseRepository.updateNodesInWorkspace) hold UI thread and waits for second job to finish (latch)
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						job.schedule();
+					}
+				});
+			}
+		}
+
+		// Always make sure globals.js exists
+		if (!project.getFile(SolutionSerializer.GLOBALS_FILE).exists())
+		{
+			WorkspaceJob wsjob = new WorkspaceJob("Create empty globals file")
+			{
+				@Override
+				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+				{
+					IFile globalsFile = project.getFile(SolutionSerializer.GLOBALS_FILE);
+					try
+					{
+						if (!globalsFile.exists())
+						{
+							globalsFile.create(new ByteArrayInputStream(new byte[0]), true, null);
+						}
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError("Could not create empty globals file " + globalsFile, e);
 					}
 					return Status.OK_STATUS;
 				}
 			};
-
-			job.setUser(false);
-			job.setSystem(true);
-			job.setRule(getWorkspace().getRoot());
-			// Schedule the job in the UI thread, the job is only scheduled when the UI thread is released (may be held by
-			// EclipseRepository.updateNodesInWorkspace())
-			// deadlock situation: scriptjob is waits for UI thread but keeps workspace rule, second job in EclipseRepository.updateNodesInWorkspace
-			// is not started because of rule conflicting and main thread (in EclipseRepository.updateNodesInWorkspace) hold UI thread and waits for second job to finish (latch)
-			Display.getDefault().asyncExec(new Runnable()
-			{
-				public void run()
-				{
-					job.schedule();
-				}
-			});
+			wsjob.setUser(true);
+			wsjob.schedule();
 		}
 	}
 

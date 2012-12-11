@@ -3329,37 +3329,40 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		private int getProblemType(SimpleUserNode element)
 		{
-			int problemLevel = -1;
-
 			Object realObject = element.getRealObject();
 			if (realObject instanceof ScriptVariable || realObject instanceof ScriptMethod)
 			{
-				String scriptPath = SolutionSerializer.getScriptPath((IPersist)realObject, false);
-				IFile jsResource = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
-				try
+				IFile jsResource = ServoyModel.getWorkspace().getRoot().getFile(new Path(SolutionSerializer.getScriptPath((IPersist)realObject, false)));
+				if (jsResource.exists())
 				{
-					IMarker[] jsMarkers = jsResource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-					if (jsMarkers != null && jsMarkers.length > 0)
+					try
 					{
-						ISourceModule sourceModule = DLTKCore.createSourceModuleFrom(jsResource);
-						Script script = JavaScriptParserUtil.parse(sourceModule);
-						if (realObject instanceof ScriptMethod)
+						IMarker[] jsMarkers = jsResource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+						if (jsMarkers != null && jsMarkers.length > 0)
 						{
-							problemLevel = getProblemLevel(jsMarkers, sourceModule, getFunctionStatementForName(script, ((ScriptMethod)realObject).getName()));
-						}
-						else if (realObject instanceof ScriptVariable)
-						{
-							problemLevel = getProblemLevel(jsMarkers, sourceModule,
-								getVariableDeclarationForName(script, ((ScriptVariable)realObject).getName()));
+							ISourceModule sourceModule = DLTKCore.createSourceModuleFrom(jsResource);
+							Script script = JavaScriptParserUtil.parse(sourceModule);
+
+							if (realObject instanceof ScriptMethod)
+							{
+								return getProblemLevel(jsMarkers, sourceModule, getFunctionStatementForName(script, ((ScriptMethod)realObject).getName()));
+							}
+
+							if (realObject instanceof ScriptVariable)
+							{
+								return getProblemLevel(jsMarkers, sourceModule, getVariableDeclarationForName(script, ((ScriptVariable)realObject).getName()));
+							}
 						}
 					}
-				}
-				catch (Exception e)
-				{
-					ServoyLog.logError(e);
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+					}
 				}
 			}
-			return problemLevel;
+
+			// unspecified
+			return -1;
 		}
 
 		/**
