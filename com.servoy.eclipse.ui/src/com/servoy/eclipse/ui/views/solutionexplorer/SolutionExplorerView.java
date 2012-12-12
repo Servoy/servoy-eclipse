@@ -1406,15 +1406,19 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		});
 	}
 
+	private Solution getActiveSolution()
+	{
+		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+		return (activeProject != null ? activeProject.getSolution() : null);
+	}
+
 	private MobileViewerFilter mobileViewerFilter;
 
 	private void createTreeViewer(Composite parent)
 	{
 		tree = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 
-		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-		Solution s = (activeProject != null ? activeProject.getSolution() : null);
-		if (SolutionMetaData.isServoyMobileSolution(s))
+		if (SolutionMetaData.isServoyMobileSolution(getActiveSolution()))
 		{
 			if (mobileViewerFilter == null) mobileViewerFilter = new MobileViewerFilter();
 			tree.addFilter(mobileViewerFilter);
@@ -1587,18 +1591,27 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			servoyModel.addSolutionMetaDataChangeListener(solutionMetaDataChangeListener);
 		}
 
-		ServoyProject activeProject = servoyModel.getActiveProject();
-		Solution s = (activeProject != null ? activeProject.getSolution() : null);
 		List<ViewerFilter> vf = Arrays.asList(tree.getFilters());
-		if (SolutionMetaData.isServoyMobileSolution(s))
+		if (SolutionMetaData.isServoyMobileSolution(getActiveSolution()))
 		{
 			if (mobileViewerFilter == null) mobileViewerFilter = new MobileViewerFilter();
 			if (!vf.contains(mobileViewerFilter)) tree.addFilter(mobileViewerFilter);
+
+			if (openNewSubFormWizardAction != null && newActionInTreeSecondary != null)
+			{
+				newActionInTreeSecondary.unregisterAction(UserNodeType.FORM);
+			}
 		}
 		else
 		{
 			if (mobileViewerFilter != null && vf.contains(mobileViewerFilter)) tree.removeFilter(mobileViewerFilter);
+
+			if (openNewSubFormWizardAction != null && newActionInTreeSecondary != null)
+			{
+				newActionInTreeSecondary.registerAction(UserNodeType.FORM, openNewSubFormWizardAction);
+			}
 		}
+
 
 		tree.setInput(roots);
 		drillDownAdapter.reset();

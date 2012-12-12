@@ -94,6 +94,7 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Style;
@@ -101,6 +102,7 @@ import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.util.DataSourceUtils;
+import com.servoy.j2db.util.DataSourceUtilsBase;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
@@ -526,11 +528,12 @@ public class NewFormWizard extends Wizard implements INewWizard
 				}
 			});
 			dataSourceViewer.setInput(new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, true));
-			dataSourceViewer.setEditable(true);
+			dataSourceViewer.setEditable(!SolutionMetaData.isServoyMobileSolution(getActiveSolution()));
 			Control dataSOurceControl = dataSourceViewer.getControl();
 
 			Label extendsLabel = new Label(topLevel, SWT.NONE);
 			extendsLabel.setText("E&xtends");
+			extendsLabel.setEnabled(!SolutionMetaData.isServoyMobileSolution(getActiveSolution()));
 
 			extendsFormViewer = new TreeSelectViewer(topLevel, SWT.NONE);
 			extendsFormViewer.setTitleText("Select super form");
@@ -551,11 +554,13 @@ public class NewFormWizard extends Wizard implements INewWizard
 				}
 			});
 
-			extendsFormViewer.setEditable(true);
+			extendsFormViewer.setEnabled(!SolutionMetaData.isServoyMobileSolution(getActiveSolution()));
+			extendsFormViewer.setEditable(!SolutionMetaData.isServoyMobileSolution(getActiveSolution()));
 			Control extendsFormControl = extendsFormViewer.getControl();
 
 			Label styleLabel = new Label(topLevel, SWT.NONE);
 			styleLabel.setText("St&yle");
+			styleLabel.setEnabled(!SolutionMetaData.isServoyMobileSolution(getActiveSolution()));
 
 			styleNameCombo = new ComboViewer(topLevel, SWT.BORDER | SWT.READ_ONLY);
 			styleNameCombo.setContentProvider(new ArrayContentProvider());
@@ -567,6 +572,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 				}
 			});
 			Combo styleNameComboControl = styleNameCombo.getCombo();
+			styleNameComboControl.setEnabled(!SolutionMetaData.isServoyMobileSolution(getActiveSolution()));
 
 			Label templateLabel = new Label(topLevel, SWT.NONE);
 			templateLabel.setText("T&emplate");
@@ -861,7 +867,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 					// dataSource
 					if (formObject.has(StaticContentSpecLoader.PROPERTY_DATASOURCE.getPropertyName()))
 					{
-						String[] stn = DataSourceUtils.getDBServernameTablename(formObject.getString(StaticContentSpecLoader.PROPERTY_DATASOURCE.getPropertyName()));
+						String[] stn = DataSourceUtilsBase.getDBServernameTablename(formObject.getString(StaticContentSpecLoader.PROPERTY_DATASOURCE.getPropertyName()));
 						if (stn != null)
 						{
 							dataSourceViewer.setSelection(new StructuredSelection(new TableWrapper(stn[0], stn[1], EditorUtil.isViewTypeTable(stn[0], stn[1]))));
@@ -1119,5 +1125,11 @@ public class NewFormWizard extends Wizard implements INewWizard
 			return ((IStructuredSelection)treeViewer.getSelection()).toArray();
 		}
 
+	}
+
+	private Solution getActiveSolution()
+	{
+		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+		return (activeProject != null ? activeProject.getSolution() : null);
 	}
 }

@@ -265,12 +265,12 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		{
 			if (FoundSet.class.equals(children[i].getRealObject()))
 			{
-				newChildren[i] = new PlatformSimpleUserNode(FoundSet.JS_FOUNDSET, UserNodeType.RETURNTYPE, FoundSet.class, null);
+				newChildren[i] = new PlatformSimpleUserNode(FoundSet.JS_FOUNDSET, UserNodeType.RETURNTYPE, FoundSet.class, (Object)null, FoundSet.class);
 				newChildren[i].parent = databaseManager;
 			}
 			else if (Record.class.equals(children[i].getRealObject()))
 			{
-				newChildren[i] = new PlatformSimpleUserNode(Record.JS_RECORD, UserNodeType.RETURNTYPE, Record.class, null);
+				newChildren[i] = new PlatformSimpleUserNode(Record.JS_RECORD, UserNodeType.RETURNTYPE, Record.class, (Object)null, Record.class);
 				newChildren[i].parent = databaseManager;
 			}
 			else newChildren[i] = children[i];
