@@ -82,7 +82,7 @@ public class MobileGroupGraphicalEditPart extends BaseGroupGraphicalEditPart
 	{
 		IFigure fig = new GroupFigure();
 		fig.setLayoutManager(new MobileGroupLayoutManager());
-		fig.addFigureListener(new SetBoundsToSupportBoundsFigureListener(getGroup(), false));
+		fig.addFigureListener(new SetBoundsToSupportBoundsFigureListener(getForm(), getGroup(), false));
 		return fig;
 	}
 

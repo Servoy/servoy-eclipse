@@ -116,6 +116,7 @@ public class AddInsetListCommand extends BaseFormPlaceElementCommand
 			tabForm.putCustomMobileProperty("mobileform", Boolean.TRUE);
 			tabForm.putCustomMobileProperty("listitemFormContainer", form.getUUID());
 			tabForm.putCustomMobileProperty("listitemFormTab", tabPanel.getUUID());
+			tabForm.setStyleName("_servoy_mobile"); // set internal style name
 
 			// add items for properties
 			AddFormListCommand.addlistItems(tabForm);
@@ -127,6 +128,7 @@ public class AddInsetListCommand extends BaseFormPlaceElementCommand
 			// for debug in developer
 			header.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST | IAnchorConstants.NORTH);
 			header.setHorizontalAlignment(ISupportTextSetup.CENTER);
+			header.setStyleClass("b"); // default for headers
 
 			// add tab
 			ElementFactory.createTabs(application, tabPanel, new Object[] { new ElementFactory.RelatedForm(null, tabForm) }, null, TabPanel.DEFAULT, null);

@@ -56,9 +56,9 @@ import com.servoy.j2db.dataprocessing.IValueList;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
-import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.smart.dataui.DataCheckBox;
 import com.servoy.j2db.smart.dataui.DataChoice;
 import com.servoy.j2db.smart.dataui.DataComboBox;
@@ -308,7 +308,7 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 			}
 		};
 
-		figure.addFigureListener(new SetBoundsToSupportBoundsFigureListener((ISupportBounds)editPart.getModel(), false));
+		figure.addFigureListener(new SetBoundsToSupportBoundsFigureListener(form, (ISupportBounds)editPart.getModel(), false));
 		return figure;
 	}
 }

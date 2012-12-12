@@ -32,6 +32,7 @@ import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.persistence.RepositoryException;
 
 /**
  * This edit policy enables edit actions on a Form.
@@ -67,13 +68,20 @@ public class MobileFormEditPolicy extends ComponentEditPolicy
 			Form form = (Form)getHost().getModel();
 
 			Object createType = ((CreateRequest)request).getNewObjectType();
-			if (createType == MobileVisualFormEditor.REQ_PLACE_HEADER && !form.hasPart(Part.HEADER))
+
+			if ((createType == MobileVisualFormEditor.REQ_PLACE_HEADER && !form.hasPart(Part.HEADER)) ||
+				(createType == MobileVisualFormEditor.REQ_PLACE_FOOTER && !form.hasPart(Part.FOOTER)))
 			{
-				command = new AddPartsCommand(form, new int[] { Part.HEADER });
-			}
-			else if (createType == MobileVisualFormEditor.REQ_PLACE_FOOTER && !form.hasPart(Part.FOOTER))
-			{
-				command = new AddPartsCommand(form, new int[] { Part.FOOTER });
+				command = new AddPartsCommand(form, new int[] { createType == MobileVisualFormEditor.REQ_PLACE_HEADER ? Part.HEADER : Part.FOOTER })
+				{
+					@Override
+					protected Part createPart(int partTypeId) throws RepositoryException
+					{
+						Part part = super.createPart(partTypeId);
+						part.setStyleClass("b"); // default theme
+						return part;
+					}
+				};
 			}
 			else if (createType == MobileVisualFormEditor.REQ_PLACE_FIELD)
 			{

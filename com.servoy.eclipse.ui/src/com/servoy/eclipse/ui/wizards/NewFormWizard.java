@@ -300,11 +300,11 @@ public class NewFormWizard extends Wizard implements INewWizard
 				form.setStyleName(style == null ? null : style.getName());
 			}
 
-
 			if (servoyProject.getSolution().getSolutionType() == SolutionMetaData.MOBILE)
 			{
 				// mobile solution, make the form mobile
 				form.putCustomMobileProperty("mobileform", Boolean.TRUE);
+				form.setStyleName("_servoy_mobile"); // set internal style name
 			}
 
 			if (superForm != null && template == null)

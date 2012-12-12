@@ -50,6 +50,11 @@ public class AddPartsCommand extends Command
 		setLabel("Add part(s)");
 	}
 
+	protected Part createPart(int partTypeId) throws RepositoryException
+	{
+		return form.createNewPart(partTypeId, Integer.MAX_VALUE); // is used in sorting in form.getParts()
+	}
+
 	@Override
 	public void execute()
 	{
@@ -58,7 +63,7 @@ public class AddPartsCommand extends Command
 			List<Part> list = new ArrayList<Part>();
 			for (int partTypeId : partTypeIds)
 			{
-				Part part = form.createNewPart(partTypeId, Integer.MAX_VALUE); // is used in sorting in form.getParts()
+				Part part = createPart(partTypeId);
 				list.add(part);
 				int prevHeight = -1;
 				int nextHeight = 0;

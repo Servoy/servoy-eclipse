@@ -110,7 +110,7 @@ public class MobileListGraphicalEditPart extends AbstractGraphicalEditPart imple
 	{
 		IFigure fig = new MobileListFigure(getModel().tabPanel != null); // when tabPanel is filled this is an inset list
 		fig.setLayoutManager(new MobileListFigureLayoutManager());
-		fig.addFigureListener(new SetBoundsToSupportBoundsFigureListener(getModel(), false));
+		fig.addFigureListener(new SetBoundsToSupportBoundsFigureListener(editorPart.getForm(), getModel(), false));
 		return fig;
 	}
 

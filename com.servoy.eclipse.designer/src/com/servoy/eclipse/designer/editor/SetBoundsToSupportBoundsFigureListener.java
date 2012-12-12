@@ -25,6 +25,7 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Rectangle;
 
 import com.servoy.eclipse.designer.property.FormElementGroupPropertySource;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.ISupportBounds;
 
@@ -37,11 +38,13 @@ import com.servoy.j2db.persistence.ISupportBounds;
  */
 public class SetBoundsToSupportBoundsFigureListener implements FigureListener
 {
+	private final Form form;
 	private final ISupportBounds element;
 	private final boolean relativeToParent;
 
-	public SetBoundsToSupportBoundsFigureListener(ISupportBounds element, boolean relativeToParent)
+	public SetBoundsToSupportBoundsFigureListener(Form context, ISupportBounds element, boolean relativeToParent)
 	{
+		this.form = context;
 		this.element = element;
 		this.relativeToParent = relativeToParent;
 	}
@@ -63,7 +66,7 @@ public class SetBoundsToSupportBoundsFigureListener implements FigureListener
 			Point newLocation = new Point(bounds.x, bounds.y);
 			if (element instanceof FormElementGroup)
 			{
-				FormElementGroupPropertySource formElementGroupPropertySource = new FormElementGroupPropertySource((FormElementGroup)element, null);
+				FormElementGroupPropertySource formElementGroupPropertySource = new FormElementGroupPropertySource((FormElementGroup)element, form);
 				formElementGroupPropertySource.setLocation(newLocation);
 			}
 			else

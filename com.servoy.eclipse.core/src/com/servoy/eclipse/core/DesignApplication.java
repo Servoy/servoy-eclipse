@@ -68,6 +68,7 @@ import com.servoy.j2db.dataprocessing.IFoundSetManagerInternal;
 import com.servoy.j2db.dataprocessing.IGlobalValueEntry;
 import com.servoy.j2db.dataprocessing.SortColumn;
 import com.servoy.j2db.dataprocessing.SwingFoundSetFactory;
+import com.servoy.j2db.debug.DebugWebClient;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -240,7 +241,13 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	public FlattenedSolution getFlattenedSolution()
 	{
 		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-		return activeProject == null ? null : activeProject.getEditingFlattenedSolution();
+		if (activeProject == null)
+		{
+			return null;
+		}
+		FlattenedSolution flattenedSolution = activeProject.getEditingFlattenedSolution();
+		DebugWebClient.installServoyMobileInternalStyle(flattenedSolution);
+		return flattenedSolution;
 	}
 
 	public IFormManager getFormManager()
