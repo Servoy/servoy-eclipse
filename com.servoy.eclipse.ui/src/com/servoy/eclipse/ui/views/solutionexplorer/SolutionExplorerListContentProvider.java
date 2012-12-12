@@ -121,7 +121,7 @@ import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.annotations.AnnotationManager;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
-import com.servoy.j2db.util.DataSourceUtils;
+import com.servoy.j2db.util.DataSourceUtilsBase;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.ITagResolver;
@@ -765,7 +765,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			String i18nDatasource = module.getSolution().getI18nDataSource();
 			if (i18nDatasource != null)
 			{
-				String[] i18nServerTable = DataSourceUtils.getDBServernameTablename(i18nDatasource);
+				String[] i18nServerTable = DataSourceUtilsBase.getDBServernameTablename(i18nDatasource);
 				if (i18nServerTable[0] != null && i18nServerTable[1] != null) activeI18NFileNames.add(i18nServerTable[0] + '.' + i18nServerTable[1]);
 			}
 		}
@@ -1428,6 +1428,15 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					if (adapter.isDeprecated((String)element)) continue;
 					if (adapter.isDeprecated(constantsElementName + (String)element)) continue;
 
+					if (isForMobileSolution)
+					{
+						// this field is a constant
+						Field field = (Field)ijm.getField((String)element, true);
+						if (!AnnotationManager.getInstance().isMobileAnnotationPresent(field))
+						{
+							continue;
+						}
+					}
 					dlm.add(new UserNode((String)element, actionType, new FieldFeedback((String)element, constantsElementName, resolver, scriptObject, ijm),
 						real, uiActivator.loadImageFromBundle("constant.gif")));
 				}
@@ -1740,7 +1749,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 		public String getCode()
 		{
-			return DataSourceUtils.DB_DATASOURCE_SCHEME_COLON_SLASH + serverName + '/' + tableName;
+			return DataSourceUtilsBase.DB_DATASOURCE_SCHEME_COLON_SLASH + serverName + '/' + tableName;
 		}
 
 		public String getToolTipText()

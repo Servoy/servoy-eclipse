@@ -1182,10 +1182,19 @@ public class TypeCreator extends TypeCache
 						if (!visible) property.setVisible(false);
 						property.setStatic(type == STATIC_FIELD);
 
-						if (isServoyMobileSolutionType() && object instanceof BeanProperty)
+						if (isServoyMobileSolutionType() && (object instanceof BeanProperty || (object instanceof Field && property.isStatic())))
 						{
-							boolean visibility = mobileAllowedTypes.get(typeName) != null ? AnnotationManager.getInstance().isMobileAnnotationPresent(
-								((BeanProperty)object).getGetter()) : false;
+							boolean visibility = false;
+							if (object instanceof BeanProperty)
+							{
+								visibility = mobileAllowedTypes.get(typeName) != null ? AnnotationManager.getInstance().isMobileAnnotationPresent(
+									((BeanProperty)object).getGetter()) : false;
+							}
+							else if (object instanceof Field && descriptor == CONSTANT)
+							{
+								visibility = mobileAllowedTypes.get(typeName) != null ? AnnotationManager.getInstance().isMobileAnnotationPresent(
+									((Field)object)) : false;
+							}
 							if (!visibility)
 							{
 								property.setVisibility(Visibility.INTERNAL);
