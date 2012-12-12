@@ -23,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -33,6 +34,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -43,6 +46,8 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.IValueFilter;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.component.ComponentFactory;
+import com.servoy.j2db.dataprocessing.IValueList;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractScriptProvider;
 import com.servoy.j2db.persistence.BaseComponent;
@@ -214,20 +219,37 @@ public class MobileExporter
 			}
 			// export valuelists
 			Iterator<ValueList> valuelistIterator = project.getSolution().getValueLists(false);
-			List<ServoyJSONObject> valuelistJSons = new ArrayList<ServoyJSONObject>();
+			List<JSONObject> valuelistJSons = new ArrayList<JSONObject>();
 			while (valuelistIterator.hasNext())
 			{
 				final ValueList valuelist = valuelistIterator.next();
 				// for now only the custom valuelist.
+				// and we really push the RuntimeValueList not the actual persist value list
+				// so with real/display values already, instead of the "customvalues" string.
 				if (valuelist.getValueListType() == IValueListConstants.CUSTOM_VALUES)
 				{
 					try
 					{
-						ServoyJSONObject valuelistJSON = SolutionSerializer.generateJSONObject(valuelist, true, true,
-							ApplicationServerSingleton.get().getDeveloperRepository(), true, null);
-						valuelistJSons.add(valuelistJSON);
+						JSONObject json = new JSONObject();
+
+						json.put("name", valuelist.getName());
+						json.put("uuid", valuelist.getUUID().toString());
+						JSONArray displayValues = new JSONArray();
+						JSONArray realValues = new JSONArray();
+						IValueList realValueList = ComponentFactory.getRealValueList(com.servoy.eclipse.core.Activator.getDefault().getDesignClient(),
+							valuelist, true, Types.OTHER, null, null);
+						for (int i = 0; i < realValueList.getSize(); i++)
+						{
+							displayValues.put(realValueList.getElementAt(i));
+							realValues.put(realValueList.getRealElementAt(i));
+						}
+						json.put("displayValues", displayValues);
+						json.put("realValues", realValues);
+
+
+						valuelistJSons.add(json);
 					}
-					catch (Exception e)
+					catch (JSONException e)
 					{
 						ServoyLog.logError(e);
 					}
