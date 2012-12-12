@@ -59,6 +59,8 @@ import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.constants.IValueListConstants;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.ServoyJSONArray;
@@ -193,6 +195,7 @@ public class MobileExporter
 					ServoyLog.logError(e);
 				}
 			}
+			// export relations
 			Iterator<Relation> relationIterator = project.getSolution().getRelations(true);
 			List<ServoyJSONObject> relationJSons = new ArrayList<ServoyJSONObject>();
 			while (relationIterator.hasNext())
@@ -209,12 +212,36 @@ public class MobileExporter
 					ServoyLog.logError(e);
 				}
 			}
+			// export valuelists
+			Iterator<ValueList> valuelistIterator = project.getSolution().getValueLists(false);
+			List<ServoyJSONObject> valuelistJSons = new ArrayList<ServoyJSONObject>();
+			while (valuelistIterator.hasNext())
+			{
+				final ValueList valuelist = valuelistIterator.next();
+				// for now only the custom valuelist.
+				if (valuelist.getValueListType() == IValueListConstants.CUSTOM_VALUES)
+				{
+					try
+					{
+						ServoyJSONObject valuelistJSON = SolutionSerializer.generateJSONObject(valuelist, true, true,
+							ApplicationServerSingleton.get().getDeveloperRepository(), true, null);
+						valuelistJSons.add(valuelistJSON);
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
+			}
+
 			Solution solution = project.getSolution();
 			ServoyJSONArray flattenedJSon = new ServoyJSONArray(formJSons);
 			Map<String, Object> solutionModel = new HashMap<String, Object>();
 			solutionModel.put("forms", flattenedJSon);
 			flattenedJSon = new ServoyJSONArray(relationJSons);
 			solutionModel.put("relations", flattenedJSon);
+			flattenedJSon = new ServoyJSONArray(valuelistJSons);
+			solutionModel.put("valuelists", flattenedJSon);
 			solutionModel.put("solutionName", solution.getName());
 			solutionModel.put("serverURL", serverURL);
 			solutionModel.put("skipConnect", skipConnect);
