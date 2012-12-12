@@ -6751,6 +6751,25 @@ application.output(calc.getName());]]></sample>
           <sample><![CDATA[var calc = solutionModel.getDataSourceNode("db:/example_data/customers").newCalculation("function myCalculation() { return 123; }", JSVariable.INTEGER);
 application.output(calc.getUUID().toString());]]></sample>
         </function>
+        <function name="hasFlag">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[boolean whether flag is set.]]></return>
+          <description><![CDATA[Check a flag of the calculation.
+The flags are a bit pattern consisting of 1 or more of the following bits:
+ - JSColumn.UUID_COLUMN]]></description>
+          <summary><![CDATA[Check a flag of the calculation.]]></summary>
+          <sample><![CDATA[var datasourceNode = solutionModel.getDataSourceNode('db:/example_data/orders')
+var calculation = datasourceNode.getCalculation('mycalculation')
+if (calculation.hasFlag(JSColumn.UUID_COLUMN))
+{
+	 // calculation was typed as UUID 
+}]]></sample>
+          <parameters>
+            <parameter name="flag" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          </parameters>
+        </function>
         <function name="isStored">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the calculation is stored, false otherwise]]></return>
@@ -9875,6 +9894,32 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
     </object>
     <object publicName="JSForm" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSForm">
       <constants>
+        <constant name="DEFAULT_ENCAPSULATION">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The constants to set or get the encapsulation property of a JSForm. 
+They are as follows: JSForm.DEFAULT_ENCAPSULATION, JSForm.PRIVATE_ENCAPSULATION, JSForm.MODULE_PRIVATE_ENCAPSULATION, JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION, JSForm.HIDE_FOUNDSET_ENCAPSULATION, JSForm.HIDE_CONTROLLER_ENCAPSULATION, JSForm.HIDE_ELEMENTS_ENCAPSULATION]]></description>
+          <summary><![CDATA[The constants to set or get the encapsulation property of a JSForm.]]></summary>
+          <sample><![CDATA[var myDefaultForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
+myDefaultForm.encapsulation = JSForm.DEFAULT_ENCAPSULATION;
+
+var myPrivateForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);
+myPrivateForm.encapsulation = JSForm.PRIVATE_ENCAPSULATION;
+
+var myModulePrivateForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
+myModulePrivateForm.encapsulation = JSForm.MODULE_PRIVATE_ENCAPSULATION;
+
+var myHideDataprovidersForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
+myHideDataprovidersForm.encapsulation = JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION;
+
+var myHideFoundsetForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
+myHideFoundsetForm.encapsulation = JSForm.HIDE_FOUNDSET_ENCAPSULATION;
+
+var myHideControllerForm = solutionModel.newForm('newForm6', myDatasource, myStyleName, false, 800, 600);
+myHideControllerForm.encapsulation = JSForm.HIDE_CONTROLLER_ENCAPSULATION;
+
+var myHideElementsForm = solutionModel.newForm('newForm7', myDatasource, myStyleName, false, 800, 600);
+myHideElementsForm.encapsulation = JSForm.HIDE_ELEMENTS_ENCAPSULATION;]]></sample>
+        </constant>
         <constant name="EMPTY_FOUNDSET">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant used for form namedFoundset property. The form that uses empty namedFoundset will initially have an empty (cleared) foundset.]]></description>
@@ -9885,6 +9930,262 @@ frmEmpty.newLabel("Empty FoundSet",10,10,200,20);
 frmEmpty.newField('categoryid',JSField.TEXT_FIELD,10,40,200,20);
 frmEmpty.newField('productname',JSField.TEXT_FIELD,10,70,200,20);
 frmEmpty.namedFoundSet = JSForm.EMPTY_FOUNDSET;]]></sample>
+        </constant>
+        <constant name="HIDE_CONTROLLER_ENCAPSULATION">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The constants to set or get the encapsulation property of a JSForm. 
+They are as follows: JSForm.DEFAULT_ENCAPSULATION, JSForm.PRIVATE_ENCAPSULATION, JSForm.MODULE_PRIVATE_ENCAPSULATION, JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION, JSForm.HIDE_FOUNDSET_ENCAPSULATION, JSForm.HIDE_CONTROLLER_ENCAPSULATION, JSForm.HIDE_ELEMENTS_ENCAPSULATION]]></description>
+          <summary><![CDATA[The constants to set or get the encapsulation property of a JSForm.]]></summary>
+          <sample><![CDATA[var myDefaultForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
+myDefaultForm.encapsulation = JSForm.DEFAULT_ENCAPSULATION;
+
+var myPrivateForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);
+myPrivateForm.encapsulation = JSForm.PRIVATE_ENCAPSULATION;
+
+var myModulePrivateForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
+myModulePrivateForm.encapsulation = JSForm.MODULE_PRIVATE_ENCAPSULATION;
+
+var myHideDataprovidersForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
+myHideDataprovidersForm.encapsulation = JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION;
+
+var myHideFoundsetForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
+myHideFoundsetForm.encapsulation = JSForm.HIDE_FOUNDSET_ENCAPSULATION;
+
+var myHideControllerForm = solutionModel.newForm('newForm6', myDatasource, myStyleName, false, 800, 600);
+myHideControllerForm.encapsulation = JSForm.HIDE_CONTROLLER_ENCAPSULATION;
+
+var myHideElementsForm = solutionModel.newForm('newForm7', myDatasource, myStyleName, false, 800, 600);
+myHideElementsForm.encapsulation = JSForm.HIDE_ELEMENTS_ENCAPSULATION;]]></sample>
+        </constant>
+        <constant name="HIDE_DATAPROVIDERS_ENCAPSULATION">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The constants to set or get the encapsulation property of a JSForm. 
+They are as follows: JSForm.DEFAULT_ENCAPSULATION, JSForm.PRIVATE_ENCAPSULATION, JSForm.MODULE_PRIVATE_ENCAPSULATION, JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION, JSForm.HIDE_FOUNDSET_ENCAPSULATION, JSForm.HIDE_CONTROLLER_ENCAPSULATION, JSForm.HIDE_ELEMENTS_ENCAPSULATION]]></description>
+          <summary><![CDATA[The constants to set or get the encapsulation property of a JSForm.]]></summary>
+          <sample><![CDATA[var myDefaultForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
+myDefaultForm.encapsulation = JSForm.DEFAULT_ENCAPSULATION;
+
+var myPrivateForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);
+myPrivateForm.encapsulation = JSForm.PRIVATE_ENCAPSULATION;
+
+var myModulePrivateForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
+myModulePrivateForm.encapsulation = JSForm.MODULE_PRIVATE_ENCAPSULATION;
+
+var myHideDataprovidersForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
+myHideDataprovidersForm.encapsulation = JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION;
+
+var myHideFoundsetForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
+myHideFoundsetForm.encapsulation = JSForm.HIDE_FOUNDSET_ENCAPSULATION;
+
+var myHideControllerForm = solutionModel.newForm('newForm6', myDatasource, myStyleName, false, 800, 600);
+myHideControllerForm.encapsulation = JSForm.HIDE_CONTROLLER_ENCAPSULATION;
+
+var myHideElementsForm = solutionModel.newForm('newForm7', myDatasource, myStyleName, false, 800, 600);
+myHideElementsForm.encapsulation = JSForm.HIDE_ELEMENTS_ENCAPSULATION;]]></sample>
+        </constant>
+        <constant name="HIDE_ELEMENTS_ENCAPSULATION">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The constants to set or get the encapsulation property of a JSForm. 
+They are as follows: JSForm.DEFAULT_ENCAPSULATION, JSForm.PRIVATE_ENCAPSULATION, JSForm.MODULE_PRIVATE_ENCAPSULATION, JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION, JSForm.HIDE_FOUNDSET_ENCAPSULATION, JSForm.HIDE_CONTROLLER_ENCAPSULATION, JSForm.HIDE_ELEMENTS_ENCAPSULATION]]></description>
+          <summary><![CDATA[The constants to set or get the encapsulation property of a JSForm.]]></summary>
+          <sample><![CDATA[var myDefaultForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
+myDefaultForm.encapsulation = JSForm.DEFAULT_ENCAPSULATION;
+
+var myPrivateForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);
+myPrivateForm.encapsulation = JSForm.PRIVATE_ENCAPSULATION;
+
+var myModulePrivateForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
+myModulePrivateForm.encapsulation = JSForm.MODULE_PRIVATE_ENCAPSULATION;
+
+var myHideDataprovidersForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
+myHideDataprovidersForm.encapsulation = JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION;
+
+var myHideFoundsetForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
+myHideFoundsetForm.encapsulation = JSForm.HIDE_FOUNDSET_ENCAPSULATION;
+
+var myHideControllerForm = solutionModel.newForm('newForm6', myDatasource, myStyleName, false, 800, 600);
+myHideControllerForm.encapsulation = JSForm.HIDE_CONTROLLER_ENCAPSULATION;
+
+var myHideElementsForm = solutionModel.newForm('newForm7', myDatasource, myStyleName, false, 800, 600);
+myHideElementsForm.encapsulation = JSForm.HIDE_ELEMENTS_ENCAPSULATION;]]></sample>
+        </constant>
+        <constant name="HIDE_FOUNDSET_ENCAPSULATION">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The constants to set or get the encapsulation property of a JSForm. 
+They are as follows: JSForm.DEFAULT_ENCAPSULATION, JSForm.PRIVATE_ENCAPSULATION, JSForm.MODULE_PRIVATE_ENCAPSULATION, JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION, JSForm.HIDE_FOUNDSET_ENCAPSULATION, JSForm.HIDE_CONTROLLER_ENCAPSULATION, JSForm.HIDE_ELEMENTS_ENCAPSULATION]]></description>
+          <summary><![CDATA[The constants to set or get the encapsulation property of a JSForm.]]></summary>
+          <sample><![CDATA[var myDefaultForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
+myDefaultForm.encapsulation = JSForm.DEFAULT_ENCAPSULATION;
+
+var myPrivateForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);
+myPrivateForm.encapsulation = JSForm.PRIVATE_ENCAPSULATION;
+
+var myModulePrivateForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
+myModulePrivateForm.encapsulation = JSForm.MODULE_PRIVATE_ENCAPSULATION;
+
+var myHideDataprovidersForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
+myHideDataprovidersForm.encapsulation = JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION;
+
+var myHideFoundsetForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
+myHideFoundsetForm.encapsulation = JSForm.HIDE_FOUNDSET_ENCAPSULATION;
+
+var myHideControllerForm = solutionModel.newForm('newForm6', myDatasource, myStyleName, false, 800, 600);
+myHideControllerForm.encapsulation = JSForm.HIDE_CONTROLLER_ENCAPSULATION;
+
+var myHideElementsForm = solutionModel.newForm('newForm7', myDatasource, myStyleName, false, 800, 600);
+myHideElementsForm.encapsulation = JSForm.HIDE_ELEMENTS_ENCAPSULATION;]]></sample>
+        </constant>
+        <constant name="LIST_VIEW">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The constants to set or get the view property of a JSForm. 
+They are as follows: JSForm.LIST_VIEW, JSForm.LOCKED_LIST_VIEW, JSForm.LOCKED_RECORD_VIEW, JSForm.LOCKED_TABLE_VIEW, JSForm.RECORD_VIEW.]]></description>
+          <summary><![CDATA[The constants to set or get the view property of a JSForm.]]></summary>
+          <sample><![CDATA[var myListViewForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
+myListViewForm.view = JSForm.LIST_VIEW;
+
+var myLockedListViewForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);	
+myLockedListViewForm.view = JSForm.LOCKED_LIST_VIEW;
+
+var myLockedRecordViewForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
+myLockedRecordViewForm.view = JSForm.LOCKED_RECORD_VIEW;
+
+var myLockedTableViewForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
+myLockedTableViewForm.view = JSForm.LOCKED_TABLE_VIEW;
+
+var myRecordViewForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
+myRecordViewForm.view = JSForm.RECORD_VIEW;]]></sample>
+        </constant>
+        <constant name="LOCKED_LIST_VIEW">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The constants to set or get the view property of a JSForm. 
+They are as follows: JSForm.LIST_VIEW, JSForm.LOCKED_LIST_VIEW, JSForm.LOCKED_RECORD_VIEW, JSForm.LOCKED_TABLE_VIEW, JSForm.RECORD_VIEW.]]></description>
+          <summary><![CDATA[The constants to set or get the view property of a JSForm.]]></summary>
+          <sample><![CDATA[var myListViewForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
+myListViewForm.view = JSForm.LIST_VIEW;
+
+var myLockedListViewForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);	
+myLockedListViewForm.view = JSForm.LOCKED_LIST_VIEW;
+
+var myLockedRecordViewForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
+myLockedRecordViewForm.view = JSForm.LOCKED_RECORD_VIEW;
+
+var myLockedTableViewForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
+myLockedTableViewForm.view = JSForm.LOCKED_TABLE_VIEW;
+
+var myRecordViewForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
+myRecordViewForm.view = JSForm.RECORD_VIEW;]]></sample>
+        </constant>
+        <constant name="LOCKED_RECORD_VIEW">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The constants to set or get the view property of a JSForm. 
+They are as follows: JSForm.LIST_VIEW, JSForm.LOCKED_LIST_VIEW, JSForm.LOCKED_RECORD_VIEW, JSForm.LOCKED_TABLE_VIEW, JSForm.RECORD_VIEW.]]></description>
+          <summary><![CDATA[The constants to set or get the view property of a JSForm.]]></summary>
+          <sample><![CDATA[var myListViewForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
+myListViewForm.view = JSForm.LIST_VIEW;
+
+var myLockedListViewForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);	
+myLockedListViewForm.view = JSForm.LOCKED_LIST_VIEW;
+
+var myLockedRecordViewForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
+myLockedRecordViewForm.view = JSForm.LOCKED_RECORD_VIEW;
+
+var myLockedTableViewForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
+myLockedTableViewForm.view = JSForm.LOCKED_TABLE_VIEW;
+
+var myRecordViewForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
+myRecordViewForm.view = JSForm.RECORD_VIEW;]]></sample>
+        </constant>
+        <constant name="LOCKED_TABLE_VIEW">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The constants to set or get the view property of a JSForm. 
+They are as follows: JSForm.LIST_VIEW, JSForm.LOCKED_LIST_VIEW, JSForm.LOCKED_RECORD_VIEW, JSForm.LOCKED_TABLE_VIEW, JSForm.RECORD_VIEW.]]></description>
+          <summary><![CDATA[The constants to set or get the view property of a JSForm.]]></summary>
+          <sample><![CDATA[var myListViewForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
+myListViewForm.view = JSForm.LIST_VIEW;
+
+var myLockedListViewForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);	
+myLockedListViewForm.view = JSForm.LOCKED_LIST_VIEW;
+
+var myLockedRecordViewForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
+myLockedRecordViewForm.view = JSForm.LOCKED_RECORD_VIEW;
+
+var myLockedTableViewForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
+myLockedTableViewForm.view = JSForm.LOCKED_TABLE_VIEW;
+
+var myRecordViewForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
+myRecordViewForm.view = JSForm.RECORD_VIEW;]]></sample>
+        </constant>
+        <constant name="MODULE_PRIVATE_ENCAPSULATION">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The constants to set or get the encapsulation property of a JSForm. 
+They are as follows: JSForm.DEFAULT_ENCAPSULATION, JSForm.PRIVATE_ENCAPSULATION, JSForm.MODULE_PRIVATE_ENCAPSULATION, JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION, JSForm.HIDE_FOUNDSET_ENCAPSULATION, JSForm.HIDE_CONTROLLER_ENCAPSULATION, JSForm.HIDE_ELEMENTS_ENCAPSULATION]]></description>
+          <summary><![CDATA[The constants to set or get the encapsulation property of a JSForm.]]></summary>
+          <sample><![CDATA[var myDefaultForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
+myDefaultForm.encapsulation = JSForm.DEFAULT_ENCAPSULATION;
+
+var myPrivateForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);
+myPrivateForm.encapsulation = JSForm.PRIVATE_ENCAPSULATION;
+
+var myModulePrivateForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
+myModulePrivateForm.encapsulation = JSForm.MODULE_PRIVATE_ENCAPSULATION;
+
+var myHideDataprovidersForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
+myHideDataprovidersForm.encapsulation = JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION;
+
+var myHideFoundsetForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
+myHideFoundsetForm.encapsulation = JSForm.HIDE_FOUNDSET_ENCAPSULATION;
+
+var myHideControllerForm = solutionModel.newForm('newForm6', myDatasource, myStyleName, false, 800, 600);
+myHideControllerForm.encapsulation = JSForm.HIDE_CONTROLLER_ENCAPSULATION;
+
+var myHideElementsForm = solutionModel.newForm('newForm7', myDatasource, myStyleName, false, 800, 600);
+myHideElementsForm.encapsulation = JSForm.HIDE_ELEMENTS_ENCAPSULATION;]]></sample>
+        </constant>
+        <constant name="PRIVATE_ENCAPSULATION">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The constants to set or get the encapsulation property of a JSForm. 
+They are as follows: JSForm.DEFAULT_ENCAPSULATION, JSForm.PRIVATE_ENCAPSULATION, JSForm.MODULE_PRIVATE_ENCAPSULATION, JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION, JSForm.HIDE_FOUNDSET_ENCAPSULATION, JSForm.HIDE_CONTROLLER_ENCAPSULATION, JSForm.HIDE_ELEMENTS_ENCAPSULATION]]></description>
+          <summary><![CDATA[The constants to set or get the encapsulation property of a JSForm.]]></summary>
+          <sample><![CDATA[var myDefaultForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
+myDefaultForm.encapsulation = JSForm.DEFAULT_ENCAPSULATION;
+
+var myPrivateForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);
+myPrivateForm.encapsulation = JSForm.PRIVATE_ENCAPSULATION;
+
+var myModulePrivateForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
+myModulePrivateForm.encapsulation = JSForm.MODULE_PRIVATE_ENCAPSULATION;
+
+var myHideDataprovidersForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
+myHideDataprovidersForm.encapsulation = JSForm.HIDE_DATAPROVIDERS_ENCAPSULATION;
+
+var myHideFoundsetForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
+myHideFoundsetForm.encapsulation = JSForm.HIDE_FOUNDSET_ENCAPSULATION;
+
+var myHideControllerForm = solutionModel.newForm('newForm6', myDatasource, myStyleName, false, 800, 600);
+myHideControllerForm.encapsulation = JSForm.HIDE_CONTROLLER_ENCAPSULATION;
+
+var myHideElementsForm = solutionModel.newForm('newForm7', myDatasource, myStyleName, false, 800, 600);
+myHideElementsForm.encapsulation = JSForm.HIDE_ELEMENTS_ENCAPSULATION;]]></sample>
+        </constant>
+        <constant name="RECORD_VIEW">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The constants to set or get the view property of a JSForm. 
+They are as follows: JSForm.LIST_VIEW, JSForm.LOCKED_LIST_VIEW, JSForm.LOCKED_RECORD_VIEW, JSForm.LOCKED_TABLE_VIEW, JSForm.RECORD_VIEW.]]></description>
+          <summary><![CDATA[The constants to set or get the view property of a JSForm.]]></summary>
+          <sample><![CDATA[var myListViewForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
+myListViewForm.view = JSForm.LIST_VIEW;
+
+var myLockedListViewForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);	
+myLockedListViewForm.view = JSForm.LOCKED_LIST_VIEW;
+
+var myLockedRecordViewForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
+myLockedRecordViewForm.view = JSForm.LOCKED_RECORD_VIEW;
+
+var myLockedTableViewForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
+myLockedTableViewForm.view = JSForm.LOCKED_TABLE_VIEW;
+
+var myRecordViewForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
+myRecordViewForm.view = JSForm.RECORD_VIEW;]]></sample>
         </constant>
         <constant name="SELECTION_MODE_DEFAULT">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -16747,6 +17048,54 @@ record.save();]]></sample>
       </functions>
     </object>
     <object publicName="JSRelation" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSRelation">
+      <constants>
+        <constant name="FULL_JOIN">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for the joinType of a Query Builder join.]]></description>
+          <summary><![CDATA[Constant for the joinType of a Query Builder join.]]></summary>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
+ /** @type {QBJoin<db:/example_data/order_details>} */
+	var join = query.joins.add('db:/example_data/order_details', JSRelation.RIGHT_OUTER_JOIN, 'odetail')
+	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
+        </constant>
+        <constant name="INNER_JOIN">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for the joinType of a JSRelation. It is also used in solutionModel.newRelation(...) and in the QueryBuilder.]]></description>
+          <summary><![CDATA[Constant for the joinType of a JSRelation.]]></summary>
+          <sample><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
+relation.joinType = JSRelation.LEFT_OUTER_JOIN;
+
+ /** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
+ /** @type {QBJoin<db:/example_data/order_details>} */
+	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
+	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
+        </constant>
+        <constant name="LEFT_OUTER_JOIN">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for the joinType of a JSRelation. It is also used in solutionModel.newRelation(...) and in the QueryBuilder.]]></description>
+          <summary><![CDATA[Constant for the joinType of a JSRelation.]]></summary>
+          <sample><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
+relation.joinType = JSRelation.LEFT_OUTER_JOIN;
+
+ /** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
+ /** @type {QBJoin<db:/example_data/order_details>} */
+	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
+	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
+        </constant>
+        <constant name="RIGHT_OUTER_JOIN">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for the joinType of a Query Builder join.]]></description>
+          <summary><![CDATA[Constant for the joinType of a Query Builder join.]]></summary>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
+ /** @type {QBJoin<db:/example_data/order_details>} */
+	var join = query.joins.add('db:/example_data/order_details', JSRelation.RIGHT_OUTER_JOIN, 'odetail')
+	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
+        </constant>
+      </constants>
       <properties>
         <property name="allowCreationRelatedRecords">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -16814,7 +17163,14 @@ relation.initialSort = 'another_child_table_text asc';]]></sample>
           <description><![CDATA[The join type that is performed between the primary table and the foreign table.
 Can be "inner join" or "left outer join".]]></description>
           <summary><![CDATA[The join type that is performed between the primary table and the foreign table.]]></summary>
-          <sample/>
+          <sample><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
+relation.joinType = JSRelation.LEFT_OUTER_JOIN;
+
+ /** @type {QBSelect<db:/example_data/orders>} */
+	var query = databaseManager.createSelect('db:/example_data/orders')
+ /** @type {QBJoin<db:/example_data/order_details>} */
+	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
+	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
         </property>
         <property name="name">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -18634,6 +18990,52 @@ jsunit.fail("test", null, "Fail"); // 2nd param is not used in Servoy, params 3 
       </functions>
     </object>
     <object publicName="JSValueList" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSValueList">
+      <constants>
+        <constant name="CUSTOM_VALUES">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant to set the valueListType of a JSValueList.
+Sets the value list to use a custom list of values.
+Also used in solutionModel.newValueList(...) to create new valuelists]]></description>
+          <summary><![CDATA[Constant to set the valueListType of a JSValueList.]]></summary>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.DATABASE_VALUES);
+vlist.valueListType = JSValueList.CUSTOM_VALUES; // Change the type to custom values.
+vlist.customValues = "one\ntwo\nthree\nfour";]]></sample>
+        </constant>
+        <constant name="DATABASE_VALUES">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant to set the valueListType of a JSValueList.
+Sets the value list to use values loaded from a database.
+Also used in solutionModel.newValueList(...) to create new valuelists]]></description>
+          <summary><![CDATA[Constant to set the valueListType of a JSValueList.]]></summary>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
+vlist.dataSource = 'db:/example_data/parent_table';
+vlist.setDisplayDataProviderIds('parent_table_text');
+vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
+vlist.separator = ' ## ';
+vlist.sortOptions = 'parent_table_text desc';]]></sample>
+        </constant>
+        <constant name="EMPTY_VALUE_ALWAYS">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant to set/get the addEmptyValue property of a JSValueList.]]></description>
+          <summary><![CDATA[Constant to set/get the addEmptyValue property of a JSValueList.]]></summary>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.customValues = "one\ntwo\nthree\nfour";
+vlist.addEmptyValue = JSValueList.EMPTY_VALUE_ALWAYS;
+var cmb = form.newComboBox('my_table_text', 10, 10, 100, 20);
+cmb.valuelist = vlist;]]></sample>
+        </constant>
+        <constant name="EMPTY_VALUE_NEVER">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant to set/get the addEmptyValue property of a JSValueList.]]></description>
+          <summary><![CDATA[Constant to set/get the addEmptyValue property of a JSValueList.]]></summary>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.customValues = "one\ntwo\nthree\nfour";
+vlist.addEmptyValue = JSValueList.EMPTY_VALUE_NEVER;
+var cmb = form.newComboBox('my_table_text', 10, 10, 100, 20);
+cmb.valuelist = vlist;]]></sample>
+        </constant>
+      </constants>
       <properties>
         <property name="addEmptyValue">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -18757,7 +19159,13 @@ database values.]]></description>
           <summary><![CDATA[A String representing the separator that should be used when multiple
 display dataproviders are set, when the value list has the type set to
 database values.]]></summary>
-          <sample/>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
+vlist.dataSource = 'db:/example_data/parent_table';
+vlist.setDisplayDataProviderIds('parent_table_text');
+vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
+vlist.separator = ' ## ';
+vlist.sortOptions = 'parent_table_text desc';]]></sample>
         </property>
         <property name="serverName">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -18765,7 +19173,13 @@ database values.]]></summary>
 the value list has the type set to database values.]]></description>
           <summary><![CDATA[The name of the database server that is used for loading the values when 
 the value list has the type set to database values.]]></summary>
-          <sample/>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
+vlist.dataSource = 'db:/example_data/parent_table';
+vlist.setDisplayDataProviderIds('parent_table_text');
+vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
+vlist.separator = ' ## ';
+vlist.sortOptions = 'parent_table_text desc';]]></sample>
         </property>
         <property name="sortOptions">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -18773,7 +19187,13 @@ the value list has the type set to database values.]]></summary>
 from the database.]]></description>
           <summary><![CDATA[Sort options that are applied when the valuelist loads its data
 from the database.]]></summary>
-          <sample/>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
+vlist.dataSource = 'db:/example_data/parent_table';
+vlist.setDisplayDataProviderIds('parent_table_text');
+vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
+vlist.separator = ' ## ';
+vlist.sortOptions = 'parent_table_text desc';]]></sample>
         </property>
         <property name="tableName">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -18781,7 +19201,13 @@ from the database.]]></summary>
 the value list has the type set to database values.]]></description>
           <summary><![CDATA[The name of the database table that is used for loading the values when 
 the value list has the type set to database values.]]></summary>
-          <sample/>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
+vlist.dataSource = 'db:/example_data/parent_table';
+vlist.setDisplayDataProviderIds('parent_table_text');
+vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
+vlist.separator = ' ## ';
+vlist.sortOptions = 'parent_table_text desc';]]></sample>
         </property>
         <property name="useTableFilter">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -18800,7 +19226,13 @@ vlist.name = 'two';]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The type of the valuelist. Can be either custom values or database values.]]></description>
           <summary><![CDATA[The type of the valuelist.]]></summary>
-          <sample/>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
+vlist.dataSource = 'db:/example_data/parent_table';
+vlist.setDisplayDataProviderIds('parent_table_text');
+vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
+vlist.separator = ' ## ';
+vlist.sortOptions = 'parent_table_text desc';]]></sample>
         </property>
       </properties>
       <functions>
@@ -18851,7 +19283,13 @@ application.output(vlist.getUUID().toString());]]></sample>
 The values taken from these dataproviders, in order, separated by the separator, will be displayed
 by the valuelist.]]></description>
           <summary><![CDATA[Set the display dataproviders.]]></summary>
-          <sample/>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
+vlist.dataSource = 'db:/example_data/parent_table';
+vlist.setDisplayDataProviderIds('parent_table_text');
+vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
+vlist.separator = ' ## ';
+vlist.sortOptions = 'parent_table_text desc';]]></sample>
         </function>
         <function name="setDisplayDataProviderIds">
           <argumentsTypes>
@@ -18862,7 +19300,13 @@ by the valuelist.]]></description>
 The values taken from these dataproviders, in order, separated by the separator, will be displayed
 by the valuelist.]]></description>
           <summary><![CDATA[Set the display dataproviders.]]></summary>
-          <sample/>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
+vlist.dataSource = 'db:/example_data/parent_table';
+vlist.setDisplayDataProviderIds('parent_table_text');
+vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
+vlist.separator = ' ## ';
+vlist.sortOptions = 'parent_table_text desc';]]></sample>
           <parameters>
             <parameter name="dataprovider1" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The first display dataprovider.]]></description>
@@ -18879,7 +19323,13 @@ by the valuelist.]]></description>
 The values taken from these dataproviders, in order, separated by the separator, will be displayed
 by the valuelist.]]></description>
           <summary><![CDATA[Set the display dataproviders.]]></summary>
-          <sample/>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
+vlist.dataSource = 'db:/example_data/parent_table';
+vlist.setDisplayDataProviderIds('parent_table_text');
+vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
+vlist.separator = ' ## ';
+vlist.sortOptions = 'parent_table_text desc';]]></sample>
           <parameters>
             <parameter name="dataprovider1" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The first display dataprovider.]]></description>
@@ -18900,7 +19350,13 @@ by the valuelist.]]></description>
 The values taken from these dataproviders, in order, separated by the separator, will be displayed
 by the valuelist.]]></description>
           <summary><![CDATA[Set the display dataproviders.]]></summary>
-          <sample/>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
+vlist.dataSource = 'db:/example_data/parent_table';
+vlist.setDisplayDataProviderIds('parent_table_text');
+vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
+vlist.separator = ' ## ';
+vlist.sortOptions = 'parent_table_text desc';]]></sample>
           <parameters>
             <parameter name="dataprovider1" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The first display dataprovider.]]></description>
@@ -18920,7 +19376,13 @@ by the valuelist.]]></description>
 The values taken from these dataproviders, in order, separated by the separator, will be returned
 by the valuelist.]]></description>
           <summary><![CDATA[Set the return dataproviders.]]></summary>
-          <sample/>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
+vlist.dataSource = 'db:/example_data/parent_table';
+vlist.setDisplayDataProviderIds('parent_table_text');
+vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
+vlist.separator = ' ## ';
+vlist.sortOptions = 'parent_table_text desc';]]></sample>
         </function>
         <function name="setReturnDataProviderIds">
           <argumentsTypes>
@@ -18931,7 +19393,13 @@ by the valuelist.]]></description>
 The values taken from these dataproviders, in order, separated by the separator, will be returned
 by the valuelist.]]></description>
           <summary><![CDATA[Set the return dataproviders.]]></summary>
-          <sample/>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
+vlist.dataSource = 'db:/example_data/parent_table';
+vlist.setDisplayDataProviderIds('parent_table_text');
+vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
+vlist.separator = ' ## ';
+vlist.sortOptions = 'parent_table_text desc';]]></sample>
           <parameters>
             <parameter name="dataprovider1" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The first return dataprovider.]]></description>
@@ -18948,7 +19416,13 @@ by the valuelist.]]></description>
 The values taken from these dataproviders, in order, separated by the separator, will be returned
 by the valuelist.]]></description>
           <summary><![CDATA[Set the return dataproviders.]]></summary>
-          <sample/>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
+vlist.dataSource = 'db:/example_data/parent_table';
+vlist.setDisplayDataProviderIds('parent_table_text');
+vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
+vlist.separator = ' ## ';
+vlist.sortOptions = 'parent_table_text desc';]]></sample>
           <parameters>
             <parameter name="dataprovider1" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The first return dataprovider.]]></description>
@@ -18969,7 +19443,13 @@ by the valuelist.]]></description>
 The values taken from these dataproviders, in order, separated by the separator, will be returned
 by the valuelist.]]></description>
           <summary><![CDATA[Set the return dataproviders.]]></summary>
-          <sample/>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.valueListType = JSValueList.DATABASE_VALUES; // Change the type to database values.
+vlist.dataSource = 'db:/example_data/parent_table';
+vlist.setDisplayDataProviderIds('parent_table_text');
+vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
+vlist.separator = ' ## ';
+vlist.sortOptions = 'parent_table_text desc';]]></sample>
           <parameters>
             <parameter name="dataprovider1" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The first return dataprovider.]]></description>
