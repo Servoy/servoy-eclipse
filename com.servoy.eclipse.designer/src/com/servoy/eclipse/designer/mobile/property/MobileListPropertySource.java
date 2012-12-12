@@ -133,7 +133,7 @@ public class MobileListPropertySource implements IPropertySource
 				elementPropertySources.put(prefix = "listitemSubtext",
 					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.subtext, model.containedForm, false));
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
-					"subtextDataProvider");
+					"subTextDataProvider");
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName(), "subText");
 			}
 
@@ -152,7 +152,7 @@ public class MobileListPropertySource implements IPropertySource
 				elementPropertySources.put(prefix = "listitemImage",
 					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.image, model.containedForm, false));
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
-					"imageDataProvider");
+					"dataIconDataProvider");
 			}
 		}
 	}
