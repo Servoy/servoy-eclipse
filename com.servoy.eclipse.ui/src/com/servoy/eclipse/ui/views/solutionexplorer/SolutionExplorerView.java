@@ -2012,11 +2012,11 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		ServoyModelManager.getServoyModelManager().getServoyModel().addI18NChangeListener(i18nChangeListener);
 	}
 
-	public boolean isNonEmptyPlugin(SimpleUserNode un)
+	public boolean isNonEmptyPlugin(SimpleUserNode un, boolean onSolExCreate)
 	{
 		if (list != null && list.getContentProvider() instanceof SolutionExplorerListContentProvider)
 		{
-			return ((SolutionExplorerListContentProvider)list.getContentProvider()).isNonEmptyPlugin(un);
+			return ((SolutionExplorerListContentProvider)list.getContentProvider()).isNonEmptyPlugin(un, onSolExCreate);
 		}
 		return true;
 	}

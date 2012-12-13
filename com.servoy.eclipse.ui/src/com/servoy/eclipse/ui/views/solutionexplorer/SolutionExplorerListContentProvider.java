@@ -593,7 +593,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				try
 				{
-					lm = getJSMethods(un.getRealObject(), PLUGIN_PREFIX + "." + un.getName(), null, UserNodeType.PLUGINS_ITEM, null, null);
+					lm = getJSMethods(un.getRealObject(), PLUGIN_PREFIX + "." + un.getName(), null, UserNodeType.PLUGINS_ITEM, null, null, false);
 				}
 				catch (Exception ex)
 				{
@@ -1271,7 +1271,12 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	public boolean isNonEmptyPlugin(SimpleUserNode un)
 	{
-		Object[] lm = getJSMethods(un.getRealObject(), PLUGIN_PREFIX + "." + un.getName(), null, UserNodeType.PLUGINS_ITEM, null, null);
+		return isNonEmptyPlugin(un, false);
+	}
+
+	public boolean isNonEmptyPlugin(SimpleUserNode un, boolean onSolExCreate)
+	{
+		Object[] lm = getJSMethods(un.getRealObject(), PLUGIN_PREFIX + "." + un.getName(), null, UserNodeType.PLUGINS_ITEM, null, null, onSolExCreate);
 		if (lm != null && lm.length > 0) return true;
 		return false;
 	}
@@ -1295,10 +1300,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				Context.exit();
 			}
 		}
-		return getJSMethodsViaJavaMembers(jm, null, elementName, prefix, actionType, null, null);
+		return getJSMethodsViaJavaMembers(jm, null, elementName, prefix, actionType, null, null, false);
 	}
 
-	private SimpleUserNode[] getJSMethods(Object o, String elementName, String prefix, UserNodeType actionType, Object real, String[] excludeMethodNames)
+	private SimpleUserNode[] getJSMethods(Object o, String elementName, String prefix, UserNodeType actionType, Object real, String[] excludeMethodNames,
+		boolean onSolExCreate)
 	{
 		if (o == null) return EMPTY_LIST;
 		boolean current = (Context.getCurrentContext() != null);
@@ -1327,7 +1333,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			so = ScriptObjectRegistry.getScriptObjectForClass(o.getClass());
 		}
-		return getJSMethodsViaJavaMembers(ijm, so, elementName, prefix, actionType, real, excludeMethodNames);
+		return getJSMethodsViaJavaMembers(ijm, so, elementName, prefix, actionType, real, excludeMethodNames, onSolExCreate);
 	}
 
 	private SimpleUserNode[] getJSMethods(Class clz, String elementName, String prefix, UserNodeType actionType, Object real, String[] excludeMethodNames)
@@ -1382,15 +1388,16 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			// if the class is a scriptable an the javamembers is not a instance java members, just return nothing.
 			return new SimpleUserNode[0];
 		}
-		return getJSMethodsViaJavaMembers(ijm, o, elementName, prefix, actionType, real, excludeMethodNames);
+		return getJSMethodsViaJavaMembers(ijm, o, elementName, prefix, actionType, real, excludeMethodNames, false);
 	}
 
 	private SimpleUserNode[] getJSMethodsViaJavaMembers(JavaMembers ijm, IScriptObject scriptObject, String elementName, String prefix,
-		UserNodeType actionType, Object real, String[] excludeMethodNames)
+		UserNodeType actionType, Object real, String[] excludeMethodNames, boolean onSolExCreate)
 	{
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
 		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 		boolean isForMobileSolution = SolutionMetaData.isServoyMobileSolution(activeProject != null ? activeProject.getSolution() : null);
+		boolean isPluginItem = UserNodeType.PLUGINS_ITEM.equals(actionType);
 
 		IScriptObject adapter = ScriptObjectRegistry.getAdapterIfAny(scriptObject);
 
@@ -1428,7 +1435,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					if (adapter.isDeprecated((String)element)) continue;
 					if (adapter.isDeprecated(constantsElementName + (String)element)) continue;
 
-					if (isForMobileSolution)
+					if (isForMobileSolution && !(onSolExCreate && isPluginItem))
 					{
 						// this field is a constant
 						Field field = (Field)ijm.getField((String)element, true);
@@ -1481,7 +1488,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			Object bp = ijm.getField(name, false);
 			if (bp == null) continue;
 			if (isForMobileSolution && !(bp instanceof JavaMembers.BeanProperty) ||
-				!AnnotationManager.getInstance().isMobileAnnotationPresent(((JavaMembers.BeanProperty)bp).getGetter()))
+				!AnnotationManager.getInstance().isMobileAnnotationPresent(((JavaMembers.BeanProperty)bp).getGetter()) && !(onSolExCreate && isPluginItem))
 			{
 				continue;
 			}
@@ -1520,7 +1527,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 			for (MemberBox method : njm.getMethods())
 			{
-				if (isForMobileSolution && !AnnotationManager.getInstance().isMobileAnnotationPresent(method.method())) continue;
+				if (isForMobileSolution && !AnnotationManager.getInstance().isMobileAnnotationPresent(method.method()) && !(onSolExCreate && isPluginItem)) continue;
 
 				String displayName = null;
 

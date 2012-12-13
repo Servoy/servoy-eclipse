@@ -885,7 +885,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 						PlatformSimpleUserNode node = new PlatformSimpleUserNode(plugin.getName(), UserNodeType.PLUGIN, scriptObject, image,
 							scriptObject.getClass());
-						if (view.isNonEmptyPlugin(node))
+						if (view.isNonEmptyPlugin(node, true))
 						{
 							plugins.add(node);
 							node.parent = pluginNode;

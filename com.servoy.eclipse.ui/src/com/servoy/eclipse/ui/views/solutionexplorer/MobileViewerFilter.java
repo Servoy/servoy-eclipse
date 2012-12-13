@@ -62,6 +62,11 @@ public class MobileViewerFilter extends ViewerFilter
 			if (sun.isVisibleForMobile()) return true;
 			else
 			{
+				if (sun.getRealType() == UserNodeType.MEDIA)
+				{
+					return false;
+				}
+
 				// special case for plugins: this is a plugin that is not allowed in mobile
 				if (sun.parent != null && sun.parent.getRealType() == UserNodeType.PLUGINS)
 				{
