@@ -179,21 +179,28 @@ public class MobileExporter
 				}
 			}
 			// export relations
-			Iterator<Relation> relationIterator = project.getSolution().getRelations(true);
 			List<ServoyJSONObject> relationJSons = new ArrayList<ServoyJSONObject>();
-			while (relationIterator.hasNext())
+			try
 			{
-				final Relation relation = relationIterator.next();
-				try
+				Iterator<Relation> relationIterator = project.getEditingFlattenedSolution().getRelations(true); //project.getSolution().getRelations(true);
+				while (relationIterator.hasNext())
 				{
-					ServoyJSONObject relationJSON = SolutionSerializer.generateJSONObject(relation, true, true,
-						ApplicationServerSingleton.get().getDeveloperRepository(), true, null);
-					relationJSons.add(relationJSON);
+					final Relation relation = relationIterator.next();
+					try
+					{
+						ServoyJSONObject relationJSON = SolutionSerializer.generateJSONObject(relation, true, true,
+							ApplicationServerSingleton.get().getDeveloperRepository(), true, null);
+						relationJSons.add(relationJSON);
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+					}
 				}
-				catch (Exception e)
-				{
-					ServoyLog.logError(e);
-				}
+			}
+			catch (RepositoryException ex)
+			{
+				ServoyLog.logError(ex);
 			}
 			// export valuelists
 			Iterator<ValueList> valuelistIterator = project.getSolution().getValueLists(false);
