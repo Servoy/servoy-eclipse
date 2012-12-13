@@ -131,29 +131,7 @@ public class MobileExporter
 											contentSpec.getTypeID(), value);
 										if (methodID instanceof Integer)
 										{
-											IScriptProvider sm = ModelUtils.getScriptMethod(form, form, null, ((Integer)methodID).intValue());
-											if (sm != null)
-											{
-												List<Object> arguments = ((AbstractBase)persist).getInstanceMethodArguments(key);
-												StringBuilder sb = new StringBuilder(ScopesUtils.getScopeString(((AbstractScriptProvider)sm).getScopeName(),
-													sm.getDataProviderID()));
-												sb.append('(');
-												if (arguments != null && arguments.size() > 0)
-												{
-													for (Object argument : arguments)
-													{
-														sb.append(argument);
-														sb.append(',');
-													}
-													sb.setLength(sb.length() - 1);
-												}
-												sb.append(')');
-												return sb.toString();
-											}
-											else
-											{
-												return null;
-											}
+											return generateMethodCall(form, persist, key, ((Integer)methodID).intValue());
 										}
 									}
 									catch (Exception e)
@@ -268,6 +246,14 @@ public class MobileExporter
 			solutionModel.put("serverURL", serverURL);
 			solutionModel.put("skipConnect", skipConnect);
 			solutionModel.put("mustAuthenticate", solution.getMustAuthenticate());
+
+			int onOpenMethodID = solution.getOnOpenMethodID();
+			if (onOpenMethodID > 0)
+			{
+				solutionModel.put("onSolutionOpen",
+					generateMethodCall(solution, solution, StaticContentSpecLoader.PROPERTY_ONOPENMETHODID.getPropertyName(), onOpenMethodID));
+			}
+
 			if (project.getSolution().getI18nDataSource() != null)
 			{
 				EclipseMessages messagesManager = ServoyModelManager.getServoyModelManager().getServoyModel().getMessagesManager();
@@ -593,4 +579,36 @@ public class MobileExporter
 		this.skipConnect = connect;
 	}
 
+	/**
+	 * @param form
+	 * @param persist
+	 * @param key
+	 * @param methodID
+	 * @return
+	 */
+	private String generateMethodCall(final IPersist parent, IPersist persist, String key, int methodID)
+	{
+		IScriptProvider sm = ModelUtils.getScriptMethod(parent, parent, null, methodID);
+		if (sm != null)
+		{
+			List<Object> arguments = ((AbstractBase)persist).getInstanceMethodArguments(key);
+			StringBuilder sb = new StringBuilder(ScopesUtils.getScopeString(((AbstractScriptProvider)sm).getScopeName(), sm.getDataProviderID()));
+			sb.append('(');
+			if (arguments != null && arguments.size() > 0)
+			{
+				for (Object argument : arguments)
+				{
+					sb.append(argument);
+					sb.append(',');
+				}
+				sb.setLength(sb.length() - 1);
+			}
+			sb.append(')');
+			return sb.toString();
+		}
+		else
+		{
+			return null;
+		}
+	}
 }
