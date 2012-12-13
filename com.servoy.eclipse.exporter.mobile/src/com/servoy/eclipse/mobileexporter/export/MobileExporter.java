@@ -182,7 +182,7 @@ public class MobileExporter
 			List<ServoyJSONObject> relationJSons = new ArrayList<ServoyJSONObject>();
 			try
 			{
-				Iterator<Relation> relationIterator = project.getEditingFlattenedSolution().getRelations(true); //project.getSolution().getRelations(true);
+				Iterator<Relation> relationIterator = ServoyModelFinder.getServoyModel().getFlattenedSolution().getRelations(true);
 				while (relationIterator.hasNext())
 				{
 					final Relation relation = relationIterator.next();
