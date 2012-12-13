@@ -137,7 +137,7 @@ public class MobileListPropertySource implements IPropertySource
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
 					"subtextDataProvider");
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName(), "subtext");
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName(), "subTextStyleClass");
+				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName(), "subtextStyleClass");
 			}
 
 			// countBubble
