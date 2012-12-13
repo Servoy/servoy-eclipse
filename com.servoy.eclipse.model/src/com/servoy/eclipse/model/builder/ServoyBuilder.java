@@ -1463,7 +1463,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, MISSING_CONVERTER);
 		deleteMarkers(project, LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE);
 
-		getServoyModel().getDataModelManager().removeAllMissingDBIFileMarkers();
+		if (getServoyModel().getDataModelManager() != null)
+		{
+			getServoyModel().getDataModelManager().removeAllMissingDBIFileMarkers();
+		}
 
 		final ServoyProject servoyProject = getServoyProject(project);
 		boolean active = servoyModel.isSolutionActive(project.getName());
@@ -3086,7 +3089,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 
 		createAndRefreshDataSourceCollectorVisitor();
-		getServoyModel().getDataModelManager().addAllMissingDBIFileMarkersForDataSources(dataSourceCollectorVisitor.getDataSources());
+		if (getServoyModel().getDataModelManager() != null)
+		{
+			getServoyModel().getDataModelManager().addAllMissingDBIFileMarkersForDataSources(dataSourceCollectorVisitor.getDataSources());
+		}
 	}
 
 	public static int getTranslatedSeverity(String severity, ProblemSeverity problemSeverity)
