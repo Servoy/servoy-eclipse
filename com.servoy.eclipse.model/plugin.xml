@@ -136,6 +136,17 @@
       </persistent>
    </extension>
    <extension
+         id="com.servoy.eclipse.core.invalidMobileModuleProblem"
+         name="Invalid mobile module"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="com.servoy.eclipse.core.builderProblem">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+   </extension>   
+   <extension
          id="com.servoy.eclipse.core.missingConverter"
          name="Missing converter"
          point="org.eclipse.core.resources.markers">

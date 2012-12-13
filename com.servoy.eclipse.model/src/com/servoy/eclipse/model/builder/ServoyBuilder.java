@@ -286,6 +286,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String HIDDEN_TABLE_STILL_IN_USE = _PREFIX + ".hiddenTableInUse"; //$NON-NLS-1$
 	public static final String MISSING_CONVERTER = _PREFIX + ".missingConverter"; //$NON-NLS-1$
 	public static final String LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE = _PREFIX + ".labelForElementProblem"; //$NON-NLS-1$
+	public static final String INVALID_MOBILE_MODULE_MARKER_TYPE = _PREFIX + ".invalidMobileModuleProblem"; //$NON-NLS-1$
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels"; //$NON-NLS-1$
@@ -372,6 +373,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		"moduleDifferentI18NTable", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> MODULE_DIFFERENT_RESOURCE_PROJECT = new Pair<String, ProblemSeverity>(
 		"moduleDifferentResourceProject", ProblemSeverity.ERROR); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> MODULE_INVALID_MOBILE = new Pair<String, ProblemSeverity>("moduleInvalidMobile", ProblemSeverity.ERROR); //$NON-NLS-1$
 
 	// form problems
 	public final static Pair<String, ProblemSeverity> FORM_COLUMN_LENGTH_TOO_SMALL = new Pair<String, ProblemSeverity>(
@@ -757,6 +759,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	{
 		deleteMarkers(project, MISSING_MODULES_MARKER_TYPE);
 		deleteMarkers(project, MISPLACED_MODULES_MARKER_TYPE);
+		deleteMarkers(project, INVALID_MOBILE_MODULE_MARKER_TYPE);
 
 		final ServoyProject servoyProject = getServoyProject(project);
 		boolean active = servoyModel.isSolutionActive(project.getName());
@@ -788,6 +791,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 						}
 					}
+					else if (SolutionMetaData.isServoyMobileSolution(servoyProject.getSolution())) checkMobileModule(servoyProject, module);
 				}
 
 				// import hook modules should not contain other modules
@@ -797,6 +801,32 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					addMarker(project, MISPLACED_MODULES_MARKER_TYPE, message, -1, MODULE_MISPLACED, IMarker.PRIORITY_LOW, null, null);
 				}
 			}
+		}
+	}
+
+	private void checkMobileModule(ServoyProject mobileProject, ServoyProject module)
+	{
+		final boolean[] isMobileModuleValid = { true };
+		module.getSolution().acceptVisitor(new IPersistVisitor()
+		{
+			public Object visit(IPersist o)
+			{
+				if (o instanceof Solution || o instanceof Relation || o instanceof RelationItem || o instanceof ScriptCalculation)
+				{
+					return IPersistVisitor.CONTINUE_TRAVERSAL;
+				}
+				else
+				{
+					isMobileModuleValid[0] = false;
+					return IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
+				}
+			}
+		});
+
+		if (!isMobileModuleValid[0])
+		{
+			String message = "Module " + module.getSolution().getName() + " is a mobile solution module, so it should contain only relations and calculations."; //$NON-NLS-1$//$NON-NLS-2$
+			addMarker(mobileProject.getProject(), INVALID_MOBILE_MODULE_MARKER_TYPE, message, -1, MODULE_INVALID_MOBILE, IMarker.PRIORITY_NORMAL, null, null);
 		}
 	}
 
