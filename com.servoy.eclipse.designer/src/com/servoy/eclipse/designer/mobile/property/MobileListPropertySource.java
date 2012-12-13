@@ -135,8 +135,8 @@ public class MobileListPropertySource implements IPropertySource
 				elementPropertySources.put(prefix = "listitemSubtext",
 					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.subtext, model.containedForm, false));
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
-					"subTextDataProvider");
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName(), "subText");
+					"subtextDataProvider");
+				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName(), "subtext");
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName(), "subTextStyleClass");
 			}
 
