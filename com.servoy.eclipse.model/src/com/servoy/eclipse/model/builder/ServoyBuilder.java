@@ -3873,7 +3873,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					while (tables.hasNext())
 					{
 						String tableName = tables.next();
-						if (server.isTableLoaded(tableName))
+						if (server.isTableLoaded(tableName) && !server.isTableMarkedAsHiddenInDeveloper(tableName))
 						{
 							Table table = server.getTable(tableName);
 							IResource res = project;

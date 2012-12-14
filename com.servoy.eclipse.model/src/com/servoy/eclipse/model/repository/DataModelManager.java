@@ -502,7 +502,7 @@ public class DataModelManager implements IColumnInfoManager
 					if (checkForMarkers)
 					{
 						if (differenceType == TableDifference.COLUMN_CONFLICT || differenceType == TableDifference.COLUMN_MISSING_FROM_DB ||
-							differenceType == TableDifference.COLUMN_MISSING_FROM_DBI_FILE)
+							differenceType == TableDifference.COLUMN_MISSING_FROM_DBI_FILE || differenceType == TableDifference.DESERIALIZE_PROBLEM)
 						{
 							for (IUnexpectedSituationHandler e : ResourcesUtils.<IUnexpectedSituationHandler> getExtensions(IUnexpectedSituationHandler.EXTENSION_ID))
 							{
@@ -561,6 +561,68 @@ public class DataModelManager implements IColumnInfoManager
 			catch (RepositoryException e)
 			{
 				ServoyLog.logError(e);
+			}
+		}
+	}
+
+	public void updateHiddenInDeveloperState(Table t) throws RepositoryException
+	{
+		InputStream is = null;
+		try
+		{
+			IFile file = getDBIFile(t.getServerName(), t.getName());
+			if (file.exists())
+			{
+
+				is = file.getContents(true);
+				String json_table = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
+				IServerInternal s = (IServerInternal)sm.getServer(t.getServerName());
+				if (s != null && s.getConfig().isEnabled() && s.isValid() && json_table != null)
+				{
+					TableDef tableInfo = deserializeTableInfo(json_table);
+					tableInfo.hiddenInDeveloper = t.isMarkedAsHiddenInDeveloper();
+					String tObj = serializeTableInfo(tableInfo);
+					InputStream source = new ByteArrayInputStream(tObj.getBytes("UTF8"));
+					file.setContents(source, true, false, null);
+				}
+			}
+			else
+			{
+				if (!t.isMarkedAsHiddenInDeveloper())
+				{
+					TableDef tableInfo = new TableDef();
+					tableInfo.name = t.getName();
+					tableInfo.hiddenInDeveloper = t.isMarkedAsHiddenInDeveloper();
+					tableInfo.isMetaData = t.isMarkedAsMetaData();
+
+					String tObj = serializeTableInfo(tableInfo);
+					InputStream source = new ByteArrayInputStream(tObj.getBytes("UTF8"));
+					ResourcesUtils.createFileAndParentContainers(file, source, true);
+				}
+			}
+		}
+		catch (JSONException e)
+		{
+			// maybe the .dbi file content is corrupt... add an error marker
+			addDeserializeErrorMarker(t, e.getMessage());
+			throw new RepositoryException(e);
+		}
+		catch (CoreException e)
+		{
+			// maybe the .dbi file content is corrupt... add an error marker
+			addDeserializeErrorMarker(t, e.getMessage());
+			throw new RepositoryException(e);
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			throw new RepositoryException(e);
+		}
+		finally
+		{
+			if (is != null)
+			{
+				Utils.closeInputStream(is);
+				is = null;
 			}
 		}
 	}
@@ -1085,8 +1147,10 @@ public class DataModelManager implements IColumnInfoManager
 					// the project might have disappeared before this job was started... (delete)
 					try
 					{
-						IMarker marker = resource.createMarker(ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE);
-						marker.setAttribute(IMarker.MESSAGE, columnDifference.getUserFriendlyMessage());
+						if (!columnDifference.getTable().isMarkedAsHiddenInDeveloper())
+						{
+							IMarker marker = resource.createMarker(ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE);
+							marker.setAttribute(IMarker.MESSAGE, columnDifference.getUserFriendlyMessage());
 //						int adjustedSeverity = severity;
 //						if (adjustedSeverity == IMarker.SEVERITY_ERROR)
 //						{
@@ -1101,20 +1165,22 @@ public class DataModelManager implements IColumnInfoManager
 //								adjustedSeverity = IMarker.SEVERITY_WARNING;
 //							}
 //						}
-						marker.setAttribute(IMarker.SEVERITY, severity);
-						marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
-						marker.setAttribute(IMarker.LOCATION, "JSON file");
-						marker.setAttribute(TableDifference.ATTRIBUTE_SERVERNAME, columnDifference.getServerName());
-						marker.setAttribute(TableDifference.ATTRIBUTE_TABLENAME, columnDifference.getTableName());
-						marker.setAttribute(TableDifference.ATTRIBUTE_COLUMNNAME, columnDifference.getColumnName());
+							marker.setAttribute(IMarker.SEVERITY, severity);
+							marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
+							marker.setAttribute(IMarker.LOCATION, "JSON file");
+							marker.setAttribute(TableDifference.ATTRIBUTE_SERVERNAME, columnDifference.getServerName());
+							marker.setAttribute(TableDifference.ATTRIBUTE_TABLENAME, columnDifference.getTableName());
+							marker.setAttribute(TableDifference.ATTRIBUTE_COLUMNNAME, columnDifference.getColumnName());
 
-						// missing DBI file markers are added to the resources project itself (do not have the dbi file to add markers to);
-						// this means that there might be more markers like this on the resources project - from different tables;
-						// and we need to keep track of them individually - so remember the ID of the marker for each table
-						if (columnDifference.type == TableDifference.MISSING_DBI_FILE)
-						{
-							missingDbiFileMarkerIds.put(columnDifference.getServerName() + '.' + columnDifference.getTableName(), Long.valueOf(marker.getId()));
-							marker.setAttribute(TableDifference.ATTRIBUTE_ISMISSINGDBIFILEMARKER, true);
+							// missing DBI file markers are added to the resources project itself (do not have the dbi file to add markers to);
+							// this means that there might be more markers like this on the resources project - from different tables;
+							// and we need to keep track of them individually - so remember the ID of the marker for each table
+							if (columnDifference.type == TableDifference.MISSING_DBI_FILE)
+							{
+								missingDbiFileMarkerIds.put(columnDifference.getServerName() + '.' + columnDifference.getTableName(),
+									Long.valueOf(marker.getId()));
+								marker.setAttribute(TableDifference.ATTRIBUTE_ISMISSINGDBIFILEMARKER, true);
+							}
 						}
 					}
 					catch (CoreException e)
