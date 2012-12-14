@@ -32,7 +32,7 @@ import javax.swing.ImageIcon;
  */
 public class IconWithRoundBackground implements Icon
 {
-	public final static Color DATA_ICON_BG = new Color(148, 148, 148); // TODO: use theme
+	public final static Color DATA_ICON_BG = new Color(148, 148, 148);
 
 	private final ImageIcon icon;
 	private final Color color;

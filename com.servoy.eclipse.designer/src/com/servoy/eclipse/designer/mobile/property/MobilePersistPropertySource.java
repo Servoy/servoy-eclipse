@@ -35,9 +35,11 @@ import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.scripting.annotations.ServoyMobile;
+import com.servoy.j2db.util.Utils;
 
 /**
  * PersistPropertySource to filter out properties not used in mobile solutions.
@@ -242,4 +244,25 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		return super.getPropertiesPropertyDescriptor(propertySource, id, displayName, name, flattenedEditingSolution, form);
 	}
 
+	@Override
+	public void setPersistPropertyValue(Object id, Object value)
+	{
+		super.setPersistPropertyValue(id, value);
+
+		// set style on header text, copy to header part
+		if (StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName().equals(id) &&
+			getPersist() instanceof GraphicalComponent &&
+			(Boolean.TRUE.equals(((GraphicalComponent)getPersist()).getCustomMobileProperty("headerText")) || Boolean.TRUE.equals(((GraphicalComponent)getPersist()).getCustomMobileProperty("listitemHeader"))) &&
+			getContext() instanceof Form)
+		{
+			Form form = (Form)getContext();
+			for (Part part : Utils.iterate(form.getParts()))
+			{
+				if (part.getPartType() == Part.HEADER)
+				{
+					new PersistPropertySource(PersistContext.create(part, form), false).setPersistPropertyValue(id, value);
+				}
+			}
+		}
+	}
 }

@@ -31,7 +31,9 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.ComponentDeleteEditPolicy;
 import com.servoy.eclipse.designer.editor.SetBoundsToPartFigureListener;
+import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Part;
@@ -83,6 +85,22 @@ public abstract class MobilePartGraphicalEditPart extends AbstractGraphicalEditP
 		fig.addFigureListener(new SetBoundsToPartFigureListener(getModel()));
 		fig.setLayoutManager(new MobileFormPartLayoutManager(getModel().getPartType()));
 		return fig;
+	}
+
+	@Override
+	public void refresh()
+	{
+		super.refresh();
+		if (figure != null)
+		{
+			updateFigure(figure);
+		}
+	}
+
+	protected void updateFigure(IFigure fig)
+	{
+		fig.setBackgroundColor(ColorResource.INSTANCE.getColor(ColorResource.ColorAwt2Rgb(ComponentFactory.getPartBackground(application, getModel(),
+			editorPart.getForm()))));
 	}
 
 	@Override

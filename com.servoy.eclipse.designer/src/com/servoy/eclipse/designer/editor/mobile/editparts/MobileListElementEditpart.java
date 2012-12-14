@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.mobile.editparts;
 
+import java.awt.Color;
 import java.util.Collection;
 
 import org.eclipse.draw2d.IFigure;
@@ -28,20 +29,25 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
+import org.xhtmlrenderer.css.constants.CSSName;
 
 import com.servoy.eclipse.core.IPersistChangeListener;
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.SetBoundsToSupportBoundsFigureListener;
 import com.servoy.eclipse.designer.mobile.property.MobilePersistPropertySource;
+import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.resource.ImageResource;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.util.IStyleRule;
+import com.servoy.j2db.util.IStyleSheet;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -111,16 +117,7 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 				break;
 
 			case Header :
-				fig = new Label();
-				((Label)fig).setLabelAlignment(PositionConstants.CENTER);
-				fig.setBackgroundColor(MobilePartFigure.HEADER_COLOR);// TODO: use scheme
-				break;
-
 			case Button :
-				fig = new Label();
-				((Label)fig).setLabelAlignment(PositionConstants.LEFT);
-				break;
-
 			case Subtext :
 				fig = new Label();
 				((Label)fig).setLabelAlignment(PositionConstants.LEFT);
@@ -136,14 +133,28 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 		}
 
 		fig.setOpaque(type == MobileListElementType.Header);
-
-//		LineBorder border = new LineBorder(1);
-//		border.setColor(ColorConstants.white);
-//		border.setStyle(Graphics.LINE_DASH);
-//		fig.setBorder(border);
-
 		fig.addFigureListener(new SetBoundsToSupportBoundsFigureListener(editorPart.getForm(), getModel().getLeft(), true));
+
 		return fig;
+	}
+
+	public static org.eclipse.swt.graphics.Color getGcColor(GraphicalComponent gc, IApplication application, Form form, Color def)
+	{
+		Color awtColor = null;
+		if (gc.getBackground() != null)
+		{
+			awtColor = gc.getBackground();
+		}
+		else
+		{
+			Pair<IStyleSheet, IStyleRule> elementStyle = ComponentFactory.getStyleForBasicComponent(application, gc, form);
+			if (elementStyle != null && elementStyle.getRight() != null && elementStyle.getRight().hasAttribute(CSSName.BACKGROUND_COLOR.toString()))
+			{
+				awtColor = elementStyle.getLeft().getBackground(elementStyle.getRight());
+			}
+		}
+
+		return ColorResource.INSTANCE.getColor(ColorResource.ColorAwt2Rgb(awtColor == null ? def : awtColor));
 	}
 
 	/*
@@ -155,6 +166,7 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 		{
 			case Header :
 				updateFigureForGC(fig, (GraphicalComponent)getModel().getLeft(), "<header>");
+				fig.setBackgroundColor(getGcColor((GraphicalComponent)getModel().getLeft(), application, editorPart.getForm(), Color.white));
 				break;
 
 			case Button :
@@ -202,8 +214,7 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 			{
 				dataIcon = "arrow-r"; // default
 			}
-			image = ImageResource.INSTANCE.getImageWithRoundBackground(
-				Activator.loadImageDescriptorFromBundle("mobile/icons-18-white-" + dataIcon + ".png"),
+			image = ImageResource.INSTANCE.getImageWithRoundBackground(Activator.loadImageDescriptorFromBundle("mobile/icons-18-white-" + dataIcon + ".png"),
 				new RGB(IconWithRoundBackground.DATA_ICON_BG.getRed(), IconWithRoundBackground.DATA_ICON_BG.getGreen(),
 					IconWithRoundBackground.DATA_ICON_BG.getBlue()));
 			fig.setImage(image);
@@ -232,8 +243,7 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 	public void activate()
 	{
 		// listen to changes to the elements
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		servoyModel.addPersistChangeListener(false, this);
+		ServoyModelManager.getServoyModelManager().getServoyModel().addPersistChangeListener(false, this);
 
 		super.activate();
 	}
@@ -242,8 +252,7 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 	public void deactivate()
 	{
 		// stop listening to changes to the elements
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		servoyModel.removePersistChangeListener(false, this);
+		ServoyModelManager.getServoyModelManager().getServoyModel().removePersistChangeListener(false, this);
 
 		super.deactivate();
 	}

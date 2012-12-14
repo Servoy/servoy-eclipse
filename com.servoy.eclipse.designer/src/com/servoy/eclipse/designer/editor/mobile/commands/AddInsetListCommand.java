@@ -35,7 +35,6 @@ import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.ISupportTextSetup;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -108,7 +107,8 @@ public class AddInsetListCommand extends BaseFormPlaceElementCommand
 			ServoyProject servoyProject = servoyModel.getServoyProject(solution.getName());
 			tabForm = servoyProject.getEditingSolution().createNewForm(nameValidator, null, tabFormName, null, true, null);
 			// add parts so it looks nice while developing in webclient
-			tabForm.createNewPart(Part.HEADER, 40);
+			Part headerPart = tabForm.createNewPart(Part.HEADER, 40);
+			headerPart.setStyleClass("b"); // default for headers
 			tabForm.createNewPart(Part.BODY, 600);
 			tabForm.setView(FormController.LOCKED_TABLE_VIEW);
 
@@ -127,7 +127,6 @@ public class AddInsetListCommand extends BaseFormPlaceElementCommand
 			header.putCustomMobileProperty("listitemHeader", Boolean.TRUE);
 			// for debug in developer
 			header.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST | IAnchorConstants.NORTH);
-			header.setHorizontalAlignment(ISupportTextSetup.CENTER);
 			header.setStyleClass("b"); // default for headers
 
 			// add tab

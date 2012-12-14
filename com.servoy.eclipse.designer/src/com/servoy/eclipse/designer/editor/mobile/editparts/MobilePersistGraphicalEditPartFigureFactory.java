@@ -74,15 +74,6 @@ import com.servoy.j2db.util.gui.RoundedBorder;
  */
 public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFactory<PersistImageFigure>
 {
-	private final static Color BUTTON_BG = new Color(64, 116, 165); // TODO: use theme
-	private final static Color BUTTON_BORDER = new Color(20, 80, 114); // TODO: use theme
-	private final static Color TEXT_BG = new Color(240, 240, 240); // TODO: use theme
-	private final static Color LABEL_FG = new Color(68, 68, 68); // TODO: use theme
-	private final static Color COMBO_BG = new Color(246, 246, 246); // TODO: use theme
-	private final static Color RADIOS_BG = new Color(246, 246, 246); // TODO: use theme
-	private final static Color CHECKS_BG = new Color(246, 246, 246); // TODO: use theme
-	private final static Color HEADER_LABEL_FG = Color.white; // TODO: use theme
-
 	private final IApplication application;
 	private final Form form;
 
@@ -111,16 +102,15 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 						if (component instanceof JButton || component instanceof DataComboBox || component instanceof DataField ||
 							component instanceof DataChoice || component instanceof DataCheckBox)
 						{
-							RoundedBorder rborder = new RoundedBorder(1, 1, 1, 1, BUTTON_BORDER, BUTTON_BORDER, BUTTON_BORDER, BUTTON_BORDER);
+							Color roundedBorderColor = new Color(20, 80, 114);
+							RoundedBorder rborder = new RoundedBorder(1, 1, 1, 1, roundedBorderColor, roundedBorderColor, roundedBorderColor,
+								roundedBorderColor);
 							rborder.setRoundingRadius(new float[] { 10, 10, 10, 10 });
 							((JComponent)component).setBorder(rborder);
 						}
 
 						if (component instanceof JButton)
 						{
-							((JButton)component).setBackground(BUTTON_BG);
-							((JButton)component).setForeground(Color.white);
-							component.setFont(component.getFont().deriveFont(Font.BOLD));
 							if (persist instanceof AbstractBase)
 							{
 								String dataIcon = (String)((AbstractBase)persist).getCustomMobileProperty(MobilePersistPropertySource.DATA_ICON_PROPERTY);
@@ -143,14 +133,7 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 						else if (component instanceof JLabel)
 						{
 							((JLabel)component).setOpaque(false);
-							component.setFont(component.getFont().deriveFont(Font.BOLD));
-							boolean headerText = persist instanceof AbstractBase && ((AbstractBase)persist).getCustomMobileProperty("headerText") != null;
-							((JLabel)component).setForeground(headerText ? HEADER_LABEL_FG : LABEL_FG);
-							if (headerText)
-							{
-								((JLabel)component).setHorizontalAlignment(SwingConstants.CENTER);
-							}
-							else
+							if (!(persist instanceof AbstractBase && ((AbstractBase)persist).getCustomMobileProperty("headerText") != null))
 							{
 								Object headerSizeProp = ((AbstractBase)persist).getCustomMobileProperty(MobilePersistPropertySource.HEADER_SIZE_PROPERTY);
 								int headerSize = headerSizeProp instanceof Integer ? Math.max(1, Math.min(6, ((Integer)headerSizeProp).intValue())) : 4;
@@ -183,7 +166,6 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 						else if (component instanceof DataComboBox)
 						{
 							((DataComboBox)component).setEditable(false);
-							component.setBackground(COMBO_BG);
 							((DataComboBox)component).setUI(new BasicComboBoxUI()
 							{
 								@Override
@@ -197,10 +179,6 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 								}
 							});
 						}
-						else if (component instanceof DataField)
-						{
-							component.setBackground(TEXT_BG);
-						}
 						else if (component instanceof DataChoice &&
 							(((DataChoice)component).getChoiceType() == Field.RADIOS || ((DataChoice)component).getChoiceType() == Field.CHECKS))
 						{
@@ -210,7 +188,6 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 							component.setFont(component.getFont().deriveFont(Font.BOLD));
 							if (dataChoice.getChoiceType() == Field.RADIOS)
 							{
-								component.setBackground(RADIOS_BG);
 								((JRadioButton)dataChoice.getRendererComponent()).setIcon(Activator.getDefault().loadImageIconFromBundle(
 									horizontal ? "empty_18x18.png" : "mobile/radio_off.png"));
 								((JRadioButton)dataChoice.getRendererComponent()).setSelectedIcon(Activator.getDefault().loadImageIconFromBundle(
@@ -218,7 +195,6 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 							}
 							else
 							{
-								component.setBackground(CHECKS_BG);
 								((JCheckBox)dataChoice.getRendererComponent()).setIcon(Activator.getDefault().loadImageIconFromBundle("mobile/check_off.png"));
 								((JCheckBox)dataChoice.getRendererComponent()).setSelectedIcon(Activator.getDefault().loadImageIconFromBundle(
 									"mobile/check_on.png"));
@@ -243,7 +219,6 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 						}
 						else if (component instanceof DataCheckBox)
 						{
-							component.setBackground(CHECKS_BG);
 							((DataCheckBox)component).setIcon(Activator.getDefault().loadImageIconFromBundle("mobile/check_on.png"));
 						}
 

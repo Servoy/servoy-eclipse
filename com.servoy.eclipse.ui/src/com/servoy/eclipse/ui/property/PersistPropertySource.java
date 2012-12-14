@@ -169,7 +169,7 @@ import com.servoy.j2db.query.ISQLJoin;
 import com.servoy.j2db.scripting.FunctionDefinition;
 import com.servoy.j2db.smart.dataui.InvisibleBean;
 import com.servoy.j2db.util.ComponentFactoryHelper;
-import com.servoy.j2db.util.DataSourceUtils;
+import com.servoy.j2db.util.DataSourceUtilsBase;
 import com.servoy.j2db.util.IDelegate;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.SafeArrayList;
@@ -471,6 +471,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	public IPersist getPersist()
 	{
 		return persistContext.getPersist();
+	}
+
+	public IPersist getContext()
+	{
+		return persistContext.getContext();
 	}
 
 	public Object getSaveModel()
@@ -2548,7 +2553,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					!((Form)persistContext.getPersist()).getDataSource().equals(flattenedSuperForm.getDataSource()))
 				{
 					// current form has invalid data source (overrides with different value), allow user to correct
-					String[] dbServernameTablename = DataSourceUtils.getDBServernameTablename(flattenedSuperForm.getDataSource());
+					String[] dbServernameTablename = DataSourceUtilsBase.getDBServernameTablename(flattenedSuperForm.getDataSource());
 					if (dbServernameTablename != null)
 					{
 						return new DatasourceController(id, displayName, "Select table", false,

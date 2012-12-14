@@ -19,10 +19,6 @@ package com.servoy.eclipse.designer.editor.mobile.editparts;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.handles.HandleBounds;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
-
-import com.servoy.eclipse.ui.resource.ColorResource;
 
 /**
  * Figure for header or footer part in mobile form editor.
@@ -32,7 +28,6 @@ import com.servoy.eclipse.ui.resource.ColorResource;
  */
 public class MobilePartFigure extends Figure implements HandleBounds
 {
-	public static Color HEADER_COLOR = ColorResource.INSTANCE.getColor(new RGB(110, 150, 190));// TODO: use theme
 	private final int partType;
 
 	/**
@@ -43,7 +38,6 @@ public class MobilePartFigure extends Figure implements HandleBounds
 	{
 		this.partType = partType;
 		setOpaque(true);
-		setBackgroundColor(HEADER_COLOR);
 	}
 
 	/**

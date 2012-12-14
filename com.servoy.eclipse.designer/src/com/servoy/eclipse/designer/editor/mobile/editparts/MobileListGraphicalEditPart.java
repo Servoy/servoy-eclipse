@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.mobile.editparts;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -112,6 +113,24 @@ public class MobileListGraphicalEditPart extends AbstractGraphicalEditPart imple
 		fig.setLayoutManager(new MobileListFigureLayoutManager());
 		fig.addFigureListener(new SetBoundsToSupportBoundsFigureListener(editorPart.getForm(), getModel(), false));
 		return fig;
+	}
+
+	@Override
+	public void refresh()
+	{
+		super.refresh();
+		if (figure != null)
+		{
+			updateFigure(figure);
+		}
+	}
+
+	/**
+	 * @param figure
+	 */
+	protected void updateFigure(IFigure fig)
+	{
+		fig.setBackgroundColor(MobileListElementEditpart.getGcColor(getModel().button, application, editorPart.getForm(), Color.white));
 	}
 
 	@Override

@@ -23,9 +23,6 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Insets;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.handles.HandleBounds;
-import org.eclipse.swt.graphics.RGB;
-
-import com.servoy.eclipse.ui.resource.ColorResource;
 
 /**
  * Figure for (Inset) lists.
@@ -38,7 +35,6 @@ public class MobileListFigure extends Figure implements HandleBounds
 	public MobileListFigure(boolean isInset)
 	{
 		setOpaque(false); // border handles all
-		setBackgroundColor(ColorResource.INSTANCE.getColor(new RGB(245, 245, 245))); // TODO use scheme
 		setBorder(new MobileListBackgroundBorder(isInset));
 	}
 

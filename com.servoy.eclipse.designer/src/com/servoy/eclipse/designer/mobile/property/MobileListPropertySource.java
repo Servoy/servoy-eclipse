@@ -126,7 +126,7 @@ public class MobileListPropertySource implements IPropertySource
 					"textDataProvider");
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName());
 				addMethodPropertyDescriptor(elementPropertySource, prefix, MobilePersistPropertySource.DATA_ICON_PROPERTY);
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName(), "textStyleClass");
+				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName());
 			}
 
 			// subtext
@@ -137,7 +137,6 @@ public class MobileListPropertySource implements IPropertySource
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
 					"subtextDataProvider");
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName(), "subtext");
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName(), "subtextStyleClass");
 			}
 
 			// countBubble
