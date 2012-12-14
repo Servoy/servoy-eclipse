@@ -335,6 +335,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			key = null;
 		}
 
+		if (type == UserNodeType.PLUGIN && isActiveProjectMobileType()) key = key + "_mobile";
+
 		Object lst = leafList.get(key);
 		Object[] lm = null;
 		Map<Object, Object[]> parentMap = null;
@@ -1391,12 +1393,16 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return getJSMethodsViaJavaMembers(ijm, clz, o, elementName, prefix, actionType, real, excludeMethodNames, false);
 	}
 
+	private boolean isActiveProjectMobileType()
+	{
+		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+		return SolutionMetaData.isServoyMobileSolution(activeProject != null ? activeProject.getSolution() : null);
+	}
+
 	private SimpleUserNode[] getJSMethodsViaJavaMembers(JavaMembers ijm, Class< ? > originalClass, IScriptObject scriptObject, String elementName,
 		String prefix, UserNodeType actionType, Object real, String[] excludeMethodNames, boolean onSolExCreate)
 	{
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
-		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-		boolean isForMobileSolution = SolutionMetaData.isServoyMobileSolution(activeProject != null ? activeProject.getSolution() : null);
 		boolean isPluginItem = UserNodeType.PLUGINS_ITEM.equals(actionType);
 
 		IScriptObject adapter = ScriptObjectRegistry.getAdapterIfAny(scriptObject);
@@ -1435,7 +1441,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					if (adapter.isDeprecated((String)element)) continue;
 					if (adapter.isDeprecated(constantsElementName + (String)element)) continue;
 
-					if (isForMobileSolution && !(onSolExCreate && isPluginItem))
+					if (isActiveProjectMobileType() && !(onSolExCreate && isPluginItem))
 					{
 						// this field is a constant
 						Field field = (Field)ijm.getField((String)element, true);
@@ -1487,7 +1493,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			Object bp = ijm.getField(name, false);
 			if (bp == null) continue;
-			if (isForMobileSolution && !(bp instanceof JavaMembers.BeanProperty) ||
+			if (isActiveProjectMobileType() && !(bp instanceof JavaMembers.BeanProperty) ||
 				!AnnotationManager.getInstance().isMobileAnnotationPresent(((JavaMembers.BeanProperty)bp).getGetter(), originalClass) &&
 				!(onSolExCreate && isPluginItem))
 			{
@@ -1528,7 +1534,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 			for (MemberBox method : njm.getMethods())
 			{
-				if (isForMobileSolution && !AnnotationManager.getInstance().isMobileAnnotationPresent(method.method(), originalClass) &&
+				if (isActiveProjectMobileType() && !AnnotationManager.getInstance().isMobileAnnotationPresent(method.method(), originalClass) &&
 					!(onSolExCreate && isPluginItem)) continue;
 
 				String displayName = null;
