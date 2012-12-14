@@ -110,6 +110,7 @@ import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.documentation.DocumentationUtil;
 import com.servoy.j2db.documentation.IParameter;
 import com.servoy.j2db.documentation.ScriptParameter;
+import com.servoy.j2db.documentation.ServoyDocumented;
 import com.servoy.j2db.documentation.scripting.docs.FormElements;
 import com.servoy.j2db.documentation.scripting.docs.Forms;
 import com.servoy.j2db.documentation.scripting.docs.Globals;
@@ -913,7 +914,14 @@ public class TypeCreator extends TypeCache
 			type.setDeprecated(true);
 			type.setVisible(false);
 		}
-		if (cls != IRuntimeComponent.class && IRuntimeComponent.class.isAssignableFrom(cls))
+		ServoyDocumented anno = cls.getAnnotation(ServoyDocumented.class);
+		if (anno != null && anno.extendsComponent() != null && anno.extendsComponent().trim() != null)
+		{
+			Type superT = getType(context, anno.extendsComponent());
+			if (superT != null) type.setSuperType(superT);
+			else ServoyLog.logWarning("@ServoyDocumented.extendsComponent for type '" + typeName + "' was not found. Value: " + anno.extendsComponent(), null);
+		}
+		else if (cls != IRuntimeComponent.class && IRuntimeComponent.class.isAssignableFrom(cls))
 		{
 			type.setSuperType(getType(context, "RuntimeComponent"));
 		}
