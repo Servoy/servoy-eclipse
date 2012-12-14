@@ -99,7 +99,6 @@ import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
@@ -334,8 +333,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			// THE DATA FOR THIS TYPE OF NODES IS NOT CACHED
 			key = null;
 		}
-
-		if (type == UserNodeType.PLUGIN && isActiveProjectMobileType()) key = key + "_mobile";
 
 		Object lst = leafList.get(key);
 		Object[] lm = null;
@@ -595,7 +592,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				try
 				{
-					lm = getJSMethods(un.getRealObject(), PLUGIN_PREFIX + "." + un.getName(), null, UserNodeType.PLUGINS_ITEM, null, null, false);
+					lm = getJSMethods(un.getRealObject(), PLUGIN_PREFIX + "." + un.getName(), null, UserNodeType.PLUGINS_ITEM, null, null);
 				}
 				catch (Exception ex)
 				{
@@ -1273,12 +1270,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	public boolean isNonEmptyPlugin(SimpleUserNode un)
 	{
-		return isNonEmptyPlugin(un, false);
-	}
-
-	public boolean isNonEmptyPlugin(SimpleUserNode un, boolean onSolExCreate)
-	{
-		Object[] lm = getJSMethods(un.getRealObject(), PLUGIN_PREFIX + "." + un.getName(), null, UserNodeType.PLUGINS_ITEM, null, null, onSolExCreate);
+		Object[] lm = getJSMethods(un.getRealObject(), PLUGIN_PREFIX + "." + un.getName(), null, UserNodeType.PLUGINS_ITEM, null, null);
 		if (lm != null && lm.length > 0) return true;
 		return false;
 	}
@@ -1302,11 +1294,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				Context.exit();
 			}
 		}
-		return getJSMethodsViaJavaMembers(jm, beanClazz, null, elementName, prefix, actionType, null, null, false);
+		return getJSMethodsViaJavaMembers(jm, beanClazz, null, elementName, prefix, actionType, null, null);
 	}
 
-	private SimpleUserNode[] getJSMethods(Object o, String elementName, String prefix, UserNodeType actionType, Object real, String[] excludeMethodNames,
-		boolean onSolExCreate)
+	private SimpleUserNode[] getJSMethods(Object o, String elementName, String prefix, UserNodeType actionType, Object real, String[] excludeMethodNames)
 	{
 		if (o == null) return EMPTY_LIST;
 		boolean current = (Context.getCurrentContext() != null);
@@ -1335,7 +1326,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			so = ScriptObjectRegistry.getScriptObjectForClass(o.getClass());
 		}
-		return getJSMethodsViaJavaMembers(ijm, o.getClass(), so, elementName, prefix, actionType, real, excludeMethodNames, onSolExCreate);
+		return getJSMethodsViaJavaMembers(ijm, o.getClass(), so, elementName, prefix, actionType, real, excludeMethodNames);
 	}
 
 	private SimpleUserNode[] getJSMethods(Class clz, String elementName, String prefix, UserNodeType actionType, Object real, String[] excludeMethodNames)
@@ -1390,23 +1381,14 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			// if the class is a scriptable an the javamembers is not a instance java members, just return nothing.
 			return new SimpleUserNode[0];
 		}
-		return getJSMethodsViaJavaMembers(ijm, clz, o, elementName, prefix, actionType, real, excludeMethodNames, false);
-	}
-
-	private boolean isActiveProjectMobileType()
-	{
-		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-		return SolutionMetaData.isServoyMobileSolution(activeProject != null ? activeProject.getSolution() : null);
+		return getJSMethodsViaJavaMembers(ijm, clz, o, elementName, prefix, actionType, real, excludeMethodNames);
 	}
 
 	private SimpleUserNode[] getJSMethodsViaJavaMembers(JavaMembers ijm, Class< ? > originalClass, IScriptObject scriptObject, String elementName,
-		String prefix, UserNodeType actionType, Object real, String[] excludeMethodNames, boolean onSolExCreate)
+		String prefix, UserNodeType actionType, Object real, String[] excludeMethodNames)
 	{
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
-		boolean isPluginItem = UserNodeType.PLUGINS_ITEM.equals(actionType);
-
 		IScriptObject adapter = ScriptObjectRegistry.getAdapterIfAny(scriptObject);
-
 		if (real instanceof IConstantsObject || (real instanceof Class< ? > && IConstantsObject.class.isAssignableFrom((Class< ? >)real)))
 		{
 			String constantsElementName = null;
@@ -1434,6 +1416,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			arrays = fields.toArray(arrays);
 			Arrays.sort(arrays);
 
+			UserNode node;
 			for (Object element : arrays)
 			{
 				if (adapter != null)
@@ -1441,23 +1424,22 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					if (adapter.isDeprecated((String)element)) continue;
 					if (adapter.isDeprecated(constantsElementName + (String)element)) continue;
 
-					if (isActiveProjectMobileType() && !(onSolExCreate && isPluginItem))
+					node = new UserNode((String)element, actionType, new FieldFeedback((String)element, constantsElementName, resolver, scriptObject, ijm),
+						real, uiActivator.loadImageFromBundle("constant.gif"));
+
+					// this field is a constant
+					Field field = (Field)ijm.getField((String)element, true);
+					if (AnnotationManager.getInstance().isMobileAnnotationPresent(field))
 					{
-						// this field is a constant
-						Field field = (Field)ijm.getField((String)element, true);
-						if (!AnnotationManager.getInstance().isMobileAnnotationPresent(field))
-						{
-							continue;
-						}
+						node.setIsVisibleInMobile(true);
 					}
-					dlm.add(new UserNode((String)element, actionType, new FieldFeedback((String)element, constantsElementName, resolver, scriptObject, ijm),
-						real, uiActivator.loadImageFromBundle("constant.gif")));
 				}
 				else
 				{
-					dlm.add(new UserNode((String)element, actionType, constantsElementName + element, null, null, real,
-						uiActivator.loadImageFromBundle("constant.gif")));
+					node = new UserNode((String)element, actionType, constantsElementName + element, null, null, real,
+						uiActivator.loadImageFromBundle("constant.gif"));
 				}
+				dlm.add(node);
 			}
 
 		}
@@ -1493,13 +1475,13 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			Object bp = ijm.getField(name, false);
 			if (bp == null) continue;
-			if (isActiveProjectMobileType() && !(bp instanceof JavaMembers.BeanProperty) ||
-				!AnnotationManager.getInstance().isMobileAnnotationPresent(((JavaMembers.BeanProperty)bp).getGetter(), originalClass) &&
-				!(onSolExCreate && isPluginItem))
+			UserNode node = new UserNode(name, actionType, new FieldFeedback(name, elementName, resolver, scriptObject, ijm), real, pIcon);
+			if ((bp instanceof JavaMembers.BeanProperty) &&
+				AnnotationManager.getInstance().isMobileAnnotationPresent(((JavaMembers.BeanProperty)bp).getGetter(), originalClass))
 			{
-				continue;
+				node.setIsVisibleInMobile(true);
 			}
-			dlm.add(new UserNode(name, actionType, new FieldFeedback(name, elementName, resolver, scriptObject, ijm), real, pIcon));
+			dlm.add(node);
 		}
 
 		List names = ijm.getMethodIds(false);
@@ -1534,9 +1516,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 			for (MemberBox method : njm.getMethods())
 			{
-				if (isActiveProjectMobileType() && !AnnotationManager.getInstance().isMobileAnnotationPresent(method.method(), originalClass) &&
-					!(onSolExCreate && isPluginItem)) continue;
-
 				String displayName = null;
 
 				if (adapter != null)
@@ -1567,6 +1546,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 				SimpleUserNode node = new UserNode(displayName, actionType, new MethodFeedback(id, method.getParameterTypes(), elementName, resolver,
 					scriptObject, njm), (Object)null, functionIcon);
+
+				if (AnnotationManager.getInstance().isMobileAnnotationPresent(method.method(), originalClass)) node.setIsVisibleInMobile(true);
 
 				dlm.add(node);
 			}

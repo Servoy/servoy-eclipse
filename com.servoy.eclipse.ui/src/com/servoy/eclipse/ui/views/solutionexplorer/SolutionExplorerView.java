@@ -1404,6 +1404,16 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				}
 			}
 		});
+
+		if (SolutionMetaData.isServoyMobileSolution(getActiveSolution()))
+		{
+			if (mobileViewerFilter == null) mobileViewerFilter = new MobileViewerFilter();
+			list.addFilter(mobileViewerFilter);
+		}
+		else
+		{
+			if (mobileViewerFilter != null) list.removeFilter(mobileViewerFilter);
+		}
 	}
 
 	private Solution getActiveSolution()
@@ -1592,10 +1602,13 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		}
 
 		List<ViewerFilter> vf = Arrays.asList(tree.getFilters());
+		List<ViewerFilter> lvf = Arrays.asList(list.getFilters());
 		if (SolutionMetaData.isServoyMobileSolution(getActiveSolution()))
 		{
 			if (mobileViewerFilter == null) mobileViewerFilter = new MobileViewerFilter();
+
 			if (!vf.contains(mobileViewerFilter)) tree.addFilter(mobileViewerFilter);
+			if (!lvf.contains(mobileViewerFilter)) list.addFilter(mobileViewerFilter);
 
 			if (openNewSubFormWizardAction != null && newActionInTreeSecondary != null)
 			{
@@ -1605,6 +1618,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		else
 		{
 			if (mobileViewerFilter != null && vf.contains(mobileViewerFilter)) tree.removeFilter(mobileViewerFilter);
+			if (mobileViewerFilter != null && lvf.contains(mobileViewerFilter)) list.removeFilter(mobileViewerFilter);
 
 			if (openNewSubFormWizardAction != null && newActionInTreeSecondary != null)
 			{
@@ -2012,11 +2026,11 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		ServoyModelManager.getServoyModelManager().getServoyModel().addI18NChangeListener(i18nChangeListener);
 	}
 
-	public boolean isNonEmptyPlugin(SimpleUserNode un, boolean onSolExCreate)
+	public boolean isNonEmptyPlugin(SimpleUserNode un)
 	{
 		if (list != null && list.getContentProvider() instanceof SolutionExplorerListContentProvider)
 		{
-			return ((SolutionExplorerListContentProvider)list.getContentProvider()).isNonEmptyPlugin(un, onSolExCreate);
+			return ((SolutionExplorerListContentProvider)list.getContentProvider()).isNonEmptyPlugin(un);
 		}
 		return true;
 	}

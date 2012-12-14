@@ -50,7 +50,7 @@ public class SimpleUserNode
 
 	protected boolean hidden = false;
 
-	protected boolean visibleForMobile = false;
+	protected boolean visibleInMobile = false;
 
 	public SimpleUserNode(String displayName, UserNodeType type)
 	{
@@ -72,7 +72,7 @@ public class SimpleUserNode
 		this._realObject = realObject;
 		storeContainingPersistIfNeeded(_realObject);
 		this.icon = icon;
-		this.visibleForMobile = AnnotationManager.getInstance().isMobileAnnotationPresent(realType);
+		this.visibleInMobile = AnnotationManager.getInstance().isMobileAnnotationPresent(realType);
 	}
 
 	public SimpleUserNode(String displayName, UserNodeType type, Object realObject, IPersist containingPersist, Object icon)
@@ -219,12 +219,12 @@ public class SimpleUserNode
 
 	public void checkVisibleForMobileInChildren()
 	{
-		if (!visibleForMobile)
+		if (!visibleInMobile)
 		{
 			for (SimpleUserNode c : children)
 			{
-				visibleForMobile = c.isVisibleForMobile();
-				if (visibleForMobile) break;
+				visibleInMobile = c.isVisibleInMobile();
+				if (visibleInMobile) break;
 			}
 		}
 	}
@@ -252,9 +252,14 @@ public class SimpleUserNode
 		}
 	}
 
-	public boolean isVisibleForMobile()
+	public boolean isVisibleInMobile()
 	{
-		return visibleForMobile;
+		return visibleInMobile;
+	}
+
+	public void setIsVisibleInMobile(boolean isVisibleInMobile)
+	{
+		this.visibleInMobile = isVisibleInMobile;
 	}
 
 	/**

@@ -59,7 +59,7 @@ public class MobileViewerFilter extends ViewerFilter
 		if (node instanceof PlatformSimpleUserNode)
 		{
 			PlatformSimpleUserNode sun = (PlatformSimpleUserNode)node;
-			if (sun.isVisibleForMobile()) return true;
+			if (sun.isVisibleInMobile()) return true;
 			else
 			{
 				if (sun.getRealType() == UserNodeType.MEDIA)
@@ -83,6 +83,11 @@ public class MobileViewerFilter extends ViewerFilter
 					if (p != null && allowedParentNodes.contains(p.getRealType())) return true;
 				}
 			}
+		}
+		else if (node instanceof SimpleUserNode)
+		{
+			// filtering the list view
+			return ((SimpleUserNode)node).isVisibleInMobile();
 		}
 		return false;
 	}
