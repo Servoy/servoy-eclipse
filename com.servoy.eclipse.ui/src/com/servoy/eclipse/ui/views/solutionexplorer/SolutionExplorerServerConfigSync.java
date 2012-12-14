@@ -29,7 +29,7 @@ import com.servoy.j2db.persistence.ServerConfig;
  * @author alorincz
  *
  */
-public class SolutionExplorerServerConfigSync implements IServerConfigListener // RAGTEST del in solex tree dispose
+public class SolutionExplorerServerConfigSync implements IServerConfigListener
 {
 
 	/*

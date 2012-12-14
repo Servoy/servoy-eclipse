@@ -96,7 +96,7 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 	protected void fillPalette(PaletteRoot palette)
 	{
 		PaletteCustomization defaultPaletteCustomization = getDefaultPaletteCustomization();
-		PaletteCustomization savedPaletteCustomization = null; // RAGTEST new DesignerPreferences().getPaletteCustomization();
+		PaletteCustomization savedPaletteCustomization = null; // TODO new DesignerPreferences().getPaletteCustomization();
 		PaletteCustomization paletteCustomization = savedPaletteCustomization == null ? defaultPaletteCustomization : savedPaletteCustomization;
 
 		for (String drawerId : paletteCustomization.drawers == null ? defaultPaletteCustomization.drawers : paletteCustomization.drawers)

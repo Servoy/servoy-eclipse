@@ -105,7 +105,7 @@ public class MobileSnapToHelper extends SnapToHelper
 			}
 		}
 
-		// RAGTEST body
+		// Body
 
 		return null;
 	}

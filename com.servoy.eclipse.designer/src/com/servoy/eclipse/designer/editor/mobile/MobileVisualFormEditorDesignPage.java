@@ -70,14 +70,14 @@ public class MobileVisualFormEditorDesignPage extends BaseVisualFormEditorDesign
 	@Override
 	protected PaletteCustomizer createPaletteCustomizer()
 	{
-		// RAGTEST Auto-generated method stub
+		// TODO
 		return null;
 	}
 
 	@Override
 	protected void fillToolbar()
 	{
-		// RAGTEST toolbar in mobile form editor?
+		// TODO
 	}
 
 	@Override
@@ -89,7 +89,6 @@ public class MobileVisualFormEditorDesignPage extends BaseVisualFormEditorDesign
 
 		if (getEditorPart().getForm() != null)
 		{
-			// RAGTEST DnD from solex tree	viewer.addDropTargetListener(new FormElementTransferDropTarget(getGraphicalViewer(), getEditorPart()));
 			viewer.addDropTargetListener(new PaletteItemTransferDropTargetListener(getGraphicalViewer(), getEditorPart()));
 		}
 
