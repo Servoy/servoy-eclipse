@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <servoydoc>
   <runtime>
     <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT">
@@ -722,6 +722,16 @@ application.exit();]]></sample>
           <deprecated><![CDATA[As of release 2.x, replaced by #getActiveClientCount(boolean).]]></deprecated>
           <sample/>
         </function>
+        <function name="getActiveWindow">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.scripting.JSWindow" typecode="com.servoy.j2db.scripting.JSWindow"><![CDATA[the current active/focussed window.]]></return>
+          <description><![CDATA[This gets the currently focussed active window, this can be the main application window or a modal dialog.
+For a webclient getWindow() can return the main window that is not really the main for the current tab in the browser
+that can return a the previous tab that a user could have opened. For this this method is better suited because this 
+will give you the actual tab in the browser. Another call would be form.controller.getWindow() of a form that you know in which window it resides.]]></description>
+          <summary><![CDATA[This gets the currently focussed active window, this can be the main application window or a modal dialog.]]></summary>
+          <sample/>
+        </function>
         <function name="getApplicationType">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[Constant application type]]></return>
@@ -1101,7 +1111,12 @@ for( var i = 1 ; i <= dataset.getMaxRowIndex() ; i++ )
         <function name="getWindow">
           <argumentsTypes/>
           <return type="com.servoy.j2db.scripting.JSWindow" typecode="com.servoy.j2db.scripting.JSWindow"><![CDATA[the main application JSWindow.]]></return>
-          <description><![CDATA[Get the main application window.]]></description>
+          <description><![CDATA[Get the main application window. This is the window that is created first for this client. 
+In a smart client this is always just the first started window where the solution is loaded in.
+In a webclient when users (so not the developer through a createWindow() call) create there own tabs after
+they already created a client, loaded a solution. This doesn't have to be the main window that you expect.
+This is because there are then 2 main windows, the first tab that was used to load the solution first and then the second.
+Please use getActiveWindow() for that or controller.getWindow() of a form that you know is in the right window.]]></description>
           <summary><![CDATA[Get the main application window.]]></summary>
           <sample><![CDATA[// close and dispose window resources
 var mainAppWindow = application.getWindow();]]></sample>
@@ -1907,7 +1922,8 @@ elements.myfield.font = selectedFont]]></sample>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Show the form specified by the parameter, that can be a name (is case sensitive!) or a form object.]]></description>
+          <description><![CDATA[Show the form specified by the parameter, that can be a name (is case sensitive!) or a form object.
+This will show the form in the active/currently focussed window. So when called from a form in a dialog the dialog will show the form.]]></description>
           <summary><![CDATA[Show the form specified by the parameter, that can be a name (is case sensitive!) or a form object.]]></summary>
           <sample><![CDATA[application.showForm('MyForm');]]></sample>
           <parameters>
@@ -14532,7 +14548,8 @@ while(fsUpdater.next())
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if succeeded, false if failed.]]></return>
           <description><![CDATA[Do the actual update in the database, returns true if successful.
 There are 3 types of possible use with the foundset updater
-1) update entire foundset, not possible when the table of the foundset has tracking enabled, will fall back to 3.
+1) update entire foundset, not possible when the table of the foundset has tracking enabled, will fall back to 3. 
+   This will not update any modification columns, because it does the update directly in the database, without getting the records.
 2) update part of foundset, for example the first 4 row (starts with selected row)
 3) safely loop through foundset (starts with selected row)]]></description>
           <summary><![CDATA[Do the actual update in the database, returns true if successful.]]></summary>
