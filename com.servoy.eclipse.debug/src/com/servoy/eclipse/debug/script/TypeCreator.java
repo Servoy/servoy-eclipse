@@ -1061,7 +1061,7 @@ public class TypeCreator extends TypeCache
 							if (isServoyMobileSolutionType())
 							{
 								boolean visible = mobileAllowedTypes.get(typeName) != null ? AnnotationManager.getInstance().isMobileAnnotationPresent(
-									memberbox[i].method()) : false;
+									memberbox[i].method(), scriptObjectClass) : false;
 								if (!visible)
 								{
 									method.setVisibility(Visibility.INTERNAL);
@@ -1175,7 +1175,8 @@ public class TypeCreator extends TypeCache
 						boolean readOnly = false;
 						if (object instanceof BeanProperty)
 						{
-							readOnly = AnnotationManager.getInstance().isAnnotationPresent(((BeanProperty)object).getGetter(), JSReadonlyProperty.class);
+							readOnly = AnnotationManager.getInstance().isAnnotationPresent(((BeanProperty)object).getGetter(), scriptObjectClass,
+								JSReadonlyProperty.class);
 						}
 
 						Property property = createProperty(propertyName, readOnly, returnType, getDoc(name, scriptObjectClass, null), descriptor);
@@ -1188,7 +1189,7 @@ public class TypeCreator extends TypeCache
 							if (object instanceof BeanProperty)
 							{
 								visibility = mobileAllowedTypes.get(typeName) != null ? AnnotationManager.getInstance().isMobileAnnotationPresent(
-									((BeanProperty)object).getGetter()) : false;
+									((BeanProperty)object).getGetter(), scriptObjectClass) : false;
 							}
 							else if (object instanceof Field && descriptor == CONSTANT)
 							{
