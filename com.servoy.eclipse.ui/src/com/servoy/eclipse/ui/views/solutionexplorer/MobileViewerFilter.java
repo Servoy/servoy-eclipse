@@ -98,16 +98,10 @@ public class MobileViewerFilter extends ViewerFilter
 				((SimpleUserNode)node).getRealType() == UserNodeType.FOUNDSET_ITEM ||
 				((SimpleUserNode)node).getRealType() == UserNodeType.FORM_CONTROLLER_FUNCTION_ITEM ||
 				((SimpleUserNode)node).getRealType() == UserNodeType.CURRENT_FORM_ITEM ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.FORM_ELEMENTS_ITEM ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.FOUNDSET_MANAGER_ITEM ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.APPLICATION_ITEM || ((SimpleUserNode)node).getRealType() == UserNodeType.HISTORY_ITEM ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.SOLUTION_MODEL_ITEM || ((SimpleUserNode)node).getRealType() == UserNodeType.I18N_ITEM ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.EXCEPTIONS_ITEM || ((SimpleUserNode)node).getRealType() == UserNodeType.UTIL_ITEM ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.JSUNIT_ITEM || ((SimpleUserNode)node).getRealType() == UserNodeType.SECURITY_ITEM ||
+				((SimpleUserNode)node).getRealType() == UserNodeType.FORM_ELEMENTS_ITEM || ((SimpleUserNode)node).getRealType() == UserNodeType.SECURITY_ITEM ||
 				((SimpleUserNode)node).getRealType() == UserNodeType.ARRAY || ((SimpleUserNode)node).getRealType() == UserNodeType.NUMBER ||
 				((SimpleUserNode)node).getRealType() == UserNodeType.SPECIAL_OPERATORS ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.FORM_ELEMENTS_ITEM_METHOD ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.PLUGINS_ITEM || ((SimpleUserNode)node).getRealType() == UserNodeType.JSLIB) return true;
+				((SimpleUserNode)node).getRealType() == UserNodeType.FORM_ELEMENTS_ITEM_METHOD || ((SimpleUserNode)node).getRealType() == UserNodeType.JSLIB) return true;
 
 			return ((SimpleUserNode)node).isVisibleInMobile();
 		}
