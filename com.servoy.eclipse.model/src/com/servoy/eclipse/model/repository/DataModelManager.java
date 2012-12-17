@@ -1146,7 +1146,7 @@ public class DataModelManager implements IColumnInfoManager
 					// the project might have disappeared before this job was started... (delete)
 					try
 					{
-						if (!columnDifference.getTable().isMarkedAsHiddenInDeveloper())
+						if (columnDifference.getTable() != null && !columnDifference.getTable().isMarkedAsHiddenInDeveloper())
 						{
 							IMarker marker = resource.createMarker(ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE);
 							marker.setAttribute(IMarker.MESSAGE, columnDifference.getUserFriendlyMessage());
