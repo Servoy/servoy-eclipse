@@ -16,19 +16,63 @@
  */
 package com.servoy.eclipse.ui.editors.table;
 
+import org.eclipse.core.databinding.observable.AbstractObservable;
+import org.eclipse.core.databinding.observable.ChangeSupport;
+import org.eclipse.core.databinding.observable.IChangeListener;
+import org.eclipse.core.databinding.observable.IObservable;
+import org.eclipse.core.databinding.observable.Realm;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Control;
 
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.query.ColumnType;
 
 public class ColumnTypeEditingSupport extends EditingSupport
 {
+	public class ColumnTypeEditingObservable extends AbstractObservable
+	{
+
+		public ColumnTypeEditingObservable(Realm realm)
+		{
+			super(realm);
+		}
+
+		@Override
+		public void addChangeListener(IChangeListener listener)
+		{
+			changeSupport.addChangeListener(listener);
+		}
+
+		@Override
+		public void removeChangeListener(IChangeListener listener)
+		{
+			changeSupport.removeChangeListener(listener);
+		}
+
+		public boolean isStale()
+		{
+			return false;
+		}
+
+		public ColumnTypeEditingSupport getEditingSupport()
+		{
+			return ColumnTypeEditingSupport.this;
+		}
+	}
+
 	private final CellEditor editor;
+	private final ChangeSupport changeSupport;
+	private final IObservable observable;
+	private Column column;
 
 	public ColumnTypeEditingSupport(TableViewer tv)
 	{
@@ -39,6 +83,29 @@ public class ColumnTypeEditingSupport extends EditingSupport
 			types[i] = Column.getDisplayTypeString(Column.allDefinedTypes[i]);
 		}
 		editor = new FixedComboBoxCellEditor(tv.getTable(), types, SWT.READ_ONLY);
+		Control control = editor.getControl();
+		CCombo c = (CCombo)control;
+		c.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				editor.deactivate();
+			}
+		});
+		changeSupport = new ChangeSupport(Realm.getDefault())
+		{
+			@Override
+			protected void lastListenerRemoved()
+			{
+			}
+
+			@Override
+			protected void firstListenerAdded()
+			{
+			}
+		};
+		observable = new ColumnTypeEditingObservable(Realm.getDefault());
 	}
 
 	@Override
@@ -47,10 +114,24 @@ public class ColumnTypeEditingSupport extends EditingSupport
 		if (element instanceof Column)
 		{
 			Column pi = (Column)element;
+			column = pi;
 			int type = Column.allDefinedTypes[Integer.parseInt(value.toString())];
 
 			int length = pi.getConfiguredColumnType().getLength();
-			if (type == IColumnTypes.NUMBER || type == IColumnTypes.MEDIA)
+
+			// if sequence type is uuid generator automaticaly fill MEDIA with length 16 and TEXT with length 36
+			if (pi.getSequenceType() == ColumnInfo.UUID_GENERATOR)
+			{
+				if (type == IColumnTypes.TEXT)
+				{
+					length = 36;
+				}
+				else if (type == IColumnTypes.MEDIA)
+				{
+					length = 16;
+				}
+			}
+			else if (type == IColumnTypes.NUMBER || type == IColumnTypes.MEDIA)
 			{
 				// default create unlimited
 				length = 0;
@@ -97,5 +178,20 @@ public class ColumnTypeEditingSupport extends EditingSupport
 			return !((Column)element).getExistInDB();
 		}
 		return false;
+	}
+
+	public void addChangeListener(IChangeListener listener)
+	{
+		changeSupport.addChangeListener(listener);
+	}
+
+	public void removeChangeListener(IChangeListener listener)
+	{
+		changeSupport.removeChangeListener(listener);
+	}
+
+	public Column getColumn()
+	{
+		return column;
 	}
 }
