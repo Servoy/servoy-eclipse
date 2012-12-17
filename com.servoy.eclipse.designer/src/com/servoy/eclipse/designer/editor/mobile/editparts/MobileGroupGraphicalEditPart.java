@@ -31,11 +31,13 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.ComponentDeleteEditPolicy;
 import com.servoy.eclipse.designer.editor.GroupFigure;
 import com.servoy.eclipse.designer.editor.SetBoundsToSupportBoundsFigureListener;
+import com.servoy.eclipse.model.util.CompositeComparator;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -51,13 +53,14 @@ public class MobileGroupGraphicalEditPart extends BaseGroupGraphicalEditPart
 		super(application, editorPart, form, group);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected List<IFormElement> getModelChildren()
 	{
 		List<IFormElement> returnList = Utils.asList(getGroup().getElements());
-		Collections.sort(returnList, new Comparator<IFormElement>()
+		Collections.sort(returnList, new CompositeComparator<IFormElement>(new Comparator<IFormElement>()
 		{
-			// sort so that label comes first
+			// sort so that label comes first	
 			public int compare(IFormElement element1, IFormElement element2)
 			{
 				if (element1.getTypeID() == IRepository.GRAPHICALCOMPONENTS)
@@ -66,7 +69,7 @@ public class MobileGroupGraphicalEditPart extends BaseGroupGraphicalEditPart
 				}
 				return element2.getTypeID() == IRepository.GRAPHICALCOMPONENTS ? 1 : 0;
 			}
-		});
+		}, PositionComparator.XY_PERSIST_COMPARATOR));
 		return returnList;
 	}
 
