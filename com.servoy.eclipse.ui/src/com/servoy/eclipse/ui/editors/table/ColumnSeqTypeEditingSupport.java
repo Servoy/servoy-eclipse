@@ -30,6 +30,10 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Control;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -40,9 +44,42 @@ import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.query.ColumnType;
 
 public class ColumnSeqTypeEditingSupport extends EditingSupport
 {
+
+	public class ColumnSeqTypeEditingObservable extends AbstractObservable
+	{
+
+		public ColumnSeqTypeEditingObservable(Realm realm)
+		{
+			super(realm);
+		}
+
+		@Override
+		public void addChangeListener(IChangeListener listener)
+		{
+			changeSupport.addChangeListener(listener);
+		}
+
+		@Override
+		public void removeChangeListener(IChangeListener listener)
+		{
+			changeSupport.removeChangeListener(listener);
+		}
+
+		public boolean isStale()
+		{
+			return false;
+		}
+
+		public ColumnSeqTypeEditingSupport getEditingSupport()
+		{
+			return ColumnSeqTypeEditingSupport.this;
+		}
+	}
+
 	private final CellEditor editor;
 	private String[] comboSeqTypes;
 	private Column column;
@@ -81,7 +118,16 @@ public class ColumnSeqTypeEditingSupport extends EditingSupport
 			ServoyLog.logError(e);
 		}
 		editor = new FixedComboBoxCellEditor(tv.getTable(), comboSeqTypes, SWT.READ_ONLY);
-
+		Control control = editor.getControl();
+		CCombo c = (CCombo)control;
+		c.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				editor.deactivate();
+			}
+		});
 		changeSupport = new ChangeSupport(Realm.getDefault())
 		{
 			@Override
@@ -94,25 +140,7 @@ public class ColumnSeqTypeEditingSupport extends EditingSupport
 			{
 			}
 		};
-		observable = new AbstractObservable(Realm.getDefault())
-		{
-			@Override
-			public void addChangeListener(IChangeListener listener)
-			{
-				changeSupport.addChangeListener(listener);
-			}
-
-			@Override
-			public void removeChangeListener(IChangeListener listener)
-			{
-				changeSupport.removeChangeListener(listener);
-			}
-
-			public boolean isStale()
-			{
-				return false;
-			}
-		};
+		observable = new ColumnSeqTypeEditingObservable(Realm.getDefault());
 	}
 
 	@Override
@@ -187,25 +215,34 @@ public class ColumnSeqTypeEditingSupport extends EditingSupport
 						MessageDialog.openWarning(((TableViewer)this.getViewer()).getTable().getShell(), "Warning",
 							"Servoy sequence is only supported for numeric column types.");
 					}
-					else if (i == ColumnInfo.UUID_GENERATOR)
+					else if (column.getSequenceType() == ColumnInfo.UUID_GENERATOR)
 					{
-						if (dpType != IColumnTypes.TEXT && dpType != IColumnTypes.MEDIA)
+						if (!(dpType == IColumnTypes.MEDIA || dpType == IColumnTypes.TEXT) && (column.getLength() == 0 || column.getLength() == 50))
 						{
-							MessageDialog.openWarning(((TableViewer)this.getViewer()).getTable().getShell(), "Warning",
-								"UUID generator sequence is only supported for text and media column types.");
-						}
-						else if (configuredLength > 0 &&
-							((dpType == IColumnTypes.MEDIA && configuredLength < 16) || (dpType == IColumnTypes.TEXT && configuredLength < 36)))
-						{
-							MessageDialog.openWarning(((TableViewer)this.getViewer()).getTable().getShell(), "Warning",
-								"UUID generator column has too small length.");
+							column.getColumnInfo().setConfiguredColumnType(ColumnType.getInstance(IColumnTypes.TEXT, 36, 0));
+							column.setFlags(Column.UUID_COLUMN);
 						}
 					}
+					//no longer needed because it is amortized by smart defaults , + doSave validation
+//					else if (i == ColumnInfo.UUID_GENERATOR)
+//					{
+//						if (dpType != IColumnTypes.TEXT && dpType != IColumnTypes.MEDIA)
+//						{
+//							MessageDialog.openWarning(((TableViewer)this.getViewer()).getTable().getShell(), "Warning",
+//								"UUID generator sequence is only supported for text and media column types.");
+//						}
+//						else if (configuredLength > 0 &&
+//							((dpType == IColumnTypes.MEDIA && configuredLength < 16) || (dpType == IColumnTypes.TEXT && configuredLength < 36)))
+//						{
+//							MessageDialog.openWarning(((TableViewer)this.getViewer()).getTable().getShell(), "Warning",
+//								"UUID generator column has too small length.");
+//						}
+//					}
 					break;
 				}
 			}
-			getViewer().update(element, null);
 			pi.flagColumnInfoChanged();
+			getViewer().update(element, null);
 		}
 	}
 

@@ -64,8 +64,10 @@ import com.servoy.j2db.dataprocessing.IColumnConverter;
 import com.servoy.j2db.dataprocessing.IColumnValidator;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnListener;
+import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerListener;
@@ -681,6 +683,17 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		{
 			try
 			{
+				try
+				{
+					validateColumnSettings();
+				}
+				catch (Exception e)
+				{
+					MessageDialog.openError(getSite().getShell(), "Error", "Save failed: " + e.getMessage());
+					if (monitor != null) monitor.setCanceled(true);
+					return;
+				}
+				//passed validation
 				if (columnComposite != null)
 				{
 					columnComposite.checkValidState();
@@ -775,6 +788,31 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				// IStatus(){});
 				MessageDialog.openError(getSite().getShell(), "Error", "Save failed: " + e.getMessage());
 				if (monitor != null) monitor.setCanceled(true);
+			}
+		}
+	}
+
+	private void validateColumnSettings() throws Exception
+	{
+		Iterator<Column> columns = table.getColumns().iterator();
+		while (columns.hasNext())
+		{
+			Column col = columns.next();
+			int colType = Column.mapToDefaultType(col.getConfiguredColumnType().getSqlType());
+			// check UUID generator valid types
+			if (col.getColumnInfo() != null && col.getSequenceType() == ColumnInfo.UUID_GENERATOR)
+			{
+				if (!col.getColumnInfo().hasFlag(Column.UUID_COLUMN) || (colType != IColumnTypes.MEDIA && colType != IColumnTypes.TEXT))
+				{
+					throw new Exception("Column '" + col.getName() +
+						"' has sequence type of 'UUID generator' , the column type should be TEXT(36) or MEDIA(16) with an UUID flag set.");
+				}
+				else if ((colType == IColumnTypes.MEDIA || colType == IColumnTypes.TEXT))
+				{
+					if ((colType == IColumnTypes.MEDIA && col.getLength() < 16) || (colType == IColumnTypes.TEXT && col.getLength() < 36)) throw new Exception(
+						"Column '" + col.getName() +
+							"' has sequence type of 'UUID generator' , the column length should be at least 36 for TEXT and 16 for MEDIA ");
+				}
 			}
 		}
 	}

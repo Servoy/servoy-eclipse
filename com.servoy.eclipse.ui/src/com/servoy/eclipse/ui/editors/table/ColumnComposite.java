@@ -66,6 +66,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.TableEditor;
+import com.servoy.eclipse.ui.editors.table.ColumnSeqTypeEditingSupport.ColumnSeqTypeEditingObservable;
 import com.servoy.eclipse.ui.editors.table.actions.CopyColumnNameAction;
 import com.servoy.eclipse.ui.editors.table.actions.SearchForDataProvidersReferencesAction;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
@@ -491,15 +492,9 @@ public class ColumnComposite extends Composite
 		{
 			public void handleChange(ChangeEvent event)
 			{
-				if (event.getSource() instanceof ColumnSeqTypeEditingSupport)
+				if (event.getSource() instanceof ColumnSeqTypeEditingObservable)
 				{
-					Column column = ((ColumnSeqTypeEditingSupport)event.getSource()).getColumn();
-					if (column != null && column.getExistInDB() && column.getColumnInfo() != null)
-					{
-						//here the data binding for a column is performed;
-						columnAutoEnterComposite.initDataBindings(column);
-						columnDetailsComposite.refresh();
-					}
+					columnDetailsComposite.refresh();
 				}
 			}
 		});
