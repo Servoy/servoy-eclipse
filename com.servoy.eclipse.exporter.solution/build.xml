@@ -231,9 +231,9 @@
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.wst.common.emfworkbench.integration_1.2.2.v201008242000.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.emf.edit_2.8.0.v20120917-0436.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.emf.ecore.change_2.8.0.v20120911-0500.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.parser_5.0.0.201211270933.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.core_5.0.0.201211270933.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.annotations_5.0.0.201211270933.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.parser_5.0.0.201212181531.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.core_5.0.0.201212181531.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.annotations_5.0.0.201212181531.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.antlr.runtime_3.0.0.v200803061811.jar"/>
 		</path>
 		<!-- compile the source code -->
