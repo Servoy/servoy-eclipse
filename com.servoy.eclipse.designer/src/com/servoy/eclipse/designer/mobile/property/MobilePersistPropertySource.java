@@ -208,8 +208,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 	 */
 	private static boolean isLabel(IPersist persist)
 	{
-		return !isButton(persist) && persist instanceof GraphicalComponent && ((GraphicalComponent)persist).getDataProviderID() == null &&
-			!((GraphicalComponent)persist).getDisplaysTags();
+		return !isButton(persist) && persist instanceof GraphicalComponent && ((GraphicalComponent)persist).getDataProviderID() == null;
 	}
 
 	/**
