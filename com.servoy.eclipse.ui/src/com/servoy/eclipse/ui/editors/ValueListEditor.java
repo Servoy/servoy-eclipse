@@ -98,9 +98,12 @@ import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.constants.IValueListConstants;
 import com.servoy.j2db.util.DataSourceUtils;
+import com.servoy.j2db.util.DataSourceUtilsBase;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ScopesUtils;
 
@@ -110,6 +113,9 @@ import com.servoy.j2db.util.ScopesUtils;
  */
 public class ValueListEditor extends PersistEditor
 {
+	private Composite valueListEditorComposite;
+	private final Set<Control> disableInMobileControls = new HashSet<Control>();
+
 	private DataBindingContext m_bindingContext;
 	private Text separator_char;
 	private ValueListDPSelectionComposite dp_select1;
@@ -151,7 +157,6 @@ public class ValueListEditor extends PersistEditor
 	private ISelectionChangedListener relationSelectionListener;
 	private IStatusChangedListener statusChangeListener;
 
-
 	@Override
 	protected boolean validatePersist(IPersist persist)
 	{
@@ -175,18 +180,18 @@ public class ValueListEditor extends PersistEditor
 		myScrolledComposite.setExpandHorizontal(true);
 		myScrolledComposite.setExpandVertical(true);
 
-		Composite comp = new Composite(myScrolledComposite, SWT.NONE);
-		Label nameLabel = new Label(comp, SWT.NONE);
+		valueListEditorComposite = new Composite(myScrolledComposite, SWT.NONE);
+		Label nameLabel = new Label(valueListEditorComposite, SWT.NONE);
 		nameLabel.setText("Valuelist Name"); //$NON-NLS-1$
 
-		myScrolledComposite.setContent(comp);
+		myScrolledComposite.setContent(valueListEditorComposite);
 
-		nameField = new Text(comp, SWT.BORDER);
+		nameField = new Text(valueListEditorComposite, SWT.BORDER);
 		nameField.addVerifyListener(DocumentValidatorVerifyListener.IDENT_SERVOY_VERIFIER);
 
-		customValues = new Text(comp, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
+		customValues = new Text(valueListEditorComposite, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
 		customValues.setToolTipText("list with fixed displayValue[|realValue] ('^' for null real value, %%scopes.globals.NAME%% for global real value)"); //$NON-NLS-1$
-		customValuesButton = new Button(comp, SWT.RADIO);
+		customValuesButton = new Button(valueListEditorComposite, SWT.RADIO);
 		customValuesButton.setText("Custom Values"); //$NON-NLS-1$
 		customvalueButtonSelectionListener = new SelectionAdapter()
 		{
@@ -202,7 +207,7 @@ public class ValueListEditor extends PersistEditor
 			}
 		};
 
-		tableValuesButton = new Button(comp, SWT.RADIO);
+		tableValuesButton = new Button(valueListEditorComposite, SWT.RADIO);
 		tableValuesButton.setText("Table Values"); //$NON-NLS-1$
 		tableValuesButtonSelectionListener = new SelectionAdapter()
 		{
@@ -217,8 +222,9 @@ public class ValueListEditor extends PersistEditor
 				}
 			}
 		};
+		disableInMobileControls.add(tableValuesButton);
 
-		tableSelect = new TreeSelectViewer(comp, SWT.NONE, TableValueEditor.INSTANCE);
+		tableSelect = new TreeSelectViewer(valueListEditorComposite, SWT.NONE, TableValueEditor.INSTANCE);
 		tableSelect.setContentProvider(new TableContentProvider());
 		tableSelect.setLabelProvider(DatasourceLabelProvider.INSTANCE_IMAGE_NAMEONLY);
 		tableSelect.setTextLabelProvider(new DatasourceLabelProvider("", false, true));
@@ -236,11 +242,13 @@ public class ValueListEditor extends PersistEditor
 		tableSelect.setInput(new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, false));
 		tableSelect.setEditable(true);
 		Control tableSelectControl = tableSelect.getControl();
+		disableInMobileControls.add(tableSelectControl);
 
-		applyValuelistNameButton = new Button(comp, SWT.CHECK);
+		applyValuelistNameButton = new Button(valueListEditorComposite, SWT.CHECK);
 		applyValuelistNameButton.setText("Apply valuelist name as filter on column 'valuelist_name'"); //$NON-NLS-1$
+		disableInMobileControls.add(applyValuelistNameButton);
 
-		relatedValuesButton = new Button(comp, SWT.RADIO);
+		relatedValuesButton = new Button(valueListEditorComposite, SWT.RADIO);
 		relatedValuesButton.setText("Related Values"); //$NON-NLS-1$
 		relatedValuesButtoneSelectionListener = new SelectionAdapter()
 		{
@@ -255,8 +263,9 @@ public class ValueListEditor extends PersistEditor
 				}
 			}
 		};
+		disableInMobileControls.add(relatedValuesButton);
 
-		relationSelect = new TreeSelectViewer(comp, SWT.NONE, RelationPropertyController.RelationValueEditor.INSTANCE);
+		relationSelect = new TreeSelectViewer(valueListEditorComposite, SWT.NONE, RelationPropertyController.RelationValueEditor.INSTANCE);
 		relationSelect.setContentProvider(new RelationContentProvider(editingFlattenedSolution));
 		relationSelect.setLabelProvider(RelationLabelProvider.INSTANCE_LAST_NAME_ONLY);
 		relationSelect.setTextLabelProvider(new RelationLabelProvider("", false, false));
@@ -275,8 +284,9 @@ public class ValueListEditor extends PersistEditor
 		};
 		relationSelect.setInput(new RelationContentProvider.RelationListOptions(null, null, false, true));
 		Control relationSelectControl = relationSelect.getControl();
+		disableInMobileControls.add(relationSelectControl);
 
-		globalMethodValuesButton = new Button(comp, SWT.RADIO);
+		globalMethodValuesButton = new Button(valueListEditorComposite, SWT.RADIO);
 		globalMethodValuesButton.setText("Global method"); //$NON-NLS-1$
 		globalMethodValuesSelectionListener = new SelectionAdapter()
 		{
@@ -291,11 +301,12 @@ public class ValueListEditor extends PersistEditor
 				}
 			}
 		};
+		disableInMobileControls.add(globalMethodValuesButton);
 
 		// use the solution as context, private methods from the same solution are allowed
 		final PersistContext context = PersistContext.create(getValueList().getParent());
 
-		globalMethodSelect = new TreeSelectViewer(comp, SWT.NONE, new MethodValueEditor(context))
+		globalMethodSelect = new TreeSelectViewer(valueListEditorComposite, SWT.NONE, new MethodValueEditor(context))
 		{
 			@Override
 			public IStructuredSelection openDialogBox(Control cellEditorWindow)
@@ -337,6 +348,7 @@ public class ValueListEditor extends PersistEditor
 		globalMethodSelect.setInput(new MethodListOptions(false, false, false, true, false, null));
 		globalMethodSelect.setEditable(true);
 		Control globalMethodSelectControl = globalMethodSelect.getControl();
+		disableInMobileControls.add(globalMethodSelectControl);
 
 		globalMethodSelectionListener = new ISelectionChangedListener()
 		{
@@ -352,10 +364,12 @@ public class ValueListEditor extends PersistEditor
 			}
 		};
 
-		definitionGroup = new Group(comp, SWT.NONE);
+		definitionGroup = new Group(valueListEditorComposite, SWT.NONE);
 		definitionGroup.setText("Definition"); //$NON-NLS-1$
-		allowEmptyValueButton = new Button(comp, SWT.CHECK);
+		disableInMobileControls.add(definitionGroup);
+		allowEmptyValueButton = new Button(valueListEditorComposite, SWT.CHECK);
 		allowEmptyValueButton.setText("Allow empty value"); //$NON-NLS-1$
+		disableInMobileControls.add(allowEmptyValueButton);
 
 		dp_select1 = new ValueListDPSelectionComposite(definitionGroup, editingFlattenedSolution, SWT.NONE);
 		dp_select2 = new ValueListDPSelectionComposite(definitionGroup, editingFlattenedSolution, SWT.NONE);
@@ -365,7 +379,7 @@ public class ValueListEditor extends PersistEditor
 		separatorCharacterLabel.setText("Separator character"); //$NON-NLS-1$
 		separator_char = new Text(definitionGroup, SWT.BORDER);
 
-		sortingDefinitionSelect = new TreeSelectViewer(comp, SWT.NONE)
+		sortingDefinitionSelect = new TreeSelectViewer(valueListEditorComposite, SWT.NONE)
 		{
 			@Override
 			protected IStructuredSelection openDialogBox(Control control)
@@ -390,8 +404,10 @@ public class ValueListEditor extends PersistEditor
 		};
 		sortingDefinitionSelect.setButtonText("Sorting Definition..."); //$NON-NLS-1$
 		Control sortingDefinitionControl = sortingDefinitionSelect.getControl();
+		disableInMobileControls.add(sortingDefinitionControl);
 
-		fallbackValuelist = new TreeSelectViewer(comp, SWT.NONE, new ValuelistPropertyController.ValueListValueEditor(editingFlattenedSolution));
+		fallbackValuelist = new TreeSelectViewer(valueListEditorComposite, SWT.NONE, new ValuelistPropertyController.ValueListValueEditor(
+			editingFlattenedSolution));
 		fallbackValuelist.setButtonText("Fallback Valuelist"); //$NON-NLS-1$
 		fallbackValuelist.setContentProvider(new FallbackValuelistContentProvider(editingFlattenedSolution, getValueList()));
 		fallbackValuelist.setLabelProvider(new ValuelistLabelProvider(editingFlattenedSolution));
@@ -400,6 +416,7 @@ public class ValueListEditor extends PersistEditor
 		fallbackValuelist.setEditable(true);
 
 		Control fallbackValueListControl = fallbackValuelist.getControl();
+		disableInMobileControls.add(fallbackValueListControl);
 
 		statusChangeListener = new IStatusChangedListener()
 		{
@@ -427,7 +444,7 @@ public class ValueListEditor extends PersistEditor
 					GroupLayout.PREFERRED_SIZE).add(separatorCharacterLabel)).addContainerGap()));
 		definitionGroup.setLayout(groupLayout_1);
 
-		final GroupLayout groupLayout = new GroupLayout(comp);
+		final GroupLayout groupLayout = new GroupLayout(valueListEditorComposite);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(
@@ -462,9 +479,9 @@ public class ValueListEditor extends PersistEditor
 				definitionGroup, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(9, 9, 9).add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(fallbackValueListControl)).add(
 					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(sortingDefinitionControl).add(allowEmptyValueButton))).add(24, 24, 24)));
-		comp.setLayout(groupLayout);
+		valueListEditorComposite.setLayout(groupLayout);
 
-		myScrolledComposite.setMinSize(comp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		myScrolledComposite.setMinSize(valueListEditorComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
 		initDataBindings();
 
@@ -490,13 +507,33 @@ public class ValueListEditor extends PersistEditor
 			flagModified();
 		}
 
+		// currently we only support custom vl in mobile
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolutionMetaData().getSolutionType() == SolutionMetaData.MOBILE &&
+			getValueList().getValueListType() != IValueListConstants.CUSTOM_VALUES)
+		{
+			handleCustomValuesButtonSelected();
+		}
+
 		doRefresh();
 	}
 
 	@Override
 	protected void doRefresh()
 	{
+		boolean activeSolutionIsMobile = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolutionMetaData().getSolutionType() == SolutionMetaData.MOBILE;
+
 		removeListeners();
+
+		if (!activeSolutionIsMobile)
+		{
+			for (Control control : valueListEditorComposite.getChildren())
+			{
+				if (disableInMobileControls.contains(control))
+				{
+					control.setEnabled(true);
+				}
+			}
+		}
 
 		ValueList valueList = getValueList();
 		try
@@ -511,20 +548,22 @@ public class ValueListEditor extends PersistEditor
 				databaseValuesType = databaseValuesTypeOverride;
 				databaseValuesTypeOverride = -1;
 			}
-			customValuesButton.setSelection(valueList.getValueListType() == ValueList.CUSTOM_VALUES);
-			customValues.setEnabled(valueList.getValueListType() == ValueList.CUSTOM_VALUES);
+			customValuesButton.setSelection(valueList.getValueListType() == IValueListConstants.CUSTOM_VALUES);
+			customValues.setEnabled(customValuesButton.getSelection());
 
-			globalMethodValuesButton.setSelection(valueList.getValueListType() == ValueList.GLOBAL_METHOD_VALUES);
+			globalMethodValuesButton.setSelection(valueList.getValueListType() == IValueListConstants.GLOBAL_METHOD_VALUES);
 
-			tableValuesButton.setSelection(valueList.getValueListType() == ValueList.DATABASE_VALUES && databaseValuesType == ValueList.TABLE_VALUES);
+			tableValuesButton.setSelection(valueList.getValueListType() == IValueListConstants.DATABASE_VALUES &&
+				databaseValuesType == IValueListConstants.TABLE_VALUES);
 			applyValuelistNameButton.setEnabled(tableValuesButton.getSelection());
-			relatedValuesButton.setSelection(valueList.getValueListType() == ValueList.DATABASE_VALUES && databaseValuesType == ValueList.RELATED_VALUES);
+			relatedValuesButton.setSelection(valueList.getValueListType() == IValueListConstants.DATABASE_VALUES &&
+				databaseValuesType == IValueListConstants.RELATED_VALUES);
 
 			FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(getPersist());
 			Table table = null;
-			if (valueList.getValueListType() == ValueList.DATABASE_VALUES && databaseValuesType == ValueList.TABLE_VALUES)
+			if (valueList.getValueListType() == IValueListConstants.DATABASE_VALUES && databaseValuesType == IValueListConstants.TABLE_VALUES)
 			{
-				String[] stn = DataSourceUtils.getDBServernameTablename(valueList.getDataSource());
+				String[] stn = DataSourceUtilsBase.getDBServernameTablename(valueList.getDataSource());
 				if (stn == null)
 				{
 					tableSelect.setSelection(StructuredSelection.EMPTY);
@@ -541,7 +580,7 @@ public class ValueListEditor extends PersistEditor
 				tableSelect.setSelection(StructuredSelection.EMPTY);
 			}
 
-			if (valueList.getValueListType() == ValueList.DATABASE_VALUES && databaseValuesType == ValueList.RELATED_VALUES)
+			if (valueList.getValueListType() == IValueListConstants.DATABASE_VALUES && databaseValuesType == IValueListConstants.RELATED_VALUES)
 			{
 				Relation[] relations = flattenedSolution.getRelationSequence(valueList.getRelationName());
 				if (relations == null)
@@ -559,7 +598,7 @@ public class ValueListEditor extends PersistEditor
 				relationSelect.setSelection(StructuredSelection.EMPTY);
 			}
 
-			if (valueList.getValueListType() != ValueList.CUSTOM_VALUES && valueList.getValueListType() != ValueList.GLOBAL_METHOD_VALUES)
+			if (valueList.getValueListType() != IValueListConstants.CUSTOM_VALUES && valueList.getValueListType() != IValueListConstants.GLOBAL_METHOD_VALUES)
 			{
 				customValues.setText(""); //$NON-NLS-1$
 			}
@@ -586,6 +625,17 @@ public class ValueListEditor extends PersistEditor
 			else
 			{
 				sortingDefinitionSelect.setSelection(StructuredSelection.EMPTY);
+			}
+
+			if (activeSolutionIsMobile)
+			{
+				for (Control control : valueListEditorComposite.getChildren())
+				{
+					if (disableInMobileControls.contains(control))
+					{
+						control.setEnabled(false);
+					}
+				}
 			}
 
 			m_bindingContext.updateTargets();
@@ -708,7 +758,7 @@ public class ValueListEditor extends PersistEditor
 				public Object convert(Object fromObject)
 				{
 					if (fromObject == null) return ""; //$NON-NLS-1$
-					if (getValueList().getValueListType() == ValueList.GLOBAL_METHOD_VALUES)
+					if (getValueList().getValueListType() == IValueListConstants.GLOBAL_METHOD_VALUES)
 					{
 						return ""; //$NON-NLS-1$
 					}
@@ -737,7 +787,7 @@ public class ValueListEditor extends PersistEditor
 			{
 				public Object convert(Object fromObject)
 				{
-					if (fromObject == null || getValueList().getValueListType() != ValueList.GLOBAL_METHOD_VALUES)
+					if (fromObject == null || getValueList().getValueListType() != IValueListConstants.GLOBAL_METHOD_VALUES)
 					{
 						return null;
 					}
@@ -760,13 +810,13 @@ public class ValueListEditor extends PersistEditor
 			{
 				public Object convert(Object fromObject)
 				{
-					return Integer.valueOf(Boolean.TRUE.equals(fromObject) ? ValueList.EMPTY_VALUE_ALWAYS : ValueList.EMPTY_VALUE_NEVER);
+					return Integer.valueOf(Boolean.TRUE.equals(fromObject) ? IValueListConstants.EMPTY_VALUE_ALWAYS : IValueListConstants.EMPTY_VALUE_NEVER);
 				}
 			}), new UpdateValueStrategy().setConverter(new Converter(int.class, boolean.class)
 			{
 				public Object convert(Object fromObject)
 				{
-					return Boolean.valueOf(fromObject instanceof Integer && ((Integer)fromObject).intValue() == ValueList.EMPTY_VALUE_ALWAYS);
+					return Boolean.valueOf(fromObject instanceof Integer && ((Integer)fromObject).intValue() == IValueListConstants.EMPTY_VALUE_ALWAYS);
 				}
 			}));
 		m_bindingContext.bindValue(applyNameFilterSelectionObserveWidget, getApplyNameFilterSelectionObserveValue, null, null);
@@ -803,7 +853,7 @@ public class ValueListEditor extends PersistEditor
 
 	private void handleGlobalMethodButtonSelected()
 	{
-		getValueList().setValueListType(ValueList.GLOBAL_METHOD_VALUES);
+		getValueList().setValueListType(IValueListConstants.GLOBAL_METHOD_VALUES);
 		getValueList().setDataSource(null);
 		getValueList().setRelationName(null);
 		getValueList().setCustomValues(null);
@@ -811,7 +861,7 @@ public class ValueListEditor extends PersistEditor
 
 	private void handleCustomValuesButtonSelected()
 	{
-		getValueList().setValueListType(ValueList.CUSTOM_VALUES);
+		getValueList().setValueListType(IValueListConstants.CUSTOM_VALUES);
 		getValueList().setDataSource(null);
 		getValueList().setRelationName(null);
 		getValueList().setCustomValues(null);
@@ -819,18 +869,18 @@ public class ValueListEditor extends PersistEditor
 
 	private void handleDatabaseValuesButtonSelected()
 	{
-		getValueList().setValueListType(ValueList.DATABASE_VALUES);
+		getValueList().setValueListType(IValueListConstants.DATABASE_VALUES);
 		getValueList().setCustomValues(null);
 		getValueList().setRelationName(null);
-		databaseValuesTypeOverride = ValueList.TABLE_VALUES;
+		databaseValuesTypeOverride = IValueListConstants.TABLE_VALUES;
 	}
 
 	private void handleRelatedValuesButtonSelected()
 	{
-		getValueList().setValueListType(ValueList.DATABASE_VALUES);
+		getValueList().setValueListType(IValueListConstants.DATABASE_VALUES);
 		getValueList().setCustomValues(null);
 		getValueList().setDataSource(null);
-		databaseValuesTypeOverride = ValueList.RELATED_VALUES;
+		databaseValuesTypeOverride = IValueListConstants.RELATED_VALUES;
 	}
 
 	private void handleGlobalMethodSelected(MethodWithArguments methodWithArguments)
@@ -1124,7 +1174,7 @@ public class ValueListEditor extends PersistEditor
 			if (list == vl) return false;
 			if (!processed.add(list)) return false;
 
-			if (list.getValueListType() == ValueList.DATABASE_VALUES && vl.getValueListType() == ValueList.DATABASE_VALUES)
+			if (list.getValueListType() == IValueListConstants.DATABASE_VALUES && vl.getValueListType() == IValueListConstants.DATABASE_VALUES)
 			{
 				String listTable = getDataSource(list);
 				String vlTable = getDataSource(vl);
@@ -1146,11 +1196,11 @@ public class ValueListEditor extends PersistEditor
 		 */
 		private String getDataSource(ValueList list)
 		{
-			if (list.getDatabaseValuesType() == ValueList.TABLE_VALUES)
+			if (list.getDatabaseValuesType() == IValueListConstants.TABLE_VALUES)
 			{
 				return list.getDataSource();
 			}
-			else if (list.getDatabaseValuesType() == ValueList.RELATED_VALUES && list.getRelationName() != null)
+			else if (list.getDatabaseValuesType() == IValueListConstants.RELATED_VALUES && list.getRelationName() != null)
 			{
 				Relation[] relations = flattenedSolution.getRelationSequence(list.getRelationName());
 				if (relations != null)

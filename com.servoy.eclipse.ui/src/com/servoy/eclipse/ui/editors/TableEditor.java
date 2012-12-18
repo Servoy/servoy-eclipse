@@ -75,6 +75,7 @@ import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
@@ -107,7 +108,6 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 	private PropertiesComposite propertiesComposite;
 
-
 	private ITableListener tableListener;
 
 	private IColumnListener columnListener;
@@ -115,22 +115,6 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	private IServerListener serverListener;
 
 	private IPersistChangeListener persistListener;
-
-	public static int ColumnPageIndex = 0;
-
-	public static int CalculationsPageIndex = 1;
-
-	public static int MethodsPageIndex = 2;
-
-	public static int AggregationsPageIndex = 3;
-
-	public static int EventsPageIndex = 4;
-
-	public static int SecurityPageIndex = 5;
-
-	public static int PropertiesPageIndex = 6;
-
-	public static int DataPageIndex = 7;
 
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException
@@ -169,35 +153,102 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		createColumnPage();
 		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null)
 		{
-			createCalculationsPage();
-			createFoundsSetMethodsPage();
-			createAggregationsPage();
-			createEventsPage();
-			createSecurityPage();
+			createDynamicPages();
+
 			createPropertiesPage();
-			createDataPage();
 		}
 		updateTitle();
 	}
 
+	protected int getPageIndex(Control control)
+	{
+		int pages = getPageCount();
+		for (int i = 0; i < pages; i++)
+		{
+			if (getControl(i) == control) return i;
+		}
+		return -1;
+	}
+
+	public void addPage(int order, Control control, String text)
+	{
+		int pages = getPageCount();
+		int idx = pages;
+		for (int i = 0; i < pages; i++)
+		{
+			Control page = getControl(i);
+			if (page != null && page.getData("order") instanceof Integer && ((Integer)page.getData("order")).intValue() > order)
+			{
+				idx = i;
+				break;
+			}
+		}
+
+		control.setData("order", Integer.valueOf(order));
+		addPage(idx, control);
+		setPageText(getPageIndex(control), text);
+	}
+
+	protected boolean activeSolutionIsMobile()
+	{
+		return ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolutionMetaData().getSolutionType() == SolutionMetaData.MOBILE;
+	}
+
 	private void createColumnPage()
 	{
-		columnComposite = new ColumnComposite(this, getContainer(), ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution(),
-			SWT.None);
-		addPage(TableEditor.ColumnPageIndex, columnComposite);
-		setPageText(TableEditor.ColumnPageIndex, "Columns");
+		addPage(100, columnComposite = new ColumnComposite(this, getContainer(),
+			ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution(), SWT.None), "Columns");
+	}
+
+	private void createCalculationsPage()
+	{
+		addPage(200, calculationsComposite = new CalculationsComposite(this, getContainer(),
+			ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution(), SWT.None), "Calculations");
+	}
+
+	private void createFoundsSetMethodsPage()
+	{
+		if (!activeSolutionIsMobile())
+		{
+			addPage(300, methodsComposite = new FoundsetMethodsComposite(this, getContainer(),
+				ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution(), SWT.None), "Methods");
+		}
+	}
+
+	private void createAggregationsPage()
+	{
+		addPage(400, aggregationsComposite = new AggregationsComposite(this, getContainer(),
+			ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution(), SWT.None), "Aggregations");
+	}
+
+	private void createEventsPage()
+	{
+		if (!activeSolutionIsMobile())
+		{
+			addPage(500, eventsComposite = new EventsComposite(this, getContainer(), SWT.None), "Events");
+		}
+	}
+
+	private void createSecurityPage()
+	{
+		if (!activeSolutionIsMobile())
+		{
+			addPage(600, securityComposite = new SecurityComposite(getContainer(), SWT.None, this), "Security");
+		}
+	}
+
+	private void createPropertiesPage()
+	{
+		addPage(700, propertiesComposite = new PropertiesComposite(getContainer(), SWT.None, this), "Properties");
 	}
 
 	private void createDataPage()
 	{
 		if (com.servoy.eclipse.core.Activator.getDefault().isSqlExplorerLoaded())
 		{
-			dataComposite = new DataComposite(getContainer(), table);
-			addPage(TableEditor.DataPageIndex, dataComposite);
-			setPageText(TableEditor.DataPageIndex, "Data");
+			addPage(800, dataComposite = new DataComposite(getContainer(), table), "Data");
 		}
 	}
-
 
 	public ColumnComposite getColumnComposite()
 	{
@@ -293,12 +344,12 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 			ServoyModelManager.getServoyModelManager().getServoyModel().removePersistChangeListener(false, persistListener);
 		}
 		// seems that pages added by add(Control) are not disposed by default like
-		// the ones aded with add(editor)
+		// the ones added with add(editor)
 		// we must dispose of them - or they remain as listeners that want to
 		// update disposed UI
 		if (columnComposite != null) columnComposite.dispose();
-		if (securityComposite != null) securityComposite.dispose();
-		disposePages();
+		if (propertiesComposite != null) propertiesComposite.dispose();
+		disposeDynamicPages();
 
 		if (serverListener != null)
 		{
@@ -325,110 +376,82 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	/**
 	 * 
 	 */
-	private void disposePages()
+	private void disposeDynamicPages()
 	{
 		if (calculationsComposite != null)
 		{
-			removePage(calculationsComposite);
+			removePage(getPageIndex(calculationsComposite));
 			this.calculationsComposite.dispose();
+			calculationsComposite = null;
 		}
 		if (methodsComposite != null)
 		{
-			removePage(methodsComposite);
+			removePage(getPageIndex(methodsComposite));
 			this.methodsComposite.dispose();
+			methodsComposite = null;
 		}
 		if (aggregationsComposite != null)
 		{
-			removePage(aggregationsComposite);
+			removePage(getPageIndex(aggregationsComposite));
 			aggregationsComposite.dispose();
+			aggregationsComposite = null;
 		}
 		if (eventsComposite != null)
 		{
-			removePage(eventsComposite);
+			removePage(getPageIndex(eventsComposite));
 			eventsComposite.dispose();
+			eventsComposite = null;
+		}
+		if (securityComposite != null)
+		{
+			removePage(getPageIndex(securityComposite));
+			securityComposite.dispose();
+			securityComposite = null;
 		}
 		if (dataComposite != null)
 		{
-			removePage(dataComposite);
+			removePage(getPageIndex(dataComposite));
 			dataComposite.dispose();
+			dataComposite = null;
 		}
 	}
 
-	private void removePage(Control page)
+	@Override
+	public void removePage(int pageIndex)
 	{
-		int pageCount = this.getPageCount();
-		for (int i = 0; i < pageCount; i++)
-		{
-			Control currentPage = this.getControl(i);
-			if (currentPage == page)
-			{
-				this.removePage(i);
-				break;
-			}
-		}
+		if (pageIndex == -1) return; // ignore pages that were not found
+		super.removePage(pageIndex);
 	}
 
-	private void createAggregationsPage()
+	private void createDynamicPages()
 	{
-		aggregationsComposite = new AggregationsComposite(this, getContainer(),
-			ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution(), SWT.None);
-		addPage(TableEditor.AggregationsPageIndex, aggregationsComposite);
-		setPageText(TableEditor.AggregationsPageIndex, "Aggregations");
-	}
-
-	private void createCalculationsPage()
-	{
-		calculationsComposite = new CalculationsComposite(this, getContainer(),
-			ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution(), SWT.None);
-		addPage(TableEditor.CalculationsPageIndex, calculationsComposite);
-		setPageText(TableEditor.CalculationsPageIndex, "Calculations");
-	}
-
-	private void createFoundsSetMethodsPage()
-	{
-		methodsComposite = new FoundsetMethodsComposite(this, getContainer(),
-			ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution(), SWT.None);
-		addPage(TableEditor.MethodsPageIndex, methodsComposite);
-		setPageText(TableEditor.MethodsPageIndex, "Methods");
+		createCalculationsPage();
+		createFoundsSetMethodsPage();
+		createAggregationsPage();
+		createEventsPage();
+		createSecurityPage();
+		createDataPage();
 	}
 
 	@Override
 	protected void pageChange(int newPageIndex)
 	{
 		super.pageChange(newPageIndex);
-		if (newPageIndex == CalculationsPageIndex && calculationsComposite != null)
+		Object newControl = getControl(newPageIndex);
+		if (newControl == null) return;
+
+		if (newControl == calculationsComposite)
 		{
 			calculationsComposite.refresh();
 		}
-		if (newPageIndex == MethodsPageIndex && methodsComposite != null)
+		else if (newControl == methodsComposite)
 		{
 			methodsComposite.refresh();
 		}
-		if (newPageIndex == DataPageIndex && dataComposite != null)
+		else if (newControl == dataComposite)
 		{
 			dataComposite.show();
 		}
-	}
-
-	private void createEventsPage()
-	{
-		eventsComposite = new EventsComposite(this, getContainer(), SWT.None);
-		addPage(TableEditor.EventsPageIndex, eventsComposite);
-		setPageText(TableEditor.EventsPageIndex, "Events");
-	}
-
-	private void createSecurityPage()
-	{
-		securityComposite = new SecurityComposite(getContainer(), SWT.None, this);
-		addPage(TableEditor.SecurityPageIndex, securityComposite);
-		setPageText(TableEditor.SecurityPageIndex, "Security");
-	}
-
-	private void createPropertiesPage()
-	{
-		propertiesComposite = new PropertiesComposite(getContainer(), SWT.None, this);
-		addPage(TableEditor.PropertiesPageIndex, propertiesComposite);
-		setPageText(TableEditor.PropertiesPageIndex, "Properties");
 	}
 
 	@Override
@@ -491,12 +514,12 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		{
 			if (columnComposite != null && column instanceof Column)
 			{
-				setActivePage(ColumnPageIndex);
+				setActivePage(getPageIndex(columnComposite));
 				columnComposite.selectColumn((Column)column);
 			}
 			else if (aggregationsComposite != null && column instanceof AggregateVariable)
 			{
-				setActivePage(AggregationsPageIndex);
+				setActivePage(getPageIndex(aggregationsComposite));
 				aggregationsComposite.selectColumn((AggregateVariable)column);
 			}
 		}
@@ -922,23 +945,38 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	{
 		if (updateInfo == IActiveProjectListener.MODULES_UPDATED || updateInfo == IActiveProjectListener.RESOURCES_UPDATED_ON_ACTIVE_PROJECT ||
 			updateInfo == IActiveProjectListener.RESOURCES_UPDATED_BECAUSE_ACTIVE_PROJECT_CHANGED || updateInfo == IActiveProjectListener.COLUMN_INFO_CHANGED ||
-			updateInfo == IActiveProjectListener.SECURITY_INFO_CHANGED || updateInfo == IActiveProjectListener.MODULES_UPDATED)
+			updateInfo == IActiveProjectListener.SECURITY_INFO_CHANGED || updateInfo == IActiveProjectListener.SCOPE_NAMES_CHANGED)
 		{
 			// avoid invalid thread access exceptions
-			getSite().getShell().getDisplay().syncExec(new Runnable()
+			getSite().getShell().getDisplay().asyncExec(new Runnable()
 			{
 				public void run()
 				{
+					Object activeOrder = null;
 					int activePage = getActivePage();
-					disposePages();
-					createCalculationsPage();
-					createFoundsSetMethodsPage();
-					createAggregationsPage();
-					createEventsPage();
-					createDataPage();
 					if (activePage >= 0)
 					{
-						setActivePage(activePage);
+						Control activeControl = getControl(activePage);
+						if (activeControl != null)
+						{
+							activeOrder = activeControl.getData("order");
+						}
+					}
+
+					disposeDynamicPages();
+					createDynamicPages();
+
+					if (activeOrder != null)
+					{
+						int pages = getPageCount();
+						for (int i = 0; i < pages; i++)
+						{
+							if (activeOrder.equals(getControl(i).getData("order")))
+							{
+								setActivePage(i);
+								break;
+							}
+						}
 					}
 				}
 			});
