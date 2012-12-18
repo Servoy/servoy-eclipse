@@ -101,7 +101,7 @@ public class XMLScriptObjectAdapterLoader
 					ScriptObjectRegistry.registerScriptObjectForClass(clazz, adapter);
 					succeeded++;
 				}
-				catch (ClassNotFoundException e)
+				catch (Throwable e)
 				{
 					System.out.println("Class " + objDoc.getQualifiedName() + " not found for script object registration.");
 					failed++;
