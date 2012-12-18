@@ -2154,7 +2154,7 @@ public class TypeCreator extends TypeCache
 				String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
 				if (cachedSuperTypeTemplateType == null)
 				{
-					cachedSuperTypeTemplateType = TypeCreator.this.createType(context, fullTypeName, Record.class);
+					cachedSuperTypeTemplateType = TypeCreator.this.createType(context, Record.JS_RECORD, Record.class);
 				}
 				EList<Member> members = cachedSuperTypeTemplateType.getMembers();
 				List<Member> overwrittenMembers = new ArrayList<Member>();
