@@ -30,6 +30,7 @@ import org.eclipse.dltk.compiler.env.IModuleSource;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.javascript.core.JavaScriptNature;
 import org.eclipse.dltk.javascript.typeinfo.model.Property;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
@@ -121,6 +122,10 @@ public class ElementSearch extends AbstractPersistSearch
 			if (engine != null) engine.setRequestor(new ISelectionRequestor()
 			{
 				public void acceptModelElement(IModelElement element)
+				{
+				}
+
+				public void acceptElement(Object element, ISourceRange range)
 				{
 				}
 
