@@ -27,7 +27,7 @@ import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 
 /**
- * This class filters what out what is not allowed in SolutionExplorer for a mobile project.
+ * This class filters out what is not allowed in SolutionExplorer for a mobile project.
  * 
  * @author acostache
  *
