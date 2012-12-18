@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.swing.SwingUtilities;
+
 import org.eclipse.swt.graphics.Image;
 
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -278,7 +280,7 @@ public class ElementUtil
 
 	private static Map<String, WeakReference<Class< ? >>> beanClassCache = new ConcurrentHashMap<String, WeakReference<Class< ? >>>();
 
-	public static Class< ? > getPersistScriptClass(IApplication application, IPersist persist)
+	public static Class< ? > getPersistScriptClass(final IApplication application, IPersist persist)
 	{
 		if (persist instanceof GraphicalComponent)
 		{
@@ -343,7 +345,7 @@ public class ElementUtil
 
 		if (persist instanceof Bean)
 		{
-			Bean bean = (Bean)persist;
+			final Bean bean = (Bean)persist;
 			String beanClassName = bean.getBeanClassName();
 			WeakReference<Class< ? >> beanClassRef = beanClassCache.get(beanClassName);
 			Class< ? > beanClass = null;
@@ -359,19 +361,44 @@ public class ElementUtil
 					beanClass = bcl.loadClass(beanClassName);
 					if (IServoyBeanFactory.class.isAssignableFrom(beanClass))
 					{
-						Form form = (Form)bean.getParent();
-						IServoyBeanFactory beanFactory = (IServoyBeanFactory)beanClass.newInstance();
-						Object beanInstance = beanFactory.getBeanInstance(application.getApplicationType(), (IClientPluginAccess)application.getPluginAccess(),
-							new Object[] { ComponentFactory.getWebID(null, bean), form.getName(), form.getStyleName() });
-						beanClass = beanInstance.getClass();
-						if (beanInstance instanceof IScriptObject)
+						final Class[] beanClassHolder = new Class[1];
+						beanClassHolder[0] = beanClass;
+						Runnable runnable = new Runnable()
 						{
-							ScriptObjectRegistry.registerScriptObjectForClass(beanClass, (IScriptObject)beanInstance);
+							public void run()
+							{
+								try
+								{
+									Form form = (Form)bean.getParent();
+									IServoyBeanFactory beanFactory = (IServoyBeanFactory)beanClassHolder[0].newInstance();
+									Object beanInstance = beanFactory.getBeanInstance(application.getApplicationType(),
+										(IClientPluginAccess)application.getPluginAccess(),
+										new Object[] { ComponentFactory.getWebID(null, bean), form.getName(), form.getStyleName() });
+									beanClassHolder[0] = beanInstance.getClass();
+									if (beanInstance instanceof IScriptObject)
+									{
+										ScriptObjectRegistry.registerScriptObjectForClass(beanClassHolder[0], (IScriptObject)beanInstance);
+									}
+								}
+								catch (Throwable t)
+								{
+									Debug.error("Error loading bean: " + bean.getName() + " clz: " + beanClassHolder[0], t); //$NON-NLS-1$ //$NON-NLS-2$
+								}
+							}
+						};
+						if (SwingUtilities.isEventDispatchThread())
+						{
+							runnable.run();
 						}
+						else
+						{
+							SwingUtilities.invokeAndWait(runnable);
+						}
+						beanClass = beanClassHolder[0];
 					}
 					beanClassCache.put(beanClassName, new WeakReference<Class< ? >>(beanClass));
 				}
-				catch (Exception e)
+				catch (Throwable e)
 				{
 					Debug.error("Error loading bean: " + bean.getName() + " clz: " + beanClassName, e); //$NON-NLS-1$ //$NON-NLS-2$
 				}
