@@ -29,27 +29,33 @@ public class MarkerMessages
 	{
 		private final String template;
 		private final String type;
-		private String message;
+		private final String message;
 		private final String fix;
 
 		public ServoyMarker(String template, String type)
 		{
-			this(template, type, null);
+			this(template, type, null, null);
 		}
 
 		public ServoyMarker(String template, String type, String fix)
 		{
+			this(template, type, fix, null);
+		}
+
+		/*
+		 * Internal, used with formatted message
+		 */
+		private ServoyMarker(String template, String type, String fix, String message)
+		{
 			this.template = template;
 			this.type = type;
-			this.message = null;
+			this.message = message;
 			this.fix = fix;
 		}
 
 		public ServoyMarker fill(Object... values)
 		{
-			ServoyMarker result = new ServoyMarker(template, type);
-			result.message = MessageFormat.format(template, values);
-			return result;
+			return new ServoyMarker(template, type, fix, MessageFormat.format(template, values));
 		}
 
 		public String getType()
@@ -64,7 +70,7 @@ public class MarkerMessages
 
 		public String getFix()
 		{
-			return fix != null ? fix : "";
+			return fix;
 		}
 	}
 
