@@ -120,7 +120,7 @@ public class ColumnTypeEditingSupport extends EditingSupport
 			int length = pi.getConfiguredColumnType().getLength();
 
 			// if sequence type is uuid generator automaticaly fill MEDIA with length 16 and TEXT with length 36
-			if (pi.getSequenceType() == ColumnInfo.UUID_GENERATOR)
+			if (pi.getSequenceType() == ColumnInfo.UUID_GENERATOR && !pi.getExistInDB())
 			{
 				if (type == IColumnTypes.TEXT)
 				{

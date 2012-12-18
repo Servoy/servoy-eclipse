@@ -217,11 +217,12 @@ public class ColumnSeqTypeEditingSupport extends EditingSupport
 					}
 					else if (column.getSequenceType() == ColumnInfo.UUID_GENERATOR)
 					{
-						if (!(dpType == IColumnTypes.MEDIA || dpType == IColumnTypes.TEXT) && (column.getLength() == 0 || column.getLength() == 50))
+						if (!(dpType == IColumnTypes.MEDIA || dpType == IColumnTypes.TEXT) && (column.getLength() == 0 || column.getLength() == 50) &&
+							!column.getExistInDB())
 						{
 							column.getColumnInfo().setConfiguredColumnType(ColumnType.getInstance(IColumnTypes.TEXT, 36, 0));
-							column.setFlags(Column.UUID_COLUMN);
 						}
+						column.setFlags(Column.UUID_COLUMN);
 					}
 					//no longer needed because it is amortized by smart defaults , + doSave validation
 //					else if (i == ColumnInfo.UUID_GENERATOR)
