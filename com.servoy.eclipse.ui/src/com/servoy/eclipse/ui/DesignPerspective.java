@@ -63,7 +63,7 @@ public class DesignPerspective implements IPerspectiveFactory
 
 		//maximize window on first launch, it start too small first time
 		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-		if (page == null || !page.getPerspective().getId().toString().equals("com.servoy.eclipse.ui.DesignPerspective"))
+		if (page == null || page.getPerspective() == null || !page.getPerspective().getId().toString().equals("com.servoy.eclipse.ui.DesignPerspective"))
 		{
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().setMaximized(true);
 		}
