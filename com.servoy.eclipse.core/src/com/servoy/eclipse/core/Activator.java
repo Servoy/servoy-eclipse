@@ -320,7 +320,10 @@ public class Activator extends Plugin
 
 						//remove ExternalToolsSet from current perspective - if a restart occurs, the action set has to remain removed
 						IPerspectiveDescriptor perspectiveDescriptor = workbenchPage.getPerspective();
-						turnOffExternalToolsActionSet(workbenchWindow, perspectiveDescriptor, node);
+						if (perspectiveDescriptor != null)
+						{
+							turnOffExternalToolsActionSet(workbenchWindow, perspectiveDescriptor, node);
+						}
 					}
 				}
 				catch (BackingStoreException e)
