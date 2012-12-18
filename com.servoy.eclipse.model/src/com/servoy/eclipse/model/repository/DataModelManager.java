@@ -567,35 +567,49 @@ public class DataModelManager implements IColumnInfoManager
 
 	public void updateHiddenInDeveloperState(Table t) throws RepositoryException
 	{
+		if (t == null || !t.getExistInDB()) return;
 		InputStream is = null;
 		try
 		{
 			IFile file = getDBIFile(t.getServerName(), t.getName());
 			if (file.exists())
 			{
-
 				is = file.getContents(true);
 				String json_table = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
 				IServerInternal s = (IServerInternal)sm.getServer(t.getServerName());
 				if (s != null && s.getConfig().isEnabled() && s.isValid() && json_table != null)
 				{
-					TableDef tableInfo = deserializeTableInfo(json_table);
-					tableInfo.hiddenInDeveloper = t.isMarkedAsHiddenInDeveloper();
-					String tObj = serializeTableInfo(tableInfo);
+					String tObj = null;
+					try
+					{
+						t.acquireReadLock();
+						TableDef tableInfo = deserializeTableInfo(json_table);
+						tableInfo.hiddenInDeveloper = t.isMarkedAsHiddenInDeveloper();
+						tObj = serializeTableInfo(tableInfo);
+					}
+					finally
+					{
+						t.releaseReadLock();
+					}
 					InputStream source = new ByteArrayInputStream(tObj.getBytes("UTF8"));
 					file.setContents(source, true, false, null);
 				}
 			}
 			else
 			{
-				if (!t.isMarkedAsHiddenInDeveloper())
+				if (t.isMarkedAsHiddenInDeveloper())
 				{
-					TableDef tableInfo = new TableDef();
-					tableInfo.name = t.getName();
-					tableInfo.hiddenInDeveloper = t.isMarkedAsHiddenInDeveloper();
-					tableInfo.isMetaData = t.isMarkedAsMetaData();
+					String tObj = null;
+					try
+					{
+						t.acquireReadLock();
+						tObj = serializeTable(t);
+					}
+					finally
+					{
+						t.releaseReadLock();
+					}
 
-					String tObj = serializeTableInfo(tableInfo);
 					InputStream source = new ByteArrayInputStream(tObj.getBytes("UTF8"));
 					ResourcesUtils.createFileAndParentContainers(file, source, true);
 				}
