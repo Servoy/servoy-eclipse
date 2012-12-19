@@ -138,10 +138,13 @@ import com.servoy.j2db.persistence.ISequenceProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerConfigListener;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.IServerListener;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportScope;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.ITableListener;
+import com.servoy.j2db.persistence.ITableListener.TableListener;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.IVariable;
 import com.servoy.j2db.persistence.Media;
@@ -198,7 +201,11 @@ public class ServoyModel extends AbstractServoyModel
 
 	private IResourceChangeListener preChangeListener;
 
+	private IServerListener serverTableListener;
+	private ITableListener tableListener;
+
 	private final Boolean initRepAsTeamProvider;
+
 
 	protected ServoyModel()
 	{
@@ -468,6 +475,100 @@ public class ServoyModel extends AbstractServoyModel
 				}
 
 				return true;
+			}
+		});
+
+		installServerTableListener();
+	}
+
+	/**
+	 * Install listener for changes to tables, clear cached tables when tables change.
+	 */
+	private void installServerTableListener()
+	{
+		tableListener = new TableListener()
+		{
+			@Override
+			public void tablesRemoved(IServerInternal server, Table[] tables, boolean deleted)
+			{
+				String[] tableNames = new String[tables.length];
+				for (int i = 0; i < tables.length; i++)
+				{
+					tableNames[i] = tables[i].getName();
+				}
+				clearCachedTables(tableNames);
+			}
+
+			@Override
+			public void tablesAdded(IServerInternal server, String[] tableNames)
+			{
+				clearCachedTables(tableNames);
+			}
+
+			@Override
+			public void tableInitialized(Table t)
+			{
+				clearCachedTables(new String[] { t.getName() });
+			}
+
+			private void clearCachedTables(String[] tableNames)
+			{
+				final List<String> names = Arrays.asList(tableNames);
+				IPersistVisitor visitor = new IPersistVisitor()
+				{
+					public Object visit(IPersist o)
+					{
+						if (o instanceof Form)
+						{
+							if (names.contains(((Form)o).getTableName()))
+							{
+								((Form)o).clearTable();
+							}
+						}
+
+						else if (o instanceof TableNode)
+						{
+							if (names.contains(((TableNode)o).getTableName()))
+							{
+								((TableNode)o).clearTable();
+							}
+						}
+
+						return o.getParent() instanceof Solution ? CONTINUE_TRAVERSAL : CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
+					}
+				};
+
+				// flush flattened form caches and clear cached tables
+				getFlattenedSolution().flushFlattenedFormCache();
+				for (ServoyProject project : getModulesOfActiveProject())
+				{
+					project.getEditingFlattenedSolution().flushFlattenedFormCache();
+					project.getSolution().acceptVisitor(visitor);
+					project.getEditingSolution().acceptVisitor(visitor);
+				}
+			}
+		};
+
+		IServerManagerInternal serverManager = getServerManager();
+
+		// add listeners to initial server list
+		String[] array = serverManager.getServerNames(false, false, true, true);
+		for (String server_name : array)
+		{
+			((IServerInternal)serverManager.getServer(server_name, false, false)).addTableListener(tableListener);
+		}
+
+		// monitor changes in server list
+		serverManager.addServerListener(serverTableListener = new IServerListener()
+		{
+			public void serverAdded(IServerInternal s)
+			{
+				s.addTableListener(tableListener);
+			}
+
+			public void serverRemoved(IServerInternal s)
+			{
+				s.removeTableListener(tableListener);
 			}
 		});
 	}
@@ -2761,6 +2862,12 @@ public class ServoyModel extends AbstractServoyModel
 		getServerManager().removeServerConfigListener(serverConfigSyncer);
 		getWorkspace().removeResourceChangeListener(preChangeListener);
 		getWorkspace().removeResourceChangeListener(postChangeListener);
+
+		for (String server_name : getServerManager().getServerNames(false, false, true, true))
+		{
+			((IServerInternal)getServerManager().getServer(server_name, false, false)).removeTableListener(tableListener);
+		}
+		getServerManager().removeServerListener(serverTableListener);
 	}
 
 	public void testBuildPathsAndBuild(final ServoyProject project, final boolean buildProject)
