@@ -222,23 +222,7 @@ public class ColumnSeqTypeEditingSupport extends EditingSupport
 						{
 							column.getColumnInfo().setConfiguredColumnType(ColumnType.getInstance(IColumnTypes.TEXT, 36, 0));
 						}
-						column.setFlags(Column.UUID_COLUMN);
 					}
-					//no longer needed because it is amortized by smart defaults , + doSave validation
-//					else if (i == ColumnInfo.UUID_GENERATOR)
-//					{
-//						if (dpType != IColumnTypes.TEXT && dpType != IColumnTypes.MEDIA)
-//						{
-//							MessageDialog.openWarning(((TableViewer)this.getViewer()).getTable().getShell(), "Warning",
-//								"UUID generator sequence is only supported for text and media column types.");
-//						}
-//						else if (configuredLength > 0 &&
-//							((dpType == IColumnTypes.MEDIA && configuredLength < 16) || (dpType == IColumnTypes.TEXT && configuredLength < 36)))
-//						{
-//							MessageDialog.openWarning(((TableViewer)this.getViewer()).getTable().getShell(), "Warning",
-//								"UUID generator column has too small length.");
-//						}
-//					}
 					break;
 				}
 			}

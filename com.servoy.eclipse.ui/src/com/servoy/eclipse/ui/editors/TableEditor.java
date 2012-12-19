@@ -823,10 +823,21 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 			// check UUID generator valid types
 			if (col.getColumnInfo() != null && col.getSequenceType() == ColumnInfo.UUID_GENERATOR)
 			{
-				if (!col.getColumnInfo().hasFlag(Column.UUID_COLUMN) || (colType != IColumnTypes.MEDIA && colType != IColumnTypes.TEXT))
+				if (!col.getColumnInfo().hasFlag(Column.UUID_COLUMN))
 				{
 					throw new Exception("Column '" + col.getName() +
 						"' has sequence type of 'UUID generator' , the column type should be TEXT(36) or MEDIA(16) with an UUID flag set.");
+				}
+				if (colType != IColumnTypes.TEXT && colType != IColumnTypes.MEDIA)
+				{
+					throw new Exception("Column '" + col.getName() +
+						"' has sequence type as UUID generator and is only supported for TEXT and MEDIA column types.");
+				}
+				else if (col.getLength() > 0 &&
+					((colType == IColumnTypes.MEDIA && col.getLength() < 16) || (colType == IColumnTypes.TEXT && col.getLength() < 36)))
+				{
+					throw new Exception("Column '" + col.getName() +
+						"' with sequence type UUID generator has length to small (a minimum of 16 for MEDIA and 36 for TEXT).");
 				}
 			}
 		}
