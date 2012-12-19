@@ -46,8 +46,8 @@ import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 import com.servoy.eclipse.mobileexporter.export.MobileExporter;
+import com.servoy.eclipse.mobileexporter.ui.wizard.ExportMobileWizard.CustomizedFinishPage;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.wizards.FinishPage;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
 /**
@@ -63,11 +63,11 @@ public class WarExportPage extends WizardPage
 	private Button exportAsWar;
 	private Text phoneGapUsername;
 	private Text phoneGapPassword;
-	private final FinishPage finishPage;
+	private final CustomizedFinishPage finishPage;
 	private final PhoneGapApplicationPage pgAppPage;
 	private final MobileExporter mobileExporter;
 
-	public WarExportPage(String pageName, String title, ImageDescriptor titleImage, FinishPage finishPage, PhoneGapApplicationPage pgAppPage,
+	public WarExportPage(String pageName, String title, ImageDescriptor titleImage, CustomizedFinishPage finishPage, PhoneGapApplicationPage pgAppPage,
 		MobileExporter mobileExporter)
 	{
 		super(pageName, title, titleImage);
@@ -267,7 +267,23 @@ public class WarExportPage extends WizardPage
 		{
 			if (isWarExport())
 			{
-				finishPage.setTextMessage(doExport());
+				String serverDir = ApplicationServerSingleton.get().getServoyApplicationServerDirectory();
+				if (!serverDir.endsWith(File.separator)) serverDir = serverDir + File.separator;
+				serverDir = serverDir + "server/webapps/"; //$NON-NLS-1$
+				String outputFolder = getOutputFolder();
+				if (!outputFolder.endsWith(File.pathSeparator)) outputFolder = outputFolder + File.separator;
+
+				if (serverDir.equalsIgnoreCase(outputFolder))
+				{
+					finishPage.setApplicationURL(
+						new StringBuilder("http://localhost:").append(ApplicationServerSingleton.get().getWebServerPort()).append("/").append( //$NON-NLS-1$ //$NON-NLS-2$
+							mobileExporter.getSolutionName()).append("/index.html").toString(), "Open WAR application in browser at finish.", false); //$NON-NLS-1$ //$NON-NLS-2$
+					finishPage.createControl(WarExportPage.this.getControl().getParent());
+					finishPage.setTextMessage(doExport());
+					finishPage.getControl().getParent().layout(true);
+				}
+				else finishPage.setTextMessage(doExport());
+
 				return finishPage;
 			}
 			else

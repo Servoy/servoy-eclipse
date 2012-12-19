@@ -102,6 +102,8 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 	public class CustomizedFinishPage extends FinishPage
 	{
 		private String url = null;
+		private String urlDescription;
+		private boolean urlDefaultSelected;
 		private Button openURL = null;
 
 		public CustomizedFinishPage(String pageName)
@@ -142,8 +144,8 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 				message.setEditable(false);
 
 				openURL = new Button(container, SWT.CHECK);
-				openURL.setSelection(true);
-				openURL.setText("Open PhoneGap build page at finish.");
+				openURL.setSelection(urlDefaultSelected);
+				openURL.setText(urlDescription);
 				gridData = new GridData();
 				gridData.grabExcessHorizontalSpace = true;
 				gridData.grabExcessVerticalSpace = false;
@@ -160,9 +162,11 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 			}
 		}
 
-		public void setApplicationURL(String url)
+		public void setApplicationURL(String url, String urlDescription, boolean defaultSelected)
 		{
 			this.url = url;
+			this.urlDescription = urlDescription;
+			this.urlDefaultSelected = defaultSelected;
 		}
 
 		public String getOpenUrl()

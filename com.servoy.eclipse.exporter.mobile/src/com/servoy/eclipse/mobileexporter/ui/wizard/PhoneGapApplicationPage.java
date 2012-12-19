@@ -222,7 +222,7 @@ public class PhoneGapApplicationPage extends WizardPage
 				setErrorMessage(errorMessage[0]);
 				return null;
 			}
-			finishPage.setApplicationURL("https://build.phonegap.com/people/sign_in");
+			finishPage.setApplicationURL("https://build.phonegap.com/people/sign_in", "Open PhoneGap build page at finish.", true);
 			finishPage.createControl(PhoneGapApplicationPage.this.getControl().getParent());
 			finishPage.setTextMessage("Solution exported to PhoneGap application.");
 			finishPage.getControl().getParent().layout(true);
