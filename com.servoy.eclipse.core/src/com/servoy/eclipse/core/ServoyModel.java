@@ -242,9 +242,11 @@ public class ServoyModel extends AbstractServoyModel
 			{
 				if (aProject != null)
 				{
+					Solution solution = aProject.getSolution();
 					ServoyResourcesProject resourceProject = aProject.getResourcesProject();
-					if (resourceProject != null && resourceProject.getProject().findMember(EclipseMessages.MESSAGES_DIR) == null) EclipseMessages.writeProjectI18NFiles(
-						aProject, false, false);
+					if (solution != null && (solution.getI18nDataSource() != null || aProject.getModules().length > 1) && resourceProject != null &&
+						resourceProject.getProject().findMember(EclipseMessages.MESSAGES_DIR) == null) EclipseMessages.writeProjectI18NFiles(aProject, false,
+						false);
 
 				}
 			}
