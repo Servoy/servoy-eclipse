@@ -645,6 +645,16 @@ application.exit();]]></sample>
           <deprecated><![CDATA[As of release 2.x, replaced by #getActiveClientCount(boolean).]]></deprecated>
           <sample/>
         </function>
+        <function name="getActiveWindow">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.scripting.JSWindow" typecode="com.servoy.j2db.scripting.JSWindow"><![CDATA[the current active/focussed window.]]></return>
+          <description><![CDATA[This gets the currently focused active window, this can be the main application window or a modal dialog.
+For a webclient getWindow() can return the main window that is not really the main for the current tab in the browser
+that can return a the previous tab that a user could have opened. For this this method is better suited because this 
+will give you the actual tab in the browser. Another call would be form.controller.getWindow() of a form that you know in which window it resides.]]></description>
+          <summary><![CDATA[This gets the currently focused active window, this can be the main application window or a modal dialog.]]></summary>
+          <sample/>
+        </function>
         <function name="getApplicationType">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[Constant application type]]></return>
@@ -1024,7 +1034,15 @@ for( var i = 1 ; i <= dataset.getMaxRowIndex() ; i++ )
         <function name="getWindow">
           <argumentsTypes/>
           <return type="com.servoy.j2db.scripting.JSWindow" typecode="com.servoy.j2db.scripting.JSWindow"><![CDATA[the main application JSWindow.]]></return>
-          <description><![CDATA[Get the main application window.]]></description>
+          <description><![CDATA[Get the main application window. This is the window that is created first for this client. 
+In a smart client this is always just the first started window where the solution is loaded in.
+In a webclient when users (so not the developer through a createWindow() call) create there own tabs after
+
+In a webclient the user may open the same solution in a new tab in the same browser. In that case the main solution
+window will always be the first opened tab, even if that one was already closed.
+application.getActiveWindow() will aways return the currently active/focused window or dialog.
+If you need the window of the current top-level form, controller.getWindow() of that form will
+always return the correct window.]]></description>
           <summary><![CDATA[Get the main application window.]]></summary>
           <sample><![CDATA[// close and dispose window resources
 var mainAppWindow = application.getWindow();]]></sample>
@@ -1830,7 +1848,8 @@ elements.myfield.font = selectedFont]]></sample>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Show the form specified by the parameter, that can be a name (is case sensitive!) or a form object.]]></description>
+          <description><![CDATA[Show the form specified by the parameter, that can be a name (is case sensitive!) or a form object.
+This will show the form in the active/currently focused window. So when called from a form in a dialog the dialog will show the form.]]></description>
           <summary><![CDATA[Show the form specified by the parameter, that can be a name (is case sensitive!) or a form object.]]></summary>
           <sample><![CDATA[application.showForm('MyForm');]]></sample>
           <parameters>
