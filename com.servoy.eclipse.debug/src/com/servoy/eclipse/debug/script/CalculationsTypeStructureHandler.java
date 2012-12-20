@@ -141,8 +141,9 @@ public class CalculationsTypeStructureHandler implements IStructureHandler
 			IVariable variable = new CalcVariable();
 			variable.setName(name.getName());
 			variable.setLocation(ReferenceLocation.create(rs, name.sourceStart(), name.sourceEnd()));
-			VariableDeclaration declaration = new VariableDeclaration(new VariableStatement(node));
+			VariableDeclaration declaration = new VariableDeclaration(new VariableStatement((FunctionStatement)node));
 			declaration.setIdentifier(name);
+			visitor.visit(((FunctionStatement)node).getBody()); // do visit the body so that calls are reported.
 			return new VariableNode(parent, declaration, variable);
 		}
 
