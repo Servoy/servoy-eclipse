@@ -269,7 +269,7 @@ public class WarExportPage extends WizardPage
 			{
 				String serverDir = ApplicationServerSingleton.get().getServoyApplicationServerDirectory();
 				if (!serverDir.endsWith(File.separator)) serverDir = serverDir + File.separator;
-				serverDir = serverDir + "server/webapps/"; //$NON-NLS-1$
+				serverDir = new StringBuilder(serverDir).append("server").append(File.separator).append("webapps").append(File.separator).toString(); //$NON-NLS-1$ //$NON-NLS-2$
 				String outputFolder = getOutputFolder();
 				if (!outputFolder.endsWith(File.pathSeparator)) outputFolder = outputFolder + File.separator;
 
