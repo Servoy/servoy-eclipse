@@ -281,5 +281,12 @@
               translations="templates/templates.properties">
         </include>
      </extension>
+     <extension
+           point="com.servoy.eclipse.core.debugstarter">
+        <debugstarter
+              class="com.servoy.eclipse.debug.DebugStarter"
+              id="com.servoy.eclipse.debug.debugstarter">
+        </debugstarter>
+     </extension>
    
 </plugin>

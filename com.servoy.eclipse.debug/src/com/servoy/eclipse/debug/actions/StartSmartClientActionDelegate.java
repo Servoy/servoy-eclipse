@@ -55,7 +55,7 @@ import com.servoy.j2db.util.Utils;
  * @author jcompagner,jblok
  * 
  */
-public class StartSmartClientActionDelegate extends StartDebugAction implements IRunnableWithProgress
+public class StartSmartClientActionDelegate extends StartDebugAction implements IRunnableWithProgress, IDebuggerStartListener
 {
 	public static ITagResolver noReplacementResolver = new ITagResolver()
 	{
@@ -174,8 +174,18 @@ public class StartSmartClientActionDelegate extends StartDebugAction implements 
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.debug.actions.StartDebugAction#getDebuggerAboutToStartListener()
+	 */
 	@Override
-	protected void aboutToStartDebugClient()
+	protected IDebuggerStartListener getDebuggerAboutToStartListener()
+	{
+		return this;
+	}
+
+	public void aboutToStartDebugClient()
 	{
 		// add some delay, this seems to fix grey screens in developer on the mac.
 		// If action returns and at the same time the frame is shown, awt/swt events get mixed up?
@@ -191,7 +201,6 @@ public class StartSmartClientActionDelegate extends StartDebugAction implements 
 				ServoyLog.logError(e);
 			}
 		}
-		super.aboutToStartDebugClient();
 	}
 
 

@@ -233,6 +233,8 @@ public class Activator extends Plugin
 
 	private IDocumentationManagerProvider docManagerpProvider;
 
+	private IDebuggerStarter debuggerStarter;
+
 	/**
 	 * The constructor
 	 */
@@ -585,6 +587,20 @@ public class Activator extends Plugin
 						Context.exit();
 					}
 				}
+
+				/*
+				 * (non-Javadoc)
+				 * 
+				 * @see com.servoy.j2db.IDesignerCallback#testAndStartDebugger()
+				 */
+				public void testAndStartDebugger()
+				{
+					IDebuggerStarter starter = getDebuggerStarter();
+					if (starter != null)
+					{
+						starter.testAndStartDebugger();
+					}
+				}
 			};
 			dch.setDesignerCallback(designerCallback);
 		}
@@ -933,6 +949,63 @@ public class Activator extends Plugin
 			}
 		}
 		return docManagerpProvider;
+	}
+
+	public synchronized IDebuggerStarter getDebuggerStarter()
+	{
+		if (debuggerStarter == null)
+		{
+			debuggerStarter = (IDebuggerStarter)createExtensionPoint(IDebuggerStarter.EXTENSION_ID);
+		}
+		return debuggerStarter;
+	}
+
+	/**
+	 * 
+	 */
+	public Object createExtensionPoint(String extensionId)
+	{
+		IExtensionRegistry reg = Platform.getExtensionRegistry();
+		IExtensionPoint ep = reg.getExtensionPoint(extensionId);
+		IExtension[] extensions = ep.getExtensions();
+
+		if (extensions == null || extensions.length == 0)
+		{
+			ServoyLog.logWarning("Could not find extension point " + //$NON-NLS-1$
+				extensionId, null);
+			return null;
+		}
+		if (extensions.length > 1)
+		{
+			ServoyLog.logWarning("Multiple extensions found for " + //$NON-NLS-1$
+				extensionId, null);
+		}
+		IConfigurationElement[] ce = extensions[0].getConfigurationElements();
+		if (ce == null || ce.length == 0)
+		{
+			ServoyLog.logWarning("Could not read  extension point " + extensionId, null); //$NON-NLS-1$ 
+			return null;
+		}
+		if (ce.length > 1)
+		{
+			ServoyLog.logWarning("Multiple extensions found for extension point " + //$NON-NLS-1$
+				extensionId, null);
+		}
+		Object extension = null;
+		try
+		{
+			extension = ce[0].createExecutableExtension("class"); //$NON-NLS-1$
+		}
+		catch (CoreException e)
+		{
+			ServoyLog.logWarning("Could not create debug starter (extension point " + extensionId + ")", e); //$NON-NLS-1$ //$NON-NLS-2$
+			return null;
+		}
+		if (extension == null)
+		{
+			ServoyLog.logWarning("Could not load debug starter (extension point " + extensionId + ")", null); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		return extension;
 	}
 
 	private void showFirstCheatSheet()
