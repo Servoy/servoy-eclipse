@@ -333,7 +333,10 @@ public class SolutionSerializer
 					}
 					fileAccess.closeOutputStream(fos);
 				}
-				if (fileAccess.getFileLength(fileRelativePath) == 0 && overwriteExisting) fileAccess.delete(fileRelativePath);
+				if (fileAccess.getFileLength(fileRelativePath) == 0 && !(node instanceof Media) && overwriteExisting)
+				{
+					fileAccess.delete(fileRelativePath);
+				}
 			}
 
 			if (node instanceof Solution)
