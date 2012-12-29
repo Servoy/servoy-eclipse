@@ -46,6 +46,7 @@ import com.servoy.j2db.persistence.ArgumentType;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
@@ -73,8 +74,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
-import com.servoy.j2db.persistence.IColumnTypes;
-import com.servoy.j2db.util.DataSourceUtils;
+import com.servoy.j2db.util.DataSourceUtilsBase;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ServoyJSONArray;
@@ -333,7 +333,10 @@ public class SolutionSerializer
 					}
 					fileAccess.closeOutputStream(fos);
 				}
-				if (fileAccess.getFileLength(fileRelativePath) == 0 && overwriteExisting) fileAccess.delete(fileRelativePath);
+				if (fileAccess.getFileLength(fileRelativePath) == 0 && !(node instanceof Media) && overwriteExisting)
+				{
+					fileAccess.delete(fileRelativePath);
+				}
 			}
 
 			if (node instanceof Solution)
@@ -1332,7 +1335,7 @@ public class SolutionSerializer
 		serverNameTableName[1] = tableNode.getTableName();
 		if (useOldName && tableNode.getRuntimeProperty(AbstractBase.NameChangeProperty) != null)
 		{
-			String[] names = DataSourceUtils.getDBServernameTablename(tableNode.getRuntimeProperty(AbstractBase.NameChangeProperty));
+			String[] names = DataSourceUtilsBase.getDBServernameTablename(tableNode.getRuntimeProperty(AbstractBase.NameChangeProperty));
 			if (names != null && names.length == 2)
 			{
 				serverNameTableName = names;
