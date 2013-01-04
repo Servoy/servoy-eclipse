@@ -58,6 +58,7 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
@@ -65,7 +66,6 @@ import org.eclipse.swt.widgets.TreeColumn;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
-import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
@@ -93,7 +93,6 @@ public class UpdateMetaDataWziard extends Wizard
 	private List<Pair<String, Table>> tablesWithDataInDB = null;
 	private List<Pair<String, Table>> tablesWithoutDataInDB = null;
 	private Shell shell = null;
-	private DataModelManager dmm = null;
 
 	public UpdateMetaDataWziard(List<Table> tablesWithDataInDB, List<Table> tablesWithoutDataInDB, Shell shell)
 	{
@@ -110,37 +109,50 @@ public class UpdateMetaDataWziard extends Wizard
 			this.tablesWithoutDataInDB.add(new Pair<String, Table>(t.getServerName(), t));
 		}
 		this.shell = shell;//this.getShell();
-		this.dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
 	}
 
 	@Override
 	public void addPages()
 	{
-		Comparator<Pair<String, Table>> comparator = new Comparator<Pair<String, Table>>()
+		if (tablesWithDataInDB.size() == 0)
 		{
-
-			public int compare(Pair<String, Table> o1, Pair<String, Table> o2)
+			addPage(new WizardPage("All tables that are to be synchronized are empty in the database")
 			{
-				if (o1 == null && o2 == null) return 0;
-				if (o1 == null) return -1;
-				if (o2 == null) return 1;
-
-				int result = o1.getLeft().compareToIgnoreCase(o2.getLeft());
-				if (result == 0)
+				public void createControl(Composite parent)
 				{
-					result = o1.getRight().getName().compareToIgnoreCase(o2.getRight().getName());
+					setControl(new Label(parent, SWT.NONE));
+					setTitle(getName());
 				}
-				return result;
+			});
+		}
+		else
+		{
+			Comparator<Pair<String, Table>> comparator = new Comparator<Pair<String, Table>>()
+			{
+				public int compare(Pair<String, Table> o1, Pair<String, Table> o2)
+				{
+					if (o1 == null && o2 == null) return 0;
+					if (o1 == null) return -1;
+					if (o2 == null) return 1;
 
-			}
-		};
-		Image serverImage = Activator.getDefault().loadImageFromBundle("server.gif");
-		Image tableImage = Activator.getDefault().loadImageFromBundle("portal.gif");
-		overwriteSelectionPage = new SplitInTwoWizardPage<String, Table>("The following tables are not empty",
-			"Data synchronize will overwrite existing data, continue?", "Skip", "Overwrite data", "Skip all/multiselection", "Overwrite all/multiselection",
-			tablesWithDataInDB, comparator, serverImage, tableImage);
+					int result = o1.getLeft().compareToIgnoreCase(o2.getLeft());
+					if (result == 0)
+					{
+						result = o1.getRight().getName().compareToIgnoreCase(o2.getRight().getName());
+					}
+					return result;
 
-		addPage(overwriteSelectionPage);
+				}
+			};
+
+			Image serverImage = Activator.getDefault().loadImageFromBundle("server.gif");
+			Image tableImage = Activator.getDefault().loadImageFromBundle("portal.gif");
+			overwriteSelectionPage = new SplitInTwoWizardPage<String, Table>("The following tables are not empty",
+				"Data synchronize will overwrite existing data, continue?", "Skip", "Overwrite data", "Skip all/multiselection",
+				"Overwrite all/multiselection", tablesWithDataInDB, comparator, serverImage, tableImage);
+
+			addPage(overwriteSelectionPage);
+		}
 	}
 
 	/*
@@ -163,41 +175,43 @@ public class UpdateMetaDataWziard extends Wizard
 						{
 							public void run(IProgressMonitor monitor) throws CoreException
 							{
-								//set2  the selected column to overwrite
-								int work = (overwriteSelectionPage != null ? overwriteSelectionPage.getSet2().size() : 0);
-
+								List<Pair<String, Table>> toUpdate = new ArrayList<Pair<String, Table>>();
+								if (overwriteSelectionPage != null)
+								{
+									//set2  the selected column to overwrite
+									toUpdate.addAll(overwriteSelectionPage.getSet2());
+								}
+								toUpdate.addAll(tablesWithoutDataInDB);
+								int work = toUpdate.size();
 
 								monitor.beginTask("Synchronizing database meta data", work);
 								try
 								{
 									MultiStatus warnings = new MultiStatus(Activator.PLUGIN_ID, 0, "For more information please click 'Details'.", null);
-									if (overwriteSelectionPage != null)
+									StringBuilder sb = updateMetaData(toUpdate, warnings, monitor);
+									/*
+									 * handle the updating result
+									 */
+									// show warning status messages in eclipse Platform UI way
+									if (warnings.getChildren().length > 0)
 									{
-										StringBuilder sb = updateMetaData(overwriteSelectionPage.getSet2(), warnings, work);
-										/*
-										 * handle the updating result
-										 */
-										// show warning status messages in eclipse Platform UI way
-										if (warnings.getChildren().length > 0)
+										final MultiStatus fw = warnings;
+										UIUtils.runInUI(new Runnable()
 										{
-											final MultiStatus fw = warnings;
-											UIUtils.runInUI(new Runnable()
+											public void run()
 											{
-												public void run()
-												{
-													ErrorDialog.openError(getShell(), null, null, fw);
-												}
-											}, false);
-										}
-										if (sb.length() > 0)
-										{
-											UIUtils.showScrollableDialog(shell, IMessageProvider.INFORMATION, "Update status",
-												"The folowing tables were updated:", sb.toString());
-										}
-										else
-										{
-											UIUtils.showInformation(shell, "No tables were updated", "No tables in the database were updated.");
-										}
+												ErrorDialog.openError(getShell(), null, null, fw);
+											}
+										}, false);
+									}
+									if (sb.length() > 0)
+									{
+										UIUtils.showScrollableDialog(shell, IMessageProvider.INFORMATION, "Update status", "The folowing tables were updated:",
+											sb.toString());
+									}
+									else
+									{
+										UIUtils.showInformation(shell, "No tables were updated", "No tables in the database were updated.");
 									}
 								}
 								finally
@@ -218,34 +232,34 @@ public class UpdateMetaDataWziard extends Wizard
 				 * @param overrideSet
 				 * @param subProgressMonitor
 				 * @param warnings
-				 * @param work
+				 * @param monitor 
 				 */
-				private StringBuilder updateMetaData(List<Pair<String, Table>> overrideSet, MultiStatus warnings, int work)
+				private StringBuilder updateMetaData(List<Pair<String, Table>> overrideSet, MultiStatus warnings, IProgressMonitor monitor)
 				{
-					overrideSet.addAll(tablesWithoutDataInDB);
 					StringBuilder sb = new StringBuilder();
 					for (Pair<String, Table> tablePair : overrideSet)
 					{
 						Table table = tablePair.getRight();
-						IFile dataFile = dmm.getMetaDataFile(table.getDataSource());
-
-						if (dataFile == null)
-						{
-							warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Cannot find data file for datasource '" + table.getDataSource() +
-								"'."));
-							continue;
-						}
-
-						// import file into table
-						if (!dataFile.exists())
-						{
-							warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Data file for datasource '" + table.getDataSource() +
-								"' does not exist."));
-							continue;
-						}
+						IFile dataFile = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager().getMetaDataFile(
+							table.getDataSource());
 
 						try
 						{
+							if (dataFile == null)
+							{
+								warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Cannot find data file for datasource '" + table.getDataSource() +
+									"'."));
+								continue;
+							}
+
+							// import file into table
+							if (!dataFile.exists())
+							{
+								warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Data file for datasource '" + table.getDataSource() +
+									"' does not exist."));
+								continue;
+							}
+
 							// read the json
 							String contents = new WorkspaceFileAccess(ServoyModel.getWorkspace()).getUTF8Contents(dataFile.getFullPath().toString());
 
@@ -271,6 +285,10 @@ public class UpdateMetaDataWziard extends Wizard
 							ServoyLog.logError("Error updating table", e);
 							warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Error updating table: " + e.getMessage()));
 						}
+						finally
+						{
+							monitor.worked(1);
+						}
 					}
 					return sb;
 				}
@@ -287,7 +305,6 @@ public class UpdateMetaDataWziard extends Wizard
 		}
 		return true;
 	}
-
 }
 
 

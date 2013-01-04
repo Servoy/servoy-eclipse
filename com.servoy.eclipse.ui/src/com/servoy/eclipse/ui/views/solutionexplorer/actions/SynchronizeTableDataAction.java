@@ -60,7 +60,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.query.QuerySelect;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
-import com.servoy.j2db.util.DataSourceUtils;
+import com.servoy.j2db.util.DataSourceUtilsBase;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 
@@ -194,7 +194,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 		List<Table> tables = new ArrayList<Table>();
 		for (String dataSource : dataSources)
 		{
-			String[] stn = DataSourceUtils.getDBServernameTablename(dataSource);
+			String[] stn = DataSourceUtilsBase.getDBServernameTablename(dataSource);
 			Table table = null;
 
 			if (stn != null)
@@ -283,15 +283,13 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 			return;
 		}
 		Pair<List<Table>, List<Table>> result = getTablesThatContainDataInDb(tables);
-		if (!result.getLeft().isEmpty())
-		{
-			WizardDialog dialog = new WizardDialog(shell, new UpdateMetaDataWziard(result.getLeft(), result.getRight(), shell));
-			dialog.open();
-		}
-		else
+		if (result.getLeft().isEmpty() && result.getRight().isEmpty())
 		{
 			UIUtils.reportWarning("Info", "There is no meta data to be imported in the DB.");
+			return;
 		}
+
+		new WizardDialog(shell, new UpdateMetaDataWziard(result.getLeft(), result.getRight(), shell)).open();
 	}
 
 	/**
