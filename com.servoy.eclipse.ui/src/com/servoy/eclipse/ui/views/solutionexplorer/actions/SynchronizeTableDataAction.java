@@ -283,15 +283,13 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 			return;
 		}
 		Pair<List<Table>, List<Table>> result = getTablesThatContainDataInDb(tables);
-		if (!result.getLeft().isEmpty())
-		{
-			WizardDialog dialog = new WizardDialog(shell, new UpdateMetaDataWziard(result.getLeft(), result.getRight(), shell));
-			dialog.open();
-		}
-		else
+		if (result.getLeft().isEmpty() && result.getRight().isEmpty())
 		{
 			UIUtils.reportWarning("Info", "There is no meta data to be imported in the DB.");
+			return;
 		}
+
+		new WizardDialog(shell, new UpdateMetaDataWziard(result.getLeft(), result.getRight(), shell)).open();
 	}
 
 	/**
