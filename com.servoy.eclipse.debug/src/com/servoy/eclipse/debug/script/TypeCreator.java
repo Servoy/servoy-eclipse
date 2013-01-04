@@ -876,7 +876,13 @@ public class TypeCreator extends TypeCache
 			Class< ? > superCls = classTypes.get(cls.getSuperclass().getSimpleName());
 			if (superCls != null)
 			{
-				type.setSuperType(getType(context, cls.getSuperclass().getSimpleName()));
+				JavaMembers superClassMembers = ScriptObjectRegistry.getJavaMembers(superCls, null);
+				JavaMembers classMembers = ScriptObjectRegistry.getJavaMembers(cls, null);
+				// only add the super type if both are of the same javamembers class (instance or not) or the super class is a specific js class.
+				if (classMembers.getClass() == superClassMembers.getClass() || superClassMembers instanceof InstanceJavaMembers)
+				{
+					type.setSuperType(getType(context, cls.getSuperclass().getSimpleName()));
+				}
 			}
 		}
 		Class< ? >[] returnTypes = linkedTypes.get(cls);
