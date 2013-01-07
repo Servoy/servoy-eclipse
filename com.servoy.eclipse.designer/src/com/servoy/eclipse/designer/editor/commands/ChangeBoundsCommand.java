@@ -32,6 +32,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportName;
+import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.StaticContentSpecLoader.TypedProperty;
 import com.servoy.j2db.persistence.TabPanel;
@@ -108,30 +109,21 @@ public class ChangeBoundsCommand extends BaseRestorableCommand implements ISuppo
 		models = new ArrayList<Object>();
 		try
 		{
-			toApply.add(editPart);
+			if (!(editPart instanceof GraphicalEditPart) || !changeBounds((GraphicalEditPart)editPart, change, true))// allow resize to the component it'self
+			{
+				return false;
+			}
+			addChildren(toApply, editPart.getModel());
 			while (toApply.size() > 0)
 			{
 				EditPart ep = toApply.remove(0);
-				if (!(ep instanceof GraphicalEditPart) || !changeBounds((GraphicalEditPart)ep, change))
+				if (!(ep instanceof GraphicalEditPart) || !changeBounds((GraphicalEditPart)ep, change, false)) // don't allow resize to the component's children
 				{
 					return false;
 				}
 				Object model = ep.getModel();
 				models.add(model);
-				if ((sizeDelta == null || (sizeDelta.width == 0 && sizeDelta.height == 0)/* move, not resize */) && model instanceof ISupportChilds ||
-					(sizeDelta != null && model instanceof TabPanel) /* resize tabpanel with tab children */)
-				{
-					Iterator<IPersist> it = ((ISupportChilds)model).getAllObjects();
-					while (it.hasNext())
-					{
-						IPersist child = it.next();
-						EditPart childEditPart = (EditPart)editPart.getViewer().getEditPartRegistry().get(child);
-						if (childEditPart != null)
-						{
-							toApply.add(childEditPart);
-						}
-					}
-				}
+				addChildren(toApply, model);
 			}
 			return true;
 		}
@@ -140,6 +132,30 @@ public class ChangeBoundsCommand extends BaseRestorableCommand implements ISuppo
 			if (!change)
 			{
 				models = new ArrayList<Object>();
+			}
+		}
+	}
+
+	/**
+	 * Adds corresponding EditPart children of model <b>parrentModel</b> to the list <b>childrenList</b>.
+	 * 
+	 * @param childrenList
+	 * @param parentModel
+	 */
+	public void addChildren(List<EditPart> childrenList, Object parentModel)
+	{
+		if ((sizeDelta == null || (sizeDelta.width == 0 && sizeDelta.height == 0)/* move, not resize */) && parentModel instanceof ISupportChilds ||
+			(sizeDelta != null && (parentModel instanceof TabPanel) || (parentModel instanceof Portal)) /* resize tabpanel/Portal with tab children */)
+		{
+			Iterator<IPersist> it = ((ISupportChilds)parentModel).getAllObjects();
+			while (it.hasNext())
+			{
+				IPersist child = it.next();
+				EditPart childEditPart = (EditPart)editPart.getViewer().getEditPartRegistry().get(child);
+				if (childEditPart != null)
+				{
+					childrenList.add(childEditPart);
+				}
 			}
 		}
 	}
@@ -158,7 +174,7 @@ public class ChangeBoundsCommand extends BaseRestorableCommand implements ISuppo
 		}
 	}
 
-	protected boolean changeBounds(GraphicalEditPart ep, boolean change)
+	protected boolean changeBounds(GraphicalEditPart ep, boolean change, boolean allowResize)
 	{
 		ISupportBounds model = (ISupportBounds)ep.getModel();
 		java.awt.Point location = model.getLocation();
@@ -200,7 +216,7 @@ public class ChangeBoundsCommand extends BaseRestorableCommand implements ISuppo
 			{
 				setBoundsProperty(ep, propertySource, StaticContentSpecLoader.PROPERTY_LOCATION, new java.awt.Point(x, y));
 			}
-			if (resized)
+			if (resized && allowResize)
 			{
 				setBoundsProperty(ep, propertySource, StaticContentSpecLoader.PROPERTY_SIZE, new java.awt.Dimension(width, height));
 			}
