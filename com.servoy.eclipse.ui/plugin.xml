@@ -471,25 +471,15 @@
       <actionSet id="com.servoy.eclipse.ui.marketplace"
             label="Marketplace"
             visible="true">
-		 <action
-         class="com.servoy.eclipse.ui.actions.OpenMarketplace"
-         definitionId="com.servoy.eclipse.ui.OpenMarketplaceAction"
-         icon="icons/marketplace.gif"
-         id="com.servoy.eclipse.ui.openMarketplace"
-         label="Servoy MarketPlace"
-         menubarPath="help/updates"
-         style="push"
-         tooltip="Open Servoy MarketPlace">
-         </action>
-   <action
-         class="com.servoy.eclipse.marketplace.ShowInstalledExtensionsAction"
-         definitionId="com.servoy.eclipse.ui.manageExtensionsAction"
-         icon="icons/extension16.png"
-         id="com.servoy.eclipse.ui.manageExtensions"
-         label="Manage Servoy Extensions"
-         menubarPath="help/updates"
-         style="push">
-   </action>      
+   		<action
+        	 class="com.servoy.eclipse.marketplace.ShowInstalledExtensionsAction"
+        	 definitionId="com.servoy.eclipse.ui.manageExtensionsAction"
+        	 icon="icons/extension16.png"
+        	 id="com.servoy.eclipse.ui.manageExtensions"
+        	 label="Manage Servoy Extensions"
+        	 menubarPath="help/updates"
+       	 	 style="push">
+   		</action>      
       </actionSet>
       <actionSet
             id="com.servoy.eclipse.ui.choosers"
