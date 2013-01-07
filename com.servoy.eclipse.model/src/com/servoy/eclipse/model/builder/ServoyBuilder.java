@@ -811,7 +811,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		{
 			public Object visit(IPersist o)
 			{
-				if (o instanceof Solution || o instanceof Relation || o instanceof RelationItem || o instanceof ScriptCalculation || o instanceof TableNode)
+				if (o instanceof Solution || o instanceof Relation || o instanceof RelationItem || o instanceof ScriptCalculation || o instanceof TableNode ||
+					(o instanceof ScriptVariable && ((ScriptVariable)o).getScopeName() != null))
 				{
 					return IPersistVisitor.CONTINUE_TRAVERSAL;
 				}
