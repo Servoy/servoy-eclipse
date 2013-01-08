@@ -4624,7 +4624,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
         </function>
         <function name="hasRecords">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.dataprocessing.IFoundSetInternal"/>
+            <argumentType typecode="com.servoy.j2db.scripting.api.IJSFoundSet"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the foundset/relation has records.]]></return>
           <description><![CDATA[Returns true if the (related)foundset exists and has records.]]></description>
@@ -4638,29 +4638,21 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
 //	//do work on deeper relatedFoundSet
 //}]]></sample>
           <parameters>
-            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.IFoundSetInternal">
+            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.scripting.api.IJSFoundSet">
               <description><![CDATA[A JSFoundset to test.]]></description>
             </parameter>
           </parameters>
         </function>
         <function name="hasRecords">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.dataprocessing.IRecordInternal"/>
+            <argumentType typecode="com.servoy.j2db.scripting.api.IJSRecord"/>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the foundset/relation has records.]]></return>
-          <description><![CDATA[Returns true if the (related)foundset exists and has records.]]></description>
-          <summary><![CDATA[Returns true if the (related)foundset exists and has records.]]></summary>
-          <sample><![CDATA[if (%%elementName%%.hasRecords(orders_to_orderitems))
-{
-	//do work on relatedFoundSet
-}
-//if (%%elementName%%.hasRecords(foundset.getSelectedRecord(),'orders_to_orderitems.orderitems_to_products'))
-//{
-//	//do work on deeper relatedFoundSet
-//}]]></sample>
+          <description/>
+          <sample/>
           <parameters>
-            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.IRecordInternal">
+            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.scripting.api.IJSRecord">
               <description><![CDATA[A JSRecord to test.]]></description>
             </parameter>
             <parameter name="relationString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
@@ -41247,7 +41239,7 @@ var dot = utils.getUnicodeCharacter(9679);]]></sample>
         </function>
         <function name="hasRecords">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.dataprocessing.IFoundSetInternal"/>
+            <argumentType typecode="com.servoy.j2db.scripting.api.IJSFoundSet"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if exists]]></return>
           <description><![CDATA[Returns true if the (related)foundset exists and has records.
@@ -41264,32 +41256,21 @@ if (%%elementName%%.hasRecords(orders_to_orderitems))
 //	//do work on deeper relatedFoundSet
 //}]]></sample>
           <parameters>
-            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.IFoundSetInternal">
+            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.scripting.api.IJSFoundSet">
               <description><![CDATA[the foundset to be tested]]></description>
             </parameter>
           </parameters>
         </function>
         <function name="hasRecords">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.dataprocessing.IRecordInternal"/>
+            <argumentType typecode="com.servoy.j2db.scripting.api.IJSRecord"/>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the foundset/relation has records.]]></return>
-          <description><![CDATA[Returns true if the (related)foundset exists and has records.
-Another use is, to pass a record and qualified relations string to test multiple relations/foundset at once]]></description>
-          <summary><![CDATA[Returns true if the (related)foundset exists and has records.]]></summary>
-          <sample><![CDATA[//test the orders_to_orderitems foundset 
-if (%%elementName%%.hasRecords(orders_to_orderitems))
-{
-	//do work on relatedFoundSet
-}
-//test the orders_to_orderitems.orderitems_to_products foundset to be reached from the current record 
-//if (%%elementName%%.hasRecords(foundset.getSelectedRecord(),'orders_to_orderitems.orderitems_to_products'))
-//{
-//	//do work on deeper relatedFoundSet
-//}]]></sample>
+          <description/>
+          <sample/>
           <parameters>
-            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.IRecordInternal">
+            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.scripting.api.IJSRecord">
               <description><![CDATA[A JSRecord to test.]]></description>
             </parameter>
             <parameter name="relationString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">

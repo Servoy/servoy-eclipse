@@ -1044,7 +1044,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			initializeModulesToExport();
 			projectProblemsType = getMarkers(exportModel.getModulesToExport());
 			setErrorMessage(null);
-			if (projectProblemsType == HAS_ERROR_MARKERS)
+			if (projectProblemsType == HAS_ERROR_MARKERS && !dbDownErrors)
 			{
 				setErrorMessage("There are errors in the solution that will prevent it from functioning well. Solve errors from problems view first.");
 			}
