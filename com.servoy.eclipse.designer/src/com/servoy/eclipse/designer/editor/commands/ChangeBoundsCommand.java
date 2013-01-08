@@ -32,10 +32,8 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportName;
-import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.StaticContentSpecLoader.TypedProperty;
-import com.servoy.j2db.persistence.TabPanel;
 
 
 /**
@@ -144,8 +142,7 @@ public class ChangeBoundsCommand extends BaseRestorableCommand implements ISuppo
 	 */
 	public void addChildren(List<EditPart> childrenList, Object parentModel)
 	{
-		if ((sizeDelta == null || (sizeDelta.width == 0 && sizeDelta.height == 0)/* move, not resize */) && parentModel instanceof ISupportChilds ||
-			(sizeDelta != null && (parentModel instanceof TabPanel) || (parentModel instanceof Portal)) /* resize tabpanel/Portal with tab children */)
+		if (parentModel instanceof ISupportChilds)
 		{
 			Iterator<IPersist> it = ((ISupportChilds)parentModel).getAllObjects();
 			while (it.hasNext())
