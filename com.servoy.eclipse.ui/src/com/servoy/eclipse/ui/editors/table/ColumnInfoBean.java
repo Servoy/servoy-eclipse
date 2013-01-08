@@ -168,11 +168,6 @@ public class ColumnInfoBean
 		return columnInfo.hasSystemValue();
 	}
 
-	public boolean isDBIdentity()
-	{
-		return columnInfo.isDBIdentity();
-	}
-
 	public boolean isDBManaged()
 	{
 		return columnInfo.isDBManaged();

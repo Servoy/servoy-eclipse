@@ -3923,7 +3923,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											"columnName", column.getName());
 									}
 								}
-								if (column.getSequenceType() == ColumnInfo.DATABASE_IDENTITY && !column.isDatabasePK())
+								if (column.isDBIdentity() && !column.isDatabasePK())
 								{
 									ServoyMarker mk = MarkerMessages.ColumnDatabaseIdentityProblem.fill(tableName, column.getName());
 									addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_DATABASE_IDENTITY_PROBLEM, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
