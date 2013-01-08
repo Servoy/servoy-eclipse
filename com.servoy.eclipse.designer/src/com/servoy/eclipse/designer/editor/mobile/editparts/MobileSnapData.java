@@ -17,7 +17,6 @@
 
 package com.servoy.eclipse.designer.editor.mobile.editparts;
 
-import org.eclipse.draw2d.geometry.Rectangle;
 
 /**
  * Info on snapping to positions in mobile form editor.
@@ -33,12 +32,21 @@ public class MobileSnapData
 	}
 
 	public final MobileSnapType snapType;
-	public final Rectangle bounds;
+	public final int xdelta;
+	public final int ydelta;
 
-	public MobileSnapData(MobileSnapType snapType, Rectangle bounds)
+	public MobileSnapData(MobileSnapType snapType, int xdelta, int ydelta)
 	{
 		this.snapType = snapType;
-		this.bounds = bounds;
+		this.xdelta = xdelta;
+		this.ydelta = ydelta;
 	}
+
+	@Override
+	public String toString()
+	{
+		return "MobileSnapData [snapType=" + snapType + ", xdelta=" + xdelta + ", ydelta=" + ydelta + "]";
+	}
+
 
 }

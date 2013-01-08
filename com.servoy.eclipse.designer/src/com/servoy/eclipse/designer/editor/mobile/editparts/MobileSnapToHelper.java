@@ -20,6 +20,7 @@ package com.servoy.eclipse.designer.editor.mobile.editparts;
 import java.util.List;
 
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.PrecisionRectangle;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
@@ -67,96 +68,112 @@ public class MobileSnapToHelper extends SnapToHelper
 	@Override
 	public int snapRectangle(Request request, int snapOrientation, PrecisionRectangle baseRect, PrecisionRectangle result)
 	{
-		if (request instanceof CreateRequest && ((CreateRequest)request).getNewObjectType() instanceof RequestType)
+		MobileSnapData snapData = calculateSnapping(request, baseRect.x, baseRect.y);
+		// store info for feedback and element creation
+		request.getExtendedData().put(MOBILE_SNAP_DATA, snapData);
+
+		if (snapData != null)
 		{
-			RequestType requestType = (RequestType)((CreateRequest)request).getNewObjectType();
-
-
-			((CreateRequest)request).getNewObjectType();
-			MobileSnapData snapData = calculateSnapping(requestType, baseRect.x, baseRect.y);
-			// store info for feedback and element creation
-			request.getExtendedData().put(MOBILE_SNAP_DATA, snapData);
-
-			if (snapData != null && snapData.bounds != null)
-			{
-				result.setBounds(snapData.bounds);
-			}
+			result.setPreciseX(result.preciseX() + snapData.xdelta);
+			result.setPreciseY(result.preciseY() + snapData.ydelta);
 		}
+
 		return 0;
 	}
 
-	protected MobileSnapData calculateSnapping(RequestType requestType, int x, int y)
+	protected MobileSnapData calculateSnapping(Request request, int x, int y)
 	{
-		GraphicalEditPart target = findEditpartAt(x, y);
+		GraphicalEditPart target = findEditpartAt(MobileFormLayoutManager.MOBILE_FORM_WIDTH / 2, y);
 		if (target == null)
 		{
 			return null;
 		}
 
-		if (target.getModel() instanceof Part)
+		if (request instanceof CreateRequest && ((CreateRequest)request).getNewObjectType() instanceof RequestType)
 		{
-			if (((Part)target.getModel()).getPartType() == Part.HEADER)
+			RequestType requestType = (RequestType)((CreateRequest)request).getNewObjectType();
+			if (target.getModel() instanceof Part)
 			{
-				return calculateSnappingToHeader(requestType, target, x);
-			}
-			if (((Part)target.getModel()).getPartType() == Part.FOOTER)
-			{
-				return calculateSnappingToFooter(requestType, target, x, y);
+				if (((Part)target.getModel()).getPartType() == Part.HEADER)
+				{
+					return calculateSnappingToHeader(requestType, target, ((CreateRequest)request).getSize(), x, y);
+				}
+				if (((Part)target.getModel()).getPartType() == Part.FOOTER)
+				{
+					return calculateSnappingToFooter(target, x, y);
+				}
 			}
 		}
 
-		// Body
-
-		return null;
+		// Content
+		return calculateSnappingToContent((GraphicalEditPart)target.getParent(), y);
 	}
 
-	protected MobileSnapData calculateSnappingToHeader(RequestType requestType, GraphicalEditPart target, int x)
+	protected MobileSnapData calculateSnappingToHeader(RequestType requestType, GraphicalEditPart target, Dimension size, int x, int y)
 	{
 		// header, snap to leftbutton, text or rightbutton
 		Rectangle headerBounds = target.getFigure().getBounds();
-		if (x - headerBounds.x < headerBounds.width / 3 && requestType.type == RequestType.TYPE_BUTTON)
+		if (requestType.type == RequestType.TYPE_BUTTON)
 		{
-			// left button
-			return new MobileSnapData(MobileSnapData.MobileSnapType.HeaderLeftButton, new Rectangle(headerBounds.x + 2, headerBounds.y + 2,
-				headerBounds.width / 3 - 4, headerBounds.height - 4));
-		}
-		else if (x - headerBounds.x > headerBounds.width * 2 / 3 && requestType.type == RequestType.TYPE_BUTTON)
-		{
+			if (Math.abs(headerBounds.x - x) < headerBounds.width / 3)
+			{
+				// left button
+				return new MobileSnapData(MobileSnapData.MobileSnapType.HeaderLeftButton, 20 + headerBounds.x - x, 10 - y);
+			}
 			// right button
-			return new MobileSnapData(MobileSnapData.MobileSnapType.HeaderRightButton, new Rectangle(headerBounds.x + headerBounds.width * 2 / 3 + 2,
-				headerBounds.y + 2, headerBounds.width / 3 - 4, headerBounds.height - 4));
+			return new MobileSnapData(MobileSnapData.MobileSnapType.HeaderRightButton, headerBounds.x + headerBounds.width - size.width - 20 - x, 10 - y);
 		}
-		else if (requestType.type == RequestType.TYPE_LABEL)
+
+		if (requestType.type == RequestType.TYPE_LABEL)
 		{
 			// text
-			return new MobileSnapData(MobileSnapData.MobileSnapType.HeaderText, new Rectangle(headerBounds.x + headerBounds.width / 3 + 2, headerBounds.y + 2,
-				headerBounds.width / 3 - 4, headerBounds.height - 4));
+			return new MobileSnapData(MobileSnapData.MobileSnapType.HeaderText, (headerBounds.width - size.width) / 2 + headerBounds.x - x, 10 - y);
 		}
 
 		return null;
 	}
 
-	protected MobileSnapData calculateSnappingToFooter(RequestType requestType, GraphicalEditPart target, int x, int y)
+	protected MobileSnapData calculateSnappingToFooter(GraphicalEditPart target, int x, int y)
 	{
-		// footer, snap to other elements
-		Rectangle targetBounds = target.getFigure().getBounds();
-		Rectangle.SINGLETON.x = targetBounds.x;
-		Rectangle.SINGLETON.y = targetBounds.y;
+//		// footer, snap to other elements
+//		Rectangle targetBounds = target.getFigure().getBounds();
+//		Rectangle.SINGLETON.x = targetBounds.x;
+//		Rectangle.SINGLETON.y = targetBounds.y;
+//
+//		for (IFigure child : (List<IFigure>)target.getFigure().getChildren())
+//		{
+//			Rectangle bounds = child.getBounds();
+//			if (Rectangle.SINGLETON.y < bounds.y)
+//			{
+//				Rectangle.SINGLETON.y = bounds.y;
+//				Rectangle.SINGLETON.x = 0;
+//			}
+//			else if (Rectangle.SINGLETON.y == bounds.y && Rectangle.SINGLETON.x < bounds.x)
+//			{
+//				Rectangle.SINGLETON.x = bounds.x;
+//			}
+//		}
 
-		for (IFigure child : (List<IFigure>)target.getFigure().getChildren())
+		// TODO: snap between existing buttons
+		return new MobileSnapData(MobileSnapData.MobileSnapType.FooterItem, 0, 0);
+	}
+
+	protected MobileSnapData calculateSnappingToContent(GraphicalEditPart target, int y)
+	{
+		List<IFigure> children = target.getFigure().getChildren();
+		if (children.size() == 0) return null; // nothing to snap to
+
+		// find the nearest line between 2 figures
+		int snapToY = 0;
+		for (IFigure child : children)
 		{
-			Rectangle bounds = child.getBounds();
-			if (Rectangle.SINGLETON.y < bounds.y)
+			Rectangle bounds = child.getBounds().getCopy();
+			if (Math.abs(snapToY - y) > Math.abs(bounds.y + bounds.height - y))
 			{
-				Rectangle.SINGLETON.y = bounds.y;
-				Rectangle.SINGLETON.x = 0;
-			}
-			else if (Rectangle.SINGLETON.y == bounds.y && Rectangle.SINGLETON.x < bounds.x)
-			{
-				Rectangle.SINGLETON.x = bounds.x;
+				snapToY = bounds.y + bounds.height;
 			}
 		}
 
-		return new MobileSnapData(MobileSnapData.MobileSnapType.FooterItem, new Rectangle(Rectangle.SINGLETON.x + 51, Rectangle.SINGLETON.y, 50, 40));
+		return new MobileSnapData(MobileSnapData.MobileSnapType.ContentItem, 0, snapToY - 1 - y);
 	}
 }

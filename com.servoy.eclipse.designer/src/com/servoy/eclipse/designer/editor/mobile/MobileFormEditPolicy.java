@@ -28,6 +28,8 @@ import com.servoy.eclipse.designer.editor.mobile.commands.AddFieldCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.AddFormListCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.AddInsetListCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.AddLabelCommand;
+import com.servoy.eclipse.designer.editor.mobile.commands.MobileAddButtonCommand;
+import com.servoy.eclipse.designer.editor.mobile.editparts.MobileSnapData.MobileSnapType;
 import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
@@ -99,6 +101,10 @@ public class MobileFormEditPolicy extends ComponentEditPolicy
 			{
 				command = new AddFormListCommand(application, form, (CreateRequest)request);
 			}
+			else if (createType == MobileVisualFormEditor.REQ_PLACE_BUTTON)
+			{
+				command = new MobileAddButtonCommand(application, form, (CreateRequest)request, MobileSnapType.ContentItem);
+			}
 		}
 
 		if (command == null)
@@ -106,17 +112,5 @@ public class MobileFormEditPolicy extends ComponentEditPolicy
 			return super.getCommand(request);
 		}
 		return command;
-	}
-
-	@Override
-	public boolean understandsRequest(Request request)
-	{
-		return super.understandsRequest(request);
-//		return VisualFormEditor.REQ_PLACE_TAB.equals(request.getType()) || VisualFormEditor.REQ_PLACE_PORTAL.equals(request.getType()) ||
-//			VisualFormEditor.REQ_PLACE_MEDIA.equals(request.getType()) || VisualFormEditor.REQ_PLACE_BEAN.equals(request.getType()) ||
-//			VisualFormEditor.REQ_PLACE_BUTTON.equals(request.getType()) || VisualFormEditor.REQ_PLACE_LABEL.equals(request.getType()) ||
-//			VisualFormEditor.REQ_PLACE_RECT_SHAPE.equals(request.getType()) || VisualFormEditor.REQ_PLACE_FIELD.equals(request.getType()) ||
-//			VisualFormEditor.REQ_PLACE_TEMPLATE.equals(request.getType()) || BaseVisualFormEditor.REQ_COPY.equals(request.getType()) ||
-//			BaseVisualFormEditor.REQ_CUT.equals(request.getType()) || super.understandsRequest(request);
 	}
 }

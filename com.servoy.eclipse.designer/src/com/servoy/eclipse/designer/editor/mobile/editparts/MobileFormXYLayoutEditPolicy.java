@@ -19,29 +19,30 @@ package com.servoy.eclipse.designer.editor.mobile.editparts;
 
 import java.util.List;
 
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.Shape;
+import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
+import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.editpolicies.XYLayoutEditPolicy;
+import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.gef.requests.ForwardedRequest;
 import org.eclipse.gef.requests.GroupRequest;
 
-import com.servoy.eclipse.designer.editor.BaseFormGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
-import com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditor;
 import com.servoy.eclipse.designer.editor.mobile.commands.DeleteListCommand;
-import com.servoy.eclipse.designer.editor.mobile.commands.MobileAddButtonCommand;
-import com.servoy.eclipse.designer.editor.mobile.commands.MobileAddHeaderTitleCommand;
+import com.servoy.eclipse.designer.editor.mobile.commands.ReorderContentElementsCommand;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileSnapData.MobileSnapType;
-import com.servoy.j2db.IApplication;
-import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.util.Utils;
 
@@ -53,43 +54,15 @@ import com.servoy.j2db.util.Utils;
  */
 public class MobileFormXYLayoutEditPolicy extends XYLayoutEditPolicy
 {
-	private final IApplication application;
-
-	public MobileFormXYLayoutEditPolicy(IApplication application)
-	{
-		this.application = application;
-	}
-
 	@Override
 	protected EditPolicy createChildEditPolicy(EditPart child)
 	{
-		return null; // no resizing of elements
+		return new MobileSelectionEditPolicy(!(child.getModel() instanceof Part)); // only drag contents elements
 	}
 
 	@Override
 	protected Command getCreateCommand(CreateRequest request)
 	{
-		MobileSnapData snapData = (MobileSnapData)request.getExtendedData().get(MobileSnapToHelper.MOBILE_SNAP_DATA);
-
-		MobileSnapType snapType = snapData == null ? null : snapData.snapType;
-
-		Form form = ((BaseFormGraphicalEditPart)getHost()).getPersist();
-		if (request.getNewObjectType() == MobileVisualFormEditor.REQ_PLACE_BUTTON)
-		{
-			return new MobileAddButtonCommand(application, form, request, snapType);
-		}
-
-		// TODO check drop target
-		if (snapType == MobileSnapType.HeaderText && request.getNewObjectType() == MobileVisualFormEditor.REQ_PLACE_HEADER_TITLE)
-		{
-			return new MobileAddHeaderTitleCommand(application, form, request);
-		}
-
-//		if (snapData.snapType == MobileSnapType.FooterItem)
-//		{
-//			return new MobileAddFooterItemCommand(form, request.getNewObjectType());
-//		}
-
 		return null;
 	}
 
@@ -143,5 +116,40 @@ public class MobileFormXYLayoutEditPolicy extends XYLayoutEditPolicy
 			}
 		}
 		return super.getDeleteDependantCommand(request);
+	}
+
+	@Override
+	protected Command createChangeConstraintCommand(ChangeBoundsRequest request, EditPart childEditPart, Object constraint)
+	{
+		if (childEditPart instanceof GraphicalEditPart && constraint instanceof Rectangle && childEditPart.getModel() instanceof ISupportBounds)
+		{
+			return new ReorderContentElementsCommand((GraphicalEditPart)childEditPart, (Rectangle)constraint);
+		}
+		return super.createChangeConstraintCommand(request, childEditPart, constraint);
+	}
+
+	@Override
+	protected void showSizeOnDropFeedback(CreateRequest request)
+	{
+		super.showSizeOnDropFeedback(request);
+
+		MobileSnapData snapData = (MobileSnapData)request.getExtendedData().get(MobileSnapToHelper.MOBILE_SNAP_DATA);
+		if (snapData != null && snapData.snapType == MobileSnapType.ContentItem)
+		{
+			makeDropFeedbackLine((Shape)getSizeOnDropFeedback(request));
+		}
+	}
+
+	public static void makeDropFeedbackLine(Shape feedback)
+	{
+		feedback.setBackgroundColor(ColorConstants.blue);
+		feedback.setForegroundColor(ColorConstants.blue);
+		feedback.setFillXOR(false);
+		feedback.setOutlineXOR(false);
+
+		Rectangle bounds = feedback.getBounds().getCopy();
+		feedback.translateToAbsolute(bounds);
+
+		feedback.setBounds(new Rectangle(0, bounds.y - 1, MobileFormLayoutManager.MOBILE_FORM_WIDTH, 3));
 	}
 }

@@ -105,12 +105,6 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 	}
 
 	@Override
-	protected Command createChangeConstraintCommand(EditPart child, Object constraint)
-	{
-		return null;
-	}
-
-	@Override
 	protected Command getCreateCommand(final CreateRequest request)
 	{
 		Command command = null;

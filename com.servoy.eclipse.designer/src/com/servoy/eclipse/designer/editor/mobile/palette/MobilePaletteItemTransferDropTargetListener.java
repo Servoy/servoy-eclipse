@@ -22,7 +22,6 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.Request;
-import org.eclipse.gef.SnapToHelper;
 import org.eclipse.gef.dnd.TemplateTransfer;
 import org.eclipse.gef.requests.CreationFactory;
 import org.eclipse.swt.dnd.DND;
@@ -95,12 +94,6 @@ public class MobilePaletteItemTransferDropTargetListener extends ElementTransfer
 		request.setSize(size);
 
 		return request;
-	}
-
-	@Override
-	protected SnapToHelper getSnapToHelper()
-	{
-		return null;
 	}
 
 	/**

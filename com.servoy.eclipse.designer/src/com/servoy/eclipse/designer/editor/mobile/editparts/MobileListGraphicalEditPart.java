@@ -103,7 +103,6 @@ public class MobileListGraphicalEditPart extends AbstractGraphicalEditPart imple
 	protected void createEditPolicies()
 	{
 		installEditPolicy(EditPolicy.COMPONENT_ROLE, new ComponentDeleteEditPolicy());
-		installEditPolicy(EditPolicy.SELECTION_FEEDBACK_ROLE, new MobileSelectionEditPolicy());
 	}
 
 	@Override

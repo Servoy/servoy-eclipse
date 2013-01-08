@@ -19,8 +19,8 @@ package com.servoy.eclipse.designer.editor.mobile.editparts;
 
 import java.util.List;
 
-import org.eclipse.draw2d.AbstractLayout;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.XYLayout;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Rectangle;
 
@@ -35,7 +35,7 @@ import com.servoy.j2db.persistence.Part;
  * @author rgansevles
  *
  */
-public class MobileFormPartLayoutManager extends AbstractLayout
+public class MobileFormPartLayoutManager extends XYLayout
 {
 	private final int partType;
 

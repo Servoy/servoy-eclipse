@@ -26,7 +26,6 @@ import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.IPersistChangeListener;
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.ComponentDeleteEditPolicy;
@@ -75,7 +74,7 @@ public abstract class MobilePartGraphicalEditPart extends AbstractGraphicalEditP
 	protected void createEditPolicies()
 	{
 		installEditPolicy(EditPolicy.COMPONENT_ROLE, new ComponentDeleteEditPolicy());
-		installEditPolicy(EditPolicy.SELECTION_FEEDBACK_ROLE, new MobileSelectionEditPolicy());
+		installEditPolicy(EditPolicy.LAYOUT_ROLE, new MobileFormPartXYLayoutEditPolicy(application));
 	}
 
 	@Override
@@ -83,7 +82,7 @@ public abstract class MobilePartGraphicalEditPart extends AbstractGraphicalEditP
 	{
 		IFigure fig = new MobilePartFigure(getModel().getPartType());
 		fig.addFigureListener(new SetBoundsToPartFigureListener(getModel()));
-		fig.setLayoutManager(new MobileFormPartLayoutManager(getModel().getPartType()));
+		fig.setLayoutManager(new MobileFormPartLayoutManager(getModel().getPartType())); // has to be XYLayout for XYLayoutEditPolicy.getXYLayout()
 		return fig;
 	}
 
@@ -113,8 +112,7 @@ public abstract class MobilePartGraphicalEditPart extends AbstractGraphicalEditP
 	public void activate()
 	{
 		// listen to changes to the elements
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		servoyModel.addPersistChangeListener(false, this);
+		ServoyModelManager.getServoyModelManager().getServoyModel().addPersistChangeListener(false, this);
 
 		super.activate();
 	}
@@ -123,8 +121,7 @@ public abstract class MobilePartGraphicalEditPart extends AbstractGraphicalEditP
 	public void deactivate()
 	{
 		// stop listening to changes to the elements
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		servoyModel.removePersistChangeListener(false, this);
+		ServoyModelManager.getServoyModelManager().getServoyModel().removePersistChangeListener(false, this);
 
 		super.deactivate();
 	}
@@ -147,12 +144,4 @@ public abstract class MobilePartGraphicalEditPart extends AbstractGraphicalEditP
 			}
 		}
 	}
-
-//	@Override
-//	public DragTracker getDragTracker(Request request)
-//	{
-//		return BasePersistGraphicalEditPart.createDragTracker(this, request);
-//	}
-
-
 }

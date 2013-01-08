@@ -17,12 +17,17 @@
 
 package com.servoy.eclipse.designer.editor.mobile.editparts;
 
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.Figure;
-import org.eclipse.draw2d.Graphics;
-import org.eclipse.draw2d.LineBorder;
-import org.eclipse.gef.LayerConstants;
-import org.eclipse.gef.editpolicies.SelectionEditPolicy;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.RectangleFigure;
+import org.eclipse.draw2d.Shape;
+import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.gef.editpolicies.NonResizableEditPolicy;
+import org.eclipse.gef.requests.ChangeBoundsRequest;
+
+import com.servoy.eclipse.designer.editor.mobile.editparts.MobileSnapData.MobileSnapType;
 
 /**
  * SelectionEditPolicy for use in mobile form editor.
@@ -30,31 +35,44 @@ import org.eclipse.gef.editpolicies.SelectionEditPolicy;
  * @author rgansevles
  *
  */
-public class MobileSelectionEditPolicy extends SelectionEditPolicy
+public class MobileSelectionEditPolicy extends NonResizableEditPolicy
 {
-	Figure selectedBox;
+	public MobileSelectionEditPolicy(boolean isDragAllowed)
+	{
+		setDragAllowed(isDragAllowed);
+	}
 
 	@Override
-	protected void hideSelection()
+	protected List<IFigure> createSelectionHandles()
 	{
-		if (selectedBox != null)
+		// just 1 line (the move handles), no drag handles
+		List<IFigure> list = new ArrayList<IFigure>();
+		createMoveHandle(list);
+		return list;
+	}
+
+	@Override
+	protected void showChangeBoundsFeedback(ChangeBoundsRequest request)
+	{
+		MobileSnapData snapData = (MobileSnapData)request.getExtendedData().get(MobileSnapToHelper.MOBILE_SNAP_DATA);
+		if (snapData != null && snapData.snapType == MobileSnapType.ContentItem)
 		{
-			getLayer(LayerConstants.HANDLE_LAYER).remove(selectedBox);
+			Shape feedback = (Shape)getDragSourceFeedbackFigure();
+
+			Rectangle rect = new Rectangle(getInitialFeedbackBounds().getCopy());
+			rect.translate(request.getMoveDelta());
+			feedback.translateToRelative(rect);
+			feedback.setBounds(rect);
+			MobileFormXYLayoutEditPolicy.makeDropFeedbackLine(feedback);
 		}
-		selectedBox = null;
 	}
 
 	@Override
-	protected void showSelection()
+	protected IFigure createDragSourceFeedbackFigure()
 	{
-		selectedBox = new Figure();
-		selectedBox.setOpaque(false);
-		LineBorder border = new LineBorder(2);
-		border.setColor(ColorConstants.darkBlue);
-		border.setStyle(Graphics.LINE_DASH);
-		selectedBox.setBorder(border);
-		selectedBox.setBounds(getHostFigure().getBounds());
-		getLayer(LayerConstants.HANDLE_LAYER).add(selectedBox);
+		RectangleFigure r = new RectangleFigure();
+		r.setBounds(getInitialFeedbackBounds());
+		addFeedback(r);
+		return r;
 	}
-
 }

@@ -32,7 +32,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.Pair;
 
 /**
- * Properties source for InsetList im mobile form editor.
+ * Properties source for InsetList in mobile form editor.
  * 
  * @author rgansevles
  *
@@ -53,7 +53,6 @@ public class MobileListPropertySource implements IPropertySource
 //		}
 //		return mobileInsetListPropertySource;
 	}
-
 
 	private final MobileListModel model;
 	private LinkedHashMap<Object, IPropertyDescriptor> propertyDescriptors;
@@ -103,6 +102,11 @@ public class MobileListPropertySource implements IPropertySource
 				elementPropertySources.put(prefix = "containedForm",
 					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.containedForm, model.containedForm, false));
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATASOURCE.getPropertyName());
+
+				// location is based on tabpanel
+				elementPropertySources.put(prefix = null,
+					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.tabPanel, context, false));
+				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName());
 			}
 
 			// list item header
@@ -166,7 +170,7 @@ public class MobileListPropertySource implements IPropertySource
 
 	private void addMethodPropertyDescriptor(PersistPropertySource elementPropertySource, String prefix, String propertyName, String displayName)
 	{
-		String id = prefix + '.' + propertyName;
+		String id = prefix == null ? propertyName : prefix + '.' + propertyName;
 		IPropertyDescriptor propertyDescriptor = elementPropertySource.getPropertyDescriptor(propertyName);
 		if (propertyDescriptor != null)
 		{
@@ -180,12 +184,12 @@ public class MobileListPropertySource implements IPropertySource
 		init();
 
 		String[] split = id.toString().split("\\.");
-		if (split.length == 2)
+		if (split.length <= 2) // when prefix is null, property is top-level, like location
 		{
-			IPropertySource elementPropertySource = elementPropertySources.get(split[0] /* prefix */);
+			IPropertySource elementPropertySource = elementPropertySources.get(split.length == 1 ? null : split[0] /* prefix */);
 			if (elementPropertySource != null)
 			{
-				return new Pair<IPropertySource, String>(elementPropertySource, split[1] /* id */);
+				return new Pair<IPropertySource, String>(elementPropertySource, split[split.length - 1] /* id */);
 			}
 		}
 
@@ -232,4 +236,9 @@ public class MobileListPropertySource implements IPropertySource
 		}
 	}
 
+	@Override
+	public String toString()
+	{
+		return "List";
+	}
 }

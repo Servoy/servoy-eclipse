@@ -19,13 +19,11 @@ package com.servoy.eclipse.designer.editor.mobile.editparts;
 
 import java.util.List;
 
-import org.eclipse.draw2d.AbstractLayout;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.XYLayout;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Rectangle;
 
-import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Part;
 
 /** 
@@ -34,21 +32,22 @@ import com.servoy.j2db.persistence.Part;
  * @author rgansevles
  *
  */
-public class MobileFormLayoutManager extends AbstractLayout
+public class MobileFormLayoutManager extends XYLayout
 {
+	public static final int MOBILE_FORM_WIDTH = 350; // fixed width, future: make configurable
+
 	private static final int MIN_FORM_HEIGHT = 250;
 
-	private final Form form;
+	public static final MobileFormLayoutManager INSTANCE = new MobileFormLayoutManager();
 
-	public MobileFormLayoutManager(Form form)
+	private MobileFormLayoutManager()
 	{
-		this.form = form;
 	}
 
+	@Override
 	public void layout(IFigure container)
 	{
 		// children are based on model order as created in editPart.getModelChildren()
-		int formWidth = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form).getWidth();
 		int y = 0;
 		int height = 0;
 
@@ -64,7 +63,7 @@ public class MobileFormLayoutManager extends AbstractLayout
 				x = 10;
 				y++;
 			}
-			int width = formWidth - (2 * x);
+			int width = MOBILE_FORM_WIDTH - (2 * x);
 			y += height;
 
 			Dimension childSize = child.getPreferredSize(width, -1);

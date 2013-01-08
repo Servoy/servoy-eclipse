@@ -17,11 +17,15 @@
 
 package com.servoy.eclipse.designer.editor.mobile.editparts;
 
-import org.eclipse.gef.EditPolicy;
+import org.eclipse.gef.DragTracker;
+import org.eclipse.gef.Request;
+import org.eclipse.gef.commands.Command;
+import org.eclipse.gef.tools.DragEditPartsTracker;
 
 import com.servoy.eclipse.designer.editor.IFigureFactory;
 import com.servoy.eclipse.designer.editor.PersistGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.PersistImageFigure;
+import com.servoy.eclipse.designer.editor.commands.SelectModelsCommandWrapper;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -34,7 +38,6 @@ import com.servoy.j2db.persistence.IPersist;
  */
 public class MobilePersistGraphicalEditPart extends PersistGraphicalEditPart
 {
-
 	/**
 	 * @param application
 	 * @param model
@@ -49,10 +52,23 @@ public class MobilePersistGraphicalEditPart extends PersistGraphicalEditPart
 	}
 
 	@Override
-	protected void createEditPolicies()
+	public DragTracker getDragTracker(Request request)
 	{
-		super.createEditPolicies();
-		installEditPolicy(EditPolicy.SELECTION_FEEDBACK_ROLE, new MobileSelectionEditPolicy());
+		return new DragEditPartsTracker(this)
+		{
+			@Override
+			protected void performDirectEdit()
+			{
+				return; // Disabled direct edit via drag tracker, it activates direct edit on single click on selected element;
+				// direct edit is handled in FormSelectionTool on double-click
+			}
 
+			@Override
+			protected Command getCommand()
+			{
+				Command command = super.getCommand();
+				return command == null ? null : new SelectModelsCommandWrapper(getViewer(), MobilePersistGraphicalEditPart.this, command);
+			}
+		};
 	}
 }

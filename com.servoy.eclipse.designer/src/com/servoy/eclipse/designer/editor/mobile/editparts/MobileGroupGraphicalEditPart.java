@@ -77,7 +77,6 @@ public class MobileGroupGraphicalEditPart extends BaseGroupGraphicalEditPart
 	protected void createEditPolicies()
 	{
 		installEditPolicy(EditPolicy.COMPONENT_ROLE, new ComponentDeleteEditPolicy());
-		installEditPolicy(EditPolicy.SELECTION_FEEDBACK_ROLE, new MobileSelectionEditPolicy());
 	}
 
 	@Override

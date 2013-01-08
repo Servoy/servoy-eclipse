@@ -15,32 +15,38 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.designer.util;
+package com.servoy.eclipse.designer.editor.mobile.editparts;
+
+
+import java.util.List;
 
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.LayoutManager;
+import org.eclipse.draw2d.XYLayout;
 import org.eclipse.draw2d.geometry.Dimension;
+import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.draw2d.geometry.Rectangle;
 
-import com.servoy.j2db.util.IDelegate;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.util.Utils;
 
 /**
- * Simple delegate layout manager.
+ * Calculate the body part height after delegate layout.
+ * Used for debugging mobile forms in developer web client.
  * 
  * @author rgansevles
  *
  */
-public class DelegateLayoutManager implements LayoutManager, IDelegate<LayoutManager>
+public class SetHeightToBodyPartXYLayoutManager extends XYLayout implements LayoutManager
 {
-	private final LayoutManager layoutManager;
+	private final XYLayout layoutManager;
+	protected final Form form;
 
-	public DelegateLayoutManager(LayoutManager layoutManager)
+	public SetHeightToBodyPartXYLayoutManager(XYLayout layoutManager, Form form)
 	{
 		this.layoutManager = layoutManager;
-	}
-
-	public LayoutManager getDelegate()
-	{
-		return layoutManager;
+		this.form = form;
 	}
 
 	/**
@@ -48,6 +54,7 @@ public class DelegateLayoutManager implements LayoutManager, IDelegate<LayoutMan
 	 * @return
 	 * @see org.eclipse.draw2d.LayoutManager#getConstraint(org.eclipse.draw2d.IFigure)
 	 */
+	@Override
 	public Object getConstraint(IFigure child)
 	{
 		return layoutManager.getConstraint(child);
@@ -60,6 +67,7 @@ public class DelegateLayoutManager implements LayoutManager, IDelegate<LayoutMan
 	 * @return
 	 * @see org.eclipse.draw2d.LayoutManager#getMinimumSize(org.eclipse.draw2d.IFigure, int, int)
 	 */
+	@Override
 	public Dimension getMinimumSize(IFigure container, int wHint, int hHint)
 	{
 		return layoutManager.getMinimumSize(container, wHint, hHint);
@@ -72,6 +80,7 @@ public class DelegateLayoutManager implements LayoutManager, IDelegate<LayoutMan
 	 * @return
 	 * @see org.eclipse.draw2d.LayoutManager#getPreferredSize(org.eclipse.draw2d.IFigure, int, int)
 	 */
+	@Override
 	public Dimension getPreferredSize(IFigure container, int wHint, int hHint)
 	{
 		return layoutManager.getPreferredSize(container, wHint, hHint);
@@ -81,24 +90,17 @@ public class DelegateLayoutManager implements LayoutManager, IDelegate<LayoutMan
 	 * 
 	 * @see org.eclipse.draw2d.LayoutManager#invalidate()
 	 */
+	@Override
 	public void invalidate()
 	{
 		layoutManager.invalidate();
 	}
 
 	/**
-	 * @param container
-	 * @see org.eclipse.draw2d.LayoutManager#layout(org.eclipse.draw2d.IFigure)
-	 */
-	public void layout(IFigure container)
-	{
-		layoutManager.layout(container);
-	}
-
-	/**
 	 * @param child
 	 * @see org.eclipse.draw2d.LayoutManager#remove(org.eclipse.draw2d.IFigure)
 	 */
+	@Override
 	public void remove(IFigure child)
 	{
 		layoutManager.remove(child);
@@ -109,8 +111,57 @@ public class DelegateLayoutManager implements LayoutManager, IDelegate<LayoutMan
 	 * @param constraint
 	 * @see org.eclipse.draw2d.LayoutManager#setConstraint(org.eclipse.draw2d.IFigure, java.lang.Object)
 	 */
+	@Override
 	public void setConstraint(IFigure child, Object constraint)
 	{
 		layoutManager.setConstraint(child, constraint);
+	}
+
+	@Override
+	public void layout(IFigure container)
+	{
+		layoutManager.layout(container);
+
+		// use created layout to adjust body part
+		int max = 0;
+		for (IFigure child : (List<IFigure>)container.getChildren())
+		{
+			if (child instanceof MobilePartFigure)
+			{
+				continue;
+			}
+
+			Rectangle bounds = child.getBounds();
+			max = Math.max(max, bounds.y + bounds.height);
+		}
+
+		if (max != 0)
+		{
+			for (Part part : Utils.iterate(form.getParts()))
+			{
+				if (part.getPartType() == Part.BODY)
+				{
+					part.setHeight(max);
+				}
+			}
+		}
+	}
+
+	@Override
+	public Point getOrigin(IFigure parent)
+	{
+		return layoutManager.getOrigin(parent);
+	}
+
+	@Override
+	public boolean isObservingVisibility()
+	{
+		return layoutManager.isObservingVisibility();
+	}
+
+	@Override
+	public void setObserveVisibility(boolean newValue)
+	{
+		layoutManager.setObserveVisibility(newValue);
 	}
 }

@@ -214,7 +214,8 @@ public class MobileFormGraphicalEditPart extends BaseFormGraphicalEditPart imple
 	protected IFigure createFigure()
 	{
 		FreeformLayer formLayer = new FreeformLayer();
-		formLayer.setLayoutManager(new SetHeightToBodyPartLayoutManager(new MobileFormLayoutManager(getPersist()), getPersist()));
+		// has to be a XYLayout, see XYLayoutEditPolicy.getXYLayout()
+		formLayer.setLayoutManager(new SetHeightToBodyPartXYLayoutManager(MobileFormLayoutManager.INSTANCE, getPersist()));
 		return formLayer;
 	}
 
@@ -231,7 +232,7 @@ public class MobileFormGraphicalEditPart extends BaseFormGraphicalEditPart imple
 	@Override
 	protected void createEditPolicies()
 	{
-		installEditPolicy(EditPolicy.LAYOUT_ROLE, new MobileFormXYLayoutEditPolicy(getApplication()));
+		installEditPolicy(EditPolicy.LAYOUT_ROLE, new MobileFormXYLayoutEditPolicy());
 		installEditPolicy(EditPolicy.COMPONENT_ROLE, new MobileFormEditPolicy(getApplication()));
 	}
 
