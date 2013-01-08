@@ -204,7 +204,7 @@ public class ChangeBoundsCommand extends BaseRestorableCommand implements ISuppo
 			resized = true;
 		}
 
-		if (x < 0 || y < 0 || width < 0 || height < 0) return false;
+		if (x < 0 || y < 0) return false;
 
 		if (change)
 		{
