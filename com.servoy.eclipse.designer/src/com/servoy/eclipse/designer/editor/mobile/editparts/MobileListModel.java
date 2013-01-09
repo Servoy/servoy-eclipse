@@ -20,14 +20,15 @@ package com.servoy.eclipse.designer.editor.mobile.editparts;
 import java.awt.Dimension;
 import java.awt.Point;
 
-import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
-import com.servoy.j2db.persistence.Tab;
-import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportSize;
+import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Model for list in mobile form editor.
@@ -39,9 +40,7 @@ import com.servoy.j2db.persistence.TabPanel;
 public class MobileListModel implements ISupportBounds
 {
 	public final Form form;
-	public final TabPanel tabPanel;
-	public final Tab tab;
-	public final Form containedForm;
+	public final ISupportChilds component;
 	public final GraphicalComponent header;
 	public final GraphicalComponent button;
 	public final GraphicalComponent subtext;
@@ -59,13 +58,11 @@ public class MobileListModel implements ISupportBounds
 	 * @param countBubble
 	 * @param image
 	 */
-	public MobileListModel(Form form, TabPanel tabPanel, Tab tab, Form containedForm, GraphicalComponent header, GraphicalComponent button,
-		GraphicalComponent subtext, Field countBubble, Field image)
+	public MobileListModel(Form form, ISupportChilds component, GraphicalComponent header, GraphicalComponent button, GraphicalComponent subtext,
+		Field countBubble, Field image)
 	{
 		this.form = form;
-		this.tabPanel = tabPanel;
-		this.tab = tab;
-		this.containedForm = containedForm;
+		this.component = component;
 		this.header = header;
 		this.button = button;
 		this.subtext = subtext;
@@ -83,9 +80,7 @@ public class MobileListModel implements ISupportBounds
 	public MobileListModel(Form form, GraphicalComponent button, GraphicalComponent subtext, Field countBubble, Field image)
 	{
 		this.form = form;
-		this.tabPanel = null;
-		this.tab = null;
-		this.containedForm = null;
+		this.component = null;
 		this.header = null;
 		this.button = button;
 		this.subtext = subtext;
@@ -95,56 +90,58 @@ public class MobileListModel implements ISupportBounds
 
 	public void setSize(Dimension d)
 	{
-		if (tabPanel != null) tabPanel.setSize(d);
+		if (component instanceof ISupportSize) ((ISupportSize)component).setSize(d);
 	}
 
 	public Dimension getSize()
 	{
-		return tabPanel == null ? null : tabPanel.getSize();
+		return component instanceof ISupportSize ? ((ISupportSize)component).getSize() : null;
 	}
 
 	public void setLocation(Point p)
 	{
-		if (tabPanel != null) tabPanel.setLocation(p);
+		if (component instanceof ISupportBounds) ((ISupportBounds)component).setLocation(p);
 	}
 
 	public Point getLocation()
 	{
-		return tabPanel == null ? null : tabPanel.getLocation();
+		return component instanceof ISupportBounds ? ((ISupportBounds)component).getLocation() : null;
 	}
 
-	public static MobileListModel create(IApplication application, Form form, TabPanel tabPanel, Tab tab, Form containedForm)
+	public static MobileListModel create(Form form, ISupportChilds component)
 	{
 		GraphicalComponent header = null;
 		GraphicalComponent button = null;
 		GraphicalComponent subtext = null;
 		Field countBubble = null;
 		Field image = null;
-		for (IPersist elem : application.getFlattenedSolution().getFlattenedForm(containedForm).getAllObjectsAsList())
+		for (IPersist elem : Utils.iterate(component.getAllObjects()))
 		{
-			if (elem instanceof GraphicalComponent && ((GraphicalComponent)elem).getCustomMobileProperty("listitemHeader") != null)
+			if (elem instanceof GraphicalComponent &&
+				((GraphicalComponent)elem).getCustomMobileProperty(IMobileProperties.LIST_ITEM_HEADER.propertyName) != null)
 			{
 				header = (GraphicalComponent)elem;
 			}
-			else if (elem instanceof GraphicalComponent && ((GraphicalComponent)elem).getCustomMobileProperty("listitemButton") != null)
+			else if (elem instanceof GraphicalComponent &&
+				((GraphicalComponent)elem).getCustomMobileProperty(IMobileProperties.LIST_ITEM_BUTTON.propertyName) != null)
 			{
 				button = (GraphicalComponent)elem;
 			}
-			else if (elem instanceof GraphicalComponent && ((GraphicalComponent)elem).getCustomMobileProperty("listitemSubtext") != null)
+			else if (elem instanceof GraphicalComponent &&
+				((GraphicalComponent)elem).getCustomMobileProperty(IMobileProperties.LIST_ITEM_SUBTEXT.propertyName) != null)
 			{
 				subtext = (GraphicalComponent)elem;
 			}
-			else if (elem instanceof Field && ((Field)elem).getCustomMobileProperty("listitemCount") != null)
+			else if (elem instanceof Field && ((Field)elem).getCustomMobileProperty(IMobileProperties.LIST_ITEM_COUNT.propertyName) != null)
 			{
 				countBubble = (Field)elem;
 			}
-			else if (elem instanceof Field && ((Field)elem).getCustomMobileProperty("listitemImage") != null)
+			else if (elem instanceof Field && ((Field)elem).getCustomMobileProperty(IMobileProperties.LIST_ITEM_IMAGE.propertyName) != null)
 			{
 				image = (Field)elem;
 			}
 		}
 
-		return new MobileListModel(form, tabPanel, tab, containedForm, header, button, subtext, countBubble, image);
-
+		return new MobileListModel(form, component, header, button, subtext, countBubble, image);
 	}
 }

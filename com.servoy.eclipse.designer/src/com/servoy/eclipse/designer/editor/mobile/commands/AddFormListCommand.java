@@ -31,8 +31,10 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
+import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 import com.servoy.j2db.util.IAnchorConstants;
 
 /**
@@ -41,6 +43,7 @@ import com.servoy.j2db.util.IAnchorConstants;
  * @author rgansevles
  *
  */
+@SuppressWarnings("nls")
 public class AddFormListCommand extends CompoundCommand
 {
 	public AddFormListCommand(IApplication application, Form form, CreateRequest request)
@@ -67,7 +70,7 @@ public class AddFormListCommand extends CompoundCommand
 			if (parent instanceof Form)
 			{
 				// add items for properties
-				MobileListModel model = addlistItems((Form)parent);
+				MobileListModel model = addlistItems((Form)parent, null);
 				return new Object[] { model.button, model.subtext, model.countBubble, model.image };
 			}
 
@@ -75,27 +78,29 @@ public class AddFormListCommand extends CompoundCommand
 		}
 	}
 
-	public static MobileListModel addlistItems(Form form) throws RepositoryException
+	public static MobileListModel addlistItems(Form form, ISupportFormElements component) throws RepositoryException
 	{
+		ISupportFormElements parent = component == null ? form : component;
+
 		// image
-		Field image = ElementFactory.createField(form, null, new Point(0, 40));
-		image.putCustomMobileProperty("listitemImage", Boolean.TRUE);
+		Field image = ElementFactory.createField(parent, null, new Point(0, 40));
+		image.putCustomMobileProperty(IMobileProperties.LIST_ITEM_IMAGE.propertyName, Boolean.TRUE);
 		image.setEditable(false); // for debug in developer
 
 		// button
-		GraphicalComponent button = ElementFactory.createButton(form, null, "list", new Point(10, 40));
+		GraphicalComponent button = ElementFactory.createButton(parent, null, "list", new Point(10, 40));
 		button.setDisplaysTags(true);
-		button.putCustomMobileProperty("listitemButton", Boolean.TRUE);
+		button.putCustomMobileProperty(IMobileProperties.LIST_ITEM_BUTTON.propertyName, Boolean.TRUE);
 		button.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST | IAnchorConstants.NORTH);
 
 		// subtext
-		GraphicalComponent subtext = ElementFactory.createLabel(form, null, new Point(40, 40));
+		GraphicalComponent subtext = ElementFactory.createLabel(parent, null, new Point(40, 40));
 		subtext.setDisplaysTags(true);
-		subtext.putCustomMobileProperty("listitemSubtext", Boolean.TRUE);
+		subtext.putCustomMobileProperty(IMobileProperties.LIST_ITEM_SUBTEXT.propertyName, Boolean.TRUE);
 
 		// countBubble
-		Field countBubble = ElementFactory.createField(form, null, new Point(60, 40));
-		countBubble.putCustomMobileProperty("listitemCount", Boolean.TRUE);
+		Field countBubble = ElementFactory.createField(parent, null, new Point(60, 40));
+		countBubble.putCustomMobileProperty(IMobileProperties.LIST_ITEM_COUNT.propertyName, Boolean.TRUE);
 		countBubble.setEditable(false); // for debug in developer
 		countBubble.setAnchors(IAnchorConstants.EAST);
 

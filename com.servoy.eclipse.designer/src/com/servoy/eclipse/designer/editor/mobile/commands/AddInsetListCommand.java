@@ -22,26 +22,19 @@ import java.awt.Dimension;
 import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.swt.graphics.Point;
 
-import com.servoy.eclipse.core.ServoyModel;
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.designer.editor.commands.BaseFormPlaceElementCommand;
-import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.designer.editor.mobile.editparts.MobileListModel;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.FormController;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
-import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.IValidateName;
-import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.TabPanel;
-import com.servoy.j2db.persistence.ValidatorSearchContext;
+import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 import com.servoy.j2db.util.IAnchorConstants;
+import com.servoy.j2db.util.UUID;
 
 /**
  * Command to add a inset list to the form.
@@ -52,8 +45,6 @@ import com.servoy.j2db.util.IAnchorConstants;
  */
 public class AddInsetListCommand extends BaseFormPlaceElementCommand
 {
-	private Form tabForm;
-
 	public AddInsetListCommand(IApplication application, Form form, CreateRequest request)
 	{
 		super(application, form, null, request.getType(), null, null, request.getLocation().getSWTPoint(), null, form);
@@ -66,96 +57,36 @@ public class AddInsetListCommand extends BaseFormPlaceElementCommand
 		{
 			Form form = (Form)parent;
 
-			// create a tabpanel
-			IPersist[] createdTabPanel = ElementFactory.createTabs(application, form, null, location, TabPanel.DEFAULT, "list"); //$NON-NLS-1$
-			if (createdTabPanel == null || createdTabPanel.length != 1 || !(createdTabPanel[0] instanceof TabPanel))
+			// create a portal
+			Portal portal = ElementFactory.createPortal(form, null, false, false, false, false, location);
+			if (portal == null)
 			{
-				ServoyLog.logError("Could not create tabpanel for inset list", null);
+				ServoyLog.logError("Could not create portal for inset list", null);
 				return null;
 			}
 
-			TabPanel tabPanel = (TabPanel)createdTabPanel[0];
-			tabPanel.putCustomMobileProperty("list", Boolean.TRUE);
+			portal.putCustomMobileProperty(IMobileProperties.LIST_COMPONENT.propertyName, Boolean.TRUE);
 			// for debug in developer
-			tabPanel.setSize(new Dimension(((Form)parent).getWidth(), 300));
-			tabPanel.setAnchors(IAnchorConstants.ALL);
-
-			// create target form
-			Solution solution = (Solution)form.getAncestor(IRepository.SOLUTIONS);
-			if (solution == null)
-			{
-				ServoyLog.logError("Could not find solution for inset list form", null);
-				return null;
-			}
-
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-			IValidateName nameValidator = servoyModel.getNameValidator();
-			String tabFormName = null;
-			for (int i = 0; i < 100; i++)
-			{
-				tabFormName = form.getName() + '_' + tabPanel.getName() + (i > 0 ? String.valueOf(i) : "");
-				try
-				{
-					nameValidator.checkName(tabFormName, 0, new ValidatorSearchContext(IRepository.FORMS), false);
-					break;
-				}
-				catch (RepositoryException e)
-				{
-				}
-			}
-
-			ServoyProject servoyProject = servoyModel.getServoyProject(solution.getName());
-			tabForm = servoyProject.getEditingSolution().createNewForm(nameValidator, null, tabFormName, null, true, null);
-			// add parts so it looks nice while developing in webclient
-			Part headerPart = tabForm.createNewPart(Part.HEADER, 40);
-			headerPart.setStyleClass("b"); // default for headers
-			tabForm.createNewPart(Part.BODY, 600);
-			tabForm.setView(FormController.LOCKED_TABLE_VIEW);
-
-			// mark target form as contained in this form
-			tabForm.putCustomMobileProperty("mobileform", Boolean.TRUE);
-			tabForm.putCustomMobileProperty("listitemFormContainer", form.getUUID());
-			tabForm.putCustomMobileProperty("listitemFormTab", tabPanel.getUUID());
-			tabForm.setStyleName("_servoy_mobile"); // set internal style name
+			portal.setSize(new Dimension(((Form)parent).getWidth(), 300));
+			portal.setAnchors(IAnchorConstants.ALL);
 
 			// add items for properties
-			AddFormListCommand.addlistItems(tabForm);
+			MobileListModel model = AddFormListCommand.addlistItems(form, portal);
 
 			// add header
-			GraphicalComponent header = ElementFactory.createLabel(tabForm, null, new Point(0, 0));
+			GraphicalComponent header = ElementFactory.createLabel(portal, null, new Point(0, 0));
+			// set labelfor for display in webclient
+			model.button.setName("button" + UUID.randomUUID().toString().replace('-', '_').toLowerCase());
+			header.setLabelFor(model.button.getName());
 			header.setDisplaysTags(true);
-			header.putCustomMobileProperty("listitemHeader", Boolean.TRUE);
+			header.putCustomMobileProperty(IMobileProperties.LIST_ITEM_HEADER.propertyName, Boolean.TRUE);
 			// for debug in developer
-			header.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST | IAnchorConstants.NORTH);
 			header.setStyleClass("b"); // default for headers
 
-			// add tab
-			ElementFactory.createTabs(application, tabPanel, new Object[] { new ElementFactory.RelatedForm(null, tabForm) }, null, TabPanel.DEFAULT, null);
-
-			// save the tabForm, it cannot be saved from the form editor
-			servoyProject.saveEditingSolutionNodes(new IPersist[] { tabForm }, true);
-
-			// models is tabpanel and containing form
-			return new IPersist[] { tabPanel, tabForm };
+			// models is portal
+			return new IPersist[] { portal };
 		}
 
 		return null;
-	}
-
-	@Override
-	protected void deleteForUndo(IPersist persist) throws RepositoryException
-	{
-		if (tabForm == persist)
-		{
-			// delete the saved form
-			((IDeveloperRepository)persist.getRootObject().getRepository()).deleteObject(persist);
-			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(persist.getRootObject().getName());
-			servoyProject.saveEditingSolutionNodes(new IPersist[] { tabForm }, true);
-			tabForm = null;
-		}
-		else
-		{
-			super.deleteForUndo(persist);
-		}
 	}
 }

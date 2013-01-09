@@ -31,9 +31,7 @@ import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.IForm;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
@@ -46,7 +44,7 @@ public class DeleteListCommand extends CompoundCommand
 {
 	public DeleteListCommand(MobileListModel model)
 	{
-		if (model.tabPanel == null)
+		if (model.component == null)
 		{
 			// form list, set view type back to record view
 			add(SetValueCommand.createSetvalueCommand(
@@ -81,13 +79,11 @@ public class DeleteListCommand extends CompoundCommand
 
 			try
 			{
-				if (model.tabPanel != null)
+				if (model.component != null)
 				{
 					// inset lists
-					repository.deleteObject(model.tabPanel);
-					repository.deleteObject(model.containedForm);
-					changes.add(model.tabPanel);
-					changes.add(model.containedForm);
+					repository.deleteObject(model.component);
+					changes.add(model.component);
 				}
 				else
 				{
@@ -134,13 +130,11 @@ public class DeleteListCommand extends CompoundCommand
 			List<IPersist> changes = new ArrayList<IPersist>(2);
 			try
 			{
-				if (model.tabPanel != null)
+				if (model.component != null)
 				{
 					// inset list
-					repository.undeleteObject(model.form, model.tabPanel);
-					repository.undeleteObject((Solution)model.form.getAncestor(IRepository.SOLUTIONS), model.containedForm);
-					changes.add(model.tabPanel);
-					changes.add(model.containedForm);
+					repository.undeleteObject(model.form, model.component);
+					changes.add(model.component);
 				}
 				else
 				{

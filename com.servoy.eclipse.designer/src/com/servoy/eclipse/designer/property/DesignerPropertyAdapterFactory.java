@@ -55,6 +55,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Style;
+import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -216,7 +217,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 				boolean readonlyPersist = isReadonlyPersist(persist);
 				PersistPropertySource persistProperties;
 				Form form = (Form)persistContext.getContext().getAncestor(IRepository.FORMS);
-				boolean mobile = form != null && form.getCustomMobileProperty("mobileform") != null;
+				boolean mobile = form != null && form.getCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName) != null;
 				if (!mobile)
 				{
 					Solution solution = (Solution)persistContext.getContext().getAncestor(IRepository.SOLUTIONS);

@@ -26,6 +26,7 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 
 /**
  * Edit part for header in mobile form editor.
@@ -48,15 +49,15 @@ public class MobileHeaderGraphicalEditPart extends MobilePartGraphicalEditPart
 		{
 			if (persist instanceof IFormElement && persist instanceof AbstractBase)
 			{
-				if (((AbstractBase)persist).getCustomMobileProperty("headerLeftButton") != null)
+				if (((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.HEADER_LEFT_BUTTON.propertyName) != null)
 				{
 					list.add((IFormElement)persist);
 				}
-				else if (((AbstractBase)persist).getCustomMobileProperty("headerRightButton") != null)
+				else if (((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.HEADER_RIGHT_BUTTON.propertyName) != null)
 				{
 					list.add((IFormElement)persist);
 				}
-				else if (((AbstractBase)persist).getCustomMobileProperty("headerText") != null)
+				else if (((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName) != null)
 				{
 					list.add((IFormElement)persist);
 				}

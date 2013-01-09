@@ -709,7 +709,7 @@ public class ElementFactory
 		return new Dimension(width, height);
 	}
 
-	public static IPersist createPortal(Form form, Object[] dataProviders, boolean fillText, boolean fillName, boolean placeAsLabels, boolean placeWithLabels,
+	public static Portal createPortal(Form form, Object[] dataProviders, boolean fillText, boolean fillName, boolean placeAsLabels, boolean placeWithLabels,
 		Point location) throws RepositoryException
 	{
 		Relation[] relations = dataProviders == null || dataProviders.length == 0 ? null : ((IDataProvider)dataProviders[0]).getColumnWrapper().getRelations();

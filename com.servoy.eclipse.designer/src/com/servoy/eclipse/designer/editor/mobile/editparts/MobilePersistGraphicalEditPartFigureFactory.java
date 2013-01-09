@@ -59,6 +59,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
+import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 import com.servoy.j2db.smart.dataui.DataCheckBox;
 import com.servoy.j2db.smart.dataui.DataChoice;
 import com.servoy.j2db.smart.dataui.DataComboBox;
@@ -113,7 +114,7 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 						{
 							if (persist instanceof AbstractBase)
 							{
-								String dataIcon = (String)((AbstractBase)persist).getCustomMobileProperty(MobilePersistPropertySource.DATA_ICON_PROPERTY);
+								String dataIcon = (String)((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.DATA_ICON.propertyName);
 								if (dataIcon != null)
 								{
 									ImageIcon icon = Activator.getDefault().loadImageIconFromBundle("mobile/icons-18-white-" + dataIcon + ".png");
@@ -133,9 +134,9 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 						else if (component instanceof JLabel)
 						{
 							((JLabel)component).setOpaque(false);
-							if (!(persist instanceof AbstractBase && ((AbstractBase)persist).getCustomMobileProperty("headerText") != null))
+							if (!(persist instanceof AbstractBase && ((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName) != null))
 							{
-								Object headerSizeProp = ((AbstractBase)persist).getCustomMobileProperty(MobilePersistPropertySource.HEADER_SIZE_PROPERTY);
+								Object headerSizeProp = ((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.HEADER_SIZE.propertyName);
 								int headerSize = headerSizeProp instanceof Integer ? Math.max(1, Math.min(6, ((Integer)headerSizeProp).intValue())) : 4;
 
 								float fontsize;
@@ -183,7 +184,7 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 							(((DataChoice)component).getChoiceType() == Field.RADIOS || ((DataChoice)component).getChoiceType() == Field.CHECKS))
 						{
 							DataChoice dataChoice = (DataChoice)component;
-							boolean horizontal = MobilePersistPropertySource.RADIO_STYLE_HORIZONTAL.equals(((AbstractBase)persist).getCustomMobileProperty(MobilePersistPropertySource.RADIO_STYLE_PROPERTY));
+							boolean horizontal = MobilePersistPropertySource.RADIO_STYLE_HORIZONTAL.equals(((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.RADIO_STYLE.propertyName));
 
 							component.setFont(component.getFont().deriveFont(Font.BOLD));
 							if (dataChoice.getChoiceType() == Field.RADIOS)

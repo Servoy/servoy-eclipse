@@ -27,6 +27,7 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -57,7 +58,7 @@ public class MobileFooterGraphicalEditPart extends MobilePartGraphicalEditPart
 				}
 			})))
 		{
-			if (persist instanceof AbstractBase && ((AbstractBase)persist).getCustomMobileProperty("footeritem") != null)
+			if (persist instanceof AbstractBase && ((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.FOOTER_ITEM.propertyName) != null)
 			{
 				list.add(persist);
 			}

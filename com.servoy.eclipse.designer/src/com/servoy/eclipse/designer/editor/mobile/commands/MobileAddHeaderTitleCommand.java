@@ -27,6 +27,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.ISupportTextSetup;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 import com.servoy.j2db.util.IAnchorConstants;
 
 /**
@@ -51,8 +52,8 @@ public class MobileAddHeaderTitleCommand extends BaseFormPlaceElementCommand
 			setLabel("place header text");
 			GraphicalComponent label = ElementFactory.createLabel((Form)parent, "Title", null);
 			label.setDisplaysTags(true);
-			label.putCustomMobileProperty("headeritem", Boolean.TRUE);
-			label.putCustomMobileProperty("headerText", Boolean.TRUE);
+			label.putCustomMobileProperty(IMobileProperties.HEADER_ITEM.propertyName, Boolean.TRUE);
+			label.putCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName, Boolean.TRUE);
 			// for debug in developer
 			label.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST | IAnchorConstants.NORTH);
 			label.setHorizontalAlignment(ISupportTextSetup.CENTER);

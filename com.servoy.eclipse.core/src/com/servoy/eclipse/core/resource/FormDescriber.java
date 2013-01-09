@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.content.IContentDescriber;
 import org.eclipse.core.runtime.content.IContentDescription;
 
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 
 /**
  * IContentDescriber for form files.
@@ -92,11 +93,11 @@ public class FormDescriber implements IContentDescriber
 
 
 	/**
-	 * @param testForm
-	 * @return
+	 * @param form
 	 */
 	public static String getFormContentTypeIdentifier(Form form)
 	{
-		return form.getCustomMobileProperty("mobileform") == null ? PersistEditorInput.FORM_RESOURCE_ID : PersistEditorInput.MOBILE_FORM_RESOURCE_ID;
+		return form.getCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName) == null ? PersistEditorInput.FORM_RESOURCE_ID
+			: PersistEditorInput.MOBILE_FORM_RESOURCE_ID;
 	}
 }

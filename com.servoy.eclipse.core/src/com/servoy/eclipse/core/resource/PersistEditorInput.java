@@ -23,6 +23,7 @@ import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -137,7 +138,7 @@ public class PersistEditorInput implements IEditorInput
 	 */
 	public static String getFormContentTypeIdentifier(Form form)
 	{
-		return form.getCustomMobileProperty("mobileform") == null ? FORM_RESOURCE_ID : MOBILE_FORM_RESOURCE_ID;
+		return form.getCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName) == null ? FORM_RESOURCE_ID : MOBILE_FORM_RESOURCE_ID;
 	}
 
 	/*

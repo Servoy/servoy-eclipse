@@ -108,7 +108,7 @@ public class MobileListGraphicalEditPart extends AbstractGraphicalEditPart imple
 	@Override
 	protected IFigure createFigure()
 	{
-		IFigure fig = new MobileListFigure(getModel().tabPanel != null); // when tabPanel is filled this is an inset list
+		IFigure fig = new MobileListFigure(getModel().component != null); // when tabPanel is filled this is an inset list
 		fig.setLayoutManager(new MobileListFigureLayoutManager());
 		fig.addFigureListener(new SetBoundsToSupportBoundsFigureListener(editorPart.getForm(), getModel(), false));
 		return fig;
@@ -177,8 +177,8 @@ public class MobileListGraphicalEditPart extends AbstractGraphicalEditPart imple
 		MobileListModel m = getModel();
 		for (IPersist persist : changes)
 		{
-			if (persist == m.button || persist == m.containedForm || persist == m.countBubble || persist == m.form || persist == m.header ||
-				persist == m.image || persist == m.subtext || persist == m.tab || persist == m.tabPanel)
+			if (persist == m.button || persist == m.countBubble || persist == m.form || persist == m.header || persist == m.image || persist == m.subtext ||
+				persist == m.component)
 			{
 				Display.getDefault().asyncExec(new Runnable()
 				{

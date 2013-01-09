@@ -31,6 +31,7 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 
 /**
  * Edit policy for adding/deleting components header/footer in mobile form editor.
@@ -65,13 +66,13 @@ public class MobileFormPartXYLayoutEditPolicy extends XYLayoutEditPolicy
 			for (IPersist element : form.getAllObjectsAsList())
 			{
 				if (snapType == MobileSnapType.HeaderLeftButton && element instanceof AbstractBase &&
-					Boolean.TRUE.equals(((AbstractBase)element).getCustomMobileProperty("headerLeftButton")))
+					Boolean.TRUE.equals(((AbstractBase)element).getCustomMobileProperty(IMobileProperties.HEADER_LEFT_BUTTON.propertyName)))
 				{
 					// already a left button
 					return null;
 				}
 				if (snapType == MobileSnapType.HeaderRightButton && element instanceof AbstractBase &&
-					Boolean.TRUE.equals(((AbstractBase)element).getCustomMobileProperty("headerRightButton")))
+					Boolean.TRUE.equals(((AbstractBase)element).getCustomMobileProperty(IMobileProperties.HEADER_RIGHT_BUTTON.propertyName)))
 				{
 					// already a right button
 					return null;
@@ -85,7 +86,8 @@ public class MobileFormPartXYLayoutEditPolicy extends XYLayoutEditPolicy
 		{
 			for (IPersist element : form.getAllObjectsAsList())
 			{
-				if (element instanceof AbstractBase && Boolean.TRUE.equals(((AbstractBase)element).getCustomMobileProperty("headerText")))
+				if (element instanceof AbstractBase &&
+					Boolean.TRUE.equals(((AbstractBase)element).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName)))
 				{
 					// already a title text
 					return null;

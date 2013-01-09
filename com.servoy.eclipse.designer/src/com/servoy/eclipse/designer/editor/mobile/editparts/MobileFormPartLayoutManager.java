@@ -28,6 +28,7 @@ import com.servoy.eclipse.designer.editor.PersistImageFigure;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 
 /** 
  * Layout for header or footer elements in mobile form editor.
@@ -44,6 +45,7 @@ public class MobileFormPartLayoutManager extends XYLayout
 		this.partType = partType;
 	}
 
+	@Override
 	public void layout(IFigure container)
 	{
 		if (partType == Part.HEADER)
@@ -75,16 +77,16 @@ public class MobileFormPartLayoutManager extends XYLayout
 				if (persist instanceof AbstractBase)
 				{
 					int x;
-					if (((AbstractBase)persist).getCustomMobileProperty("headerLeftButton") != null)
+					if (((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.HEADER_LEFT_BUTTON.propertyName) != null)
 					{
 						x = containerBounds.x + 20;
 					}
-					else if (((AbstractBase)persist).getCustomMobileProperty("headerText") != null)
+					else if (((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName) != null)
 					{
 						width = containerBounds.width - 150;
 						x = containerBounds.x + (containerBounds.width - width) / 2;
 					}
-					else if (((AbstractBase)persist).getCustomMobileProperty("headerRightButton") != null)
+					else if (((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.HEADER_RIGHT_BUTTON.propertyName) != null)
 					{
 						x = containerBounds.x + containerBounds.width - width - 20;
 					}

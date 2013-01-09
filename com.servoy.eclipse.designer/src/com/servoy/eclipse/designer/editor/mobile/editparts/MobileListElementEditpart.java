@@ -36,7 +36,6 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.SetBoundsToSupportBoundsFigureListener;
-import com.servoy.eclipse.designer.mobile.property.MobilePersistPropertySource;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.resource.ImageResource;
@@ -46,6 +45,8 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.Portal;
+import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 import com.servoy.j2db.util.IStyleRule;
 import com.servoy.j2db.util.IStyleSheet;
 import com.servoy.j2db.util.Pair;
@@ -187,18 +188,28 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 
 	/**
 	 * @param fig
-	 * @param button
+	 * @param gc
 	 */
-	private void updateFigureForGC(IFigure fig, GraphicalComponent button, String defaultText)
+	private void updateFigureForGC(IFigure fig, GraphicalComponent gc, String defaultText)
 	{
-		if (button.getDataProviderID() != null)
+		if (gc.getDataProviderID() != null)
 		{
-			((Label)fig).setText(button.getDataProviderID());
+			String text = gc.getDataProviderID();
+			if (gc.getParent() instanceof Portal)
+			{
+				Portal p = (Portal)gc.getParent();
+				if (p.getRelationName() != null && text.startsWith(p.getRelationName() + '.'))
+				{
+					text = text.substring(p.getRelationName().length() + 1);
+				}
+			}
+
+			((Label)fig).setText(text);
 			((Label)fig).setFont(FontResource.getDefaultFont(SWT.BOLD, -2));
 		}
 		else
 		{
-			String text = button.getText();
+			String text = gc.getText();
 			((Label)fig).setText(text == null ? defaultText : text);
 			((Label)fig).setFont(FontResource.getDefaultFont(text == null ? SWT.ITALIC : SWT.NORMAL, 0));
 		}
@@ -209,12 +220,13 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 		if (getType() == MobileListElementType.Icon)
 		{
 			Image image = null;
-			String dataIcon = (String)button.getCustomMobileProperty(MobilePersistPropertySource.DATA_ICON_PROPERTY);
+			String dataIcon = (String)button.getCustomMobileProperty(IMobileProperties.DATA_ICON.propertyName);
 			if (dataIcon == null)
 			{
 				dataIcon = "arrow-r"; // default
 			}
-			image = ImageResource.INSTANCE.getImageWithRoundBackground(Activator.loadImageDescriptorFromBundle("mobile/icons-18-white-" + dataIcon + ".png"),
+			image = ImageResource.INSTANCE.getImageWithRoundBackground(
+				Activator.loadImageDescriptorFromBundle("mobile/icons-18-white-" + dataIcon + ".png"),
 				new RGB(IconWithRoundBackground.DATA_ICON_BG.getRed(), IconWithRoundBackground.DATA_ICON_BG.getGreen(),
 					IconWithRoundBackground.DATA_ICON_BG.getBlue()));
 			fig.setImage(image);

@@ -101,6 +101,7 @@ import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
+import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.DataSourceUtilsBase;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -303,7 +304,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			if (servoyProject.getSolution().getSolutionType() == SolutionMetaData.MOBILE)
 			{
 				// mobile solution, make the form mobile
-				form.putCustomMobileProperty("mobileform", Boolean.TRUE);
+				form.putCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName, Boolean.TRUE);
 				form.setStyleName("_servoy_mobile"); // set internal style name
 			}
 

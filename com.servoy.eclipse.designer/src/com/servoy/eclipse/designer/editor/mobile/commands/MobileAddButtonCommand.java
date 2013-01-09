@@ -27,6 +27,7 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 import com.servoy.j2db.util.IAnchorConstants;
 
 /**
@@ -60,14 +61,15 @@ public class MobileAddButtonCommand extends BaseFormPlaceElementCommand
 			{
 				// header button
 				button.setText(snapType == MobileSnapType.HeaderLeftButton ? "left" : "right");
-				button.putCustomMobileProperty("headeritem", Boolean.TRUE);
-				button.putCustomMobileProperty(snapType == MobileSnapType.HeaderLeftButton ? "headerLeftButton" : "headerRightButton", Boolean.TRUE);
+				button.putCustomMobileProperty(IMobileProperties.HEADER_ITEM.propertyName, Boolean.TRUE);
+				button.putCustomMobileProperty(snapType == MobileSnapType.HeaderLeftButton ? IMobileProperties.HEADER_LEFT_BUTTON.propertyName
+					: IMobileProperties.HEADER_RIGHT_BUTTON.propertyName, Boolean.TRUE);
 				button.setAnchors((snapType == MobileSnapType.HeaderLeftButton ? IAnchorConstants.WEST : IAnchorConstants.EAST) | IAnchorConstants.NORTH);
 			}
 			else if (snapType == MobileSnapType.FooterItem)
 			{
 				// footer button
-				button.putCustomMobileProperty("footeritem", Boolean.TRUE);
+				button.putCustomMobileProperty(IMobileProperties.FOOTER_ITEM.propertyName, Boolean.TRUE);
 				button.setAnchors(IAnchorConstants.WEST | IAnchorConstants.SOUTH);
 			}
 			else

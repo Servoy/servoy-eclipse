@@ -344,7 +344,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 			{
 				form.removeChild(ip);
 			}
-			servoyProject.saveEditingSolutionNodes(getNodesToSave(), true);
+			servoyProject.saveEditingSolutionNodes(new IPersist[] { form }, true);
 			graphicaleditor.doSave(monitor); // for marking the command stack
 			isModified = false;
 			firePropertyChange(IEditorPart.PROP_DIRTY);
@@ -353,14 +353,6 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 		{
 			ServoyLog.logError(e);
 		}
-	}
-
-	/**
-	 * @return
-	 */
-	protected IPersist[] getNodesToSave()
-	{
-		return new IPersist[] { form };
 	}
 
 	/**

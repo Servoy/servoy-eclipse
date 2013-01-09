@@ -52,8 +52,8 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.Part;
-import com.servoy.j2db.persistence.Tab;
-import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.persistence.Portal;
+import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
 
@@ -92,7 +92,7 @@ public class MobileFormGraphicalEditPart extends BaseFormGraphicalEditPart imple
 		if (flattenedForm.getView() == FormController.LOCKED_TABLE_VIEW)
 		{
 			// ignore all other elements, just the list items.
-			list.add(MobileListModel.create(getApplication(), getPersist(), null, null, getPersist()));
+			list.add(MobileListModel.create(getPersist(), getPersist()));
 		}
 		else
 		{
@@ -127,25 +127,15 @@ public class MobileFormGraphicalEditPart extends BaseFormGraphicalEditPart imple
 				String groupID = ((IFormElement)persist).getGroupID();
 				if (groupID == null)
 				{
-					if (persist instanceof TabPanel && ((TabPanel)persist).getCustomMobileProperty("list") != null)
+					if (persist instanceof Portal && ((Portal)persist).getCustomMobileProperty(IMobileProperties.LIST_COMPONENT.propertyName) != null)
 					{
 						// inset list
-						for (IPersist tab : ((TabPanel)persist).getAllObjectsAsList())
-						{
-							if (tab instanceof Tab)
-							{
-								Form containedForm = getApplication().getFlattenedSolution().getForm(((Tab)tab).getContainsFormID());
-								if (containedForm != null)
-								{
-									elements.add(MobileListModel.create(getApplication(), getPersist(), ((TabPanel)persist), (Tab)tab, containedForm));
-								}
-							}
-						}
+						elements.add(MobileListModel.create(getPersist(), ((Portal)persist)));
 					}
 
 					// tabpanel: list elements or navtab
-					else if (((AbstractBase)persist).getCustomMobileProperty("headeritem") == null &&
-						((AbstractBase)persist).getCustomMobileProperty("footeritem") == null)
+					else if (((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.HEADER_ITEM.propertyName) == null &&
+						((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.FOOTER_ITEM.propertyName) == null)
 					{
 						// regular item
 						elements.add((ISupportBounds)(persist instanceof IFlattenedPersistWrapper

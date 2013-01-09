@@ -39,6 +39,7 @@ import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.scripting.annotations.ServoyMobile;
+import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -49,27 +50,25 @@ import com.servoy.j2db.util.Utils;
  */
 public class MobilePersistPropertySource extends PersistPropertySource
 {
-	public static final String HEADER_SIZE_PROPERTY = "headerSize"; //$NON-NLS-1$
 	public static final PropertyController<Integer, Integer> MOBILE_LABEL_HEADERSIZE_CONTROLLER = new DelegatePropertySetterController<Integer, MobilePersistPropertySource>(
-		new ComboboxPropertyController<Integer>(HEADER_SIZE_PROPERTY, HEADER_SIZE_PROPERTY, new ComboboxPropertyModel<Integer>(
-			new Integer[] { Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3), Integer.valueOf(4), Integer.valueOf(5), Integer.valueOf(6) }),
-			Messages.LabelDefault), HEADER_SIZE_PROPERTY)
+		new ComboboxPropertyController<Integer>(IMobileProperties.HEADER_SIZE.propertyName, IMobileProperties.HEADER_SIZE.propertyName,
+			new ComboboxPropertyModel<Integer>(
+				new Integer[] { Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3), Integer.valueOf(4), Integer.valueOf(5), Integer.valueOf(6) }),
+			Messages.LabelDefault), IMobileProperties.HEADER_SIZE.propertyName)
 	{
-
 		public void setProperty(MobilePersistPropertySource propertySource, Integer value)
 		{
-			((AbstractBase)propertySource.getPersist()).putCustomMobileProperty(HEADER_SIZE_PROPERTY, value);
+			((AbstractBase)propertySource.getPersist()).putCustomMobileProperty(IMobileProperties.HEADER_SIZE.propertyName, value);
 			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, propertySource.getPersist(), false);
 		}
 
 		public Integer getProperty(MobilePersistPropertySource propertySource)
 		{
-			return (Integer)((AbstractBase)propertySource.getPersist()).getCustomMobileProperty(HEADER_SIZE_PROPERTY);
+			return (Integer)((AbstractBase)propertySource.getPersist()).getCustomMobileProperty(IMobileProperties.HEADER_SIZE.propertyName);
 		}
 	};
 
 	public static final String RADIO_STYLE_NAME = "horizontal"; //$NON-NLS-1$
-	public static final String RADIO_STYLE_PROPERTY = "radioStyle"; //$NON-NLS-1$
 	public static final Integer RADIO_STYLE_HORIZONTAL = Integer.valueOf(1);
 	public static final PropertyController<Boolean, Boolean> MOBILE_RADIO_STYLE_CONTROLLER = new DelegatePropertySetterController<Boolean, MobilePersistPropertySource>(
 		new CheckboxPropertyDescriptor(RADIO_STYLE_NAME, RADIO_STYLE_NAME), RADIO_STYLE_NAME)
@@ -79,18 +78,17 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		// ... future
 		public void setProperty(MobilePersistPropertySource propertySource, Boolean value)
 		{
-			((AbstractBase)propertySource.getPersist()).putCustomMobileProperty(RADIO_STYLE_PROPERTY, Boolean.TRUE.equals(value) ? RADIO_STYLE_HORIZONTAL
-				: null);
+			((AbstractBase)propertySource.getPersist()).putCustomMobileProperty(IMobileProperties.RADIO_STYLE.propertyName, Boolean.TRUE.equals(value)
+				? RADIO_STYLE_HORIZONTAL : null);
 			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, propertySource.getPersist(), false);
 		}
 
 		public Boolean getProperty(MobilePersistPropertySource propertySource)
 		{
-			return Boolean.valueOf(RADIO_STYLE_HORIZONTAL.equals(((AbstractBase)propertySource.getPersist()).getCustomMobileProperty(RADIO_STYLE_PROPERTY)));
+			return Boolean.valueOf(RADIO_STYLE_HORIZONTAL.equals(((AbstractBase)propertySource.getPersist()).getCustomMobileProperty(IMobileProperties.RADIO_STYLE.propertyName)));
 		}
 	};
 
-	public static final String DATA_ICON_PROPERTY = "dataIcon"; //$NON-NLS-1$
 	public static String[] DATA_ICONS = new String[] { //
 	"alert", //$NON-NLS-1$
 	"arrow-d", //$NON-NLS-1$
@@ -114,18 +112,18 @@ public class MobilePersistPropertySource extends PersistPropertySource
 	};
 
 	public static final PropertyController<String, String> MOBILE_ICONS_CONTROLLER = new DelegatePropertySetterController<String, MobilePersistPropertySource>(
-		new ComboboxPropertyController<String>(DATA_ICON_PROPERTY, DATA_ICON_PROPERTY, new ComboboxPropertyModel<String>(DATA_ICONS), Messages.LabelDefault),
-		DATA_ICON_PROPERTY)
+		new ComboboxPropertyController<String>(IMobileProperties.DATA_ICON.propertyName, IMobileProperties.DATA_ICON.propertyName, new ComboboxPropertyModel<String>(DATA_ICONS), Messages.LabelDefault),
+		IMobileProperties.DATA_ICON.propertyName)
 	{
 		public void setProperty(MobilePersistPropertySource propertySource, String value)
 		{
-			((AbstractBase)propertySource.getPersist()).putCustomMobileProperty(DATA_ICON_PROPERTY, value);
+			((AbstractBase)propertySource.getPersist()).putCustomMobileProperty(IMobileProperties.DATA_ICON.propertyName, value);
 			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, propertySource.getPersist(), false);
 		}
 
 		public String getProperty(MobilePersistPropertySource propertySource)
 		{
-			return (String)((AbstractBase)propertySource.getPersist()).getCustomMobileProperty(DATA_ICON_PROPERTY);
+			return (String)((AbstractBase)propertySource.getPersist()).getCustomMobileProperty(IMobileProperties.DATA_ICON.propertyName);
 		}
 	};
 
@@ -180,13 +178,13 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		if (GraphicalComponent.class == clazz && isButton(getPersist()))
 		{
 			// button
-			return new String[] { DATA_ICON_PROPERTY };
+			return new String[] { IMobileProperties.DATA_ICON.propertyName };
 		}
 
 		if (GraphicalComponent.class == clazz && isLabel(getPersist()))
 		{
 			// script label
-			return new String[] { HEADER_SIZE_PROPERTY };
+			return new String[] { IMobileProperties.HEADER_SIZE.propertyName };
 		}
 
 		if (Field.class == clazz)
@@ -225,7 +223,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 	protected IPropertyDescriptor getPropertiesPropertyDescriptor(IPropertySource propertySource, String id, String displayName, String name,
 		FlattenedSolution flattenedEditingSolution, Form form) throws RepositoryException
 	{
-		if (name.equals(HEADER_SIZE_PROPERTY))
+		if (name.equals(IMobileProperties.HEADER_SIZE.propertyName))
 		{
 			return MOBILE_LABEL_HEADERSIZE_CONTROLLER;
 		}
@@ -235,7 +233,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			return MOBILE_RADIO_STYLE_CONTROLLER;
 		}
 
-		if (name.equals(DATA_ICON_PROPERTY))
+		if (name.equals(IMobileProperties.DATA_ICON.propertyName))
 		{
 			return MOBILE_ICONS_CONTROLLER;
 		}
@@ -251,7 +249,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		// set style on header text, copy to header part
 		if (StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName().equals(id) &&
 			getPersist() instanceof GraphicalComponent &&
-			(Boolean.TRUE.equals(((GraphicalComponent)getPersist()).getCustomMobileProperty("headerText")) || Boolean.TRUE.equals(((GraphicalComponent)getPersist()).getCustomMobileProperty("listitemHeader"))) &&
+			(Boolean.TRUE.equals(((GraphicalComponent)getPersist()).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName)) || Boolean.TRUE.equals(((GraphicalComponent)getPersist()).getCustomMobileProperty(IMobileProperties.LIST_ITEM_HEADER.propertyName))) &&
 			getContext() instanceof Form)
 		{
 			Form form = (Form)getContext();

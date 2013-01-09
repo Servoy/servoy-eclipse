@@ -29,6 +29,7 @@ import com.servoy.eclipse.ui.property.DelegatePropertyController;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -37,6 +38,7 @@ import com.servoy.j2db.util.Pair;
  * @author rgansevles
  *
  */
+@SuppressWarnings("nls")
 public class MobileListPropertySource implements IPropertySource
 {
 //	private static final WeakHashMap<Pair<MobileInsetListModel, Form>, MobileInsetListPropertySource> cache = new WeakHashMap<Pair<MobileInsetListModel, Form>, MobileInsetListPropertySource>();
@@ -53,6 +55,7 @@ public class MobileListPropertySource implements IPropertySource
 //		}
 //		return mobileInsetListPropertySource;
 	}
+
 
 	private final MobileListModel model;
 	private LinkedHashMap<Object, IPropertyDescriptor> propertyDescriptors;
@@ -89,23 +92,14 @@ public class MobileListPropertySource implements IPropertySource
 			PersistPropertySource elementPropertySource;
 
 			// tab settings
-			if (model.tab != null)
-			{
-				elementPropertySources.put(prefix = "listitemTab",
-					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.tab, context, false));
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_RELATIONNAME.getPropertyName());
-			}
-
-			if (model.tabPanel != null)
+			if (model.component != null)
 			{
 				// inset list
-				elementPropertySources.put(prefix = "containedForm",
-					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.containedForm, model.containedForm, false));
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATASOURCE.getPropertyName());
-
-				// location is based on tabpanel
 				elementPropertySources.put(prefix = null,
-					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.tabPanel, context, false));
+					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.component, context, false));
+				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_RELATIONNAME.getPropertyName());
+
+				// location is based on component
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName());
 			}
 
@@ -113,7 +107,7 @@ public class MobileListPropertySource implements IPropertySource
 			if (model.header != null)
 			{
 				elementPropertySources.put(prefix = "listitemHeader",
-					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.header, model.containedForm, false));
+					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.header, model.form, false));
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
 					"headerDataProvider");
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName(), "headerText");
@@ -124,12 +118,12 @@ public class MobileListPropertySource implements IPropertySource
 			if (model.button != null)
 			{
 				elementPropertySources.put(prefix = "listitemButton",
-					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.button, model.containedForm, false));
+					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.button, model.form, false));
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_ONACTIONMETHODID.getPropertyName());
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
 					"textDataProvider");
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName());
-				addMethodPropertyDescriptor(elementPropertySource, prefix, MobilePersistPropertySource.DATA_ICON_PROPERTY);
+				addMethodPropertyDescriptor(elementPropertySource, prefix, IMobileProperties.DATA_ICON.propertyName);
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName());
 			}
 
@@ -137,7 +131,7 @@ public class MobileListPropertySource implements IPropertySource
 			if (model.subtext != null)
 			{
 				elementPropertySources.put(prefix = "listitemSubtext",
-					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.subtext, model.containedForm, false));
+					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.subtext, model.form, false));
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
 					"subtextDataProvider");
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName(), "subtext");
@@ -147,7 +141,7 @@ public class MobileListPropertySource implements IPropertySource
 			if (model.countBubble != null)
 			{
 				elementPropertySources.put(prefix = "listitemCount",
-					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.countBubble, model.containedForm, false));
+					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.countBubble, model.form, false));
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
 					"countDataProvider");
 			}
@@ -156,7 +150,7 @@ public class MobileListPropertySource implements IPropertySource
 			if (model.image != null)
 			{
 				elementPropertySources.put(prefix = "listitemImage",
-					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.image, model.containedForm, false));
+					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.image, model.form, false));
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
 					"dataIconDataProvider");
 			}

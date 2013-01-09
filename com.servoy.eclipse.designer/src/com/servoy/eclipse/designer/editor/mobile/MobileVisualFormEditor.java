@@ -17,14 +17,8 @@
 
 package com.servoy.eclipse.designer.editor.mobile;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
-import com.servoy.eclipse.designer.editor.mobile.editparts.MobileFormGraphicalEditPart;
-import com.servoy.eclipse.designer.editor.mobile.editparts.MobileListModel;
-import com.servoy.j2db.persistence.IPersist;
 
 /**
  * Mobile form editor.
@@ -48,24 +42,5 @@ public class MobileVisualFormEditor extends BaseVisualFormEditor
 	protected BaseVisualFormEditorDesignPage createGraphicaleditor()
 	{
 		return new MobileVisualFormEditorDesignPage(this);
-	}
-
-	@Override
-	protected IPersist[] getNodesToSave()
-	{
-		List<IPersist> nodesToSave = new ArrayList<IPersist>();
-		nodesToSave.add(getForm());
-
-		// look for inset-tabs, save those forms as well
-		MobileFormGraphicalEditPart contents = (MobileFormGraphicalEditPart)getGraphicaleditor().getGraphicalViewer().getContents();
-		for (Object model : contents.getModelChildren())
-		{
-			if (model instanceof MobileListModel)
-			{
-				nodesToSave.add(((MobileListModel)model).containedForm);
-			}
-		}
-
-		return nodesToSave.toArray(new IPersist[nodesToSave.size()]);
 	}
 }
