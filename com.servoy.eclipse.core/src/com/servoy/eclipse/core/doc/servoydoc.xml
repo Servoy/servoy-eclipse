@@ -4649,8 +4649,16 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the foundset/relation has records.]]></return>
-          <description/>
-          <sample/>
+          <description><![CDATA[Returns true if the (related)foundset exists and has records.]]></description>
+          <summary><![CDATA[Returns true if the (related)foundset exists and has records.]]></summary>
+          <sample><![CDATA[if (%%elementName%%.hasRecords(orders_to_orderitems))
+{
+	//do work on relatedFoundSet
+}
+//if (%%elementName%%.hasRecords(foundset.getSelectedRecord(),'orders_to_orderitems.orderitems_to_products'))
+//{
+//	//do work on deeper relatedFoundSet
+//}]]></sample>
           <parameters>
             <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.scripting.api.IJSRecord">
               <description><![CDATA[A JSRecord to test.]]></description>
@@ -41267,8 +41275,19 @@ if (%%elementName%%.hasRecords(orders_to_orderitems))
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the foundset/relation has records.]]></return>
-          <description/>
-          <sample/>
+          <description><![CDATA[Returns true if the (related)foundset exists and has records.
+Another use is, to pass a record and qualified relations string to test multiple relations/foundset at once]]></description>
+          <summary><![CDATA[Returns true if the (related)foundset exists and has records.]]></summary>
+          <sample><![CDATA[//test the orders_to_orderitems foundset 
+if (%%elementName%%.hasRecords(orders_to_orderitems))
+{
+	//do work on relatedFoundSet
+}
+//test the orders_to_orderitems.orderitems_to_products foundset to be reached from the current record 
+//if (%%elementName%%.hasRecords(foundset.getSelectedRecord(),'orders_to_orderitems.orderitems_to_products'))
+//{
+//	//do work on deeper relatedFoundSet
+//}]]></sample>
           <parameters>
             <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.scripting.api.IJSRecord">
               <description><![CDATA[A JSRecord to test.]]></description>
