@@ -8386,7 +8386,7 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="JSDNDEvent" qualifiedName="com.servoy.j2db.dnd.JSDNDEvent">
+    <object publicName="JSDNDEvent" qualifiedName="com.servoy.j2db.dnd.JSDNDEvent" servoyMobile="true">
       <constants>
         <constant name="ACTION" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -9548,7 +9548,7 @@ for (var i = 0; i < allMethods; i++)
         </function>
       </functions>
     </object>
-    <object publicName="JSEvent" qualifiedName="com.servoy.j2db.scripting.JSEvent">
+    <object publicName="JSEvent" qualifiedName="com.servoy.j2db.scripting.JSEvent" servoyMobile="true">
       <constants>
         <constant name="ACTION" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -17571,7 +17571,7 @@ for( var i = 1 ; i <= dataset.getMaxRowIndex() ; i++ )
           <summary><![CDATA[Returns true if the current record is a new record or false otherwise.]]></summary>
           <sample><![CDATA[var isNew = foundset.getSelectedRecord().isNew();]]></sample>
         </function>
-        <function name="revertChanges">
+        <function name="revertChanges" servoyMobile="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[Reverts the in memory outstanding (not saved) changes of the record.]]></description>
@@ -24438,7 +24438,7 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
         </constant>
       </constants>
     </object>
-    <object publicName="Relation" qualifiedName="com.servoy.j2db.dataprocessing.RelatedFoundSet">
+    <object publicName="Relation" qualifiedName="com.servoy.j2db.dataprocessing.RelatedFoundSet" servoyMobile="true">
       <properties>
         <property name="alldataproviders" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"/>
