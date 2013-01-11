@@ -167,6 +167,7 @@ import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.query.ISQLJoin;
 import com.servoy.j2db.scripting.FunctionDefinition;
+import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 import com.servoy.j2db.smart.dataui.InvisibleBean;
 import com.servoy.j2db.util.ComponentFactoryHelper;
 import com.servoy.j2db.util.DataSourceUtilsBase;
@@ -2703,7 +2704,10 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		if (name.endsWith("dataProviderID"))
 		{
 			Table table = null;
-			Portal portal = (Portal)persistContext.getPersist().getAncestor(IRepository.PORTALS);
+			boolean listItemHeader = persistContext != null && persistContext.getPersist() instanceof AbstractBase &&
+				((AbstractBase)persistContext.getPersist()).getCustomMobileProperty(IMobileProperties.LIST_ITEM_HEADER.propertyName) != null;
+			// treat list item header as field on form
+			Portal portal = listItemHeader ? null : (Portal)persistContext.getPersist().getAncestor(IRepository.PORTALS);
 			final DataProviderOptions options;
 			if (portal != null)
 			{
