@@ -52,6 +52,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TableNode;
 
@@ -217,7 +218,7 @@ public class AddMethodButtonsComposite extends Composite
 		this.methodKey = methodKey;
 		Form form = (Form)persistContext.getContext().getAncestor(IRepository.FORMS);
 		createFormMethodButton.setEnabled(form != null);
-		createFoundsetMethodButton.setEnabled((form != null && form.getDataSource() != null) ||
+		createFoundsetMethodButton.setEnabled((form != null && form.getDataSource() != null && form.getSolution().getSolutionType() != SolutionMetaData.MOBILE) ||
 			persistContext.getContext().getAncestor(IRepository.TABLENODES) != null);
 	}
 

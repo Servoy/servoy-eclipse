@@ -1616,6 +1616,14 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		{
 			return false; // in onload the foundset is not initialized yet
 		}
+
+		Object ancestor = persistContext.getContext().getAncestor(IRepository.FORMS);
+		if (ancestor instanceof Form)
+		{
+			Form f = (Form)ancestor;
+			return (f != null && f.getSolution().getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE);
+		}
+
 		return true;
 	}
 

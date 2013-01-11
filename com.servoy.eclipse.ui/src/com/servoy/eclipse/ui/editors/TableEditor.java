@@ -217,8 +217,11 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 	private void createAggregationsPage()
 	{
-		addPage(400, aggregationsComposite = new AggregationsComposite(this, getContainer(),
-			ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution(), SWT.None), "Aggregations");
+		if (!activeSolutionIsMobile())
+		{
+			addPage(400, aggregationsComposite = new AggregationsComposite(this, getContainer(),
+				ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution(), SWT.None), "Aggregations");
+		}
 	}
 
 	private void createEventsPage()
