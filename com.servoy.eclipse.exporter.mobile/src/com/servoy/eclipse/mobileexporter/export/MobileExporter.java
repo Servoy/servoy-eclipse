@@ -481,8 +481,8 @@ public class MobileExporter
 				ScriptVariable variable = variableIterator.next();
 				String variableScripting = template;
 				variableScripting = variableScripting.replace(PROPERTY_VARIABLE_NAME, variable.getName());
-				variableScripting = variableScripting.replace(PROPERTY_VARIABLE_DEFAULT_VALUE, variable.getDefaultValue() == null ? ""
-					: variable.getDefaultValue().replace("\"", "\\\""));
+				variableScripting = variableScripting.replace(PROPERTY_VARIABLE_DEFAULT_VALUE,
+					variable.getDefaultValue() == null ? "null" : Utils.stringEscapeQuote(variable.getDefaultValue(), '"'));
 				variableScripting = variableScripting.replace(PROPERTY_VARIABLE_TYPE, String.valueOf(variable.getTypeID()));
 				variablesScript.append(variableScripting);
 				if (separator != null && variableIterator.hasNext()) variablesScript.append(separator);
