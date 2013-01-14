@@ -98,6 +98,7 @@ public class MobileListPropertySource implements IPropertySource
 				elementPropertySources.put(prefix = null,
 					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.component, context, false));
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_RELATIONNAME.getPropertyName());
+				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_NAME.getPropertyName());
 
 				// location is based on component
 				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName());
