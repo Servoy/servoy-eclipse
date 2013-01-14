@@ -112,8 +112,8 @@ public class MobilePersistPropertySource extends PersistPropertySource
 	};
 
 	public static final PropertyController<String, String> MOBILE_ICONS_CONTROLLER = new DelegatePropertySetterController<String, MobilePersistPropertySource>(
-		new ComboboxPropertyController<String>(IMobileProperties.DATA_ICON.propertyName, IMobileProperties.DATA_ICON.propertyName, new ComboboxPropertyModel<String>(DATA_ICONS), Messages.LabelDefault),
-		IMobileProperties.DATA_ICON.propertyName)
+		new ComboboxPropertyController<String>(IMobileProperties.DATA_ICON.propertyName, IMobileProperties.DATA_ICON.propertyName,
+			new ComboboxPropertyModel<String>(DATA_ICONS), Messages.LabelDefault), IMobileProperties.DATA_ICON.propertyName)
 	{
 		public void setProperty(MobilePersistPropertySource propertySource, String value)
 		{
@@ -246,10 +246,9 @@ public class MobilePersistPropertySource extends PersistPropertySource
 	{
 		super.setPersistPropertyValue(id, value);
 
-		// set style on header text, copy to header part
-		if (StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName().equals(id) &&
-			getPersist() instanceof GraphicalComponent &&
-			(Boolean.TRUE.equals(((GraphicalComponent)getPersist()).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName)) || Boolean.TRUE.equals(((GraphicalComponent)getPersist()).getCustomMobileProperty(IMobileProperties.LIST_ITEM_HEADER.propertyName))) &&
+		// set style on header text, copy to header part for FormList (not for InsetList)
+		if (StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName().equals(id) && getPersist() instanceof GraphicalComponent &&
+			Boolean.TRUE.equals(((GraphicalComponent)getPersist()).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName)) &&
 			getContext() instanceof Form)
 		{
 			Form form = (Form)getContext();
