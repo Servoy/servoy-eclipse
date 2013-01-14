@@ -16,22 +16,33 @@
  */
 package com.servoy.eclipse.model.builder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.ast.ASTVisitor;
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
+import org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor;
+import org.eclipse.dltk.javascript.ast.DecimalLiteral;
 import org.eclipse.dltk.javascript.ast.Expression;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
 import org.eclipse.dltk.javascript.ast.GetArrayItemExpression;
 import org.eclipse.dltk.javascript.ast.Identifier;
+import org.eclipse.dltk.javascript.ast.ObjectInitializer;
+import org.eclipse.dltk.javascript.ast.ObjectInitializerPart;
+import org.eclipse.dltk.javascript.ast.PropertyInitializer;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.ast.Statement;
+import org.eclipse.dltk.javascript.ast.StringLiteral;
 import org.eclipse.dltk.javascript.ast.VoidExpression;
 import org.eclipse.dltk.javascript.parser.JavaScriptParser;
 
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.persistence.EnumDataProvider;
+import com.servoy.j2db.persistence.IColumnTypes;
+import com.servoy.j2db.persistence.ScriptVariable;
+import com.servoy.j2db.util.Debug;
 
 public class ScriptingUtils
 {
@@ -92,4 +103,69 @@ public class ScriptingUtils
 		}
 		return -1;
 	}
+
+	/**
+	 * @param global
+	 * @param retval
+	 */
+	public static List<EnumDataProvider> getEnumDataProviders(final ScriptVariable global)
+	{
+		final List<EnumDataProvider> retval = new ArrayList<EnumDataProvider>();
+		String defaultValue = global.getDefaultValue();
+		JavaScriptParser parser = new JavaScriptParser();
+		try
+		{
+			Script script = parser.parse(global.getName() + '=' + defaultValue, dummyReporter);
+			script.visitAll(new AbstractNavigationVisitor<Object>()
+			{
+				@Override
+				public Object visitObjectInitializer(ObjectInitializer node)
+				{
+					for (ObjectInitializerPart part : node.getInitializers())
+					{
+						if (part instanceof PropertyInitializer)
+						{
+							Object type = visit(((PropertyInitializer)part).getValue());
+							int typeid = IColumnTypes.MEDIA;
+							if (type instanceof Integer) typeid = ((Integer)type).intValue();
+							retval.add(new EnumDataProvider(global.getDataProviderID() + '.' + ((PropertyInitializer)part).getNameAsString(), typeid));
+						}
+						else
+						{
+							Debug.error("unsuported enum constant: " + part); //$NON-NLS-1$
+						}
+					}
+					return null;
+				}
+
+				/*
+				 * (non-Javadoc)
+				 * 
+				 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitDecimalLiteral(org.eclipse.dltk.javascript.ast.DecimalLiteral)
+				 */
+				@Override
+				public Object visitDecimalLiteral(DecimalLiteral node)
+				{
+					return Integer.valueOf(IColumnTypes.NUMBER);
+				}
+
+				/*
+				 * (non-Javadoc)
+				 * 
+				 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitStringLiteral(org.eclipse.dltk.javascript.ast.StringLiteral)
+				 */
+				@Override
+				public Object visitStringLiteral(StringLiteral node)
+				{
+					return Integer.valueOf(IColumnTypes.TEXT);
+				}
+			});
+		}
+		catch (Throwable throwable)
+		{
+			Debug.error(throwable);
+		}
+		return retval;
+	}
+
 }

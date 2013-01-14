@@ -95,7 +95,6 @@ public class DataProviderEditingSupport extends EditingSupport
 			editor = new FixedComboBoxCellEditor(tv.getTable(), new String[0], SWT.READ_ONLY);
 		}
 
-
 		MouseAdapter listener = new MouseAdapter()
 		{
 			@Override
@@ -250,7 +249,7 @@ public class DataProviderEditingSupport extends EditingSupport
 					currentValue = intValue != -1 ? dataProviders[intValue] : ((CCombo)editor.getControl()).getText();
 					if (intValue == -1 && !currentValue.equals(""))
 					{
-						Object parsed = Utils.parseJSExpression((String)currentValue);
+						Object parsed = Utils.parseJSExpression(currentValue);
 						if (parsed == null)
 						{
 							// not a bool, number or string, convert to quoted string

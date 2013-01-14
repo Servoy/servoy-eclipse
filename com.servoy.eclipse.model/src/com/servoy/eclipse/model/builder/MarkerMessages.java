@@ -521,6 +521,8 @@ public class MarkerMessages
 		"Relation \"{0}\" has an item without primary dataprovider.", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker RelationItemPrimaryDataproviderNotFound = new ServoyMarker(
 		"Relation \"{0}\" has a primary dataprovider \"{1}\" which is not found.", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
+	public static ServoyMarker RelationItemPrimaryEnumDataproviderNotFound = new ServoyMarker(
+		"Relation \"{0}\" has a primary @enum dataprovider \"{1}\" which is not found.", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker RelationItemNoForeignDataprovider = new ServoyMarker(
 		"Relation \"{0}\" has an item without foreign dataprovider.", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker RelationItemForeignDataproviderNotFound = new ServoyMarker(

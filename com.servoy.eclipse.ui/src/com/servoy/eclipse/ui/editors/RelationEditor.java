@@ -64,6 +64,7 @@ import org.eclipse.ui.IEditorPart;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.builder.ScriptingUtils;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.StringMatcher;
@@ -631,7 +632,7 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 
 	private Object[] getDataProvidersEx(int index)
 	{
-		List<Object> retval = new ArrayList<Object>();
+		final List<Object> retval = new ArrayList<Object>();
 		retval.add(EMPTY);
 		try
 		{
@@ -689,7 +690,15 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 				}
 				while (globs.hasNext())
 				{
-					retval.add(globs.next());
+					final ScriptVariable global = globs.next();
+					if (global.isEnum())
+					{
+						retval.addAll(ScriptingUtils.getEnumDataProviders(global));
+					}
+					else
+					{
+						retval.add(global);
+					}
 				}
 			}
 		}
