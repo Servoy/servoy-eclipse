@@ -281,5 +281,11 @@
               translations="templates/templates.properties">
         </include>
      </extension>
+     <extension
+           point="org.eclipse.dltk.javascript.parser.transformer">
+        <transformer
+              class="com.servoy.eclipse.debug.script.CalculationsNodeTransformerFactory">
+        </transformer>
+     </extension>
    
 </plugin>
