@@ -35,7 +35,6 @@ import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
-import com.servoy.j2db.util.IAnchorConstants;
 
 /**
  * Command to modify the current form as a list form.
@@ -70,7 +69,7 @@ public class AddFormListCommand extends CompoundCommand
 			if (parent instanceof Form)
 			{
 				// add items for properties
-				MobileListModel model = addlistItems((Form)parent, null);
+				MobileListModel model = addlistItems((Form)parent, null, location);
 				return new Object[] { model.button, model.subtext, model.countBubble, model.image };
 			}
 
@@ -78,31 +77,36 @@ public class AddFormListCommand extends CompoundCommand
 		}
 	}
 
-	public static MobileListModel addlistItems(Form form, ISupportFormElements component) throws RepositoryException
+	public static MobileListModel addlistItems(Form form, ISupportFormElements component, Point location) throws RepositoryException
 	{
+		int x = 0;
+		int y = 0;
+		if (location != null)
+		{
+			x = location.x;
+			y = location.y;
+		}
 		ISupportFormElements parent = component == null ? form : component;
 
 		// image
-		Field image = ElementFactory.createField(parent, null, new Point(0, 40));
+		Field image = ElementFactory.createField(parent, null, new Point(x + 0, y + 10));
 		image.putCustomMobileProperty(IMobileProperties.LIST_ITEM_IMAGE.propertyName, Boolean.TRUE);
 		image.setEditable(false); // for debug in developer
 
 		// button
-		GraphicalComponent button = ElementFactory.createButton(parent, null, "list", new Point(10, 40));
+		GraphicalComponent button = ElementFactory.createButton(parent, null, "list", new Point(x + 10, y + 20));
 		button.setDisplaysTags(true);
 		button.putCustomMobileProperty(IMobileProperties.LIST_ITEM_BUTTON.propertyName, Boolean.TRUE);
-		button.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST | IAnchorConstants.NORTH);
 
 		// subtext
-		GraphicalComponent subtext = ElementFactory.createLabel(parent, null, new Point(40, 40));
+		GraphicalComponent subtext = ElementFactory.createLabel(parent, null, new Point(x + 20, y + 30));
 		subtext.setDisplaysTags(true);
 		subtext.putCustomMobileProperty(IMobileProperties.LIST_ITEM_SUBTEXT.propertyName, Boolean.TRUE);
 
 		// countBubble
-		Field countBubble = ElementFactory.createField(parent, null, new Point(60, 40));
+		Field countBubble = ElementFactory.createField(parent, null, new Point(x + 40, y + 40));
 		countBubble.putCustomMobileProperty(IMobileProperties.LIST_ITEM_COUNT.propertyName, Boolean.TRUE);
 		countBubble.setEditable(false); // for debug in developer
-		countBubble.setAnchors(IAnchorConstants.EAST);
 
 		return new MobileListModel(form, button, subtext, countBubble, image);
 	}

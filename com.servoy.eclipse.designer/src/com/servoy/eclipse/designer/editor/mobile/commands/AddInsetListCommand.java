@@ -71,10 +71,10 @@ public class AddInsetListCommand extends BaseFormPlaceElementCommand
 			portal.setAnchors(IAnchorConstants.ALL);
 
 			// add items for properties
-			MobileListModel model = AddFormListCommand.addlistItems(form, portal);
+			MobileListModel model = AddFormListCommand.addlistItems(form, portal, location);
 
 			// add header
-			GraphicalComponent header = ElementFactory.createLabel(portal, null, new Point(0, 0));
+			GraphicalComponent header = ElementFactory.createLabel(portal, null, location);
 			// set labelfor for display in webclient
 			model.button.setName("button" + UUID.randomUUID().toString().replace('-', '_').toLowerCase());
 			header.setLabelFor(model.button.getName());

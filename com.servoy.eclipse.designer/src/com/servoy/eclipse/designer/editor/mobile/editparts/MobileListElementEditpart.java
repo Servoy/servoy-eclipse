@@ -134,7 +134,7 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 		}
 
 		fig.setOpaque(type == MobileListElementType.Header);
-		fig.addFigureListener(new SetBoundsToSupportBoundsFigureListener(editorPart.getForm(), getModel().getLeft(), true));
+		fig.addFigureListener(new SetBoundsToSupportBoundsFigureListener(editorPart.getForm(), getModel().getLeft(), false));
 
 		return fig;
 	}
