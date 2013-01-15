@@ -53,6 +53,8 @@ import org.eclipse.ui.IWorkbench;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.servoy.base.persistence.IMobileProperties;
+import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
@@ -101,9 +103,7 @@ import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
-import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 import com.servoy.j2db.util.DataSourceUtils;
-import com.servoy.j2db.util.DataSourceUtilsBase;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;

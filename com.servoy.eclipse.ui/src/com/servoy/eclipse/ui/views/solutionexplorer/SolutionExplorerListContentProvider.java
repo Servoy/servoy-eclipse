@@ -43,6 +43,8 @@ import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
+import com.servoy.base.util.DataSourceUtilsBase;
+import com.servoy.base.util.ITagResolver;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModel;
@@ -120,10 +122,8 @@ import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.annotations.AnnotationManager;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
-import com.servoy.j2db.util.DataSourceUtilsBase;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HtmlUtils;
-import com.servoy.j2db.util.ITagResolver;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.SortedList;
@@ -1252,7 +1252,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 
 		/**
-		 * @see com.servoy.j2db.util.Text.ITagResolver#getStringValue(java.lang.String)
+		 * @see com.servoy.base.util.Text.ITagResolver#getStringValue(java.lang.String)
 		 */
 		public String getStringValue(String tagname)
 		{

@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.Path;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.IValueFilter;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -74,7 +75,6 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
-import com.servoy.j2db.util.DataSourceUtilsBase;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ServoyJSONArray;

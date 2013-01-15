@@ -25,8 +25,8 @@ import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.content.IContentDescriber;
 import org.eclipse.core.runtime.content.IContentDescription;
 
+import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 
 /**
  * IContentDescriber for form files.

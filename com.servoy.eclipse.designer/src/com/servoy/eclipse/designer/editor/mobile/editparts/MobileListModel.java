@@ -20,6 +20,7 @@ package com.servoy.eclipse.designer.editor.mobile.editparts;
 import java.awt.Dimension;
 import java.awt.Point;
 
+import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
@@ -27,7 +28,6 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportSize;
-import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 import com.servoy.j2db.util.Utils;
 
 /**

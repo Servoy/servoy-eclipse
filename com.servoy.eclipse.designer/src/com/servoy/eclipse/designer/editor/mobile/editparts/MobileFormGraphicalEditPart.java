@@ -32,6 +32,7 @@ import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.SnapToHelper;
 import org.eclipse.swt.widgets.Display;
 
+import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -53,7 +54,6 @@ import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
-import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
 

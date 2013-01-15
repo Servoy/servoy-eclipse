@@ -23,6 +23,7 @@ import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.editpolicies.XYLayoutEditPolicy;
 import org.eclipse.gef.requests.CreateRequest;
 
+import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditor;
 import com.servoy.eclipse.designer.editor.mobile.commands.MobileAddButtonCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.MobileAddHeaderTitleCommand;
@@ -31,7 +32,6 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 
 /**
  * Edit policy for adding/deleting components header/footer in mobile form editor.

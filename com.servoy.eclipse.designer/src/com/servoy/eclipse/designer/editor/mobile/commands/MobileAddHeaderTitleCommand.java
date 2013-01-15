@@ -20,6 +20,7 @@ package com.servoy.eclipse.designer.editor.mobile.commands;
 import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.swt.graphics.Point;
 
+import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.designer.editor.commands.BaseFormPlaceElementCommand;
 import com.servoy.j2db.IApplication;
@@ -27,7 +28,6 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.ISupportTextSetup;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 import com.servoy.j2db.util.IAnchorConstants;
 
 /**

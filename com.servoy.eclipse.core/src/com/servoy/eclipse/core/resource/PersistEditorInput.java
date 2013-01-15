@@ -22,8 +22,8 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 import com.servoy.j2db.util.UUID;
 
 /**

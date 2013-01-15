@@ -24,12 +24,12 @@ import java.util.Map;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
+import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileListModel;
 import com.servoy.eclipse.ui.property.DelegatePropertyController;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
-import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 import com.servoy.j2db.util.Pair;
 
 /**

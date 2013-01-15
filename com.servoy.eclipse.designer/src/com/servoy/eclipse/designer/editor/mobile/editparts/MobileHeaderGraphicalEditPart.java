@@ -20,13 +20,13 @@ package com.servoy.eclipse.designer.editor.mobile.editparts;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Part;
-import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 
 /**
  * Edit part for header in mobile form editor.

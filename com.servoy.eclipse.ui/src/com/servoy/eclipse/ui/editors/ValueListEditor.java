@@ -55,6 +55,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorPart;
 
+import com.servoy.base.persistence.constants.IValueListConstants;
+import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.DatabaseUtils;
@@ -101,9 +103,7 @@ import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValueList;
-import com.servoy.j2db.persistence.constants.IValueListConstants;
 import com.servoy.j2db.util.DataSourceUtils;
-import com.servoy.j2db.util.DataSourceUtilsBase;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ScopesUtils;
 

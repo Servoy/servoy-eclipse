@@ -40,6 +40,7 @@ import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 
+import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.IFigureFactory;
 import com.servoy.eclipse.designer.editor.PersistImageFigure;
@@ -59,7 +60,6 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
-import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 import com.servoy.j2db.smart.dataui.DataCheckBox;
 import com.servoy.j2db.smart.dataui.DataChoice;
 import com.servoy.j2db.smart.dataui.DataComboBox;

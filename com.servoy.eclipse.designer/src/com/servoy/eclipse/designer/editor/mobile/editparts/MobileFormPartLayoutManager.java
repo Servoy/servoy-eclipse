@@ -24,11 +24,11 @@ import org.eclipse.draw2d.XYLayout;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Rectangle;
 
+import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.designer.editor.PersistImageFigure;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Part;
-import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 
 /** 
  * Layout for header or footer elements in mobile form editor.

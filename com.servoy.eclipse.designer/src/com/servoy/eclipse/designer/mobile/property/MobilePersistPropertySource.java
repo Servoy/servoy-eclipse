@@ -20,6 +20,8 @@ package com.servoy.eclipse.designer.mobile.property;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
+import com.servoy.base.persistence.IMobileProperties;
+import com.servoy.base.scripting.annotations.ServoyMobile;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.property.CheckboxPropertyDescriptor;
@@ -38,8 +40,6 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
-import com.servoy.j2db.scripting.annotations.ServoyMobile;
-import com.servoy.j2db.scripting.solutionhelper.IMobileProperties;
 import com.servoy.j2db.util.Utils;
 
 /**

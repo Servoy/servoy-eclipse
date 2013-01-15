@@ -38,6 +38,7 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 
+import com.servoy.base.util.ITagResolver;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -51,7 +52,6 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.DataSourceUtils;
-import com.servoy.j2db.util.ITagResolver;
 import com.servoy.j2db.util.Text;
 
 /**
@@ -396,7 +396,7 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 		}
 
 		/**
-		 * @see com.servoy.j2db.util.Text.ITagResolver#getValue(java.lang.String)
+		 * @see com.servoy.base.util.Text.ITagResolver#getValue(java.lang.String)
 		 */
 		public String getStringValue(String tagname)
 		{

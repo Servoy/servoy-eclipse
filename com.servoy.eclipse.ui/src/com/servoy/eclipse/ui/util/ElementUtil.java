@@ -29,6 +29,7 @@ import javax.swing.SwingUtilities;
 
 import org.eclipse.swt.graphics.Image;
 
+import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
@@ -61,7 +62,6 @@ import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.ValueList;
-import com.servoy.j2db.persistence.constants.IValueListConstants;
 import com.servoy.j2db.plugins.IClientPluginAccess;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
