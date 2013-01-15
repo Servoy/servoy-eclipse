@@ -2973,11 +2973,12 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	 * Performs a deep copy on the list's values. Both lists must be non-null.
 	 * @return destination array.
 	 */
-	private static <T extends PCloneable<T>, L extends List<T>> L deepCopyList(L toCopy, L destination)
+	@SuppressWarnings("unchecked")
+	private static <T> List<T> deepCopyList(List<T> toCopy, List<T> destination)
 	{
-		for (PCloneable<T> element : toCopy)
+		for (Object element : toCopy)
 		{
-			destination.add(element != null ? element.clone() : null);
+			destination.add((T)((element instanceof PCloneable) ? ((PCloneable< ? >)element).clone() : null));
 		}
 		return destination;
 	}
