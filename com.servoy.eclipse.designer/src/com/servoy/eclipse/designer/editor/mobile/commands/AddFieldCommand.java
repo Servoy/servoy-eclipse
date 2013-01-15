@@ -25,6 +25,7 @@ import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.views.properties.IPropertySource;
 
+import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.designer.editor.commands.BaseFormPlaceElementCommand;
@@ -66,6 +67,7 @@ public class AddFieldCommand extends BaseFormPlaceElementCommand
 			label.setDisplaysTags(true);
 			label.setGroupID(groupID);
 			label.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST | IAnchorConstants.NORTH);
+			label.putCustomMobileProperty(IMobileProperties.COMPONENT_TITLE.propertyName, Boolean.TRUE);
 			Field field = ElementFactory.createField(form, null, new Point(loc.x, loc.y + 1)); // enforce order by y-pos
 			field.setGroupID(groupID);
 			field.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST | IAnchorConstants.NORTH);

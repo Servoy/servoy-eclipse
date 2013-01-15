@@ -1,0 +1,124 @@
+/*
+ This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2013 Servoy BV
+
+ This program is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Affero General Public License as published by the Free
+ Software Foundation; either version 3 of the License, or (at your option) any
+ later version.
+
+ This program is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+ You should have received a copy of the GNU Affero General Public License along
+ with this program; if not, see http://www.gnu.org/licenses or write to the Free
+ Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
+ */
+
+package com.servoy.eclipse.designer.mobile.property;
+
+import java.util.Arrays;
+
+import org.eclipse.ui.views.properties.IPropertyDescriptor;
+
+import com.servoy.base.persistence.IMobileProperties;
+import com.servoy.eclipse.ui.property.IModelSavePropertySource;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.eclipse.ui.property.RetargetingPropertySource;
+import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IFormElement;
+import com.servoy.j2db.persistence.PositionComparator;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.util.Utils;
+
+/**
+ * Property source for a group that combines a text label with a component.
+ * 
+ * @author rgansevles
+ *
+ */
+public class MobileComponentWithTitlePropertySource extends RetargetingPropertySource implements IModelSavePropertySource
+{
+	/**
+	 * @param group
+	 * @param context
+	 */
+	public MobileComponentWithTitlePropertySource(FormElementGroup group, Form context)
+	{
+		super(group, context);
+	}
+
+	public Object getSaveModel()
+	{
+		return getModel();
+	}
+
+	@Override
+	protected FormElementGroup getModel()
+	{
+		return (FormElementGroup)super.getModel();
+	}
+
+	@Override
+	protected void fillPropertyDescriptors()
+	{
+		// determine title and component
+		IFormElement title = null;
+		IFormElement component = null;
+		for (IFormElement element : Utils.iterate(getModel().getElements()))
+		{
+			if (element instanceof AbstractBase && ((AbstractBase)element).getCustomMobileProperty(IMobileProperties.COMPONENT_TITLE.propertyName) != null)
+			{
+				title = element;
+			}
+			else
+			{
+				component = element;
+			}
+		}
+
+		// if no element has title property, assume first element is title, second is component
+		if (title == null)
+		{
+			component = null;
+			IFormElement[] asArray = Utils.asArray(getModel().getElements(), IFormElement.class);
+			Arrays.sort(asArray, PositionComparator.XY_PERSIST_COMPARATOR);
+			if (asArray.length > 0) title = asArray[0];
+			if (asArray.length > 1) component = asArray[1];
+			if (title instanceof AbstractBase)
+			{
+				// tag title element for next time
+				((AbstractBase)title).putCustomMobileProperty(IMobileProperties.COMPONENT_TITLE.propertyName, Boolean.TRUE);
+			}
+		}
+
+		String prefix;
+		PersistPropertySource elementPropertySource;
+		if (title != null)
+		{
+			// show just the properties that are used for the title in the mobile client
+			elementPropertySources.put(prefix = "title", elementPropertySource = PersistPropertySource.createPersistPropertySource(title, getContext(), false));
+			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), "titleDataProviderID");
+			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DISPLAYSTAGS.getPropertyName(), "titleDisplaysTags");
+			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName(), "titleText");
+		}
+
+		if (component != null)
+		{
+			// show all properties for the component
+			elementPropertySources.put(prefix = null, elementPropertySource = PersistPropertySource.createPersistPropertySource(component, getContext(), false));
+			for (IPropertyDescriptor desc : elementPropertySource.getPropertyDescriptors())
+			{
+				addMethodPropertyDescriptor(elementPropertySource, prefix, desc.getId().toString());
+			}
+		}
+	}
+
+	@Override
+	public String toString()
+	{
+		return "Componen with title";
+	}
+}

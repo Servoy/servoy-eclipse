@@ -30,6 +30,7 @@ import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileListModel;
+import com.servoy.eclipse.designer.mobile.property.MobileComponentWithTitlePropertySource;
 import com.servoy.eclipse.designer.mobile.property.MobileListPropertySource;
 import com.servoy.eclipse.designer.mobile.property.MobilePersistPropertySource;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -85,11 +86,12 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 		{
 			return new PointPropertySource(new ComplexProperty<Point>((Point)obj));
 		}
+
 		if (obj instanceof EditPart && ((EditPart)obj).getModel() instanceof FormElementGroup)
 		{
 			if (key == IPropertySource.class)
 			{
-				return new FormElementGroupPropertySource((FormElementGroup)((EditPart)obj).getModel(), getEditpartFormContext((EditPart)obj));
+				return createFormElementGroupPropertySource((FormElementGroup)((EditPart)obj).getModel(), getEditpartFormContext((EditPart)obj));
 			}
 			if (key == FormElementGroup.class)
 			{
@@ -99,7 +101,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 		}
 		if (obj instanceof FormElementGroup && key == IPropertySource.class)
 		{
-			return new FormElementGroupPropertySource((FormElementGroup)obj, null);
+			return createFormElementGroupPropertySource((FormElementGroup)obj, null);
 		}
 
 		if (obj instanceof BaseVisualFormEditor)
@@ -258,6 +260,13 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 		}
 
 		return null;
+	}
+
+	private IPropertySource createFormElementGroupPropertySource(FormElementGroup group, Form context)
+	{
+		Form form = group.getParent();
+		boolean mobile = form != null && form.getCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName) != null;
+		return mobile ? new MobileComponentWithTitlePropertySource(group, context) : new FormElementGroupPropertySource(group, context);
 	}
 
 	/**

@@ -17,20 +17,12 @@
 
 package com.servoy.eclipse.designer.mobile.property;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import org.eclipse.ui.views.properties.IPropertyDescriptor;
-import org.eclipse.ui.views.properties.IPropertySource;
-
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileListModel;
-import com.servoy.eclipse.ui.property.DelegatePropertyController;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.eclipse.ui.property.RetargetingPropertySource;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
-import com.servoy.j2db.util.Pair;
 
 /**
  * Properties source for InsetList in mobile form editor.
@@ -39,7 +31,7 @@ import com.servoy.j2db.util.Pair;
  *
  */
 @SuppressWarnings("nls")
-public class MobileListPropertySource implements IPropertySource
+public class MobileListPropertySource extends RetargetingPropertySource
 {
 //	private static final WeakHashMap<Pair<MobileInsetListModel, Form>, MobileInsetListPropertySource> cache = new WeakHashMap<Pair<MobileInsetListModel, Form>, MobileInsetListPropertySource>();
 
@@ -56,178 +48,83 @@ public class MobileListPropertySource implements IPropertySource
 //		return mobileInsetListPropertySource;
 	}
 
-
-	private final MobileListModel model;
-	private LinkedHashMap<Object, IPropertyDescriptor> propertyDescriptors;
-	private Map<String, IPropertySource> elementPropertySources;
-	private final Form context;
-
 	private MobileListPropertySource(MobileListModel model, Form context)
 	{
-		this.model = model;
-		this.context = context;
+		super(model, context);
 	}
 
-	public Object getEditableValue()
+	@Override
+	protected MobileListModel getModel()
 	{
-		return model;
+		return (MobileListModel)super.getModel();
 	}
 
-	public IPropertyDescriptor[] getPropertyDescriptors()
+	@Override
+	protected void fillPropertyDescriptors()
 	{
-		init();
-		return propertyDescriptors.values().toArray(new IPropertyDescriptor[propertyDescriptors.size()]);
-	}
+		// Delegate to members
+		String prefix;
+		PersistPropertySource elementPropertySource;
 
-	public void init()
-	{
-		if (propertyDescriptors == null)
+		// tab settings
+		if (getModel().component != null)
 		{
-			propertyDescriptors = new LinkedHashMap<Object, IPropertyDescriptor>();// defines order
+			// inset list
+			elementPropertySources.put(prefix = null,
+				elementPropertySource = PersistPropertySource.createPersistPropertySource(getModel().component, getContext(), false));
+			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_RELATIONNAME.getPropertyName());
+			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_NAME.getPropertyName());
 
-			elementPropertySources = new HashMap<String, IPropertySource>();
-
-			// Delegate to members
-			String prefix;
-			PersistPropertySource elementPropertySource;
-
-			// tab settings
-			if (model.component != null)
-			{
-				// inset list
-				elementPropertySources.put(prefix = null,
-					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.component, context, false));
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_RELATIONNAME.getPropertyName());
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_NAME.getPropertyName());
-
-				// location is based on component
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName());
-			}
-
-			// list item header
-			if (model.header != null)
-			{
-				elementPropertySources.put(prefix = "listitemHeader",
-					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.header, model.form, false));
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
-					"headerDataProvider");
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName(), "headerText");
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName(), "headerStyleClass");
-			}
-
-			// list item button
-			if (model.button != null)
-			{
-				elementPropertySources.put(prefix = "listitemButton",
-					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.button, model.form, false));
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_ONACTIONMETHODID.getPropertyName());
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
-					"textDataProvider");
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName());
-				addMethodPropertyDescriptor(elementPropertySource, prefix, IMobileProperties.DATA_ICON.propertyName);
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName(), "listStyleClass");
-			}
-
-			// subtext
-			if (model.subtext != null)
-			{
-				elementPropertySources.put(prefix = "listitemSubtext",
-					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.subtext, model.form, false));
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
-					"subtextDataProvider");
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName(), "subtext");
-			}
-
-			// countBubble
-			if (model.countBubble != null)
-			{
-				elementPropertySources.put(prefix = "listitemCount",
-					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.countBubble, model.form, false));
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
-					"countDataProvider");
-			}
-
-			// image
-			if (model.image != null)
-			{
-				elementPropertySources.put(prefix = "listitemImage",
-					elementPropertySource = PersistPropertySource.createPersistPropertySource(model.image, model.form, false));
-				addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
-					"dataIconDataProvider");
-			}
-		}
-	}
-
-	private void addMethodPropertyDescriptor(PersistPropertySource elementPropertySource, String prefix, String propertyName)
-	{
-		addMethodPropertyDescriptor(elementPropertySource, prefix, propertyName, null);
-	}
-
-	private void addMethodPropertyDescriptor(PersistPropertySource elementPropertySource, String prefix, String propertyName, String displayName)
-	{
-		String id = prefix == null ? propertyName : prefix + '.' + propertyName;
-		IPropertyDescriptor propertyDescriptor = elementPropertySource.getPropertyDescriptor(propertyName);
-		if (propertyDescriptor != null)
-		{
-			propertyDescriptors.put(id,
-				new DelegatePropertyController<Object, Object>(propertyDescriptor, id, displayName == null ? propertyDescriptor.getDisplayName() : displayName));
-		}
-	}
-
-	private Pair<IPropertySource, String> getElementPropertySource(Object id)
-	{
-		init();
-
-		String[] split = id.toString().split("\\.");
-		if (split.length <= 2) // when prefix is null, property is top-level, like location
-		{
-			IPropertySource elementPropertySource = elementPropertySources.get(split.length == 1 ? null : split[0] /* prefix */);
-			if (elementPropertySource != null)
-			{
-				return new Pair<IPropertySource, String>(elementPropertySource, split[split.length - 1] /* id */);
-			}
+			// location is based on component
+			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName());
 		}
 
-		return null;
-	}
-
-	public Object getPropertyValue(Object id)
-	{
-		Pair<IPropertySource, String> pair = getElementPropertySource(id);
-		if (pair != null)
+		// list item header
+		if (getModel().header != null)
 		{
-			return pair.getLeft().getPropertyValue(pair.getRight());
+			elementPropertySources.put(prefix = "listitemHeader",
+				elementPropertySource = PersistPropertySource.createPersistPropertySource(getModel().header, getContext(), false));
+			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), "headerDataProvider");
+			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName(), "headerText");
+			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName(), "headerStyleClass");
 		}
 
-		return null;
-	}
-
-	public boolean isPropertySet(Object id)
-	{
-		Pair<IPropertySource, String> pair = getElementPropertySource(id);
-		if (pair != null)
+		// list item button
+		if (getModel().button != null)
 		{
-			return pair.getLeft().isPropertySet(pair.getRight());
+			elementPropertySources.put(prefix = "listitemButton",
+				elementPropertySource = PersistPropertySource.createPersistPropertySource(getModel().button, getContext(), false));
+			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_ONACTIONMETHODID.getPropertyName());
+			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), "textDataProvider");
+			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName());
+			addMethodPropertyDescriptor(elementPropertySource, prefix, IMobileProperties.DATA_ICON.propertyName);
+			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName(), "listStyleClass");
 		}
 
-		return false;
-	}
-
-	public void resetPropertyValue(Object id)
-	{
-		Pair<IPropertySource, String> pair = getElementPropertySource(id);
-		if (pair != null)
+		// subtext
+		if (getModel().subtext != null)
 		{
-			pair.getLeft().resetPropertyValue(pair.getRight());
+			elementPropertySources.put(prefix = "listitemSubtext",
+				elementPropertySource = PersistPropertySource.createPersistPropertySource(getModel().subtext, getContext(), false));
+			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), "subtextDataProvider");
+			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName(), "subtext");
 		}
-	}
 
-	public void setPropertyValue(Object id, Object value)
-	{
-		Pair<IPropertySource, String> pair = getElementPropertySource(id);
-		if (pair != null)
+		// countBubble
+		if (getModel().countBubble != null)
 		{
-			pair.getLeft().setPropertyValue(pair.getRight(), value);
+			elementPropertySources.put(prefix = "listitemCount",
+				elementPropertySource = PersistPropertySource.createPersistPropertySource(getModel().countBubble, getContext(), false));
+			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), "countDataProvider");
+		}
+
+		// image
+		if (getModel().image != null)
+		{
+			elementPropertySources.put(prefix = "listitemImage",
+				elementPropertySource = PersistPropertySource.createPersistPropertySource(getModel().image, getContext(), false));
+			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
+				"dataIconDataProvider");
 		}
 	}
 
