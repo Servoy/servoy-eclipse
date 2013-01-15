@@ -91,14 +91,15 @@ public class MobileViewerFilter extends ViewerFilter
 				((SimpleUserNode)node).getRealType() == UserNodeType.STYLE_ITEM || ((SimpleUserNode)node).getRealType() == UserNodeType.I18N_FILE_ITEM ||
 				((SimpleUserNode)node).getRealType() == UserNodeType.TEMPLATE_ITEM || ((SimpleUserNode)node).getRealType() == UserNodeType.FORM_METHOD ||
 				((SimpleUserNode)node).getRealType() == UserNodeType.GLOBAL_METHOD_ITEM ||
+				((SimpleUserNode)node).getRealType() == UserNodeType.TABLE_COLUMNS_ITEM ||
 				((SimpleUserNode)node).getRealType() == UserNodeType.CALCULATIONS_ITEM ||
 				((SimpleUserNode)node).getRealType() == UserNodeType.GLOBAL_VARIABLE_ITEM ||
 				((SimpleUserNode)node).getRealType() == UserNodeType.FORM_VARIABLE_ITEM ||
 				((SimpleUserNode)node).getRealType() == UserNodeType.VALUELIST_ITEM || ((SimpleUserNode)node).getRealType() == UserNodeType.RELATION ||
 				((SimpleUserNode)node).getRealType() == UserNodeType.FOUNDSET_ITEM || ((SimpleUserNode)node).getRealType() == UserNodeType.CURRENT_FORM_ITEM ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.FORM_ELEMENTS_ITEM || ((SimpleUserNode)node).getRealType() == UserNodeType.SECURITY_ITEM ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.ARRAY || ((SimpleUserNode)node).getRealType() == UserNodeType.NUMBER ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.SPECIAL_OPERATORS ||
+				((SimpleUserNode)node).getRealType() == UserNodeType.FORM_ELEMENTS_ITEM || ((SimpleUserNode)node).getRealType() == UserNodeType.FORM_FOUNDSET ||
+				((SimpleUserNode)node).getRealType() == UserNodeType.SECURITY_ITEM || ((SimpleUserNode)node).getRealType() == UserNodeType.ARRAY ||
+				((SimpleUserNode)node).getRealType() == UserNodeType.NUMBER || ((SimpleUserNode)node).getRealType() == UserNodeType.SPECIAL_OPERATORS ||
 				((SimpleUserNode)node).getRealType() == UserNodeType.FORM_ELEMENTS_ITEM_METHOD || ((SimpleUserNode)node).getRealType() == UserNodeType.JSLIB) return true;
 
 			return ((SimpleUserNode)node).isVisibleInMobile();
