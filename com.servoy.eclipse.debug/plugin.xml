@@ -282,6 +282,12 @@
         </include>
      </extension>
      <extension
+           point="org.eclipse.dltk.javascript.parser.transformer">
+        <transformer
+              class="com.servoy.eclipse.debug.script.CalculationsNodeTransformerFactory">
+        </transformer>
+     </extension>
+     <extension
            point="com.servoy.eclipse.core.debugstarter">
         <debugstarter
               class="com.servoy.eclipse.debug.DebugStarter"

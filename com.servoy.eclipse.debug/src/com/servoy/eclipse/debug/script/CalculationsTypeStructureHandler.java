@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.debug.script;
 
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.dltk.ast.ASTNode;
@@ -136,6 +137,7 @@ public class CalculationsTypeStructureHandler implements IStructureHandler
 	{
 		if (node instanceof FunctionStatement && (((FunctionStatement)node).getParent() instanceof Script))
 		{
+			// replace all the functions with just a VariableNode, so that they are seen as variables instead of functions
 			IParentNode parent = visitor.peek();
 			Identifier name = ((FunctionStatement)node).getName();
 			IVariable variable = new CalcVariable();
@@ -145,6 +147,18 @@ public class CalculationsTypeStructureHandler implements IStructureHandler
 			declaration.setIdentifier(name);
 			visitor.visit(((FunctionStatement)node).getBody()); // do visit the body so that calls are reported.
 			return new VariableNode(parent, declaration, variable);
+		}
+		else if (node instanceof VariableStatement)
+		{
+			// there are no 2 toplevel variables statements
+			// so these are inside functions (calculations) visit the initializer
+			// but don't let the IStructureHandler itself handles them else they will be reported as toplevel
+			List<VariableDeclaration> variables = ((VariableStatement)node).getVariables();
+			for (VariableDeclaration variableDeclaration : variables)
+			{
+				visitor.visit(variableDeclaration.getInitializer());
+			}
+			return null;
 		}
 
 		return IStructureHandler.CONTINUE;
