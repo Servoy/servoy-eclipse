@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.designer.mobile.property;
 
+import org.eclipse.ui.views.properties.IPropertySource;
+
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileListModel;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
@@ -33,6 +35,11 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 @SuppressWarnings("nls")
 public class MobileListPropertySource extends RetargetingPropertySource
 {
+	private static final String PREFIX_LISTITEM_BUTTON = "listitemButton";
+	private static final String PREFIX_LISTITEM_SUBTEXT = "listitemSubtext";
+	private static final String PREFIX_LISTITEM_COUNT = "listitemCount";
+	private static final String PREFIX_LISTITEM_IMAGE = "listitemImage";
+
 //	private static final WeakHashMap<Pair<MobileInsetListModel, Form>, MobileInsetListPropertySource> cache = new WeakHashMap<Pair<MobileInsetListModel, Form>, MobileInsetListPropertySource>();
 
 	public static MobileListPropertySource getMobileListPropertySource(MobileListModel model, Form context)
@@ -92,7 +99,7 @@ public class MobileListPropertySource extends RetargetingPropertySource
 		// list item button
 		if (getModel().button != null)
 		{
-			elementPropertySources.put(prefix = "listitemButton",
+			elementPropertySources.put(prefix = PREFIX_LISTITEM_BUTTON,
 				elementPropertySource = PersistPropertySource.createPersistPropertySource(getModel().button, getContext(), false));
 			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_ONACTIONMETHODID.getPropertyName());
 			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), "textDataProvider");
@@ -104,7 +111,7 @@ public class MobileListPropertySource extends RetargetingPropertySource
 		// subtext
 		if (getModel().subtext != null)
 		{
-			elementPropertySources.put(prefix = "listitemSubtext",
+			elementPropertySources.put(prefix = PREFIX_LISTITEM_SUBTEXT,
 				elementPropertySource = PersistPropertySource.createPersistPropertySource(getModel().subtext, getContext(), false));
 			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), "subtextDataProvider");
 			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName(), "subtext");
@@ -113,7 +120,7 @@ public class MobileListPropertySource extends RetargetingPropertySource
 		// countBubble
 		if (getModel().countBubble != null)
 		{
-			elementPropertySources.put(prefix = "listitemCount",
+			elementPropertySources.put(prefix = PREFIX_LISTITEM_COUNT,
 				elementPropertySource = PersistPropertySource.createPersistPropertySource(getModel().countBubble, getContext(), false));
 			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), "countDataProvider");
 		}
@@ -121,11 +128,72 @@ public class MobileListPropertySource extends RetargetingPropertySource
 		// image
 		if (getModel().image != null)
 		{
-			elementPropertySources.put(prefix = "listitemImage",
+			elementPropertySources.put(prefix = PREFIX_LISTITEM_IMAGE,
 				elementPropertySource = PersistPropertySource.createPersistPropertySource(getModel().image, getContext(), false));
 			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
 				"dataIconDataProvider");
 		}
+	}
+
+	@Override
+	public void resetPropertyValue(Object id)
+	{
+		super.resetPropertyValue(id);
+		if (StaticContentSpecLoader.PROPERTY_RELATIONNAME.getPropertyName().equals(id))
+		{
+			clearListDataproviders();
+		}
+	}
+
+	@Override
+	public void setPropertyValue(Object id, Object value)
+	{
+		super.setPropertyValue(id, value);
+		IPropertySource listPersistPropertySource = elementPropertySources.get(null);
+		if (listPersistPropertySource instanceof PersistPropertySource)
+		{
+			Object relationValue = ((PersistPropertySource)listPersistPropertySource).getPersistPropertyValue(StaticContentSpecLoader.PROPERTY_RELATIONNAME.getPropertyName());
+			if (StaticContentSpecLoader.PROPERTY_RELATIONNAME.getPropertyName().equals(id))
+			{
+				// new relation was set, clear current data providers
+				clearListDataproviders();
+			}
+			else if (relationValue == null && id instanceof String)
+			{
+				// new data provider is set, but there is no relation yet;
+				// get the relation from the data provider and update relation with it;
+				String[] sIDs = ((String)id).split("\\.");
+				if (sIDs != null &&
+					sIDs.length == 2 &&
+					StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName().equals(sIDs[1]) &&
+					(PREFIX_LISTITEM_BUTTON.equals(sIDs[0]) || PREFIX_LISTITEM_SUBTEXT.equals(sIDs[0]) || PREFIX_LISTITEM_COUNT.equals(sIDs[0]) || PREFIX_LISTITEM_IMAGE.equals(sIDs[0])) &&
+					value instanceof String)
+				{
+					String valueString = (String)value;
+					int lastRelationSeparator = valueString.lastIndexOf('.');
+					if (lastRelationSeparator != -1)
+					{
+						String relation = valueString.substring(0, lastRelationSeparator);
+						((PersistPropertySource)listPersistPropertySource).setPersistPropertyValue(
+							StaticContentSpecLoader.PROPERTY_RELATIONNAME.getPropertyName(), relation);
+					}
+				}
+			}
+		}
+	}
+
+	private void clearListDataproviders()
+	{
+		updatePersistProperty(PREFIX_LISTITEM_BUTTON, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), null);
+		updatePersistProperty(PREFIX_LISTITEM_SUBTEXT, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), null);
+		updatePersistProperty(PREFIX_LISTITEM_COUNT, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), null);
+		updatePersistProperty(PREFIX_LISTITEM_IMAGE, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), null);
+	}
+
+	private void updatePersistProperty(String prefix, String property, Object value)
+	{
+		IPropertySource propertySource = elementPropertySources.get(prefix);
+		if (propertySource instanceof PersistPropertySource) ((PersistPropertySource)propertySource).setPersistPropertyValue(property, value);
 	}
 
 	@Override

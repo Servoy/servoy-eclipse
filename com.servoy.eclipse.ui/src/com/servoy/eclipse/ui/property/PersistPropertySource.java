@@ -1,5 +1,4 @@
 /*
- This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2010 Servoy BV
 
  This program is free software; you can redistribute it and/or modify it under
  the terms of the GNU Affero General Public License as published by the Free
@@ -2706,7 +2705,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			Table table = null;
 			boolean listItemHeader = persistContext != null && persistContext.getPersist() instanceof AbstractBase &&
 				((AbstractBase)persistContext.getPersist()).getCustomMobileProperty(IMobileProperties.LIST_ITEM_HEADER.propertyName) != null;
-			// treat list item header as field on form
+
+			// treat list item as field on form
 			Portal portal = listItemHeader ? null : (Portal)persistContext.getPersist().getAncestor(IRepository.PORTALS);
 			final DataProviderOptions options;
 			if (portal != null)
@@ -2714,7 +2714,12 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				Relation[] relations = flattenedEditingSolution.getRelationSequence(portal.getRelationName());
 				if (relations == null)
 				{
-					return null;
+					boolean listItem = persistContext != null &&
+						persistContext.getPersist() instanceof AbstractBase &&
+						(((AbstractBase)persistContext.getPersist()).getCustomMobileProperty(IMobileProperties.LIST_ITEM_BUTTON.propertyName) != null ||
+							((AbstractBase)persistContext.getPersist()).getCustomMobileProperty(IMobileProperties.LIST_ITEM_COUNT.propertyName) != null ||
+							((AbstractBase)persistContext.getPersist()).getCustomMobileProperty(IMobileProperties.LIST_ITEM_SUBTEXT.propertyName) != null || ((AbstractBase)persistContext.getPersist()).getCustomMobileProperty(IMobileProperties.LIST_ITEM_IMAGE.propertyName) != null);
+					if (!listItem) return null;
 				}
 				options = new DataProviderTreeViewer.DataProviderOptions(true, false, false, true /* related calcs */, false, false, false, false,
 					INCLUDE_RELATIONS.NESTED, false, true, relations);
@@ -2731,8 +2736,10 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					ServoyLog.logInfo("Table form not accessible: " + ex.getMessage());
 					return null;
 				}
+
 				options = new DataProviderTreeViewer.DataProviderOptions(true, table != null, table != null, table != null, true, true, table != null,
 					table != null, INCLUDE_RELATIONS.NESTED, true, true, null);
+
 			}
 			final DataProviderConverter converter = new DataProviderConverter(flattenedEditingSolution, persistContext.getPersist(), table);
 			DataProviderLabelProvider showPrefix = new DataProviderLabelProvider(false);
