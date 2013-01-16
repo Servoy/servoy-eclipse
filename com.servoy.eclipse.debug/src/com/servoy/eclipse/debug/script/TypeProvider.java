@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.debug.script;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +33,7 @@ import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IServerManagerInternal;
+import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
@@ -70,6 +73,71 @@ public class TypeProvider implements ITypeProvider
 		Set<String> names = TYPES.getTypeNames(prefix);
 		if (prefix != null)
 		{
+			if (mode == TypeMode.JSDOC && prefix.indexOf('.') != -1)
+			{
+				FlattenedSolution flattenedSolution = ElementResolver.getFlattenedSolution(context);
+				String[] scopes = prefix.split("\\.");
+				if (scopes[0].equals("scopes"))
+				{
+					Collection<String> scopeNames = flattenedSolution.getScopeNames();
+					if (scopes.length > 1 && scopeNames.contains(scopes[1]))
+					{
+						Iterator<ScriptMethod> scriptMethods = flattenedSolution.getScriptMethods(scopes[1], false);
+						for (ScriptMethod method : Utils.iterate(scriptMethods))
+						{
+							String name = "scopes." + scopes[1] + '.' + method.getName();
+							if (name.startsWith(prefix))
+							{
+								names.add(name);
+							}
+						}
+					}
+					else
+					{
+						for (String scopeName : scopeNames)
+						{
+							String name = "scopes." + scopeName;
+							if (name.startsWith(prefix))
+							{
+								names.add(name);
+							}
+						}
+					}
+				}
+				else if (scopes[0].equals("forms"))
+				{
+					ArrayList<String> formNames = new ArrayList(64);
+					Iterator<Form> forms = flattenedSolution.getForms(false);
+					for (Form form : Utils.iterate(forms))
+					{
+						formNames.add(form.getName());
+					}
+					if (scopes.length > 1 && formNames.contains(scopes[1]))
+					{
+						Iterator<ScriptMethod> scriptMethods = flattenedSolution.getForm(scopes[1]).getScriptMethods(false);
+						for (ScriptMethod method : Utils.iterate(scriptMethods))
+						{
+							String name = "forms." + scopes[1] + '.' + method.getName();
+							if (name.startsWith(prefix))
+							{
+								names.add(name);
+							}
+						}
+					}
+					else
+					{
+						for (String formName : formNames)
+						{
+							String name = "forms." + formName;
+							if (name.startsWith(prefix))
+							{
+								names.add(name);
+							}
+						}
+					}
+				}
+				return names;
+			}
 			String prefixLower = prefix.toLowerCase();
 			String datasourcePrefix = null;
 			if (Record.JS_RECORD.toLowerCase().startsWith(prefixLower))
@@ -116,6 +184,12 @@ public class TypeProvider implements ITypeProvider
 				}
 			}
 			if ("continuation".startsWith(prefixLower)) names.add("Continuation");
+			if (mode == TypeMode.JSDOC)
+			{
+				if ("scopes".startsWith(prefix)) names.add("scopes");
+				if ("forms".startsWith(prefix)) names.add("forms");
+			}
+
 		}
 		else
 		{
@@ -124,6 +198,11 @@ public class TypeProvider implements ITypeProvider
 //			names.add("Form");
 			names.add("RuntimeForm");
 			names.add("Continuation");
+			if (mode == TypeMode.JSDOC)
+			{
+				names.add("scopes");
+				names.add("forms");
+			}
 		}
 		return names;
 	}
