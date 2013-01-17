@@ -29,6 +29,7 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.Utils;
@@ -95,24 +96,32 @@ public class MobileComponentWithTitlePropertySource extends RetargetingPropertyS
 		}
 
 		String prefix;
-		PersistPropertySource elementPropertySource;
+		PersistPropertySource titlePropertySource = null, elementPropertySource;
 		if (title != null)
 		{
 			// show just the properties that are used for the title in the mobile client
-			elementPropertySources.put(prefix = "title", elementPropertySource = PersistPropertySource.createPersistPropertySource(title, getContext(), false));
-			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), "titleDataProviderID");
-			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DISPLAYSTAGS.getPropertyName(), "titleDisplaysTags");
-			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName(), "titleText");
+			elementPropertySources.put(prefix = "title", titlePropertySource = PersistPropertySource.createPersistPropertySource(title, getContext(), false));
+			addMethodPropertyDescriptor(titlePropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), "titleDataProviderID");
+			addMethodPropertyDescriptor(titlePropertySource, prefix, StaticContentSpecLoader.PROPERTY_DISPLAYSTAGS.getPropertyName(), "titleDisplaysTags");
+			addMethodPropertyDescriptor(titlePropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName(), "titleText");
 		}
 
 		if (component != null)
 		{
 			// show all properties for the component
 			elementPropertySources.put(prefix = null, elementPropertySource = PersistPropertySource.createPersistPropertySource(component, getContext(), false));
+			String propertyName;
 			for (IPropertyDescriptor desc : elementPropertySource.getPropertyDescriptors())
 			{
-				addMethodPropertyDescriptor(elementPropertySource, prefix, desc.getId().toString());
+				propertyName = desc.getId().toString();
+				// titleText should be skipped
+				if (StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName().equals(propertyName) && titlePropertySource != null) continue;
+				addMethodPropertyDescriptor(elementPropertySource, prefix, propertyName);
 			}
+
+			// if label, add support to hide the titleText
+			if (titlePropertySource != null && elementPropertySource.getPersist().getTypeID() == IRepository.GRAPHICALCOMPONENTS) addMethodPropertyDescriptor(
+				titlePropertySource, "title", StaticContentSpecLoader.PROPERTY_VISIBLE.getPropertyName(), "titleVisible");
 		}
 	}
 
