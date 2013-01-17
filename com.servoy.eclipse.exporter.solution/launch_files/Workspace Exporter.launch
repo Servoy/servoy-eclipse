@@ -14,7 +14,7 @@
 <booleanAttribute key="default" value="false"/>
 <booleanAttribute key="includeOptional" value="false"/>
 <stringAttribute key="location" value="${servoy_install}\workspace"/>
-<stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
+<stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -help -s _START_HERE -o J:\temp -data ${servoy_install}\workspace -verbose -sd -i18n -users -modules"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dservoy.application_server.dir=&quot;${servoy_install}/application_server/&quot; -Xms40m -Xmx512m -XX:MaxPermSize=256M"/>

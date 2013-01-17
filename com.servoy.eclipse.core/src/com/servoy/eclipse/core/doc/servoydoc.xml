@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <servoydoc>
   <runtime>
     <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT"/>
@@ -4624,7 +4624,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
         </function>
         <function name="hasRecords">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.scripting.api.IJSFoundSet"/>
+            <argumentType typecode="com.servoy.base.scripting.api.IJSFoundSet"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the foundset/relation has records.]]></return>
           <description><![CDATA[Returns true if the (related)foundset exists and has records.]]></description>
@@ -4638,14 +4638,14 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
 //	//do work on deeper relatedFoundSet
 //}]]></sample>
           <parameters>
-            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.scripting.api.IJSFoundSet">
+            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.base.scripting.api.IJSFoundSet">
               <description><![CDATA[A JSFoundset to test.]]></description>
             </parameter>
           </parameters>
         </function>
         <function name="hasRecords">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.scripting.api.IJSRecord"/>
+            <argumentType typecode="com.servoy.base.scripting.api.IJSRecord"/>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the foundset/relation has records.]]></return>
@@ -4660,7 +4660,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
 //	//do work on deeper relatedFoundSet
 //}]]></sample>
           <parameters>
-            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.scripting.api.IJSRecord">
+            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.base.scripting.api.IJSRecord">
               <description><![CDATA[A JSRecord to test.]]></description>
             </parameter>
             <parameter name="relationString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
@@ -5075,7 +5075,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
         </function>
         <function name="saveData">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.scripting.api.IJSFoundSet"/>
+            <argumentType typecode="com.servoy.base.scripting.api.IJSFoundSet"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the save was done without an error.]]></return>
           <description><![CDATA[Saves all outstanding (unsaved) data and exits the current record. 
@@ -5096,14 +5096,14 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
 //		if (recordIndex % 10 == 0) databaseManager.saveData();
 // }]]></sample>
           <parameters>
-            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.scripting.api.IJSFoundSet">
+            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.base.scripting.api.IJSFoundSet">
               <description><![CDATA[The JSFoundset to save.]]></description>
             </parameter>
           </parameters>
         </function>
         <function name="saveData">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.scripting.api.IJSRecord"/>
+            <argumentType typecode="com.servoy.base.scripting.api.IJSRecord"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the save was done without an error.]]></return>
           <description><![CDATA[Saves all outstanding (unsaved) data and exits the current record. 
@@ -5124,7 +5124,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
 //		if (recordIndex % 10 == 0) databaseManager.saveData();
 // }]]></sample>
           <parameters>
-            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.scripting.api.IJSRecord">
+            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.base.scripting.api.IJSRecord">
               <description><![CDATA[The JSRecord to save.]]></description>
             </parameter>
           </parameters>
@@ -12929,7 +12929,7 @@ If the foundset is in multiselect mode, all selected records are deleted.]]></de
         </function>
         <function name="deleteRecord">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.dataprocessing.IRecord"/>
+            <argumentType typecode="com.servoy.base.scripting.api.IJSRecord"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[boolean true if record could be deleted.]]></return>
           <description><![CDATA[Delete record from foundset.]]></description>
@@ -12937,7 +12937,7 @@ If the foundset is in multiselect mode, all selected records are deleted.]]></de
           <sample><![CDATA[var success = %%prefix%%foundset.deleteRecord(rec);
 //can return false incase of related foundset having records and orphans records are not allowed by the relation]]></sample>
           <parameters>
-            <parameter name="record" type="com.servoy.j2db.dataprocessing.IRecord" typecode="com.servoy.j2db.dataprocessing.IRecord">
+            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.base.scripting.api.IJSRecord">
               <description><![CDATA[The record to delete from the foundset.]]></description>
             </parameter>
           </parameters>
@@ -13314,7 +13314,7 @@ foundset.loadRecords(q);]]></sample>
           <argumentsTypes>
             <argumentType typecode="int"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.scripting.api.IJSRecord"><![CDATA[Record record.]]></return>
+          <return type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.base.scripting.api.IJSRecord"><![CDATA[Record record.]]></return>
           <description><![CDATA[Get the record object at the index.]]></description>
           <summary><![CDATA[Get the record object at the index.]]></summary>
           <sample><![CDATA[var record = %%prefix%%foundset.getRecord(index);]]></sample>
@@ -13373,7 +13373,7 @@ if (current.length > 1)
         </function>
         <function name="getSelectedRecord">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.scripting.api.IJSRecord"><![CDATA[Record record.]]></return>
+          <return type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.base.scripting.api.IJSRecord"><![CDATA[Record record.]]></return>
           <description><![CDATA[Get the selected record.]]></description>
           <summary><![CDATA[Get the selected record.]]></summary>
           <sample><![CDATA[var selectedRecord = %%prefix%%foundset.getSelectedRecord();]]></sample>
@@ -16903,7 +16903,7 @@ childrenPortal.setIntercellSpacing(5,10);]]></sample>
           <sample><![CDATA[var exception = record.exception;]]></sample>
         </property>
         <property name="foundset">
-          <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.scripting.api.IJSFoundSet"><![CDATA[The parent foundset of the record.]]></return>
+          <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.base.scripting.api.IJSFoundSet"><![CDATA[The parent foundset of the record.]]></return>
           <description><![CDATA[Returns parent foundset of the record.]]></description>
           <summary><![CDATA[Returns parent foundset of the record.]]></summary>
           <sample><![CDATA[var parent = record.foundset;]]></sample>
@@ -16921,7 +16921,7 @@ record.deleteRecord();]]></sample>
         </function>
         <function name="getChangedData">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.scripting.api.IJSDataSet"><![CDATA[a JSDataSet with the changed data of this record.]]></return>
+          <return type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.base.scripting.api.IJSDataSet"><![CDATA[a JSDataSet with the changed data of this record.]]></return>
           <description><![CDATA[Returns a JSDataSet with outstanding (not saved) changed data of this record.
 column1 is the column name, colum2 is the old data and column3 is the new data.
 
@@ -18032,7 +18032,7 @@ application.output(button_uuid.toString());]]></sample>
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMForm"/>
+            <argumentType typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMForm"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSTab" typecode="com.servoy.j2db.scripting.solutionmodel.JSTab"><![CDATA[A JSTab instance representing the newly created and added tab.]]></return>
           <description><![CDATA[Adds a new tab with the text label and JSForm.]]></description>
@@ -18059,7 +18059,7 @@ tabPanel.newTab('tab2', 'Child Two', childTwo);]]></sample>
             <parameter name="text" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The text to be displayed on the new tab.]]></description>
             </parameter>
-            <parameter name="form" type="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMForm" typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMForm">
+            <parameter name="form" type="com.servoy.base.scripting.api.solutionmodel.IBaseSMForm" typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMForm">
               <description><![CDATA[The JSForm instance that should be displayed in the new tab.]]></description>
             </parameter>
           </parameters>
@@ -18068,7 +18068,7 @@ tabPanel.newTab('tab2', 'Child Two', childTwo);]]></sample>
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMForm"/>
+            <argumentType typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMForm"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSTab" typecode="com.servoy.j2db.scripting.solutionmodel.JSTab"><![CDATA[A JSTab instance representing the newly created and added tab.]]></return>
@@ -18096,7 +18096,7 @@ tabPanel.newTab('tab2', 'Child Two', childTwo);]]></sample>
             <parameter name="text" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The text to be displayed on the new tab.]]></description>
             </parameter>
-            <parameter name="form" type="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMForm" typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMForm">
+            <parameter name="form" type="com.servoy.base.scripting.api.solutionmodel.IBaseSMForm" typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMForm">
               <description><![CDATA[The JSForm instance that should be displayed in the new tab.]]></description>
             </parameter>
             <parameter name="relation" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
@@ -23911,7 +23911,7 @@ If the foundset is in multiselect mode, all selected records are deleted.]]></de
         </function>
         <function name="deleteRecord">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.dataprocessing.IRecord"/>
+            <argumentType typecode="com.servoy.base.scripting.api.IJSRecord"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[boolean true if record could be deleted.]]></return>
           <description><![CDATA[Delete record from foundset.]]></description>
@@ -23919,7 +23919,7 @@ If the foundset is in multiselect mode, all selected records are deleted.]]></de
           <sample><![CDATA[var success = %%prefix%%foundset.deleteRecord(rec);
 //can return false incase of related foundset having records and orphans records are not allowed by the relation]]></sample>
           <parameters>
-            <parameter name="record" type="com.servoy.j2db.dataprocessing.IRecord" typecode="com.servoy.j2db.dataprocessing.IRecord">
+            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.base.scripting.api.IJSRecord">
               <description><![CDATA[The record to delete from the foundset.]]></description>
             </parameter>
           </parameters>
@@ -24296,7 +24296,7 @@ foundset.loadRecords(q);]]></sample>
           <argumentsTypes>
             <argumentType typecode="int"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.scripting.api.IJSRecord"><![CDATA[Record record.]]></return>
+          <return type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.base.scripting.api.IJSRecord"><![CDATA[Record record.]]></return>
           <description><![CDATA[Get the record object at the index.]]></description>
           <summary><![CDATA[Get the record object at the index.]]></summary>
           <sample><![CDATA[var record = %%prefix%%foundset.getRecord(index);]]></sample>
@@ -24355,7 +24355,7 @@ if (current.length > 1)
         </function>
         <function name="getSelectedRecord">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.scripting.api.IJSRecord"><![CDATA[Record record.]]></return>
+          <return type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.base.scripting.api.IJSRecord"><![CDATA[Record record.]]></return>
           <description><![CDATA[Get the selected record.]]></description>
           <summary><![CDATA[Get the selected record.]]></summary>
           <sample><![CDATA[var selectedRecord = %%prefix%%foundset.getSelectedRecord();]]></sample>
@@ -39334,7 +39334,7 @@ return true]]></sample>
         <function name="cloneComponent">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMComponent"/>
+            <argumentType typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMComponent"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSComponent" typecode="com.servoy.j2db.scripting.solutionmodel.JSComponent"><![CDATA[the exact copy of the given component]]></return>
           <description><![CDATA[Makes an exact copy of the given component (JSComponent/JSField/JSLabel) and gives it a new name.]]></description>
@@ -39347,7 +39347,7 @@ var clone = solutionModel.cloneComponent("clonedField",field);]]></sample>
             <parameter name="newName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the new name of the cloned component]]></description>
             </parameter>
-            <parameter name="component" type="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMComponent" typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMComponent">
+            <parameter name="component" type="com.servoy.base.scripting.api.solutionmodel.IBaseSMComponent" typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMComponent">
               <description><![CDATA[the component to clone]]></description>
             </parameter>
           </parameters>
@@ -39355,8 +39355,8 @@ var clone = solutionModel.cloneComponent("clonedField",field);]]></sample>
         <function name="cloneComponent">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMComponent"/>
-            <argumentType typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMForm"/>
+            <argumentType typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMComponent"/>
+            <argumentType typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMForm"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSComponent" typecode="com.servoy.j2db.scripting.solutionmodel.JSComponent"><![CDATA[the exact copy of the given component]]></return>
           <description><![CDATA[Makes an exact copy of the given component (JSComponent/JSField/JSLabel), gives it a new name and moves it to a new parent form, specified as a parameter.]]></description>
@@ -39373,10 +39373,10 @@ forms["targetForm"].controller.show();]]></sample>
             <parameter name="newName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the new name of the cloned component]]></description>
             </parameter>
-            <parameter name="component" type="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMComponent" typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMComponent">
+            <parameter name="component" type="com.servoy.base.scripting.api.solutionmodel.IBaseSMComponent" typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMComponent">
               <description><![CDATA[the component to clone]]></description>
             </parameter>
-            <parameter name="newParentForm" type="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMForm" typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMForm">
+            <parameter name="newParentForm" type="com.servoy.base.scripting.api.solutionmodel.IBaseSMForm" typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMForm">
               <description><![CDATA[the new parent form]]></description>
             </parameter>
           </parameters>
@@ -39384,7 +39384,7 @@ forms["targetForm"].controller.show();]]></sample>
         <function name="cloneForm">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMForm"/>
+            <argumentType typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMForm"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSForm" typecode="com.servoy.j2db.scripting.solutionmodel.JSForm"><![CDATA[a JSForm]]></return>
           <description><![CDATA[Makes an exact copy of the given form and gives it the new name.]]></description>
@@ -39401,7 +39401,7 @@ forms["clonedForm"].controller.show();]]></sample>
             <parameter name="newName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the new name for the form clone]]></description>
             </parameter>
-            <parameter name="jsForm" type="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMForm" typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMForm">
+            <parameter name="jsForm" type="com.servoy.base.scripting.api.solutionmodel.IBaseSMForm" typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMForm">
               <description><![CDATA[the form to be cloned]]></description>
             </parameter>
           </parameters>
@@ -40831,7 +40831,7 @@ forms.myForm.controller.recreateUI();]]></sample>
         </function>
         <function name="wrapMethodWithArguments" varargs="true">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMMethod"/>
+            <argumentType typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMMethod"/>
             <argumentType typecode="[Ljava.lang.Object;"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"><![CDATA[a JSMethod]]></return>
@@ -40846,7 +40846,7 @@ var quotedString = "'"+utils.stringReplace(str, "'", "\\'")+"'"
 // list all arguments the method has, use nulls for fixed arguments (like event)
 button.onAction = solutionModel.wrapMethodWithArguments(method, [null, true, 42, quotedString])]]></sample>
           <parameters>
-            <parameter name="method" type="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMMethod" typecode="com.servoy.j2db.scripting.api.solutionmodel.IBaseSMMethod">
+            <parameter name="method" type="com.servoy.base.scripting.api.solutionmodel.IBaseSMMethod" typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMMethod">
               <description><![CDATA[JSMethod to be assigned to an event]]></description>
             </parameter>
             <parameter name="args" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
@@ -41247,7 +41247,7 @@ var dot = utils.getUnicodeCharacter(9679);]]></sample>
         </function>
         <function name="hasRecords">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.scripting.api.IJSFoundSet"/>
+            <argumentType typecode="com.servoy.base.scripting.api.IJSFoundSet"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if exists]]></return>
           <description><![CDATA[Returns true if the (related)foundset exists and has records.
@@ -41264,14 +41264,14 @@ if (%%elementName%%.hasRecords(orders_to_orderitems))
 //	//do work on deeper relatedFoundSet
 //}]]></sample>
           <parameters>
-            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.scripting.api.IJSFoundSet">
+            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.base.scripting.api.IJSFoundSet">
               <description><![CDATA[the foundset to be tested]]></description>
             </parameter>
           </parameters>
         </function>
         <function name="hasRecords">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.scripting.api.IJSRecord"/>
+            <argumentType typecode="com.servoy.base.scripting.api.IJSRecord"/>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the foundset/relation has records.]]></return>
@@ -41289,7 +41289,7 @@ if (%%elementName%%.hasRecords(orders_to_orderitems))
 //	//do work on deeper relatedFoundSet
 //}]]></sample>
           <parameters>
-            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.scripting.api.IJSRecord">
+            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.base.scripting.api.IJSRecord">
               <description><![CDATA[A JSRecord to test.]]></description>
             </parameter>
             <parameter name="relationString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
@@ -43566,135 +43566,7 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
         </function>
         <function name="showRecords">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
-            <argumentType typecode="com.servoy.j2db.scripting.JSWindow"/>
-          </argumentsTypes>
-          <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
-          <parameters>
-            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
-              <description><![CDATA[the foundset to load before showing the form.]]></description>
-            </parameter>
-            <parameter name="window" type="com.servoy.j2db.scripting.JSWindow" typecode="com.servoy.j2db.scripting.JSWindow">
-              <description><![CDATA[the window in which this form should be shown, given as a window object.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="showRecords">
-          <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
-            <argumentType typecode="java.lang.String"/>
-          </argumentsTypes>
-          <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
-          <parameters>
-            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
-              <description><![CDATA[the foundset to load before showing the form.]]></description>
-            </parameter>
-            <parameter name="window" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[the window in which this form should be shown, specified by the name of an existing window.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="showRecords">
-          <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.dataprocessing.JSDataSet"/>
-          </argumentsTypes>
-          <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
-          <parameters>
-            <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet">
-              <description><![CDATA[the pkdataset to load before showing the form.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="showRecords">
-          <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.dataprocessing.JSDataSet"/>
-            <argumentType typecode="com.servoy.j2db.scripting.JSWindow"/>
-          </argumentsTypes>
-          <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
-          <parameters>
-            <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet">
-              <description><![CDATA[the pkdataset to load before showing the form.]]></description>
-            </parameter>
-            <parameter name="window" type="com.servoy.j2db.scripting.JSWindow" typecode="com.servoy.j2db.scripting.JSWindow">
-              <description><![CDATA[the window in which this form should be shown, given as a window object.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="showRecords">
-          <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.dataprocessing.JSDataSet"/>
-            <argumentType typecode="java.lang.String"/>
-          </argumentsTypes>
-          <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
-          <parameters>
-            <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet">
-              <description><![CDATA[the pkdataset to load before showing the form.]]></description>
-            </parameter>
-            <parameter name="window" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[the window in which this form should be shown, specified by the name of an existing window.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="showRecords">
-          <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
-          </argumentsTypes>
-          <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
-          <parameters>
-            <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
-              <description><![CDATA[the query to load before showing the form.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="showRecords">
-          <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
-            <argumentType typecode="com.servoy.j2db.scripting.JSWindow"/>
-          </argumentsTypes>
-          <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
-          <parameters>
-            <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
-              <description><![CDATA[the query to load before showing the form.]]></description>
-            </parameter>
-            <parameter name="window" type="com.servoy.j2db.scripting.JSWindow" typecode="com.servoy.j2db.scripting.JSWindow">
-              <description><![CDATA[the window in which this form should be shown, given as a window object.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="showRecords">
-          <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
-            <argumentType typecode="java.lang.String"/>
-          </argumentsTypes>
-          <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
-          <parameters>
-            <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
-              <description><![CDATA[the query to load before showing the form.]]></description>
-            </parameter>
-            <parameter name="window" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[the window in which this form should be shown, specified by the name of an existing window.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="showRecords">
-          <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.scripting.api.IJSFoundSet"/>
+            <argumentType typecode="com.servoy.base.scripting.api.IJSFoundSet"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
@@ -43708,8 +43580,136 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
 %%prefix%%controller.showRecords(foundset, w);
 //%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
           <parameters>
-            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.scripting.api.IJSFoundSet">
+            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.base.scripting.api.IJSFoundSet">
               <description><![CDATA[the foundset to load before showing the form.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="showRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
+            <argumentType typecode="com.servoy.j2db.scripting.JSWindow"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description/>
+          <sample/>
+          <parameters>
+            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
+              <description><![CDATA[the foundset to load before showing the form.]]></description>
+            </parameter>
+            <parameter name="window" type="com.servoy.j2db.scripting.JSWindow" typecode="com.servoy.j2db.scripting.JSWindow">
+              <description><![CDATA[the window in which this form should be shown, given as a window object.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="showRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description/>
+          <sample/>
+          <parameters>
+            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
+              <description><![CDATA[the foundset to load before showing the form.]]></description>
+            </parameter>
+            <parameter name="window" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the window in which this form should be shown, specified by the name of an existing window.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="showRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.JSDataSet"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description/>
+          <sample/>
+          <parameters>
+            <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet">
+              <description><![CDATA[the pkdataset to load before showing the form.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="showRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.JSDataSet"/>
+            <argumentType typecode="com.servoy.j2db.scripting.JSWindow"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description/>
+          <sample/>
+          <parameters>
+            <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet">
+              <description><![CDATA[the pkdataset to load before showing the form.]]></description>
+            </parameter>
+            <parameter name="window" type="com.servoy.j2db.scripting.JSWindow" typecode="com.servoy.j2db.scripting.JSWindow">
+              <description><![CDATA[the window in which this form should be shown, given as a window object.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="showRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.JSDataSet"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description/>
+          <sample/>
+          <parameters>
+            <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet">
+              <description><![CDATA[the pkdataset to load before showing the form.]]></description>
+            </parameter>
+            <parameter name="window" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the window in which this form should be shown, specified by the name of an existing window.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="showRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description/>
+          <sample/>
+          <parameters>
+            <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
+              <description><![CDATA[the query to load before showing the form.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="showRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
+            <argumentType typecode="com.servoy.j2db.scripting.JSWindow"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description/>
+          <sample/>
+          <parameters>
+            <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
+              <description><![CDATA[the query to load before showing the form.]]></description>
+            </parameter>
+            <parameter name="window" type="com.servoy.j2db.scripting.JSWindow" typecode="com.servoy.j2db.scripting.JSWindow">
+              <description><![CDATA[the window in which this form should be shown, given as a window object.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="showRecords">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description/>
+          <sample/>
+          <parameters>
+            <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
+              <description><![CDATA[the query to load before showing the form.]]></description>
+            </parameter>
+            <parameter name="window" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the window in which this form should be shown, specified by the name of an existing window.]]></description>
             </parameter>
           </parameters>
         </function>
