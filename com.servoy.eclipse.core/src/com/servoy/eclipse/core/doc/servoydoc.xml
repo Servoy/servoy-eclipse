@@ -18032,7 +18032,7 @@ application.output(button_uuid.toString());]]></sample>
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMForm"/>
+            <argumentType typecode="com.servoy.base.solutionmodel.IBaseSMForm"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSTab" typecode="com.servoy.j2db.scripting.solutionmodel.JSTab"><![CDATA[A JSTab instance representing the newly created and added tab.]]></return>
           <description><![CDATA[Adds a new tab with the text label and JSForm.]]></description>
@@ -18059,7 +18059,7 @@ tabPanel.newTab('tab2', 'Child Two', childTwo);]]></sample>
             <parameter name="text" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The text to be displayed on the new tab.]]></description>
             </parameter>
-            <parameter name="form" type="com.servoy.base.scripting.api.solutionmodel.IBaseSMForm" typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMForm">
+            <parameter name="form" type="com.servoy.base.solutionmodel.IBaseSMForm" typecode="com.servoy.base.solutionmodel.IBaseSMForm">
               <description><![CDATA[The JSForm instance that should be displayed in the new tab.]]></description>
             </parameter>
           </parameters>
@@ -18068,7 +18068,7 @@ tabPanel.newTab('tab2', 'Child Two', childTwo);]]></sample>
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMForm"/>
+            <argumentType typecode="com.servoy.base.solutionmodel.IBaseSMForm"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSTab" typecode="com.servoy.j2db.scripting.solutionmodel.JSTab"><![CDATA[A JSTab instance representing the newly created and added tab.]]></return>
@@ -18096,7 +18096,7 @@ tabPanel.newTab('tab2', 'Child Two', childTwo);]]></sample>
             <parameter name="text" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The text to be displayed on the new tab.]]></description>
             </parameter>
-            <parameter name="form" type="com.servoy.base.scripting.api.solutionmodel.IBaseSMForm" typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMForm">
+            <parameter name="form" type="com.servoy.base.solutionmodel.IBaseSMForm" typecode="com.servoy.base.solutionmodel.IBaseSMForm">
               <description><![CDATA[The JSForm instance that should be displayed in the new tab.]]></description>
             </parameter>
             <parameter name="relation" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
@@ -39334,7 +39334,7 @@ return true]]></sample>
         <function name="cloneComponent">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMComponent"/>
+            <argumentType typecode="com.servoy.base.solutionmodel.IBaseSMComponent"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSComponent" typecode="com.servoy.j2db.scripting.solutionmodel.JSComponent"><![CDATA[the exact copy of the given component]]></return>
           <description><![CDATA[Makes an exact copy of the given component (JSComponent/JSField/JSLabel) and gives it a new name.]]></description>
@@ -39347,7 +39347,7 @@ var clone = solutionModel.cloneComponent("clonedField",field);]]></sample>
             <parameter name="newName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the new name of the cloned component]]></description>
             </parameter>
-            <parameter name="component" type="com.servoy.base.scripting.api.solutionmodel.IBaseSMComponent" typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMComponent">
+            <parameter name="component" type="com.servoy.base.solutionmodel.IBaseSMComponent" typecode="com.servoy.base.solutionmodel.IBaseSMComponent">
               <description><![CDATA[the component to clone]]></description>
             </parameter>
           </parameters>
@@ -39355,8 +39355,8 @@ var clone = solutionModel.cloneComponent("clonedField",field);]]></sample>
         <function name="cloneComponent">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMComponent"/>
-            <argumentType typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMForm"/>
+            <argumentType typecode="com.servoy.base.solutionmodel.IBaseSMComponent"/>
+            <argumentType typecode="com.servoy.base.solutionmodel.IBaseSMForm"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSComponent" typecode="com.servoy.j2db.scripting.solutionmodel.JSComponent"><![CDATA[the exact copy of the given component]]></return>
           <description><![CDATA[Makes an exact copy of the given component (JSComponent/JSField/JSLabel), gives it a new name and moves it to a new parent form, specified as a parameter.]]></description>
@@ -39373,10 +39373,10 @@ forms["targetForm"].controller.show();]]></sample>
             <parameter name="newName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the new name of the cloned component]]></description>
             </parameter>
-            <parameter name="component" type="com.servoy.base.scripting.api.solutionmodel.IBaseSMComponent" typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMComponent">
+            <parameter name="component" type="com.servoy.base.solutionmodel.IBaseSMComponent" typecode="com.servoy.base.solutionmodel.IBaseSMComponent">
               <description><![CDATA[the component to clone]]></description>
             </parameter>
-            <parameter name="newParentForm" type="com.servoy.base.scripting.api.solutionmodel.IBaseSMForm" typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMForm">
+            <parameter name="newParentForm" type="com.servoy.base.solutionmodel.IBaseSMForm" typecode="com.servoy.base.solutionmodel.IBaseSMForm">
               <description><![CDATA[the new parent form]]></description>
             </parameter>
           </parameters>
@@ -39384,7 +39384,7 @@ forms["targetForm"].controller.show();]]></sample>
         <function name="cloneForm">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMForm"/>
+            <argumentType typecode="com.servoy.base.solutionmodel.IBaseSMForm"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSForm" typecode="com.servoy.j2db.scripting.solutionmodel.JSForm"><![CDATA[a JSForm]]></return>
           <description><![CDATA[Makes an exact copy of the given form and gives it the new name.]]></description>
@@ -39401,7 +39401,7 @@ forms["clonedForm"].controller.show();]]></sample>
             <parameter name="newName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the new name for the form clone]]></description>
             </parameter>
-            <parameter name="jsForm" type="com.servoy.base.scripting.api.solutionmodel.IBaseSMForm" typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMForm">
+            <parameter name="jsForm" type="com.servoy.base.solutionmodel.IBaseSMForm" typecode="com.servoy.base.solutionmodel.IBaseSMForm">
               <description><![CDATA[the form to be cloned]]></description>
             </parameter>
           </parameters>
@@ -40831,7 +40831,7 @@ forms.myForm.controller.recreateUI();]]></sample>
         </function>
         <function name="wrapMethodWithArguments" varargs="true">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMMethod"/>
+            <argumentType typecode="com.servoy.base.solutionmodel.IBaseSMMethod"/>
             <argumentType typecode="[Ljava.lang.Object;"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"><![CDATA[a JSMethod]]></return>
@@ -40846,7 +40846,7 @@ var quotedString = "'"+utils.stringReplace(str, "'", "\\'")+"'"
 // list all arguments the method has, use nulls for fixed arguments (like event)
 button.onAction = solutionModel.wrapMethodWithArguments(method, [null, true, 42, quotedString])]]></sample>
           <parameters>
-            <parameter name="method" type="com.servoy.base.scripting.api.solutionmodel.IBaseSMMethod" typecode="com.servoy.base.scripting.api.solutionmodel.IBaseSMMethod">
+            <parameter name="method" type="com.servoy.base.solutionmodel.IBaseSMMethod" typecode="com.servoy.base.solutionmodel.IBaseSMMethod">
               <description><![CDATA[JSMethod to be assigned to an event]]></description>
             </parameter>
             <parameter name="args" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
