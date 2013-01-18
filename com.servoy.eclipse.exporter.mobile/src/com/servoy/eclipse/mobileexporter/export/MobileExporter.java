@@ -448,13 +448,13 @@ public class MobileExporter
 		StringBuffer variablesScript = new StringBuffer();
 		if (parent instanceof Form)
 		{
-			variablesScript.append(buildVariablesScripting(template, ((Form)parent).getScriptVariables(true), ",\n")); //$NON-NLS-1$
+			variablesScript.append(buildVariablesScripting(template, ((Form)parent).getScriptVariables(false), ",\n")); //$NON-NLS-1$
 		}
 		if (parent instanceof Solution)
 		{
 			if (scopeName != null)
 			{
-				variablesScript.append(buildVariablesScripting(template, ((Solution)parent).getScriptVariables(scopeName, true), ",\n")); //$NON-NLS-1$
+				variablesScript.append(buildVariablesScripting(template, ((Solution)parent).getScriptVariables(scopeName, false), ",\n")); //$NON-NLS-1$
 			}
 			else
 			{
@@ -463,9 +463,9 @@ public class MobileExporter
 				while (formIterator.hasNext())
 				{
 					Form form = formIterator.next();
-					variablesScript.append(buildVariablesScripting(template, form.getScriptVariables(true), null));
+					variablesScript.append(buildVariablesScripting(template, form.getScriptVariables(false), null));
 				}
-				variablesScript.append(buildVariablesScripting(template, ((Solution)parent).getScriptVariables(true), null));
+				variablesScript.append(buildVariablesScripting(template, ((Solution)parent).getScriptVariables(false), null));
 			}
 		}
 		return variablesScript.toString();
@@ -482,7 +482,7 @@ public class MobileExporter
 				String variableScripting = template;
 				variableScripting = variableScripting.replace(PROPERTY_VARIABLE_NAME, variable.getName());
 				variableScripting = variableScripting.replace(PROPERTY_VARIABLE_DEFAULT_VALUE,
-					variable.getDefaultValue() == null ? "null" : Utils.stringEscapeQuote(variable.getDefaultValue(), '"'));
+					variable.getDefaultValue() == null ? "\"null\"" : JSONObject.quote(variable.getDefaultValue()));
 				variableScripting = variableScripting.replace(PROPERTY_VARIABLE_TYPE, String.valueOf(variable.getTypeID()));
 				variablesScript.append(variableScripting);
 				if (separator != null && variableIterator.hasNext()) variablesScript.append(separator);

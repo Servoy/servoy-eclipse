@@ -34,7 +34,7 @@ ${loop_forms}			${formName} : {
 ${loop_functions}					${functionName} : ${functionCode}${endloop_functions}
 				},
 				vrbs: {
-${loop_variables}					${variableName} : ["${defaultValue}", ${variableType}]${endloop_variables}
+${loop_variables}					${variableName} : [${defaultValue}, ${variableType}]${endloop_variables}
 				}
 			}${endloop_forms}			     
 		},
@@ -45,7 +45,7 @@ ${loop_scopes}			${scopeName} : {
 ${loop_functions}					 ${functionName} : ${functionCode}${endloop_functions}
 				},
 				vrbs: {
-${loop_variables}					${variableName} : ["${defaultValue}",${variableType}]${endloop_variables}
+${loop_variables}					${variableName} : [${defaultValue},${variableType}]${endloop_variables}
 				}
 			}${endloop_scopes}			
 		},
