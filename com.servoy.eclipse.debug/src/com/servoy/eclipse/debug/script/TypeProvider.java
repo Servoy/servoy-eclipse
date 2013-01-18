@@ -22,6 +22,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.ITypeProvider;
 import org.eclipse.dltk.javascript.typeinfo.TypeMode;
@@ -32,6 +34,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormEncapsulation;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.util.Debug;
@@ -71,74 +74,131 @@ public class TypeProvider implements ITypeProvider
 	public Set<String> listTypes(ITypeInfoContext context, TypeMode mode, String prefix)
 	{
 		Set<String> names = TYPES.getTypeNames(prefix);
-		if (prefix != null)
+		if (prefix != null && prefix.trim().length() != 0)
 		{
-			if (mode == TypeMode.JSDOC && prefix.indexOf('.') != -1)
-			{
-				FlattenedSolution flattenedSolution = ElementResolver.getFlattenedSolution(context);
-				String[] scopes = prefix.split("\\.");
-				if (scopes[0].equals("scopes"))
-				{
-					Collection<String> scopeNames = flattenedSolution.getScopeNames();
-					if (scopes.length > 1 && scopeNames.contains(scopes[1]))
-					{
-						Iterator<ScriptMethod> scriptMethods = flattenedSolution.getScriptMethods(scopes[1], false);
-						for (ScriptMethod method : Utils.iterate(scriptMethods))
-						{
-							String name = "scopes." + scopes[1] + '.' + method.getName();
-							if (name.startsWith(prefix))
-							{
-								names.add(name);
-							}
-						}
-					}
-					else
-					{
-						for (String scopeName : scopeNames)
-						{
-							String name = "scopes." + scopeName;
-							if (name.startsWith(prefix))
-							{
-								names.add(name);
-							}
-						}
-					}
-				}
-				else if (scopes[0].equals("forms"))
-				{
-					ArrayList<String> formNames = new ArrayList(64);
-					Iterator<Form> forms = flattenedSolution.getForms(false);
-					for (Form form : Utils.iterate(forms))
-					{
-						formNames.add(form.getName());
-					}
-					if (scopes.length > 1 && formNames.contains(scopes[1]))
-					{
-						Iterator<ScriptMethod> scriptMethods = flattenedSolution.getForm(scopes[1]).getScriptMethods(false);
-						for (ScriptMethod method : Utils.iterate(scriptMethods))
-						{
-							String name = "forms." + scopes[1] + '.' + method.getName();
-							if (name.startsWith(prefix))
-							{
-								names.add(name);
-							}
-						}
-					}
-					else
-					{
-						for (String formName : formNames)
-						{
-							String name = "forms." + formName;
-							if (name.startsWith(prefix))
-							{
-								names.add(name);
-							}
-						}
-					}
-				}
-				return names;
-			}
 			String prefixLower = prefix.toLowerCase();
+			FlattenedSolution flattenedSolution = ElementResolver.getFlattenedSolution(context);
+			if (mode == TypeMode.JSDOC && flattenedSolution != null)
+			{
+				if (prefix.indexOf('.') != -1)
+				{
+					String[] scopes = prefix.split("\\.");
+					if (scopes[0].equals("scopes"))
+					{
+						Collection<String> scopeNames = flattenedSolution.getScopeNames();
+						if (scopes.length > 1 && scopeNames.contains(scopes[1]))
+						{
+							Iterator<ScriptMethod> scriptMethods = flattenedSolution.getScriptMethods(scopes[1], false);
+							for (ScriptMethod method : Utils.iterate(scriptMethods))
+							{
+								String name = "scopes." + scopes[1] + '.' + method.getName();
+								if (name.startsWith(prefix))
+								{
+									names.add(name);
+								}
+							}
+						}
+						else
+						{
+							for (String scopeName : scopeNames)
+							{
+								String name = "scopes." + scopeName;
+								if (name.startsWith(prefix))
+								{
+									names.add(name);
+								}
+							}
+						}
+					}
+					else if (scopes[0].equals("forms"))
+					{
+						ArrayList<String> formNames = new ArrayList<String>(64);
+						Iterator<Form> forms = flattenedSolution.getForms(false);
+						for (Form form : Utils.iterate(forms))
+						{
+							formNames.add(form.getName());
+						}
+						if (scopes.length > 1 && formNames.contains(scopes[1]))
+						{
+							Iterator<ScriptMethod> scriptMethods = flattenedSolution.getForm(scopes[1]).getScriptMethods(false);
+							for (ScriptMethod method : Utils.iterate(scriptMethods))
+							{
+								if (method.isConstructor() && !method.isPrivate())
+								{
+									String name = "forms." + scopes[1] + '.' + method.getName();
+									if (name.startsWith(prefix))
+									{
+										names.add(name);
+									}
+								}
+							}
+						}
+						else
+						{
+							for (String formName : formNames)
+							{
+								String name = "forms." + formName;
+								if (name.startsWith(prefix) && !FormEncapsulation.isPrivate(flattenedSolution.getForm(formName), flattenedSolution))
+								{
+									names.add(name);
+								}
+							}
+						}
+					}
+					return names;
+				}
+				else
+				{
+					Form currentForm = ElementResolver.getForm(context);
+					String currentScope = null;
+					if (currentForm == null)
+					{
+						IResource resource = context.getModelElement().getResource();
+						if (resource != null)
+						{
+							IPath path = resource.getProjectRelativePath();
+							if (path.segmentCount() == 1 && path.lastSegment().endsWith(".js"))
+							{
+								currentScope = path.lastSegment().substring(0, path.lastSegment().length() - 3);
+							}
+						}
+					}
+					Iterator<ScriptMethod> scriptMethods = flattenedSolution.getScriptMethods(false);
+					while (scriptMethods.hasNext())
+					{
+						ScriptMethod sm = scriptMethods.next();
+						if (sm.isConstructor() && !sm.isPrivate() && !sm.getScopeName().equals(currentScope))
+						{
+							String name = sm.getName();
+							if (name.toLowerCase().startsWith(prefixLower))
+							{
+								names.add(sm.getScopeName() + '.' + sm.getName());
+							}
+						}
+					}
+					Iterator<Form> forms = flattenedSolution.getForms(false);
+					while (forms.hasNext())
+					{
+						Form form = forms.next();
+						if (currentForm != form && !FormEncapsulation.isPrivate(form, flattenedSolution))
+						{
+							scriptMethods = form.getScriptMethods(false);
+							while (scriptMethods.hasNext())
+							{
+								ScriptMethod sm = scriptMethods.next();
+								if (sm.isConstructor() && !sm.isPrivate())
+								{
+									String name = sm.getName();
+									if (name.toLowerCase().startsWith(prefixLower))
+									{
+										names.add("forms." + form.getName() + '.' + sm.getName());
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 			String datasourcePrefix = null;
 			if (Record.JS_RECORD.toLowerCase().startsWith(prefixLower))
 			{
