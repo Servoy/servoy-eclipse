@@ -108,14 +108,14 @@ public class MobileListModel implements ISupportBounds
 		return component instanceof ISupportBounds ? ((ISupportBounds)component).getLocation() : null;
 	}
 
-	public static MobileListModel create(Form form, ISupportChilds component)
+	public static MobileListModel create(Form form, ISupportChilds parent)
 	{
 		GraphicalComponent header = null;
 		GraphicalComponent button = null;
 		GraphicalComponent subtext = null;
 		Field countBubble = null;
 		Field image = null;
-		for (IPersist elem : Utils.iterate(component.getAllObjects()))
+		for (IPersist elem : Utils.iterate(parent.getAllObjects()))
 		{
 			if (elem instanceof GraphicalComponent &&
 				((GraphicalComponent)elem).getCustomMobileProperty(IMobileProperties.LIST_ITEM_HEADER.propertyName) != null)
@@ -142,6 +142,6 @@ public class MobileListModel implements ISupportBounds
 			}
 		}
 
-		return new MobileListModel(form, component, header, button, subtext, countBubble, image);
+		return new MobileListModel(form, parent instanceof Form ? null : parent, header, button, subtext, countBubble, image);
 	}
 }
