@@ -1,7 +1,84 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <servoydoc>
   <runtime>
-    <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT"/>
+    <object publicName="ALIGNMENT" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ALIGNMENT">
+      <constants>
+        <constant name="ACCORDION_PANEL">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used for creating accordion panel from tab panel, by setting its tabOrientation.]]></description>
+          <summary><![CDATA[Constant used for creating accordion panel from tab panel, by setting its tabOrientation.]]></summary>
+          <sample><![CDATA[var accordion = myForm.newTabPanel('accordion', 10, 10, 620, 460);
+accordion.tabOrientation = SM_ALIGNMENT.ACCORDION_PANEL;]]></sample>
+        </constant>
+        <constant name="BOTTOM">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used for setting vertical alignment for components.
+It makes the text inside the component be bottom aligned vertically.]]></description>
+          <summary><![CDATA[Constant used for setting vertical alignment for components.]]></summary>
+          <sample><![CDATA[var bottomAlignedLabel = form.newLabel('BOTTOM', 520, 10, 50, 300);
+bottomAlignedLabel.verticalAlignment = SM_ALIGNMENT.BOTTOM;]]></sample>
+        </constant>
+        <constant name="CENTER">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used for setting horizontal and vertical alignment
+for components. If used for horizontal alignment,
+then the text of the component will be horizontally centered.
+Similarly, if used for vertical alignment, then the text
+of the component will be vertically centered.]]></description>
+          <summary><![CDATA[Constant used for setting horizontal and vertical alignment
+for components.]]></summary>
+          <sample><![CDATA[var hCenteredLabel = form.newLabel('CENTER', 10, 40, 300, 20);
+hCenteredLabel.horizontalAlignment = SM_ALIGNMENT.CENTER;
+var vCenterAlignedLabel = form.newLabel('CENTER', 460, 10, 50, 300);
+vCenterAlignedLabel.verticalAlignment = SM_ALIGNMENT.CENTER]]></sample>
+        </constant>
+        <constant name="DEFAULT">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used for setting horizontal and vertical alignment. DEFAULT value makes the alignment behave as if it was not changed before.]]></description>
+          <summary><![CDATA[Constant used for setting horizontal and vertical alignment.]]></summary>
+          <sample><![CDATA[var hLabel = myJSForm.getLabel('label_name');
+if (hLabel.horizontalAlignment == SM_ALIGNMENT.LEFT) hLabel.horizontalAlignment = SM_ALIGNMENT.DEFAULT;]]></sample>
+        </constant>
+        <constant name="LEFT">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used for setting horizontal alignment for components.
+It makes the text inside the component be left aligned horizontally.]]></description>
+          <summary><![CDATA[Constant used for setting horizontal alignment for components.]]></summary>
+          <sample><![CDATA[var leftAlignedLabel = form.newLabel('LEFT', 10, 10, 300, 20);
+leftAlignedLabel.horizontalAlignment = SM_ALIGNMENT.LEFT;]]></sample>
+        </constant>
+        <constant name="RIGHT">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used for setting horizontal alignment for components.
+It makes the text inside the component be right aligned vertically.]]></description>
+          <summary><![CDATA[Constant used for setting horizontal alignment for components.]]></summary>
+          <sample><![CDATA[var rightAlignedLabel = form.newLabel('RIGHT', 10, 70, 300, 20);
+rightAlignedLabel.horizontalAlignment = SM_ALIGNMENT.RIGHT;]]></sample>
+        </constant>
+        <constant name="SPLIT_HORIZONTAL">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used for creating horizontal split pane from tab panel, by setting its tabOrientation.]]></description>
+          <summary><![CDATA[Constant used for creating horizontal split pane from tab panel, by setting its tabOrientation.]]></summary>
+          <sample><![CDATA[var splitPane = myForm.newTabPanel('splitPane', 10, 10, 620, 460);
+splitPane.tabOrientation = SM_ALIGNMENT.SPLIT_HORIZONTAL;]]></sample>
+        </constant>
+        <constant name="SPLIT_VERTICAL">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used for creating vertical split pane from tab panel, by setting its tabOrientation.]]></description>
+          <summary><![CDATA[Constant used for creating vertical split pane from tab panel, by setting its tabOrientation.]]></summary>
+          <sample><![CDATA[var splitPane = myForm.newTabPanel('splitPane', 10, 10, 620, 460);
+splitPane.tabOrientation = SM_ALIGNMENT.SPLIT_VERTICAL;]]></sample>
+        </constant>
+        <constant name="TOP">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used for setting vertical alignment for components.
+It makes the text inside the component be top aligned vertically.]]></description>
+          <summary><![CDATA[Constant used for setting vertical alignment for components.]]></summary>
+          <sample><![CDATA[var topAlignedLabel = form.newLabel('TOP', 400, 10, 50, 300);
+topAlignedLabel.verticalAlignment = SM_ALIGNMENT.TOP;]]></sample>
+        </constant>
+      </constants>
+    </object>
     <object publicName="ANCHOR" qualifiedName="com.servoy.j2db.scripting.solutionmodel.ANCHOR">
       <constants>
         <constant name="ALL">
@@ -502,8 +579,28 @@ controller.showRecords(15, nmd); // 15 is a single-number pk in this case]]></sa
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The output generated by the program execution.]]></return>
-          <description/>
-          <sample/>
+          <description><![CDATA[Execute a program and returns output. Specify the cmd as you would do in a console.]]></description>
+          <summary><![CDATA[Execute a program and returns output.]]></summary>
+          <sample><![CDATA[// For Windows systems:
+// Runs a binary located in the user's home directory. The application will run in the current working
+// directory, which in general is the one where Servoy was started from.
+application.executeProgram("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"]);
+// The same as above, but run the application in the user's home directory. 
+application.executeProgram("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"],null,"c:\\Users\\myself\\");	
+// The same as above, but also set an environment variable for the called program.
+application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
+// For non-Windows systems:
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"],null,"/home/myself/");	
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"],"/home/myself/");
+// Open a file with the default application associated with it. (on Windows)
+application.executeProgram("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
+// Open a file with the default application associated with it. (on Linux)
+application.executeProgram("xdg-open", ["filename"]);
+// Open a file with the default application associated with it. (on MacOS)
+application.executeProgram("open",["filename"]);
+// Open a file with a specific application (on MacOS).
+application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"]);]]></sample>
           <parameters>
             <parameter name="program" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[(fullpath) of the program to execute]]></description>
@@ -516,8 +613,28 @@ controller.showRecords(15, nmd); // 15 is a single-number pk in this case]]></sa
             <argumentType typecode="[Ljava.lang.String;"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The output generated by the program execution.]]></return>
-          <description/>
-          <sample/>
+          <description><![CDATA[Execute a program and returns output. Specify the cmd as you would do in a console.]]></description>
+          <summary><![CDATA[Execute a program and returns output.]]></summary>
+          <sample><![CDATA[// For Windows systems:
+// Runs a binary located in the user's home directory. The application will run in the current working
+// directory, which in general is the one where Servoy was started from.
+application.executeProgram("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"]);
+// The same as above, but run the application in the user's home directory. 
+application.executeProgram("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"],null,"c:\\Users\\myself\\");	
+// The same as above, but also set an environment variable for the called program.
+application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
+// For non-Windows systems:
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"],null,"/home/myself/");	
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"],"/home/myself/");
+// Open a file with the default application associated with it. (on Windows)
+application.executeProgram("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
+// Open a file with the default application associated with it. (on Linux)
+application.executeProgram("xdg-open", ["filename"]);
+// Open a file with the default application associated with it. (on MacOS)
+application.executeProgram("open",["filename"]);
+// Open a file with a specific application (on MacOS).
+application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"]);]]></sample>
           <parameters>
             <parameter name="program" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[(fullpath) of the program to execute]]></description>
@@ -534,8 +651,28 @@ controller.showRecords(15, nmd); // 15 is a single-number pk in this case]]></sa
             <argumentType typecode="[Ljava.lang.String;"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The output generated by the program execution.]]></return>
-          <description/>
-          <sample/>
+          <description><![CDATA[Execute a program and returns output. Specify the cmd as you would do in a console.]]></description>
+          <summary><![CDATA[Execute a program and returns output.]]></summary>
+          <sample><![CDATA[// For Windows systems:
+// Runs a binary located in the user's home directory. The application will run in the current working
+// directory, which in general is the one where Servoy was started from.
+application.executeProgram("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"]);
+// The same as above, but run the application in the user's home directory. 
+application.executeProgram("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"],null,"c:\\Users\\myself\\");	
+// The same as above, but also set an environment variable for the called program.
+application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
+// For non-Windows systems:
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"],null,"/home/myself/");	
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"],"/home/myself/");
+// Open a file with the default application associated with it. (on Windows)
+application.executeProgram("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
+// Open a file with the default application associated with it. (on Linux)
+application.executeProgram("xdg-open", ["filename"]);
+// Open a file with the default application associated with it. (on MacOS)
+application.executeProgram("open",["filename"]);
+// Open a file with a specific application (on MacOS).
+application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"]);]]></sample>
           <parameters>
             <parameter name="program" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[(fullpath) of the program to execute]]></description>
@@ -599,7 +736,7 @@ application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"])
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The output generated by the program execution.]]></return>
           <description/>
-          <deprecated><![CDATA[* @deprecated as of release 7.0 .Use overload with array arguments ,for ex: executeProgram("c:\\Users\\myself\\myapp.exe", null,["arg1", "arg2", "arg3"]);
+          <deprecated><![CDATA[As of release 7.0. Use overload with array arguments, for ex: executeProgram("c:\\Users\\myself\\myapp.exe", null,["arg1", "arg2", "arg3"]);
 Execute a program and returns output. Specify the cmd as you would do in a console.]]></deprecated>
           <sample><![CDATA[// "#" is divider between program args, environment vars and startdir
 // For Windows systems:
@@ -652,27 +789,67 @@ application.executeProgram("open", "-a", "OpenOffice.org.app", "filename.doc");]
             </parameter>
           </parameters>
         </function>
-        <function name="executeProgramInBacground">
+        <function name="executeProgramInBackground">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Execute a program in the background. Specify the cmd as you would do in a console.]]></description>
+          <summary><![CDATA[Execute a program in the background.]]></summary>
+          <sample><![CDATA[// For Windows systems:
+// Runs a binary located in the user's home directory. The application will run in the current working
+// directory, which in general is the one where Servoy was started from.
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"]);
+// The same as above, but run the application in the user's home directory. 
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"],null,"c:\\Users\\myself\\");	
+// The same as above, but also set an environment variable for the called program.
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
+// For non-Windows systems:
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"],null,"/home/myself/");	
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"],"/home/myself/");
+// Open a file with the default application associated with it. (on Windows)
+application.executeProgramInBackground("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
+// Open a file with the default application associated with it. (on Linux)
+application.executeProgramInBackground("xdg-open", ["filename"]);
+// Open a file with the default application associated with it. (on MacOS)
+application.executeProgramInBackground("open",["filename"]);
+// Open a file with a specific application (on MacOS).
+application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"]);]]></sample>
           <parameters>
             <parameter name="program" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[(fullpath) of the program to execute]]></description>
             </parameter>
           </parameters>
         </function>
-        <function name="executeProgramInBacground">
+        <function name="executeProgramInBackground">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="[Ljava.lang.String;"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Execute a program in the background. Specify the cmd as you would do in a console.]]></description>
+          <summary><![CDATA[Execute a program in the background.]]></summary>
+          <sample><![CDATA[// For Windows systems:
+// Runs a binary located in the user's home directory. The application will run in the current working
+// directory, which in general is the one where Servoy was started from.
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"]);
+// The same as above, but run the application in the user's home directory. 
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"],null,"c:\\Users\\myself\\");	
+// The same as above, but also set an environment variable for the called program.
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
+// For non-Windows systems:
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"],null,"/home/myself/");	
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"],"/home/myself/");
+// Open a file with the default application associated with it. (on Windows)
+application.executeProgramInBackground("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
+// Open a file with the default application associated with it. (on Linux)
+application.executeProgramInBackground("xdg-open", ["filename"]);
+// Open a file with the default application associated with it. (on MacOS)
+application.executeProgramInBackground("open",["filename"]);
+// Open a file with a specific application (on MacOS).
+application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"]);]]></sample>
           <parameters>
             <parameter name="program" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[(fullpath) of the program to execute]]></description>
@@ -682,15 +859,35 @@ application.executeProgram("open", "-a", "OpenOffice.org.app", "filename.doc");]
             </parameter>
           </parameters>
         </function>
-        <function name="executeProgramInBacground">
+        <function name="executeProgramInBackground">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="[Ljava.lang.String;"/>
             <argumentType typecode="[Ljava.lang.String;"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Execute a program in the background. Specify the cmd as you would do in a console.]]></description>
+          <summary><![CDATA[Execute a program in the background.]]></summary>
+          <sample><![CDATA[// For Windows systems:
+// Runs a binary located in the user's home directory. The application will run in the current working
+// directory, which in general is the one where Servoy was started from.
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"]);
+// The same as above, but run the application in the user's home directory. 
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"],null,"c:\\Users\\myself\\");	
+// The same as above, but also set an environment variable for the called program.
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
+// For non-Windows systems:
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"],null,"/home/myself/");	
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"],"/home/myself/");
+// Open a file with the default application associated with it. (on Windows)
+application.executeProgramInBackground("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
+// Open a file with the default application associated with it. (on Linux)
+application.executeProgramInBackground("xdg-open", ["filename"]);
+// Open a file with the default application associated with it. (on MacOS)
+application.executeProgramInBackground("open",["filename"]);
+// Open a file with a specific application (on MacOS).
+application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"]);]]></sample>
           <parameters>
             <parameter name="program" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[(fullpath) of the program to execute]]></description>
@@ -754,8 +951,7 @@ application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"])
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[as of release 7.0 .Use overload with array arguments for ex: executeProgramInBackground("c:\\Users\\myself\\myapp.exe", null,["arg1", "arg2", "arg3"]);
-
+          <deprecated><![CDATA[As of release 7.0. Use overload with array arguments for ex: executeProgramInBackground("c:\\Users\\myself\\myapp.exe", null,["arg1", "arg2", "arg3"]);
 Execute a program in the background. Specify the cmd as you would do in a console.]]></deprecated>
           <sample><![CDATA[// "#" is divider between program args, environment vars and startdir
 // For Windows systems:
@@ -843,12 +1039,13 @@ application.exit();]]></sample>
         <function name="getActiveWindow">
           <argumentsTypes/>
           <return type="com.servoy.j2db.scripting.JSWindow" typecode="com.servoy.j2db.scripting.JSWindow"><![CDATA[the current active/focussed window.]]></return>
-          <description><![CDATA[This gets the currently focused active window, this can be the main application window or a modal dialog.
+          <description><![CDATA[This gets the currently focused active window; this can be the main application window or a modal dialog.
 For a webclient getWindow() can return the main window that is not really the main for the current tab in the browser
-that can return a the previous tab that a user could have opened. For this this method is better suited because this 
+that can return the previous tab that a user could have opened. For this method is better suited because this 
 will give you the actual tab in the browser. Another call would be form.controller.getWindow() of a form that you know in which window it resides.]]></description>
-          <summary><![CDATA[This gets the currently focused active window, this can be the main application window or a modal dialog.]]></summary>
-          <sample/>
+          <summary><![CDATA[This gets the currently focused active window; this can be the main application window or a modal dialog.]]></summary>
+          <sample><![CDATA[// get the currently active/focused window or dialog
+var activeWindow = application.getActiveWindow();]]></sample>
         </function>
         <function name="getApplicationType">
           <argumentsTypes/>
@@ -2503,6 +2700,42 @@ label.rolloverCursor = SM_CURSOR.HAND_CURSOR;]]></sample>
           <summary><![CDATA[Constants used for setting commands to "default".]]></summary>
           <sample><![CDATA[var form = solutionModel.newForm('parentForm', 'db:/example_data/parent_table', null, false, 1200, 800);
 form.onFindCmd = SM_DEFAULTS.COMMAND_DEFAULT; // This makes the find work like it does by default.]]></sample>
+        </constant>
+        <constant name="COMMAND_NONE">
+          <return type="com.servoy.base.solutionmodel.IBaseSMMethod" typecode="com.servoy.base.solutionmodel.IBaseSMMethod"/>
+          <description><![CDATA[Constant used for setting commands to "none".]]></description>
+          <summary><![CDATA[Constant used for setting commands to "none".]]></summary>
+          <sample><![CDATA[var form = solutionModel.newForm('parentForm', 'db:/example_data/parent_table', null, false, 1200, 800);
+form.onFindCmd = SM_DEFAULTS.COMMAND_NONE; // This disables the find on the form.]]></sample>
+        </constant>
+        <constant name="DEFAULT">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used in various places to set properties to their default value.]]></description>
+          <summary><![CDATA[Constant used in various places to set properties to their default value.]]></summary>
+          <sample><![CDATA[var form = solutionModel.newForm('parentForm', 'db:/example_data/parent_table', null, false, 1200, 800);
+form.navigator = SM_DEFAULTS.DEFAULT; // Show the default navigator on the form.]]></sample>
+        </constant>
+        <constant name="IGNORE">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used to remove a component from the tab sequence.]]></description>
+          <summary><![CDATA[Constant used to remove a component from the tab sequence.]]></summary>
+          <sample><![CDATA[// Create three fields. Based on how they are placed, by default they will come one
+// after another in the tab sequence.
+var fieldOne = form.newField('parent_table_id', JSField.TEXT_FIELD, 10, 10, 100, 20);
+var fieldTwo = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
+var fieldThree = form.newField('parent_table_id', JSField.TEXT_FIELD, 10, 70, 100, 20);
+// Set the third field come before the first in the tab sequence, and remove the 
+// second field from the tab sequence.
+fieldOne.tabSeq = 2;
+fieldTwo.tabSeq = SM_DEFAULTS.IGNORE;
+fieldThree.tabSeq = 1;]]></sample>
+        </constant>
+        <constant name="NONE">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant used in various places to set properties to "none".]]></description>
+          <summary><![CDATA[Constant used in various places to set properties to "none".]]></summary>
+          <sample><![CDATA[var form = solutionModel.newForm('parentForm', 'db:/example_data/parent_table', null, false, 1200, 800);
+form.navigator = SM_DEFAULTS.NONE; // Hide the navigator on the form.]]></sample>
         </constant>
       </constants>
     </object>
@@ -5530,6 +5763,7 @@ if (etype == ELEMENT_TYPES.LISTBOX)
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant representing a listbox element.]]></description>
           <summary><![CDATA[Constant representing a listbox element.]]></summary>
+          <deprecated><![CDATA[replaced by ELEMENT_TYPES.LISTBOX]]></deprecated>
           <sample><![CDATA[//the return value for an element of the ListBox type, as returned by the following code
 var etype = elements.elementName.getElementType();
 if (etype == ELEMENT_TYPES.LIST_BOX)
@@ -5928,6 +6162,120 @@ Will return false when the form can't be removed, this can happen in certain sit
       </constants>
     </object>
     <object publicName="JSBaseEvent" qualifiedName="com.servoy.j2db.scripting.JSBaseEvent">
+      <constants>
+        <constant name="ACTION">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onAction event.]]></description>
+          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSEvent.ACTION) 
+{
+	// its an action event.
+}]]></sample>
+        </constant>
+        <constant name="DATACHANGE">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onDataChange event.]]></description>
+          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSEvent.DATACHANGE) 
+{
+	// its a data change event
+}]]></sample>
+        </constant>
+        <constant name="DOUBLECLICK">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onDoubleClick event.]]></description>
+          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSEvent.DOUBLECLICK) 
+{
+	// its a double click event.
+}]]></sample>
+        </constant>
+        <constant name="FOCUSGAINED">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onFocusGained or the forms onElementFocusGained event.]]></description>
+          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSEvent.FOCUSGAINED) 
+{
+	// its a focus gained event.
+}]]></sample>
+        </constant>
+        <constant name="FOCUSLOST">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onFocusLost or the forms onElementFocusLost event.]]></description>
+          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSEvent.FOCUSLOST) 
+{
+	// its a focus lost event.
+}]]></sample>
+        </constant>
+        <constant name="FORM">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to a form event (like onShow) or command (like onDeleteRecord)]]></description>
+          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSEvent.FORM) 
+{
+	// its a form event or command
+}]]></sample>
+        </constant>
+        <constant name="MODIFIER_ALT">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for the ALT modifier that can be returned by JSEvent.getModifiers();]]></description>
+          <summary><![CDATA[Constant for the ALT modifier that can be returned by JSEvent.]]></summary>
+          <sample><![CDATA[//test if the SHIFT modifier is used.
+if (event.getModifiers() & JSEvent.MODIFIER_SHIFT)
+{
+	//do shift action
+}]]></sample>
+        </constant>
+        <constant name="MODIFIER_CTRL">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for the CTRL modifier that can be returned by JSEvent.getModifiers();]]></description>
+          <summary><![CDATA[Constant for the CTRL modifier that can be returned by JSEvent.]]></summary>
+          <sample><![CDATA[//test if the SHIFT modifier is used.
+if (event.getModifiers() & JSEvent.MODIFIER_SHIFT)
+{
+	//do shift action
+}]]></sample>
+        </constant>
+        <constant name="MODIFIER_META">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for the META modifier that can be returned by JSEvent.getModifiers();]]></description>
+          <summary><![CDATA[Constant for the META modifier that can be returned by JSEvent.]]></summary>
+          <sample><![CDATA[//test if the SHIFT modifier is used.
+if (event.getModifiers() & JSEvent.MODIFIER_SHIFT)
+{
+	//do shift action
+}]]></sample>
+        </constant>
+        <constant name="MODIFIER_SHIFT">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for the SHIFT modifier that can be returned by JSEvent.getModifiers();]]></description>
+          <summary><![CDATA[Constant for the SHIFT modifier that can be returned by JSEvent.]]></summary>
+          <sample><![CDATA[//test if the SHIFT modifier is used.
+if (event.getModifiers() & JSEvent.MODIFIER_SHIFT)
+{
+	//do shift action
+}]]></sample>
+        </constant>
+        <constant name="NONE">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant returned by JSEvent.getType() if the event is not used in a known event or command.]]></description>
+          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSEvent.NONE) 
+{
+	// type is not set.
+}]]></sample>
+        </constant>
+        <constant name="RIGHTCLICK">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onRightClick event.]]></description>
+          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSEvent.RIGHTCLICK) 
+{
+	// its a right click event.
+}]]></sample>
+        </constant>
+      </constants>
       <properties>
         <property name="data">
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
@@ -6384,8 +6732,7 @@ field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
         </property>
         <property name="dataProviderID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[The dataprovider of the component.]]></description>
-          <summary><![CDATA[The dataprovider of the component.]]></summary>
+          <description/>
           <sample><![CDATA[// Normally the dataprovider is specified when a component is created.
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
 // But it can be modified later if needed.
@@ -8372,29 +8719,108 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
     </object>
     <object publicName="JSDNDEvent" qualifiedName="com.servoy.j2db.dnd.JSDNDEvent">
       <constants>
+        <constant name="ACTION">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onAction event.]]></description>
+          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSEvent.ACTION) 
+{
+	// its an action event.
+}]]></sample>
+        </constant>
+        <constant name="DATACHANGE">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onDataChange event.]]></description>
+          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSEvent.DATACHANGE) 
+{
+	// its a data change event
+}]]></sample>
+        </constant>
+        <constant name="DOUBLECLICK">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onDoubleClick event.]]></description>
+          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSEvent.DOUBLECLICK) 
+{
+	// its a double click event.
+}]]></sample>
+        </constant>
+        <constant name="FOCUSGAINED">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onFocusGained or the forms onElementFocusGained event.]]></description>
+          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSEvent.FOCUSGAINED) 
+{
+	// its a focus gained event.
+}]]></sample>
+        </constant>
+        <constant name="FOCUSLOST">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onFocusLost or the forms onElementFocusLost event.]]></description>
+          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSEvent.FOCUSLOST) 
+{
+	// its a focus lost event.
+}]]></sample>
+        </constant>
+        <constant name="FORM">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to a form event (like onShow) or command (like onDeleteRecord)]]></description>
+          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSEvent.FORM) 
+{
+	// its a form event or command
+}]]></sample>
+        </constant>
         <constant name="MODIFIER_ALT">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant for the ALT modifier that can be returned by JSDNDEvent.getModifiers();]]></description>
           <summary><![CDATA[Constant for the ALT modifier that can be returned by JSDNDEvent.]]></summary>
-          <sample/>
+          <sample><![CDATA[//test if the SHIFT modifier is used.
+if (event.getModifiers() & JSDNDEvent.MODIFIER_SHIFT)
+{
+	//do shift action
+}]]></sample>
         </constant>
         <constant name="MODIFIER_CTRL">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant for the CTRL modifier that can be returned by JSDNDEvent.getModifiers();]]></description>
           <summary><![CDATA[Constant for the CTRL modifier that can be returned by JSDNDEvent.]]></summary>
-          <sample/>
+          <sample><![CDATA[//test if the SHIFT modifier is used.
+if (event.getModifiers() & JSDNDEvent.MODIFIER_SHIFT)
+{
+	//do shift action
+}]]></sample>
         </constant>
         <constant name="MODIFIER_META">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant for the META modifier that can be returned by JSDNDEvent.getModifiers();]]></description>
           <summary><![CDATA[Constant for the META modifier that can be returned by JSDNDEvent.]]></summary>
-          <sample/>
+          <sample><![CDATA[//test if the SHIFT modifier is used.
+if (event.getModifiers() & JSDNDEvent.MODIFIER_SHIFT)
+{
+	//do shift action
+}]]></sample>
         </constant>
         <constant name="MODIFIER_SHIFT">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant for the SHIFT modifier that can be returned by JSDNDEvent.getModifiers();]]></description>
           <summary><![CDATA[Constant for the SHIFT modifier that can be returned by JSDNDEvent.]]></summary>
-          <sample/>
+          <sample><![CDATA[//test if the SHIFT modifier is used.
+if (event.getModifiers() & JSDNDEvent.MODIFIER_SHIFT)
+{
+	//do shift action
+}]]></sample>
+        </constant>
+        <constant name="NONE">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant returned by JSEvent.getType() if the event is not used in a known event or command.]]></description>
+          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSEvent.NONE) 
+{
+	// type is not set.
+}]]></sample>
         </constant>
         <constant name="ONDRAG">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -8439,6 +8865,15 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
 	var element = elements[event.getElementName()];
 	// do drop on element
 	return true;
+}]]></sample>
+        </constant>
+        <constant name="RIGHTCLICK">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onRightClick event.]]></description>
+          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSEvent.RIGHTCLICK) 
+{
+	// its a right click event.
 }]]></sample>
         </constant>
       </constants>
@@ -9461,6 +9896,120 @@ for (var i = 0; i < allMethods; i++)
       </functions>
     </object>
     <object publicName="JSEvent" qualifiedName="com.servoy.j2db.scripting.JSEvent">
+      <constants>
+        <constant name="ACTION">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onAction event.]]></description>
+          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSEvent.ACTION) 
+{
+	// its an action event.
+}]]></sample>
+        </constant>
+        <constant name="DATACHANGE">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onDataChange event.]]></description>
+          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSEvent.DATACHANGE) 
+{
+	// its a data change event
+}]]></sample>
+        </constant>
+        <constant name="DOUBLECLICK">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onDoubleClick event.]]></description>
+          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSEvent.DOUBLECLICK) 
+{
+	// its a double click event.
+}]]></sample>
+        </constant>
+        <constant name="FOCUSGAINED">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onFocusGained or the forms onElementFocusGained event.]]></description>
+          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSEvent.FOCUSGAINED) 
+{
+	// its a focus gained event.
+}]]></sample>
+        </constant>
+        <constant name="FOCUSLOST">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onFocusLost or the forms onElementFocusLost event.]]></description>
+          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSEvent.FOCUSLOST) 
+{
+	// its a focus lost event.
+}]]></sample>
+        </constant>
+        <constant name="FORM">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to a form event (like onShow) or command (like onDeleteRecord)]]></description>
+          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSEvent.FORM) 
+{
+	// its a form event or command
+}]]></sample>
+        </constant>
+        <constant name="MODIFIER_ALT">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for the ALT modifier that can be returned by JSEvent.getModifiers();]]></description>
+          <summary><![CDATA[Constant for the ALT modifier that can be returned by JSEvent.]]></summary>
+          <sample><![CDATA[//test if the SHIFT modifier is used.
+if (event.getModifiers() & JSEvent.MODIFIER_SHIFT)
+{
+	//do shift action
+}]]></sample>
+        </constant>
+        <constant name="MODIFIER_CTRL">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for the CTRL modifier that can be returned by JSEvent.getModifiers();]]></description>
+          <summary><![CDATA[Constant for the CTRL modifier that can be returned by JSEvent.]]></summary>
+          <sample><![CDATA[//test if the SHIFT modifier is used.
+if (event.getModifiers() & JSEvent.MODIFIER_SHIFT)
+{
+	//do shift action
+}]]></sample>
+        </constant>
+        <constant name="MODIFIER_META">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for the META modifier that can be returned by JSEvent.getModifiers();]]></description>
+          <summary><![CDATA[Constant for the META modifier that can be returned by JSEvent.]]></summary>
+          <sample><![CDATA[//test if the SHIFT modifier is used.
+if (event.getModifiers() & JSEvent.MODIFIER_SHIFT)
+{
+	//do shift action
+}]]></sample>
+        </constant>
+        <constant name="MODIFIER_SHIFT">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for the SHIFT modifier that can be returned by JSEvent.getModifiers();]]></description>
+          <summary><![CDATA[Constant for the SHIFT modifier that can be returned by JSEvent.]]></summary>
+          <sample><![CDATA[//test if the SHIFT modifier is used.
+if (event.getModifiers() & JSEvent.MODIFIER_SHIFT)
+{
+	//do shift action
+}]]></sample>
+        </constant>
+        <constant name="NONE">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant returned by JSEvent.getType() if the event is not used in a known event or command.]]></description>
+          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSEvent.NONE) 
+{
+	// type is not set.
+}]]></sample>
+        </constant>
+        <constant name="RIGHTCLICK">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onRightClick event.]]></description>
+          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSEvent.RIGHTCLICK) 
+{
+	// its a right click event.
+}]]></sample>
+        </constant>
+      </constants>
       <properties>
         <property name="data">
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
@@ -9569,6 +10118,143 @@ var movedYPixels = y -yPrevious;]]></sample>
       </functions>
     </object>
     <object extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSField" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSField">
+      <constants>
+        <constant name="CALENDAR">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the 
+field to calendar. The field will show a formatted date and will have a button which
+pops up a calendar for date selection.]]></description>
+          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
+          <sample><![CDATA[var cal = form.newField('my_table_date', JSField.CALENDAR, 10, 10, 100, 20);]]></sample>
+        </constant>
+        <constant name="CHECKS">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
+field to checkbox. The field will show a checkbox, or a list of checkboxes if the valuelist
+property is also set.]]></description>
+          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.customValues = "one\ntwo\nthree\nfour";
+var chk = form.newField('my_table_options', JSField.CHECKS, 10, 40, 100, 50);
+chk.valuelist = vlist;]]></sample>
+        </constant>
+        <constant name="COMBOBOX">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
+field to combobox.]]></description>
+          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.customValues = "one\ntwo\nthree\nfour";
+var cmb = form.newField('my_table_options', JSField.COMBOBOX, 10, 100, 100, 20);
+cmb.valuelist = vlist;]]></sample>
+        </constant>
+        <constant name="HTML_AREA">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
+field to HTML area. The field will display formatted HTML content.]]></description>
+          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
+          <sample><![CDATA[var html = form.newField('my_table_html', JSField.HTML_AREA, 10, 130, 100, 50);]]></sample>
+        </constant>
+        <constant name="IMAGE_MEDIA">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
+field to image. The field will display images.]]></description>
+          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
+          <sample><![CDATA[var img = form.newField('my_table_image', JSField.IMAGE_MEDIA, 10, 190, 100, 50);]]></sample>
+        </constant>
+        <constant name="LISTBOX">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
+field to list box. The field will show a selection list with single choice selection.]]></description>
+          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.customValues = "one\ntwo\nthree\nfour";
+var list = form.newField('my_table_list', JSField.LISTBOX, 10, 280, 100, 50);
+list.valuelist = vlist;]]></sample>
+        </constant>
+        <constant deprecated="true" name="LIST_BOX">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
+field to list box. The field will show a selection list with single choice selection.]]></description>
+          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
+          <deprecated><![CDATA[replaced by JSField.LISTBOX]]></deprecated>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.customValues = "one\ntwo\nthree\nfour";
+var list = form.newField('my_table_list', JSField.LIST_BOX, 10, 280, 100, 50);
+list.valuelist = vlist;]]></sample>
+        </constant>
+        <constant name="MULTISELECT_LISTBOX">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
+field to list box. The field will show a selection list with multiple choice selection.]]></description>
+          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.customValues = "one\ntwo\nthree\nfour";
+var list = form.newField('my_table_options', JSField.MULTISELECT_LISTBOX, 10, 280, 100, 50);
+list.valuelist = vlist;]]></sample>
+        </constant>
+        <constant name="PASSWORD">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
+fiels to password. The field will allow the user to enter passwords, masking the typed
+characters.]]></description>
+          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
+          <sample><![CDATA[var pwd = form.newField('my_table_text', JSField.PASSWORD, 10, 250, 100, 20);]]></sample>
+        </constant>
+        <constant name="RADIOS">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
+field to radio buttons. The field will show a radio button, or a list of them if 
+the valuelist property is also set.]]></description>
+          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.customValues = "one\ntwo\nthree\nfour";
+var radio = form.newField('my_table_options', JSField.RADIOS, 10, 280, 100, 50);
+radio.valuelist = vlist;]]></sample>
+        </constant>
+        <constant name="RTF_AREA">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the 
+field to RTF area. The field will display formatted RTF content.]]></description>
+          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
+          <sample><![CDATA[var rtf = form.newField('my_table_rtf', JSField.RTF_AREA, 10, 340, 100, 50);]]></sample>
+        </constant>
+        <constant name="SPINNER">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
+field to spinner. The field will show a spinner.]]></description>
+          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.customValues = "one\ntwo\nthree\nfour";
+var spinner = form.newField('my_spinner', JSField.SPINNER, 10, 460, 100, 20);
+spinner.valuelist = vlist;]]></sample>
+        </constant>
+        <constant name="TEXT_AREA">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
+field to text area. The field will show text on multiple lines.]]></description>
+          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
+          <sample><![CDATA[var tarea = form.newField('my_table_text', JSField.TEXT_AREA, 10, 400, 100, 50);]]></sample>
+        </constant>
+        <constant name="TEXT_FIELD">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
+field to text field. The field will show regular text on a single line.]]></description>
+          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
+          <sample><![CDATA[var tfield = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 460, 100, 20);]]></sample>
+        </constant>
+        <constant name="TYPE_AHEAD">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
+field to type ahead. The field will show regular text, but will have type ahead 
+capabilities.]]></description>
+          <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
+          <sample><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.customValues = "one\ntwo\nthree\nfour";
+var tahead = form.newField('my_table_text', JSField.TYPE_AHEAD, 10, 490, 100, 20);
+tahead.valuelist = vlist;]]></sample>
+        </constant>
+      </constants>
       <properties>
         <property name="anchors">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -9624,8 +10310,7 @@ field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
         </property>
         <property name="dataProviderID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[The dataprovider of the component.]]></description>
-          <summary><![CDATA[The dataprovider of the component.]]></summary>
+          <description/>
           <sample><![CDATA[// Normally the dataprovider is specified when a component is created.
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
 // But it can be modified later if needed.
@@ -9645,8 +10330,7 @@ cal.displayType = JSField.TEXT_FIELD;]]></sample>
         </property>
         <property name="displaysTags">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
-          <description><![CDATA[The dataprovider of the component.]]></description>
-          <summary><![CDATA[The dataprovider of the component.]]></summary>
+          <description/>
           <sample><![CDATA[// Normally the dataprovider is specified when a component is created.
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
 // But it can be modified later if needed.
@@ -10267,20 +10951,85 @@ myHideControllerForm.encapsulation = JSForm.HIDE_CONTROLLER_ENCAPSULATION;
 var myHideElementsForm = solutionModel.newForm('newForm7', myDatasource, myStyleName, false, 800, 600);
 myHideElementsForm.encapsulation = JSForm.HIDE_ELEMENTS_ENCAPSULATION;]]></sample>
         </constant>
+        <constant name="LIST_VIEW">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The constants to set or get the view property of a JSForm. 
+They are as follows: JSForm.LIST_VIEW, JSForm.LOCKED_LIST_VIEW, JSForm.LOCKED_RECORD_VIEW, JSForm.LOCKED_TABLE_VIEW, JSForm.RECORD_VIEW.]]></description>
+          <summary><![CDATA[The constants to set or get the view property of a JSForm.]]></summary>
+          <sample><![CDATA[var myListViewForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
+myListViewForm.view = JSForm.LIST_VIEW;
+
+var myLockedListViewForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);	
+myLockedListViewForm.view = JSForm.LOCKED_LIST_VIEW;
+
+var myLockedRecordViewForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
+myLockedRecordViewForm.view = JSForm.LOCKED_RECORD_VIEW;
+
+var myLockedTableViewForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
+myLockedTableViewForm.view = JSForm.LOCKED_TABLE_VIEW;
+
+var myRecordViewForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
+myRecordViewForm.view = JSForm.RECORD_VIEW;]]></sample>
+        </constant>
         <constant name="LOCKED_LIST_VIEW">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[The constants to set or get the view property of a JSForm. 
+They are as follows: JSForm.LIST_VIEW, JSForm.LOCKED_LIST_VIEW, JSForm.LOCKED_RECORD_VIEW, JSForm.LOCKED_TABLE_VIEW, JSForm.RECORD_VIEW.]]></description>
+          <summary><![CDATA[The constants to set or get the view property of a JSForm.]]></summary>
+          <sample><![CDATA[var myListViewForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
+myListViewForm.view = JSForm.LIST_VIEW;
+
+var myLockedListViewForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);	
+myLockedListViewForm.view = JSForm.LOCKED_LIST_VIEW;
+
+var myLockedRecordViewForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
+myLockedRecordViewForm.view = JSForm.LOCKED_RECORD_VIEW;
+
+var myLockedTableViewForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
+myLockedTableViewForm.view = JSForm.LOCKED_TABLE_VIEW;
+
+var myRecordViewForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
+myRecordViewForm.view = JSForm.RECORD_VIEW;]]></sample>
         </constant>
         <constant name="LOCKED_RECORD_VIEW">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[The constants to set or get the view property of a JSForm. 
+They are as follows: JSForm.LIST_VIEW, JSForm.LOCKED_LIST_VIEW, JSForm.LOCKED_RECORD_VIEW, JSForm.LOCKED_TABLE_VIEW, JSForm.RECORD_VIEW.]]></description>
+          <summary><![CDATA[The constants to set or get the view property of a JSForm.]]></summary>
+          <sample><![CDATA[var myListViewForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
+myListViewForm.view = JSForm.LIST_VIEW;
+
+var myLockedListViewForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);	
+myLockedListViewForm.view = JSForm.LOCKED_LIST_VIEW;
+
+var myLockedRecordViewForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
+myLockedRecordViewForm.view = JSForm.LOCKED_RECORD_VIEW;
+
+var myLockedTableViewForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
+myLockedTableViewForm.view = JSForm.LOCKED_TABLE_VIEW;
+
+var myRecordViewForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
+myRecordViewForm.view = JSForm.RECORD_VIEW;]]></sample>
         </constant>
         <constant name="LOCKED_TABLE_VIEW">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[The constants to set or get the view property of a JSForm. 
+They are as follows: JSForm.LIST_VIEW, JSForm.LOCKED_LIST_VIEW, JSForm.LOCKED_RECORD_VIEW, JSForm.LOCKED_TABLE_VIEW, JSForm.RECORD_VIEW.]]></description>
+          <summary><![CDATA[The constants to set or get the view property of a JSForm.]]></summary>
+          <sample><![CDATA[var myListViewForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
+myListViewForm.view = JSForm.LIST_VIEW;
+
+var myLockedListViewForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);	
+myLockedListViewForm.view = JSForm.LOCKED_LIST_VIEW;
+
+var myLockedRecordViewForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
+myLockedRecordViewForm.view = JSForm.LOCKED_RECORD_VIEW;
+
+var myLockedTableViewForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
+myLockedTableViewForm.view = JSForm.LOCKED_TABLE_VIEW;
+
+var myRecordViewForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
+myRecordViewForm.view = JSForm.RECORD_VIEW;]]></sample>
         </constant>
         <constant name="MODULE_PRIVATE_ENCAPSULATION">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -10333,6 +11082,26 @@ myHideControllerForm.encapsulation = JSForm.HIDE_CONTROLLER_ENCAPSULATION;
 
 var myHideElementsForm = solutionModel.newForm('newForm7', myDatasource, myStyleName, false, 800, 600);
 myHideElementsForm.encapsulation = JSForm.HIDE_ELEMENTS_ENCAPSULATION;]]></sample>
+        </constant>
+        <constant name="RECORD_VIEW">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The constants to set or get the view property of a JSForm. 
+They are as follows: JSForm.LIST_VIEW, JSForm.LOCKED_LIST_VIEW, JSForm.LOCKED_RECORD_VIEW, JSForm.LOCKED_TABLE_VIEW, JSForm.RECORD_VIEW.]]></description>
+          <summary><![CDATA[The constants to set or get the view property of a JSForm.]]></summary>
+          <sample><![CDATA[var myListViewForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
+myListViewForm.view = JSForm.LIST_VIEW;
+
+var myLockedListViewForm = solutionModel.newForm('newForm2', myDatasource, myStyleName, false, 800, 600);	
+myLockedListViewForm.view = JSForm.LOCKED_LIST_VIEW;
+
+var myLockedRecordViewForm = solutionModel.newForm('newForm3', myDatasource, myStyleName, false, 800, 600);
+myLockedRecordViewForm.view = JSForm.LOCKED_RECORD_VIEW;
+
+var myLockedTableViewForm = solutionModel.newForm('newForm4', myDatasource, myStyleName, false, 800, 600);
+myLockedTableViewForm.view = JSForm.LOCKED_TABLE_VIEW;
+
+var myRecordViewForm = solutionModel.newForm('newForm5', myDatasource, myStyleName, false, 800, 600);
+myRecordViewForm.view = JSForm.RECORD_VIEW;]]></sample>
         </constant>
         <constant name="SELECTION_MODE_DEFAULT">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -14437,8 +15206,7 @@ field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
         </property>
         <property name="dataProviderID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[The dataprovider of the component.]]></description>
-          <summary><![CDATA[The dataprovider of the component.]]></summary>
+          <description/>
           <sample><![CDATA[// Normally the dataprovider is specified when a component is created.
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
 // But it can be modified later if needed.
@@ -15057,8 +15825,7 @@ field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
         </property>
         <property name="dataProviderID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[The dataprovider of the component.]]></description>
-          <summary><![CDATA[The dataprovider of the component.]]></summary>
+          <description/>
           <sample><![CDATA[// Normally the dataprovider is specified when a component is created.
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
 // But it can be modified later if needed.
@@ -19612,6 +20379,48 @@ vlist.sortOptions = 'parent_table_text desc';]]></sample>
       </functions>
     </object>
     <object publicName="JSVariable" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSVariable">
+      <constants>
+        <constant name="DATETIME">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></description>
+          <summary><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></summary>
+          <sample><![CDATA[var dateVar = solutionModel.newGlobalVariable('globals', 'gDate', JSVariable.DATETIME);
+dateVar.defaultValue = 'now';
+application.output(scopes.globals.gDate); // Prints the current date and time.]]></sample>
+        </constant>
+        <constant name="INTEGER">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></description>
+          <summary><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></summary>
+          <sample><![CDATA[var intVar = solutionModel.newGlobalVariable('globals', 'gInt', JSVariable.INTEGER);
+intVar.defaultValue = 997;
+application.output(scopes.globals.gInt); // Prints 997]]></sample>
+        </constant>
+        <constant name="MEDIA">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></description>
+          <summary><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></summary>
+          <sample><![CDATA[var mediaVar = solutionModel.newGlobalVariable('globals', 'gMedia', JSVariable.MEDIA);
+mediaVar.defaultValue = 'new Array(1, 2, 3, 4)';
+application.output(scopes.globals.gMedia); // Prints out the array with four elements.]]></sample>
+        </constant>
+        <constant name="NUMBER">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></description>
+          <summary><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></summary>
+          <sample><![CDATA[var numberVar = solutionModel.newGlobalVariable('globals', 'gNumber', JSVariable.NUMBER);
+numberVar.defaultValue = 192.334;
+application.output(scopes.globals.gNumber); // Prints 192.334]]></sample>
+        </constant>
+        <constant name="TEXT">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></description>
+          <summary><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></summary>
+          <sample><![CDATA[var txtVar = solutionModel.newGlobalVariable('globals', 'gText', JSVariable.TEXT);
+txtVar.defaultValue = '"some text"'; // Use two pairs of quotes if you want to assign a String as default value.
+application.output(scopes.globals.gText); // Prints 'some text' (without quotes).]]></sample>
+        </constant>
+      </constants>
       <properties>
         <property name="defaultValue">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -43786,8 +44595,16 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="com.servoy.j2db.scripting.JSWindow"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);
+//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
           <parameters>
             <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
               <description><![CDATA[the foundset to load before showing the form.]]></description>
@@ -43803,8 +44620,16 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);
+//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
           <parameters>
             <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
               <description><![CDATA[the foundset to load before showing the form.]]></description>
@@ -43819,8 +44644,16 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="com.servoy.j2db.dataprocessing.JSDataSet"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);
+//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
           <parameters>
             <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet">
               <description><![CDATA[the pkdataset to load before showing the form.]]></description>
@@ -43833,8 +44666,16 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="com.servoy.j2db.scripting.JSWindow"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);
+//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
           <parameters>
             <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet">
               <description><![CDATA[the pkdataset to load before showing the form.]]></description>
@@ -43850,8 +44691,16 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);
+//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
           <parameters>
             <parameter name="pkdataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet">
               <description><![CDATA[the pkdataset to load before showing the form.]]></description>
@@ -43866,8 +44715,16 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);
+//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
           <parameters>
             <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
               <description><![CDATA[the query to load before showing the form.]]></description>
@@ -43880,8 +44737,16 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="com.servoy.j2db.scripting.JSWindow"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);
+//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
           <parameters>
             <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
               <description><![CDATA[the query to load before showing the form.]]></description>
@@ -43897,8 +44762,16 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);
+//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
           <parameters>
             <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
               <description><![CDATA[the query to load before showing the form.]]></description>
@@ -43913,8 +44786,16 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="com.servoy.j2db.util.UUID"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);
+//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
           <parameters>
             <parameter name="UUIDpk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID">
               <description><![CDATA[the UUIDpk to load before showing the form.]]></description>
@@ -43927,8 +44808,16 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="com.servoy.j2db.scripting.JSWindow"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);
+//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
           <parameters>
             <parameter name="UUIDpk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID">
               <description><![CDATA[the UUIDpk to load before showing the form.]]></description>
@@ -43944,8 +44833,16 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);
+//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
           <parameters>
             <parameter name="UUIDpk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID">
               <description><![CDATA[the UUIDpk to load before showing the form.]]></description>
@@ -43960,8 +44857,16 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="java.lang.Number"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);
+//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
           <parameters>
             <parameter name="singleNumber_pk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[the singleNumber_pk to load before showing the form.]]></description>
@@ -43974,8 +44879,16 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="com.servoy.j2db.scripting.JSWindow"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);
+//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
           <parameters>
             <parameter name="singleNumber_pk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[the singleNumber_pk to load before showing the form.]]></description>
@@ -43991,8 +44904,16 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);
+//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
           <parameters>
             <parameter name="singleNumber_pk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[the singleNumber_pk to load before showing the form.]]></description>
@@ -44009,9 +44930,17 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
           <deprecated><![CDATA[see showRecords(FoundSet, String) or showRecords(FoundSet, JSWindow)]]></deprecated>
-          <sample/>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);
+//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
           <parameters>
             <parameter name="foundset" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[the foundset to load before showing the form]]></description>
@@ -44029,8 +44958,16 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);
+//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
           <parameters>
             <parameter name="query" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the query to load before showing the form.]]></description>
@@ -44043,8 +44980,16 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="com.servoy.j2db.scripting.JSWindow"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);
+//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
           <parameters>
             <parameter name="query" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the query to load before showing the form.]]></description>
@@ -44060,8 +45005,16 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="[Ljava.lang.Object;"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);
+//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
           <parameters>
             <parameter name="query" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the query to load before showing the form.]]></description>
@@ -44078,8 +45031,16 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="com.servoy.j2db.scripting.JSWindow"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);
+//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
           <parameters>
             <parameter name="query" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the query to load before showing the form.]]></description>
@@ -44099,8 +45060,16 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);
+//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
           <parameters>
             <parameter name="query" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the query to load before showing the form.]]></description>
@@ -44119,8 +45088,16 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description/>
-          <sample/>
+          <description><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></description>
+          <summary><![CDATA[Load data into the form and shows the form, is a shortcut for the functions 'loadRecords' and 'show'.]]></summary>
+          <sample><![CDATA[%%prefix%%controller.showRecords(foundset);
+// load foundset & show the form in newly created named modal dialog
+var w = application.createWindow("mydialog", JSWindow.MODAL_DIALOG);
+%%prefix%%controller.showRecords(foundset, w);
+// load foundset & show the form in an existing window/dialog
+var w = application.getWindow("mydialog"); // use null name for main app. window
+%%prefix%%controller.showRecords(foundset, w);
+//%%prefix%%controller.showRecords(foundset, "mydialog");]]></sample>
           <parameters>
             <parameter name="query" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the query to load before showing the form.]]></description>
