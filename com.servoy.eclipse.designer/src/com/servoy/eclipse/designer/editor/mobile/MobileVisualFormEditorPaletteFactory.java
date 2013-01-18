@@ -247,6 +247,8 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 		int displayType = -1;
 		String text = null;
 
+		Map<String, Object> extendedData = new HashMap<String, Object>();
+
 		if (ELEMENTS_TEXT_FIELD_ID.equals(id))
 		{
 			icon = Activator.loadImageDescriptorFromBundle("mobile/text.png");
@@ -262,6 +264,7 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 		{
 			icon = Activator.loadImageDescriptorFromBundle("mobile/combo.png");
 			displayType = Field.COMBOBOX;
+			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_EDITABLE, Boolean.FALSE);
 		}
 
 		else if (ELEMENTS_CHECKBOXES_ID.equals(id))
@@ -289,7 +292,6 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 			return null;
 		}
 
-		Map<String, Object> extendedData = new HashMap<String, Object>();
 		if (displayType != -1)
 		{
 			setProperty(
