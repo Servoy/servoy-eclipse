@@ -114,8 +114,9 @@ public class MobileComponentWithTitlePropertySource extends RetargetingPropertyS
 			for (IPropertyDescriptor desc : elementPropertySource.getPropertyDescriptors())
 			{
 				propertyName = desc.getId().toString();
-				// titleText should be skipped
-				if (StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName().equals(propertyName) && titlePropertySource != null) continue;
+				// titleText should be skipped for fields
+				if (component.getTypeID() == IRepository.FIELDS && StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName().equals(propertyName) &&
+					titlePropertySource != null) continue;
 				addMethodPropertyDescriptor(elementPropertySource, prefix, propertyName);
 			}
 
