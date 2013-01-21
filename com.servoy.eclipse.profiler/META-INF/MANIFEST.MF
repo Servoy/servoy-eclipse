@@ -19,5 +19,5 @@ Require-Bundle: servoy_debug,
  com.servoy.eclipse.ui,
  org.eclipse.ui.ide
 Eclipse-LazyStart: true
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
