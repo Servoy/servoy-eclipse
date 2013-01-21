@@ -385,7 +385,15 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 			{
 				if (allFormsAreInTheSameSet(deleteItems))
 				{
-					performDeletion(selectedPersists);
+					if (selectedPersists.get(0) instanceof Form) //we'll later use the delete resources wizard for forms, and that already contains question on deletion 
+					{
+						performDeletion(selectedPersists);
+					}
+					else if (MessageDialog.openConfirm(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getText(),
+						"Are you sure you want to delete?")) //$NON-NLS-1$
+					{
+						performDeletion(selectedPersists);
+					}
 				}
 				else
 				{
@@ -396,7 +404,15 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 			}
 			else
 			{
-				performDeletion(selectedPersists);
+				if (selectedPersists.get(0) instanceof Form) //we'll later use the delete resources wizard for forms, and that already contains question on deletion
+				{
+					performDeletion(selectedPersists);
+				}
+				else if (MessageDialog.openConfirm(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getText(),
+					"Are you sure you want to delete?")) //$NON-NLS-1$
+				{
+					performDeletion(selectedPersists);
+				}
 			}
 		}
 		else if (deleteItems.size() > 0 && (deleteItems.get(0).getRootObject() instanceof StringResource))
