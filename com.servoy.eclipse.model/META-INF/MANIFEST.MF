@@ -4,7 +4,7 @@ Bundle-Name: Workspace based Repository
 Bundle-SymbolicName: com.servoy.eclipse.model;singleton:=true
 Bundle-Version: 6.0.8.1237
 Bundle-Vendor: Servoy
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: servoy_shared,
  org.eclipse.core.resources,
  org.eclipse.core.runtime,
