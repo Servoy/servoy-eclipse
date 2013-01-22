@@ -129,6 +129,6 @@ public class MobileComponentWithTitlePropertySource extends RetargetingPropertyS
 	@Override
 	public String toString()
 	{
-		return "Componen with title";
+		return "Component with title";
 	}
 }
