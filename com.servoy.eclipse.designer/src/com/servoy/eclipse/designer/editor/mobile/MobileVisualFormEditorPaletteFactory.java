@@ -34,10 +34,10 @@ import com.servoy.eclipse.designer.editor.palette.BaseVisualFormEditorPaletteFac
 import com.servoy.eclipse.designer.editor.palette.ElementCreationToolEntry;
 import com.servoy.eclipse.designer.editor.palette.ElementPaletteDrawer;
 import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
+import com.servoy.eclipse.designer.mobile.property.MobilePersistPropertySource;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences.PaletteCustomization;
-import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
@@ -73,6 +73,7 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 	private static final String ELEMENTS_COMBOBOX_ID = "combobox";
 	private static final String ELEMENTS_CHECKBOXES_ID = "checkboxes";
 	private static final String ELEMENTS_RADIOBUTTONS_ID = "radio buttons";
+	private static final String ELEMENTS_PASSWORD_ID = "password";
 	private static final String ELEMENTS_LABEL_ID = "label";
 
 	private static final String[] ELEMENTS_IDS = new String[] {
@@ -81,6 +82,7 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 	/* */, ELEMENTS_COMBOBOX_ID
 	/* */, ELEMENTS_CHECKBOXES_ID
 	/* */, ELEMENTS_RADIOBUTTONS_ID
+	/* */, ELEMENTS_PASSWORD_ID
 	/* */, ELEMENTS_LABEL_ID
 	/* */};
 
@@ -280,6 +282,12 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 			displayType = Field.RADIOS;
 		}
 
+		else if (ELEMENTS_PASSWORD_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("mobile/password.png");
+			displayType = Field.PASSWORD;
+		}
+
 		else if (ELEMENTS_LABEL_ID.equals(id))
 		{
 			icon = Activator.loadImageDescriptorFromBundle("mobile/label.png");
@@ -297,8 +305,8 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 			setProperty(
 				extendedData,
 				StaticContentSpecLoader.PROPERTY_DISPLAYTYPE,
-				PersistPropertySource.DISPLAY_TYPE_CONTOLLER.getConverter().convertProperty(StaticContentSpecLoader.PROPERTY_DISPLAYTYPE.getPropertyName(),
-					Integer.valueOf(displayType)));
+				MobilePersistPropertySource.MOBILE_DISPLAY_TYPE_CONTROLLER.getConverter().convertProperty(
+					StaticContentSpecLoader.PROPERTY_DISPLAYTYPE.getPropertyName(), Integer.valueOf(displayType)));
 		}
 		if (text != null)
 		{

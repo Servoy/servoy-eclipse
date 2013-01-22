@@ -30,6 +30,7 @@ import com.servoy.eclipse.ui.property.ComboboxPropertyModel;
 import com.servoy.eclipse.ui.property.DelegatePropertySetterController;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.eclipse.ui.property.PropertyCategory;
 import com.servoy.eclipse.ui.property.PropertyController;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -39,6 +40,7 @@ import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.Utils;
 
@@ -126,6 +128,13 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			return (String)((AbstractBase)propertySource.getPersist()).getCustomMobileProperty(IMobileProperties.DATA_ICON.propertyName);
 		}
 	};
+
+	public static final ComboboxPropertyController<Integer> MOBILE_DISPLAY_TYPE_CONTROLLER = new ComboboxPropertyController<Integer>(
+		"displayType",
+		RepositoryHelper.getDisplayName("displayType", Field.class),
+		new ComboboxPropertyModel<Integer>(
+			new Integer[] { Integer.valueOf(Field.TEXT_FIELD), Integer.valueOf(Field.TEXT_AREA), Integer.valueOf(Field.COMBOBOX), Integer.valueOf(Field.RADIOS), Integer.valueOf(Field.CHECKS), Integer.valueOf(Field.PASSWORD) },
+			new String[] { "TEXT_FIELD", "TEXT_AREA", "COMBOBOX", "RADIOS", "CHECKS", "PASSWORD" }), Messages.LabelUnresolved);
 
 	/**
 	 * @param persistContext
@@ -246,6 +255,19 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		}
 
 		return super.getPropertiesPropertyDescriptor(propertySource, id, displayName, name, flattenedEditingSolution, form);
+	}
+
+	@Override
+	protected IPropertyDescriptor createPropertyDescriptor(PropertyDescriptorWrapper propertyDescriptor, FlattenedSolution flattenedEditingSolution, Form form,
+		PropertyCategory category, String id) throws RepositoryException
+	{
+
+		if (id.equals(StaticContentSpecLoader.PROPERTY_DISPLAYTYPE.getPropertyName()))
+		{
+			return MOBILE_DISPLAY_TYPE_CONTROLLER;
+		}
+
+		return super.createPropertyDescriptor(propertyDescriptor, flattenedEditingSolution, form, category, id);
 	}
 
 	@Override
