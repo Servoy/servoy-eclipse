@@ -70,14 +70,12 @@ public class MobileVisualFormEditorDesignPage extends BaseVisualFormEditorDesign
 	@Override
 	protected PaletteCustomizer createPaletteCustomizer()
 	{
-		// TODO
 		return null;
 	}
 
 	@Override
 	protected void fillToolbar()
 	{
-		// TODO
 	}
 
 	@Override
@@ -92,14 +90,12 @@ public class MobileVisualFormEditorDesignPage extends BaseVisualFormEditorDesign
 			viewer.addDropTargetListener(new PaletteItemTransferDropTargetListener(getGraphicalViewer(), getEditorPart()));
 		}
 
-//		// configure the context menu provider
-//		String id = "#FormDesignerContext";
-//		VisualFormEditorContextMenuProvider cmProvider = new VisualFormEditorContextMenuProvider(id, viewer, getActionRegistry());
-//		viewer.setContextMenu(cmProvider);
-//		getSite().registerContextMenu(id, cmProvider, viewer);
+		// configure the context menu provider
+		String id = "#MobileFormDesignerContext";
+		MobileVisualFormEditorContextMenuProvider cmProvider = new MobileVisualFormEditorContextMenuProvider(id, viewer, getActionRegistry());
+		viewer.setContextMenu(cmProvider);
+		getSite().registerContextMenu(id, cmProvider, viewer);
 
 		//  refreshToolBars();
 	}
-
-
 }

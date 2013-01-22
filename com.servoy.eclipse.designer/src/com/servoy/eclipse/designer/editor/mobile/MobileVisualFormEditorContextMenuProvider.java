@@ -1,5 +1,5 @@
 /*
- This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2010 Servoy BV
+ This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2013 Servoy BV
 
  This program is free software; you can redistribute it and/or modify it under
  the terms of the GNU Affero General Public License as published by the Free
@@ -14,22 +14,23 @@
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
-package com.servoy.eclipse.designer.editor;
+package com.servoy.eclipse.designer.editor.mobile;
 
 import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.gef.ui.actions.GEFActionConstants;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.actions.ActionFactory;
 
-import com.servoy.eclipse.designer.editor.commands.DesignerActionFactory;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditorContextMenuProvider;
 
 
 /**
- * Provides context menu actions for the VisualFormEditor.
+ * Provides context menu actions for the mobile VisualFormEditor.
+ * 
+ * @author rgansevles
  */
-class VisualFormEditorContextMenuProvider extends BaseVisualFormEditorContextMenuProvider
+class MobileVisualFormEditorContextMenuProvider extends BaseVisualFormEditorContextMenuProvider
 {
 	/**
 	 * Instantiate a new menu context provider for the specified EditPartViewer and ActionRegistry.
@@ -38,7 +39,7 @@ class VisualFormEditorContextMenuProvider extends BaseVisualFormEditorContextMen
 	 * @param registry the editor's action registry
 	 * @throws IllegalArgumentException if registry is <tt>null</tt>.
 	 */
-	public VisualFormEditorContextMenuProvider(String id, EditPartViewer viewer, ActionRegistry registry)
+	public MobileVisualFormEditorContextMenuProvider(String id, EditPartViewer viewer, ActionRegistry registry)
 	{
 		super(id, viewer, registry);
 	}
@@ -49,10 +50,9 @@ class VisualFormEditorContextMenuProvider extends BaseVisualFormEditorContextMen
 		// Add actions to the menu
 		menu.appendToGroup(GEFActionConstants.GROUP_UNDO, actionRegistry.getAction(ActionFactory.UNDO.getId()));
 		menu.appendToGroup(GEFActionConstants.GROUP_UNDO, actionRegistry.getAction(ActionFactory.REDO.getId()));
-		menu.appendToGroup(GEFActionConstants.GROUP_COPY, actionRegistry.getAction(ActionFactory.CUT.getId()));
-		menu.appendToGroup(GEFActionConstants.GROUP_COPY, actionRegistry.getAction(ActionFactory.COPY.getId()));
-		menu.appendToGroup(GEFActionConstants.GROUP_COPY, actionRegistry.getAction(ActionFactory.PASTE.getId()));
+//		menu.appendToGroup(GEFActionConstants.GROUP_COPY, actionRegistry.getAction(ActionFactory.CUT.getId()));
+//		menu.appendToGroup(GEFActionConstants.GROUP_COPY, actionRegistry.getAction(ActionFactory.COPY.getId()));
+//		menu.appendToGroup(GEFActionConstants.GROUP_COPY, actionRegistry.getAction(ActionFactory.PASTE.getId()));
 		menu.appendToGroup(GEFActionConstants.GROUP_COPY, actionRegistry.getAction(ActionFactory.DELETE.getId()));
-		menu.appendToGroup(IWorkbenchActionConstants.SAVE_EXT, actionRegistry.getAction(DesignerActionFactory.SAVE_AS_TEMPLATE.getId()));
 	}
 }

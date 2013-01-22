@@ -905,6 +905,20 @@
             </groupMarker>
          </menu>
       </viewerContribution>
+      <viewerContribution
+            id="com.servoy.eclipse.designer.editor.MobileFormDesignerContext"
+            targetID="#MobileFormDesignerContext">
+         <action
+               class="com.servoy.eclipse.designer.editor.commands.RevertFormActionDelegateHandler"
+               definitionId="com.servoy.eclipse.designer.revertForm"
+               id="com.servoy.eclipse.designer.action.revertForm"
+               label="Revert Form"
+               menubarPath="org.eclipse.gef.group.undo"
+               state="true"
+               style="push"
+               tooltip="Revert Form">
+         </action>
+      </viewerContribution>
    </extension>
       <extension
             point="org.eclipse.ui.contexts">

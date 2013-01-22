@@ -87,18 +87,6 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 			return new PointPropertySource(new ComplexProperty<Point>((Point)obj));
 		}
 
-		if (obj instanceof EditPart && ((EditPart)obj).getModel() instanceof FormElementGroup)
-		{
-			if (key == IPropertySource.class)
-			{
-				return createFormElementGroupPropertySource((FormElementGroup)((EditPart)obj).getModel(), getEditpartFormContext((EditPart)obj));
-			}
-			if (key == FormElementGroup.class)
-			{
-				return ((EditPart)obj).getModel();
-			}
-			return null;
-		}
 		if (obj instanceof FormElementGroup && key == IPropertySource.class)
 		{
 			return createFormElementGroupPropertySource((FormElementGroup)obj, null);
@@ -141,11 +129,39 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 			EditPart editPart = (EditPart)obj;
 			Form contextForm = getEditpartFormContext(editPart);
 			context = contextForm;
+
+			if (key == IResource.class)
+			{
+				return getResource(contextForm);
+			}
+
+			if (key == Openable.class)
+			{
+				return Openable.getOpenable(contextForm);
+			}
+
 			Object model = editPart.getModel();
 
-			if (model instanceof MobileListModel && key == IPropertySource.class)
+			if (model instanceof FormElementGroup)
 			{
-				return MobileListPropertySource.getMobileListPropertySource((MobileListModel)model, contextForm);
+				if (key == IPropertySource.class)
+				{
+					return createFormElementGroupPropertySource((FormElementGroup)model, contextForm);
+				}
+				if (key == FormElementGroup.class)
+				{
+					return model;
+				}
+				return null;
+			}
+
+			if (model instanceof MobileListModel)
+			{
+				if (key == IPropertySource.class)
+				{
+					return MobileListPropertySource.getMobileListPropertySource((MobileListModel)model, contextForm);
+				}
+				return null;
 			}
 
 			if (model instanceof IPersist)
@@ -250,8 +266,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 			}
 			if (key == IResource.class)
 			{
-				Pair<String, String> filePath = SolutionSerializer.getFilePath(persist, true);
-				return ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(filePath.getLeft() + filePath.getRight()));
+				return getResource(persist);
 			}
 			if (key == Openable.class)
 			{
@@ -260,6 +275,16 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 		}
 
 		return null;
+	}
+
+	/**
+	 * @param persist
+	 * @return
+	 */
+	private IResource getResource(IPersist persist)
+	{
+		Pair<String, String> filePath = SolutionSerializer.getFilePath(persist, true);
+		return ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(filePath.getLeft() + filePath.getRight()));
 	}
 
 	private IPropertySource createFormElementGroupPropertySource(FormElementGroup group, Form context)
