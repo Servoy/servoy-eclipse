@@ -101,7 +101,7 @@ public class MobileComponentWithTitlePropertySource extends RetargetingPropertyS
 		{
 			// show just the properties that are used for the title in the mobile client
 			elementPropertySources.put(prefix = "title", titlePropertySource = PersistPropertySource.createPersistPropertySource(title, getContext(), false));
-			addMethodPropertyDescriptor(titlePropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), "titleDataProviderID");
+			addMethodPropertyDescriptor(titlePropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), "titleDataProvider");
 			addMethodPropertyDescriptor(titlePropertySource, prefix, StaticContentSpecLoader.PROPERTY_DISPLAYSTAGS.getPropertyName(), "titleDisplaysTags");
 			addMethodPropertyDescriptor(titlePropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName(), "titleText");
 		}
