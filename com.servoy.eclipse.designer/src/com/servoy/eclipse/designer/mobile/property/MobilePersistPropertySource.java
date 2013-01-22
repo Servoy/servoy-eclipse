@@ -69,7 +69,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 	};
 
 	public static final String RADIO_STYLE_NAME = "horizontal"; //$NON-NLS-1$
-	public static final Integer RADIO_STYLE_HORIZONTAL = Integer.valueOf(1);
+	public static final Integer RADIO_STYLE_HORIZONTAL = Integer.valueOf(IMobileProperties.RADIO_STYLE_HORIZONTAL);
 	public static final PropertyController<Boolean, Boolean> MOBILE_RADIO_STYLE_CONTROLLER = new DelegatePropertySetterController<Boolean, MobilePersistPropertySource>(
 		new CheckboxPropertyDescriptor(RADIO_STYLE_NAME, RADIO_STYLE_NAME), RADIO_STYLE_NAME)
 	{
