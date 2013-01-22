@@ -104,6 +104,7 @@ public class MobileComponentWithTitlePropertySource extends RetargetingPropertyS
 			addMethodPropertyDescriptor(titlePropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), "titleDataProvider");
 			addMethodPropertyDescriptor(titlePropertySource, prefix, StaticContentSpecLoader.PROPERTY_DISPLAYSTAGS.getPropertyName(), "titleDisplaysTags");
 			addMethodPropertyDescriptor(titlePropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName(), "titleText");
+			// not supported yet in mobile client // addMethodPropertyDescriptor(titlePropertySource, prefix, IMobileProperties.HEADER_SIZE.propertyName);
 		}
 
 		if (component != null)
@@ -116,8 +117,19 @@ public class MobileComponentWithTitlePropertySource extends RetargetingPropertyS
 				propertyName = desc.getId().toString();
 				// titleText should be skipped for fields
 				if (component.getTypeID() == IRepository.FIELDS && StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName().equals(propertyName) &&
-					titlePropertySource != null) continue;
-				addMethodPropertyDescriptor(elementPropertySource, prefix, propertyName);
+					titlePropertySource != null)
+				{
+					continue;
+				}
+
+				String displayName = null;
+				// headersize should be labelsize for component
+				if (IMobileProperties.HEADER_SIZE.propertyName.equals(propertyName) && titlePropertySource != null)
+				{
+					displayName = "labelSize";
+				}
+
+				addMethodPropertyDescriptor(elementPropertySource, prefix, propertyName, displayName);
 			}
 
 			// if label, add support to hide the titleText
