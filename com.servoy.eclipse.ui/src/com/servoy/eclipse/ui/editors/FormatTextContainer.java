@@ -33,6 +33,8 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -46,6 +48,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.ui.editors.FormatDialog.IFormatTextContainer;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.FormatParser.ParsedFormat;
 
 /**
@@ -79,6 +82,7 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 	private final Button displayFormatRadio;
 	private Point caret = null;
 	private final Text allowedCharacters;
+	private Text maxLength;
 
 	/**
 	 * @param parent
@@ -100,72 +104,55 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 					lowerCase.setSelection(false);
 					numberInput.setSelection(false);
 					displayFormatRadio.setSelection(true);
-					placeHolder.setEnabled(true);
-					useRaw.setEnabled(true);
+					placeHolder.setEnabled(!displayFormat.getText().equals(""));
+					allowedCharacters.setEnabled(!displayFormat.getText().equals(""));
+					useRaw.setEnabled(!displayFormat.getText().equals(""));
+					maxLength.setEnabled(displayFormat.getText().equals(""));
 				}
 			}
 		};
 		ignoreTextChanges = true;
 
-		upperCase = new Button(this, SWT.RADIO);
-		upperCase.addSelectionListener(new SelectionAdapter()
+		SelectionAdapter listener = new SelectionAdapter()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				if (upperCase.getSelection())
+				if (upperCase.getSelection() || lowerCase.getSelection() || numberInput.getSelection())
 				{
 					placeHolder.setEnabled(false);
 					useRaw.setEnabled(false);
+					allowedCharacters.setEnabled(false);
+					maxLength.setEnabled(true);
+				}
+				else
+				{
+					placeHolder.setEnabled(!displayFormat.getText().equals(""));
+					allowedCharacters.setEnabled(!displayFormat.getText().equals(""));
+					useRaw.setEnabled(!displayFormat.getText().equals(""));
+					maxLength.setEnabled(displayFormat.getText().equals(""));
 				}
 			}
-		});
+		};
+
+		upperCase = new Button(this, SWT.RADIO);
+		upperCase.addSelectionListener(listener);
 		upperCase.setText("All Uppercase");
 		new Label(this, SWT.NONE);
 
 		lowerCase = new Button(this, SWT.RADIO);
-		lowerCase.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				if (lowerCase.getSelection())
-				{
-					placeHolder.setEnabled(false);
-					useRaw.setEnabled(false);
-				}
-			}
-		});
+
+		lowerCase.addSelectionListener(listener);
 		lowerCase.setText("All Lowercase");
 		new Label(this, SWT.NONE);
 
 		numberInput = new Button(this, SWT.RADIO);
-		numberInput.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				if (numberInput.getSelection())
-				{
-					placeHolder.setEnabled(false);
-					useRaw.setEnabled(false);
-				}
-			}
-		});
+		numberInput.addSelectionListener(listener);
 		numberInput.setText("Only Numbers");
 		new Label(this, SWT.NONE);
 
 		displayFormatRadio = new Button(this, SWT.RADIO);
-		displayFormatRadio.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				placeHolder.setEnabled(true);
-				useRaw.setEnabled(true);
-			}
-
-		});
+		displayFormatRadio.addSelectionListener(listener);
 		displayFormatRadio.setText("Display Format");
 
 		displayFormat = new Combo(this, SWT.NONE);
@@ -206,8 +193,27 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 
 		useRaw = new Button(this, SWT.CHECK);
 		useRaw.setText("Raw value (Literals are not in the real value)");
+		new Label(this, SWT.NONE).setText("Max length");
+		maxLength = new Text(this, SWT.BORDER);
+		maxLength.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		maxLength.addVerifyListener(new VerifyListener()
+		{
+			public void verifyText(VerifyEvent e)
+			{
+				if (e.keyCode == SWT.DEL || e.keyCode == SWT.BS) return;
+				char[] chars = new char[] { e.character };
+				if (e.text != null) chars = e.text.toCharArray();
+				for (char c : chars)
+				{
+					if (!Character.isDigit(c))
+					{
+						e.doit = false;
+						break;
+					}
+				}
+			}
+		});
 		new Label(this, SWT.NONE);
-
 		new Label(this, SWT.NONE);
 
 		Label lblLegenda = new Label(this, SWT.NONE);
@@ -266,8 +272,21 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 	@SuppressWarnings("nls")
 	public ParsedFormat getParsedFormat()
 	{
+		Integer len = null;
+		// if there is a display or edit format then ignore length, format dictates it. 
+		if (displayFormat.getText().equals("") && placeHolder.getText().equals(""))
+		{
+			try
+			{
+				len = Integer.valueOf(maxLength.getText());
+			}
+			catch (NumberFormatException e)
+			{
+				Debug.log(e);
+			}
+		}
 		return new ParsedFormat(upperCase.getSelection(), lowerCase.getSelection(), numberInput.getSelection(), useRaw.getSelection(), false,
-			placeHolder.getText(), displayFormat.getText(), null, null, null, allowedCharacters.getText());
+			placeHolder.getText(), displayFormat.getText(), len, null, null, allowedCharacters.getText());
 	}
 
 	/**
@@ -291,6 +310,7 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 				displayFormatRadio.setSelection(false);
 				placeHolder.setEnabled(false);
 				useRaw.setEnabled(false);
+				allowedCharacters.setEnabled(false);
 			}
 			else
 			{
@@ -306,6 +326,14 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 					placeHolder.setText(Character.toString(parsedFormat.getPlaceHolderCharacter()));
 				}
 			}
+			placeHolder.setEnabled(!displayFormat.getText().equals("")); //$NON-NLS-1$
+			allowedCharacters.setEnabled(!displayFormat.getText().equals("")); //$NON-NLS-1$
+			useRaw.setEnabled(!displayFormat.getText().equals("")); //$NON-NLS-1$
+			maxLength.setEnabled(displayFormat.getText().equals("")); //$NON-NLS-1$
+			if (parsedFormat.getMaxLength() != null)
+			{
+				maxLength.setText(parsedFormat.getMaxLength().toString());
+			}
 		}
 	}
 
@@ -319,6 +347,7 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 		placeHolder.setText("");
 		displayFormat.setText("");
 		allowedCharacters.setText("");
+		maxLength.setText("");
 		caret = null;
 		useRaw.setSelection(false);
 		ignoreTextChanges = false;
