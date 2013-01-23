@@ -38,6 +38,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.servoy.base.persistence.constants.IComponentConstants;
 import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -139,14 +140,10 @@ public class MobileExporter
 										ServoyLog.logError(e);
 									}
 								}
-								if (persist instanceof GraphicalComponent && !property_values.containsKey("viewType"))
+								if (persist instanceof GraphicalComponent && !property_values.containsKey(IComponentConstants.VIEW_TYPE_ATTR))
 								{
-									String labelViewType = "label";
-									if (((GraphicalComponent)persist).getOnActionMethodID() != 0 && ((GraphicalComponent)persist).getShowClick())
-									{
-										labelViewType = "button";
-									}
-									property_values.put("viewType", labelViewType);
+									property_values.put(IComponentConstants.VIEW_TYPE_ATTR, ComponentFactory.isButton(((GraphicalComponent)persist))
+										? IComponentConstants.VIEW_TYPE_BUTTON : IComponentConstants.VIEW_TYPE_LABEL);
 								}
 								if (value != null && contentSpec != null &&
 									contentSpec.getName().equals(StaticContentSpecLoader.PROPERTY_CUSTOMPROPERTIES.getPropertyName()))

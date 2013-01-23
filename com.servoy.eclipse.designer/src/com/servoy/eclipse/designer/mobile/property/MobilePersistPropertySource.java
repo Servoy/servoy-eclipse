@@ -33,6 +33,7 @@ import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.PropertyCategory;
 import com.servoy.eclipse.ui.property.PropertyController;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
@@ -168,7 +169,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		}
 
 		if (propertyDescriptor.propertyDescriptor.getName().equals(StaticContentSpecLoader.PROPERTY_ONACTIONMETHODID.getPropertyName()) &&
-			isLabel(getPersist()))
+			!isButton(getPersist()))
 		{
 			return true;
 		}
@@ -180,7 +181,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 
 		// there is no style support for labels & text fields on mobile client
 		if (propertyDescriptor.propertyDescriptor.getName().equals(StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName()) &&
-			((getPersist() instanceof Field && (((Field)getPersist()).getDisplayType() == Field.TEXT_FIELD || ((Field)getPersist()).getDisplayType() == Field.TEXT_AREA)) || isLabel(getPersist())))
+			((getPersist() instanceof Field && (((Field)getPersist()).getDisplayType() == Field.TEXT_FIELD || ((Field)getPersist()).getDisplayType() == Field.TEXT_AREA)) || !isButton(getPersist())))
 		{
 			return true;
 		}
@@ -197,7 +198,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			return new String[] { IMobileProperties.DATA_ICON.propertyName };
 		}
 
-		if (GraphicalComponent.class == clazz && isLabel(getPersist()))
+		if (GraphicalComponent.class == clazz && !isButton(getPersist()))
 		{
 			// script label
 			return new String[] { IMobileProperties.HEADER_SIZE.propertyName };
@@ -220,19 +221,9 @@ public class MobilePersistPropertySource extends PersistPropertySource
 	 * @param persist
 	 * @return
 	 */
-	private static boolean isLabel(IPersist persist)
-	{
-		return !isButton(persist) && persist instanceof GraphicalComponent && ((GraphicalComponent)persist).getDataProviderID() == null;
-	}
-
-	/**
-	 * @param persist
-	 * @return
-	 */
 	private static boolean isButton(IPersist persist)
 	{
-		return persist instanceof GraphicalComponent && ((GraphicalComponent)persist).getOnActionMethodID() != 0 &&
-			((GraphicalComponent)persist).getShowClick();
+		return persist instanceof GraphicalComponent && ComponentFactory.isButton((GraphicalComponent)persist);
 	}
 
 	@Override

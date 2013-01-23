@@ -1763,7 +1763,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		if (name.equals("labelFor") && persistContext.getPersist() instanceof GraphicalComponent)
 		{
 			GraphicalComponent gc = (GraphicalComponent)persistContext.getPersist();
-			if (gc.getOnActionMethodID() >= 1 && gc.getShowClick())
+			if (ComponentFactory.isButton(gc))
 			{
 				//if it's a button, then we only show the property if it has a value (probably to be cleared via quickfix)
 				return gc.getLabelFor() != null && !gc.getLabelFor().equals("");
