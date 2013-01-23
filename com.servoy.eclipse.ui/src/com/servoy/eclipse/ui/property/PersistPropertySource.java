@@ -649,6 +649,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		}
 
 		IPropertyDescriptor pd = createPropertyDescriptor(propertyDescriptor, flattenedEditingSolution, form, category, id);
+		setCategory(pd, category);
 		IPropertyDescriptor combinedPropertyDesciptor = null;
 		if (propertyDescriptor.valueObject == persistContext.getPersist())
 		{
@@ -778,7 +779,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 		IPropertyDescriptor desc = createPropertyDescriptor(propertySource, persistContext, readOnly, propertyDescriptor, id, displayName, category,
 			flattenedEditingSolution, form);
-		setCategory(desc, category);
 		if (desc != null //
 			&&
 			persistContext != null &&
