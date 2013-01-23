@@ -1798,6 +1798,15 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		}
 
 
+		if (name.equals("placeholderText") && persistContext.getPersist() instanceof Field)
+		{
+			Field field = (Field)persistContext.getPersist();
+			if (field.getDisplayType() != Field.TEXT_FIELD && field.getDisplayType() != Field.PASSWORD && field.getDisplayType() != Field.TYPE_AHEAD &&
+				field.getDisplayType() != Field.TEXT_AREA)
+			{
+				return false;
+			}
+		}
 		return true;
 	}
 
