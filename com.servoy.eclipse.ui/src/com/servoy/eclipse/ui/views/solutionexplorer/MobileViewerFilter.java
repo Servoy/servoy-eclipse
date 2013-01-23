@@ -25,7 +25,6 @@ import org.eclipse.jface.viewers.ViewerFilter;
 
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
-import com.servoy.j2db.persistence.ScriptMethod;
 
 /**
  * This class filters out what is not allowed in SolutionExplorer for a mobile project.
@@ -88,27 +87,19 @@ public class MobileViewerFilter extends ViewerFilter
 		else if (node instanceof SimpleUserNode)
 		{
 			// filtering the list view
-			boolean isAllowedNode = (((SimpleUserNode)node).getRealType() == UserNodeType.TABLE ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.VIEW ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.STYLE_ITEM ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.I18N_FILE_ITEM ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.TEMPLATE_ITEM ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.FORM_METHOD ||
+			boolean isAllowedNode = (((SimpleUserNode)node).getRealType() == UserNodeType.TABLE || ((SimpleUserNode)node).getRealType() == UserNodeType.VIEW ||
+				((SimpleUserNode)node).getRealType() == UserNodeType.STYLE_ITEM || ((SimpleUserNode)node).getRealType() == UserNodeType.I18N_FILE_ITEM ||
+				((SimpleUserNode)node).getRealType() == UserNodeType.TEMPLATE_ITEM || ((SimpleUserNode)node).getRealType() == UserNodeType.FORM_METHOD ||
 				((SimpleUserNode)node).getRealType() == UserNodeType.GLOBAL_METHOD_ITEM ||
 				((SimpleUserNode)node).getRealType() == UserNodeType.TABLE_COLUMNS_ITEM ||
 				((SimpleUserNode)node).getRealType() == UserNodeType.CALCULATIONS_ITEM ||
 				((SimpleUserNode)node).getRealType() == UserNodeType.GLOBAL_VARIABLE_ITEM ||
 				((SimpleUserNode)node).getRealType() == UserNodeType.FORM_VARIABLE_ITEM ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.VALUELIST_ITEM ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.RELATION ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.FOUNDSET_ITEM ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.FORM_ELEMENTS_ITEM ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.FORM_FOUNDSET ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.SECURITY_ITEM ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.ARRAY ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.NUMBER ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.SPECIAL_OPERATORS ||
-				(((SimpleUserNode)node).getRealType() == UserNodeType.FORM_ELEMENTS_ITEM_METHOD && ((SimpleUserNode)node).getRealObject() instanceof ScriptMethod) || ((SimpleUserNode)node).getRealType() == UserNodeType.JSLIB);
+				((SimpleUserNode)node).getRealType() == UserNodeType.VALUELIST_ITEM || ((SimpleUserNode)node).getRealType() == UserNodeType.RELATION ||
+				((SimpleUserNode)node).getRealType() == UserNodeType.FOUNDSET_ITEM || ((SimpleUserNode)node).getRealType() == UserNodeType.FORM_ELEMENTS_ITEM ||
+				((SimpleUserNode)node).getRealType() == UserNodeType.FORM_FOUNDSET || ((SimpleUserNode)node).getRealType() == UserNodeType.SECURITY_ITEM ||
+				((SimpleUserNode)node).getRealType() == UserNodeType.ARRAY || ((SimpleUserNode)node).getRealType() == UserNodeType.NUMBER ||
+				((SimpleUserNode)node).getRealType() == UserNodeType.SPECIAL_OPERATORS || ((SimpleUserNode)node).getRealType() == UserNodeType.JSLIB);
 
 			return (isAllowedNode || ((SimpleUserNode)node).isVisibleInMobile());
 		}
