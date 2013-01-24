@@ -924,14 +924,22 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				for (Pair<String, ISupportChilds> duplicatedParent : duplicatedParents)
 				{
 					String duplicateParentsName = ""; //$NON-NLS-1$
-					if (duplicatedParent instanceof ISupportName)
+					if (duplicatedParent.getRight() instanceof ISupportName)
 					{
-						duplicateParentsName = ((ISupportName)duplicatedParent).getName();
+						duplicateParentsName = ((ISupportName)duplicatedParent.getRight()).getName();
+					}
+					if (duplicatedParent.getLeft() != null)
+					{
+						duplicateParentsName += '.' + duplicatedParent.getLeft();
 					}
 					String parentsName = ""; //$NON-NLS-1$
 					if (persist.getParent() instanceof ISupportName)
 					{
 						parentsName = ((ISupportName)persist.getParent()).getName();
+					}
+					if (scopeName != null)
+					{
+						parentsName += '.' + scopeName;
 					}
 					String type = "method"; //$NON-NLS-1$
 					if (persist instanceof ScriptVariable)
@@ -1003,6 +1011,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				{
 					persistSet = new HashMap<Integer, Set<Pair<String, ISupportChilds>>>();
 					duplicationMap.put(entityName_plus_dataSource, persistSet);
+					if (persist instanceof IScriptProvider || persist instanceof ScriptVariable)
+					{
+						String name = ((ISupportName)persist).getName();
+						duplicationMap.remove(name);
+					}
 				}
 
 				Integer type = TABLE_CALCULATION_DUPLICATION; // ScriptCalculation
