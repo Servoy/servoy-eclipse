@@ -93,6 +93,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 	};
 
 	public static String[] DATA_ICONS = new String[] { //
+	"DEFAULT", //$NON-NLS-1$
 	"alert", //$NON-NLS-1$
 	"arrow-d", //$NON-NLS-1$
 	"arrow-l", //$NON-NLS-1$
