@@ -268,7 +268,7 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 	{
 		Integer len = null;
 		// if there is a display or edit format then ignore length, format dictates it. 
-		if (displayFormat.getText().equals("") && placeHolder.getText().equals(""))
+		if (!displayFormatRadio.getSelection() || displayFormat.getText().equals("") && placeHolder.getText().equals(""))
 		{
 			try
 			{
