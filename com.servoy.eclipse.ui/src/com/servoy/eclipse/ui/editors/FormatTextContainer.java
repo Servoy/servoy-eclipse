@@ -104,10 +104,7 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 					lowerCase.setSelection(false);
 					numberInput.setSelection(false);
 					displayFormatRadio.setSelection(true);
-					placeHolder.setEnabled(!displayFormat.getText().equals(""));
-					allowedCharacters.setEnabled(!displayFormat.getText().equals(""));
-					useRaw.setEnabled(!displayFormat.getText().equals(""));
-					maxLength.setEnabled(displayFormat.getText().equals(""));
+					setEnablementOfDisplayFormatOptions();
 				}
 			}
 		};
@@ -127,10 +124,7 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 				}
 				else
 				{
-					placeHolder.setEnabled(!displayFormat.getText().equals(""));
-					allowedCharacters.setEnabled(!displayFormat.getText().equals(""));
-					useRaw.setEnabled(!displayFormat.getText().equals(""));
-					maxLength.setEnabled(displayFormat.getText().equals(""));
+					setEnablementOfDisplayFormatOptions();
 				}
 			}
 		};
@@ -326,10 +320,7 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 					placeHolder.setText(Character.toString(parsedFormat.getPlaceHolderCharacter()));
 				}
 			}
-			placeHolder.setEnabled(!displayFormat.getText().equals("")); //$NON-NLS-1$
-			allowedCharacters.setEnabled(!displayFormat.getText().equals("")); //$NON-NLS-1$
-			useRaw.setEnabled(!displayFormat.getText().equals("")); //$NON-NLS-1$
-			maxLength.setEnabled(displayFormat.getText().equals("")); //$NON-NLS-1$
+			setEnablementOfDisplayFormatOptions();
 			if (parsedFormat.getMaxLength() != null)
 			{
 				maxLength.setText(parsedFormat.getMaxLength().toString());
@@ -351,5 +342,16 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 		caret = null;
 		useRaw.setSelection(false);
 		ignoreTextChanges = false;
+	}
+
+	/**
+	 * 
+	 */
+	public void setEnablementOfDisplayFormatOptions()
+	{
+		placeHolder.setEnabled(!displayFormat.getText().equals(""));
+		allowedCharacters.setEnabled(!displayFormat.getText().equals(""));
+		useRaw.setEnabled(!displayFormat.getText().equals(""));
+		maxLength.setEnabled(displayFormat.getText().equals(""));
 	}
 }
