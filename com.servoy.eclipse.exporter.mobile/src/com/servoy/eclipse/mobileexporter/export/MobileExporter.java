@@ -17,7 +17,6 @@
 
 package com.servoy.eclipse.mobileexporter.export;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -48,6 +47,7 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.IValueFilter;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.IValueList;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -337,25 +337,38 @@ public class MobileExporter
 			ZipOutputStream warStream = null;
 			try
 			{
+				Map<String, String> renameMap = new HashMap<String, String>();
+				buildRenameEntriesList(renameMap);
 				exportedFile = new File(outputFolder, solutionName + (exportAsZip ? ".zip" : ".war"));
 				warStream = new ZipOutputStream(new FileOutputStream(exportedFile));
 				ZipInputStream zipStream = new ZipInputStream(is);
 				ZipEntry entry = zipStream.getNextEntry();
 				while (entry != null)
 				{
+					InputStream contentStream = null;
 					String entryName = entry.getName();
-					if (entryName.equals("servoy_mobile.html"))
+					if (entryName.equals("servoy_mobile.html") || entryName.equals("mobileclient/mobileclient.nocache.js"))
 					{
-						entryName = "index.html";
+						String fileContent = Utils.getTXTFileContent(zipStream, Charset.forName("UTF8"), false);
+						for (String key : renameMap.keySet())
+						{
+							fileContent = fileContent.replaceAll(key, renameMap.get(key));
+						}
+						contentStream = Utils.getUTF8EncodedStream(fileContent);
 					}
+					if (renameMap.containsKey(entryName))
+					{
+						entryName = renameMap.get(entryName);
+					}
+
 					if (!exportAsZip || !entryName.startsWith("WEB-INF"))
 					{
-						addZipEntry(entryName, warStream, zipStream);
+						addZipEntry(entryName, warStream, contentStream != null ? contentStream : zipStream);
 					}
 					entry = zipStream.getNextEntry();
 				}
-				addZipEntry("solution.json", warStream, new ByteArrayInputStream(formJson.getBytes("UTF8")));
-				addZipEntry("solution.js", warStream, new ByteArrayInputStream(solutionJavascript.getBytes("UTF8")));
+				addZipEntry(renameMap.get("solution.json"), warStream, Utils.getUTF8EncodedStream(formJson));
+				addZipEntry(renameMap.get("solution.js"), warStream, Utils.getUTF8EncodedStream(solutionJavascript));
 				Utils.closeInputStream(zipStream);
 			}
 			catch (IOException e)
@@ -372,6 +385,18 @@ public class MobileExporter
 			ServoyLog.logError("mobile.war file was not found in exporter project", null);
 		}
 		return exportedFile;
+	}
+
+	private void buildRenameEntriesList(Map<String, String> renameMap)
+	{
+		renameMap.put("servoy_mobile.html", "index.html");
+		renameMap.put("servoy.css", "servoy_" + ClientVersion.getReleaseNumber() + ".css");
+		renameMap.put("servoy_utils.js", "servoy_utils_" + ClientVersion.getReleaseNumber() + ".js");
+		renameMap.put("solution.js", "solution_" + System.currentTimeMillis() + ".js");
+		renameMap.put("solution.json", "solution_" + System.currentTimeMillis() + ".json");
+		String mobileClientFileName = "mobileclient.nocache_" + System.currentTimeMillis() + ".js";
+		renameMap.put("mobileclient/mobileclient.nocache.js", "mobileclient/" + mobileClientFileName);
+		renameMap.put("mobileclient.nocache.js", mobileClientFileName);
 	}
 
 	private void addZipEntry(String entryName, ZipOutputStream stream, InputStream inputStream) throws IOException
