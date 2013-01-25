@@ -286,7 +286,7 @@ public class ElementUtil
 		if (persist instanceof GraphicalComponent)
 		{
 			GraphicalComponent label = (GraphicalComponent)persist;
-			if (label.getOnActionMethodID() != 0 && label.getShowClick())
+			if (ComponentFactory.isButton(label))
 			{
 				if (label.getDataProviderID() == null && !label.getDisplaysTags())
 				{
