@@ -214,18 +214,14 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 	static
 	{
-		HORIZONTAL_ALIGNMENT_CONTROLLER = new ComboboxPropertyController<Integer>(
-			"horizontalAlignment",
-			RepositoryHelper.getDisplayName("horizontalAlignment", Field.class),
-			new ComboboxPropertyModel<Integer>(
-				new Integer[] { Integer.valueOf(-1), Integer.valueOf(SwingConstants.LEFT), Integer.valueOf(SwingConstants.CENTER), Integer.valueOf(SwingConstants.RIGHT) },
-				new String[] { Messages.LabelDefault, Messages.AlignLeft, Messages.AlignCenter, Messages.AlignRight }), Messages.LabelUnresolved);
-		SELECTION_MODE_CONTROLLER = new ComboboxPropertyController<Integer>(
-			"selectionMode",
-			RepositoryHelper.getDisplayName("selectionMode", Form.class),
-			new ComboboxPropertyModel<Integer>(
-				new Integer[] { Integer.valueOf(IForm.SELECTION_MODE_DEFAULT), Integer.valueOf(IForm.SELECTION_MODE_SINGLE), Integer.valueOf(IForm.SELECTION_MODE_MULTI) },
-				new String[] { Messages.LabelDefault, Messages.SelectionModeSingle, Messages.SelectionModeMulti }), Messages.LabelUnresolved);
+		HORIZONTAL_ALIGNMENT_CONTROLLER = new ComboboxPropertyController<Integer>("horizontalAlignment", RepositoryHelper.getDisplayName("horizontalAlignment",
+			Field.class), new ComboboxPropertyModel<Integer>(
+			new Integer[] { Integer.valueOf(SwingConstants.LEFT), Integer.valueOf(SwingConstants.CENTER), Integer.valueOf(SwingConstants.RIGHT) },
+			new String[] { Messages.AlignLeft, Messages.AlignCenter, Messages.AlignRight }).addDefaultValue(Integer.valueOf(-1)), Messages.LabelUnresolved);
+		SELECTION_MODE_CONTROLLER = new ComboboxPropertyController<Integer>("selectionMode", RepositoryHelper.getDisplayName("selectionMode", Form.class),
+			new ComboboxPropertyModel<Integer>(new Integer[] { Integer.valueOf(IForm.SELECTION_MODE_SINGLE), Integer.valueOf(IForm.SELECTION_MODE_MULTI) },
+				new String[] { Messages.SelectionModeSingle, Messages.SelectionModeMulti }).addDefaultValue(Integer.valueOf(IForm.SELECTION_MODE_DEFAULT)),
+			Messages.LabelUnresolved);
 		SHAPE_TYPE_CONTOLLER = new ComboboxPropertyController<Integer>(
 			"shapeType",
 			RepositoryHelper.getDisplayName("shapeType", RectShape.class),
@@ -236,8 +232,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			"tabOrientation",
 			RepositoryHelper.getDisplayName("tabOrientation", TabPanel.class),
 			new ComboboxPropertyModel<Integer>(
-				new Integer[] { Integer.valueOf(TabPanel.DEFAULT), Integer.valueOf(SwingConstants.TOP), Integer.valueOf(SwingConstants.RIGHT), Integer.valueOf(SwingConstants.BOTTOM), Integer.valueOf(SwingConstants.LEFT), Integer.valueOf(TabPanel.HIDE), Integer.valueOf(TabPanel.SPLIT_HORIZONTAL), Integer.valueOf(TabPanel.SPLIT_VERTICAL), Integer.valueOf(TabPanel.ACCORDION_PANEL) },
-				new String[] { Messages.LabelDefault, Messages.AlignTop, Messages.AlignRight, Messages.AlignBottom, Messages.AlignLeft, "HIDE", "SPLIT HORIZONTAL", "SPLIT VERTICAL", "ACCORDION PANE" }),
+				new Integer[] { Integer.valueOf(SwingConstants.TOP), Integer.valueOf(SwingConstants.RIGHT), Integer.valueOf(SwingConstants.BOTTOM), Integer.valueOf(SwingConstants.LEFT), Integer.valueOf(TabPanel.HIDE), Integer.valueOf(TabPanel.SPLIT_HORIZONTAL), Integer.valueOf(TabPanel.SPLIT_VERTICAL), Integer.valueOf(TabPanel.ACCORDION_PANEL) },
+				new String[] { Messages.AlignTop, Messages.AlignRight, Messages.AlignBottom, Messages.AlignLeft, "HIDE", "SPLIT HORIZONTAL", "SPLIT VERTICAL", "ACCORDION PANE" }).addDefaultValue(Integer.valueOf(TabPanel.DEFAULT)),
 			Messages.LabelUnresolved);
 		DISPLAY_TYPE_CONTOLLER = new ComboboxPropertyController<Integer>(
 			"displayType",
@@ -288,22 +284,20 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			Messages.LabelUnresolved);
 
 		ROLLOVER_CURSOR_CONTROLLER = new ComboboxPropertyController<Integer>("rolloverCursor", RepositoryHelper.getDisplayName("rolloverCursor",
-			GraphicalComponent.class), new ComboboxPropertyModel<Integer>(
-			new Integer[] { Integer.valueOf(Cursor.DEFAULT_CURSOR), Integer.valueOf(Cursor.HAND_CURSOR) },
-			new String[] { Messages.LabelDefault, Messages.CursorHand }), Messages.LabelUnresolved);
-		VERTICAL_ALIGNMENT_CONTROLLER = new ComboboxPropertyController<Integer>(
-			"verticalAlignment",
-			RepositoryHelper.getDisplayName("verticalAlignment", Field.class),
-			new ComboboxPropertyModel<Integer>(
-				new Integer[] { Integer.valueOf(-1), Integer.valueOf(SwingConstants.TOP), Integer.valueOf(SwingConstants.CENTER), Integer.valueOf(SwingConstants.BOTTOM) },
-				new String[] { Messages.LabelDefault, Messages.AlignTop, Messages.AlignCenter, Messages.AlignBottom }), Messages.LabelUnresolved);
+			GraphicalComponent.class), new ComboboxPropertyModel<Integer>(new Integer[] { Integer.valueOf(Cursor.HAND_CURSOR) },
+			new String[] { Messages.CursorHand }).addDefaultValue(Integer.valueOf(Cursor.DEFAULT_CURSOR)), Messages.LabelUnresolved);
+
+		VERTICAL_ALIGNMENT_CONTROLLER = new ComboboxPropertyController<Integer>("verticalAlignment", RepositoryHelper.getDisplayName("verticalAlignment",
+			Field.class), new ComboboxPropertyModel<Integer>(
+			new Integer[] { Integer.valueOf(SwingConstants.TOP), Integer.valueOf(SwingConstants.CENTER), Integer.valueOf(SwingConstants.BOTTOM) },
+			new String[] { Messages.AlignTop, Messages.AlignCenter, Messages.AlignBottom }).addDefaultValue(Integer.valueOf(-1)), Messages.LabelUnresolved);
 
 		TEXT_ORIENTATION_CONTROLLER = new ComboboxPropertyController<Integer>(
 			"textOrientation",
 			RepositoryHelper.getDisplayName("textOrientation", Solution.class),
 			new ComboboxPropertyModel<Integer>(
-				new Integer[] { Integer.valueOf(Solution.TEXT_ORIENTATION_DEFAULT), Integer.valueOf(Solution.TEXT_ORIENTATION_LEFT_TO_RIGHT), Integer.valueOf(Solution.TEXT_ORIENTATION_RIGHT_TO_LEFT), Integer.valueOf(Solution.TEXT_ORIENTATION_LOCALE_SPECIFIC) },
-				new String[] { Messages.LabelDefault, Messages.OrientationLeftToRight, Messages.OrientationRightToLeft, Messages.OrientationLocaleSpecific }),
+				new Integer[] { Integer.valueOf(Solution.TEXT_ORIENTATION_LEFT_TO_RIGHT), Integer.valueOf(Solution.TEXT_ORIENTATION_RIGHT_TO_LEFT), Integer.valueOf(Solution.TEXT_ORIENTATION_LOCALE_SPECIFIC) },
+				new String[] { Messages.OrientationLeftToRight, Messages.OrientationRightToLeft, Messages.OrientationLocaleSpecific }).addDefaultValue(Integer.valueOf(Solution.TEXT_ORIENTATION_DEFAULT)),
 			Messages.LabelUnresolved);
 
 		SLIDING_OPTIONS_CONTROLLER = new SlidingoptionsPropertyController("printSliding", RepositoryHelper.getDisplayName("printSliding",
