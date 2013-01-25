@@ -4417,13 +4417,7 @@ for( var i = 0 ; i < array.length ; i++ )
           <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"><![CDATA[A new JSFoundset for that query.]]></return>
           <description><![CDATA[Returns a foundset object for a specified pk query.]]></description>
           <summary><![CDATA[Returns a foundset object for a specified pk query.]]></summary>
-          <sample><![CDATA[// type the foundset returned from the call with JSDoc, fill in the right server/tablename
-/** @type {JSFoundset<db:/servername/tablename>} */
-var fs = databaseManager.getFoundSet(controller.getDataSource())
-var ridx = fs.newRecord()
-var record = fs.getRecord(ridx)
-record.emp_name = 'John'
-databaseManager.saveData()]]></sample>
+          <sample/>
           <parameters>
             <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
               <description><![CDATA[The query to get the JSFoundset for.]]></description>
@@ -4434,7 +4428,7 @@ databaseManager.saveData()]]></sample>
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"><![CDATA[A new JSFoundset for that datasource.]]></return>
+          <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.base.scripting.api.IJSFoundSet"><![CDATA[A new JSFoundset for that datasource.]]></return>
           <description><![CDATA[Returns a foundset object for a specified datasource or server and tablename.]]></description>
           <summary><![CDATA[Returns a foundset object for a specified datasource or server and tablename.]]></summary>
           <sample><![CDATA[// type the foundset returned from the call with JSDoc, fill in the right server/tablename
@@ -4455,16 +4449,10 @@ databaseManager.saveData()]]></sample>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"><![CDATA[A new JSFoundset for that datasource.]]></return>
+          <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.base.scripting.api.IJSFoundSet"><![CDATA[A new JSFoundset for that datasource.]]></return>
           <description><![CDATA[Returns a foundset object for a specified datasource or server and tablename.]]></description>
           <summary><![CDATA[Returns a foundset object for a specified datasource or server and tablename.]]></summary>
-          <sample><![CDATA[// type the foundset returned from the call with JSDoc, fill in the right server/tablename
-/** @type {JSFoundset<db:/servername/tablename>} */
-var fs = databaseManager.getFoundSet(controller.getDataSource())
-var ridx = fs.newRecord()
-var record = fs.getRecord(ridx)
-record.emp_name = 'John'
-databaseManager.saveData()]]></sample>
+          <sample/>
           <parameters>
             <parameter name="serverName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The servername to get a JSFoundset for.]]></description>
@@ -44191,6 +44179,90 @@ if (!form.controller.getDesignMode())
             </parameter>
             <parameter name="onresize" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
               <description><![CDATA[onResize method reference]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setDesignMode">
+          <argumentsTypes>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets this form in designmode with one or more callback methods.]]></description>
+          <summary><![CDATA[Sets this form in designmode with one or more callback methods.]]></summary>
+          <sample><![CDATA[var form = forms["selectedFormName"];
+if (!form.controller.getDesignMode())
+{
+	// Set the current form in designmode with no callbacks
+	form.controller.setDesignMode(true);
+	// Set the current form in designmode with callbacks
+	// where onDrag, onDrop, onSelect, onResize are names of form methods (not from "selectedFormName" form)
+	// form.controller.setDesignMode(onDrag, onDrop, onSelect, onResize);
+}
+//Set the current form out of designmode (to normal browse)
+//form.controller.setDesignMode(false);]]></sample>
+          <parameters>
+            <parameter name="ondrag" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onDrag method reference]]></description>
+            </parameter>
+            <parameter name="ondrop" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onDrop method reference]]></description>
+            </parameter>
+            <parameter name="onselect" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onSelect method reference]]></description>
+            </parameter>
+            <parameter name="onresize" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onResize method reference]]></description>
+            </parameter>
+            <parameter name="ondblclick" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onDblClick method reference]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setDesignMode">
+          <argumentsTypes>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets this form in designmode with one or more callback methods.]]></description>
+          <summary><![CDATA[Sets this form in designmode with one or more callback methods.]]></summary>
+          <sample><![CDATA[var form = forms["selectedFormName"];
+if (!form.controller.getDesignMode())
+{
+	// Set the current form in designmode with no callbacks
+	form.controller.setDesignMode(true);
+	// Set the current form in designmode with callbacks
+	// where onDrag, onDrop, onSelect, onResize are names of form methods (not from "selectedFormName" form)
+	// form.controller.setDesignMode(onDrag, onDrop, onSelect, onResize);
+}
+//Set the current form out of designmode (to normal browse)
+//form.controller.setDesignMode(false);]]></sample>
+          <parameters>
+            <parameter name="ondrag" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onDrag method reference]]></description>
+            </parameter>
+            <parameter name="ondrop" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onDrop method reference]]></description>
+            </parameter>
+            <parameter name="onselect" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onSelect method reference]]></description>
+            </parameter>
+            <parameter name="onresize" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onResize method reference]]></description>
+            </parameter>
+            <parameter name="ondblclick" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onDblClick method reference]]></description>
+            </parameter>
+            <parameter name="onrightclick" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onRightClick method reference]]></description>
             </parameter>
           </parameters>
         </function>
