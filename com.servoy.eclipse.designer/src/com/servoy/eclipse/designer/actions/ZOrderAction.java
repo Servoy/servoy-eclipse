@@ -179,19 +179,21 @@ public class ZOrderAction extends DesignerSelectionAction
 
 		ArrayList<OrderableElement> orderedElements = new ArrayList<OrderableElement>();
 
+		int maxFormIndexToMove = -1;
 		for (int index = 0; index <= unorderedList.size() - 1; index++)
 		{
 			OrderableElement current = unorderedList.get(index);
 			if (current.needsAdjustement)
 			{
 				orderedElements.add(current);
+				maxFormIndexToMove = Math.max(maxFormIndexToMove, current.zIndex);
 			}
 		}
 
-		for (int index = 0; index <= orderedElements.size() - 1; index++)
+		for (int index = 0; index <= unorderedList.size() - 1; index++)
 		{
 			OrderableElement current = unorderedList.get(index);
-			if (!current.needsAdjustement)
+			if (!current.needsAdjustement && current.zIndex <= maxFormIndexToMove)
 			{
 				orderedElements.add(current);
 			}
