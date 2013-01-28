@@ -189,6 +189,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 		PlatformSimpleUserNode jsarray = new PlatformSimpleUserNode(Messages.TreeStrings_Array, UserNodeType.ARRAY, null, IconProvider.instance().image(
 			com.servoy.j2db.documentation.scripting.docs.Array.class));
+		jsarray.setIsVisibleInMobile(true);
 		PlatformSimpleUserNode jsdate = new PlatformSimpleUserNode(Messages.TreeStrings_Date, UserNodeType.DATE, null, null, IconProvider.instance().image(
 			com.servoy.j2db.documentation.scripting.docs.Date.class));
 		PlatformSimpleUserNode jsstring = new PlatformSimpleUserNode(Messages.TreeStrings_String, UserNodeType.STRING, null, IconProvider.instance().image(
@@ -209,6 +210,15 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			com.servoy.j2db.documentation.scripting.docs.Number.class));
 		PlatformSimpleUserNode json = new PlatformSimpleUserNode(Messages.TreeStrings_JSON, UserNodeType.JSON, null, IconProvider.instance().image(
 			com.servoy.j2db.documentation.scripting.docs.JSON.class));
+		jsarray.setIsVisibleInMobile(true);
+		jsdate.setIsVisibleInMobile(true);
+		jsstring.setIsVisibleInMobile(true);
+		jsnumber.setIsVisibleInMobile(true);
+		jsmath.setIsVisibleInMobile(true);
+		jsregexp.setIsVisibleInMobile(true);
+		jsstatements.setIsVisibleInMobile(true);
+		jsspecialops.setIsVisibleInMobile(true);
+		json.setIsVisibleInMobile(true);
 
 		jslib.children = new PlatformSimpleUserNode[] { jsarray, jsdate, jsstring, jsnumber, jsmath, jsregexp, jsstatements, jsspecialops, json, jsxml, jsxmllist };
 		jsarray.parent = jslib;

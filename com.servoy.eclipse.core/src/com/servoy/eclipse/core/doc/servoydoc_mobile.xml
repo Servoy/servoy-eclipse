@@ -584,21 +584,21 @@ controller.showRecords(15, nmd); // 15 is a single-number pk in this case]]></sa
           <sample><![CDATA[// For Windows systems:
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
-application.executeProgram("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"]);
+application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"]);
 // The same as above, but run the application in the user's home directory. 
-application.executeProgram("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"],null,"c:\\Users\\myself\\");	
+application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");	
 // The same as above, but also set an environment variable for the called program.
 application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
-application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"],null,"/home/myself/");	
-application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"],"/home/myself/");
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");	
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 // Open a file with the default application associated with it. (on Windows)
 application.executeProgram("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgram("xdg-open", ["filename"]);
 // Open a file with the default application associated with it. (on MacOS)
-application.executeProgram("open",["filename"]);
+application.executeProgram("open", ["filename"]);
 // Open a file with a specific application (on MacOS).
 application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"]);]]></sample>
           <parameters>
@@ -618,21 +618,21 @@ application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"])
           <sample><![CDATA[// For Windows systems:
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
-application.executeProgram("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"]);
+application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"]);
 // The same as above, but run the application in the user's home directory. 
-application.executeProgram("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"],null,"c:\\Users\\myself\\");	
+application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");	
 // The same as above, but also set an environment variable for the called program.
 application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
-application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"],null,"/home/myself/");	
-application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"],"/home/myself/");
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");	
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 // Open a file with the default application associated with it. (on Windows)
 application.executeProgram("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgram("xdg-open", ["filename"]);
 // Open a file with the default application associated with it. (on MacOS)
-application.executeProgram("open",["filename"]);
+application.executeProgram("open", ["filename"]);
 // Open a file with a specific application (on MacOS).
 application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"]);]]></sample>
           <parameters>
@@ -656,21 +656,21 @@ application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"])
           <sample><![CDATA[// For Windows systems:
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
-application.executeProgram("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"]);
+application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"]);
 // The same as above, but run the application in the user's home directory. 
-application.executeProgram("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"],null,"c:\\Users\\myself\\");	
+application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");	
 // The same as above, but also set an environment variable for the called program.
 application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
-application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"],null,"/home/myself/");	
-application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"],"/home/myself/");
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");	
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 // Open a file with the default application associated with it. (on Windows)
 application.executeProgram("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgram("xdg-open", ["filename"]);
 // Open a file with the default application associated with it. (on MacOS)
-application.executeProgram("open",["filename"]);
+application.executeProgram("open", ["filename"]);
 // Open a file with a specific application (on MacOS).
 application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"]);]]></sample>
           <parameters>
@@ -698,21 +698,21 @@ application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"])
           <sample><![CDATA[// For Windows systems:
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
-application.executeProgram("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"]);
+application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"]);
 // The same as above, but run the application in the user's home directory. 
-application.executeProgram("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"],null,"c:\\Users\\myself\\");	
+application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");	
 // The same as above, but also set an environment variable for the called program.
 application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
-application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"],null,"/home/myself/");	
-application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"],"/home/myself/");
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");	
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 // Open a file with the default application associated with it. (on Windows)
 application.executeProgram("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgram("xdg-open", ["filename"]);
 // Open a file with the default application associated with it. (on MacOS)
-application.executeProgram("open",["filename"]);
+application.executeProgram("open", ["filename"]);
 // Open a file with a specific application (on MacOS).
 application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"]);]]></sample>
           <parameters>
@@ -736,7 +736,7 @@ application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"])
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The output generated by the program execution.]]></return>
           <description/>
-          <deprecated><![CDATA[As of release 7.0. Use overload with array arguments, for ex: executeProgram("c:\\Users\\myself\\myapp.exe", null,["arg1", "arg2", "arg3"]);
+          <deprecated><![CDATA[As of release 7.0. Use overload with array arguments, for ex: executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 Execute a program and returns output. Specify the cmd as you would do in a console.]]></deprecated>
           <sample><![CDATA[// "#" is divider between program args, environment vars and startdir
 // For Windows systems:
@@ -799,21 +799,21 @@ application.executeProgram("open", "-a", "OpenOffice.org.app", "filename.doc");]
           <sample><![CDATA[// For Windows systems:
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
-application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"]);
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"]);
 // The same as above, but run the application in the user's home directory. 
-application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"],null,"c:\\Users\\myself\\");	
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");	
 // The same as above, but also set an environment variable for the called program.
 application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
-application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"],null,"/home/myself/");	
-application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"],"/home/myself/");
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");	
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 // Open a file with the default application associated with it. (on Windows)
 application.executeProgramInBackground("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgramInBackground("xdg-open", ["filename"]);
 // Open a file with the default application associated with it. (on MacOS)
-application.executeProgramInBackground("open",["filename"]);
+application.executeProgramInBackground("open", ["filename"]);
 // Open a file with a specific application (on MacOS).
 application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"]);]]></sample>
           <parameters>
@@ -833,21 +833,21 @@ application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"])
           <sample><![CDATA[// For Windows systems:
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
-application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"]);
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"]);
 // The same as above, but run the application in the user's home directory. 
-application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"],null,"c:\\Users\\myself\\");	
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");	
 // The same as above, but also set an environment variable for the called program.
 application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
-application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"],null,"/home/myself/");	
-application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"],"/home/myself/");
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");	
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 // Open a file with the default application associated with it. (on Windows)
 application.executeProgramInBackground("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgramInBackground("xdg-open", ["filename"]);
 // Open a file with the default application associated with it. (on MacOS)
-application.executeProgramInBackground("open",["filename"]);
+application.executeProgramInBackground("open", ["filename"]);
 // Open a file with a specific application (on MacOS).
 application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"]);]]></sample>
           <parameters>
@@ -871,21 +871,21 @@ application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"])
           <sample><![CDATA[// For Windows systems:
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
-application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"]);
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"]);
 // The same as above, but run the application in the user's home directory. 
-application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"],null,"c:\\Users\\myself\\");	
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");	
 // The same as above, but also set an environment variable for the called program.
 application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
-application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"],null,"/home/myself/");	
-application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"],"/home/myself/");
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");	
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 // Open a file with the default application associated with it. (on Windows)
 application.executeProgramInBackground("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgramInBackground("xdg-open", ["filename"]);
 // Open a file with the default application associated with it. (on MacOS)
-application.executeProgramInBackground("open",["filename"]);
+application.executeProgramInBackground("open", ["filename"]);
 // Open a file with a specific application (on MacOS).
 application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"]);]]></sample>
           <parameters>
@@ -913,21 +913,21 @@ application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"])
           <sample><![CDATA[// For Windows systems:
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
-application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"]);
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"]);
 // The same as above, but run the application in the user's home directory. 
-application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe",["arg1", "arg2", "arg3"],null,"c:\\Users\\myself\\");	
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");	
 // The same as above, but also set an environment variable for the called program.
 application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
-application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"],null,"/home/myself/");	
-application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"],"/home/myself/");
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");	
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 // Open a file with the default application associated with it. (on Windows)
 application.executeProgramInBackground("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgramInBackground("xdg-open", ["filename"]);
 // Open a file with the default application associated with it. (on MacOS)
-application.executeProgramInBackground("open",["filename"]);
+application.executeProgramInBackground("open", ["filename"]);
 // Open a file with a specific application (on MacOS).
 application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"]);]]></sample>
           <parameters>
@@ -951,7 +951,7 @@ application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"])
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description/>
-          <deprecated><![CDATA[As of release 7.0. Use overload with array arguments for ex: executeProgramInBackground("c:\\Users\\myself\\myapp.exe", null,["arg1", "arg2", "arg3"]);
+          <deprecated><![CDATA[As of release 7.0. Use overload with array arguments for ex: executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 Execute a program in the background. Specify the cmd as you would do in a console.]]></deprecated>
           <sample><![CDATA[// "#" is divider between program args, environment vars and startdir
 // For Windows systems:
@@ -4430,11 +4430,11 @@ databaseManager.saveData()]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="getFoundSet">
+        <function name="getFoundSet" servoyMobile="true">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"><![CDATA[A new JSFoundset for that datasource.]]></return>
+          <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.base.scripting.api.IJSFoundSet"><![CDATA[A new JSFoundset for that datasource.]]></return>
           <description><![CDATA[Returns a foundset object for a specified datasource or server and tablename.]]></description>
           <summary><![CDATA[Returns a foundset object for a specified datasource or server and tablename.]]></summary>
           <sample><![CDATA[// type the foundset returned from the call with JSDoc, fill in the right server/tablename
@@ -4455,7 +4455,7 @@ databaseManager.saveData()]]></sample>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"><![CDATA[A new JSFoundset for that datasource.]]></return>
+          <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.base.scripting.api.IJSFoundSet"><![CDATA[A new JSFoundset for that datasource.]]></return>
           <description><![CDATA[Returns a foundset object for a specified datasource or server and tablename.]]></description>
           <summary><![CDATA[Returns a foundset object for a specified datasource or server and tablename.]]></summary>
           <sample><![CDATA[// type the foundset returned from the call with JSDoc, fill in the right server/tablename
@@ -5501,7 +5501,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
 //		if (recordIndex % 10 == 0) databaseManager.saveData();
 // }]]></sample>
         </function>
-        <function name="saveData" servoyMobile="true">
+        <function name="saveData">
           <argumentsTypes>
             <argumentType typecode="com.servoy.base.scripting.api.IJSFoundSet"/>
           </argumentsTypes>
@@ -5529,7 +5529,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
             </parameter>
           </parameters>
         </function>
-        <function name="saveData" servoyMobile="true">
+        <function name="saveData">
           <argumentsTypes>
             <argumentType typecode="com.servoy.base.scripting.api.IJSRecord"/>
           </argumentsTypes>
@@ -5957,9 +5957,9 @@ component.fontType = solutionModel.createFont('Arial',SM_FONTSTYLE.PLAIN,10);]]>
         </constant>
       </constants>
     </object>
-    <object publicName="Forms" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Forms" scriptingName="forms">
+    <object publicName="Forms" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Forms" scriptingName="forms" servoyMobile="true">
       <properties>
-        <property name="[name]">
+        <property name="[name]" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Form" typecode="com.servoy.j2db.scripting.FormScope"/>
           <description><![CDATA[Get a form by name.]]></description>
           <summary><![CDATA[Get a form by name.]]></summary>
@@ -5971,7 +5971,7 @@ for (var i=0; i<allForms.length; i++)
 	application.output("Form " + allForms[i].name + " has selected index " + f.controller.getSelectedIndex());
 }]]></sample>
         </property>
-        <property deprecated="true" name="allnames" special="true">
+        <property deprecated="true" name="allnames" servoyMobile="true" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.String;"/>
           <description><![CDATA[Get all form names of the current solution.]]></description>
           <summary><![CDATA[Get all form names of the current solution.]]></summary>
@@ -5985,7 +5985,7 @@ for (var i=0; i<allFormNames.length; i++)
 	application.output("Form " + allFormNames[i] + " has selected index " + f.controller.getSelectedIndex());
 }]]></sample>
         </property>
-        <property name="length">
+        <property name="length" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Get the number of forms loaded into memory.]]></description>
           <summary><![CDATA[Get the number of forms loaded into memory.]]></summary>
@@ -6383,7 +6383,7 @@ var movedYPixels = y -yPrevious;]]></sample>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSBean" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSBean" servoyMobile="true">
+    <object extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSBean" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSBean">
       <properties>
         <property name="anchors">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -6487,7 +6487,7 @@ var fieldAbove = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 
 fieldAbove.background = '#FF0000';
 fieldAbove.formIndex = 20;]]></sample>
         </property>
-        <property name="groupID" servoyMobile="true">
+        <property name="groupID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[A String representing a group ID for this component. If several
 components have the same group ID then they belong to the same
@@ -6800,7 +6800,7 @@ Some examples are "#%", "dd-MM-yyyy", "MM-dd-yyyy", etc.]]></description>
           <sample><![CDATA[var label = form.newLabel('', 10, 10, 100, 100);
 label.format = '$#.00';]]></sample>
         </property>
-        <property name="groupID" servoyMobile="true">
+        <property name="groupID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[A String representing a group ID for this component. If several
 components have the same group ID then they belong to the same
@@ -8531,7 +8531,7 @@ var fieldAbove = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 
 fieldAbove.background = '#FF0000';
 fieldAbove.formIndex = 20;]]></sample>
         </property>
-        <property name="groupID" servoyMobile="true">
+        <property name="groupID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[A String representing a group ID for this component. If several
 components have the same group ID then they belong to the same
@@ -8717,7 +8717,7 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="JSDNDEvent" qualifiedName="com.servoy.j2db.dnd.JSDNDEvent" servoyMobile="true">
+    <object publicName="JSDNDEvent" qualifiedName="com.servoy.j2db.dnd.JSDNDEvent">
       <constants>
         <constant name="ACTION" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -10392,7 +10392,7 @@ This property is applicable only for types: TEXT_FIELD, COMBOBOX, TYPE_AHEAD, CA
           <sample><![CDATA[var field = form.newField('my_table_number', JSField.TEXT_FIELD, 10, 10, 100, 20);
 field.format = '$#.00';]]></sample>
         </property>
-        <property name="groupID" servoyMobile="true">
+        <property name="groupID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[A String representing a group ID for this component. If several
 components have the same group ID then they belong to the same
@@ -10522,6 +10522,12 @@ var btn = form.newButton('I am a button', 10, 40, 200, 20, doNothingMethod);
 btn.onAction = onClickMethod;
 btn.onDoubleClick = onDoubleClickMethod;
 btn.onRightClick = onRightClickMethod;]]></sample>
+        </property>
+        <property name="placeholderText" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></description>
+          <summary><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></summary>
+          <sample><![CDATA[field.placeholderText = 'Search';]]></sample>
         </property>
         <property name="printSliding">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -12478,7 +12484,7 @@ application.output("The new button: " + button.name + " has the following onActi
             </parameter>
           </parameters>
         </function>
-        <function name="newCalendar" servoyMobile="true">
+        <function name="newCalendar">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="int"/>
@@ -14998,7 +15004,7 @@ function mySortFunction(r1, r2)
 	return o;
 }]]></sample>
           <parameters>
-            <parameter name="comparator" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+            <parameter name="recordComparisonFunction" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[record comparator function]]></description>
             </parameter>
           </parameters>
@@ -15274,7 +15280,7 @@ Some examples are "#%", "dd-MM-yyyy", "MM-dd-yyyy", etc.]]></description>
           <sample><![CDATA[var label = form.newLabel('', 10, 10, 100, 100);
 label.format = '$#.00';]]></sample>
         </property>
-        <property name="groupID" servoyMobile="true">
+        <property name="groupID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[A String representing a group ID for this component. If several
 components have the same group ID then they belong to the same
@@ -15893,7 +15899,7 @@ Some examples are "#%", "dd-MM-yyyy", "MM-dd-yyyy", etc.]]></description>
           <sample><![CDATA[var label = form.newLabel('', 10, 10, 100, 100);
 label.format = '$#.00';]]></sample>
         </property>
-        <property name="groupID" servoyMobile="true">
+        <property name="groupID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[A String representing a group ID for this component. If several
 components have the same group ID then they belong to the same
@@ -16740,7 +16746,7 @@ application.output(button_uuid.toString());]]></sample>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSPortal" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSPortal" servoyMobile="true">
+    <object extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSPortal" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSPortal">
       <properties>
         <property name="anchors">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -16833,7 +16839,7 @@ var fieldAbove = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 
 fieldAbove.background = '#FF0000';
 fieldAbove.formIndex = 20;]]></sample>
         </property>
-        <property name="groupID" servoyMobile="true">
+        <property name="groupID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[A String representing a group ID for this component. If several
 components have the same group ID then they belong to the same
@@ -18634,7 +18640,7 @@ application.output(button_uuid.toString());]]></sample>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSTabPanel" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSTabPanel" servoyMobile="true">
+    <object extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSTabPanel" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSTabPanel">
       <properties>
         <property name="anchors">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -18733,7 +18739,7 @@ var fieldAbove = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 
 fieldAbove.background = '#FF0000';
 fieldAbove.formIndex = 20;]]></sample>
         </property>
-        <property name="groupID" servoyMobile="true">
+        <property name="groupID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[A String representing a group ID for this component. If several
 components have the same group ID then they belong to the same
@@ -26005,7 +26011,7 @@ function mySortFunction(r1, r2)
 	return o;
 }]]></sample>
           <parameters>
-            <parameter name="comparator" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+            <parameter name="recordComparisonFunction" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[record comparator function]]></description>
             </parameter>
           </parameters>
@@ -26089,7 +26095,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -26163,7 +26169,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -26267,7 +26273,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -26315,7 +26321,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeAccordionPanel" qualifiedName="com.servoy.j2db.ui.IScriptAccordionPanelMethods">
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeAccordionPanel" qualifiedName="com.servoy.j2db.ui.IScriptAccordionPanelMethods" servoyMobile="true">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -26350,7 +26356,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -26441,7 +26447,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -26606,7 +26612,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             </parameter>
           </parameters>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -26890,7 +26896,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeButton" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeButton">
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeButton" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeButton" servoyMobile="true">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -26925,7 +26931,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -27056,7 +27062,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -27169,7 +27175,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -27324,7 +27330,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeCalendar" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeCalendar">
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeCalendar" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeCalendar" servoyMobile="true">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -27368,7 +27374,7 @@ NOTE the "!" operator can be used to invert the editable state.]]></description>
           <sample><![CDATA[var currentState = %%prefix%%%%elementName%%.editable;
 %%prefix%%%%elementName%%.editable = !currentState;]]></sample>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -27460,7 +27466,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -27584,7 +27590,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -27712,7 +27718,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeCheck" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeCheck">
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeCheck" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeCheck" servoyMobile="true">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -27747,7 +27753,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -27829,7 +27835,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -27953,7 +27959,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -28112,7 +28118,7 @@ dataset.addRow(['cc',3]);
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeChecks" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeChecks">
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeChecks" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeChecks" servoyMobile="true">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -28147,7 +28153,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -28229,7 +28235,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -28353,7 +28359,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -28571,7 +28577,7 @@ dataset.addRow(['cc',3]);
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeCombobox" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeCombobox">
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeCombobox" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeCombobox" servoyMobile="true">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -28615,7 +28621,7 @@ NOTE the "!" operator can be used to invert the editable state.]]></description>
           <sample><![CDATA[var currentState = %%prefix%%%%elementName%%.editable;
 %%prefix%%%%elementName%%.editable = !currentState;]]></sample>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -28707,7 +28713,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -28831,7 +28837,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -28990,7 +28996,7 @@ dataset.addRow(['cc',3]);
         </function>
       </functions>
     </object>
-    <object publicName="RuntimeComponent" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeComponent">
+    <object publicName="RuntimeComponent" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeComponent" servoyMobile="true">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -29025,7 +29031,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -29089,7 +29095,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -29195,7 +29201,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -29300,7 +29306,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeDataButton" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeDataButton">
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeDataButton" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeDataButton" servoyMobile="true">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -29335,7 +29341,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -29454,7 +29460,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -29567,7 +29573,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -29722,7 +29728,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeDataLabel" qualifiedName="com.servoy.j2db.ui.IScriptDataLabelMethods">
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeDataLabel" qualifiedName="com.servoy.j2db.ui.IScriptDataLabelMethods" servoyMobile="true">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -29757,7 +29763,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -29876,7 +29882,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -29996,7 +30002,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -30145,7 +30151,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
     </object>
     <object publicName="RuntimeForm" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Form" servoyMobile="true">
       <properties>
-        <property name="_super" servoyMobile="true">
+        <property name="_super">
           <return type="com.servoy.j2db.documentation.scripting.docs.Form" typecode="com.servoy.j2db.scripting.FormScope"/>
           <description><![CDATA[Provides access to the methods of the parent of this form.]]></description>
           <summary><![CDATA[Provides access to the methods of the parent of this form.]]></summary>
@@ -30227,7 +30233,7 @@ for (var i=0; i<elems.length; i++)
         </property>
       </properties>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeGroup" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeGroup">
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeGroup" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeGroup" servoyMobile="true">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -30262,7 +30268,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -30338,7 +30344,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -30444,7 +30450,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -30549,7 +30555,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeHtmlArea" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeHtmlArea">
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeHtmlArea" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeHtmlArea" servoyMobile="true">
       <properties>
         <property name="URL">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -30624,7 +30630,7 @@ NOTE the "!" operator can be used to invert the editable state.]]></description>
           <sample><![CDATA[var currentState = %%prefix%%%%elementName%%.editable;
 %%prefix%%%%elementName%%.editable = !currentState;]]></sample>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -30706,7 +30712,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -30841,7 +30847,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -31064,7 +31070,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeImageMedia" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeImageMedia">
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeImageMedia" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeImageMedia" servoyMobile="true">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -31108,7 +31114,7 @@ NOTE the "!" operator can be used to invert the editable state.]]></description>
           <sample><![CDATA[var currentState = %%prefix%%%%elementName%%.editable;
 %%prefix%%%%elementName%%.editable = !currentState;]]></sample>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -31190,7 +31196,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -31303,7 +31309,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -31467,7 +31473,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeLabel" qualifiedName="com.servoy.j2db.ui.IScriptScriptLabelMethods">
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeLabel" qualifiedName="com.servoy.j2db.ui.IScriptScriptLabelMethods" servoyMobile="true">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -31502,7 +31508,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -31633,7 +31639,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -31753,7 +31759,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -31900,7 +31906,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeListBox" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeListBox">
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeListBox" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeListBox" servoyMobile="true">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -31935,7 +31941,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -32017,7 +32023,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -32141,7 +32147,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -32366,7 +32372,7 @@ dataset.addRow(['cc',3]);
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimePassword" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimePassword">
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimePassword" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimePassword" servoyMobile="true">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -32410,7 +32416,7 @@ NOTE the "!" operator can be used to invert the editable state.]]></description>
           <sample><![CDATA[var currentState = %%prefix%%%%elementName%%.editable;
 %%prefix%%%%elementName%%.editable = !currentState;]]></sample>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -32446,6 +32452,15 @@ style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3)
 size - the size of the font (in points).]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
+        </property>
+        <property name="placeholderText" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Gets or sets the placeholder text in a field.]]></description>
+          <summary><![CDATA[Gets or sets the placeholder text in a field.]]></summary>
+          <sample><![CDATA[//get the placeholder text
+var placeholderText = %%prefix%%%%elementName%%.placeholderText;
+//set another placeholder
+%%prefix%%%%elementName%%.placeholderText = 'Search..';]]></sample>
         </property>
         <property name="readOnly">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -32492,7 +32507,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -32616,7 +32631,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -32744,7 +32759,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimePortal" qualifiedName="com.servoy.j2db.ui.IScriptPortalComponentMethods">
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimePortal" qualifiedName="com.servoy.j2db.ui.IScriptPortalComponentMethods" servoyMobile="true">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -32779,7 +32794,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -32862,7 +32877,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -33008,7 +33023,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <deprecated><![CDATA[As of release 5.x, replaced by foundset#getSize().]]></deprecated>
           <sample/>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -33232,7 +33247,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeRadio" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeRadio">
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeRadio" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeRadio" servoyMobile="true">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -33267,7 +33282,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -33349,7 +33364,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -33473,7 +33488,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -33632,7 +33647,7 @@ dataset.addRow(['cc',3]);
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeRadios" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeRadios">
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeRadios" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeRadios" servoyMobile="true">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -33667,7 +33682,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -33749,7 +33764,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -33873,7 +33888,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -34098,7 +34113,7 @@ dataset.addRow(['cc',3]);
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeRectangle" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeRectangle">
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeRectangle" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeRectangle" servoyMobile="true">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -34133,7 +34148,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -34197,7 +34212,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -34303,7 +34318,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -34408,7 +34423,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeRtfArea" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeRtfArea">
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeRtfArea" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeRtfArea" servoyMobile="true">
       <properties>
         <property name="URL">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -34483,7 +34498,7 @@ NOTE the "!" operator can be used to invert the editable state.]]></description>
           <sample><![CDATA[var currentState = %%prefix%%%%elementName%%.editable;
 %%prefix%%%%elementName%%.editable = !currentState;]]></sample>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -34565,7 +34580,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -34700,7 +34715,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -34923,7 +34938,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeSpinner" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeSpinner">
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeSpinner" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeSpinner" servoyMobile="true">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -34967,7 +34982,7 @@ NOTE the "!" operator can be used to invert the editable state.]]></description>
           <sample><![CDATA[var currentState = %%prefix%%%%elementName%%.editable;
 %%prefix%%%%elementName%%.editable = !currentState;]]></sample>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -35059,7 +35074,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -35183,7 +35198,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -35342,7 +35357,7 @@ dataset.addRow(['cc',3]);
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeSplitPane" qualifiedName="com.servoy.j2db.ui.IScriptSplitPaneMethods">
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeSplitPane" qualifiedName="com.servoy.j2db.ui.IScriptSplitPaneMethods" servoyMobile="true">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -35397,7 +35412,7 @@ otherwise it will represent the pixels from left.]]></description>
           <summary><![CDATA[Gets or sets divider size in pixels.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.dividerSize = 10;]]></sample>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -35509,7 +35524,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -35681,7 +35696,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             </parameter>
           </parameters>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -36036,7 +36051,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeTabPanel" qualifiedName="com.servoy.j2db.ui.IScriptTabPanelMethods">
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeTabPanel" qualifiedName="com.servoy.j2db.ui.IScriptTabPanelMethods" servoyMobile="true">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -36071,7 +36086,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -36162,7 +36177,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -36327,7 +36342,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             </parameter>
           </parameters>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -36656,7 +36671,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeTextArea" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeTextArea">
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeTextArea" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeTextArea" servoyMobile="true">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -36709,7 +36724,7 @@ NOTE the "!" operator can be used to invert the editable state.]]></description>
           <sample><![CDATA[var currentState = %%prefix%%%%elementName%%.editable;
 %%prefix%%%%elementName%%.editable = !currentState;]]></sample>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -36745,6 +36760,15 @@ style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3)
 size - the size of the font (in points).]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
+        </property>
+        <property name="placeholderText" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Gets or sets the placeholder text in a field.]]></description>
+          <summary><![CDATA[Gets or sets the placeholder text in a field.]]></summary>
+          <sample><![CDATA[//get the placeholder text
+var placeholderText = %%prefix%%%%elementName%%.placeholderText;
+//set another placeholder
+%%prefix%%%%elementName%%.placeholderText = 'Search..';]]></sample>
         </property>
         <property name="readOnly">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -36791,7 +36815,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -36915,7 +36939,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -37138,7 +37162,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeTextField" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeTextField">
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeTextField" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeTextField" servoyMobile="true">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -37191,7 +37215,7 @@ NOTE the "!" operator can be used to invert the editable state.]]></description>
           <sample><![CDATA[var currentState = %%prefix%%%%elementName%%.editable;
 %%prefix%%%%elementName%%.editable = !currentState;]]></sample>
         </property>
-        <property name="enabled">
+        <property name="enabled" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -37238,6 +37262,15 @@ size - the size of the font (in points).]]></description>
 //gets the display formatting of the field
 var format = %%prefix%%%%elementName%%.format;]]></sample>
         </property>
+        <property name="placeholderText" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Gets or sets the placeholder text in a field.]]></description>
+          <summary><![CDATA[Gets or sets the placeholder text in a field.]]></summary>
+          <sample><![CDATA[//get the placeholder text
+var placeholderText = %%prefix%%%%elementName%%.placeholderText;
+//set another placeholder
+%%prefix%%%%elementName%%.placeholderText = 'Search..';]]></sample>
+        </property>
         <property name="readOnly">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the editable/read-only state of a field; true - read-only; false - editable; ! - the editable/read-only state is inverted (the opposite). 
@@ -37283,7 +37316,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible">
+        <property name="visible" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -37407,7 +37440,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName">
+        <function name="getName" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -43394,7 +43427,7 @@ if (dialogOrWindowName != null) {
             </parameter>
           </parameters>
         </function>
-        <function name="getDataSource">
+        <function name="getDataSource" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the datasource]]></return>
           <description><![CDATA[Get the used datasource.]]></description>
@@ -44158,6 +44191,90 @@ if (!form.controller.getDesignMode())
             </parameter>
             <parameter name="onresize" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
               <description><![CDATA[onResize method reference]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setDesignMode">
+          <argumentsTypes>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets this form in designmode with one or more callback methods.]]></description>
+          <summary><![CDATA[Sets this form in designmode with one or more callback methods.]]></summary>
+          <sample><![CDATA[var form = forms["selectedFormName"];
+if (!form.controller.getDesignMode())
+{
+	// Set the current form in designmode with no callbacks
+	form.controller.setDesignMode(true);
+	// Set the current form in designmode with callbacks
+	// where onDrag, onDrop, onSelect, onResize are names of form methods (not from "selectedFormName" form)
+	// form.controller.setDesignMode(onDrag, onDrop, onSelect, onResize);
+}
+//Set the current form out of designmode (to normal browse)
+//form.controller.setDesignMode(false);]]></sample>
+          <parameters>
+            <parameter name="ondrag" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onDrag method reference]]></description>
+            </parameter>
+            <parameter name="ondrop" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onDrop method reference]]></description>
+            </parameter>
+            <parameter name="onselect" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onSelect method reference]]></description>
+            </parameter>
+            <parameter name="onresize" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onResize method reference]]></description>
+            </parameter>
+            <parameter name="ondblclick" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onDblClick method reference]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setDesignMode">
+          <argumentsTypes>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets this form in designmode with one or more callback methods.]]></description>
+          <summary><![CDATA[Sets this form in designmode with one or more callback methods.]]></summary>
+          <sample><![CDATA[var form = forms["selectedFormName"];
+if (!form.controller.getDesignMode())
+{
+	// Set the current form in designmode with no callbacks
+	form.controller.setDesignMode(true);
+	// Set the current form in designmode with callbacks
+	// where onDrag, onDrop, onSelect, onResize are names of form methods (not from "selectedFormName" form)
+	// form.controller.setDesignMode(onDrag, onDrop, onSelect, onResize);
+}
+//Set the current form out of designmode (to normal browse)
+//form.controller.setDesignMode(false);]]></sample>
+          <parameters>
+            <parameter name="ondrag" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onDrag method reference]]></description>
+            </parameter>
+            <parameter name="ondrop" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onDrop method reference]]></description>
+            </parameter>
+            <parameter name="onselect" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onSelect method reference]]></description>
+            </parameter>
+            <parameter name="onresize" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onResize method reference]]></description>
+            </parameter>
+            <parameter name="ondblclick" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onDblClick method reference]]></description>
+            </parameter>
+            <parameter name="onrightclick" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[onRightClick method reference]]></description>
             </parameter>
           </parameters>
         </function>

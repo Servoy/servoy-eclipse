@@ -1,0 +1,2214 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<servoydoc>
+  <designtime>
+    <object publicName="BaseComponent" qualifiedName="com.servoy.j2db.persistence.BaseComponent">
+      <properties>
+        <property name="anchors">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Enables a component to stick to a specific side of form and/or to 
+grow or shrink when a window is resized. 
+
+If opposite anchors are activated then the component with grow or 
+shrink with the window. For example if Top and Bottom are activated, 
+then the component will grow/shrink when the window is vertically 
+resized. If Left and Right are activated then the component
+will grow/shrink when the window is horizontally resized. 
+
+If opposite anchors are not activated, then the component will 
+keep a constant distance from the sides of the window which
+correspond to the activated anchors.]]></description>
+          <summary><![CDATA[Enables a component to stick to a specific side of form and/or to 
+grow or shrink when a window is resized.]]></summary>
+        </property>
+        <property name="background">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Color"/>
+          <description><![CDATA[The background color of the component.]]></description>
+          <summary><![CDATA[The background color of the component.]]></summary>
+        </property>
+        <property name="borderType">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The type, color and style of border of the component.]]></description>
+          <summary><![CDATA[The type, color and style of border of the component.]]></summary>
+        </property>
+        <property name="enabled" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[enabled state]]></return>
+          <description><![CDATA[The enable state of the component, default true.]]></description>
+          <summary><![CDATA[The enable state of the component, default true.]]></summary>
+        </property>
+        <property name="extends">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[the parent]]></return>
+          <description><![CDATA[The selected parent (extended element) for the element (form).]]></description>
+          <summary><![CDATA[The selected parent (extended element) for the element (form).]]></summary>
+        </property>
+        <property name="fontType">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The font type of the component.]]></description>
+          <summary><![CDATA[The font type of the component.]]></summary>
+        </property>
+        <property name="foreground">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Color"/>
+          <description><![CDATA[The foreground color of the component.]]></description>
+          <summary><![CDATA[The foreground color of the component.]]></summary>
+        </property>
+        <property name="location" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Point"/>
+          <description><![CDATA[The x and y position of the component, in pixels, separated by a comma.]]></description>
+          <summary><![CDATA[The x and y position of the component, in pixels, separated by a comma.]]></summary>
+        </property>
+        <property name="name" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the component. Through this name it can also accessed in methods.]]></description>
+          <summary><![CDATA[The name of the component.]]></summary>
+        </property>
+        <property name="printSliding">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Enables an element to resize based on its content and/or move when printing.
+The component can move horizontally or vertically and can grow or shrink in 
+height and width, based on its content and the content of neighboring 
+components.]]></description>
+          <summary><![CDATA[Enables an element to resize based on its content and/or move when printing.]]></summary>
+        </property>
+        <property name="printable">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Flag that tells if the component should be printed or not when the form is printed.
+
+By default components are printable.]]></description>
+          <summary><![CDATA[Flag that tells if the component should be printed or not when the form is printed.]]></summary>
+        </property>
+        <property name="size" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Dimension"/>
+          <description><![CDATA[The width and height (in pixels), separated by a comma.]]></description>
+          <summary><![CDATA[The width and height (in pixels), separated by a comma.]]></summary>
+        </property>
+        <property name="transparent">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Flag that tells if the component is transparent or not.
+
+The default value is "false", that is the components 
+are not transparent.]]></description>
+          <summary><![CDATA[Flag that tells if the component is transparent or not.]]></summary>
+        </property>
+        <property name="visible" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[visible property]]></return>
+          <description><![CDATA[The visible property of the component, default true.]]></description>
+          <summary><![CDATA[The visible property of the component, default true.]]></summary>
+        </property>
+      </properties>
+    </object>
+    <object publicName="Bean" qualifiedName="com.servoy.j2db.persistence.Bean">
+      <properties>
+        <property name="anchors">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Enables a component to stick to a specific side of form and/or to 
+grow or shrink when a window is resized. 
+
+If opposite anchors are activated then the component with grow or 
+shrink with the window. For example if Top and Bottom are activated, 
+then the component will grow/shrink when the window is vertically 
+resized. If Left and Right are activated then the component
+will grow/shrink when the window is horizontally resized. 
+
+If opposite anchors are not activated, then the component will 
+keep a constant distance from the sides of the window which
+correspond to the activated anchors.]]></description>
+          <summary><![CDATA[Enables a component to stick to a specific side of form and/or to 
+grow or shrink when a window is resized.]]></summary>
+        </property>
+        <property name="enabled" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[enabled state]]></return>
+          <description><![CDATA[The enable state of the component, default true.]]></description>
+          <summary><![CDATA[The enable state of the component, default true.]]></summary>
+        </property>
+        <property name="location" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Point"/>
+          <description><![CDATA[The x and y position of the component, in pixels, separated by a comma.]]></description>
+          <summary><![CDATA[The x and y position of the component, in pixels, separated by a comma.]]></summary>
+        </property>
+        <property name="name" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the component. Through this name it can also accessed in methods.]]></description>
+          <summary><![CDATA[The name of the component.]]></summary>
+        </property>
+        <property name="printable">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Flag that tells if the component should be printed or not when the form is printed.
+
+By default components are printable.]]></description>
+          <summary><![CDATA[Flag that tells if the component should be printed or not when the form is printed.]]></summary>
+        </property>
+        <property name="size" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Dimension"/>
+          <description><![CDATA[The width and height (in pixels), separated by a comma.]]></description>
+          <summary><![CDATA[The width and height (in pixels), separated by a comma.]]></summary>
+        </property>
+        <property name="tabSeq">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[An index that specifies the position of the component in the tab sequence. The components 
+are put into the tab sequence in increasing order of this property. A value of 0 means
+to use the default mechanism of building the tab sequence (based on their location on the form).
+A value of -2 means to remove the component from the tab sequence.]]></description>
+          <summary><![CDATA[An index that specifies the position of the component in the tab sequence.]]></summary>
+        </property>
+        <property name="visible" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[visible property]]></return>
+          <description><![CDATA[The visible property of the component, default true.]]></description>
+          <summary><![CDATA[The visible property of the component, default true.]]></summary>
+        </property>
+      </properties>
+    </object>
+    <object publicName="ColumnInfo" qualifiedName="com.servoy.j2db.persistence.ColumnInfo">
+      <properties>
+        <property name="autoEnterSubType">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The subtype of autoenter configured for the column. The available options depend
+on the type of autoenter. 
+
+If autoenter is set to system value, then the subtype can be one of: none, creation datetime,
+creation username, modification datetime, modification username, database managed,
+creation user uid, modification user uid, creation server datetime or modification server datetime.
+
+If autoenter is set to sequence, then the subtype can be one of: none, Servoy sequence,
+database sequence, database identity or universally unique identifier.]]></description>
+          <summary><![CDATA[The subtype of autoenter configured for the column.]]></summary>
+        </property>
+        <property name="autoEnterType">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The type of autoenter configured for the column. Can be one of: none,
+system value, sequence, custom value or lookup value.]]></description>
+          <summary><![CDATA[The type of autoenter configured for the column.]]></summary>
+        </property>
+        <property name="converterName">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the converter used for this column.]]></description>
+          <summary><![CDATA[The name of the converter used for this column.]]></summary>
+        </property>
+        <property name="converterProperties">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The properties of the converter used for this column.]]></description>
+          <summary><![CDATA[The properties of the converter used for this column.]]></summary>
+        </property>
+        <property name="databaseDefaultValue">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The database default value that is used when autoenter is set to database default.]]></description>
+          <summary><![CDATA[The database default value that is used when autoenter is set to database default.]]></summary>
+        </property>
+        <property name="databaseSequenceName">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The database sequence name that is used when autoenter is set to sequence and autoenter subtype
+is set to database sequence.]]></description>
+          <summary><![CDATA[The database sequence name that is used when autoenter is set to sequence and autoenter subtype
+is set to database sequence.]]></summary>
+        </property>
+        <property name="defaultFormat">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The default format of the column. 
+Currently only strings or numbers are supported.]]></description>
+          <summary><![CDATA[The default format of the column.]]></summary>
+        </property>
+        <property name="defaultValue">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The value that is used when autoenter is set to custom value.]]></description>
+          <summary><![CDATA[The value that is used when autoenter is set to custom value.]]></summary>
+        </property>
+        <property name="description">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The description of the column.]]></description>
+          <summary><![CDATA[The description of the column.]]></summary>
+        </property>
+        <property name="foreignType">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The foreign type of the column. It is used for foreign key columns, to hold the foreign table they point to.]]></description>
+          <summary><![CDATA[The foreign type of the column.]]></summary>
+        </property>
+        <property name="lookupValue">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The lookup value that is used when autotype is set to lookup.]]></description>
+          <summary><![CDATA[The lookup value that is used when autotype is set to lookup.]]></summary>
+        </property>
+        <property name="titleText">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The title of the column.]]></description>
+          <summary><![CDATA[The title of the column.]]></summary>
+        </property>
+        <property name="validatorName">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the validator used for the column.]]></description>
+          <summary><![CDATA[The name of the validator used for the column.]]></summary>
+        </property>
+        <property name="validatorProperties">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The properties of the validator used for the column.]]></description>
+          <summary><![CDATA[The properties of the validator used for the column.]]></summary>
+        </property>
+      </properties>
+    </object>
+    <object publicName="Field" qualifiedName="com.servoy.j2db.persistence.Field">
+      <properties>
+        <property name="anchors">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Enables a component to stick to a specific side of form and/or to 
+grow or shrink when a window is resized. 
+
+If opposite anchors are activated then the component with grow or 
+shrink with the window. For example if Top and Bottom are activated, 
+then the component will grow/shrink when the window is vertically 
+resized. If Left and Right are activated then the component
+will grow/shrink when the window is horizontally resized. 
+
+If opposite anchors are not activated, then the component will 
+keep a constant distance from the sides of the window which
+correspond to the activated anchors.]]></description>
+          <summary><![CDATA[Enables a component to stick to a specific side of form and/or to 
+grow or shrink when a window is resized.]]></summary>
+        </property>
+        <property name="background">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Color"/>
+          <description><![CDATA[The background color of the component.]]></description>
+          <summary><![CDATA[The background color of the component.]]></summary>
+        </property>
+        <property name="borderType">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The type, color and style of border of the component.]]></description>
+          <summary><![CDATA[The type, color and style of border of the component.]]></summary>
+        </property>
+        <property name="dataProvider" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The dataprovider of the component.]]></description>
+          <summary><![CDATA[The dataprovider of the component.]]></summary>
+        </property>
+        <property name="displayType" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The type of display used by the field. Can be one of CALENDAR, CHECKS,
+COMBOBOX, HTML_AREA, IMAGE_MEDIA, PASSWORD, RADIOS, RTF_AREA, TEXT_AREA,
+TEXT_FIELD, TYPE_AHEAD, LIST_BOX, MULTISELECT_LISTBOX or SPINNER.]]></description>
+          <summary><![CDATA[The type of display used by the field.]]></summary>
+        </property>
+        <property name="displaysTags">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Flag that enables or disables merging of data inside components using tags (placeholders).
+Tags (or placeholders) are words surrounded by %% on each side. There are data tags and
+standard tags. Data tags consist in names of dataproviders surrounded by %%. Standard tags
+are a set of predefined tags that are made available by the system.
+
+See the "Merging data" section for more details about tags.
+
+The default value of this flag is "false", that is merging of data is disabled by default.]]></description>
+          <summary><![CDATA[Flag that enables or disables merging of data inside components using tags (placeholders).]]></summary>
+        </property>
+        <property name="enabled" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[enabled state]]></return>
+          <description><![CDATA[The enable state of the component, default true.]]></description>
+          <summary><![CDATA[The enable state of the component, default true.]]></summary>
+        </property>
+        <property name="fontType">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The font type of the component.]]></description>
+          <summary><![CDATA[The font type of the component.]]></summary>
+        </property>
+        <property name="foreground">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Color"/>
+          <description><![CDATA[The foreground color of the component.]]></description>
+          <summary><![CDATA[The foreground color of the component.]]></summary>
+        </property>
+        <property name="format">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The format that should be applied when displaying the data in the component.
+Some examples are "#%", "dd-MM-yyyy", "MM-dd-yyyy", etc.
+This property is applicable only for types: TEXT_FIELD, COMBOBOX, TYPE_AHEAD, CALLENDAR and SPINNER.]]></description>
+          <summary><![CDATA[The format that should be applied when displaying the data in the component.]]></summary>
+        </property>
+        <property name="horizontalAlignment">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Horizontal alignment of the text inside the component. Can be one of
+LEFT, CENTER or RIGHT.
+
+Note that this property does not refer to the horizontal alignment
+of the component inside the form.]]></description>
+          <summary><![CDATA[Horizontal alignment of the text inside the component.]]></summary>
+        </property>
+        <property name="location" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Point"/>
+          <description><![CDATA[The x and y position of the component, in pixels, separated by a comma.]]></description>
+          <summary><![CDATA[The x and y position of the component, in pixels, separated by a comma.]]></summary>
+        </property>
+        <property name="margin">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Insets"/>
+          <description><![CDATA[The margins of the component. They are specified in this order, 
+separated by commas: top, left, bottom, right.]]></description>
+          <summary><![CDATA[The margins of the component.]]></summary>
+        </property>
+        <property name="name" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the component. Through this name it can also accessed in methods.]]></description>
+          <summary><![CDATA[The name of the component.]]></summary>
+        </property>
+        <property name="placeholderText" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></description>
+          <summary><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></summary>
+        </property>
+        <property name="printSliding">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Enables an element to resize based on its content and/or move when printing.
+The component can move horizontally or vertically and can grow or shrink in 
+height and width, based on its content and the content of neighboring 
+components.]]></description>
+          <summary><![CDATA[Enables an element to resize based on its content and/or move when printing.]]></summary>
+        </property>
+        <property name="printable">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Flag that tells if the component should be printed or not when the form is printed.
+
+By default components are printable.]]></description>
+          <summary><![CDATA[Flag that tells if the component should be printed or not when the form is printed.]]></summary>
+        </property>
+        <property name="scrollbars">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Scrollbar options for the vertical and horizontal scrollbars. Each of the
+vertical and horizontal scrollbars can be configured to display all the time,
+to display only when needed or to never display.]]></description>
+          <summary><![CDATA[Scrollbar options for the vertical and horizontal scrollbars.]]></summary>
+        </property>
+        <property name="selectOnEnter">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Flag that tells if the content of the field should be automatically selected
+when the field receives focus. The default value of this field is "false".]]></description>
+          <summary><![CDATA[Flag that tells if the content of the field should be automatically selected
+when the field receives focus.]]></summary>
+        </property>
+        <property name="size" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Dimension"/>
+          <description><![CDATA[The width and height (in pixels), separated by a comma.]]></description>
+          <summary><![CDATA[The width and height (in pixels), separated by a comma.]]></summary>
+        </property>
+        <property name="tabSeq">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[An index that specifies the position of the component in the tab sequence. The components 
+are put into the tab sequence in increasing order of this property. A value of 0 means
+to use the default mechanism of building the tab sequence (based on their location on the form).
+A value of -2 means to remove the component from the tab sequence.]]></description>
+          <summary><![CDATA[An index that specifies the position of the component in the tab sequence.]]></summary>
+        </property>
+        <property name="text" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The text that is displayed in the column header associated with the component when the form
+is in table view.]]></description>
+          <summary><![CDATA[The text that is displayed in the column header associated with the component when the form
+is in table view.]]></summary>
+        </property>
+        <property name="toolTipText">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The text displayed when hovering over the component with a mouse cursor.
+
+NOTE:
+HTML should be used for multi-line tooltips; you can also use any
+valid HTML tags to format tooltip text. For example: 
+<html>This includes<b>bolded text</b> and 
+<font color='blue'>BLUE</font> text as well.</html>]]></description>
+          <summary><![CDATA[The text displayed when hovering over the component with a mouse cursor.]]></summary>
+        </property>
+        <property name="transparent">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Flag that tells if the component is transparent or not.
+
+The default value is "false", that is the components 
+are not transparent.]]></description>
+          <summary><![CDATA[Flag that tells if the component is transparent or not.]]></summary>
+        </property>
+        <property name="valuelist" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The valuelist that is used by this field when displaying data. Can be used
+with fields of type CHECKS, COMBOBOX, RADIOS and TYPE_AHEAD.]]></description>
+          <summary><![CDATA[The valuelist that is used by this field when displaying data.]]></summary>
+        </property>
+        <property name="visible" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[visible property]]></return>
+          <description><![CDATA[The visible property of the component, default true.]]></description>
+          <summary><![CDATA[The visible property of the component, default true.]]></summary>
+        </property>
+      </properties>
+      <events>
+        <event name="onAction" servoyMobile="true">
+          <description><![CDATA[The method that is executed when the component is clicked.]]></description>
+          <summary><![CDATA[The method that is executed when the component is clicked.]]></summary>
+        </event>
+        <event name="onDataChange" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean"/>
+          <description><![CDATA[Method that is executed when the data in the component is successfully changed.]]></description>
+          <summary><![CDATA[Method that is executed when the data in the component is successfully changed.]]></summary>
+          <parameters>
+            <parameter name="oldValue">
+              <description><![CDATA[old value]]></description>
+            </parameter>
+            <parameter name="newValue">
+              <description><![CDATA[new value]]></description>
+            </parameter>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onFocusGained">
+          <description><![CDATA[The method that is executed when the component gains focus.
+NOTE: Do not call methods that will influence the focus itself.]]></description>
+          <summary><![CDATA[The method that is executed when the component gains focus.]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onFocusLost">
+          <description><![CDATA[The method that is executed when the component looses focus.]]></description>
+          <summary><![CDATA[The method that is executed when the component looses focus.]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onRender">
+          <description><![CDATA[The method that is executed when the component is rendered.]]></description>
+          <summary><![CDATA[The method that is executed when the component is rendered.]]></summary>
+        </event>
+        <event name="onRightClick">
+          <description><![CDATA[The method that is executed when the component is right clicked.]]></description>
+          <summary><![CDATA[The method that is executed when the component is right clicked.]]></summary>
+        </event>
+      </events>
+    </object>
+    <object publicName="Form" qualifiedName="com.servoy.j2db.persistence.Form">
+      <properties>
+        <property name="borderType">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The type, color and style of border. 
+This property is automatically set to "DEFAULT" when a new form is created.]]></description>
+          <summary><![CDATA[The type, color and style of border.]]></summary>
+        </property>
+        <property name="dataSource" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The names of the database server and table that this form is linked to.]]></description>
+          <summary><![CDATA[The names of the database server and table that this form is linked to.]]></summary>
+        </property>
+        <property name="defaultPageFormat">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The default page format for the form.]]></description>
+          <summary><![CDATA[The default page format for the form.]]></summary>
+        </property>
+        <property name="encapsulation" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[the encapsulation mode/level for the form]]></return>
+          <description><![CDATA[The encapsulation mode for the form (see JSForm constants for encapsulation mode constants).]]></description>
+          <summary><![CDATA[The encapsulation mode for the form (see JSForm constants for encapsulation mode constants).]]></summary>
+        </property>
+        <property name="extendsForm">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[the parent]]></return>
+          <description><![CDATA[The selected parent (extended element) for the element (form).]]></description>
+          <summary><![CDATA[The selected parent (extended element) for the element (form).]]></summary>
+        </property>
+        <property name="initialSort">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The default sort order only when the form loads.
+This is applied each time an internal SQL query is being executed (find, find-all, open form); and is only executed when no other manual sort has been performed on the foundset.]]></description>
+          <summary><![CDATA[The default sort order only when the form loads.]]></summary>
+        </property>
+        <property name="name" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the form.]]></description>
+          <summary><![CDATA[The name of the form.]]></summary>
+        </property>
+        <property name="namedFoundSet">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Property that tells the form to use a named foundset instead of the default foundset.
+When "separate" as special value is specified the form will always create a copy of assigned foundset and therefor become separated from other foundsets.
+When "empty" it will initially load an empty foundset.
+When a global relation name it will load the a related foundset.]]></description>
+          <summary><![CDATA[Property that tells the form to use a named foundset instead of the default foundset.]]></summary>
+        </property>
+        <property name="navigator">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The navigator (previously named "controller")
+that is used to control/navigate to the form. The navigator is shown at
+the left or at the right side of the form, depending on the page orientation. 
+
+The following options are available: 
+-none- - no navigator is assigned. 
+DEFAULT - the Servoy default navigator is assigned. 
+IGNORE - the navigator last assigned to a previous form. 
+Custom - a custom navigator based on a selected form.]]></description>
+          <summary><![CDATA[The navigator (previously named "controller")
+that is used to control/navigate to the form.]]></summary>
+        </property>
+        <property name="paperPrintScale">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The percentage value the printed page is enlarged or reduced to; the size of the printed form 
+is inversely proportional. For example, if the paperPrintScale is 50, the printed form will be 
+enlarged 200%.]]></description>
+          <summary><![CDATA[The percentage value the printed page is enlarged or reduced to; the size of the printed form 
+is inversely proportional.]]></summary>
+        </property>
+        <property name="rowBGColorCalculation">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The calculation dataprovider used to add background color and highlight selected or alternate rows. 
+The default is -none-. 
+
+NOTE: This property has been deprecated and is kept visible for legacy purposes. Use CSS Row Styling & onRender event instead.]]></description>
+          <summary><![CDATA[The calculation dataprovider used to add background color and highlight selected or alternate rows.]]></summary>
+        </property>
+        <property name="scrollbars">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Scrollbar options for the vertical and horizontal scrollbars. Each of the
+vertical and horizontal scrollbars can be configured to display all the time,
+to display only when needed or to never display.]]></description>
+          <summary><![CDATA[Scrollbar options for the vertical and horizontal scrollbars.]]></summary>
+        </property>
+        <property name="selectionMode">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[one of IForm#SELECTION_MODE_DEFAULT, IForm#SELECTION_MODE_SINGLE and IForm#SELECTION_MODE_MULTI.]]></return>
+          <description><![CDATA[Returns the value of the selectionMode property.]]></description>
+          <summary><![CDATA[Returns the value of the selectionMode property.]]></summary>
+        </property>
+        <property deprecated="true" name="serverName">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Get the server name used by this form.]]></description>
+          <summary><![CDATA[Get the server name used by this form.]]></summary>
+        </property>
+        <property name="showInMenu">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[When set, the form is displayed under the Window menu. 
+If it is not set, the form will be 'hidden'. 
+NOTE: This is only applicable for Servoy Client. Servoy Developer always shows all forms so that
+developers have access to all forms within a solution during development.]]></description>
+          <summary><![CDATA[When set, the form is displayed under the Window menu.]]></summary>
+        </property>
+        <property name="styleClass">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The Cascading Style Sheet (CSS) class name applied to the form.]]></description>
+          <summary><![CDATA[The Cascading Style Sheet (CSS) class name applied to the form.]]></summary>
+        </property>
+        <property name="styleName">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the Servoy style that is being used on the form.]]></description>
+          <summary><![CDATA[The name of the Servoy style that is being used on the form.]]></summary>
+        </property>
+        <property deprecated="true" name="tableName">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The [name of the table/SQL view].[the name of the database server connection] the form is based on.]]></description>
+          <summary><![CDATA[The [name of the table/SQL view].]]></summary>
+        </property>
+        <property name="titleText">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The text that displays in the title bar of the form window. 
+NOTE: Data tags and Servoy tags can be used as part of the title text.]]></description>
+          <summary><![CDATA[The text that displays in the title bar of the form window.]]></summary>
+        </property>
+        <property name="transparent">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[When set, the form is transparent.]]></description>
+          <summary><![CDATA[When set, the form is transparent.]]></summary>
+        </property>
+        <property name="width">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The width of the form in pixels.]]></description>
+          <summary><![CDATA[The width of the form in pixels.]]></summary>
+        </property>
+      </properties>
+      <events>
+        <event name="onDrag">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number"/>
+          <description><![CDATA[The method that is triggered when (non Design Mode) dragging occurs.]]></description>
+          <summary><![CDATA[The method that is triggered when (non Design Mode) dragging occurs.]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.dnd.JSDNDEvent" typecode="com.servoy.j2db.dnd.JSDNDEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onDragEnd">
+          <description><![CDATA[The method that is triggered when (non Design Mode) dragging end occurs.]]></description>
+          <summary><![CDATA[The method that is triggered when (non Design Mode) dragging end occurs.]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.dnd.JSDNDEvent" typecode="com.servoy.j2db.dnd.JSDNDEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onDragOver">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean"/>
+          <description><![CDATA[The method that is triggered when (non Design Mode) dragging over a component occurs.]]></description>
+          <summary><![CDATA[The method that is triggered when (non Design Mode) dragging over a component occurs.]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.dnd.JSDNDEvent" typecode="com.servoy.j2db.dnd.JSDNDEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onDrop">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean"/>
+          <description><![CDATA[The method that is triggered when (non Design Mode) dropping occurs.]]></description>
+          <summary><![CDATA[The method that is triggered when (non Design Mode) dropping occurs.]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.dnd.JSDNDEvent" typecode="com.servoy.j2db.dnd.JSDNDEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onElementFocusGained">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean"/>
+          <description><![CDATA[The method that is triggered when focus is gained by a component inside the form.]]></description>
+          <summary><![CDATA[The method that is triggered when focus is gained by a component inside the form.]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onElementFocusLost">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean"/>
+          <description><![CDATA[The method that gets triggered when focus is lost by a component inside the form.]]></description>
+          <summary><![CDATA[The method that gets triggered when focus is lost by a component inside the form.]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onHide" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean"/>
+          <description><![CDATA[The method that is triggered when another form is being activated. 
+NOTE: If the onHide method returns false, the form can be prevented from hiding. 
+For example, when using onHide with showFormInDialog, the form will not close by clicking the dialog close box (X).]]></description>
+          <summary><![CDATA[The method that is triggered when another form is being activated.]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onLoad" servoyMobile="true">
+          <description><![CDATA[The method that is triggered when a form is loaded/reloaded from the repository; used to alter elements, set globals, hide toolbars, 
+etc; onShow method can also be assigned.
+NOTE: onShow should be used to access current foundset dataproviders; onLoad cannot be used because the foundset data is not loaded until after the form is loaded. 
+Also calls to loadRecords() should be done in the onShow method and not in the onLoad method
+If you call loadRecords() in the onShow method, you may want to set the namedFoundSet property of the form to 'empty' to prevent the first default form query.
+NOTE: the onLoad event bubbles down, meaning that the onLoad is first fired on the parent then on a tab in a tabpanel (and in tab of that tab panels if you are 3 deep)]]></description>
+          <summary><![CDATA[The method that is triggered when a form is loaded/reloaded from the repository; used to alter elements, set globals, hide toolbars, 
+etc; onShow method can also be assigned.]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onRecordEditStart">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean"/>
+          <description><![CDATA[The method that is triggered when a user clicks into a column on the form.
+NOTE: There is a small "e" displayed in the lower left side of the Servoy Client screen in the status area at the bottom of the window when the record is being edited.]]></description>
+          <summary><![CDATA[The method that is triggered when a user clicks into a column on the form.]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onRecordEditStop">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean"/>
+          <description><![CDATA[The method that is triggered when a record is being saved. 
+A record is saved when a user clicks out of it (for example on an empty part of the layout or to another form).
+When the method returns false (for example as part of a validation), the user cannot leave the record, for example in
+a table view a user cannot move to another record when the callback returns false.]]></description>
+          <summary><![CDATA[The method that is triggered when a record is being saved.]]></summary>
+          <parameters>
+            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.Record">
+              <description><![CDATA[record being saved]]></description>
+            </parameter>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onRecordSelection" servoyMobile="true">
+          <description><![CDATA[The method that is triggered each time a record is selected. 
+If a form is in List view or Special table view - when the user clicks on it.
+In Record view - after the user navigates to another record using the slider or clicks up or down for next/previous record. 
+NOTE: Data and Servoy tag values are returned when the onRecordSelection method is executed.]]></description>
+          <summary><![CDATA[The method that is triggered each time a record is selected.]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onRender">
+          <description><![CDATA[The method that is executed when the component is rendered.]]></description>
+          <summary><![CDATA[The method that is executed when the component is rendered.]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSRenderEvent" typecode="com.servoy.j2db.scripting.JSRenderEvent">
+              <description><![CDATA[the render event]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onResize">
+          <description><![CDATA[The method that gets triggered when resize occurs.]]></description>
+          <summary><![CDATA[The method that gets triggered when resize occurs.]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onShow" servoyMobile="true">
+          <description><![CDATA[The method that is triggered EVERY TIME the form is displayed; an argument must be passed to the method if this is the first time the form is displayed. 
+
+NOTE: onShow can be used to access current foundset dataproviders; onLoad cannot be used because the foundset data is not loaded until after the form is loaded. 
+
+NOTE: the onShow event bubbles down, meaning that the onShow event of a form displayed in a tabPanel is fired after the onShow event of the parent.]]></description>
+          <summary><![CDATA[The method that is triggered EVERY TIME the form is displayed; an argument must be passed to the method if this is the first time the form is displayed.]]></summary>
+          <parameters>
+            <parameter name="firstShow" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
+              <description><![CDATA[form is shown first time after load]]></description>
+            </parameter>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onUnLoad">
+          <description><![CDATA[The method that is triggered when a form is unloaded from the repository. 
+NOTE: Forms can be prevented from being removed from memory by referencing the form object in a global variable or inside an array inside a global variable. Do take care using this technique.
+Forms take up memory and if too many forms are in memory and cannot be unloaded, there is a possibility of running out of memory.]]></description>
+          <summary><![CDATA[The method that is triggered when a form is unloaded from the repository.]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </event>
+      </events>
+      <commands>
+        <command name="onDeleteAllRecords">
+          <description><![CDATA[The method that overrides the Servoy menu item Select > Delete All. 
+This property is automatically set to "DEFAULT" (no override) when the form is created.]]></description>
+          <summary><![CDATA[The method that overrides the Servoy menu item Select > Delete All.]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </command>
+        <command name="onDeleteRecord">
+          <description><![CDATA[The method that overrides the Servoy menu item Select > Delete Record (or keyboard shortcut). 
+This property is automatically set to "DEFAULT" (no override) when the form is created.]]></description>
+          <summary><![CDATA[The method that overrides the Servoy menu item Select > Delete Record (or keyboard shortcut).]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </command>
+        <command name="onDuplicateRecord">
+          <description><![CDATA[The method that overrides the Servoy menu item Select > Duplicate Record (or keyboard shortcut).
+This property is automatically set to "DEFAULT" (no override) when the form is created.]]></description>
+          <summary><![CDATA[The method that overrides the Servoy menu item Select > Duplicate Record (or keyboard shortcut).]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </command>
+        <command name="onFind">
+          <description><![CDATA[The method that overrides the Servoy menu item Select > Find (or keyboard shortcut) in Data (ready) mode. 
+This property is automatically set to "DEFAULT" (no override) when the form is created.]]></description>
+          <summary><![CDATA[The method that overrides the Servoy menu item Select > Find (or keyboard shortcut) in Data (ready) mode.]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </command>
+        <command name="onInvertRecords">
+          <description><![CDATA[The method that overrides the Servoy menu item Select > Invert Records. 
+This property is automatically set to "DEFAULT" (no override) when the form is created.]]></description>
+          <summary><![CDATA[The method that overrides the Servoy menu item Select > Invert Records.]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </command>
+        <command name="onNewRecord">
+          <description><![CDATA[The method that overrides the Servoy menu item Select > New Record (or keyboard shortcut). 
+This property is automatically set to "DEFAULT" (no override) when the form is created.]]></description>
+          <summary><![CDATA[The method that overrides the Servoy menu item Select > New Record (or keyboard shortcut).]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </command>
+        <command name="onNextRecord">
+          <description><![CDATA[The method that overrides the Servoy menu item Select > Next Record. 
+This property is automatically set to "DEFAULT" (no override) when the form is created.]]></description>
+          <summary><![CDATA[The method that overrides the Servoy menu item Select > Next Record.]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </command>
+        <command name="onOmitRecord">
+          <description><![CDATA[The method that overrides the Servoy menu item Select > Omit Record. 
+This property is automatically set to "DEFAULT" (no override) when the form is created.]]></description>
+          <summary><![CDATA[The method that overrides the Servoy menu item Select > Omit Record.]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </command>
+        <command name="onPreviousRecord">
+          <description><![CDATA[The method that overrides the Servoy menu item Select > Previous Record. 
+This property is automatically set to "DEFAULT" (no override) when the form is created.]]></description>
+          <summary><![CDATA[The method that overrides the Servoy menu item Select > Previous Record.]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </command>
+        <command name="onPrintPreview">
+          <description><![CDATA[The method that overrides the Servoy menu item File > Print Preview. 
+This property is automatically set to "DEFAULT" (no override) when the form is created.]]></description>
+          <summary><![CDATA[The method that overrides the Servoy menu item File > Print Preview.]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </command>
+        <command name="onSearch">
+          <description><![CDATA[The method that overrides the Servoy menu item Select > Search (or keyboard shortcut) in Find mode. 
+This property is automatically set to "DEFAULT" (no override) when the form is created.]]></description>
+          <summary><![CDATA[The method that overrides the Servoy menu item Select > Search (or keyboard shortcut) in Find mode.]]></summary>
+          <parameters>
+            <parameter name="clear" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
+              <description><![CDATA[clear last results]]></description>
+            </parameter>
+            <parameter name="reduce" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
+              <description><![CDATA[reduce search]]></description>
+            </parameter>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </command>
+        <command name="onShowAllRecords">
+          <description><![CDATA[The method that overrides the Servoy menu item Select > Show All (or keyboard shortcut). 
+This property is automatically set to "DEFAULT" (no override) when the form is created.]]></description>
+          <summary><![CDATA[The method that overrides the Servoy menu item Select > Show All (or keyboard shortcut).]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </command>
+        <command name="onShowOmittedRecords">
+          <description><![CDATA[The method that overrides the Servoy menu item Select > Show Omitted Records. 
+This property is automatically set to "DEFAULT" (no override) when the form is created.]]></description>
+          <summary><![CDATA[The method that overrides the Servoy menu item Select > Show Omitted Records.]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </command>
+        <command name="onSort">
+          <description><![CDATA[The method that overrides the Servoy menu item Select > Sort. 
+This property is automatically set to "DEFAULT" (no override) when the form is created.]]></description>
+          <summary><![CDATA[The method that overrides the Servoy menu item Select > Sort.]]></summary>
+          <parameters>
+            <parameter name="dataProviderID" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[element data provider]]></description>
+            </parameter>
+            <parameter name="asc" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
+              <description><![CDATA[sort ascending [true] or descending [false]]]></description>
+            </parameter>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </command>
+      </commands>
+    </object>
+    <object publicName="Label, Button, Image" qualifiedName="com.servoy.j2db.persistence.GraphicalComponent">
+      <properties>
+        <property name="anchors">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Enables a component to stick to a specific side of form and/or to 
+grow or shrink when a window is resized. 
+
+If opposite anchors are activated then the component with grow or 
+shrink with the window. For example if Top and Bottom are activated, 
+then the component will grow/shrink when the window is vertically 
+resized. If Left and Right are activated then the component
+will grow/shrink when the window is horizontally resized. 
+
+If opposite anchors are not activated, then the component will 
+keep a constant distance from the sides of the window which
+correspond to the activated anchors.]]></description>
+          <summary><![CDATA[Enables a component to stick to a specific side of form and/or to 
+grow or shrink when a window is resized.]]></summary>
+        </property>
+        <property name="background">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Color"/>
+          <description><![CDATA[The background color of the component.]]></description>
+          <summary><![CDATA[The background color of the component.]]></summary>
+        </property>
+        <property name="borderType">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The type, color and style of border of the component.]]></description>
+          <summary><![CDATA[The type, color and style of border of the component.]]></summary>
+        </property>
+        <property name="dataProvider" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The dataprovider of the component.]]></description>
+          <summary><![CDATA[The dataprovider of the component.]]></summary>
+        </property>
+        <property name="displaysTags" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Flag that enables or disables merging of data inside components using tags (placeholders).
+Tags (or placeholders) are words surrounded by %% on each side. There are data tags and
+standard tags. Data tags consist in names of dataproviders surrounded by %%. Standard tags
+are a set of predefined tags that are made available by the system.
+
+See the "Merging data" section for more details about tags.
+
+The default value of this flag is "false", that is merging of data is disabled by default.]]></description>
+          <summary><![CDATA[Flag that enables or disables merging of data inside components using tags (placeholders).]]></summary>
+        </property>
+        <property name="enabled" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[enabled state]]></return>
+          <description><![CDATA[The enable state of the component, default true.]]></description>
+          <summary><![CDATA[The enable state of the component, default true.]]></summary>
+        </property>
+        <property name="fontType">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The font type of the component.]]></description>
+          <summary><![CDATA[The font type of the component.]]></summary>
+        </property>
+        <property name="foreground">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Color"/>
+          <description><![CDATA[The foreground color of the component.]]></description>
+          <summary><![CDATA[The foreground color of the component.]]></summary>
+        </property>
+        <property name="format">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The format that should be applied when displaying data(using dataProviderID) in the label/button.
+Some examples are "#%", "dd-MM-yyyy", "MM-dd-yyyy", etc.]]></description>
+          <summary><![CDATA[The format that should be applied when displaying data(using dataProviderID) in the label/button.]]></summary>
+        </property>
+        <property name="horizontalAlignment">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Horizontal alignment of the text inside the component. Can be one of
+LEFT, CENTER or RIGHT.
+
+Note that this property does not refer to the horizontal alignment
+of the component inside the form.]]></description>
+          <summary><![CDATA[Horizontal alignment of the text inside the component.]]></summary>
+        </property>
+        <property name="imageMedia">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The image Media object that should be displayed inside the component.]]></description>
+          <summary><![CDATA[The image Media object that should be displayed inside the component.]]></summary>
+        </property>
+        <property name="labelFor">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Some components can be set to be labels of other components. This is useful in
+two situations. In table view mode it is used for constructing the header of the
+table. In record view mode, by setting mnemonics on the label, keyboard shortcuts
+can be used to set the focus to fields.]]></description>
+          <summary><![CDATA[Some components can be set to be labels of other components.]]></summary>
+        </property>
+        <property name="location" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Point"/>
+          <description><![CDATA[The x and y position of the component, in pixels, separated by a comma.]]></description>
+          <summary><![CDATA[The x and y position of the component, in pixels, separated by a comma.]]></summary>
+        </property>
+        <property name="margin">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Insets"/>
+          <description><![CDATA[The margins of the component. They are specified in this order, 
+separated by commas: top, left, bottom, right.]]></description>
+          <summary><![CDATA[The margins of the component.]]></summary>
+        </property>
+        <property name="mediaOptions">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Options to scale the image Media object that is displayed inside the component.
+Can be set to one or a combination of CROP, REDUCE, ENLARGE and KEEPASPECT.
+
+REDUCE will scale down the image if the component is smaller than the image.
+REDUCE combined with KEEPASPECT will reduce the image, but keep its aspect ratio. 
+This is useful when the component has other proportions than the image.
+
+ENLARGE will scale up the image if the component is larger than the image.
+ENLARGE combined with KEEPASPECT will scale up the image while keeping its aspect ratio.
+
+CROP will leave the image at its original size. If the component is smaller than
+the image this will result in only a part of the image showing up.]]></description>
+          <summary><![CDATA[Options to scale the image Media object that is displayed inside the component.]]></summary>
+        </property>
+        <property name="mnemonic">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The keyboard shortcut that activates this component. A letter must be specified, 
+and the actual shortcut will be combination of ALT + the specified letter.
+
+This property can be used in two ways. Normally the keyboard shortcut activates 
+the onClick event of the component. But if the "labelFor" property is set for the
+component, then the keyboard shortcut will move the focus to the component whose
+label this component is.]]></description>
+          <summary><![CDATA[The keyboard shortcut that activates this component.]]></summary>
+        </property>
+        <property name="name" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the component. Through this name it can also accessed in methods.]]></description>
+          <summary><![CDATA[The name of the component.]]></summary>
+        </property>
+        <property name="printSliding">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Enables an element to resize based on its content and/or move when printing.
+The component can move horizontally or vertically and can grow or shrink in 
+height and width, based on its content and the content of neighboring 
+components.]]></description>
+          <summary><![CDATA[Enables an element to resize based on its content and/or move when printing.]]></summary>
+        </property>
+        <property name="printable">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Flag that tells if the component should be printed or not when the form is printed.
+
+By default components are printable.]]></description>
+          <summary><![CDATA[Flag that tells if the component should be printed or not when the form is printed.]]></summary>
+        </property>
+        <property name="rolloverCursor">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The cursor that is shown as the mouse is rolled over the component.
+Possible options are DEFAULT and HAND.]]></description>
+          <summary><![CDATA[The cursor that is shown as the mouse is rolled over the component.]]></summary>
+        </property>
+        <property name="rolloverImageMedia">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The roll over image Media object used. It will only work if a property image is also used.
+When the mouse is moved over the component, this image Media will be displayed. 
+When the mouse is moved out of the component, whatever text or image was being initially 
+displayed will be restored.]]></description>
+          <summary><![CDATA[The roll over image Media object used.]]></summary>
+        </property>
+        <property name="showClick">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[When set, the element will show the clicked state when selected. 
+Applies to labels and buttons and images only.]]></description>
+          <summary><![CDATA[When set, the element will show the clicked state when selected.]]></summary>
+        </property>
+        <property name="showFocus">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[When set the text of an element will showfocus when selected.
+Applies to labels and buttons only. 
+The text property for the element MUST be filled in first. 
+
+NOTE: The TAB key may also be used to select the element, depending 
+on the operating system being used and the selected LAF.]]></description>
+          <summary><![CDATA[When set the text of an element will showfocus when selected.]]></summary>
+        </property>
+        <property name="size" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Dimension"/>
+          <description><![CDATA[The width and height (in pixels), separated by a comma.]]></description>
+          <summary><![CDATA[The width and height (in pixels), separated by a comma.]]></summary>
+        </property>
+        <property name="tabSeq">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[An index that specifies the position of the component in the tab sequence. The components 
+are put into the tab sequence in increasing order of this property. A value of 0 means
+to use the default mechanism of building the tab sequence (based on their location on the form).
+A value of -2 means to remove the component from the tab sequence.]]></description>
+          <summary><![CDATA[An index that specifies the position of the component in the tab sequence.]]></summary>
+        </property>
+        <property name="text" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The text that is displayed inside the component.]]></description>
+          <summary><![CDATA[The text that is displayed inside the component.]]></summary>
+        </property>
+        <property name="textRotation">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The rotation of the element. You can choose 0, 90, 180, or 270 and the label is rotated accordingly.  
+This property also applies to buttons and images.]]></description>
+          <summary><![CDATA[The rotation of the element.]]></summary>
+        </property>
+        <property name="toolTipText">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The text displayed when hovering over the component with a mouse cursor.
+
+NOTE:
+HTML should be used for multi-line tooltips; you can also use any
+valid HTML tags to format tooltip text. For example: 
+<html>This includes<b>bolded text</b> and 
+<font color='blue'>BLUE</font> text as well.</html>]]></description>
+          <summary><![CDATA[The text displayed when hovering over the component with a mouse cursor.]]></summary>
+        </property>
+        <property name="transparent">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Flag that tells if the component is transparent or not.
+
+The default value is "false", that is the components 
+are not transparent.]]></description>
+          <summary><![CDATA[Flag that tells if the component is transparent or not.]]></summary>
+        </property>
+        <property name="verticalAlignment">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The vertical alignment of the text inside the component. Can be one of
+TOP, CENTER or BOTTOM.
+
+Note that this property does not refer to the vertical alignment of the
+component inside the form.]]></description>
+          <summary><![CDATA[The vertical alignment of the text inside the component.]]></summary>
+        </property>
+        <property name="visible" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[visible property]]></return>
+          <description><![CDATA[The visible property of the component, default true.]]></description>
+          <summary><![CDATA[The visible property of the component, default true.]]></summary>
+        </property>
+      </properties>
+      <events>
+        <event name="onDoubleClick">
+          <description><![CDATA[The method that is executed when the component is double clicked.]]></description>
+          <summary><![CDATA[The method that is executed when the component is double clicked.]]></summary>
+          <parameters>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onRender">
+          <description><![CDATA[The method that is executed when the component is rendered.]]></description>
+          <summary><![CDATA[The method that is executed when the component is rendered.]]></summary>
+        </event>
+        <event name="onRightClick">
+          <description><![CDATA[The method that is executed when the component is right clicked.]]></description>
+          <summary><![CDATA[The method that is executed when the component is right clicked.]]></summary>
+        </event>
+      </events>
+    </object>
+    <object publicName="Media" qualifiedName="com.servoy.j2db.persistence.Media">
+      <properties>
+        <property name="mimeType">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The MIME type of the Media object.
+
+Some examples are: 'image/jpg', 'image/png', etc.]]></description>
+          <summary><![CDATA[The MIME type of the Media object.]]></summary>
+        </property>
+        <property name="name" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the Media object.]]></description>
+          <summary><![CDATA[The name of the Media object.]]></summary>
+        </property>
+      </properties>
+    </object>
+    <object publicName="Method" qualifiedName="com.servoy.j2db.persistence.ScriptMethod">
+      <properties>
+        <property name="declaration">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The full source code of this method (including doc and function declaration).]]></description>
+          <summary><![CDATA[The full source code of this method (including doc and function declaration).]]></summary>
+        </property>
+        <property name="name">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the method.]]></description>
+          <summary><![CDATA[The name of the method.]]></summary>
+        </property>
+        <property name="scopeName">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the scope.]]></description>
+          <summary><![CDATA[The name of the scope.]]></summary>
+        </property>
+        <property name="showInMenu">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Flag that tells if the method appears or not in the "Methods" menu of Servoy Client.]]></description>
+          <summary><![CDATA[Flag that tells if the method appears or not in the "Methods" menu of Servoy Client.]]></summary>
+        </property>
+      </properties>
+    </object>
+    <object publicName="Part" qualifiedName="com.servoy.j2db.persistence.Part">
+      <properties>
+        <property name="allowBreakAcrossPageBounds">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[When set, the remainder of a selected part that does not fit on the page currently 
+being printed, will not be transported to the next page - it will break where the page 
+ends and continue on the next page. 
+
+NOTE: Make sure to set this option when you are printing more than one page per record.]]></description>
+          <summary><![CDATA[When set, the remainder of a selected part that does not fit on the page currently 
+being printed, will not be transported to the next page - it will break where the page 
+ends and continue on the next page.]]></summary>
+        </property>
+        <property name="background">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Color"/>
+          <description><![CDATA[The background color of the form part. 
+
+NOTE: When no background color has been set, the default background 
+color will be determined by the Look and Feel (LAF) that has been selected 
+in Application Preferences.]]></description>
+          <summary><![CDATA[The background color of the form part.]]></summary>
+        </property>
+        <property name="discardRemainderAfterBreak">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[When set, the remainder of a selected part that is broken due to the page 
+ending will not be printed on the next page - it will be discarded.]]></description>
+          <summary><![CDATA[When set, the remainder of a selected part that is broken due to the page 
+ending will not be printed on the next page - it will be discarded.]]></summary>
+        </property>
+        <property name="groupbyDataProviderIDs">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[For Leading Subsummary or Trailing Subsummary parts, one or more
+dataproviders can be added as Break (GroupBy) dataproviders. The
+Leading/Trailing Subsummary parts will be displayed once for each
+resulted group of data.]]></description>
+          <summary><![CDATA[For Leading Subsummary or Trailing Subsummary parts, one or more
+dataproviders can be added as Break (GroupBy) dataproviders.]]></summary>
+        </property>
+        <property name="height">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The height of a selected part; specified in pixels. 
+
+This height property is the lowerbound as its ending Y value (0 == top of the form).]]></description>
+          <summary><![CDATA[The height of a selected part; specified in pixels.]]></summary>
+        </property>
+        <property name="pageBreakAfterOccurrence">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[A page break will be inserted after a specified number of occurences of a selected part.]]></description>
+          <summary><![CDATA[A page break will be inserted after a specified number of occurences of a selected part.]]></summary>
+        </property>
+        <property name="pageBreakBefore">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[When set, a page break will be inserted before each occurrence of a selected part.]]></description>
+          <summary><![CDATA[When set, a page break will be inserted before each occurrence of a selected part.]]></summary>
+        </property>
+        <property name="partType">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The type of this part.]]></description>
+          <summary><![CDATA[The type of this part.]]></summary>
+        </property>
+        <property name="restartPageNumber">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[When set, page numbering will be restarted after each occurrence of a selected part.]]></description>
+          <summary><![CDATA[When set, page numbering will be restarted after each occurrence of a selected part.]]></summary>
+        </property>
+        <property name="sinkWhenLast">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[When set, the last part on a page (such as a Trailing Grand Summary part) will 
+"sink" to the lowest part of the page when there is free space.]]></description>
+          <summary><![CDATA[When set, the last part on a page (such as a Trailing Grand Summary part) will 
+"sink" to the lowest part of the page when there is free space.]]></summary>
+        </property>
+        <property name="styleClass" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The Cascading Style Sheet (CSS) class name applied to the part.]]></description>
+          <summary><![CDATA[The Cascading Style Sheet (CSS) class name applied to the part.]]></summary>
+        </property>
+      </properties>
+    </object>
+    <object publicName="Portal" qualifiedName="com.servoy.j2db.persistence.Portal">
+      <properties>
+        <property name="anchors">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Enables a component to stick to a specific side of form and/or to 
+grow or shrink when a window is resized. 
+
+If opposite anchors are activated then the component with grow or 
+shrink with the window. For example if Top and Bottom are activated, 
+then the component will grow/shrink when the window is vertically 
+resized. If Left and Right are activated then the component
+will grow/shrink when the window is horizontally resized. 
+
+If opposite anchors are not activated, then the component will 
+keep a constant distance from the sides of the window which
+correspond to the activated anchors.]]></description>
+          <summary><![CDATA[Enables a component to stick to a specific side of form and/or to 
+grow or shrink when a window is resized.]]></summary>
+        </property>
+        <property name="background">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Color"/>
+          <description><![CDATA[The background color of the component.]]></description>
+          <summary><![CDATA[The background color of the component.]]></summary>
+        </property>
+        <property name="borderType">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The type, color and style of border of the component.]]></description>
+          <summary><![CDATA[The type, color and style of border of the component.]]></summary>
+        </property>
+        <property name="enabled" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[enabled state]]></return>
+          <description><![CDATA[The enable state of the component, default true.]]></description>
+          <summary><![CDATA[The enable state of the component, default true.]]></summary>
+        </property>
+        <property name="initialSort">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The default sort order for the rows displayed in the portal.]]></description>
+          <summary><![CDATA[The default sort order for the rows displayed in the portal.]]></summary>
+        </property>
+        <property name="intercellSpacing">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Dimension"/>
+          <description><![CDATA[The additional spacing between cell rows. Is composed from the horizontal spacing
+and the vertical spacing.]]></description>
+          <summary><![CDATA[The additional spacing between cell rows.]]></summary>
+        </property>
+        <property name="location" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Point"/>
+          <description><![CDATA[The x and y position of the component, in pixels, separated by a comma.]]></description>
+          <summary><![CDATA[The x and y position of the component, in pixels, separated by a comma.]]></summary>
+        </property>
+        <property name="multiLine">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[When set, portal rows can have a custom layout of fields, buttons, etc. displayed for each 
+matching row (rather than the default "grid").]]></description>
+          <summary><![CDATA[When set, portal rows can have a custom layout of fields, buttons, etc.]]></summary>
+        </property>
+        <property name="name" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the component. Through this name it can also accessed in methods.]]></description>
+          <summary><![CDATA[The name of the component.]]></summary>
+        </property>
+        <property name="printSliding">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Enables an element to resize based on its content and/or move when printing.
+The component can move horizontally or vertically and can grow or shrink in 
+height and width, based on its content and the content of neighboring 
+components.]]></description>
+          <summary><![CDATA[Enables an element to resize based on its content and/or move when printing.]]></summary>
+        </property>
+        <property name="printable">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Flag that tells if the component should be printed or not when the form is printed.
+
+By default components are printable.]]></description>
+          <summary><![CDATA[Flag that tells if the component should be printed or not when the form is printed.]]></summary>
+        </property>
+        <property name="relationName" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the relationship between the table related to the currently active 
+form and the table you want to show data from in the portal.]]></description>
+          <summary><![CDATA[The name of the relationship between the table related to the currently active 
+form and the table you want to show data from in the portal.]]></summary>
+        </property>
+        <property name="reorderable">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[When set, the portal rows can be re-ordered by dragging the column headers.]]></description>
+          <summary><![CDATA[When set, the portal rows can be re-ordered by dragging the column headers.]]></summary>
+        </property>
+        <property name="resizable">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[When set the portal rows can be resized by users.]]></description>
+          <summary><![CDATA[When set the portal rows can be resized by users.]]></summary>
+        </property>
+        <property name="rowBGColorCalculation">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The calculation dataprovider (such as servoy_row_bgcolor) used to add background 
+color and highlight selected or alternate portal rows. 
+
+NOTE: This property has been deprecated and is kept visible for legacy purposes. Use CSS Row Styling & onRender event instead.]]></description>
+          <summary><![CDATA[The calculation dataprovider (such as servoy_row_bgcolor) used to add background 
+color and highlight selected or alternate portal rows.]]></summary>
+        </property>
+        <property name="rowHeight">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The height of each row in pixels. If 0 or not set, the height defaults to 10.]]></description>
+          <summary><![CDATA[The height of each row in pixels.]]></summary>
+        </property>
+        <property name="scrollbars">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Scrollbar options for the vertical and horizontal scrollbars. Each of the
+vertical and horizontal scrollbars can be configured to display all the time,
+to display only when needed or to never display.]]></description>
+          <summary><![CDATA[Scrollbar options for the vertical and horizontal scrollbars.]]></summary>
+        </property>
+        <property name="showHorizontalLines">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[When set, the portal displays horizontal lines between the rows. 
+
+NOTE: 
+In a multi-line portal, a horizontal line is only displayed 
+in the selected row; to display a horizontal line in all rows, add a 
+line to the portal.]]></description>
+          <summary><![CDATA[When set, the portal displays horizontal lines between the rows.]]></summary>
+        </property>
+        <property name="showVerticalLines">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[When set the portal displays vertical lines between the columns. 
+
+NOTE: 
+In a multi-line portal, a vertical line is only displayed 
+in the selected row; to display a vertical line in all rows, add 
+a line to the portal.]]></description>
+          <summary><![CDATA[When set the portal displays vertical lines between the columns.]]></summary>
+        </property>
+        <property name="size" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Dimension"/>
+          <description><![CDATA[The width and height (in pixels), separated by a comma.]]></description>
+          <summary><![CDATA[The width and height (in pixels), separated by a comma.]]></summary>
+        </property>
+        <property name="sortable">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[When set, users can sort the contents of the portal by clicking on the column headings.]]></description>
+          <summary><![CDATA[When set, users can sort the contents of the portal by clicking on the column headings.]]></summary>
+        </property>
+        <property name="styleClass" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the style class that should be applied to this component.
+
+When defining style classes for specific component types, their names
+must be prefixed according to the type of the component. For example 
+in order to define a class names 'fancy' for fields, in the style
+definition the class must be named 'field.fancy'. If it would be 
+intended for labels, then it would be named 'label.fancy'. When specifying
+the class name for a component, the prefix is dropped however. Thus the
+field or the label will have its styleClass property set to 'fancy' only.]]></description>
+          <summary><![CDATA[The name of the style class that should be applied to this component.]]></summary>
+        </property>
+        <property name="tabSeq">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[An index that specifies the position of the component in the tab sequence. The components 
+are put into the tab sequence in increasing order of this property. A value of 0 means
+to use the default mechanism of building the tab sequence (based on their location on the form).
+A value of -2 means to remove the component from the tab sequence.]]></description>
+          <summary><![CDATA[An index that specifies the position of the component in the tab sequence.]]></summary>
+        </property>
+        <property name="transparent">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Flag that tells if the component is transparent or not.
+
+The default value is "false", that is the components 
+are not transparent.]]></description>
+          <summary><![CDATA[Flag that tells if the component is transparent or not.]]></summary>
+        </property>
+        <property name="visible" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[visible property]]></return>
+          <description><![CDATA[The visible property of the component, default true.]]></description>
+          <summary><![CDATA[The visible property of the component, default true.]]></summary>
+        </property>
+      </properties>
+      <events>
+        <event name="onDrag">
+          <description><![CDATA[The method that is triggered when (non Design Mode) dragging occurs.]]></description>
+          <summary><![CDATA[The method that is triggered when (non Design Mode) dragging occurs.]]></summary>
+        </event>
+        <event name="onDragEnd">
+          <description><![CDATA[The method that is triggered when (non Design Mode) dragging end occurs.]]></description>
+          <summary><![CDATA[The method that is triggered when (non Design Mode) dragging end occurs.]]></summary>
+        </event>
+        <event name="onDragOver">
+          <description><![CDATA[The method that is triggered when (non Design Mode) dragging over a component occurs.]]></description>
+          <summary><![CDATA[The method that is triggered when (non Design Mode) dragging over a component occurs.]]></summary>
+        </event>
+        <event name="onDrop">
+          <description><![CDATA[The method that is triggered when (non Design Mode) dropping occurs.]]></description>
+          <summary><![CDATA[The method that is triggered when (non Design Mode) dropping occurs.]]></summary>
+        </event>
+        <event name="onRender">
+          <description><![CDATA[The method that is executed when the component is rendered.]]></description>
+          <summary><![CDATA[The method that is executed when the component is rendered.]]></summary>
+        </event>
+      </events>
+    </object>
+    <object publicName="Rectangle" qualifiedName="com.servoy.j2db.persistence.RectShape">
+      <properties>
+        <property name="anchors">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Enables a component to stick to a specific side of form and/or to 
+grow or shrink when a window is resized. 
+
+If opposite anchors are activated then the component with grow or 
+shrink with the window. For example if Top and Bottom are activated, 
+then the component will grow/shrink when the window is vertically 
+resized. If Left and Right are activated then the component
+will grow/shrink when the window is horizontally resized. 
+
+If opposite anchors are not activated, then the component will 
+keep a constant distance from the sides of the window which
+correspond to the activated anchors.]]></description>
+          <summary><![CDATA[Enables a component to stick to a specific side of form and/or to 
+grow or shrink when a window is resized.]]></summary>
+        </property>
+        <property name="background">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Color"/>
+          <description><![CDATA[The background color of the component.]]></description>
+          <summary><![CDATA[The background color of the component.]]></summary>
+        </property>
+        <property name="borderType">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The type, color and style of border of the component.]]></description>
+          <summary><![CDATA[The type, color and style of border of the component.]]></summary>
+        </property>
+        <property name="enabled" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[enabled state]]></return>
+          <description><![CDATA[The enable state of the component, default true.]]></description>
+          <summary><![CDATA[The enable state of the component, default true.]]></summary>
+        </property>
+        <property name="foreground">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Color"/>
+          <description><![CDATA[The foreground color of the component.]]></description>
+          <summary><![CDATA[The foreground color of the component.]]></summary>
+        </property>
+        <property name="lineSize">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The width of the line used for drawing the rectangle.]]></description>
+          <summary><![CDATA[The width of the line used for drawing the rectangle.]]></summary>
+        </property>
+        <property name="location" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Point"/>
+          <description><![CDATA[The x and y position of the component, in pixels, separated by a comma.]]></description>
+          <summary><![CDATA[The x and y position of the component, in pixels, separated by a comma.]]></summary>
+        </property>
+        <property name="name" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the component. Through this name it can also accessed in methods.]]></description>
+          <summary><![CDATA[The name of the component.]]></summary>
+        </property>
+        <property name="printSliding">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Enables an element to resize based on its content and/or move when printing.
+The component can move horizontally or vertically and can grow or shrink in 
+height and width, based on its content and the content of neighboring 
+components.]]></description>
+          <summary><![CDATA[Enables an element to resize based on its content and/or move when printing.]]></summary>
+        </property>
+        <property name="printable">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Flag that tells if the component should be printed or not when the form is printed.
+
+By default components are printable.]]></description>
+          <summary><![CDATA[Flag that tells if the component should be printed or not when the form is printed.]]></summary>
+        </property>
+        <property name="roundedRadius">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The rounding radius in pixels.]]></description>
+          <summary><![CDATA[The rounding radius in pixels.]]></summary>
+        </property>
+        <property name="shapeType">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The type of the shape. The type can be BORDER_PANEL, RECTANGLE, ROUNDED_RECTANGLE or OVAL.]]></description>
+          <summary><![CDATA[The type of the shape.]]></summary>
+        </property>
+        <property name="size" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Dimension"/>
+          <description><![CDATA[The width and height (in pixels), separated by a comma.]]></description>
+          <summary><![CDATA[The width and height (in pixels), separated by a comma.]]></summary>
+        </property>
+        <property name="transparent">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Flag that tells if the component is transparent or not.
+
+The default value is "false", that is the components 
+are not transparent.]]></description>
+          <summary><![CDATA[Flag that tells if the component is transparent or not.]]></summary>
+        </property>
+        <property name="visible" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[visible property]]></return>
+          <description><![CDATA[The visible property of the component, default true.]]></description>
+          <summary><![CDATA[The visible property of the component, default true.]]></summary>
+        </property>
+      </properties>
+    </object>
+    <object publicName="Relation" qualifiedName="com.servoy.j2db.persistence.Relation">
+      <properties>
+        <property name="allowCreationRelatedRecords">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Flag that tells if related records can be created through this relation.
+
+The default value of this flag is "false".]]></description>
+          <summary><![CDATA[Flag that tells if related records can be created through this relation.]]></summary>
+        </property>
+        <property name="allowParentDeleteWhenHavingRelatedRecords">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Flag that tells if the parent record can be deleted while it has related records.
+
+The default value of this flag is "true".]]></description>
+          <summary><![CDATA[Flag that tells if the parent record can be deleted while it has related records.]]></summary>
+        </property>
+        <property name="deleteRelatedRecords">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Flag that tells if related records should be deleted or not when a parent record is deleted.
+
+The default value of this flag is "false".]]></description>
+          <summary><![CDATA[Flag that tells if related records should be deleted or not when a parent record is deleted.]]></summary>
+        </property>
+        <property name="foreignDataSource">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Qualified name of the foreign data source. Contains both the name of the foreign
+server and the name of the foreign table.]]></description>
+          <summary><![CDATA[Qualified name of the foreign data source.]]></summary>
+        </property>
+        <property name="initialSort">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[A String which specified a set of sort options for the initial sorting of data
+retrieved through this relation.
+
+Has the form "column_name asc, another_column_name desc, ...".]]></description>
+          <summary><![CDATA[A String which specified a set of sort options for the initial sorting of data
+retrieved through this relation.]]></summary>
+        </property>
+        <property name="joinType">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The join type that is performed between the primary table and the foreign table.
+Can be "inner join" or "left outer join".]]></description>
+          <summary><![CDATA[The join type that is performed between the primary table and the foreign table.]]></summary>
+        </property>
+        <property name="name">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the relation.]]></description>
+          <summary><![CDATA[The name of the relation.]]></summary>
+        </property>
+        <property name="primaryDataSource">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Qualified name of the primary data source. Contains both the name of the primary server
+and the name of the primary table.]]></description>
+          <summary><![CDATA[Qualified name of the primary data source.]]></summary>
+        </property>
+      </properties>
+    </object>
+    <object publicName="RelationItem" qualifiedName="com.servoy.j2db.persistence.RelationItem">
+      <properties>
+        <property name="foreignColumnName">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the column from the destination table
+that this relation item is based on.]]></description>
+          <summary><![CDATA[The name of the column from the destination table
+that this relation item is based on.]]></summary>
+        </property>
+        <property name="operator">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The operator that defines the relationship between the primary dataprovider
+and the foreign column.]]></description>
+          <summary><![CDATA[The operator that defines the relationship between the primary dataprovider
+and the foreign column.]]></summary>
+        </property>
+        <property name="primaryDataProvider">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the column from the source table 
+that this relation item is based on.]]></description>
+          <summary><![CDATA[The name of the column from the source table 
+that this relation item is based on.]]></summary>
+        </property>
+      </properties>
+    </object>
+    <object publicName="Solution" qualifiedName="com.servoy.j2db.persistence.Solution">
+      <properties>
+        <property name="firstForm" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The first form that loads when a solution is deployed.
+
+NOTE: If the Login form is specified, then the firstForm is the first form that will load next after the loginForm.]]></description>
+          <summary><![CDATA[The first form that loads when a solution is deployed.]]></summary>
+        </property>
+        <property name="i18nDataSource" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The i18n database server connection and database table that stores the i18n keys for a solution.]]></description>
+          <summary><![CDATA[The i18n database server connection and database table that stores the i18n keys for a solution.]]></summary>
+        </property>
+        <property name="loginForm">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The name of the login form that loads when a solution is deployed.]]></description>
+          <summary><![CDATA[The name of the login form that loads when a solution is deployed.]]></summary>
+        </property>
+        <property name="loginSolutionName">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Get the first module that is also a login solution.]]></description>
+          <summary><![CDATA[Get the first module that is also a login solution.]]></summary>
+        </property>
+        <property name="modulesNames" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The list of modules that have been added to a solution.]]></description>
+          <summary><![CDATA[The list of modules that have been added to a solution.]]></summary>
+        </property>
+        <property name="mustAuthenticate" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Flag that tells if authentication is needed in order to access the solution.
+
+To enforce a default Servoy user name and password login dialog; if set a login dialog is required, if unchecked no login dialog is required.]]></description>
+          <summary><![CDATA[Flag that tells if authentication is needed in order to access the solution.]]></summary>
+        </property>
+        <property name="solutionType" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The type of a solution; can be "Normal" (non-module), "Module", "Web client only", "Smart client only",
+"Login", "Authenticator", "Pre-import hook module", "Post-import hook module", "Mobile".]]></description>
+          <summary><![CDATA[The type of a solution; can be "Normal" (non-module), "Module", "Web client only", "Smart client only",
+"Login", "Authenticator", "Pre-import hook module", "Post-import hook module", "Mobile".]]></summary>
+        </property>
+        <property name="textOrientation">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The direction that text is displayed. 
+
+Options include: 
+DEFAULT
+left to right
+right to left
+locale specific]]></description>
+          <summary><![CDATA[The direction that text is displayed.]]></summary>
+        </property>
+        <property name="titleText">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The menu bar title of a solution.]]></description>
+          <summary><![CDATA[The menu bar title of a solution.]]></summary>
+        </property>
+      </properties>
+      <events>
+        <event name="onClose">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean"/>
+          <description><![CDATA[The method that is executed when a solution closes. The default is -none-.]]></description>
+          <summary><![CDATA[The method that is executed when a solution closes.]]></summary>
+          <parameters>
+            <parameter name="force" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
+              <description><![CDATA[if false then solution close can be stopped by returning false]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onDataBroadcast">
+          <description><![CDATA[Method that is executed when data broadcast occurs. The default is -none-.]]></description>
+          <summary><![CDATA[Method that is executed when data broadcast occurs.]]></summary>
+          <parameters>
+            <parameter name="dataSource" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[table data source]]></description>
+            </parameter>
+            <parameter name="action" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
+              <description><![CDATA[see SQL_ACTION_TYPES constants]]></description>
+            </parameter>
+            <parameter name="pks" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet">
+              <description><![CDATA[affected primary keys]]></description>
+            </parameter>
+            <parameter name="cached" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
+              <description><![CDATA[data was cached]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onError">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean"/>
+          <description><![CDATA[The method that is executed when a solution opens and an error occurs. The default is -none.]]></description>
+          <summary><![CDATA[The method that is executed when a solution opens and an error occurs.]]></summary>
+          <parameters>
+            <parameter name="ex">
+              <description><![CDATA[exception to handle]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onOpen" servoyMobile="true">
+          <description><![CDATA[The method that is executed when a solution opens. The default is -none-.]]></description>
+          <summary><![CDATA[The method that is executed when a solution opens.]]></summary>
+        </event>
+      </events>
+    </object>
+    <object publicName="Tab" qualifiedName="com.servoy.j2db.persistence.Tab">
+      <properties>
+        <property name="containsForm">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The name of the form displayed in the tab.]]></description>
+          <summary><![CDATA[The name of the form displayed in the tab.]]></summary>
+        </property>
+        <property name="foreground">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Color"/>
+          <description><![CDATA[The foreground color of the tab.]]></description>
+          <summary><![CDATA[The foreground color of the tab.]]></summary>
+        </property>
+        <property name="imageMedia">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The name of the image Media file used.]]></description>
+          <summary><![CDATA[The name of the image Media file used.]]></summary>
+        </property>
+        <property name="mnemonic">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Mnemonic used to switch to tab.]]></description>
+          <summary><![CDATA[Mnemonic used to switch to tab.]]></summary>
+        </property>
+        <property name="name">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the tab.]]></description>
+          <summary><![CDATA[The name of the tab.]]></summary>
+        </property>
+        <property name="relationName" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the relation that links the form which contains the tab 
+with the form displayed in the tab.]]></description>
+          <summary><![CDATA[The name of the relation that links the form which contains the tab 
+with the form displayed in the tab.]]></summary>
+        </property>
+        <property name="text">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The text on the tab.]]></description>
+          <summary><![CDATA[The text on the tab.]]></summary>
+        </property>
+        <property name="toolTipText">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The text displayed when hovering over the component with a mouse cursor.
+
+NOTE:
+HTML should be used for multi-line tooltips; you can also use any
+valid HTML tags to format tooltip text. For example: 
+<html>This includes<b>bolded text</b> and 
+<font color='blue'>BLUE</font> text as well.</html>]]></description>
+          <summary><![CDATA[The text displayed when hovering over the component with a mouse cursor.]]></summary>
+        </property>
+      </properties>
+    </object>
+    <object publicName="TabPanel" qualifiedName="com.servoy.j2db.persistence.TabPanel">
+      <properties>
+        <property name="anchors">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Enables a component to stick to a specific side of form and/or to 
+grow or shrink when a window is resized. 
+
+If opposite anchors are activated then the component with grow or 
+shrink with the window. For example if Top and Bottom are activated, 
+then the component will grow/shrink when the window is vertically 
+resized. If Left and Right are activated then the component
+will grow/shrink when the window is horizontally resized. 
+
+If opposite anchors are not activated, then the component will 
+keep a constant distance from the sides of the window which
+correspond to the activated anchors.]]></description>
+          <summary><![CDATA[Enables a component to stick to a specific side of form and/or to 
+grow or shrink when a window is resized.]]></summary>
+        </property>
+        <property name="background">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Color"/>
+          <description><![CDATA[The background color of the component.]]></description>
+          <summary><![CDATA[The background color of the component.]]></summary>
+        </property>
+        <property name="borderType">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The type, color and style of border of the component.]]></description>
+          <summary><![CDATA[The type, color and style of border of the component.]]></summary>
+        </property>
+        <property name="enabled" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[enabled state]]></return>
+          <description><![CDATA[The enable state of the component, default true.]]></description>
+          <summary><![CDATA[The enable state of the component, default true.]]></summary>
+        </property>
+        <property name="fontType">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The font type of the component.]]></description>
+          <summary><![CDATA[The font type of the component.]]></summary>
+        </property>
+        <property name="foreground">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Color"/>
+          <description><![CDATA[The foreground color of the component.]]></description>
+          <summary><![CDATA[The foreground color of the component.]]></summary>
+        </property>
+        <property name="horizontalAlignment">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The horizontal alignment of the tabpanel.]]></description>
+          <summary><![CDATA[The horizontal alignment of the tabpanel.]]></summary>
+        </property>
+        <property name="location" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Point"/>
+          <description><![CDATA[The x and y position of the component, in pixels, separated by a comma.]]></description>
+          <summary><![CDATA[The x and y position of the component, in pixels, separated by a comma.]]></summary>
+        </property>
+        <property name="name" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the component. Through this name it can also accessed in methods.]]></description>
+          <summary><![CDATA[The name of the component.]]></summary>
+        </property>
+        <property name="printSliding">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Enables an element to resize based on its content and/or move when printing.
+The component can move horizontally or vertically and can grow or shrink in 
+height and width, based on its content and the content of neighboring 
+components.]]></description>
+          <summary><![CDATA[Enables an element to resize based on its content and/or move when printing.]]></summary>
+        </property>
+        <property name="printable">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Flag that tells if the component should be printed or not when the form is printed.
+
+By default components are printable.]]></description>
+          <summary><![CDATA[Flag that tells if the component should be printed or not when the form is printed.]]></summary>
+        </property>
+        <property name="scrollTabs">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Flag that tells how to arrange the tabs if they don't fit on a single line.
+If this flag is set, then the tabs will stay on a single line, but there will
+be the possibility to scroll them to the left and to the right. If this flag
+is not set, then the tabs will be arranged on multiple lines.]]></description>
+          <summary><![CDATA[Flag that tells how to arrange the tabs if they don't fit on a single line.]]></summary>
+        </property>
+        <property name="size" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.awt.Dimension"/>
+          <description><![CDATA[The width and height (in pixels), separated by a comma.]]></description>
+          <summary><![CDATA[The width and height (in pixels), separated by a comma.]]></summary>
+        </property>
+        <property name="styleClass" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the style class that should be applied to this component.
+
+When defining style classes for specific component types, their names
+must be prefixed according to the type of the component. For example 
+in order to define a class names 'fancy' for fields, in the style
+definition the class must be named 'field.fancy'. If it would be 
+intended for labels, then it would be named 'label.fancy'. When specifying
+the class name for a component, the prefix is dropped however. Thus the
+field or the label will have its styleClass property set to 'fancy' only.]]></description>
+          <summary><![CDATA[The name of the style class that should be applied to this component.]]></summary>
+        </property>
+        <property name="tabOrientation">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The position of the tabs related to the tab panel. Can be one of TOP, RIGHT, BOTTOM, LEFT,
+HIDE, SPLIT_HORIZONTAL, SPLIT_VERTICAL. The HIDE option makes the tabs invisible, SPLIT_HORIZONTAL
+makes the tab panel horizontal split pane, SPLIT_VERTICAL makes the tab panel vertical split pane.]]></description>
+          <summary><![CDATA[The position of the tabs related to the tab panel.]]></summary>
+        </property>
+        <property name="tabSeq">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[An index that specifies the position of the component in the tab sequence. The components 
+are put into the tab sequence in increasing order of this property. A value of 0 means
+to use the default mechanism of building the tab sequence (based on their location on the form).
+A value of -2 means to remove the component from the tab sequence.]]></description>
+          <summary><![CDATA[An index that specifies the position of the component in the tab sequence.]]></summary>
+        </property>
+        <property name="transparent">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Flag that tells if the component is transparent or not.
+
+The default value is "false", that is the components 
+are not transparent.]]></description>
+          <summary><![CDATA[Flag that tells if the component is transparent or not.]]></summary>
+        </property>
+        <property name="visible" servoyMobile="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[visible property]]></return>
+          <description><![CDATA[The visible property of the component, default true.]]></description>
+          <summary><![CDATA[The visible property of the component, default true.]]></summary>
+        </property>
+      </properties>
+      <events>
+        <event name="onChange">
+          <description><![CDATA[Method to be executed when the selected tab is changed in the tab panel or divider position is changed in split pane.]]></description>
+          <summary><![CDATA[Method to be executed when the selected tab is changed in the tab panel or divider position is changed in split pane.]]></summary>
+          <parameters>
+            <parameter name="previousIndex" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
+              <description><![CDATA[index of tab shown before the change]]></description>
+            </parameter>
+            <parameter name="event" type="com.servoy.j2db.scripting.JSEvent" typecode="com.servoy.j2db.scripting.JSEvent">
+              <description><![CDATA[the event that triggered the action]]></description>
+            </parameter>
+          </parameters>
+        </event>
+      </events>
+    </object>
+    <object publicName="Table" qualifiedName="com.servoy.j2db.persistence.TableNode">
+      <events>
+        <event name="onAfterCreate">
+          <description><![CDATA[A method that is executed after a new record is created.]]></description>
+          <summary><![CDATA[A method that is executed after a new record is created.]]></summary>
+          <parameters>
+            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.Record">
+              <description><![CDATA[record that is created]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onAfterDelete">
+          <description><![CDATA[A method that is executed after a delete operation.]]></description>
+          <summary><![CDATA[A method that is executed after a delete operation.]]></summary>
+          <parameters>
+            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.Record">
+              <description><![CDATA[record that is deleted]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onAfterFind">
+          <description><![CDATA[A method that is executed after a foundset has switched to find mode.]]></description>
+          <summary><![CDATA[A method that is executed after a foundset has switched to find mode.]]></summary>
+        </event>
+        <event name="onAfterInsert">
+          <description><![CDATA[A method that is executed after an insert operation.]]></description>
+          <summary><![CDATA[A method that is executed after an insert operation.]]></summary>
+          <parameters>
+            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.Record">
+              <description><![CDATA[record that is inserted]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onAfterSearch">
+          <description><![CDATA[A method that is executed after a search is executed for a foundset.]]></description>
+          <summary><![CDATA[A method that is executed after a search is executed for a foundset.]]></summary>
+        </event>
+        <event name="onAfterUpdate">
+          <description><![CDATA[A method that is executed after an update operation.]]></description>
+          <summary><![CDATA[A method that is executed after an update operation.]]></summary>
+          <parameters>
+            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.Record">
+              <description><![CDATA[record that is updated]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onCreate">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean"/>
+          <description><![CDATA[A method that is executed before a record is created. The method can block the creation by returning false.]]></description>
+          <summary><![CDATA[A method that is executed before a record is created.]]></summary>
+        </event>
+        <event name="onDelete">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean"/>
+          <description><![CDATA[A method that is executed before a delete operation. The method can block the delete operation by returning false.]]></description>
+          <summary><![CDATA[A method that is executed before a delete operation.]]></summary>
+          <parameters>
+            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.Record">
+              <description><![CDATA[record that will be deleted]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onFind">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean"/>
+          <description><![CDATA[A method that is executed before a foundset is going into find mode. The method can block the mode change.]]></description>
+          <summary><![CDATA[A method that is executed before a foundset is going into find mode.]]></summary>
+        </event>
+        <event name="onInsert">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean"/>
+          <description><![CDATA[A method that is executed before an insert operation. The method can block the insert operation by returning false.]]></description>
+          <summary><![CDATA[A method that is executed before an insert operation.]]></summary>
+          <parameters>
+            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.Record">
+              <description><![CDATA[record that will be inserted]]></description>
+            </parameter>
+          </parameters>
+        </event>
+        <event name="onSearch">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean"/>
+          <description><![CDATA[A method that is executed before search() is called on a foundset in find mode. The method can block the search (foundset will stay in find mode).]]></description>
+          <summary><![CDATA[A method that is executed before search() is called on a foundset in find mode.]]></summary>
+          <parameters>
+            <parameter name="clearLastResults" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean"/>
+            <parameter name="reduceSearch" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean"/>
+          </parameters>
+        </event>
+        <event name="onUpdate">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean"/>
+          <description><![CDATA[A method that is executed before an update operation. A method can block the update by returning false.]]></description>
+          <summary><![CDATA[A method that is executed before an update operation.]]></summary>
+          <parameters>
+            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.Record">
+              <description><![CDATA[record that will be updated]]></description>
+            </parameter>
+          </parameters>
+        </event>
+      </events>
+    </object>
+    <object publicName="ValueList" qualifiedName="com.servoy.j2db.persistence.ValueList">
+      <properties>
+        <property name="addEmptyValue">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Property that tells if an empty value must be shown next to the items in the value list.]]></description>
+          <summary><![CDATA[Property that tells if an empty value must be shown next to the items in the value list.]]></summary>
+        </property>
+        <property name="customValues">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[A string with the elements in the valuelist. The elements 
+can be separated by linefeeds (custom1
+custom2), optional with realvalues ((custom1|1
+custom2|2)).]]></description>
+          <summary><![CDATA[A string with the elements in the valuelist.]]></summary>
+        </property>
+        <property name="dataSource">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Compact representation of the names of the server and table that 
+are used for loading the data from the database.]]></description>
+          <summary><![CDATA[Compact representation of the names of the server and table that 
+are used for loading the data from the database.]]></summary>
+        </property>
+        <property name="name">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the value list.
+
+It is relevant when the "useTableFilter" property is set.]]></description>
+          <summary><![CDATA[The name of the value list.]]></summary>
+        </property>
+        <property name="relationName">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the relation that is used for loading data from the database.]]></description>
+          <summary><![CDATA[The name of the relation that is used for loading data from the database.]]></summary>
+        </property>
+        <property name="separator">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[A String representing the separator that should be used when multiple
+display dataproviders are set, when the value list has the type set to
+database values.]]></description>
+          <summary><![CDATA[A String representing the separator that should be used when multiple
+display dataproviders are set, when the value list has the type set to
+database values.]]></summary>
+        </property>
+        <property deprecated="true" name="serverName">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the database server that is used for loading the values when 
+the value list has the type set to database values.]]></description>
+          <summary><![CDATA[The name of the database server that is used for loading the values when 
+the value list has the type set to database values.]]></summary>
+        </property>
+        <property name="sortOptions">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Sort options that are applied when the valuelist loads its data
+from the database.]]></description>
+          <summary><![CDATA[Sort options that are applied when the valuelist loads its data
+from the database.]]></summary>
+        </property>
+        <property deprecated="true" name="tableName">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the database table that is used for loading the values when 
+the value list has the type set to database values.]]></description>
+          <summary><![CDATA[The name of the database table that is used for loading the values when 
+the value list has the type set to database values.]]></summary>
+        </property>
+        <property name="useTableFilter">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Flag that tells if the name of the valuelist should be applied as a filter on the
+'valuelist_name' column when retrieving the data from the database.]]></description>
+          <summary><![CDATA[Flag that tells if the name of the valuelist should be applied as a filter on the
+'valuelist_name' column when retrieving the data from the database.]]></summary>
+        </property>
+        <property name="valueListType">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The type of the valuelist. Can be either custom values or database values.]]></description>
+          <summary><![CDATA[The type of the valuelist.]]></summary>
+        </property>
+      </properties>
+    </object>
+    <object publicName="Variable" qualifiedName="com.servoy.j2db.persistence.ScriptVariable">
+      <properties>
+        <property name="comment">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the value of the jsdoc text (comment) of the script variable]]></return>
+          <description><![CDATA[Property for setting and getting the jsdoc text (comment) of the script variable.]]></description>
+          <summary><![CDATA[Property for setting and getting the jsdoc text (comment) of the script variable.]]></summary>
+        </property>
+        <property name="defaultValue">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The default value of the variable. 
+
+It is interpreted as a JS expression.
+<p>
+<b>For form variables ,setting this property requires the form instances to be destroyed (history.remove("formName")). 
+If you want to use a default value for a newly created variable  create the variable using the 3 paramaeter version newVariable(name,type,defaultValue)</b>
+</p>
+For INTEGER variables it can be an integer constant, like 10 for example.
+For NUMBER variables it can be a real constant, like 22.41. For DATETIME
+variables it can be "now", or a JS expression like "new Date()". For TEXT 
+variables it can be any string surrounded with quotes, like "'some text'".]]></description>
+          <summary><![CDATA[The default value of the variable.]]></summary>
+        </property>
+        <property name="name">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the variable.]]></description>
+          <summary><![CDATA[The name of the variable.]]></summary>
+        </property>
+        <property name="scopeName">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[The name of the scope.]]></description>
+          <summary><![CDATA[The name of the scope.]]></summary>
+        </property>
+        <property name="variableType">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[The type of the variable. Can be one of: TEXT, INTEGER, NUMBER, DATETIME or MEDIA.]]></description>
+          <summary><![CDATA[The type of the variable.]]></summary>
+        </property>
+      </properties>
+    </object>
+  </designtime>
+</servoydoc>
