@@ -71,7 +71,6 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IDeveloperRepository;
-import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -388,33 +387,26 @@ public class VisualFormEditorPartsPage extends Composite
 		ISelection availablePartsSelection = availableParts.getSelection();
 
 		Part lastSuperPart = null;
-		if (editor.getForm().getExtendsID() > 0)
+		Form flattenedSuperForm = ModelUtils.getEditingFlattenedSolution(editor.getForm()).getFlattenedForm(editor.getForm().getExtendsForm());
+		if (flattenedSuperForm != null)
 		{
 			// there is a super-form, can only add parts on the bottom
-			Iterator<Part> flattenedParts = flattenedForm.getParts();
-			while (flattenedParts.hasNext())
+			for (Part p : Utils.iterate(flattenedSuperForm.getParts()))
 			{
-				Part p = flattenedParts.next();
-				if (p.getParent() != editor.getForm() || PersistHelper.isOverrideOrphanElement(p))
-				{
-					lastSuperPart = p;
-				}
+				lastSuperPart = p;
 			}
 		}
 
 		Set<Integer> currentTypes = new HashSet<Integer>();
 		List<Part> currentPartList = new ArrayList<Part>();
 
-		Iterator<Part> it;
 		// currently used parts
-		it = flattenedForm.getParts();
-		while (it.hasNext())
+		for (Part p : Utils.iterate(flattenedForm.getParts()))
 		{
-			Part p = it.next();
 			if (!PersistHelper.isOverrideOrphanElement(p))
 			{
 				currentPartList.add(p);
-				currentTypes.add(new Integer(p.getPartType()));
+				currentTypes.add(Integer.valueOf(p.getPartType()));
 			}
 		}
 		currentParts.setInput(currentPartList);
@@ -442,13 +434,10 @@ public class VisualFormEditorPartsPage extends Composite
 				if (o instanceof Part) // always true
 				{
 					Part oldP = (Part)o;
-					IPersist oldParent = oldP.getAncestor(IRepository.FORMS);
 					for (Part newP : currentPartList)
 					{
-						IPersist newParent = newP.getAncestor(IRepository.FORMS);
 						if (newP == oldP ||
-							(newP.getPartType() == oldP.getPartType() && ((oldParent != editor.getForm() && newParent == editor.getForm() && newP.getExtendsID() == oldP.getID()) || (oldParent == editor.getForm() &&
-								newParent != editor.getForm() && oldP.getExtendsID() == newP.getID()))))
+							(newP.getPartType() == oldP.getPartType() && PersistHelper.getBasePersist(newP) == PersistHelper.getBasePersist(oldP)))
 						{
 							newSelection.add(newP);
 							break;
@@ -464,7 +453,6 @@ public class VisualFormEditorPartsPage extends Composite
 
 		configurePartsButtons();
 	}
-
 
 	/**
 	 * Add an available part type to partTypes if part type may be added to the form.
@@ -482,9 +470,9 @@ public class VisualFormEditorPartsPage extends Composite
 			return;
 		}
 
-		if (Part.canBeMoved(partType) || !currentTypes.contains(new Integer(partType)))
+		if (Part.canBeMoved(partType) || !currentTypes.contains(Integer.valueOf(partType)))
 		{
-			partTypes.add(new Integer(partType));
+			partTypes.add(Integer.valueOf(partType));
 		}
 	}
 
@@ -513,11 +501,9 @@ public class VisualFormEditorPartsPage extends Composite
 
 	private boolean hasInheritedPart(IStructuredSelection selection)
 	{
-		Iterator it = selection.iterator();
-		while (it.hasNext())
+		for (Part part : Utils.iterate((Iterator<Part>)selection.iterator()))
 		{
-			Part part = (Part)it.next();
-			if (part.getAncestor(IRepository.FORMS) != editor.getForm())
+			if (part.getAncestor(IRepository.FORMS) != editor.getForm() || PersistHelper.isOverrideElement(part))
 			{
 				return true;
 			}
@@ -735,10 +721,10 @@ public class VisualFormEditorPartsPage extends Composite
 		CompoundCommand command = new CompoundCommand("Move Part " + (up ? "up" : "down"));
 
 		command.add(SetValueCommand.createSetvalueCommand("", PersistPropertySource.createPersistPropertySource(partToMove, editor.getForm(), false),
-			StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName(), new Integer(switchPart.getHeight())));
+			StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName(), Integer.valueOf(switchPart.getHeight())));
 
 		command.add(SetValueCommand.createSetvalueCommand("", PersistPropertySource.createPersistPropertySource(switchPart, editor.getForm(), false),
-			StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName(), new Integer(partToMove.getHeight())));
+			StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName(), Integer.valueOf(partToMove.getHeight())));
 
 		return command;
 	}
@@ -935,7 +921,7 @@ public class VisualFormEditorPartsPage extends Composite
 
 		public void setPageBreakAfterEveryNthOccurence(boolean pageBreakAfterEveryNthOccurence)
 		{
-			setPartProperty("pageBreakAfterOccurrence", new Integer(pageBreakAfterEveryNthOccurence ? 1 : 0));
+			setPartProperty("pageBreakAfterOccurrence", Integer.valueOf(pageBreakAfterEveryNthOccurence ? 1 : 0));
 		}
 
 		public String getPageBreakAfterOccurrence()
@@ -958,7 +944,7 @@ public class VisualFormEditorPartsPage extends Composite
 			catch (NumberFormatException e)
 			{ // ignore
 			}
-			setPartProperty(property, new Integer(n));
+			setPartProperty(property, Integer.valueOf(n));
 		}
 
 		/**
@@ -976,6 +962,11 @@ public class VisualFormEditorPartsPage extends Composite
 			if (propertySource == null)
 			{
 				propertySource = PersistPropertySource.createPersistPropertySource(part, editor.getForm(), false);
+				if (propertySource == null)
+				{
+					// part was deleted
+					return null;
+				}
 			}
 			return propertySource.getPropertyValue(property);
 		}

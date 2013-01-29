@@ -245,7 +245,8 @@ public class MarkerMessages
 		"For performance reasons on the internet/WAN it is strongly suggested to place no more then {0} {1} on a{2} form.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormRowBGCalcTargetNotFound = new ServoyMarker(
 		"rowBGColorCalculation of form \"{0}\" is linked to an entity that does not exist.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
-	public static ServoyMarker FormDuplicatePart = new ServoyMarker("Form \"{0}\" has multiple parts of type: \"{1}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+	public static ServoyMarker FormDuplicatePart = new ServoyMarker(
+		"Form \"{0}\" has multiple parts of type: \"{1}\".", ServoyBuilder.FORM_DUPLICATE_PART_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker NonAccessibleFormInModuleUsedInParentSolutionForm = new ServoyMarker(
 		"Non-public form \"{0}\" from module \"{1}\" is used in solution \"{2}\", in form \"{3}\". This is not allowed.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$

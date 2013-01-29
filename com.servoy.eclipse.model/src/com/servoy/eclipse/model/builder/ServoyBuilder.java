@@ -284,6 +284,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String HIDDEN_TABLE_STILL_IN_USE = _PREFIX + ".hiddenTableInUse"; //$NON-NLS-1$
 	public static final String MISSING_CONVERTER = _PREFIX + ".missingConverter"; //$NON-NLS-1$
 	public static final String LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE = _PREFIX + ".labelForElementProblem"; //$NON-NLS-1$
+	public static final String FORM_DUPLICATE_PART_MARKER_TYPE = _PREFIX + ".formDuplicatePart"; //$NON-NLS-1$
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels"; //$NON-NLS-1$
@@ -1475,6 +1476,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, HIDDEN_TABLE_STILL_IN_USE);
 		deleteMarkers(project, MISSING_CONVERTER);
 		deleteMarkers(project, LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE);
+		deleteMarkers(project, FORM_DUPLICATE_PART_MARKER_TYPE);
 
 		if (getServoyModel().getDataModelManager() != null)
 		{
@@ -2424,7 +2426,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										{
 											ServoyMarker mk = MarkerMessages.FormDuplicatePart.fill(form.getName(),
 												com.servoy.j2db.persistence.Part.getDisplayName(part.getPartType()));
-											addMarker(project, mk.getType(), mk.getText(), -1, FORM_DUPLICATE_PART, IMarker.PRIORITY_NORMAL, null, form);
+											addMarker(project, mk.getType(), mk.getText(), -1, FORM_DUPLICATE_PART, IMarker.PRIORITY_NORMAL, null, part);
 											parts.put(Integer.valueOf(part.getPartType()), Boolean.FALSE);
 										}
 									}
@@ -4640,7 +4642,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			else if (type.equals(DUPLICATE_UUID) || type.equals(DUPLICATE_SIBLING_UUID) || type.equals(BAD_STRUCTURE_MARKER_TYPE) ||
 				type.equals(INVALID_SORT_OPTION) || type.equals(EVENT_METHOD_MARKER_TYPE) || type.equals(PORTAL_DIFFERENT_RELATION_NAME_MARKER_TYPE) ||
 				type.equals(INVALID_EVENT_METHOD) || type.equals(MISSING_STYLE) || type.equals(INVALID_COMMAND_METHOD) || type.equals(INVALID_DATAPROVIDERID) ||
-				type.equals(OBSOLETE_ELEMENT) || type.equals(HIDDEN_TABLE_STILL_IN_USE) || type.equals(LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE))
+				type.equals(OBSOLETE_ELEMENT) || type.equals(HIDDEN_TABLE_STILL_IN_USE) || type.equals(LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE) ||
+				type.equals(FORM_DUPLICATE_PART_MARKER_TYPE))
 			{
 				marker.setAttribute("Uuid", persist.getUUID().toString()); //$NON-NLS-1$
 				marker.setAttribute("SolutionName", resource.getName()); //$NON-NLS-1$
