@@ -210,9 +210,12 @@ application.output(a2);]]></sample>
             <argumentType typecode="org.mozilla.javascript.Function"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Runs a function on every item in the array.]]></description>
-          <summary><![CDATA[Runs a function on every item in the array.]]></summary>
-          <sample><![CDATA[function printThemOut(params) {	application.output(params);} 
+          <description><![CDATA[Runs a function (callback) on every item in the array. The callback function is invoked only for indexes of the array which have assigned values.
+The callback function is invoked with three arguments: the element value, the element index, the array being traversed.]]></description>
+          <summary><![CDATA[Runs a function (callback) on every item in the array.]]></summary>
+          <sample><![CDATA[function printThemOut(element, index, array) {
+		application.output("a[" + index + "] = " + element);
+}
 var a = ['a', 'b', 'c'];	
 a.forEach(printThemOut);]]></sample>
           <parameters>
@@ -227,17 +230,20 @@ a.forEach(printThemOut);]]></sample>
         <function name="forEach" servoyMobile="true">
           <argumentsTypes>
             <argumentType typecode="org.mozilla.javascript.Function"/>
-            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Runs a function on every item in the array.]]></description>
-          <summary><![CDATA[Runs a function on every item in the array.]]></summary>
-          <sample><![CDATA[function printThemOut(params) {	application.output(params);} 
+          <description><![CDATA[Runs a function (callback) on every item in the array. The callback function is invoked only for indexes of the array which have assigned values.
+The callback function is invoked with three arguments: the element value, the element index, the array being traversed.]]></description>
+          <summary><![CDATA[Runs a function (callback) on every item in the array.]]></summary>
+          <sample><![CDATA[function printThemOut(element, index, array) {
+		application.output("a[" + index + "] = " + element);
+}
 var a = ['a', 'b', 'c'];	
 a.forEach(printThemOut);]]></sample>
           <parameters>
             <parameter name="callback" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function"/>
-            <parameter name="thisObject" type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
+            <parameter name="thisObject" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </parameters>
         </function>
         <function name="indexOf" servoyMobile="true">
