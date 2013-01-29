@@ -155,8 +155,8 @@ public class ImageDataCollector implements ImageConsumer
 				{
 					h = maxHeight;
 				}
-				final int iWidth = w;
-				final int iHeight = h;
+				final int iWidth = w <= 0 ? 1 : w;
+				final int iHeight = h <= 0 ? 1 : h;
 				final Image componentImage = new BufferedImage(iWidth, iHeight, BufferedImage.TYPE_INT_ARGB);
 				inProgress = true;
 
