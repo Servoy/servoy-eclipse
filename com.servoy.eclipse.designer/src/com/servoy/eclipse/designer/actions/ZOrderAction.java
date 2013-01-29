@@ -33,8 +33,8 @@ import org.eclipse.gef.Request;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.designer.editor.BasePersistGraphicalEditPart;
-import com.servoy.eclipse.designer.editor.GroupGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.GroupGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.commands.DesignerActionFactory;
 import com.servoy.eclipse.designer.editor.commands.DesignerSelectionAction;
 import com.servoy.eclipse.designer.util.DesignerUtil;
@@ -176,18 +176,16 @@ public class ZOrderAction extends DesignerSelectionAction
 
 		ArrayList<OrderableElement> orderedElements = new ArrayList<OrderableElement>();
 
-		for (int index = 0; index <= unorderedList.size() - 1; index++)
+		for (OrderableElement current : unorderedList)
 		{
-			OrderableElement current = unorderedList.get(index);
 			if (!current.needsAdjustement)
 			{
 				orderedElements.add(current);
 			}
 		}
 
-		for (int index = 0; index <= orderedElements.size() - 1; index++)
+		for (OrderableElement current : unorderedList)
 		{
-			OrderableElement current = unorderedList.get(index);
 			if (current.needsAdjustement)
 			{
 				orderedElements.add(current);
@@ -204,9 +202,8 @@ public class ZOrderAction extends DesignerSelectionAction
 		ArrayList<OrderableElement> orderedElements = new ArrayList<OrderableElement>();
 
 		int maxFormIndexToMove = -1;
-		for (int index = 0; index <= unorderedList.size() - 1; index++)
+		for (OrderableElement current : unorderedList)
 		{
-			OrderableElement current = unorderedList.get(index);
 			if (current.needsAdjustement)
 			{
 				orderedElements.add(current);
@@ -214,9 +211,8 @@ public class ZOrderAction extends DesignerSelectionAction
 			}
 		}
 
-		for (int index = 0; index <= unorderedList.size() - 1; index++)
+		for (OrderableElement current : unorderedList)
 		{
-			OrderableElement current = unorderedList.get(index);
 			if (!current.needsAdjustement && current.zIndex <= maxFormIndexToMove)
 			{
 				orderedElements.add(current);
@@ -454,10 +450,8 @@ public class ZOrderAction extends DesignerSelectionAction
 					int index = oe.zIndex - oe.nrOfSubElements + 1;
 					for (IFormElement bc : groupElements)
 					{
-						requests.put(
-							editPartMap.get(bc),
-							new SetPropertyRequest(BaseVisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(),
-								Integer.valueOf(index++), "")); //$NON-NLS-1$
+						requests.put(editPartMap.get(bc), new SetPropertyRequest(BaseVisualFormEditor.REQ_SET_PROPERTY,
+							StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), Integer.valueOf(index++), "")); //$NON-NLS-1$
 					}
 				}
 			}
@@ -466,13 +460,10 @@ public class ZOrderAction extends DesignerSelectionAction
 		return requests;
 	}
 
-	private final String zOrderType;
-
 	public ZOrderAction(IWorkbenchPart part, Object requestType)
 	{
 		super(part, requestType);
 		initAction((String)requestType);
-		zOrderType = (String)requestType;
 	}
 
 	public void initAction(String zOrderType)
