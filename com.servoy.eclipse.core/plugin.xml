@@ -290,6 +290,10 @@
             class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
             markerType="com.servoy.eclipse.core.labelForElementProblem">
       </markerResolutionGenerator>      
+      <markerResolutionGenerator
+            class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
+            markerType="com.servoy.eclipse.core.formDuplicatePart">
+      </markerResolutionGenerator>      
    </extension>
    <extension
          point="org.eclipse.ui.splashHandlers">

@@ -222,7 +222,7 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				String uuid = (String)marker.getAttribute("Uuid");
 				fixes = new IMarkerResolution[] { new ModifyRelationNameQuickfix(uuid, solName, true), new ModifyRelationNameQuickfix(uuid, solName, false) };
 			}
-			else if (type.equals(ServoyBuilder.OBSOLETE_ELEMENT))
+			else if (type.equals(ServoyBuilder.OBSOLETE_ELEMENT) || type.equals(ServoyBuilder.FORM_DUPLICATE_PART_MARKER_TYPE))
 			{
 				String solName = (String)marker.getAttribute("SolutionName");
 				String uuid = (String)marker.getAttribute("Uuid");
