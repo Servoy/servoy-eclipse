@@ -185,7 +185,7 @@ public class ZOrderAction extends DesignerSelectionAction
 			}
 		}
 
-		for (int index = 0; index <= orderedElements.size() - 1; index++)
+		for (int index = 0; index <= unorderedList.size() - 1; index++)
 		{
 			OrderableElement current = unorderedList.get(index);
 			if (current.needsAdjustement)
