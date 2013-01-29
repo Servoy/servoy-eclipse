@@ -40,6 +40,7 @@ import com.servoy.eclipse.designer.editor.commands.DesignerSelectionAction;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.util.ElementUtil;
+import com.servoy.j2db.persistence.FlattenedForm;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
@@ -129,6 +130,25 @@ public class ZOrderAction extends DesignerSelectionAction
 
 			return returnList;
 		}
+
+		public IFormElement getFormElement()
+		{
+			if (element instanceof IFormElement)
+			{
+				return (IFormElement)element;
+			}
+			else if (element instanceof FormElementGroup)
+			{
+				IFormElement returnElement = null;
+				Iterator<IFormElement> elements = ((FormElementGroup)element).getElements();
+				while (elements.hasNext())
+				{
+					returnElement = elements.next();
+				}
+				return returnElement;
+			}
+			return null;
+		}
 	}
 
 	private static class OrdarableElementZOrderComparator implements Comparator<OrderableElement>
@@ -142,6 +162,10 @@ public class ZOrderAction extends DesignerSelectionAction
 		 */
 		public int compare(OrderableElement o1, OrderableElement o2)
 		{
+			if (o1.getFormElement() != null && o2.getFormElement() != null)
+			{
+				return FlattenedForm.FORM_INDEX_COMPARATOR.compare(o1.getFormElement(), o2.getFormElement());
+			}
 			return o1.zIndex - o2.zIndex;
 		}
 	}
