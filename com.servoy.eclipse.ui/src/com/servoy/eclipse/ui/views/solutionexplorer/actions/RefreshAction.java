@@ -25,6 +25,7 @@ import org.eclipse.jface.action.Action;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.RunInWorkspaceJob;
+import com.servoy.eclipse.model.extensions.AbstractServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -58,7 +59,7 @@ public class RefreshAction extends Action
 			{
 				try
 				{
-					ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel().refreshServoyProjects();
+					AbstractServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel().refreshServoyProjects();
 					ServoyProject[] sp = servoyModel.getServoyProjects();
 					ServoyResourcesProject[] rp = servoyModel.getResourceProjects();
 					monitor.beginTask("Refreshing", sp.length + rp.length + 1);
