@@ -52,12 +52,11 @@ import com.servoy.j2db.util.Utils;
  */
 public abstract class AbstractServoyModel implements IServoyModel
 {
-
 	protected ServoyProject activeProject;
 	protected ServoyResourcesProject activeResourcesProject;
 
 	protected DataModelManager dataModelManager;
-	protected Map<String, ServoyProject> servoyProjectCache;
+	private volatile Map<String, ServoyProject> servoyProjectCache;
 
 	private FlattenedSolution flattenedSolution;
 	private IActiveSolutionHandler activeSolutionHandler;
@@ -84,14 +83,13 @@ public abstract class AbstractServoyModel implements IServoyModel
 
 	public ServoyProject[] getServoyProjects()
 	{
-		reloadProjectCacheIfNecessary();
-		return servoyProjectCache.values().toArray(new ServoyProject[servoyProjectCache.size()]);
+		Map<String, ServoyProject> servoyProjects = reloadProjectCacheIfNecessary();
+		return servoyProjects.values().toArray(new ServoyProject[servoyProjects.size()]);
 	}
 
 	public ServoyProject getServoyProject(String name)
 	{
-		reloadProjectCacheIfNecessary();
-		return servoyProjectCache.get(name);
+		return reloadProjectCacheIfNecessary().get(name);
 	}
 
 	/**
@@ -165,12 +163,18 @@ public abstract class AbstractServoyModel implements IServoyModel
 		return retval.toArray(new ServoyResourcesProject[retval.size()]);
 	}
 
-	private void reloadProjectCacheIfNecessary()
+	public AbstractServoyModel refreshServoyProjects()
 	{
-		if (servoyProjectCache == null)
+		servoyProjectCache = null;
+		return this;
+	}
+
+	private Map<String, ServoyProject> reloadProjectCacheIfNecessary()
+	{
+		Map<String, ServoyProject> servoyProjects = servoyProjectCache;
+		if (servoyProjects == null)
 		{
-			Map<String, ServoyProject> servoyProjects = new HashMap<String, ServoyProject>();
-			List<ServoyProject> retval = new ArrayList<ServoyProject>();
+			servoyProjects = new HashMap<String, ServoyProject>();
 			for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects())
 			{
 				try
@@ -178,7 +182,6 @@ public abstract class AbstractServoyModel implements IServoyModel
 					if (project.isOpen() && project.hasNature(ServoyProject.NATURE_ID))
 					{
 						ServoyProject sp = (ServoyProject)project.getNature(ServoyProject.NATURE_ID);
-						retval.add(sp);
 						servoyProjects.put(project.getName(), sp);
 					}
 				}
@@ -189,6 +192,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 			}
 			servoyProjectCache = servoyProjects;
 		}
+		return servoyProjects;
 	}
 
 	public DataModelManager getDataModelManager()

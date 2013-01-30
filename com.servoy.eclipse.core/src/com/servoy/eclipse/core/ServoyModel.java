@@ -674,24 +674,6 @@ public class ServoyModel extends AbstractServoyModel
 			String.valueOf(Settings.ALLOW_CLIENT_REPOSITORY_ACCESS_DEFAULT)));
 	}
 
-	public synchronized ServoyModel refreshServoyProjects()
-	{
-		servoyProjectCache = null;
-		return this;
-	}
-
-	@Override
-	public synchronized ServoyProject[] getServoyProjects()
-	{
-		return super.getServoyProjects();
-	}
-
-	@Override
-	public synchronized ServoyProject getServoyProject(String name)
-	{
-		return super.getServoyProject(name);
-	}
-
 	/**
 	 * Returns the root object with the given name. string resources are read from the resources project referenced by the current active solution project.
 	 * 
@@ -924,14 +906,16 @@ public class ServoyModel extends AbstractServoyModel
 							{
 								// update the ui if we are the ui thread in this progress dialog
 								while (Display.getCurrent().readAndDispatch())
-									;
+								{
+								}
 							}
 							activeProject.getEditingFlattenedSolution();
 							if (Display.getCurrent() != null)
 							{
 								// update the ui if we are the ui thread in this progress dialog
 								while (Display.getCurrent().readAndDispatch())
-									;
+								{
+								}
 							}
 						}
 
