@@ -4144,6 +4144,18 @@ for( var i = 1 ; i <= dataset.getMaxRowIndex() ; i++ )
             </parameter>
           </parameters>
         </function>
+        <function name="getDataModelClonesFrom">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"/>
+          <description><![CDATA[Retrieves a list with names of all database servers that have property DataModelCloneFrom equal to the server name parameter.]]></description>
+          <summary><![CDATA[Retrieves a list with names of all database servers that have property DataModelCloneFrom equal to the server name parameter.]]></summary>
+          <sample><![CDATA[var serverNames = databaseManager.getDataModelClonesFrom('myServerName');]]></sample>
+          <parameters>
+            <parameter name="serverName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          </parameters>
+        </function>
         <function name="getDataSetByQuery">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
