@@ -175,7 +175,7 @@ public class TypeProvider implements ITypeProvider
 							String name = sm.getName();
 							if (name.toLowerCase().startsWith(prefixLower))
 							{
-								names.add(sm.getScopeName() + '.' + sm.getName());
+								names.add("scopes." + sm.getScopeName() + '.' + sm.getName());
 							}
 						}
 					}
