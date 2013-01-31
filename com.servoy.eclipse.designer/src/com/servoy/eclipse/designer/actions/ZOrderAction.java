@@ -47,6 +47,7 @@ import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.UUID;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author alorincz
@@ -105,7 +106,7 @@ public class ZOrderAction extends DesignerSelectionAction
 			if (o instanceof IFormElement && element instanceof IFormElement) return ((IFormElement)element).getUUID().equals(((IFormElement)o).getUUID());
 			else if (o instanceof FormElementGroup && element instanceof FormElementGroup) return ((FormElementGroup)element).getGroupID().equals(
 				((FormElementGroup)o).getGroupID());
-
+			else if (o instanceof OrderableElement) return Utils.equalObjects(element, ((OrderableElement)o).element);
 			return false;
 		}
 
@@ -226,82 +227,36 @@ public class ZOrderAction extends DesignerSelectionAction
 		return orderedElements;
 	}
 
-	private static List<OrderableElement> orderForBringForward(List<OrderableElement> unorderedList)
+	private static List<OrderableElement> orderForOneStepSend(List<OrderableElement> initialList, List<OrderableElement> neighboursList, boolean backwards)
 	{
-		if (unorderedList == null || unorderedList.isEmpty() || unorderedList.size() == 1) return unorderedList;
+		if (initialList == null || initialList.isEmpty() || initialList.size() == 1) return initialList;
 
-		ArrayList<OrderableElement> orderedList = new ArrayList<OrderableElement>();
-
-		OrderableElement[] orderedArray = new OrderableElement[unorderedList.size() + 1];
-
-		for (int index = 0; index < unorderedList.size(); index++)
+		int step = backwards ? 1 : -1;
+		int startIndex = backwards ? 0 : neighboursList.size() - 1;
+		OrderableElement replacementElement = null;
+		for (int index = startIndex; index < neighboursList.size() && index >= 0; index = index + step)
 		{
-			OrderableElement current = unorderedList.get(index);
+			OrderableElement current = neighboursList.get(index);
 			if (current.needsAdjustement)
 			{
-				orderedArray[index + 1] = current;
-			}
-		}
-
-		for (int index = unorderedList.size() - 1; index >= 0; index--)
-		{
-			OrderableElement current = unorderedList.get(index);
-			if (!current.needsAdjustement)
-			{
-				int freeSlot = index;
-				for (; orderedArray[freeSlot] != null && freeSlot >= 0;)
+				if (replacementElement != null)
 				{
-					freeSlot--;
+					int replacementIndex = initialList.indexOf(replacementElement);
+					int currentIndex = initialList.indexOf(current);
+					if (replacementIndex >= 0 && currentIndex >= 0)
+					{
+						initialList.set(replacementIndex, current);
+						initialList.set(currentIndex, replacementElement);
+					}
 				}
-				orderedArray[freeSlot] = current;
 			}
-		}
-
-		for (OrderableElement oe : orderedArray)
-		{
-			if (oe != null) orderedList.add(oe);
-		}
-
-		return orderedList;
-	}
-
-	private static List<OrderableElement> orderForSendBackward(List<OrderableElement> unorderedList)
-	{
-		if (unorderedList == null || unorderedList.isEmpty() || unorderedList.size() == 1) return unorderedList;
-
-		ArrayList<OrderableElement> orderedList = new ArrayList<OrderableElement>();
-
-		OrderableElement[] orderedArray = new OrderableElement[unorderedList.size() + 1];
-
-		for (int index = 0; index < unorderedList.size(); index++)
-		{
-			OrderableElement current = unorderedList.get(index);
-			if (current.needsAdjustement)
+			else
 			{
-				orderedArray[index] = current;
+				replacementElement = current;
 			}
 		}
 
-		for (int index = 0; index < unorderedList.size(); index++)
-		{
-			OrderableElement current = unorderedList.get(index);
-			if (!current.needsAdjustement)
-			{
-				int freeSlot = index + 1;
-				for (; orderedArray[freeSlot] != null && freeSlot < unorderedList.size();)
-				{
-					freeSlot++;
-				}
-				orderedArray[freeSlot] = current;
-			}
-		}
-
-		for (OrderableElement oe : orderedArray)
-		{
-			if (oe != null) orderedList.add(oe);
-		}
-
-		return orderedList;
+		return initialList;
 	}
 
 	protected static List<OrderableElement> calculateNewZOrder(Form form, List<Object> models, String zOrderId)
@@ -325,15 +280,7 @@ public class ZOrderAction extends DesignerSelectionAction
 		{
 			if (!oe.needsAdjustement) continue;
 
-			HashMap<UUID, IFormElement> neighbours = ElementUtil.getNeighbours(flattenedForm, oe.getElements(), oe.getElements());
-
-			ArrayList<OrderableElement> unorderedNeighbours = groupElements(neighbours, form);
-			Collections.sort(unorderedNeighbours, OrdarableElementZOrderComparator.INSTANCE);
-
-			for (OrderableElement element : unorderedNeighbours)
-			{
-				if (elementsToAdjust.containsKey(element.id)) element.needsAdjustement = true;
-			}
+			ArrayList<OrderableElement> unorderedNeighbours = getNeighbours(flattenedForm, oe, elementsToAdjust, true);
 
 			List<OrderableElement> tmpAdjustedElements = null;
 
@@ -345,13 +292,12 @@ public class ZOrderAction extends DesignerSelectionAction
 			{
 				tmpAdjustedElements = orderForBringToFront(unorderedNeighbours);
 			}
-			else if (ID_Z_ORDER_SEND_TO_BACK_ONE_STEP.equals(zOrderId))
+			else if (ID_Z_ORDER_SEND_TO_BACK_ONE_STEP.equals(zOrderId) || ID_Z_ORDER_BRING_TO_FRONT_ONE_STEP.equals(zOrderId))
 			{
-				tmpAdjustedElements = orderForSendBackward(unorderedNeighbours);
-			}
-			else if (ID_Z_ORDER_BRING_TO_FRONT_ONE_STEP.equals(zOrderId))
-			{
-				tmpAdjustedElements = orderForBringForward(unorderedNeighbours);
+				ArrayList<OrderableElement> unorderedIntersectingNeighbours = getNeighbours(flattenedForm, oe, elementsToAdjust, false);
+
+				tmpAdjustedElements = orderForOneStepSend(unorderedNeighbours, unorderedIntersectingNeighbours,
+					ID_Z_ORDER_SEND_TO_BACK_ONE_STEP.equals(zOrderId));
 			}
 
 			int index = 0;
@@ -369,6 +315,20 @@ public class ZOrderAction extends DesignerSelectionAction
 		}
 
 		return adjustedElements;
+	}
+
+	private static ArrayList<OrderableElement> getNeighbours(Form form, OrderableElement oe, HashMap<UUID, OrderableElement> elementsToAdjust, boolean recursive)
+	{
+		HashMap<UUID, IFormElement> neighbours = ElementUtil.getNeighbours(form, oe.getElements(), oe.getElements(), recursive);
+
+		ArrayList<OrderableElement> unorderedNeighbours = groupElements(neighbours, form);
+		Collections.sort(unorderedNeighbours, OrdarableElementZOrderComparator.INSTANCE);
+
+		for (OrderableElement element : unorderedNeighbours)
+		{
+			if (elementsToAdjust.containsKey(element.id)) element.needsAdjustement = true;
+		}
+		return unorderedNeighbours;
 	}
 
 	private static ArrayList<OrderableElement> groupElements(HashMap<UUID, IFormElement> elementList, Form form)

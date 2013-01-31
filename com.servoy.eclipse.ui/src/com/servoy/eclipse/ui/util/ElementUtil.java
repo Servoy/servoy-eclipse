@@ -487,7 +487,8 @@ public class ElementUtil
 		return overlappingElements;
 	}
 
-	public static HashMap<UUID, IFormElement> getNeighbours(Form form, HashMap<UUID, IFormElement> foundList, HashMap<UUID, IFormElement> elementsToVisit)
+	public static HashMap<UUID, IFormElement> getNeighbours(Form form, HashMap<UUID, IFormElement> foundList, HashMap<UUID, IFormElement> elementsToVisit,
+		boolean recursive)
 	{
 		if (form == null || foundList == null || elementsToVisit == null || elementsToVisit.isEmpty()) return null;
 
@@ -526,7 +527,7 @@ public class ElementUtil
 			}
 		}
 
-		if (!newElements.isEmpty()) returnList = getNeighbours(form, newFoundList, newElements);
+		if (!newElements.isEmpty() && recursive) returnList = getNeighbours(form, newFoundList, newElements, true);
 		else returnList = newFoundList;
 
 		return returnList;
