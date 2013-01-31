@@ -91,10 +91,13 @@ public class TypeProvider implements ITypeProvider
 							Iterator<ScriptMethod> scriptMethods = flattenedSolution.getScriptMethods(scopes[1], false);
 							for (ScriptMethod method : Utils.iterate(scriptMethods))
 							{
-								String name = "scopes." + scopes[1] + '.' + method.getName();
-								if (name.startsWith(prefix))
+								if (method.isConstructor() && !method.isPrivate())
 								{
-									names.add(name);
+									String name = "scopes." + scopes[1] + '.' + method.getName();
+									if (name.startsWith(prefix))
+									{
+										names.add(name);
+									}
 								}
 							}
 						}
