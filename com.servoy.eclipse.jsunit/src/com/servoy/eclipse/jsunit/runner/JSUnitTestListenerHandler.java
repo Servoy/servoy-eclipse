@@ -265,7 +265,7 @@ public class JSUnitTestListenerHandler
 					fileOrMethodName = fileOrMethodAndLine;
 				}
 				boolean isFile = (fileOrMethodName.endsWith(".js"));
-				boolean isMethod = ((!isFile) && line.contains("org.mozilla.javascript.gen."));
+				boolean isMethod = ((!isFile) && (line.contains("org.mozilla.javascript.gen.") || line.contains(" script.")));
 				if (fileOrMethodName != null && lineNumber > -1 && (isFile || isMethod) &&
 					!/* (ignoreAllButClientStackTraces && */isStackElementFilterMatch(fileOrMethodName)/* ) */) // this line can be uncommented to show stack inside testing code
 				{
