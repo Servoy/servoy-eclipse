@@ -110,12 +110,13 @@ public class JSUnitTestListenerHandler
 				if (exception instanceof Scriptable)
 				{
 					errorMsg = getMessage(context, (Scriptable)exception);
+					stackTrace = getStackTrace(context, (Scriptable)exception);
 				}
 				else if (exception instanceof RhinoException)
 				{
 					errorMsg = ((RhinoException)exception).getMessage();
+					stackTrace = getRhinoExceptionStackTrace((RhinoException)exception);
 				}
-				stackTrace = getStackTrace(context, (Scriptable)exception);
 			}
 			if ((stackTrace == null || stackTrace.length == 0) && throwable instanceof Scriptable)
 			{
