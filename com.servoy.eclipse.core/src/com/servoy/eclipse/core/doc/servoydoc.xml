@@ -26808,6 +26808,7 @@ NOTE: In Servoy 4.x (and higher), the addTab function applies to relationless or
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -26852,7 +26853,8 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -26865,7 +26867,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -27325,6 +27327,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -27351,7 +27354,8 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -27364,7 +27368,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -27724,6 +27728,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -27750,7 +27755,8 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -27763,7 +27769,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -28100,6 +28106,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -28126,7 +28133,8 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -28139,7 +28147,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -28532,6 +28540,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -28585,7 +28594,8 @@ forms.company.elements.portal50.setScroll(x+10,y+10);]]></description>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -28598,7 +28608,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -28989,6 +28999,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -29015,7 +29026,8 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -29028,7 +29040,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -29323,6 +29335,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -29349,7 +29362,8 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -29362,7 +29376,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -29756,6 +29770,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -29782,7 +29797,8 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -29795,7 +29811,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -30188,6 +30204,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -30214,7 +30231,8 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -30227,7 +30245,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -30594,6 +30612,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -30620,7 +30639,8 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -30633,7 +30653,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -31082,6 +31102,7 @@ var my_text = %%prefix%%%%elementName%%.getSelectedText();
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -31135,7 +31156,8 @@ forms.company.elements.portal50.setScroll(x+10,y+10);]]></description>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -31148,7 +31170,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -31485,6 +31507,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -31538,7 +31561,8 @@ forms.company.elements.portal50.setScroll(x+10,y+10);]]></description>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -31551,7 +31575,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -31956,6 +31980,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -31982,7 +32007,8 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -31995,7 +32021,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -32371,6 +32397,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -32424,7 +32451,8 @@ forms.company.elements.portal50.setScroll(x+10,y+10);]]></description>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -32437,7 +32465,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -32809,6 +32837,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -32835,7 +32864,8 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -32848,7 +32878,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -33252,6 +33282,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -33323,7 +33354,8 @@ var current = %%prefix%%%%elementName%%.getSelectedIndex();
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -33336,7 +33368,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -33673,6 +33705,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -33699,7 +33732,8 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -33712,7 +33746,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -34112,6 +34146,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -34165,7 +34200,8 @@ forms.company.elements.portal50.setScroll(x+10,y+10);]]></description>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -34178,7 +34214,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -34473,6 +34509,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -34499,7 +34536,8 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -34512,7 +34550,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -34961,6 +34999,7 @@ var my_text = %%prefix%%%%elementName%%.getSelectedText();
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -35014,7 +35053,8 @@ forms.company.elements.portal50.setScroll(x+10,y+10);]]></description>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -35027,7 +35067,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -35394,6 +35434,7 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -35420,7 +35461,8 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -35433,7 +35475,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -36008,6 +36050,7 @@ NOTE: In Servoy 4.x (and higher), the addTab function applies to relationless or
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -36084,7 +36127,8 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -36097,7 +36141,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -36640,6 +36684,7 @@ NOTE: In Servoy 4.x (and higher), the addTab function applies to relationless or
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -36684,7 +36729,8 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -36697,7 +36743,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -37196,6 +37242,7 @@ var my_text = %%prefix%%%%elementName%%.getSelectedText();
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -37249,7 +37296,8 @@ forms.company.elements.portal50.setScroll(x+10,y+10);]]></description>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -37262,7 +37310,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -37683,6 +37731,7 @@ var my_text = %%prefix%%%%elementName%%.getSelectedText();
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
 
@@ -37709,7 +37758,8 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
-          <description><![CDATA[Sets the size of the field. It takes as input the width and the height. 
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
 
 NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
 
@@ -37722,7 +37772,7 @@ forms.company.elements.faxBtn.setSize(w,h);
 
 //sets the new size and adds 1 px to both the width and height
 forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
-          <summary><![CDATA[Sets the size of the field.]]></summary>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
