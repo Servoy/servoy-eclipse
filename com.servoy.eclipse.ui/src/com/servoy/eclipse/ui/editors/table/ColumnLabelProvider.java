@@ -25,10 +25,13 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.resource.ColorResource;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.util.Utils;
 
@@ -108,7 +111,13 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 
 	public Color getBackground(Object element, int columnIndex)
 	{
-		if (element instanceof Column && ((Column)element).hasBadNaming())
+		boolean isMobile = false;
+		FlattenedSolution fs = ServoyModelFinder.getServoyModel().getFlattenedSolution();
+		if (fs != null && fs.getSolution() != null)
+		{
+			isMobile = fs.getSolution().getSolutionType() == SolutionMetaData.MOBILE;
+		}
+		if (element instanceof Column && ((Column)element).hasBadNaming(isMobile))
 		{
 			return color;
 		}
