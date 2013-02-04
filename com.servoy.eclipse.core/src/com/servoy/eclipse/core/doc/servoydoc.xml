@@ -14566,7 +14566,9 @@ When the founset is in find mode, the find states are discarded, the foundset wi
             <argumentType typecode="com.servoy.j2db.util.UUID"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Loads a single record by primary key, will remove related sort.]]></description>
+          <description><![CDATA[Loads a single record by primary key, will remove related sort.
+
+NOTE: This function will return true if the foundset was altered/changed. It is up to the developer to check for the presence of actual data using getSize().]]></description>
           <summary><![CDATA[Loads a single record by primary key, will remove related sort.]]></summary>
           <sample><![CDATA[//Loads a single record by primary key, will remove related sort!
 %%prefix%%foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));]]></sample>
@@ -14600,7 +14602,9 @@ When the founset is in find mode, the find states are discarded, the foundset wi
             <argumentType typecode="java.lang.Number"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Loads a single record by primary key, will remove related sort.]]></description>
+          <description><![CDATA[Loads a single record by primary key, will remove related sort.
+
+NOTE: This function will return true if the foundset was altered/changed. It is up to the developer to check for the presence of actual data using getSize().]]></description>
           <summary><![CDATA[Loads a single record by primary key, will remove related sort.]]></summary>
           <sample><![CDATA[//Loads a single record by primary key, will remove related sort!
 %%prefix%%foundset.loadRecords(123);]]></sample>
@@ -25573,7 +25577,9 @@ When the founset is in find mode, the find states are discarded, the foundset wi
             <argumentType typecode="com.servoy.j2db.util.UUID"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Loads a single record by primary key, will remove related sort.]]></description>
+          <description><![CDATA[Loads a single record by primary key, will remove related sort.
+
+NOTE: This function will return true if the foundset was altered/changed. It is up to the developer to check for the presence of actual data using getSize().]]></description>
           <summary><![CDATA[Loads a single record by primary key, will remove related sort.]]></summary>
           <sample><![CDATA[//Loads a single record by primary key, will remove related sort!
 %%prefix%%foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));]]></sample>
@@ -25607,7 +25613,9 @@ When the founset is in find mode, the find states are discarded, the foundset wi
             <argumentType typecode="java.lang.Number"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Loads a single record by primary key, will remove related sort.]]></description>
+          <description><![CDATA[Loads a single record by primary key, will remove related sort.
+
+NOTE: This function will return true if the foundset was altered/changed. It is up to the developer to check for the presence of actual data using getSize().]]></description>
           <summary><![CDATA[Loads a single record by primary key, will remove related sort.]]></summary>
           <sample><![CDATA[//Loads a single record by primary key, will remove related sort!
 %%prefix%%foundset.loadRecords(123);]]></sample>
@@ -43863,7 +43871,9 @@ that is given.]]></description>
             <argumentType typecode="com.servoy.j2db.util.UUID"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Loads a single record by primary key, will remove related sort.]]></description>
+          <description><![CDATA[Loads a single record by primary key, will remove related sort.
+
+NOTE: This function will return true if the foundset was altered/changed. It is up to the developer to check for the presence of actual data using getSize().]]></description>
           <summary><![CDATA[Loads a single record by primary key, will remove related sort.]]></summary>
           <sample><![CDATA[%%prefix%%controller.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));]]></sample>
           <parameters>
@@ -43892,7 +43902,9 @@ that is given.]]></description>
             <argumentType typecode="java.lang.Number"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Loads a single record by primary key, will remove related sort.]]></description>
+          <description><![CDATA[Loads a single record by primary key, will remove related sort.
+
+NOTE: This function will return true if the foundset was altered/changed. It is up to the developer to check for the presence of actual data using getSize().]]></description>
           <summary><![CDATA[Loads a single record by primary key, will remove related sort.]]></summary>
           <sample><![CDATA[%%prefix%%controller.loadRecords(123);]]></sample>
           <parameters>
