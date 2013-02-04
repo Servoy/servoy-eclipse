@@ -155,6 +155,7 @@ import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
+import com.servoy.j2db.util.keyword.Ident;
 
 /**
  * Builds Servoy projects. Adds problem markers where needed.
@@ -267,6 +268,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String DUPLICATE_UUID = _PREFIX + ".duplicateUUID"; //$NON-NLS-1$
 	public static final String DUPLICATE_SIBLING_UUID = _PREFIX + ".duplicateSiblingUUID"; //$NON-NLS-1$
 	public static final String DUPLICATE_NAME_MARKER_TYPE = _PREFIX + ".duplicateNameProblem"; //$NON-NLS-1$
+	public static final String RESERVED_WINDOW_OBJECT_PROPERTY_TYPE = _PREFIX + ".reservedWindowObjectPropertyProblem"; //$NON-NLS-1$
 	public static final String DUPLICATE_SCOPE_NAME_MARKER_TYPE = _PREFIX + ".duplicateScopeNameProblem"; //$NON-NLS-1$
 	public static final String INVALID_SORT_OPTION = _PREFIX + ".invalidSortOption"; //$NON-NLS-1$
 	public static final String PORTAL_DIFFERENT_RELATION_NAME_MARKER_TYPE = _PREFIX + ".differentRelationName"; //$NON-NLS-1$
@@ -332,6 +334,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		"duplicationUUIDDuplicate", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> DUPLICATION_DUPLICATE_ENTITY_FOUND = new Pair<String, ProblemSeverity>(
 		"duplicationDuplicateEntityFound", ProblemSeverity.ERROR); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> RESERVED_WINDOW_OBJECT_PROPERTY = new Pair<String, ProblemSeverity>(
+		"reservedWindowObjectProperty", ProblemSeverity.WARNING); //$NON-NLS-1$
 
 	// database information problems
 	public final static Pair<String, ProblemSeverity> DBI_BAD_INFO = new Pair<String, ProblemSeverity>("DBIBadDBInfo", ProblemSeverity.ERROR); //$NON-NLS-1$
@@ -1494,6 +1498,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, DUPLICATE_UUID);
 		deleteMarkers(project, DUPLICATE_SIBLING_UUID);
 		deleteMarkers(project, DUPLICATE_NAME_MARKER_TYPE);
+		deleteMarkers(project, RESERVED_WINDOW_OBJECT_PROPERTY_TYPE);
 		deleteMarkers(project, MISSING_SERVER);
 		deleteMarkers(project, BAD_STRUCTURE_MARKER_TYPE);
 		deleteMarkers(project, MISSING_STYLE);
@@ -3095,6 +3100,23 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							// remove this property as it takes too much memory
 							// debugging engine needs this info for scriptproviders !!
 							((AbstractBase)o).setSerializableRuntimeProperty(IScriptProvider.FILENAME, null);
+						}
+						if (o instanceof ScriptVariable && servoyModel.getFlattenedSolution().getSolution().getSolutionType() == SolutionMetaData.MOBILE &&
+							Ident.checkIfReservedBrowserWindowObjectWord(((ScriptVariable)o).getName()))
+						{
+							Pair<String, String> pathPair = SolutionSerializer.getFilePath(o, false);
+							String path = ((AbstractBase)o).getSerializableRuntimeProperty(IScriptProvider.FILENAME);
+							IResource file = project;
+							if (path != null && !"".equals(path)) //$NON-NLS-1$
+							{
+								file = getEclipseResourceFromJavaIO(new java.io.File(path), project);
+								if (file != null) path = file.getProjectRelativePath().toString();
+							}
+							if (path == null || "".equals(path)) path = pathPair.getRight(); //$NON-NLS-1$
+
+							ServoyMarker mk = MarkerMessages.ReservedWindowObjectProperty.fill(((ScriptVariable)o).getName());
+
+							addMarker(file, mk.getType(), mk.getText(), -1, RESERVED_WINDOW_OBJECT_PROPERTY, IMarker.PRIORITY_NORMAL, path, o);
 						}
 						checkCancel();
 						return IPersistVisitor.CONTINUE_TRAVERSAL;
