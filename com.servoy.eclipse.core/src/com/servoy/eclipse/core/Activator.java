@@ -105,6 +105,7 @@ import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.IDebugWebClient;
 import com.servoy.j2db.IDesignerCallback;
 import com.servoy.j2db.dataprocessing.ClientInfo;
+import com.servoy.j2db.debug.DebugUtils;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
@@ -501,7 +502,7 @@ public class Activator extends Plugin
 			boolean interrupted = false;
 			try
 			{
-				SwingUtilities.invokeAndWait(new Runnable()
+				Runnable run = new Runnable()
 				{
 					public void run()
 					{
@@ -519,7 +520,17 @@ public class Activator extends Plugin
 							ServoyLog.logError(e);
 						}
 					}
-				});
+				};
+				if (Utils.isAppleMacOS())
+				{
+					DebugUtils.invokeAndWaitWhileDispatchingOnSWT(run);
+				}
+				else
+				{
+					SwingUtilities.invokeAndWait(run);
+				}
+
+
 			}
 			catch (InterruptedException e)
 			{
