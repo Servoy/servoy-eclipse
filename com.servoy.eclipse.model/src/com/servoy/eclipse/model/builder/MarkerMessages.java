@@ -149,7 +149,7 @@ public class MarkerMessages
 	 * This means that for a mobile solution, they use for variables names that are reserved because of the window object in a browser.
 	 */
 	public static ServoyMarker ReservedWindowObjectProperty = new ServoyMarker(
-		"Reserved browser window object property name '{0}' found.", ServoyBuilder.RESERVED_WINDOW_OBJECT_PROPERTY_TYPE); //$NON-NLS-1$
+		"Reserved browser window object property name \"{0}\" found.", ServoyBuilder.RESERVED_WINDOW_OBJECT_PROPERTY_TYPE); //$NON-NLS-1$
 
 	/**
 	 * This means that two or more scopes have the same name. This can create various kinds of conflicts and should be avoided.
