@@ -839,6 +839,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	private void checkDuplicateScopes(IFile scriptFile)
 	{
+		if (!servoyModel.isSolutionActive(scriptFile.getProject().getName())) return;
+
 		if (scriptFile.getParent() == scriptFile.getProject() && scriptFile.getName().endsWith(SolutionSerializer.JS_FILE_EXTENSION) &&
 			servoyModel.isSolutionActive(scriptFile.getProject().getName()))
 		{
