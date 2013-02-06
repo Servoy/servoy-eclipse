@@ -358,17 +358,13 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 						{
 							parent = '/' + ((Solution)persist).getName() + parent;
 						}
+						else if (persist instanceof TableNode)
+						{
+							parent = "  (" + ((TableNode)persist).getDataSource() + ')' + parent;
+						}
 
 					}
-					if (element instanceof ScriptCalculation)
-					{
-						TableNode node = (TableNode)((ScriptCalculation)element).getParent();
-						name += " - " + node.getServerName() + '/' + node.getTableName();
-					}
-					else
-					{
-						name += " - " + parent.substring(1);
-					}
+					name += " - " + parent.substring(1);
 				}
 				return name;
 			}
