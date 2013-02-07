@@ -52,7 +52,7 @@ ${loop_variables}					${variableName} : [${defaultValue},${variableType}]${endlo
 		
 		initScope : function (containerName, subscope, scopeToInit, oldScope) {
 			var subs = this[containerName][subscope];
-
+			var history = _ServoyUtils_.history;
 			var fncs = subs.fncs;
 			for (var key in fncs) {
 				scopeToInit[key] = _ServoyUtils_.wrapFunction(eval("(" + fncs[key] + ")"), scopeToInit);

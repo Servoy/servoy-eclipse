@@ -549,15 +549,6 @@ public class MobileExporter
 		scripting = scripting.replaceAll("function " + method.getName(), "function ");
 		int index = scripting.indexOf("function ");
 		scripting = scripting.substring(index).trim();
-		if (scripting.contains("history."))
-		{
-			int codeStart = scripting.indexOf("{") + 1;
-			String code1 = scripting.substring(0, codeStart);
-			String code2 = scripting.substring(codeStart);
-			String historyDefinition = "\n\tvar history = _ServoyUtils_.history;"; //$NON-NLS-1$
-			scripting = code1 + historyDefinition + code2;
-		}
-
 		// convert to JSON escaped string
 		return JSONObject.quote(scripting);
 	}
