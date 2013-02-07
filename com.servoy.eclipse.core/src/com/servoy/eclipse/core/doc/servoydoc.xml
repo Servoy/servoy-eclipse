@@ -25895,7 +25895,8 @@ If the current foundset is not related, no copy will made.]]></description>
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -25913,6 +25914,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -25945,7 +25947,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -25959,13 +25962,16 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
         <property name="format">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.]]></description>
+          <description><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.
+
+<p>It only returns it's correct value if it was explicitly set, otherwise null.]]></description>
           <summary><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.]]></summary>
           <sample><![CDATA[//sets the display formatting of the field
 %%prefix%%%%elementName%%.format = '###';
@@ -26156,7 +26162,8 @@ NOTE: Depending on the operating system, a user interface property name may be a
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -26174,6 +26181,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -26206,7 +26214,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -26220,7 +26229,8 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
@@ -26733,7 +26743,8 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -26751,6 +26762,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -26783,7 +26795,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -26797,13 +26810,16 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
         <property name="format">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.]]></description>
+          <description><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.
+
+<p>It only returns it's correct value if it was explicitly set, otherwise null.]]></description>
           <summary><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.]]></summary>
           <sample><![CDATA[//sets the display formatting of the field
 %%prefix%%%%elementName%%.format = '###';
@@ -27169,7 +27185,8 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -27187,6 +27204,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -27228,7 +27246,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -27242,13 +27261,16 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
         <property name="format">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.]]></description>
+          <description><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.
+
+<p>It only returns it's correct value if it was explicitly set, otherwise null.]]></description>
           <summary><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.]]></summary>
           <sample><![CDATA[//sets the display formatting of the field
 %%prefix%%%%elementName%%.format = '###';
@@ -27559,7 +27581,8 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -27577,6 +27600,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -27609,7 +27633,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -27623,7 +27648,8 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
@@ -27961,7 +27987,8 @@ dataset.addRow(['cc',3]);
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -27979,6 +28006,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -28011,7 +28039,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -28025,7 +28054,8 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
@@ -28422,7 +28452,8 @@ dataset.addRow(['cc',3]);
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -28440,6 +28471,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -28481,7 +28513,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -28495,13 +28528,16 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
         <property name="format">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.]]></description>
+          <description><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.
+
+<p>It only returns it's correct value if it was explicitly set, otherwise null.]]></description>
           <summary><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.]]></summary>
           <sample><![CDATA[//sets the display formatting of the field
 %%prefix%%%%elementName%%.format = '###';
@@ -28843,7 +28879,8 @@ dataset.addRow(['cc',3]);
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -28861,6 +28898,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -28893,7 +28931,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -28907,7 +28946,8 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
@@ -29155,7 +29195,8 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -29173,6 +29214,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -29205,7 +29247,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -29219,13 +29262,16 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
         <property name="format">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.]]></description>
+          <description><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.
+
+<p>It only returns it's correct value if it was explicitly set, otherwise null.]]></description>
           <summary><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.]]></summary>
           <sample><![CDATA[//sets the display formatting of the field
 %%prefix%%%%elementName%%.format = '###';
@@ -29579,7 +29625,8 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -29597,6 +29644,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -29629,7 +29677,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -29643,13 +29692,16 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
         <property name="format">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.]]></description>
+          <description><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.
+
+<p>It only returns it's correct value if it was explicitly set, otherwise null.]]></description>
           <summary><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.]]></summary>
           <sample><![CDATA[//sets the display formatting of the field
 %%prefix%%%%elementName%%.format = '###';
@@ -30086,7 +30138,8 @@ for (var i=0; i<elems.length; i++)
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -30104,6 +30157,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -30136,7 +30190,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -30150,7 +30205,8 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
@@ -30432,7 +30488,8 @@ var baseURL = %%prefix%%%%elementName%%.baseURL;
         </property>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -30450,6 +30507,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -30500,7 +30558,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -30514,7 +30573,8 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
@@ -30927,7 +30987,8 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -30945,6 +31006,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -30986,7 +31048,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -31000,7 +31063,8 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
@@ -31332,7 +31396,8 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -31350,6 +31415,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -31382,7 +31448,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -31396,13 +31463,16 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
         <property name="format">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.]]></description>
+          <description><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.
+
+<p>It only returns it's correct value if it was explicitly set, otherwise null.]]></description>
           <summary><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.]]></summary>
           <sample><![CDATA[//sets the display formatting of the field
 %%prefix%%%%elementName%%.format = '###';
@@ -31767,7 +31837,8 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -31785,6 +31856,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -31817,7 +31889,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -31831,7 +31904,8 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
@@ -32235,7 +32309,8 @@ dataset.addRow(['cc',3]);
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -32253,6 +32328,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -32294,7 +32370,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -32308,7 +32385,8 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
@@ -32615,7 +32693,8 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -32633,6 +32712,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -32665,7 +32745,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -32679,7 +32760,8 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
@@ -33105,7 +33187,8 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -33123,6 +33206,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -33155,7 +33239,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -33169,7 +33254,8 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
@@ -33507,7 +33593,8 @@ dataset.addRow(['cc',3]);
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -33525,6 +33612,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -33557,7 +33645,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -33571,7 +33660,8 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
@@ -33975,7 +34065,8 @@ dataset.addRow(['cc',3]);
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -33993,6 +34084,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -34025,7 +34117,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -34039,7 +34132,8 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
@@ -34309,7 +34403,8 @@ var baseURL = %%prefix%%%%elementName%%.baseURL;
         </property>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -34327,6 +34422,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -34377,7 +34473,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -34391,7 +34488,8 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
@@ -34804,7 +34902,8 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -34822,6 +34921,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -34863,7 +34963,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -34877,13 +34978,16 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
         <property name="format">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.]]></description>
+          <description><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.
+
+<p>It only returns it's correct value if it was explicitly set, otherwise null.]]></description>
           <summary><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.]]></summary>
           <sample><![CDATA[//sets the display formatting of the field
 %%prefix%%%%elementName%%.format = '###';
@@ -35225,7 +35329,8 @@ dataset.addRow(['cc',3]);
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -35243,6 +35348,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -35295,7 +35401,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -35309,7 +35416,8 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
@@ -35921,7 +36029,8 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -35939,6 +36048,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -35971,7 +36081,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -35985,7 +36096,8 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
@@ -36543,7 +36655,8 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -36561,6 +36674,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -36611,7 +36725,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -36625,7 +36740,8 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
@@ -37027,7 +37143,8 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
           <sample><![CDATA[//sets the background color of the field
 %%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
@@ -37045,6 +37162,7 @@ size - (numeric value) for: bottom, left, right, top.
 color - (hexadecimal value) for: bottom, left, right, top.
 dash pattern - (numeric value) for selected side(s).
 rounding radius - (numeric value) for selected side(s).
+<br>It only returns it's correct value if it was explicitly set.
 
 NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
           <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
@@ -37095,7 +37213,8 @@ var currState = %%prefix%%%%elementName%%.enabled;
         </property>
         <property name="fgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.]]></description>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
           <sample><![CDATA[//sets the foreground color of the field
 %%prefix%%%%elementName%%.fgcolor = "#000000";
@@ -37109,13 +37228,16 @@ var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
 
 font name - the name of the font family.
 style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
-size - the size of the font (in points).]]></description>
+size - the size of the font (in points). 
+<br>It only returns it's correct value if it was explicitly set.]]></description>
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
         <property name="format">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.]]></description>
+          <description><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.
+
+<p>It only returns it's correct value if it was explicitly set, otherwise null.]]></description>
           <summary><![CDATA[Gets or sets the display formatting of an element for number and text values; does not affect the actual value stored in the database column.]]></summary>
           <sample><![CDATA[//sets the display formatting of the field
 %%prefix%%%%elementName%%.format = '###';
