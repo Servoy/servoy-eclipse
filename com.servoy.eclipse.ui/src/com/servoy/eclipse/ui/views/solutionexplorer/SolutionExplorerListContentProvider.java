@@ -121,6 +121,7 @@ import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.annotations.AnnotationManager;
+import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HtmlUtils;
@@ -1518,12 +1519,21 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				String displayName = null;
 
+				Class[] parameterTypes = method.getParameterTypes();
+				Class returnType = method.getReturnType();
+				JSSignature annotation = method.method().getAnnotation(JSSignature.class);
+				if (annotation != null)
+				{
+					if (annotation.arguments().length > 0) parameterTypes = annotation.arguments();
+					if (annotation.returns() != Object.class) returnType = annotation.returns();
+				}
+
 				if (adapter != null)
 				{
 					if (adapter instanceof ITypedScriptObject)
 					{
-						if (((ITypedScriptObject)adapter).isDeprecated(id, method.getParameterTypes())) continue;
-						displayName = ((ITypedScriptObject)adapter).getJSTranslatedSignature(id, method.getParameterTypes());
+						if (((ITypedScriptObject)adapter).isDeprecated(id, parameterTypes)) continue;
+						displayName = ((ITypedScriptObject)adapter).getJSTranslatedSignature(id, parameterTypes);
 					}
 					else
 					{
@@ -1535,17 +1545,16 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				if (displayName == null)
 				{
 					String paramTypes = "";
-					for (Class param : method.getParameterTypes())
+					for (Class param : parameterTypes)
 					{
 						paramTypes += DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(param) + ", ";
 					}
-					paramTypes = "(" + (method.getParameterTypes().length > 0 ? paramTypes.substring(0, paramTypes.length() - 2) : "") + ")";
-					displayName = id + paramTypes + " - " +
-						DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(method.getReturnType());
+					paramTypes = "(" + (parameterTypes.length > 0 ? paramTypes.substring(0, paramTypes.length() - 2) : "") + ")";
+					displayName = id + paramTypes + " - " + DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(returnType);
 				}
 
-				SimpleUserNode node = new UserNode(displayName, actionType, new MethodFeedback(id, method.getParameterTypes(), elementName, resolver,
-					scriptObject, njm), (Object)null, functionIcon);
+				SimpleUserNode node = new UserNode(displayName, actionType, new MethodFeedback(id, parameterTypes, elementName, resolver, scriptObject, njm),
+					(Object)null, functionIcon);
 
 				if (AnnotationManager.getInstance().isMobileAnnotationPresent(method.method(), originalClass)) node.setIsVisibleInMobile(true);
 
