@@ -180,6 +180,7 @@ import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.annotations.AnnotationManager;
 import com.servoy.j2db.scripting.annotations.JSReadonlyProperty;
+import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.ui.IScriptAccordionPanelMethods;
 import com.servoy.j2db.ui.IScriptDataLabelMethods;
@@ -1058,6 +1059,13 @@ public class TypeCreator extends TypeCache
 							method.setName(name);
 							Class< ? >[] parameterTypes = memberbox[i].getParameterTypes();
 
+							JSSignature annotation = memberbox[i].method().getAnnotation(JSSignature.class);
+							if (annotation != null)
+							{
+								if (annotation.arguments().length > 0) parameterTypes = annotation.arguments();
+								if (annotation.returns() != Object.class) returnTypeClz = annotation.returns();
+
+							}
 							if (scriptObject instanceof ITypedScriptObject)
 							{
 								if (((ITypedScriptObject)scriptObject).isDeprecated(name, parameterTypes))
