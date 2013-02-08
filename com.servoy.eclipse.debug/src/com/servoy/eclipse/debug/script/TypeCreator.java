@@ -1226,14 +1226,18 @@ public class TypeCreator extends TypeCache
 				}
 			}
 
-			// Make sure that deprecated methods are added at the end, when multiple methods match, the non-deprecated ones should first be considered.
+			// Make sure that deprecated and mobile-hidden methods are added at the end, when multiple methods match, the non-deprecated ones should first be considered.
 			Collections.sort(newMembers, new Comparator<Member>()
 			{
 				public int compare(Member member1, Member member2)
 				{
 					if (member1.isDeprecated() == member2.isDeprecated())
 					{
-						return 0;
+						if (member1.getVisibility() == member2.getVisibility())
+						{
+							return 0;
+						}
+						return member1.getVisibility() == Visibility.INTERNAL ? 1 : -1;
 					}
 
 					return member1.isDeprecated() ? 1 : -1;
