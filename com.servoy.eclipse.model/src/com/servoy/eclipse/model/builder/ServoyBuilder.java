@@ -87,6 +87,9 @@ import com.servoy.j2db.IServiceProvider;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.DBValueList;
 import com.servoy.j2db.dataprocessing.IColumnConverter;
+import com.servoy.j2db.dataprocessing.IColumnValidator;
+import com.servoy.j2db.dataprocessing.IPropertyDescriptor;
+import com.servoy.j2db.dataprocessing.IPropertyDescriptorProvider;
 import com.servoy.j2db.dataprocessing.ITypedColumnConverter;
 import com.servoy.j2db.dataprocessing.IUIConverter;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -291,6 +294,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE = _PREFIX + ".labelForElementProblem"; //$NON-NLS-1$
 	public static final String INVALID_MOBILE_MODULE_MARKER_TYPE = _PREFIX + ".invalidMobileModuleProblem"; //$NON-NLS-1$
 	public static final String FORM_DUPLICATE_PART_MARKER_TYPE = _PREFIX + ".formDuplicatePart"; //$NON-NLS-1$
+	public static final String DEPRECATED_SCRIPT_ELEMENT_USAGE = _PREFIX + ".deprecatedScriptElementUsage"; //$NON-NLS-1$
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels"; //$NON-NLS-1$
@@ -329,6 +333,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> DEPRECATED_PROPERTY_USAGE_PROBLEM = new Pair<String, ProblemSeverity>(
 		"deprecatedPropertyUsage", ProblemSeverity.WARNING); //$NON-NLS-1$
 
+	//deprecated script elements usage problems
+	public final static Pair<String, ProblemSeverity> DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM = new Pair<String, ProblemSeverity>(
+		"deprecatedScriptElementUsage", ProblemSeverity.WARNING); //$NON-NLS-1$
+
 	// duplication problems
 	public final static Pair<String, ProblemSeverity> DUPLICATION_UUID_DUPLICATE = new Pair<String, ProblemSeverity>(
 		"duplicationUUIDDuplicate", ProblemSeverity.ERROR); //$NON-NLS-1$
@@ -363,6 +371,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> COLUMN_INCOMPATIBLE_WITH_UUID = new Pair<String, ProblemSeverity>(
 		"ColumnIncompatbleWithUUID", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> COLUMN_LOOKUP_INVALID = new Pair<String, ProblemSeverity>("ColumnLookupInvalid", ProblemSeverity.WARNING); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> COLUMN_VALIDATOR_INVALID = new Pair<String, ProblemSeverity>(
+		"ColumnValidatorInvalid", ProblemSeverity.WARNING); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> COLUMN_CONVERTER_INVALID = new Pair<String, ProblemSeverity>(
+		"ColumnConverterInvalid", ProblemSeverity.WARNING); //$NON-NLS-1$
 
 	// sort problems
 	public final static Pair<String, ProblemSeverity> INVALID_SORT_OPTIONS_RELATION_NOT_FOUND = new Pair<String, ProblemSeverity>(
@@ -1485,6 +1497,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
+	private boolean hasDeletedMarkers = false;
+
 	private void checkServoyProject(final IProject project)
 	{
 		// only log exceptions to max count
@@ -1513,6 +1527,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, INVALID_DATAPROVIDERID);
 		deleteMarkers(project, INVALID_COMMAND_METHOD);
 		deleteMarkers(project, DEPRECATED_PROPERTY_USAGE);
+		deleteMarkers(project, DEPRECATED_SCRIPT_ELEMENT_USAGE);
 		deleteMarkers(project, MULTIPLE_METHODS_ON_SAME_ELEMENT);
 		deleteMarkers(project, UNRESOLVED_RELATION_UUID);
 		deleteMarkers(project, MISSING_DRIVER);
@@ -1521,6 +1536,26 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, MISSING_CONVERTER);
 		deleteMarkers(project, LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE);
 		deleteMarkers(project, FORM_DUPLICATE_PART_MARKER_TYPE);
+
+		try
+		{
+			if (project.getReferencedProjects() != null)
+			{
+				for (IProject referenced : project.getReferencedProjects())
+				{
+					if (referenced.exists() && referenced.isOpen() && referenced.hasNature(ServoyResourcesProject.NATURE_ID))
+					{
+						deleteMarkers(referenced, DEPRECATED_SCRIPT_ELEMENT_USAGE);
+					}
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
+		}
+
+		hasDeletedMarkers = true;
 
 		if (getServoyModel().getDataModelManager() != null)
 		{
@@ -1828,6 +1863,18 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													addMarker(project, mk.getType(), mk.getText(), -1, FORM_PROPERTY_METHOD_NOT_ACCESIBLE,
 														IMarker.PRIORITY_LOW, null, o);
 												}
+												else if (scriptMethod.isDeprecated())
+												{
+													ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(scriptMethod.getDisplayName() + "()");
+													addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
+														IMarker.PRIORITY_NORMAL, null, o);
+												}
+											}
+											else if (scriptMethod.isDeprecated())
+											{
+												ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(scriptMethod.getDisplayName() + "()");
+												addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
+													IMarker.PRIORITY_NORMAL, null, o);
 											}
 										}
 										else if (foundPersist instanceof Form)
@@ -2080,6 +2127,18 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														inForm);
 													addMarker(project, mk.getType(), mk.getText(), -1, FORM_INCOMPATIBLE_ELEMENT_TYPE, IMarker.PRIORITY_NORMAL,
 														null, o);
+												}
+												if (dataProvider instanceof ScriptVariable && ((ScriptVariable)dataProvider).isDeprecated())
+												{
+													ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedVariable.fill(((ScriptVariable)dataProvider).getName());
+													addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
+														IMarker.PRIORITY_NORMAL, null, o);
+												}
+												else if (dataProvider instanceof ScriptCalculation && ((ScriptCalculation)dataProvider).isDeprecated())
+												{
+													ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedCalculation.fill(((ScriptCalculation)dataProvider).getName());
+													addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
+														IMarker.PRIORITY_NORMAL, null, o);
 												}
 											}
 
@@ -3384,6 +3443,18 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										mk.getText()));
 								}
 							}
+							else if (flattenedSolution.getScriptCalculation(vl.getDataProviderID1(), table).isDeprecated())
+							{
+								String customSeverity = getSeverity(DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getLeft(),
+									DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getRight().name(), vl);
+								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
+								{
+									ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedCalculation.fill(flattenedSolution.getScriptCalculation(
+										vl.getDataProviderID1(), table).getName());
+									problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity,
+										DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getRight()), mk.getText()));
+								}
+							}
 						}
 						else if (column.getColumnInfo() != null && column.getColumnInfo().isExcluded())
 						{
@@ -3409,6 +3480,18 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									ServoyMarker mk = MarkerMessages.ValuelistDBDatasourceNotFound.fill(vl.getName(), vl.getDataProviderID2(), table.getName());
 									problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_ENTITY_NOT_FOUND.getRight()),
 										mk.getText()));
+								}
+							}
+							else if (flattenedSolution.getScriptCalculation(vl.getDataProviderID2(), table).isDeprecated())
+							{
+								String customSeverity = getSeverity(DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getLeft(),
+									DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getRight().name(), vl);
+								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
+								{
+									ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedCalculation.fill(flattenedSolution.getScriptCalculation(
+										vl.getDataProviderID2(), table).getName());
+									problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity,
+										DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getRight()), mk.getText()));
 								}
 							}
 						}
@@ -3437,6 +3520,18 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									ServoyMarker mk = MarkerMessages.ValuelistDBDatasourceNotFound.fill(vl.getName(), vl.getDataProviderID3(), table.getName());
 									problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_ENTITY_NOT_FOUND.getRight()),
 										mk.getText()));
+								}
+							}
+							else if (flattenedSolution.getScriptCalculation(vl.getDataProviderID3(), table).isDeprecated())
+							{
+								String customSeverity = getSeverity(DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getLeft(),
+									DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getRight().name(), vl);
+								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
+								{
+									ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedCalculation.fill(flattenedSolution.getScriptCalculation(
+										vl.getDataProviderID3(), table).getName());
+									problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity,
+										DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getRight()), mk.getText()));
 								}
 							}
 						}
@@ -3515,6 +3610,17 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						{
 							ServoyMarker mk = MarkerMessages.ValuelistGlobalMethodNotAccessible.fill(vl.getName());
 							problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_ENTITY_NOT_FOUND.getRight()), mk.getText()));
+						}
+					}
+					else if (scriptMethod.isDeprecated())
+					{
+						String customSeverity = getSeverity(DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getLeft(),
+							DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getRight().name(), vl);
+						if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
+						{
+							ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(scriptMethod.getDisplayName() + "()");
+							problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getRight()),
+								mk.getText()));
 						}
 					}
 				}
@@ -3884,6 +3990,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	private void checkColumns(final IProject project)
 	{
 		deleteMarkers(project, COLUMN_MARKER_TYPE);
+		if (!hasDeletedMarkers) deleteMarkers(project, DEPRECATED_SCRIPT_ELEMENT_USAGE); //deprecation markers are also deleted from checkServoyProject method. we need to not delete markers twice.
 		try
 		{
 			if (project.getReferencedProjects() != null)
@@ -3893,6 +4000,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					if (referenced.exists() && referenced.isOpen() && referenced.hasNature(ServoyResourcesProject.NATURE_ID))
 					{
 						deleteMarkers(referenced, COLUMN_MARKER_TYPE);
+						if (!hasDeletedMarkers) deleteMarkers(referenced, DEPRECATED_SCRIPT_ELEMENT_USAGE);
 					}
 				}
 			}
@@ -3901,6 +4009,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		{
 			ServoyLog.logError(ex);
 		}
+		hasDeletedMarkers = false;
 		String[] array = ApplicationServerSingleton.get().getServerManager().getServerNames(true, true, false, true);
 		for (String server_name : array)
 		{
@@ -3977,49 +4086,143 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_FOREIGN_TYPE_PROBLEM, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
 										"columnName", column.getName());
 								}
-								if (column.getColumnInfo() != null && column.getColumnInfo().getAutoEnterType() == ColumnInfo.LOOKUP_VALUE_AUTO_ENTER)
+								if (column.getColumnInfo() != null)
 								{
-									String lookup = column.getColumnInfo().getLookupValue();
-									if (lookup != null && !"".equals(lookup)) //$NON-NLS-1$
+									if (column.getColumnInfo().getAutoEnterType() == ColumnInfo.LOOKUP_VALUE_AUTO_ENTER)
 									{
-										boolean invalid = false;
-										if (ScopesUtils.isVariableScope(lookup))
+										String lookup = column.getColumnInfo().getLookupValue();
+										if (lookup != null && !"".equals(lookup)) //$NON-NLS-1$
 										{
-											if (getServoyModel().getFlattenedSolution().getGlobalDataProvider(lookup) == null &&
-												getServoyModel().getFlattenedSolution().getScriptMethod(null, lookup) == null)
+											boolean invalid = false;
+											if (ScopesUtils.isVariableScope(lookup))
 											{
-												invalid = true;
-											}
-										}
-										else
-										{
-											Table lookupTable = table;
-											int indx = lookup.lastIndexOf('.');
-											if (indx > 0)
-											{
-												String rel_name = lookup.substring(0, indx);
-												Relation[] relations = getServoyModel().getFlattenedSolution().getRelationSequence(rel_name);
-												if (relations == null)
+												IDataProvider globalDataProvider = getServoyModel().getFlattenedSolution().getGlobalDataProvider(lookup);
+												ScriptMethod scriptMethod = getServoyModel().getFlattenedSolution().getScriptMethod(null, lookup);
+												if (globalDataProvider == null && scriptMethod == null)
 												{
 													invalid = true;
 												}
-												else if (relations.length > 0)
+												else
 												{
-													Relation r = relations[relations.length - 1];
-													lookupTable = r.getForeignTable();
+													if (globalDataProvider != null && globalDataProvider instanceof ScriptVariable)
+													{
+														if (((ScriptVariable)globalDataProvider).isDeprecated())
+														{
+															ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedVariable.fill(((ScriptVariable)globalDataProvider).getName());
+															addMarker(res, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
+																IMarker.PRIORITY_NORMAL, null, null).setAttribute("columnName", column.getName());
+														}
+													}
+													else if (scriptMethod != null && scriptMethod.isDeprecated())
+													{
+														ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(scriptMethod.getDisplayName() +
+															"()");
+														addMarker(res, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
+															IMarker.PRIORITY_NORMAL, null, null).setAttribute("columnName", column.getName());
+													}
 												}
 											}
-											String col = lookup.substring(indx + 1);
-											if (lookupTable != null && lookupTable.getColumn(col) == null)
+											else
 											{
-												invalid = true;
+												Table lookupTable = table;
+												int indx = lookup.lastIndexOf('.');
+												if (indx > 0)
+												{
+													String rel_name = lookup.substring(0, indx);
+													Relation[] relations = getServoyModel().getFlattenedSolution().getRelationSequence(rel_name);
+													if (relations == null)
+													{
+														invalid = true;
+													}
+													else if (relations.length > 0)
+													{
+														Relation r = relations[relations.length - 1];
+														lookupTable = r.getForeignTable();
+													}
+												}
+												String col = lookup.substring(indx + 1);
+												if (lookupTable != null && lookupTable.getColumn(col) == null)
+												{
+													invalid = true;
+												}
+											}
+											if (invalid)
+											{
+												ServoyMarker mk = MarkerMessages.ColumnLookupInvalid.fill(tableName, column.getName());
+												addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_LOOKUP_INVALID, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
+													"columnName", column.getName());
 											}
 										}
-										if (invalid)
+									}
+
+									if (column.getColumnInfo().getValidatorName() != null)
+									{
+										IServiceProvider serviceProvider = ServoyModelFinder.getServiceProvider();
+										if (serviceProvider != null)
 										{
-											ServoyMarker mk = MarkerMessages.ColumnLookupInvalid.fill(tableName, column.getName());
-											addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_LOOKUP_INVALID, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
-												"columnName", column.getName());
+											IColumnValidator validator = serviceProvider.getFoundSetManager().getColumnValidatorManager().getValidator(
+												column.getColumnInfo().getValidatorName());
+											if (validator instanceof IPropertyDescriptorProvider)
+											{
+												for (String key : validator.getDefaultProperties().keySet())
+												{
+													IPropertyDescriptor propertyDescriptor = ((IPropertyDescriptorProvider)validator).getPropertyDescriptor(key);
+													if (propertyDescriptor != null && propertyDescriptor.getType() == IPropertyDescriptor.GLOBAL_METHOD)
+													{
+														Map<String, String> parsedValidatorProperties = ComponentFactory.parseJSonProperties(column.getColumnInfo().getValidatorProperties());
+														String methodName = parsedValidatorProperties.get(key);
+														ScriptMethod scriptMethod = getServoyModel().getFlattenedSolution().getScriptMethod(null, methodName);
+														if (scriptMethod == null)
+														{
+															ServoyMarker mk = MarkerMessages.ColumnValidatorInvalid.fill(tableName, column.getName());
+															addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_VALIDATOR_INVALID, IMarker.PRIORITY_NORMAL,
+																null, null).setAttribute("columnName", column.getName());
+														}
+														else if (scriptMethod.isDeprecated())
+														{
+															ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(scriptMethod.getDisplayName() +
+																"()");
+															addMarker(res, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
+																IMarker.PRIORITY_NORMAL, null, null).setAttribute("columnName", column.getName());
+														}
+													}
+												}
+											}
+										}
+									}
+									if (column.getColumnInfo().getConverterName() != null)
+									{
+										IServiceProvider serviceProvider = ServoyModelFinder.getServiceProvider();
+										if (serviceProvider != null)
+										{
+											IColumnConverter converter = serviceProvider.getFoundSetManager().getColumnConverterManager().getConverter(
+												column.getColumnInfo().getConverterName());
+											if (converter instanceof IPropertyDescriptorProvider)
+											{
+												for (String key : converter.getDefaultProperties().keySet())
+												{
+													IPropertyDescriptor propertyDescriptor = ((IPropertyDescriptorProvider)converter).getPropertyDescriptor(key);
+													if (propertyDescriptor != null && propertyDescriptor.getType() == IPropertyDescriptor.GLOBAL_METHOD)
+													{
+														Map<String, String> parsedConverterProperties = ComponentFactory.parseJSonProperties(column.getColumnInfo().getConverterProperties());
+														String methodName = parsedConverterProperties.get(key);
+														ScriptMethod scriptMethod = getServoyModel().getFlattenedSolution().getScriptMethod(null, methodName);
+														if (scriptMethod == null)
+														{
+															ServoyMarker mk = MarkerMessages.ColumnConverterInvalid.fill(tableName, column.getName());
+															addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_CONVERTER_INVALID, IMarker.PRIORITY_NORMAL,
+																null, null).setAttribute("columnName", column.getName());
+														}
+														else if (scriptMethod.isDeprecated())
+														{
+															ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(scriptMethod.getDisplayName() +
+																"()");
+															addMarker(res, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
+																IMarker.PRIORITY_NORMAL, null, null).setAttribute("columnName", column.getName());
+														}
+													}
+												}
+											}
 										}
 									}
 								}
@@ -4520,6 +4723,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											}
 										}
 									}
+									else if (dataProvider != null && dataProvider instanceof ScriptVariable && ((ScriptVariable)dataProvider).isDeprecated())
+									{
+										mk = MarkerMessages.ElementUsingDeprecatedVariable.fill(((ScriptVariable)dataProvider).getName());
+										errorsFound = true;
+										addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM, IMarker.PRIORITY_NORMAL,
+											null, element);
+									}
 								}
 								else
 								{
@@ -4531,6 +4741,20 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									errorsFound = true;
 									addMarker(project, mk.getType(), mk.getText(), -1, RELATION_ITEM_DATAPROVIDER_NOT_FOUND, IMarker.PRIORITY_NORMAL, null,
 										element);
+								}
+								else
+								{
+									if (dataProvider instanceof ScriptCalculation)
+									{
+										ScriptCalculation calc = (ScriptCalculation)dataProvider;
+										if (calc.isDeprecated())
+										{
+											mk = MarkerMessages.ElementUsingDeprecatedCalculation.fill(calc.getName());
+											errorsFound = true;
+											addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
+												IMarker.PRIORITY_NORMAL, null, element);
+										}
+									}
 								}
 							}
 							if (foreignColumn == null || "".equals(foreignColumn))//$NON-NLS-1$ 

@@ -195,6 +195,7 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_moduleDifferentResourceProject;
 	public static String ErrorWarningPreferencePage_loginFormWithDatasourceInLoginSolution;
 	public static String ErrorWarningPreferencePage_deprecatedPropertyUsageProblem;
+	public static String ErrorWarningPreferencePage_deprecatedScriptElementUsageProblem;
 	public static String ErrorWarningPreferencePage_columnUUIDFlagNotSet;
 	public static String ErrorWarningPreferencePage_columnDatabaseIdentityProblem;
 	public static String ErrorWarningPreferencePage_columnDuplicateNameDPID;

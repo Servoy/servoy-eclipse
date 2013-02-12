@@ -93,7 +93,7 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 	private final String ERROR_WARNING_RESOURCE_PROJECT_PROBLEMS = "Resource project problems"; //$NON-NLS-1$
 	private final String ERROR_WARNING_STYLES_PROBLEMS = "Styles problems"; //$NON-NLS-1$
 	private final String ERROR_WARNING_LOGIN_PROBLEMS = "Login problems"; //$NON-NLS-1$
-	private final String ERROR_WARNING_DEPRECATED_PROPERTIES_USAGE_PROBLEMS = "Deprecated properties usage problems"; //$NON-NLS-1$
+	private final String ERROR_WARNING_DEPRECATED_PROPERTIES_USAGE_PROBLEMS = "Deprecated elements usage problems"; //$NON-NLS-1$
 	private final String ERROR_WARNING_MODULES_PROBLEMS = "Module problems"; //$NON-NLS-1$
 	private final String ERROR_WARNING_FORM_PROBLEMS = "Form problems"; //$NON-NLS-1$
 	private final String ERROR_WARNING_COLUMNS_PROBLEMS = "Column problems"; //$NON-NLS-1$
@@ -390,6 +390,8 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 		{
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.DEPRECATED_PROPERTY_USAGE_PROBLEM,
 				Messages.ErrorWarningPreferencePage_deprecatedPropertyUsageProblem, true));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
+				Messages.ErrorWarningPreferencePage_deprecatedScriptElementUsageProblem, true));
 		}
 		else if (ERROR_WARNING_COLUMNS_PROBLEMS.equals(problemSection))
 		{
