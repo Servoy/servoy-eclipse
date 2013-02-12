@@ -474,6 +474,16 @@ public class MarkerMessages
 	 */
 	public static ServoyMarker ColumnLookupInvalid = new ServoyMarker(
 		"Table \"{0}\" has column \"{1}\" which has an invalid lookup value.", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
+	/**
+	 * The validator value used for a column is invalid. This can happen when the validator points to a global identifier that does not exist.
+	 */
+	public static ServoyMarker ColumnValidatorInvalid = new ServoyMarker(
+		"Table \"{0}\" has column \"{1}\" which has an invalid validator.", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
+	/**
+	 * The converter value used for a column is invalid. This can happen when the converterr points to a global identifier that does not exist.
+	 */
+	public static ServoyMarker ColumnConverterInvalid = new ServoyMarker(
+		"Table \"{0}\" has column \"{1}\" which has an invalid converter.", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker ColumnDuplicateNameDPID = new ServoyMarker(
 		"Table \"{0}\" has column \"{1}\" which has a duplicate name/dataProviderID as column \"{2}\".", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
@@ -541,4 +551,14 @@ public class MarkerMessages
 
 	public static ServoyMarker MissingConverter = new ServoyMarker(
 		"Converter \"{0}\" has been configured on dataprovider \"{1}\" but cannot be found.", ServoyBuilder.MISSING_CONVERTER); //$NON-NLS-1$
+
+	/**
+	 * The element uses deprecated script element. 
+	 */
+	public static ServoyMarker ElementUsingDeprecatedVariable = new ServoyMarker(
+		"Variable \"{0}\" is used while deprecated.", ServoyBuilder.DEPRECATED_SCRIPT_ELEMENT_USAGE); //$NON-NLS-1$
+	public static ServoyMarker ElementUsingDeprecatedFunction = new ServoyMarker(
+		"Function \"{0}\" is used while deprecated.", ServoyBuilder.DEPRECATED_SCRIPT_ELEMENT_USAGE); //$NON-NLS-1$
+	public static ServoyMarker ElementUsingDeprecatedCalculation = new ServoyMarker(
+		"Calculation \"{0}\" is used while deprecated.", ServoyBuilder.DEPRECATED_SCRIPT_ELEMENT_USAGE); //$NON-NLS-1$
 }
