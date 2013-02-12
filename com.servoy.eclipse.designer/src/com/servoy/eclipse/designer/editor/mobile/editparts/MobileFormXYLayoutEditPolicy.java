@@ -150,6 +150,6 @@ public class MobileFormXYLayoutEditPolicy extends XYLayoutEditPolicy
 		Rectangle bounds = feedback.getBounds().getCopy();
 		feedback.translateToAbsolute(bounds);
 
-		feedback.setBounds(new Rectangle(0, bounds.y - 1, MobileFormLayoutManager.MOBILE_FORM_WIDTH, 3));
+		feedback.setBounds(new Rectangle(0, bounds.y - feedback.getParent().getBounds().y, MobileFormLayoutManager.MOBILE_FORM_WIDTH, 3));
 	}
 }

@@ -143,4 +143,14 @@ public class MobileComponentWithTitlePropertySource extends RetargetingPropertyS
 	{
 		return "Component with title";
 	}
+
+	@Override
+	public void setPropertyValue(Object id, Object value)
+	{
+		super.setPropertyValue(id, value);
+		if ("location".equals(id))
+		{
+			super.setPropertyValue("title.location", value);
+		}
+	}
 }

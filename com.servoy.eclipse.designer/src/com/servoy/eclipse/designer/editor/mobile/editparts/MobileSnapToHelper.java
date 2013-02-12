@@ -19,7 +19,6 @@ package com.servoy.eclipse.designer.editor.mobile.editparts;
 
 import java.util.List;
 
-import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.PrecisionRectangle;
 import org.eclipse.draw2d.geometry.Rectangle;
@@ -68,7 +67,9 @@ public class MobileSnapToHelper extends SnapToHelper
 	@Override
 	public int snapRectangle(Request request, int snapOrientation, PrecisionRectangle baseRect, PrecisionRectangle result)
 	{
-		MobileSnapData snapData = calculateSnapping(request, baseRect.x, baseRect.y);
+		container.getFigure().translateToRelative(baseRect);
+
+		MobileSnapData snapData = calculateSnapping(request, baseRect.x, baseRect.y, baseRect.height);
 		// store info for feedback and element creation
 		request.getExtendedData().put(MOBILE_SNAP_DATA, snapData);
 
@@ -81,7 +82,7 @@ public class MobileSnapToHelper extends SnapToHelper
 		return 0;
 	}
 
-	protected MobileSnapData calculateSnapping(Request request, int x, int y)
+	protected MobileSnapData calculateSnapping(Request request, int x, int y, int height)
 	{
 		GraphicalEditPart target = findEditpartAt(MobileFormLayoutManager.MOBILE_FORM_WIDTH / 2, y);
 		if (target == null)
@@ -105,8 +106,14 @@ public class MobileSnapToHelper extends SnapToHelper
 			}
 		}
 
+		GraphicalEditPart snapTarget = findEditpartAt(MobileFormLayoutManager.MOBILE_FORM_WIDTH / 2, y + height);
+		if (snapTarget == null)
+		{
+			snapTarget = target;
+		}
 		// Content
-		return calculateSnappingToContent((GraphicalEditPart)target.getParent(), y);
+		return new MobileSnapData(MobileSnapData.MobileSnapType.ContentItem, 0, snapTarget.getFigure().getBounds().y +
+			snapTarget.getFigure().getBounds().height - y + ((GraphicalEditPart)snapTarget.getParent()).getFigure().getBounds().y);
 	}
 
 	protected MobileSnapData calculateSnappingToHeader(RequestType requestType, GraphicalEditPart target, Dimension size, int x, int y)
@@ -156,24 +163,5 @@ public class MobileSnapToHelper extends SnapToHelper
 
 		// TODO: snap between existing buttons
 		return new MobileSnapData(MobileSnapData.MobileSnapType.FooterItem, 0, 0);
-	}
-
-	protected MobileSnapData calculateSnappingToContent(GraphicalEditPart target, int y)
-	{
-		List<IFigure> children = target.getFigure().getChildren();
-		if (children.size() == 0) return null; // nothing to snap to
-
-		// find the nearest line between 2 figures
-		int snapToY = 0;
-		for (IFigure child : children)
-		{
-			Rectangle bounds = child.getBounds().getCopy();
-			if (Math.abs(snapToY - y) > Math.abs(bounds.y + bounds.height - y))
-			{
-				snapToY = bounds.y + bounds.height;
-			}
-		}
-
-		return new MobileSnapData(MobileSnapData.MobileSnapType.ContentItem, 0, snapToY - 1 - y);
 	}
 }
