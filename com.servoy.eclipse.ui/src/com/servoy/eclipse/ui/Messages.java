@@ -203,6 +203,8 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_columnIncompatibleTypeForSequence;
 	public static String ErrorWarningPreferencePage_columnIncompatbleWithUUID;
 	public static String ErrorWarningPreferencePage_columnLookupInvalid;
+	public static String ErrorWarningPreferencePage_columnValidatorInvalid;
+	public static String ErrorWarningPreferencePage_columnConverterInvalid;
 	public static String ErrorWarningPreferencePage_invalidSortOptionsColumnNotFound;
 	public static String ErrorWarningPreferencePage_invalidSortOptionsRelationDifferentPrimaryDatasource;
 	public static String ErrorWarningPreferencePage_invalidSortOptionsRelationNotFound;
