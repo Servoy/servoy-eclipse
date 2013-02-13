@@ -669,7 +669,7 @@ words.unshift("limit","lines");]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="Boolean" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Boolean" scriptingName="Boolean"/>
+    <object publicName="Boolean" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Boolean" scriptingName="Boolean" servoyMobile="true"/>
     <object publicName="Date" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Date" scriptingName="Date" servoyMobile="true">
       <constructors>
         <constructor name="Date" servoyMobile="true">
@@ -1827,9 +1827,9 @@ application.output(str);]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="Function" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Function" scriptingName="Function">
+    <object publicName="Function" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Function" scriptingName="Function" servoyMobile="true">
       <properties>
-        <property name="constructor">
+        <property name="constructor" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="com.servoy.j2db.documentation.scripting.docs.Function"/>
           <description><![CDATA[Specifies the function that creates an object's prototype.]]></description>
           <summary><![CDATA[Specifies the function that creates an object's prototype.]]></summary>
@@ -1844,7 +1844,7 @@ console.log("theTree.constructor is " + theTree.constructor);]]></sample>
             </link>
           </links>
         </property>
-        <property name="length">
+        <property name="length" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Specifies the number of arguments expected by the function.]]></description>
           <summary><![CDATA[Specifies the number of arguments expected by the function.]]></summary>
@@ -1862,7 +1862,7 @@ console.log("theTree.constructor is " + theTree.constructor);]]></sample>
         </property>
       </properties>
       <functions>
-        <function name="apply">
+        <function name="apply" servoyMobile="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[Applies the method of another object in the context of a different object (the calling object); arguments can be passed as an Array object.]]></description>
@@ -1885,7 +1885,7 @@ var aBook = new book_with_topic("name","author","topic");]]></sample>
             </link>
           </links>
         </function>
-        <function name="bind">
+        <function name="bind" servoyMobile="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[Creates a new function which, when called, itself calls this function in the context of the provided value, with a given sequence of arguments preceding any provided when the new function was called.]]></description>
@@ -1911,7 +1911,7 @@ boundGetX(); // > 81]]></sample>
             </link>
           </links>
         </function>
-        <function name="call">
+        <function name="call" servoyMobile="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[Calls (executes) a method of another object in the context of a different object (the calling object); arguments can be passed as they are.]]></description>
@@ -1933,7 +1933,7 @@ var aBook = new book_with_author("name","author");]]></sample>
             </link>
           </links>
         </function>
-        <function name="toString">
+        <function name="toString" servoyMobile="true">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[Returns a string representing the source code of the function. Overrides the Object.toString method.]]></description>
@@ -2986,7 +2986,7 @@ application.output(n.toString(2)); //displays "111"]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="Object" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Object" scriptingName="Object"/>
+    <object publicName="Object" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Object" scriptingName="Object" servoyMobile="true"/>
     <object publicName="QName" qualifiedName="com.servoy.j2db.documentation.scripting.docs.QName" scriptingName="QName">
       <properties>
         <property name="localName">
