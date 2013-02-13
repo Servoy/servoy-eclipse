@@ -556,9 +556,9 @@ public class MarkerMessages
 	 * The element uses deprecated script element. 
 	 */
 	public static ServoyMarker ElementUsingDeprecatedVariable = new ServoyMarker(
-		"Variable \"{0}\" is used while deprecated.", ServoyBuilder.DEPRECATED_SCRIPT_ELEMENT_USAGE); //$NON-NLS-1$
+		"Variable \"{0}\" in \"{1}\" as \"{2}\" property while deprecated.", ServoyBuilder.DEPRECATED_SCRIPT_ELEMENT_USAGE); //$NON-NLS-1$
 	public static ServoyMarker ElementUsingDeprecatedFunction = new ServoyMarker(
 		"Function \"{0}\" is used in \"{1}\" as \"{2}\" property while deprecated.", ServoyBuilder.DEPRECATED_SCRIPT_ELEMENT_USAGE); //$NON-NLS-1$
 	public static ServoyMarker ElementUsingDeprecatedCalculation = new ServoyMarker(
-		"Calculation \"{0}\" is used while deprecated.", ServoyBuilder.DEPRECATED_SCRIPT_ELEMENT_USAGE); //$NON-NLS-1$
+		"Calculation \"{0}\" is used in \"{1}\" as \"{2}\" property while deprecated.", ServoyBuilder.DEPRECATED_SCRIPT_ELEMENT_USAGE); //$NON-NLS-1$
 }
