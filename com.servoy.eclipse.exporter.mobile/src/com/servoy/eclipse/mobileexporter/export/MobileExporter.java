@@ -505,7 +505,7 @@ public class MobileExporter
 				variableScripting = variableScripting.replace(PROPERTY_VARIABLE_NAME, variable.getName());
 				variableScripting = variableScripting.replace(PROPERTY_VARIABLE_DEFAULT_VALUE,
 					variable.getDefaultValue() == null ? "\"null\"" : JSONObject.quote(variable.getDefaultValue()));
-				variableScripting = variableScripting.replace(PROPERTY_VARIABLE_TYPE, String.valueOf(variable.getTypeID()));
+				variableScripting = variableScripting.replace(PROPERTY_VARIABLE_TYPE, String.valueOf(variable.getVariableType()));
 				variablesScript.append(variableScripting);
 				if (separator != null && variableIterator.hasNext()) variablesScript.append(separator);
 			}
