@@ -669,7 +669,7 @@ words.unshift("limit","lines");]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="Boolean" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Boolean"/>
+    <object publicName="Boolean" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Boolean" scriptingName="Boolean"/>
     <object publicName="Date" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Date" scriptingName="Date">
       <constructors>
         <constructor name="Date">
@@ -1827,7 +1827,7 @@ application.output(str);]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="Function" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Function">
+    <object publicName="Function" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Function" scriptingName="Function">
       <properties>
         <property name="constructor">
           <return type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="com.servoy.j2db.documentation.scripting.docs.Function"/>

@@ -3496,7 +3496,7 @@ if (cancel || !databaseManager.commitTransaction())
         <function name="convertFoundSet">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
-            <argumentType typecode="com.servoy.j2db.dataprocessing.RelatedFoundSet"/>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"><![CDATA[The converted JSFoundset.]]></return>
           <description><![CDATA[Creates a foundset that combines all the records of the specified one-to-many relation seen from the given parent/primary foundset.
@@ -3512,7 +3512,7 @@ forms.orderdetails.controller.showRecords(convertedFoundSet);]]></sample>
             <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
               <description><![CDATA[The JSFoundset to convert.]]></description>
             </parameter>
-            <parameter name="related" type="com.servoy.j2db.dataprocessing.RelatedFoundSet" typecode="com.servoy.j2db.dataprocessing.RelatedFoundSet">
+            <parameter name="related" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
               <description><![CDATA[can be a one-to-many relation object or the name of a one-to-many relation]]></description>
             </parameter>
           </parameters>
@@ -6177,228 +6177,6 @@ Will return false when the form can't be removed, this can happen in certain sit
         </constant>
       </constants>
     </object>
-    <object publicName="JSBaseEvent" qualifiedName="com.servoy.j2db.scripting.JSBaseEvent">
-      <constants>
-        <constant name="ACTION">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onAction event.]]></description>
-          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
-          <sample><![CDATA[if (event.getType() == JSEvent.ACTION) 
-{
-	// its an action event.
-}]]></sample>
-        </constant>
-        <constant name="DATACHANGE">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onDataChange event.]]></description>
-          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
-          <sample><![CDATA[if (event.getType() == JSEvent.DATACHANGE) 
-{
-	// its a data change event
-}]]></sample>
-        </constant>
-        <constant name="DOUBLECLICK">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onDoubleClick event.]]></description>
-          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
-          <sample><![CDATA[if (event.getType() == JSEvent.DOUBLECLICK) 
-{
-	// its a double click event.
-}]]></sample>
-        </constant>
-        <constant name="FOCUSGAINED">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onFocusGained or the forms onElementFocusGained event.]]></description>
-          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
-          <sample><![CDATA[if (event.getType() == JSEvent.FOCUSGAINED) 
-{
-	// its a focus gained event.
-}]]></sample>
-        </constant>
-        <constant name="FOCUSLOST">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onFocusLost or the forms onElementFocusLost event.]]></description>
-          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
-          <sample><![CDATA[if (event.getType() == JSEvent.FOCUSLOST) 
-{
-	// its a focus lost event.
-}]]></sample>
-        </constant>
-        <constant name="FORM">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to a form event (like onShow) or command (like onDeleteRecord)]]></description>
-          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
-          <sample><![CDATA[if (event.getType() == JSEvent.FORM) 
-{
-	// its a form event or command
-}]]></sample>
-        </constant>
-        <constant name="MODIFIER_ALT">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for the ALT modifier that can be returned by JSEvent.getModifiers();]]></description>
-          <summary><![CDATA[Constant for the ALT modifier that can be returned by JSEvent.]]></summary>
-          <sample><![CDATA[//test if the SHIFT modifier is used.
-if (event.getModifiers() & JSEvent.MODIFIER_SHIFT)
-{
-	//do shift action
-}]]></sample>
-        </constant>
-        <constant name="MODIFIER_CTRL">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for the CTRL modifier that can be returned by JSEvent.getModifiers();]]></description>
-          <summary><![CDATA[Constant for the CTRL modifier that can be returned by JSEvent.]]></summary>
-          <sample><![CDATA[//test if the SHIFT modifier is used.
-if (event.getModifiers() & JSEvent.MODIFIER_SHIFT)
-{
-	//do shift action
-}]]></sample>
-        </constant>
-        <constant name="MODIFIER_META">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for the META modifier that can be returned by JSEvent.getModifiers();]]></description>
-          <summary><![CDATA[Constant for the META modifier that can be returned by JSEvent.]]></summary>
-          <sample><![CDATA[//test if the SHIFT modifier is used.
-if (event.getModifiers() & JSEvent.MODIFIER_SHIFT)
-{
-	//do shift action
-}]]></sample>
-        </constant>
-        <constant name="MODIFIER_SHIFT">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Constant for the SHIFT modifier that can be returned by JSEvent.getModifiers();]]></description>
-          <summary><![CDATA[Constant for the SHIFT modifier that can be returned by JSEvent.]]></summary>
-          <sample><![CDATA[//test if the SHIFT modifier is used.
-if (event.getModifiers() & JSEvent.MODIFIER_SHIFT)
-{
-	//do shift action
-}]]></sample>
-        </constant>
-        <constant name="NONE">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Constant returned by JSEvent.getType() if the event is not used in a known event or command.]]></description>
-          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
-          <sample><![CDATA[if (event.getType() == JSEvent.NONE) 
-{
-	// type is not set.
-}]]></sample>
-        </constant>
-        <constant name="RIGHTCLICK">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onRightClick event.]]></description>
-          <summary><![CDATA[Constant returned by JSEvent.]]></summary>
-          <sample><![CDATA[if (event.getType() == JSEvent.RIGHTCLICK) 
-{
-	// its a right click event.
-}]]></sample>
-        </constant>
-      </constants>
-      <properties>
-        <property name="data">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
-          <description><![CDATA[A data object that specific events can set, a user can set data back to the system for events that supports this.]]></description>
-          <summary><![CDATA[A data object that specific events can set, a user can set data back to the system for events that supports this.]]></summary>
-          <sample><![CDATA[// A client design method that handles ondrag
-if (event.getType() == JSEvent.ONDRAG)
-{
-     // the data is the selected elements array
-     var elements = event.data;
-     // only start a client design drag when there is 1 element
-     if (elements.length == 1)
-     {
-     	return true;
-     }
-}
-
-// code for a data drag method
-event.data = "drag me!";
-return DRAGNDROP.COPY;
-
-// code for a data drop method
-var data = event.data;
-elemements[event.getElementName()].setText(data);
-return true;]]></sample>
-        </property>
-      </properties>
-      <functions>
-        <function name="getElementName">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[a String representing the element name.]]></return>
-          <description><![CDATA[returns the name of the element, can be null if the form was the source of the event.]]></description>
-          <summary><![CDATA[returns the name of the element, can be null if the form was the source of the event.]]></summary>
-          <sample><![CDATA[if (event.getElementName() == 'myElement')
-{
-    elements[event.getElementName()].bgcolor = '#ff0000';
-}]]></sample>
-        </function>
-        <function name="getFormName">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[a String representing the form name.]]></return>
-          <description><![CDATA[returns the name of the form the element was placed on.]]></description>
-          <summary><![CDATA[returns the name of the form the element was placed on.]]></summary>
-          <sample><![CDATA[forms[event.getFormName()].myFormMethod();]]></sample>
-        </function>
-        <function name="getModifiers">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[an int which holds the modifiers as a bitset.]]></return>
-          <description><![CDATA[Returns the modifiers of the event, see JSEvent.MODIFIER_XXXX for the modifiers that can be returned.]]></description>
-          <summary><![CDATA[Returns the modifiers of the event, see JSEvent.]]></summary>
-          <sample><![CDATA[//test if the SHIFT modifier is used.
-if (event.getModifiers() & JSEvent.MODIFIER_SHIFT)
-{
-	//do shift action
-}]]></sample>
-        </function>
-        <function name="getSource">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[an Object representing the source of this event.]]></return>
-          <description><![CDATA[returns the source component/element of the event.
-If it has a name the getElementName() is the name of this component.]]></description>
-          <summary><![CDATA[returns the source component/element of the event.]]></summary>
-          <sample><![CDATA[// cast to runtime text field (change to anoter kind of type if you know the type)
-/** @type {RuntimeTextField} */
-var source = event.getSource();
-var sourceDataProvider = source.getDataProviderID();]]></sample>
-        </function>
-        <function name="getTimestamp">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Date" typecode="java.util.Date"><![CDATA[a Date when this event happened.]]></return>
-          <description><![CDATA[Returns the time the event occurred.]]></description>
-          <summary><![CDATA[Returns the time the event occurred.]]></summary>
-          <sample><![CDATA[event.getTimestamp();]]></sample>
-        </function>
-        <function name="getType">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[a String representing the type of this event.]]></return>
-          <description><![CDATA[returns the event type see the JSEvents constants what it can return.
-Plugins can create events with there own types.]]></description>
-          <summary><![CDATA[returns the event type see the JSEvents constants what it can return.]]></summary>
-          <sample><![CDATA[if (event.getType() == JSEvent.ACTION) 
-{
-	// its an action event.
-}]]></sample>
-        </function>
-        <function name="getX">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[an int representing the X position.]]></return>
-          <description><![CDATA[Returns the x position of the event, relative to the component that fired it, if applicable.
-For example drag'n'drop events will set the x,y positions.]]></description>
-          <summary><![CDATA[Returns the x position of the event, relative to the component that fired it, if applicable.]]></summary>
-          <sample><![CDATA[var x = event.getX();
-var xPrevious = previousEvent.getX();
-var movedXPixels = x -xPrevious;]]></sample>
-        </function>
-        <function name="getY">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[an int representing the Y position.]]></return>
-          <description><![CDATA[Returns the y position of the event, relative to the component that fired it, if applicable.
-For example drag'n'drop events will set the x,y positions.]]></description>
-          <summary><![CDATA[Returns the y position of the event, relative to the component that fired it, if applicable.]]></summary>
-          <sample><![CDATA[var y = event.getY();
-var yPrevious = previousEvent.getY();
-var movedYPixels = y -yPrevious;]]></sample>
-        </function>
-      </functions>
-    </object>
     <object extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSBean" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSBean">
       <properties>
         <property name="anchors">
@@ -6692,7 +6470,7 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSButton" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSButton">
+    <object extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSButton" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSButton" scriptingName="JSButton">
       <properties>
         <property name="anchors">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -8454,7 +8232,7 @@ if (server)
         </function>
       </functions>
     </object>
-    <object publicName="JSComponent" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSComponent">
+    <object publicName="JSComponent" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSComponent" scriptingName="JSComponent">
       <properties>
         <property name="anchors">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -8733,7 +8511,7 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="JSDNDEvent" qualifiedName="com.servoy.j2db.dnd.JSDNDEvent">
+    <object publicName="JSDNDEvent" qualifiedName="com.servoy.j2db.dnd.JSDNDEvent" scriptingName="JSDNDEvent">
       <constants>
         <constant name="ACTION">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -9018,7 +8796,7 @@ var movedYPixels = y -yPrevious;]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="JSDataSet" qualifiedName="com.servoy.j2db.dataprocessing.JSDataSet">
+    <object publicName="JSDataSet" qualifiedName="com.servoy.j2db.dataprocessing.JSDataSet" scriptingName="JSDataSet">
       <properties>
         <property name="rowIndex">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -9911,7 +9689,7 @@ for (var i = 0; i < allMethods; i++)
         </function>
       </functions>
     </object>
-    <object publicName="JSEvent" qualifiedName="com.servoy.j2db.scripting.JSEvent">
+    <object publicName="JSEvent" qualifiedName="com.servoy.j2db.scripting.JSEvent" scriptingName="JSEvent">
       <constants>
         <constant name="ACTION">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -10133,7 +9911,7 @@ var movedYPixels = y -yPrevious;]]></sample>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSField" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSField">
+    <object extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSField" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSField" scriptingName="JSField">
       <constants>
         <constant name="CALENDAR">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -10839,7 +10617,7 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="JSForm" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSForm">
+    <object publicName="JSForm" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSForm" scriptingName="JSForm">
       <constants>
         <constant name="DEFAULT_ENCAPSULATION">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -13807,7 +13585,7 @@ forms['newForm1'].controller.recreateUI();]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="JSFoundSet" qualifiedName="com.servoy.j2db.dataprocessing.FoundSet">
+    <object publicName="JSFoundSet" qualifiedName="com.servoy.j2db.dataprocessing.FoundSet" scriptingName="JSFoundSet">
       <properties>
         <property name="alldataproviders" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"/>
@@ -13908,7 +13686,7 @@ var ok = %%prefix%%foundset.addFoundSetFilterParam('companyname', '#^||=', 'serv
         </function>
         <function name="deleteAllRecords">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number"><![CDATA[boolean true if all records could be deleted.]]></return>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[boolean true if all records could be deleted.]]></return>
           <description><![CDATA[Delete all records in foundset, resulting in empty foundset.]]></description>
           <summary><![CDATA[Delete all records in foundset, resulting in empty foundset.]]></summary>
           <sample><![CDATA[var success = %%prefix%%foundset.deleteAllRecords();]]></sample>
@@ -14038,10 +13816,10 @@ if (count == 0)
         </function>
         <function name="duplicateRecord">
           <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.Number"/>
+            <argumentType typecode="java.lang.Boolean"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[0 if record was not created or the record index if it was created.]]></return>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[0 if record was not created or the record index if it was created.]]></return>
           <description><![CDATA[Duplicate record at index in the foundset, change selection to new record.]]></description>
           <summary><![CDATA[Duplicate record at index in the foundset, change selection to new record.]]></summary>
           <sample><![CDATA[%%prefix%%foundset.duplicateRecord();
@@ -14050,10 +13828,10 @@ if (count == 0)
 //duplicates the record (record index 3), adds on top and selects the record
 %%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
           <parameters>
-            <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+            <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
               <description><![CDATA[The index of the record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
             </parameter>
-            <parameter name="onTop" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+            <parameter name="onTop" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
               <description><![CDATA[when true the new record is added as the topmost record.]]></description>
             </parameter>
           </parameters>
@@ -15185,626 +14963,7 @@ while(fsUpdater.next())
         </function>
       </functions>
     </object>
-    <object publicName="JSGraphicalComponent" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSGraphicalComponent">
-      <properties>
-        <property name="anchors">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Enables a component to stick to a specific side of form and/or to 
-grow or shrink when a window is resized. 
-
-If opposite anchors are activated then the component with grow or 
-shrink with the window. For example if Top and Bottom are activated, 
-then the component will grow/shrink when the window is vertically 
-resized. If Left and Right are activated then the component
-will grow/shrink when the window is horizontally resized. 
-
-If opposite anchors are not activated, then the component will 
-keep a constant distance from the sides of the window which
-correspond to the activated anchors.]]></description>
-          <summary><![CDATA[Enables a component to stick to a specific side of form and/or to 
-grow or shrink when a window is resized.]]></summary>
-          <sample><![CDATA[var form = solutionModel.newForm('mediaForm', 'db:/example_data/parent_table', null, false, 400, 300);
-var strechAllDirectionsLabel = form.newLabel('Strech all directions', 10, 10, 380, 280);
-strechAllDirectionsLabel.background = 'red';
-strechAllDirectionsLabel.anchors = SM_ANCHOR.ALL;	
-var strechVerticallyLabel = form.newLabel('Strech vertically', 10, 10, 190, 280);
-strechVerticallyLabel.background = 'green';
-strechVerticallyLabel.anchors = SM_ANCHOR.WEST | SM_ANCHOR.NORTH | SM_ANCHOR.SOUTH;
-var strechHorizontallyLabel = form.newLabel('Strech horizontally', 10, 10, 380, 140);
-strechHorizontallyLabel.background = 'blue';
-strechHorizontallyLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST | SM_ANCHOR.EAST;
-var stickToTopLeftCornerLabel = form.newLabel('Stick to top-left corner', 10, 10, 200, 100);
-stickToTopLeftCornerLabel.background = 'orange';
-stickToTopLeftCornerLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST; // This is equivalent to SM_ANCHOR.DEFAULT 
-var stickToBottomRightCornerLabel = form.newLabel('Stick to bottom-right corner', 190, 190, 200, 100);
-stickToBottomRightCornerLabel.background = 'pink';
-stickToBottomRightCornerLabel.anchors = SM_ANCHOR.SOUTH | SM_ANCHOR.EAST;]]></sample>
-        </property>
-        <property name="background">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[The background color of the component.]]></description>
-          <summary><![CDATA[The background color of the component.]]></summary>
-          <sample><![CDATA[// This property can be used on all types of components.
-// Here it is illustrated only for labels and fields.
-var greenLabel = form.newLabel('Green',10,10,100,50);
-greenLabel.background = 'green'; // Use generic names for colors.	
-var redField = form.newField('parent_table_text',JSField.TEXT_FIELD,10,110,100,30);
-redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
-        </property>
-        <property name="borderType">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[The type, color and style of border of the component.]]></description>
-          <summary><![CDATA[The type, color and style of border of the component.]]></summary>
-          <sample><![CDATA[//HINT: To know exactly the notation of this property set it in the designer and then read it once out through the solution model.
-var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
-        </property>
-        <property name="dataProviderID">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description/>
-          <sample><![CDATA[// Normally the dataprovider is specified when a component is created.
-var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
-// But it can be modified later if needed.
-field.dataProviderID = 'parent_table_id';]]></sample>
-        </property>
-        <property name="displaysTags">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
-          <description><![CDATA[Flag that enables or disables merging of data inside components using tags (placeholders).
-Tags (or placeholders) are words surrounded by %% on each side. There are data tags and
-standard tags. Data tags consist in names of dataproviders surrounded by %%. Standard tags
-are a set of predefined tags that are made available by the system.
-
-See the "Merging data" section for more details about tags.
-
-The default value of this flag is "false", that is merging of data is disabled by default.]]></description>
-          <summary><![CDATA[Flag that enables or disables merging of data inside components using tags (placeholders).]]></summary>
-          <sample><![CDATA[var label = form.newLabel('You are viewing record no. %%parent_table_id%%. You are running on server %%serverURL%%.', 
-					10, 10, 600, 100);
-label.displaysTags = true;]]></sample>
-        </property>
-        <property name="enabled">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
-          <description><![CDATA[The enable state of the component, default true.]]></description>
-          <summary><![CDATA[The enable state of the component, default true.]]></summary>
-          <sample><![CDATA[var form = solutionModel.newForm('printForm', 'db:/example_data/parent_table', null, false, 400, 300);
-var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-field.enabled = false;]]></sample>
-        </property>
-        <property name="fontType">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[The font type of the component.]]></description>
-          <summary><![CDATA[The font type of the component.]]></summary>
-          <sample><![CDATA[var label = form.newLabel('Text here', 10, 50, 100, 20);
-label.fontType = solutionModel.createFont('Times New Roman',1,14);]]></sample>
-        </property>
-        <property name="foreground">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[The foreground color of the component.]]></description>
-          <summary><![CDATA[The foreground color of the component.]]></summary>
-          <sample><![CDATA[// This property can be used on all types of components.
-// Here it is illustrated only for labels and fields.
-var labelWithBlueText = form.newLabel('Blue text', 10, 10, 100, 30);
-labelWithBlueText.foreground = 'blue'; // Use generic names for colors.
-var fieldWithYellowText = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 50, 100, 20);
-fieldWithYellowText.foreground = '#FFFF00'; // Use RGB codes for colors.]]></sample>
-        </property>
-        <property name="formIndex">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[The Z index of this component. If two components overlap,
-then the component with higher Z index is displayed above
-the component with lower Z index.]]></description>
-          <summary><![CDATA[The Z index of this component.]]></summary>
-          <sample><![CDATA[var labelBelow = form.newLabel('Green', 10, 10, 100, 50);
-labelBelow.background = 'green';	
-labelBelow.formIndex = 10;
-var fieldAbove = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 30);
-fieldAbove.background = '#FF0000';
-fieldAbove.formIndex = 20;]]></sample>
-        </property>
-        <property name="format">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[The format that should be applied when displaying data(using dataProviderID) in the label/button.
-Some examples are "#%", "dd-MM-yyyy", "MM-dd-yyyy", etc.]]></description>
-          <summary><![CDATA[The format that should be applied when displaying data(using dataProviderID) in the label/button.]]></summary>
-          <sample><![CDATA[var label = form.newLabel('', 10, 10, 100, 100);
-label.format = '$#.00';]]></sample>
-        </property>
-        <property name="groupID">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[A String representing a group ID for this component. If several
-components have the same group ID then they belong to the same
-group of components. Using the group itself, all components can
-be disabled/enabled or made invisible/visible.
-The group id should be a javascript compatible identifier to allow access of the group in scripting.]]></description>
-          <summary><![CDATA[A String representing a group ID for this component.]]></summary>
-          <sample><![CDATA[var form = solutionModel.newForm('someForm', 'db:/example_data/parent_table', null, false, 400, 300);
-var label = form.newLabel('Green', 10, 10, 100, 20);
-var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
-label.groupID = 'someGroup';
-field.groupID = 'someGroup';	
-forms['someForm'].elements.someGroup.enabled = false;]]></sample>
-        </property>
-        <property name="height">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[The height in pixels of the component.]]></description>
-          <summary><![CDATA[The height in pixels of the component.]]></summary>
-          <sample><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-application.output('original width: ' + field.width);
-application.output('original height: ' + field.height);
-field.width = 200;
-field.height = 100;
-application.output('modified width: ' + field.width);
-application.output('modified height: ' + field.height);]]></sample>
-        </property>
-        <property name="horizontalAlignment">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Horizontal alignment of the text inside the component. Can be one of
-LEFT, CENTER or RIGHT.
-
-Note that this property does not refer to the horizontal alignment
-of the component inside the form.]]></description>
-          <summary><![CDATA[Horizontal alignment of the text inside the component.]]></summary>
-          <sample><![CDATA[var leftAlignedLabel = form.newLabel('LEFT', 10, 10, 300, 20);
-leftAlignedLabel.horizontalAlignment = SM_ALIGNMENT.LEFT;
-var hCenteredLabel = form.newLabel('CENTER', 10, 40, 300, 20);
-hCenteredLabel.horizontalAlignment = SM_ALIGNMENT.CENTER;
-var rightAlignedLabel = form.newLabel('RIGHT', 10, 70, 300, 20);
-rightAlignedLabel.horizontalAlignment = SM_ALIGNMENT.RIGHT;]]></sample>
-        </property>
-        <property name="imageMedia">
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSMedia" typecode="com.servoy.j2db.scripting.solutionmodel.JSMedia"/>
-          <description><![CDATA[The image Media object that should be displayed inside the component.]]></description>
-          <summary><![CDATA[The image Media object that should be displayed inside the component.]]></summary>
-          <sample><![CDATA[var ballBytes = plugins.file.readFile('d:/ball.jpg');
-var ballImage = solutionModel.newMedia('ball.jpg', ballBytes);
-var label = form.newLabel('', 10, 10, 100, 100);
-label.imageMedia = ballImage;]]></sample>
-        </property>
-        <property name="labelFor">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Some components can be set to be labels of other components. This is useful in
-two situations. In table view mode it is used for constructing the header of the
-table. In record view mode, by setting mnemonics on the label, keyboard shortcuts
-can be used to set the focus to fields.]]></description>
-          <summary><![CDATA[Some components can be set to be labels of other components.]]></summary>
-          <sample><![CDATA[var labelOne = form.newLabel('Label One', 10, 10, 100, 20);
-var fieldOne = form.newField('parent_table_id', JSField.TEXT_FIELD, 120, 10, 100, 20);
-fieldOne.name = 'fieldOne';
-labelOne.labelFor = 'fieldOne';
-labelOne.mnemonic = 'O';]]></sample>
-        </property>
-        <property name="margin">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[The margins of the component. They are specified in this order, 
-separated by commas: top, left, bottom, right.]]></description>
-          <summary><![CDATA[The margins of the component.]]></summary>
-          <sample><![CDATA[var label = form.newLabel('Label', 10, 10, 150, 150);
-label.background = 'yellow';
-label.margin = '10,20,30,40';]]></sample>
-        </property>
-        <property name="mediaOptions">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Options to scale the image Media object that is displayed inside the component.
-Can be set to one or a combination of CROP, REDUCE, ENLARGE and KEEPASPECT.
-
-REDUCE will scale down the image if the component is smaller than the image.
-REDUCE combined with KEEPASPECT will reduce the image, but keep its aspect ratio. 
-This is useful when the component has other proportions than the image.
-
-ENLARGE will scale up the image if the component is larger than the image.
-ENLARGE combined with KEEPASPECT will scale up the image while keeping its aspect ratio.
-
-CROP will leave the image at its original size. If the component is smaller than
-the image this will result in only a part of the image showing up.]]></description>
-          <summary><![CDATA[Options to scale the image Media object that is displayed inside the component.]]></summary>
-          <sample><![CDATA[// Load two images, a big one and a small one.
-var bigBytes = plugins.file.readFile('d:/big.jpg');
-var bigImage = solutionModel.newMedia('big.jpg', bigBytes);
-var smallBytes = plugins.file.readFile('d:/small.jpg');
-var smallImage = solutionModel.newMedia('small.jpg', smallBytes);
-// Put the big image in several small labels, with different media options.
-var smallLabelWithBigImageReduceKeepAspect = form.newLabel('', 10, 10, 50, 50);
-smallLabelWithBigImageReduceKeepAspect.imageMedia = bigImage;
-smallLabelWithBigImageReduceKeepAspect.background = 'yellow';	
-smallLabelWithBigImageReduceKeepAspect.mediaOptions = SM_MEDIAOPTION.REDUCE | SM_MEDIAOPTION.KEEPASPECT;
-var smallLabelWithBigImageReduceNoAspect = form.newLabel('', 70, 10, 50, 50);
-smallLabelWithBigImageReduceNoAspect.imageMedia = bigImage;
-smallLabelWithBigImageReduceNoAspect.background = 'yellow';	
-smallLabelWithBigImageReduceNoAspect.mediaOptions = SM_MEDIAOPTION.REDUCE;
-var smallLabelWithBigImageCrop = form.newLabel('', 130, 10, 50, 50);
-smallLabelWithBigImageCrop.imageMedia = bigImage;
-smallLabelWithBigImageCrop.background = 'yellow';	
-smallLabelWithBigImageCrop.mediaOptions = SM_MEDIAOPTION.CROP;
-// Put the small image in several big labels, with different media options.
-var bigLabelWithSmallImageEnlargeKeepAspect = form.newLabel('', 10, 70, 200, 100);
-bigLabelWithSmallImageEnlargeKeepAspect.imageMedia = smallImage;
-bigLabelWithSmallImageEnlargeKeepAspect.background = 'yellow';
-bigLabelWithSmallImageEnlargeKeepAspect.mediaOptions = SM_MEDIAOPTION.ENLARGE | SM_MEDIAOPTION.KEEPASPECT;
-var bigLabelWithSmallImageEnlargeNoAspect = form.newLabel('', 10, 180, 200, 100);
-bigLabelWithSmallImageEnlargeNoAspect.imageMedia = smallImage;
-bigLabelWithSmallImageEnlargeNoAspect.background = 'yellow';
-bigLabelWithSmallImageEnlargeNoAspect.mediaOptions = SM_MEDIAOPTION.ENLARGE;
-var bigLabelWithSmallImageCrop = form.newLabel('', 10, 290, 200, 100);
-bigLabelWithSmallImageCrop.imageMedia = smallImage;
-bigLabelWithSmallImageCrop.background = 'yellow';
-bigLabelWithSmallImageCrop.mediaOptions = SM_MEDIAOPTION.CROP; // This does not do any cropping actually if the label is larger than the image.]]></sample>
-        </property>
-        <property name="mnemonic">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[The keyboard shortcut that activates this component. A letter must be specified, 
-and the actual shortcut will be combination of ALT + the specified letter.
-
-This property can be used in two ways. Normally the keyboard shortcut activates 
-the onClick event of the component. But if the "labelFor" property is set for the
-component, then the keyboard shortcut will move the focus to the component whose
-label this component is.]]></description>
-          <summary><![CDATA[The keyboard shortcut that activates this component.]]></summary>
-          <sample><![CDATA[var m = form.newMethod('function onClick() { application.output("I was clicked."); }');
-var btn = form.newButton('I am a button', 10, 40, 200, 20, m);
-btn.mnemonic = 'B'; // When ALT-B is pressed the mouse will respond as if clicked.
-var labelOne = form.newLabel('Label One', 10, 10, 100, 20);
-var fieldOne = form.newField('parent_table_id', JSField.TEXT_FIELD, 120, 10, 100, 20);
-fieldOne.name = 'fieldOne';
-labelOne.labelFor = 'fieldOne';
-labelOne.mnemonic = 'O'; // When ALT-O is pressed the focus will move to fieldOne.]]></sample>
-        </property>
-        <property name="name">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[The name of the component. Through this name it can also accessed in methods.]]></description>
-          <summary><![CDATA[The name of the component.]]></summary>
-          <sample><![CDATA[var form = solutionModel.newForm('someForm', 'db:/example_data/parent_table', null, false, 620, 300);
-var label = form.newLabel('Label', 10, 10, 150, 150);
-label.name = 'myLabel'; // Give a name to the component.
-forms['someForm'].controller.show()
-// Now use the name to access the component.
-forms['someForm'].elements['myLabel'].text = 'Updated text';]]></sample>
-        </property>
-        <property name="onAction">
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"/>
-          <description><![CDATA[The method that is executed when the component is clicked.]]></description>
-          <summary><![CDATA[The method that is executed when the component is clicked.]]></summary>
-          <sample><![CDATA[var doNothingMethod = form.newMethod('function doNothing() { application.output("Doing nothing."); }');
-var onClickMethod = form.newMethod('function onClick(event) { application.output("I was clicked at " + event.getTimestamp()); }');
-var onDoubleClickMethod = form.newMethod('function onDoubleClick(event) { application.output("I was double-clicked at " + event.getTimestamp()); }');
-var onRightClickMethod = form.newMethod('function onRightClick(event) { application.output("I was right-clicked at " + event.getTimestamp()); }');
-// At creation the button has the 'doNothing' method as onClick handler, but we'll change that later.
-var btn = form.newButton('I am a button', 10, 40, 200, 20, doNothingMethod);
-btn.onAction = onClickMethod;
-btn.onDoubleClick = onDoubleClickMethod;
-btn.onRightClick = onRightClickMethod;]]></sample>
-        </property>
-        <property name="onDoubleClick">
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"/>
-          <description><![CDATA[The method that is executed when the component is double clicked.]]></description>
-          <summary><![CDATA[The method that is executed when the component is double clicked.]]></summary>
-          <sample><![CDATA[var doNothingMethod = form.newMethod('function doNothing() { application.output("Doing nothing."); }');
-var onClickMethod = form.newMethod('function onClick(event) { application.output("I was clicked at " + event.getTimestamp()); }');
-var onDoubleClickMethod = form.newMethod('function onDoubleClick(event) { application.output("I was double-clicked at " + event.getTimestamp()); }');
-var onRightClickMethod = form.newMethod('function onRightClick(event) { application.output("I was right-clicked at " + event.getTimestamp()); }');
-// At creation the button has the 'doNothing' method as onClick handler, but we'll change that later.
-var btn = form.newButton('I am a button', 10, 40, 200, 20, doNothingMethod);
-btn.onAction = onClickMethod;
-btn.onDoubleClick = onDoubleClickMethod;
-btn.onRightClick = onRightClickMethod;]]></sample>
-        </property>
-        <property name="onRender">
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"/>
-          <description><![CDATA[The method that is executed when the component is rendered.]]></description>
-          <summary><![CDATA[The method that is executed when the component is rendered.]]></summary>
-          <sample><![CDATA[label.onRender = form.newMethod('function onRender(event) { event.getElement().bgcolor = \'#00ff00\' }');]]></sample>
-        </property>
-        <property name="onRightClick">
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"/>
-          <description><![CDATA[The method that is executed when the component is right clicked.]]></description>
-          <summary><![CDATA[The method that is executed when the component is right clicked.]]></summary>
-          <sample><![CDATA[var doNothingMethod = form.newMethod('function doNothing() { application.output("Doing nothing."); }');
-var onClickMethod = form.newMethod('function onClick(event) { application.output("I was clicked at " + event.getTimestamp()); }');
-var onDoubleClickMethod = form.newMethod('function onDoubleClick(event) { application.output("I was double-clicked at " + event.getTimestamp()); }');
-var onRightClickMethod = form.newMethod('function onRightClick(event) { application.output("I was right-clicked at " + event.getTimestamp()); }');
-// At creation the button has the 'doNothing' method as onClick handler, but we'll change that later.
-var btn = form.newButton('I am a button', 10, 40, 200, 20, doNothingMethod);
-btn.onAction = onClickMethod;
-btn.onDoubleClick = onDoubleClickMethod;
-btn.onRightClick = onRightClickMethod;]]></sample>
-        </property>
-        <property name="printSliding">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Enables an element to resize based on its content and/or move when printing.
-The component can move horizontally or vertically and can grow or shrink in 
-height and width, based on its content and the content of neighboring 
-components.]]></description>
-          <summary><![CDATA[Enables an element to resize based on its content and/or move when printing.]]></summary>
-          <sample><![CDATA[var form = solutionModel.newForm('printForm', 'db:/example_data/parent_table', null, false, 400, 300);
-var slidingLabel = form.newLabel('Some long text here', 10, 10, 5, 5);
-slidingLabel.printSliding = SM_PRINT_SLIDING.GROW_HEIGHT | SM_PRINT_SLIDING.GROW_WIDTH;
-slidingLabel.background = 'gray';
-forms['printForm'].controller.showPrintPreview();]]></sample>
-        </property>
-        <property name="printable">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
-          <description><![CDATA[Flag that tells if the component should be printed or not when the form is printed.
-
-By default components are printable.]]></description>
-          <summary><![CDATA[Flag that tells if the component should be printed or not when the form is printed.]]></summary>
-          <sample><![CDATA[var form = solutionModel.newForm('printForm', 'db:/example_data/parent_table', null, false, 400, 300);
-var printedField = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-var notPrintedField = form.newField('parent_table_id', JSField.TEXT_FIELD, 10, 40, 100, 20);
-notPrintedField.printable = false; // This field won't show up in print preview and won't be printed.
-forms['printForm'].controller.showPrintPreview()]]></sample>
-        </property>
-        <property name="rolloverCursor">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[The cursor that is shown as the mouse is rolled over the component.
-Possible options are DEFAULT and HAND.]]></description>
-          <summary><![CDATA[The cursor that is shown as the mouse is rolled over the component.]]></summary>
-          <sample><![CDATA[var label = form.newLabel('Move the mouse over me', 10, 10, 200, 200);
-label.rolloverCursor = SM_CURSOR.HAND_CURSOR;]]></sample>
-        </property>
-        <property name="rolloverImageMedia">
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSMedia" typecode="com.servoy.j2db.scripting.solutionmodel.JSMedia"/>
-          <description><![CDATA[The roll over image Media object used. It will only work if a property image is also used.
-When the mouse is moved over the component, this image Media will be displayed. 
-When the mouse is moved out of the component, whatever text or image was being initially 
-displayed will be restored.]]></description>
-          <summary><![CDATA[The roll over image Media object used.]]></summary>
-          <sample><![CDATA[var ballBytes = plugins.file.readFile('d:/ball.jpg');
-var ballImage = solutionModel.newMedia('ball.jpg', ballBytes);
-var mapBytes = plugins.file.readFile('d:/map.jpg');
-var mapImage = solutionModel.newMedia('map.jpg', mapBytes);
-var label = form.newLabel('', 10, 10, 200, 200);
-label.imageMedia = mapImage;
-label.rolloverImageMedia = ballImage;]]></sample>
-        </property>
-        <property name="rotation">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[The rotation of the element. You can choose 0, 90, 180, or 270 and the label is rotated accordingly.  
-This property also applies to buttons and images.]]></description>
-          <summary><![CDATA[The rotation of the element.]]></summary>
-          <sample><![CDATA[var m = form.newMethod('function onClick() { application.output("I was clicked."); }');
-var label = form.newLabel('I am a label', 10, 10, 200, 200, m);
-label.rotation = 90;
-var btn = form.newButton('And I am a button', 10, 220, 200, 20, m);
-btn.rotation = 180;]]></sample>
-        </property>
-        <property name="showClick">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
-          <description><![CDATA[When set, the element will show the clicked state when selected. 
-Applies to labels and buttons and images only.]]></description>
-          <summary><![CDATA[When set, the element will show the clicked state when selected.]]></summary>
-          <sample><![CDATA[// Create a form method.
-var m = form.newMethod('function onClick() { application.output("I was clicked."); }');
-// Create a label with the method attached to its onClick event.
-var label = form.newLabel('I am a label', 10, 10, 200, 20, m);
-// By default the label does not visually react to clicks, but we can enable this.
-// Basically the label will now behave as a button does.
-label.showClick = true;
-// Create a button with the same method attached to its onClick event.
-var btn = form.newButton('And I am a button', 10, 40, 200, 20, m);
-// By default the button visually reacts to onClick, but we can disable this.
-// Then the button will behave like a label does.
-btn.showClick = false;]]></sample>
-        </property>
-        <property name="showFocus">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
-          <description><![CDATA[When set the text of an element will showfocus when selected.
-Applies to labels and buttons only. 
-The text property for the element MUST be filled in first. 
-
-NOTE: The TAB key may also be used to select the element, depending 
-on the operating system being used and the selected LAF.]]></description>
-          <summary><![CDATA[When set the text of an element will showfocus when selected.]]></summary>
-          <sample><![CDATA[var m = form.newMethod('function onClick() { application.output("I was clicked."); }');
-var label = form.newLabel('I am a label', 10, 10, 200, 20, m);
-label.showFocus = false;
-var btn = form.newButton('And I am a button', 10, 40, 200, 20, m);
-btn.showFocus = false;]]></sample>
-        </property>
-        <property name="styleClass">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[The name of the style class that should be applied to this component.
-
-When defining style classes for specific component types, their names
-must be prefixed according to the type of the component. For example 
-in order to define a class names 'fancy' for fields, in the style
-definition the class must be named 'field.fancy'. If it would be 
-intended for labels, then it would be named 'label.fancy'. When specifying
-the class name for a component, the prefix is dropped however. Thus the
-field or the label will have its styleClass property set to 'fancy' only.]]></description>
-          <summary><![CDATA[The name of the style class that should be applied to this component.]]></summary>
-          <sample><![CDATA[var form = solutionModel.newForm('printForm', 'db:/example_data/parent_table', null, false, 400, 300);
-var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-var style = solutionModel.newStyle('myStyle','field.fancy { background-color: yellow; }');
-form.styleName = 'myStyle'; // First set the style on the form.
-field.styleClass = 'fancy'; // Then set the style class on the field.]]></sample>
-        </property>
-        <property name="tabSeq">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[An index that specifies the position of the component in the tab sequence. The components 
-are put into the tab sequence in increasing order of this property. A value of 0 means
-to use the default mechanism of building the tab sequence (based on their location on the form).
-A value of -2 means to remove the component from the tab sequence.]]></description>
-          <summary><![CDATA[An index that specifies the position of the component in the tab sequence.]]></summary>
-          <sample><![CDATA[// Create three fields. Based on how they are placed, by default they will come one
-// after another in the tab sequence.
-var fieldOne = form.newField('parent_table_id', JSField.TEXT_FIELD, 10, 10, 100, 20);
-var fieldTwo = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
-var fieldThree = form.newField('parent_table_id', JSField.TEXT_FIELD, 10, 70, 100, 20);
-// Set the third field come before the first in the tab sequence, and remove the 
-// second field from the tab sequence.
-fieldOne.tabSeq = 2;
-fieldTwo.tabSeq = SM_DEFAULTS.IGNORE;
-fieldThree.tabSeq = 1;]]></sample>
-        </property>
-        <property name="text">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[The text that is displayed inside the component.]]></description>
-          <summary><![CDATA[The text that is displayed inside the component.]]></summary>
-          <sample><![CDATA[// In general the text is specified when creating the component.
-var label = form.newLabel('Initial text', 10, 10, 100, 20);
-// But it can be changed later if needed.
-label.text = 'Changed text';]]></sample>
-        </property>
-        <property name="toolTipText">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[The text displayed when hovering over the component with a mouse cursor.
-
-NOTE:
-HTML should be used for multi-line tooltips; you can also use any
-valid HTML tags to format tooltip text. For example: 
-<html>This includes<b>bolded text</b> and 
-<font color='blue'>BLUE</font> text as well.</html>]]></description>
-          <summary><![CDATA[The text displayed when hovering over the component with a mouse cursor.]]></summary>
-          <sample><![CDATA[var label = form.newLabel('Stop the mouse over me!', 10, 10, 200, 20);
-label.toolTipText = 'I\'m the tooltip. Do you see me?';]]></sample>
-        </property>
-        <property name="transparent">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
-          <description><![CDATA[Flag that tells if the component is transparent or not.
-
-The default value is "false", that is the components 
-are not transparent.]]></description>
-          <summary><![CDATA[Flag that tells if the component is transparent or not.]]></summary>
-          <sample><![CDATA[// Load an image from disk an create a Media object based on it.
-var imageBytes = plugins.file.readFile('d:/ball.jpg');
-var media = solutionModel.newMedia('ball.jpg', imageBytes);
-// Put on the form a label with the image.
-var image = form.newLabel('', 10, 10, 100, 100);
-image.imageMedia = media;
-// Put two fields over the image. The second one will be transparent and the
-// image will shine through.
-var nonTransparentField = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 20, 100, 20);
-var transparentField = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 50, 100, 20);
-transparentField.transparent = true;]]></sample>
-        </property>
-        <property name="verticalAlignment">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[The vertical alignment of the text inside the component. Can be one of
-TOP, CENTER or BOTTOM.
-
-Note that this property does not refer to the vertical alignment of the
-component inside the form.]]></description>
-          <summary><![CDATA[The vertical alignment of the text inside the component.]]></summary>
-          <sample><![CDATA[var topAlignedLabel = form.newLabel('TOP', 400, 10, 50, 300);
-topAlignedLabel.verticalAlignment = SM_ALIGNMENT.TOP;
-var vCenterAlignedLabel = form.newLabel('CENTER', 460, 10, 50, 300);
-vCenterAlignedLabel.verticalAlignment = SM_ALIGNMENT.CENTER
-var bottomAlignedLabel = form.newLabel('BOTTOM', 520, 10, 50, 300);
-bottomAlignedLabel.verticalAlignment = SM_ALIGNMENT.BOTTOM;]]></sample>
-        </property>
-        <property name="visible">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
-          <description><![CDATA[The visible property of the component, default true.]]></description>
-          <summary><![CDATA[The visible property of the component, default true.]]></summary>
-          <sample><![CDATA[var form = solutionModel.newForm('printForm', 'db:/example_data/parent_table', null, false, 400, 300);
-var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-field.visible = false;]]></sample>
-        </property>
-        <property name="width">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[The width in pixels of the component.]]></description>
-          <summary><![CDATA[The width in pixels of the component.]]></summary>
-          <sample><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-application.output('original width: ' + field.width);
-application.output('original height: ' + field.height);
-field.width = 200;
-field.height = 100;
-application.output('modified width: ' + field.width);
-application.output('modified height: ' + field.height);]]></sample>
-        </property>
-        <property name="x">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[The x coordinate of the component on the form.]]></description>
-          <summary><![CDATA[The x coordinate of the component on the form.]]></summary>
-          <sample><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-application.output('original location: ' + field.x + ', ' + field.y);
-field.x = 90;
-field.y = 90;
-application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
-        </property>
-        <property name="y">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[The y coordinate of the component on the form.]]></description>
-          <summary><![CDATA[The y coordinate of the component on the form.]]></summary>
-          <sample><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-application.output('original location: ' + field.x + ', ' + field.y);
-field.x = 90;
-field.y = 90;
-application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
-        </property>
-      </properties>
-      <functions>
-        <function name="getDesignTimeProperty">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
-          <description><![CDATA[Get a design-time property of an element.]]></description>
-          <summary><![CDATA[Get a design-time property of an element.]]></summary>
-          <sample><![CDATA[var frm = solutionModel.getForm('orders')
-var fld = frm.getField('fld')
-var prop = fld.getDesignTimeProperty('myprop')]]></sample>
-        </function>
-        <function name="getUUID">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID"/>
-          <description><![CDATA[Returns the UUID of this component.]]></description>
-          <summary><![CDATA[Returns the UUID of this component.]]></summary>
-          <sample><![CDATA[var button_uuid = solutionModel.getForm("my_form").getButton("my_button").getUUID();
-application.output(button_uuid.toString());]]></sample>
-        </function>
-        <function name="putDesignTimeProperty">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.Object"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
-          <description><![CDATA[Set a design-time property of an element.]]></description>
-          <summary><![CDATA[Set a design-time property of an element.]]></summary>
-          <sample><![CDATA[var frm = solutionModel.getForm('orders')
-var fld = frm.getField('fld')
-fld.putDesignTimeProperty('myprop', 'strawberry')]]></sample>
-        </function>
-        <function name="removeDesignTimeProperty">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
-          <description><![CDATA[Clear a design-time property of an element.]]></description>
-          <summary><![CDATA[Clear a design-time property of an element.]]></summary>
-          <sample><![CDATA[var frm = solutionModel.getForm('orders')
-var fld = frm.getField('fld')
-fld.removeDesignTimeProperty('myprop')]]></sample>
-        </function>
-        <function deprecated="true" name="setOnActionMethod">
-          <argumentsTypes>
-            <argumentType typecode="org.mozilla.javascript.Function"/>
-          </argumentsTypes>
-          <return type="void" typecode="void"/>
-          <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by setOnAction(JSMethod).]]></deprecated>
-          <sample/>
-        </function>
-        <function deprecated="true" name="setOnDoubleClickMethod">
-          <argumentsTypes>
-            <argumentType typecode="org.mozilla.javascript.Function"/>
-          </argumentsTypes>
-          <return type="void" typecode="void"/>
-          <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by setOnDoubleClick(JSMethod).]]></deprecated>
-          <sample/>
-        </function>
-        <function deprecated="true" name="setOnRightClickMethod">
-          <argumentsTypes>
-            <argumentType typecode="org.mozilla.javascript.Function"/>
-          </argumentsTypes>
-          <return type="void" typecode="void"/>
-          <description/>
-          <deprecated><![CDATA[As of release 4.1, replaced by setOnRightClick(JSMethod).]]></deprecated>
-          <sample/>
-        </function>
-      </functions>
-    </object>
-    <object extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSLabel" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSLabel">
+    <object extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSLabel" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSLabel" scriptingName="JSLabel">
       <properties>
         <property name="anchors">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -16482,7 +15641,7 @@ application.output(ballImg.getUUID().toString());]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="JSMethod" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSMethod">
+    <object publicName="JSMethod" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSMethod" scriptingName="JSMethod">
       <properties>
         <property name="code">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -17891,7 +17050,7 @@ childrenPortal.setIntercellSpacing(5,10);]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="JSRecord" qualifiedName="com.servoy.j2db.dataprocessing.Record">
+    <object publicName="JSRecord" qualifiedName="com.servoy.j2db.dataprocessing.Record" scriptingName="JSRecord">
       <properties>
         <property name="exception">
           <return type="com.servoy.j2db.util.ServoyException" typecode="java.lang.Exception"><![CDATA[The occurred exception.]]></return>
@@ -18301,7 +17460,7 @@ application.output(button_uuid.toString());]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="JSRenderEvent" qualifiedName="com.servoy.j2db.scripting.JSRenderEvent">
+    <object publicName="JSRenderEvent" qualifiedName="com.servoy.j2db.scripting.JSRenderEvent" scriptingName="JSRenderEvent">
       <functions>
         <function deprecated="true" name="getElement">
           <argumentsTypes/>
@@ -19223,7 +18382,7 @@ var serverName = jsTable.getServerName()]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="JSTableObject" qualifiedName="com.servoy.j2db.dataprocessing.JSTableObject">
+    <object publicName="JSTableObject" qualifiedName="com.servoy.j2db.dataprocessing.JSTableObject" scriptingName="JSTableObject">
       <functions>
         <function name="createNewColumn">
           <argumentsTypes>
@@ -20528,7 +19687,7 @@ application.output(dateVar.getUUID().toString());]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="JSWindow" qualifiedName="com.servoy.j2db.scripting.JSWindow">
+    <object publicName="JSWindow" qualifiedName="com.servoy.j2db.scripting.JSWindow" scriptingName="JSWindow">
       <constants>
         <constant name="DEFAULT">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -21377,8 +20536,8 @@ forms['printForm'].controller.showPrintPreview();]]></sample>
         </constant>
       </constants>
     </object>
-    <object publicName="PrinterJob" qualifiedName="com.servoy.j2db.documentation.scripting.docs.PrinterJob"/>
-    <object publicName="QBAggregate" qualifiedName="com.servoy.j2db.querybuilder.impl.QBAggregate">
+    <object publicName="PrinterJob" qualifiedName="com.servoy.j2db.documentation.scripting.docs.PrinterJob" scriptingName="PrinterJob"/>
+    <object publicName="QBAggregate" qualifiedName="com.servoy.j2db.querybuilder.impl.QBAggregate" scriptingName="QBAggregate">
       <properties>
         <property name="abs">
           <return type="com.servoy.j2db.querybuilder.impl.QBFunction" typecode="com.servoy.j2db.querybuilder.impl.QBFunction"/>
@@ -21904,7 +21063,7 @@ Operator: lessThan]]></description>
         </function>
       </functions>
     </object>
-    <object publicName="QBColumn" qualifiedName="com.servoy.j2db.querybuilder.impl.QBColumn">
+    <object publicName="QBColumn" qualifiedName="com.servoy.j2db.querybuilder.impl.QBColumn" scriptingName="QBColumn">
       <properties>
         <property name="abs">
           <return type="com.servoy.j2db.querybuilder.impl.QBFunction" typecode="com.servoy.j2db.querybuilder.impl.QBFunction"/>
@@ -22431,7 +21590,7 @@ Operator: lessThan]]></description>
       </functions>
     </object>
     <object publicName="QBColumns" qualifiedName="com.servoy.j2db.querybuilder.impl.QBColumns"/>
-    <object publicName="QBCondition" qualifiedName="com.servoy.j2db.querybuilder.impl.QBCondition">
+    <object publicName="QBCondition" qualifiedName="com.servoy.j2db.querybuilder.impl.QBCondition" scriptingName="QBCondition">
       <properties>
         <property name="parent">
           <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
@@ -22464,7 +21623,7 @@ Operator: lessThan]]></description>
         </property>
       </properties>
     </object>
-    <object publicName="QBFunction" qualifiedName="com.servoy.j2db.querybuilder.impl.QBFunction">
+    <object publicName="QBFunction" qualifiedName="com.servoy.j2db.querybuilder.impl.QBFunction" scriptingName="QBFunction">
       <properties>
         <property name="abs">
           <return type="com.servoy.j2db.querybuilder.impl.QBFunction" typecode="com.servoy.j2db.querybuilder.impl.QBFunction"/>
@@ -23870,7 +23029,7 @@ foundset.loadRecords(query)]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="QBLogicalCondition" qualifiedName="com.servoy.j2db.querybuilder.impl.QBLogicalCondition">
+    <object publicName="QBLogicalCondition" qualifiedName="com.servoy.j2db.querybuilder.impl.QBLogicalCondition" scriptingName="QBLogicalCondition">
       <properties>
         <property name="parent">
           <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
@@ -23955,7 +23114,7 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
       </properties>
     </object>
     <object publicName="QBParameters" qualifiedName="com.servoy.j2db.querybuilder.impl.QBParameters"/>
-    <object publicName="QBPart" qualifiedName="com.servoy.j2db.querybuilder.impl.QBPart">
+    <object publicName="QBPart" qualifiedName="com.servoy.j2db.querybuilder.impl.QBPart" scriptingName="QBPart">
       <properties>
         <property name="parent">
           <return type="com.servoy.j2db.querybuilder.impl.QBTableClause" typecode="com.servoy.j2db.querybuilder.impl.QBTableClause"/>
@@ -24094,7 +23253,7 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="QBSelect" qualifiedName="com.servoy.j2db.querybuilder.impl.QBSelect">
+    <object publicName="QBSelect" qualifiedName="com.servoy.j2db.querybuilder.impl.QBSelect" scriptingName="QBSelect">
       <properties>
         <property name="and">
           <return type="com.servoy.j2db.querybuilder.impl.QBLogicalCondition" typecode="com.servoy.j2db.querybuilder.impl.QBLogicalCondition"/>
@@ -24348,7 +23507,7 @@ foundset.loadRecords(q);]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="QBSort" qualifiedName="com.servoy.j2db.querybuilder.impl.QBSort">
+    <object publicName="QBSort" qualifiedName="com.servoy.j2db.querybuilder.impl.QBSort" scriptingName="QBSort">
       <properties>
         <property name="parent">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
@@ -24832,1266 +23991,6 @@ query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
         </constant>
       </constants>
-    </object>
-    <object publicName="Relation" qualifiedName="com.servoy.j2db.dataprocessing.RelatedFoundSet">
-      <properties>
-        <property name="alldataproviders" special="true">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"/>
-          <description><![CDATA[Get all dataproviders of the foundset.]]></description>
-          <summary><![CDATA[Get all dataproviders of the foundset.]]></summary>
-          <sample><![CDATA[var dataprovidersNames = %%prefix%%alldataproviders;
-application.output("This foundset has " + dataprovidersNames.length + " data providers.")
-for (var i=0; i<dataprovidersNames.length; i++)
-	application.output(dataprovidersNames[i]);]]></sample>
-        </property>
-        <property name="multiSelect">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
-          <description><![CDATA[Get or set the multiSelect flag of the foundset.]]></description>
-          <summary><![CDATA[Get or set the multiSelect flag of the foundset.]]></summary>
-          <sample><![CDATA[// allow user to select multiple rows.
-%%prefix%%foundset.multiSelect = true;]]></sample>
-        </property>
-      </properties>
-      <functions>
-        <function name="addFoundSetFilterParam">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.Object"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if adding the filter succeeded, false otherwise.]]></return>
-          <description><![CDATA[Add a filter parameter that is permanent per user session to limit a specified foundset of records.
-Use clear() or loadAllRecords() to make the filter effective.
-Multiple filters can be added to the same dataprovider, they will all be applied.]]></description>
-          <summary><![CDATA[Add a filter parameter that is permanent per user session to limit a specified foundset of records.]]></summary>
-          <sample><![CDATA[// Filter a fondset on a dataprovider value.
-// Note that multiple filters can be added to the same dataprovider, they will all be applied.
-
-var success = %%prefix%%foundset.addFoundSetFilterParam('customerid', '=', 'BLONP', 'custFilter');//possible to add multiple
-%%prefix%%foundset.loadAllRecords();//to make param(s) effective
-// Named filters can be removed using %%prefix%%foundset.removeFoundSetFilterParam(filterName)]]></sample>
-          <parameters>
-            <parameter name="dataprovider" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[String column to filter on.]]></description>
-            </parameter>
-            <parameter name="operator" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[String operator: =, <, >, >=, <=, !=, (NOT) LIKE, (NOT) IN, (NOT) BETWEEN and IS (NOT) NULL optionally augmented with modifiers "#" (ignore case) or "^||" (or-is-null).]]></description>
-            </parameter>
-            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
-              <description><![CDATA[Object filter value (for in array and between an array with 2 elements)]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="addFoundSetFilterParam">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.Object"/>
-            <argumentType typecode="java.lang.String"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if adding the filter succeeded, false otherwise.]]></return>
-          <description><![CDATA[Add a filter parameter that is permanent per user session to limit a specified foundset of records.
-Use clear() or loadAllRecords() to make the filter effective.
-The filter is removed again using removeFoundSetFilterParam(name).]]></description>
-          <summary><![CDATA[Add a filter parameter that is permanent per user session to limit a specified foundset of records.]]></summary>
-          <sample><![CDATA[var success = %%prefix%%foundset.addFoundSetFilterParam('customerid', '=', 'BLONP', 'custFilter');//possible to add multiple
-// Named filters can be removed using %%prefix%%foundset.removeFoundSetFilterParam(filterName)
-
-// you can use modifiers in the operator as well, filter on companies where companyname is null or equals-ignore-case 'servoy'
-var ok = %%prefix%%foundset.addFoundSetFilterParam('companyname', '#^||=', 'servoy')
-
-%%prefix%%foundset.loadAllRecords();//to make param(s) effective]]></sample>
-          <parameters>
-            <parameter name="dataprovider" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[String column to filter on.]]></description>
-            </parameter>
-            <parameter name="operator" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[String operator: =, <, >, >=, <=, !=, (NOT) LIKE, (NOT) IN, (NOT) BETWEEN and IS (NOT) NULL optionally augmented with modifiers "#" (ignore case) or "^||" (or-is-null).]]></description>
-            </parameter>
-            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
-              <description><![CDATA[Object filter value (for in array and between an array with 2 elements)]]></description>
-            </parameter>
-            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[String name, used to remove the filter again.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="clear">
-          <argumentsTypes/>
-          <return type="void" typecode="void"/>
-          <description><![CDATA[Clear the foundset.]]></description>
-          <summary><![CDATA[Clear the foundset.]]></summary>
-          <sample><![CDATA[//Clear the foundset, including searches that may be on it
-%%prefix%%foundset.clear();]]></sample>
-        </function>
-        <function deprecated="true" name="clearFoundSet">
-          <argumentsTypes/>
-          <return type="void" typecode="void"/>
-          <description><![CDATA[Clears the foundset.]]></description>
-          <summary><![CDATA[Clears the foundset.]]></summary>
-          <deprecated><![CDATA[As of release 3.1, replaced by #clear().]]></deprecated>
-          <sample/>
-        </function>
-        <function name="deleteAllRecords">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number"><![CDATA[boolean true if all records could be deleted.]]></return>
-          <description><![CDATA[Delete all records in foundset, resulting in empty foundset.]]></description>
-          <summary><![CDATA[Delete all records in foundset, resulting in empty foundset.]]></summary>
-          <sample><![CDATA[var success = %%prefix%%foundset.deleteAllRecords();]]></sample>
-        </function>
-        <function name="deleteRecord">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[boolean true if all records could be deleted.]]></return>
-          <description><![CDATA[Delete currently selected record(s).
-If the foundset is in multiselect mode, all selected records are deleted.]]></description>
-          <summary><![CDATA[Delete currently selected record(s).]]></summary>
-          <sample><![CDATA[var success = %%prefix%%foundset.deleteRecord();
-//can return false incase of related foundset having records and orphans records are not allowed by the relation]]></sample>
-        </function>
-        <function name="deleteRecord">
-          <argumentsTypes>
-            <argumentType typecode="com.servoy.base.scripting.api.IJSRecord"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[boolean true if record could be deleted.]]></return>
-          <description><![CDATA[Delete record from foundset.]]></description>
-          <summary><![CDATA[Delete record from foundset.]]></summary>
-          <sample><![CDATA[var success = %%prefix%%foundset.deleteRecord(rec);
-//can return false incase of related foundset having records and orphans records are not allowed by the relation]]></sample>
-          <parameters>
-            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.base.scripting.api.IJSRecord">
-              <description><![CDATA[The record to delete from the foundset.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="deleteRecord">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.Number"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[boolean true if record could be deleted.]]></return>
-          <description><![CDATA[Delete record with the given index.]]></description>
-          <summary><![CDATA[Delete record with the given index.]]></summary>
-          <sample><![CDATA[var success = %%prefix%%foundset.deleteRecord(4);
-//can return false incase of related foundset having records and orphans records are not allowed by the relation]]></sample>
-          <parameters>
-            <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
-              <description><![CDATA[The index of the record to delete.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="duplicateFoundSet">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"><![CDATA[foundset duplicate.]]></return>
-          <description><![CDATA[Get a duplicate of the foundset.]]></description>
-          <summary><![CDATA[Get a duplicate of the foundset.]]></summary>
-          <sample><![CDATA[var dupFoundset = %%prefix%%foundset.duplicateFoundSet();
-%%prefix%%foundset.find();
-//search some fields
-var count = %%prefix%%foundset.search();
-if (count == 0)
-{
-	plugins.dialogs.showWarningDialog('Alert', 'No records found','OK');
-	%%prefix%%foundset.loadRecords(dupFoundset);
-}]]></sample>
-        </function>
-        <function name="duplicateRecord">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[0 if record was not created or the record index if it was created.]]></return>
-          <description><![CDATA[Duplicate current record, change selection to new record, place on top.]]></description>
-          <summary><![CDATA[Duplicate current record, change selection to new record, place on top.]]></summary>
-          <sample><![CDATA[%%prefix%%foundset.duplicateRecord();
-%%prefix%%foundset.duplicateRecord(false); //duplicate the current record, adds at bottom
-%%prefix%%foundset.duplicateRecord(1,2); //duplicate the first record as second record
-//duplicates the record (record index 3), adds on top and selects the record
-%%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
-        </function>
-        <function name="duplicateRecord">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.Boolean"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[0 if record was not created or the record index if it was created.]]></return>
-          <description><![CDATA[Duplicate selected record, change selection to new record.]]></description>
-          <summary><![CDATA[Duplicate selected record, change selection to new record.]]></summary>
-          <sample><![CDATA[%%prefix%%foundset.duplicateRecord();
-%%prefix%%foundset.duplicateRecord(false); //duplicate the current record, adds at bottom
-%%prefix%%foundset.duplicateRecord(1,2); //duplicate the first record as second record
-//duplicates the record (record index 3), adds on top and selects the record
-%%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
-          <parameters>
-            <parameter name="onTop" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
-              <description><![CDATA[when true the new record is added as the topmost record.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="duplicateRecord">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.Boolean"/>
-            <argumentType typecode="java.lang.Boolean"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[0 if record was not created or the record index if it was created.]]></return>
-          <description><![CDATA[Duplicate selected record.]]></description>
-          <summary><![CDATA[Duplicate selected record.]]></summary>
-          <sample><![CDATA[%%prefix%%foundset.duplicateRecord();
-%%prefix%%foundset.duplicateRecord(false); //duplicate the current record, adds at bottom
-%%prefix%%foundset.duplicateRecord(1,2); //duplicate the first record as second record
-//duplicates the record (record index 3), adds on top and selects the record
-%%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
-          <parameters>
-            <parameter name="onTop" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
-              <description><![CDATA[when true the new record is added as the topmost record.]]></description>
-            </parameter>
-            <parameter name="changeSelection" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
-              <description><![CDATA[when true the selection is changed to the duplicated record.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="duplicateRecord">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.Number"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[0 if record was not created or the record index if it was created.]]></return>
-          <description><![CDATA[Duplicate record at index in the foundset, change selection to new record, place on top.]]></description>
-          <summary><![CDATA[Duplicate record at index in the foundset, change selection to new record, place on top.]]></summary>
-          <sample><![CDATA[%%prefix%%foundset.duplicateRecord();
-%%prefix%%foundset.duplicateRecord(false); //duplicate the current record, adds at bottom
-%%prefix%%foundset.duplicateRecord(1,2); //duplicate the first record as second record
-//duplicates the record (record index 3), adds on top and selects the record
-%%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
-          <parameters>
-            <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
-              <description><![CDATA[The index of the record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="duplicateRecord">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[0 if record was not created or the record index if it was created.]]></return>
-          <description><![CDATA[Duplicate record at index in the foundset, change selection to new record.]]></description>
-          <summary><![CDATA[Duplicate record at index in the foundset, change selection to new record.]]></summary>
-          <sample><![CDATA[%%prefix%%foundset.duplicateRecord();
-%%prefix%%foundset.duplicateRecord(false); //duplicate the current record, adds at bottom
-%%prefix%%foundset.duplicateRecord(1,2); //duplicate the first record as second record
-//duplicates the record (record index 3), adds on top and selects the record
-%%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
-          <parameters>
-            <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[The index of the record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
-            </parameter>
-            <parameter name="onTop" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[when true the new record is added as the topmost record.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="duplicateRecord">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.Number"/>
-            <argumentType typecode="java.lang.Boolean"/>
-            <argumentType typecode="java.lang.Boolean"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[0 if record was not created or the record index if it was created.]]></return>
-          <description><![CDATA[Duplicate record at index in the foundset.]]></description>
-          <summary><![CDATA[Duplicate record at index in the foundset.]]></summary>
-          <sample><![CDATA[%%prefix%%foundset.duplicateRecord();
-%%prefix%%foundset.duplicateRecord(false); //duplicate the current record, adds at bottom
-%%prefix%%foundset.duplicateRecord(1,2); //duplicate the first record as second record
-//duplicates the record (record index 3), adds on top and selects the record
-%%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
-          <parameters>
-            <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
-              <description><![CDATA[The index of the record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
-            </parameter>
-            <parameter name="onTop" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
-              <description><![CDATA[when true the new record is added as the topmost record.]]></description>
-            </parameter>
-            <parameter name="changeSelection" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
-              <description><![CDATA[when true the selection is changed to the duplicated record.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="duplicateRecord">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.Number"/>
-            <argumentType typecode="java.lang.Number"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[0 if record was not created or the record index if it was created.]]></return>
-          <description><![CDATA[Duplicate record at index in the foundset, change selection to new record.]]></description>
-          <summary><![CDATA[Duplicate record at index in the foundset, change selection to new record.]]></summary>
-          <sample><![CDATA[%%prefix%%foundset.duplicateRecord();
-%%prefix%%foundset.duplicateRecord(false); //duplicate the current record, adds at bottom
-%%prefix%%foundset.duplicateRecord(1,2); //duplicate the first record as second record
-//duplicates the record (record index 3), adds on top and selects the record
-%%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
-          <parameters>
-            <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
-              <description><![CDATA[The index of the record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
-            </parameter>
-            <parameter name="location" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
-              <description><![CDATA[the new record is added at specified index]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="duplicateRecord">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.Number"/>
-            <argumentType typecode="java.lang.Number"/>
-            <argumentType typecode="java.lang.Boolean"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[0 if record was not created or the record index if it was created.]]></return>
-          <description><![CDATA[Duplicate record at index in the foundset.]]></description>
-          <summary><![CDATA[Duplicate record at index in the foundset.]]></summary>
-          <sample><![CDATA[%%prefix%%foundset.duplicateRecord();
-%%prefix%%foundset.duplicateRecord(false); //duplicate the current record, adds at bottom
-%%prefix%%foundset.duplicateRecord(1,2); //duplicate the first record as second record
-//duplicates the record (record index 3), adds on top and selects the record
-%%prefix%%foundset.duplicateRecord(3,true,true);]]></sample>
-          <parameters>
-            <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
-              <description><![CDATA[The index of the record to duplicate; defaults to currently selected index. Ignored if first given parameter is a boolean value.]]></description>
-            </parameter>
-            <parameter name="location" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
-              <description><![CDATA[the new record is added at specified index]]></description>
-            </parameter>
-            <parameter name="changeSelection" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
-              <description><![CDATA[when true the selection is changed to the duplicated record.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="find">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the foundset is now in find mode, false otherwise.]]></return>
-          <description><![CDATA[Set the foundset in find mode. (Start a find request), use the "search" function to perform/exit the find.
-
-Before going into find mode, all unsaved records will be saved in the database.
-If this fails (due to validation failures or sql errors) or is not allowed (autosave off), the foundset will not go into find mode.
-Make sure the operator and the data (value) are part of the string passed to dataprovider (included inside a pair of quotation marks).
-Note: always make sure to check the result of the find() method.
-
-When in find mode, columns can be assigned string expressions (including operators) that are evaluated as:
-General:
-      c1||c2    (condition1 or condition2)
-      c|format  (apply format on condition like 'x|dd-MM-yyyy')
-      !c        (not condition)
-      #c        (modify condition, depends on column type)
-      ^         (is null)
-      ^=        (is null or empty)
-      &lt;x     (less than value x)
-      &gt;x     (greater than value x)
-      &lt;=x    (less than or equals value x)
-      &gt;=x    (greater than or equals value x)
-      x...y     (between values x and y, including values)
-      x         (equals value x)
-
- Number fields:
-      =x       (equals value x)
-      ^=       (is null or zero)
-
- Date fields:
-      #c       (equals value x, entire day)
-      now      (equals now, date and or time)
-      //       (equals today)
-      today    (equals today)
-
- Text fields:
-      #c	        (case insensitive condition)
-      = x      (equals a space and 'x')
-      ^=       (is null or empty)
-      %x%      (contains 'x')
-      %x_y%    (contains 'x' followed by any char and 'y')
-      \%      (contains char '%')
-      \_      (contains char '_')
-
-Related columns can be assigned, they will result in related searches.
-For example, "employees_to_department.location_id = headoffice" finds all employees in the specified location).
-
-Searching on related aggregates is supported.
-For example, "orders_to_details.total_amount = '&gt;1000'" finds all orders with total order details amount more than 1000.
-
-Arrays can be used for searching a number of values, this will result in an 'IN' condition that will be used in the search.
-The values are not restricted to strings but can be any type that matches the column type.
-For example, "record.department_id = [1, 33, 99]"]]></description>
-          <summary><![CDATA[Set the foundset in find mode.]]></summary>
-          <sample><![CDATA[if (%%prefix%%foundset.find()) //find will fail if autosave is disabled and there are unsaved records
-{
-	columnTextDataProvider = 'a search value'
-	// for numbers you have to make sure to format it correctly so that the decimal point is in your locales notation (. or ,)
-	columnNumberDataProvider = '>' + utils.numberFormat(anumber, '####.00');
-	columnDateDataProvider = '31-12-2010|dd-MM-yyyy'
-	%%prefix%%foundset.search()
-}]]></sample>
-        </function>
-        <function name="getCurrentSort">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String sort columns]]></return>
-          <description><![CDATA[Get the current sort columns.]]></description>
-          <summary><![CDATA[Get the current sort columns.]]></summary>
-          <sample><![CDATA[//reverse the current sort
-
-//the original sort "companyName asc, companyContact desc"
-//the inversed sort "companyName desc, companyContact asc"
-var foundsetSort = foundset.getCurrentSort()
-var sortColumns = foundsetSort.split(',')
-var newFoundsetSort = ''
-for(var i=0; i<sortColumns.length; i++)
-{
-	var currentSort = sortColumns[i]
-	var sortType = currentSort.substring(currentSort.length-3)
-	if(sortType.equalsIgnoreCase('asc'))
-	{
-		newFoundsetSort += currentSort.replace(' asc', ' desc')
-	}
-	else
-	{
-		newFoundsetSort += currentSort.replace(' desc', ' asc')
-	}
-	if(i != sortColumns.length - 1)
-	{
-		newFoundsetSort += ','
-	}
-}
-foundset.sort(newFoundsetSort)]]></sample>
-        </function>
-        <function name="getDataProviderValue">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[Object value]]></return>
-          <description><![CDATA[Get a value based on a dataprovider name.]]></description>
-          <summary><![CDATA[Get a value based on a dataprovider name.]]></summary>
-          <sample><![CDATA[var val = %%prefix%%foundset.getDataProviderValue('contact_name');]]></sample>
-          <parameters>
-            <parameter name="dataProviderID" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[data provider name]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="getDataSource">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String data source.]]></return>
-          <description><![CDATA[Get the datasource used.
-The datasource is an url that describes the data source.]]></description>
-          <summary><![CDATA[Get the datasource used.]]></summary>
-          <sample><![CDATA[var dataSource = %%prefix%%foundset.getDataSource();]]></sample>
-        </function>
-        <function name="getFoundSetFilterParams">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object[][]" typecode="[[Ljava.lang.Object;"><![CDATA[Array of filter definitions.]]></return>
-          <description><![CDATA[Get the list of previously defined foundset filters.
-The result is an array of:
- [ tableName, dataprovider, operator, value, name ]]]></description>
-          <summary><![CDATA[Get the list of previously defined foundset filters.]]></summary>
-          <sample><![CDATA[var params = foundset.getFoundSetFilterParams()
-for (var i = 0; params != null && i < params.length; i++)
-{
-	application.output('FoundSet filter on table ' + params[i][0]+ ': '+ params[i][1]+ ' '+params[i][2]+ ' '+params[i][3] +(params[i][4] == null ? ' [no name]' : ' ['+params[i][4]+']'))
-}]]></sample>
-        </function>
-        <function name="getFoundSetFilterParams">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object[][]" typecode="[[Ljava.lang.Object;"><![CDATA[Array of filter definitions.]]></return>
-          <description><![CDATA[Get a previously defined foundset filter, using its given name.
-The result is an array of:
- [ tableName, dataprovider, operator, value, name ]]]></description>
-          <summary><![CDATA[Get a previously defined foundset filter, using its given name.]]></summary>
-          <sample><![CDATA[var params = foundset.getFoundSetFilterParams()
-for (var i = 0; params != null && i < params.length; i++)
-{
-	application.output('FoundSet filter on table ' + params[i][0]+ ': '+ params[i][1]+ ' '+params[i][2]+ ' '+params[i][3] +(params[i][4] == null ? ' [no name]' : ' ['+params[i][4]+']'))
-}]]></sample>
-          <parameters>
-            <parameter name="filterName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[name of the filter to retrieve.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function deprecated="true" name="getMaxRecordIndex">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <description><![CDATA[Get the number of records in this foundset.]]></description>
-          <summary><![CDATA[Get the number of records in this foundset.]]></summary>
-          <deprecated><![CDATA[As of release 3.1, replaced by #getSize().]]></deprecated>
-          <sample><![CDATA[for ( var i = 1 ; i <= %%prefix%%foundset.getMaxRecordIndex() ; i++ )
-{
-	%%prefix%%foundset.setSelectedIndex(i);
-	//do some action per record
-}]]></sample>
-        </function>
-        <function name="getQuery">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"><![CDATA[query.]]></return>
-          <description><![CDATA[Get the query that the foundset is currently using.
-When the founset is in find mode, the find conditions are included in the resulting query. 
-So the query that would be used when just calling search() (or search(true,true)) is returned.
-Note that foundset filters are included and table filters are not included in the query.]]></description>
-          <summary><![CDATA[Get the query that the foundset is currently using.]]></summary>
-          <sample><![CDATA[var q = foundset.getQuery()
-q.where.add(q.columns.x.eq(100))
-foundset.loadRecords(q);]]></sample>
-        </function>
-        <function name="getRecord">
-          <argumentsTypes>
-            <argumentType typecode="int"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.base.scripting.api.IJSRecord"><![CDATA[Record record.]]></return>
-          <description><![CDATA[Get the record object at the index.]]></description>
-          <summary><![CDATA[Get the record object at the index.]]></summary>
-          <sample><![CDATA[var record = %%prefix%%foundset.getRecord(index);]]></sample>
-          <parameters>
-            <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
-              <description><![CDATA[record index]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="getRecordIndex">
-          <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.dataprocessing.IRecordInternal"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int index.]]></return>
-          <description><![CDATA[Get the record index. Will return -1 if the record can't be found.]]></description>
-          <summary><![CDATA[Get the record index.]]></summary>
-          <sample><![CDATA[var index = %%prefix%%foundset.getRecordIndex(record);]]></sample>
-          <parameters>
-            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.IRecordInternal">
-              <description><![CDATA[Record]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="getRelationName">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String relation name when related.]]></return>
-          <description><![CDATA[Gets the relation name (null if not a related foundset).]]></description>
-          <summary><![CDATA[Gets the relation name (null if not a related foundset).]]></summary>
-          <sample><![CDATA[var relName = %%prefix%%foundset.getRelationName();]]></sample>
-        </function>
-        <function name="getSelectedIndex">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int current index (1-based)]]></return>
-          <description><![CDATA[Get the current record index of the foundset.]]></description>
-          <summary><![CDATA[Get the current record index of the foundset.]]></summary>
-          <sample><![CDATA[//gets the current record index in the current foundset
-var current = %%prefix%%foundset.getSelectedIndex();
-//sets the next record in the foundset
-%%prefix%%foundset.setSelectedIndex(current+1);]]></sample>
-        </function>
-        <function name="getSelectedIndexes">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[Ljava.lang.Number;"><![CDATA[Array current indexes (1-based)]]></return>
-          <description><![CDATA[Get the indexes of the selected records.
-When the founset is in multiSelect mode (see property multiSelect), a selection can consist of more than one index.]]></description>
-          <summary><![CDATA[Get the indexes of the selected records.]]></summary>
-          <sample><![CDATA[// modify selection to the first selected item and the following row only
-var current = %%prefix%%foundset.getSelectedIndexes();
-if (current.length > 1)
-{
-	var newSelection = new Array();
-	newSelection[0] = current[0]; // first current selection
-	newSelection[1] = current[0] + 1; // and the next row
-	%%prefix%%foundset.setSelectedIndexes(newSelection);
-}]]></sample>
-        </function>
-        <function name="getSelectedRecord">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.base.scripting.api.IJSRecord"><![CDATA[Record record.]]></return>
-          <description><![CDATA[Get the selected record.]]></description>
-          <summary><![CDATA[Get the selected record.]]></summary>
-          <sample><![CDATA[var selectedRecord = %%prefix%%foundset.getSelectedRecord();]]></sample>
-        </function>
-        <function name="getSelectedRecords">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.dataprocessing.Record[]" typecode="[Lcom.servoy.j2db.dataprocessing.IRecordInternal;"><![CDATA[Array current records.]]></return>
-          <description><![CDATA[Get the selected records.
-When the founset is in multiSelect mode (see property multiSelect), selection can be a more than 1 record.]]></description>
-          <summary><![CDATA[Get the selected records.]]></summary>
-          <sample><![CDATA[var selectedRecords = %%prefix%%foundset.getSelectedRecords();]]></sample>
-        </function>
-        <function deprecated="true" name="getServerName">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets the name of the server used.]]></description>
-          <summary><![CDATA[Gets the name of the server used.]]></summary>
-          <deprecated><![CDATA[As of release 5.0, replaced by #getDataSource().]]></deprecated>
-          <sample/>
-        </function>
-        <function deprecated="true" name="getTableName">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[Gets the name of the table used.]]></description>
-          <summary><![CDATA[Gets the name of the table used.]]></summary>
-          <deprecated><![CDATA[As of release 5.0, replaced by #getDataSource().]]></deprecated>
-          <sample/>
-        </function>
-        <function name="hasConditions">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[wether the foundset has find-conditions]]></return>
-          <description><![CDATA[Check wether the foundset has any conditions from a previous find action.]]></description>
-          <summary><![CDATA[Check wether the foundset has any conditions from a previous find action.]]></summary>
-          <sample><![CDATA[if (%%prefix%%foundset.hasConditions())
-{
-		// foundset had find actions
-}]]></sample>
-        </function>
-        <function name="invertRecords">
-          <argumentsTypes/>
-          <return type="void" typecode="void"/>
-          <description><![CDATA[Invert the foundset against all rows of the current table.
-All records that are not in the foundset will become the current foundset.]]></description>
-          <summary><![CDATA[Invert the foundset against all rows of the current table.]]></summary>
-          <sample><![CDATA[%%prefix%%foundset.invertRecords();]]></sample>
-        </function>
-        <function name="isInFind">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[boolean is in find mode.]]></return>
-          <description><![CDATA[Check if this foundset is in find mode.]]></description>
-          <summary><![CDATA[Check if this foundset is in find mode.]]></summary>
-          <sample><![CDATA[//Returns true when find was called on this foundset and search has not been called yet
-%%prefix%%foundset.isInFind();]]></sample>
-        </function>
-        <function name="loadAllRecords">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if records are loaded, false otherwise.]]></return>
-          <description><![CDATA[Loads all accessible records from the datasource into the foundset.
-Filters on the foundset are applied.
-
-Before loading the records, all unsaved records will be saved in the database.
-If this fails (due to validation failures or sql errors) or is not allowed (autosave off), 
-records will not be loaded,]]></description>
-          <summary><![CDATA[Loads all accessible records from the datasource into the foundset.]]></summary>
-          <sample><![CDATA[%%prefix%%foundset.loadAllRecords();]]></sample>
-        </function>
-        <function name="loadOmittedRecords">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if records are loaded, false otherwise.]]></return>
-          <description><![CDATA[Loads the records that are currently omitted as a foundset.
-
-Before loading the omitted records, all unsaved records will be saved in the database.
-If this fails (due to validation failures or sql errors) or is not allowed (autosave off), 
-omitted records will not be loaded,]]></description>
-          <summary><![CDATA[Loads the records that are currently omitted as a foundset.]]></summary>
-          <sample><![CDATA[%%prefix%%foundset.loadOmittedRecords();]]></sample>
-        </function>
-        <function name="loadRecords">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Reloads all last (related) records again, if, for example, after search in tabpanel.
-When in find mode, this will reload the records from before the find() call.]]></description>
-          <summary><![CDATA[Reloads all last (related) records again, if, for example, after search in tabpanel.]]></summary>
-          <sample><![CDATA[//to reload all last (related) records again, if for example when searched in tabpanel
- %%prefix%%foundset.loadRecords();]]></sample>
-        </function>
-        <function name="loadRecords">
-          <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Copies foundset data from another foundset.
-This will alter the foundset state to the state of the foundset that is given.
-If you really just want to use the given foundset on the form itself, then you need to use controller.loadRecords(foundset)
-that will change the instance of the foundset that is used for this form. Not just update an existing form.
-
-If you copy over a relation into this foundset, then this foundset will not be a related foundset, it will not automatically update its state 
-of records are updated or added that belong to that relation. It will only be a snapshot of that related foundsets state.]]></description>
-          <summary><![CDATA[Copies foundset data from another foundset.]]></summary>
-          <sample><![CDATA[//Copies foundset data from another foundset
-%%prefix%%foundset.loadRecords(fs);]]></sample>
-          <parameters>
-            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
-              <description><![CDATA[The foundset to load records from]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function deprecated="true" name="loadRecords">
-          <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
-            <argumentType typecode="java.lang.Object"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
-          <description><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></description>
-          <summary><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></summary>
-          <deprecated><![CDATA[use loadRecords(FoundSet)]]></deprecated>
-          <sample/>
-          <parameters>
-            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
-              <description><![CDATA[The foundset to load record from]]></description>
-            </parameter>
-            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
-              <description><![CDATA[true for ignoring the argument array]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="loadRecords">
-          <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.dataprocessing.IDataSet"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Loads a primary key dataset, will remove related sort.]]></description>
-          <summary><![CDATA[Loads a primary key dataset, will remove related sort.]]></summary>
-          <sample><![CDATA[// loads a primary key dataset, will remove related sort!
-//var dataset = databaseManager.getDataSetByQuery(...);
-// dataset must match the table primary key columns (alphabetically ordered)
-%%prefix%%foundset.loadRecords(dataset);]]></sample>
-          <parameters>
-            <parameter name="dataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet">
-              <description><![CDATA[pkdataset]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function deprecated="true" name="loadRecords">
-          <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.dataprocessing.IDataSet"/>
-            <argumentType typecode="java.lang.Object"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
-          <description><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></description>
-          <summary><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></summary>
-          <deprecated><![CDATA[use loadRecords(JSDataSet)]]></deprecated>
-          <sample/>
-          <parameters>
-            <parameter name="dataset" type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.IDataSet">
-              <description><![CDATA[The dataset to load records from]]></description>
-            </parameter>
-            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
-              <description><![CDATA[true for ignoring the argument array]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="loadRecords">
-          <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Loads records into form foundset based on a query builder object (also known as 'Form by query').
-When the founset is in find mode, the find states are discarded, the foundset will go out of find mode and the foundset will be loaded using the query.]]></description>
-          <summary><![CDATA[Loads records into form foundset based on a query builder object (also known as 'Form by query').]]></summary>
-          <sample><![CDATA[%%prefix%%foundset.loadRecords(qbselect);]]></sample>
-          <parameters>
-            <parameter name="querybuilder" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
-              <description><![CDATA[the query builder]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="loadRecords">
-          <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.util.UUID"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Loads a single record by primary key, will remove related sort.
-
-NOTE: This function will return true if the foundset was altered/changed. It is up to the developer to check for the presence of actual data using getSize().]]></description>
-          <summary><![CDATA[Loads a single record by primary key, will remove related sort.]]></summary>
-          <sample><![CDATA[//Loads a single record by primary key, will remove related sort!
-%%prefix%%foundset.loadRecords(application.getUUID('6b5e2f5d-047e-45b3-80ee-3a32267b1f20'));]]></sample>
-          <parameters>
-            <parameter name="uuidpk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID">
-              <description><![CDATA[single-column pk value]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function deprecated="true" name="loadRecords">
-          <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.util.UUID"/>
-            <argumentType typecode="java.lang.Object"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
-          <description><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></description>
-          <summary><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></summary>
-          <deprecated><![CDATA[use loadRecords(UUID)]]></deprecated>
-          <sample/>
-          <parameters>
-            <parameter name="uuidpk" type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID">
-              <description><![CDATA[single-column pk value]]></description>
-            </parameter>
-            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
-              <description><![CDATA[true to ignore argument array]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="loadRecords">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.Number"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Loads a single record by primary key, will remove related sort.
-
-NOTE: This function will return true if the foundset was altered/changed. It is up to the developer to check for the presence of actual data using getSize().]]></description>
-          <summary><![CDATA[Loads a single record by primary key, will remove related sort.]]></summary>
-          <sample><![CDATA[//Loads a single record by primary key, will remove related sort!
-%%prefix%%foundset.loadRecords(123);]]></sample>
-          <parameters>
-            <parameter name="numberpk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
-              <description><![CDATA[single-column pk value]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function deprecated="true" name="loadRecords">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.Number"/>
-            <argumentType typecode="java.lang.Object"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
-          <description><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></description>
-          <summary><![CDATA[Method to handle old loadRecords calls with ignored argumentsaray.]]></summary>
-          <deprecated><![CDATA[use loadRecords(Number)]]></deprecated>
-          <sample/>
-          <parameters>
-            <parameter name="numberpk" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
-              <description><![CDATA[single-column pk value]]></description>
-            </parameter>
-            <parameter name="ignored" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
-              <description><![CDATA[true to ignore arguments array]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function deprecated="true" name="loadRecords">
-          <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
-          <description><![CDATA[Method to handle old foundset loadRecords calls.
-Deprecated method to handle pre-6.1 calls to varargs function foundset.loadRecords([1]), this was called with vargs=[1] in stead of vargs=[[1]].]]></description>
-          <summary><![CDATA[Method to handle old foundset loadRecords calls.]]></summary>
-          <deprecated><![CDATA[use loadRecords with single typed argument]]></deprecated>
-          <sample/>
-          <parameters>
-            <parameter name="vargs" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
-              <description><![CDATA[the arguments]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="loadRecords">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.]]></description>
-          <summary><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
-          <sample><![CDATA[//loads records in to the foundset based on a query (also known as 'Form by query')
-%%prefix%%foundset.loadRecords(sqlstring);]]></sample>
-          <parameters>
-            <parameter name="queryString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[select statement]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="loadRecords">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="[Ljava.lang.Object;"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.]]></description>
-          <summary><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
-          <sample><![CDATA[//loads records in to the foundset based on a query (also known as 'Form by query')
-%%prefix%%foundset.loadRecords(sqlstring,parameters);]]></sample>
-          <parameters>
-            <parameter name="queryString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[select statement]]></description>
-            </parameter>
-            <parameter name="argumentsArray" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
-              <description><![CDATA[arguments to query]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="newRecord">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int index of new record.]]></return>
-          <description><![CDATA[Create a new record on top of the foundset and change selection to it. Returns -1 if the record can't be made.]]></description>
-          <summary><![CDATA[Create a new record on top of the foundset and change selection to it.]]></summary>
-          <sample><![CDATA[// foreign key data is only filled in for equals (=) relation items 
-var idx = %%prefix%%foundset.newRecord(false); // add as last record
-// %%prefix%%foundset.newRecord(); // adds as first record
-// %%prefix%%foundset.newRecord(2); //adds as second record
-if (idx >= 0) // returned index is -1 in case of failure 
-{
-	%%prefix%%foundset.some_column = "some text";
-	application.output("added on position " + idx);
-	// when adding at the end of the foundset, the returned index
-	// corresponds with the size of the foundset
-}]]></sample>
-        </function>
-        <function name="newRecord">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.Boolean"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int index of new record.]]></return>
-          <description><![CDATA[Create a new record in the foundset and change selection to it. Returns -1 if the record can't be made.]]></description>
-          <summary><![CDATA[Create a new record in the foundset and change selection to it.]]></summary>
-          <sample><![CDATA[// foreign key data is only filled in for equals (=) relation items 
-var idx = %%prefix%%foundset.newRecord(false); // add as last record
-// %%prefix%%foundset.newRecord(); // adds as first record
-// %%prefix%%foundset.newRecord(2); //adds as second record
-if (idx >= 0) // returned index is -1 in case of failure 
-{
-	%%prefix%%foundset.some_column = "some text";
-	application.output("added on position " + idx);
-	// when adding at the end of the foundset, the returned index
-	// corresponds with the size of the foundset
-}]]></sample>
-          <parameters>
-            <parameter name="onTop" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
-              <description><![CDATA[when true the new record is added as the topmost record.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="newRecord">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.Boolean"/>
-            <argumentType typecode="java.lang.Boolean"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int index of new record.]]></return>
-          <description><![CDATA[Create a new record in the foundset. Returns -1 if the record can't be made.]]></description>
-          <summary><![CDATA[Create a new record in the foundset.]]></summary>
-          <sample><![CDATA[// foreign key data is only filled in for equals (=) relation items 
-var idx = %%prefix%%foundset.newRecord(false); // add as last record
-// %%prefix%%foundset.newRecord(); // adds as first record
-// %%prefix%%foundset.newRecord(2); //adds as second record
-if (idx >= 0) // returned index is -1 in case of failure 
-{
-	%%prefix%%foundset.some_column = "some text";
-	application.output("added on position " + idx);
-	// when adding at the end of the foundset, the returned index
-	// corresponds with the size of the foundset
-}]]></sample>
-          <parameters>
-            <parameter name="onTop" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
-              <description><![CDATA[when true the new record is added as the topmost record.]]></description>
-            </parameter>
-            <parameter name="changeSelection" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
-              <description><![CDATA[when true the selection is changed to the new record.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="newRecord">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.Number"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int index of new record.]]></return>
-          <description><![CDATA[Create a new record in the foundset and change selection to it. Returns -1 if the record can't be made.]]></description>
-          <summary><![CDATA[Create a new record in the foundset and change selection to it.]]></summary>
-          <sample><![CDATA[// foreign key data is only filled in for equals (=) relation items 
-var idx = %%prefix%%foundset.newRecord(false); // add as last record
-// %%prefix%%foundset.newRecord(); // adds as first record
-// %%prefix%%foundset.newRecord(2); //adds as second record
-if (idx >= 0) // returned index is -1 in case of failure 
-{
-	%%prefix%%foundset.some_column = "some text";
-	application.output("added on position " + idx);
-	// when adding at the end of the foundset, the returned index
-	// corresponds with the size of the foundset
-}]]></sample>
-          <parameters>
-            <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
-              <description><![CDATA[the new record is added at specified index.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="newRecord">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.Number"/>
-            <argumentType typecode="java.lang.Boolean"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int index of new record.]]></return>
-          <description><![CDATA[Create a new record in the foundset. Returns -1 if the record can't be made.]]></description>
-          <summary><![CDATA[Create a new record in the foundset.]]></summary>
-          <sample><![CDATA[// foreign key data is only filled in for equals (=) relation items 
-var idx = %%prefix%%foundset.newRecord(false); // add as last record
-// %%prefix%%foundset.newRecord(); // adds as first record
-// %%prefix%%foundset.newRecord(2); //adds as second record
-if (idx >= 0) // returned index is -1 in case of failure 
-{
-	%%prefix%%foundset.some_column = "some text";
-	application.output("added on position " + idx);
-	// when adding at the end of the foundset, the returned index
-	// corresponds with the size of the foundset
-}]]></sample>
-          <parameters>
-            <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
-              <description><![CDATA[the new record is added at specified index.]]></description>
-            </parameter>
-            <parameter name="changeSelection" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
-              <description><![CDATA[when true the selection is changed to the new record.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="omitRecord">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[boolean true if all records could be omitted.]]></return>
-          <description><![CDATA[Omit current record, to be shown with loadOmittedRecords.
-If the foundset is in multiselect mode, all selected records are omitted (when no index parameter is used).
-
-Note: The omitted records list is discarded when these functions are executed: loadAllRecords, loadRecords(dataset), loadRecords(sqlstring), invertRecords()]]></description>
-          <summary><![CDATA[Omit current record, to be shown with loadOmittedRecords.]]></summary>
-          <sample><![CDATA[var success = %%prefix%%foundset.omitRecord();]]></sample>
-        </function>
-        <function name="omitRecord">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.Number"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[boolean true if all records could be omitted.]]></return>
-          <description><![CDATA[Omit record under the given index, to be shown with loadOmittedRecords.
-If the foundset is in multiselect mode, all selected records are omitted (when no index parameter is used).
-
-Note: The omitted records list is discarded when these functions are executed: loadAllRecords, loadRecords(dataset), loadRecords(sqlstring), invertRecords()]]></description>
-          <summary><![CDATA[Omit record under the given index, to be shown with loadOmittedRecords.]]></summary>
-          <sample><![CDATA[var success = %%prefix%%foundset.omitRecord();]]></sample>
-          <parameters>
-            <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
-              <description><![CDATA[The index of the record to omit.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="relookup">
-          <argumentsTypes/>
-          <return type="void" typecode="void"/>
-          <description><![CDATA[Perform a relookup for the currently selected records
-Lookups are defined in the dataprovider (columns) auto-enter setting and are normally performed over a relation upon record creation.]]></description>
-          <summary><![CDATA[Perform a relookup for the currently selected records
-Lookups are defined in the dataprovider (columns) auto-enter setting and are normally performed over a relation upon record creation.]]></summary>
-          <sample><![CDATA[%%prefix%%foundset.relookup(1);]]></sample>
-        </function>
-        <function name="relookup">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.Number"/>
-          </argumentsTypes>
-          <return type="void" typecode="void"/>
-          <description><![CDATA[Perform a relookup for the record under the given index
-Lookups are defined in the dataprovider (columns) auto-enter setting and are normally performed over a relation upon record creation.]]></description>
-          <summary><![CDATA[Perform a relookup for the record under the given index
-Lookups are defined in the dataprovider (columns) auto-enter setting and are normally performed over a relation upon record creation.]]></summary>
-          <sample><![CDATA[%%prefix%%foundset.relookup(1);]]></sample>
-          <parameters>
-            <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
-              <description><![CDATA[record index (1-based)]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="removeFoundSetFilterParam">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if removing the filter succeeded, false otherwise.]]></return>
-          <description><![CDATA[Remove a named foundset filter.
-Use clear() or loadAllRecords() to make the filter effective.]]></description>
-          <summary><![CDATA[Remove a named foundset filter.]]></summary>
-          <sample><![CDATA[var success = %%prefix%%foundset.removeFoundSetFilterParam('custFilter');// removes all filters with this name
-%%prefix%%foundset.loadAllRecords();//to make param(s) effective]]></sample>
-          <parameters>
-            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[String filter name.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="search">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[the recordCount]]></return>
-          <description><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.
-Clear results from previous searches.
-
-Note: Omitted records are automatically excluded when performing a search - meaning that the foundset result by default will not include omitted records.]]></description>
-          <summary><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.]]></summary>
-          <sample><![CDATA[var recordCount = %%prefix%%foundset.search();
-//var recordCount = %%prefix%%foundset.search(false,false); //to extend foundset]]></sample>
-        </function>
-        <function name="search">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.Boolean"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[the recordCount]]></return>
-          <description><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.
-Reduce results from previous searches.
-
-Note: Omitted records are automatically excluded when performing a search - meaning that the foundset result by default will not include omitted records.]]></description>
-          <summary><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.]]></summary>
-          <sample><![CDATA[var recordCount = %%prefix%%foundset.search();
-//var recordCount = %%prefix%%foundset.search(false,false); //to extend foundset]]></sample>
-          <parameters>
-            <parameter name="clearLastResults" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
-              <description><![CDATA[boolean, clear previous search, default true]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="search">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.Boolean"/>
-            <argumentType typecode="java.lang.Boolean"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[the recordCount]]></return>
-          <description><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.
-
-Note: Omitted records are automatically excluded when performing a search - meaning that the foundset result by default will not include omitted records.]]></description>
-          <summary><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.]]></summary>
-          <sample><![CDATA[var recordCount = %%prefix%%foundset.search();
-//var recordCount = %%prefix%%foundset.search(false,false); //to extend foundset]]></sample>
-          <parameters>
-            <parameter name="clearLastResults" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
-              <description><![CDATA[boolean, clear previous search, default true]]></description>
-            </parameter>
-            <parameter name="reduceSearch" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
-              <description><![CDATA[boolean, reduce (true) or extend (false) previous search results, default true]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="selectRecord">
-          <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Object;"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if succeeded.]]></return>
-          <description><![CDATA[Select the record based on pk data.
-Note that if the foundset has not loaded the record with the pk, selectrecord will fail.
-
-In case of a table with a composite key, the pk sequence must match the alphabetical 
-ordering of the pk column names.]]></description>
-          <summary><![CDATA[Select the record based on pk data.]]></summary>
-          <sample><![CDATA[%%prefix%%foundset.selectRecord(pkid1,pkid2,pkidn);//pks must be alphabetically set! It is also possible to use an array as parameter.]]></sample>
-          <parameters>
-            <parameter name="pkid1">
-              <description><![CDATA[primary key]]></description>
-            </parameter>
-            <parameter name="pkid2" optional="true">
-              <description><![CDATA[second primary key (in case of composite primary key)]]></description>
-            </parameter>
-            <parameter name="pkidn" optional="true">
-              <description><![CDATA[nth primary key]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="setDataProviderValue">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.Object"/>
-          </argumentsTypes>
-          <return type="void" typecode="void"/>
-          <description><![CDATA[Set a value based on a dataprovider name.]]></description>
-          <summary><![CDATA[Set a value based on a dataprovider name.]]></summary>
-          <sample><![CDATA[%%prefix%%foundset.setDataProviderValue('contact_name','mycompany');]]></sample>
-          <parameters>
-            <parameter name="dataProviderID" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[data provider name]]></description>
-            </parameter>
-            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
-              <description><![CDATA[value to set]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="setSelectedIndex">
-          <argumentsTypes>
-            <argumentType typecode="int"/>
-          </argumentsTypes>
-          <return type="void" typecode="void"/>
-          <description><![CDATA[Set the current record index.]]></description>
-          <summary><![CDATA[Set the current record index.]]></summary>
-          <sample><![CDATA[//gets the current record index in the current foundset
-var current = %%prefix%%foundset.getSelectedIndex();
-//sets the next record in the foundset
-%%prefix%%foundset.setSelectedIndex(current+1);]]></sample>
-          <parameters>
-            <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
-              <description><![CDATA[index to set (1-based)]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="setSelectedIndexes">
-          <argumentsTypes>
-            <argumentType typecode="[Ljava.lang.Number;"/>
-          </argumentsTypes>
-          <return type="void" typecode="void"/>
-          <description><![CDATA[Set the selected records indexes.]]></description>
-          <summary><![CDATA[Set the selected records indexes.]]></summary>
-          <sample><![CDATA[// modify selection to the first selected item and the following row only
-var current = %%prefix%%foundset.getSelectedIndexes();
-if (current.length > 1)
-{
-	var newSelection = new Array();
-	newSelection[0] = current[0]; // first current selection
-	newSelection[1] = current[0] + 1; // and the next row
-	%%prefix%%foundset.setSelectedIndexes(newSelection);
-}]]></sample>
-          <parameters>
-            <parameter name="indexes" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[Ljava.lang.Number;">
-              <description><![CDATA[An array with indexes to set.]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="sort">
-          <argumentsTypes>
-            <argumentType typecode="org.mozilla.javascript.Function"/>
-          </argumentsTypes>
-          <return type="void" typecode="void"/>
-          <description><![CDATA[Sorts the foundset based on the given record comparator function.
-The comparator function is called to compare
-two records, that are passed as arguments, and
-it will return -1/0/1 if the first record is less/equal/greater
-then the second record.
-
-The function based sorting does not work with printing.
-It is just a temporary in-memory sort.]]></description>
-          <summary><![CDATA[Sorts the foundset based on the given record comparator function.]]></summary>
-          <sample><![CDATA[%%prefix%%foundset.sort(mySortFunction);
-
-function mySortFunction(r1, r2)
-{
-	var o = 0;
-	if(r1.id < r2.id)
-	{
-		o = -1;
-	}
-	else if(r1.id > r2.id)
-	{
-		o = 1;
-	}
-	return o;
-}]]></sample>
-          <parameters>
-            <parameter name="recordComparisonFunction" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
-              <description><![CDATA[record comparator function]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="sort">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-          </argumentsTypes>
-          <return type="void" typecode="void"/>
-          <description><![CDATA[Sorts the foundset based on the given sort string.
-TIP: You can use the Copy button in the developer Select Sorting Fields dialog to get the needed syntax string for the desired sort fields/order.]]></description>
-          <summary><![CDATA[Sorts the foundset based on the given sort string.]]></summary>
-          <sample><![CDATA[%%prefix%%foundset.sort('columnA desc,columnB asc');]]></sample>
-          <parameters>
-            <parameter name="sortString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[the specified columns (and sort order)]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="sort">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.Boolean"/>
-          </argumentsTypes>
-          <return type="void" typecode="void"/>
-          <description><![CDATA[Sorts the foundset based on the given sort string.
-TIP: You can use the Copy button in the developer Select Sorting Fields dialog to get the needed syntax string for the desired sort fields/order.]]></description>
-          <summary><![CDATA[Sorts the foundset based on the given sort string.]]></summary>
-          <sample><![CDATA[%%prefix%%foundset.sort('columnA desc,columnB asc');]]></sample>
-          <parameters>
-            <parameter name="sortString" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[the specified columns (and sort order)]]></description>
-            </parameter>
-            <parameter name="defer" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
-              <description><![CDATA[when true, the "sortString" will be just stored, without performing a query on the database (the actual sorting will be deferred until the next data loading action).]]></description>
-            </parameter>
-          </parameters>
-        </function>
-        <function name="unrelate">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.IFoundSetInternal"><![CDATA[FoundSet unrelated foundset.]]></return>
-          <description><![CDATA[Create a new unrelated foundset that is a copy of the current foundset.
-If the current foundset is not related, no copy will made.]]></description>
-          <summary><![CDATA[Create a new unrelated foundset that is a copy of the current foundset.]]></summary>
-          <sample><![CDATA[%%prefix%%foundset.unrelate();]]></sample>
-        </function>
-      </functions>
     </object>
     <object publicName="Renderable" qualifiedName="com.servoy.j2db.ui.IScriptRenderMethodsWithFormat" scriptingName="Renderable">
       <properties>
@@ -29117,7 +27016,7 @@ dataset.addRow(['cc',3]);
         </function>
       </functions>
     </object>
-    <object publicName="RuntimeComponent" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeComponent">
+    <object publicName="RuntimeComponent" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeComponent" scriptingName="RuntimeComponent">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -30312,7 +28211,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object publicName="RuntimeForm" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Form">
+    <object publicName="RuntimeForm" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Form" scriptingName="RuntimeForm ">
       <properties>
         <property name="_super">
           <return type="com.servoy.j2db.documentation.scripting.docs.Form" typecode="com.servoy.j2db.scripting.FormScope"/>
@@ -42505,7 +40404,7 @@ form.defaultPageFormat = solutionModel.createPageFormat(612,792,72,72,72,72,SM_O
         </constant>
       </constants>
     </object>
-    <object publicName="UUID" qualifiedName="com.servoy.j2db.util.UUID">
+    <object publicName="UUID" qualifiedName="com.servoy.j2db.util.UUID" scriptingName="UUID">
       <functions>
         <function name="toBytes">
           <argumentsTypes/>

@@ -136,7 +136,8 @@
             <argumentType typecode="org.mozilla.javascript.Function"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="com.servoy.j2db.documentation.scripting.docs.Boolean"/>
-          <description><![CDATA[Runs a function on items in the array while that function is returning true. It returns true if the function returns true for every item it could visit.]]></description>
+          <description><![CDATA[Runs a function on items in the array while that function is returning true. It returns true if the function returns true for every item it could visit.
+The callback function is invoked with three arguments: the element value, the element index, the array being traversed.]]></description>
           <summary><![CDATA[Runs a function on items in the array while that function is returning true.]]></summary>
           <sample><![CDATA[function isNumber(value) { return typeof value == 'number'; }
 var a1 = [1, 2, 3];
@@ -158,7 +159,8 @@ application.output(a2.every(isNumber));]]></sample>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="com.servoy.j2db.documentation.scripting.docs.Boolean"/>
-          <description><![CDATA[Runs a function on items in the array while that function is returning true. It returns true if the function returns true for every item it could visit.]]></description>
+          <description><![CDATA[Runs a function on items in the array while that function is returning true. It returns true if the function returns true for every item it could visit.
+The callback function is invoked with three arguments: the element value, the element index, the array being traversed.]]></description>
           <summary><![CDATA[Runs a function on items in the array while that function is returning true.]]></summary>
           <sample><![CDATA[function isNumber(value) { return typeof value == 'number'; }
 var a1 = [1, 2, 3];
@@ -175,7 +177,8 @@ application.output(a2.every(isNumber));]]></sample>
             <argumentType typecode="org.mozilla.javascript.Function"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
-          <description><![CDATA[Runs a function on every item in the array and returns an array of all items for which the function returns true.]]></description>
+          <description><![CDATA[Runs a function on every item in the array and returns an array of all items for which the function returns true.
+The callback function is invoked with three arguments: the element value, the element index, the array being traversed.]]></description>
           <summary><![CDATA[Runs a function on every item in the array and returns an array of all items for which the function returns true.]]></summary>
           <sample><![CDATA[var a1 = ['a', 10, 'b', 20, 'c', 30];
 var a2 = a1.filter(function(item) { return typeof item == 'number'; });
@@ -195,7 +198,8 @@ application.output(a2);]]></sample>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
-          <description><![CDATA[Runs a function on every item in the array and returns an array of all items for which the function returns true.]]></description>
+          <description><![CDATA[Runs a function on every item in the array and returns an array of all items for which the function returns true.
+The callback function is invoked with three arguments: the element value, the element index, the array being traversed.]]></description>
           <summary><![CDATA[Runs a function on every item in the array and returns an array of all items for which the function returns true.]]></summary>
           <sample><![CDATA[var a1 = ['a', 10, 'b', 20, 'c', 30];
 var a2 = a1.filter(function(item) { return typeof item == 'number'; });
@@ -343,7 +347,8 @@ application.output(a.lastIndexOf('z'));]]></sample>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
-          <description><![CDATA[Runs a function on every item in the array and returns the results in an array.]]></description>
+          <description><![CDATA[Runs a function on every item in the array and returns the results in an array.
+The callback function is invoked with three arguments: the element value, the element index, the array being traversed.]]></description>
           <summary><![CDATA[Runs a function on every item in the array and returns the results in an array.]]></summary>
           <sample><![CDATA[var a = ['a', 'b', 'c'];	
 var a2 = a.map(function(item) { return item.toUpperCase(); });	
@@ -363,7 +368,8 @@ application.output(a2);]]></sample>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
-          <description><![CDATA[Runs a function on every item in the array and returns the results in an array.]]></description>
+          <description><![CDATA[Runs a function on every item in the array and returns the results in an array.
+The callback function is invoked with three arguments: the element value, the element index, the array being traversed.]]></description>
           <summary><![CDATA[Runs a function on every item in the array and returns the results in an array.]]></summary>
           <sample><![CDATA[var a = ['a', 'b', 'c'];	
 var a2 = a.map(function(item) { return item.toUpperCase(); });	
@@ -500,7 +506,8 @@ var nwords1 = words.slice(3, 5);]]></sample>
             <argumentType typecode="org.mozilla.javascript.Function"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="com.servoy.j2db.documentation.scripting.docs.Boolean"/>
-          <description><![CDATA[Runs a function on items in the array while that function returns false. It returns true if the function returns true for any item it could visit.]]></description>
+          <description><![CDATA[Runs a function on items in the array while that function returns false. It returns true if the function returns true for any item it could visit.
+The callback function is invoked with three arguments: the element value, the element index, the array being traversed.]]></description>
           <summary><![CDATA[Runs a function on items in the array while that function returns false.]]></summary>
           <sample><![CDATA[function isNumber(value) { return typeof value == 'number'; }  
 var a1 = [1, 2, 3];    
@@ -522,7 +529,8 @@ application.output(a2.some(isNumber));]]></sample>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="com.servoy.j2db.documentation.scripting.docs.Boolean"/>
-          <description><![CDATA[Runs a function on items in the array while that function returns false. It returns true if the function returns true for any item it could visit.]]></description>
+          <description><![CDATA[Runs a function on items in the array while that function returns false. It returns true if the function returns true for any item it could visit.
+The callback function is invoked with three arguments: the element value, the element index, the array being traversed.]]></description>
           <summary><![CDATA[Runs a function on items in the array while that function returns false.]]></summary>
           <sample><![CDATA[function isNumber(value) { return typeof value == 'number'; }  
 var a1 = [1, 2, 3];    
@@ -661,7 +669,7 @@ words.unshift("limit","lines");]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="Boolean" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Boolean"/>
+    <object publicName="Boolean" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Boolean" scriptingName="Boolean"/>
     <object publicName="Date" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Date" scriptingName="Date" servoyMobile="true">
       <constructors>
         <constructor name="Date" servoyMobile="true">
@@ -1819,7 +1827,7 @@ application.output(str);]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="Function" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Function">
+    <object publicName="Function" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Function" scriptingName="Function">
       <properties>
         <property name="constructor">
           <return type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="com.servoy.j2db.documentation.scripting.docs.Function"/>
