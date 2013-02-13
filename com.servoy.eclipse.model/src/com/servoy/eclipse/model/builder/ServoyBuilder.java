@@ -1823,14 +1823,16 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												}
 												else if (scriptMethod.isDeprecated())
 												{
-													ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(scriptMethod.getDisplayName() + "()");
+													ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(scriptMethod.getDisplayName() + "()",
+														"form " + parentForm.getName(), element.getName());
 													addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
 														IMarker.PRIORITY_NORMAL, null, o);
 												}
 											}
 											else if (scriptMethod.isDeprecated())
 											{
-												ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(scriptMethod.getDisplayName() + "()");
+												ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(scriptMethod.getDisplayName() + "()",
+													"solution " + project.getName(), element.getName());
 												addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
 													IMarker.PRIORITY_NORMAL, null, o);
 											}
@@ -3387,8 +3389,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getRight().name(), vl);
 								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 								{
-									ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedCalculation.fill(flattenedSolution.getScriptCalculation(
-										vl.getDataProviderID1(), table).getName());
+									ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedCalculation.fill(
+										flattenedSolution.getScriptCalculation(vl.getDataProviderID1(), table).getName(), "valuelist " + vl.getName(),
+										"Related value");
 									problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity,
 										DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getRight()), mk.getText()));
 								}
@@ -3426,8 +3429,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getRight().name(), vl);
 								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 								{
-									ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedCalculation.fill(flattenedSolution.getScriptCalculation(
-										vl.getDataProviderID2(), table).getName());
+									ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedCalculation.fill(
+										flattenedSolution.getScriptCalculation(vl.getDataProviderID2(), table).getName(), "valuelist " + vl.getName(),
+										"Related value");
 									problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity,
 										DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getRight()), mk.getText()));
 								}
@@ -3466,8 +3470,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getRight().name(), vl);
 								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 								{
-									ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedCalculation.fill(flattenedSolution.getScriptCalculation(
-										vl.getDataProviderID3(), table).getName());
+									ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedCalculation.fill(
+										flattenedSolution.getScriptCalculation(vl.getDataProviderID3(), table).getName(), "valuelist " + vl.getName(),
+										"Related value");
 									problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity,
 										DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getRight()), mk.getText()));
 								}
@@ -3555,7 +3560,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getRight().name(), vl);
 						if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 						{
-							ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(scriptMethod.getDisplayName() + "()");
+							ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(scriptMethod.getDisplayName() + "()",
+								"valuelist " + vl.getName(), "Global method");
 							problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getRight()),
 								mk.getText()));
 						}
@@ -4053,7 +4059,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													else if (scriptMethod != null && scriptMethod.isDeprecated())
 													{
 														ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(scriptMethod.getDisplayName() +
-															"()");
+															"()", "table " + tableName, "Lookup value");
 														addMarker(res, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
 															IMarker.PRIORITY_NORMAL, null, null).setAttribute("columnName", column.getName());
 													}
@@ -4118,7 +4124,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														else if (scriptMethod.isDeprecated())
 														{
 															ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(scriptMethod.getDisplayName() +
-																"()");
+																"()", "table " + tableName, "servoy.GlobalMethodValidator");
 															addMarker(res, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
 																IMarker.PRIORITY_NORMAL, null, null).setAttribute("columnName", column.getName());
 														}
@@ -4153,7 +4159,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														else if (scriptMethod.isDeprecated())
 														{
 															ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(scriptMethod.getDisplayName() +
-																"()");
+																"()", "table " + tableName, "GlobalMethodConverter");
 															addMarker(res, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
 																IMarker.PRIORITY_NORMAL, null, null).setAttribute("columnName", column.getName());
 														}

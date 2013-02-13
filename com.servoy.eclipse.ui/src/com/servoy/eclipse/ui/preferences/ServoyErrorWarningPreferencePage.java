@@ -409,6 +409,10 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 				Messages.ErrorWarningPreferencePage_columnIncompatbleWithUUID, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.COLUMN_LOOKUP_INVALID,
 				Messages.ErrorWarningPreferencePage_columnLookupInvalid, false));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.COLUMN_VALIDATOR_INVALID,
+				Messages.ErrorWarningPreferencePage_columnValidatorInvalid, false));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.COLUMN_CONVERTER_INVALID,
+				Messages.ErrorWarningPreferencePage_columnConverterInvalid, false));
 		}
 		else if (ERROR_WARNING_SORT_PROBLEMS.equals(problemSection))
 		{
