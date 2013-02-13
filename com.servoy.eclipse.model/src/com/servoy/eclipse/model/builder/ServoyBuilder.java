@@ -2132,13 +2132,15 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												}
 												if (dataProvider instanceof ScriptVariable && ((ScriptVariable)dataProvider).isDeprecated())
 												{
-													ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedVariable.fill(((ScriptVariable)dataProvider).getName());
+													ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedVariable.fill(
+														((ScriptVariable)dataProvider).getName(), "form " + inForm, "dataProvider");
 													addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
 														IMarker.PRIORITY_NORMAL, null, o);
 												}
 												else if (dataProvider instanceof ScriptCalculation && ((ScriptCalculation)dataProvider).isDeprecated())
 												{
-													ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedCalculation.fill(((ScriptCalculation)dataProvider).getName());
+													ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedCalculation.fill(
+														((ScriptCalculation)dataProvider).getName(), "form " + inForm, "dataProvider");
 													addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
 														IMarker.PRIORITY_NORMAL, null, o);
 												}
@@ -4114,7 +4116,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													{
 														if (((ScriptVariable)globalDataProvider).isDeprecated())
 														{
-															ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedVariable.fill(((ScriptVariable)globalDataProvider).getName());
+															ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedVariable.fill(
+																((ScriptVariable)globalDataProvider).getName(), "table " + tableName, "Lookup value");
 															addMarker(res, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
 																IMarker.PRIORITY_NORMAL, null, null).setAttribute("columnName", column.getName());
 														}
@@ -4731,7 +4734,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									}
 									else if (dataProvider != null && dataProvider instanceof ScriptVariable && ((ScriptVariable)dataProvider).isDeprecated())
 									{
-										mk = MarkerMessages.ElementUsingDeprecatedVariable.fill(((ScriptVariable)dataProvider).getName());
+										mk = MarkerMessages.ElementUsingDeprecatedVariable.fill(((ScriptVariable)dataProvider).getName(),
+											"relation " + element.getName(), "primary key");
 										errorsFound = true;
 										addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM, IMarker.PRIORITY_NORMAL,
 											null, element);
@@ -4755,7 +4759,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										ScriptCalculation calc = (ScriptCalculation)dataProvider;
 										if (calc.isDeprecated())
 										{
-											mk = MarkerMessages.ElementUsingDeprecatedCalculation.fill(calc.getName());
+											mk = MarkerMessages.ElementUsingDeprecatedCalculation.fill(calc.getName(), "relation " + element.getName(),
+												"primary key");
 											errorsFound = true;
 											addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
 												IMarker.PRIORITY_NORMAL, null, element);
