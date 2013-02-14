@@ -4115,9 +4115,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													IPropertyDescriptor propertyDescriptor = ((IPropertyDescriptorProvider)validator).getPropertyDescriptor(key);
 													if (propertyDescriptor != null && propertyDescriptor.getType() == IPropertyDescriptor.GLOBAL_METHOD)
 													{
+														ScriptMethod scriptMethod = null;
 														Map<String, String> parsedValidatorProperties = ComponentFactory.parseJSonProperties(column.getColumnInfo().getValidatorProperties());
-														String methodName = parsedValidatorProperties.get(key);
-														ScriptMethod scriptMethod = getServoyModel().getFlattenedSolution().getScriptMethod(null, methodName);
+														if (parsedValidatorProperties != null)
+														{
+															String methodName = parsedValidatorProperties.get(key);
+															scriptMethod = getServoyModel().getFlattenedSolution().getScriptMethod(null, methodName);
+														}
 														if (scriptMethod == null)
 														{
 															ServoyMarker mk = MarkerMessages.ColumnValidatorInvalid.fill(tableName, column.getName());
