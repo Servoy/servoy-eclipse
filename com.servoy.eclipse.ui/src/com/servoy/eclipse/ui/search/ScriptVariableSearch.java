@@ -89,7 +89,8 @@ public class ScriptVariableSearch extends DLTKSearchEngineSearch
 
 		if (variable.getParent() instanceof Solution)
 		{
-			FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm", "*.rel" }, true);
+			FileTextSearchScope scope = FileTextSearchScope.newSearchScope(getAllScopesAndActiveResourceProject(), new String[] { "*.frm", "*.rel", "*.dbi" },
+				true);
 			if (ScriptVariable.GLOBAL_SCOPE.equals(variable.getScopeName()))
 			{
 				// legacy globals.xx, also matches scopes.globals.xx

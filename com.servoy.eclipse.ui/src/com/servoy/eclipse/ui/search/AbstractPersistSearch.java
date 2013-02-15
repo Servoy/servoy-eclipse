@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.search;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
@@ -128,6 +129,19 @@ public abstract class AbstractPersistSearch implements ISearchQuery
 			ServoyProject servoyProject = servoyModel.getServoyProject(solution.getName());
 			scopes.add(servoyProject.getProject());
 		}
+		return scopes.toArray(new IResource[scopes.size()]);
+	}
+
+	protected IResource[] getAllScopesAndActiveResourceProject()
+	{
+		List<IResource> scopes = new ArrayList<IResource>(Arrays.asList(getAllScopes()));
+
+		ServoyProject currentProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+		if (currentProject != null && currentProject.getResourcesProject() != null)
+		{
+			scopes.add(currentProject.getResourcesProject().getProject());
+		}
+
 		return scopes.toArray(new IResource[scopes.size()]);
 	}
 
