@@ -94,7 +94,7 @@ public class TypeProvider implements ITypeProvider
 								if (method.isConstructor() && !method.isPrivate())
 								{
 									String name = "scopes." + scopes[1] + '.' + method.getName();
-									if (name.startsWith(prefix))
+									if (name.toLowerCase().startsWith(prefixLower))
 									{
 										names.add(name);
 									}
@@ -106,7 +106,7 @@ public class TypeProvider implements ITypeProvider
 							for (String scopeName : scopeNames)
 							{
 								String name = "scopes." + scopeName;
-								if (name.startsWith(prefix))
+								if (name.toLowerCase().startsWith(prefixLower))
 								{
 									names.add(name);
 								}
@@ -129,7 +129,7 @@ public class TypeProvider implements ITypeProvider
 								if (method.isConstructor() && !method.isPrivate())
 								{
 									String name = "forms." + scopes[1] + '.' + method.getName();
-									if (name.startsWith(prefix))
+									if (name.toLowerCase().startsWith(prefixLower))
 									{
 										names.add(name);
 									}
@@ -141,7 +141,8 @@ public class TypeProvider implements ITypeProvider
 							for (String formName : formNames)
 							{
 								String name = "forms." + formName;
-								if (name.startsWith(prefix) && !FormEncapsulation.isPrivate(flattenedSolution.getForm(formName), flattenedSolution))
+								if (name.toLowerCase().startsWith(prefixLower) &&
+									!FormEncapsulation.isPrivate(flattenedSolution.getForm(formName), flattenedSolution))
 								{
 									names.add(name);
 								}
