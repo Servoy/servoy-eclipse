@@ -493,10 +493,15 @@ public class MarkerMessages
 	public static ServoyMarker ColumnValidatorInvalid = new ServoyMarker(
 		"Table \"{0}\" has column \"{1}\" which has an invalid validator.", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
 	/**
-	 * The converter value used for a column is invalid. This can happen when the converterr points to a global identifier that does not exist.
+	 * The converter value used for a column is invalid. This can happen when the converter points to a global identifier that does not exist.
 	 */
 	public static ServoyMarker ColumnConverterInvalid = new ServoyMarker(
 		"Table \"{0}\" has column \"{1}\" which has an invalid converter.", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
+
+	public static ServoyMarker UIConverterInvalid = new ServoyMarker(
+		"Element in form \"{0}\" has UI converter: \"{1}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+	public static ServoyMarker UIConverterOnElementInvalid = new ServoyMarker(
+		"Element \"{0}\" in form \"{1}\" has invalid UI converter: \"{2}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker ColumnDuplicateNameDPID = new ServoyMarker(
 		"Table \"{0}\" has column \"{1}\" which has a duplicate name/dataProviderID as column \"{2}\".", ServoyBuilder.COLUMN_MARKER_TYPE); //$NON-NLS-1$
