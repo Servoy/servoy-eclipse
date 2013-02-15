@@ -17,8 +17,6 @@
 package com.servoy.eclipse.designer.editor.mobile.editparts;
 
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.draw2d.IFigure;
@@ -31,14 +29,11 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.ComponentDeleteEditPolicy;
 import com.servoy.eclipse.designer.editor.GroupFigure;
 import com.servoy.eclipse.designer.editor.SetBoundsToSupportBoundsFigureListener;
-import com.servoy.eclipse.model.util.CompositeComparator;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.debug.layout.MobileFormLayout;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
-import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.PositionComparator;
-import com.servoy.j2db.util.Utils;
 
 /**
  * Graphical edit part for element groups in mobile editor.
@@ -53,24 +48,10 @@ public class MobileGroupGraphicalEditPart extends BaseGroupGraphicalEditPart
 		super(application, editorPart, form, group);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected List<IFormElement> getModelChildren()
 	{
-		List<IFormElement> returnList = Utils.asList(getGroup().getElements());
-		Collections.sort(returnList, new CompositeComparator<IFormElement>(new Comparator<IFormElement>()
-		{
-			// sort so that label comes first	
-			public int compare(IFormElement element1, IFormElement element2)
-			{
-				if (element1.getTypeID() == IRepository.GRAPHICALCOMPONENTS)
-				{
-					return element2.getTypeID() == IRepository.GRAPHICALCOMPONENTS ? 0 : -1;
-				}
-				return element2.getTypeID() == IRepository.GRAPHICALCOMPONENTS ? 1 : 0;
-			}
-		}, PositionComparator.XY_PERSIST_COMPARATOR));
-		return returnList;
+		return MobileFormLayout.getGroupElements(getGroup());
 	}
 
 	@Override

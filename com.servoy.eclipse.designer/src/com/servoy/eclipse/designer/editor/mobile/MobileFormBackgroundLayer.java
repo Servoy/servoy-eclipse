@@ -24,9 +24,9 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.designer.editor.mobile.editparts.MobileFormLayoutManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.resource.ColorResource;
+import com.servoy.j2db.debug.layout.MobileFormLayout;
 
 /**
  * Layer to print form background
@@ -50,6 +50,6 @@ public class MobileFormBackgroundLayer extends FreeformLayer
 	{
 		Dimension size = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm()).getSize();
 		graphics.setBackgroundColor(BG_COLOR);
-		graphics.fillRectangle(0, 0, MobileFormLayoutManager.MOBILE_FORM_WIDTH, size.height);
+		graphics.fillRectangle(0, 0, MobileFormLayout.MOBILE_FORM_WIDTH, size.height);
 	}
 }

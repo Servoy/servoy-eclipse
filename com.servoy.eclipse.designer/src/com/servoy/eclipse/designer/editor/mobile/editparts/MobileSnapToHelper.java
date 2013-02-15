@@ -29,6 +29,7 @@ import org.eclipse.gef.SnapToHelper;
 import org.eclipse.gef.requests.CreateRequest;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor.RequestType;
+import com.servoy.j2db.debug.layout.MobileFormLayout;
 import com.servoy.j2db.persistence.Part;
 
 /**
@@ -84,7 +85,7 @@ public class MobileSnapToHelper extends SnapToHelper
 
 	protected MobileSnapData calculateSnapping(Request request, int x, int y, int height)
 	{
-		GraphicalEditPart target = findEditpartAt(MobileFormLayoutManager.MOBILE_FORM_WIDTH / 2, y);
+		GraphicalEditPart target = findEditpartAt(MobileFormLayout.MOBILE_FORM_WIDTH / 2, y);
 		if (target == null)
 		{
 			return null;
@@ -106,7 +107,7 @@ public class MobileSnapToHelper extends SnapToHelper
 			}
 		}
 
-		GraphicalEditPart snapTarget = findEditpartAt(MobileFormLayoutManager.MOBILE_FORM_WIDTH / 2, y + height);
+		GraphicalEditPart snapTarget = findEditpartAt(MobileFormLayout.MOBILE_FORM_WIDTH / 2, y + height);
 		if (snapTarget == null)
 		{
 			snapTarget = target;

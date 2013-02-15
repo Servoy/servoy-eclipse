@@ -19,11 +19,7 @@ package com.servoy.eclipse.designer.editor.mobile.editparts;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.draw2d.FreeformLayer;
 import org.eclipse.draw2d.IFigure;
@@ -43,18 +39,15 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController;
 import com.servoy.j2db.IApplication;
-import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.debug.layout.MobileFormLayout;
+import com.servoy.j2db.persistence.FlattenedForm;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
-import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportBounds;
-import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
-import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -96,7 +89,18 @@ public class MobileFormGraphicalEditPart extends BaseFormGraphicalEditPart imple
 		}
 		else
 		{
-			list.addAll(getBodyElementsForRecordView(editingFlattenedSolution, flattenedForm));
+			for (ISupportBounds element : MobileFormLayout.getBodyElementsForRecordView(editingFlattenedSolution, flattenedForm))
+			{
+				if (element instanceof Portal && ((Portal)element).getCustomMobileProperty(IMobileProperties.LIST_COMPONENT.propertyName) != null)
+				{
+					// inset list
+					list.add(MobileListModel.create(FlattenedForm.getWrappedForm(flattenedForm), ((Portal)element)));
+				}
+				else
+				{
+					list.add(element);
+				}
+			}
 		}
 
 		for (Part part : Utils.iterate(flattenedForm.getParts()))
@@ -110,56 +114,6 @@ public class MobileFormGraphicalEditPart extends BaseFormGraphicalEditPart imple
 		return list;
 	}
 
-	private List<ISupportBounds> getBodyElementsForRecordView(FlattenedSolution editingFlattenedSolution, Form flattenedForm)
-	{
-		List<ISupportBounds> elements = new ArrayList<ISupportBounds>();
-		Set<String> groups = new HashSet<String>();
-		for (IPersist persist : flattenedForm.getAllObjectsAsList())
-		{
-			if (persist instanceof ISupportExtendsID && PersistHelper.isOverrideOrphanElement((ISupportExtendsID)persist))
-			{
-				// skip orphaned overrides
-				continue;
-			}
-
-			if (persist instanceof IFormElement && persist instanceof AbstractBase)
-			{
-				String groupID = ((IFormElement)persist).getGroupID();
-				if (groupID == null)
-				{
-					if (persist instanceof Portal && ((Portal)persist).getCustomMobileProperty(IMobileProperties.LIST_COMPONENT.propertyName) != null)
-					{
-						// inset list
-						elements.add(MobileListModel.create(getPersist(), ((Portal)persist)));
-					}
-
-					// tabpanel: list elements or navtab
-					else if (((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.HEADER_ITEM.propertyName) == null &&
-						((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.FOOTER_ITEM.propertyName) == null)
-					{
-						// regular item
-						elements.add((ISupportBounds)(persist instanceof IFlattenedPersistWrapper
-							? ((IFlattenedPersistWrapper< ? >)persist).getWrappedPersist() : persist));
-					}
-				}
-				else if (groups.add(groupID))
-				{
-					elements.add(new FormElementGroup(groupID, editingFlattenedSolution, getPersist()));
-				}
-			}
-		}
-
-		// sort by y-position
-		Collections.sort(elements, new Comparator<ISupportBounds>()
-		{
-			public int compare(ISupportBounds element1, ISupportBounds element2)
-			{
-				return element1.getLocation().y - element2.getLocation().y;
-			}
-		});
-
-		return elements;
-	}
 
 	@Override
 	public void activate()

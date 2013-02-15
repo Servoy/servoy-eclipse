@@ -17,12 +17,16 @@
 
 package com.servoy.eclipse.designer.editor.mobile.editparts;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.draw2d.AbstractLayout;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Rectangle;
+
+import com.servoy.j2db.debug.layout.ILayoutWrapper;
+import com.servoy.j2db.debug.layout.MobileFormLayout;
 
 /**
  * Layout title above input
@@ -35,33 +39,23 @@ public class MobileGroupLayoutManager extends AbstractLayout
 	public void layout(IFigure container)
 	{
 		Rectangle containerBounds = container.getBounds();
-		// children are based on model order as created in editPart.getModelChildren()
-
-		int x = containerBounds.x + 2;
-		int y = containerBounds.y + 2;
-		int width = containerBounds.width - 4;
-
-		for (IFigure child : (List<IFigure>)container.getChildren())
-		{
-			Dimension childPrefSize = child.getPreferredSize();
-			int height = (childPrefSize.height > 0 ? childPrefSize.height : 38);
-
-			child.setBounds(new Rectangle(x, y, width, height));
-
-			y += height + 2;
-		}
+		MobileFormLayout.layoutGroup(containerBounds.x, containerBounds.y, containerBounds.width, containerBounds.height, getLayoutElements(container));
 	}
 
 	@Override
 	protected Dimension calculatePreferredSize(IFigure container, int wHint, int hHint)
 	{
-		int height = 0;
+		return new Dimension(wHint, MobileFormLayout.calculateGroupHeight(getLayoutElements(container)));
+	}
+
+	private List<ILayoutWrapper> getLayoutElements(IFigure container)
+	{
+		List<ILayoutWrapper> elements = new ArrayList<ILayoutWrapper>();
+		// children are based on model order as created in editPart.getModelChildren()
 		for (IFigure child : (List<IFigure>)container.getChildren())
 		{
-			Dimension childPrefSize = child.getPreferredSize();
-			height += (childPrefSize.height > 0 ? childPrefSize.height : 38) + 2;
+			elements.add(new FigureLayoutWrapper(child));
 		}
-
-		return new Dimension(wHint, height);
+		return elements;
 	}
 }

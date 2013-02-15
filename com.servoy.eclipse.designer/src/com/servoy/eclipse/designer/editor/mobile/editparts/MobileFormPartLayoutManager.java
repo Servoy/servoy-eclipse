@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.mobile.editparts;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.draw2d.IFigure;
@@ -24,10 +25,8 @@ import org.eclipse.draw2d.XYLayout;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Rectangle;
 
-import com.servoy.base.persistence.IMobileProperties;
-import com.servoy.eclipse.designer.editor.PersistImageFigure;
-import com.servoy.j2db.persistence.AbstractBase;
-import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.debug.layout.ILayoutWrapper;
+import com.servoy.j2db.debug.layout.MobileFormLayout;
 import com.servoy.j2db.persistence.Part;
 
 /** 
@@ -48,76 +47,21 @@ public class MobileFormPartLayoutManager extends XYLayout
 	@Override
 	public void layout(IFigure container)
 	{
+		Rectangle containerBounds = container.getBounds();
+		List<ILayoutWrapper> elements = new ArrayList<ILayoutWrapper>();
+		// children are based on model order as created in editPart.getModelChildren()
+		for (IFigure child : (List<IFigure>)container.getChildren())
+		{
+			elements.add(new FigureLayoutWrapper(child));
+		}
+
 		if (partType == Part.HEADER)
 		{
-			layoutHeader(container);
+			MobileFormLayout.layoutHeader(elements, containerBounds.x, containerBounds.y, containerBounds.width);
 		}
 		else
 		{
-			layoutFooter(container);
-		}
-	}
-
-	/*
-	 * left button, text and right button
-	 */
-	public void layoutHeader(IFigure container)
-	{
-		Rectangle containerBounds = container.getBounds();
-		// children are based on model order as created in editPart.getModelChildren()
-		int y = containerBounds.y + 8;
-		int height = 28;
-
-		for (IFigure child : (List<IFigure>)container.getChildren())
-		{
-			int width = 50;
-			if (child instanceof PersistImageFigure)
-			{
-				IPersist persist = ((PersistImageFigure)child).getPersist();
-				if (persist instanceof AbstractBase)
-				{
-					int x;
-					if (((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.HEADER_LEFT_BUTTON.propertyName) != null)
-					{
-						x = containerBounds.x + 20;
-					}
-					else if (((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName) != null)
-					{
-						width = containerBounds.width - 150;
-						x = containerBounds.x + (containerBounds.width - width) / 2;
-					}
-					else if (((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.HEADER_RIGHT_BUTTON.propertyName) != null)
-					{
-						x = containerBounds.x + containerBounds.width - width - 20;
-					}
-					else continue;
-
-					child.setBounds(new Rectangle(x, y, width, height));
-				}
-			}
-		}
-	}
-
-	public void layoutFooter(IFigure container)
-	{
-		Rectangle containerBounds = container.getBounds();
-		// children are based on model order as created in editPart.getModelChildren()
-		int x = containerBounds.x + 1;
-		int y = containerBounds.y + 1;
-		int width = 49;
-		int height = 38;
-
-		for (IFigure child : (List<IFigure>)container.getChildren())
-		{
-			child.setBounds(new Rectangle(x, y, width, height));
-
-			x += width + 1;
-			if (x + width > containerBounds.width)
-			{
-				// next line
-				x = containerBounds.x + 2;
-				y += height + 2;
-			}
+			MobileFormLayout.layoutFooter(elements, containerBounds.x, containerBounds.y, containerBounds.width);
 		}
 	}
 

@@ -39,6 +39,7 @@ import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.DeleteListCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.ReorderContentElementsCommand;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileSnapData.MobileSnapType;
+import com.servoy.j2db.debug.layout.MobileFormLayout;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
@@ -150,6 +151,6 @@ public class MobileFormXYLayoutEditPolicy extends XYLayoutEditPolicy
 		Rectangle bounds = feedback.getBounds().getCopy();
 		feedback.translateToAbsolute(bounds);
 
-		feedback.setBounds(new Rectangle(0, bounds.y - feedback.getParent().getBounds().y, MobileFormLayoutManager.MOBILE_FORM_WIDTH, 3));
+		feedback.setBounds(new Rectangle(0, bounds.y - feedback.getParent().getBounds().y, MobileFormLayout.MOBILE_FORM_WIDTH, 3));
 	}
 }
