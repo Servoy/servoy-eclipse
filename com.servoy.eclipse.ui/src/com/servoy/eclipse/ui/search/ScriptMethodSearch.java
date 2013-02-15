@@ -74,7 +74,7 @@ public class ScriptMethodSearch extends DLTKSearchEngineSearch
 		if (method.getParent() instanceof Solution)
 		{
 			// bgcolor usage
-			scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm" }, true);
+			scope = FileTextSearchScope.newSearchScope(getAllScopesAndActiveResourceProject(), new String[] { "*.frm", "*.tbl", "*.dbi" }, true);
 			if (ScriptVariable.GLOBAL_SCOPE.equals(method.getScopeName()))
 			{
 				// legacy globals.xx, also matches scopes.globals.xx
