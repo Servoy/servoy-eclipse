@@ -2021,7 +2021,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 															addMarker(project, mk.getType(), mk.getText(), -1, FORM_FORMAT_INVALID, IMarker.PRIORITY_NORMAL,
 																null, o);
 														}
-
 													}
 												}
 											}
@@ -4131,7 +4130,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														else if (scriptMethod.isDeprecated())
 														{
 															ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(scriptMethod.getDisplayName() +
-																"()", "table " + tableName, "servoy.GlobalMethodValidator");
+																"()", "table " + tableName, validator.getName());
 															addMarker(res, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
 																IMarker.PRIORITY_NORMAL, null, null).setAttribute("columnName", column.getName());
 														}
@@ -4166,7 +4165,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														else if (scriptMethod.isDeprecated())
 														{
 															ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(scriptMethod.getDisplayName() +
-																"()", "table " + tableName, "GlobalMethodConverter");
+																"()", "table " + tableName, converter.getName());
 															addMarker(res, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
 																IMarker.PRIORITY_NORMAL, null, null).setAttribute("columnName", column.getName());
 														}
@@ -5078,6 +5077,50 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				if (convType != Integer.MAX_VALUE)
 				{
 					dataType = Column.mapToDefaultType(convType);
+				}
+
+				// check global method ui converters
+				if (converter instanceof IPropertyDescriptorProvider)
+				{
+					for (String key : converter.getDefaultProperties().keySet())
+					{
+						IPropertyDescriptor propertyDescriptor = ((IPropertyDescriptorProvider)converter).getPropertyDescriptor(key);
+						if (propertyDescriptor != null && propertyDescriptor.getType() == IPropertyDescriptor.GLOBAL_METHOD)
+						{
+							String methodName = parsedFormat.getUIConverterProperties().get(key);
+							ScriptMethod scriptMethod = getServoyModel().getFlattenedSolution().getScriptMethod(null, methodName);
+							if (scriptMethod == null)
+							{
+								Form form = (Form)persist.getAncestor(IRepository.FORMS);
+								String inForm = form == null ? "<unknown>" : form.getName();
+								String elementName = null;
+								if (persist instanceof ISupportName)
+								{
+									elementName = ((ISupportName)persist).getName();
+								}
+								ServoyMarker mk;
+								if (elementName == null)
+								{
+									mk = MarkerMessages.UIConverterInvalid.fill(inForm, methodName);
+								}
+								else
+								{
+									mk = MarkerMessages.UIConverterOnElementInvalid.fill(elementName, inForm, methodName);
+								}
+
+								addMarker(resource, mk.getType(), mk.getText(), -1, DATAPROVIDER_MISSING_CONVERTER, IMarker.PRIORITY_HIGH, null, persist);
+							}
+							else if (scriptMethod.isDeprecated())
+							{
+								Form form = (Form)persist.getAncestor(IRepository.FORMS);
+								ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(scriptMethod.getDisplayName() + "()",
+									"uiconverter on form " + (form == null ? "<unknown>" : form.getName()) + " on " + ((ISupportName)persist).getName(),
+									converter.getName());
+								addMarker(resource, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM, IMarker.PRIORITY_NORMAL, null,
+									null);
+							}
+						}
+					}
 				}
 			}
 			else
