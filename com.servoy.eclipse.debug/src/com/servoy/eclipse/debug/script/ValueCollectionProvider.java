@@ -70,19 +70,6 @@ public class ValueCollectionProvider implements IMemberEvaluator
 
 	private static final Map<IFile, SoftReference<Pair<Long, IValueCollection>>> scriptCache = new ConcurrentHashMap<IFile, SoftReference<Pair<Long, IValueCollection>>>();
 
-//	private static final Map<IFile, SoftReference<Pair<Long, IValueCollection>>> scriptCache = Collections.synchronizedMap(new LinkedHashMap<IFile, SoftReference<Pair<Long, IValueCollection>>>()
-//	{
-//		@Override
-//		protected boolean removeEldestEntry(Map.Entry<IFile, SoftReference<Pair<Long, IValueCollection>>> eldest)
-//		{
-//			if (size() > Utils.getAsInteger(System.getProperty("servoy.script.cache.size", "300")))
-//			{
-//				return true;
-//			}
-//			return false;
-//		}
-//	});
-
 	public static void clear()
 	{
 		scriptCache.clear();
@@ -446,10 +433,6 @@ public class ValueCollectionProvider implements IMemberEvaluator
 							// clear the cache to help the garbage collector.
 							scriptCache.clear();
 						}
-					}
-					else if (scriptCache.size() > MAX_SCRIPT_CACHE_SIZE)
-					{
-						System.err.println("script cache size was exceded but skipped because in recursion");
 					}
 					set.add(file);
 					boolean doResolve = false;
