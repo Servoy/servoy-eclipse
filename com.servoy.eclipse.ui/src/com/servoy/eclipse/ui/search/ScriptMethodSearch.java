@@ -68,7 +68,7 @@ public class ScriptMethodSearch extends DLTKSearchEngineSearch
 		IResource[] scopes = getScopes((Solution)method.getRootObject());
 		final TextSearchRequestor collector = getResultCollector();
 
-		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm", "*.tbl" }, true);
+		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm", "*.tbl", "*.val" }, true);
 		TextSearchEngine.create().search(scope, collector, createSearchPattern(method.getUUID().toString()), monitor);
 
 		if (method.getParent() instanceof Solution)
