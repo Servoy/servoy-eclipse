@@ -281,9 +281,21 @@ public class WarExportPage extends WizardPage
 					finishPage.createControl(WarExportPage.this.getControl().getParent());
 					finishPage.setTextMessage(doExport());
 					finishPage.getControl().getParent().layout(true);
+
+					if (finishPage.isOpenUrl())
+					{
+						// wait for the deploy of the new WAR file
+						try
+						{
+							Thread.sleep(3000);
+						}
+						catch (InterruptedException ex)
+						{
+							ServoyLog.logError(ex);
+						}
+					}
 				}
 				else finishPage.setTextMessage(doExport());
-
 				return finishPage;
 			}
 			else

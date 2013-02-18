@@ -19,6 +19,8 @@ package com.servoy.eclipse.mobileexporter.ui.wizard;
 
 import java.net.URL;
 
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -33,6 +35,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
+import org.osgi.service.prefs.BackingStoreException;
 
 import com.servoy.eclipse.mobileexporter.export.MobileExporter;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -41,6 +44,8 @@ import com.servoy.eclipse.ui.wizards.FinishPage;
 
 public class ExportMobileWizard extends Wizard implements IExportWizard
 {
+	private static final String PROPERTY_IS_OPEN_URL = "isOpenURL"; //$NON-NLS-1$
+
 	private final MobileExporter mobileExporter = new MobileExporter();
 
 	private final CustomizedFinishPage finishPage = new CustomizedFinishPage("lastPage");
@@ -73,6 +78,17 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 	@Override
 	public boolean performFinish()
 	{
+		IEclipsePreferences preferences = InstanceScope.INSTANCE.getNode(com.servoy.eclipse.mobileexporter.Activator.PLUGIN_ID);
+		preferences.putBoolean(PROPERTY_IS_OPEN_URL, finishPage.isOpenUrl());
+		try
+		{
+			preferences.flush();
+		}
+		catch (BackingStoreException e)
+		{
+			ServoyLog.logError(e);
+		}
+
 		if (finishPage.getOpenUrl() != null)
 		{
 			try
@@ -103,7 +119,7 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 	{
 		private String url = null;
 		private String urlDescription;
-		private boolean urlDefaultSelected;
+		private boolean urlSelected;
 		private Button openURL = null;
 
 		public CustomizedFinishPage(String pageName)
@@ -144,7 +160,7 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 				message.setEditable(false);
 
 				openURL = new Button(container, SWT.CHECK);
-				openURL.setSelection(urlDefaultSelected);
+				openURL.setSelection(urlSelected);
 				openURL.setText(urlDescription);
 				gridData = new GridData();
 				gridData.grabExcessHorizontalSpace = true;
@@ -166,16 +182,22 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 		{
 			this.url = url;
 			this.urlDescription = urlDescription;
-			this.urlDefaultSelected = defaultSelected;
+			IEclipsePreferences preferences = InstanceScope.INSTANCE.getNode(com.servoy.eclipse.mobileexporter.Activator.PLUGIN_ID);
+			this.urlSelected = preferences.getBoolean(PROPERTY_IS_OPEN_URL, defaultSelected);
 		}
 
 		public String getOpenUrl()
 		{
-			if (openURL != null && openURL.getSelection())
+			if (isOpenUrl())
 			{
 				return url;
 			}
 			return null;
+		}
+
+		public boolean isOpenUrl()
+		{
+			return openURL != null && openURL.getSelection();
 		}
 	}
 }
