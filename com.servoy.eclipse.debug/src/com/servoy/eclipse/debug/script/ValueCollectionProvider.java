@@ -58,12 +58,15 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Utils;
 
 @SuppressWarnings("nls")
 public class ValueCollectionProvider implements IMemberEvaluator
 {
 	public static final String PRIVATE = "PRIVATE";
 	public static final String SUPER_SCOPE = "SUPER_SCOPE";
+
+	private static final int MAX_SCRIPT_CACHE_SIZE = Utils.getAsInteger(System.getProperty("servoy.script.cache.size", "300"));
 
 	private static final Map<IFile, SoftReference<Pair<Long, IValueCollection>>> scriptCache = new ConcurrentHashMap<IFile, SoftReference<Pair<Long, IValueCollection>>>();
 
@@ -420,6 +423,16 @@ public class ValueCollectionProvider implements IMemberEvaluator
 					if (pair != null && pair.getLeft().longValue() != file.getModificationStamp())
 					{
 						scriptCache.clear();
+					}
+					// if the current thread set size is 0 (first request, so not in recursion)
+					if (set.size() == 0)
+					{
+						// and the scriptCache size is bigger then the default 300 or the system property
+						if (scriptCache.size() > MAX_SCRIPT_CACHE_SIZE)
+						{
+							// clear the cache to help the garbage collector.
+							scriptCache.clear();
+						}
 					}
 					set.add(file);
 					boolean doResolve = false;
