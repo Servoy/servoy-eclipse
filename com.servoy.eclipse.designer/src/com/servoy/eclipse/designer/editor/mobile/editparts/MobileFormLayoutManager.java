@@ -35,12 +35,6 @@ import com.servoy.j2db.debug.layout.MobileFormLayout;
  */
 public class MobileFormLayoutManager extends XYLayout
 {
-	public static final MobileFormLayoutManager INSTANCE = new MobileFormLayoutManager();
-
-	private MobileFormLayoutManager()
-	{
-	}
-
 	@Override
 	public void layout(IFigure container)
 	{

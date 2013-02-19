@@ -126,12 +126,18 @@ public class SetHeightToBodyPartXYLayoutManager extends XYLayout implements Layo
 		int max = 0;
 		for (IFigure child : (List<IFigure>)container.getChildren())
 		{
+			Rectangle bounds = child.getBounds();
 			if (child instanceof MobilePartFigure)
 			{
+				if (((MobilePartFigure)child).getPartType() == Part.FOOTER)
+				{
+					max = bounds.y;
+					break; // align to footer
+				}
 				continue;
 			}
 
-			Rectangle bounds = child.getBounds();
+			// if there is no footer align to lowest element
 			max = Math.max(max, bounds.y + bounds.height);
 		}
 
@@ -142,6 +148,7 @@ public class SetHeightToBodyPartXYLayoutManager extends XYLayout implements Layo
 				if (part.getPartType() == Part.BODY)
 				{
 					part.setHeight(max);
+					return;
 				}
 			}
 		}

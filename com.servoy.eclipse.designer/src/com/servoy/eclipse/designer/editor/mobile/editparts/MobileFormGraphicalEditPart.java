@@ -159,7 +159,7 @@ public class MobileFormGraphicalEditPart extends BaseFormGraphicalEditPart imple
 	{
 		FreeformLayer formLayer = new FreeformLayer();
 		// has to be a XYLayout, see XYLayoutEditPolicy.getXYLayout()
-		formLayer.setLayoutManager(new SetHeightToBodyPartXYLayoutManager(MobileFormLayoutManager.INSTANCE, getPersist()));
+		formLayer.setLayoutManager(new SetHeightToBodyPartXYLayoutManager(new MobileFormLayoutManager(), getPersist()));
 		return formLayer;
 	}
 
