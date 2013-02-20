@@ -323,12 +323,15 @@ public class MobileExporter
 		String formJson = doPersistExport();
 		String solutionJavascript = doScriptingExport(solutionName);
 
-		//TODO remove these lines
-		File outputFile = new File(outputFolder, "solution.js"); //$NON-NLS-1$
+		// TODO BEGIN remove these lines
+		File tmpP = new File(outputFolder.getParent() + "/src/com/servoy/mobile/parent");
+
+		File outputFile = new File(tmpP, "solution.js"); //$NON-NLS-1$
 		Utils.writeTXTFile(outputFile, solutionJavascript);
 
-		outputFile = new File(outputFolder, "solution.json");
+		outputFile = new File(tmpP, "solution_json.js");
 		Utils.writeTXTFile(outputFile, formJson);
+		// TODO END
 
 		File exportedFile = null;
 		InputStream is = this.getClass().getResourceAsStream(RELATIVE_WAR_PATH);
@@ -367,7 +370,7 @@ public class MobileExporter
 					}
 					entry = zipStream.getNextEntry();
 				}
-				addZipEntry(renameMap.get("solution.json"), warStream, Utils.getUTF8EncodedStream(formJson));
+				addZipEntry(renameMap.get("solution_json.js"), warStream, Utils.getUTF8EncodedStream(formJson));
 				addZipEntry(renameMap.get("solution.js"), warStream, Utils.getUTF8EncodedStream(solutionJavascript));
 				Utils.closeInputStream(zipStream);
 			}
@@ -393,7 +396,7 @@ public class MobileExporter
 		renameMap.put("servoy.css", "servoy_" + ClientVersion.getReleaseNumber() + ".css");
 		renameMap.put("servoy_utils.js", "servoy_utils_" + ClientVersion.getReleaseNumber() + ".js");
 		renameMap.put("solution.js", "solution_" + System.currentTimeMillis() + ".js");
-		renameMap.put("solution.json", "solution_" + System.currentTimeMillis() + ".json");
+		renameMap.put("solution_json.js", "solution_json_" + System.currentTimeMillis() + ".js");
 		String mobileClientFileName = "mobileclient.nocache_" + System.currentTimeMillis() + ".js";
 		renameMap.put("mobileclient/mobileclient.nocache.js", "mobileclient/" + mobileClientFileName);
 		renameMap.put("mobileclient.nocache.js", mobileClientFileName);
