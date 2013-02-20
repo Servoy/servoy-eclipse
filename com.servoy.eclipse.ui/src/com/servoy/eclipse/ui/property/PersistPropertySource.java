@@ -1634,8 +1634,9 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		final String styleLookupname, Form form)
 	{
 		StyleClassesComboboxModel model = new StyleClassesComboboxModel(form, styleLookupname);
-		return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved, new ComboboxDelegateValueEditor<String>(
-			new StyleClassValueEditor(form, persist), model))
+		return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved,
+			((Solution)persist.getRootObject()).getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE ? new ComboboxDelegateValueEditor<String>(
+				new StyleClassValueEditor(form, persist), model) : null)
 		{
 			@Override
 			protected String getWarningMessage()
