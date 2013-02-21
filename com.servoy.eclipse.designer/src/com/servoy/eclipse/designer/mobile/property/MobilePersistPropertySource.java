@@ -181,7 +181,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 
 		// there is no style support for labels & text fields on mobile client
 		if (propertyDescriptor.propertyDescriptor.getName().equals(StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName()) &&
-			((getPersist() instanceof Field && (((Field)getPersist()).getDisplayType() == Field.TEXT_FIELD || ((Field)getPersist()).getDisplayType() == Field.TEXT_AREA)) || !isButton(getPersist())))
+			(((getPersist() instanceof Field && (((Field)getPersist()).getDisplayType() == Field.TEXT_FIELD || ((Field)getPersist()).getDisplayType() == Field.TEXT_AREA)) || !isButton(getPersist())) && !(getPersist() instanceof Part)))
 		{
 			return true;
 		}
