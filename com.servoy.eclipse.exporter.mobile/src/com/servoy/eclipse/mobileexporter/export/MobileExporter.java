@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -47,7 +48,6 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.IValueFilter;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.IValueList;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -358,7 +358,7 @@ public class MobileExporter
 						String fileContent = Utils.getTXTFileContent(zipStream, Charset.forName("UTF8"), false);
 						for (String key : renameMap.keySet())
 						{
-							fileContent = fileContent.replaceAll(key, renameMap.get(key));
+							fileContent = fileContent.replaceAll(Pattern.quote(key), renameMap.get(key));
 						}
 						contentStream = Utils.getUTF8EncodedStream(fileContent);
 					}
@@ -396,13 +396,19 @@ public class MobileExporter
 	private void buildRenameEntriesList(Map<String, String> renameMap)
 	{
 		renameMap.put("servoy_mobile.html", "index.html");
-		renameMap.put("servoy.css", "servoy_" + ClientVersion.getReleaseNumber() + ".css");
-		renameMap.put("servoy_utils.js", "servoy_utils_" + ClientVersion.getReleaseNumber() + ".js");
-		renameMap.put("solution.js", "solution_" + System.currentTimeMillis() + ".js");
-		renameMap.put("solution_json.js", "solution_json_" + System.currentTimeMillis() + ".js");
-		String mobileClientFileName = "mobileclient.nocache_" + System.currentTimeMillis() + ".js";
-		renameMap.put("mobileclient/mobileclient.nocache.js", "mobileclient/" + mobileClientFileName);
-		renameMap.put("mobileclient.nocache.js", mobileClientFileName);
+
+		addRenameEntries(renameMap, "mobileclient/", "solution_json", ".js");
+		addRenameEntries(renameMap, "mobileclient/", "solution", ".js");
+		addRenameEntries(renameMap, "mobileclient/", "servoy_utils", ".js");
+		addRenameEntries(renameMap, "mobileclient/", "servoy", ".css");
+		addRenameEntries(renameMap, "mobileclient/", "mobileclient.nocache", ".js");
+	}
+
+	private void addRenameEntries(Map<String, String> renameMap, String prefixLocation, String name, String subfix)
+	{
+		String mobileClientFileName = name + '_' + System.currentTimeMillis() + subfix;
+		renameMap.put(prefixLocation + name + subfix, prefixLocation + mobileClientFileName); // for zip entry path replace
+		renameMap.put(name + subfix, mobileClientFileName); // for content replacement
 	}
 
 	private void addZipEntry(String entryName, ZipOutputStream stream, InputStream inputStream) throws IOException
