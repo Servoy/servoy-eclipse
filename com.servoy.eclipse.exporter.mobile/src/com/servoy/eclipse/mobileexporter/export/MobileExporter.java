@@ -326,11 +326,14 @@ public class MobileExporter
 		// TODO BEGIN remove these lines
 		File tmpP = new File(outputFolder.getParent() + "/src/com/servoy/mobile/public");
 
-		File outputFile = new File(tmpP, "solution.js"); //$NON-NLS-1$
-		Utils.writeTXTFile(outputFile, solutionJavascript);
+		if (outputFolder.getParent() != null && tmpP.exists())
+		{
+			File outputFile = new File(tmpP, "solution.js"); //$NON-NLS-1$
+			Utils.writeTXTFile(outputFile, solutionJavascript);
 
-		outputFile = new File(tmpP, "solution_json.js");
-		Utils.writeTXTFile(outputFile, formJson);
+			outputFile = new File(tmpP, "solution_json.js");
+			Utils.writeTXTFile(outputFile, formJson);
+		}
 		// TODO END
 
 		File exportedFile = null;
