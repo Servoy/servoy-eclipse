@@ -1466,7 +1466,12 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			Object bp = ijm.getField(name, false);
 			if (bp == null) continue;
-			dlm.add(new UserNode(name, actionType, new FieldFeedback(name, elementName, resolver, scriptObject, ijm), real, pIcon));
+			String codePrefix = "";
+			if (actionType != UserNodeType.RETURNTYPE_ELEMENT)
+			{
+				codePrefix = elementName;
+			}
+			dlm.add(new UserNode(name, actionType, new FieldFeedback(name, codePrefix, resolver, scriptObject, ijm), real, pIcon));
 		}
 
 		List names = ijm.getMethodIds(false);
@@ -1528,8 +1533,12 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					displayName = id + paramTypes + " - " +
 						DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(method.getReturnType());
 				}
-
-				SimpleUserNode node = new UserNode(displayName, actionType, new MethodFeedback(id, method.getParameterTypes(), elementName, resolver,
+				String codePrefix = "";
+				if (actionType != UserNodeType.RETURNTYPE_ELEMENT)
+				{
+					codePrefix = elementName;
+				}
+				SimpleUserNode node = new UserNode(displayName, actionType, new MethodFeedback(id, method.getParameterTypes(), codePrefix, resolver,
 					scriptObject, njm), (Object)null, functionIcon);
 
 				dlm.add(node);
