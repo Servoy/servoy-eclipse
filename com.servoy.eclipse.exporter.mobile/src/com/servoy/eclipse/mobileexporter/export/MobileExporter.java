@@ -324,7 +324,7 @@ public class MobileExporter
 		String solutionJavascript = doScriptingExport(solutionName);
 
 		// TODO BEGIN remove these lines
-		File tmpP = new File(outputFolder.getParent() + "/src/com/servoy/mobile/parent");
+		File tmpP = new File(outputFolder.getParent() + "/src/com/servoy/mobile/public");
 
 		File outputFile = new File(tmpP, "solution.js"); //$NON-NLS-1$
 		Utils.writeTXTFile(outputFile, solutionJavascript);
@@ -370,8 +370,8 @@ public class MobileExporter
 					}
 					entry = zipStream.getNextEntry();
 				}
-				addZipEntry(renameMap.get("solution_json.js"), warStream, Utils.getUTF8EncodedStream(formJson));
-				addZipEntry(renameMap.get("solution.js"), warStream, Utils.getUTF8EncodedStream(solutionJavascript));
+				addZipEntry("mobileclient/" + renameMap.get("solution_json.js"), warStream, Utils.getUTF8EncodedStream(formJson));
+				addZipEntry("mobileclient/" + renameMap.get("solution.js"), warStream, Utils.getUTF8EncodedStream(solutionJavascript));
 				Utils.closeInputStream(zipStream);
 			}
 			catch (IOException e)
