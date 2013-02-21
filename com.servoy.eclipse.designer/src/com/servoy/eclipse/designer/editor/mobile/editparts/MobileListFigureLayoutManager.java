@@ -55,7 +55,7 @@ public class MobileListFigureLayoutManager extends AbstractLayout
 				switch (constraint)
 				{
 					case Header :
-						y = containerBounds.y + 2;
+						y = containerBounds.y;
 						x = containerBounds.x;
 						width = containerBounds.width;
 						break;
