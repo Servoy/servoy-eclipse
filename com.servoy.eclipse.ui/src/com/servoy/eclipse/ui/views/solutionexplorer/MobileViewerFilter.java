@@ -62,7 +62,8 @@ public class MobileViewerFilter extends ViewerFilter
 			if (sun.isVisibleInMobile()) return true;
 			else
 			{
-				if (sun.getRealType() == UserNodeType.MEDIA)
+				if (sun.getRealType() == UserNodeType.MEDIA || sun.getRealType() == UserNodeType.TEMPLATES || sun.getRealType() == UserNodeType.STYLES ||
+					sun.getRealType() == UserNodeType.USER_GROUP_SECURITY)
 				{
 					return false;
 				}
