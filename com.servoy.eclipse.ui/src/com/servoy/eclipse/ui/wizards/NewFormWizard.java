@@ -577,6 +577,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 			Label templateLabel = new Label(topLevel, SWT.NONE);
 			templateLabel.setText("T&emplate");
+			templateLabel.setEnabled(!SolutionMetaData.isServoyMobileSolution(getActiveSolution()));
 
 			templateNameCombo = new ComboViewer(topLevel, SWT.BORDER | SWT.READ_ONLY);
 			templateNameCombo.setContentProvider(new ArrayContentProvider());
@@ -604,8 +605,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 				}
 			});
 			Combo templateNameComboControl = templateNameCombo.getCombo();
+			templateNameComboControl.setEnabled(!SolutionMetaData.isServoyMobileSolution(getActiveSolution()));
 
 			Label projectLabel = new Label(topLevel, SWT.NONE);
+			projectLabel.setEnabled(!SolutionMetaData.isServoyMobileSolution(getActiveSolution()));
 			projectLabel.setText("S&olution");
 
 			projectCombo = new ComboViewer(topLevel, SWT.BORDER | SWT.READ_ONLY);
@@ -618,7 +621,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 					handleProjectSelected();
 				}
 			});
-
+			projectComboControl.setEnabled(!SolutionMetaData.isServoyMobileSolution(getActiveSolution()));
 
 			final GroupLayout groupLayout = new GroupLayout(topLevel);
 			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
