@@ -1476,7 +1476,13 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			Object bp = ijm.getField(name, false);
 			if (bp == null) continue;
-			UserNode node = new UserNode(name, actionType, new FieldFeedback(name, elementName, resolver, scriptObject, ijm), real, pIcon);
+			String codePrefix = "";
+			if (actionType != UserNodeType.RETURNTYPE_ELEMENT)
+			{
+				codePrefix = elementName;
+			}
+			
+			UserNode node = new UserNode(name, actionType, new FieldFeedback(name, codePrefix, resolver, scriptObject, ijm), real, pIcon);
 			if ((bp instanceof JavaMembers.BeanProperty) &&
 				AnnotationManager.getInstance().isMobileAnnotationPresent(((JavaMembers.BeanProperty)bp).getGetter(), originalClass))
 			{
@@ -1552,8 +1558,13 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					paramTypes = "(" + (parameterTypes.length > 0 ? paramTypes.substring(0, paramTypes.length() - 2) : "") + ")";
 					displayName = id + paramTypes + " - " + DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(returnType);
 				}
+				String codePrefix = "";
+				if (actionType != UserNodeType.RETURNTYPE_ELEMENT)
+				{
+					codePrefix = elementName;
+				}
 
-				SimpleUserNode node = new UserNode(displayName, actionType, new MethodFeedback(id, parameterTypes, elementName, resolver, scriptObject, njm),
+				SimpleUserNode node = new UserNode(displayName, actionType, new MethodFeedback(id, parameterTypes, codePrefix, resolver, scriptObject, njm),
 					(Object)null, functionIcon);
 
 				if (AnnotationManager.getInstance().isMobileAnnotationPresent(method.method(), originalClass)) node.setIsVisibleInMobile(true);
