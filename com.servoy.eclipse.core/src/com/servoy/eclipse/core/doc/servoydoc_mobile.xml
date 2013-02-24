@@ -11421,7 +11421,7 @@ forms['myForm'].controller.show();]]></sample>
           <deprecated><![CDATA[see getNamedFoundSet()]]></deprecated>
           <sample/>
         </property>
-        <property name="view" servoyMobile="true">
+        <property name="view">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The default form view mode. 
 
@@ -11857,7 +11857,7 @@ for (var m in methods)
             </parameter>
           </parameters>
         </function>
-        <function name="getPart">
+        <function name="getPart" servoyMobile="true">
           <argumentsTypes>
             <argumentType typecode="int"/>
           </argumentsTypes>
@@ -12373,7 +12373,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="newFooterPart">
+        <function name="newFooterPart" servoyMobile="true">
           <argumentsTypes>
             <argumentType typecode="int"/>
           </argumentsTypes>
@@ -12381,6 +12381,11 @@ forms['newForm1'].controller.show();]]></sample>
           <description><![CDATA[Creates a new Footer part on the form.]]></description>
           <summary><![CDATA[Creates a new Footer part on the form.]]></summary>
           <sample><![CDATA[var footer = form.newFooterPart(440);]]></sample>
+          <parameters>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The height of the new part]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function deprecated="true" name="newFormMethod">
           <argumentsTypes>
@@ -12401,7 +12406,7 @@ forms['newForm1'].controller.show();]]></sample>
           <deprecated><![CDATA[replaced by newVariable(String, int)]]></deprecated>
           <sample/>
         </function>
-        <function name="newHeaderPart">
+        <function name="newHeaderPart" servoyMobile="true">
           <argumentsTypes>
             <argumentType typecode="int"/>
           </argumentsTypes>
@@ -12409,6 +12414,11 @@ forms['newForm1'].controller.show();]]></sample>
           <description><![CDATA[Creates a new Header part on the form.]]></description>
           <summary><![CDATA[Creates a new Header part on the form.]]></summary>
           <sample><![CDATA[var header = form.newHeaderPart(80);]]></sample>
+          <parameters>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The height of the new part]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function name="newHtmlArea">
           <argumentsTypes>
@@ -12553,6 +12563,11 @@ forms['newForm1'].controller.show();]]></sample>
           <description><![CDATA[Creates a new Leading Grand Summary part on the form.]]></description>
           <summary><![CDATA[Creates a new Leading Grand Summary part on the form.]]></summary>
           <sample><![CDATA[var leadingGrandSummary = form.newLeadingGrandSummaryPart(120);]]></sample>
+          <parameters>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The height of the new part]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function name="newLeadingSubSummaryPart">
           <argumentsTypes>
@@ -12562,6 +12577,11 @@ forms['newForm1'].controller.show();]]></sample>
           <description><![CDATA[Creates a new Leading Subsummary part on the form.]]></description>
           <summary><![CDATA[Creates a new Leading Subsummary part on the form.]]></summary>
           <sample><![CDATA[var leadingSubsummary = form.newLeadingSubSummaryPart(160);]]></sample>
+          <parameters>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The height of the new part]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function name="newListBox">
           <argumentsTypes>
@@ -12962,6 +12982,11 @@ forms['newForm1'].controller.show();]]></sample>
           <description><![CDATA[Creates a new Title Footer part on the form.]]></description>
           <summary><![CDATA[Creates a new Title Footer part on the form.]]></summary>
           <sample><![CDATA[var titleFooter = form.newTitleFooterPart(500);]]></sample>
+          <parameters>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The height of the new part]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function name="newTitleHeaderPart">
           <argumentsTypes>
@@ -12971,6 +12996,11 @@ forms['newForm1'].controller.show();]]></sample>
           <description><![CDATA[Creates a new Title Header part on the form.]]></description>
           <summary><![CDATA[Creates a new Title Header part on the form.]]></summary>
           <sample><![CDATA[var titleHeader = form.newTitleHeaderPart(40);]]></sample>
+          <parameters>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The height of the new part]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function name="newTrailingGrandSummaryPart">
           <argumentsTypes>
@@ -12980,6 +13010,11 @@ forms['newForm1'].controller.show();]]></sample>
           <description><![CDATA[Creates a new Trailing Grand Summary part on the form.]]></description>
           <summary><![CDATA[Creates a new Trailing Grand Summary part on the form.]]></summary>
           <sample><![CDATA[var trailingGrandSummary = form.newTrailingGrandSummaryPart(400);]]></sample>
+          <parameters>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The height of the new part]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function name="newTrailingSubSummaryPart">
           <argumentsTypes>
@@ -12989,6 +13024,11 @@ forms['newForm1'].controller.show();]]></sample>
           <description><![CDATA[Creates a new Trailing Subsummary part on the form.]]></description>
           <summary><![CDATA[Creates a new Trailing Subsummary part on the form.]]></summary>
           <sample><![CDATA[var trailingSubsummary = form.newTrailingSubSummaryPart(360);]]></sample>
+          <parameters>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The height of the new part]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function name="newTypeAhead">
           <argumentsTypes>
@@ -15668,7 +15708,7 @@ application.output(method.getUUID().toString());]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="JSPart" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSPart">
+    <object publicName="JSPart" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSPart" servoyMobile="true">
       <constants>
         <constant name="BODY">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -15679,7 +15719,7 @@ displayed and/or printed).]]></description>
           <summary><![CDATA[Constant use for specifying the type of form parts.]]></summary>
           <sample><![CDATA[var body = form.newPart(JSPart.BODY, 320);]]></sample>
         </constant>
-        <constant name="FOOTER">
+        <constant name="FOOTER" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant use for specifying the type of form parts.
 
@@ -15689,7 +15729,7 @@ footer is displayed at the bottom of the list of records.]]></description>
           <summary><![CDATA[Constant use for specifying the type of form parts.]]></summary>
           <sample><![CDATA[var footer = form.newPart(JSPart.FOOTER, 440);]]></sample>
         </constant>
-        <constant name="HEADER">
+        <constant name="HEADER" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant use for specifying the type of form parts. 
 
@@ -15845,7 +15885,7 @@ trailingSubsummary.restartPageNumber = true;]]></sample>
           <sample><![CDATA[var trailingGrandSummary = form.newPart(JSPart.TRAILING_GRAND_SUMMARY, 400);
 trailingGrandSummary.sinkWhenLast = true;]]></sample>
         </property>
-        <property name="styleClass">
+        <property name="styleClass" servoyMobile="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The Cascading Style Sheet (CSS) class name applied to the part.]]></description>
           <summary><![CDATA[The Cascading Style Sheet (CSS) class name applied to the part.]]></summary>
