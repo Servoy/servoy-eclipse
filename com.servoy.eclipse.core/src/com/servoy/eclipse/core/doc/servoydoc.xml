@@ -221,54 +221,6 @@ stickToTopLeftCornerLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST;]]></sample
         </constant>
       </constants>
     </object>
-    <object publicName="ARGUMENTS" qualifiedName="com.servoy.j2db.scripting.info.ARGUMENTS">
-      <constants>
-        <constant name="callee">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[The currently executing function.]]></description>
-          <summary><![CDATA[The currently executing function.]]></summary>
-          <sample><![CDATA[function makeFactorialFunc() {
-	application.output('making a factorial function!');
-	return function(x) {
-		if (x <= 1)
-			return 1;
-		return x * arguments.callee(x - 1);
-	};
-}
-var result = makeFactorialFunc()(5); // returns 120 (5 * 4 * 3 * 2 * 1)
-application.output("Result = " + result);]]></sample>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/JavaScript/Reference/Functions_and_function_scope/arguments/callee</url>
-            </link>
-          </links>
-        </constant>
-        <constant name="length">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description><![CDATA[The number of arguments passed to the function.]]></description>
-          <summary><![CDATA[The number of arguments passed to the function.]]></summary>
-          <sample><![CDATA[function addNumbers(x, y) {
-	if (arguments.length == addNumbers.length) {
-		return (x + y);
-	} 
-	else {
-		return 0;
-	}
-}
-var result = addNumbers(3, 4, 5);
-application.output(result); // returns 0
-result = addNumbers(3, 4);
-application.output(result); // returns 7
-result = addNumbers(103, 104);
-application.output(result); // returns 207]]></sample>
-          <links>
-            <link>
-              <url>https://developer.mozilla.org/en/JavaScript/Reference/Functions_and_function_scope/arguments/length</url>
-            </link>
-          </links>
-        </constant>
-      </constants>
-    </object>
     <object publicName="Application" qualifiedName="com.servoy.j2db.scripting.JSApplication" scriptingName="application">
       <functions>
         <function name="addClientInfo">
@@ -12429,6 +12381,11 @@ forms['newForm1'].controller.show();]]></sample>
           <description><![CDATA[Creates a new Footer part on the form.]]></description>
           <summary><![CDATA[Creates a new Footer part on the form.]]></summary>
           <sample><![CDATA[var footer = form.newFooterPart(440);]]></sample>
+          <parameters>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The height of the new part]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function deprecated="true" name="newFormMethod">
           <argumentsTypes>
@@ -12457,6 +12414,11 @@ forms['newForm1'].controller.show();]]></sample>
           <description><![CDATA[Creates a new Header part on the form.]]></description>
           <summary><![CDATA[Creates a new Header part on the form.]]></summary>
           <sample><![CDATA[var header = form.newHeaderPart(80);]]></sample>
+          <parameters>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The height of the new part]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function name="newHtmlArea">
           <argumentsTypes>
@@ -12601,6 +12563,11 @@ forms['newForm1'].controller.show();]]></sample>
           <description><![CDATA[Creates a new Leading Grand Summary part on the form.]]></description>
           <summary><![CDATA[Creates a new Leading Grand Summary part on the form.]]></summary>
           <sample><![CDATA[var leadingGrandSummary = form.newLeadingGrandSummaryPart(120);]]></sample>
+          <parameters>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The height of the new part]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function name="newLeadingSubSummaryPart">
           <argumentsTypes>
@@ -12610,6 +12577,11 @@ forms['newForm1'].controller.show();]]></sample>
           <description><![CDATA[Creates a new Leading Subsummary part on the form.]]></description>
           <summary><![CDATA[Creates a new Leading Subsummary part on the form.]]></summary>
           <sample><![CDATA[var leadingSubsummary = form.newLeadingSubSummaryPart(160);]]></sample>
+          <parameters>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The height of the new part]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function name="newListBox">
           <argumentsTypes>
@@ -13010,6 +12982,11 @@ forms['newForm1'].controller.show();]]></sample>
           <description><![CDATA[Creates a new Title Footer part on the form.]]></description>
           <summary><![CDATA[Creates a new Title Footer part on the form.]]></summary>
           <sample><![CDATA[var titleFooter = form.newTitleFooterPart(500);]]></sample>
+          <parameters>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The height of the new part]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function name="newTitleHeaderPart">
           <argumentsTypes>
@@ -13019,6 +12996,11 @@ forms['newForm1'].controller.show();]]></sample>
           <description><![CDATA[Creates a new Title Header part on the form.]]></description>
           <summary><![CDATA[Creates a new Title Header part on the form.]]></summary>
           <sample><![CDATA[var titleHeader = form.newTitleHeaderPart(40);]]></sample>
+          <parameters>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The height of the new part]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function name="newTrailingGrandSummaryPart">
           <argumentsTypes>
@@ -13028,6 +13010,11 @@ forms['newForm1'].controller.show();]]></sample>
           <description><![CDATA[Creates a new Trailing Grand Summary part on the form.]]></description>
           <summary><![CDATA[Creates a new Trailing Grand Summary part on the form.]]></summary>
           <sample><![CDATA[var trailingGrandSummary = form.newTrailingGrandSummaryPart(400);]]></sample>
+          <parameters>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The height of the new part]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function name="newTrailingSubSummaryPart">
           <argumentsTypes>
@@ -13037,6 +13024,11 @@ forms['newForm1'].controller.show();]]></sample>
           <description><![CDATA[Creates a new Trailing Subsummary part on the form.]]></description>
           <summary><![CDATA[Creates a new Trailing Subsummary part on the form.]]></summary>
           <sample><![CDATA[var trailingSubsummary = form.newTrailingSubSummaryPart(360);]]></sample>
+          <parameters>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The height of the new part]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function name="newTypeAhead">
           <argumentsTypes>
@@ -18380,6 +18372,13 @@ var tableNameForDisplay = jsTable.getSQLName()]]></sample>
           <sample><![CDATA[var jsTable = databaseManager.getTable('udm', 'campaigns')
 var serverName = jsTable.getServerName()]]></sample>
         </function>
+        <function name="isMetadataTable">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[boolean is metadata]]></return>
+          <description><![CDATA[Returns whether table was flagged as metadata table.]]></description>
+          <summary><![CDATA[Returns whether table was flagged as metadata table.]]></summary>
+          <sample/>
+        </function>
       </functions>
     </object>
     <object publicName="JSTableObject" qualifiedName="com.servoy.j2db.dataprocessing.JSTableObject" scriptingName="JSTableObject">
@@ -18592,6 +18591,13 @@ var tableNameForDisplay = jsTable.getSQLName()]]></sample>
           <summary><![CDATA[Returns the Servoy server name.]]></summary>
           <sample><![CDATA[var jsTable = databaseManager.getTable('udm', 'campaigns')
 var serverName = jsTable.getServerName()]]></sample>
+        </function>
+        <function name="isMetadataTable">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[boolean is metadata]]></return>
+          <description><![CDATA[Returns whether table was flagged as metadata table.]]></description>
+          <summary><![CDATA[Returns whether table was flagged as metadata table.]]></summary>
+          <sample/>
         </function>
       </functions>
     </object>
