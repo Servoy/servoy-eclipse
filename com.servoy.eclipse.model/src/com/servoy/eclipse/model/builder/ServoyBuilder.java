@@ -4739,7 +4739,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									{
 										mk = MarkerMessages.ElementUsingDeprecatedVariable.fill(((ScriptVariable)dataProvider).getName(),
 											"relation " + element.getName(), "primary key");
-										errorsFound = true;
 										addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM, IMarker.PRIORITY_NORMAL,
 											null, element);
 									}
@@ -4764,7 +4763,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										{
 											mk = MarkerMessages.ElementUsingDeprecatedCalculation.fill(calc.getName(), "relation " + element.getName(),
 												"primary key");
-											errorsFound = true;
 											addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
 												IMarker.PRIORITY_NORMAL, null, element);
 										}
