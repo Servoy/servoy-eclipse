@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <servoydoc>
   <jslib>
-    <object publicName="Array" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Array" scriptingName="Array" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="Array" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Array" scriptingName="Array">
       <constructors>
-        <constructor name="Array" servoyMobile="true">
+        <constructor clientSupport="mc,wc,sc" name="Array">
           <argumentsTypes/>
           <description><![CDATA[Constructs a new default array]]></description>
           <summary><![CDATA[Constructs a new default array]]></summary>
@@ -14,7 +14,7 @@
             </link>
           </links>
         </constructor>
-        <constructor name="Array" servoyMobile="true">
+        <constructor clientSupport="mc,wc,sc" name="Array">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -30,7 +30,7 @@
             </link>
           </links>
         </constructor>
-        <constructor name="Array" servoyMobile="true">
+        <constructor clientSupport="mc,wc,sc" name="Array">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
@@ -48,7 +48,7 @@
             </link>
           </links>
         </constructor>
-        <constructor name="Array" servoyMobile="true">
+        <constructor clientSupport="mc,wc,sc" name="Array">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
@@ -65,13 +65,13 @@
         </constructor>
       </constructors>
       <properties>
-        <property name="[index]" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="[index]">
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           <description><![CDATA[Get an element by index.]]></description>
           <summary><![CDATA[Get an element by index.]]></summary>
           <sample><![CDATA[array[0]]]></sample>
         </property>
-        <property name="length" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="length">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Get the length of the array.]]></description>
           <summary><![CDATA[Get the length of the array.]]></summary>
@@ -84,7 +84,7 @@
         </property>
       </properties>
       <functions>
-        <function name="concat" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="concat">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </argumentsTypes>
@@ -101,7 +101,7 @@
             </link>
           </links>
         </function>
-        <function name="concat" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="concat">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
@@ -115,7 +115,7 @@
             <parameter name="value2" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </parameters>
         </function>
-        <function name="concat" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="concat">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
@@ -131,7 +131,7 @@
             <parameter name="valueN" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </parameters>
         </function>
-        <function name="every" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="every">
           <argumentsTypes>
             <argumentType typecode="org.mozilla.javascript.Function"/>
           </argumentsTypes>
@@ -153,7 +153,7 @@ application.output(a2.every(isNumber));]]></sample>
             </link>
           </links>
         </function>
-        <function name="every" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="every">
           <argumentsTypes>
             <argumentType typecode="org.mozilla.javascript.Function"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
@@ -172,7 +172,7 @@ application.output(a2.every(isNumber));]]></sample>
             <parameter name="thisObject" type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
           </parameters>
         </function>
-        <function name="filter" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="filter">
           <argumentsTypes>
             <argumentType typecode="org.mozilla.javascript.Function"/>
           </argumentsTypes>
@@ -192,7 +192,7 @@ application.output(a2);]]></sample>
             </link>
           </links>
         </function>
-        <function name="filter" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="filter">
           <argumentsTypes>
             <argumentType typecode="org.mozilla.javascript.Function"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
@@ -209,7 +209,7 @@ application.output(a2);]]></sample>
             <parameter name="thisObject" type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
           </parameters>
         </function>
-        <function name="forEach" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="forEach">
           <argumentsTypes>
             <argumentType typecode="org.mozilla.javascript.Function"/>
           </argumentsTypes>
@@ -231,7 +231,7 @@ a.forEach(printThemOut);]]></sample>
             </link>
           </links>
         </function>
-        <function name="forEach" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="forEach">
           <argumentsTypes>
             <argumentType typecode="org.mozilla.javascript.Function"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
@@ -250,7 +250,7 @@ a.forEach(printThemOut);]]></sample>
             <parameter name="thisObject" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </parameters>
         </function>
-        <function name="indexOf" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="indexOf">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </argumentsTypes>
@@ -270,7 +270,7 @@ application.output(a.indexOf('z'));]]></sample>
             </link>
           </links>
         </function>
-        <function name="indexOf" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="indexOf">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -287,7 +287,7 @@ application.output(a.indexOf('z'));]]></sample>
             <parameter name="fromIndex" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
-        <function name="join" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="join">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -305,7 +305,7 @@ var jwords = words.join(";");]]></sample>
             </link>
           </links>
         </function>
-        <function name="lastIndexOf" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="lastIndexOf">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </argumentsTypes>
@@ -325,7 +325,7 @@ application.output(a.lastIndexOf('z'));]]></sample>
             </link>
           </links>
         </function>
-        <function name="lastIndexOf" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="lastIndexOf">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -342,7 +342,7 @@ application.output(a.lastIndexOf('z'));]]></sample>
             <parameter name="fromIndex" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
-        <function name="map" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="map">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </argumentsTypes>
@@ -362,7 +362,7 @@ application.output(a2);]]></sample>
             </link>
           </links>
         </function>
-        <function name="map" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="map">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
@@ -379,7 +379,7 @@ application.output(a2);]]></sample>
             <parameter name="thisObject" type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
           </parameters>
         </function>
-        <function name="pop" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="pop">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           <description><![CDATA[Pops the last string off the array and returns it.]]></description>
@@ -392,7 +392,7 @@ var lastword = words.pop();]]></sample>
             </link>
           </links>
         </function>
-        <function name="push" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="push">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </argumentsTypes>
@@ -410,7 +410,7 @@ words.push("In","Out");]]></sample>
             </link>
           </links>
         </function>
-        <function name="push" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="push">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
@@ -425,7 +425,7 @@ words.push("In","Out");]]></sample>
             <parameter name="value2" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </parameters>
         </function>
-        <function name="push" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="push">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
@@ -442,7 +442,7 @@ words.push("In","Out");]]></sample>
             <parameter name="valueN" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </parameters>
         </function>
-        <function name="reverse" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="reverse">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
           <description><![CDATA[Puts array elements in reverse order.]]></description>
@@ -455,7 +455,7 @@ words.reverse();]]></sample>
             </link>
           </links>
         </function>
-        <function name="shift" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="shift">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           <description><![CDATA[Decreases array element size by one by shifting the first element off the array and returning it.]]></description>
@@ -468,7 +468,7 @@ words.shift();]]></sample>
             </link>
           </links>
         </function>
-        <function name="slice" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="slice">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </argumentsTypes>
@@ -486,7 +486,7 @@ var nwords1 = words.slice(3, 5);]]></sample>
             </link>
           </links>
         </function>
-        <function name="slice" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="slice">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
@@ -501,7 +501,7 @@ var nwords1 = words.slice(3, 5);]]></sample>
             <parameter name="end" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </parameters>
         </function>
-        <function name="some" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="some">
           <argumentsTypes>
             <argumentType typecode="org.mozilla.javascript.Function"/>
           </argumentsTypes>
@@ -523,7 +523,7 @@ application.output(a2.some(isNumber));]]></sample>
             </link>
           </links>
         </function>
-        <function name="some" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="some">
           <argumentsTypes>
             <argumentType typecode="org.mozilla.javascript.Function"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
@@ -542,7 +542,7 @@ application.output(a2.some(isNumber));]]></sample>
             <parameter name="thisObject" type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
           </parameters>
         </function>
-        <function name="sort" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="sort">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
           <description><![CDATA[Sorts the array elements in dictionary order or using a compare function passed to the method.]]></description>
@@ -555,7 +555,7 @@ words.sort();]]></sample>
             </link>
           </links>
         </function>
-        <function name="sort" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="sort">
           <argumentsTypes>
             <argumentType typecode="org.mozilla.javascript.Function"/>
           </argumentsTypes>
@@ -568,7 +568,7 @@ words.sort();]]></sample>
             <parameter name="function" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function"/>
           </parameters>
         </function>
-        <function name="splice" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="splice">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
@@ -588,7 +588,7 @@ var nwords1 = words.splice(3, 2, "done", "On");]]></sample>
             </link>
           </links>
         </function>
-        <function name="splice" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="splice">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
@@ -605,7 +605,7 @@ var nwords1 = words.splice(3, 2, "done", "On");]]></sample>
             <parameter name="value1" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </parameters>
         </function>
-        <function name="splice" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="splice">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
@@ -624,7 +624,7 @@ var nwords1 = words.splice(3, 2, "done", "On");]]></sample>
             <parameter name="value2" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </parameters>
         </function>
-        <function name="splice" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="splice">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
@@ -645,7 +645,7 @@ var nwords1 = words.splice(3, 2, "done", "On");]]></sample>
             <parameter name="valueN" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </parameters>
         </function>
-        <function name="unshift" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="unshift">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
@@ -669,16 +669,16 @@ words.unshift("limit","lines");]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="Boolean" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Boolean" scriptingName="Boolean" servoyMobile="true"/>
-    <object publicName="Date" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Date" scriptingName="Date" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="Boolean" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Boolean" scriptingName="Boolean"/>
+    <object clientSupport="mc,wc,sc" publicName="Date" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Date" scriptingName="Date">
       <constructors>
-        <constructor name="Date" servoyMobile="true">
+        <constructor clientSupport="mc,wc,sc" name="Date">
           <argumentsTypes/>
           <description><![CDATA[Use the current date and time to create an instance of the object date.]]></description>
           <summary><![CDATA[Use the current date and time to create an instance of the object date.]]></summary>
           <sample><![CDATA[var date = new Date();]]></sample>
         </constructor>
-        <constructor name="Date" servoyMobile="true">
+        <constructor clientSupport="mc,wc,sc" name="Date">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -689,7 +689,7 @@ words.unshift("limit","lines");]]></sample>
             <parameter name="milliseconds" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </constructor>
-        <constructor name="Date" servoyMobile="true">
+        <constructor clientSupport="mc,wc,sc" name="Date">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -704,7 +704,7 @@ words.unshift("limit","lines");]]></sample>
             <parameter name="day" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </constructor>
-        <constructor name="Date" servoyMobile="true">
+        <constructor clientSupport="mc,wc,sc" name="Date">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -725,7 +725,7 @@ words.unshift("limit","lines");]]></sample>
             <parameter name="seconds" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </constructor>
-        <constructor name="Date" servoyMobile="true">
+        <constructor clientSupport="mc,wc,sc" name="Date">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -748,7 +748,7 @@ words.unshift("limit","lines");]]></sample>
             <parameter name="milliseconds" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </constructor>
-        <constructor name="Date" servoyMobile="true">
+        <constructor clientSupport="mc,wc,sc" name="Date">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -761,7 +761,7 @@ words.unshift("limit","lines");]]></sample>
         </constructor>
       </constructors>
       <functions>
-        <function name="UTC" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="UTC">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -785,7 +785,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
-        <function name="UTC" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="UTC">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -808,7 +808,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </parameter>
           </parameters>
         </function>
-        <function name="UTC" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="UTC">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -835,7 +835,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </parameter>
           </parameters>
         </function>
-        <function name="UTC" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="UTC">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -866,7 +866,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </parameter>
           </parameters>
         </function>
-        <function name="UTC" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="UTC">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -901,7 +901,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </parameter>
           </parameters>
         </function>
-        <function name="UTC" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="UTC">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -940,7 +940,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </parameter>
           </parameters>
         </function>
-        <function name="getDate" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getDate">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Gets the day of month.]]></description>
@@ -952,7 +952,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
-        <function name="getDay" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getDay">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Gets the day of the week (sunday = 0).]]></description>
@@ -964,7 +964,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
-        <function name="getFullYear" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getFullYear">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Gets the full year of the date.]]></description>
@@ -976,7 +976,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
-        <function name="getHours" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getHours">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Gets the hours of the date.]]></description>
@@ -988,7 +988,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
-        <function name="getMilliseconds" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getMilliseconds">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Gets the milliseconds of the date.]]></description>
@@ -1000,7 +1000,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
-        <function name="getMinutes" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getMinutes">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Gets the minutes of the date.]]></description>
@@ -1012,7 +1012,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
-        <function name="getMonth" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getMonth">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Gets the month of the date.]]></description>
@@ -1024,7 +1024,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
-        <function name="getSeconds" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getSeconds">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Gets the seconds of the date.]]></description>
@@ -1036,7 +1036,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
-        <function name="getTime" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getTime">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[The value returned by the getTime method is the number of milliseconds since 1 January 1970 00:00:00.]]></description>
@@ -1048,7 +1048,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
-        <function name="getTimezoneOffset" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getTimezoneOffset">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Gets the number of minutes between GMT and this date.]]></description>
@@ -1060,7 +1060,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
-        <function name="getUTCDate" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getUTCDate">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Gets the UTC date.]]></description>
@@ -1072,7 +1072,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
-        <function name="getUTCDay" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getUTCDay">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Gets the day in UTC time.]]></description>
@@ -1084,7 +1084,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
-        <function name="getUTCFullYear" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getUTCFullYear">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Gets the full year in UTC time.]]></description>
@@ -1096,7 +1096,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
-        <function name="getUTCHours" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getUTCHours">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Gets the hours in UTC time.]]></description>
@@ -1108,7 +1108,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
-        <function name="getUTCMilliseconds" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getUTCMilliseconds">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Gets the milliseconds in UTC time.]]></description>
@@ -1120,7 +1120,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
-        <function name="getUTCMinutes" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getUTCMinutes">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Gets the minutes in UTC time.]]></description>
@@ -1132,7 +1132,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
-        <function name="getUTCMonth" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getUTCMonth">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Gets the month in UTC time.]]></description>
@@ -1144,7 +1144,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
-        <function name="getUTCSeconds" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getUTCSeconds">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Gets the seconds in UTC time.]]></description>
@@ -1156,7 +1156,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
-        <function deprecated="true" name="getYear" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" deprecated="true" name="getYear">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Gets the year of the date.]]></description>
@@ -1169,7 +1169,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
-        <function name="now" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="now">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Date" typecode="com.servoy.j2db.documentation.scripting.docs.Date"/>
           <description><![CDATA[Returns the milliseconds elapsed since 1 January 1970 00:00:00 UTC up until now.]]></description>
@@ -1181,7 +1181,7 @@ application.output(Date.UTC(1970, 00, 01, 00, 01, 00, 00)); // prints: 60000.0]]
             </link>
           </links>
         </function>
-        <function name="parse" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="parse">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -1196,7 +1196,7 @@ application.output(str);]]></sample>
             </link>
           </links>
         </function>
-        <function name="setDate" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setDate">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -1213,7 +1213,7 @@ application.output(str);]]></sample>
             </link>
           </links>
         </function>
-        <function name="setFullYear" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setFullYear">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -1230,7 +1230,7 @@ application.output(str);]]></sample>
             </link>
           </links>
         </function>
-        <function name="setFullYear" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setFullYear">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -1244,7 +1244,7 @@ application.output(str);]]></sample>
             <parameter name="monthValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
-        <function name="setFullYear" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setFullYear">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -1260,7 +1260,7 @@ application.output(str);]]></sample>
             <parameter name="dayValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
-        <function name="setHours" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setHours">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -1277,7 +1277,7 @@ application.output(str);]]></sample>
             </link>
           </links>
         </function>
-        <function name="setHours" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setHours">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -1291,7 +1291,7 @@ application.output(str);]]></sample>
             <parameter name="minutesValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
-        <function name="setHours" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setHours">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -1307,7 +1307,7 @@ application.output(str);]]></sample>
             <parameter name="secondsValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
-        <function name="setHours" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setHours">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -1325,7 +1325,7 @@ application.output(str);]]></sample>
             <parameter name="msValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
-        <function name="setMilliseconds" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setMilliseconds">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -1342,7 +1342,7 @@ application.output(str);]]></sample>
             </link>
           </links>
         </function>
-        <function name="setMinutes" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setMinutes">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -1359,7 +1359,7 @@ application.output(str);]]></sample>
             </link>
           </links>
         </function>
-        <function name="setMinutes" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setMinutes">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -1373,7 +1373,7 @@ application.output(str);]]></sample>
             <parameter name="secondsValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
-        <function name="setMinutes" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setMinutes">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -1389,7 +1389,7 @@ application.output(str);]]></sample>
             <parameter name="msValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
-        <function name="setMonth" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setMonth">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -1406,7 +1406,7 @@ application.output(str);]]></sample>
             </link>
           </links>
         </function>
-        <function name="setMonth" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setMonth">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -1420,7 +1420,7 @@ application.output(str);]]></sample>
             <parameter name="dayValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
-        <function name="setSeconds" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setSeconds">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -1437,7 +1437,7 @@ application.output(str);]]></sample>
             </link>
           </links>
         </function>
-        <function name="setSeconds" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setSeconds">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -1451,7 +1451,7 @@ application.output(str);]]></sample>
             <parameter name="msValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
-        <function name="setTime" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setTime">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -1468,7 +1468,7 @@ application.output(str);]]></sample>
             </link>
           </links>
         </function>
-        <function name="setUTCDate" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setUTCDate">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -1485,7 +1485,7 @@ application.output(str);]]></sample>
             </link>
           </links>
         </function>
-        <function name="setUTCFullYear" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setUTCFullYear">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -1502,7 +1502,7 @@ application.output(str);]]></sample>
             </link>
           </links>
         </function>
-        <function name="setUTCFullYear" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setUTCFullYear">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -1516,7 +1516,7 @@ application.output(str);]]></sample>
             <parameter name="monthValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
-        <function name="setUTCFullYear" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setUTCFullYear">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -1532,7 +1532,7 @@ application.output(str);]]></sample>
             <parameter name="dayValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
-        <function name="setUTCHours" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setUTCHours">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -1549,7 +1549,7 @@ application.output(str);]]></sample>
             </link>
           </links>
         </function>
-        <function name="setUTCHours" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setUTCHours">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -1563,7 +1563,7 @@ application.output(str);]]></sample>
             <parameter name="minutesValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
-        <function name="setUTCHours" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setUTCHours">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -1579,7 +1579,7 @@ application.output(str);]]></sample>
             <parameter name="secondsValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
-        <function name="setUTCHours" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setUTCHours">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -1597,7 +1597,7 @@ application.output(str);]]></sample>
             <parameter name="msValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
-        <function name="setUTCMilliseconds" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setUTCMilliseconds">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -1614,7 +1614,7 @@ application.output(str);]]></sample>
             </link>
           </links>
         </function>
-        <function name="setUTCMinutes" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setUTCMinutes">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -1631,7 +1631,7 @@ application.output(str);]]></sample>
             </link>
           </links>
         </function>
-        <function name="setUTCMinutes" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setUTCMinutes">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -1645,7 +1645,7 @@ application.output(str);]]></sample>
             <parameter name="secondsValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
-        <function name="setUTCMinutes" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setUTCMinutes">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -1661,7 +1661,7 @@ application.output(str);]]></sample>
             <parameter name="msValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
-        <function name="setUTCMonth" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setUTCMonth">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -1678,7 +1678,7 @@ application.output(str);]]></sample>
             </link>
           </links>
         </function>
-        <function name="setUTCMonth" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setUTCMonth">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -1692,7 +1692,7 @@ application.output(str);]]></sample>
             <parameter name="dayValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
-        <function name="setUTCSeconds" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setUTCSeconds">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -1709,7 +1709,7 @@ application.output(str);]]></sample>
             </link>
           </links>
         </function>
-        <function name="setUTCSeconds" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setUTCSeconds">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -1723,7 +1723,7 @@ application.output(str);]]></sample>
             <parameter name="msValue" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
-        <function deprecated="true" name="setYear" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" deprecated="true" name="setYear">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -1741,7 +1741,7 @@ application.output(str);]]></sample>
             </link>
           </links>
         </function>
-        <function name="toDateString" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="toDateString">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[Returns a string version of the date.]]></description>
@@ -1753,7 +1753,7 @@ application.output(str);]]></sample>
             </link>
           </links>
         </function>
-        <function name="toLocaleDateString" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="toLocaleDateString">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[Returns a string version of the local time zone of the date.]]></description>
@@ -1765,7 +1765,7 @@ application.output(str);]]></sample>
             </link>
           </links>
         </function>
-        <function name="toLocaleString" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="toLocaleString">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[Returns a string version of the local time zone of the date.]]></description>
@@ -1777,7 +1777,7 @@ application.output(str);]]></sample>
             </link>
           </links>
         </function>
-        <function name="toLocaleTimeString" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="toLocaleTimeString">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[Returns a string version of the local time zone of the date.]]></description>
@@ -1789,7 +1789,7 @@ application.output(str);]]></sample>
             </link>
           </links>
         </function>
-        <function name="toTimeString" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="toTimeString">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[Returns a string version of the date.]]></description>
@@ -1801,7 +1801,7 @@ application.output(str);]]></sample>
             </link>
           </links>
         </function>
-        <function name="toUTCString" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="toUTCString">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[Returns a string version of the UTC value of the date.]]></description>
@@ -1813,7 +1813,7 @@ application.output(str);]]></sample>
             </link>
           </links>
         </function>
-        <function name="valueOf" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="valueOf">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Return integer milliseconds count]]></description>
@@ -1827,9 +1827,9 @@ application.output(str);]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="Function" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Function" scriptingName="Function" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="Function" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Function" scriptingName="Function">
       <properties>
-        <property name="constructor" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="constructor">
           <return type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="com.servoy.j2db.documentation.scripting.docs.Function"/>
           <description><![CDATA[Specifies the function that creates an object's prototype.]]></description>
           <summary><![CDATA[Specifies the function that creates an object's prototype.]]></summary>
@@ -1844,7 +1844,7 @@ console.log("theTree.constructor is " + theTree.constructor);]]></sample>
             </link>
           </links>
         </property>
-        <property name="length" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="length">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Specifies the number of arguments expected by the function.]]></description>
           <summary><![CDATA[Specifies the number of arguments expected by the function.]]></summary>
@@ -1862,7 +1862,7 @@ console.log("theTree.constructor is " + theTree.constructor);]]></sample>
         </property>
       </properties>
       <functions>
-        <function name="apply" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="apply">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[Applies the method of another object in the context of a different object (the calling object); arguments can be passed as an Array object.]]></description>
@@ -1885,7 +1885,7 @@ var aBook = new book_with_topic("name","author","topic");]]></sample>
             </link>
           </links>
         </function>
-        <function name="bind" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="bind">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[Creates a new function which, when called, itself calls this function in the context of the provided value, with a given sequence of arguments preceding any provided when the new function was called.]]></description>
@@ -1911,7 +1911,7 @@ boundGetX(); // > 81]]></sample>
             </link>
           </links>
         </function>
-        <function name="call" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="call">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[Calls (executes) a method of another object in the context of a different object (the calling object); arguments can be passed as they are.]]></description>
@@ -1933,7 +1933,7 @@ var aBook = new book_with_author("name","author");]]></sample>
             </link>
           </links>
         </function>
-        <function name="toString" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="toString">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[Returns a string representing the source code of the function. Overrides the Object.toString method.]]></description>
@@ -1950,9 +1950,9 @@ application.output(printHello.toString());]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="JS Lib" qualifiedName="com.servoy.j2db.documentation.scripting.docs.JSLib" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="JS Lib" qualifiedName="com.servoy.j2db.documentation.scripting.docs.JSLib">
       <properties>
-        <property name="Infinity" servoyMobile="true" staticCall="true">
+        <property clientSupport="mc,wc,sc" name="Infinity" staticCall="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Numeric value representing infinity.]]></description>
           <summary><![CDATA[Numeric value representing infinity.]]></summary>
@@ -1963,7 +1963,7 @@ application.output(printHello.toString());]]></sample>
             </link>
           </links>
         </property>
-        <property name="NaN" servoyMobile="true" staticCall="true">
+        <property clientSupport="mc,wc,sc" name="NaN" staticCall="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Value representing Not-a-Number.]]></description>
           <summary><![CDATA[Value representing Not-a-Number.]]></summary>
@@ -1974,7 +1974,7 @@ application.output(printHello.toString());]]></sample>
             </link>
           </links>
         </property>
-        <property name="undefined" servoyMobile="true" staticCall="true">
+        <property clientSupport="mc,wc,sc" name="undefined" staticCall="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           <description><![CDATA[The value undefined.]]></description>
           <summary><![CDATA[The value undefined.]]></summary>
@@ -1987,7 +1987,7 @@ application.output(printHello.toString());]]></sample>
         </property>
       </properties>
       <functions>
-        <function name="decodeURI" servoyMobile="true" staticCall="true">
+        <function clientSupport="mc,wc,sc" name="decodeURI" staticCall="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -2008,7 +2008,7 @@ application.output(decoded);//http://www.mysite.com/my code.asp?name=[cool]]]></
             </link>
           </links>
         </function>
-        <function name="decodeURIComponent" servoyMobile="true" staticCall="true">
+        <function clientSupport="mc,wc,sc" name="decodeURIComponent" staticCall="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -2029,7 +2029,7 @@ application.output(decoded); //my code.asp?name=[cool]]]></sample>
             </link>
           </links>
         </function>
-        <function name="encodeURI" servoyMobile="true" staticCall="true">
+        <function clientSupport="mc,wc,sc" name="encodeURI" staticCall="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -2050,7 +2050,7 @@ application.output(decoded);//http://www.mysite.com/my code.asp?name=[cool]]]></
             </link>
           </links>
         </function>
-        <function name="encodeURIComponent" servoyMobile="true" staticCall="true">
+        <function clientSupport="mc,wc,sc" name="encodeURIComponent" staticCall="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -2071,7 +2071,7 @@ application.output(decoded); //my code.asp?name=[cool]]]></sample>
             </link>
           </links>
         </function>
-        <function deprecated="true" name="escape" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" deprecated="true" name="escape">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -2088,7 +2088,7 @@ application.output(unescape(encoded)); // prints: Hello World!]]></sample>
             </link>
           </links>
         </function>
-        <function name="eval" servoyMobile="true" staticCall="true">
+        <function clientSupport="mc,wc,sc" name="eval" staticCall="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -2106,7 +2106,7 @@ application.output(x); // prints: 5.0]]></sample>
             </link>
           </links>
         </function>
-        <function name="isFinite" servoyMobile="true" staticCall="true">
+        <function clientSupport="mc,wc,sc" name="isFinite" staticCall="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -2125,7 +2125,7 @@ application.output(isFinite(isNaN)); // prints: false]]></sample>
             </link>
           </links>
         </function>
-        <function name="isNaN" servoyMobile="true" staticCall="true">
+        <function clientSupport="mc,wc,sc" name="isNaN" staticCall="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </argumentsTypes>
@@ -2160,7 +2160,7 @@ application.output(isXMLName("bad name")); // because of the space, prints: fals
             </link>
           </links>
         </function>
-        <function name="parseFloat" servoyMobile="true" staticCall="true">
+        <function clientSupport="mc,wc,sc" name="parseFloat" staticCall="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -2177,7 +2177,7 @@ application.output(isXMLName("bad name")); // because of the space, prints: fals
             </link>
           </links>
         </function>
-        <function name="parseInt" servoyMobile="true" staticCall="true">
+        <function clientSupport="mc,wc,sc" name="parseInt" staticCall="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -2194,7 +2194,7 @@ application.output(isXMLName("bad name")); // because of the space, prints: fals
             </link>
           </links>
         </function>
-        <function name="parseInt" servoyMobile="true" staticCall="true">
+        <function clientSupport="mc,wc,sc" name="parseInt" staticCall="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
             <argumentType typecode="int"/>
@@ -2213,7 +2213,7 @@ application.output(isXMLName("bad name")); // because of the space, prints: fals
             </link>
           </links>
         </function>
-        <function deprecated="true" name="unescape" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" deprecated="true" name="unescape">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -2230,7 +2230,7 @@ application.output(unescape(encoded)); // prints: Hello World!]]></sample>
             </link>
           </links>
         </function>
-        <function name="uneval" servoyMobile="true" staticCall="true">
+        <function clientSupport="mc,wc,sc" name="uneval" staticCall="true">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </argumentsTypes>
@@ -2244,9 +2244,9 @@ application.output(unescape(encoded)); // prints: Hello World!]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="JSON" qualifiedName="com.servoy.j2db.documentation.scripting.docs.JSON" scriptingName="JSON" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="JSON" qualifiedName="com.servoy.j2db.documentation.scripting.docs.JSON" scriptingName="JSON">
       <functions>
-        <function name="parse" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="parse">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -2265,7 +2265,7 @@ application.output(unescape(encoded)); // prints: Hello World!]]></sample>
             </link>
           </links>
         </function>
-        <function name="parse" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="parse">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Function"/>
@@ -2288,7 +2288,7 @@ application.output(unescape(encoded)); // prints: Hello World!]]></sample>
             </link>
           </links>
         </function>
-        <function name="stringify" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="stringify">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </argumentsTypes>
@@ -2307,7 +2307,7 @@ application.output(unescape(encoded)); // prints: Hello World!]]></sample>
             </link>
           </links>
         </function>
-        <function name="stringify" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="stringify">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
@@ -2338,7 +2338,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </function>
-        <function name="stringify" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="stringify">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
@@ -2367,9 +2367,9 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="Math" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Math" scriptingName="Math" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="Math" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Math" scriptingName="Math">
       <properties>
-        <property name="E" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="E">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Euler's constant and the base of natural logarithms. Approximately 2.718.]]></description>
           <summary><![CDATA[Euler's constant and the base of natural logarithms.]]></summary>
@@ -2380,7 +2380,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </property>
-        <property name="LN10" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="LN10">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Natural logarithm of 10. Approximately 2.302.]]></description>
           <summary><![CDATA[Natural logarithm of 10.]]></summary>
@@ -2391,7 +2391,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </property>
-        <property name="LN2" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="LN2">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Natural logarithm of 2. Approximately 0.693.]]></description>
           <summary><![CDATA[Natural logarithm of 2.]]></summary>
@@ -2402,7 +2402,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </property>
-        <property name="LOG10E" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="LOG10E">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Base 10 logarithm of E. Approximately 0.434.]]></description>
           <summary><![CDATA[Base 10 logarithm of E.]]></summary>
@@ -2413,7 +2413,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </property>
-        <property name="LOG2E" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="LOG2E">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Base 2 logarithm of E. Approximately 1.442.]]></description>
           <summary><![CDATA[Base 2 logarithm of E.]]></summary>
@@ -2424,7 +2424,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </property>
-        <property name="PI" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="PI">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Ratio of the circumference of a circle to its diameter. Approximately 3.14159.]]></description>
           <summary><![CDATA[Ratio of the circumference of a circle to its diameter.]]></summary>
@@ -2435,7 +2435,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </property>
-        <property name="SQRT1_2" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="SQRT1_2">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Square root of 1/2. Equivalently, 1 over the square root of 2, approximately 0.707.]]></description>
           <summary><![CDATA[Square root of 1/2.]]></summary>
@@ -2446,7 +2446,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </property>
-        <property name="SQRT2" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="SQRT2">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Square root of 2. Approximately 1.414.]]></description>
           <summary><![CDATA[Square root of 2.]]></summary>
@@ -2459,7 +2459,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
         </property>
       </properties>
       <functions>
-        <function name="abs" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="abs">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -2476,7 +2476,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </function>
-        <function name="acos" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="acos">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -2493,7 +2493,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </function>
-        <function name="asin" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="asin">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -2510,7 +2510,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </function>
-        <function name="atan" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="atan">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -2527,7 +2527,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </function>
-        <function name="atan2" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="atan2">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -2546,7 +2546,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </function>
-        <function name="ceil" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="ceil">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -2563,7 +2563,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </function>
-        <function name="cos" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="cos">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -2580,7 +2580,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </function>
-        <function name="exp" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="exp">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -2597,7 +2597,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </function>
-        <function name="floor" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="floor">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -2614,7 +2614,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </function>
-        <function name="log" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="log">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -2631,7 +2631,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </function>
-        <function name="max" servoyMobile="true" varargs="true">
+        <function clientSupport="mc,wc,sc" name="max" varargs="true">
           <argumentsTypes>
             <argumentType typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;"/>
           </argumentsTypes>
@@ -2648,7 +2648,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </function>
-        <function name="min" servoyMobile="true" varargs="true">
+        <function clientSupport="mc,wc,sc" name="min" varargs="true">
           <argumentsTypes>
             <argumentType typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;"/>
           </argumentsTypes>
@@ -2665,7 +2665,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </function>
-        <function name="pow" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="pow">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -2684,7 +2684,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </function>
-        <function name="random" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="random">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[Returns a pseudo-random number between 0 and 1.]]></description>
@@ -2696,7 +2696,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </function>
-        <function name="round" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="round">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -2713,7 +2713,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </function>
-        <function name="sin" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="sin">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -2730,7 +2730,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </function>
-        <function name="sqrt" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="sqrt">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -2747,7 +2747,7 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             </link>
           </links>
         </function>
-        <function name="tan" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="tan">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -2798,9 +2798,9 @@ application.output("URI: " + namespace.uri); //will output: 'http://www.w3.org/1
         </property>
       </properties>
     </object>
-    <object publicName="Number" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Number" scriptingName="Number" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="Number" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Number" scriptingName="Number">
       <properties>
-        <property name="MAX_VALUE" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="MAX_VALUE">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[The largest representable number.]]></description>
           <summary><![CDATA[The largest representable number.]]></summary>
@@ -2811,7 +2811,7 @@ application.output("URI: " + namespace.uri); //will output: 'http://www.w3.org/1
             </link>
           </links>
         </property>
-        <property name="MIN_VALUE" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="MIN_VALUE">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[The smallest representable number.]]></description>
           <summary><![CDATA[The smallest representable number.]]></summary>
@@ -2822,7 +2822,7 @@ application.output("URI: " + namespace.uri); //will output: 'http://www.w3.org/1
             </link>
           </links>
         </property>
-        <property name="NEGATIVE_INFINITY" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="NEGATIVE_INFINITY">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Special value representing negative infinity; returned on overflow.]]></description>
           <summary><![CDATA[Special value representing negative infinity; returned on overflow.]]></summary>
@@ -2833,7 +2833,7 @@ application.output("URI: " + namespace.uri); //will output: 'http://www.w3.org/1
             </link>
           </links>
         </property>
-        <property name="NaN" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="NaN">
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           <description><![CDATA[Special "not a number" value.]]></description>
           <summary><![CDATA[Special "not a number" value.]]></summary>
@@ -2844,7 +2844,7 @@ application.output("URI: " + namespace.uri); //will output: 'http://www.w3.org/1
             </link>
           </links>
         </property>
-        <property name="POSITIVE_INFINITY" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="POSITIVE_INFINITY">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Special value representing infinity; returned on overflow.]]></description>
           <summary><![CDATA[Special value representing infinity; returned on overflow.]]></summary>
@@ -2857,7 +2857,7 @@ application.output("URI: " + namespace.uri); //will output: 'http://www.w3.org/1
         </property>
       </properties>
       <functions>
-        <function name="toExponential" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="toExponential">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"><![CDATA[A string representing the number in exponential notation.]]></return>
           <description><![CDATA[Returns a string representing the number in exponential notation.]]></description>
@@ -2870,7 +2870,7 @@ application.output(n.toExponential(3));]]></sample>
             </link>
           </links>
         </function>
-        <function name="toExponential" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="toExponential">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -2885,7 +2885,7 @@ application.output(n.toExponential(3));]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="toFixed" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="toFixed">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"><![CDATA[A string representing the number in fixed-point notation.]]></return>
           <description><![CDATA[Returns a string representing the number in fixed-point notation.]]></description>
@@ -2898,7 +2898,7 @@ application.output(n.toFixed(3));]]></sample>
             </link>
           </links>
         </function>
-        <function name="toFixed" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="toFixed">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -2913,7 +2913,7 @@ application.output(n.toFixed(3));]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="toLocaleString" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="toLocaleString">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"><![CDATA[A string representing the number in the current locale.]]></return>
           <description><![CDATA[Converts the number into a string which is suitable for presentation in the given locale.]]></description>
@@ -2926,7 +2926,7 @@ application.output(n.toLocaleString());]]></sample>
             </link>
           </links>
         </function>
-        <function name="toPrecision" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="toPrecision">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"><![CDATA[A string representing the number to a specified precision in fixed-point or exponential notation.]]></return>
           <description><![CDATA[Returns a string representing the number to a specified precision in fixed-point or exponential notation.]]></description>
@@ -2939,7 +2939,7 @@ application.output(n.toPrecision(5));]]></sample>
             </link>
           </links>
         </function>
-        <function name="toPrecision" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="toPrecision">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -2954,7 +2954,7 @@ application.output(n.toPrecision(5));]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="toString" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="toString">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"><![CDATA[A string representing the specified Number object.]]></return>
           <description><![CDATA[Returns a string representing the specified Number object.]]></description>
@@ -2968,7 +2968,7 @@ application.output(n.toString(2)); //displays "111"]]></sample>
             </link>
           </links>
         </function>
-        <function name="toString" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="toString">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -2986,7 +2986,7 @@ application.output(n.toString(2)); //displays "111"]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="Object" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Object" scriptingName="Object" servoyMobile="true"/>
+    <object clientSupport="mc,wc,sc" publicName="Object" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Object" scriptingName="Object"/>
     <object publicName="QName" qualifiedName="com.servoy.j2db.documentation.scripting.docs.QName" scriptingName="QName">
       <properties>
         <property name="localName">
@@ -3017,9 +3017,9 @@ application.output(Qnamevar.uri);]]></sample>
         </property>
       </properties>
     </object>
-    <object publicName="RegExp" qualifiedName="com.servoy.j2db.documentation.scripting.docs.RegExp" scriptingName="RegExp" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="RegExp" qualifiedName="com.servoy.j2db.documentation.scripting.docs.RegExp" scriptingName="RegExp">
       <properties>
-        <property name="global" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="global">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="com.servoy.j2db.documentation.scripting.docs.Boolean"/>
           <description><![CDATA[Specifies if the "g" modifier is set.]]></description>
           <summary><![CDATA[Specifies if the "g" modifier is set.]]></summary>
@@ -3032,7 +3032,7 @@ application.output(patt1.global);]]></sample>
             </link>
           </links>
         </property>
-        <property name="ignoreCase" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="ignoreCase">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="com.servoy.j2db.documentation.scripting.docs.Boolean"/>
           <description><![CDATA[Specifies if the "i" modifier is set.]]></description>
           <summary><![CDATA[Specifies if the "i" modifier is set.]]></summary>
@@ -3045,7 +3045,7 @@ application.output(patt1.ignoreCase);]]></sample>
             </link>
           </links>
         </property>
-        <property deprecated="true" name="input" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" deprecated="true" name="input">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[The string on which the pattern match is performed.]]></description>
           <summary><![CDATA[The string on which the pattern match is performed.]]></summary>
@@ -3060,7 +3060,7 @@ application.output(RegExp.input);]]></sample>
             </link>
           </links>
         </property>
-        <property name="lastIndex" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="lastIndex">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[An integer specifying the index at which to start the next match.]]></description>
           <summary><![CDATA[An integer specifying the index at which to start the next match.]]></summary>
@@ -3074,7 +3074,7 @@ application.output('Match found. index now at: ' + patt1.lastIndex);]]></sample>
             </link>
           </links>
         </property>
-        <property deprecated="true" name="lastMatch" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" deprecated="true" name="lastMatch">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[The last matched characters.]]></description>
           <summary><![CDATA[The last matched characters.]]></summary>
@@ -3089,7 +3089,7 @@ application.output('Match found: ' + RegExp.lastMatch);]]></sample>
             </link>
           </links>
         </property>
-        <property deprecated="true" name="lastParen" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" deprecated="true" name="lastParen">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[The last matched parenthesized substring.]]></description>
           <summary><![CDATA[The last matched parenthesized substring.]]></summary>
@@ -3104,7 +3104,7 @@ application.output('Last parenthesized substring is: ' + RegExp.lastParen);]]></
             </link>
           </links>
         </property>
-        <property deprecated="true" name="leftContext" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" deprecated="true" name="leftContext">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[The substring in front of the characters most recently matched.]]></description>
           <summary><![CDATA[The substring in front of the characters most recently matched.]]></summary>
@@ -3119,7 +3119,7 @@ application.output('Text before match: ' + RegExp.leftContext);]]></sample>
             </link>
           </links>
         </property>
-        <property name="multiline" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="multiline">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="com.servoy.j2db.documentation.scripting.docs.Boolean"/>
           <description><![CDATA[Specifies if the "m" modifier is set.]]></description>
           <summary><![CDATA[Specifies if the "m" modifier is set.]]></summary>
@@ -3132,7 +3132,7 @@ application.output(patt1.multiline);]]></sample>
             </link>
           </links>
         </property>
-        <property deprecated="true" name="rightContext" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" deprecated="true" name="rightContext">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[The substring after the characters most recently matched]]></description>
           <summary><![CDATA[The substring after the characters most recently matched]]></summary>
@@ -3147,7 +3147,7 @@ application.output('Text after match: ' + RegExp.rightContext);]]></sample>
             </link>
           </links>
         </property>
-        <property name="source" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="source">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[The text used for pattern matching.]]></description>
           <summary><![CDATA[The text used for pattern matching.]]></summary>
@@ -3162,7 +3162,7 @@ application.output('The regular expression is: ' + patt1.source);]]></sample>
         </property>
       </properties>
       <functions>
-        <function deprecated="true" name="compile" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" deprecated="true" name="compile">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </argumentsTypes>
@@ -3184,7 +3184,7 @@ application.output(patt.test(str)==true);]]></sample>
             </link>
           </links>
         </function>
-        <function name="exec" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="exec">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </argumentsTypes>
@@ -3203,7 +3203,7 @@ application.output(patt.exec(str));]]></sample>
             </link>
           </links>
         </function>
-        <function name="test" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="test">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </argumentsTypes>
@@ -3226,9 +3226,9 @@ application.output(patt.test(str)==true)]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="Special Operators" qualifiedName="com.servoy.j2db.documentation.scripting.docs.SpecialOperators" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="Special Operators" qualifiedName="com.servoy.j2db.documentation.scripting.docs.SpecialOperators">
       <functions>
-        <function name="typeof" servoyMobile="true" simplifiedSignature="true">
+        <function clientSupport="mc,wc,sc" name="typeof" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[Returns the type of the given object, one of these strings get returned: "number", "string", "boolean", "object", "function" or undefined if the object doesn't exists.]]></description>
@@ -3248,30 +3248,30 @@ application.output(typeof somethingInexisting); // undefined]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="Statements" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Statements" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="Statements" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Statements">
       <functions>
-        <function name="break" servoyMobile="true" simplifiedSignature="true">
+        <function clientSupport="mc,wc,sc" name="break" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[Break statement exits a loop.]]></description>
           <summary><![CDATA[Break statement exits a loop.]]></summary>
           <sample><![CDATA[break]]></sample>
         </function>
-        <function name="const" servoyMobile="true" simplifiedSignature="true">
+        <function clientSupport="mc,wc,sc" name="const" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[Constant declaration.]]></description>
           <summary><![CDATA[Constant declaration.]]></summary>
           <sample><![CDATA[const #;]]></sample>
         </function>
-        <function name="continue" servoyMobile="true" simplifiedSignature="true">
+        <function clientSupport="mc,wc,sc" name="continue" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[Continue statement, jumps to next iteration of the loop.]]></description>
           <summary><![CDATA[Continue statement, jumps to next iteration of the loop.]]></summary>
           <sample><![CDATA[continue]]></sample>
         </function>
-        <function name="do while" servoyMobile="true" simplifiedSignature="true">
+        <function clientSupport="mc,wc,sc" name="do while" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[do while loop]]></description>
@@ -3281,7 +3281,7 @@ application.output(typeof somethingInexisting); // undefined]]></sample>
 }
 while ( # )]]></sample>
         </function>
-        <function name="for each in" servoyMobile="true" simplifiedSignature="true">
+        <function clientSupport="mc,wc,sc" name="for each in" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[foreach loop]]></description>
@@ -3290,7 +3290,7 @@ while ( # )]]></sample>
 {
 }]]></sample>
         </function>
-        <function name="for" servoyMobile="true" simplifiedSignature="true">
+        <function clientSupport="mc,wc,sc" name="for" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[for loop]]></description>
@@ -3299,7 +3299,7 @@ while ( # )]]></sample>
 {
 }]]></sample>
         </function>
-        <function name="if else" servoyMobile="true" simplifiedSignature="true">
+        <function clientSupport="mc,wc,sc" name="if else" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[If/Else statement.]]></description>
@@ -3311,7 +3311,7 @@ else
 {
 }]]></sample>
         </function>
-        <function name="if" servoyMobile="true" simplifiedSignature="true">
+        <function clientSupport="mc,wc,sc" name="if" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[If statement]]></description>
@@ -3320,7 +3320,7 @@ else
 {
 }]]></sample>
         </function>
-        <function name="label" servoyMobile="true" simplifiedSignature="true">
+        <function clientSupport="mc,wc,sc" name="label" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[Provides a statement with an identifier that you can refer to using a break or continue statement.
@@ -3339,7 +3339,7 @@ outer_loop: while (i < 10) {
 	}
 }]]></sample>
         </function>
-        <function name="switch" servoyMobile="true" simplifiedSignature="true">
+        <function clientSupport="mc,wc,sc" name="switch" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[Switch statement.]]></description>
@@ -3350,7 +3350,7 @@ case:
 default:
 }]]></sample>
         </function>
-        <function name="try catch finally" servoyMobile="true" simplifiedSignature="true">
+        <function clientSupport="mc,wc,sc" name="try catch finally" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[try/catch/finally statement]]></description>
@@ -3367,7 +3367,7 @@ default:
 	#
 }]]></sample>
         </function>
-        <function name="try catch" servoyMobile="true" simplifiedSignature="true">
+        <function clientSupport="mc,wc,sc" name="try catch" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[try/catch statement]]></description>
@@ -3381,14 +3381,14 @@ default:
 	#
 }]]></sample>
         </function>
-        <function name="var" servoyMobile="true" simplifiedSignature="true">
+        <function clientSupport="mc,wc,sc" name="var" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[Variable declaration]]></description>
           <summary><![CDATA[Variable declaration]]></summary>
           <sample><![CDATA[var #;]]></sample>
         </function>
-        <function name="while" servoyMobile="true" simplifiedSignature="true">
+        <function clientSupport="mc,wc,sc" name="while" simplifiedSignature="true">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[while loop]]></description>
@@ -3400,9 +3400,9 @@ default:
         </function>
       </functions>
     </object>
-    <object publicName="String" qualifiedName="com.servoy.j2db.documentation.scripting.docs.String" scriptingName="String" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="String" qualifiedName="com.servoy.j2db.documentation.scripting.docs.String" scriptingName="String">
       <properties>
-        <property name="length" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="length">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Gives the length of the string.]]></description>
           <summary><![CDATA[Gives the length of the string.]]></summary>
@@ -3415,7 +3415,7 @@ default:
         </property>
       </properties>
       <functions>
-        <function name="anchor" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="anchor">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -3432,7 +3432,7 @@ default:
             </link>
           </links>
         </function>
-        <function name="big" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="big">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[returns a copy of the string embedded within an &lt;BIG&gt; tag set.]]></description>
@@ -3444,7 +3444,7 @@ default:
             </link>
           </links>
         </function>
-        <function name="blink" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="blink">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[returns a copy of the string embedded within an &lt;BLINK&gt; tag set.]]></description>
@@ -3456,7 +3456,7 @@ default:
             </link>
           </links>
         </function>
-        <function name="bold" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="bold">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[returns a copy of the string embedded within an &lt;B&gt; tag set.]]></description>
@@ -3468,7 +3468,7 @@ default:
             </link>
           </links>
         </function>
-        <function name="charAt" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="charAt">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -3485,7 +3485,7 @@ default:
             </link>
           </links>
         </function>
-        <function name="charCodeAt" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="charCodeAt">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -3502,7 +3502,7 @@ default:
             </link>
           </links>
         </function>
-        <function name="concat" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="concat">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -3519,7 +3519,7 @@ default:
             </link>
           </links>
         </function>
-        <function name="concat" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="concat">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
@@ -3533,7 +3533,7 @@ default:
             <parameter name="stringN" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </parameters>
         </function>
-        <function name="equals" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="equals">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -3545,7 +3545,7 @@ default:
             <parameter name="other" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </parameters>
         </function>
-        <function name="equalsIgnoreCase" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="equalsIgnoreCase">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -3557,7 +3557,7 @@ default:
             <parameter name="other" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </parameters>
         </function>
-        <function name="fixed" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="fixed">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[returns a copy of the string embedded within an anchor &lt;TT&gt; tag set.]]></description>
@@ -3569,7 +3569,7 @@ default:
             </link>
           </links>
         </function>
-        <function name="fontcolor" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="fontcolor">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -3586,7 +3586,7 @@ default:
             </link>
           </links>
         </function>
-        <function name="fontsize" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="fontsize">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -3603,7 +3603,7 @@ default:
             </link>
           </links>
         </function>
-        <function name="indexOf" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="indexOf">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -3622,7 +3622,7 @@ default:
             </link>
           </links>
         </function>
-        <function name="italics" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="italics">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[returns a copy of the string embedded within an &lt;I&gt; tag set]]></description>
@@ -3634,7 +3634,7 @@ default:
             </link>
           </links>
         </function>
-        <function name="lastIndexOf" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="lastIndexOf">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -3653,7 +3653,7 @@ default:
             </link>
           </links>
         </function>
-        <function name="link" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="link">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -3670,7 +3670,7 @@ default:
             </link>
           </links>
         </function>
-        <function name="localeCompare" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="localeCompare">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
@@ -3687,7 +3687,7 @@ application.output(s.localeCompare("Hello"));]]></sample>
             </link>
           </links>
         </function>
-        <function name="match" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="match">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.RegExp"/>
           </argumentsTypes>
@@ -3704,7 +3704,7 @@ application.output(s.localeCompare("Hello"));]]></sample>
             </link>
           </links>
         </function>
-        <function name="replace" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="replace">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.RegExp"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
@@ -3723,7 +3723,7 @@ application.output(s.localeCompare("Hello"));]]></sample>
             </link>
           </links>
         </function>
-        <function name="search" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="search">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.RegExp"/>
           </argumentsTypes>
@@ -3740,7 +3740,7 @@ application.output(s.localeCompare("Hello"));]]></sample>
             </link>
           </links>
         </function>
-        <function name="slice" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="slice">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -3757,7 +3757,7 @@ application.output(s.localeCompare("Hello"));]]></sample>
             </link>
           </links>
         </function>
-        <function name="slice" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="slice">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -3771,7 +3771,7 @@ application.output(s.localeCompare("Hello"));]]></sample>
             <parameter name="endSlice" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
-        <function name="small" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="small">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[returns a copy of the string embedded within an &lt;SMALL&gt; tag set.]]></description>
@@ -3783,7 +3783,7 @@ application.output(s.localeCompare("Hello"));]]></sample>
             </link>
           </links>
         </function>
-        <function name="split" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="split">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -3802,7 +3802,7 @@ application.output(s.localeCompare("Hello"));]]></sample>
             </link>
           </links>
         </function>
-        <function name="strike" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="strike">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[returns a copy of the string embedded within an &lt;STRIKE&gt; tag set.]]></description>
@@ -3814,7 +3814,7 @@ application.output(s.localeCompare("Hello"));]]></sample>
             </link>
           </links>
         </function>
-        <function name="sub" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="sub">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[returns a copy of the string embedded within an &lt;SUB&gt; tag set.]]></description>
@@ -3826,7 +3826,7 @@ application.output(s.localeCompare("Hello"));]]></sample>
             </link>
           </links>
         </function>
-        <function name="substr" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="substr">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -3843,7 +3843,7 @@ application.output(s.localeCompare("Hello"));]]></sample>
             </link>
           </links>
         </function>
-        <function name="substr" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="substr">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -3857,7 +3857,7 @@ application.output(s.localeCompare("Hello"));]]></sample>
             <parameter name="length" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
-        <function name="substring" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="substring">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
@@ -3874,7 +3874,7 @@ application.output(s.localeCompare("Hello"));]]></sample>
             </link>
           </links>
         </function>
-        <function name="substring" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="substring">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
@@ -3888,7 +3888,7 @@ application.output(s.localeCompare("Hello"));]]></sample>
             <parameter name="indexB" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
-        <function name="sup" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="sup">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[returns a copy of the string embedded within an &lt;SUP&gt; tag set.]]></description>
@@ -3900,7 +3900,7 @@ application.output(s.localeCompare("Hello"));]]></sample>
             </link>
           </links>
         </function>
-        <function name="toLocaleLowerCase" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="toLocaleLowerCase">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description/>
@@ -3912,7 +3912,7 @@ application.output(s.toLocaleLowerCase());]]></sample>
             </link>
           </links>
         </function>
-        <function name="toLocaleUpperCase" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="toLocaleUpperCase">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description/>
@@ -3924,7 +3924,7 @@ application.output(s.toLocaleUpperCase());]]></sample>
             </link>
           </links>
         </function>
-        <function name="toLowerCase" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="toLowerCase">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[returns a string with all lowercase letters of the current string.]]></description>
@@ -3936,7 +3936,7 @@ application.output(s.toLocaleUpperCase());]]></sample>
             </link>
           </links>
         </function>
-        <function name="toUpperCase" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="toUpperCase">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <description><![CDATA[returns a string with all uppercase letters of the current string.]]></description>

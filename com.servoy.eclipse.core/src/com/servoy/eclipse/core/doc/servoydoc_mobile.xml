@@ -221,7 +221,7 @@ stickToTopLeftCornerLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST;]]></sample
         </constant>
       </constants>
     </object>
-    <object publicName="Application" qualifiedName="com.servoy.j2db.scripting.JSApplication" scriptingName="application" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="Application" qualifiedName="com.servoy.j2db.scripting.JSApplication" scriptingName="application">
       <functions>
         <function name="addClientInfo">
           <argumentsTypes>
@@ -1496,7 +1496,7 @@ if (win != null) {
             </parameter>
           </parameters>
         </function>
-        <function name="isInDeveloper" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="isInDeveloper">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[Boolean (true) if the solution is running in the developer, (false) otherwise]]></return>
           <description><![CDATA[Returns true if the solution is running in the developer.]]></description>
@@ -1534,7 +1534,7 @@ if (scopes.globals.showPrintPreview == 1)
           <deprecated><![CDATA[As of release 3.0, replaced by security#logout(Object[]).]]></deprecated>
           <sample/>
         </function>
-        <function name="output" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="output">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
@@ -1889,7 +1889,7 @@ application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 
             </parameter>
           </parameters>
         </function>
-        <function name="setValueListItems" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setValueListItems">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="[Ljava.lang.Object;"/>
@@ -1953,7 +1953,7 @@ application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 
             </parameter>
           </parameters>
         </function>
-        <function name="setValueListItems" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setValueListItems">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="[Ljava.lang.Object;"/>
@@ -3090,7 +3090,7 @@ return true]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="Database Manager" qualifiedName="com.servoy.j2db.dataprocessing.JSDatabaseManager" scriptingName="databaseManager" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="Database Manager" qualifiedName="com.servoy.j2db.dataprocessing.JSDatabaseManager" scriptingName="databaseManager">
       <properties>
         <property name="nullColumnValidatorEnabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -4195,7 +4195,7 @@ for( var i = 1 ; i <= dataset.getMaxRowIndex() ; i++ )
             </parameter>
           </parameters>
         </function>
-        <function name="getDataSource" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getDataSource">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
@@ -4213,7 +4213,7 @@ for( var i = 1 ; i <= dataset.getMaxRowIndex() ; i++ )
             </parameter>
           </parameters>
         </function>
-        <function name="getDataSourceServerName" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getDataSourceServerName">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -4227,7 +4227,7 @@ for( var i = 1 ; i <= dataset.getMaxRowIndex() ; i++ )
             </parameter>
           </parameters>
         </function>
-        <function name="getDataSourceTableName" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getDataSourceTableName">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -4398,7 +4398,7 @@ databaseManager.saveData()]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="getFoundSet" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getFoundSet">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -5018,7 +5018,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
             </parameter>
           </parameters>
         </function>
-        <function name="hasRecords" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="hasRecords">
           <argumentsTypes>
             <argumentType typecode="com.servoy.base.scripting.api.IJSFoundSet"/>
           </argumentsTypes>
@@ -5039,7 +5039,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
             </parameter>
           </parameters>
         </function>
-        <function name="hasRecords" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="hasRecords">
           <argumentsTypes>
             <argumentType typecode="com.servoy.base.scripting.api.IJSRecord"/>
             <argumentType typecode="java.lang.String"/>
@@ -5448,7 +5448,7 @@ if (cancel || !databaseManager.commitTransaction())
             </parameter>
           </parameters>
         </function>
-        <function name="saveData" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="saveData">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the save was done without an error.]]></return>
           <description><![CDATA[Saves all outstanding (unsaved) data and exits the current record. 
@@ -5925,9 +5925,9 @@ component.fontType = solutionModel.createFont('Arial',SM_FONTSTYLE.PLAIN,10);]]>
         </constant>
       </constants>
     </object>
-    <object publicName="Forms" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Forms" scriptingName="forms" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="Forms" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Forms" scriptingName="forms">
       <properties>
-        <property name="[name]" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="[name]">
           <return type="com.servoy.j2db.documentation.scripting.docs.Form" typecode="com.servoy.j2db.scripting.FormScope"/>
           <description><![CDATA[Get a form by name.]]></description>
           <summary><![CDATA[Get a form by name.]]></summary>
@@ -5939,7 +5939,7 @@ for (var i=0; i<allForms.length; i++)
 	application.output("Form " + allForms[i].name + " has selected index " + f.controller.getSelectedIndex());
 }]]></sample>
         </property>
-        <property deprecated="true" name="allnames" servoyMobile="true" special="true">
+        <property clientSupport="mc,wc,sc" deprecated="true" name="allnames" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.String;"/>
           <description><![CDATA[Get all form names of the current solution.]]></description>
           <summary><![CDATA[Get all form names of the current solution.]]></summary>
@@ -5953,7 +5953,7 @@ for (var i=0; i<allFormNames.length; i++)
 	application.output("Form " + allFormNames[i] + " has selected index " + f.controller.getSelectedIndex());
 }]]></sample>
         </property>
-        <property name="length" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="length">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Get the number of forms loaded into memory.]]></description>
           <summary><![CDATA[Get the number of forms loaded into memory.]]></summary>
@@ -5961,9 +5961,9 @@ for (var i=0; i<allFormNames.length; i++)
         </property>
       </properties>
     </object>
-    <object publicName="Globals" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Globals" scriptingName="globals" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="Globals" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Globals" scriptingName="globals">
       <properties>
-        <property deprecated="true" name="allmethods" servoyMobile="true" special="true">
+        <property clientSupport="mc,wc,sc" deprecated="true" name="allmethods" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.String;"/>
           <description><![CDATA[Get all script names of this global scope.]]></description>
           <summary><![CDATA[Get all script names of this global scope.]]></summary>
@@ -5974,7 +5974,7 @@ application.output("There are " + allMethodNames.length + " global methods.");
 for (var i=0; i<allMethodNames.length; i++)
 	application.output(allMethodNames[i]);]]></sample>
         </property>
-        <property deprecated="true" name="allrelations" servoyMobile="true" special="true">
+        <property clientSupport="mc,wc,sc" deprecated="true" name="allrelations" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.String;"/>
           <description><![CDATA[Get all global relation names of the current solution.]]></description>
           <summary><![CDATA[Get all global relation names of the current solution.]]></summary>
@@ -5985,7 +5985,7 @@ application.output("There are " + allRelationNames.length + " global relations."
 for (var i=0; i<allRelationNames.length; i++)
 	application.output(allRelationNames[i]);]]></sample>
         </property>
-        <property deprecated="true" name="allvariables" servoyMobile="true" special="true">
+        <property clientSupport="mc,wc,sc" deprecated="true" name="allvariables" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.String;"/>
           <description><![CDATA[Get all variable names of this global scope.]]></description>
           <summary><![CDATA[Get all variable names of this global scope.]]></summary>
@@ -5996,7 +5996,7 @@ application.output("There are " + allVarNames.length + " global variables.");
 for (var i=0; i<allVarNames.length; i++)
 	application.output(allVarNames[i]);]]></sample>
         </property>
-        <property name="currentcontroller" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="currentcontroller">
           <return type="com.servoy.j2db.FormController$JSForm" typecode="com.servoy.j2db.FormController$JSForm"/>
           <description><![CDATA[Get the controller of the top level form in the currently active dialog.]]></description>
           <summary><![CDATA[Get the controller of the top level form in the currently active dialog.]]></summary>
@@ -6004,7 +6004,7 @@ for (var i=0; i<allVarNames.length; i++)
         </property>
       </properties>
     </object>
-    <object publicName="History" qualifiedName="com.servoy.j2db.FormManager$HistoryProvider" scriptingName="history" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="History" qualifiedName="com.servoy.j2db.FormManager$HistoryProvider" scriptingName="history">
       <properties>
         <property name="buttonsEnabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -6015,35 +6015,35 @@ var status = history.buttonsEnabled;]]></sample>
         </property>
       </properties>
       <functions>
-        <function name="back" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="back">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[Navigates back in the history stack; shows the previous form (if present).]]></description>
           <summary><![CDATA[Navigates back in the history stack; shows the previous form (if present).]]></summary>
           <sample><![CDATA[history.back();]]></sample>
         </function>
-        <function name="clear" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="clear">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[Clear the entire history stack.]]></description>
           <summary><![CDATA[Clear the entire history stack.]]></summary>
           <sample><![CDATA[history.clear();]]></sample>
         </function>
-        <function name="forward" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="forward">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[Navigates forward in the history stack; shows the next form (if present).]]></description>
           <summary><![CDATA[Navigates forward in the history stack; shows the next form (if present).]]></summary>
           <sample><![CDATA[history.forward();]]></sample>
         </function>
-        <function name="getCurrentIndex" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getCurrentIndex">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[the current absolute index]]></return>
           <description><![CDATA[Get the current absolute index in the history stack.]]></description>
           <summary><![CDATA[Get the current absolute index in the history stack.]]></summary>
           <sample><![CDATA[var abs_index = history.getCurrentIndex();]]></sample>
         </function>
-        <function name="getFormName" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getFormName">
           <argumentsTypes>
             <argumentType typecode="int"/>
           </argumentsTypes>
@@ -6057,7 +6057,7 @@ var status = history.buttonsEnabled;]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="go" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="go">
           <argumentsTypes>
             <argumentType typecode="int"/>
           </argumentsTypes>
@@ -6071,7 +6071,7 @@ var status = history.buttonsEnabled;]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="removeForm" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="removeForm">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -6090,7 +6090,7 @@ Will return false when the form can't be removed, this can happen in certain sit
             </parameter>
           </parameters>
         </function>
-        <function name="removeIndex" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="removeIndex">
           <argumentsTypes>
             <argumentType typecode="int"/>
           </argumentsTypes>
@@ -6104,7 +6104,7 @@ Will return false when the form can't be removed, this can happen in certain sit
             </parameter>
           </parameters>
         </function>
-        <function name="size" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="size">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[the size]]></return>
           <description><![CDATA[Returns the total size of the history stack.]]></description>
@@ -6129,7 +6129,7 @@ Will return false when the form can't be removed, this can happen in certain sit
         </constant>
       </constants>
     </object>
-    <object extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSBean" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSBean">
+    <object clientSupport="mc,wc,sc" extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSBean" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSBean">
       <properties>
         <property name="anchors">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -6422,7 +6422,7 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSButton" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSButton" scriptingName="JSButton" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSButton" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSButton" scriptingName="JSButton">
       <properties>
         <property name="anchors">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -6476,7 +6476,7 @@ redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
 var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
         </property>
-        <property name="dataProviderID" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="dataProviderID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description/>
           <sample><![CDATA[// Normally the dataprovider is specified when a component is created.
@@ -6484,7 +6484,7 @@ var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 
 // But it can be modified later if needed.
 field.dataProviderID = 'parent_table_id';]]></sample>
         </property>
-        <property name="displaysTags" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="displaysTags">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Flag that enables or disables merging of data inside components using tags (placeholders).
 Tags (or placeholders) are words surrounded by %% on each side. There are data tags and
@@ -6499,7 +6499,7 @@ The default value of this flag is "false", that is merging of data is disabled b
 					10, 10, 600, 100);
 label.displaysTags = true;]]></sample>
         </property>
-        <property name="enabled" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[The enable state of the component, default true.]]></description>
           <summary><![CDATA[The enable state of the component, default true.]]></summary>
@@ -6561,7 +6561,7 @@ label.groupID = 'someGroup';
 field.groupID = 'someGroup';	
 forms['someForm'].elements.someGroup.enabled = false;]]></sample>
         </property>
-        <property name="height" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="height">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The height in pixels of the component.]]></description>
           <summary><![CDATA[The height in pixels of the component.]]></summary>
@@ -6685,7 +6685,7 @@ fieldOne.name = 'fieldOne';
 labelOne.labelFor = 'fieldOne';
 labelOne.mnemonic = 'O'; // When ALT-O is pressed the focus will move to fieldOne.]]></sample>
         </property>
-        <property name="name" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="name">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The name of the component. Through this name it can also accessed in methods.]]></description>
           <summary><![CDATA[The name of the component.]]></summary>
@@ -6696,7 +6696,7 @@ forms['someForm'].controller.show()
 // Now use the name to access the component.
 forms['someForm'].elements['myLabel'].text = 'Updated text';]]></sample>
         </property>
-        <property name="onAction" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="onAction">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"/>
           <description><![CDATA[The method that is executed when the component is clicked.]]></description>
           <summary><![CDATA[The method that is executed when the component is clicked.]]></summary>
@@ -6836,7 +6836,7 @@ label.showFocus = false;
 var btn = form.newButton('And I am a button', 10, 40, 200, 20, m);
 btn.showFocus = false;]]></sample>
         </property>
-        <property name="styleClass" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="styleClass">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The name of the style class that should be applied to this component.
 
@@ -6872,7 +6872,7 @@ fieldOne.tabSeq = 2;
 fieldTwo.tabSeq = SM_DEFAULTS.IGNORE;
 fieldThree.tabSeq = 1;]]></sample>
         </property>
-        <property name="text" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="text">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The text that is displayed inside the component.]]></description>
           <summary><![CDATA[The text that is displayed inside the component.]]></summary>
@@ -6928,7 +6928,7 @@ vCenterAlignedLabel.verticalAlignment = SM_ALIGNMENT.CENTER
 var bottomAlignedLabel = form.newLabel('BOTTOM', 520, 10, 50, 300);
 bottomAlignedLabel.verticalAlignment = SM_ALIGNMENT.BOTTOM;]]></sample>
         </property>
-        <property name="visible" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="visible">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[The visible property of the component, default true.]]></description>
           <summary><![CDATA[The visible property of the component, default true.]]></summary>
@@ -6936,7 +6936,7 @@ bottomAlignedLabel.verticalAlignment = SM_ALIGNMENT.BOTTOM;]]></sample>
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 field.visible = false;]]></sample>
         </property>
-        <property name="width" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="width">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The width in pixels of the component.]]></description>
           <summary><![CDATA[The width in pixels of the component.]]></summary>
@@ -6948,7 +6948,7 @@ field.height = 100;
 application.output('modified width: ' + field.width);
 application.output('modified height: ' + field.height);]]></sample>
         </property>
-        <property name="x" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="x">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The x coordinate of the component on the form.]]></description>
           <summary><![CDATA[The x coordinate of the component on the form.]]></summary>
@@ -6958,7 +6958,7 @@ field.x = 90;
 field.y = 90;
 application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
         </property>
-        <property name="y" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="y">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The y coordinate of the component on the form.]]></description>
           <summary><![CDATA[The y coordinate of the component on the form.]]></summary>
@@ -8184,7 +8184,7 @@ if (server)
         </function>
       </functions>
     </object>
-    <object publicName="JSComponent" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSComponent" scriptingName="JSComponent" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="JSComponent" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSComponent" scriptingName="JSComponent">
       <properties>
         <property name="anchors">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -8238,7 +8238,7 @@ redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
 var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
         </property>
-        <property name="enabled" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[The enable state of the component, default true.]]></description>
           <summary><![CDATA[The enable state of the component, default true.]]></summary>
@@ -8292,7 +8292,7 @@ label.groupID = 'someGroup';
 field.groupID = 'someGroup';	
 forms['someForm'].elements.someGroup.enabled = false;]]></sample>
         </property>
-        <property name="height" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="height">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The height in pixels of the component.]]></description>
           <summary><![CDATA[The height in pixels of the component.]]></summary>
@@ -8304,7 +8304,7 @@ field.height = 100;
 application.output('modified width: ' + field.width);
 application.output('modified height: ' + field.height);]]></sample>
         </property>
-        <property name="name" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="name">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The name of the component. Through this name it can also accessed in methods.]]></description>
           <summary><![CDATA[The name of the component.]]></summary>
@@ -8340,7 +8340,7 @@ var notPrintedField = form.newField('parent_table_id', JSField.TEXT_FIELD, 10, 4
 notPrintedField.printable = false; // This field won't show up in print preview and won't be printed.
 forms['printForm'].controller.showPrintPreview()]]></sample>
         </property>
-        <property name="styleClass" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="styleClass">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The name of the style class that should be applied to this component.
 
@@ -8377,7 +8377,7 @@ var nonTransparentField = form.newField('parent_table_text', JSField.TEXT_FIELD,
 var transparentField = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 50, 100, 20);
 transparentField.transparent = true;]]></sample>
         </property>
-        <property name="visible" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="visible">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[The visible property of the component, default true.]]></description>
           <summary><![CDATA[The visible property of the component, default true.]]></summary>
@@ -8385,7 +8385,7 @@ transparentField.transparent = true;]]></sample>
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 field.visible = false;]]></sample>
         </property>
-        <property name="width" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="width">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The width in pixels of the component.]]></description>
           <summary><![CDATA[The width in pixels of the component.]]></summary>
@@ -8397,7 +8397,7 @@ field.height = 100;
 application.output('modified width: ' + field.width);
 application.output('modified height: ' + field.height);]]></sample>
         </property>
-        <property name="x" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="x">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The x coordinate of the component on the form.]]></description>
           <summary><![CDATA[The x coordinate of the component on the form.]]></summary>
@@ -8407,7 +8407,7 @@ field.x = 90;
 field.y = 90;
 application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
         </property>
-        <property name="y" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="y">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The y coordinate of the component on the form.]]></description>
           <summary><![CDATA[The y coordinate of the component on the form.]]></summary>
@@ -9641,9 +9641,9 @@ for (var i = 0; i < allMethods; i++)
         </function>
       </functions>
     </object>
-    <object publicName="JSEvent" qualifiedName="com.servoy.j2db.scripting.JSEvent" scriptingName="JSEvent" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="JSEvent" qualifiedName="com.servoy.j2db.scripting.JSEvent" scriptingName="JSEvent">
       <constants>
-        <constant name="ACTION" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="ACTION">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onAction event.]]></description>
           <summary><![CDATA[Constant returned by JSEvent.]]></summary>
@@ -9652,7 +9652,7 @@ for (var i = 0; i < allMethods; i++)
 	// its an action event.
 }]]></sample>
         </constant>
-        <constant name="DATACHANGE" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="DATACHANGE">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onDataChange event.]]></description>
           <summary><![CDATA[Constant returned by JSEvent.]]></summary>
@@ -9661,7 +9661,7 @@ for (var i = 0; i < allMethods; i++)
 	// its a data change event
 }]]></sample>
         </constant>
-        <constant name="DOUBLECLICK" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="DOUBLECLICK">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onDoubleClick event.]]></description>
           <summary><![CDATA[Constant returned by JSEvent.]]></summary>
@@ -9670,7 +9670,7 @@ for (var i = 0; i < allMethods; i++)
 	// its a double click event.
 }]]></sample>
         </constant>
-        <constant name="FOCUSGAINED" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="FOCUSGAINED">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onFocusGained or the forms onElementFocusGained event.]]></description>
           <summary><![CDATA[Constant returned by JSEvent.]]></summary>
@@ -9679,7 +9679,7 @@ for (var i = 0; i < allMethods; i++)
 	// its a focus gained event.
 }]]></sample>
         </constant>
-        <constant name="FOCUSLOST" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="FOCUSLOST">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onFocusLost or the forms onElementFocusLost event.]]></description>
           <summary><![CDATA[Constant returned by JSEvent.]]></summary>
@@ -9688,7 +9688,7 @@ for (var i = 0; i < allMethods; i++)
 	// its a focus lost event.
 }]]></sample>
         </constant>
-        <constant name="FORM" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="FORM">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to a form event (like onShow) or command (like onDeleteRecord)]]></description>
           <summary><![CDATA[Constant returned by JSEvent.]]></summary>
@@ -9697,7 +9697,7 @@ for (var i = 0; i < allMethods; i++)
 	// its a form event or command
 }]]></sample>
         </constant>
-        <constant name="MODIFIER_ALT" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="MODIFIER_ALT">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant for the ALT modifier that can be returned by JSEvent.getModifiers();]]></description>
           <summary><![CDATA[Constant for the ALT modifier that can be returned by JSEvent.]]></summary>
@@ -9707,7 +9707,7 @@ if (event.getModifiers() & JSEvent.MODIFIER_SHIFT)
 	//do shift action
 }]]></sample>
         </constant>
-        <constant name="MODIFIER_CTRL" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="MODIFIER_CTRL">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant for the CTRL modifier that can be returned by JSEvent.getModifiers();]]></description>
           <summary><![CDATA[Constant for the CTRL modifier that can be returned by JSEvent.]]></summary>
@@ -9717,7 +9717,7 @@ if (event.getModifiers() & JSEvent.MODIFIER_SHIFT)
 	//do shift action
 }]]></sample>
         </constant>
-        <constant name="MODIFIER_META" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="MODIFIER_META">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant for the META modifier that can be returned by JSEvent.getModifiers();]]></description>
           <summary><![CDATA[Constant for the META modifier that can be returned by JSEvent.]]></summary>
@@ -9727,7 +9727,7 @@ if (event.getModifiers() & JSEvent.MODIFIER_SHIFT)
 	//do shift action
 }]]></sample>
         </constant>
-        <constant name="MODIFIER_SHIFT" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="MODIFIER_SHIFT">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant for the SHIFT modifier that can be returned by JSEvent.getModifiers();]]></description>
           <summary><![CDATA[Constant for the SHIFT modifier that can be returned by JSEvent.]]></summary>
@@ -9737,7 +9737,7 @@ if (event.getModifiers() & JSEvent.MODIFIER_SHIFT)
 	//do shift action
 }]]></sample>
         </constant>
-        <constant name="NONE" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="NONE">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant returned by JSEvent.getType() if the event is not used in a known event or command.]]></description>
           <summary><![CDATA[Constant returned by JSEvent.]]></summary>
@@ -9746,7 +9746,7 @@ if (event.getModifiers() & JSEvent.MODIFIER_SHIFT)
 	// type is not set.
 }]]></sample>
         </constant>
-        <constant name="RIGHTCLICK" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="RIGHTCLICK">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Constant returned by JSEvent.getType() in a method that is attached to an onRightClick event.]]></description>
           <summary><![CDATA[Constant returned by JSEvent.]]></summary>
@@ -9757,7 +9757,7 @@ if (event.getModifiers() & JSEvent.MODIFIER_SHIFT)
         </constant>
       </constants>
       <properties>
-        <property name="data" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="data">
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <description><![CDATA[A data object that specific events can set, a user can set data back to the system for events that supports this.]]></description>
           <summary><![CDATA[A data object that specific events can set, a user can set data back to the system for events that supports this.]]></summary>
@@ -9784,7 +9784,7 @@ return true;]]></sample>
         </property>
       </properties>
       <functions>
-        <function name="getElementName" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getElementName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[a String representing the element name.]]></return>
           <description><![CDATA[returns the name of the element, can be null if the form was the source of the event.]]></description>
@@ -9794,14 +9794,14 @@ return true;]]></sample>
     elements[event.getElementName()].bgcolor = '#ff0000';
 }]]></sample>
         </function>
-        <function name="getFormName" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getFormName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[a String representing the form name.]]></return>
           <description><![CDATA[returns the name of the form the element was placed on.]]></description>
           <summary><![CDATA[returns the name of the form the element was placed on.]]></summary>
           <sample><![CDATA[forms[event.getFormName()].myFormMethod();]]></sample>
         </function>
-        <function name="getModifiers" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getModifiers">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[an int which holds the modifiers as a bitset.]]></return>
           <description><![CDATA[Returns the modifiers of the event, see JSEvent.MODIFIER_XXXX for the modifiers that can be returned.]]></description>
@@ -9812,7 +9812,7 @@ if (event.getModifiers() & JSEvent.MODIFIER_SHIFT)
 	//do shift action
 }]]></sample>
         </function>
-        <function name="getSource" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getSource">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[an Object representing the source of this event.]]></return>
           <description><![CDATA[returns the source component/element of the event.
@@ -9823,14 +9823,14 @@ If it has a name the getElementName() is the name of this component.]]></descrip
 var source = event.getSource();
 var sourceDataProvider = source.getDataProviderID();]]></sample>
         </function>
-        <function name="getTimestamp" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getTimestamp">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Date" typecode="java.util.Date"><![CDATA[a Date when this event happened.]]></return>
           <description><![CDATA[Returns the time the event occurred.]]></description>
           <summary><![CDATA[Returns the time the event occurred.]]></summary>
           <sample><![CDATA[event.getTimestamp();]]></sample>
         </function>
-        <function name="getType" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getType">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[a String representing the type of this event.]]></return>
           <description><![CDATA[returns the event type see the JSEvents constants what it can return.
@@ -9841,7 +9841,7 @@ Plugins can create events with there own types.]]></description>
 	// its an action event.
 }]]></sample>
         </function>
-        <function name="getX" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getX">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[an int representing the X position.]]></return>
           <description><![CDATA[Returns the x position of the event, relative to the component that fired it, if applicable.
@@ -9851,7 +9851,7 @@ For example drag'n'drop events will set the x,y positions.]]></description>
 var xPrevious = previousEvent.getX();
 var movedXPixels = x -xPrevious;]]></sample>
         </function>
-        <function name="getY" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getY">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[an int representing the Y position.]]></return>
           <description><![CDATA[Returns the y position of the event, relative to the component that fired it, if applicable.
@@ -9863,7 +9863,7 @@ var movedYPixels = y -yPrevious;]]></sample>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSField" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSField" scriptingName="JSField" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSField" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSField" scriptingName="JSField">
       <constants>
         <constant name="CALENDAR">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -9873,7 +9873,7 @@ pops up a calendar for date selection.]]></description>
           <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
           <sample><![CDATA[var cal = form.newField('my_table_date', JSField.CALENDAR, 10, 10, 100, 20);]]></sample>
         </constant>
-        <constant name="CHECKS" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="CHECKS">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
 field to checkbox. The field will show a checkbox, or a list of checkboxes if the valuelist
@@ -9884,7 +9884,7 @@ vlist.customValues = "one\ntwo\nthree\nfour";
 var chk = form.newField('my_table_options', JSField.CHECKS, 10, 40, 100, 50);
 chk.valuelist = vlist;]]></sample>
         </constant>
-        <constant name="COMBOBOX" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="COMBOBOX">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
 field to combobox.]]></description>
@@ -9918,7 +9918,7 @@ vlist.customValues = "one\ntwo\nthree\nfour";
 var list = form.newField('my_table_list', JSField.LISTBOX, 10, 280, 100, 50);
 list.valuelist = vlist;]]></sample>
         </constant>
-        <constant deprecated="true" name="LIST_BOX" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" deprecated="true" name="LIST_BOX">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
 field to list box. The field will show a selection list with single choice selection.]]></description>
@@ -9939,7 +9939,7 @@ vlist.customValues = "one\ntwo\nthree\nfour";
 var list = form.newField('my_table_options', JSField.MULTISELECT_LISTBOX, 10, 280, 100, 50);
 list.valuelist = vlist;]]></sample>
         </constant>
-        <constant name="PASSWORD" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="PASSWORD">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
 fiels to password. The field will allow the user to enter passwords, masking the typed
@@ -9947,7 +9947,7 @@ characters.]]></description>
           <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
           <sample><![CDATA[var pwd = form.newField('my_table_text', JSField.PASSWORD, 10, 250, 100, 20);]]></sample>
         </constant>
-        <constant name="RADIOS" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="RADIOS">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
 field to radio buttons. The field will show a radio button, or a list of them if 
@@ -9975,14 +9975,14 @@ vlist.customValues = "one\ntwo\nthree\nfour";
 var spinner = form.newField('my_spinner', JSField.SPINNER, 10, 460, 100, 20);
 spinner.valuelist = vlist;]]></sample>
         </constant>
-        <constant name="TEXT_AREA" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="TEXT_AREA">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
 field to text area. The field will show text on multiple lines.]]></description>
           <summary><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
           <sample><![CDATA[var tarea = form.newField('my_table_text', JSField.TEXT_AREA, 10, 400, 100, 50);]]></sample>
         </constant>
-        <constant name="TEXT_FIELD" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="TEXT_FIELD">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the
 field to text field. The field will show regular text on a single line.]]></description>
@@ -10054,7 +10054,7 @@ redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
 var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
         </property>
-        <property name="dataProviderID" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="dataProviderID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description/>
           <sample><![CDATA[// Normally the dataprovider is specified when a component is created.
@@ -10062,7 +10062,7 @@ var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 
 // But it can be modified later if needed.
 field.dataProviderID = 'parent_table_id';]]></sample>
         </property>
-        <property name="displayType" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="displayType">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The type of display used by the field. Can be one of CALENDAR, CHECKS,
 COMBOBOX, HTML_AREA, IMAGE_MEDIA, PASSWORD, RADIOS, RTF_AREA, TEXT_AREA,
@@ -10090,7 +10090,7 @@ The default value of this flag is "true", that is the content can be edited.]]><
           <sample><![CDATA[var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 field.editable = false;]]></sample>
         </property>
-        <property name="enabled" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[The enable state of the component, default true.]]></description>
           <summary><![CDATA[The enable state of the component, default true.]]></summary>
@@ -10162,7 +10162,7 @@ label.groupID = 'someGroup';
 field.groupID = 'someGroup';	
 forms['someForm'].elements.someGroup.enabled = false;]]></sample>
         </property>
-        <property name="height" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="height">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The height in pixels of the component.]]></description>
           <summary><![CDATA[The height in pixels of the component.]]></summary>
@@ -10198,7 +10198,7 @@ separated by commas: top, left, bottom, right.]]></description>
 label.background = 'yellow';
 label.margin = '10,20,30,40';]]></sample>
         </property>
-        <property name="name" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="name">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The name of the component. Through this name it can also accessed in methods.]]></description>
           <summary><![CDATA[The name of the component.]]></summary>
@@ -10209,7 +10209,7 @@ forms['someForm'].controller.show()
 // Now use the name to access the component.
 forms['someForm'].elements['myLabel'].text = 'Updated text';]]></sample>
         </property>
-        <property name="onAction" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="onAction">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"/>
           <description><![CDATA[The method that is executed when the component is clicked.]]></description>
           <summary><![CDATA[The method that is executed when the component is clicked.]]></summary>
@@ -10223,7 +10223,7 @@ btn.onAction = onClickMethod;
 btn.onDoubleClick = onDoubleClickMethod;
 btn.onRightClick = onRightClickMethod;]]></sample>
         </property>
-        <property name="onDataChange" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="onDataChange">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"/>
           <description><![CDATA[Method that is executed when the data in the component is successfully changed.]]></description>
           <summary><![CDATA[Method that is executed when the data in the component is successfully changed.]]></summary>
@@ -10278,7 +10278,7 @@ btn.onAction = onClickMethod;
 btn.onDoubleClick = onDoubleClickMethod;
 btn.onRightClick = onRightClickMethod;]]></sample>
         </property>
-        <property name="placeholderText" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="placeholderText">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></description>
           <summary><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></summary>
@@ -10335,7 +10335,7 @@ var fieldNoSelect = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 1
 var fieldSelect = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
 fieldSelect.selectOnEnter = true;]]></sample>
         </property>
-        <property name="styleClass" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="styleClass">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The name of the style class that should be applied to this component.
 
@@ -10421,7 +10421,7 @@ var nonTransparentField = form.newField('parent_table_text', JSField.TEXT_FIELD,
 var transparentField = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 50, 100, 20);
 transparentField.transparent = true;]]></sample>
         </property>
-        <property name="valuelist" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="valuelist">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSValueList" typecode="com.servoy.j2db.scripting.solutionmodel.JSValueList"/>
           <description><![CDATA[The valuelist that is used by this field when displaying data. Can be used
 with fields of type CHECKS, COMBOBOX, RADIOS and TYPE_AHEAD.]]></description>
@@ -10447,7 +10447,7 @@ vCenterAlignedLabel.verticalAlignment = SM_ALIGNMENT.CENTER
 var bottomAlignedLabel = form.newLabel('BOTTOM', 520, 10, 50, 300);
 bottomAlignedLabel.verticalAlignment = SM_ALIGNMENT.BOTTOM;]]></sample>
         </property>
-        <property name="visible" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="visible">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[The visible property of the component, default true.]]></description>
           <summary><![CDATA[The visible property of the component, default true.]]></summary>
@@ -10455,7 +10455,7 @@ bottomAlignedLabel.verticalAlignment = SM_ALIGNMENT.BOTTOM;]]></sample>
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 field.visible = false;]]></sample>
         </property>
-        <property name="width" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="width">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The width in pixels of the component.]]></description>
           <summary><![CDATA[The width in pixels of the component.]]></summary>
@@ -10467,7 +10467,7 @@ field.height = 100;
 application.output('modified width: ' + field.width);
 application.output('modified height: ' + field.height);]]></sample>
         </property>
-        <property name="x" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="x">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The x coordinate of the component on the form.]]></description>
           <summary><![CDATA[The x coordinate of the component on the form.]]></summary>
@@ -10477,7 +10477,7 @@ field.x = 90;
 field.y = 90;
 application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
         </property>
-        <property name="y" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="y">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The y coordinate of the component on the form.]]></description>
           <summary><![CDATA[The y coordinate of the component on the form.]]></summary>
@@ -10569,7 +10569,7 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="JSForm" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSForm" scriptingName="JSForm" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="JSForm" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSForm" scriptingName="JSForm">
       <constants>
         <constant name="DEFAULT_ENCAPSULATION">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -10909,7 +10909,7 @@ forms['products_separate'].controller.search();]]></sample>
 var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
         </property>
-        <property name="dataSource" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="dataSource">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The names of the database server and table that this form is linked to.]]></description>
           <summary><![CDATA[The names of the database server and table that this form is linked to.]]></summary>
@@ -10956,7 +10956,7 @@ This is applied each time an internal SQL query is being executed (find, find-al
           <sample><![CDATA[var form = solutionModel.newForm('myForm',myDatasource,null,true,800,600);
 form.initialSort = "column1 desc, column2 asc, column3 asc";]]></sample>
         </property>
-        <property name="name" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="name">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The name of the form.]]></description>
           <summary><![CDATA[The name of the form.]]></summary>
@@ -11112,7 +11112,7 @@ This property is automatically set to "DEFAULT" (no override) when the form is c
 form.onSearchCmd = form.newMethod('function onSearchCmd(event) { application.output("onSearchCmd intercepted on " + event.getFormName()); }');
 form.onShowAllRecordsCmd = form.newMethod('function onShowAllRecordsCmd(event) { application.output("onShowAllRecordsCmd intercepted on " + event.getFormName()); }');]]></sample>
         </property>
-        <property name="onHide" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="onHide">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"/>
           <description><![CDATA[The method that is triggered when another form is being activated. 
 NOTE: If the onHide method returns false, the form can be prevented from hiding. 
@@ -11130,7 +11130,7 @@ This property is automatically set to "DEFAULT" (no override) when the form is c
 form.onShowOmittedRecordsCmd = form.newMethod('function onShowOmittedRecordsCmd(event) { application.output("onShowOmittedRecordsCmd intercepted on " + event.getFormName()); }');
 form.onInvertRecordsCmd = form.newMethod('function onInvertRecordsCmd(event) { application.output("onInvertRecordsCmd intercepted on " + event.getFormName()); }');]]></sample>
         </property>
-        <property name="onLoad" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="onLoad">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"/>
           <description><![CDATA[The method that is triggered when a form is loaded/reloaded from the repository; used to alter elements, set globals, hide toolbars, 
 etc; onShow method can also be assigned.
@@ -11205,7 +11205,7 @@ a table view a user cannot move to another record when the callback returns fals
 form.onRecordEditStop = form.newMethod('function onRecordEditStop(record, event) { application.output("onRecordEditStop intercepted on " + event.getFormName() + ". record is: " + record); }');
 form.onRecordSelection = form.newMethod('function onRecordSelection(event) { application.output("onRecordSelection intercepted on " + event.getFormName()); }');]]></sample>
         </property>
-        <property name="onRecordSelection" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="onRecordSelection">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"/>
           <description><![CDATA[The method that is triggered each time a record is selected. 
 If a form is in List view or Special table view - when the user clicks on it.
@@ -11237,7 +11237,7 @@ This property is automatically set to "DEFAULT" (no override) when the form is c
 form.onSearchCmd = form.newMethod('function onSearchCmd(event) { application.output("onSearchCmd intercepted on " + event.getFormName()); }');
 form.onShowAllRecordsCmd = form.newMethod('function onShowAllRecordsCmd(event) { application.output("onShowAllRecordsCmd intercepted on " + event.getFormName()); }');]]></sample>
         </property>
-        <property name="onShow" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="onShow">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"/>
           <description><![CDATA[The method that is triggered EVERY TIME the form is displayed; an argument must be passed to the method if this is the first time the form is displayed. 
 
@@ -11329,7 +11329,7 @@ Can be one of SELECTION_MODE_DEFAULT, SELECTION_MODE_SINGLE or SELECTION_MODE_MU
           <sample><![CDATA[var myForm = solutionModel.getForm('my_form_name');
 if (myForm.selectionMode == JSForm.SELECTION_MODE_MULTI) myForm.selectionMode = JSForm.SELECTION_MODE_DEFAULT;]]></sample>
         </property>
-        <property name="serverName" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="serverName">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Get the server name used by this form.]]></description>
           <summary><![CDATA[Get the server name used by this form.]]></summary>
@@ -11373,7 +11373,7 @@ if (aForm.styleName == null)
 else
 	application.output("The name of the Servoy style that is being used on the form is " + aForm.styleName);]]></sample>
         </property>
-        <property name="tableName" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="tableName">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The [name of the table/SQL view].[the name of the database server connection] the form is based on.]]></description>
           <summary><![CDATA[The [name of the table/SQL view].]]></summary>
@@ -11504,7 +11504,7 @@ for (var b in beans)
           <summary><![CDATA[Retrieves the Body part of the form.]]></summary>
           <sample><![CDATA[form.getBodyPart().background = 'blue';]]></sample>
         </function>
-        <function name="getButton" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getButton">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -11519,7 +11519,7 @@ application.output(btn.text);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="getButtons" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getButtons">
           <argumentsTypes/>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSButton[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSButton;"><![CDATA[the list of all JSbuttons on this forms]]></return>
           <description><![CDATA[Returns all JSButtons of this form, including the ones without a name.]]></description>
@@ -11554,7 +11554,7 @@ for (var b in buttons)
             </parameter>
           </parameters>
         </function>
-        <function name="getComponent" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getComponent">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -11570,7 +11570,7 @@ application.output("Component type and name: " + cmp);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="getComponents" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getComponents">
           <argumentsTypes/>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSComponent[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSComponent;"><![CDATA[an array of all the JSComponents on the form.]]></return>
           <description><![CDATA[Returns a array of all the JSComponents that a form has; they are of type JSField,JSLabel,JSButton,JSPortal,JSBean or JSTabPanel.]]></description>
@@ -11607,7 +11607,7 @@ for (var i in components)
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 var prop = frm.getDesignTimeProperty('myprop')]]></sample>
         </function>
-        <function name="getField" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getField">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -11623,7 +11623,7 @@ application.output(field.dataProviderID);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="getFields" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getFields">
           <argumentsTypes/>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSField[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSField;"><![CDATA[all JSField objects of this form]]></return>
           <description><![CDATA[Returns all JSField objects of this form, including the ones without a name.]]></description>
@@ -11742,7 +11742,7 @@ for (var f in fields)
           <summary><![CDATA[Retrieves the Header part of the form.]]></summary>
           <sample><![CDATA[form.getHeaderPart().background = 'orange';]]></sample>
         </function>
-        <function name="getLabel" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getLabel">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -11758,7 +11758,7 @@ application.output(label.text);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="getLabels" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getLabels">
           <argumentsTypes/>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSLabel[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSLabel;"><![CDATA[all JSLabels on this form]]></return>
           <description><![CDATA[Returns all JSLabels of this form (not including its super form), including the ones without a name.]]></description>
@@ -11814,7 +11814,7 @@ for (var i in labels)
           <summary><![CDATA[Gets an array of the Leading Subsummary parts of the form, ordered by their height from top == 0 to bottom.]]></summary>
           <sample><![CDATA[form.getLeadingSubSummaryParts()[0].background = 'green';]]></sample>
         </function>
-        <function name="getMethod" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getMethod">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -11830,7 +11830,7 @@ application.output(method.code);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="getMethods" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getMethods">
           <argumentsTypes/>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSMethod;"><![CDATA[all form methods for the form]]></return>
           <description><![CDATA[Returns all existing form methods for this form.]]></description>
@@ -11857,7 +11857,7 @@ for (var m in methods)
             </parameter>
           </parameters>
         </function>
-        <function name="getPart" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getPart">
           <argumentsTypes>
             <argumentType typecode="int"/>
           </argumentsTypes>
@@ -12123,7 +12123,7 @@ for (var i in tabPanels)
           <sample><![CDATA[var form_UUID = myForm.getUUID();
 application.output(form_UUID.toString());]]></sample>
         </function>
-        <function name="getVariable" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getVariable">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -12139,7 +12139,7 @@ application.output(form_UUID.toString());]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="getVariables" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getVariables">
           <argumentsTypes/>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSVariable[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSVariable;"><![CDATA[an array of all variables on this form]]></return>
           <description><![CDATA[An array consisting of all form variables for this form.]]></description>
@@ -12202,7 +12202,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="newButton" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="newButton">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="int"/>
@@ -12271,7 +12271,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="newCheck" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="newCheck">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="int"/>
@@ -12303,7 +12303,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="newComboBox" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="newComboBox">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="int"/>
@@ -12335,7 +12335,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="newField" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="newField">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="int"/>
@@ -12373,7 +12373,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="newFooterPart" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="newFooterPart">
           <argumentsTypes>
             <argumentType typecode="int"/>
           </argumentsTypes>
@@ -12406,7 +12406,7 @@ forms['newForm1'].controller.show();]]></sample>
           <deprecated><![CDATA[replaced by newVariable(String, int)]]></deprecated>
           <sample/>
         </function>
-        <function name="newHeaderPart" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="newHeaderPart">
           <argumentsTypes>
             <argumentType typecode="int"/>
           </argumentsTypes>
@@ -12487,7 +12487,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="newLabel" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="newLabel">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="int"/>
@@ -12615,7 +12615,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="newMethod" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="newMethod">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -12689,7 +12689,7 @@ footer.background = 'orange';]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="newPassword" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="newPassword">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="int"/>
@@ -12760,7 +12760,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="newRadios" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="newRadios">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="int"/>
@@ -12898,7 +12898,7 @@ forms['parentForm'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="newTextArea" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="newTextArea">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="int"/>
@@ -12932,7 +12932,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="newTextField" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="newTextField">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="int"/>
@@ -13065,7 +13065,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="newVariable" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="newVariable">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="int"/>
@@ -13089,7 +13089,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="newVariable" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="newVariable">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="int"/>
@@ -13147,7 +13147,7 @@ form.removeBean('mybean')]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="removeButton" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="removeButton">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -13167,7 +13167,7 @@ forms['newFormX'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="removeComponent" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="removeComponent">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -13215,7 +13215,7 @@ forms['newFormX'].controller.show();]]></sample>
           <sample><![CDATA[var frm = solutionModel.getForm('orders')
 frm.removeDesignTimeProperty('myprop')]]></sample>
         </function>
-        <function name="removeField" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="removeField">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -13235,7 +13235,7 @@ forms['newFormX'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="removeLabel" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="removeLabel">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -13257,7 +13257,7 @@ forms['newFormX'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="removeMethod" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="removeMethod">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -13363,7 +13363,7 @@ forms['newFormX'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="removeVariable" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="removeVariable">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -13577,7 +13577,7 @@ forms['newForm1'].controller.recreateUI();]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="JSFoundSet" qualifiedName="com.servoy.j2db.dataprocessing.FoundSet" scriptingName="JSFoundSet" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="JSFoundSet" qualifiedName="com.servoy.j2db.dataprocessing.FoundSet" scriptingName="JSFoundSet">
       <properties>
         <property name="alldataproviders" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"/>
@@ -13683,7 +13683,7 @@ var ok = %%prefix%%foundset.addFoundSetFilterParam('companyname', '#^||=', 'serv
           <summary><![CDATA[Delete all records in foundset, resulting in empty foundset.]]></summary>
           <sample><![CDATA[var success = %%prefix%%foundset.deleteAllRecords();]]></sample>
         </function>
-        <function name="deleteRecord" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="deleteRecord">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[boolean true if all records could be deleted.]]></return>
           <description><![CDATA[Delete currently selected record(s).
@@ -13692,7 +13692,7 @@ If the foundset is in multiselect mode, all selected records are deleted.]]></de
           <sample><![CDATA[var success = %%prefix%%foundset.deleteRecord();
 //can return false incase of related foundset having records and orphans records are not allowed by the relation]]></sample>
         </function>
-        <function name="deleteRecord" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="deleteRecord">
           <argumentsTypes>
             <argumentType typecode="com.servoy.base.scripting.api.IJSRecord"/>
           </argumentsTypes>
@@ -13707,7 +13707,7 @@ If the foundset is in multiselect mode, all selected records are deleted.]]></de
             </parameter>
           </parameters>
         </function>
-        <function name="deleteRecord" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="deleteRecord">
           <argumentsTypes>
             <argumentType typecode="java.lang.Number"/>
           </argumentsTypes>
@@ -14075,7 +14075,7 @@ Note that foundset filters are included and table filters are not included in th
 q.where.add(q.columns.x.eq(100))
 foundset.loadRecords(q);]]></sample>
         </function>
-        <function name="getRecord" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getRecord">
           <argumentsTypes>
             <argumentType typecode="int"/>
           </argumentsTypes>
@@ -14110,7 +14110,7 @@ foundset.loadRecords(q);]]></sample>
           <summary><![CDATA[Gets the relation name (null if not a related foundset).]]></summary>
           <sample><![CDATA[var relName = %%prefix%%foundset.getRelationName();]]></sample>
         </function>
-        <function name="getSelectedIndex" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getSelectedIndex">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int current index (1-based)]]></return>
           <description><![CDATA[Get the current record index of the foundset.]]></description>
@@ -14136,7 +14136,7 @@ if (current.length > 1)
 	%%prefix%%foundset.setSelectedIndexes(newSelection);
 }]]></sample>
         </function>
-        <function name="getSelectedRecord" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getSelectedRecord">
           <argumentsTypes/>
           <return type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.base.scripting.api.IJSRecord"><![CDATA[Record record.]]></return>
           <description><![CDATA[Get the selected record.]]></description>
@@ -14159,7 +14159,7 @@ When the founset is in multiSelect mode (see property multiSelect), selection ca
           <deprecated><![CDATA[As of release 5.0, replaced by #getDataSource().]]></deprecated>
           <sample/>
         </function>
-        <function name="getSize" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getSize">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int current size.]]></return>
           <description><![CDATA[Get the number of records in this foundset.
@@ -14453,7 +14453,7 @@ Deprecated method to handle pre-6.1 calls to varargs function foundset.loadRecor
             </parameter>
           </parameters>
         </function>
-        <function name="newRecord" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="newRecord">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int index of new record.]]></return>
           <description><![CDATA[Create a new record on top of the foundset and change selection to it. Returns -1 if the record can't be made.]]></description>
@@ -14546,7 +14546,7 @@ if (idx >= 0) // returned index is -1 in case of failure
             </parameter>
           </parameters>
         </function>
-        <function name="newRecord" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="newRecord">
           <argumentsTypes>
             <argumentType typecode="java.lang.Number"/>
             <argumentType typecode="java.lang.Boolean"/>
@@ -14734,7 +14734,7 @@ ordering of the pk column names.]]></description>
             </parameter>
           </parameters>
         </function>
-        <function name="setSelectedIndex" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setSelectedIndex">
           <argumentsTypes>
             <argumentType typecode="int"/>
           </argumentsTypes>
@@ -14773,7 +14773,7 @@ if (current.length > 1)
             </parameter>
           </parameters>
         </function>
-        <function name="sort" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="sort">
           <argumentsTypes>
             <argumentType typecode="org.mozilla.javascript.Function"/>
           </argumentsTypes>
@@ -14955,7 +14955,7 @@ while(fsUpdater.next())
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSLabel" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSLabel" scriptingName="JSLabel" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSLabel" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSLabel" scriptingName="JSLabel">
       <properties>
         <property name="anchors">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -15009,7 +15009,7 @@ redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
 var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
         </property>
-        <property name="dataProviderID" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="dataProviderID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description/>
           <sample><![CDATA[// Normally the dataprovider is specified when a component is created.
@@ -15017,7 +15017,7 @@ var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 
 // But it can be modified later if needed.
 field.dataProviderID = 'parent_table_id';]]></sample>
         </property>
-        <property name="displaysTags" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="displaysTags">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Flag that enables or disables merging of data inside components using tags (placeholders).
 Tags (or placeholders) are words surrounded by %% on each side. There are data tags and
@@ -15032,7 +15032,7 @@ The default value of this flag is "false", that is merging of data is disabled b
 					10, 10, 600, 100);
 label.displaysTags = true;]]></sample>
         </property>
-        <property name="enabled" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[The enable state of the component, default true.]]></description>
           <summary><![CDATA[The enable state of the component, default true.]]></summary>
@@ -15094,7 +15094,7 @@ label.groupID = 'someGroup';
 field.groupID = 'someGroup';	
 forms['someForm'].elements.someGroup.enabled = false;]]></sample>
         </property>
-        <property name="height" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="height">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The height in pixels of the component.]]></description>
           <summary><![CDATA[The height in pixels of the component.]]></summary>
@@ -15218,7 +15218,7 @@ fieldOne.name = 'fieldOne';
 labelOne.labelFor = 'fieldOne';
 labelOne.mnemonic = 'O'; // When ALT-O is pressed the focus will move to fieldOne.]]></sample>
         </property>
-        <property name="name" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="name">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The name of the component. Through this name it can also accessed in methods.]]></description>
           <summary><![CDATA[The name of the component.]]></summary>
@@ -15229,7 +15229,7 @@ forms['someForm'].controller.show()
 // Now use the name to access the component.
 forms['someForm'].elements['myLabel'].text = 'Updated text';]]></sample>
         </property>
-        <property name="onAction" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="onAction">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"/>
           <description><![CDATA[The method that is executed when the component is clicked.]]></description>
           <summary><![CDATA[The method that is executed when the component is clicked.]]></summary>
@@ -15369,7 +15369,7 @@ label.showFocus = false;
 var btn = form.newButton('And I am a button', 10, 40, 200, 20, m);
 btn.showFocus = false;]]></sample>
         </property>
-        <property name="styleClass" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="styleClass">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The name of the style class that should be applied to this component.
 
@@ -15405,7 +15405,7 @@ fieldOne.tabSeq = 2;
 fieldTwo.tabSeq = SM_DEFAULTS.IGNORE;
 fieldThree.tabSeq = 1;]]></sample>
         </property>
-        <property name="text" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="text">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The text that is displayed inside the component.]]></description>
           <summary><![CDATA[The text that is displayed inside the component.]]></summary>
@@ -15461,7 +15461,7 @@ vCenterAlignedLabel.verticalAlignment = SM_ALIGNMENT.CENTER
 var bottomAlignedLabel = form.newLabel('BOTTOM', 520, 10, 50, 300);
 bottomAlignedLabel.verticalAlignment = SM_ALIGNMENT.BOTTOM;]]></sample>
         </property>
-        <property name="visible" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="visible">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[The visible property of the component, default true.]]></description>
           <summary><![CDATA[The visible property of the component, default true.]]></summary>
@@ -15469,7 +15469,7 @@ bottomAlignedLabel.verticalAlignment = SM_ALIGNMENT.BOTTOM;]]></sample>
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 field.visible = false;]]></sample>
         </property>
-        <property name="width" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="width">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The width in pixels of the component.]]></description>
           <summary><![CDATA[The width in pixels of the component.]]></summary>
@@ -15481,7 +15481,7 @@ field.height = 100;
 application.output('modified width: ' + field.width);
 application.output('modified height: ' + field.height);]]></sample>
         </property>
-        <property name="x" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="x">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The x coordinate of the component on the form.]]></description>
           <summary><![CDATA[The x coordinate of the component on the form.]]></summary>
@@ -15491,7 +15491,7 @@ field.x = 90;
 field.y = 90;
 application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
         </property>
-        <property name="y" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="y">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The y coordinate of the component on the form.]]></description>
           <summary><![CDATA[The y coordinate of the component on the form.]]></summary>
@@ -15633,9 +15633,9 @@ application.output(ballImg.getUUID().toString());]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="JSMethod" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSMethod" scriptingName="JSMethod" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="JSMethod" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSMethod" scriptingName="JSMethod">
       <properties>
-        <property name="code" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="code">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The full source code of this method (including doc and function declaration).]]></description>
           <summary><![CDATA[The full source code of this method (including doc and function declaration).]]></summary>
@@ -15659,7 +15659,7 @@ var button = form.newButton('Click me!', 10, 10, 100, 30, method);]]></sample>
         </property>
       </properties>
       <functions>
-        <function name="getArguments" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getArguments">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;"><![CDATA[Array of the arguments, null if not specified.]]></return>
           <description><![CDATA[Gets the argument array for this method if that is set for the specific action this method is taken from.
@@ -15677,7 +15677,7 @@ if (arguments && arguments.length > 1 && arguments[1] == 10) {
 	button.onAction = solutionModel.wrapMethodWithArguments(button.onAction,arguments);
 }]]></sample>
         </function>
-        <function name="getName" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[A String holding the name of this method.]]></return>
           <description><![CDATA[The name of the method.]]></description>
@@ -15689,7 +15689,7 @@ method.code = 'function changed() { application.output("This is another function
 method.showInMenu = false;
 var button = form.newButton('Click me!', 10, 10, 100, 30, method);]]></sample>
         </function>
-        <function name="getScopeName" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getScopeName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Get scope name]]></description>
@@ -15708,7 +15708,7 @@ application.output(method.getUUID().toString());]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="JSPart" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSPart" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="JSPart" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSPart">
       <constants>
         <constant name="BODY">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -15719,7 +15719,7 @@ displayed and/or printed).]]></description>
           <summary><![CDATA[Constant use for specifying the type of form parts.]]></summary>
           <sample><![CDATA[var body = form.newPart(JSPart.BODY, 320);]]></sample>
         </constant>
-        <constant name="FOOTER" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="FOOTER">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant use for specifying the type of form parts.
 
@@ -15729,7 +15729,7 @@ footer is displayed at the bottom of the list of records.]]></description>
           <summary><![CDATA[Constant use for specifying the type of form parts.]]></summary>
           <sample><![CDATA[var footer = form.newPart(JSPart.FOOTER, 440);]]></sample>
         </constant>
-        <constant name="HEADER" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="HEADER">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant use for specifying the type of form parts. 
 
@@ -15885,7 +15885,7 @@ trailingSubsummary.restartPageNumber = true;]]></sample>
           <sample><![CDATA[var trailingGrandSummary = form.newPart(JSPart.TRAILING_GRAND_SUMMARY, 400);
 trailingGrandSummary.sinkWhenLast = true;]]></sample>
         </property>
-        <property name="styleClass" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="styleClass">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The Cascading Style Sheet (CSS) class name applied to the part.]]></description>
           <summary><![CDATA[The Cascading Style Sheet (CSS) class name applied to the part.]]></summary>
@@ -15926,7 +15926,7 @@ application.output(button_uuid.toString());]]></sample>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSPortal" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSPortal">
+    <object clientSupport="mc,wc,sc" extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSPortal" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSPortal">
       <properties>
         <property name="anchors">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -17042,7 +17042,7 @@ childrenPortal.setIntercellSpacing(5,10);]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="JSRecord" qualifiedName="com.servoy.j2db.dataprocessing.Record" scriptingName="JSRecord" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="JSRecord" qualifiedName="com.servoy.j2db.dataprocessing.Record" scriptingName="JSRecord">
       <properties>
         <property name="exception">
           <return type="com.servoy.j2db.util.ServoyException" typecode="java.lang.Exception"><![CDATA[The occurred exception.]]></return>
@@ -17050,7 +17050,7 @@ childrenPortal.setIntercellSpacing(5,10);]]></sample>
           <summary><![CDATA[Returns last occurred exception on this record (or null).]]></summary>
           <sample><![CDATA[var exception = record.exception;]]></sample>
         </property>
-        <property name="foundset" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="foundset">
           <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.base.scripting.api.IJSFoundSet"><![CDATA[The parent foundset of the record.]]></return>
           <description><![CDATA[Returns parent foundset of the record.]]></description>
           <summary><![CDATA[Returns parent foundset of the record.]]></summary>
@@ -17082,14 +17082,14 @@ for( var i = 1 ; i <= dataset.getMaxRowIndex() ; i++ )
 	application.output(dataset.getValue(i,1) +' '+ dataset.getValue(i,2) +' '+ dataset.getValue(i,3));
 }]]></sample>
         </function>
-        <function name="getDataSource" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getDataSource">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The datasource string of this record.]]></return>
           <description><![CDATA[Returns the records datasource string.]]></description>
           <summary><![CDATA[Returns the records datasource string.]]></summary>
           <sample><![CDATA[var ds = record.getDataSource();]]></sample>
         </function>
-        <function name="getPKs" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getPKs">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;"><![CDATA[an Array with the pk values.]]></return>
           <description><![CDATA[Returns an array with the primary key values of the record.]]></description>
@@ -17103,21 +17103,21 @@ for( var i = 1 ; i <= dataset.getMaxRowIndex() ; i++ )
           <summary><![CDATA[Returns true if the current record has outstanding/changed data.]]></summary>
           <sample><![CDATA[var hasChanged = record.hasChangedData();]]></sample>
         </function>
-        <function name="isEditing" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="isEditing">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[a boolean when in edit.]]></return>
           <description><![CDATA[Returns true or false if the record is being edited or not.]]></description>
           <summary><![CDATA[Returns true or false if the record is being edited or not.]]></summary>
           <sample><![CDATA[var isEditing = foundset.getSelectedRecord().isEditing() // also foundset.getRecord can be used]]></sample>
         </function>
-        <function name="isNew" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="isNew">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the current record is a new record, false otherwise;]]></return>
           <description><![CDATA[Returns true if the current record is a new record or false otherwise.]]></description>
           <summary><![CDATA[Returns true if the current record is a new record or false otherwise.]]></summary>
           <sample><![CDATA[var isNew = foundset.getSelectedRecord().isNew();]]></sample>
         </function>
-        <function name="revertChanges" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="revertChanges">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[Reverts the in memory outstanding (not saved) changes of the record.]]></description>
@@ -19103,7 +19103,7 @@ jsunit.fail("test", null, "Fail"); // 2nd param is not used in Servoy, params 3 
         </function>
       </functions>
     </object>
-    <object publicName="JSValueList" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSValueList" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="JSValueList" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSValueList">
       <constants>
         <constant name="CUSTOM_VALUES">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -19233,7 +19233,7 @@ In find mode the record with be the FindRecord which is just like a normal JSRec
 var vlist = solutionModel.newValueList('vlist', JSValueList.CUSTOM_VALUES);
 vlist.globalMethod = listProvider;]]></sample>
         </property>
-        <property name="name" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="name">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The name of the value list.
 
@@ -19578,9 +19578,9 @@ vlist.sortOptions = 'parent_table_text desc';]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="JSVariable" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSVariable" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="JSVariable" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSVariable">
       <constants>
-        <constant name="DATETIME" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="DATETIME">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></description>
           <summary><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></summary>
@@ -19588,7 +19588,7 @@ vlist.sortOptions = 'parent_table_text desc';]]></sample>
 dateVar.defaultValue = 'now';
 application.output(scopes.globals.gDate); // Prints the current date and time.]]></sample>
         </constant>
-        <constant name="INTEGER" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="INTEGER">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></description>
           <summary><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></summary>
@@ -19596,7 +19596,7 @@ application.output(scopes.globals.gDate); // Prints the current date and time.]]
 intVar.defaultValue = 997;
 application.output(scopes.globals.gInt); // Prints 997]]></sample>
         </constant>
-        <constant name="MEDIA" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="MEDIA">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></description>
           <summary><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></summary>
@@ -19604,7 +19604,7 @@ application.output(scopes.globals.gInt); // Prints 997]]></sample>
 mediaVar.defaultValue = 'new Array(1, 2, 3, 4)';
 application.output(scopes.globals.gMedia); // Prints out the array with four elements.]]></sample>
         </constant>
-        <constant name="NUMBER" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="NUMBER">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></description>
           <summary><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></summary>
@@ -19612,7 +19612,7 @@ application.output(scopes.globals.gMedia); // Prints out the array with four ele
 numberVar.defaultValue = 192.334;
 application.output(scopes.globals.gNumber); // Prints 192.334]]></sample>
         </constant>
-        <constant name="TEXT" servoyMobile="true">
+        <constant clientSupport="mc,wc,sc" name="TEXT">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></description>
           <summary><![CDATA[Constant to be used when the type of a variable needs to be specified.]]></summary>
@@ -19622,7 +19622,7 @@ application.output(scopes.globals.gText); // Prints 'some text' (without quotes)
         </constant>
       </constants>
       <properties>
-        <property name="defaultValue" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="defaultValue">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The default value of the variable. 
 
@@ -19652,7 +19652,7 @@ var mediaVar = solutionModel.newGlobalVariable('globals', 'gMedia', JSVariable.M
 mediaVar.defaultValue = 'new Array(1, 2, 3, 4)';
 application.output(scopes.globals.gMedia); // Prints out the array with four elements.]]></sample>
         </property>
-        <property name="name" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="name">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The name of the variable.]]></description>
           <summary><![CDATA[The name of the variable.]]></summary>
@@ -19663,7 +19663,7 @@ gVar.defaultValue = '"default text"';
 application.output(scopes.globals[gVar.name]);
 application.output(scopes.globals.anotherName);]]></sample>
         </property>
-        <property name="variableType" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="variableType">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The type of the variable. Can be one of: TEXT, INTEGER, NUMBER, DATETIME or MEDIA.]]></description>
           <summary><![CDATA[The type of the variable.]]></summary>
@@ -19674,7 +19674,7 @@ scopes.globals.gtext = 'another text'; // This will raise an error now, because 
         </property>
       </properties>
       <functions>
-        <function name="getScopeName" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getScopeName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Get scope name]]></description>
@@ -24856,7 +24856,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeButton" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeButton" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeButton" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeButton">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -24893,7 +24893,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -25038,7 +25038,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="visible">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -25151,7 +25151,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -25714,7 +25714,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeCheck" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeCheck" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeCheck" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeCheck">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -25751,7 +25751,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -25835,7 +25835,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="visible">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -25959,7 +25959,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -26120,7 +26120,7 @@ dataset.addRow(['cc',3]);
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeChecks" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeChecks" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeChecks" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeChecks">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -26157,7 +26157,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -26241,7 +26241,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="visible">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -26365,7 +26365,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -26585,7 +26585,7 @@ dataset.addRow(['cc',3]);
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeCombobox" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeCombobox" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeCombobox" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeCombobox">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -26631,7 +26631,7 @@ NOTE the "!" operator can be used to invert the editable state.]]></description>
           <sample><![CDATA[var currentState = %%prefix%%%%elementName%%.editable;
 %%prefix%%%%elementName%%.editable = !currentState;]]></sample>
         </property>
-        <property name="enabled" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -26737,7 +26737,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="visible">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -26861,7 +26861,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -27022,7 +27022,7 @@ dataset.addRow(['cc',3]);
         </function>
       </functions>
     </object>
-    <object publicName="RuntimeComponent" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeComponent" scriptingName="RuntimeComponent" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="RuntimeComponent" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeComponent" scriptingName="RuntimeComponent">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -27059,7 +27059,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -27125,7 +27125,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="visible">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -27231,7 +27231,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -27338,7 +27338,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeDataButton" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeDataButton" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeDataButton" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeDataButton">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -27375,7 +27375,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -27508,7 +27508,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="visible">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -27621,7 +27621,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -27778,7 +27778,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeDataLabel" qualifiedName="com.servoy.j2db.ui.IScriptDataLabelMethods" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeDataLabel" qualifiedName="com.servoy.j2db.ui.IScriptDataLabelMethods">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -27815,7 +27815,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -27948,7 +27948,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="visible">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -28068,7 +28068,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -28217,7 +28217,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object publicName="RuntimeForm" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Form" scriptingName="RuntimeForm " servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="RuntimeForm" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Form" scriptingName="RuntimeForm ">
       <properties>
         <property name="_super">
           <return type="com.servoy.j2db.documentation.scripting.docs.Form" typecode="com.servoy.j2db.scripting.FormScope"/>
@@ -28225,7 +28225,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <summary><![CDATA[Provides access to the methods of the parent of this form.]]></summary>
           <sample><![CDATA[%%prefix%%_super.some_method();]]></sample>
         </property>
-        <property deprecated="true" name="alldataproviders" servoyMobile="true" special="true">
+        <property clientSupport="mc,wc,sc" deprecated="true" name="alldataproviders" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.String;"/>
           <description><![CDATA[Get all dataproviders of the form's foundset.]]></description>
           <summary><![CDATA[Get all dataproviders of the form's foundset.]]></summary>
@@ -28235,7 +28235,7 @@ application.output("This form has " + dataprovidersNames.length + " data provide
 for (var i=0; i<dataprovidersNames.length; i++)
 	application.output(dataprovidersNames[i]);]]></sample>
         </property>
-        <property deprecated="true" name="allmethods" servoyMobile="true" special="true">
+        <property clientSupport="mc,wc,sc" deprecated="true" name="allmethods" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.String;"/>
           <description><![CDATA[Get all script names of the form.]]></description>
           <summary><![CDATA[Get all script names of the form.]]></summary>
@@ -28246,7 +28246,7 @@ application.output("This form has " + methodNames.length + " methods defined.")
 for (var i=0; i<methodNames.length; i++)
 	application.output(methodNames[i]);]]></sample>
         </property>
-        <property deprecated="true" name="allnames" servoyMobile="true" special="true">
+        <property clientSupport="mc,wc,sc" deprecated="true" name="allnames" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.String;"/>
           <description><![CDATA[Get the names of all elements on the form as an array.]]></description>
           <summary><![CDATA[Get the names of all elements on the form as an array.]]></summary>
@@ -28256,7 +28256,7 @@ application.output("This form has " + names.length + " named items.")
 for (var i=0; i<names.length; i++)
 	application.output(names[i]);]]></sample>
         </property>
-        <property deprecated="true" name="allrelations" servoyMobile="true" special="true">
+        <property clientSupport="mc,wc,sc" deprecated="true" name="allrelations" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.String;"/>
           <description><![CDATA[Get all relation names of the form.]]></description>
           <summary><![CDATA[Get all relation names of the form.]]></summary>
@@ -28267,7 +28267,7 @@ application.output("This form has " + relationsNames.length + " relations.")
 for (var i=0; i<relationsNames.length; i++)
 	application.output(relationsNames[i]);]]></sample>
         </property>
-        <property deprecated="true" name="allvariables" servoyMobile="true" special="true">
+        <property clientSupport="mc,wc,sc" deprecated="true" name="allvariables" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.String;"/>
           <description><![CDATA[Get all form variable names.]]></description>
           <summary><![CDATA[Get all form variable names.]]></summary>
@@ -28278,13 +28278,13 @@ application.output("This form has " + varNames.length + " variables defined.")
 for (var i=0; i<varNames.length; i++)
 	application.output(varNames[i]);]]></sample>
         </property>
-        <property name="controller" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="controller">
           <return type="com.servoy.j2db.FormController$JSForm" typecode="com.servoy.j2db.FormController$JSForm"/>
           <description><![CDATA[Get the controller of the form.]]></description>
           <summary><![CDATA[Get the controller of the form.]]></summary>
           <sample><![CDATA[%%prefix%%controller.enabled = !%%prefix%%controller.enabled;]]></sample>
         </property>
-        <property name="elements" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="elements">
           <return type="com.servoy.j2db.documentation.scripting.docs.FormElements" typecode="com.servoy.j2db.documentation.scripting.docs.FormElements"/>
           <description><![CDATA[Get an array with the elements in the form.]]></description>
           <summary><![CDATA[Get an array with the elements in the form.]]></summary>
@@ -28293,7 +28293,7 @@ application.output("This form has " + elems.length + " named elements.")
 for (var i=0; i<elems.length; i++)
 	application.output(elems[i].getName());]]></sample>
         </property>
-        <property name="foundset" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="foundset">
           <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
           <description><![CDATA[Get the foundset of the form.]]></description>
           <summary><![CDATA[Get the foundset of the form.]]></summary>
@@ -29559,7 +29559,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeLabel" qualifiedName="com.servoy.j2db.ui.IScriptScriptLabelMethods" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeLabel" qualifiedName="com.servoy.j2db.ui.IScriptScriptLabelMethods">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -29596,7 +29596,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -29741,7 +29741,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="visible">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -29861,7 +29861,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -30482,7 +30482,7 @@ dataset.addRow(['cc',3]);
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimePassword" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimePassword" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimePassword" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimePassword">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -30528,7 +30528,7 @@ NOTE the "!" operator can be used to invert the editable state.]]></description>
           <sample><![CDATA[var currentState = %%prefix%%%%elementName%%.editable;
 %%prefix%%%%elementName%%.editable = !currentState;]]></sample>
         </property>
-        <property name="enabled" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -30567,7 +30567,7 @@ size - the size of the font (in points).
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
-        <property name="placeholderText" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="placeholderText">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Gets or sets the placeholder text in a field.]]></description>
           <summary><![CDATA[Gets or sets the placeholder text in a field.]]></summary>
@@ -30621,7 +30621,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="visible">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -30745,7 +30745,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -31369,7 +31369,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeRadio" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeRadio" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeRadio" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeRadio">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -31406,7 +31406,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -31490,7 +31490,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="visible">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -31614,7 +31614,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -31775,7 +31775,7 @@ dataset.addRow(['cc',3]);
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeRadios" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeRadios" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeRadios" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeRadios">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -31812,7 +31812,7 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
             </parameter>
           </parameters>
         </property>
-        <property name="enabled" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -31896,7 +31896,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="visible">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -32020,7 +32020,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -34847,7 +34847,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeTextArea" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeTextArea" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeTextArea" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeTextArea">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -34902,7 +34902,7 @@ NOTE the "!" operator can be used to invert the editable state.]]></description>
           <sample><![CDATA[var currentState = %%prefix%%%%elementName%%.editable;
 %%prefix%%%%elementName%%.editable = !currentState;]]></sample>
         </property>
-        <property name="enabled" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -34941,7 +34941,7 @@ size - the size of the font (in points).
           <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
           <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
         </property>
-        <property name="placeholderText" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="placeholderText">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Gets or sets the placeholder text in a field.]]></description>
           <summary><![CDATA[Gets or sets the placeholder text in a field.]]></summary>
@@ -34995,7 +34995,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="visible">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -35119,7 +35119,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -35344,7 +35344,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeTextField" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeTextField" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeTextField" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeTextField">
       <properties>
         <property name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -35399,7 +35399,7 @@ NOTE the "!" operator can be used to invert the editable state.]]></description>
           <sample><![CDATA[var currentState = %%prefix%%%%elementName%%.editable;
 %%prefix%%%%elementName%%.editable = !currentState;]]></sample>
         </property>
-        <property name="enabled" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
@@ -35460,7 +35460,7 @@ So a string in scripting/db is converted to a integer in the ui, then you have t
 //gets the display formatting of the field
 var format = %%prefix%%%%elementName%%.format;]]></sample>
         </property>
-        <property name="placeholderText" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="placeholderText">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[Gets or sets the placeholder text in a field.]]></description>
           <summary><![CDATA[Gets or sets the placeholder text in a field.]]></summary>
@@ -35514,7 +35514,7 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 //sets the transparency of the element
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
         </property>
-        <property name="visible" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="visible">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
@@ -35638,7 +35638,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <summary><![CDATA[Returns the y location of the current element.]]></summary>
           <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
         </function>
-        <function name="getName" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
@@ -38566,7 +38566,7 @@ return true]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="SolutionModel" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSSolutionModel" scriptingName="solutionModel" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="SolutionModel" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSSolutionModel" scriptingName="solutionModel">
       <functions>
         <function name="cloneComponent">
           <argumentsTypes>
@@ -39112,7 +39112,7 @@ application.output("Name: " + c.getName() + ", Stored: " + c.isStored());]]></sa
             </parameter>
           </parameters>
         </function>
-        <function name="getForm" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getForm">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -39128,7 +39128,7 @@ var styleName = myForm.styleName;]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="getForms" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getForms">
           <argumentsTypes/>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSForm[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSForm;"><![CDATA[an array of JSForm type elements]]></return>
           <description><![CDATA[Get an array of all forms.]]></description>
@@ -39137,7 +39137,7 @@ var styleName = myForm.styleName;]]></sample>
 for (var i in forms)
 	application.output(forms[i].name)]]></sample>
         </function>
-        <function name="getForms" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getForms">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -39153,7 +39153,7 @@ for (var i in forms)
             </parameter>
           </parameters>
         </function>
-        <function name="getForms" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getForms">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
@@ -39182,7 +39182,7 @@ for (var i in forms)
           <deprecated><![CDATA[Replaced by #getGlobalMethod(String,String)]]></deprecated>
           <sample/>
         </function>
-        <function name="getGlobalMethod" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getGlobalMethod">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
@@ -39201,7 +39201,7 @@ if (method != null) application.output(method.code);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="getGlobalMethods" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getGlobalMethods">
           <argumentsTypes/>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSMethod;"><![CDATA[an array of JSMethod type elements]]></return>
           <description><![CDATA[The list of all global methods.]]></description>
@@ -39210,7 +39210,7 @@ if (method != null) application.output(method.code);]]></sample>
 for (var x in methods) 
 	application.output(methods[x].getName());]]></sample>
         </function>
-        <function name="getGlobalMethods" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getGlobalMethods">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -39235,7 +39235,7 @@ for (var x in methods)
           <deprecated><![CDATA[Replaced by #getGlobalVariable(String,String)]]></deprecated>
           <sample/>
         </function>
-        <function name="getGlobalVariable" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getGlobalVariable">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
@@ -39254,7 +39254,7 @@ application.output(globalVariable.name + " has the default value of " + globalVa
             </parameter>
           </parameters>
         </function>
-        <function name="getGlobalVariables" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getGlobalVariables">
           <argumentsTypes/>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSVariable[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSVariable;"><![CDATA[an array of JSVariable type elements]]></return>
           <description><![CDATA[Gets an array of all global variables.]]></description>
@@ -39263,7 +39263,7 @@ application.output(globalVariable.name + " has the default value of " + globalVa
 for (var i in globalVariables)
 	application.output(globalVariables[i].name + " has the default value of " + globalVariables[i].defaultValue);]]></sample>
         </function>
-        <function name="getGlobalVariables" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getGlobalVariables">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -39365,7 +39365,7 @@ if (relations.length != 0)
             </parameter>
           </parameters>
         </function>
-        <function name="getScopeNames" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getScopeNames">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"><![CDATA[an array of String scope names]]></return>
           <description><![CDATA[Gets an array of all scope names used.]]></description>
@@ -39389,7 +39389,7 @@ style.content = 'combobox { color: #0000ff;font: italic 10pt "Verdana";}']]></sa
             </parameter>
           </parameters>
         </function>
-        <function name="getValueList" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getValueList">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -39405,7 +39405,7 @@ style.content = 'combobox { color: #0000ff;font: italic 10pt "Verdana";}']]></sa
             </parameter>
           </parameters>
         </function>
-        <function name="getValueLists" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getValueLists">
           <argumentsTypes/>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSValueList[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSValueList;"><![CDATA[an array of JSValueList objects]]></return>
           <description><![CDATA[Gets an array of all valuelists for the currently active solution.]]></description>
@@ -39499,7 +39499,7 @@ forms['mySubForm'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="newForm" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="newForm">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
@@ -39540,7 +39540,7 @@ myForm.newTextField('dataProviderNameHere', 140, 20, 140,20)]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="newForm" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="newForm">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
@@ -39596,7 +39596,7 @@ myForm.newTextField('dataProviderNameHere', 140, 20, 140,20)]]></sample>
           <deprecated><![CDATA[Replaced by #newGlobalMethod(String,String)]]></deprecated>
           <sample/>
         </function>
-        <function name="newGlobalMethod" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="newGlobalMethod">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
@@ -39624,7 +39624,7 @@ myForm.newTextField('dataProviderNameHere', 140, 20, 140,20)]]></sample>
           <deprecated><![CDATA[Replaced by #newGlobalVariable(String,String,int)]]></deprecated>
           <sample/>
         </function>
-        <function name="newGlobalVariable" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="newGlobalVariable">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
@@ -39856,7 +39856,7 @@ for (var i = 0; i < allCalcs.length; i++) {
             </parameter>
           </parameters>
         </function>
-        <function name="removeForm" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="removeForm">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -39887,7 +39887,7 @@ if(success)
           <deprecated><![CDATA[Replaced by #removeGlobalMethod(String,String)]]></deprecated>
           <sample/>
         </function>
-        <function name="removeGlobalMethod" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="removeGlobalMethod">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
@@ -39923,7 +39923,7 @@ for (var i = 0; i < list.length; i++) {
           <deprecated><![CDATA[Replaced by #removeGlobalVariable(String,String)]]></deprecated>
           <sample/>
         </function>
-        <function name="removeGlobalVariable" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="removeGlobalVariable">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
@@ -40045,7 +40045,7 @@ if (vls != null) {
             </parameter>
           </parameters>
         </function>
-        <function name="revertForm" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="revertForm">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -40428,7 +40428,7 @@ form.defaultPageFormat = solutionModel.createPageFormat(612,792,72,72,72,72,SM_O
         </function>
       </functions>
     </object>
-    <object publicName="Utils" qualifiedName="com.servoy.j2db.scripting.JSUtils" scriptingName="utils" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="Utils" qualifiedName="com.servoy.j2db.scripting.JSUtils" scriptingName="utils">
       <functions>
         <function deprecated="true" name="dateFormat">
           <argumentsTypes>
@@ -40440,7 +40440,7 @@ form.defaultPageFormat = solutionModel.createPageFormat(612,792,72,72,72,72,SM_O
           <deprecated><![CDATA[replaced by parseDate(String, String) or dateFormat(Date, String)]]></deprecated>
           <sample/>
         </function>
-        <function name="dateFormat" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="dateFormat">
           <argumentsTypes>
             <argumentType typecode="java.util.Date"/>
             <argumentType typecode="java.lang.String"/>
@@ -40482,7 +40482,7 @@ var dot = utils.getUnicodeCharacter(9679);]]></sample>
           <deprecated><![CDATA[As of release 2.0, replaced by #hasRecords(JSFoundSet).]]></deprecated>
           <sample/>
         </function>
-        <function name="hasRecords" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="hasRecords">
           <argumentsTypes>
             <argumentType typecode="com.servoy.base.scripting.api.IJSFoundSet"/>
           </argumentsTypes>
@@ -40506,7 +40506,7 @@ if (%%elementName%%.hasRecords(orders_to_orderitems))
             </parameter>
           </parameters>
         </function>
-        <function name="hasRecords" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="hasRecords">
           <argumentsTypes>
             <argumentType typecode="com.servoy.base.scripting.api.IJSRecord"/>
             <argumentType typecode="java.lang.String"/>
@@ -40544,7 +40544,7 @@ if (%%elementName%%.hasRecords(orders_to_orderitems))
 	//a date calculation
 }]]></sample>
         </function>
-        <function name="numberFormat" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="numberFormat">
           <argumentsTypes>
             <argumentType typecode="java.lang.Number"/>
             <argumentType typecode="java.lang.Number"/>
@@ -40562,7 +40562,7 @@ if (%%elementName%%.hasRecords(orders_to_orderitems))
             </parameter>
           </parameters>
         </function>
-        <function name="numberFormat" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="numberFormat">
           <argumentsTypes>
             <argumentType typecode="java.lang.Number"/>
             <argumentType typecode="java.lang.String"/>
@@ -41336,9 +41336,9 @@ application.putClientProperty(APP_WEB_PROPERTY.WEBCLIENT_TEMPLATES_DIR, 'myclien
         </constant>
       </constants>
     </object>
-    <object publicName="controller" qualifiedName="com.servoy.j2db.FormController$JSForm" scriptingName="controller" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="controller" qualifiedName="com.servoy.j2db.FormController$JSForm" scriptingName="controller">
       <properties>
-        <property name="enabled" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets or sets the enabled state of a form; also known as "grayed-out".
 
@@ -41627,7 +41627,7 @@ if (dialogOrWindowName != null) {
             </parameter>
           </parameters>
         </function>
-        <function name="getDataSource" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getDataSource">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the datasource]]></return>
           <description><![CDATA[Get the used datasource.]]></description>
@@ -41686,7 +41686,7 @@ Tip: get the the table count of all rows in a table, use: databaseManager.getTab
 	//do some action per record
 }]]></sample>
         </function>
-        <function name="getName" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the name]]></return>
           <description><![CDATA[Get the name of this form.]]></description>
@@ -41721,7 +41721,7 @@ Tip: get the the table count of all rows in a table, use: databaseManager.getTab
             </parameter>
           </parameters>
         </function>
-        <function name="getSelectedIndex" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getSelectedIndex">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[the index]]></return>
           <description><![CDATA[Gets the current record index of the current foundset.]]></description>
@@ -42673,7 +42673,7 @@ Note: The unit specified for width, height and all margins MUST be the same.]]><
             </parameter>
           </parameters>
         </function>
-        <function name="setSelectedIndex" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setSelectedIndex">
           <argumentsTypes>
             <argumentType typecode="int"/>
           </argumentsTypes>
@@ -42704,7 +42704,7 @@ var current = %%prefix%%controller.getSelectedIndex();
             </parameter>
           </parameters>
         </function>
-        <function name="show" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="show">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <description><![CDATA[Shows the form (makes the form visible)
@@ -42889,7 +42889,7 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
             </parameter>
           </parameters>
         </function>
-        <function name="showRecords" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="showRecords">
           <argumentsTypes>
             <argumentType typecode="com.servoy.base.scripting.api.IJSFoundSet"/>
           </argumentsTypes>
@@ -43494,9 +43494,9 @@ TIP: You can use the Copy button in the developer Select Sorting Fields dialog t
         </function>
       </functions>
     </object>
-    <object publicName="elements" qualifiedName="com.servoy.j2db.documentation.scripting.docs.FormElements" scriptingName="elements" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="elements" qualifiedName="com.servoy.j2db.documentation.scripting.docs.FormElements" scriptingName="elements">
       <properties>
-        <property name="[index]" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="[index]">
           <return type="com.servoy.j2db.ui.runtime.IRuntimeComponent" typecode="com.servoy.j2db.ui.runtime.IRuntimeComponent"/>
           <description><![CDATA[Get an element of the form by its index.]]></description>
           <summary><![CDATA[Get an element of the form by its index.]]></summary>
@@ -43506,7 +43506,7 @@ TIP: You can use the Copy button in the developer Select Sorting Fields dialog t
 	application.output(elem.getName() + ": " + elem.getDataProviderID());
 }]]></sample>
         </property>
-        <property name="[name]" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="[name]">
           <return type="com.servoy.j2db.ui.runtime.IRuntimeComponent" typecode="com.servoy.j2db.ui.runtime.IRuntimeComponent"/>
           <description><![CDATA[Get an element of the form by its name.]]></description>
           <summary><![CDATA[Get an element of the form by its name.]]></summary>
@@ -43517,7 +43517,7 @@ TIP: You can use the Copy button in the developer Select Sorting Fields dialog t
 	application.output(name + ": " + elem.getDataProviderID());	
 }]]></sample>
         </property>
-        <property name="allnames" servoyMobile="true" special="true">
+        <property clientSupport="mc,wc,sc" name="allnames" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.String;"/>
           <description><![CDATA[Get the names of all elements of the form, as an array.]]></description>
           <summary><![CDATA[Get the names of all elements of the form, as an array.]]></summary>
@@ -43528,7 +43528,7 @@ TIP: You can use the Copy button in the developer Select Sorting Fields dialog t
 	application.output(name + ": " + elem.getDataProviderID());	
 }]]></sample>
         </property>
-        <property name="length" servoyMobile="true">
+        <property clientSupport="mc,wc,sc" name="length">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <description><![CDATA[Get the number of elements of the form.]]></description>
           <summary><![CDATA[Get the number of elements of the form.]]></summary>
@@ -43540,7 +43540,7 @@ TIP: You can use the Copy button in the developer Select Sorting Fields dialog t
         </property>
       </properties>
     </object>
-    <object publicName="i18n" qualifiedName="com.servoy.j2db.scripting.JSI18N" scriptingName="i18n" servoyMobile="true">
+    <object clientSupport="mc,wc,sc" publicName="i18n" qualifiedName="com.servoy.j2db.scripting.JSI18N" scriptingName="i18n">
       <functions>
         <function name="getAvailableTimeZoneIDs">
           <argumentsTypes/>
@@ -43566,7 +43566,7 @@ NOTE: For more information on i18n, see the chapter on Internationalization (i18
           <summary><![CDATA[Gets the current country; based on the current locale settings in the Servoy Client Locale preferences.]]></summary>
           <sample><![CDATA[var currCountry = i18n.getCurrentCountry();]]></sample>
         </function>
-        <function name="getCurrentLanguage" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getCurrentLanguage">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[a String representing the current language.]]></return>
           <description><![CDATA[Gets the current language; based on the current locale settings in the Servoy Client Locale preferences. 
@@ -43596,7 +43596,7 @@ NOTE: For more information on i18n, see the chapter on Internationalization (i18
           <summary><![CDATA[Gets the current default number format; based on the current locale settings in the Servoy Client Locale preferences.]]></summary>
           <sample><![CDATA[var defaultNumberFormat = i18n.getDefaultNumberFormat();]]></sample>
         </function>
-        <function name="getI18NMessage" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getI18NMessage">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
@@ -43612,7 +43612,7 @@ i18n.getI18NMessage('mykey.username.text',new Array('my_name'))]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function name="getI18NMessage" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="getI18NMessage">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="[Ljava.lang.Object;"/>
@@ -43702,7 +43702,7 @@ for(var i=1;i<=set.getMaxRowIndex();i++)
           <summary><![CDATA[Returns an array of known timezones.]]></summary>
           <sample><![CDATA[var timeZones = i18n.getTimeZones();]]></sample>
         </function>
-        <function name="setI18NMessage" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setI18NMessage">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
@@ -43799,7 +43799,7 @@ i18n.setI18NMessagesFilter('message_variant', filterValue)
             </parameter>
           </parameters>
         </function>
-        <function name="setLocale" servoyMobile="true">
+        <function clientSupport="mc,wc,sc" name="setLocale">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
