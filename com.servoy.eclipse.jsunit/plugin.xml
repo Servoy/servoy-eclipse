@@ -3,10 +3,16 @@
 <plugin>
    <extension
          point="org.eclipse.ui.commands">
-      <command
+     <!-- <command
             categoryId="com.servoy.eclipse.ui"
             description="Run Solution/Scope/Form/Method Javascript Unit Test(s)"
             id="com.servoy.eclipse.jsunit.actions.runJSTests"
+            name="Run JS Unit Test(s)">
+      </command>-->
+      <command
+            categoryId="com.servoy.eclipse.ui"
+            description="Run Solution/Scope/Form/Method Javascript Unit Test(s)"
+            id="com.servoy.eclipse.jsunit.actions.runSriptUintTests"
             name="Run JS Unit Test(s)">
       </command>
    </extension>
@@ -16,7 +22,7 @@
             adaptable="true"
             id="com.servoy.eclipse.jsunit.solutioncontribution"
             objectClass="com.servoy.eclipse.jsunit.SolutionUnitTestTarget">
-         <action
+        <!-- <action
                class="com.servoy.eclipse.jsunit.actions.RunJSTests"
                definitionId="com.servoy.eclipse.jsunit.actions.runJSTests"
                enablesFor="1"
@@ -26,10 +32,21 @@
                menubarPath="additions"
                style="push"
                tooltip="Run Solution/Scope/Form/Method Javascript Unit Test(s)">
+         </action>-->
+         <action
+               class="com.servoy.eclipse.jsunit.actions.RunJSUnitAction"
+               definitionId="com.servoy.eclipse.jsunit.actions.runSriptUintTests"
+               enablesFor="1"
+               icon="icons/jsunit.png"
+               id="com.servoy.eclipse.jsunit.actions.runScriptUnitMenuContribution"
+               label="Run JS &amp;Unit Test(s)"
+               menubarPath="additions"
+               style="push"
+               tooltip="Run Solution/Scope/Form/Method Javascript Unit Test(s)">
          </action>
       </objectContribution>
    </extension>
-   <extension
+   <!--<extension
          point="org.eclipse.ui.actionSets">
       <actionSet
             id="com.servoy.eclipse.jsunit.RunJSTests"
@@ -44,7 +61,7 @@
                tooltip="Run Solution/Scope/Form/Method Javascript Unit Test(s)">
          </action>
       </actionSet>
-   </extension>
+   </extension>-->
    <extension
          point="org.eclipse.core.runtime.adapters">
       <factory
@@ -57,13 +74,18 @@
    </extension>
    <extension
          point="org.eclipse.ui.bindings">
-      <key
+      <!--<key
             commandId="com.servoy.eclipse.jsunit.actions.runJSTests"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M3+M2+U">
+      </key>-->
+      <key
+            commandId="com.servoy.eclipse.jsunit.actions.runSriptUintTests"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M3+M2+U">
       </key>
    </extension>
-   <extension
+   <!--<extension
          point="org.eclipse.ui.perspectiveExtensions">
       <perspectiveExtension
             targetID="com.servoy.eclipse.ui.DesignPerspective">
@@ -77,7 +99,7 @@
                id="com.servoy.eclipse.jsunit.RunJSTests">
          </actionSet>
       </perspectiveExtension>
-   </extension>
+   </extension>-->
    <extension
          point="org.eclipse.core.contenttype.contentTypes">
       <content-type
@@ -102,6 +124,25 @@
             name="JUnit"
             restorable="true">
       </view>
+   </extension>
+   <extension point="org.eclipse.dltk.testing.engine">
+	   <testingEngine
+	         class="com.servoy.eclipse.jsunit.scriptunit.JSUnitTestingEngine"
+	         id="com.servoy.eclipse.jsunit.scriptunit.JSUnitTestingEngine"
+	         name="JSUnit"
+	         nature="org.eclipse.dltk.javascript.core.nature"
+	         priority="20">
+	   </testingEngine>
+   </extension>
+   <extension
+         point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+            delegate="com.servoy.eclipse.jsunit.launch.JSUnitLaunchConfigurationDelegate"
+            id="com.servoy.eclipse.jsunit.launch"
+            modes="run, debug"
+            name=" Servoy JSunit"
+            public="true">
+      </launchConfigurationType>
    </extension>
    <!--extension
          point="org.eclipse.debug.ui.launchShortcuts">

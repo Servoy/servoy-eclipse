@@ -39,6 +39,8 @@ import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
+import com.servoy.eclipse.jsunit.scriptunit.ScriptUnitTestRunNotifier;
+
 /**
  * Class that makes the conversion between JSUnit test result and JUnit test result.
  * 
@@ -49,6 +51,7 @@ import org.mozilla.javascript.ScriptableObject;
 public class JSUnitTestListenerHandler
 {
 
+
 	private static final String[] DEFAULT_STACK_ELEMENT_FILTERS = new String[] { "\\AJsUnit.js\\z", "\\AsuiteName\\z", "\\AJsUtil.js\\z", "\\AJsUnitToJava.js\\z" };
 
 	private final TestResult result;
@@ -58,6 +61,7 @@ public class JSUnitTestListenerHandler
 	private final boolean useFileInStackQualifiedName;
 	private final Pattern[] stackElementFilters;
 
+	private ScriptUnitTestRunNotifier scriptUnitNotifier = null;
 	private Scriptable jsResult;
 
 	public JSUnitTestListenerHandler(TestResult result, List<Test> testList, boolean useFileInStackQualifiedName)
@@ -74,6 +78,7 @@ public class JSUnitTestListenerHandler
 		this.result = result;
 		this.testList = testList;
 		this.useFileInStackQualifiedName = useFileInStackQualifiedName;
+		scriptUnitNotifier = new ScriptUnitTestRunNotifier(testList, testStack);
 
 		final int filtersSize = (stackElementFilters == null ? 0 : stackElementFilters.length);
 		final int defaultFiltersSize = DEFAULT_STACK_ELEMENT_FILTERS.length;
@@ -87,6 +92,8 @@ public class JSUnitTestListenerHandler
 		{
 			this.stackElementFilters[i] = Pattern.compile(stackElementFilters[i - defaultFiltersSize]);
 		}
+		scriptUnitNotifier.sendStartRun();
+		scriptUnitNotifier.sendTestTree();
 	}
 
 	// JS parameters (Test, Error)
@@ -138,6 +145,7 @@ public class JSUnitTestListenerHandler
 		if (stackTrace == null) stackTrace = new StackTraceElement[0];
 		err.setStackTrace(stackTrace);
 		result.addError(currentTest, err);
+		scriptUnitNotifier.sendTestFailure(currentTest, err);
 	}
 
 	// JS parameters (Test, AssertionFailedError)
@@ -174,6 +182,8 @@ public class JSUnitTestListenerHandler
 		if (stackTrace == null) stackTrace = new StackTraceElement[0];
 		failure.setStackTrace(stackTrace);
 		result.addFailure(currentTest, failure);
+		scriptUnitNotifier.sendTestFailure(currentTest, failure);
+
 	}
 
 	private String getMessage(Context context, Scriptable throwable)
@@ -359,6 +369,7 @@ public class JSUnitTestListenerHandler
 		{
 			result.endTest(currentTest);
 		}
+		scriptUnitNotifier.sendTestEnded(currentTest);
 	}
 
 	// JS parameters (Test)
@@ -394,6 +405,7 @@ public class JSUnitTestListenerHandler
 		{
 			result.startTest(currentTest);
 		}
+		scriptUnitNotifier.sendTestStarted(currentTest);
 	}
 
 	private boolean sameName(Test test, String testName)
@@ -423,7 +435,7 @@ public class JSUnitTestListenerHandler
 
 	public void applyShouldStopToJSIfNeeded(Context context)
 	{
-		if (jsResult != null && result.shouldStop())
+		if (jsResult != null && (result.shouldStop() || scriptUnitNotifier.isStopRequested()))
 		{
 			context.evaluateString(jsResult, "this.stop()", "Stopped by user", 1, null);
 			jsResult = null; // stopping it once is enough

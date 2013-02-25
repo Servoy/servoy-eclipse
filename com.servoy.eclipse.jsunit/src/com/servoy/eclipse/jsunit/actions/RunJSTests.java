@@ -85,7 +85,9 @@ import com.servoy.j2db.server.shared.ApplicationServerSingleton;
  * running workspace.<br>
  * If we would want to avoid this, we would either have to somehow simulate a complete Java Model in the workspace, or rewrite a similar view from scratch.
  * @author acostescu
+ * @deprecated this action is replaced by RunJSUnitAction
  */
+@Deprecated
 public class RunJSTests implements IObjectActionDelegate, IWorkbenchWindowActionDelegate
 {
 

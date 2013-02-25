@@ -17,6 +17,12 @@
 
 package com.servoy.eclipse.jsunit.runner;
 
+import java.util.StringTokenizer;
+
+import org.eclipse.core.runtime.Assert;
+
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
@@ -29,41 +35,176 @@ import com.servoy.j2db.util.Pair;
 public class TestTarget
 {
 
-	public final Pair<Solution, String> globalScopeToTest; // if a global scope should be tested 
-	public final Solution moduleToTest; // if a module is to be tested
-	public final Form formToTest; // if a form scope should be tested
-	public final ScriptMethod testMethodToTest; // if only one test method should be tested
+	private static final int SOLUTION = 1;
+	private static final int FORM = 2;
+	private static final int GLOBAL_SCOPE = 3;
+	private static final int FORM_METHOD = 4;
+	private static final int GLOBAL_METHOD = 5;
+
+	private final static String DELIM = "|";
+
+
+	public Pair<Solution, String> globalScopeToTest; // if a global scope should be tested 
+	public Solution moduleToTest; // if a module is to be tested
+	public Form formToTest; // if a form scope should be tested
+	public ScriptMethod testMethodToTest; // if only one test method should be tested
+
+	private Solution activeSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution();
+	private Form testMethodsForm;
+	private String testMethodsScope;
+	private int type; //value of SOLUTION ,FORM, GLOBAL_SCOPE...
+
+	private TestTarget()
+	{
+	}
 
 	public TestTarget(Pair<Solution, String> globalScopeToTest)
 	{
+		this.type = GLOBAL_SCOPE;
 		this.globalScopeToTest = globalScopeToTest;
 		this.moduleToTest = null;
 		this.formToTest = null;
 		this.testMethodToTest = null;
+
 	}
 
 	public TestTarget(Solution moduleToTest)
 	{
+		this.type = SOLUTION;
 		this.globalScopeToTest = null;
 		this.moduleToTest = moduleToTest;
 		this.formToTest = null;
 		this.testMethodToTest = null;
+
 	}
 
 	public TestTarget(Form formToTest)
 	{
+		this.type = FORM;
 		this.globalScopeToTest = null;
 		this.moduleToTest = null;
 		this.formToTest = formToTest;
 		this.testMethodToTest = null;
+
 	}
 
-	public TestTarget(ScriptMethod testMethodToTest)
+	public TestTarget(Form form, ScriptMethod testMethodToTest)
 	{
+		this.type = FORM_METHOD;
 		this.globalScopeToTest = null;
 		this.moduleToTest = null;
 		this.formToTest = null;
 		this.testMethodToTest = testMethodToTest;
+		this.testMethodsForm = form;
+		Assert.isNotNull(form);
 	}
 
+	public TestTarget(String scope, ScriptMethod testMethodToTest)
+	{
+		this.type = GLOBAL_METHOD;
+		this.globalScopeToTest = null;
+		this.moduleToTest = null;
+		this.formToTest = null;
+		this.testMethodToTest = testMethodToTest;
+		this.testMethodsScope = scope;
+		Assert.isNotNull(scope);
+	}
+
+	@Override
+	public String toString()
+	{
+		switch (type)
+		{
+			case SOLUTION :
+			{
+				return type + DELIM + activeSolution.getName() + DELIM + moduleToTest.getName();
+			}
+			case FORM :
+			{
+				return type + DELIM + activeSolution.getName() + DELIM + formToTest.getName();
+			}
+			case GLOBAL_SCOPE :
+			{
+				return type + DELIM + activeSolution.getName() + DELIM + globalScopeToTest.getLeft().getName() + DELIM + globalScopeToTest.getRight();
+			}
+			case FORM_METHOD :
+			{
+				return type + DELIM + activeSolution.getName() + DELIM + testMethodsForm.getName() + DELIM + testMethodToTest.getName();
+			}
+			case GLOBAL_METHOD :
+			{
+				return type + DELIM + activeSolution.getName() + DELIM + testMethodsScope + DELIM + testMethodToTest.getName();
+			}
+		}
+		return null;
+	}
+
+	public static TestTarget fromString(String str)
+	{
+		TestTarget target = new TestTarget();
+		FlattenedSolution fl = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getEditingFlattenedSolution();
+		StringTokenizer st = new StringTokenizer(str, DELIM);
+		int type = Integer.valueOf(st.nextToken());
+		String activeSolution = st.nextToken();
+		target.activeSolution = findSolution(activeSolution);
+		target.type = type;
+		switch (type)
+		{
+			case SOLUTION :
+			{
+				String solutionName = st.nextToken();
+				target.moduleToTest = findSolution(solutionName); //Assert not null
+				break;
+			}
+			case FORM :
+			{
+				String formName = st.nextToken();
+				target.formToTest = fl.getForm(formName); //Assert not null
+				break;
+			}
+			case GLOBAL_SCOPE :
+			{
+				String solName = st.nextToken();
+				String scopeName = st.nextToken();
+				Solution s = findSolution(solName); //Assert not null
+				Pair<Solution, String> pair = new Pair<Solution, String>(s, scopeName);
+				target.globalScopeToTest = pair;
+				break;
+			}
+			case FORM_METHOD :
+			{
+				String formName = st.nextToken();
+				String methodName = st.nextToken();
+				Form form = fl.getForm(formName); //Assert not null
+				ScriptMethod method = form.getScriptMethod(methodName); //Assert not null
+				target.testMethodToTest = method;
+				break;
+			}
+			case GLOBAL_METHOD :
+			{
+				String scopeName = st.nextToken();
+				String methodName = st.nextToken();
+				target.testMethodToTest = fl.getScriptMethod(scopeName, methodName);
+				break;
+			}
+		}
+		return target;
+	}
+
+	private static Solution findSolution(String name)
+	{
+		FlattenedSolution fl = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getEditingFlattenedSolution();
+		if (fl.getSolution().getName().equals(name))
+		{
+			return fl.getSolution();
+		}
+		for (Solution module : fl.getModules())
+		{
+			if (module.getName().equals(name))
+			{
+				return module;
+			}
+		}
+		return null;
+	}
 }

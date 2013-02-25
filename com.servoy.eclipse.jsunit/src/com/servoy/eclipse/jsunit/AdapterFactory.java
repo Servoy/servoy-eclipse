@@ -53,6 +53,7 @@ public class AdapterFactory implements IAdapterFactory
 			switch (node.getType())
 			{
 				case SOLUTION_ITEM :
+				case SOLUTION :
 					retVal = new TestTarget(((ServoyProject)node.getRealObject()).getSolution());
 					break;
 				case FORM :
@@ -62,8 +63,12 @@ public class AdapterFactory implements IAdapterFactory
 					retVal = new TestTarget((Pair<Solution, String>)node.getRealObject());
 					break;
 				case FORM_METHOD :
+					Form form = (Form)(((ScriptMethod)node.getRealObject()).getParent());
+					retVal = new TestTarget(form, (ScriptMethod)node.getRealObject());
+					break;
 				case GLOBAL_METHOD_ITEM :
-					retVal = new TestTarget((ScriptMethod)node.getRealObject());
+					String scope = (((ScriptMethod)node.getRealObject()).getScopeName());
+					retVal = new TestTarget(scope, (ScriptMethod)node.getRealObject());
 					break;
 				default : // remains null
 			}

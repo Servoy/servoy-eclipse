@@ -223,7 +223,8 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 		TestIdentifier resultingSuiteId = null;
 		if (solution != null && !inspectedModules.contains(solution))
 		{
-			boolean thisSolutionShouldBeTested = (partOfTargetModuleSubtree || target.moduleToTest == null || target.moduleToTest == solution);
+			String moduleToTestName = target.moduleToTest == null ? "" : target.moduleToTest.getName();
+			boolean thisSolutionShouldBeTested = (partOfTargetModuleSubtree || target.moduleToTest == null || moduleToTestName.equals(solution.getName()));
 			boolean addedTestCode = false;
 			inspectedModules.add(solution);
 
@@ -239,7 +240,7 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 					{
 						Solution module = (Solution)solution.getRepository().getActiveRootObject(ref.getMetaData().getRootObjectId());
 						TestIdentifier tmp = appendSolutionTestCode(module, target, testCode, inspectedModules, flattenedSolution,
-							(partOfTargetModuleSubtree || module == target.moduleToTest));
+							(partOfTargetModuleSubtree || module.getName().equals(moduleToTestName)));
 						if (tmp != null)
 						{
 							modulesThatAddedTests.add(tmp);
@@ -289,7 +290,7 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 		for (String scopeName : solution.getScopeNames())
 		{
 			if (target == null || target.globalScopeToTest == null ||
-				(target.globalScopeToTest.getRight().equals(scopeName) && target.globalScopeToTest.getLeft() == solution))
+				(target.globalScopeToTest.getRight().equals(scopeName) && solution.getName().equals(target.globalScopeToTest.getLeft().getName())))
 			{
 				Iterator<ScriptMethod> it = solution.getScriptMethods(scopeName, true);
 				// prefix the name so that we have no name conflicts with other form/module/global tests
@@ -335,7 +336,7 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 		while (it.hasNext())
 		{
 			Form form = it.next();
-			if (target == null || target.formToTest == null || target.formToTest == form)
+			if (target == null || target.formToTest == null || target.formToTest.getName().equals(form.getName()))
 			{
 				TestIdentifier formTestIdentifier = addFormTests(flattenedSolution.getFlattenedForm(form), target, testCode);
 				if (formTestIdentifier != null)
@@ -362,8 +363,10 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 		while (it.hasNext())
 		{
 			ScriptMethod method = it.next();
-			if (method.getName().equals(SET_UP_METHOD) || method.getName().equals(TEAR_DOWN_METHOD) ||
-				((target == null || target.testMethodToTest == null || target.testMethodToTest == method) && method.getName().startsWith(TEST_METHOD_PREFIX)))
+			if (method.getName().equals(SET_UP_METHOD) ||
+				method.getName().equals(TEAR_DOWN_METHOD) ||
+				((target == null || target.testMethodToTest == null || target.testMethodToTest.getName().equals(method.getName())) && method.getName().startsWith(
+					TEST_METHOD_PREFIX)))
 			{
 				if (!testMethodsFound && method.getName().startsWith(TEST_METHOD_PREFIX))
 				{
