@@ -48,6 +48,7 @@ import com.servoy.eclipse.mobileexporter.export.PhoneGapApplication;
 import com.servoy.eclipse.mobileexporter.export.PhoneGapConnector;
 import com.servoy.eclipse.mobileexporter.ui.wizard.ExportMobileWizard.CustomizedFinishPage;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.util.EditorUtil;
 
 /**
  * @author lvostinar
@@ -193,6 +194,7 @@ public class PhoneGapApplicationPage extends WizardPage
 		super.setErrorMessage(null);
 		if (canFlipToNextPage())
 		{
+			EditorUtil.saveDirtyEditors(getShell(), true);
 			final String[] errorMessage = new String[1];
 			final String appName = applicationNameCombo.getText();
 			final String appVersion = txtVersion.getText();

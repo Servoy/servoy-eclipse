@@ -48,6 +48,7 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import com.servoy.eclipse.mobileexporter.export.MobileExporter;
 import com.servoy.eclipse.mobileexporter.ui.wizard.ExportMobileWizard.CustomizedFinishPage;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
 /**
@@ -273,6 +274,7 @@ public class WarExportPage extends WizardPage
 				String outputFolder = getOutputFolder();
 				if (!outputFolder.endsWith(File.pathSeparator)) outputFolder = outputFolder + File.separator;
 
+				EditorUtil.saveDirtyEditors(getShell(), true);
 				if (serverDir.equalsIgnoreCase(outputFolder))
 				{
 					finishPage.setApplicationURL(
