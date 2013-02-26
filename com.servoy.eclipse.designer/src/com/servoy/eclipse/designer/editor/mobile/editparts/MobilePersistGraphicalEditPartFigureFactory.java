@@ -222,7 +222,6 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 						{
 							((DataCheckBox)component).setIcon(Activator.getDefault().loadImageIconFromBundle("mobile/check_on.png"));
 						}
-
 						return component;
 					}
 
@@ -280,6 +279,11 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 			@Override
 			public org.eclipse.draw2d.geometry.Dimension getPreferredSize(int wHint, int hHint)
 			{
+				if (persist instanceof Field && ((Field)persist).getDisplayType() != Field.CHECKS && ((Field)persist).getDisplayType() != Field.RADIOS)
+				{
+					// always calculate, see setPreferredSize call for checks/radios
+					return super.getPreferredSize(wHint, hHint);
+				}
 				return prefSize != null ? prefSize : super.getPreferredSize(wHint, hHint);
 			}
 		};
