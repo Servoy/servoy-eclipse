@@ -3,12 +3,6 @@
 <plugin>
    <extension
          point="org.eclipse.ui.commands">
-     <!-- <command
-            categoryId="com.servoy.eclipse.ui"
-            description="Run Solution/Scope/Form/Method Javascript Unit Test(s)"
-            id="com.servoy.eclipse.jsunit.actions.runJSTests"
-            name="Run JS Unit Test(s)">
-      </command>-->
       <command
             categoryId="com.servoy.eclipse.ui"
             description="Run Solution/Scope/Form/Method Javascript Unit Test(s)"
@@ -22,17 +16,6 @@
             adaptable="true"
             id="com.servoy.eclipse.jsunit.solutioncontribution"
             objectClass="com.servoy.eclipse.jsunit.SolutionUnitTestTarget">
-        <!-- <action
-               class="com.servoy.eclipse.jsunit.actions.RunJSTests"
-               definitionId="com.servoy.eclipse.jsunit.actions.runJSTests"
-               enablesFor="1"
-               icon="icons/jsunit.png"
-               id="com.servoy.eclipse.jsunit.actions.runJSTestsMenuContribution"
-               label="Run JS &amp;Unit Test(s)"
-               menubarPath="additions"
-               style="push"
-               tooltip="Run Solution/Scope/Form/Method Javascript Unit Test(s)">
-         </action>-->
          <action
                class="com.servoy.eclipse.jsunit.actions.RunJSUnitAction"
                definitionId="com.servoy.eclipse.jsunit.actions.runSriptUintTests"
@@ -46,22 +29,6 @@
          </action>
       </objectContribution>
    </extension>
-   <!--<extension
-         point="org.eclipse.ui.actionSets">
-      <actionSet
-            id="com.servoy.eclipse.jsunit.RunJSTests"
-            label="Run JS Unit Test(s)">
-         <action
-               class="com.servoy.eclipse.jsunit.actions.RunJSTests"
-               definitionId="com.servoy.eclipse.jsunit.actions.runJSTests"
-               icon="icons/jsunit.png"
-               id="com.servoy.eclipse.jsunit.actions.runJSTests"
-               label="Run JS Unit Test(s)"
-               style="push"
-               tooltip="Run Solution/Scope/Form/Method Javascript Unit Test(s)">
-         </action>
-      </actionSet>
-   </extension>-->
    <extension
          point="org.eclipse.core.runtime.adapters">
       <factory
@@ -74,32 +41,12 @@
    </extension>
    <extension
          point="org.eclipse.ui.bindings">
-      <!--<key
-            commandId="com.servoy.eclipse.jsunit.actions.runJSTests"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M3+M2+U">
-      </key>-->
       <key
             commandId="com.servoy.eclipse.jsunit.actions.runSriptUintTests"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M3+M2+U">
       </key>
    </extension>
-   <!--<extension
-         point="org.eclipse.ui.perspectiveExtensions">
-      <perspectiveExtension
-            targetID="com.servoy.eclipse.ui.DesignPerspective">
-         <actionSet
-               id="com.servoy.eclipse.jsunit.RunJSTests">
-         </actionSet>
-      </perspectiveExtension>
-      <perspectiveExtension
-            targetID="org.eclipse.debug.ui.DebugPerspective">
-         <actionSet
-               id="com.servoy.eclipse.jsunit.RunJSTests">
-         </actionSet>
-      </perspectiveExtension>
-   </extension>-->
    <extension
          point="org.eclipse.core.contenttype.contentTypes">
       <content-type
@@ -144,35 +91,4 @@
             public="true">
       </launchConfigurationType>
    </extension>
-   <!--extension
-         point="org.eclipse.debug.ui.launchShortcuts">
-      <shortcut
-            class="com.servoy.eclipse.jsunit.actions.RunJSTests"
-            helpContextId="org.eclipse.jdt.junit.launch_shortcut"
-            id="com.servoy.eclipse.jsunit.launchShortcut"
-            label="JSUnit tests"
-            modes="run">
-         <contextualLaunch>
-            <enablement>
-               <with variable="selection">
-                  <count value="1"/>
-                  <iterate>
-                     <adapt type="com.servoy.j2db.persistence.IPersist">
-                        <test property="org.eclipse.jdt.core.isInJavaProject"/>
-                        <test property="org.eclipse.jdt.core.hasTypeOnClasspath" value="junit.framework.Test"/>
-                        <test property="org.eclipse.jdt.junit.canLaunchAsJUnit" forcePluginActivation="true"/>
-                     </adapt>
-                  </iterate>
-               </with>
-            </enablement>
-         </contextualLaunch>
-         <perspective
-               id="com.servoy.eclipse.ui.DesignPerspective">
-         </perspective>
-         <perspective
-               id="org.eclipse.debug.ui.DebugPerspective">
-         </perspective>
-      </shortcut>
-   </extension-->
-
 </plugin>

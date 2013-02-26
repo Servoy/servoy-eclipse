@@ -37,7 +37,7 @@ import org.eclipse.dltk.testing.ITestRunnerUI;
 public class JSUnitTestingEngine extends AbstractTestingEngine
 {
 
-	public static String ENGINE_ID = "com.servoy.eclipse.jsunit.scriptunit.JSUnitTestingEngine";
+	public static final String ENGINE_ID = "com.servoy.eclipse.jsunit.scriptunit.JSUnitTestingEngine";
 
 	@Override
 	public void configureLaunch(InterpreterConfig config, ILaunchConfiguration configuration, ILaunch launch) throws CoreException

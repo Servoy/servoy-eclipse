@@ -42,6 +42,7 @@ public class JSUnitLaunchConfigurationDelegate extends LaunchConfigurationDelega
 {
 	public static final String LAUNCH_CONFIGURATION_TYPE_ID = "com.servoy.eclipse.jsunit.launch";
 	public static final String LAUNCH_CONFIG_INSTANCE = "com.servoy.eclipse.jsunit.launch.configurationInstance";
+	public static final int MAX_CONFIG_INSTANCES = 10;
 	private static ILaunch currentLaunch = null;
 
 	public static ILaunch getCurrentLaunch()

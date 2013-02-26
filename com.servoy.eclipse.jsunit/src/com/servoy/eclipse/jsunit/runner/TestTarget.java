@@ -44,10 +44,10 @@ public class TestTarget
 	private final static String DELIM = "|";
 
 
-	public Pair<Solution, String> globalScopeToTest; // if a global scope should be tested 
-	public Solution moduleToTest; // if a module is to be tested
-	public Form formToTest; // if a form scope should be tested
-	public ScriptMethod testMethodToTest; // if only one test method should be tested
+	private Pair<Solution, String> globalScopeToTest; // if a global scope should be tested 
+	private Solution moduleToTest; // if a module is to be tested
+	private Form formToTest; // if a form scope should be tested
+	private ScriptMethod testMethodToTest; // if only one test method should be tested
 
 	private Solution activeSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution();
 	private Form testMethodsForm;
@@ -56,6 +56,26 @@ public class TestTarget
 
 	private TestTarget()
 	{
+	}
+
+	public Pair<Solution, String> getGlobalScopeToTest()
+	{
+		return globalScopeToTest;
+	}
+
+	public Solution getModuleToTest()
+	{
+		return moduleToTest;
+	}
+
+	public Form getFormToTest()
+	{
+		return formToTest;
+	}
+
+	public ScriptMethod getTestMethodToTest()
+	{
+		return testMethodToTest;
 	}
 
 	public TestTarget(Pair<Solution, String> globalScopeToTest)

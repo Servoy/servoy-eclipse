@@ -61,11 +61,17 @@ public class RunJSUnitAction implements IObjectActionDelegate
 			ILaunchConfiguration[] configurations;
 
 			configurations = manager.getLaunchConfigurations(type);
-
+			int count = 0;
 			for (ILaunchConfiguration configuration : configurations)
 			{
-				//configuration.delete();
-				break;
+				//was this target already launched before? if yes reuse the launch configuration
+				if (getTestTarget().toString().equals(configuration.getAttribute(JSUnitLaunchConfigurationDelegate.LAUNCH_CONFIG_INSTANCE, "")))
+				{
+					DebugUITools.launch(configuration, ILaunchManager.DEBUG_MODE);
+					return;
+				}
+				count++;
+				if (count > JSUnitLaunchConfigurationDelegate.MAX_CONFIG_INSTANCES) configuration.delete();
 			}
 			//create a launch configuration copy  with jsunit.js from berilos
 			ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(null, "JSunit tests run " + counter++);

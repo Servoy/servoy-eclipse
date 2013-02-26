@@ -58,8 +58,8 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 	public static final String TEAR_DOWN_METHOD = "tearDown";
 	public static final String SOLUTION_TEST_JS_NAME = "solutionTestSuite.js";
 
-	private static IApplication staticSuiteApplication;
-	private static TestTarget staticTarget;
+	protected static IApplication staticSuiteApplication;
+	protected static TestTarget staticTarget;
 
 	private static class TestIdentifier
 	{
@@ -223,8 +223,8 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 		TestIdentifier resultingSuiteId = null;
 		if (solution != null && !inspectedModules.contains(solution))
 		{
-			String moduleToTestName = target.moduleToTest == null ? "" : target.moduleToTest.getName();
-			boolean thisSolutionShouldBeTested = (partOfTargetModuleSubtree || target.moduleToTest == null || moduleToTestName.equals(solution.getName()));
+			String moduleToTestName = target == null ? "" : (target.getModuleToTest() == null ? "" : target.getModuleToTest().getName());
+			boolean thisSolutionShouldBeTested = (partOfTargetModuleSubtree || target.getModuleToTest() == null || moduleToTestName.equals(solution.getName()));
 			boolean addedTestCode = false;
 			inspectedModules.add(solution);
 
@@ -269,8 +269,8 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 			{
 				// really create the solution test code now that module test code has been created
 				// first globals/form testcases
-				if (target == null || target.formToTest == null) globalSuiteId = addGlobalTests(solution, target, testCode);
-				if (target == null || target.globalScopeToTest == null) formTestIds.addAll(addAllFormTests(solution, target, flattenedSolution, testCode));
+				if (target == null || target.getFormToTest() == null) globalSuiteId = addGlobalTests(solution, target, testCode);
+				if (target == null || target.getGlobalScopeToTest() == null) formTestIds.addAll(addAllFormTests(solution, target, flattenedSolution, testCode));
 				addedTestCode = addedTestCode || (formTestIds.size() > 0) || globalSuiteId != null;
 			}
 
@@ -289,8 +289,8 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 		List<TestIdentifier> allGlobalIdentifiers = new ArrayList<TestIdentifier>();
 		for (String scopeName : solution.getScopeNames())
 		{
-			if (target == null || target.globalScopeToTest == null ||
-				(target.globalScopeToTest.getRight().equals(scopeName) && solution.getName().equals(target.globalScopeToTest.getLeft().getName())))
+			if (target == null || target.getGlobalScopeToTest() == null ||
+				(target.getGlobalScopeToTest().getRight().equals(scopeName) && solution.getName().equals(target.getGlobalScopeToTest().getLeft().getName())))
 			{
 				Iterator<ScriptMethod> it = solution.getScriptMethods(scopeName, true);
 				// prefix the name so that we have no name conflicts with other form/module/global tests
@@ -336,7 +336,7 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 		while (it.hasNext())
 		{
 			Form form = it.next();
-			if (target == null || target.formToTest == null || target.formToTest.getName().equals(form.getName()))
+			if (target == null || target.getFormToTest() == null || target.getFormToTest().getName().equals(form.getName()))
 			{
 				TestIdentifier formTestIdentifier = addFormTests(flattenedSolution.getFlattenedForm(form), target, testCode);
 				if (formTestIdentifier != null)
@@ -365,7 +365,7 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 			ScriptMethod method = it.next();
 			if (method.getName().equals(SET_UP_METHOD) ||
 				method.getName().equals(TEAR_DOWN_METHOD) ||
-				((target == null || target.testMethodToTest == null || target.testMethodToTest.getName().equals(method.getName())) && method.getName().startsWith(
+				((target == null || target.getTestMethodToTest() == null || target.getTestMethodToTest().getName().equals(method.getName())) && method.getName().startsWith(
 					TEST_METHOD_PREFIX)))
 			{
 				if (!testMethodsFound && method.getName().startsWith(TEST_METHOD_PREFIX))

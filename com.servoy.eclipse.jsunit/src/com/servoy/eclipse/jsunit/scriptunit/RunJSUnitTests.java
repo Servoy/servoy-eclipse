@@ -63,7 +63,7 @@ import com.servoy.eclipse.core.util.SerialRule;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.debug.actions.StartJsUnitClientActionDelegate;
 import com.servoy.eclipse.jsunit.SolutionRemoteTestRunner;
-import com.servoy.eclipse.jsunit.runner.ApplicationJSTestSuite;
+import com.servoy.eclipse.jsunit.launch.JSUnitLaunchConfigurationDelegate;
 import com.servoy.eclipse.jsunit.runner.JSUnitTestListenerHandler;
 import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -77,8 +77,7 @@ import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
 /**
  * Runs the servoy unit tests on the active solution using the java JUunit runner and dltk.testing Script Unit view.
- * The hacks are still present becasue one can switch to junit view from open view menu and go to the stack line as before.
- *  The description for the hacks is in {@link com.servoy.eclipse.jsunit.actions.RunJSTests}
+ * The hacks are still present because one can switch to junit view from open view menu and using the junit view  go to the stack line as before.
  * @author obuligan
  */
 public class RunJSUnitTests implements Runnable
@@ -283,10 +282,10 @@ public class RunJSUnitTests implements Runnable
 													public void run()
 													{
 
-														ApplicationJSTestSuite.setTestTarget(testApp, testTarget);
+														ScriptUnitTestSuite.setTestTarget(testApp, testTarget);
 														try
 														{
-															SolutionRemoteTestRunner.main(new String[] { "-version", "3", "-port", String.valueOf(port), "-testLoaderClass", "org.eclipse.jdt.internal.junit.runner.junit3.JUnit3TestLoader", "loaderpluginname", "org.eclipse.jdt.junit.runtime", "-classNames", ApplicationJSTestSuite.class.getCanonicalName() });
+															SolutionRemoteTestRunner.main(new String[] { "-version", "3", "-port", String.valueOf(port), "-testLoaderClass", "org.eclipse.jdt.internal.junit.runner.junit3.JUnit3TestLoader", "loaderpluginname", "org.eclipse.jdt.junit.runtime", "-classNames", ScriptUnitTestSuite.class.getCanonicalName() });
 														}
 														catch (RuntimeException e)
 														{
@@ -551,7 +550,9 @@ public class RunJSUnitTests implements Runnable
 	private void removeDLTKTestSessions()
 	{
 		List<org.eclipse.dltk.internal.testing.model.TestRunSession> testRunSessions = DLTKTestingPlugin.getModel().getTestRunSessions();
-		int toDelete = testRunSessions.size() - 10;
+		int toDelete = testRunSessions.size() - JSUnitLaunchConfigurationDelegate.MAX_CONFIG_INSTANCES;
+		//max TestRunSession history size was chosen based on max config instance size . 1 config instance can be run 10 times and still fill the history.
+		// The edge case to cover would be 10 different consecutive runs each based on a different target.
 		while (toDelete > 0)
 		{
 			toDelete--;

@@ -41,7 +41,7 @@ public class JSUnitSuite extends TestSuite
 {
 
 	private JSUnitToJavaRunner runner;
-	private List<Test> testList = null;
+	protected List<Test> testList = null;
 	private String jsSuiteClassName;
 
 	private String testFileName;
