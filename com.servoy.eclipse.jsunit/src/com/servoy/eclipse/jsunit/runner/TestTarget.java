@@ -78,6 +78,11 @@ public class TestTarget
 		return testMethodToTest;
 	}
 
+	public Solution getActiveSolution()
+	{
+		return activeSolution;
+	}
+
 	public TestTarget(Pair<Solution, String> globalScopeToTest)
 	{
 		this.type = GLOBAL_SCOPE;
