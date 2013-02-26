@@ -139,8 +139,23 @@ public class TextFilter extends ViewerFilter
 			{
 				if (match(labelProvider.getText(node)))
 				{
-					matchingNodes.add(node); // for text decoration in list
-					matched = true;
+					if (isInMobile)
+					{
+						if (MobileViewerFilter.isNodeAllowedInMobile(node))
+						{
+							matchingNodes.add(node); // for text decoration in list
+							matched = true;
+						}
+						else
+						{
+							matched = false;
+						}
+					}
+					else
+					{
+						matchingNodes.add(node); // for text decoration in list
+						matched = true;
+					}
 				}
 			}
 		}
@@ -166,6 +181,8 @@ public class TextFilter extends ViewerFilter
 	protected boolean fIgnoreWildCards;
 
 	protected boolean fIgnoreCase;
+
+	protected boolean isInMobile;
 
 	protected boolean fHasLeadingStar;
 
@@ -219,11 +236,12 @@ public class TextFilter extends ViewerFilter
 	 * @param ignoreCase if true, case is ignored
 	 * @param ignoreWildCards if true, wild cards and their escape sequences are ignored (everything is taken literally).
 	 */
-	public TextFilter(ILabelProvider labelProvider, boolean ignoreCase, boolean ignoreWildCards)
+	public TextFilter(ILabelProvider labelProvider, boolean ignoreCase, boolean ignoreWildCards, boolean isInMobile)
 	{
 		this.labelProvider = labelProvider;
 		fIgnoreCase = ignoreCase;
 		fIgnoreWildCards = ignoreWildCards;
+		this.isInMobile = isInMobile;
 	}
 
 	/**

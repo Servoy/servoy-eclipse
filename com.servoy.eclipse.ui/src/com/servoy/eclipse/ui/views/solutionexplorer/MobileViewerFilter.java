@@ -34,27 +34,30 @@ import com.servoy.eclipse.ui.node.UserNodeType;
  */
 public class MobileViewerFilter extends ViewerFilter
 {
-	private List<UserNodeType> allowedParentNodes = null;
+	private static final List<UserNodeType> allowedParentNodes = new ArrayList<UserNodeType>();
 
-	public MobileViewerFilter()
+	static
 	{
 		// adding hardcode node types, because they don't have a corresponding class type that we can check is allowed in mobile
-		allowedParentNodes = new ArrayList<UserNodeType>();
 		allowedParentNodes.add(UserNodeType.RESOURCES);
 		allowedParentNodes.add(UserNodeType.ALL_SOLUTIONS);
 		allowedParentNodes.add(UserNodeType.SOLUTION);
 		allowedParentNodes.add(UserNodeType.PLUGINS);
 	}
 
-	private SimpleUserNode getFirstParent(SimpleUserNode node)
+	public MobileViewerFilter()
+	{
+
+	}
+
+	private static SimpleUserNode getFirstParent(SimpleUserNode node)
 	{
 		if (node == null || node.parent == null) return null;
 		if (node.parent != null && node.parent.getRealType() == UserNodeType.ARRAY && "root".equals(node.parent.getName())) return node; //$NON-NLS-1$
 		else return getFirstParent(node.parent);
 	}
 
-	@Override
-	public boolean select(Viewer viewer, Object parentNode, Object node)
+	public static boolean isNodeAllowedInMobile(Object node)
 	{
 		if (node instanceof PlatformSimpleUserNode)
 		{
@@ -105,5 +108,11 @@ public class MobileViewerFilter extends ViewerFilter
 			return (isAllowedNode || ((SimpleUserNode)node).isVisibleInMobile());
 		}
 		return false;
+	}
+
+	@Override
+	public boolean select(Viewer viewer, Object parentNode, Object node)
+	{
+		return isNodeAllowedInMobile(node);
 	}
 }

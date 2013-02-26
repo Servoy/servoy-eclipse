@@ -2531,16 +2531,38 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		filterTree(filterValue);
 	}
 
+	private List<Object> filterOutNoneMobileStuff(Object[] elements)
+	{
+		List<Object> toRet = new ArrayList<Object>();
+		for (Object element : elements)
+		{
+			SimpleUserNode node = (SimpleUserNode)element;
+
+			if (!MobileViewerFilter.isNodeAllowedInMobile(node)) continue;
+
+			if (node.children != null)
+			{
+				List<Object> res = filterOutNoneMobileStuff(node.children);
+				node.children = res.toArray(new SimpleUserNode[res.size()]);
+			}
+			toRet.add(node);
+		}
+		return toRet;
+	}
+
 	private void filterTree(final String text)
 	{
 		final boolean wasNull;
 		if (treeFilter == null)
 		{
-			treeFilter = new TextFilter(labelProvider, true, false);
+			boolean inMobile = SolutionMetaData.isServoyMobileSolution(getActiveSolution());
+			treeFilter = new TextFilter(labelProvider, true, false, inMobile);
 			treeFilter.setSupplementalContentProvider((IStructuredContentProvider)list.getContentProvider());
 			treeFilter.setText(text);
 			// cache contents as it may take a while the first time... (filter once outside of SWT UI thread - so we can show progress dialog)
-			treeFilter.filter(tree, tree.getInput(), ((IStructuredContentProvider)tree.getContentProvider()).getElements(tree.getInput()));
+			Object[] elements = ((IStructuredContentProvider)tree.getContentProvider()).getElements(tree.getInput());
+			if (inMobile) elements = filterOutNoneMobileStuff(elements).toArray();
+			treeFilter.filter(tree, tree.getInput(), elements);
 			wasNull = true;
 		}
 		else
