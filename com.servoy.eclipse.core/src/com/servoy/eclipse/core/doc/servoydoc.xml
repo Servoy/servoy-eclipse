@@ -6478,7 +6478,8 @@ field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
         </property>
         <property name="dataProviderID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description/>
+          <description><![CDATA[The dataprovider of the component.]]></description>
+          <summary><![CDATA[The dataprovider of the component.]]></summary>
           <sample><![CDATA[// Normally the dataprovider is specified when a component is created.
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
 // But it can be modified later if needed.
@@ -10056,11 +10057,9 @@ field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
         </property>
         <property name="dataProviderID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description/>
-          <sample><![CDATA[// Normally the dataprovider is specified when a component is created.
-var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
-// But it can be modified later if needed.
-field.dataProviderID = 'parent_table_id';]]></sample>
+          <description><![CDATA[The dataprovider of the component.]]></description>
+          <summary><![CDATA[The dataprovider of the component.]]></summary>
+          <sample/>
         </property>
         <property name="displayType">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -10076,11 +10075,16 @@ cal.displayType = JSField.TEXT_FIELD;]]></sample>
         </property>
         <property name="displaysTags">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
-          <description/>
-          <sample><![CDATA[// Normally the dataprovider is specified when a component is created.
-var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
-// But it can be modified later if needed.
-field.dataProviderID = 'parent_table_id';]]></sample>
+          <description><![CDATA[Flag that enables or disables merging of data inside components using tags (placeholders).
+Tags (or placeholders) are words surrounded by %% on each side. There are data tags and
+standard tags. Data tags consist in names of dataproviders surrounded by %%. Standard tags
+are a set of predefined tags that are made available by the system.
+
+See the "Merging data" section for more details about tags.
+
+The default value of this flag is "false", that is merging of data is disabled by default.]]></description>
+          <summary><![CDATA[Flag that enables or disables merging of data inside components using tags (placeholders).]]></summary>
+          <sample/>
         </property>
         <property name="editable">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -15011,7 +15015,8 @@ field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
         </property>
         <property name="dataProviderID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <description/>
+          <description><![CDATA[The dataprovider of the component.]]></description>
+          <summary><![CDATA[The dataprovider of the component.]]></summary>
           <sample><![CDATA[// Normally the dataprovider is specified when a component is created.
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
 // But it can be modified later if needed.
