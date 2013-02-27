@@ -17,10 +17,11 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -33,21 +34,23 @@ import com.servoy.eclipse.core.util.OptionDialog;
 import com.servoy.eclipse.core.util.UIUtils.ExtendedInputDialog;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.AbstractPersistFactory;
 import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ISupportName;
-import com.servoy.j2db.persistence.ISupportUpdateableName;
 import com.servoy.j2db.persistence.IValidateName;
-import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -147,58 +150,46 @@ public class MovePersistAction extends AbstractMovePersistAction
 	@Override
 	protected void doWork(final IPersist persist, final Location location, IValidateName nameValidator) throws RepositoryException
 	{
-		String tempName = persist.getUUID().toString();
-		String persistName = null;
-		if (persist instanceof ISupportName) persistName = ((ISupportName)persist).getName();
-		final IPersist duplicate = intelligentClonePersist(persist, tempName, location.getServoyProject(), nameValidator, false);
-		if (duplicate != null)
+		IRootObject rootObject = persist.getRootObject();
+		if (rootObject instanceof Solution)
 		{
-			IRootObject rootObject = persist.getRootObject();
-			final int oldId = persist.getID();
-			if (rootObject instanceof Solution)
-			{
-				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(rootObject.getName());
-				EclipseRepository repository = (EclipseRepository)rootObject.getRepository();
+			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(rootObject.getName());
 
-				IPersist editingNode = servoyProject.getEditingPersist(persist.getUUID());
-				repository.deleteObject(editingNode);
+			IPersist editingNode = servoyProject.getEditingPersist(persist.getUUID());
 
-				servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
-			}
+			// reset all uuids
+			final Map<Integer, Integer> idMap = AbstractPersistFactory.resetUUIDSRecursively(editingNode, (EclipseRepository)rootObject.getRepository(), true);
 
-			if (duplicate instanceof ISupportUpdateableName)
-			{
-				((ISupportUpdateableName)duplicate).updateName(nameValidator, persistName);
-			}
-			else if (duplicate instanceof Media)
-			{
-				((Media)duplicate).setName(persistName);
-			}
+			servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
 
+			// update references
 			for (ServoyProject project : ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject())
 			{
+				final boolean[] changed = { false };
 				project.getEditingSolution().acceptVisitor(new IPersistVisitor()
 				{
 					public Object visit(IPersist o)
 					{
 						try
 						{
-							EclipseRepository er = (EclipseRepository)ServoyModel.getDeveloperRepository();
-							Iterator<ContentSpec.Element> iterator = er.getContentSpec().getPropertiesForObjectType(o.getTypeID());
-							while (iterator.hasNext())
+							for (ContentSpec.Element element : Utils.iterate(((EclipseRepository)ServoyModel.getDeveloperRepository()).getContentSpec().getPropertiesForObjectType(
+								o.getTypeID())))
 							{
-								final ContentSpec.Element element = iterator.next();
 								// Don't set meta data properties.
 								if (element.isMetaData() || element.isDeprecated()) continue;
 								// Get default property value as an object.
-								final int typeId = element.getTypeID();
-								if (typeId == IRepository.ELEMENTS)
+								if (element.getTypeID() == IRepository.ELEMENTS)
 								{
 									Object property_value = ((AbstractBase)o).getProperty(element.getName());
-									final int element_id = Utils.getAsInteger(property_value);
-									if (element_id > 0 && element_id == oldId)
+									int id = Utils.getAsInteger(property_value);
+									if (id > 0)
 									{
-										((AbstractBase)o).setProperty(element.getName(), new Integer(duplicate.getID()));
+										Integer newId = idMap.get(new Integer(id));
+										if (newId != null)
+										{
+											((AbstractBase)o).setProperty(element.getName(), newId);
+											changed[0] = true;
+										}
 									}
 								}
 							}
@@ -211,7 +202,44 @@ public class MovePersistAction extends AbstractMovePersistAction
 					}
 				});
 
-				project.saveEditingSolutionNodes(new IPersist[] { project.getEditingSolution() }, true);
+				if (changed[0])
+				{
+					project.saveEditingSolutionNodes(new IPersist[] { project.getEditingSolution() }, true, false);
+				}
+			}
+
+			// Then move the file(s)
+			try
+			{
+				Pair<String, String> filePairFrom = SolutionSerializer.getFilePath(editingNode, true);
+				String[] scriptPathsFrom = SolutionSerializer.getScriptPaths(editingNode, true);
+
+				String relativePathFrom = editingNode.getRootObject().getName() + '/';
+				String relativePathTo = location.getServoyProject().getSolution().getName() + '/';
+				if (filePairFrom.getLeft().startsWith(relativePathFrom))
+				{
+					WorkspaceFileAccess wsa = new WorkspaceFileAccess(ServoyModel.getWorkspace());
+					// move object file
+					if (wsa.move(filePairFrom.getLeft() + filePairFrom.getRight(), relativePathTo +
+						filePairFrom.getLeft().substring(relativePathFrom.length()) + filePairFrom.getRight()))
+					{
+						// move script files
+						if (scriptPathsFrom != null)
+						{
+							for (String scriptFile : scriptPathsFrom)
+							{
+								if (scriptFile.startsWith(relativePathFrom))
+								{
+									wsa.move(scriptFile, relativePathTo + scriptFile.substring(relativePathFrom.length()));
+								}
+							}
+						}
+					}
+				}
+			}
+			catch (IOException e)
+			{
+				ServoyLog.logError(e);
 			}
 		}
 	}

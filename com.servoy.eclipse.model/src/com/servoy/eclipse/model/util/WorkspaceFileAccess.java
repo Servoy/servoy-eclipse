@@ -250,10 +250,12 @@ public class WorkspaceFileAccess implements IFileAccess
 
 	protected boolean moveFile(Path relativePathFrom, Path relativePathTo) throws CoreException
 	{
-		IFile file = workspaceRoot.getFile(relativePathFrom);
-		if (file.exists())
+		IFile fileFrom = workspaceRoot.getFile(relativePathFrom);
+		if (fileFrom.exists())
 		{
-			file.move(workspaceRoot.getFile(relativePathTo).getFullPath(), true, null);
+			IFile fileTo = workspaceRoot.getFile(relativePathTo);
+			mkdirs(fileTo.getParent());
+			fileFrom.move(fileTo.getFullPath(), true, null);
 			return true;
 		}
 		return false;
@@ -261,10 +263,12 @@ public class WorkspaceFileAccess implements IFileAccess
 
 	protected boolean moveFolder(Path relativePathFrom, Path relativePathTo) throws CoreException
 	{
-		IFolder folder = workspaceRoot.getFolder(relativePathFrom);
-		if (folder.exists())
+		IFolder folderFrom = workspaceRoot.getFolder(relativePathFrom);
+		if (folderFrom.exists())
 		{
-			folder.move(workspaceRoot.getFolder(relativePathTo).getFullPath(), true, null);
+			IFolder folderTo = workspaceRoot.getFolder(relativePathTo);
+			mkdirs(folderTo.getParent());
+			folderFrom.move(folderTo.getFullPath(), true, null);
 			return true;
 		}
 		return false;
