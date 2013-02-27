@@ -208,7 +208,11 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 		StringBuffer testCode = new StringBuffer(1024);
 		HashSet<Solution> inspectedModules = new HashSet<Solution>();
 		TestIdentifier testIdentifier = appendSolutionTestCode(application.getSolution(), target, testCode, inspectedModules,
-			application.getFlattenedSolution(), target == null || target.getModuleToTest().getName().equals(target.getActiveSolution().getName()));
+			application.getFlattenedSolution(),
+			//* If Test target is null that means the whole active solution.
+			//* If Test tarfet's module to test is the same as active solution  that  means the whole active solution again.
+			target == null || target.getActiveSolution().getName().equals(target.getModuleToTest() == null ? "" : target.getModuleToTest().getName()));
+
 		if (testIdentifier == null)
 		{
 			return getErrorSuite("Th" + (target == null ? "is solution" : "e selection") + " does not have jsunit tests" +

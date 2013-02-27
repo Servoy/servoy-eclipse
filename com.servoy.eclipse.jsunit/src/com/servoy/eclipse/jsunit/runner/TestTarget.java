@@ -30,6 +30,8 @@ import com.servoy.j2db.util.Pair;
 
 /**
  * Specifies which tests of an active solution's subtree should run.
+ * If Test target is null that means the whole active solution.
+ * If Test tarfet's module to test is the same as active solution  that  means the whole active solution again.
  * @author acostescu
  */
 public class TestTarget
