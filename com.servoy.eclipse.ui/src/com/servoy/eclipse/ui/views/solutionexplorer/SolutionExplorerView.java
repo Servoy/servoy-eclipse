@@ -2550,19 +2550,21 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		return toRet;
 	}
 
+	private Object[] mobileOnlyElements = null;
+	private Object[] allElements = null;
+
 	private void filterTree(final String text)
 	{
 		final boolean wasNull;
+		boolean inMobile = SolutionMetaData.isServoyMobileSolution(getActiveSolution());
 		if (treeFilter == null)
 		{
-			boolean inMobile = SolutionMetaData.isServoyMobileSolution(getActiveSolution());
-			treeFilter = new TextFilter(labelProvider, true, false, inMobile);
+			treeFilter = new TextFilter(labelProvider, true, false);
 			treeFilter.setSupplementalContentProvider((IStructuredContentProvider)list.getContentProvider());
 			treeFilter.setText(text);
 			// cache contents as it may take a while the first time... (filter once outside of SWT UI thread - so we can show progress dialog)
-			Object[] elements = ((IStructuredContentProvider)tree.getContentProvider()).getElements(tree.getInput());
-			if (inMobile) elements = filterOutNoneMobileStuff(elements).toArray();
-			treeFilter.filter(tree, tree.getInput(), elements);
+			allElements = ((IStructuredContentProvider)tree.getContentProvider()).getElements(tree.getInput());
+			mobileOnlyElements = filterOutNoneMobileStuff(allElements).toArray();
 			wasNull = true;
 		}
 		else
@@ -2570,6 +2572,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			treeFilter.setText(text);
 			wasNull = false;
 		}
+
+		treeFilter.setIsInMobile(inMobile);
+		treeFilter.filter(tree, tree.getInput(), inMobile ? mobileOnlyElements : allElements);
 
 		Runnable updateUI = new Runnable()
 		{

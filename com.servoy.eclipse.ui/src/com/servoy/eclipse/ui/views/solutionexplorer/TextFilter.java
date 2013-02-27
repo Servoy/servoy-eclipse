@@ -236,12 +236,12 @@ public class TextFilter extends ViewerFilter
 	 * @param ignoreCase if true, case is ignored
 	 * @param ignoreWildCards if true, wild cards and their escape sequences are ignored (everything is taken literally).
 	 */
-	public TextFilter(ILabelProvider labelProvider, boolean ignoreCase, boolean ignoreWildCards, boolean isInMobile)
+	public TextFilter(ILabelProvider labelProvider, boolean ignoreCase, boolean ignoreWildCards)
 	{
 		this.labelProvider = labelProvider;
 		fIgnoreCase = ignoreCase;
 		fIgnoreWildCards = ignoreWildCards;
-		this.isInMobile = isInMobile;
+		this.isInMobile = false;
 	}
 
 	/**
@@ -730,5 +730,10 @@ public class TextFilter extends ViewerFilter
 		}
 
 		return -1;
+	}
+
+	public void setIsInMobile(boolean isInMobile)
+	{
+		this.isInMobile = isInMobile;
 	}
 }
