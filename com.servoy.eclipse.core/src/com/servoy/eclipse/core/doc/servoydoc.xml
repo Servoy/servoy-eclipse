@@ -9248,6 +9248,22 @@ for (var i = 1; i <= dataset.getMaxColumnIndex(); i++)
             </parameter>
           </parameters>
         </function>
+        <function name="getColumnType" since="7.0">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number"><![CDATA[Number the column type (JSColumn constant)]]></return>
+          <description><![CDATA[Get a column type based on index.]]></description>
+          <summary><![CDATA[Get a column type based on index.]]></summary>
+          <sample><![CDATA[//assuming the variable dataset contains a dataset
+var firstColumnType = dataset.getColumnType(1) //retrieves the first columnname into the variable firstColumName
+if (firstColumnType == JSColumn.NUMBER) { }]]></sample>
+          <parameters>
+            <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[index of column (1-based).]]></description>
+            </parameter>
+          </parameters>
+        </function>
         <function name="getException">
           <argumentsTypes/>
           <return type="com.servoy.j2db.util.ServoyException" typecode="com.servoy.j2db.util.ServoyException"><![CDATA[ServoyException exception or null when not available.]]></return>
@@ -10059,7 +10075,10 @@ field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <description><![CDATA[The dataprovider of the component.]]></description>
           <summary><![CDATA[The dataprovider of the component.]]></summary>
-          <sample/>
+          <sample><![CDATA[// Normally the dataprovider is specified when a component is created.
+var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
+// But it can be modified later if needed.
+field.dataProviderID = 'parent_table_id';]]></sample>
         </property>
         <property name="displayType">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -10084,7 +10103,8 @@ See the "Merging data" section for more details about tags.
 
 The default value of this flag is "false", that is merging of data is disabled by default.]]></description>
           <summary><![CDATA[Flag that enables or disables merging of data inside components using tags (placeholders).]]></summary>
-          <sample/>
+          <sample><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
+field.displaysTags = true;]]></sample>
         </property>
         <property name="editable">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -41659,7 +41679,8 @@ if (dialogOrWindowName != null) {
           <argumentsTypes/>
           <return type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet"><![CDATA[the dataset with form context]]></return>
           <description><![CDATA[Gets the forms context where it resides, returns a dataset of its structure to the main controller.
-Note: can't be called in onload, because no context is yet available at this time.]]></description>
+Note1: can't be called in onload, because no context is yet available at this time.
+Note2: tabindex is 1 (left) or 2 (right) for a SplitPane and 0 based for the other tabpanels.]]></description>
           <summary><![CDATA[Gets the forms context where it resides, returns a dataset of its structure to the main controller.]]></summary>
           <sample><![CDATA[//dataset columns: [containername(1),formname(2),tabpanel or beanname(3),tabname(4),tabindex(5)]
 //dataset rows: mainform(1) -> parent(2)  -> current form(3) (when 3 forms deep)
