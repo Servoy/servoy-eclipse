@@ -43,6 +43,7 @@ import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.scripting.annotations.AnnotationManager;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -149,8 +150,8 @@ public class MobilePersistPropertySource extends PersistPropertySource
 	@Override
 	protected boolean shouldShow(PropertyDescriptorWrapper propertyDescriptor) throws RepositoryException
 	{
-		if (propertyDescriptor.propertyDescriptor.getReadMethod() != null &&
-			propertyDescriptor.propertyDescriptor.getReadMethod().getAnnotation(ServoyMobile.class) == null)
+		if (!AnnotationManager.getInstance().isAnnotationPresent(propertyDescriptor.propertyDescriptor.getReadMethod(), getPersist().getClass(),
+			ServoyMobile.class))
 		{
 			// do not show the property if the read-method is not flagged
 			return false;
