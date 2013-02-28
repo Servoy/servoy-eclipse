@@ -41,12 +41,14 @@ import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractPersistFactory;
 import com.servoy.j2db.persistence.ContentSpec;
+import com.servoy.j2db.persistence.DummyValidator;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.IValidateName;
+import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
@@ -158,9 +160,19 @@ public class MovePersistAction extends AbstractMovePersistAction
 			IPersist editingNode = servoyProject.getEditingPersist(persist.getUUID());
 
 			// reset all uuids
-			final Map<Integer, Integer> idMap = AbstractPersistFactory.resetUUIDSRecursively(editingNode, (EclipseRepository)rootObject.getRepository(), true);
-
-			servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
+			IPersist duplicate = null;
+			final Map<Integer, Integer> idMap;
+			if (editingNode instanceof Media)
+			{
+				duplicate = duplicatePersist(editingNode, ((Media)editingNode).getName(), location.getServoyProject(), DummyValidator.INSTANCE);
+				idMap = Collections.singletonMap(new Integer(editingNode.getID()), new Integer(duplicate.getID()));
+				servoyProject.saveEditingSolutionNodes(new IPersist[] { duplicate }, true);
+			}
+			else
+			{
+				idMap = AbstractPersistFactory.resetUUIDSRecursively(editingNode, (EclipseRepository)rootObject.getRepository(), true);
+				servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
+			}
 
 			// update references
 			for (ServoyProject project : ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject())
@@ -220,8 +232,9 @@ public class MovePersistAction extends AbstractMovePersistAction
 				{
 					WorkspaceFileAccess wsa = new WorkspaceFileAccess(ServoyModel.getWorkspace());
 					// move object file
-					if (wsa.move(filePairFrom.getLeft() + filePairFrom.getRight(), relativePathTo +
-						filePairFrom.getLeft().substring(relativePathFrom.length()) + filePairFrom.getRight()))
+					String relativeFilePathTo = relativePathTo + filePairFrom.getLeft().substring(relativePathFrom.length()) + filePairFrom.getRight();
+					wsa.delete(relativeFilePathTo);
+					if (wsa.move(filePairFrom.getLeft() + filePairFrom.getRight(), relativeFilePathTo))
 					{
 						// move script files
 						if (scriptPathsFrom != null)
@@ -240,6 +253,13 @@ public class MovePersistAction extends AbstractMovePersistAction
 			catch (IOException e)
 			{
 				ServoyLog.logError(e);
+			}
+
+			if (duplicate != null)
+			{
+				// delete duplicate Media
+				((EclipseRepository)rootObject.getRepository()).deleteObject(editingNode);
+				servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
 			}
 		}
 	}
