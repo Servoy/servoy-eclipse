@@ -576,6 +576,7 @@ public class ServoyModel extends AbstractServoyModel
 			@Override
 			public void tableInitialized(Table t)
 			{
+				t.addIColumnListener(columnListener);
 				clearCachedTables(new String[] { t.getName() });
 			}
 
@@ -637,17 +638,7 @@ public class ServoyModel extends AbstractServoyModel
 			public void serverRemoved(IServerInternal s)
 			{
 				s.removeTableListener(tableListener);
-				try
-				{
-					for (String tableName : s.getTableNames(false))
-					{
-						flushDataProvidersForTable(s.getTable(tableName));
-					}
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError(e);
-				}
+				ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().flushAllCachedData();
 			}
 		});
 	}
