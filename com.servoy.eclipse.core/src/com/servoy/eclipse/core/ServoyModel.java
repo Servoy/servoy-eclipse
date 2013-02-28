@@ -127,7 +127,9 @@ import com.servoy.j2db.debug.DebugWebClientSession;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnInfoBasedSequenceProvider;
+import com.servoy.j2db.persistence.IColumnListener;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
@@ -203,6 +205,7 @@ public class ServoyModel extends AbstractServoyModel
 
 	private IServerListener serverTableListener;
 	private ITableListener tableListener;
+	private IColumnListener columnListener;
 
 	private final Boolean initRepAsTeamProvider;
 
@@ -478,19 +481,70 @@ public class ServoyModel extends AbstractServoyModel
 			}
 		});
 
-		installServerTableListener();
+		installServerTableColumnListener();
 	}
 
 	/**
 	 * Install listener for changes to tables, clear cached tables when tables change.
 	 */
-	private void installServerTableListener()
+	private void installServerTableColumnListener()
 	{
+		columnListener = new IColumnListener()
+		{
+
+			@Override
+			public void iColumnsChanged(Collection<IColumn> columns)
+			{
+				try
+				{
+					for (IColumn column : columns)
+					{
+						flushDataProvidersForTable(column.getTable());
+					}
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+
+			@Override
+			public void iColumnRemoved(IColumn column)
+			{
+				try
+				{
+					flushDataProvidersForTable(column.getTable());
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+
+			@Override
+			public void iColumnCreated(IColumn column)
+			{
+				try
+				{
+					flushDataProvidersForTable(column.getTable());
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+		};
+
 		tableListener = new TableListener()
 		{
 			@Override
 			public void tablesRemoved(IServerInternal server, Table[] tables, boolean deleted)
 			{
+				for (Table table : tables)
+				{
+					table.removeIColumnListener(columnListener);
+					flushDataProvidersForTable(table);
+				}
 				String[] tableNames = new String[tables.length];
 				for (int i = 0; i < tables.length; i++)
 				{
@@ -503,6 +557,20 @@ public class ServoyModel extends AbstractServoyModel
 			public void tablesAdded(IServerInternal server, String[] tableNames)
 			{
 				clearCachedTables(tableNames);
+				try
+				{
+					for (String tableName : tableNames)
+					{
+						if (server.isTableLoaded(tableName))
+						{
+							(server.getTable(tableName)).addIColumnListener(columnListener);
+						}
+					}
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
 			}
 
 			@Override
@@ -569,6 +637,17 @@ public class ServoyModel extends AbstractServoyModel
 			public void serverRemoved(IServerInternal s)
 			{
 				s.removeTableListener(tableListener);
+				try
+				{
+					for (String tableName : s.getTableNames(false))
+					{
+						flushDataProvidersForTable(s.getTable(tableName));
+					}
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
 			}
 		});
 	}

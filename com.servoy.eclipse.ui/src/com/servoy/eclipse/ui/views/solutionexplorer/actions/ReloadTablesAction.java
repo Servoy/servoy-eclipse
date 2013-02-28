@@ -24,6 +24,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -131,6 +132,17 @@ public class ReloadTablesAction extends Action implements ISelectionChangedListe
 		if (s.getConfig().isEnabled() && s.isValid())
 		{
 			s.reloadTables();
+				try
+				{
+					for (String tableName : s.getTableNames(false))
+					{
+						ServoyModelManager.getServoyModelManager().getServoyModel().flushDataProvidersForTable(s.getTable(tableName));
+					}
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
 		}
 		else if (s.getConfig().isEnabled())
 		{
