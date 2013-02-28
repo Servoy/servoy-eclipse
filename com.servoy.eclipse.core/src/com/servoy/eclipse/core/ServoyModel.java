@@ -638,7 +638,7 @@ public class ServoyModel extends AbstractServoyModel
 			public void serverRemoved(IServerInternal s)
 			{
 				s.removeTableListener(tableListener);
-				ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().flushAllCachedData();
+				flushAllCachedData();
 			}
 		});
 	}
@@ -2906,6 +2906,18 @@ public class ServoyModel extends AbstractServoyModel
 		for (ServoyProject servoyProject : getModulesOfActiveProject())
 		{
 			servoyProject.getEditingFlattenedSolution().flushDataProvidersForTable(table);
+		}
+	}
+
+	/*
+	 * Flush all cashed data on all flattened solutions
+	 */
+	public synchronized void flushAllCachedData()
+	{
+		getFlattenedSolution().flushAllCachedData();
+		for (ServoyProject servoyProject : getModulesOfActiveProject())
+		{
+			servoyProject.getEditingFlattenedSolution().flushAllCachedData();
 		}
 	}
 
