@@ -62,7 +62,8 @@ public class TextFilter extends ViewerFilter
 	public boolean select(Viewer viewer, Object parentElement, Object node)
 	{
 		if (fPattern.trim().length() == 0) return true;
-		return matchingNodes.contains(node) || parentsOfMatchingNodes.contains(node) || childrenOfMatchingNodes.contains(node);
+		boolean result = (matchingNodes.contains(node) || parentsOfMatchingNodes.contains(node) || childrenOfMatchingNodes.contains(node));
+		return (isInMobile ? (MobileViewerFilter.isNodeAllowedInMobile(node) && result) : result);
 	}
 
 	/**
@@ -88,7 +89,10 @@ public class TextFilter extends ViewerFilter
 			}
 			else if (ancestorsMatched)
 			{
-				childrenOfMatchingNodes.add(element);
+				if (!isInMobile || (isInMobile && MobileViewerFilter.isNodeAllowedInMobile(element)))
+				{
+					childrenOfMatchingNodes.add(element);
+				}
 			}
 		}
 		return retval;
@@ -118,8 +122,11 @@ public class TextFilter extends ViewerFilter
 					{
 						// this means that some of the children of this element matched - so if this
 						// node itself does not match - store it in parentsOfMatchingNodes
-						parentsOfMatchingNodes.add(element);
-						match = true;
+						if (!isInMobile || (isInMobile && MobileViewerFilter.isNodeAllowedInMobile(element)))
+						{
+							parentsOfMatchingNodes.add(element);
+							match = true;
+						}
 					}
 				}
 			}
@@ -139,19 +146,7 @@ public class TextFilter extends ViewerFilter
 			{
 				if (match(labelProvider.getText(node)))
 				{
-					if (isInMobile)
-					{
-						if (MobileViewerFilter.isNodeAllowedInMobile(node))
-						{
-							matchingNodes.add(node); // for text decoration in list
-							matched = true;
-						}
-						else
-						{
-							matched = false;
-						}
-					}
-					else
+					if (!isInMobile || (isInMobile && MobileViewerFilter.isNodeAllowedInMobile(node)))
 					{
 						matchingNodes.add(node); // for text decoration in list
 						matched = true;
