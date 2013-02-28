@@ -56,7 +56,6 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
@@ -113,7 +112,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 	private final TreeSelectViewer lookupValueSelect;
 	private final Control lookupValueControl;
 	private final TabFolder tabFolder;
-	private final Label databaseDefaultValue;
+	private final Text databaseDefaultValue;
 	private Column column;
 	private ColumnInfoBean columnInfoBean;
 	private final IObservable observable;
@@ -150,7 +149,8 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 		databaseDefaultButton.addSelectionListener(this);
 
 
-		databaseDefaultValue = new Label(this, SWT.BORDER);
+		databaseDefaultValue = new Text(this, SWT.BORDER);
+		databaseDefaultValue.setEnabled(false);
 
 		lookupValueButton = new Button(this, SWT.RADIO);
 		lookupValueButton.setText("Lookup Value");
