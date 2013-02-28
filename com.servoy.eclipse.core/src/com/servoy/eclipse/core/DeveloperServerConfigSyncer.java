@@ -17,9 +17,11 @@
 package com.servoy.eclipse.core;
 
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IServerConfigListener;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ServerConfig;
 
 /**
@@ -42,11 +44,16 @@ public class DeveloperServerConfigSyncer implements IServerConfigListener
 	public void serverConfigurationChanged(ServerConfig oldServerConfig, ServerConfig newServerConfig)
 	{
 		int oldState = -1;
+		boolean valid = false;
 		if (oldServerConfig != null)
 		{
 			// server was deleted or changed
 			IServerInternal oldServer = (IServerInternal)serverManager.getServer(oldServerConfig.getServerName(), false, false);
-			if (oldServer != null) oldState = oldServer.getState();
+			if (oldServer != null)
+			{
+				oldState = oldServer.getState();
+				if (oldServerConfig.isEnabled() && oldServer.isValid()) valid = true;
+			}
 
 			serverManager.deleteServer(oldServerConfig);
 			ModelUtils.updateActiveSolutionServerProxies(ServoyModel.getDeveloperRepository());
@@ -61,6 +68,20 @@ public class DeveloperServerConfigSyncer implements IServerConfigListener
 		if (oldState != -1 && newServer != null && oldState != newServer.getState())
 		{
 			newServer.fireStateChanged(oldState, newServer.getState());
+			if (valid && (!newServer.isValid() || !newServerConfig.isEnabled()))
+			{
+				try
+				{
+					for (String tableName : newServer.getTableNames(false))
+					{
+						ServoyModelManager.getServoyModelManager().getServoyModel().flushDataProvidersForTable(newServer.getTable(tableName));
+					}
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
 		}
 		ServoyModelManager.getServoyModelManager().getServoyModel().buildActiveProjectsInJob();
 	}
