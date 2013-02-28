@@ -68,7 +68,7 @@ public class DeveloperServerConfigSyncer implements IServerConfigListener
 			newServer.fireStateChanged(oldState, newServer.getState());
 			if (wasValid && (!newServer.isValid() || !newServerConfig.isEnabled()))
 			{
-				ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().flushAllCachedData();
+				ServoyModelManager.getServoyModelManager().getServoyModel().flushAllCachedData();
 			}
 		}
 		ServoyModelManager.getServoyModelManager().getServoyModel().buildActiveProjectsInJob();
