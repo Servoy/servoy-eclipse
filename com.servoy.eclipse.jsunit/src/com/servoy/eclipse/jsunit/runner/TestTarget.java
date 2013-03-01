@@ -20,8 +20,11 @@ package com.servoy.eclipse.jsunit.runner;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.ScriptMethod;
@@ -174,6 +177,15 @@ public class TestTarget
 		int type = Integer.valueOf(st.nextToken());
 		String activeSolution = st.nextToken();
 		target.activeSolution = findSolution(activeSolution);
+		Solution actualActiveSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution();
+		if (target.activeSolution.getName() != actualActiveSolution.getName())
+		{
+			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+			UIUtils.showInformation(shell, "Cannot run target", "The currently launched configuration is expects the active solution to be : " +
+				activeSolution + " instead of " + actualActiveSolution.getName() + "\n Running current active solution");
+			target.activeSolution = actualActiveSolution;
+			return target;
+		}
 		target.type = type;
 		switch (type)
 		{
@@ -218,7 +230,7 @@ public class TestTarget
 		return target;
 	}
 
-	private static Solution findSolution(String name)
+	public static Solution findSolution(String name)
 	{
 		FlattenedSolution fl = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getEditingFlattenedSolution();
 		if (fl.getSolution().getName().equals(name))

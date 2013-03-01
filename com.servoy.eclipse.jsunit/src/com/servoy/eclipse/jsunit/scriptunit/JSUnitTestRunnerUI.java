@@ -27,7 +27,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.debug.core.ILaunch;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
@@ -38,7 +40,7 @@ import org.eclipse.dltk.internal.launching.IPathEquality;
 import org.eclipse.dltk.internal.launching.PathEqualityUtils;
 import org.eclipse.dltk.testing.AbstractTestRunnerUI;
 import org.eclipse.dltk.testing.ITestElementResolver;
-import org.eclipse.dltk.testing.ITestRunnerUI;
+import org.eclipse.dltk.testing.ITestRunnerUIExtension;
 import org.eclipse.dltk.testing.ITestingEngine;
 import org.eclipse.dltk.testing.TestElementResolution;
 import org.eclipse.dltk.testing.model.ITestCaseElement;
@@ -49,15 +51,22 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.jsunit.actions.OpenEditorAtLineAction;
+import com.servoy.eclipse.jsunit.launch.JSUnitLaunchConfigurationDelegate;
+import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.Pair;
 
 /**
  * Handles callbacks from scriptUnit view  (ex dobleclick on stac trace to go to that file in createOpenEditorAction(line) )
  * 
  * @author obuligan
  */
-public class JSUnitTestRunnerUI extends AbstractTestRunnerUI implements ITestRunnerUI, ITestElementResolver
+public class JSUnitTestRunnerUI extends AbstractTestRunnerUI implements ITestElementResolver, ITestRunnerUIExtension
 {
 
 	protected static final Pattern STACK_FRAME_PATTERN = Pattern.compile("(.*)\\.method\\(file:(\\d*).*"); //$NON-NLS-1$
@@ -68,10 +77,75 @@ public class JSUnitTestRunnerUI extends AbstractTestRunnerUI implements ITestRun
 
 	protected static final String SCOPE_TESTS_PATTERN = "Scope tests";
 
-
+	final FlattenedSolution fl = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
 	protected final IScriptProject project;
 	protected final JSUnitTestingEngine testingEngine;
 	protected IPathEquality pathEquality;
+
+	private static class JSUnitUIUtils
+	{
+
+		static boolean isSolutionSuite(ITestSuiteElement element)
+		{
+			return element.getSuiteTypeName().matches(SOLUTION_TEST_ELEMENT_PATTERN);
+		}
+
+		/** 
+		 * returns the solutoin name from a form suite
+		 */
+		static String getSolutionOfForm(ITestSuiteElement element)
+		{
+			return ((ITestSuiteElement)element.getParentContainer()).getSuiteTypeName().replaceAll(SOLUTION_TEST_ELEMENT_PATTERN, "$1");
+		}
+
+		/**
+		 * returns the solution name from a scope suite
+		 */
+		static String getSolutionOfScope(ITestSuiteElement element)
+		{
+			return ((ITestSuiteElement)element.getParentContainer().getParentContainer()).getSuiteTypeName().replaceAll(SOLUTION_TEST_ELEMENT_PATTERN, "$1");
+		}
+
+		static boolean isScopeSuite(ITestSuiteElement element)
+		{
+			if (element.getParentContainer() != null && element.getParentContainer().getParentContainer() != null)
+			{
+				if (((ITestSuiteElement)element.getParentContainer()).getSuiteTypeName().matches(SCOPE_TESTS_PATTERN))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		/**
+		 * returns the solution name from a form test
+		 */
+		static String getSolutionOfFormTest(ITestCaseElement element)
+		{
+			return ((ITestSuiteElement)element.getParentContainer().getParentContainer()).getSuiteTypeName().replaceAll(SOLUTION_TEST_ELEMENT_PATTERN, "$1");
+		}
+
+		static String getSolutionOfScopeTest(ITestCaseElement element)
+		{
+			return ((ITestSuiteElement)element.getParentContainer().getParentContainer().getParentContainer()).getSuiteTypeName().replaceAll(
+				SOLUTION_TEST_ELEMENT_PATTERN, "$1");
+		}
+
+		/**
+		 *  @return true is form test , false if Scope test
+		 */
+		static boolean isFormTest(ITestCaseElement element)
+		{
+			return ((ITestSuiteElement)element.getParentContainer()).getSuiteTypeName().matches(FORM_TEST_ELEMENT_PATTERN);
+		}
+
+		static boolean isFormSuite(ITestSuiteElement element)
+		{
+			return element.getSuiteTypeName().matches(FORM_TEST_ELEMENT_PATTERN);
+		}
+
+	}
 
 	/**
 	 * @param testingEngine
@@ -150,28 +224,26 @@ public class JSUnitTestRunnerUI extends AbstractTestRunnerUI implements ITestRun
 		String suiteName = element.getSuiteTypeName();
 		String solution = null;
 		IFile scriptFile = null;
-		//is it a form testSuite:  "Form 'name' test" element
-		if (suiteName.matches(FORM_TEST_ELEMENT_PATTERN))
+		//is it a form testSuite, ex:   - "Form 'name' test" - element
+		if (JSUnitUIUtils.isFormSuite(element))
 		{
-			solution = ((ITestSuiteElement)element.getParentContainer()).getSuiteTypeName().replaceAll(SOLUTION_TEST_ELEMENT_PATTERN, "$1");
-			String formName = suiteName.replaceAll(FORM_TEST_ELEMENT_PATTERN, "$1");
+			solution = JSUnitUIUtils.getSolutionOfForm(element);
+			String formName = element.getSuiteTypeName().replaceAll(FORM_TEST_ELEMENT_PATTERN, "$1");
 			scriptFile = ServoyModel.getWorkspace().getRoot().getFile(new Path(solution + "/forms/" + formName + ".js"));
 		}
 		//only if it is a scope suite
-		else if (element.getParentContainer() != null && element.getParentContainer().getParentContainer() != null)
+		else if (JSUnitUIUtils.isScopeSuite(element))
 		{
-			if (((ITestSuiteElement)element.getParentContainer()).getSuiteTypeName().matches(SCOPE_TESTS_PATTERN))
-			{
-				solution = ((ITestSuiteElement)element.getParentContainer().getParentContainer()).getSuiteTypeName().replaceAll(SOLUTION_TEST_ELEMENT_PATTERN,
-					"$1");
-				scriptFile = ServoyModel.getWorkspace().getRoot().getFile(new Path(solution + "/" + suiteName + ".js"));
-			}
+			solution = JSUnitUIUtils.getSolutionOfScope(element);
+			scriptFile = ServoyModel.getWorkspace().getRoot().getFile(new Path(solution + "/" + suiteName + ".js"));
 		}
 		if (scriptFile != null)
 		{
 			ISourceModule scriptModel = DLTKUIPlugin.getEditorInputModelElement(new org.eclipse.ui.part.FileEditorInput(scriptFile));
 			return new TestElementResolution(scriptModel, null);
 		}
+		//IScriptProject scriptProject = DLTKCore.create(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject());
+		//return new TestElementResolution(scriptProject, null);
 		return null;
 	}
 
@@ -183,18 +255,17 @@ public class JSUnitTestRunnerUI extends AbstractTestRunnerUI implements ITestRun
 		String formOrScope = ((ITestSuiteElement)element.getParentContainer()).getSuiteTypeName();
 		String solution = null;
 		IFile scriptFile = null;
-		boolean isFormTest = formOrScope.matches(FORM_TEST_ELEMENT_PATTERN);
-		if (isFormTest)
+		if (JSUnitUIUtils.isFormTest(element))
 		{
 			//->parent->parent->getSuiteTypeName()
-			solution = ((ITestSuiteElement)element.getParentContainer().getParentContainer()).getSuiteTypeName().replaceAll(SOLUTION_TEST_ELEMENT_PATTERN, "$1");
+			solution = JSUnitUIUtils.getSolutionOfFormTest(element);
 			formOrScope = formOrScope.replaceAll(FORM_TEST_ELEMENT_PATTERN, "$1");
 			scriptFile = ServoyModel.getWorkspace().getRoot().getFile(new Path(solution + "/forms/" + formOrScope + ".js"));
 		}
 		else
-		{ //->parent->parent->parent->getSuiteTypeName()
-			solution = ((ITestSuiteElement)element.getParentContainer().getParentContainer().getParentContainer()).getSuiteTypeName().replaceAll(
-				SOLUTION_TEST_ELEMENT_PATTERN, "$1");
+		{ // scope test
+			//->parent->parent->parent->getSuiteTypeName()
+			solution = JSUnitUIUtils.getSolutionOfScopeTest(element);
 			scriptFile = ServoyModel.getWorkspace().getRoot().getFile(new Path(solution + "/" + formOrScope + ".js"));
 		}
 
@@ -280,11 +351,6 @@ public class JSUnitTestRunnerUI extends AbstractTestRunnerUI implements ITestRun
 	{
 		Matcher matcher = STACK_FRAME_PATTERN.matcher(line);
 		boolean matches = matcher.matches();
-		if (!matches)
-		{
-			matcher = STACK_FRAME_PATTERN.matcher(line);
-			matches = matcher.matches();
-		}
 		if (matches)
 		{
 			return matcher.group(1);
@@ -295,17 +361,96 @@ public class JSUnitTestRunnerUI extends AbstractTestRunnerUI implements ITestRun
 		}
 	}
 
-	/*
-	 * @see org.eclipse.dltk.testing.ITestRunnerUI#getTestingEngine()
+	@Override
+	public boolean canRerun(ITestElement testElement)
+	{
+		if (testElement instanceof ITestCaseElement)
+		{
+			return true;
+		}
+		else if (testElement instanceof ITestSuiteElement)
+		{
+			ITestSuiteElement suite = (ITestSuiteElement)testElement;
+			String suiteName = suite.getSuiteTypeName();
+			if (JSUnitUIUtils.isFormSuite(suite))
+			{
+				return true;
+			}
+			else if (JSUnitUIUtils.isScopeSuite(suite))
+			{
+				return true;
+			}
+			else if (JSUnitUIUtils.isSolutionSuite(suite))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * ITestRunnerUIExtension's can Rerun an certain selected test.
+	 * Calls  ITestRunnerUI canRerun(ITestElement)
 	 */
+	@Override
+	public boolean canRerun(ITestElement testElement, String launchMode)
+	{
+		return canRerun(testElement);
+	}
+
+	@Override
+	public boolean rerunTest(ILaunch launch, ITestElement element, String launchMode) throws CoreException
+	{
+		TestTarget target = null;
+		if (element instanceof ITestCaseElement)
+		{
+			ITestCaseElement testCase = (ITestCaseElement)element;
+			if (JSUnitUIUtils.isFormTest(testCase))
+			{
+				String formName = ((ITestSuiteElement)element.getParentContainer()).getSuiteTypeName().replaceAll(FORM_TEST_ELEMENT_PATTERN, "$1");
+				Form form = fl.getForm(formName);
+				target = new TestTarget(form, form.getScriptMethod(testCase.getTestName()));
+			}
+			else
+			{// scope test case
+				String scopeName = ((ITestSuiteElement)element.getParentContainer()).getSuiteTypeName().replaceAll(SCOPE_TESTS_PATTERN, "$1");
+				target = new TestTarget(scopeName, fl.getScriptMethod(scopeName, testCase.getTestName()));
+			}
+		}
+		else if (element instanceof ITestSuiteElement)
+		{
+			ITestSuiteElement suite = (ITestSuiteElement)element;
+			if (JSUnitUIUtils.isFormSuite(suite))
+			{
+				String formName = suite.getSuiteTypeName().replaceAll(FORM_TEST_ELEMENT_PATTERN, "$1");
+				Form form = fl.getForm(formName);
+				target = new TestTarget(form);
+
+			}
+			else if (JSUnitUIUtils.isScopeSuite(suite))
+			{
+				String solName = JSUnitUIUtils.getSolutionOfScope(suite);
+				Solution solution = TestTarget.findSolution(solName);
+				Pair<Solution, String> pair = new Pair<Solution, String>(solution, suite.getSuiteTypeName());
+				target = new TestTarget(pair);
+			}
+			else if (JSUnitUIUtils.isSolutionSuite(suite))
+			{// if it is a module it will only test the module and not its submodules
+				String solName = suite.getSuiteTypeName().replaceAll(SOLUTION_TEST_ELEMENT_PATTERN, "$1");
+				Solution solution = TestTarget.findSolution(solName);
+				target = new TestTarget(solution);
+			}
+		}
+		if (target != null) JSUnitLaunchConfigurationDelegate.launchTestTarget(target);
+		System.out.println("yay!! updated");
+		return true;
+	}
+
 	public ITestingEngine getTestingEngine()
 	{
 		return testingEngine;
 	}
 
-	/*
-	 * @see org.eclipse.dltk.testing.ITestRunnerUI#getProject()
-	 */
 	public IScriptProject getProject()
 	{
 		return project;

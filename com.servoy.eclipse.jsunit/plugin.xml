@@ -86,9 +86,23 @@
       <launchConfigurationType
             delegate="com.servoy.eclipse.jsunit.launch.JSUnitLaunchConfigurationDelegate"
             id="com.servoy.eclipse.jsunit.launch"
-            modes="run, debug"
+            modes="run,debug"
             name=" Servoy JSunit"
             public="true">
       </launchConfigurationType>
    </extension>
+   <extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+	    <launchConfigurationTypeImage
+	        icon="icons/jsunit.png"
+	        configTypeID="com.servoy.eclipse.jsunit.launch"
+	        id="com.servoy.eclipse.jsunit.launch.icon">
+	    </launchConfigurationTypeImage>
+	</extension>
+	<extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+		  <launchConfigurationTabGroup
+		      id="com.servoy.eclipse.jsunit.launch.tabGroup"
+		      type="com.servoy.eclipse.jsunit.launch"
+		      class="com.servoy.eclipse.jsunit.launch.JSUnitLaunchConfigurationTabGroup">
+		  </launchConfigurationTabGroup>
+ 	</extension>
 </plugin>

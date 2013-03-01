@@ -19,16 +19,27 @@ package com.servoy.eclipse.jsunit.launch;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.LaunchConfigurationDelegate;
+import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 import org.eclipse.dltk.testing.DLTKTestingConstants;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
 import org.eclipse.dltk.testing.ITestingEngine;
 import org.eclipse.dltk.testing.TestingEngineManager;
 
 import com.servoy.eclipse.jsunit.runner.TestTarget;
+import com.servoy.eclipse.jsunit.scriptunit.JSUnitTestingEngine;
 import com.servoy.eclipse.jsunit.scriptunit.RunJSUnitTests;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ScriptMethod;
 
 /**
  * TestTargets are stored in launch configurations.
@@ -44,6 +55,8 @@ public class JSUnitLaunchConfigurationDelegate extends LaunchConfigurationDelega
 	public static final String LAUNCH_CONFIG_INSTANCE = "com.servoy.eclipse.jsunit.launch.configurationInstance";
 	public static final int MAX_CONFIG_INSTANCES = 10;
 	private static ILaunch currentLaunch = null;
+
+	private static int counter = 1;
 
 	public static ILaunch getCurrentLaunch()
 	{
@@ -63,6 +76,89 @@ public class JSUnitLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		String testTargetStr = configuration.getAttribute(JSUnitLaunchConfigurationDelegate.LAUNCH_CONFIG_INSTANCE, (String)null);
 		TestTarget testTarget = TestTarget.fromString(testTargetStr);
 		new RunJSUnitTests(testTarget, launch).run();
+	}
+
+	public static void launchTestTarget(TestTarget target)
+	{
+		if (target == null) return;
+		try
+		{
+			ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
+			ILaunchConfigurationType type = manager.getLaunchConfigurationType(JSUnitLaunchConfigurationDelegate.LAUNCH_CONFIGURATION_TYPE_ID);
+			ILaunchConfiguration[] configurations;
+			configurations = manager.getLaunchConfigurations(type);
+			int count = 0;
+			for (ILaunchConfiguration configuration : configurations)
+			{
+				//was this target already launched before? if yes reuse the launch configuration
+				if (target.toString().equals(configuration.getAttribute(JSUnitLaunchConfigurationDelegate.LAUNCH_CONFIG_INSTANCE, "")))
+				{
+					DebugUITools.launch(configuration, ILaunchManager.DEBUG_MODE);
+					return;
+				}
+				count++;
+				if (count > JSUnitLaunchConfigurationDelegate.MAX_CONFIG_INSTANCES) configuration.delete();
+			}
+
+			//create a launch configuration copy 
+			ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(null, generateLaunchConfigName(target));
+			workingCopy.setAttribute(DLTKTestingConstants.ATTR_ENGINE_ID, JSUnitTestingEngine.ENGINE_ID);
+
+			workingCopy.setAttribute(ScriptLaunchConfigurationConstants.ATTR_PROJECT_NAME, generateLaunchConfigName(target));
+			workingCopy.setAttribute(JSUnitLaunchConfigurationDelegate.LAUNCH_CONFIG_INSTANCE, target.toString());
+			ILaunchConfiguration configuration = workingCopy.doSave();
+			//this call will end up in launch method of ServoyJsLaunchConfigurationDelegate
+			DebugUITools.launch(configuration, ILaunchManager.DEBUG_MODE);
+		}
+		catch (CoreException e)
+		{
+			ServoyLog.logError(e);
+		}
+	}
+
+	public static String generateLaunchConfigName(TestTarget target)
+	{
+		String ret = "";
+		String solutionName = target.getActiveSolution().getName();
+		String moduleToTest = target.getModuleToTest() == null ? "" : target.getModuleToTest().getName();
+
+		if (solutionName.equals(moduleToTest))
+		{// whole active solution target
+			ret = solutionName;
+		}
+		else if (target.getModuleToTest() != null)
+		{
+			ret = solutionName + " Module=" + moduleToTest;
+		}
+		else if (target.getFormToTest() != null)
+		{
+			ret = solutionName + " Form=" + target.getFormToTest().getName();
+		}
+		else if (target.getGlobalScopeToTest() != null)
+		{
+			if (solutionName.equals(target.getGlobalScopeToTest().getLeft().getName()))
+			{
+				ret = target.getGlobalScopeToTest().getLeft().getName() + " Scope=" + target.getGlobalScopeToTest().getRight();
+			}
+			else
+			{
+				ret = solutionName + " Module=" + target.getGlobalScopeToTest().getLeft().getName() + " Scope=" + target.getGlobalScopeToTest().getRight();
+			}
+		}
+		else if (target.getTestMethodToTest() != null)
+		{
+			ScriptMethod met = target.getTestMethodToTest();
+			if (met.getAncestor(IRepository.FORMS) instanceof Form)
+			{
+				Form form = (Form)met.getAncestor(IRepository.FORMS);
+				ret = solutionName + " Form=" + form.getName() + " func=" + target.getTestMethodToTest().getName();
+			}
+			else
+			{
+				ret = solutionName + " Scope=" + met.getScopeName() + " func=" + target.getTestMethodToTest().getName();
+			}
+		}
+		return ret.equals("") ? "Dummmy Solution Name" : ret;
 	}
 
 	private ITestingEngine getTestingEngine(ILaunchConfiguration configuration) throws CoreException
