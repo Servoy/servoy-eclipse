@@ -294,5 +294,15 @@
               id="com.servoy.eclipse.debug.debugstarter">
         </debugstarter>
      </extension>
+     <extension
+           point="org.eclipse.dltk.launching.interpreterInstalls">
+        <interpreterInstall
+              bundle="."
+              home="plugin.xml"
+              id="com.servoy.eclipse.debug.interpreter.rhino"
+              interpreterInstallType="org.eclipse.dltk.internal.debug.ui.launcher.GenericRhinoInstallType"
+              name="rhino">
+        </interpreterInstall>
+     </extension>
    
 </plugin>
