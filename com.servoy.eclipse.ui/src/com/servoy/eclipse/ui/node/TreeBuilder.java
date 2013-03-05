@@ -26,10 +26,13 @@ import java.util.SortedSet;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.XMLScriptObjectAdapterLoader;
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerListContentProvider;
+import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.IDocumentationManager;
 import com.servoy.j2db.documentation.IFunctionDocumentation;
 import com.servoy.j2db.documentation.IObjectDocumentation;
+import com.servoy.j2db.persistence.SolutionMetaData;
 
 public class TreeBuilder
 {
@@ -40,7 +43,13 @@ public class TreeBuilder
 	{
 		if (!docManagerLoaded)
 		{
-			URL url = XMLScriptObjectAdapterLoader.class.getResource("doc/servoydoc_jslib.xml"); //$NON-NLS-1$
+			String docfile = "doc/servoydoc_jslib_mobile.xml";
+			if (ServoyModelFinder.getServoyModel().getActiveProject() != null &&
+				ServoyModelFinder.getServoyModel().getActiveProject().getSolutionMetaData().getSolutionType() == SolutionMetaData.MOBILE)
+			{
+				docfile = "doc/servoydoc_jslib.xml";
+			}
+			URL url = XMLScriptObjectAdapterLoader.class.getResource(docfile);
 			IDocumentationManagerProvider documentationManagerProvider = Activator.getDefault().getDocumentationManagerProvider();
 			if (documentationManagerProvider != null)
 			{
@@ -159,6 +168,7 @@ public class TreeBuilder
 		String tooltip = "<html><body><b>" + fdoc.getFullSignature(true, true) + "</b><br>" + fdoc.getDescription() + "</body></html>"; //$NON-NLS-1$//$NON-NLS-2$
 		UserNode un = new UserNode(fdoc.getFullSignature(false, true), type, fdoc.getSignature("."), fdoc.getSample(), tooltip, null, //$NON-NLS-1$
 			functionIcon);
+		if (fdoc.getClientSupport() != null) un.setIsVisibleInMobile(fdoc.getClientSupport().supports(ClientSupport.mc));
 		return un;
 	}
 

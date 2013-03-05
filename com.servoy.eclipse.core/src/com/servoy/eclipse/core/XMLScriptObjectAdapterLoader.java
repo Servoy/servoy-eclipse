@@ -33,12 +33,14 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IBeanManagerInternal;
 import com.servoy.j2db.documentation.DocumentationUtil;
 import com.servoy.j2db.documentation.IDocumentationManager;
 import com.servoy.j2db.documentation.IObjectDocumentation;
 import com.servoy.j2db.documentation.XMLScriptObjectAdapter;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.smart.plugins.PluginManager;
@@ -62,7 +64,13 @@ public class XMLScriptObjectAdapterLoader
 	{
 		if (!coreLoaded)
 		{
-			URL url = XMLScriptObjectAdapterLoader.class.getResource("doc/servoydoc.xml"); //$NON-NLS-1$
+			String docfile = "doc/servoydoc.xml";
+			if (ServoyModelFinder.getServoyModel().getActiveProject() != null &&
+				ServoyModelFinder.getServoyModel().getActiveProject().getSolutionMetaData().getSolutionType() == SolutionMetaData.MOBILE)
+			{
+				docfile = "doc/servoydoc_mobile.xml";
+			}
+			URL url = XMLScriptObjectAdapterLoader.class.getResource(docfile); //$NON-NLS-1$
 			IDocumentationManagerProvider documentationManagerProvider = Activator.getDefault().getDocumentationManagerProvider();
 			if (documentationManagerProvider != null)
 			{

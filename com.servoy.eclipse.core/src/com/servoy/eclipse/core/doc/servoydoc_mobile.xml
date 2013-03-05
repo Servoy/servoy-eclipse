@@ -6129,7 +6129,7 @@ Will return false when the form can't be removed, this can happen in certain sit
         </constant>
       </constants>
     </object>
-    <object clientSupport="mc,wc,sc" extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSBean" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSBean">
+    <object clientSupport="wc,sc" extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSBean" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSBean">
       <properties>
         <property clientSupport="wc,sc" name="anchors">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -15949,7 +15949,7 @@ application.output(button_uuid.toString());]]></sample>
         </function>
       </functions>
     </object>
-    <object clientSupport="mc,wc,sc" extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSPortal" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSPortal">
+    <object clientSupport="wc,sc" extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSPortal" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSPortal">
       <properties>
         <property clientSupport="wc,sc" name="anchors">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
