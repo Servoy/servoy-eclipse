@@ -163,32 +163,10 @@ public class MobilePersistPropertySource extends PersistPropertySource
 	@Override
 	protected boolean hideForProperties(PropertyDescriptorWrapper propertyDescriptor)
 	{
-		if (propertyDescriptor.propertyDescriptor.getName().equals(StaticContentSpecLoader.PROPERTY_EDITABLE.getPropertyName()) &&
-			getPersist() instanceof Field && ((Field)getPersist()).getDisplayType() == Field.COMBOBOX)
-		{
-			return true;
-		}
+		return RepositoryHelper.hideForMobileProperties(propertyDescriptor.propertyDescriptor.getName(), getPersist().getClass(),
+			(getPersist() instanceof Field) ? ((Field)getPersist()).getDisplayType() : 0, isButton(getPersist())) ||
 
-		if (propertyDescriptor.propertyDescriptor.getName().equals(StaticContentSpecLoader.PROPERTY_ONACTIONMETHODID.getPropertyName()) &&
-			!isButton(getPersist()))
-		{
-			return true;
-		}
-
-		if (propertyDescriptor.propertyDescriptor.getName().equals(StaticContentSpecLoader.PROPERTY_VIEW.getPropertyName()) && getPersist() instanceof Form)
-		{
-			return true;
-		}
-
-		// there is no style support for labels & text fields on mobile client
-		if (propertyDescriptor.propertyDescriptor.getName().equals(StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName()) &&
-			(((getPersist() instanceof Field && (((Field)getPersist()).getDisplayType() == Field.TEXT_FIELD ||
-				((Field)getPersist()).getDisplayType() == Field.TEXT_AREA || ((Field)getPersist()).getDisplayType() == Field.PASSWORD)) || (getPersist() instanceof GraphicalComponent && !isButton(getPersist()))) && !(getPersist() instanceof Part)))
-		{
-			return true;
-		}
-
-		return super.hideForProperties(propertyDescriptor);
+		super.hideForProperties(propertyDescriptor);
 	}
 
 	@Override

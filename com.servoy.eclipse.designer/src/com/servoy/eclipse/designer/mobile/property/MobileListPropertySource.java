@@ -104,7 +104,7 @@ public class MobileListPropertySource extends RetargetingPropertySource
 			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_ONACTIONMETHODID.getPropertyName());
 			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), "textDataProvider");
 			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName());
-			addMethodPropertyDescriptor(elementPropertySource, prefix, IMobileProperties.DATA_ICON.propertyName);
+			addMethodPropertyDescriptor(elementPropertySource, prefix, IMobileProperties.DATA_ICON.propertyName, "dataIconType");
 			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName(), "listStyleClass");
 		}
 
