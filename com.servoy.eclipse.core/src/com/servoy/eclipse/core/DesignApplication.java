@@ -762,6 +762,18 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		getClient().reportJSError(msg, detail);
 	}
 
+	@Override
+	public void reportJSWarning(String msg)
+	{
+		getClient().reportJSWarning(msg);
+	}
+
+	@Override
+	public void reportJSInfo(String msg)
+	{
+		getClient().reportJSInfo(msg);
+	}
+
 	public void reportWarning(String msg)
 	{
 		getClient().reportWarning(msg);
