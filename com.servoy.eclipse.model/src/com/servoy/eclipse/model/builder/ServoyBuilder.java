@@ -809,7 +809,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 						}
 					}
-					else if (SolutionMetaData.isServoyMobileSolution(servoyProject.getSolution())) checkMobileModule(servoyProject, module);
+					else if (SolutionMetaData.isServoyMobileSolution(servoyProject.getSolution()) &&
+						!SolutionMetaData.isServoyMobileSolution(module.getSolution())) checkMobileModule(servoyProject, module);
 				}
 
 				// import hook modules should not contain other modules

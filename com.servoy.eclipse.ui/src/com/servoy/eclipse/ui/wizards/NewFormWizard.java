@@ -195,21 +195,16 @@ public class NewFormWizard extends Wizard implements INewWizard
 		}
 
 		dataProviderWizardPage = null;
-		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() == null)
+		ServoyProject activeProject;
+		if ((activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject()) == null)
 		{
-			errorPage = new WizardPage("No active Servoy solution project found")
-			{
-
-				public void createControl(Composite parent)
-				{
-					setControl(new Composite(parent, SWT.NONE));
-				}
-
-			};
-			errorPage.setTitle("No active Servoy solution project found");
-			errorPage.setErrorMessage("Please activate a Servoy solution project before trying to create a new form");
-			errorPage.setPageComplete(false);
-			newFormWizardPage = null;
+			createErrorPage("No active Servoy solution project found", "No active Servoy solution project found",
+				"Please activate a Servoy solution project before trying to create a new form");
+		}
+		else if (SolutionMetaData.isServoyMobileSolution(activeProject.getSolution()) && !SolutionMetaData.isServoyMobileSolution(servoyProject.getSolution()))
+		{
+			createErrorPage("Selected module is not of type mobile", "Selected module is not of type mobile",
+				"Forms can only be created in modules of type mobile");
 		}
 		else
 		{
@@ -227,6 +222,23 @@ public class NewFormWizard extends Wizard implements INewWizard
 				dataProviderWizardPage = new DataProviderWizardPage("Data Providers");
 			}
 		}
+	}
+
+	private void createErrorPage(String pageName, String title, String errorMessage)
+	{
+		errorPage = new WizardPage(pageName)
+		{
+
+			public void createControl(Composite parent)
+			{
+				setControl(new Composite(parent, SWT.NONE));
+			}
+
+		};
+		errorPage.setTitle(title);
+		errorPage.setErrorMessage(errorMessage);
+		errorPage.setPageComplete(false);
+		newFormWizardPage = null;
 	}
 
 	@Override
