@@ -77,6 +77,7 @@ import org.json.JSONException;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.BuilderUtils;
 import com.servoy.eclipse.core.util.SerialRule;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -111,11 +112,6 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 {
 	private Solution activeSolution;
 	private ExportSolutionModel exportModel;
-
-	private static int HAS_NO_MARKERS = 0;
-	private static int HAS_ERROR_MARKERS = 1;
-	private static int HAS_WARNING_MARKERS = 2;
-
 	private FileSelectionPage fileSelectionPage;
 	private ExportOptionsPage exportOptionsPage;
 	private ModulesSelectionPage modulesSelectionPage;
@@ -139,45 +135,6 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		workspace = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
 	}
 
-	/**
-	 * 
-	 * @return the HAS_ERROR_MARKERS constant for errors, HAS_WARNING_MARKERS constant for warnings, HAS_NO_MARKERS for no markers
-	 */
-	private int getMarkers(String[] projects)
-	{
-		if (projects != null && projects.length > 0)
-		{
-			boolean hasWarnings = false;
-			try
-			{
-				for (String moduleName : projects)
-				{
-					ServoyProject module = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(moduleName);
-					if (module != null)
-					{
-						IMarker[] markers = module.getProject().findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-						for (IMarker marker : markers)
-						{
-							if (marker.getAttribute(IMarker.SEVERITY) != null && marker.getAttribute(IMarker.SEVERITY).equals(IMarker.SEVERITY_ERROR))
-							{
-								return HAS_ERROR_MARKERS;
-							}
-							if (marker.getAttribute(IMarker.SEVERITY) != null && marker.getAttribute(IMarker.SEVERITY).equals(IMarker.SEVERITY_WARNING))
-							{
-								hasWarnings = true;
-							}
-						}
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				ServoyLog.logError(ex);
-			}
-			if (hasWarnings) return HAS_WARNING_MARKERS;
-		}
-		return HAS_NO_MARKERS;
-	}
 
 	/** 
 	 * 
@@ -511,8 +468,8 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		exportModel.setExportReferencedModules(activeSolution.getModulesNames() != null);
 
 
-		int hasErrs = getMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
-		if (hasErrs == HAS_ERROR_MARKERS)
+		int hasErrs = BuilderUtils.getMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
+		if (hasErrs == BuilderUtils.HAS_ERROR_MARKERS)
 		{
 			if (hasDbErrorMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() }) == Boolean.TRUE)
 			{
@@ -576,11 +533,11 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		if (exportModel.isExportReferencedModules() && currentPage == exportOptionsPage)
 		{
 			modulesSelectionPage.checkStateChanged(null);
-			if (modulesSelectionPage.projectProblemsType == HAS_ERROR_MARKERS && !dbDownErrors) return false;
+			if (modulesSelectionPage.projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS && !dbDownErrors) return false;
 		}
 		if (currentPage == modulesSelectionPage)
 		{
-			if (modulesSelectionPage.projectProblemsType == HAS_ERROR_MARKERS && !dbDownErrors) return false;
+			if (modulesSelectionPage.projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS && !dbDownErrors) return false;
 		}
 		return exportModel.canFinish();
 	}
@@ -636,12 +593,12 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			super("page1"); //$NON-NLS-1$
 			setTitle("Choose the destination file"); //$NON-NLS-1$
 			setDescription("Select the file where you want your solution exported to"); //$NON-NLS-1$
-			projectProblemsType = getMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
-			if (projectProblemsType == HAS_ERROR_MARKERS && !dbDownErrors)
+			projectProblemsType = BuilderUtils.getMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
+			if (projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS && !dbDownErrors)
 			{
 				setErrorMessage("There are errors in the solution that will prevent it from functioning well. Solve errors from problems view first."); //$NON-NLS-1$
 			}
-			if (projectProblemsType == HAS_WARNING_MARKERS)
+			if (projectProblemsType == BuilderUtils.HAS_WARNING_MARKERS)
 			{
 				setMessage(
 					"There are warnings in the solution that may prevent it from functioning well. You may want to solve warnings from problems view first.", IMessageProvider.WARNING); //$NON-NLS-1$
@@ -711,9 +668,9 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		public boolean canFlipToNextPage()
 		{
 			boolean result = true;
-			if (projectProblemsType == HAS_ERROR_MARKERS && !dbDownErrors) return false;
+			if (projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS && !dbDownErrors) return false;
 
-			boolean messageSet = (projectProblemsType == HAS_WARNING_MARKERS);
+			boolean messageSet = (projectProblemsType == BuilderUtils.HAS_WARNING_MARKERS);
 			if (exportModel.getFileName() == null) return false;
 			if (fileNameText.getText().length() == 0)
 			{
@@ -970,7 +927,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 	private class ModulesSelectionPage extends WizardPage implements ICheckStateListener
 	{
 		CheckboxTreeViewer treeViewer;
-		public int projectProblemsType = HAS_NO_MARKERS;
+		public int projectProblemsType = BuilderUtils.HAS_NO_MARKERS;
 
 		protected ModulesSelectionPage()
 		{
@@ -1042,13 +999,13 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		public void checkStateChanged(CheckStateChangedEvent event)
 		{
 			initializeModulesToExport();
-			projectProblemsType = getMarkers(exportModel.getModulesToExport());
+			projectProblemsType = BuilderUtils.getMarkers(exportModel.getModulesToExport());
 			setErrorMessage(null);
-			if (projectProblemsType == HAS_ERROR_MARKERS && !dbDownErrors)
+			if (projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS && !dbDownErrors)
 			{
 				setErrorMessage("There are errors in the solution that will prevent it from functioning well. Solve errors from problems view first.");
 			}
-			if (projectProblemsType == HAS_WARNING_MARKERS)
+			if (projectProblemsType == BuilderUtils.HAS_WARNING_MARKERS)
 			{
 				setMessage(
 					"There are warnings in the solution that may prevent it from functioning well. You may want to solve warnings from problems view first.", IMessageProvider.WARNING); //$NON-NLS-1$
@@ -1079,7 +1036,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		@Override
 		public boolean canFlipToNextPage()
 		{
-			return (projectProblemsType == HAS_NO_MARKERS || projectProblemsType == HAS_WARNING_MARKERS) && super.canFlipToNextPage();
+			return (projectProblemsType == BuilderUtils.HAS_NO_MARKERS || projectProblemsType == BuilderUtils.HAS_WARNING_MARKERS) && super.canFlipToNextPage();
 		}
 	}
 
