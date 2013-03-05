@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -37,7 +38,10 @@ import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.osgi.service.prefs.BackingStoreException;
 
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.BuilderUtils;
 import com.servoy.eclipse.mobileexporter.export.MobileExporter;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.wizards.FinishPage;
@@ -58,6 +62,8 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 
 	private final ExportOptionsPage optionsPage = new ExportOptionsPage("optionsPage", licensePage, mobileExporter);
 
+	private WizardPage errorPage;
+
 	public ExportMobileWizard()
 	{
 		IDialogSettings workbenchSettings = Activator.getDefault().getDialogSettings();
@@ -73,6 +79,34 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
+		ServoyProject activeProject;
+		if ((activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject()) == null)
+		{
+			createErrorPage("No active Servoy solution project found", "No active Servoy solution project found",
+				"Please activate a Servoy solution project before trying to export");
+		}
+		else if (BuilderUtils.getMarkers(activeProject) == BuilderUtils.HAS_ERROR_MARKERS)
+		{
+			createErrorPage("Solution with errors", "Solution with errors", "Cannot export solution with errors, please fix them first");
+		}
+		else
+		{
+			optionsPage.setSolution(activeProject.getSolution().getName());
+		}
+	}
+
+	private void createErrorPage(String pageName, String title, String errorMessage)
+	{
+		errorPage = new WizardPage(pageName)
+		{
+			public void createControl(Composite parent)
+			{
+				setControl(new Composite(parent, SWT.NONE));
+			}
+		};
+		errorPage.setTitle(title);
+		errorPage.setErrorMessage(errorMessage);
+		errorPage.setPageComplete(false);
 	}
 
 	@Override
@@ -108,11 +142,18 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 	@Override
 	public void addPages()
 	{
-		addPage(optionsPage);
-		addPage(warExportPage);
-		addPage(finishPage);
-		addPage(pgAppPage);
-		addPage(licensePage);
+		if (errorPage != null)
+		{
+			addPage(errorPage);
+		}
+		else
+		{
+			addPage(optionsPage);
+			addPage(warExportPage);
+			addPage(finishPage);
+			addPage(pgAppPage);
+			addPage(licensePage);
+		}
 	}
 
 	public class CustomizedFinishPage extends FinishPage

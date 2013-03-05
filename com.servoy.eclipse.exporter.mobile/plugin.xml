@@ -8,7 +8,7 @@
             class="com.servoy.eclipse.mobileexporter.ui.wizard.ExportMobileWizard"
             icon="icons/mobile.png"
             id="com.servoy.eclipse.mobileexporter.ExportMobileWizard"
-            name="Export Mobile File">
+            name="Export Active Solution To Mobile File">
       </wizard>
    </extension>
    <extension

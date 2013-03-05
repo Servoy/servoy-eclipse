@@ -42,12 +42,12 @@ import com.servoy.base.persistence.constants.IComponentConstants;
 import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
-import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.IValueFilter;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.IValueList;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -106,10 +106,10 @@ public class MobileExporter
 	@SuppressWarnings("restriction")
 	private String doPersistExport()
 	{
-		ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(solutionName);
-		if (project != null)
+		FlattenedSolution flattenedSolution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
+		if (flattenedSolution != null)
 		{
-			Iterator<Form> formIterator = project.getSolution().getForms(null, true);
+			Iterator<Form> formIterator = flattenedSolution.getForms(true);
 			List<ServoyJSONObject> formJSons = new ArrayList<ServoyJSONObject>();
 			while (formIterator.hasNext())
 			{
@@ -161,7 +161,7 @@ public class MobileExporter
 								return value;
 							}
 						});
-					if (project.getSolution().getFirstFormID() == form.getID())
+					if (flattenedSolution.getSolution().getFirstFormID() == form.getID())
 					{
 						formJSons.add(0, formJSon);
 					}
@@ -179,7 +179,7 @@ public class MobileExporter
 			List<ServoyJSONObject> relationJSons = new ArrayList<ServoyJSONObject>();
 			try
 			{
-				Iterator<Relation> relationIterator = ServoyModelFinder.getServoyModel().getFlattenedSolution().getRelations(true);
+				Iterator<Relation> relationIterator = flattenedSolution.getRelations(true);
 				while (relationIterator.hasNext())
 				{
 					final Relation relation = relationIterator.next();
@@ -200,7 +200,7 @@ public class MobileExporter
 				ServoyLog.logError(ex);
 			}
 			// export valuelists
-			Iterator<ValueList> valuelistIterator = project.getSolution().getValueLists(false);
+			Iterator<ValueList> valuelistIterator = flattenedSolution.getValueLists(false);
 			List<JSONObject> valuelistJSons = new ArrayList<JSONObject>();
 			while (valuelistIterator.hasNext())
 			{
@@ -238,7 +238,7 @@ public class MobileExporter
 				}
 			}
 
-			Solution solution = project.getSolution();
+			Solution solution = flattenedSolution.getSolution();
 			ServoyJSONArray flattenedJSon = new ServoyJSONArray(formJSons);
 			Map<String, Object> solutionModel = new HashMap<String, Object>();
 			solutionModel.put("forms", flattenedJSon);
@@ -258,7 +258,7 @@ public class MobileExporter
 					generateMethodCall(solution, solution, StaticContentSpecLoader.PROPERTY_ONOPENMETHODID.getPropertyName(), onOpenMethodID));
 			}
 
-			if (project.getSolution().getI18nDataSource() != null)
+			if (flattenedSolution.getSolution().getI18nDataSource() != null)
 			{
 				EclipseMessages messagesManager = ServoyModelManager.getServoyModelManager().getServoyModel().getMessagesManager();
 				TreeMap<String, I18NUtil.MessageEntry> i18nData = messagesManager.getDatasourceMessages(solution.getI18nDataSource());
@@ -274,10 +274,10 @@ public class MobileExporter
 		return null;
 	}
 
-	private String doScriptingExport(String solutionName)
+	private String doScriptingExport()
 	{
-		ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(solutionName);
-		if (project != null)
+		FlattenedSolution flattenedSolution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
+		if (flattenedSolution != null)
 		{
 			String template = Utils.getTXTFileContent(getClass().getResourceAsStream(RELATIVE_TEMPLATE_PATH), Charset.forName("UTF8")); //$NON-NLS-1$
 			StringBuilder builder = new StringBuilder();
@@ -296,7 +296,7 @@ public class MobileExporter
 			int allVariablesLoopEndIndex = template.indexOf(VARIABLES_LOOP_END, scopesLoopEndIndex);
 			builder.append(template.substring(scopesLoopEndIndex + SCOPES_LOOP_END.length(), allVariablesLoopStartIndex));
 			builder.append(replaceVariablesScripting(template.substring(allVariablesLoopStartIndex + VARIABLES_LOOP_START.length(), allVariablesLoopEndIndex),
-				project.getSolution(), null));
+				flattenedSolution.getSolution(), null));
 
 			formsLoopStartIndex = template.indexOf(FORM_LOOP_START, allVariablesLoopEndIndex);
 			formsLoopEndIndex = template.indexOf(FORM_LOOP_END, allVariablesLoopEndIndex);
@@ -321,7 +321,7 @@ public class MobileExporter
 	public File doExport(boolean exportAsZip)
 	{
 		String formJson = doPersistExport();
-		String solutionJavascript = doScriptingExport(solutionName);
+		String solutionJavascript = doScriptingExport();
 
 		// TODO BEGIN remove these lines
 		File tmpP = new File(outputFolder.getParent() + "/src/com/servoy/mobile/public");
@@ -421,10 +421,10 @@ public class MobileExporter
 	private String replaceFormsScripting(String template, String separator)
 	{
 		StringBuffer formsScript = new StringBuffer();
-		ServoyProject project = ServoyModelFinder.getServoyModel().getActiveProject();
-		if (project != null)
+		FlattenedSolution flattenedSolution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
+		if (flattenedSolution != null)
 		{
-			Iterator<Form> formIterator = project.getSolution().getForms(null, true);
+			Iterator<Form> formIterator = flattenedSolution.getForms(true);
 			while (formIterator.hasNext())
 			{
 				Form form = formIterator.next();
@@ -463,14 +463,14 @@ public class MobileExporter
 	private String replaceScopesScripting(String template, String separator)
 	{
 		StringBuffer scopesScript = new StringBuffer();
-		ServoyProject project = ServoyModelFinder.getServoyModel().getActiveProject();
-		if (project != null)
+		FlattenedSolution flattenedSolution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
+		if (flattenedSolution != null)
 		{
-			Iterator<String> scopeIterator = project.getSolution().getScopeNames().iterator();
+			Iterator<String> scopeIterator = flattenedSolution.getScopeNames().iterator();
 			while (scopeIterator.hasNext())
 			{
 				String scopeName = scopeIterator.next();
-				addVariablesAndFunctionsScripting(template.replace(PROPERTY_SCOPE_NAME, scopeName), scopesScript, project.getSolution(), scopeName);
+				addVariablesAndFunctionsScripting(template.replace(PROPERTY_SCOPE_NAME, scopeName), scopesScript, flattenedSolution.getSolution(), scopeName);
 				if (separator != null && scopeIterator.hasNext()) scopesScript.append(separator);
 			}
 		}

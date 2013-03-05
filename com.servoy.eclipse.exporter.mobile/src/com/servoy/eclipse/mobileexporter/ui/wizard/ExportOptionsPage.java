@@ -17,8 +17,6 @@
 
 package com.servoy.eclipse.mobileexporter.ui.wizard;
 
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -27,20 +25,10 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.mobileexporter.export.MobileExporter;
-import com.servoy.eclipse.model.ServoyModelFinder;
-import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
-import com.servoy.eclipse.ui.labelproviders.SupportNameLabelProvider;
-import com.servoy.eclipse.ui.views.TreeSelectViewer;
-import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.RootObjectMetaData;
-import com.servoy.j2db.persistence.SolutionMetaData;
 
 /**
  * @author lvostinar
@@ -51,7 +39,7 @@ public class ExportOptionsPage extends WizardPage
 	public static String SERVER_URL_KEY = "serverURL";
 
 	private Text serverURL;
-	private TreeSelectViewer solutionSelectViewer;
+	private String solution;
 	private final WizardPage nextPage;
 	private final MobileExporter mobileExporter;
 
@@ -77,43 +65,18 @@ public class ExportOptionsPage extends WizardPage
 		Label solutionLabel = new Label(container, SWT.NONE);
 		solutionLabel.setText("Solution");
 
-		solutionSelectViewer = new TreeSelectViewer(container, SWT.None);
-		solutionSelectViewer.setButtonText("Browse");
-		solutionSelectViewer.setTitleText("Select solution");
-		solutionSelectViewer.setName("warExportDialog");
-		solutionSelectViewer.setContentProvider(FlatTreeContentProvider.INSTANCE);
-		solutionSelectViewer.setLabelProvider(SupportNameLabelProvider.INSTANCE_DEFAULT_NONE);
-
-		try
-		{
-			solutionSelectViewer.setInput(ServoyModel.getDeveloperRepository().getRootObjectMetaDatasForType(IRepository.SOLUTIONS));
-		}
-		catch (Exception e)
-		{
-			ServoyLog.logError(e);
-		}
-
-		if (ServoyModelFinder.getServoyModel().getActiveProject() != null)
-		{
-			SolutionMetaData activeSolution = ServoyModelFinder.getServoyModel().getActiveProject().getSolutionMetaData();
-			if (activeSolution != null)
-			{
-				solutionSelectViewer.setSelection(new StructuredSelection(activeSolution));
-			}
-		}
-		Control solutionSelectControl = solutionSelectViewer.getControl();
+		Label solutionName = new Label(container, SWT.NONE);
+		solutionName.setText(solution);
 
 		final GroupLayout groupLayout = new GroupLayout(container);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(solutionLabel).add(serverURLLabel)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(solutionSelectControl, GroupLayout.DEFAULT_SIZE, 480, Short.MAX_VALUE).add(serverURL,
-					GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE)).addContainerGap()));
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(solutionName).add(serverURL, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE)).addContainerGap()));
 
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(solutionSelectControl, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(solutionLabel)).add(7).add(
+				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(solutionName).add(solutionLabel)).add(7).add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(serverURL, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 					GroupLayout.PREFERRED_SIZE).add(serverURLLabel)).add(10)));
 
@@ -142,10 +105,15 @@ public class ExportOptionsPage extends WizardPage
 		return serverURL.getText();
 	}
 
-	private String getSolution()
+
+	public void setSolution(String solution)
 	{
-		IStructuredSelection selection = (IStructuredSelection)solutionSelectViewer.getSelection();
-		return selection.isEmpty() ? null : ((RootObjectMetaData)selection.getFirstElement()).getName();
+		this.solution = solution;
+	}
+
+	public String getSolution()
+	{
+		return solution;
 	}
 
 	@Override
