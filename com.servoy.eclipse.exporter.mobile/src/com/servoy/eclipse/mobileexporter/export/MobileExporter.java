@@ -103,7 +103,6 @@ public class MobileExporter
 	private static final String PROPERTY_VARIABLE_DEFAULT_VALUE = "${defaultValue}";
 	private static final String PROPERTY_VARIABLE_TYPE = "${variableType}";
 
-	@SuppressWarnings("restriction")
 	private String doPersistExport()
 	{
 		FlattenedSolution flattenedSolution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
@@ -248,8 +247,8 @@ public class MobileExporter
 			solutionModel.put("valuelists", flattenedJSon);
 			solutionModel.put("solutionName", solution.getName());
 			solutionModel.put("serverURL", serverURL);
-			solutionModel.put("skipConnect", skipConnect);
-			solutionModel.put("mustAuthenticate", solution.getMustAuthenticate());
+			solutionModel.put("skipConnect", Boolean.valueOf(skipConnect));
+			solutionModel.put("mustAuthenticate", Boolean.valueOf(solution.getMustAuthenticate()));
 
 			int onOpenMethodID = solution.getOnOpenMethodID();
 			if (onOpenMethodID > 0)
@@ -323,7 +322,7 @@ public class MobileExporter
 		String formJson = doPersistExport();
 		String solutionJavascript = doScriptingExport();
 
-		// TODO BEGIN remove these lines
+		// Write files for running from java source
 		File tmpP = new File(outputFolder.getParent() + "/src/com/servoy/mobile/public");
 
 		if (outputFolder.getParent() != null && tmpP.exists())
@@ -334,7 +333,6 @@ public class MobileExporter
 			outputFile = new File(tmpP, "solution_json.js");
 			Utils.writeTXTFile(outputFile, formJson);
 		}
-		// TODO END
 
 		File exportedFile = null;
 		InputStream is = this.getClass().getResourceAsStream(RELATIVE_WAR_PATH);

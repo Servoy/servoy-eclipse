@@ -5,12 +5,12 @@ Bundle-SymbolicName: com.servoy.eclipse.exporter.mobile;singleton:=true
 Bundle-Version: 7.0.0.2007
 Bundle-Activator: com.servoy.eclipse.mobileexporter.Activator
 Bundle-Vendor: Servoy
-Require-Bundle: org.eclipse.ui,
+Require-Bundle: com.servoy.eclipse.model,
+ com.servoy.eclipse.core,
+ org.eclipse.ui,
  org.eclipse.core.runtime,
  servoy_shared,
- com.servoy.eclipse.ui,
- com.servoy.eclipse.core,
- com.servoy.eclipse.model
+ com.servoy.eclipse.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
