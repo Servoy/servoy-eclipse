@@ -27,8 +27,8 @@ import com.servoy.eclipse.designer.editor.mobile.editparts.MobileSnapData.Mobile
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
+import com.servoy.j2db.persistence.IAnchorConstants;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.util.IAnchorConstants;
 
 /**
  * Command to add a button in mobile form editor.

@@ -38,10 +38,10 @@ import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.AnchorPropertyController.AnchorPropertySource;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IAnchorConstants;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportAnchors;
 import com.servoy.j2db.persistence.Part;
-import com.servoy.j2db.util.IAnchorConstants;
 
 /**
  * Snap elements according to alignment with other elements or container borders.

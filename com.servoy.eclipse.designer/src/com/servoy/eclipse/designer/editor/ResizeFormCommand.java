@@ -30,11 +30,11 @@ import com.servoy.eclipse.designer.editor.commands.ChangeBoundsCommand;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IAnchorConstants;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportAnchors;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
-import com.servoy.j2db.util.IAnchorConstants;
 
 /**
  * Command to resize a form in form editor.

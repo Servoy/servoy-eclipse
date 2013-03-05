@@ -492,7 +492,7 @@ public abstract class BaseFormPlaceElementCommand extends Command implements ISu
 		if (draggedPersist instanceof Form && parent instanceof Form)
 		{
 			return ElementFactory.createTabs(application, parent, new Object[] { new ElementFactory.RelatedForm(null, (Form)draggedPersist) }, location,
-				TabPanel.DEFAULT, "tab_" + ((Form)draggedPersist).getName());
+				TabPanel.DEFAULT_ORIENTATION, "tab_" + ((Form)draggedPersist).getName());
 		}
 
 		ServoyLog.logWarning("place object: dropped object not supported: " + draggedPersist.getClass().getName(), null);

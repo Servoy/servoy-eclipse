@@ -16,7 +16,7 @@
  */
 package com.servoy.eclipse.designer.editor.commands;
 
-import com.servoy.j2db.util.IAnchorConstants;
+import com.servoy.j2db.persistence.IAnchorConstants;
 
 /**
  * An action to set the anchoring of selected objects.

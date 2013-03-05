@@ -35,13 +35,13 @@ import com.servoy.eclipse.designer.editor.commands.MovePartCommand;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IAnchorConstants;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportAnchors;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.IAnchorConstants;
 
 /**
  * Edit policy for dragging the part in form designer.

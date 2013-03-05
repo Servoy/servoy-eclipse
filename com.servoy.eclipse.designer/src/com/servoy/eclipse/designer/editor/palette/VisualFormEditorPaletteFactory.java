@@ -530,7 +530,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		String nameHint = null;
 
 		// tab panels
-		int tabOrienation = TabPanel.DEFAULT;
+		int tabOrienation = TabPanel.DEFAULT_ORIENTATION;
 		if (CONTAINERS_DEFAULT_PANEL_ID.equals(id))
 		{
 			icon = com.servoy.eclipse.designer.Activator.loadImageDescriptorFromBundle("tabs.gif");

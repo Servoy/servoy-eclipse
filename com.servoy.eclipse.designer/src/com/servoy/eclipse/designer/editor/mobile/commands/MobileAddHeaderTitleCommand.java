@@ -26,9 +26,9 @@ import com.servoy.eclipse.designer.editor.commands.BaseFormPlaceElementCommand;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
+import com.servoy.j2db.persistence.IAnchorConstants;
 import com.servoy.j2db.persistence.ISupportTextSetup;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.util.IAnchorConstants;
 
 /**
  * Command to add title to header in mobile form editor.

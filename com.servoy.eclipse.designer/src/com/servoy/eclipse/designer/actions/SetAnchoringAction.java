@@ -20,7 +20,7 @@ package com.servoy.eclipse.designer.actions;
 import org.eclipse.gef.EditPart;
 import org.eclipse.ui.IWorkbenchPart;
 
-import com.servoy.j2db.util.IAnchorConstants;
+import com.servoy.j2db.persistence.IAnchorConstants;
 
 /**
  * Action to set Anchoring to specific value.

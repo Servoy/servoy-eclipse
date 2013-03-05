@@ -56,10 +56,10 @@ import com.servoy.eclipse.designer.util.FigureMovedTracker;
 import com.servoy.eclipse.designer.util.PersistChangedTracker;
 import com.servoy.eclipse.ui.property.AnchorPropertyController.AnchorPropertySource;
 import com.servoy.j2db.persistence.GraphicalComponent;
+import com.servoy.j2db.persistence.IAnchorConstants;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportAnchors;
 import com.servoy.j2db.persistence.Part;
-import com.servoy.j2db.util.IAnchorConstants;
 
 /**
  * Edit policy for moving/resizing elements.

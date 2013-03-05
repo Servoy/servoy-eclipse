@@ -22,7 +22,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
-import com.servoy.j2db.util.IAnchorConstants;
+import com.servoy.j2db.persistence.IAnchorConstants;
 
 /**
  * Property controller for anchors properties.

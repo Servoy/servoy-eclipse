@@ -26,8 +26,8 @@ import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Rectangle;
 
+import com.servoy.j2db.persistence.IAnchorConstants;
 import com.servoy.j2db.persistence.ISupportAnchors;
-import com.servoy.j2db.util.IAnchorConstants;
 
 /**
  * Figure that shows the anchoring state of an ISupportAnchors model.

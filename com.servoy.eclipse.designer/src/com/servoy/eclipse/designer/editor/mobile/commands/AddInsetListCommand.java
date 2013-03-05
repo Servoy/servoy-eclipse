@@ -30,10 +30,10 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
+import com.servoy.j2db.persistence.IAnchorConstants;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.util.IAnchorConstants;
 import com.servoy.j2db.util.UUID;
 
 /**

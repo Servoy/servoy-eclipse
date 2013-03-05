@@ -20,12 +20,14 @@ import org.eclipse.core.runtime.IAdapterFactory;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.jsunit.runner.TestTarget;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -77,7 +79,7 @@ public class AdapterFactory implements IAdapterFactory
 
 	}
 
-	private static Class[] ADAPTERS = new Class[] { SolutionUnitTestTarget.class };
+	private static Class< ? >[] ADAPTERS = new Class[] { SolutionUnitTestTarget.class };
 
 	public Object getAdapter(Object object, Class adapterType)
 	{
@@ -89,19 +91,22 @@ public class AdapterFactory implements IAdapterFactory
 				SimpleUserNode node = (SimpleUserNode)object;
 				UserNodeType type = node.getType();
 
-
-				if (type == UserNodeType.SOLUTION || type == UserNodeType.SOLUTION_ITEM)
+				ServoyProject ap = ServoyModelFinder.getServoyModel().getActiveProject();
+				if (ap != null && !SolutionMetaData.isServoyMobileSolution(ap.getSolution()))
 				{
-					ServoyProject sp = (ServoyProject)node.getRealObject();
-					if (sp != null && ServoyModelManager.getServoyModelManager().getServoyModel().isSolutionActive(sp.getProject().getName()))
+					if (type == UserNodeType.SOLUTION || type == UserNodeType.SOLUTION_ITEM)
+					{
+						ServoyProject sp = (ServoyProject)node.getRealObject();
+						if (sp != null && ServoyModelManager.getServoyModelManager().getServoyModel().isSolutionActive(sp.getProject().getName()))
+						{
+							retVal = new NodeSolutionUnitTestTarget(node);
+						}
+					}
+					else if (type == UserNodeType.FORM || type == UserNodeType.GLOBALS_ITEM || type == UserNodeType.FORM_METHOD ||
+						type == UserNodeType.GLOBAL_METHOD_ITEM)
 					{
 						retVal = new NodeSolutionUnitTestTarget(node);
 					}
-				}
-				else if (type == UserNodeType.FORM || type == UserNodeType.GLOBALS_ITEM || type == UserNodeType.FORM_METHOD ||
-					type == UserNodeType.GLOBAL_METHOD_ITEM)
-				{
-					retVal = new NodeSolutionUnitTestTarget(node);
 				}
 			}
 		}

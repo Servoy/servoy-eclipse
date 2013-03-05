@@ -74,7 +74,7 @@ public class FormPlaceElementCommand extends BaseFormPlaceElementCommand
 			if (((RequestType)requestType).type == RequestType.TYPE_TAB)
 			{
 				command.setLabel("place tabpanel");
-				return ElementFactory.createTabs(application, parent, (Object[])object, location, TabPanel.DEFAULT, objectProperties == null ? null
+				return ElementFactory.createTabs(application, parent, (Object[])object, location, TabPanel.DEFAULT_ORIENTATION, objectProperties == null ? null
 					: (String)objectProperties.get(ElementFactory.NAME_HINT_PROPERTY));
 			}
 

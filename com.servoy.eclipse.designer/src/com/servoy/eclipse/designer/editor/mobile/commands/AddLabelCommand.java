@@ -27,8 +27,8 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.GraphicalComponent;
+import com.servoy.j2db.persistence.IAnchorConstants;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.util.IAnchorConstants;
 import com.servoy.j2db.util.UUID;
 
 /**

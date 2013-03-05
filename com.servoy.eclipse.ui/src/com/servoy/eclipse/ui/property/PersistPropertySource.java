@@ -233,7 +233,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			RepositoryHelper.getDisplayName("tabOrientation", TabPanel.class),
 			new ComboboxPropertyModel<Integer>(
 				new Integer[] { Integer.valueOf(SwingConstants.TOP), Integer.valueOf(SwingConstants.RIGHT), Integer.valueOf(SwingConstants.BOTTOM), Integer.valueOf(SwingConstants.LEFT), Integer.valueOf(TabPanel.HIDE), Integer.valueOf(TabPanel.SPLIT_HORIZONTAL), Integer.valueOf(TabPanel.SPLIT_VERTICAL), Integer.valueOf(TabPanel.ACCORDION_PANEL) },
-				new String[] { Messages.AlignTop, Messages.AlignRight, Messages.AlignBottom, Messages.AlignLeft, "HIDE", "SPLIT HORIZONTAL", "SPLIT VERTICAL", "ACCORDION PANE" }).addDefaultValue(Integer.valueOf(TabPanel.DEFAULT)),
+				new String[] { Messages.AlignTop, Messages.AlignRight, Messages.AlignBottom, Messages.AlignLeft, "HIDE", "SPLIT HORIZONTAL", "SPLIT VERTICAL", "ACCORDION PANE" }).addDefaultValue(Integer.valueOf(TabPanel.DEFAULT_ORIENTATION)),
 			Messages.LabelUnresolved);
 		DISPLAY_TYPE_CONTOLLER = new ComboboxPropertyController<Integer>(
 			"displayType",
