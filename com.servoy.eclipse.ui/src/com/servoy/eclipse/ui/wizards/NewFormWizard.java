@@ -633,7 +633,6 @@ public class NewFormWizard extends Wizard implements INewWizard
 					handleProjectSelected();
 				}
 			});
-			projectComboControl.setEnabled(!SolutionMetaData.isServoyMobileSolution(getActiveSolution()));
 
 			final GroupLayout groupLayout = new GroupLayout(topLevel);
 			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
@@ -763,6 +762,16 @@ public class NewFormWizard extends Wizard implements INewWizard
 		public void fillProjectCombo()
 		{
 			ServoyProject[] modules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
+			if (SolutionMetaData.isServoyMobileSolution(getActiveSolution()))
+			{
+				ArrayList<ServoyProject> mobileModules = new ArrayList<ServoyProject>();
+				for (ServoyProject module : modules)
+				{
+					if (SolutionMetaData.isServoyMobileSolution(module.getSolution())) mobileModules.add(module);
+				}
+				modules = mobileModules.toArray(new ServoyProject[mobileModules.size()]);
+			}
+
 			projectCombo.setInput(modules);
 			if (servoyProject != null)
 			{
