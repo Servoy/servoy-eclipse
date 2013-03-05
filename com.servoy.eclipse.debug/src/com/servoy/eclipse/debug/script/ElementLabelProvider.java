@@ -148,7 +148,7 @@ public class ElementLabelProvider implements IElementLabelProviderExtension
 			if (method.getType() != null)
 			{
 				nameBuffer.append(": ");
-				nameBuffer.append(method.getName());
+				nameBuffer.append(method.getType().getName());
 			}
 			return nameBuffer.toString();
 		}
