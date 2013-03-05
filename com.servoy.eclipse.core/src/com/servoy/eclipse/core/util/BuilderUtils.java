@@ -41,7 +41,6 @@ public class BuilderUtils
 	public static int getMarkers(ServoyProject servoyProject)
 	{
 		ArrayList<String> projects = new ArrayList<String>();
-		projects.add(servoyProject.getSolution().getName());
 		Solution[] modules = servoyProject.getModules();
 		for (Solution m : modules)
 			projects.add(m.getName());
