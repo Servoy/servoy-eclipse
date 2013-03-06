@@ -683,7 +683,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 						ServoyLog.logError("Could not get style list", e);
 					}
 				}
-				setFormName(formName);
+				if (formNameField.getText().equals(""))
+				{
+					setFormName(formName);
+				}
 				fillStyleCombo();
 				fillTemplateCombo(superForm == null ? settings.get("templatename") : null);
 				fillProjectCombo();
@@ -921,8 +924,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 		private void setFormName(String text)
 		{
-			formName = "".equals(text) ? null : text;
-			formNameField.setText(text == null ? "" : text);
+			formName = "".equals(text) ? null : text; //$NON-NLS-1$
+			formNameField.setText(text == null ? "" : text); //$NON-NLS-1$
 			formNameTyped = false;
 			setPageComplete(validatePage());
 		}
