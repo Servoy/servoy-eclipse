@@ -6,7 +6,7 @@
       <command
             categoryId="com.servoy.eclipse.ui"
             description="Run Solution/Scope/Form/Method Javascript Unit Test(s)"
-            id="com.servoy.eclipse.jsunit.actions.runSriptUintTests"
+            id="com.servoy.eclipse.jsunit.commands.runScriptUintTests"
             name="Run JS Unit Test(s)">
       </command>
    </extension>
@@ -18,7 +18,7 @@
             objectClass="com.servoy.eclipse.jsunit.SolutionUnitTestTarget">
          <action
                class="com.servoy.eclipse.jsunit.actions.RunJSUnitAction"
-               definitionId="com.servoy.eclipse.jsunit.actions.runSriptUintTests"
+               definitionId="com.servoy.eclipse.jsunit.commands.runScriptUintTests"
                enablesFor="1"
                icon="icons/jsunit.png"
                id="com.servoy.eclipse.jsunit.actions.runScriptUnitMenuContribution"
@@ -42,10 +42,41 @@
    <extension
          point="org.eclipse.ui.bindings">
       <key
-            commandId="com.servoy.eclipse.jsunit.actions.runSriptUintTests"
+            commandId="com.servoy.eclipse.jsunit.commands.runScriptUintTests"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M3+M2+U">
       </key>
+   </extension>
+    <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            id="com.servoy.eclipse.jsunit.actions.runScriptUnitAction"
+            label="Run JS Unit Test(s)">
+         <action
+               class="com.servoy.eclipse.jsunit.actions.RunJSUnitAction"
+               definitionId="com.servoy.eclipse.jsunit.commands.runScriptUintTests"
+               icon="icons/jsunit.png"
+               id="com.servoy.eclipse.jsunit.actions.runScriptUnitAction"
+               label="Run JS Unit Test(s)"
+               style="push"
+               tooltip="Run Solution/Scope/Form/Method Javascript Unit Test(s)">
+         </action>
+      </actionSet>
+   </extension>
+    <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="com.servoy.eclipse.ui.DesignPerspective">
+         <actionSet
+               id="com.servoy.eclipse.jsunit.actions.runScriptUnitAction">
+         </actionSet>
+      </perspectiveExtension>
+      <perspectiveExtension
+            targetID="org.eclipse.debug.ui.DebugPerspective">
+         <actionSet
+               id="com.servoy.eclipse.jsunit.actions.runScriptUnitAction">
+         </actionSet>
+      </perspectiveExtension>
    </extension>
    <extension
          point="org.eclipse.core.contenttype.contentTypes">

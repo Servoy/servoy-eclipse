@@ -21,6 +21,8 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
 import com.servoy.eclipse.jsunit.SolutionUnitTestTarget;
 import com.servoy.eclipse.jsunit.launch.JSUnitLaunchConfigurationDelegate;
@@ -30,7 +32,7 @@ import com.servoy.eclipse.jsunit.runner.TestTarget;
  * This action launches a script unit test run from a selected node in the solex view.
  * @author obuligan
  */
-public class RunJSUnitAction implements IObjectActionDelegate
+public class RunJSUnitAction implements IObjectActionDelegate, IWorkbenchWindowActionDelegate
 {
 
 	private IStructuredSelection structuredSelection;
@@ -67,6 +69,19 @@ public class RunJSUnitAction implements IObjectActionDelegate
 	}
 
 	public void setActivePart(IAction action, IWorkbenchPart targetPart)
+	{
+		// not interested
+	}
+
+
+	@Override
+	public void dispose()
+	{
+		structuredSelection = null;
+	}
+
+	@Override
+	public void init(IWorkbenchWindow window)
 	{
 		// not interested
 	}

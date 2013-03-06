@@ -33,6 +33,7 @@ import org.eclipse.dltk.testing.DLTKTestingPlugin;
 import org.eclipse.dltk.testing.ITestingEngine;
 import org.eclipse.dltk.testing.TestingEngineManager;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.jsunit.scriptunit.JSUnitTestingEngine;
 import com.servoy.eclipse.jsunit.scriptunit.RunJSUnitTests;
@@ -80,7 +81,11 @@ public class JSUnitLaunchConfigurationDelegate extends LaunchConfigurationDelega
 
 	public static void launchTestTarget(TestTarget target)
 	{
-		if (target == null) return;
+		if (target == null)
+		{
+			// use currently active solution
+			target = new TestTarget(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution());
+		}
 		try
 		{
 			ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
