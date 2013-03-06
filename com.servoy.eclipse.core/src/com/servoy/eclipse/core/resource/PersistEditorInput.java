@@ -22,8 +22,6 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.base.persistence.IMobileProperties;
-import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -33,7 +31,6 @@ import com.servoy.j2db.util.UUID;
 public class PersistEditorInput implements IEditorInput
 {
 	public static final String FORM_RESOURCE_ID = "com.servoy.eclipse.core.resource.form";
-	public static final String MOBILE_FORM_RESOURCE_ID = "com.servoy.eclipse.core.resource.mobileform";
 	public static final String VALUELIST_RESOURCE_ID = "com.servoy.eclipse.core.resource.valuelist";
 	public static final String RELATION_RESOURCE_ID = "com.servoy.eclipse.core.resource.relation";
 	public static final String MEDIA_RESOURCE_ID = "com.servoy.eclipse.core.resource.media";
@@ -130,15 +127,6 @@ public class PersistEditorInput implements IEditorInput
 	public IPersistableElement getPersistable()
 	{
 		return (IPersistableElement)getAdapter(IPersistableElement.class);
-	}
-
-	/**
-	 * @param form
-	 * @return
-	 */
-	public static String getFormContentTypeIdentifier(Form form)
-	{
-		return form.getCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName) == null ? FORM_RESOURCE_ID : MOBILE_FORM_RESOURCE_ID;
 	}
 
 	/*

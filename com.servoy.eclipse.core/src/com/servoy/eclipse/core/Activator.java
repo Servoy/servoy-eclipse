@@ -87,7 +87,6 @@ import org.osgi.service.url.URLConstants;
 import org.osgi.service.url.URLStreamHandlerService;
 
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
-import com.servoy.eclipse.core.resource.FormDescriber;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -573,7 +572,7 @@ public class Activator extends Plugin
 								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
 									new PersistEditorInput(testForm.getName(), testForm.getSolution().getName(), testForm.getUUID()),
 									PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-										Platform.getContentTypeManager().getContentType(FormDescriber.getFormContentTypeIdentifier(testForm))).getId());
+										Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId());
 								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().forceActive();
 
 							}

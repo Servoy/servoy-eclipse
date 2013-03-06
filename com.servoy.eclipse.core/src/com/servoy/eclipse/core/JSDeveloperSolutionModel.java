@@ -25,7 +25,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.resource.FormDescriber;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.repository.EclipseRepository;
@@ -190,7 +189,7 @@ public class JSDeveloperSolutionModel
 							PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
 								new PersistEditorInput(frm.getName(), frm.getSolution().getName(), frm.getUUID()).setNew(false),
 								PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-									Platform.getContentTypeManager().getContentType(FormDescriber.getFormContentTypeIdentifier(frm))).getId());
+									Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId());
 						}
 						catch (PartInitException ex)
 						{

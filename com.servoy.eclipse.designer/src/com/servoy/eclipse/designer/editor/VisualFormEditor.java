@@ -25,7 +25,10 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 
+import com.servoy.base.persistence.IMobileProperties;
+import com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditorDesignPage;
 import com.servoy.eclipse.ui.editors.ITabbedEditor;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 
 
@@ -48,6 +51,15 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 	public static final RequestType REQ_PLACE_TEMPLATE = new RequestType(RequestType.TYPE_TEMPLATE);
 	public static final String REQ_DISTRIBUTE = "VFE_DISTRIBUTE"; //$NON-NLS-1$
 	public static final String VFE_PAGE_ID = "PageID"; //$NON-NLS-1$
+
+	// constants for the mobile editor
+	public static final RequestType REQ_PLACE_HEADER_TITLE = new RequestType(RequestType.TYPE_LABEL);
+	public static final RequestType REQ_PLACE_HEADER = new RequestType(RequestType.TYPE_PART);
+	public static final RequestType REQ_PLACE_FOOTER = new RequestType(RequestType.TYPE_PART);
+	public static final RequestType REQ_PLACE_INSET_LIST = new RequestType(RequestType.TYPE_TAB);
+	public static final RequestType REQ_PLACE_FORM_LIST = new RequestType(RequestType.TYPE_TAB);
+	public static final RequestType REQ_PLACE_TOGGLE = new RequestType(RequestType.TYPE_FIELD);
+
 
 	private VisualFormEditorPartsPage partseditor = null;
 	private VisualFormEditorTabSequencePage tabseditor = null;
@@ -73,12 +85,15 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 	protected void createPages()
 	{
 		super.createPages();
-		if (!isClosing())
+		if (!isMobile())
 		{
-			createPartsPage();
-			createTabsPage();
+			if (!isClosing())
+			{
+				createPartsPage();
+				createTabsPage();
+			}
+			createSecPage(); // MultiPageEditorPart wants at least 1 page
 		}
-		createSecPage(); // MultiPageEditorPart wants at least 1 page
 	}
 
 	private void createPartsPage()
@@ -103,23 +118,26 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 	@Override
 	protected BaseVisualFormEditorDesignPage createGraphicaleditor()
 	{
-		return new VisualFormEditorDesignPage(this);
+		return isMobile() ? new MobileVisualFormEditorDesignPage(this) : new VisualFormEditorDesignPage(this);
 	}
 
 	@Override
 	public void dispose()
 	{
-		if (partseditor != null)
+		if (!isMobile())
 		{
-			partseditor.dispose();
-		}
-		if (tabseditor != null)
-		{
-			tabseditor.dispose();
-		}
-		if (seceditor != null)
-		{
-			seceditor.dispose();
+			if (partseditor != null)
+			{
+				partseditor.dispose();
+			}
+			if (tabseditor != null)
+			{
+				tabseditor.dispose();
+			}
+			if (seceditor != null)
+			{
+				seceditor.dispose();
+			}
 		}
 		super.dispose();
 	}
@@ -127,7 +145,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 	@Override
 	public void doSave(IProgressMonitor monitor)
 	{
-		seceditor.saveSecurityElements();
+		if (!isMobile()) seceditor.saveSecurityElements();
 		super.doSave(monitor);
 	}
 
@@ -138,24 +156,27 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 	protected void doRefresh(List<IPersist> persists)
 	{
 		super.doRefresh(persists);
-		if (partseditor != null)
+		if (!isMobile())
 		{
-			partseditor.refresh();
-		}
-		if (tabseditor != null)
-		{
-			tabseditor.refresh();
-		}
-		if (seceditor != null)
-		{
-			seceditor.refresh();
+			if (partseditor != null)
+			{
+				partseditor.refresh();
+			}
+			if (tabseditor != null)
+			{
+				tabseditor.refresh();
+			}
+			if (seceditor != null)
+			{
+				seceditor.refresh();
+			}
 		}
 	}
 
 	@Override
 	public Object getAdapter(Class adapter)
 	{
-		if (adapter.equals(CommandStack.class) && getActivePage() >= 0 && getControl(getActivePage()).equals(seceditor))
+		if (!isMobile() && adapter.equals(CommandStack.class) && getActivePage() >= 0 && getControl(getActivePage()).equals(seceditor))
 		{
 			return dummyCommandStack;
 		}
@@ -182,5 +203,9 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		}
 	}
 
-
+	private boolean isMobile()
+	{
+		Form form = getForm();
+		return form != null && form.getCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName) != null;
+	}
 }

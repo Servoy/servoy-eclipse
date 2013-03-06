@@ -21,18 +21,6 @@
             <contentTypeBinding
                contentTypeId="com.servoy.eclipse.core.resource.form"/>
       </editor>
-      <editor
-            class="com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditor"
-            contributorClass="com.servoy.eclipse.designer.editor.ActionBarContributor"
-            default="true"
-            extensions="frm"
-            icon="icons/designer.gif"
-            id="com.servoy.eclipse.designer.editor.MobileVisualFormEditor"
-            matchingStrategy="com.servoy.eclipse.core.resource.PersistMatchingStrategy"
-            name="Mobile Form Editor">
-            <contentTypeBinding
-               contentTypeId="com.servoy.eclipse.core.resource.mobileform"/>
-      </editor>
    </extension>
    <extension
          point="org.eclipse.core.runtime.adapters">
