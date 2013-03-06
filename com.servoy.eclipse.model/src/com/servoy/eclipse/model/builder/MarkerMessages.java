@@ -453,6 +453,12 @@ public class MarkerMessages
 	 */
 	public static ServoyMarker ImageMediaNotSet = new ServoyMarker(
 		"Element in form \"{0}\" has a 'rolloverImageMedia' property while no 'imageMedia' property is set.", ServoyBuilder.MEDIA_MARKER_TYPE); //$NON-NLS-1$
+	
+	/**
+	 * The roll over imageand cursor is not working in Smart Client tableview/listview form.
+	 */
+	public static ServoyMarker RolloverImageAndCursorNotWorking = new ServoyMarker(
+		"Roll over image and cursor are not supported in Smart client tableview/listview forms.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	/**
 	 * The HTML or RTF field has as dataprovider a column whose length may be too small.

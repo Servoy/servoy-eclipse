@@ -228,6 +228,11 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 								{
 									text = "Set value <empty> for no title text";
 								}
+								if (StaticContentSpecLoader.PROPERTY_ROLLOVERCURSOR.getPropertyName().equals(item.getText(0)) ||
+									StaticContentSpecLoader.PROPERTY_ROLLOVERIMAGEMEDIAID.getPropertyName().replace("ID", "").equals(item.getText(0)))
+								{
+									text = "Not supported in smart client for listview/tableview";
+								}
 								if (text != null)
 								{
 									if (tip != null && !tip.isDisposed()) tip.dispose();
