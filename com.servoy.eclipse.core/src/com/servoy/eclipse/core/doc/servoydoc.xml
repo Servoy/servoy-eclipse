@@ -6776,7 +6776,7 @@ forms['printForm'].controller.showPrintPreview()]]></sample>
         <property name="rolloverCursor">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The cursor that is shown as the mouse is rolled over the component.
-Possible options are DEFAULT and HAND.]]></description>
+Possible options are DEFAULT and HAND. Note that roll over cursor is not supported in Smart client for list view and tableview forms.]]></description>
           <summary><![CDATA[The cursor that is shown as the mouse is rolled over the component.]]></summary>
           <sample><![CDATA[var label = form.newLabel('Move the mouse over me', 10, 10, 200, 200);
 label.rolloverCursor = SM_CURSOR.HAND_CURSOR;]]></sample>
@@ -6786,7 +6786,7 @@ label.rolloverCursor = SM_CURSOR.HAND_CURSOR;]]></sample>
           <description><![CDATA[The roll over image Media object used. It will only work if a property image is also used.
 When the mouse is moved over the component, this image Media will be displayed. 
 When the mouse is moved out of the component, whatever text or image was being initially 
-displayed will be restored.]]></description>
+displayed will be restored. Note that roll over image is not supported in Smart client for list view and tableview forms.]]></description>
           <summary><![CDATA[The roll over image Media object used.]]></summary>
           <sample><![CDATA[var ballBytes = plugins.file.readFile('d:/ball.jpg');
 var ballImage = solutionModel.newMedia('ball.jpg', ballBytes);
@@ -15331,7 +15331,7 @@ forms['printForm'].controller.showPrintPreview()]]></sample>
         <property name="rolloverCursor">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <description><![CDATA[The cursor that is shown as the mouse is rolled over the component.
-Possible options are DEFAULT and HAND.]]></description>
+Possible options are DEFAULT and HAND. Note that roll over cursor is not supported in Smart client for list view and tableview forms.]]></description>
           <summary><![CDATA[The cursor that is shown as the mouse is rolled over the component.]]></summary>
           <sample><![CDATA[var label = form.newLabel('Move the mouse over me', 10, 10, 200, 200);
 label.rolloverCursor = SM_CURSOR.HAND_CURSOR;]]></sample>
@@ -15341,7 +15341,7 @@ label.rolloverCursor = SM_CURSOR.HAND_CURSOR;]]></sample>
           <description><![CDATA[The roll over image Media object used. It will only work if a property image is also used.
 When the mouse is moved over the component, this image Media will be displayed. 
 When the mouse is moved out of the component, whatever text or image was being initially 
-displayed will be restored.]]></description>
+displayed will be restored. Note that roll over image is not supported in Smart client for list view and tableview forms.]]></description>
           <summary><![CDATA[The roll over image Media object used.]]></summary>
           <sample><![CDATA[var ballBytes = plugins.file.readFile('d:/ball.jpg');
 var ballImage = solutionModel.newMedia('ball.jpg', ballBytes);
@@ -18098,6 +18098,21 @@ var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 
 var style = solutionModel.newStyle('myStyle','field.fancy { background-color: yellow; }');
 form.styleName = 'myStyle'; // First set the style on the form.
 field.styleClass = 'fancy'; // Then set the style class on the field.]]></sample>
+        </property>
+        <property name="tabOrientation">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Specifies either the position of the tabs related to the tab panel or the type of tab-panel.
+Can be one of SM_ALIGNMENT.(TOP, RIGHT, BOTTOM, LEFT), DEFAULT_ORIENTATION, HIDE, SPLIT_HORIZONTAL, SPLIT_VERTICAL, ACCORDION_PANEL.]]></description>
+          <summary><![CDATA[Specifies either the position of the tabs related to the tab panel or the type of tab-panel.]]></summary>
+          <sample><![CDATA[var tabPanel = form.newTabPanel('tabs', 10, 10, 620, 460);
+tabPanel.newTab('tab1', 'Child Two', childOne, parentToChild); // The first form uses the relation.
+tabPanel.newTab('tab2', 'Child Two', childTwo);
+// The SM_ALIGNMENT constants TOP, RIGHT, BOTTOM and LEFT can be used to put the
+// tabs into the needed position. Use HIDE to hide the tabs. Use DEFAULT_ORIENTATION to restore it to it's initial state.
+// The constants SPLIT_HORIZONTAL, SPLIT_VERTICAL can be used to create a split pane,
+// where the first tab will be the first component and the second tab will the second component.
+// ACCORDION_PANEL can be used to create an accordion pane.
+tabPanel.tabOrientation = SM_ALIGNMENT.BOTTOM;]]></sample>
         </property>
         <property name="tabSeq">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -41755,9 +41770,9 @@ if (dialogOrWindowName != null) {
           <return type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet"><![CDATA[the dataset with form context]]></return>
           <description><![CDATA[Gets the forms context where it resides, returns a dataset of its structure to the main controller.
 Note1: can't be called in onload, because no context is yet available at this time.
-Note2: tabindex is 1 (left) or 2 (right) for a SplitPane and 0 based for the other tabpanels.]]></description>
+Note2: tabindex is 1 (left) or 2 (right) for a SplitPane and 0 based for the other tabpanels; tabindex1based is the same as tabindex but is 1 based.]]></description>
           <summary><![CDATA[Gets the forms context where it resides, returns a dataset of its structure to the main controller.]]></summary>
-          <sample><![CDATA[//dataset columns: [containername(1),formname(2),tabpanel or beanname(3),tabname(4),tabindex(5)]
+          <sample><![CDATA[//dataset columns: [containername(1),formname(2),tabpanel or beanname(3),tabname(4),tabindex(5),tabindex1based(6)]
 //dataset rows: mainform(1) -> parent(2)  -> current form(3) (when 3 forms deep)
 /** @type {JSDataSet} */
 var dataset = %%prefix%%controller.getFormContext();
