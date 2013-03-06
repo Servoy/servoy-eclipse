@@ -26,13 +26,11 @@ import java.util.SortedSet;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.XMLScriptObjectAdapterLoader;
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
-import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerListContentProvider;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.IDocumentationManager;
 import com.servoy.j2db.documentation.IFunctionDocumentation;
 import com.servoy.j2db.documentation.IObjectDocumentation;
-import com.servoy.j2db.persistence.SolutionMetaData;
 
 public class TreeBuilder
 {
@@ -43,13 +41,7 @@ public class TreeBuilder
 	{
 		if (!docManagerLoaded)
 		{
-			String docfile = "doc/servoydoc_jslib_mobile.xml";
-			if (ServoyModelFinder.getServoyModel().getActiveProject() != null &&
-				ServoyModelFinder.getServoyModel().getActiveProject().getSolutionMetaData().getSolutionType() == SolutionMetaData.MOBILE)
-			{
-				docfile = "doc/servoydoc_jslib.xml";
-			}
-			URL url = XMLScriptObjectAdapterLoader.class.getResource(docfile);
+			URL url = XMLScriptObjectAdapterLoader.class.getResource("doc/servoydoc_jslib_mobile.xml");
 			IDocumentationManagerProvider documentationManagerProvider = Activator.getDefault().getDocumentationManagerProvider();
 			if (documentationManagerProvider != null)
 			{
