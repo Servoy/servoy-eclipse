@@ -81,6 +81,7 @@ import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController;
+import com.servoy.j2db.IForm;
 import com.servoy.j2db.IServiceProvider;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.DBValueList;
@@ -308,6 +309,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> CALCULATION_FORM_ACCESS = new Pair<String, ProblemSeverity>(
 		"calculationFormAccess", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> IMAGE_MEDIA_NOT_SET = new Pair<String, ProblemSeverity>("imageMediaNotSet", ProblemSeverity.WARNING); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> ROLLOVER_NOT_WORKING = new Pair<String, ProblemSeverity>("rolloverNotWorking", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> DATAPROVIDER_MISSING_CONVERTER = new Pair<String, ProblemSeverity>(
 		"dataproviderMissingConverter", ProblemSeverity.WARNING); //$NON-NLS-1$
 
@@ -3023,6 +3025,24 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						{
 							ServoyMarker mk = MarkerMessages.ImageMediaNotSet.fill(((Form)o.getAncestor(IRepository.FORMS)).getName());
 							addMarker(project, mk.getType(), mk.getText(), -1, IMAGE_MEDIA_NOT_SET, IMarker.PRIORITY_NORMAL, null, o);
+						}
+						if (o instanceof GraphicalComponent &&
+							(((GraphicalComponent)o).getRolloverImageMediaID() > 0 || ((GraphicalComponent)o).getRolloverCursor() > 0))
+						{
+							ServoyProject activeProject = getServoyModel().getActiveProject();
+							if (activeProject != null &&
+								(activeProject.getSolutionMetaData().getSolutionType() == SolutionMetaData.SMART_CLIENT_ONLY || activeProject.getSolutionMetaData().getSolutionType() == SolutionMetaData.SOLUTION))
+							{
+								Form parentForm = (Form)context;
+								if (parentForm != null &&
+									(parentForm.getView() == FormController.LOCKED_TABLE_VIEW || parentForm.getView() == FormController.LOCKED_LIST_VIEW ||
+										parentForm.getView() == FormController.TABLE_VIEW || parentForm.getView() == IForm.LIST_VIEW))
+								{
+									ServoyMarker mk = MarkerMessages.RolloverImageAndCursorNotWorking.fill();
+									addMarker(project, mk.getType(), mk.getText(), -1, ROLLOVER_NOT_WORKING, IMarker.PRIORITY_NORMAL, null, o);
+								}
+							}
+
 						}
 						checkCancel();
 						if (o.getTypeID() == IRepository.SHAPES)
