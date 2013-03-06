@@ -29,6 +29,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor.RequestType;
+import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.editor.mobile.palette.MobileElementCreationToolEntry;
 import com.servoy.eclipse.designer.editor.palette.BaseVisualFormEditorPaletteFactory;
 import com.servoy.eclipse.designer.editor.palette.ElementCreationToolEntry;
@@ -198,13 +199,13 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 		if (BUTTON_BUTTON_ID.equals(id))
 		{
 			icon = Activator.loadImageDescriptorFromBundle("mobile/button.png");
-			requestType = MobileVisualFormEditor.REQ_PLACE_BUTTON;
+			requestType = VisualFormEditor.REQ_PLACE_BUTTON;
 		}
 
 		else if (BUTTONS_HEADER_TITLE_ID.equals(id))
 		{
 			icon = Activator.loadImageDescriptorFromBundle("mobile/headertitle.png");
-			requestType = MobileVisualFormEditor.REQ_PLACE_HEADER_TITLE;
+			requestType = VisualFormEditor.REQ_PLACE_HEADER_TITLE;
 		}
 
 		else
@@ -223,13 +224,13 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 
 		if (PARTS_HEADER_ID.equals(id))
 		{
-			requestType = MobileVisualFormEditor.REQ_PLACE_HEADER;
+			requestType = VisualFormEditor.REQ_PLACE_HEADER;
 			icon = Activator.loadImageDescriptorFromBundle("mobile/header.png");
 		}
 
 		else if (PARTS_FOOTER_ID.equals(id))
 		{
-			requestType = MobileVisualFormEditor.REQ_PLACE_FOOTER;
+			requestType = VisualFormEditor.REQ_PLACE_FOOTER;
 			icon = Activator.loadImageDescriptorFromBundle("mobile/footer.png");
 		}
 
@@ -245,7 +246,7 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 	private PaletteEntry createElementsEntry(String id)
 	{
 		ImageDescriptor icon;
-		RequestType requestType = MobileVisualFormEditor.REQ_PLACE_FIELD;
+		RequestType requestType = VisualFormEditor.REQ_PLACE_FIELD;
 		int displayType = -1;
 		String text = null;
 
@@ -291,7 +292,7 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 		else if (ELEMENTS_LABEL_ID.equals(id))
 		{
 			icon = Activator.loadImageDescriptorFromBundle("mobile/label.png");
-			requestType = MobileVisualFormEditor.REQ_PLACE_LABEL;
+			requestType = VisualFormEditor.REQ_PLACE_LABEL;
 		}
 
 		else
@@ -326,13 +327,13 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 		if (LISTS_INSET_ID.equals(id))
 		{
 			icon = Activator.loadImageDescriptorFromBundle("mobile/insetlist.png");
-			requestType = MobileVisualFormEditor.REQ_PLACE_INSET_LIST;
+			requestType = VisualFormEditor.REQ_PLACE_INSET_LIST;
 		}
 
 		else if (LISTS_FORM_ID.equals(id))
 		{
 			icon = Activator.loadImageDescriptorFromBundle("mobile/listform.png");
-			requestType = MobileVisualFormEditor.REQ_PLACE_FORM_LIST;
+			requestType = VisualFormEditor.REQ_PLACE_FORM_LIST;
 		}
 
 		else

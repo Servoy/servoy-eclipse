@@ -24,6 +24,7 @@ import org.eclipse.gef.requests.CreationFactory;
 
 import com.servoy.eclipse.designer.editor.AddPartsCommand;
 import com.servoy.eclipse.designer.editor.CreateElementRequest;
+import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.editor.mobile.commands.AddFieldCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.AddFormListCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.AddInsetListCommand;
@@ -71,10 +72,10 @@ public class MobileFormEditPolicy extends ComponentEditPolicy
 
 			Object createType = ((CreateRequest)request).getNewObjectType();
 
-			if ((createType == MobileVisualFormEditor.REQ_PLACE_HEADER && !form.hasPart(Part.HEADER)) ||
-				(createType == MobileVisualFormEditor.REQ_PLACE_FOOTER && !form.hasPart(Part.FOOTER)))
+			if ((createType == VisualFormEditor.REQ_PLACE_HEADER && !form.hasPart(Part.HEADER)) ||
+				(createType == VisualFormEditor.REQ_PLACE_FOOTER && !form.hasPart(Part.FOOTER)))
 			{
-				command = new AddPartsCommand(form, new int[] { createType == MobileVisualFormEditor.REQ_PLACE_HEADER ? Part.HEADER : Part.FOOTER })
+				command = new AddPartsCommand(form, new int[] { createType == VisualFormEditor.REQ_PLACE_HEADER ? Part.HEADER : Part.FOOTER })
 				{
 					@Override
 					protected Part createPart(int partTypeId) throws RepositoryException
@@ -85,23 +86,23 @@ public class MobileFormEditPolicy extends ComponentEditPolicy
 					}
 				};
 			}
-			else if (createType == MobileVisualFormEditor.REQ_PLACE_FIELD)
+			else if (createType == VisualFormEditor.REQ_PLACE_FIELD)
 			{
 				command = new AddFieldCommand(application, form, (CreateRequest)request);
 			}
-			else if (createType == MobileVisualFormEditor.REQ_PLACE_LABEL)
+			else if (createType == VisualFormEditor.REQ_PLACE_LABEL)
 			{
 				command = new AddLabelCommand(application, form, (CreateRequest)request);
 			}
-			else if (createType == MobileVisualFormEditor.REQ_PLACE_INSET_LIST)
+			else if (createType == VisualFormEditor.REQ_PLACE_INSET_LIST)
 			{
 				command = new AddInsetListCommand(application, form, (CreateRequest)request);
 			}
-			else if (createType == MobileVisualFormEditor.REQ_PLACE_FORM_LIST)
+			else if (createType == VisualFormEditor.REQ_PLACE_FORM_LIST)
 			{
 				command = new AddFormListCommand(application, form, (CreateRequest)request);
 			}
-			else if (createType == MobileVisualFormEditor.REQ_PLACE_BUTTON)
+			else if (createType == VisualFormEditor.REQ_PLACE_BUTTON)
 			{
 				command = new MobileAddButtonCommand(application, form, (CreateRequest)request, MobileSnapType.ContentItem);
 			}

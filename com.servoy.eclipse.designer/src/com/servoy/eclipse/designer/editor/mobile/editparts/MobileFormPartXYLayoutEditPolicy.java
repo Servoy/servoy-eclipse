@@ -24,7 +24,7 @@ import org.eclipse.gef.editpolicies.XYLayoutEditPolicy;
 import org.eclipse.gef.requests.CreateRequest;
 
 import com.servoy.base.persistence.IMobileProperties;
-import com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditor;
+import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.editor.mobile.commands.MobileAddButtonCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.MobileAddHeaderTitleCommand;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileSnapData.MobileSnapType;
@@ -61,7 +61,7 @@ public class MobileFormPartXYLayoutEditPolicy extends XYLayoutEditPolicy
 		MobileSnapType snapType = snapData == null ? null : snapData.snapType;
 
 		Form form = ((MobilePartGraphicalEditPart)getHost()).getEditorPart().getForm();
-		if (request.getNewObjectType() == MobileVisualFormEditor.REQ_PLACE_BUTTON)
+		if (request.getNewObjectType() == VisualFormEditor.REQ_PLACE_BUTTON)
 		{
 			for (IPersist element : form.getAllObjectsAsList())
 			{
@@ -82,7 +82,7 @@ public class MobileFormPartXYLayoutEditPolicy extends XYLayoutEditPolicy
 			return new MobileAddButtonCommand(application, form, request, snapType);
 		}
 
-		if (snapType == MobileSnapType.HeaderText && request.getNewObjectType() == MobileVisualFormEditor.REQ_PLACE_HEADER_TITLE)
+		if (snapType == MobileSnapType.HeaderText && request.getNewObjectType() == VisualFormEditor.REQ_PLACE_HEADER_TITLE)
 		{
 			for (IPersist element : form.getAllObjectsAsList())
 			{
