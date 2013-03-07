@@ -2986,7 +2986,7 @@ application.output(n.toString(2)); //displays "111"]]></sample>
         </function>
       </functions>
     </object>
-    <object clientSupport="wc,sc" publicName="Object" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Object" scriptingName="Object"/>
+    <object clientSupport="mc,wc,sc" publicName="Object" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Object" scriptingName="Object"/>
     <object publicName="QName" qualifiedName="com.servoy.j2db.documentation.scripting.docs.QName" scriptingName="QName">
       <properties>
         <property name="localName">
