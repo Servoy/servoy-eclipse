@@ -1026,6 +1026,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						if (selectedEl != null) sel = new StructuredSelection(selectedEl);
 					}
 					list.setSelection(sel, selectIndex >= 0);
+					((SolutionExplorerListContentProvider)list.getContentProvider()).clearCache();
 				}
 			}
 		};
