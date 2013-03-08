@@ -101,7 +101,7 @@ public class MobileViewerFilter extends ViewerFilter
 				((SimpleUserNode)node).getRealType() == UserNodeType.FORM_VARIABLE_ITEM ||
 				((SimpleUserNode)node).getRealType() == UserNodeType.VALUELIST_ITEM || ((SimpleUserNode)node).getRealType() == UserNodeType.RELATION ||
 				((SimpleUserNode)node).getRealType() == UserNodeType.FOUNDSET_ITEM || ((SimpleUserNode)node).getRealType() == UserNodeType.FORM_ELEMENTS_ITEM ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.FORM_FOUNDSET || ((SimpleUserNode)node).getRealType() == UserNodeType.SECURITY_ITEM);
+				((SimpleUserNode)node).getRealType() == UserNodeType.ARRAY || ((SimpleUserNode)node).getRealType() == UserNodeType.FORM_FOUNDSET || ((SimpleUserNode)node).getRealType() == UserNodeType.SECURITY_ITEM);
 
 			return (isAllowedNode || ((SimpleUserNode)node).isVisibleInMobile());
 		}
