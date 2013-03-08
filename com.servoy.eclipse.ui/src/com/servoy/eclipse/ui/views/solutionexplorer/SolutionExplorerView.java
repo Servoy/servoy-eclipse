@@ -1019,6 +1019,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					{
 						sel = list.getSelection();
 					}
+					((SolutionExplorerListContentProvider)list.getContentProvider()).clearCache();
 					list.refresh();
 					if (selectIndex >= 0)
 					{
@@ -1026,7 +1027,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						if (selectedEl != null) sel = new StructuredSelection(selectedEl);
 					}
 					list.setSelection(sel, selectIndex >= 0);
-					((SolutionExplorerListContentProvider)list.getContentProvider()).clearCache();
 				}
 			}
 		};
