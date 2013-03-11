@@ -287,14 +287,18 @@ public class ValueCollectionProvider implements IMemberEvaluator
 					IPath path = resource.getProjectRelativePath();
 					if (path.segmentCount() == 1)
 					{
-						// globals scope
-						IValueCollection globalsValueCollection = getGlobalModulesValueCollection(fs, path.segment(0),
-							ValueCollectionFactory.createValueCollection());
-						if (fullGlobalScope.get().booleanValue())
+						if (path.segment(0).equals(SolutionSerializer.GLOBALS_FILE))
 						{
-							ValueCollectionFactory.copyInto(globalsValueCollection, getValueCollection((IFile)resource));
+							// globals scope
+							IValueCollection globalsValueCollection = getGlobalModulesValueCollection(fs, path.segment(0),
+								ValueCollectionFactory.createValueCollection());
+							if (fullGlobalScope.get().booleanValue())
+							{
+								ValueCollectionFactory.copyInto(globalsValueCollection, getValueCollection((IFile)resource));
+							}
+							return globalsValueCollection;
 						}
-						return globalsValueCollection;
+						return null;
 					}
 
 					String formName = SolutionSerializer.getFormNameForJSFile(resource);
@@ -355,7 +359,8 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			}
 			finally
 			{
-				resolve.set(resolving);
+				if (resolving != null) resolve.set(resolving);
+				resolve.remove();
 			}
 		}
 		return collection;
@@ -420,7 +425,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 						return null;
 					}
 					removeFromScriptCache(file, pair);
-					boolean globalsFile = file.getName().equals("globals.js");
+					boolean globalsFile = file.getName().equals(SolutionSerializer.GLOBALS_FILE);
 					if (!globalsFile)
 					{
 						// if the current thread set size is 0 (first request, so not in recursion)
@@ -486,7 +491,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	private static Pair<Long, IValueCollection> getFromScriptCache(IResource resource)
 	{
 		SoftReference<Pair<Long, IValueCollection>> sr = null;
-		if (resource.getName().equals("globals.js"))
+		if (resource.getName().equals(SolutionSerializer.GLOBALS_FILE))
 		{
 			sr = globalScriptCache.get(resource);
 		}
@@ -494,7 +499,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		{
 			sr = scriptCache.get(resource);
 		}
-		return sr != null?sr.get():null;
+		return sr != null ? sr.get() : null;
 	}
 
 	/**
@@ -505,7 +510,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	{
 		if (pair != null && pair.getLeft().longValue() != file.getModificationStamp())
 		{
-			if (file.getName().equals("globals.js"))
+			if (file.getName().equals(SolutionSerializer.GLOBALS_FILE))
 			{
 				globalScriptCache.remove(file);
 			}
