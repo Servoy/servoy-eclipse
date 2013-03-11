@@ -37,9 +37,9 @@ public class ServoyDynamicRuntimeType extends RSimpleType
 	 * @param typeSystem
 	 * @param declaration
 	 */
-	public ServoyDynamicRuntimeType(ITypeSystem typeSystem, IRTypeDeclaration declaration)
+	public ServoyDynamicRuntimeType(IRTypeDeclaration declaration)
 	{
-		super(typeSystem, declaration);
+		super(declaration);
 	}
 
 	/**
