@@ -36,9 +36,9 @@ public class ServoyDynamicMetaType extends DefaultMetaType
 	}
 
 	@Override
-	public IRType toRType(ITypeSystem typeSystem, IRTypeDeclaration declaration)
+	public IRType toRType(IRTypeDeclaration declaration)
 	{
-		return new ServoyDynamicRuntimeType(typeSystem, declaration);
+		return new ServoyDynamicRuntimeType(declaration);
 	}
 
 	@Override
