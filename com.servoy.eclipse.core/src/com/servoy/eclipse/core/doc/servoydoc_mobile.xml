@@ -3810,7 +3810,7 @@ databaseManager.saveData();
 Will throw an exception if anything went wrong when executing the query.
 Column types in the datasource are inferred from the query result or can be explicitly specified.
 
-Table filters on the involved tables in the query are applied.]]></description>
+Using this variation of createDataSourceByQuery any Tablefilter on the involved tables will be taken into account.]]></description>
           <summary><![CDATA[Performs a query and saves the result in a datasource.]]></summary>
           <sample><![CDATA[// select customer data for order 1234
 /** @type {QBSelect<db:/example_data/customers>} */
@@ -3851,7 +3851,7 @@ fs.loadAllRecords();]]></sample>
 Will throw an exception if anything went wrong when executing the query.
 Column types in the datasource are inferred from the query result or can be explicitly specified.
 
-Table filters on the involved tables in the query are applied.]]></description>
+Using this variation of createDataSourceByQuery any Tablefilter on the involved tables will be taken into account.]]></description>
           <summary><![CDATA[Performs a query and saves the result in a datasource.]]></summary>
           <sample><![CDATA[// select customer data for order 1234
 /** @type {QBSelect<db:/example_data/customers>} */
@@ -3894,7 +3894,9 @@ fs.loadAllRecords();]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[datasource containing the results of the query or null if the parameters are wrong.]]></return>
           <description><![CDATA[Performs a sql query on the specified server, saves the the result in a datasource.
 Will throw an exception if anything went wrong when executing the query.
-Column types in the datasource are inferred from the query result or can be explicitly specified.]]></description>
+Column types in the datasource are inferred from the query result or can be explicitly specified.
+
+Using this variation of createDataSourceByQuery any Tablefilter on the involved tables will be disregarded.]]></description>
           <summary><![CDATA[Performs a sql query on the specified server, saves the the result in a datasource.]]></summary>
           <sample><![CDATA[var query = 'select address, city, country  from customers';
 var uri = databaseManager.createDataSourceByQuery('mydata', 'example_data', query, null, 999);
@@ -3937,7 +3939,9 @@ fs.loadAllRecords();]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[datasource containing the results of the query or null if the parameters are wrong.]]></return>
           <description><![CDATA[Performs a sql query on the specified server, saves the the result in a datasource.
 Will throw an exception if anything went wrong when executing the query.
-Column types in the datasource are inferred from the query result or can be explicitly specified.]]></description>
+Column types in the datasource are inferred from the query result or can be explicitly specified.
+
+Using this variation of createDataSourceByQuery any Tablefilter on the involved tables will be disregarded.]]></description>
           <summary><![CDATA[Performs a sql query on the specified server, saves the the result in a datasource.]]></summary>
           <sample><![CDATA[var query = 'select address, city, country  from customers';
 var uri = databaseManager.createDataSourceByQuery('mydata', 'example_data', query, null, 999);
@@ -4123,7 +4127,7 @@ for( var i = 1 ; i <= dataset.getMaxRowIndex() ; i++ )
           <description><![CDATA[Performs a sql query with a query builder object.
 Will throw an exception if anything did go wrong when executing the query.
 
-Table filters on the involved tables in the query are applied.]]></description>
+Using this variation of getDataSetByQuery any Tablefilter on the involved tables will be taken into account.]]></description>
           <summary><![CDATA[Performs a sql query with a query builder object.]]></summary>
           <sample><![CDATA[// use the query froma foundset and add a condition
 /** @type {QBSelect<db:/example_data/orders>} */
@@ -4158,7 +4162,9 @@ databaseManager.getDataSetByQuery(q, max_returned_rows)]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet"><![CDATA[The JSDataSet containing the results of the query.]]></return>
           <description><![CDATA[Performs a sql query on the specified server, returns the result in a dataset.
-Will throw an exception if anything did go wrong when executing the query.]]></description>
+Will throw an exception if anything did go wrong when executing the query.
+
+Using this variation of getDataSetByQuery any Tablefilter on the involved tables will be disregarded.]]></description>
           <summary><![CDATA[Performs a sql query on the specified server, returns the result in a dataset.]]></summary>
           <sample><![CDATA[//finds duplicate records in a specified foundset
 var vQuery =" SELECT companiesid from companies where company_name IN (SELECT company_name from companies group bycompany_name having count(company_name)>1 )";
@@ -8705,6 +8711,17 @@ function onDragOver(event)
           <summary><![CDATA[returns the name of the form the element was placed on.]]></summary>
           <sample><![CDATA[forms[event.getFormName()].myFormMethod();]]></sample>
         </function>
+        <function clientSupport="wc,sc" name="getModifiers">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[an int which holds the modifiers as a bitset.]]></return>
+          <description><![CDATA[Returns the modifiers of the event, see JSDNDEvent.MODIFIER_XXXX for the modifiers that can be returned.]]></description>
+          <summary><![CDATA[Returns the modifiers of the event, see JSDNDEvent.]]></summary>
+          <sample><![CDATA[//test if the SHIFT modifier is used.
+if (event.getModifiers() & JSDNDEvent.MODIFIER_SHIFT)
+{
+	//do shift action
+}]]></sample>
+        </function>
         <function clientSupport="wc,sc" name="getRecord">
           <argumentsTypes/>
           <return type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.Record"><![CDATA[Record of the event]]></return>
@@ -8729,6 +8746,16 @@ var sourceDataProvider = source.getDataProviderID();]]></sample>
           <description><![CDATA[Returns the time the event occurred.]]></description>
           <summary><![CDATA[Returns the time the event occurred.]]></summary>
           <sample><![CDATA[event.getTimestamp();]]></sample>
+        </function>
+        <function clientSupport="wc,sc" name="getType">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[a String representing the type of this event.]]></return>
+          <description><![CDATA[returns the dnd event type see the JSDNDEvents constants what it can return.]]></description>
+          <summary><![CDATA[returns the dnd event type see the JSDNDEvents constants what it can return.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSDNDEvent.ONDROP) 
+{
+	// it's a drop
+}]]></sample>
         </function>
         <function clientSupport="wc,sc" name="getX">
           <argumentsTypes/>
