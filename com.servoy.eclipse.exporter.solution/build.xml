@@ -158,8 +158,6 @@
 			
 			<pathelement path="../servoy_shared/lib/slf4j-log4j.jar"/>
 			
-			<pathelement path="../servoy_shared/lib/wicket-calendar.jar"/>
-			
 			<pathelement path="../servoy_shared/lib/wicket-extentions.jar"/>
 			
 			<pathelement path="../servoy_shared/lib/wicket.jar"/>
@@ -197,6 +195,8 @@
 			<pathelement path="../servoy_shared/lib/xstream.jar"/>
 			
 			<pathelement path="../servoy_shared/lib/prompt.jar"/>
+			
+			<pathelement path="../servoy_shared/lib/wicket-calendar.jar"/>
 			
 			<pathelement path="../org.eclipse.dltk.javascript.rhino/bin/"/>
 			
@@ -237,9 +237,9 @@
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.wst.common.emfworkbench.integration_1.2.2.v201008242000.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.emf.edit_2.8.0.v20120917-0436.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.emf.ecore.change_2.8.0.v20120911-0500.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.parser_5.0.0.201302131257.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.core_5.0.0.201302131257.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.annotations_5.0.0.201302131257.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.parser_5.0.0.201303111059.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.core_5.0.0.201303111059.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.annotations_5.0.0.201303111059.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.antlr.runtime_3.0.0.v200803061811.jar"/>
 		</path>
 		<!-- compile the source code -->
