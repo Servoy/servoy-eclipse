@@ -69,10 +69,12 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	private static final int MAX_SCRIPT_CACHE_SIZE = Utils.getAsInteger(System.getProperty("servoy.script.cache.size", "300"));
 
 	private static final Map<IFile, SoftReference<Pair<Long, IValueCollection>>> scriptCache = new ConcurrentHashMap<IFile, SoftReference<Pair<Long, IValueCollection>>>();
+	private static final Map<IFile, SoftReference<Pair<Long, IValueCollection>>> globalScriptCache = new ConcurrentHashMap<IFile, SoftReference<Pair<Long, IValueCollection>>>();
 
 	public static void clear()
 	{
 		scriptCache.clear();
+		globalScriptCache.clear();
 	}
 
 	@SuppressWarnings("restriction")
@@ -276,16 +278,8 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			IResource resource = context.getModelElement().getResource();
 			if (resource != null && resource.getName().endsWith(SolutionSerializer.JS_FILE_EXTENSION))
 			{
-				SoftReference<Pair<Long, IValueCollection>> sr = scriptCache.get(resource);
-				Pair<Long, IValueCollection> pair = null;
-				if (sr != null)
-				{
-					pair = sr.get();
-					if (pair != null && pair.getLeft().longValue() != resource.getModificationStamp())
-					{
-						scriptCache.clear();
-					}
-				}
+				Pair<Long, IValueCollection> pair = getFromScriptCache(resource);
+				removeFromScriptCache(resource, pair);
 				// javascript file
 				FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 				if (fs != null)
@@ -343,15 +337,25 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		Solution[] modules = fs.getModules();
 		if (modules != null)
 		{
-			for (Solution module : modules)
+			// don't resolve all the globals scopes when filling one.
+			Boolean resolving = resolve.get();
+			resolve.set(Boolean.TRUE);
+			try
 			{
-				ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(module.getName());
-				IFile file = project.getProject().getFile(filename);
-				IValueCollection moduleCollection = getValueCollection(file);
-				if (moduleCollection != null)
+				for (Solution module : modules)
 				{
-					ValueCollectionFactory.copyInto(collection, moduleCollection);
+					ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(module.getName());
+					IFile file = project.getProject().getFile(filename);
+					IValueCollection moduleCollection = getValueCollection(file);
+					if (moduleCollection != null)
+					{
+						ValueCollectionFactory.copyInto(collection, moduleCollection);
+					}
 				}
+			}
+			finally
+			{
+				resolve.set(resolving);
 			}
 		}
 		return collection;
@@ -406,12 +410,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		{
 			try
 			{
-				SoftReference<Pair<Long, IValueCollection>> sr = scriptCache.get(file);
-				Pair<Long, IValueCollection> pair = null;
-				if (sr != null)
-				{
-					pair = sr.get();
-				}
+				Pair<Long, IValueCollection> pair = getFromScriptCache(file);
 				if (pair == null || pair.getLeft().longValue() != file.getModificationStamp())
 				{
 					Set<IFile> set = creatingCollection.get();
@@ -420,18 +419,19 @@ public class ValueCollectionProvider implements IMemberEvaluator
 						if (pair != null) return pair.getRight();
 						return null;
 					}
-					if (pair != null && pair.getLeft().longValue() != file.getModificationStamp())
+					removeFromScriptCache(file, pair);
+					boolean globalsFile = file.getName().equals("globals.js");
+					if (!globalsFile)
 					{
-						scriptCache.clear();
-					}
-					// if the current thread set size is 0 (first request, so not in recursion)
-					if (set.size() == 0)
-					{
-						// and the scriptCache size is bigger then the default 300 or the system property
-						if (scriptCache.size() > MAX_SCRIPT_CACHE_SIZE)
+						// if the current thread set size is 0 (first request, so not in recursion)
+						if (set.size() == 0)
 						{
-							// clear the cache to help the garbage collector.
-							scriptCache.clear();
+							// and the scriptCache size is bigger then the default 300 or the system property
+							if (scriptCache.size() > MAX_SCRIPT_CACHE_SIZE)
+							{
+								// clear the cache to help the garbage collector.
+								scriptCache.clear();
+							}
 						}
 					}
 					set.add(file);
@@ -446,9 +446,18 @@ public class ValueCollectionProvider implements IMemberEvaluator
 					{
 						collection = ValueCollectionFactory.createValueCollection(file, doResolve);
 						collection = ValueCollectionFactory.makeImmutable(collection);
-						scriptCache.put(
-							file,
-							new SoftReference<Pair<Long, IValueCollection>>(new Pair<Long, IValueCollection>(new Long(file.getModificationStamp()), collection)));
+						if (globalsFile)
+						{
+							globalScriptCache.put(file,
+								new SoftReference<Pair<Long, IValueCollection>>(new Pair<Long, IValueCollection>(new Long(file.getModificationStamp()),
+									collection)));
+						}
+						else
+						{
+							scriptCache.put(file,
+								new SoftReference<Pair<Long, IValueCollection>>(new Pair<Long, IValueCollection>(new Long(file.getModificationStamp()),
+									collection)));
+						}
 					}
 					finally
 					{
@@ -468,6 +477,43 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		}
 
 		return collection;
+	}
+
+	/**
+	 * @param resource
+	 * @return
+	 */
+	private static Pair<Long, IValueCollection> getFromScriptCache(IResource resource)
+	{
+		SoftReference<Pair<Long, IValueCollection>> sr = null;
+		if (resource.getName().equals("globals.js"))
+		{
+			sr = globalScriptCache.get(resource);
+		}
+		else
+		{
+			sr = scriptCache.get(resource);
+		}
+		return sr != null?sr.get():null;
+	}
+
+	/**
+	 * @param file
+	 * @param pair
+	 */
+	private static void removeFromScriptCache(IResource file, Pair<Long, IValueCollection> pair)
+	{
+		if (pair != null && pair.getLeft().longValue() != file.getModificationStamp())
+		{
+			if (file.getName().equals("globals.js"))
+			{
+				globalScriptCache.remove(file);
+			}
+			else
+			{
+				scriptCache.remove(file);
+			}
+		}
 	}
 
 	private static final ThreadLocal<Boolean> fullGlobalScope = new ThreadLocal<Boolean>()
