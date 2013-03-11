@@ -360,7 +360,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			finally
 			{
 				if (resolving != null) resolve.set(resolving);
-				resolve.remove();
+				else resolve.remove();
 			}
 		}
 		return collection;
