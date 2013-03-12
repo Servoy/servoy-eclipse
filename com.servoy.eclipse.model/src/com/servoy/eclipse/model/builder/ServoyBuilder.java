@@ -517,6 +517,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> SERVER_NOT_ACCESSIBLE_FIRST_OCCURENCE = new Pair<String, ProblemSeverity>(
 		"serverNotAccessibleFirstOccurence", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> CONSTANTS_USED = new Pair<String, ProblemSeverity>("constantsUsed", ProblemSeverity.ERROR); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> SERVER_MISSING_SCOPE = new Pair<String, ProblemSeverity>("severMissingScope", ProblemSeverity.WARNING); //$NON-NLS-1$
 
 	private SAXParserFactory parserFactory;
 	private final HashSet<String> referencedProjectsSet = new HashSet<String>();
@@ -1577,6 +1578,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				addDeserializeProblemMarkersIfNeeded(servoyProject);
 				refreshDBIMarkers();
 				checkPersistDuplication();
+				addScopesProblem(project);
 				addDriverProblemMarker(project);
 				servoyProject.getSolution().acceptVisitor(new IPersistVisitor()
 				{
@@ -3743,6 +3745,19 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			IResource file = getEclipseResourceFromJavaIO(entry.getKey(), servoyProject.getProject());
 			if (file == null) file = servoyProject.getProject();
 			addDeserializeProblemMarker(file, entry.getValue().getMessage(), servoyProject.getProject().getName());
+		}
+	}
+
+	private void addScopesProblem(IProject project)
+	{
+		ServoyProject activeProject = getServoyModel().getActiveProject();
+		if (activeProject != null && activeProject.getProject().getName().equals(project.getName()))
+		{
+			if (activeProject.getGlobalScopenames().size() == 0)
+			{
+				ServoyMarker mk = MarkerMessages.MissingScope.fill(activeProject.getSolutionMetaData().getName());
+				addMarker(project, mk.getType(), mk.getText(), -1, SERVER_MISSING_SCOPE, IMarker.PRIORITY_NORMAL, null, null);
+			}
 		}
 	}
 

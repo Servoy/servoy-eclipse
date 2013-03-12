@@ -58,6 +58,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.RepositorySettingsDeserializer;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
@@ -67,6 +68,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
+import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
@@ -147,6 +149,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					IProject newProject = ServoyModel.getWorkspace().getRoot().getProject(page1.getNewSolutionName());
 					newProject.create(null);
 					newProject.open(null);
+					newProject.getFile(SolutionSerializer.GLOBALS_FILE).create(Utils.getUTF8EncodedStream(""), true, null);
 					monitor.worked(1);
 
 					if (solution != null)

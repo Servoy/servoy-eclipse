@@ -93,7 +93,12 @@ public class DebugStarter implements IDebuggerStarter
 			ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 			if (activeProject != null && activeProject.getProject() != null)
 			{
-				IFile script = activeProject.getProject().getFile(SolutionSerializer.GLOBALS_FILE);
+				IFile script = getGlobalScopeFile(activeProject);
+				if (script == null)
+				{
+					ServoyLog.logError("Couldn't start the debugger because there was no global scope", null);
+					return false;
+				}
 				ILaunchConfigurationType configType = DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurationType(
 					JavaScriptLaunchConfigurationConstants.ID_JAVASCRIPT_SCRIPT);
 
@@ -113,7 +118,7 @@ public class DebugStarter implements IDebuggerStarter
 					}
 					else
 					{
-						ServoyLog.logError("Couldn't start the debugger because there was nog launch config", null);
+						ServoyLog.logError("Couldn't start the debugger because there was no launch config", null);
 						return false;
 					}
 				}
@@ -222,5 +227,21 @@ public class DebugStarter implements IDebuggerStarter
 	private static ILaunchManager getLaunchManager()
 	{
 		return DebugPlugin.getDefault().getLaunchManager();
+	}
+
+	public static IFile getGlobalScopeFile(ServoyProject project)
+	{
+		IFile script = project.getProject().getFile(SolutionSerializer.GLOBALS_FILE);
+		if (script.exists())
+		{
+			return script;
+		}
+		List<String> scopes = project.getGlobalScopenames();
+		if (scopes.size() > 0)
+		{
+			return project.getProject().getFile(scopes.get(0) + SolutionSerializer.JS_FILE_EXTENSION);
+		}
+		return null;
+
 	}
 }

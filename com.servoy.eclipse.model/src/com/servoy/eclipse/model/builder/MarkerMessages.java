@@ -453,7 +453,7 @@ public class MarkerMessages
 	 */
 	public static ServoyMarker ImageMediaNotSet = new ServoyMarker(
 		"Element in form \"{0}\" has a 'rolloverImageMedia' property while no 'imageMedia' property is set.", ServoyBuilder.MEDIA_MARKER_TYPE); //$NON-NLS-1$
-	
+
 	/**
 	 * The roll over imageand cursor is not working in Smart Client tableview/listview form.
 	 */
@@ -574,6 +574,9 @@ public class MarkerMessages
 		"Event parameter is passed to event method; make sure it is used with right type (change method signature).", ServoyBuilder.EVENT_METHOD_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker MissingDriver = new ServoyMarker("Server \"{0}\" has invalid/missing driver ( \"{1}\" ).", ServoyBuilder.MISSING_DRIVER); //$NON-NLS-1$
+
+	public static ServoyMarker MissingScope = new ServoyMarker(
+		"Solution \"{0}\" has no global scope defined, cannot start debug clients.", ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker MissingConverter = new ServoyMarker(
 		"Converter \"{0}\" has been configured on dataprovider \"{1}\" but cannot be found.", ServoyBuilder.MISSING_CONVERTER); //$NON-NLS-1$

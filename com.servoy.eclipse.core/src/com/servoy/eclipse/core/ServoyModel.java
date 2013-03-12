@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.core;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
@@ -2266,33 +2265,6 @@ public class ServoyModel extends AbstractServoyModel
 					}
 				});
 			}
-		}
-
-		// Always make sure globals.js exists
-		if (!project.getFile(SolutionSerializer.GLOBALS_FILE).exists())
-		{
-			WorkspaceJob wsjob = new WorkspaceJob("Create empty globals file")
-			{
-				@Override
-				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
-				{
-					IFile globalsFile = project.getFile(SolutionSerializer.GLOBALS_FILE);
-					try
-					{
-						if (!globalsFile.exists())
-						{
-							globalsFile.create(new ByteArrayInputStream(new byte[0]), true, null);
-						}
-					}
-					catch (CoreException e)
-					{
-						ServoyLog.logError("Could not create empty globals file " + globalsFile, e);
-					}
-					return Status.OK_STATUS;
-				}
-			};
-			wsjob.setUser(true);
-			wsjob.schedule();
 		}
 	}
 

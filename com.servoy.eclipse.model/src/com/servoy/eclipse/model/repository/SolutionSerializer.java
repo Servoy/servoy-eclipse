@@ -355,13 +355,6 @@ public class SolutionSerializer
 					}
 				}
 
-				//test if the globals js is created, else create one this is needed because debug needs to have 1 javascript file to be able to start.
-				String globals = getScriptPath(solution, false);
-				if (!fileAccess.exists(globals))
-				{
-					fileAccess.setUTF8Contents(globals, ""); //$NON-NLS-1$
-				}
-
 				//create the "solution_settings.obj" file
 				Pair<String, String> solutionPath = getFilePath(node, false);
 				String solutionFile = solutionPath.getLeft() + solutionPath.getRight();

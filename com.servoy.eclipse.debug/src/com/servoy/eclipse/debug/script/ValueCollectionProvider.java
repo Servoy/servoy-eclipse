@@ -350,10 +350,13 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				{
 					ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(module.getName());
 					IFile file = project.getProject().getFile(filename);
-					IValueCollection moduleCollection = getValueCollection(file);
-					if (moduleCollection != null)
+					if (file.exists())
 					{
-						ValueCollectionFactory.copyInto(collection, moduleCollection);
+						IValueCollection moduleCollection = getValueCollection(file);
+						if (moduleCollection != null)
+						{
+							ValueCollectionFactory.copyInto(collection, moduleCollection);
+						}
 					}
 				}
 			}

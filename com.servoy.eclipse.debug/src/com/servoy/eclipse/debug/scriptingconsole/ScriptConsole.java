@@ -62,6 +62,8 @@ import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.ClientState;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.scripting.GlobalScope;
@@ -146,6 +148,12 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 	public static Scriptable getScope(ClientState state, boolean create)
 	{
 		GlobalScope ss = state.getScriptEngine().getScopesScope().getGlobalScope(ScriptVariable.GLOBAL_SCOPE);
+		if (ss == null)
+		{
+			ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+			// this shouldn't throw an exception, if debugger is launched we must have at least a global scope
+			ss = state.getScriptEngine().getScopesScope().getGlobalScope(activeProject.getGlobalScopenames().get(0));
+		}
 		Scriptable scope = null;
 		if (ss.has(TEST_SCOPE, ss))
 		{

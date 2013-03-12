@@ -24,8 +24,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
 
@@ -95,5 +97,11 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 	protected void setSolutionAndModules(String mainSolutionName, Solution[] mods) throws RemoteException
 	{
 		super.setSolutionAndModules(mainSolutionName, filterModules(mainSolutionName, mods));
+	}
+
+	@Override
+	protected void addGlobalsScope(Map<String, Pair<String, IRootObject>> scopes)
+	{
+		//NOP
 	}
 }
