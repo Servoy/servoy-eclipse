@@ -251,7 +251,7 @@ public class ElementFactory
 		GraphicalComponent label = parent.createNewGraphicalComponent(new java.awt.Point(location == null ? 0 : location.x, location == null ? 0 : location.y));
 		label.setText(""); //$NON-NLS-1$
 		label.setImageMediaID(media.getID());
-		label.setTransparent(ImageLoader.hasAlpha(ii));
+		label.setTransparent(ImageLoader.imageHasAlpha(ii.getImage(), 0));
 		Dimension labeldim = new Dimension(ii.getIconWidth(), ii.getIconHeight());
 		if (labeldim.width < 10 || labeldim.height < 10)
 		{
