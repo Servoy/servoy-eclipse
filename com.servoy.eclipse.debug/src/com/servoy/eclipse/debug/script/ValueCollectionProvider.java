@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.IFile;
@@ -70,6 +71,8 @@ public class ValueCollectionProvider implements IMemberEvaluator
 
 	private static final Map<IFile, SoftReference<Pair<Long, IValueCollection>>> scriptCache = new ConcurrentHashMap<IFile, SoftReference<Pair<Long, IValueCollection>>>();
 	private static final Map<IFile, SoftReference<Pair<Long, IValueCollection>>> globalScriptCache = new ConcurrentHashMap<IFile, SoftReference<Pair<Long, IValueCollection>>>();
+	private static final WeakHashMap<Element, IValueCollection> elementToValueCollectionCache = new WeakHashMap<Element, IValueCollection>();
+	private static final IValueCollection EMPTY = ValueCollectionFactory.createValueCollection();
 
 	public static void clear()
 	{
@@ -80,6 +83,8 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	@SuppressWarnings("restriction")
 	public IValueCollection valueOf(ITypeInfoContext context, Element member)
 	{
+		IValueCollection cached = elementToValueCollectionCache.get(member);
+		if (cached != null) return cached == EMPTY ? null : cached;
 		Object attribute = member.getAttribute(TypeCreator.LAZY_VALUECOLLECTION);
 		if (attribute instanceof Form)
 		{
@@ -100,8 +105,10 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				{
 					((IValueProvider)collection).getValue().setAttribute(SUPER_SCOPE, Boolean.TRUE);
 				}
+				elementToValueCollectionCache.put(member, collection);
 				return collection;
 			}
+			elementToValueCollectionCache.put(member, EMPTY);
 			return null;
 		}
 
@@ -151,6 +158,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 							IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(SolutionSerializer.getScriptPath(tableNode, false)));
 							ValueCollectionFactory.copyInto(valueCollection, getValueCollection(file));
 						}
+						elementToValueCollectionCache.put(member, valueCollection);
 						return valueCollection;
 					}
 				}
@@ -181,6 +189,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 
 								if (globalsValueCollection == null)
 								{
+									elementToValueCollectionCache.put(member, EMPTY);
 									return null;
 								}
 
@@ -193,6 +202,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 									ValueCollectionProvider.getGlobalModulesValueCollection(editingFlattenedSolution, fileName, collection);
 								}
 								// scopes other than globals are not merged
+								elementToValueCollectionCache.put(member, collection);
 								return collection;
 							}
 						}
@@ -200,7 +210,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				}
 			}
 		}
-
+		elementToValueCollectionCache.put(member, EMPTY);
 		return null;
 	}
 
@@ -436,6 +446,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 							{
 								// clear the cache to help the garbage collector.
 								scriptCache.clear();
+								elementToValueCollectionCache.clear();
 							}
 						}
 					}
