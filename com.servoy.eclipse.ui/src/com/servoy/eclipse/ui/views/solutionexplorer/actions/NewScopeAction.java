@@ -39,6 +39,7 @@ import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
@@ -88,7 +89,7 @@ public class NewScopeAction extends Action implements ISelectionChangedListener
 				return;
 			}
 
-			String scopeName = askScopeName(viewer.getViewSite().getShell(), "");
+			String scopeName = askScopeName(viewer.getViewSite().getShell(), "", (ServoyProject)project.getRealObject());
 			if (scopeName == null)
 			{
 				return;
@@ -112,7 +113,7 @@ public class NewScopeAction extends Action implements ISelectionChangedListener
 		}
 	}
 
-	public static String askScopeName(Shell shell, final String initialValue)
+	public static String askScopeName(Shell shell, final String initialValue, final ServoyProject project)
 	{
 		InputDialog nameDialog = new InputDialog(shell, "Create new global scope", "New scope name", initialValue, new IInputValidator()
 		{
@@ -126,7 +127,15 @@ public class NewScopeAction extends Action implements ISelectionChangedListener
 				{
 					return "Invalid scope name";
 				}
-				Collection<String> scopeNames = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getScopeNames();
+				Collection<String> scopeNames = null;
+				if (ScriptVariable.GLOBAL_SCOPE.equals(newText))
+				{
+					scopeNames = project.getGlobalScopenames();
+				}
+				else
+				{
+					scopeNames = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getScopeNames();
+				}
 				for (String scopeName : scopeNames)
 				{
 					if (scopeName.equals(newText) || (initialValue.equals("") && scopeName.equalsIgnoreCase(newText)) ||

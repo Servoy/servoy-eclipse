@@ -80,7 +80,7 @@ public class RenameScopeAction extends Action implements ISelectionChangedListen
 			Pair<Solution, String> pair = (Pair<Solution, String>)node.getRealObject();
 			String oldname = pair.getRight();
 
-			String scopeName = NewScopeAction.askScopeName(viewer.getViewSite().getShell(), oldname);
+			String scopeName = NewScopeAction.askScopeName(viewer.getViewSite().getShell(), oldname, (ServoyProject)project.getRealObject());
 			if (scopeName == null || scopeName.equals(oldname))
 			{
 				return;

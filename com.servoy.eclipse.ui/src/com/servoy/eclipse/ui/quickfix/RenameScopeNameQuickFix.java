@@ -68,14 +68,15 @@ public class RenameScopeNameQuickFix implements IMarkerResolution2
 	 */
 	public void run(IMarker marker)
 	{
+		ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(resource.getProject().getName());
+
 		String oldname = resource.getName().substring(0, resource.getName().length() - SolutionSerializer.JS_FILE_EXTENSION.length());
-		String scopeName = NewScopeAction.askScopeName(Display.getDefault().getActiveShell(), oldname);
+		String scopeName = NewScopeAction.askScopeName(Display.getDefault().getActiveShell(), oldname, project);
 		if (scopeName == null || scopeName.equals(oldname))
 		{
 			return;
 		}
 
-		ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(resource.getProject().getName());
 		Solution solution = project.getSolution();
 
 		WorkspaceFileAccess wsfa = new WorkspaceFileAccess(project.getProject().getWorkspace());
