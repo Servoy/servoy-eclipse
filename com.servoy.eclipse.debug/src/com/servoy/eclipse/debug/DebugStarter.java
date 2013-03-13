@@ -19,11 +19,13 @@ package com.servoy.eclipse.debug;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
@@ -44,12 +46,14 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.IDebuggerStarter;
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.debug.actions.IDebuggerStartListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
+import com.servoy.j2db.persistence.Form;
 
 /**
  * @author jcompagner
@@ -93,10 +97,11 @@ public class DebugStarter implements IDebuggerStarter
 			ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 			if (activeProject != null && activeProject.getProject() != null)
 			{
-				IFile script = getGlobalScopeFile(activeProject);
+				IFile script = getJavascriptFile(activeProject);
 				if (script == null)
 				{
-					ServoyLog.logError("Couldn't start the debugger because there was no global scope", null);
+					// shouldn't happen
+					ServoyLog.logError("Couldn't start the debugger because there was no javascript file found", null);
 					return false;
 				}
 				ILaunchConfigurationType configType = DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurationType(
@@ -229,7 +234,7 @@ public class DebugStarter implements IDebuggerStarter
 		return DebugPlugin.getDefault().getLaunchManager();
 	}
 
-	public static IFile getGlobalScopeFile(ServoyProject project)
+	private static IFile getJavascriptFile(ServoyProject project)
 	{
 		IFile script = project.getProject().getFile(SolutionSerializer.GLOBALS_FILE);
 		if (script.exists())
@@ -241,7 +246,13 @@ public class DebugStarter implements IDebuggerStarter
 		{
 			return project.getProject().getFile(scopes.get(0) + SolutionSerializer.JS_FILE_EXTENSION);
 		}
-		return null;
+		Iterator<Form> it = project.getEditingFlattenedSolution().getForms(false);
+		if (it.hasNext())
+		{
+			String scriptPath = SolutionSerializer.getScriptPath(it.next(), false);
+			script = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
+		}
+		return script;
 
 	}
 }

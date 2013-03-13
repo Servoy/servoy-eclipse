@@ -575,9 +575,6 @@ public class MarkerMessages
 
 	public static ServoyMarker MissingDriver = new ServoyMarker("Server \"{0}\" has invalid/missing driver ( \"{1}\" ).", ServoyBuilder.MISSING_DRIVER); //$NON-NLS-1$
 
-	public static ServoyMarker MissingScope = new ServoyMarker(
-		"Solution \"{0}\" has no global scope defined, cannot start debug clients.", ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE); //$NON-NLS-1$
-
 	public static ServoyMarker MissingConverter = new ServoyMarker(
 		"Converter \"{0}\" has been configured on dataprovider \"{1}\" but cannot be found.", ServoyBuilder.MISSING_CONVERTER); //$NON-NLS-1$
 

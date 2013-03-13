@@ -65,9 +65,11 @@ import org.mozilla.javascript.Scriptable;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.ClientState;
+import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.scripting.GlobalScope;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.util.Pair;
 
 /**
  * @author jcompagner
@@ -145,15 +147,39 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 		return page;
 	}
 
+	public static Pair<String, IRootObject> getGlobalScope()
+	{
+		// get globals scope from main solution or from modules or any global scope
+		ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+		if (servoyProject != null)
+		{
+			Pair<String, IRootObject> selectedScope = null;
+
+			for (Pair<String, IRootObject> currentScope : servoyProject.getEditingFlattenedSolution().getScopes())
+			{
+				if (selectedScope == null) selectedScope = currentScope;
+				if (ScriptVariable.GLOBAL_SCOPE.equals(currentScope.getLeft()))
+				{
+					if (servoyProject.getSolution().getName().equals(currentScope.getRight().getName()))
+					{
+						return currentScope;
+					}
+					else
+					{
+						selectedScope = currentScope;
+					}
+				}
+			}
+			return selectedScope;
+		}
+		return null;
+	}
+
 	public static Scriptable getScope(ClientState state, boolean create)
 	{
-		GlobalScope ss = state.getScriptEngine().getScopesScope().getGlobalScope(ScriptVariable.GLOBAL_SCOPE);
-		if (ss == null)
-		{
-			ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-			// this shouldn't throw an exception, if debugger is launched we must have at least a global scope
-			ss = state.getScriptEngine().getScopesScope().getGlobalScope(activeProject.getGlobalScopenames().get(0));
-		}
+		Pair<String, IRootObject> scopePair = getGlobalScope();
+		String scopeName = scopePair != null ? scopePair.getLeft() : ScriptVariable.GLOBAL_SCOPE;
+		GlobalScope ss = state.getScriptEngine().getScopesScope().getGlobalScope(scopeName);
 		Scriptable scope = null;
 		if (ss.has(TEST_SCOPE, ss))
 		{

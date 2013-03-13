@@ -57,9 +57,12 @@ import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateException;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.debug.DebugStarter;
 import com.servoy.eclipse.debug.script.ValueCollectionProvider;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.j2db.ClientState;
+import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.util.Pair;
 
 /**
  * @author jcompagner
@@ -115,128 +118,133 @@ final class ContentAssistProcessor implements IContentAssistProcessor
 
 			String solutionName = selectedClient.getSolutionName();
 			IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(solutionName);
-			final IFile file = DebugStarter.getGlobalScopeFile(ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName));
-			if (file != null)
+			Pair<String, IRootObject> scopePair = ScriptConsole.getGlobalScope();
+			if (scopePair != null)
 			{
-				final IModelElement modelElement = DLTKCore.create(file);
-
-				IModuleSource source = new IModuleSource()
+				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(scopePair.getRight().getName());
+				if (servoyProject != null)
 				{
+					final IFile file = servoyProject.getProject().getFile(scopePair.getLeft() + SolutionSerializer.JS_FILE_EXTENSION);
+					final IModelElement modelElement = DLTKCore.create(file);
 
-					public String getFileName()
+					IModuleSource source = new IModuleSource()
 					{
-						return file.getName();
-					}
 
-					public String getSourceContents()
-					{
-						return input;
-					}
-
-					public IModelElement getModelElement()
-					{
-						return modelElement;
-					}
-
-					public char[] getContentsAsCharArray()
-					{
-						return input.toCharArray();
-					}
-				};
-
-				ScriptCompletionProposalCollector collector = new ScriptCompletionProposalCollector(DLTKCore.create(project))
-				{
-					@Override
-					protected String getNatureId()
-					{
-						return JavaScriptLanguageToolkit.getDefault().getNatureId();
-					}
-				};
-				engine.setRequestor(collector);
-				int caretPosition = ((ScriptConsoleViewer)viewer).getCaretPosition();
-				// a bit of a hack to get full globals completion.
-				ValueCollectionProvider.setGenerateFullGlobalCollection(Boolean.TRUE);
-				try
-				{
-					caretPosition = caretPosition - ((ScriptConsoleViewer)viewer).getCommandLineOffset();
-					if (sb != null) caretPosition += sb.length();
-					engine.complete(source, caretPosition, 0);
-				}
-				finally
-				{
-					ValueCollectionProvider.setGenerateFullGlobalCollection(Boolean.FALSE);
-				}
-				ArrayList<ICompletionProposal> list = new ArrayList<ICompletionProposal>();
-				String prefix = extractPrefix(viewer, offset);
-				IRegion region = new Region(offset - prefix.length(), prefix.length());
-				if (isValidLocation(viewer, region))
-				{
-					ScriptTemplateContextType contextType = new ScriptTemplateContextType()
-					{
-						/*
-						 * (non-Javadoc)
-						 * 
-						 * @see org.eclipse.dltk.ui.templates.ScriptTemplateContextType#createContext(org.eclipse.jface.text.IDocument, int, int,
-						 * org.eclipse.dltk.core.ISourceModule)
-						 */
-						@Override
-						public ScriptTemplateContext createContext(IDocument document, int completionPosition, int length, ISourceModule sourceModule)
+						public String getFileName()
 						{
-							return new ScriptTemplateContext(this, document, completionPosition, length, sourceModule)
-							{
-								/*
-								 * (non-Javadoc)
-								 * 
-								 * @see org.eclipse.dltk.ui.templates.ScriptTemplateContext#evaluate(org.eclipse.jface.text.templates.Template)
-								 */
-								@Override
-								public TemplateBuffer evaluate(Template template) throws BadLocationException, TemplateException
-								{
-									if (!canEvaluate(template))
-									{
-										return null;
-									}
-									Template copy = template;
-									final String[] lines = TextUtils.splitLines(copy.getPattern());
-									if (lines.length > 1)
-									{
-										StringBuilder sb1 = new StringBuilder();
-										for (String line : lines)
-										{
-											sb1.append(line);
-										}
-										copy = new Template(copy.getName(), copy.getDescription(), copy.getContextTypeId(), sb1.toString(),
-											copy.isAutoInsertable());
-									}
-									return super.evaluate(copy);
-								}
-							};
+							return file.getName();
+						}
+
+						public String getSourceContents()
+						{
+							return input;
+						}
+
+						public IModelElement getModelElement()
+						{
+							return modelElement;
+						}
+
+						public char[] getContentsAsCharArray()
+						{
+							return input.toCharArray();
 						}
 					};
-					TemplateContext context = contextType.createContext(viewer.getDocument(), offset - prefix.length(), prefix.length(),
-						(ISourceModule)modelElement);
-					IDLTKUILanguageToolkit languageToolkit = DLTKUILanguageManager.getLanguageToolkit(JavaScriptLanguageToolkit.getDefault().getNatureId());
-					Template[] templates = languageToolkit.getEditorTemplates().getTemplateStore().getTemplates();
-					for (Template template : templates)
+
+					ScriptCompletionProposalCollector collector = new ScriptCompletionProposalCollector(DLTKCore.create(project))
 					{
-						if (template.getName().startsWith(prefix))
+						@Override
+						protected String getNatureId()
 						{
-							list.add(new ScriptTemplateProposal(template, context, region, DLTKPluginImages.get(DLTKPluginImages.IMG_OBJS_TEMPLATE), 1));
+							return JavaScriptLanguageToolkit.getDefault().getNatureId();
+						}
+					};
+					engine.setRequestor(collector);
+					int caretPosition = ((ScriptConsoleViewer)viewer).getCaretPosition();
+					// a bit of a hack to get full globals completion.
+					ValueCollectionProvider.setGenerateFullGlobalCollection(Boolean.TRUE);
+					try
+					{
+						caretPosition = caretPosition - ((ScriptConsoleViewer)viewer).getCommandLineOffset();
+						if (sb != null) caretPosition += sb.length();
+						engine.complete(source, caretPosition, 0);
+					}
+					finally
+					{
+						ValueCollectionProvider.setGenerateFullGlobalCollection(Boolean.FALSE);
+					}
+					ArrayList<ICompletionProposal> list = new ArrayList<ICompletionProposal>();
+					String prefix = extractPrefix(viewer, offset);
+					IRegion region = new Region(offset - prefix.length(), prefix.length());
+					if (isValidLocation(viewer, region))
+					{
+						ScriptTemplateContextType contextType = new ScriptTemplateContextType()
+						{
+							/*
+							 * (non-Javadoc)
+							 * 
+							 * @see org.eclipse.dltk.ui.templates.ScriptTemplateContextType#createContext(org.eclipse.jface.text.IDocument, int, int,
+							 * org.eclipse.dltk.core.ISourceModule)
+							 */
+							@Override
+							public ScriptTemplateContext createContext(IDocument document, int completionPosition, int length, ISourceModule sourceModule)
+							{
+								return new ScriptTemplateContext(this, document, completionPosition, length, sourceModule)
+								{
+									/*
+									 * (non-Javadoc)
+									 * 
+									 * @see org.eclipse.dltk.ui.templates.ScriptTemplateContext#evaluate(org.eclipse.jface.text.templates.Template)
+									 */
+									@Override
+									public TemplateBuffer evaluate(Template template) throws BadLocationException, TemplateException
+									{
+										if (!canEvaluate(template))
+										{
+											return null;
+										}
+										Template copy = template;
+										final String[] lines = TextUtils.splitLines(copy.getPattern());
+										if (lines.length > 1)
+										{
+											StringBuilder sb1 = new StringBuilder();
+											for (String line : lines)
+											{
+												sb1.append(line);
+											}
+											copy = new Template(copy.getName(), copy.getDescription(), copy.getContextTypeId(), sb1.toString(),
+												copy.isAutoInsertable());
+										}
+										return super.evaluate(copy);
+									}
+								};
+							}
+						};
+						TemplateContext context = contextType.createContext(viewer.getDocument(), offset - prefix.length(), prefix.length(),
+							(ISourceModule)modelElement);
+						IDLTKUILanguageToolkit languageToolkit = DLTKUILanguageManager.getLanguageToolkit(JavaScriptLanguageToolkit.getDefault().getNatureId());
+						Template[] templates = languageToolkit.getEditorTemplates().getTemplateStore().getTemplates();
+						for (Template template : templates)
+						{
+							if (template.getName().startsWith(prefix))
+							{
+								list.add(new ScriptTemplateProposal(template, context, region, DLTKPluginImages.get(DLTKPluginImages.IMG_OBJS_TEMPLATE), 1));
+							}
 						}
 					}
-				}
 
-				IScriptCompletionProposal[] scriptCompletionProposals = collector.getScriptCompletionProposals();
+					IScriptCompletionProposal[] scriptCompletionProposals = collector.getScriptCompletionProposals();
 
-				int commandLineStart = ((ScriptConsoleViewer)viewer).getCommandLineOffset() - (sb != null ? sb.length() : 0);
-				for (IScriptCompletionProposal scriptCompletionProposal : scriptCompletionProposals)
-				{
-					int replacementOffset = ((AbstractScriptCompletionProposal)scriptCompletionProposal).getReplacementOffset();
-					((AbstractScriptCompletionProposal)scriptCompletionProposal).setReplacementOffset(commandLineStart + replacementOffset);
+					int commandLineStart = ((ScriptConsoleViewer)viewer).getCommandLineOffset() - (sb != null ? sb.length() : 0);
+					for (IScriptCompletionProposal scriptCompletionProposal : scriptCompletionProposals)
+					{
+						int replacementOffset = ((AbstractScriptCompletionProposal)scriptCompletionProposal).getReplacementOffset();
+						((AbstractScriptCompletionProposal)scriptCompletionProposal).setReplacementOffset(commandLineStart + replacementOffset);
+					}
+					list.addAll(Arrays.asList(scriptCompletionProposals));
+					Collections.sort(list, new CompletionProposalComparator());
+					return list.toArray(new ICompletionProposal[list.size()]);
 				}
-				list.addAll(Arrays.asList(scriptCompletionProposals));
-				Collections.sort(list, new CompletionProposalComparator());
-				return list.toArray(new ICompletionProposal[list.size()]);
 			}
 		}
 		return new ICompletionProposal[0];

@@ -19,7 +19,6 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.List;
 
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.jface.action.Action;
@@ -30,7 +29,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -87,30 +85,6 @@ public class DeleteScopeAction extends Action implements ISelectionChangedListen
 	@Override
 	public void run()
 	{
-		if (ServoyModelFinder.getServoyModel().getActiveProject() != null)
-		{
-			List<String> globalScopes = ServoyModelFinder.getServoyModel().getActiveProject().getGlobalScopenames();
-			if (globalScopes.size() >= 1)
-			{
-				for (SimpleUserNode node : viewer.getSelectedTreeNodes())
-				{
-					SimpleUserNode project = node.getAncestorOfType(ServoyProject.class);
-					if (project == null || !project.getName().equals(ServoyModelFinder.getServoyModel().getActiveProject().getSolution().getName()))
-					{
-						continue;
-					}
-					Pair<Solution, String> pair = (Pair<Solution, String>)node.getRealObject();
-					String scopeName = pair.getRight();
-					globalScopes.remove(scopeName);
-				}
-				if (globalScopes.size() == 0)
-				{
-					MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Cannot delete scope",
-						"Active solution must have at least one global scope, otherwise debug clients cannot be started.");
-					return;
-				}
-			}
-		}
 		if (!MessageDialog.openConfirm(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getText(), "Are you sure you want to delete?")) //$NON-NLS-1$
 		{
 			return;
