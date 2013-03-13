@@ -179,13 +179,16 @@ public class ValueCollectionProvider implements IMemberEvaluator
 								IFile file = project.getProject().getFile(fileName);
 								IValueCollection globalsValueCollection = ValueCollectionProvider.getValueCollection(file);
 
-								if (globalsValueCollection == null)
+								if (globalsValueCollection == null && !fileName.equals(SolutionSerializer.GLOBALS_FILE))
 								{
 									return null;
 								}
 
 								IValueCollection collection = ValueCollectionFactory.createScopeValueCollection();
-								ValueCollectionFactory.copyInto(collection, globalsValueCollection);
+								if (globalsValueCollection != null)
+								{
+									ValueCollectionFactory.copyInto(collection, globalsValueCollection);
+								}
 
 								// Currently only the old globals scope is merged with entries from modules
 								if (ScriptVariable.GLOBAL_SCOPE.equals(scopeName))
