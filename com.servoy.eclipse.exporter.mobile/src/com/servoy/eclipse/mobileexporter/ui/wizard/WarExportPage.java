@@ -275,29 +275,18 @@ public class WarExportPage extends WizardPage
 				if (!outputFolder.endsWith(File.pathSeparator)) outputFolder = outputFolder + File.separator;
 
 				EditorUtil.saveDirtyEditors(getShell(), true);
-				if (serverDir.equalsIgnoreCase(outputFolder))
+				boolean isLocalDeploy = serverDir.equalsIgnoreCase(outputFolder);
+				String exportMessage = doExport(isLocalDeploy && finishPage.isOpenUrl() ? 3000 : 0);
+				if (isLocalDeploy)
 				{
 					finishPage.setApplicationURL(
 						new StringBuilder("http://localhost:").append(ApplicationServerSingleton.get().getWebServerPort()).append("/").append( //$NON-NLS-1$ //$NON-NLS-2$
 							mobileExporter.getSolutionName()).append("/index.html").toString(), "Open WAR application in browser at finish.", false); //$NON-NLS-1$ //$NON-NLS-2$
 					finishPage.createControl(WarExportPage.this.getControl().getParent());
-					finishPage.setTextMessage(doExport());
+					finishPage.setTextMessage(exportMessage);
 					finishPage.getControl().getParent().layout(true);
-
-					if (finishPage.isOpenUrl())
-					{
-						// wait for the deploy of the new WAR file
-						try
-						{
-							Thread.sleep(3000);
-						}
-						catch (InterruptedException ex)
-						{
-							ServoyLog.logError(ex);
-						}
-					}
 				}
-				else finishPage.setTextMessage(doExport());
+				else finishPage.setTextMessage(exportMessage);
 				return finishPage;
 			}
 			else
@@ -334,11 +323,28 @@ public class WarExportPage extends WizardPage
 		return null;
 	}
 
-	private String doExport()
+	private String doExport(final long delayAfterExport)
 	{
 		File outputFile = new File(getOutputFolder());
 		mobileExporter.setOutputFolder(outputFile);
-		mobileExporter.doExport(false);
+
+		IRunnableWithProgress job = new IRunnableWithProgress()
+		{
+			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+			{
+				mobileExporter.doExport(false);
+				if (delayAfterExport > 0) Thread.sleep(delayAfterExport);
+			}
+		};
+		try
+		{
+			getContainer().run(true, false, job);
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+		}
+
 
 		getDialogSettings().put(WarExportPage.OUTPUT_PATH_KEY, getOutputFolder());
 		getDialogSettings().put(ExportOptionsPage.SERVER_URL_KEY, mobileExporter.getServerURL());
