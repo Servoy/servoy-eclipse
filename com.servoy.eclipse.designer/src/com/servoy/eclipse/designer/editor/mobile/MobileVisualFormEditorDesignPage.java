@@ -28,7 +28,7 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.IPaletteFactory;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileFormGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileFormGraphicalRootEditPart;
-import com.servoy.eclipse.designer.editor.palette.PaletteItemTransferDropTargetListener;
+import com.servoy.eclipse.designer.editor.mobile.palette.MobilePaletteItemTransferDropTargetListener;
 
 /**
  * Design page for mobile form editor.
@@ -87,7 +87,7 @@ public class MobileVisualFormEditorDesignPage extends BaseVisualFormEditorDesign
 
 		if (getEditorPart().getForm() != null)
 		{
-			viewer.addDropTargetListener(new PaletteItemTransferDropTargetListener(getGraphicalViewer(), getEditorPart()));
+			viewer.addDropTargetListener(new MobilePaletteItemTransferDropTargetListener(getGraphicalViewer(), getEditorPart()));
 		}
 
 		// configure the context menu provider
