@@ -20,6 +20,8 @@ package com.servoy.eclipse.designer.editor.mobile.editparts;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -50,6 +52,10 @@ public class IconWithRoundBackground implements Icon
 
 	public void paintIcon(Component c, Graphics g, int x, int y)
 	{
+		if (g instanceof Graphics2D)
+		{
+			((Graphics2D)g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		}
 		g.setColor(color);
 		g.fillOval(x, y, getIconWidth(), getIconHeight());
 		icon.paintIcon(c, g, x + 1, y + 1);

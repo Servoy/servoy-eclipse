@@ -17,12 +17,15 @@
 
 package com.servoy.eclipse.designer.editor.mobile.editparts;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.Shape;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -241,7 +244,13 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 										Border compBorder = ((JComponent)comp).getBorder();
 										if (compBorder instanceof RoundedBorder)
 										{
-											graphics.setClip(((RoundedBorder)compBorder).createRoundedShape(width, height));
+											// fake soft clipping
+											Shape clip = ((RoundedBorder)compBorder).createRoundedShape(width, height);
+											((Graphics2D)graphics).setComposite(AlphaComposite.Src);
+											((Graphics2D)graphics).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+											graphics.setColor(Color.WHITE);
+											((Graphics2D)graphics).fill(clip);
+											((Graphics2D)graphics).setComposite(AlphaComposite.SrcAtop);
 											return;
 										}
 									}
