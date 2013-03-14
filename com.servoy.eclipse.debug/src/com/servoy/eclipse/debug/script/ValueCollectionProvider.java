@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.IFile;
@@ -38,9 +39,13 @@ import org.eclipse.dltk.javascript.typeinference.IValueReference;
 import org.eclipse.dltk.javascript.typeinference.ValueCollectionFactory;
 import org.eclipse.dltk.javascript.typeinfo.IMemberEvaluator;
 import org.eclipse.dltk.javascript.typeinfo.IModelBuilder.IMember;
+import org.eclipse.dltk.javascript.typeinfo.IRSimpleType;
+import org.eclipse.dltk.javascript.typeinfo.IRType;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.model.Element;
+import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
+import org.eclipse.dltk.javascript.typeinfo.model.Property;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.Visibility;
 
@@ -70,16 +75,51 @@ public class ValueCollectionProvider implements IMemberEvaluator
 
 	private static final Map<IFile, SoftReference<Pair<Long, IValueCollection>>> scriptCache = new ConcurrentHashMap<IFile, SoftReference<Pair<Long, IValueCollection>>>();
 	private static final Map<IFile, SoftReference<Pair<Long, IValueCollection>>> globalScriptCache = new ConcurrentHashMap<IFile, SoftReference<Pair<Long, IValueCollection>>>();
+	private static final WeakHashMap<Type, IValueCollection> propertyToValueCollectionCache = new WeakHashMap<Type, IValueCollection>();
+	private static final WeakHashMap<Type, IValueCollection> typeToValueCollectionCache = new WeakHashMap<Type, IValueCollection>();
+	private static final IValueCollection EMPTY = ValueCollectionFactory.createValueCollection();
 
 	public static void clear()
 	{
 		scriptCache.clear();
 		globalScriptCache.clear();
+		propertyToValueCollectionCache.clear();
+		typeToValueCollectionCache.clear();
 	}
 
 	@SuppressWarnings("restriction")
 	public IValueCollection valueOf(ITypeInfoContext context, Element member)
 	{
+		IValueCollection cached = null;
+		Type memberType = null;
+		if (member instanceof Member)
+		{
+			JSType type = ((Member)member).getType();
+			if (type != null)
+			{
+				IRType irType = context.contextualize(type);
+				if (irType instanceof IRSimpleType)
+				{
+					memberType = ((IRSimpleType)irType).getTarget();
+					if (member instanceof Property)
+					{
+						cached = propertyToValueCollectionCache.get(memberType);
+					}
+					else
+					{
+						cached = typeToValueCollectionCache.get(memberType);
+					}
+				}
+			}
+		}
+		else if (member instanceof Type)
+		{
+			cached = typeToValueCollectionCache.get(member);
+		}
+		if (cached != null)
+		{
+			return cached == EMPTY ? null : cached;
+		}
 		Object attribute = member.getAttribute(TypeCreator.LAZY_VALUECOLLECTION);
 		if (attribute instanceof Form)
 		{
@@ -100,8 +140,10 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				{
 					((IValueProvider)collection).getValue().setAttribute(SUPER_SCOPE, Boolean.TRUE);
 				}
+				addToCache(member, memberType, collection);
 				return collection;
 			}
+			addToCache(member, memberType, EMPTY);
 			return null;
 		}
 
@@ -151,6 +193,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 							IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(SolutionSerializer.getScriptPath(tableNode, false)));
 							ValueCollectionFactory.copyInto(valueCollection, getValueCollection(file));
 						}
+						addToCache(member, memberType, valueCollection);
 						return valueCollection;
 					}
 				}
@@ -181,6 +224,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 
 								if (globalsValueCollection == null && !fileName.equals(SolutionSerializer.GLOBALS_FILE))
 								{
+									addToCache(member, memberType, EMPTY);
 									return null;
 								}
 
@@ -196,6 +240,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 									ValueCollectionProvider.getGlobalModulesValueCollection(editingFlattenedSolution, fileName, collection);
 								}
 								// scopes other than globals are not merged
+								addToCache(member, memberType, collection);
 								return collection;
 							}
 						}
@@ -203,8 +248,34 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				}
 			}
 		}
-
+		addToCache(member, memberType, EMPTY);
 		return null;
+	}
+
+	/**
+	 * @param member
+	 * @param memberType
+	 */
+	private void addToCache(Element member, Type memberType, IValueCollection collection)
+	{
+		if (resolve.get() == null)
+		{
+			if (memberType != null)
+			{
+				if (member instanceof Property)
+				{
+					propertyToValueCollectionCache.put(memberType, collection);
+				}
+				else
+				{
+					typeToValueCollectionCache.put(memberType, collection);
+				}
+			}
+			else if (member instanceof Type)
+			{
+				typeToValueCollectionCache.put((Type)member, EMPTY);
+			}
+		}
 	}
 
 	/**
@@ -442,6 +513,8 @@ public class ValueCollectionProvider implements IMemberEvaluator
 							{
 								// clear the cache to help the garbage collector.
 								scriptCache.clear();
+								propertyToValueCollectionCache.clear();
+								typeToValueCollectionCache.clear();
 							}
 						}
 					}
