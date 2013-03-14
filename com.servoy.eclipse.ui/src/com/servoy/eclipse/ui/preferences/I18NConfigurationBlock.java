@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.osgi.service.prefs.BackingStoreException;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
@@ -74,6 +75,7 @@ public class I18NConfigurationBlock extends AbstractConfigurationBlock
 	private Combo defaultI18NServer;
 	private Combo defaultI18NTable;
 	private Button btnCreateI18NTable;
+	private Button btnRecreateFormsOnI18NChange;
 
 	private UserTypingMonitorListener typingListener;
 
@@ -183,6 +185,28 @@ public class I18NConfigurationBlock extends AbstractConfigurationBlock
 
 			}
 		});
+
+		btnRecreateFormsOnI18NChange = new Button(composite, SWT.CHECK);
+		GridData btnRecreateFormsData = new GridData(GridData.HORIZONTAL_ALIGN_END);
+		btnRecreateFormsData.verticalIndent = 5;
+		btnRecreateFormsOnI18NChange.setLayoutData(btnRecreateFormsData);
+		btnRecreateFormsOnI18NChange.setText("Recreate forms in debug clients on i18n change"); //$NON-NLS-1$
+		btnRecreateFormsOnI18NChange.addListener(SWT.Selection, new Listener()
+		{
+			public void handleEvent(Event event)
+			{
+				Activator.getEclipsePreferences().putBoolean(Activator.RECREATE_ON_I18N_CHANGE_PREFERENCE, btnRecreateFormsOnI18NChange.getSelection());
+				try
+				{
+					Activator.getEclipsePreferences().flush();
+				}
+				catch (BackingStoreException e)
+				{
+				}
+			}
+		});
+		btnRecreateFormsOnI18NChange.setSelection(Activator.getEclipsePreferences().getBoolean(Activator.RECREATE_ON_I18N_CHANGE_PREFERENCE, true));
+
 
 		// Prepare the array of locales. We do this only once, here, not in initializeFields,
 		// which can be invoked several times.
