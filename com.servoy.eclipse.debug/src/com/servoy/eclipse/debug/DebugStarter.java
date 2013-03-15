@@ -54,6 +54,7 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author jcompagner
@@ -247,10 +248,27 @@ public class DebugStarter implements IDebuggerStarter
 			return project.getProject().getFile(scopes.get(0) + SolutionSerializer.JS_FILE_EXTENSION);
 		}
 		Iterator<Form> it = project.getEditingFlattenedSolution().getForms(false);
-		if (it.hasNext())
+		while (it.hasNext())
 		{
 			String scriptPath = SolutionSerializer.getScriptPath(it.next(), false);
 			script = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
+			if (script.exists())
+			{
+				return script;
+			}
+			else if (!it.hasNext())
+			{
+				// create the form js
+				try
+				{
+					script.create(Utils.getUTF8EncodedStream(""), true, null);
+					return script;
+				}
+				catch (Exception ex)
+				{
+					ServoyLog.logError(ex);
+				}
+			}
 		}
 		return script;
 
