@@ -17,7 +17,6 @@
 
 package com.servoy.eclipse.designer.editor.mobile.editparts;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -27,6 +26,7 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.IPersistChangeListener;
@@ -129,7 +129,7 @@ public class MobileListGraphicalEditPart extends AbstractGraphicalEditPart imple
 	 */
 	protected void updateFigure(IFigure fig)
 	{
-		fig.setBackgroundColor(MobileListElementEditpart.getGcColor(getModel().button, application, editorPart.getForm(), Color.white));
+		fig.setBackgroundColor(getListBackground());
 	}
 
 	@Override
@@ -146,10 +146,15 @@ public class MobileListGraphicalEditPart extends AbstractGraphicalEditPart imple
 	}
 
 
+	private Color getListBackground()
+	{
+		return MobileListElementEditpart.getGcColor(getModel().button, application, editorPart.getForm(), java.awt.Color.white);
+	}
+
 	@Override
 	protected EditPart createChild(Object child)
 	{
-		return new MobileListElementEditpart(application, editorPart, (Pair<BaseComponent, MobileListElementType>)child);
+		return new MobileListElementEditpart(application, editorPart, (Pair<BaseComponent, MobileListElementType>)child, getListBackground());
 	}
 
 	@Override
