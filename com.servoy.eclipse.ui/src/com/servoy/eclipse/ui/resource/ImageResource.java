@@ -40,7 +40,7 @@ public class ImageResource
 {
 	public static ImageResource INSTANCE = new ImageResource();
 
-	private final Map<Pair<ImageDescriptor, RGB>, Image> imageCacheDescriptor = new HashMap<Pair<ImageDescriptor, RGB>, Image>();
+	private final Map<Pair<Pair<ImageDescriptor, RGB>, RGB>, Image> imageCacheDescriptor = new HashMap<Pair<Pair<ImageDescriptor, RGB>, RGB>, Image>();
 
 	public Image getImage(ImageDescriptor imageDescriptor)
 	{
@@ -51,9 +51,9 @@ public class ImageResource
 	{
 		if (imageDescriptor == null) return null;
 
-		Pair<ImageDescriptor, RGB> key = new Pair<ImageDescriptor, RGB>(imageDescriptor, rgb);
+		Pair<Pair<ImageDescriptor, RGB>, RGB> key = new Pair<Pair<ImageDescriptor, RGB>, RGB>(new Pair<ImageDescriptor, RGB>(imageDescriptor, rgb), background);
 		Image image = imageCacheDescriptor.get(key);
-		if (image == null || background != null)
+		if (image == null)
 		{
 			if (rgb == null)
 			{
@@ -65,7 +65,7 @@ public class ImageResource
 				Image plainImage = getImage(imageDescriptor);
 
 				ImageData imageData = plainImage.getImageData().scaledTo(plainImage.getBounds().width + 2, plainImage.getBounds().height + 2);
-				RGB rgb2 = background != null ? background : new RGB(rgb.blue - 10, rgb.green - 10, rgb.red - 10);
+				RGB rgb2 = background != null ? background : new RGB(255, 255, 255);
 				imageData.transparentPixel = imageData.palette.getPixel(rgb2);
 				image = new Image(Display.getCurrent(), imageData);
 
