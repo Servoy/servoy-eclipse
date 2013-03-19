@@ -22,7 +22,7 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ISupportHTMLToolTipText;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.scripting.annotations.AnnotationManager;
+import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 
 /**
  * Universal class to use in tree nodes and as list item.
@@ -72,7 +72,7 @@ public class SimpleUserNode
 		this._realObject = realObject;
 		storeContainingPersistIfNeeded(_realObject);
 		this.icon = icon;
-		this.visibleInMobile = AnnotationManager.getInstance().isMobileAnnotationPresent(realType);
+		this.visibleInMobile = AnnotationManagerReflection.getInstance().isAnnotatedForMobile(realType);
 	}
 
 	public SimpleUserNode(String displayName, UserNodeType type, Object realObject, IPersist containingPersist, Object icon)
@@ -235,7 +235,9 @@ public class SimpleUserNode
 		if (children != null)
 		{
 			for (SimpleUserNode un : children)
+			{
 				un.hide();
+			}
 		}
 	}
 
@@ -246,7 +248,9 @@ public class SimpleUserNode
 			if (children != null)
 			{
 				for (SimpleUserNode un : children)
+				{
 					un.unhide();
+				}
 			}
 			hidden = false;
 		}

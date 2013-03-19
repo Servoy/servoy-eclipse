@@ -120,7 +120,7 @@ import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
-import com.servoy.j2db.scripting.annotations.AnnotationManager;
+import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.util.Debug;
@@ -1430,7 +1430,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 					// this field is a constant
 					Field field = (Field)ijm.getField((String)element, true);
-					if (AnnotationManager.getInstance().isMobileAnnotationPresent(field))
+					if (AnnotationManagerReflection.getInstance().isAnnotatedForMobile(field))
 					{
 						node.setIsVisibleInMobile(true);
 					}
@@ -1481,10 +1481,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				codePrefix = elementName;
 			}
-			
+
 			UserNode node = new UserNode(name, actionType, new FieldFeedback(name, codePrefix, resolver, scriptObject, ijm), real, pIcon);
 			if ((bp instanceof JavaMembers.BeanProperty) &&
-				AnnotationManager.getInstance().isMobileAnnotationPresent(((JavaMembers.BeanProperty)bp).getGetter(), originalClass))
+				AnnotationManagerReflection.getInstance().isAnnotatedForMobile(((JavaMembers.BeanProperty)bp).getGetter(), originalClass))
 			{
 				node.setIsVisibleInMobile(true);
 			}
@@ -1567,7 +1567,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				SimpleUserNode node = new UserNode(displayName, actionType, new MethodFeedback(id, parameterTypes, codePrefix, resolver, scriptObject, njm),
 					(Object)null, functionIcon);
 
-				if (AnnotationManager.getInstance().isMobileAnnotationPresent(method.method(), originalClass)) node.setIsVisibleInMobile(true);
+				if (AnnotationManagerReflection.getInstance().isAnnotatedForMobile(method.method(), originalClass)) node.setIsVisibleInMobile(true);
 
 				dlm.add(node);
 			}

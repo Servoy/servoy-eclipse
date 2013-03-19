@@ -178,7 +178,7 @@ import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
-import com.servoy.j2db.scripting.annotations.AnnotationManager;
+import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 import com.servoy.j2db.scripting.annotations.JSReadonlyProperty;
 import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
@@ -1081,14 +1081,11 @@ public class TypeCreator extends TypeCache
 								method.setVisible(false);
 							}
 
-							if (isServoyMobileSolutionType())
+							if (isServoyMobileSolutionType() &&
+								(mobileAllowedTypes.get(typeName) == null || !AnnotationManagerReflection.getInstance().isAnnotatedForMobile(
+									memberbox[i].method(), scriptObjectClass)))
 							{
-								boolean visible = mobileAllowedTypes.get(typeName) != null ? AnnotationManager.getInstance().isMobileAnnotationPresent(
-									memberbox[i].method(), scriptObjectClass) : false;
-								if (!visible)
-								{
-									method.setVisibility(Visibility.INTERNAL);
-								}
+								method.setVisibility(Visibility.INTERNAL);
 							}
 
 							method.setDescription(getDoc(name, scriptObjectClass, parameterTypes)); // TODO name should be of parent.
@@ -1198,7 +1195,7 @@ public class TypeCreator extends TypeCache
 						boolean readOnly = false;
 						if (object instanceof BeanProperty)
 						{
-							readOnly = AnnotationManager.getInstance().isAnnotationPresent(((BeanProperty)object).getGetter(), scriptObjectClass,
+							readOnly = AnnotationManagerReflection.getInstance().isAnnotationPresent(((BeanProperty)object).getGetter(), scriptObjectClass,
 								JSReadonlyProperty.class);
 						}
 
@@ -1211,13 +1208,13 @@ public class TypeCreator extends TypeCache
 							boolean visibility = false;
 							if (object instanceof BeanProperty)
 							{
-								visibility = mobileAllowedTypes.get(typeName) != null ? AnnotationManager.getInstance().isMobileAnnotationPresent(
-									((BeanProperty)object).getGetter(), scriptObjectClass) : false;
+								visibility = mobileAllowedTypes.get(typeName) != null &&
+									AnnotationManagerReflection.getInstance().isAnnotatedForMobile(((BeanProperty)object).getGetter(), scriptObjectClass);
 							}
 							else if (object instanceof Field && descriptor == CONSTANT)
 							{
-								visibility = mobileAllowedTypes.get(typeName) != null ? AnnotationManager.getInstance().isMobileAnnotationPresent(
-									((Field)object)) : false;
+								visibility = mobileAllowedTypes.get(typeName) != null &&
+									AnnotationManagerReflection.getInstance().isAnnotatedForMobile(((Field)object));
 							}
 							if (!visibility)
 							{
@@ -1326,7 +1323,7 @@ public class TypeCreator extends TypeCache
 	public final void addType(String name, Class< ? > cls)
 	{
 		classTypes.put(name, cls);
-		mobileAllowedTypes.put(name, Boolean.valueOf(AnnotationManager.getInstance().isMobileAnnotationPresent(cls)));
+		mobileAllowedTypes.put(name, Boolean.valueOf(AnnotationManagerReflection.getInstance().isAnnotatedForMobile(cls)));
 	}
 
 	protected void addAnonymousClassType(String name, Class< ? > cls)
@@ -1334,7 +1331,7 @@ public class TypeCreator extends TypeCache
 		if (!classTypes.containsKey(name) && !scopeTypes.containsKey(name) && !BASE_TYPES.contains(name))
 		{
 			anonymousClassTypes.put(name, cls);
-			mobileAllowedTypes.put(name, Boolean.valueOf(AnnotationManager.getInstance().isMobileAnnotationPresent(cls)));
+			mobileAllowedTypes.put(name, Boolean.valueOf(AnnotationManagerReflection.getInstance().isAnnotatedForMobile(cls)));
 		}
 	}
 
@@ -2375,7 +2372,7 @@ public class TypeCreator extends TypeCache
 					addAnonymousClassType("Plugin<" + clientPlugin.getName() + '>', scriptObject.getClass());
 					property.setType(getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'));
 
-					if (isServoyMobileSolutionType() && !AnnotationManager.getInstance().isMobileAnnotationPresent(scriptObject.getClass()))
+					if (isServoyMobileSolutionType() && !AnnotationManagerReflection.getInstance().isAnnotatedForMobile(scriptObject.getClass()))
 					{
 						property.setVisibility(Visibility.INTERNAL);
 					}

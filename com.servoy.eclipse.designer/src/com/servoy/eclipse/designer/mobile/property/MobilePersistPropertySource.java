@@ -21,7 +21,6 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.base.persistence.IMobileProperties;
-import com.servoy.base.scripting.annotations.ServoyMobile;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.property.CheckboxPropertyDescriptor;
@@ -43,7 +42,7 @@ import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
-import com.servoy.j2db.scripting.annotations.AnnotationManager;
+import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -150,10 +149,9 @@ public class MobilePersistPropertySource extends PersistPropertySource
 	@Override
 	protected boolean shouldShow(PropertyDescriptorWrapper propertyDescriptor) throws RepositoryException
 	{
-		if (!AnnotationManager.getInstance().isAnnotationPresent(propertyDescriptor.propertyDescriptor.getReadMethod(), getPersist().getClass(),
-			ServoyMobile.class))
+		if (!AnnotationManagerReflection.getInstance().isAnnotatedForMobile(propertyDescriptor.propertyDescriptor.getReadMethod(), getPersist().getClass()))
 		{
-			// do not show the property if the read-method is not flagged
+			// do not show the property if the read-method is not flagged for mobile client
 			return false;
 		}
 

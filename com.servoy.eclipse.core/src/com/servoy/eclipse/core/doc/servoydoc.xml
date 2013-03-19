@@ -2839,6 +2839,1136 @@ form.navigator = SM_DEFAULTS.NONE; // Hide the navigator on the form.]]></sample
       </constants>
     </object>
     <object publicName="DataException" qualifiedName="com.servoy.j2db.dataprocessing.DataException">
+      <constants>
+        <constant name="ABSTRACT_FORM">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for ABSTRACT_FORM.
+
+This code is used when a form, that cannot be created, is shown (for example, a form without parts).]]></description>
+          <summary><![CDATA[Exception code for ABSTRACT_FORM.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="ACQUIRE_LOCK_FAILURE">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for ACQUIRE_LOCK_FAILURE.
+
+This code is used when a database failed to lock a row or table.]]></description>
+          <summary><![CDATA[Exception code for ACQUIRE_LOCK_FAILURE.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="BAD_SQL_SYNTAX">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for BAD_SQL_SYNTAX.
+
+This code is used when a database exception is recognized as an sql syntax error.]]></description>
+          <summary><![CDATA[Exception code for BAD_SQL_SYNTAX.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="CLIENT_NOT_AUTHORIZED">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for CLIENT_NOT_AUTHORIZED.
+
+This code is used when an client performs an action that requires the user to be logged in and the user has not logged in yet.]]></description>
+          <summary><![CDATA[Exception code for CLIENT_NOT_AUTHORIZED.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="DATA_ACCESS_RESOURCE_FAILURE">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for DATA_ACCESS_RESOURCE_FAILURE.
+
+This code is used when a database exception received an error accessing storage devices.]]></description>
+          <summary><![CDATA[Exception code for DATA_ACCESS_RESOURCE_FAILURE.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="DATA_INTEGRITY_VIOLATION">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for DATA_INTEGRITY_VIOLATION.
+
+This code is used when a database exception is recognized as an integrity exception (like constraint violation).]]></description>
+          <summary><![CDATA[Exception code for DATA_INTEGRITY_VIOLATION.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="DEADLOCK">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for DEADLOCK.
+
+This code is used when a deadlock is detected by the database.]]></description>
+          <summary><![CDATA[Exception code for DEADLOCK.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="DELETE_NOT_GRANTED">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for DELETE_NOT_GRANTED.
+
+This code is used when a record deletion was rejected by a pre-delete Servoy trigger.]]></description>
+          <summary><![CDATA[Exception code for DELETE_NOT_GRANTED.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="EXECUTE_PROGRAM_FAILED">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for EXECUTE_PROGRAM_FAILED.
+
+This code is used when an external program was not executed correctly.]]></description>
+          <summary><![CDATA[Exception code for EXECUTE_PROGRAM_FAILED.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="INCORRECT_LOGIN">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for INCORRECT_LOGIN.
+
+This code is used when the user enters invalid credentials.]]></description>
+          <summary><![CDATA[Exception code for INCORRECT_LOGIN.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="INVALID_INPUT">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for INVALID_INPUT.
+
+This code is used when the user enters data that could not be validated.]]></description>
+          <summary><![CDATA[Exception code for INVALID_INPUT.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant deprecated="true" name="INVALID_INPUT_FORMAT">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for INVALID_INPUT_FORMAT.
+
+This code is not used.]]></description>
+          <summary><![CDATA[Exception code for INVALID_INPUT_FORMAT.]]></summary>
+          <deprecated><![CDATA[This code is not used]]></deprecated>
+          <sample/>
+        </constant>
+        <constant name="INVALID_RESULTSET_ACCESS">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for INVALID_RESULTSET_ACCESS.
+
+This code is used when a data is requested that is not selected in the sql.]]></description>
+          <summary><![CDATA[Exception code for INVALID_RESULTSET_ACCESS.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="MAINTENANCE_MODE">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for MAINTENANCE_MODE.
+
+This code is used when a client could not be registered with the server because the server is in maintenance mode.]]></description>
+          <summary><![CDATA[Exception code for MAINTENANCE_MODE.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="NO_ACCESS">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for NO_ACCESS.
+
+This code is used when a user wants to view data and this is disallowed by security settings.]]></description>
+          <summary><![CDATA[Exception code for NO_ACCESS.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="NO_CREATE_ACCESS">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for NO_CREATE_ACCESS.
+
+This code is used when a user wants to create new records and this is disallowed by security settings.]]></description>
+          <summary><![CDATA[Exception code for NO_CREATE_ACCESS.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="NO_DELETE_ACCESS">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for NO_DELETE_ACCESS.
+
+This code is used when a user wants to delete data and this is disallowed by security settings.]]></description>
+          <summary><![CDATA[Exception code for NO_DELETE_ACCESS.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="NO_LICENSE">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for NO_LICENSE.
+
+This code is used when a client could not be registered with the server because of license limitations.]]></description>
+          <summary><![CDATA[Exception code for NO_LICENSE.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="NO_MODIFY_ACCESS">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for NO_MODIFY_ACCESS.
+
+This code is used when a user wants to update data and this is disallowed by security settings.]]></description>
+          <summary><![CDATA[Exception code for NO_MODIFY_ACCESS.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="NO_PARENT_DELETE_WITH_RELATED_RECORDS">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for NO_PARENT_DELETE_WITH_RELATED_RECORDS.
+
+This code is used when a record could not be deleted because a non-empty relation exists for the record that does not allow parent delete when having related records.]]></description>
+          <summary><![CDATA[Exception code for NO_PARENT_DELETE_WITH_RELATED_RECORDS.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="NO_RELATED_CREATE_ACCESS">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for NO_RELATED_CREATE_ACCESS.
+
+This code is used when a user wants to create new related records and this is disallowed by security settings.]]></description>
+          <summary><![CDATA[Exception code for NO_RELATED_CREATE_ACCESS.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="PERMISSION_DENIED">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for PERMISSION_DENIED.
+
+This code is used when a database exception is recognized as a authorization error.]]></description>
+          <summary><![CDATA[Exception code for PERMISSION_DENIED.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="RECORD_LOCKED">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for RECORD_LOCKED.
+
+This code is used when a record could not be updated or deleted because it is locked by another client.]]></description>
+          <summary><![CDATA[Exception code for RECORD_LOCKED.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="RECORD_VALIDATION_FAILED">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for RECORD_VALIDATION_FAILED.
+
+This code is used when a record update/insert was rejected by a pre-update/insert Servoy trigger.]]></description>
+          <summary><![CDATA[Exception code for RECORD_VALIDATION_FAILED.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="SAVE_FAILED">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for SAVE_FAILED.
+
+This code is used when a javascript exception occurred during saving data to the database.]]></description>
+          <summary><![CDATA[Exception code for SAVE_FAILED.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="UNEXPECTED_UPDATE_COUNT">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for UNEXPECTED_UPDATE_COUNT.
+
+This code is used when a data could not be deleted or updated when expected (for example 
+when a record was deleted outside Servoy and a Servoy client wants to update the record).]]></description>
+          <summary><![CDATA[Exception code for UNEXPECTED_UPDATE_COUNT.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="UNKNOWN_DATABASE_EXCEPTION">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for UNKNOWN_DATABASE_EXCEPTION.
+
+This code is used when an unrecognized database exception has occurred.]]></description>
+          <summary><![CDATA[Exception code for UNKNOWN_DATABASE_EXCEPTION.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+      </constants>
       <functions>
         <function name="getErrorCode">
           <argumentsTypes/>
@@ -22253,12 +23383,9 @@ Operator: lessThan]]></description>
       <properties>
         <property name="parent">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
-          <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
-          <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
-	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
-	foundset.loadRecords(query)]]></sample>
+          <description><![CDATA[Get query builder parent.]]></description>
+          <summary><![CDATA[Get query builder parent.]]></summary>
+          <sample/>
         </property>
         <property name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
@@ -22795,12 +23922,9 @@ foundset.loadRecords(query);]]></sample>
       <properties>
         <property name="parent">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
-          <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
-          <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
-	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
-	foundset.loadRecords(query)]]></sample>
+          <description><![CDATA[Get query builder parent.]]></description>
+          <summary><![CDATA[Get query builder parent.]]></summary>
+          <sample/>
         </property>
         <property name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
@@ -23182,10 +24306,7 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
-	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
@@ -23253,12 +24374,9 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
         </property>
         <property name="parent">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
-          <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
-          <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
-	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
-	foundset.loadRecords(query)]]></sample>
+          <description><![CDATA[Get query builder parent.]]></description>
+          <summary><![CDATA[Get query builder parent.]]></summary>
+          <sample/>
         </property>
         <property name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
@@ -23609,10 +24727,7 @@ The alias may be of the main table or any level deep joined table.]]></descripti
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
-	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
@@ -23642,10 +24757,7 @@ The alias may be of the main table or any level deep joined table.]]></descripti
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
-	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
@@ -30091,6 +31203,15 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             <parameter name="y" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[the Y coordinate of the element in pixels.]]></description>
             </parameter>
+          </parameters>
+        </function>
+        <function deprecated="true" name="setRecordIndex" undocumented="true">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <parameters>
+            <parameter name="i" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           </parameters>
         </function>
         <function name="setScroll">
