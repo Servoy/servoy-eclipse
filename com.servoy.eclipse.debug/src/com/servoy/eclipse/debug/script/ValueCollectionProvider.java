@@ -270,7 +270,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			}
 			else if (member instanceof Type)
 			{
-				typeToValueCollectionCache.put((Type)member, EMPTY);
+				typeToValueCollectionCache.put((Type)member, collection);
 			}
 		}
 	}
