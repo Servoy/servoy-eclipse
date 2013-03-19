@@ -29,6 +29,7 @@ import javax.swing.SwingUtilities;
 
 import org.eclipse.swt.graphics.Image;
 
+import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.Activator;
@@ -418,7 +419,8 @@ public class ElementUtil
 
 		if (persist instanceof Portal)
 		{
-			if (((Portal)persist).getCustomMobileProperties() != null)
+			if (((Portal)persist).getCustomMobileProperties() != null &&
+				Boolean.TRUE.equals(((Portal)persist).getCustomMobileProperties().get(IMobileProperties.LIST_COMPONENT.propertyName)))
 			{
 				return IScriptInsetListComponentMethods.class;
 			}
