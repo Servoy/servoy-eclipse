@@ -184,6 +184,7 @@ import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.ui.IScriptAccordionPanelMethods;
 import com.servoy.j2db.ui.IScriptDataLabelMethods;
+import com.servoy.j2db.ui.IScriptInsetListComponentMethods;
 import com.servoy.j2db.ui.IScriptPortalComponentMethods;
 import com.servoy.j2db.ui.IScriptScriptLabelMethods;
 import com.servoy.j2db.ui.IScriptSplitPaneMethods;
@@ -3100,6 +3101,8 @@ public class TypeCreator extends TypeCache
 			addType("RuntimeSplitPane", IScriptSplitPaneMethods.class);
 			typeNames.put(IScriptPortalComponentMethods.class.getSimpleName(), "RuntimePortal");
 			addType("RuntimePortal", IScriptPortalComponentMethods.class);
+			typeNames.put(IScriptInsetListComponentMethods.class.getSimpleName(), "RuntimeInsetList");
+			addType("RuntimeInsetList", IScriptInsetListComponentMethods.class);
 			typeNames.put(IRuntimeListBox.class.getSimpleName(), "RuntimeListBox");
 			addType("RuntimeListBox", IRuntimeListBox.class);
 			typeNames.put(IScriptAccordionPanelMethods.class.getSimpleName(), "RuntimeAccordionPanel");

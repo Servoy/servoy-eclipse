@@ -67,6 +67,7 @@ import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.ui.IScriptAccordionPanelMethods;
 import com.servoy.j2db.ui.IScriptDataLabelMethods;
+import com.servoy.j2db.ui.IScriptInsetListComponentMethods;
 import com.servoy.j2db.ui.IScriptPortalComponentMethods;
 import com.servoy.j2db.ui.IScriptScriptLabelMethods;
 import com.servoy.j2db.ui.IScriptSplitPaneMethods;
@@ -417,7 +418,14 @@ public class ElementUtil
 
 		if (persist instanceof Portal)
 		{
-			return IScriptPortalComponentMethods.class;
+			if (((Portal)persist).getCustomMobileProperties() != null)
+			{
+				return IScriptInsetListComponentMethods.class;
+			}
+			else
+			{
+				return IScriptPortalComponentMethods.class;
+			}
 		}
 
 		if (persist instanceof RectShape)
