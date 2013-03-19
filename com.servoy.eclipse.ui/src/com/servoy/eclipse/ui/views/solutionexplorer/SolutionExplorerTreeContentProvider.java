@@ -1050,15 +1050,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			return;
 		}
 
-		PlatformSimpleUserNode currentForm = new PlatformSimpleUserNode(Messages.TreeStrings_currentcontroller, UserNodeType.CURRENT_FORM, null,
-			uiActivator.loadImageFromBundle("formula.gif")); //$NON-NLS-1$
-		if (solutionOfCalculation != null) currentForm.hide();
-		currentForm.parent = parent;
-
 		// property Solution.SCOPE_NAMES is maintained by ServoyModel based on global js file names
 		String[] scopeNames = solution.getRuntimeProperty(Solution.SCOPE_NAMES);
 		List<PlatformSimpleUserNode> nodes = new ArrayList<PlatformSimpleUserNode>(scopeNames == null ? 1 : (scopeNames.length + 1));
-		nodes.add(currentForm);
 		if (scopeNames != null) // when refreshScopes has not been called yet
 		{
 			for (String scopeName : scopeNames)

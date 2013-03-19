@@ -115,6 +115,7 @@ public class ElementResolver implements IElementResolver
 		noneCalcNames.add("databaseManager");
 
 		deprecated.add("alldataproviders");
+		deprecated.add("currentcontroller");
 	}
 
 

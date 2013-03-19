@@ -6602,7 +6602,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
 // when creating many records in a loop do a batch save on an interval as every 10 records (to save on memory and roundtrips)
 // for (var recordIndex = 1; recordIndex <= 5000; recordIndex++) 
 // {
-//		currentcontroller.newRecord();
+//		foundset.newRecord();
 //		someColumn = recordIndex;
 //		anotherColumn = "Index is: " + recordIndex;
 //		if (recordIndex % 10 == 0) databaseManager.saveData();
@@ -6625,7 +6625,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
 // when creating many records in a loop do a batch save on an interval as every 10 records (to save on memory and roundtrips)
 // for (var recordIndex = 1; recordIndex <= 5000; recordIndex++) 
 // {
-//		currentcontroller.newRecord();
+//		foundset.newRecord();
 //		someColumn = recordIndex;
 //		anotherColumn = "Index is: " + recordIndex;
 //		if (recordIndex % 10 == 0) databaseManager.saveData();
@@ -6653,7 +6653,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
 // when creating many records in a loop do a batch save on an interval as every 10 records (to save on memory and roundtrips)
 // for (var recordIndex = 1; recordIndex <= 5000; recordIndex++) 
 // {
-//		currentcontroller.newRecord();
+//		foundset.newRecord();
 //		someColumn = recordIndex;
 //		anotherColumn = "Index is: " + recordIndex;
 //		if (recordIndex % 10 == 0) databaseManager.saveData();
@@ -7135,10 +7135,11 @@ application.output("There are " + allVarNames.length + " global variables.");
 for (var i=0; i<allVarNames.length; i++)
 	application.output(allVarNames[i]);]]></sample>
         </property>
-        <property name="currentcontroller">
+        <property deprecated="true" name="currentcontroller">
           <return type="com.servoy.j2db.FormController$JSForm" typecode="com.servoy.j2db.FormController$JSForm"/>
           <description><![CDATA[Get the controller of the top level form in the currently active dialog.]]></description>
           <summary><![CDATA[Get the controller of the top level form in the currently active dialog.]]></summary>
+          <deprecated><![CDATA[use forms.myform.controller instead, currentcontroller usage can be confusing when using multiple windows]]></deprecated>
           <sample><![CDATA[application.output("Current controller is: " + currentcontroller.getName());]]></sample>
         </property>
       </properties>
@@ -20971,6 +20972,12 @@ myWindow.show(forms.myForm);]]></sample>
         </constant>
       </constants>
       <properties>
+        <property name="currentcontroller">
+          <return type="com.servoy.j2db.FormController$JSForm" typecode="com.servoy.j2db.FormController$JSForm"/>
+          <description><![CDATA[Get the current controller from the window/dialog.]]></description>
+          <summary><![CDATA[Get the current controller from the window/dialog.]]></summary>
+          <sample><![CDATA[var formName = application.getWindow('test').currentcontroller.getName();]]></sample>
+        </property>
         <property name="resizable">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <description><![CDATA[Gets/Sets whether or not this window can be resized by the user (default true).]]></description>
@@ -41363,7 +41370,7 @@ myForm.newTextField('dataProviderNameHere', 140, 20, 140,20)]]></sample>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"><![CDATA[a JSMethod object]]></return>
           <description><![CDATA[Creates a new global method with the specified code in a scope.]]></description>
           <summary><![CDATA[Creates a new global method with the specified code in a scope.]]></summary>
-          <sample><![CDATA[var method = solutionModel.newGlobalMethod('globals', 'function myglobalmethod(){currentcontroller.newRecord()}')]]></sample>
+          <sample><![CDATA[var method = solutionModel.newGlobalMethod('globals', 'function myglobalmethod(){foundset.newRecord()}')]]></sample>
           <parameters>
             <parameter name="scopeName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the scope in which the method is created]]></description>
@@ -41723,7 +41730,7 @@ var image2 = solutionModel.newMedia('image2.jpg',bytes2);
 var bytes3 = plugins.file.readFile('D:/Imgs/image3.jpg');
 var image3 = solutionModel.newMedia('image3.jpg',bytes3);
 
-var f = solutionModel.newForm("newForm",currentcontroller.getDataSource(),null,false,500,350);
+var f = solutionModel.newForm("newForm",databaseManager.getDataSource('example_data', 'orders'),null,false,500,350);
 var l = f.newLabel('', 20, 70, 300, 200);
 l.imageMedia = image1;
 l.borderType =  solutionModel.createLineBorder(4,'#ff0000');
