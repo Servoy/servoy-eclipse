@@ -76,6 +76,7 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 	private static final String ELEMENTS_RADIOBUTTONS_ID = "radio buttons";
 	private static final String ELEMENTS_PASSWORD_ID = "password";
 	private static final String ELEMENTS_LABEL_ID = "label";
+	private static final String ELEMENTS_BEAN_ID = "bean";
 
 	private static final String[] ELEMENTS_IDS = new String[] {
 	/* */ELEMENTS_TEXT_FIELD_ID
@@ -85,6 +86,7 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 	/* */, ELEMENTS_RADIOBUTTONS_ID
 	/* */, ELEMENTS_PASSWORD_ID
 	/* */, ELEMENTS_LABEL_ID
+	/* */, ELEMENTS_BEAN_ID
 	/* */};
 
 	private static final String LISTS_ID = "lists";
@@ -293,6 +295,12 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 		{
 			icon = Activator.loadImageDescriptorFromBundle("mobile/label.png");
 			requestType = VisualFormEditor.REQ_PLACE_LABEL;
+		}
+
+		else if (ELEMENTS_BEAN_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("mobile/bean.png");
+			requestType = VisualFormEditor.REQ_PLACE_BEAN;
 		}
 
 		else

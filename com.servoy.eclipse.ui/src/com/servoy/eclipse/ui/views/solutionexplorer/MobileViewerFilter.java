@@ -65,7 +65,7 @@ public class MobileViewerFilter extends ViewerFilter
 			if (sun.isVisibleInMobile()) return true;
 			else
 			{
-				if (sun.getRealType() == UserNodeType.MEDIA || sun.getRealType() == UserNodeType.TEMPLATES || sun.getRealType() == UserNodeType.STYLES ||
+				if (sun.getRealType() == UserNodeType.TEMPLATES || sun.getRealType() == UserNodeType.STYLES ||
 					sun.getRealType() == UserNodeType.USER_GROUP_SECURITY)
 				{
 					return false;
@@ -98,10 +98,11 @@ public class MobileViewerFilter extends ViewerFilter
 				((SimpleUserNode)node).getRealType() == UserNodeType.TABLE_COLUMNS_ITEM ||
 				((SimpleUserNode)node).getRealType() == UserNodeType.CALCULATIONS_ITEM ||
 				((SimpleUserNode)node).getRealType() == UserNodeType.GLOBAL_VARIABLE_ITEM ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.FORM_VARIABLE_ITEM ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.VALUELIST_ITEM || ((SimpleUserNode)node).getRealType() == UserNodeType.RELATION ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.FOUNDSET_ITEM || ((SimpleUserNode)node).getRealType() == UserNodeType.FORM_ELEMENTS_ITEM ||
-				((SimpleUserNode)node).getRealType() == UserNodeType.ARRAY || ((SimpleUserNode)node).getRealType() == UserNodeType.FORM_FOUNDSET || ((SimpleUserNode)node).getRealType() == UserNodeType.SECURITY_ITEM);
+				((SimpleUserNode)node).getRealType() == UserNodeType.FORM_VARIABLE_ITEM || ((SimpleUserNode)node).getRealType() == UserNodeType.MEDIA_FOLDER ||
+				((SimpleUserNode)node).getRealType() == UserNodeType.MEDIA_IMAGE || ((SimpleUserNode)node).getRealType() == UserNodeType.VALUELIST_ITEM ||
+				((SimpleUserNode)node).getRealType() == UserNodeType.RELATION || ((SimpleUserNode)node).getRealType() == UserNodeType.FOUNDSET_ITEM ||
+				((SimpleUserNode)node).getRealType() == UserNodeType.FORM_ELEMENTS_ITEM || ((SimpleUserNode)node).getRealType() == UserNodeType.ARRAY ||
+				((SimpleUserNode)node).getRealType() == UserNodeType.FORM_FOUNDSET || ((SimpleUserNode)node).getRealType() == UserNodeType.SECURITY_ITEM);
 
 			return (isAllowedNode || ((SimpleUserNode)node).isVisibleInMobile());
 		}

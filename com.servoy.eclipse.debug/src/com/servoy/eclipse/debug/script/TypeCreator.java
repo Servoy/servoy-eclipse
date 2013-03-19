@@ -135,7 +135,6 @@ import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
-import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.plugins.IBeanClassProvider;
 import com.servoy.j2db.plugins.IClientPlugin;
@@ -185,6 +184,7 @@ import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.ui.IScriptAccordionPanelMethods;
 import com.servoy.j2db.ui.IScriptDataLabelMethods;
 import com.servoy.j2db.ui.IScriptInsetListComponentMethods;
+import com.servoy.j2db.ui.IScriptMobileBean;
 import com.servoy.j2db.ui.IScriptPortalComponentMethods;
 import com.servoy.j2db.ui.IScriptScriptLabelMethods;
 import com.servoy.j2db.ui.IScriptSplitPaneMethods;
@@ -489,18 +489,6 @@ public class TypeCreator extends TypeCache
 			}
 		}
 		return type;
-	}
-
-	private boolean isServoyMobileSolutionType()
-	{
-		boolean isServoyMobileSolution = false;
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		ServoyProject activeProject = servoyModel.getActiveProject();
-		if (activeProject != null && activeProject.getSolution() != null)
-		{
-			isServoyMobileSolution = (activeProject.getSolution().getSolutionType() == SolutionMetaData.MOBILE);
-		}
-		return isServoyMobileSolution;
 	}
 
 	private Type getClassType(String context, Class< ? > clz, String name)
@@ -1081,7 +1069,7 @@ public class TypeCreator extends TypeCache
 								method.setVisible(false);
 							}
 
-							if (isServoyMobileSolutionType() &&
+							if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile() &&
 								(mobileAllowedTypes.get(typeName) == null || !AnnotationManagerReflection.getInstance().isAnnotatedForMobile(
 									memberbox[i].method(), scriptObjectClass)))
 							{
@@ -1203,7 +1191,8 @@ public class TypeCreator extends TypeCache
 						if (!visible) property.setVisible(false);
 						property.setStatic(type == STATIC_FIELD);
 
-						if (isServoyMobileSolutionType() && (object instanceof BeanProperty || (object instanceof Field && property.isStatic())))
+						if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile() &&
+							(object instanceof BeanProperty || (object instanceof Field && property.isStatic())))
 						{
 							boolean visibility = false;
 							if (object instanceof BeanProperty)
@@ -1542,7 +1531,7 @@ public class TypeCreator extends TypeCache
 //		{
 //			javaTypes.add(type.getName());
 //		}
-		if (isServoyMobileSolutionType())
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile())
 		{
 			if (type.getMetaType() != null && type.getMetaType() == javaMetaType)
 			{
@@ -2372,7 +2361,8 @@ public class TypeCreator extends TypeCache
 					addAnonymousClassType("Plugin<" + clientPlugin.getName() + '>', scriptObject.getClass());
 					property.setType(getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'));
 
-					if (isServoyMobileSolutionType() && !AnnotationManagerReflection.getInstance().isAnnotatedForMobile(scriptObject.getClass()))
+					if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile() &&
+						!AnnotationManagerReflection.getInstance().isAnnotatedForMobile(scriptObject.getClass()))
 					{
 						property.setVisibility(Visibility.INTERNAL);
 					}
@@ -3176,7 +3166,7 @@ public class TypeCreator extends TypeCache
 						if (persistClass != null && formElement instanceof Bean)
 						{
 							String beanClassName = ((Bean)formElement).getBeanClassName();
-							if (beanClassName != null)
+							if (persistClass != IScriptMobileBean.class && beanClassName != null)
 							{
 								// map the persist class that is registered in the initialize() method under the beanclassname under that same name.
 								// So SwingDBTreeView class/name points to "DBTreeView" which points to that class again of the class types 

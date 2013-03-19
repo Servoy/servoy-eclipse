@@ -153,6 +153,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.ScriptNameValidator;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Table;
@@ -3083,5 +3084,16 @@ public class ServoyModel extends AbstractServoyModel
 	public void addIgnoreFile(File file)
 	{
 		ignoreOnceFiles.add(file);
+	}
+
+	public boolean isActiveSolutionMobile()
+	{
+		boolean isServoyMobileSolution = false;
+		ServoyProject aProject = getActiveProject();
+		if (aProject != null && aProject.getSolution() != null)
+		{
+			isServoyMobileSolution = (aProject.getSolution().getSolutionType() == SolutionMetaData.MOBILE);
+		}
+		return isServoyMobileSolution;
 	}
 }
