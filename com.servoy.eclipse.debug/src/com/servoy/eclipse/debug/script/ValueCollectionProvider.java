@@ -45,7 +45,6 @@ import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.model.Element;
 import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
-import org.eclipse.dltk.javascript.typeinfo.model.Property;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.Visibility;
 
@@ -75,7 +74,6 @@ public class ValueCollectionProvider implements IMemberEvaluator
 
 	private static final Map<IFile, SoftReference<Pair<Long, IValueCollection>>> scriptCache = new ConcurrentHashMap<IFile, SoftReference<Pair<Long, IValueCollection>>>();
 	private static final Map<IFile, SoftReference<Pair<Long, IValueCollection>>> globalScriptCache = new ConcurrentHashMap<IFile, SoftReference<Pair<Long, IValueCollection>>>();
-	private static final WeakHashMap<Type, IValueCollection> propertyToValueCollectionCache = new WeakHashMap<Type, IValueCollection>();
 	private static final WeakHashMap<Type, IValueCollection> typeToValueCollectionCache = new WeakHashMap<Type, IValueCollection>();
 	private static final IValueCollection EMPTY = ValueCollectionFactory.createValueCollection();
 
@@ -83,7 +81,6 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	{
 		scriptCache.clear();
 		globalScriptCache.clear();
-		propertyToValueCollectionCache.clear();
 		typeToValueCollectionCache.clear();
 	}
 
@@ -101,24 +98,18 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				if (irType instanceof IRSimpleType)
 				{
 					memberType = ((IRSimpleType)irType).getTarget();
-					if (member instanceof Property)
-					{
-						cached = propertyToValueCollectionCache.get(memberType);
-					}
-					else
-					{
-						cached = typeToValueCollectionCache.get(memberType);
-					}
+					cached = typeToValueCollectionCache.get(memberType);
 				}
 			}
 		}
 		else if (member instanceof Type)
 		{
+			memberType = (Type)member;
 			cached = typeToValueCollectionCache.get(member);
 		}
 		if (cached != null)
 		{
-			return cached == EMPTY ? null : cached;
+			return cached == EMPTY ? null : ValueCollectionFactory.shallowCloneValueCollection(cached);
 		}
 		Object attribute = member.getAttribute(TypeCreator.LAZY_VALUECOLLECTION);
 		if (attribute instanceof Form)
@@ -140,10 +131,9 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				{
 					((IValueProvider)collection).getValue().setAttribute(SUPER_SCOPE, Boolean.TRUE);
 				}
-				addToCache(member, memberType, collection);
-				return collection;
+				return addToCache(memberType, collection);
 			}
-			addToCache(member, memberType, EMPTY);
+			addToCache(memberType, EMPTY);
 			return null;
 		}
 
@@ -193,8 +183,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 							IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(SolutionSerializer.getScriptPath(tableNode, false)));
 							ValueCollectionFactory.copyInto(valueCollection, getValueCollection(file));
 						}
-						addToCache(member, memberType, valueCollection);
-						return valueCollection;
+						return addToCache(memberType, valueCollection);
 					}
 				}
 			}
@@ -224,7 +213,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 
 								if (globalsValueCollection == null)
 								{
-									addToCache(member, memberType, EMPTY);
+									addToCache(memberType, EMPTY);
 									return null;
 								}
 
@@ -237,15 +226,14 @@ public class ValueCollectionProvider implements IMemberEvaluator
 									ValueCollectionProvider.getGlobalModulesValueCollection(editingFlattenedSolution, fileName, collection);
 								}
 								// scopes other than globals are not merged
-								addToCache(member, memberType, collection);
-								return collection;
+								return addToCache(memberType, collection);
 							}
 						}
 					}
 				}
 			}
 		}
-		addToCache(member, memberType, EMPTY);
+		addToCache(memberType, EMPTY);
 		return null;
 	}
 
@@ -253,26 +241,14 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	 * @param member
 	 * @param memberType
 	 */
-	private void addToCache(Element member, Type memberType, IValueCollection collection)
+	private IValueCollection addToCache(Element member, IValueCollection collection)
 	{
-		if (resolve.get() == null)
+		if (resolve.get() == null && member instanceof Type)
 		{
-			if (memberType != null)
-			{
-				if (member instanceof Property)
-				{
-					propertyToValueCollectionCache.put(memberType, collection);
-				}
-				else
-				{
-					typeToValueCollectionCache.put(memberType, collection);
-				}
-			}
-			else if (member instanceof Type)
-			{
-				typeToValueCollectionCache.put((Type)member, collection);
-			}
+			typeToValueCollectionCache.put((Type)member, collection);
+			return ValueCollectionFactory.shallowCloneValueCollection(collection);
 		}
+		return collection;
 	}
 
 	/**
@@ -507,7 +483,6 @@ public class ValueCollectionProvider implements IMemberEvaluator
 							{
 								// clear the cache to help the garbage collector.
 								scriptCache.clear();
-								propertyToValueCollectionCache.clear();
 								typeToValueCollectionCache.clear();
 							}
 						}
