@@ -17,22 +17,18 @@
 
 package com.servoy.eclipse.designer.editor.mobile.palette;
 
-import org.eclipse.draw2d.geometry.Dimension;
+import java.util.List;
+
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartViewer;
-import org.eclipse.gef.Request;
-import org.eclipse.gef.dnd.TemplateTransfer;
-import org.eclipse.gef.requests.CreationFactory;
-import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.ui.IWorkbenchPart;
 
-import com.servoy.eclipse.core.util.TemplateElementHolder;
-import com.servoy.eclipse.designer.dnd.ElementTransferDropTarget;
-import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.designer.editor.CreateElementRequest;
-import com.servoy.eclipse.designer.editor.commands.DataRequest;
-import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
+import com.servoy.eclipse.designer.editor.mobile.editparts.MobileFormGraphicalEditPart;
+import com.servoy.eclipse.designer.editor.mobile.editparts.MobileListGraphicalEditPart;
+import com.servoy.eclipse.designer.editor.mobile.editparts.MobilePartGraphicalEditPart;
+import com.servoy.eclipse.designer.editor.palette.PaletteItemTransferDropTargetListener;
 
 /**
  * Drop target for elements from the palette.
@@ -40,7 +36,7 @@ import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
  * @author rgansevles
  *
  */
-public class MobilePaletteItemTransferDropTargetListener extends ElementTransferDropTarget
+public class MobilePaletteItemTransferDropTargetListener extends PaletteItemTransferDropTargetListener
 {
 
 	/**
@@ -48,69 +44,54 @@ public class MobilePaletteItemTransferDropTargetListener extends ElementTransfer
 	 */
 	public MobilePaletteItemTransferDropTargetListener(EditPartViewer viewer, IWorkbenchPart workbenchPart)
 	{
-		super(viewer, TemplateTransfer.getInstance(), workbenchPart);
+		super(viewer, workbenchPart);
 	}
 
 	@Override
-	protected Request createTargetRequest()
+	public boolean isEnabled(DropTargetEvent event)
 	{
-		TemplateElementHolder template = null;
-		Dimension size = null;
-		CreationFactory factory = getFactory(TemplateTransfer.getInstance().getTemplate());
-		if (factory instanceof RequestTypeCreationFactory)
+		boolean enabled = super.isEnabled(event);
+		if (enabled)
 		{
-			Object data = ((RequestTypeCreationFactory)factory).getData();
-			size = ((RequestTypeCreationFactory)factory).getNewObjectSize();
-			if (data instanceof TemplateElementHolder)
+			EditPart ep = getViewer().findObjectAt(getDropLocation());
+			if (!(ep instanceof MobileFormGraphicalEditPart))
 			{
-				template = (TemplateElementHolder)data;
+				EditPart tempPart = ep;
+				while (tempPart != null)
+				{
+					if (tempPart.getParent() instanceof MobileFormGraphicalEditPart)
+					{
+						ep = tempPart.getParent();
+						break;
+					}
+					tempPart = tempPart.getParent();
+				}
+				if (tempPart == null && ep.getChildren().size() > 0)
+				{
+					ep = (EditPart)ep.getChildren().get(0);
+				}
+			}
+			if (ep instanceof MobileFormGraphicalEditPart)
+			{
+				boolean hasListForm = false;
+				Point dropLocation = getDropLocation();
+				for (EditPart editPart : (List<EditPart>)ep.getChildren())
+				{
+					if (editPart instanceof MobilePartGraphicalEditPart)
+					{
+						if (((MobilePartGraphicalEditPart)editPart).getFigure().getBounds().contains(dropLocation))
+						{
+							return true;
+						}
+					}
+					else if (editPart instanceof MobileListGraphicalEditPart && !((MobileListGraphicalEditPart)editPart).isInsetList())
+					{
+						hasListForm = true;
+					}
+				}
+				if (hasListForm) return false;
 			}
 		}
-
-		if (template != null && (getCurrentEvent().operations & DND.DROP_LINK) != 0)
-		{
-			org.eclipse.swt.graphics.Point swtPoint = getViewer().getControl().toControl(getCurrentEvent().x, getCurrentEvent().y);
-			Point point = new Point(swtPoint.x, swtPoint.y);
-			EditPart editPart = getViewer().findObjectAt(point);
-			if (editPart == getViewer().getRootEditPart())
-			{
-				editPart = getViewer().getContents();
-			}
-			DataRequest dropReq = new DataRequest(BaseVisualFormEditor.REQ_DROP_LINK, point, template);
-			if (editPart.understandsRequest(dropReq))
-			{
-				// link template to existing element
-				return dropReq;
-			}
-		}
-
-		// drop element or template on form
-		CreateElementRequest request = new CreateElementRequest(factory);
-
-		if (size == null)
-		{
-			size = new Dimension(80, 20);
-		}
-		request.setSize(size);
-
-		return request;
-	}
-
-	/**
-	 * Returns the appropriate Factory object to be used for the specified
-	 * template. This Factory is used on the CreateRequest that is sent to the
-	 * target EditPart.
-	 * 
-	 * @param template
-	 *            the template Object
-	 * @return a Factory
-	 */
-	protected CreationFactory getFactory(Object template)
-	{
-		if (template instanceof CreationFactory)
-		{
-			return ((CreationFactory)template);
-		}
-		return null;
+		return enabled;
 	}
 }

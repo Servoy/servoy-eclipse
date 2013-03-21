@@ -60,16 +60,7 @@
       </config>
    </extension>
    
-   <extension point="org.eclipse.ui.actionSets">
-		<actionSet id="org.eclipse.ui.cheatsheets.actionSet" label="Cheat Sheats" visible="true">
-			<action class="org.eclipse.ui.cheatsheets.CheatSheetExtensionFactory:helpMenuAction"
-				id="org.eclipse.ui.cheatsheets.actions.CheatSheetHelpMenuAction"
-				label="&amp;Cheat Sheets..."
-				menubarPath="help/group.tutorials"/>
-		</actionSet>
-   </extension>
-
-   <extension
+    <extension
          point="org.eclipse.ui.popupMenus">
       <objectContribution
             adaptable="true"

@@ -2839,6 +2839,1136 @@ form.navigator = SM_DEFAULTS.NONE; // Hide the navigator on the form.]]></sample
       </constants>
     </object>
     <object publicName="DataException" qualifiedName="com.servoy.j2db.dataprocessing.DataException">
+      <constants>
+        <constant name="ABSTRACT_FORM">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for ABSTRACT_FORM.
+
+This code is used when a form, that cannot be created, is shown (for example, a form without parts).]]></description>
+          <summary><![CDATA[Exception code for ABSTRACT_FORM.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="ACQUIRE_LOCK_FAILURE">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for ACQUIRE_LOCK_FAILURE.
+
+This code is used when a database failed to lock a row or table.]]></description>
+          <summary><![CDATA[Exception code for ACQUIRE_LOCK_FAILURE.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="BAD_SQL_SYNTAX">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for BAD_SQL_SYNTAX.
+
+This code is used when a database exception is recognized as an sql syntax error.]]></description>
+          <summary><![CDATA[Exception code for BAD_SQL_SYNTAX.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="CLIENT_NOT_AUTHORIZED">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for CLIENT_NOT_AUTHORIZED.
+
+This code is used when an client performs an action that requires the user to be logged in and the user has not logged in yet.]]></description>
+          <summary><![CDATA[Exception code for CLIENT_NOT_AUTHORIZED.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="DATA_ACCESS_RESOURCE_FAILURE">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for DATA_ACCESS_RESOURCE_FAILURE.
+
+This code is used when a database exception received an error accessing storage devices.]]></description>
+          <summary><![CDATA[Exception code for DATA_ACCESS_RESOURCE_FAILURE.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="DATA_INTEGRITY_VIOLATION">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for DATA_INTEGRITY_VIOLATION.
+
+This code is used when a database exception is recognized as an integrity exception (like constraint violation).]]></description>
+          <summary><![CDATA[Exception code for DATA_INTEGRITY_VIOLATION.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="DEADLOCK">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for DEADLOCK.
+
+This code is used when a deadlock is detected by the database.]]></description>
+          <summary><![CDATA[Exception code for DEADLOCK.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="DELETE_NOT_GRANTED">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for DELETE_NOT_GRANTED.
+
+This code is used when a record deletion was rejected by a pre-delete Servoy trigger.]]></description>
+          <summary><![CDATA[Exception code for DELETE_NOT_GRANTED.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="EXECUTE_PROGRAM_FAILED">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for EXECUTE_PROGRAM_FAILED.
+
+This code is used when an external program was not executed correctly.]]></description>
+          <summary><![CDATA[Exception code for EXECUTE_PROGRAM_FAILED.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="INCORRECT_LOGIN">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for INCORRECT_LOGIN.
+
+This code is used when the user enters invalid credentials.]]></description>
+          <summary><![CDATA[Exception code for INCORRECT_LOGIN.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="INVALID_INPUT">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for INVALID_INPUT.
+
+This code is used when the user enters data that could not be validated.]]></description>
+          <summary><![CDATA[Exception code for INVALID_INPUT.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant deprecated="true" name="INVALID_INPUT_FORMAT">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for INVALID_INPUT_FORMAT.
+
+This code is not used.]]></description>
+          <summary><![CDATA[Exception code for INVALID_INPUT_FORMAT.]]></summary>
+          <deprecated><![CDATA[This code is not used]]></deprecated>
+          <sample/>
+        </constant>
+        <constant name="INVALID_RESULTSET_ACCESS">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for INVALID_RESULTSET_ACCESS.
+
+This code is used when a data is requested that is not selected in the sql.]]></description>
+          <summary><![CDATA[Exception code for INVALID_RESULTSET_ACCESS.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="MAINTENANCE_MODE">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for MAINTENANCE_MODE.
+
+This code is used when a client could not be registered with the server because the server is in maintenance mode.]]></description>
+          <summary><![CDATA[Exception code for MAINTENANCE_MODE.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="NO_ACCESS">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for NO_ACCESS.
+
+This code is used when a user wants to view data and this is disallowed by security settings.]]></description>
+          <summary><![CDATA[Exception code for NO_ACCESS.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="NO_CREATE_ACCESS">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for NO_CREATE_ACCESS.
+
+This code is used when a user wants to create new records and this is disallowed by security settings.]]></description>
+          <summary><![CDATA[Exception code for NO_CREATE_ACCESS.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="NO_DELETE_ACCESS">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for NO_DELETE_ACCESS.
+
+This code is used when a user wants to delete data and this is disallowed by security settings.]]></description>
+          <summary><![CDATA[Exception code for NO_DELETE_ACCESS.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="NO_LICENSE">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for NO_LICENSE.
+
+This code is used when a client could not be registered with the server because of license limitations.]]></description>
+          <summary><![CDATA[Exception code for NO_LICENSE.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="NO_MODIFY_ACCESS">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for NO_MODIFY_ACCESS.
+
+This code is used when a user wants to update data and this is disallowed by security settings.]]></description>
+          <summary><![CDATA[Exception code for NO_MODIFY_ACCESS.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="NO_PARENT_DELETE_WITH_RELATED_RECORDS">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for NO_PARENT_DELETE_WITH_RELATED_RECORDS.
+
+This code is used when a record could not be deleted because a non-empty relation exists for the record that does not allow parent delete when having related records.]]></description>
+          <summary><![CDATA[Exception code for NO_PARENT_DELETE_WITH_RELATED_RECORDS.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="NO_RELATED_CREATE_ACCESS">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for NO_RELATED_CREATE_ACCESS.
+
+This code is used when a user wants to create new related records and this is disallowed by security settings.]]></description>
+          <summary><![CDATA[Exception code for NO_RELATED_CREATE_ACCESS.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="PERMISSION_DENIED">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for PERMISSION_DENIED.
+
+This code is used when a database exception is recognized as a authorization error.]]></description>
+          <summary><![CDATA[Exception code for PERMISSION_DENIED.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="RECORD_LOCKED">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for RECORD_LOCKED.
+
+This code is used when a record could not be updated or deleted because it is locked by another client.]]></description>
+          <summary><![CDATA[Exception code for RECORD_LOCKED.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="RECORD_VALIDATION_FAILED">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for RECORD_VALIDATION_FAILED.
+
+This code is used when a record update/insert was rejected by a pre-update/insert Servoy trigger.]]></description>
+          <summary><![CDATA[Exception code for RECORD_VALIDATION_FAILED.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="SAVE_FAILED">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for SAVE_FAILED.
+
+This code is used when a javascript exception occurred during saving data to the database.]]></description>
+          <summary><![CDATA[Exception code for SAVE_FAILED.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="UNEXPECTED_UPDATE_COUNT">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for UNEXPECTED_UPDATE_COUNT.
+
+This code is used when a data could not be deleted or updated when expected (for example 
+when a record was deleted outside Servoy and a Servoy client wants to update the record).]]></description>
+          <summary><![CDATA[Exception code for UNEXPECTED_UPDATE_COUNT.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+        <constant name="UNKNOWN_DATABASE_EXCEPTION">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Exception code for UNKNOWN_DATABASE_EXCEPTION.
+
+This code is used when an unrecognized database exception has occurred.]]></description>
+          <summary><![CDATA[Exception code for UNKNOWN_DATABASE_EXCEPTION.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </constant>
+      </constants>
       <functions>
         <function name="getErrorCode">
           <argumentsTypes/>
@@ -8705,6 +9835,17 @@ function onDragOver(event)
           <summary><![CDATA[returns the name of the form the element was placed on.]]></summary>
           <sample><![CDATA[forms[event.getFormName()].myFormMethod();]]></sample>
         </function>
+        <function name="getModifiers">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[an int which holds the modifiers as a bitset.]]></return>
+          <description><![CDATA[Returns the modifiers of the event, see JSDNDEvent.MODIFIER_XXXX for the modifiers that can be returned.]]></description>
+          <summary><![CDATA[Returns the modifiers of the event, see JSDNDEvent.]]></summary>
+          <sample><![CDATA[//test if the SHIFT modifier is used.
+if (event.getModifiers() & JSDNDEvent.MODIFIER_SHIFT)
+{
+	//do shift action
+}]]></sample>
+        </function>
         <function name="getRecord">
           <argumentsTypes/>
           <return type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.Record"><![CDATA[Record of the event]]></return>
@@ -8729,6 +9870,16 @@ var sourceDataProvider = source.getDataProviderID();]]></sample>
           <description><![CDATA[Returns the time the event occurred.]]></description>
           <summary><![CDATA[Returns the time the event occurred.]]></summary>
           <sample><![CDATA[event.getTimestamp();]]></sample>
+        </function>
+        <function name="getType">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[a String representing the type of this event.]]></return>
+          <description><![CDATA[returns the dnd event type see the JSDNDEvents constants what it can return.]]></description>
+          <summary><![CDATA[returns the dnd event type see the JSDNDEvents constants what it can return.]]></summary>
+          <sample><![CDATA[if (event.getType() == JSDNDEvent.ONDROP) 
+{
+	// it's a drop
+}]]></sample>
         </function>
         <function name="getX">
           <argumentsTypes/>
@@ -22226,12 +23377,9 @@ Operator: lessThan]]></description>
       <properties>
         <property name="parent">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
-          <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
-          <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
-	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
-	foundset.loadRecords(query)]]></sample>
+          <description><![CDATA[Get query builder parent.]]></description>
+          <summary><![CDATA[Get query builder parent.]]></summary>
+          <sample/>
         </property>
         <property name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
@@ -22768,12 +23916,9 @@ foundset.loadRecords(query);]]></sample>
       <properties>
         <property name="parent">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
-          <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
-          <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
-	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
-	foundset.loadRecords(query)]]></sample>
+          <description><![CDATA[Get query builder parent.]]></description>
+          <summary><![CDATA[Get query builder parent.]]></summary>
+          <sample/>
         </property>
         <property name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
@@ -23155,10 +24300,7 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
-	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
@@ -23226,12 +24368,9 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
         </property>
         <property name="parent">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
-          <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
-          <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
-	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
-	foundset.loadRecords(query)]]></sample>
+          <description><![CDATA[Get query builder parent.]]></description>
+          <summary><![CDATA[Get query builder parent.]]></summary>
+          <sample/>
         </property>
         <property name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
@@ -23582,10 +24721,7 @@ The alias may be of the main table or any level deep joined table.]]></descripti
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
-	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
@@ -23615,10 +24751,7 @@ The alias may be of the main table or any level deep joined table.]]></descripti
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
-	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
-	foundset.loadRecords(query)]]></sample>
+          <sample/>
         </property>
         <property name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
@@ -24918,6 +26051,334 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
             </parameter>
             <parameter name="text">
               <description><![CDATA[the text to be set for the specified tab]]></description>
+            </parameter>
+          </parameters>
+        </function>
+      </functions>
+    </object>
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeBean" qualifiedName="com.servoy.j2db.ui.IScriptMobileBean">
+      <properties>
+        <property name="bgcolor">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+It only returns it's correct value if it was explicitly set.]]></description>
+          <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
+          <sample><![CDATA[//sets the background color of the field
+%%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
+//gets the background color of the field
+var c = %%prefix%%%%elementName%%.bgcolor;]]></sample>
+        </property>
+        <property name="border">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Gets or sets the border attribute(s) of a specified element. 
+
+The border attributes:
+
+borderType - EmptyBorder, EtchedBorder, BevelBorder, LineBorder, TitleBorder, MatteBorder, SpecialMatteBorder.
+size - (numeric value) for: bottom, left, right, top.
+color - (hexadecimal value) for: bottom, left, right, top.
+dash pattern - (numeric value) for selected side(s).
+rounding radius - (numeric value) for selected side(s).
+
+It only returns it's correct value if it was explicitly set.
+
+NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
+          <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
+          <sample><![CDATA[//sets the border type to "LineBorder"
+//sets a 1 px line width for the bottom and left side of the border
+//sets the hexadecimal color of the border to "#ccffcc"
+%%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
+          <parameters>
+            <parameter name="spec">
+              <description><![CDATA[the border attributes]]></description>
+            </parameter>
+          </parameters>
+        </property>
+        <property name="enabled">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
+true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
+
+NOTE: A disabled element cannot be selected by clicking the element (or by pressing the TAB key even if this option is supported by the operating system).
+
+NOTE: A label or button element will not disable if the "displayType" design time property for a field is set to HTML_AREA.
+
+NOTE: The disabled "grayed" color is dependent on the LAF set in the Servoy Client Application Preferences. For more information see Preferences: Look And Feel in the Servoy Developer User's Guide.]]></description>
+          <summary><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".]]></summary>
+          <sample><![CDATA[//gets the enabled state of the field
+var currState = %%prefix%%%%elementName%%.enabled;
+
+//sets the enabled state of the field
+%%prefix%%%%elementName%%.enabled = !currentState;]]></sample>
+        </property>
+        <property name="fgcolor">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+It only returns it's correct value if it was explicitly set.]]></description>
+          <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
+          <sample><![CDATA[//sets the foreground color of the field
+%%prefix%%%%elementName%%.fgcolor = "#000000";
+
+//gets the foreground color of the field
+var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
+        </property>
+        <property name="font">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Gets or sets the font name, style, and size of an element. 
+
+font name - the name of the font family.
+style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
+size - the size of the font (in points). 
+
+It only returns it's correct value if it was explicitly set.]]></description>
+          <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
+        </property>
+        <property name="text">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Gets or sets the text that is displayed on the bean]]></description>
+          <summary><![CDATA[Gets or sets the text that is displayed on the bean]]></summary>
+          <sample><![CDATA[//gets the text of the element
+var my_text = %%prefix%%%%elementName%%.text;
+
+//sets the text of the element
+%%prefix%%%%elementName%%.text = my_text + 'is cool';]]></sample>
+        </property>
+        <property name="toolTipText">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Gets or sets the tool tip text of an element; text displays when the mouse cursor hovers over an element. 
+
+NOTE: HTML should be used for multi-line tooltips; you can also use any valid HTML tags to format tooltip text.]]></description>
+          <summary><![CDATA[Gets or sets the tool tip text of an element; text displays when the mouse cursor hovers over an element.]]></summary>
+          <sample><![CDATA[//gets the tooltip text of the element
+var toolTip = %%prefix%%%%elementName%%.toolTipText;
+
+//sets the tooltip text of the element
+%%prefix%%%%elementName%%.toolTipText = "New tip";
+%%prefix%%%%elementName%%.toolTipText = "<html>This includes <b>bolded text</b> and <font color='blue'>BLUE</font> text as well.";]]></sample>
+        </property>
+        <property name="transparent">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Gets or sets the transparency of an element; true - transparent; false - not transparent.
+
+NOTE: transparency can be inverted using ! operator: elements.elementName.transparent = !elements.elementName.transparent;
+
+NOTE: transparency will be mostly used for background color, a transparent element will receive the background of the element "beneath" it, a non transparent one will use its own background color]]></description>
+          <summary><![CDATA[Gets or sets the transparency of an element; true - transparent; false - not transparent.]]></summary>
+          <sample><![CDATA[//gets the transparency of the element
+var currentState = %%prefix%%%%elementName%%.transparent;
+
+//sets the transparency of the element
+%%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
+        </property>
+        <property name="visible">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
+
+NOTE: The visibility of an element is not persistent; the state of visibility only applies to the current user in his/her current session.]]></description>
+          <summary><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).]]></summary>
+          <sample><![CDATA[//sets the element as visible
+forms.company.elements.faxBtn.visible = true;
+
+//gets the visibility of the element
+var currentState = forms.company.elements.faxBtn.visible;
+
+//sets the element as not visible when the current state is visible
+forms.company.elements.faxBtn.visible = !currentState;]]></sample>
+        </property>
+      </properties>
+      <functions>
+        <function name="getAbsoluteFormLocationY">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the form in pixels.]]></return>
+          <description><![CDATA[Returns the absolute form (designed) Y location.]]></description>
+          <summary><![CDATA[Returns the absolute form (designed) Y location.]]></summary>
+          <sample><![CDATA[var absolute_y = %%prefix%%%%elementName%%.getAbsoluteFormLocationY();]]></sample>
+        </function>
+        <function name="getClientProperty">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[The value of the property for specified key.]]></return>
+          <description><![CDATA[Gets the specified client property for the element based on a key.
+
+NOTE: Depending on the operating system, a user interface property name may be available.]]></description>
+          <summary><![CDATA[Gets the specified client property for the element based on a key.]]></summary>
+          <sample><![CDATA[var property = %%prefix%%%%elementName%%.getClientProperty('ToolTipText');]]></sample>
+          <parameters>
+            <parameter name="key" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[user interface key (depends on operating system)]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="getDesignTimeProperty">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+          <description><![CDATA[Get a design-time property of an element.]]></description>
+          <summary><![CDATA[Get a design-time property of an element.]]></summary>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
+        </function>
+        <function name="getElementType">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The display type of the element as String.]]></return>
+          <description><![CDATA[Returns the type of a specified element.]]></description>
+          <summary><![CDATA[Returns the type of a specified element.]]></summary>
+          <sample><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
+        </function>
+        <function name="getHeight">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The height of the element in pixels.]]></return>
+          <description><![CDATA[Returns the height of the current element. 
+NOTE: getHeight() can be used with getWidth() to set the size of an element using the setSize function. For example:
+
+//returns the width (w) and height (h)
+var w = forms.company.elements.faxBtn.getWidth();
+var h = forms.company.elements.faxBtn.getHeight();
+
+//sets the new size
+forms.company.elements.faxBtn.setSize(w,h);
+
+//sets the new size and adds 1 px to both the width and height
+forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
+          <summary><![CDATA[Returns the height of the current element.]]></summary>
+          <sample><![CDATA[var ht = %%prefix%%%%elementName%%.getHeight();]]></sample>
+        </function>
+        <function name="getLocationX">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The x location of the element in pixels.]]></return>
+          <description><![CDATA[Returns the x location of the current element. 
+
+NOTE: getLocationX() can be used with getLocationY() to set the location of an element using the setLocation function. For Example:
+
+//returns the X and Y coordinates
+var x = forms.company.elements.faxBtn.getLocationX();
+var y = forms.company.elements.faxBtn.getLocationY();
+
+//sets the new location 10 px to the right; 10 px down from the current location
+forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
+          <summary><![CDATA[Returns the x location of the current element.]]></summary>
+          <sample><![CDATA[var x = %%prefix%%%%elementName%%.getLocationX();]]></sample>
+        </function>
+        <function name="getLocationY">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
+          <description><![CDATA[Returns the y location of the current element. 
+
+NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
+
+//returns the X and Y coordinates
+var x = forms.company.elements.faxBtn.getLocationX();
+var y = forms.company.elements.faxBtn.getLocationY();
+
+//sets the new location 10 px to the right; 10 px down from the current location
+forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
+          <summary><![CDATA[Returns the y location of the current element.]]></summary>
+          <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
+        </function>
+        <function name="getName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
+          <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
+          <summary><![CDATA[Returns the name of an element.]]></summary>
+          <sample><![CDATA[var name = %%prefix%%%%elementName%%.getName();]]></sample>
+        </function>
+        <function name="getWidth">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The width of the element in pixels.]]></return>
+          <description><![CDATA[Returns the width of the current element. 
+
+NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example:
+
+//returns the width (w) and height (h)
+var w = forms.company.elements.faxBtn.getWidth();
+var h = forms.company.elements.faxBtn.getHeight();
+
+//sets the new size
+forms.company.elements.faxBtn.setSize(w,h);
+
+//sets the new size and adds 1 px to both the width and height
+forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
+          <summary><![CDATA[Returns the width of the current element.]]></summary>
+          <sample><![CDATA[var w = %%prefix%%%%elementName%%.getWidth();]]></sample>
+        </function>
+        <function name="putClientProperty">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.Object"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the value for the specified element client property key.
+
+NOTE: Depending on the operating system, a user interface property name may be available.]]></description>
+          <summary><![CDATA[Sets the value for the specified element client property key.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.putClientProperty('ToolTipText','some text');]]></sample>
+          <parameters>
+            <parameter name="key" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[user interface key (depends on operating system)]]></description>
+            </parameter>
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[a predefined value for the key]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setLocation">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
+
+NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
+
+//returns the X and Y coordinates
+var x = forms.company.elements.faxBtn.getLocationX();
+var y = forms.company.elements.faxBtn.getLocationY();
+
+//sets the new location 10 px to the right; 10 px down from the current location
+forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
+          <summary><![CDATA[Sets the location of an element.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.setLocation(200,200);]]></sample>
+          <parameters>
+            <parameter name="x" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the X coordinate of the element in pixels.]]></description>
+            </parameter>
+            <parameter name="y" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the Y coordinate of the element in pixels.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setSize">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
+
+NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
+
+//returns the width (w) and height (h)
+var w = forms.company.elements.faxBtn.getWidth();
+var h = forms.company.elements.faxBtn.getHeight();
+
+//sets the new size
+forms.company.elements.faxBtn.setSize(w,h);
+
+//sets the new size and adds 1 px to both the width and height
+forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
+          <parameters>
+            <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the width of the element in pixels.]]></description>
+            </parameter>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the height of the element in pixels.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -29612,6 +31073,511 @@ forms.company.elements.portal50.setScroll(x+10,y+10);]]></description>
             </parameter>
             <parameter name="y" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[the Y coordinate of the portal scroll location in pixels]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setSize">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the size of an element. It takes as input the width and the height. 
+Please note that size should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
+
+NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example: 
+
+//returns the width (w) and height (h)
+var w = forms.company.elements.faxBtn.getWidth();
+var h = forms.company.elements.faxBtn.getHeight();
+
+//sets the new size
+forms.company.elements.faxBtn.setSize(w,h);
+
+//sets the new size and adds 1 px to both the width and height
+forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
+          <summary><![CDATA[Sets the size of an element.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.setSize(20,30);]]></sample>
+          <parameters>
+            <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the width of the element in pixels.]]></description>
+            </parameter>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the height of the element in pixels.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+      </functions>
+    </object>
+    <object extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeInsetList" qualifiedName="com.servoy.j2db.ui.IScriptInsetListComponentMethods">
+      <properties>
+        <property name="bgcolor">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Gets or sets the background color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+It only returns it's correct value if it was explicitly set.]]></description>
+          <summary><![CDATA[Gets or sets the background color of a field.]]></summary>
+          <sample><![CDATA[//sets the background color of the field
+%%prefix%%%%elementName%%.bgcolor = "#FFFFFF";
+//gets the background color of the field
+var c = %%prefix%%%%elementName%%.bgcolor;]]></sample>
+        </property>
+        <property name="border">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Gets or sets the border attribute(s) of a specified element. 
+
+The border attributes:
+
+borderType - EmptyBorder, EtchedBorder, BevelBorder, LineBorder, TitleBorder, MatteBorder, SpecialMatteBorder.
+size - (numeric value) for: bottom, left, right, top.
+color - (hexadecimal value) for: bottom, left, right, top.
+dash pattern - (numeric value) for selected side(s).
+rounding radius - (numeric value) for selected side(s).
+
+It only returns it's correct value if it was explicitly set.
+
+NOTE: Use the same value(s) and order of attribute(s) from the element design time property "borderType".]]></description>
+          <summary><![CDATA[Gets or sets the border attribute(s) of a specified element.]]></summary>
+          <sample><![CDATA[//sets the border type to "LineBorder"
+//sets a 1 px line width for the bottom and left side of the border
+//sets the hexadecimal color of the border to "#ccffcc"
+%%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
+          <parameters>
+            <parameter name="spec">
+              <description><![CDATA[the border attributes]]></description>
+            </parameter>
+          </parameters>
+        </property>
+        <property name="enabled">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
+true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
+
+NOTE: A disabled element cannot be selected by clicking the element (or by pressing the TAB key even if this option is supported by the operating system).
+
+NOTE: A label or button element will not disable if the "displayType" design time property for a field is set to HTML_AREA.
+
+NOTE: The disabled "grayed" color is dependent on the LAF set in the Servoy Client Application Preferences. For more information see Preferences: Look And Feel in the Servoy Developer User's Guide.]]></description>
+          <summary><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".]]></summary>
+          <sample><![CDATA[//gets the enabled state of the field
+var currState = %%prefix%%%%elementName%%.enabled;
+
+//sets the enabled state of the field
+%%prefix%%%%elementName%%.enabled = !currentState;]]></sample>
+        </property>
+        <property name="fgcolor">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Gets or sets the foreground color of a field. The color has to be set using the hexadecimal RGB value as used in HTML.
+It only returns it's correct value if it was explicitly set.]]></description>
+          <summary><![CDATA[Gets or sets the foreground color of a field.]]></summary>
+          <sample><![CDATA[//sets the foreground color of the field
+%%prefix%%%%elementName%%.fgcolor = "#000000";
+
+//gets the foreground color of the field
+var c = %%prefix%%%%elementName%%.fgcolor;]]></sample>
+        </property>
+        <property name="font">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Gets or sets the font name, style, and size of an element. 
+
+font name - the name of the font family.
+style - the type of the font. (plain = 0; bold = 1; italic = 2; bold-italic = 3).
+size - the size of the font (in points). 
+
+It only returns it's correct value if it was explicitly set.]]></description>
+          <summary><![CDATA[Gets or sets the font name, style, and size of an element.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.font = 'Tahoma,1,11';]]></sample>
+        </property>
+        <property name="readOnly">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Gets or sets the editable/read-only state of a field; true - read-only; false - editable; ! - the editable/read-only state is inverted (the opposite). 
+
+NOTE: A field set as read-only can be selected by clicking (or pressing the TAB key if this option is supported by the operating system) and the field data can be copied.]]></description>
+          <summary><![CDATA[Gets or sets the editable/read-only state of a field; true - read-only; false - editable; ! - the editable/read-only state is inverted (the opposite).]]></summary>
+          <sample><![CDATA[//gets the editable/read-only state of the field
+var currentState = %%prefix%%%%elementName%%.readOnly;
+
+//sets the editable/read-only state of the field
+%%prefix%%%%elementName%%.readOnly = !currentState;]]></sample>
+        </property>
+        <property deprecated="true" name="recordIndex">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description><![CDATA[Get record index.]]></description>
+          <summary><![CDATA[Get record index.]]></summary>
+          <deprecated><![CDATA[As of release 3.0, replaced by foundset#getSelectedIndex().]]></deprecated>
+          <sample/>
+        </property>
+        <property name="toolTipText">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <description><![CDATA[Gets or sets the tool tip text of an element; text displays when the mouse cursor hovers over an element. 
+
+NOTE: HTML should be used for multi-line tooltips; you can also use any valid HTML tags to format tooltip text.]]></description>
+          <summary><![CDATA[Gets or sets the tool tip text of an element; text displays when the mouse cursor hovers over an element.]]></summary>
+          <sample><![CDATA[//gets the tooltip text of the element
+var toolTip = %%prefix%%%%elementName%%.toolTipText;
+
+//sets the tooltip text of the element
+%%prefix%%%%elementName%%.toolTipText = "New tip";
+%%prefix%%%%elementName%%.toolTipText = "<html>This includes <b>bolded text</b> and <font color='blue'>BLUE</font> text as well.";]]></sample>
+        </property>
+        <property name="transparent">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Gets or sets the transparency of an element; true - transparent; false - not transparent.
+
+NOTE: transparency can be inverted using ! operator: elements.elementName.transparent = !elements.elementName.transparent;
+
+NOTE: transparency will be mostly used for background color, a transparent element will receive the background of the element "beneath" it, a non transparent one will use its own background color]]></description>
+          <summary><![CDATA[Gets or sets the transparency of an element; true - transparent; false - not transparent.]]></summary>
+          <sample><![CDATA[//gets the transparency of the element
+var currentState = %%prefix%%%%elementName%%.transparent;
+
+//sets the transparency of the element
+%%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
+        </property>
+        <property name="visible">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <description><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
+
+NOTE: The visibility of an element is not persistent; the state of visibility only applies to the current user in his/her current session.]]></description>
+          <summary><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).]]></summary>
+          <sample><![CDATA[//sets the element as visible
+forms.company.elements.faxBtn.visible = true;
+
+//gets the visibility of the element
+var currentState = forms.company.elements.faxBtn.visible;
+
+//sets the element as not visible when the current state is visible
+forms.company.elements.faxBtn.visible = !currentState;]]></sample>
+        </property>
+      </properties>
+      <functions>
+        <function name="deleteRecord">
+          <argumentsTypes/>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Deletes the currently selected portal row in the foundset of the specified portal.]]></description>
+          <summary><![CDATA[Deletes the currently selected portal row in the foundset of the specified portal.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.deleteRecord();]]></sample>
+        </function>
+        <function name="duplicateRecord">
+          <argumentsTypes/>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Duplicates the currently selected portal row in the foundset of the specified portal.]]></description>
+          <summary><![CDATA[Duplicates the currently selected portal row in the foundset of the specified portal.]]></summary>
+          <sample><![CDATA[// adds the duplicated record on top
+%%prefix%%%%elementName%%.duplicateRecord();
+
+adds the duplicated record as the topmost record of the foundset]]></sample>
+        </function>
+        <function name="duplicateRecord">
+          <argumentsTypes>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Duplicates the currently selected portal row in the foundset of the specified portal.]]></description>
+          <summary><![CDATA[Duplicates the currently selected portal row in the foundset of the specified portal.]]></summary>
+          <sample><![CDATA[// adds the duplicated record on top
+%%prefix%%%%elementName%%.duplicateRecord(true);]]></sample>
+          <parameters>
+            <parameter name="addOnTop" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[add on top (default true)
+adds the duplicated record to the foundset]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="getAbsoluteFormLocationY">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the form in pixels.]]></return>
+          <description><![CDATA[Returns the absolute form (designed) Y location.]]></description>
+          <summary><![CDATA[Returns the absolute form (designed) Y location.]]></summary>
+          <sample><![CDATA[var absolute_y = %%prefix%%%%elementName%%.getAbsoluteFormLocationY();]]></sample>
+        </function>
+        <function name="getClientProperty">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[The value of the property for specified key.]]></return>
+          <description><![CDATA[Gets the specified client property for the element based on a key.
+
+NOTE: Depending on the operating system, a user interface property name may be available.]]></description>
+          <summary><![CDATA[Gets the specified client property for the element based on a key.]]></summary>
+          <sample><![CDATA[var property = %%prefix%%%%elementName%%.getClientProperty('ToolTipText');]]></sample>
+          <parameters>
+            <parameter name="key" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[user interface key (depends on operating system)]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="getDesignTimeProperty">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+          <description><![CDATA[Get a design-time property of an element.]]></description>
+          <summary><![CDATA[Get a design-time property of an element.]]></summary>
+          <sample><![CDATA[var prop = forms.orders.elements.mylabel.getDesignTimeProperty('myprop')]]></sample>
+        </function>
+        <function name="getElementType">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The display type of the element as String.]]></return>
+          <description><![CDATA[Returns the type of a specified element.]]></description>
+          <summary><![CDATA[Returns the type of a specified element.]]></summary>
+          <sample><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
+        </function>
+        <function name="getHeight">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The height of the element in pixels.]]></return>
+          <description><![CDATA[Returns the height of the current element. 
+NOTE: getHeight() can be used with getWidth() to set the size of an element using the setSize function. For example:
+
+//returns the width (w) and height (h)
+var w = forms.company.elements.faxBtn.getWidth();
+var h = forms.company.elements.faxBtn.getHeight();
+
+//sets the new size
+forms.company.elements.faxBtn.setSize(w,h);
+
+//sets the new size and adds 1 px to both the width and height
+forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
+          <summary><![CDATA[Returns the height of the current element.]]></summary>
+          <sample><![CDATA[var ht = %%prefix%%%%elementName%%.getHeight();]]></sample>
+        </function>
+        <function name="getLocationX">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The x location of the element in pixels.]]></return>
+          <description><![CDATA[Returns the x location of the current element. 
+
+NOTE: getLocationX() can be used with getLocationY() to set the location of an element using the setLocation function. For Example:
+
+//returns the X and Y coordinates
+var x = forms.company.elements.faxBtn.getLocationX();
+var y = forms.company.elements.faxBtn.getLocationY();
+
+//sets the new location 10 px to the right; 10 px down from the current location
+forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
+          <summary><![CDATA[Returns the x location of the current element.]]></summary>
+          <sample><![CDATA[var x = %%prefix%%%%elementName%%.getLocationX();]]></sample>
+        </function>
+        <function name="getLocationY">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
+          <description><![CDATA[Returns the y location of the current element. 
+
+NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
+
+//returns the X and Y coordinates
+var x = forms.company.elements.faxBtn.getLocationX();
+var y = forms.company.elements.faxBtn.getLocationY();
+
+//sets the new location 10 px to the right; 10 px down from the current location
+forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
+          <summary><![CDATA[Returns the y location of the current element.]]></summary>
+          <sample><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
+        </function>
+        <function deprecated="true" name="getMaxRecordIndex">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <description/>
+          <deprecated><![CDATA[As of release 5.x, replaced by foundset#getSize().]]></deprecated>
+          <sample/>
+        </function>
+        <function name="getName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
+          <description><![CDATA[Returns the name of an element. (may be null as well)]]></description>
+          <summary><![CDATA[Returns the name of an element.]]></summary>
+          <sample><![CDATA[var name = %%prefix%%%%elementName%%.getName();]]></sample>
+        </function>
+        <function name="getScrollX">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The x scroll location in pixels.]]></return>
+          <description><![CDATA[Returns the x scroll location of specified element - only for an element where height of element is less than the height of element content.
+
+NOTE: getScrollX() can be used with getScrollY() to set the scroll location of an element using the setScroll function. For Example:
+
+//returns the X and Y scroll coordinates
+var x = forms.company.elements.portal50.getScrollX();
+var y = forms.company.elements.portal50.getScrollY();
+
+//sets the new scroll location
+forms.company.elements.portal50.setScroll(x+10,y+10);]]></description>
+          <summary><![CDATA[Returns the x scroll location of specified element - only for an element where height of element is less than the height of element content.]]></summary>
+          <sample><![CDATA[var x = %%prefix%%%%elementName%%.getScrollX();]]></sample>
+        </function>
+        <function name="getScrollY">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y scroll location in pixels.]]></return>
+          <description><![CDATA[Returns the y scroll location of specified element - only for an element where height of element is less than the height of element content.
+
+NOTE: getScrollY() can be used with getScrollX() to set the scroll location of an element using the setScroll function. For Example:
+
+//returns the X and Y scroll coordinates
+var x = forms.company.elements.portal50.getScrollX();
+var y = forms.company.elements.portal50.getScrollY();
+
+//sets the new scroll location
+forms.company.elements.portal50.setScroll(x+10,y+10);]]></description>
+          <summary><![CDATA[Returns the y scroll location of specified element - only for an element where height of element is less than the height of element content.]]></summary>
+          <sample><![CDATA[var y = %%prefix%%%%elementName%%.getScrollY();]]></sample>
+        </function>
+        <function name="getSelectedIndex">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The selected index (integer).]]></return>
+          <description><![CDATA[Gets the selected record index in the current cached foundset in the specified portal.]]></description>
+          <summary><![CDATA[Gets the selected record index in the current cached foundset in the specified portal.]]></summary>
+          <sample><![CDATA[//gets the selected record index in the foundset
+var current = %%prefix%%%%elementName%%.getSelectedIndex();
+
+//sets the next record index in the foundset
+%%prefix%%%%elementName%%.setSelectedIndex(current+1);]]></sample>
+        </function>
+        <function name="getSortColumns">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[array with column names]]></return>
+          <description><![CDATA[Returns the sort columns names of the current portal (as comma separated string).]]></description>
+          <summary><![CDATA[Returns the sort columns names of the current portal (as comma separated string).]]></summary>
+          <sample><![CDATA[var w = %%prefix%%%%elementName%%.getSortColumns();]]></sample>
+        </function>
+        <function name="getWidth">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The width of the element in pixels.]]></return>
+          <description><![CDATA[Returns the width of the current element. 
+
+NOTE: getWidth() can be used with getHeight() to set the size of an element using the setSize function. For Example:
+
+//returns the width (w) and height (h)
+var w = forms.company.elements.faxBtn.getWidth();
+var h = forms.company.elements.faxBtn.getHeight();
+
+//sets the new size
+forms.company.elements.faxBtn.setSize(w,h);
+
+//sets the new size and adds 1 px to both the width and height
+forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
+          <summary><![CDATA[Returns the width of the current element.]]></summary>
+          <sample><![CDATA[var w = %%prefix%%%%elementName%%.getWidth();]]></sample>
+        </function>
+        <function name="newRecord">
+          <argumentsTypes/>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Creates a new portal row in the foundset of the specified portal.]]></description>
+          <summary><![CDATA[Creates a new portal row in the foundset of the specified portal.]]></summary>
+          <sample><![CDATA[// foreign key data is only filled in for equals (=) relation items 
+%%prefix%%%%elementName%%.newRecord();]]></sample>
+        </function>
+        <function name="newRecord">
+          <argumentsTypes>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Creates a new portal row in the foundset of the specified portal.]]></description>
+          <summary><![CDATA[Creates a new portal row in the foundset of the specified portal.]]></summary>
+          <sample><![CDATA[// foreign key data is only filled in for equals (=) relation items 
+//adds the new record on top
+%%prefix%%%%elementName%%.newRecord(true);]]></sample>
+          <parameters>
+            <parameter name="addOnTop" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[adds the new portal record as the topmost row of the foundset, default value is true]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="putClientProperty">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.Object"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the value for the specified element client property key.
+
+NOTE: Depending on the operating system, a user interface property name may be available.]]></description>
+          <summary><![CDATA[Sets the value for the specified element client property key.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.putClientProperty('ToolTipText','some text');]]></sample>
+          <parameters>
+            <parameter name="key" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[user interface key (depends on operating system)]]></description>
+            </parameter>
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[a predefined value for the key]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setLocation">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen.
+Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.
+
+NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:
+
+//returns the X and Y coordinates
+var x = forms.company.elements.faxBtn.getLocationX();
+var y = forms.company.elements.faxBtn.getLocationY();
+
+//sets the new location 10 px to the right; 10 px down from the current location
+forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
+          <summary><![CDATA[Sets the location of an element.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.setLocation(200,200);]]></sample>
+          <parameters>
+            <parameter name="x" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the X coordinate of the element in pixels.]]></description>
+            </parameter>
+            <parameter name="y" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the Y coordinate of the element in pixels.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function deprecated="true" name="setRecordIndex" undocumented="true">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <parameters>
+            <parameter name="i" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          </parameters>
+        </function>
+        <function name="setScroll">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the scroll location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen - only for an element where the height of the element is greater than the height of element content
+
+NOTE: getScrollX() can be used with getScrollY() to return the current scroll location of an element; then use the X and Y coordinates with the setScroll function to set a new scroll location. For Example:
+
+//returns the X and Y coordinates
+var x = forms.company.elements.portal50.getScrollX();
+var y = forms.company.elements.portal50.getScrollY();
+
+//sets the new location
+forms.company.elements.portal50.setScroll(x+10,y+10);]]></description>
+          <summary><![CDATA[Sets the scroll location of an element.]]></summary>
+          <sample><![CDATA[%%prefix%%%%elementName%%.setScroll(200,200);]]></sample>
+          <parameters>
+            <parameter name="x" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the X coordinate of the portal scroll location in pixels]]></description>
+            </parameter>
+            <parameter name="y" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the Y coordinate of the portal scroll location in pixels]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="setSelectedIndex">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Sets the selected record index in the current cached foundset in the specified portal.]]></description>
+          <summary><![CDATA[Sets the selected record index in the current cached foundset in the specified portal.]]></summary>
+          <sample><![CDATA[//gets the selected record index in the foundset
+var current = %%prefix%%%%elementName%%.getSelectedIndex();
+
+//sets the next record index in the foundset
+%%prefix%%%%elementName%%.setSelectedIndex(current+1);]]></sample>
+          <parameters>
+            <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the specified record index]]></description>
             </parameter>
           </parameters>
         </function>

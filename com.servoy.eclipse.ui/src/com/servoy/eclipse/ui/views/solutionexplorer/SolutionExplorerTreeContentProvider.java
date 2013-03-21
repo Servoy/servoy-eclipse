@@ -179,61 +179,35 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private final List<Image> imagesConvertedFromSwing = new ArrayList<Image>();
 
+	private static PlatformSimpleUserNode createTypeNode(String displayName, UserNodeType type, Class< ? > realType, PlatformSimpleUserNode parent)
+	{
+		PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayName, type, null, IconProvider.instance().image(realType), realType);
+		node.parent = parent;
+		return node;
+	}
+
 	SolutionExplorerTreeContentProvider(SolutionExplorerView v)
 	{
 		view = v;
 		invisibleRootNode = new PlatformSimpleUserNode("root", UserNodeType.ARRAY); //$NON-NLS-1$
 
-		PlatformSimpleUserNode jslib = new PlatformSimpleUserNode(Messages.TreeStrings_JSLib, UserNodeType.JSLIB, null, IconProvider.instance().image(
-			JSLib.class), JSLib.class);
+		PlatformSimpleUserNode jslib = createTypeNode(Messages.TreeStrings_JSLib, UserNodeType.JSLIB, JSLib.class, invisibleRootNode);
 
-		PlatformSimpleUserNode jsarray = new PlatformSimpleUserNode(Messages.TreeStrings_Array, UserNodeType.ARRAY, null, IconProvider.instance().image(
-			com.servoy.j2db.documentation.scripting.docs.Array.class));
-		jsarray.setIsVisibleInMobile(true);
-		PlatformSimpleUserNode jsdate = new PlatformSimpleUserNode(Messages.TreeStrings_Date, UserNodeType.DATE, null, null, IconProvider.instance().image(
-			com.servoy.j2db.documentation.scripting.docs.Date.class));
-		PlatformSimpleUserNode jsstring = new PlatformSimpleUserNode(Messages.TreeStrings_String, UserNodeType.STRING, null, IconProvider.instance().image(
-			com.servoy.j2db.documentation.scripting.docs.String.class));
-		PlatformSimpleUserNode jsmath = new PlatformSimpleUserNode(Messages.TreeStrings_Math, UserNodeType.FUNCTIONS, null, IconProvider.instance().image(
-			com.servoy.j2db.documentation.scripting.docs.Math.class));
-		PlatformSimpleUserNode jsstatements = new PlatformSimpleUserNode(Messages.TreeStrings_Statements, UserNodeType.STATEMENTS, null,
-			IconProvider.instance().image(com.servoy.j2db.documentation.scripting.docs.Statements.class));
-		PlatformSimpleUserNode jsspecialops = new PlatformSimpleUserNode(Messages.TreeStrings_SpecialOperators, UserNodeType.SPECIAL_OPERATORS, null,
-			IconProvider.instance().image(com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class));
-		PlatformSimpleUserNode jsxml = new PlatformSimpleUserNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, null,
-			IconProvider.instance().image(com.servoy.j2db.documentation.scripting.docs.XML.class));
-		PlatformSimpleUserNode jsxmllist = new PlatformSimpleUserNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, null,
-			IconProvider.instance().image(com.servoy.j2db.documentation.scripting.docs.XMLList.class));
-		PlatformSimpleUserNode jsregexp = new PlatformSimpleUserNode(Messages.TreeStrings_RegExp, UserNodeType.REGEXP, null, IconProvider.instance().image(
-			com.servoy.j2db.documentation.scripting.docs.RegExp.class));
-		PlatformSimpleUserNode jsnumber = new PlatformSimpleUserNode(Messages.TreeStrings_Number, UserNodeType.NUMBER, null, IconProvider.instance().image(
-			com.servoy.j2db.documentation.scripting.docs.Number.class));
-		PlatformSimpleUserNode json = new PlatformSimpleUserNode(Messages.TreeStrings_JSON, UserNodeType.JSON, null, IconProvider.instance().image(
-			com.servoy.j2db.documentation.scripting.docs.JSON.class));
-		jsarray.setIsVisibleInMobile(true);
-		jsdate.setIsVisibleInMobile(true);
-		jsstring.setIsVisibleInMobile(true);
-		jsnumber.setIsVisibleInMobile(true);
-		jsmath.setIsVisibleInMobile(true);
-		jsregexp.setIsVisibleInMobile(true);
-		jsstatements.setIsVisibleInMobile(true);
-		jsspecialops.setIsVisibleInMobile(true);
-		json.setIsVisibleInMobile(true);
+		jslib.children = new PlatformSimpleUserNode[] { //
+		createTypeNode(Messages.TreeStrings_Array, UserNodeType.ARRAY, com.servoy.j2db.documentation.scripting.docs.Array.class, jslib),//
+		createTypeNode(Messages.TreeStrings_Date, UserNodeType.DATE, com.servoy.j2db.documentation.scripting.docs.Date.class, jslib), //
+		createTypeNode(Messages.TreeStrings_String, UserNodeType.STRING, com.servoy.j2db.documentation.scripting.docs.String.class, jslib), //
+		createTypeNode(Messages.TreeStrings_Number, UserNodeType.NUMBER, com.servoy.j2db.documentation.scripting.docs.Number.class, jslib), // 
+		createTypeNode(Messages.TreeStrings_Math, UserNodeType.FUNCTIONS, com.servoy.j2db.documentation.scripting.docs.Math.class, jslib),//
+		createTypeNode(Messages.TreeStrings_RegExp, UserNodeType.REGEXP, com.servoy.j2db.documentation.scripting.docs.RegExp.class, jslib), //
+		createTypeNode(Messages.TreeStrings_Statements, UserNodeType.STATEMENTS, com.servoy.j2db.documentation.scripting.docs.Statements.class, jslib), //
+		createTypeNode(Messages.TreeStrings_SpecialOperators, UserNodeType.SPECIAL_OPERATORS,
+			com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, jslib), //
+		createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
+		createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
+		createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class, jslib) };
 
-		jslib.children = new PlatformSimpleUserNode[] { jsarray, jsdate, jsstring, jsnumber, jsmath, jsregexp, jsstatements, jsspecialops, json, jsxml, jsxmllist };
-		jsarray.parent = jslib;
-		jsdate.parent = jslib;
-		jsstring.parent = jslib;
-		jsnumber.parent = jslib;
-		jsmath.parent = jslib;
-		jsstatements.parent = jslib;
-		jsspecialops.parent = jslib;
-		jsxml.parent = jslib;
-		jsxmllist.parent = jslib;
-
-
-		PlatformSimpleUserNode application = new PlatformSimpleUserNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, null,
-			IconProvider.instance().image(JSApplication.class), JSApplication.class);
+		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, invisibleRootNode);
 
 		Class< ? >[] applicationClasses1 = ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class).getAllReturnedTypes();
 		Class< ? >[] applicationClasses2 = new ServoyException(0).getAllReturnedTypes();
@@ -243,6 +217,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		addReturnTypeNodes(application, applicationClasses);
 
 		resources = new PlatformSimpleUserNode(Messages.TreeStrings_Resources, UserNodeType.RESOURCES, null, uiActivator.loadImageFromBundle("resources.png")); //$NON-NLS-1$
+		resources.parent = invisibleRootNode;
 
 		stylesNode = new PlatformSimpleUserNode(Messages.TreeStrings_Styles, UserNodeType.STYLES, null, uiActivator.loadImageFromBundle("styles.gif")); //$NON-NLS-1$
 		stylesNode.parent = resources;
@@ -260,14 +235,16 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 		activeSolutionNode = new PlatformSimpleUserNode(Messages.TreeStrings_NoActiveSolution, UserNodeType.SOLUTION, null,
 			Messages.SolutionExplorerView_activeSolution, null, uiActivator.loadImageFromBundle("solution.gif")); //$NON-NLS-1$
+		activeSolutionNode.parent = invisibleRootNode;
 		modulesOfActiveSolution = new PlatformSimpleUserNode(Messages.TreeStrings_Modules, UserNodeType.MODULES, null,
 			uiActivator.loadImageFromBundle("modules.gif")); //$NON-NLS-1$
+		modulesOfActiveSolution.parent = activeSolutionNode;
 
 		allSolutionsNode = new PlatformSimpleUserNode(Messages.TreeStrings_AllSolutions, UserNodeType.ALL_SOLUTIONS, null,
 			PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER));
+		allSolutionsNode.parent = invisibleRootNode;
 
-		databaseManager = new PlatformSimpleUserNode(Messages.TreeStrings_DatabaseManager, UserNodeType.FOUNDSET_MANAGER, null, IconProvider.instance().image(
-			JSDatabaseManager.class), JSDatabaseManager.class);
+		databaseManager = createTypeNode(Messages.TreeStrings_DatabaseManager, UserNodeType.FOUNDSET_MANAGER, JSDatabaseManager.class, invisibleRootNode);
 		addReturnTypeNodes(databaseManager, ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class).getAllReturnedTypes());
 		PlatformSimpleUserNode[] children = (PlatformSimpleUserNode[])databaseManager.children;
 		PlatformSimpleUserNode[] newChildren = new PlatformSimpleUserNode[children.length];
@@ -294,50 +271,32 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		});
 		databaseManager.children = newChildren;
 
-		PlatformSimpleUserNode utils = new PlatformSimpleUserNode(Messages.TreeStrings_Utils, UserNodeType.UTILS, null, IconProvider.instance().image(
-			JSUtils.class), JSUtils.class);
+		PlatformSimpleUserNode utils = createTypeNode(Messages.TreeStrings_Utils, UserNodeType.UTILS, JSUtils.class, invisibleRootNode);
 
-		PlatformSimpleUserNode jsunit = new PlatformSimpleUserNode(Messages.TreeStrings_JSUnit, UserNodeType.JSUNIT, null, IconProvider.instance().image(
-			JSUnitAssertFunctions.class), JSUnitAssertFunctions.class);
+		PlatformSimpleUserNode jsunit = createTypeNode(Messages.TreeStrings_JSUnit, UserNodeType.JSUNIT, JSUnitAssertFunctions.class, invisibleRootNode);
 
-		solutionModel = new PlatformSimpleUserNode(Messages.TreeStrings_SolutionModel, UserNodeType.SOLUTION_MODEL, null, IconProvider.instance().image(
-			JSSolutionModel.class), JSSolutionModel.class);
+		solutionModel = createTypeNode(Messages.TreeStrings_SolutionModel, UserNodeType.SOLUTION_MODEL, JSSolutionModel.class, invisibleRootNode);
 
 		addReturnTypeNodes(solutionModel, ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class).getAllReturnedTypes());
 
-		history = new PlatformSimpleUserNode(Messages.TreeStrings_History, UserNodeType.HISTORY, null, IconProvider.instance().image(HistoryProvider.class),
-			HistoryProvider.class);
+		history = createTypeNode(Messages.TreeStrings_History, UserNodeType.HISTORY, HistoryProvider.class, invisibleRootNode);
 
-		security = new PlatformSimpleUserNode(Messages.TreeStrings_Security, UserNodeType.SECURITY, null, IconProvider.instance().image(JSSecurity.class),
-			JSSecurity.class);
+		security = createTypeNode(Messages.TreeStrings_Security, UserNodeType.SECURITY, JSSecurity.class, invisibleRootNode);
 		addReturnTypeNodes(security, ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class).getAllReturnedTypes());
 
-		i18n = new PlatformSimpleUserNode(Messages.TreeStrings_i18n, UserNodeType.I18N, null, IconProvider.instance().image(JSI18N.class), JSI18N.class);
+		i18n = createTypeNode(Messages.TreeStrings_i18n, UserNodeType.I18N, JSI18N.class, invisibleRootNode);
 		addReturnTypeNodes(i18n, ScriptObjectRegistry.getScriptObjectForClass(JSI18N.class).getAllReturnedTypes());
 
 		servers = new PlatformSimpleUserNode(Messages.TreeStrings_DBServers, UserNodeType.SERVERS, null, uiActivator.loadImageFromBundle("database_srv.gif")); //$NON-NLS-1$
+		servers.parent = resources;
+
 		final PlatformSimpleUserNode plugins = new PlatformSimpleUserNode(Messages.TreeStrings_Plugins, UserNodeType.PLUGINS, null,
 			uiActivator.loadImageFromBundle("plugin.gif")); //$NON-NLS-1$
-
+		plugins.parent = invisibleRootNode;
 
 		resources.children = new PlatformSimpleUserNode[] { servers, stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode };
 
 		invisibleRootNode.children = new PlatformSimpleUserNode[] { resources, allSolutionsNode, activeSolutionNode, jslib, application, solutionModel, databaseManager, utils, history, security, i18n, jsunit, plugins };
-		jslib.parent = invisibleRootNode;
-		application.parent = invisibleRootNode;
-		resources.parent = invisibleRootNode;
-		activeSolutionNode.parent = invisibleRootNode;
-		allSolutionsNode.parent = invisibleRootNode;
-		databaseManager.parent = invisibleRootNode;
-		utils.parent = invisibleRootNode;
-		history.parent = invisibleRootNode;
-		solutionModel.parent = invisibleRootNode;
-		security.parent = invisibleRootNode;
-		i18n.parent = invisibleRootNode;
-		jsunit.parent = invisibleRootNode;
-		servers.parent = resources;
-		plugins.parent = invisibleRootNode;
-		modulesOfActiveSolution.parent = activeSolutionNode;
 
 		scriptingNodes = new PlatformSimpleUserNode[] { jslib, application, solutionModel, databaseManager, utils, history, security, i18n, /* exceptions, */jsunit, plugins };
 		resourceNodes = new PlatformSimpleUserNode[] { stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode };
@@ -346,14 +305,12 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		// when used...
 		Job job = new Job("Background loading of plugins node")
 		{
-
 			@Override
 			protected IStatus run(IProgressMonitor monitor)
 			{
 				addPluginsNodeChildren(plugins);
 				return Status.OK_STATUS;
 			}
-
 		};
 		job.setSystem(true);
 		job.setPriority(Job.LONG);
@@ -819,7 +776,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			{
 				image = uiActivator.loadImageFromBundle("serverDisabled.gif"); //$NON-NLS-1$
 			}
-
 
 			PlatformSimpleUserNode node = new PlatformSimpleUserNode(server_name, UserNodeType.SERVER, "", tooltip, serverObj, image); //$NON-NLS-1$
 			serverNodes.add(node);

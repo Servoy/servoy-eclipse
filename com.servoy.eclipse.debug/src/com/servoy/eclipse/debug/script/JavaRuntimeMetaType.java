@@ -48,9 +48,9 @@ final class JavaRuntimeMetaType extends DefaultMetaType
 	}
 
 	@Override
-	public IRType toRType(ITypeSystem typeSystem, IRTypeDeclaration declaration)
+	public IRType toRType(IRTypeDeclaration declaration)
 	{
-		return new JavaRuntimeType(typeSystem, declaration);
+		return new JavaRuntimeType(declaration);
 	}
 
 	/*

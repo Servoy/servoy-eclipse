@@ -297,7 +297,7 @@
      <extension
            point="org.eclipse.dltk.launching.interpreterInstalls">
         <interpreterInstall
-              home="${eclipse_home}\artifacts.xml"
+              home="${eclipse_home}/artifacts.xml"
               id="com.servoy.eclipse.debug.interpreter.rhino"
               interpreterInstallType="org.eclipse.dltk.internal.debug.ui.launcher.GenericRhinoInstallType"
               name="rhino">

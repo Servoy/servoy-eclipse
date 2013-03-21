@@ -18,6 +18,7 @@
 package com.servoy.eclipse.mobileexporter.export;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,6 +61,7 @@ import com.servoy.j2db.persistence.I18NUtil;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
@@ -102,6 +104,47 @@ public class MobileExporter
 	private static final String PROPERTY_FUNCTION_CODE = "${functionCode}";
 	private static final String PROPERTY_VARIABLE_DEFAULT_VALUE = "${defaultValue}";
 	private static final String PROPERTY_VARIABLE_TYPE = "${variableType}";
+
+
+	private static final String MIME_JS = "text/javascript";
+	private static final String MIME_CSS = "text/css";
+	private static final String TAG_SCRIPT = "<script type=\"text/javascript\" language=\"javascript\" src=\"mobileclient/js/";
+	private static final String TAG_CSS = "<link rel=\"stylesheet\" type=\"text/css\" href=\"mobileclient/css/";
+	private static final String TAG_SCRIPT_END = "\"></script>\n";
+	private static final String TAG_CSS_END = "\"/>\n";
+
+
+	private String doMediaExport(ZipOutputStream zos, File outputFolder) throws IOException
+	{
+		StringBuilder headerText = new StringBuilder();
+
+		FlattenedSolution flattenedSolution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
+		if (flattenedSolution != null)
+		{
+			Iterator<Media> mediasIte = flattenedSolution.getMedias(false);
+			Media media;
+			String content;
+			boolean isJS;
+			while (mediasIte.hasNext())
+			{
+				media = mediasIte.next();
+				if ((isJS = MIME_JS.equals(media.getMimeType())) || MIME_CSS.equals(media.getMimeType()))
+				{
+					content = new String(media.getMediaData());
+					headerText.append(isJS ? TAG_SCRIPT : TAG_CSS).append(media.getName()).append(isJS ? TAG_SCRIPT_END : TAG_CSS_END);
+					addZipEntry("mobileclient/" + (isJS ? "js" : "css") + "/" + media.getName(), zos, Utils.getUTF8EncodedStream(content));
+					if (outputFolder != null)
+					{
+						File outputFolderJS = new File(outputFolder, (isJS ? "js" : "css"));
+						outputFolderJS.mkdirs();
+						Utils.writeTXTFile(new File(outputFolderJS, media.getName()), content);
+					}
+				}
+			}
+		}
+
+		return headerText.toString();
+	}
 
 	private String doPersistExport()
 	{
@@ -324,6 +367,7 @@ public class MobileExporter
 
 		// Write files for running from java source
 		File tmpP = new File(outputFolder.getParent() + "/src/com/servoy/mobile/public");
+		File tmpWAR = new File(outputFolder.getParent() + "/war");
 
 		if (outputFolder.getParent() != null && tmpP.exists())
 		{
@@ -345,6 +389,9 @@ public class MobileExporter
 				buildRenameEntriesList(renameMap);
 				exportedFile = new File(outputFolder, solutionName + (exportAsZip ? ".zip" : ".war"));
 				warStream = new ZipOutputStream(new FileOutputStream(exportedFile));
+
+				String mediaExport = doMediaExport(warStream, outputFolder.getParent() != null && tmpP.exists() ? tmpP : null);
+
 				ZipInputStream zipStream = new ZipInputStream(is);
 				ZipEntry entry = zipStream.getNextEntry();
 				while (entry != null)
@@ -357,6 +404,18 @@ public class MobileExporter
 						for (String key : renameMap.keySet())
 						{
 							fileContent = fileContent.replaceAll(Pattern.quote(key), renameMap.get(key));
+						}
+						if (entryName.equals("servoy_mobile.html") && mediaExport.length() > 0)
+						{
+							fileContent = fileContent.replaceAll(Pattern.quote("<!--SOLUTION_MEDIA_PLACEHOLDER-->"), mediaExport);
+							if (outputFolder.getParent() != null && tmpWAR.exists())
+							{
+								String indexContent = Utils.getTXTFileContent(new FileInputStream(new File(tmpWAR, "servoy_mobile.html")),
+									Charset.forName("UTF8"), false);
+								File outputFile = new File(tmpWAR, "index.html"); //$NON-NLS-1$
+								indexContent = indexContent.replaceAll(Pattern.quote("<!--SOLUTION_MEDIA_PLACEHOLDER-->"), mediaExport);
+								Utils.writeTXTFile(outputFile, indexContent);
+							}
 						}
 						contentStream = Utils.getUTF8EncodedStream(fileContent);
 					}

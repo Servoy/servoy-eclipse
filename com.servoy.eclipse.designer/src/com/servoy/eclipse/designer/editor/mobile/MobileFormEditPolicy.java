@@ -25,6 +25,7 @@ import org.eclipse.gef.requests.CreationFactory;
 import com.servoy.eclipse.designer.editor.AddPartsCommand;
 import com.servoy.eclipse.designer.editor.CreateElementRequest;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.mobile.commands.AddBeanCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.AddFieldCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.AddFormListCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.AddInsetListCommand;
@@ -105,6 +106,10 @@ public class MobileFormEditPolicy extends ComponentEditPolicy
 			else if (createType == VisualFormEditor.REQ_PLACE_BUTTON)
 			{
 				command = new MobileAddButtonCommand(application, form, (CreateRequest)request, MobileSnapType.ContentItem);
+			}
+			else if (createType == VisualFormEditor.REQ_PLACE_BEAN)
+			{
+				command = new AddBeanCommand(application, form, (CreateRequest)request);
 			}
 		}
 

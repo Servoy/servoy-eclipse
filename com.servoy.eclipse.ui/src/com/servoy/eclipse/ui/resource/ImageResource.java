@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
@@ -39,18 +40,18 @@ public class ImageResource
 {
 	public static ImageResource INSTANCE = new ImageResource();
 
-	private final Map<Pair<ImageDescriptor, RGB>, Image> imageCacheDescriptor = new HashMap<Pair<ImageDescriptor, RGB>, Image>();
+	private final Map<Pair<Pair<ImageDescriptor, RGB>, RGB>, Image> imageCacheDescriptor = new HashMap<Pair<Pair<ImageDescriptor, RGB>, RGB>, Image>();
 
 	public Image getImage(ImageDescriptor imageDescriptor)
 	{
-		return getImageWithRoundBackground(imageDescriptor, null);
+		return getImageWithRoundBackground(imageDescriptor, null, null);
 	}
 
-	public Image getImageWithRoundBackground(ImageDescriptor imageDescriptor, RGB rgb)
+	public Image getImageWithRoundBackground(ImageDescriptor imageDescriptor, RGB rgb, RGB background)
 	{
 		if (imageDescriptor == null) return null;
 
-		Pair<ImageDescriptor, RGB> key = new Pair<ImageDescriptor, RGB>(imageDescriptor, rgb);
+		Pair<Pair<ImageDescriptor, RGB>, RGB> key = new Pair<Pair<ImageDescriptor, RGB>, RGB>(new Pair<ImageDescriptor, RGB>(imageDescriptor, rgb), background);
 		Image image = imageCacheDescriptor.get(key);
 		if (image == null)
 		{
@@ -64,10 +65,16 @@ public class ImageResource
 				Image plainImage = getImage(imageDescriptor);
 
 				ImageData imageData = plainImage.getImageData().scaledTo(plainImage.getBounds().width + 2, plainImage.getBounds().height + 2);
-				imageData.transparentPixel = imageData.palette.getPixel(new RGB(255, 255, 255)); // whitePixel
+				RGB rgb2 = background != null ? background : new RGB(255, 255, 255);
+				imageData.transparentPixel = imageData.palette.getPixel(rgb2);
 				image = new Image(Display.getCurrent(), imageData);
 
 				GC gc = new GC(image);
+
+				gc.setAntialias(SWT.ON);
+				gc.setInterpolation(SWT.HIGH);
+				gc.setBackground(ColorResource.INSTANCE.getColor(rgb2));
+				gc.fillRectangle(0, 0, imageData.width, imageData.height);
 				gc.setBackground(ColorResource.INSTANCE.getColor(rgb));
 				gc.fillOval(0, 0, imageData.width, imageData.height);
 				gc.drawImage(plainImage, 1, 1);

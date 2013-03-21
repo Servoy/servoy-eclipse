@@ -69,11 +69,14 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 
 	protected IApplication application;
 	private final BaseVisualFormEditor editorPart;
+	private final org.eclipse.swt.graphics.Color backgroundColor;
 
-	public MobileListElementEditpart(IApplication application, BaseVisualFormEditor editorPart, Pair<BaseComponent, MobileListElementType> model)
+	public MobileListElementEditpart(IApplication application, BaseVisualFormEditor editorPart, Pair<BaseComponent, MobileListElementType> model,
+		org.eclipse.swt.graphics.Color backgroundColor)
 	{
 		this.application = application;
 		this.editorPart = editorPart;
+		this.backgroundColor = backgroundColor;
 		setModel(model);
 	}
 
@@ -228,7 +231,7 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 			image = ImageResource.INSTANCE.getImageWithRoundBackground(
 				Activator.loadImageDescriptorFromBundle("mobile/icons-18-white-" + dataIcon + ".png"),
 				new RGB(IconWithRoundBackground.DATA_ICON_BG.getRed(), IconWithRoundBackground.DATA_ICON_BG.getGreen(),
-					IconWithRoundBackground.DATA_ICON_BG.getBlue()));
+					IconWithRoundBackground.DATA_ICON_BG.getBlue()), backgroundColor != null ? backgroundColor.getRGB() : null);
 			fig.setImage(image);
 		}
 	}

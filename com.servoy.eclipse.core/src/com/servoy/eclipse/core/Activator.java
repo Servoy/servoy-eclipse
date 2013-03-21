@@ -130,6 +130,7 @@ import com.servoy.j2db.util.Utils;
  */
 public class Activator extends Plugin
 {
+	public static final String RECREATE_ON_I18N_CHANGE_PREFERENCE = "recreate.forms.on.i18n.change"; //$NON-NLS-1$
 
 	private volatile boolean defaultAccessed = false;
 
@@ -697,6 +698,14 @@ public class Activator extends Plugin
 		return plugin;
 	}
 
+	/**
+	 * Global (workspace) preferences
+	 */
+	public static IEclipsePreferences getEclipsePreferences()
+	{
+		return InstanceScope.INSTANCE.getNode(PLUGIN_ID);
+	}
+
 	@SuppressWarnings("restriction")
 	private void initialize()
 	{
@@ -850,7 +859,7 @@ public class Activator extends Plugin
 								public void run()
 								{
 									IDebugClientHandler dch = getDebugClientHandler();
-									dch.refreshDebugClientsI18N();
+									dch.refreshDebugClientsI18N(getEclipsePreferences().getBoolean(RECREATE_ON_I18N_CHANGE_PREFERENCE, true));
 								}
 							});
 						}
@@ -900,7 +909,6 @@ public class Activator extends Plugin
 			}
 		}
 	}
-
 
 	private void processMethodTemplates(Map<String, IMethodTemplate> templs)
 	{

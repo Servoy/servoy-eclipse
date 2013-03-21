@@ -23,7 +23,6 @@ import java.awt.HeadlessException;
 import java.awt.MediaTracker;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
-import java.awt.image.PixelGrabber;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.io.PipedInputStream;
@@ -84,6 +83,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.ImageLoader;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -694,26 +694,6 @@ public class UIUtils
 		return errorImageDescriptor.getImageData();
 	}
 
-	private static boolean hasAlpha(java.awt.Image image)
-	{
-		if (image instanceof BufferedImage)
-		{
-			return ((BufferedImage)image).getColorModel().hasAlpha();
-		}
-
-		PixelGrabber pg = new PixelGrabber(image, 0, 0, 1, 1, false);
-		try
-		{
-			pg.grabPixels(30000); //workaround for case SVY-3024, import image loading hang up.
-		}
-		catch (InterruptedException e)
-		{
-			return false;
-		}
-		return pg.getColorModel() != null && pg.getColorModel().hasAlpha();
-	}
-
-
 	private static BufferedImage toBufferedImage(java.awt.Image image)
 	{
 		if (image instanceof BufferedImage)
@@ -740,7 +720,7 @@ public class UIUtils
 		}
 		while (!mt.checkAll());
 
-		boolean hasAlpha = hasAlpha(image);
+		boolean hasAlpha = ImageLoader.imageHasAlpha(image, 30000); //workaround for case SVY-3024, import image loading hang up.
 		BufferedImage bimage = null;
 		try
 		{

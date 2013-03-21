@@ -23,6 +23,7 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Insets;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.handles.HandleBounds;
+import org.eclipse.swt.SWT;
 
 /**
  * Figure for (Inset) lists.
@@ -60,6 +61,7 @@ public class MobileListFigure extends Figure implements HandleBounds
 		public void paintBackground(IFigure figure, Graphics graphics, Insets is)
 		{
 			int arc = isInset ? 20 : 0;
+			graphics.setAntialias(SWT.ON);
 			graphics.fillRoundRectangle(figure.getBounds(), arc, arc);
 		}
 	}

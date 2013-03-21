@@ -29,7 +29,9 @@ import javax.swing.SwingUtilities;
 
 import org.eclipse.swt.graphics.Image;
 
+import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.constants.IValueListConstants;
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
@@ -67,6 +69,8 @@ import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.ui.IScriptAccordionPanelMethods;
 import com.servoy.j2db.ui.IScriptDataLabelMethods;
+import com.servoy.j2db.ui.IScriptInsetListComponentMethods;
+import com.servoy.j2db.ui.IScriptMobileBean;
 import com.servoy.j2db.ui.IScriptPortalComponentMethods;
 import com.servoy.j2db.ui.IScriptScriptLabelMethods;
 import com.servoy.j2db.ui.IScriptSplitPaneMethods;
@@ -346,65 +350,69 @@ public class ElementUtil
 
 		if (persist instanceof Bean)
 		{
-			final Bean bean = (Bean)persist;
-			String beanClassName = bean.getBeanClassName();
-			WeakReference<Class< ? >> beanClassRef = beanClassCache.get(beanClassName);
-			Class< ? > beanClass = null;
-			if (beanClassRef != null)
+			if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile()) return IScriptMobileBean.class;
+			else
 			{
-				beanClass = beanClassRef.get();
-			}
-			if (beanClass == null)
-			{
-				ClassLoader bcl = application.getBeanManager().getClassLoader();
-				try
+				final Bean bean = (Bean)persist;
+				String beanClassName = bean.getBeanClassName();
+				WeakReference<Class< ? >> beanClassRef = beanClassCache.get(beanClassName);
+				Class< ? > beanClass = null;
+				if (beanClassRef != null)
 				{
-					beanClass = bcl.loadClass(beanClassName);
-					if (IServoyBeanFactory.class.isAssignableFrom(beanClass))
+					beanClass = beanClassRef.get();
+				}
+				if (beanClass == null)
+				{
+					ClassLoader bcl = application.getBeanManager().getClassLoader();
+					try
 					{
-						final Class[] beanClassHolder = new Class[1];
-						beanClassHolder[0] = beanClass;
-						Runnable runnable = new Runnable()
+						beanClass = bcl.loadClass(beanClassName);
+						if (IServoyBeanFactory.class.isAssignableFrom(beanClass))
 						{
-							public void run()
+							final Class[] beanClassHolder = new Class[1];
+							beanClassHolder[0] = beanClass;
+							Runnable runnable = new Runnable()
 							{
-								try
+								public void run()
 								{
-									Form form = (Form)bean.getParent();
-									IServoyBeanFactory beanFactory = (IServoyBeanFactory)beanClassHolder[0].newInstance();
-									Object beanInstance = beanFactory.getBeanInstance(application.getApplicationType(),
-										(IClientPluginAccess)application.getPluginAccess(),
-										new Object[] { ComponentFactory.getWebID(null, bean), form.getName(), form.getStyleName() });
-									beanClassHolder[0] = beanInstance.getClass();
-									if (beanInstance instanceof IScriptObject)
+									try
 									{
-										ScriptObjectRegistry.registerScriptObjectForClass(beanClassHolder[0], (IScriptObject)beanInstance);
+										Form form = (Form)bean.getParent();
+										IServoyBeanFactory beanFactory = (IServoyBeanFactory)beanClassHolder[0].newInstance();
+										Object beanInstance = beanFactory.getBeanInstance(application.getApplicationType(),
+											(IClientPluginAccess)application.getPluginAccess(),
+											new Object[] { ComponentFactory.getWebID(null, bean), form.getName(), form.getStyleName() });
+										beanClassHolder[0] = beanInstance.getClass();
+										if (beanInstance instanceof IScriptObject)
+										{
+											ScriptObjectRegistry.registerScriptObjectForClass(beanClassHolder[0], (IScriptObject)beanInstance);
+										}
+									}
+									catch (Throwable t)
+									{
+										Debug.error("Error loading bean: " + bean.getName() + " clz: " + beanClassHolder[0], t); //$NON-NLS-1$ //$NON-NLS-2$
 									}
 								}
-								catch (Throwable t)
-								{
-									Debug.error("Error loading bean: " + bean.getName() + " clz: " + beanClassHolder[0], t); //$NON-NLS-1$ //$NON-NLS-2$
-								}
+							};
+							if (SwingUtilities.isEventDispatchThread())
+							{
+								runnable.run();
 							}
-						};
-						if (SwingUtilities.isEventDispatchThread())
-						{
-							runnable.run();
+							else
+							{
+								SwingUtilities.invokeAndWait(runnable);
+							}
+							beanClass = beanClassHolder[0];
 						}
-						else
-						{
-							SwingUtilities.invokeAndWait(runnable);
-						}
-						beanClass = beanClassHolder[0];
+						beanClassCache.put(beanClassName, new WeakReference<Class< ? >>(beanClass));
 					}
-					beanClassCache.put(beanClassName, new WeakReference<Class< ? >>(beanClass));
+					catch (Throwable e)
+					{
+						Debug.error("Error loading bean: " + bean.getName() + " clz: " + beanClassName, e); //$NON-NLS-1$ //$NON-NLS-2$
+					}
 				}
-				catch (Throwable e)
-				{
-					Debug.error("Error loading bean: " + bean.getName() + " clz: " + beanClassName, e); //$NON-NLS-1$ //$NON-NLS-2$
-				}
+				return beanClass;
 			}
-			return beanClass;
 		}
 
 		if (persist instanceof TabPanel)
@@ -417,7 +425,15 @@ public class ElementUtil
 
 		if (persist instanceof Portal)
 		{
-			return IScriptPortalComponentMethods.class;
+			if (((Portal)persist).getCustomMobileProperties() != null &&
+				Boolean.TRUE.equals(((Portal)persist).getCustomMobileProperties().get(IMobileProperties.LIST_COMPONENT.propertyName)))
+			{
+				return IScriptInsetListComponentMethods.class;
+			}
+			else
+			{
+				return IScriptPortalComponentMethods.class;
+			}
 		}
 
 		if (persist instanceof RectShape)

@@ -1026,6 +1026,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					{
 						sel = list.getSelection();
 					}
+					((SolutionExplorerListContentProvider)list.getContentProvider()).clearCache();
 					list.refresh();
 					if (selectIndex >= 0)
 					{

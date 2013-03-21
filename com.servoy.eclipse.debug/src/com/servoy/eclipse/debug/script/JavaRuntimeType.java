@@ -43,14 +43,8 @@ class JavaRuntimeType extends RSimpleType
 	}
 
 	/**
-	 * @param typeSystem2
 	 * @param declaration
 	 */
-	public JavaRuntimeType(ITypeSystem typeSystem, IRTypeDeclaration declaration)
-	{
-		super(typeSystem, declaration);
-	}
-
 	public JavaRuntimeType(IRTypeDeclaration declaration)
 	{
 		super(declaration);

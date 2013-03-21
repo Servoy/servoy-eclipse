@@ -135,7 +135,6 @@ import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
-import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.plugins.IBeanClassProvider;
 import com.servoy.j2db.plugins.IClientPlugin;
@@ -178,12 +177,14 @@ import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
-import com.servoy.j2db.scripting.annotations.AnnotationManager;
+import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 import com.servoy.j2db.scripting.annotations.JSReadonlyProperty;
 import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.ui.IScriptAccordionPanelMethods;
 import com.servoy.j2db.ui.IScriptDataLabelMethods;
+import com.servoy.j2db.ui.IScriptInsetListComponentMethods;
+import com.servoy.j2db.ui.IScriptMobileBean;
 import com.servoy.j2db.ui.IScriptPortalComponentMethods;
 import com.servoy.j2db.ui.IScriptScriptLabelMethods;
 import com.servoy.j2db.ui.IScriptSplitPaneMethods;
@@ -488,18 +489,6 @@ public class TypeCreator extends TypeCache
 			}
 		}
 		return type;
-	}
-
-	private boolean isServoyMobileSolutionType()
-	{
-		boolean isServoyMobileSolution = false;
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		ServoyProject activeProject = servoyModel.getActiveProject();
-		if (activeProject != null && activeProject.getSolution() != null)
-		{
-			isServoyMobileSolution = (activeProject.getSolution().getSolutionType() == SolutionMetaData.MOBILE);
-		}
-		return isServoyMobileSolution;
 	}
 
 	private Type getClassType(String context, Class< ? > clz, String name)
@@ -1080,14 +1069,11 @@ public class TypeCreator extends TypeCache
 								method.setVisible(false);
 							}
 
-							if (isServoyMobileSolutionType())
+							if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile() &&
+								(mobileAllowedTypes.get(typeName) == null || !AnnotationManagerReflection.getInstance().isAnnotatedForMobile(
+									memberbox[i].method(), scriptObjectClass)))
 							{
-								boolean visible = mobileAllowedTypes.get(typeName) != null ? AnnotationManager.getInstance().isMobileAnnotationPresent(
-									memberbox[i].method(), scriptObjectClass) : false;
-								if (!visible)
-								{
-									method.setVisibility(Visibility.INTERNAL);
-								}
+								method.setVisibility(Visibility.INTERNAL);
 							}
 
 							method.setDescription(getDoc(name, scriptObjectClass, parameterTypes)); // TODO name should be of parent.
@@ -1197,7 +1183,7 @@ public class TypeCreator extends TypeCache
 						boolean readOnly = false;
 						if (object instanceof BeanProperty)
 						{
-							readOnly = AnnotationManager.getInstance().isAnnotationPresent(((BeanProperty)object).getGetter(), scriptObjectClass,
+							readOnly = AnnotationManagerReflection.getInstance().isAnnotationPresent(((BeanProperty)object).getGetter(), scriptObjectClass,
 								JSReadonlyProperty.class);
 						}
 
@@ -1205,18 +1191,19 @@ public class TypeCreator extends TypeCache
 						if (!visible) property.setVisible(false);
 						property.setStatic(type == STATIC_FIELD);
 
-						if (isServoyMobileSolutionType() && (object instanceof BeanProperty || (object instanceof Field && property.isStatic())))
+						if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile() &&
+							(object instanceof BeanProperty || (object instanceof Field && property.isStatic())))
 						{
 							boolean visibility = false;
 							if (object instanceof BeanProperty)
 							{
-								visibility = mobileAllowedTypes.get(typeName) != null ? AnnotationManager.getInstance().isMobileAnnotationPresent(
-									((BeanProperty)object).getGetter(), scriptObjectClass) : false;
+								visibility = mobileAllowedTypes.get(typeName) != null &&
+									AnnotationManagerReflection.getInstance().isAnnotatedForMobile(((BeanProperty)object).getGetter(), scriptObjectClass);
 							}
 							else if (object instanceof Field && descriptor == CONSTANT)
 							{
-								visibility = mobileAllowedTypes.get(typeName) != null ? AnnotationManager.getInstance().isMobileAnnotationPresent(
-									((Field)object)) : false;
+								visibility = mobileAllowedTypes.get(typeName) != null &&
+									AnnotationManagerReflection.getInstance().isAnnotatedForMobile(((Field)object));
 							}
 							if (!visibility)
 							{
@@ -1325,7 +1312,7 @@ public class TypeCreator extends TypeCache
 	public final void addType(String name, Class< ? > cls)
 	{
 		classTypes.put(name, cls);
-		mobileAllowedTypes.put(name, Boolean.valueOf(AnnotationManager.getInstance().isMobileAnnotationPresent(cls)));
+		mobileAllowedTypes.put(name, Boolean.valueOf(AnnotationManagerReflection.getInstance().isAnnotatedForMobile(cls)));
 	}
 
 	protected void addAnonymousClassType(String name, Class< ? > cls)
@@ -1333,7 +1320,7 @@ public class TypeCreator extends TypeCache
 		if (!classTypes.containsKey(name) && !scopeTypes.containsKey(name) && !BASE_TYPES.contains(name))
 		{
 			anonymousClassTypes.put(name, cls);
-			mobileAllowedTypes.put(name, Boolean.valueOf(AnnotationManager.getInstance().isMobileAnnotationPresent(cls)));
+			mobileAllowedTypes.put(name, Boolean.valueOf(AnnotationManagerReflection.getInstance().isAnnotatedForMobile(cls)));
 		}
 	}
 
@@ -1544,7 +1531,7 @@ public class TypeCreator extends TypeCache
 //		{
 //			javaTypes.add(type.getName());
 //		}
-		if (isServoyMobileSolutionType())
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile())
 		{
 			if (type.getMetaType() != null && type.getMetaType() == javaMetaType)
 			{
@@ -2374,7 +2361,8 @@ public class TypeCreator extends TypeCache
 					addAnonymousClassType("Plugin<" + clientPlugin.getName() + '>', scriptObject.getClass());
 					property.setType(getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'));
 
-					if (isServoyMobileSolutionType() && !AnnotationManager.getInstance().isMobileAnnotationPresent(scriptObject.getClass()))
+					if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile() &&
+						!AnnotationManagerReflection.getInstance().isAnnotatedForMobile(scriptObject.getClass()))
 					{
 						property.setVisibility(Visibility.INTERNAL);
 					}
@@ -3100,6 +3088,8 @@ public class TypeCreator extends TypeCache
 			addType("RuntimeSplitPane", IScriptSplitPaneMethods.class);
 			typeNames.put(IScriptPortalComponentMethods.class.getSimpleName(), "RuntimePortal");
 			addType("RuntimePortal", IScriptPortalComponentMethods.class);
+			typeNames.put(IScriptInsetListComponentMethods.class.getSimpleName(), "RuntimeInsetList");
+			addType("RuntimeInsetList", IScriptInsetListComponentMethods.class);
 			typeNames.put(IRuntimeListBox.class.getSimpleName(), "RuntimeListBox");
 			addType("RuntimeListBox", IRuntimeListBox.class);
 			typeNames.put(IScriptAccordionPanelMethods.class.getSimpleName(), "RuntimeAccordionPanel");
@@ -3176,7 +3166,7 @@ public class TypeCreator extends TypeCache
 						if (persistClass != null && formElement instanceof Bean)
 						{
 							String beanClassName = ((Bean)formElement).getBeanClassName();
-							if (beanClassName != null)
+							if (persistClass != IScriptMobileBean.class && beanClassName != null)
 							{
 								// map the persist class that is registered in the initialize() method under the beanclassname under that same name.
 								// So SwingDBTreeView class/name points to "DBTreeView" which points to that class again of the class types 
