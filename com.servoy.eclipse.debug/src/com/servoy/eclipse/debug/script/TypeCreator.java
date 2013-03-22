@@ -3096,6 +3096,8 @@ public class TypeCreator extends TypeCache
 			addType("RuntimeAccordionPanel", IScriptAccordionPanelMethods.class);
 			typeNames.put(IRuntimeSpinner.class.getSimpleName(), "RuntimeSpinner");
 			addType("RuntimeSpinner", IRuntimeSpinner.class);
+			typeNames.put(IScriptMobileBean.class.getSimpleName(), "RuntimeBean");
+			addType("RuntimeBean", IScriptMobileBean.class);
 			addType("RuntimeComponent", IRuntimeComponent.class);
 		}
 
