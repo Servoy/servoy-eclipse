@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Workspace based Repository
 Bundle-SymbolicName: com.servoy.eclipse.model;singleton:=true
-Bundle-Version: 7.0.0.2008
+Bundle-Version: 7.0.1.2008
 Bundle-Vendor: Servoy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: servoy_shared,
