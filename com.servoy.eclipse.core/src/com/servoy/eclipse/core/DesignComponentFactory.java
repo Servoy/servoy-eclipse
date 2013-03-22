@@ -262,7 +262,7 @@ public class DesignComponentFactory extends ComponentFactory
 		}
 		else if (meta instanceof GraphicalComponent && ((GraphicalComponent)meta).getDisplaysTags() && c instanceof ILabel)
 		{
-			((ILabel)c).setText(((GraphicalComponent)meta).getText());
+			((ILabel)c).setText(application.getI18NMessageIfPrefixed(((GraphicalComponent)meta).getText()));
 		}
 		OrientationApplier.setOrientationToAWTComponent(c, application.getLocale(), application.getSolution().getTextOrientation());
 		return c;//removeTransparencyAndScrolling(c);
