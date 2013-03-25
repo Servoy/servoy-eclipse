@@ -287,6 +287,25 @@ application.output(a.indexOf('z'));]]></sample>
             <parameter name="fromIndex" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
+        <function name="isArray">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="com.servoy.j2db.documentation.scripting.docs.Boolean"/>
+          <description><![CDATA[Checks whether an object is an array or not.]]></description>
+          <summary><![CDATA[Checks whether an object is an array or not.]]></summary>
+          <sample><![CDATA[var a = [1, 2, 3];
+application.output(Array.isArray(a)); //prints true
+application.output(Array.isArray(23)); //prints false]]></sample>
+          <parameters>
+            <parameter name="obj" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+          </parameters>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/isArray</url>
+            </link>
+          </links>
+        </function>
         <function name="join">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
