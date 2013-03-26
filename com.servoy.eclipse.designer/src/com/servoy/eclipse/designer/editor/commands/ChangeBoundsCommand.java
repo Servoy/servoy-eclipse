@@ -111,6 +111,7 @@ public class ChangeBoundsCommand extends BaseRestorableCommand implements ISuppo
 			{
 				return false;
 			}
+			models.add(editPart.getModel());
 			addChildren(toApply, editPart.getModel());
 			while (toApply.size() > 0)
 			{
