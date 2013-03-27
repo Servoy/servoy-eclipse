@@ -3079,9 +3079,16 @@ public class ServoyModel extends AbstractServoyModel
 
 					JSDocScriptTemplates prefs = JSDocScriptTemplates.getTemplates(scriptFile.getProject(), true);
 					String userTemplate = (persist instanceof IVariable) ? prefs.getVariableTemplate() : prefs.getMethodTemplate();
-
-					String comment = SolutionSerializer.getComment(persist, userTemplate, getDeveloperRepository());
-					if (documentation == null || !documentation.getText().equals(comment.trim()))
+					String comment = null;
+					try
+					{
+						comment = SolutionSerializer.getComment(persist, userTemplate, getDeveloperRepository());
+					}
+					catch (StringIndexOutOfBoundsException e)
+					{
+						//do nothing
+					}
+					if (comment != null && documentation == null || !documentation.getText().equals(comment.trim()))
 					{
 						// if the jsdoc didn't match make sure that the persist is flagged as changed, because it needs to be regenerated.
 						persist.flagChanged();

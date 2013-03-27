@@ -37,6 +37,7 @@ import org.eclipse.gef.palette.PaletteDrawer;
 import org.eclipse.gef.palette.PaletteEntry;
 import org.eclipse.gef.palette.PaletteRoot;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.widgets.Display;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -897,10 +898,16 @@ public class VisualFormEditorPaletteFactory
 		return defval;
 	}
 
-	public static void refreshPalette(PaletteRoot palette)
+	public static void refreshPalette(final PaletteRoot palette)
 	{
-		palette.setChildren(new ArrayList<PaletteEntry>());
-		fillPalette(palette);
+		Display.getDefault().asyncExec(new Runnable()
+		{
+			public void run()
+			{
+				palette.setChildren(new ArrayList<PaletteEntry>());
+				fillPalette(palette);
+			}
+		});
 	}
 
 	public static void savePaletteCustomization(PaletteRoot palette)

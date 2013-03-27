@@ -1353,8 +1353,15 @@ public class SolutionDeserializer
 					if (prop_idx != -1)
 					{
 						int prop_newline_idx = comment.indexOf('}', prop_idx);
-						String sobj = comment.substring(prop_idx + SolutionSerializer.PROPERTIESKEY.length(), prop_newline_idx + 1);
-						json = new ServoyJSONObject(sobj, false);
+						if (prop_newline_idx < comment.length() && prop_newline_idx >= prop_idx + SolutionSerializer.PROPERTIESKEY.length())
+						{
+							String sobj = comment.substring(prop_idx + SolutionSerializer.PROPERTIESKEY.length(), prop_newline_idx + 1);
+							json = new ServoyJSONObject(sobj, false);
+						}
+						else
+						{
+							ServoyLog.logError("Invalid properties comment, ignoring:\n" + comment, null); //$NON-NLS-1$
+						}
 					}
 				}
 				else
