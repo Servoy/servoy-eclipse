@@ -26,6 +26,7 @@ import java.util.Map;
 import org.eclipse.gef.palette.PaletteDrawer;
 import org.eclipse.gef.palette.PaletteEntry;
 import org.eclipse.gef.palette.PaletteRoot;
+import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.designer.editor.IPaletteFactory;
 import com.servoy.eclipse.designer.property.SetValueCommand;
@@ -101,10 +102,16 @@ public abstract class BaseVisualFormEditorPaletteFactory implements IPaletteFact
 		return defval;
 	}
 
-	public void refreshPalette(PaletteRoot palette)
+	public void refreshPalette(final PaletteRoot palette)
 	{
-		palette.setChildren(new ArrayList<PaletteEntry>());
-		fillPalette(palette);
+		Display.getDefault().asyncExec(new Runnable()
+		{
+			public void run()
+			{
+				palette.setChildren(new ArrayList<PaletteEntry>());
+				fillPalette(palette);
+			}
+		});
 	}
 
 	public PaletteCustomization createPaletteCustomization(PaletteRoot palette)

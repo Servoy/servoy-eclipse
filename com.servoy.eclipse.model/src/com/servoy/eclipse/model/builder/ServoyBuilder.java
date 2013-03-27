@@ -4021,7 +4021,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		if (!hasDeletedMarkers) deleteMarkers(project, DEPRECATED_SCRIPT_ELEMENT_USAGE); //deprecation markers are also deleted from checkServoyProject method. we need to not delete markers twice.
 		try
 		{
-			if (project.getReferencedProjects() != null)
+			if (project.getReferencedProjects() != null && project.isOpen())
 			{
 				for (IProject referenced : project.getReferencedProjects())
 				{
