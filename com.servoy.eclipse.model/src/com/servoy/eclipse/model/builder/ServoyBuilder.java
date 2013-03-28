@@ -3038,8 +3038,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									(parentForm.getView() == FormController.LOCKED_TABLE_VIEW || parentForm.getView() == FormController.LOCKED_LIST_VIEW ||
 										parentForm.getView() == FormController.TABLE_VIEW || parentForm.getView() == IForm.LIST_VIEW))
 								{
-									ServoyMarker mk = MarkerMessages.RolloverImageAndCursorNotWorking.fill();
-									addMarker(project, mk.getType(), mk.getText(), -1, ROLLOVER_NOT_WORKING, IMarker.PRIORITY_NORMAL, null, o);
+									Part part = parentForm.getPartAt(((GraphicalComponent)o).getLocation().y);
+									if (part != null && part.getPartType() == Part.BODY)
+									{
+										ServoyMarker mk = MarkerMessages.RolloverImageAndCursorNotWorking.fill();
+										addMarker(project, mk.getType(), mk.getText(), -1, ROLLOVER_NOT_WORKING, IMarker.PRIORITY_NORMAL, null, o);
+									}
 								}
 							}
 
