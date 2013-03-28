@@ -41,7 +41,7 @@ public class TreeBuilder
 	{
 		if (!docManagerLoaded)
 		{
-			URL url = XMLScriptObjectAdapterLoader.class.getResource("doc/servoydoc_jslib_mobile.xml");
+			URL url = XMLScriptObjectAdapterLoader.class.getResource("doc/servoydoc_jslib.xml");
 			IDocumentationManagerProvider documentationManagerProvider = Activator.getDefault().getDocumentationManagerProvider();
 			if (documentationManagerProvider != null)
 			{
