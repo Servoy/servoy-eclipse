@@ -3008,6 +3008,48 @@ if (record.exception instanceof DataException)
 	application.output("SQLState: " + record.exception.getSQLState());
 }]]></sample>
         </function>
+        <function name="getScriptStackTrace">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the string stack trace for this ServoyException.]]></return>
+          <description><![CDATA[Returns the script stack trace for this ServoyException if this could be created.]]></description>
+          <summary><![CDATA[Returns the script stack trace for this ServoyException if this could be created.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </function>
         <function name="getStackTrace">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the string stack trace for this ServoyException.]]></return>
@@ -40240,6 +40282,48 @@ return true]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the string message for this ServoyException.]]></return>
           <description><![CDATA[Returns the string message for this ServoyException.]]></description>
           <summary><![CDATA[Returns the string message for this ServoyException.]]></summary>
+          <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
+application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+	/** @type {ServoyException} */
+	var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+	var trace = "";
+	if (ex.getScriptStackTrace) trace = servoyException.getScriptStackTrace();
+	else if (servoyException.getStackTrace)  trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+		//Get the failed records after a save
+		var array = databaseManager.getFailedRecords()
+		for( var i = 0 ; i < array.length ; i++ )
+		{
+			var record = array[i];
+			application.output(record.exception);
+			if (record.exception instanceof DataException)
+			{
+				/** @type {DataException} */
+				var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			}
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></sample>
+        </function>
+        <function name="getScriptStackTrace">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the string stack trace for this ServoyException.]]></return>
+          <description><![CDATA[Returns the script stack trace for this ServoyException if this could be created.]]></description>
+          <summary><![CDATA[Returns the script stack trace for this ServoyException if this could be created.]]></summary>
           <sample><![CDATA[//this sample script should be attached to onError method handler in the solution settings
 application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
