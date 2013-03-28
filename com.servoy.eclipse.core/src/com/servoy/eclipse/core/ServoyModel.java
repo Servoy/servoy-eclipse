@@ -3084,11 +3084,11 @@ public class ServoyModel extends AbstractServoyModel
 					{
 						comment = SolutionSerializer.getComment(persist, userTemplate, getDeveloperRepository());
 					}
-					catch (StringIndexOutOfBoundsException e)
+					catch (RuntimeException e)
 					{
-						//do nothing
 					}
-					if (comment != null && documentation == null || !documentation.getText().equals(comment.trim()))
+					if (comment == null) continue;
+					if (documentation == null || !documentation.getText().equals(comment.trim()))
 					{
 						// if the jsdoc didn't match make sure that the persist is flagged as changed, because it needs to be regenerated.
 						persist.flagChanged();
