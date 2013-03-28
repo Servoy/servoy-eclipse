@@ -23432,9 +23432,12 @@ Operator: lessThan]]></description>
       <properties>
         <property clientSupport="wc,sc" name="parent">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
-          <description><![CDATA[Get query builder parent.]]></description>
-          <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample/>
+          <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
+          <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
+	var query = databaseManager.createSelect('db:/example_data/person')
+	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
+	foundset.loadRecords(query)]]></sample>
         </property>
         <property clientSupport="wc,sc" name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
@@ -23971,9 +23974,12 @@ foundset.loadRecords(query);]]></sample>
       <properties>
         <property clientSupport="wc,sc" name="parent">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
-          <description><![CDATA[Get query builder parent.]]></description>
-          <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample/>
+          <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
+          <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
+	var query = databaseManager.createSelect('db:/example_data/person')
+	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
+	foundset.loadRecords(query)]]></sample>
         </property>
         <property clientSupport="wc,sc" name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
@@ -24355,7 +24361,10 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample/>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
+	var query = databaseManager.createSelect('db:/example_data/person')
+	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
+	foundset.loadRecords(query)]]></sample>
         </property>
         <property clientSupport="wc,sc" name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
@@ -24423,9 +24432,12 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
         </property>
         <property clientSupport="wc,sc" name="parent">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
-          <description><![CDATA[Get query builder parent.]]></description>
-          <summary><![CDATA[Get query builder parent.]]></summary>
-          <sample/>
+          <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
+          <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
+	var query = databaseManager.createSelect('db:/example_data/person')
+	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
+	foundset.loadRecords(query)]]></sample>
         </property>
         <property clientSupport="wc,sc" name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
@@ -24776,7 +24788,10 @@ The alias may be of the main table or any level deep joined table.]]></descripti
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample/>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
+	var query = databaseManager.createSelect('db:/example_data/person')
+	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
+	foundset.loadRecords(query)]]></sample>
         </property>
         <property clientSupport="wc,sc" name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
@@ -24806,7 +24821,10 @@ The alias may be of the main table or any level deep joined table.]]></descripti
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
           <description><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></description>
           <summary><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
-          <sample/>
+          <sample><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
+	var query = databaseManager.createSelect('db:/example_data/person')
+	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
+	foundset.loadRecords(query)]]></sample>
         </property>
         <property clientSupport="wc,sc" name="root">
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
