@@ -22,13 +22,17 @@ import java.util.List;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartViewer;
+import org.eclipse.gef.dnd.TemplateTransfer;
+import org.eclipse.gef.requests.CreationFactory;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.ui.IWorkbenchPart;
 
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor.RequestType;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileFormGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileListGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobilePartGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.palette.PaletteItemTransferDropTargetListener;
+import com.servoy.eclipse.designer.editor.palette.RequestTypeCreationFactory;
 
 /**
  * Drop target for elements from the palette.
@@ -53,6 +57,15 @@ public class MobilePaletteItemTransferDropTargetListener extends PaletteItemTran
 		boolean enabled = super.isEnabled(event);
 		if (enabled)
 		{
+			CreationFactory factory = getFactory(TemplateTransfer.getInstance().getTemplate());
+			if (factory instanceof RequestTypeCreationFactory && ((RequestTypeCreationFactory)factory).getObjectType() instanceof RequestType)
+			{
+				int type = ((RequestType)((RequestTypeCreationFactory)factory).getObjectType()).type;
+				if (type == RequestType.TYPE_PART)
+				{
+					return true;
+				}
+			}
 			EditPart ep = getViewer().findObjectAt(getDropLocation());
 			if (!(ep instanceof MobileFormGraphicalEditPart))
 			{
