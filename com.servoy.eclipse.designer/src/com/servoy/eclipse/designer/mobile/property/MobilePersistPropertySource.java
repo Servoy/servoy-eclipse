@@ -161,6 +161,16 @@ public class MobilePersistPropertySource extends PersistPropertySource
 	@Override
 	protected boolean hideForProperties(PropertyDescriptorWrapper propertyDescriptor)
 	{
+		if (StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName().equals(propertyDescriptor.propertyDescriptor.getName()) &&
+			getPersist() instanceof GraphicalComponent &&
+			Boolean.TRUE.equals(((GraphicalComponent)getPersist()).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName)) &&
+			getContext() instanceof Form)
+		{
+			// Special case: allow setting of header style class via headertext element
+			return false;
+		}
+
+
 		return RepositoryHelper.hideForMobileProperties(propertyDescriptor.propertyDescriptor.getName(), getPersist().getClass(),
 			(getPersist() instanceof Field) ? ((Field)getPersist()).getDisplayType() : 0, isButton(getPersist())) ||
 
