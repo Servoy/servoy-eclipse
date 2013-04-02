@@ -985,6 +985,10 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						TreePath[] oldPath = tree.getExpandedTreePaths();
 						toRun.run();
 						// try to restore the old path
+						for (TreePath path : oldPath)
+						{
+							tree.setExpandedState(path, true);
+						}
 						tree.setExpandedTreePaths(oldPath);
 						list.refresh();
 					}
