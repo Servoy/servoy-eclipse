@@ -523,7 +523,28 @@ public class Activator extends Plugin
 				};
 				if (Utils.isAppleMacOS())
 				{
-					DebugUtils.invokeAndWaitWhileDispatchingOnSWT(run);
+					boolean allDisplaysDisposed = true;
+					// in mac os 10.8 with java 1.6_43 the display is disposed before the clients are closed
+					//  -- test first if we are in that specific case
+					//loop through all the threads to see if there is still a display associated with any of them 
+					// if there is a display associated
+					Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+					for (Thread thread : threadSet)
+					{
+						if (Display.findDisplay(thread) != null)
+						{
+							allDisplaysDisposed = false;
+							DebugUtils.invokeAndWaitWhileDispatchingOnSWT(run);
+							break;
+						}
+					}
+					// -- display disposed case
+					if (allDisplaysDisposed)
+					{ // create a display
+						Display d = Display.getDefault();
+						DebugUtils.invokeAndWaitWhileDispatchingOnSWT(run);
+						d.dispose();
+					}
 				}
 				else
 				{
