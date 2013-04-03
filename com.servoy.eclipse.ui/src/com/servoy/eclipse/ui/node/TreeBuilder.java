@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.SortedSet;
 
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.XMLScriptObjectAdapterLoader;
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerListContentProvider;
@@ -158,7 +159,9 @@ public class TreeBuilder
 	private static UserNode fdoc2usernode(IFunctionDocumentation fdoc, UserNodeType type, Object functionIcon)
 	{
 		String tooltip = "<html><body><b>" + fdoc.getFullSignature(true, true) + "</b><br>" + fdoc.getDescription() + "</body></html>"; //$NON-NLS-1$//$NON-NLS-2$
-		UserNode un = new UserNode(fdoc.getFullSignature(false, true), type, fdoc.getSignature("."), fdoc.getSample(), tooltip, null, //$NON-NLS-1$
+		String fdocSample = ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile() ? fdoc.getSample(ClientSupport.mc)
+			: fdoc.getSample(ClientSupport.Default);
+		UserNode un = new UserNode(fdoc.getFullSignature(false, true), type, fdoc.getSignature("."), fdocSample, tooltip, null, //$NON-NLS-1$
 			functionIcon);
 		if (fdoc.getClientSupport() != null) un.setIsVisibleInMobile(fdoc.getClientSupport().supports(ClientSupport.mc));
 		return un;
@@ -227,8 +230,10 @@ public class TreeBuilder
 				{
 					toolTip = tmp + "<br><pre>" + toolTip + "</pre></body></html>"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
-				dlm.add(new UserNode(fdoc.getMainName(), type, fdoc.getSignature(codePrefix != null ? codePrefix : null), fdoc.getSample(), toolTip,
-					realObject, fdoc.isSpecial() ? specialIcon : icon));
+				String fdocSample = ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile() ? fdoc.getSample(ClientSupport.mc)
+					: fdoc.getSample(ClientSupport.Default);
+				dlm.add(new UserNode(fdoc.getMainName(), type, fdoc.getSignature(codePrefix != null ? codePrefix : null), fdocSample, toolTip, realObject,
+					fdoc.isSpecial() ? specialIcon : icon));
 			}
 		}
 	}

@@ -108,10 +108,14 @@ import com.servoy.j2db.dataprocessing.IFoundSet;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
+import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.DocumentationUtil;
 import com.servoy.j2db.documentation.IParameter;
+import com.servoy.j2db.documentation.ISampleDocumentation;
+import com.servoy.j2db.documentation.SampleDocumentation;
 import com.servoy.j2db.documentation.ScriptParameter;
 import com.servoy.j2db.documentation.ServoyDocumented;
+import com.servoy.j2db.documentation.XMLScriptObjectAdapter;
 import com.servoy.j2db.documentation.scripting.docs.FormElements;
 import com.servoy.j2db.documentation.scripting.docs.Forms;
 import com.servoy.j2db.documentation.scripting.docs.Globals;
@@ -1722,7 +1726,7 @@ public class TypeCreator extends TypeCache
 			if (scriptObject != null)
 			{
 				StringBuilder docBuilder = new StringBuilder(200);
-				String sample = null;
+				ISampleDocumentation sampleDoc = null;
 				IParameter[] parameters = null;
 				String returnText = null;
 				if (scriptObject instanceof ITypedScriptObject)
@@ -1748,7 +1752,14 @@ public class TypeCreator extends TypeCache
 						docBuilder.append(toolTip);
 						docBuilder.append("<br/>");
 					}
-					sample = ((ITypedScriptObject)scriptObject).getSample(name, parameterTypes);
+					if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile())
+					{
+						sampleDoc = ((ITypedScriptObject)scriptObject).getMobileSample(name, parameterTypes);
+					}
+					if (sampleDoc == null || "".equals(sampleDoc.getSampleCode()))
+					{
+						sampleDoc = ((ITypedScriptObject)scriptObject).getSample(name, parameterTypes);
+					}
 
 					if (parameterTypes != null)
 					{
@@ -1778,13 +1789,20 @@ public class TypeCreator extends TypeCache
 						docBuilder.append(toolTip);
 						docBuilder.append("<br/>");
 					}
-					sample = scriptObject.getSample(name);
+					if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile() && scriptObject instanceof XMLScriptObjectAdapter)
+					{
+						sampleDoc = ((XMLScriptObjectAdapter)scriptObject).getMobileSample(name);
+					}
+					if (sampleDoc == null || "".equals(sampleDoc.getSampleCode()))
+					{
+						sampleDoc = new SampleDocumentation(ClientSupport.Default, scriptObject.getSample(name));
+					}
 				}
 
-				if (sample != null && sample.trim().length() != 0)
+				if (sampleDoc != null && sampleDoc.getSampleCode() != null && sampleDoc.getSampleCode().trim().length() != 0)
 				{
 					docBuilder.append("<pre>");
-					docBuilder.append(HtmlUtils.escapeMarkup(sample));
+					docBuilder.append(HtmlUtils.escapeMarkup(sampleDoc.getSampleCode()));
 					docBuilder.append("</pre><br/>");
 				}
 				if (docBuilder.length() > 0)

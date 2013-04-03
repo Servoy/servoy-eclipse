@@ -72,8 +72,11 @@ import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.RelatedFoundSet;
+import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.DocumentationUtil;
 import com.servoy.j2db.documentation.IParameter;
+import com.servoy.j2db.documentation.ISampleDocumentation;
+import com.servoy.j2db.documentation.SampleDocumentation;
 import com.servoy.j2db.documentation.XMLScriptObjectAdapter;
 import com.servoy.j2db.documentation.scripting.docs.FormElements;
 import com.servoy.j2db.documentation.scripting.docs.Forms;
@@ -1800,15 +1803,35 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		 */
 		public String getSample()
 		{
-			String sample = null;
+			ISampleDocumentation sample = null;
 			if (scriptObject != null)
 			{
-				if (parameterTypes != null && scriptObject instanceof XMLScriptObjectAdapter) sample = ((XMLScriptObjectAdapter)scriptObject).getSample(name,
-					parameterTypes);
-				else sample = scriptObject.getSample(name);
-				sample = Text.processTags(sample, resolver);
+				if (parameterTypes != null && scriptObject instanceof XMLScriptObjectAdapter)
+				{
+					if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile())
+					{
+						sample = ((XMLScriptObjectAdapter)scriptObject).getMobileSample(name, parameterTypes);
+						if (sample == null) sample = ((XMLScriptObjectAdapter)scriptObject).getSample(name, parameterTypes);
+					}
+					else
+					{
+						sample = ((XMLScriptObjectAdapter)scriptObject).getSample(name, parameterTypes);
+					}
+				}
+				else
+				{
+					if (scriptObject instanceof XMLScriptObjectAdapter && ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile())
+					{
+						sample = ((XMLScriptObjectAdapter)scriptObject).getMobileSample(name);
+					}
+					if (sample == null || "".equals(sample.getSampleCode()))
+					{
+						sample = new SampleDocumentation(ClientSupport.Default, scriptObject.getSample(name));
+					}
+				}
+				sample.setSampleCode(Text.processTags(sample.getSampleCode(), resolver));
 			}
-			return sample;
+			return sample.getSampleCode();
 		}
 
 		/**
@@ -1978,13 +2001,17 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		 */
 		public String getSample()
 		{
-			String sample = null;
+			ISampleDocumentation sample = null;
 			if (scriptObject != null)
 			{
-				sample = scriptObject.getSample(name);
-				sample = Text.processTags(sample, resolver);
+				if (scriptObject instanceof XMLScriptObjectAdapter && ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile())
+				{
+					sample = ((XMLScriptObjectAdapter)scriptObject).getMobileSample(name);
+				}
+				if (sample == null || "".equals(sample.getSampleCode())) sample = new SampleDocumentation(ClientSupport.Default, scriptObject.getSample(name));
+				sample.setSampleCode(Text.processTags(sample.getSampleCode(), resolver));
 			}
-			return sample;
+			return sample.getSampleCode();
 		}
 
 		/**
