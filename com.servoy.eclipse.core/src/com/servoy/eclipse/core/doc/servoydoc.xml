@@ -9489,6 +9489,26 @@ dataset.removeRow(-1); //removes all rows]]></sample>
             </parameter>
           </parameters>
         </function>
+        <function name="setColumnName">
+          <argumentsTypes>
+            <argumentType typecode="int"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <description><![CDATA[Set a column name based on index.]]></description>
+          <summary><![CDATA[Set a column name based on index.]]></summary>
+          <sample><![CDATA[var query = 'select customerid, customername from customers';
+var dataset = databaseManager.getDataSetByQuery(databaseManager.getDataSourceServerName(controller.getDataSource()), query, null, -1);
+dataset.setColumnName(2, 'name_of_customer') // change the column name for second column.]]></sample>
+          <parameters>
+            <parameter name="index" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[index of column (1-based).]]></description>
+            </parameter>
+            <parameter name="columnName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[new column name.]]></description>
+            </parameter>
+          </parameters>
+        </function>
         <function name="setValue">
           <argumentsTypes>
             <argumentType typecode="int"/>
@@ -23890,6 +23910,24 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
         </function>
         <function name="add">
           <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBAggregate"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.querybuilder.impl.QBResult" typecode="com.servoy.j2db.querybuilder.impl.QBResult"/>
+          <description><![CDATA[Add an aggregate with alias to the query result.]]></description>
+          <summary><![CDATA[Add an aggregate with alias to the query result.]]></summary>
+          <sample><![CDATA[query.result.add(query.columns.item_count.max, 'maximum_items')]]></sample>
+          <parameters>
+            <parameter name="aggregate" type="com.servoy.j2db.querybuilder.impl.QBAggregate" typecode="com.servoy.j2db.querybuilder.impl.QBAggregate">
+              <description><![CDATA[the aggregate to add to result]]></description>
+            </parameter>
+            <parameter name="alias" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[aggregate alias]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="add">
+          <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBColumn"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.querybuilder.impl.QBResult" typecode="com.servoy.j2db.querybuilder.impl.QBResult"/>
@@ -23904,6 +23942,24 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
         </function>
         <function name="add">
           <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBColumn"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.querybuilder.impl.QBResult" typecode="com.servoy.j2db.querybuilder.impl.QBResult"/>
+          <description><![CDATA[Add a column with alias to the query result.]]></description>
+          <summary><![CDATA[Add a column with alias to the query result.]]></summary>
+          <sample><![CDATA[query.result.add(query.columns.custname, 'customer_name')]]></sample>
+          <parameters>
+            <parameter name="column" type="com.servoy.j2db.querybuilder.impl.QBColumn" typecode="com.servoy.j2db.querybuilder.impl.QBColumn">
+              <description><![CDATA[column to add to result]]></description>
+            </parameter>
+            <parameter name="alias" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[column alias]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="add">
+          <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBFunction"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.querybuilder.impl.QBResult" typecode="com.servoy.j2db.querybuilder.impl.QBResult"/>
@@ -23913,6 +23969,24 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
           <parameters>
             <parameter name="func" type="com.servoy.j2db.querybuilder.impl.QBFunction" typecode="com.servoy.j2db.querybuilder.impl.QBFunction">
               <description><![CDATA[the function to add to the result]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="add">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBFunction"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.querybuilder.impl.QBResult" typecode="com.servoy.j2db.querybuilder.impl.QBResult"/>
+          <description><![CDATA[Add a function with alias result to the query result.]]></description>
+          <summary><![CDATA[Add a function with alias result to the query result.]]></summary>
+          <sample><![CDATA[query.result.add(query.columns.custname.upper(), 'customer_name')]]></sample>
+          <parameters>
+            <parameter name="func" type="com.servoy.j2db.querybuilder.impl.QBFunction" typecode="com.servoy.j2db.querybuilder.impl.QBFunction">
+              <description><![CDATA[the function to add to the result]]></description>
+            </parameter>
+            <parameter name="alias" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[function alias]]></description>
             </parameter>
           </parameters>
         </function>
@@ -23931,6 +24005,29 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
           <description><![CDATA[Add a value to the query result.]]></description>
           <summary><![CDATA[Add a value to the query result.]]></summary>
           <sample><![CDATA[query.result.addValue(100)]]></sample>
+          <parameters>
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[value add to result]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function name="addValue">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.Object"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.querybuilder.impl.QBResult" typecode="com.servoy.j2db.querybuilder.impl.QBResult"/>
+          <description><![CDATA[Add a value with an alias to the query result.]]></description>
+          <summary><![CDATA[Add a value with an alias to the query result.]]></summary>
+          <sample><![CDATA[query.result.addValue(100, 'myvalue')]]></sample>
+          <parameters>
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[value add to result]]></description>
+            </parameter>
+            <parameter name="alias" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[value alias]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function name="clear">
           <argumentsTypes/>
