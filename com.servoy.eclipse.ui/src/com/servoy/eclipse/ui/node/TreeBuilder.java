@@ -158,7 +158,9 @@ public class TreeBuilder
 
 	private static UserNode fdoc2usernode(IFunctionDocumentation fdoc, UserNodeType type, Object functionIcon)
 	{
-		String tooltip = "<html><body><b>" + fdoc.getFullSignature(true, true) + "</b><br>" + fdoc.getDescription() + "</body></html>"; //$NON-NLS-1$//$NON-NLS-2$
+		String fdocDescription = ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile() ? fdoc.getDescription(ClientSupport.mc)
+			: fdoc.getDescription(ClientSupport.Default);
+		String tooltip = "<html><body><b>" + fdoc.getFullSignature(true, true) + "</b><br>" + fdocDescription + "</body></html>"; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		String fdocSample = ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile() ? fdoc.getSample(ClientSupport.mc)
 			: fdoc.getSample(ClientSupport.Default);
 		UserNode un = new UserNode(fdoc.getFullSignature(false, true), type, fdoc.getSignature("."), fdocSample, tooltip, null, //$NON-NLS-1$
@@ -220,7 +222,8 @@ public class TreeBuilder
 				Object realObject = null;
 				if (answeredName != null) realObject = onlyThese.get(answeredName);
 
-				String toolTip = fdoc.getDescription();
+				String toolTip = ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile() ? fdoc.getDescription(ClientSupport.mc)
+					: fdoc.getDescription(ClientSupport.Default);
 				String tmp = "<html><body><b>" + SolutionExplorerListContentProvider.getReturnTypeString(fdoc.getReturnedType()) + " " + fdoc.getMainName() + "</b>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				if ("".equals(toolTip)) //$NON-NLS-1$
 				{

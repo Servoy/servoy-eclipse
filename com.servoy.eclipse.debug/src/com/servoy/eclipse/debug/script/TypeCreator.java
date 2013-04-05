@@ -111,11 +111,8 @@ import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.DocumentationUtil;
 import com.servoy.j2db.documentation.IParameter;
-import com.servoy.j2db.documentation.ISampleDocumentation;
-import com.servoy.j2db.documentation.SampleDocumentation;
 import com.servoy.j2db.documentation.ScriptParameter;
 import com.servoy.j2db.documentation.ServoyDocumented;
-import com.servoy.j2db.documentation.XMLScriptObjectAdapter;
 import com.servoy.j2db.documentation.scripting.docs.FormElements;
 import com.servoy.j2db.documentation.scripting.docs.Forms;
 import com.servoy.j2db.documentation.scripting.docs.Globals;
@@ -1726,9 +1723,11 @@ public class TypeCreator extends TypeCache
 			if (scriptObject != null)
 			{
 				StringBuilder docBuilder = new StringBuilder(200);
-				ISampleDocumentation sampleDoc = null;
+				String sampleDoc = null;
 				IParameter[] parameters = null;
 				String returnText = null;
+				ClientSupport csp = (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile() ? ClientSupport.mc
+					: ClientSupport.Default);
 				if (scriptObject instanceof ITypedScriptObject)
 				{
 					if (((ITypedScriptObject)scriptObject).isDeprecated(name, parameterTypes))
@@ -1745,22 +1744,14 @@ public class TypeCreator extends TypeCache
 							docBuilder.append("<br/><b>@deprecated</b><br/>");
 						}
 					}
-					String toolTip = ((ITypedScriptObject)scriptObject).getToolTip(name, parameterTypes);
+					String toolTip = ((ITypedScriptObject)scriptObject).getToolTip(name, parameterTypes, csp);
 					if (toolTip != null && toolTip.trim().length() != 0)
 					{
 						docBuilder.append("<br/>");
 						docBuilder.append(toolTip);
 						docBuilder.append("<br/>");
 					}
-					if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile())
-					{
-						sampleDoc = ((ITypedScriptObject)scriptObject).getMobileSample(name, parameterTypes);
-					}
-					if (sampleDoc == null || "".equals(sampleDoc.getSampleCode()))
-					{
-						sampleDoc = ((ITypedScriptObject)scriptObject).getSample(name, parameterTypes);
-					}
-
+					sampleDoc = ((ITypedScriptObject)scriptObject).getSample(name, parameterTypes, csp);
 					if (parameterTypes != null)
 					{
 						parameters = ((ITypedScriptObject)scriptObject).getParameters(name, parameterTypes);
@@ -1789,20 +1780,13 @@ public class TypeCreator extends TypeCache
 						docBuilder.append(toolTip);
 						docBuilder.append("<br/>");
 					}
-					if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile() && scriptObject instanceof XMLScriptObjectAdapter)
-					{
-						sampleDoc = ((XMLScriptObjectAdapter)scriptObject).getMobileSample(name);
-					}
-					if (sampleDoc == null || "".equals(sampleDoc.getSampleCode()))
-					{
-						sampleDoc = new SampleDocumentation(ClientSupport.Default, scriptObject.getSample(name));
-					}
+					sampleDoc = scriptObject.getSample(name);
 				}
 
-				if (sampleDoc != null && sampleDoc.getSampleCode() != null && sampleDoc.getSampleCode().trim().length() != 0)
+				if (sampleDoc != null && sampleDoc.trim().length() != 0)
 				{
 					docBuilder.append("<pre>");
-					docBuilder.append(HtmlUtils.escapeMarkup(sampleDoc.getSampleCode()));
+					docBuilder.append(HtmlUtils.escapeMarkup(sampleDoc));
 					docBuilder.append("</pre><br/>");
 				}
 				if (docBuilder.length() > 0)
