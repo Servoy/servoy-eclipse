@@ -5086,8 +5086,6 @@ default:
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
-          <descriptions/>
-          <summaries/>
           <samples>
             <sample clientSupport="mc,wc,sc"><![CDATA[var s = "Have a nice day!";
 application.output(s.localeCompare("Hello"));]]></sample>
@@ -5401,8 +5399,6 @@ application.output(s.localeCompare("Hello"));]]></sample>
         <function clientSupport="mc,wc,sc" name="toLocaleLowerCase">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
-          <descriptions/>
-          <summaries/>
           <samples>
             <sample clientSupport="mc,wc,sc"><![CDATA[var s = "Have a nice day!";
 application.output(s.toLocaleLowerCase());]]></sample>
@@ -5416,8 +5412,6 @@ application.output(s.toLocaleLowerCase());]]></sample>
         <function clientSupport="mc,wc,sc" name="toLocaleUpperCase">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
-          <descriptions/>
-          <summaries/>
           <samples>
             <sample clientSupport="mc,wc,sc"><![CDATA[var s = "Have a nice day!";
 application.output(s.toLocaleUpperCase());]]></sample>
