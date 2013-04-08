@@ -152,6 +152,12 @@ public class MarkerMessages
 		"Reserved browser window object property name \"{0}\" found.", ServoyBuilder.RESERVED_WINDOW_OBJECT_PROPERTY_TYPE); //$NON-NLS-1$
 
 	/**
+	 * This means that a solution is used as a web service, and has mustAuthenticate property checked.
+	 */
+	public static ServoyMarker SolutionUsedAsWebServiceMustAuthenticateProblem = new ServoyMarker(
+		"Solution \"{0}\" has mustAuthenticate property checked while used as a web service.", ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE); //$NON-NLS-1$
+
+	/**
 	 * This means that two or more scopes have the same name. This can create various kinds of conflicts and should be avoided.
 	 */
 	public static ServoyMarker DuplicateScopeFound = new ServoyMarker("Duplicate scope \"{0}\" found in {1}.", ServoyBuilder.DUPLICATE_SCOPE_NAME_MARKER_TYPE); //$NON-NLS-1$

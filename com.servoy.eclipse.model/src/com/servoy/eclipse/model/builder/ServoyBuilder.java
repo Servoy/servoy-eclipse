@@ -517,6 +517,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> SERVER_NOT_ACCESSIBLE_FIRST_OCCURENCE = new Pair<String, ProblemSeverity>(
 		"serverNotAccessibleFirstOccurence", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> CONSTANTS_USED = new Pair<String, ProblemSeverity>("constantsUsed", ProblemSeverity.ERROR); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> SOLUTION_USED_AS_WEBSERVICE_MUSTAUTHENTICATE_PROBLEM = new Pair<String, ProblemSeverity>(
+		"solutionUsedAsWebServiceMustAuthenticateProblem", ProblemSeverity.WARNING); //$NON-NLS-1$
 
 	private SAXParserFactory parserFactory;
 	private final HashSet<String> referencedProjectsSet = new HashSet<String>();
@@ -1578,11 +1580,41 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				refreshDBIMarkers();
 				checkPersistDuplication();
 				addDriverProblemMarker(project);
-				servoyProject.getSolution().acceptVisitor(new IPersistVisitor()
+
+				final Solution solution = servoyProject.getSolution();
+				final FlattenedSolution flattenedSolution = getServoyModel().getFlattenedSolution();
+
+				if (solution.getMustAuthenticate())
+				{
+					//check if solution is used as web service
+					Iterator<Form> formsIt = flattenedSolution.getForms(false);
+					boolean isServiceSolution = false;
+					while (formsIt.hasNext() && !isServiceSolution)
+					{
+						Iterator<ScriptMethod> methodIt = formsIt.next().getScriptMethods(false);
+						while (methodIt.hasNext())
+						{
+							if (methodIt.next().getName().equals("ws_read") || methodIt.next().getName().equals("ws_create") || //$NON-NLS-1$//$NON-NLS-2$
+								methodIt.next().getName().equals("ws_delete") || methodIt.next().getName().equals("ws_update") || //$NON-NLS-1$//$NON-NLS-2$
+								methodIt.next().getName().equals("ws_authenticate") || methodIt.next().getName().equals("ws_response_headers")) //$NON-NLS-1$ //$NON-NLS-2$
+							{
+								isServiceSolution = true;
+								break;
+							}
+						}
+					}
+					if (isServiceSolution)
+					{
+						//create warning marker
+						ServoyMarker mk = MarkerMessages.SolutionUsedAsWebServiceMustAuthenticateProblem.fill(solution.getName());
+						addMarker(project, mk.getType(), mk.getText(), -1, SOLUTION_USED_AS_WEBSERVICE_MUSTAUTHENTICATE_PROBLEM, IMarker.PRIORITY_HIGH, null,
+							solution);
+					}
+				}
+
+				solution.acceptVisitor(new IPersistVisitor()
 				{
 					private final ServoyProject[] modules = getSolutionModules(servoyProject);
-					private final FlattenedSolution flattenedSolution = getServoyModel().getFlattenedSolution();
-					private final Solution solution = servoyProject.getSolution();
 					private IntHashMap<IPersist> elementIdPersistMap = null;
 					private final Map<UUID, List<IPersist>> theMakeSureNoDuplicateUUIDsAreFound = new HashMap<UUID, List<IPersist>>();
 					private final Map<Form, Boolean> formsAbstractChecked = new HashMap<Form, Boolean>();

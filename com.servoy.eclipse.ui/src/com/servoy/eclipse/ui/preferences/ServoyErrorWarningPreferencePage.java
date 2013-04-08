@@ -324,6 +324,7 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 		problemSections.add(ERROR_WARNING_MODULES_PROBLEMS);
 		problemSections.add(ERROR_WARNING_FORM_PROBLEMS);
 		problemSections.add(ERROR_WARNING_STYLES_PROBLEMS);
+		problemSections.add(ERROR_WARNING_SOLUTION_PROBLEMS);
 		Collections.sort(problemSections);
 	}
 
@@ -553,6 +554,8 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.SOLUTION_PROPERTY_TARGET_NOT_FOUND,
 				Messages.ErrorWarningPreferencePage_solutionPropertyTargetNotFound, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.CONSTANTS_USED, Messages.ErrorWarningPreferencePage_constantsUsed, false));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.SOLUTION_USED_AS_WEBSERVICE_MUSTAUTHENTICATE_PROBLEM,
+				Messages.ErrorWarningPreferencePage_solutionUsedAsWebServiceMustAuthenticateProblem, false));
 		}
 
 		Collections.sort(associatedProblemMarkers, descriptionComparator);
