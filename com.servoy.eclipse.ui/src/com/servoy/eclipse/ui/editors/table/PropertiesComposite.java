@@ -174,17 +174,17 @@ public class PropertiesComposite extends Composite
 			IFile dataFile = ServoyModelFinder.getServoyModel().getDataModelManager().getMetaDataFile(table.getDataSource());
 			if (dataFile != null && dataFile.exists())
 			{
-				String wscontents = null;
+				long fileLength = 0;
 				try
 				{
-					wscontents = new WorkspaceFileAccess(ServoyModel.getWorkspace()).getUTF8Contents(dataFile.getFullPath().toString());
+					fileLength = new WorkspaceFileAccess(ServoyModel.getWorkspace()).getFileLength(dataFile.getFullPath().toString());
 				}
 				catch (IOException e1)
 				{
 					ServoyLog.logError(e1);
 				}
 				boolean deleteFile = false;
-				if (wscontents != null && wscontents.length() > 0)
+				if (fileLength > 0)
 				{
 					if (UIUtils.askConfirmation(getShell(), "Unmark metadata table",
 						"Are you sure you want to unmark table as metadata table? This will also delete data file."))
