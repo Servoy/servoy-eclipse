@@ -1594,9 +1594,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						Iterator<ScriptMethod> methodIt = formsIt.next().getScriptMethods(false);
 						while (methodIt.hasNext())
 						{
-							if (methodIt.next().getName().equals("ws_read") || methodIt.next().getName().equals("ws_create") || //$NON-NLS-1$//$NON-NLS-2$
-								methodIt.next().getName().equals("ws_delete") || methodIt.next().getName().equals("ws_update") || //$NON-NLS-1$//$NON-NLS-2$
-								methodIt.next().getName().equals("ws_authenticate") || methodIt.next().getName().equals("ws_response_headers")) //$NON-NLS-1$ //$NON-NLS-2$
+							String methodName = methodIt.next().getName();
+							if (methodName.equals("ws_read") || methodName.equals("ws_create") || //$NON-NLS-1$//$NON-NLS-2$
+								methodName.equals("ws_delete") || methodName.equals("ws_update") || //$NON-NLS-1$//$NON-NLS-2$
+								methodName.equals("ws_authenticate") || methodName.equals("ws_response_headers")) //$NON-NLS-1$ //$NON-NLS-2$
 							{
 								isServiceSolution = true;
 								break;
