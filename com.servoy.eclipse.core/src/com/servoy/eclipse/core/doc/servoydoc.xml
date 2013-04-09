@@ -34299,11 +34299,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -34692,11 +34687,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -35497,11 +35487,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -35951,11 +35936,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -36585,11 +36565,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="wc,sc" name="editable">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -37161,11 +37136,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -37686,7 +37656,7 @@ dataset.addRow(['cc',3]);
 %%prefix%%%%elementName%%.setValueListItems(dataset);]]></sample>
           </samples>
           <parameters>
-            <parameter name="dataset">
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[first column is display value, second column is real value]]></description>
             </parameter>
           </parameters>
@@ -37737,11 +37707,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -38339,7 +38304,7 @@ dataset.addRow(['cc',3]);
 %%prefix%%%%elementName%%.setValueListItems(dataset);]]></sample>
           </samples>
           <parameters>
-            <parameter name="dataset">
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[first column is display value, second column is real value]]></description>
             </parameter>
           </parameters>
@@ -38390,11 +38355,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="wc,sc" name="editable">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -38958,7 +38918,7 @@ dataset.addRow(['cc',3]);
 %%prefix%%%%elementName%%.setValueListItems(dataset);]]></sample>
           </samples>
           <parameters>
-            <parameter name="dataset">
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[first column is display value, second column is real value]]></description>
             </parameter>
           </parameters>
@@ -39009,11 +38969,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -39447,11 +39402,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -40063,11 +40013,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -40816,11 +40761,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -41306,11 +41246,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="wc,sc" name="caretPosition">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -42017,11 +41952,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="wc,sc" name="editable">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -42590,11 +42520,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -43288,11 +43213,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -43921,11 +43841,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -44536,7 +44451,7 @@ dataset.addRow(['cc',3]);
 %%prefix%%%%elementName%%.setValueListItems(dataset);]]></sample>
           </samples>
           <parameters>
-            <parameter name="dataset">
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[first column is display value, second column is real value]]></description>
             </parameter>
           </parameters>
@@ -44587,11 +44502,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="wc,sc" name="editable">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -45150,11 +45060,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -45839,11 +45744,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -46364,7 +46264,7 @@ dataset.addRow(['cc',3]);
 %%prefix%%%%elementName%%.setValueListItems(dataset);]]></sample>
           </samples>
           <parameters>
-            <parameter name="dataset">
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[first column is display value, second column is real value]]></description>
             </parameter>
           </parameters>
@@ -46415,11 +46315,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -47030,7 +46925,7 @@ dataset.addRow(['cc',3]);
 %%prefix%%%%elementName%%.setValueListItems(dataset);]]></sample>
           </samples>
           <parameters>
-            <parameter name="dataset">
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[first column is display value, second column is real value]]></description>
             </parameter>
           </parameters>
@@ -47081,11 +46976,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -47553,11 +47443,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="wc,sc" name="caretPosition">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -48264,11 +48149,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="wc,sc" name="editable">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -48832,7 +48712,7 @@ dataset.addRow(['cc',3]);
 %%prefix%%%%elementName%%.setValueListItems(dataset);]]></sample>
           </samples>
           <parameters>
-            <parameter name="dataset">
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[first column is display value, second column is real value]]></description>
             </parameter>
           </parameters>
@@ -48883,11 +48763,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="wc,sc" name="continuousLayout">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -49690,11 +49565,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -50530,11 +50400,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="wc,sc" name="caretPosition">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -51239,11 +51104,6 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
 //sets the hexadecimal color of the border to "#ccffcc"
 %%prefix%%%%elementName%%.border = 'LineBorder,1,#ccffcc';]]></sample>
           </samples>
-          <parameters>
-            <parameter name="spec">
-              <description><![CDATA[the border attributes]]></description>
-            </parameter>
-          </parameters>
         </property>
         <property clientSupport="wc,sc" name="caretPosition">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -51891,7 +51751,7 @@ dataset.addRow(['cc',3]);
 %%prefix%%%%elementName%%.setValueListItems(dataset);]]></sample>
           </samples>
           <parameters>
-            <parameter name="dataset">
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[first column is display value, second column is real value]]></description>
             </parameter>
           </parameters>
