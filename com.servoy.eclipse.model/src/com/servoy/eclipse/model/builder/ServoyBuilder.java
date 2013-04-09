@@ -1582,12 +1582,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				addDriverProblemMarker(project);
 
 				final Solution solution = servoyProject.getSolution();
-				final FlattenedSolution flattenedSolution = getServoyModel().getFlattenedSolution();
 
 				if (solution.getMustAuthenticate())
 				{
 					//check if solution is used as web service
-					Iterator<Form> formsIt = flattenedSolution.getForms(false);
+					Iterator<Form> formsIt = Solution.getForms(solution.getAllObjectsAsList(), null, false);
 					boolean isServiceSolution = false;
 					while (formsIt.hasNext() && !isServiceSolution)
 					{
@@ -1616,6 +1615,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				solution.acceptVisitor(new IPersistVisitor()
 				{
 					private final ServoyProject[] modules = getSolutionModules(servoyProject);
+					private final FlattenedSolution flattenedSolution = getServoyModel().getFlattenedSolution();
 					private IntHashMap<IPersist> elementIdPersistMap = null;
 					private final Map<UUID, List<IPersist>> theMakeSureNoDuplicateUUIDsAreFound = new HashMap<UUID, List<IPersist>>();
 					private final Map<Form, Boolean> formsAbstractChecked = new HashMap<Form, Boolean>();
