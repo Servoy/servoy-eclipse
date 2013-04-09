@@ -17,6 +17,10 @@
 
 package com.servoy.eclipse.ui.editors.table;
 
+import java.io.IOException;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -27,15 +31,18 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.j2db.dataprocessing.MetaDataUtils;
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
-import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
 /**
@@ -162,6 +169,42 @@ public class PropertiesComposite extends Composite
 	 */
 	public void saveValues()
 	{
+		if (table.isMarkedAsMetaData() && !btnMetadataTable.getSelection())
+		{
+			IFile dataFile = ServoyModelFinder.getServoyModel().getDataModelManager().getMetaDataFile(table.getDataSource());
+			if (dataFile != null && dataFile.exists())
+			{
+				String wscontents = null;
+				try
+				{
+					wscontents = new WorkspaceFileAccess(ServoyModel.getWorkspace()).getUTF8Contents(dataFile.getFullPath().toString());
+				}
+				catch (IOException e1)
+				{
+					ServoyLog.logError(e1);
+				}
+				if (wscontents != null && wscontents.length() > 0)
+				{
+					if (UIUtils.askConfirmation(getShell(), "Unmark metadata table",
+						"Are you sure you want to unmark table as metadata table? This will also delete data file."))
+					{
+						try
+						{
+							dataFile.delete(true, null);
+						}
+						catch (CoreException e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+					else
+					{
+						btnMetadataTable.setSelection(true);
+					}
+				}
+			}
+
+		}
 		table.setMarkedAsMetaData(btnMetadataTable.getSelection());
 		IServerInternal server = (IServerInternal)ApplicationServerSingleton.get().getServerManager().getServer(table.getServerName());
 		if (server != null)
