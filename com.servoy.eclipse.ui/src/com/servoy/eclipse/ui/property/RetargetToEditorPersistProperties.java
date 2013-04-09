@@ -24,7 +24,6 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.IPropertySourceProvider;
 
 import com.servoy.eclipse.ui.util.EditorUtil;
-import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -35,9 +34,9 @@ import com.servoy.j2db.util.Utils;
  */
 public class RetargetToEditorPersistProperties implements IPropertySource, IAdaptable
 {
-	private final PersistPropertySource persistProperties;
+	private final IModelSavePropertySource persistProperties;
 
-	public RetargetToEditorPersistProperties(PersistPropertySource persistProperties)
+	public RetargetToEditorPersistProperties(IModelSavePropertySource persistProperties)
 	{
 		this.persistProperties = persistProperties;
 	}
@@ -99,10 +98,10 @@ public class RetargetToEditorPersistProperties implements IPropertySource, IAdap
 	 */
 	protected void updateProperty(boolean set, Object id, Object value)
 	{
-		IPersist persist = persistProperties.getPersist();
+		Object model = persistProperties.getSaveModel();
 
 		// find the editor of this persist and change the value in the editor
-		IEditorPart editor = EditorUtil.openPersistEditor(persist, false); // activate=false here otherwise the editor is activated too soon and the save editor button remains grayed out
+		IEditorPart editor = EditorUtil.openPersistEditor(model, false); // activate=false here otherwise the editor is activated too soon and the save editor button remains grayed out
 		if (editor == null)
 		{
 			return;
@@ -111,7 +110,7 @@ public class RetargetToEditorPersistProperties implements IPropertySource, IAdap
 		IPropertySourceProvider propertySourceProvider = (IPropertySourceProvider)editor.getAdapter(IPropertySourceProvider.class);
 		if (propertySourceProvider != null)
 		{
-			IPropertySource propertySource = propertySourceProvider.getPropertySource(persist);
+			IPropertySource propertySource = propertySourceProvider.getPropertySource(model);
 			if (propertySource != null)
 			{
 				if (set)
@@ -128,7 +127,7 @@ public class RetargetToEditorPersistProperties implements IPropertySource, IAdap
 
 	public Object getAdapter(Class adapter)
 	{
-		return persistProperties.getAdapter(adapter);
+		return persistProperties instanceof IAdaptable ? ((IAdaptable)persistProperties).getAdapter(adapter) : null;
 	}
 
 	@Override

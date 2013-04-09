@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.designer.property;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.IPropertySourceProvider;
 
@@ -41,10 +42,15 @@ public class UndoablePersistPropertySourceProvider implements IPropertySourcePro
 
 	public IPropertySource getPropertySource(Object object)
 	{
+		IPropertySource propertySource;
 		if (object instanceof IPersist)
 		{
-			return new UndoablePropertySource(PersistPropertySource.createPersistPropertySource(((IPersist)object), editorPart.getForm(), false), editorPart);
+			propertySource = PersistPropertySource.createPersistPropertySource(((IPersist)object), editorPart.getForm(), false);
 		}
-		return null;
+		else
+		{
+			propertySource = (IPropertySource)Platform.getAdapterManager().getAdapter(object, IPropertySource.class);
+		}
+		return propertySource == null ? null : new UndoablePropertySource(propertySource, editorPart);
 	}
 }

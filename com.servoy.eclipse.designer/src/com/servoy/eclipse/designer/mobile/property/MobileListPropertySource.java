@@ -20,7 +20,8 @@ package com.servoy.eclipse.designer.mobile.property;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.base.persistence.IMobileProperties;
-import com.servoy.eclipse.designer.editor.mobile.editparts.MobileListModel;
+import com.servoy.eclipse.ui.property.IModelSavePropertySource;
+import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.RetargetingPropertySource;
 import com.servoy.j2db.persistence.Form;
@@ -33,7 +34,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
  *
  */
 @SuppressWarnings("nls")
-public class MobileListPropertySource extends RetargetingPropertySource
+public class MobileListPropertySource extends RetargetingPropertySource implements IModelSavePropertySource
 {
 	private static final String PREFIX_LISTITEM_BUTTON = "listitemButton";
 	private static final String PREFIX_LISTITEM_SUBTEXT = "listitemSubtext";
@@ -58,6 +59,12 @@ public class MobileListPropertySource extends RetargetingPropertySource
 	private MobileListPropertySource(MobileListModel model, Form context)
 	{
 		super(model, context);
+	}
+
+	@Override
+	public Object getSaveModel()
+	{
+		return getModel();
 	}
 
 	@Override

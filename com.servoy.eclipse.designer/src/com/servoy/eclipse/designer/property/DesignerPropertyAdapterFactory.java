@@ -29,7 +29,6 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.designer.editor.mobile.editparts.MobileListModel;
 import com.servoy.eclipse.designer.mobile.property.MobileComponentWithTitlePropertySource;
 import com.servoy.eclipse.designer.mobile.property.MobileListPropertySource;
 import com.servoy.eclipse.designer.mobile.property.MobilePersistPropertySource;
@@ -41,6 +40,8 @@ import com.servoy.eclipse.ui.editors.PersistEditor;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.DimensionPropertySource;
+import com.servoy.eclipse.ui.property.IModelSavePropertySource;
+import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.PointPropertySource;
@@ -64,7 +65,7 @@ import com.servoy.j2db.util.Pair;
  */
 public class DesignerPropertyAdapterFactory implements IAdapterFactory
 {
-	private static Class[] ADAPTERS = new Class[] { IPropertySource.class, IPersist.class, IResource.class, FormElementGroup.class, Openable.class };
+	private static Class[] ADAPTERS = new Class[] { IPropertySource.class, IPersist.class, IResource.class, FormElementGroup.class, MobileListModel.class, Openable.class };
 
 	public Class[] getAdapterList()
 	{
@@ -73,11 +74,11 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 
 	public Object getAdapter(Object obj, Class key)
 	{
-		IPersist persist = null;
-		IPersist context = null;
-		boolean autoSave = false;
-		boolean retargetToEditor = true;
-
+		if (obj instanceof MobileListModel && key == IPropertySource.class)
+		{
+			MobileListModel model = getEditingMobileListModel((MobileListModel)obj);
+			return MobileListPropertySource.getMobileListPropertySource(model, model.form);
+		}
 		if (obj instanceof Dimension && key == IPropertySource.class)
 		{
 			return new DimensionPropertySource(new ComplexProperty<Dimension>((Dimension)obj), null);
@@ -92,6 +93,10 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 			return createFormElementGroupPropertySource((FormElementGroup)obj, null);
 		}
 
+		IPersist persist = null;
+		IPersist context = null;
+		boolean autoSave = false;
+		boolean retargetToEditor = true;
 		if (obj instanceof BaseVisualFormEditor)
 		{
 			persist = ((BaseVisualFormEditor)obj).getForm();
@@ -109,10 +114,33 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 					autoSave = true; // there is no editor, changes must be saved straight through
 				}
 				// some nodes are stored in an object array
-				if (realObject instanceof Object[] && ((Object[])realObject).length > 0 && ((Object[])realObject)[0] instanceof IPersist)
+				if (realObject instanceof Object[] && ((Object[])realObject).length > 0)
 				{
 					realObject = ((Object[])realObject)[0];
 				}
+
+				if (key == MobileListModel.class)
+				{
+					if (realObject instanceof MobileListModel)
+					{
+						return getEditingMobileListModel((MobileListModel)realObject);
+					}
+					return null;
+				}
+				if (realObject instanceof MobileListModel && key == IPropertySource.class)
+				{
+					MobileListModel model = getEditingMobileListModel((MobileListModel)realObject);
+					return new RetargetToEditorPersistProperties(MobileListPropertySource.getMobileListPropertySource(model, model.form));
+				}
+				if (realObject instanceof FormElementGroup && key == FormElementGroup.class)
+				{
+					return getEditingFormElementGroup((FormElementGroup)realObject);
+				}
+				if (realObject instanceof FormElementGroup && key == IPropertySource.class)
+				{
+					return new RetargetToEditorPersistProperties(createFormElementGroupPropertySource((FormElementGroup)realObject, null));
+				}
+
 				if (realObject instanceof IPersist && !(realObject instanceof Solution) && !(realObject instanceof Style) &&
 					!(realObject instanceof StringResource)) // solution is shown under ServoyProject nodes
 				{
@@ -150,7 +178,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 				}
 				if (key == FormElementGroup.class)
 				{
-					return model;
+					return getEditingFormElementGroup((FormElementGroup)model);
 				}
 				return null;
 			}
@@ -159,7 +187,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 			{
 				if (key == IPropertySource.class)
 				{
-					return MobileListPropertySource.getMobileListPropertySource((MobileListModel)model, contextForm);
+					return MobileListPropertySource.getMobileListPropertySource(getEditingMobileListModel((MobileListModel)model), contextForm);
 				}
 				return null;
 			}
@@ -199,7 +227,8 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 				return null;
 			}
 			// make sure we have the in-memory editing version, the real solution is read-only
-			persist = AbstractRepository.searchPersist(servoyProject.getEditingSolution(), persist);
+			persist = getEditingPersist(persist);
+
 			if (persist == null)
 			{
 				// not present yet in editing solution
@@ -277,6 +306,52 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 		return null;
 	}
 
+	private static FormElementGroup getEditingFormElementGroup(FormElementGroup group)
+	{
+		if (group == null)
+		{
+			return null;
+		}
+
+		ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(group.getParent().getRootObject().getName());
+		if (servoyProject == null)
+		{
+			ServoyLog.logError("Cannot find Servoy project for persist " + group.getParent(), null);
+			return null;
+		}
+		// make sure we have the in-memory editing version, the real solution is read-only
+		return new FormElementGroup(group.getGroupID(), servoyProject.getEditingFlattenedSolution(), AbstractRepository.searchPersist(
+			servoyProject.getEditingSolution(), group.getParent()));
+	}
+
+	private static MobileListModel getEditingMobileListModel(MobileListModel model)
+	{
+		if (model == null)
+		{
+			return null;
+		}
+
+		return new MobileListModel(getEditingPersist(model.form), getEditingPersist(model.component), getEditingPersist(model.header),
+			getEditingPersist(model.button), getEditingPersist(model.subtext), getEditingPersist(model.countBubble), getEditingPersist(model.image));
+	}
+
+	private static <T extends IPersist> T getEditingPersist(T persist)
+	{
+		if (persist == null)
+		{
+			return null;
+		}
+
+		ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(persist.getRootObject().getName());
+		if (servoyProject == null)
+		{
+			ServoyLog.logError("Cannot find Servoy project for persist " + persist, null);
+			return null;
+		}
+		// make sure we have the in-memory editing version, the real solution is read-only
+		return AbstractRepository.searchPersist(servoyProject.getEditingSolution(), persist);
+	}
+
 	/**
 	 * @param persist
 	 * @return
@@ -287,11 +362,12 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 		return ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(filePath.getLeft() + filePath.getRight()));
 	}
 
-	private IPropertySource createFormElementGroupPropertySource(FormElementGroup group, Form context)
+	private IModelSavePropertySource createFormElementGroupPropertySource(FormElementGroup group, Form context)
 	{
 		Form form = group.getParent();
+		FormElementGroup editingGroup = getEditingFormElementGroup(group);
 		boolean mobile = form != null && form.getCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName) != null;
-		return mobile ? new MobileComponentWithTitlePropertySource(group, context) : new FormElementGroupPropertySource(group, context);
+		return mobile ? new MobileComponentWithTitlePropertySource(editingGroup, context) : new FormElementGroupPropertySource(editingGroup, context);
 	}
 
 	/**

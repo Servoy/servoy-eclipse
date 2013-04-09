@@ -711,7 +711,7 @@ public class ElementFactory
 	}
 
 	public static Portal createPortal(Form form, Object[] dataProviders, boolean fillText, boolean fillName, boolean placeAsLabels, boolean placeWithLabels,
-		Point location) throws RepositoryException
+		Point location, String prefix) throws RepositoryException
 	{
 		Relation[] relations = dataProviders == null || dataProviders.length == 0 ? null : ((IDataProvider)dataProviders[0]).getColumnWrapper().getRelations();
 
@@ -719,7 +719,7 @@ public class ElementFactory
 		int y = location == null ? 0 : location.y;
 
 		StringBuilder relationName = new StringBuilder();
-		StringBuilder portalName = new StringBuilder("portal");
+		StringBuilder portalName = new StringBuilder(prefix);
 		for (int i = 0; relations != null && i < relations.length; i++)
 		{
 			if (i > 0) relationName.append('.');

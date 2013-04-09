@@ -85,12 +85,14 @@ import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.resource.FileEditorInputFactory;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
@@ -332,8 +334,21 @@ public class EditorUtil
 		return openPersistEditor(persist, true);
 	}
 
-	public static IEditorPart openPersistEditor(IPersist persist, boolean activate)
+	public static IEditorPart openPersistEditor(Object model, boolean activate)
 	{
+		IPersist persist = null;
+		if (model instanceof IPersist)
+		{
+			persist = (IPersist)model;
+		}
+		else if (model instanceof MobileListModel)
+		{
+			persist = ((MobileListModel)model).component;
+		}
+		else if (model instanceof FormElementGroup)
+		{
+			persist = ((FormElementGroup)model).getParent();
+		}
 		if (persist == null)
 		{
 			return null;

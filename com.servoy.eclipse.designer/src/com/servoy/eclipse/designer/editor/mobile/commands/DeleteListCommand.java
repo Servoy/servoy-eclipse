@@ -24,9 +24,9 @@ import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.designer.editor.mobile.editparts.MobileListModel;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.IForm;
 import com.servoy.j2db.persistence.IDeveloperRepository;

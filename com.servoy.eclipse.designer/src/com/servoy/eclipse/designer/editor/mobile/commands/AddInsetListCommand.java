@@ -25,8 +25,8 @@ import org.eclipse.swt.graphics.Point;
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.designer.editor.commands.BaseFormPlaceElementCommand;
-import com.servoy.eclipse.designer.editor.mobile.editparts.MobileListModel;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
@@ -58,7 +58,7 @@ public class AddInsetListCommand extends BaseFormPlaceElementCommand
 			Form form = (Form)parent;
 
 			// create a portal
-			Portal portal = ElementFactory.createPortal(form, null, false, false, false, false, location);
+			Portal portal = ElementFactory.createPortal(form, null, false, false, false, false, location, "list");
 			if (portal == null)
 			{
 				ServoyLog.logError("Could not create portal for inset list", null);

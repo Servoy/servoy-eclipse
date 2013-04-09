@@ -39,6 +39,7 @@ import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.DeleteListCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.ReorderContentElementsCommand;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileSnapData.MobileSnapType;
+import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.j2db.debug.layout.MobileFormLayout;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;

@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.designer.editor.mobile.editparts;
+package com.servoy.eclipse.ui.property;
 
 import java.awt.Dimension;
 import java.awt.Point;
@@ -143,5 +143,65 @@ public class MobileListModel implements ISupportBounds
 		}
 
 		return new MobileListModel(form, parent instanceof Form ? null : parent, header, button, subtext, countBubble, image);
+	}
+
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((button == null) ? 0 : button.hashCode());
+		result = prime * result + ((component == null) ? 0 : component.hashCode());
+		result = prime * result + ((countBubble == null) ? 0 : countBubble.hashCode());
+		result = prime * result + ((form == null) ? 0 : form.hashCode());
+		result = prime * result + ((header == null) ? 0 : header.hashCode());
+		result = prime * result + ((image == null) ? 0 : image.hashCode());
+		result = prime * result + ((subtext == null) ? 0 : subtext.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		MobileListModel other = (MobileListModel)obj;
+		if (button == null)
+		{
+			if (other.button != null) return false;
+		}
+		else if (!button.equals(other.button)) return false;
+		if (component == null)
+		{
+			if (other.component != null) return false;
+		}
+		else if (!component.equals(other.component)) return false;
+		if (countBubble == null)
+		{
+			if (other.countBubble != null) return false;
+		}
+		else if (!countBubble.equals(other.countBubble)) return false;
+		if (form == null)
+		{
+			if (other.form != null) return false;
+		}
+		else if (!form.equals(other.form)) return false;
+		if (header == null)
+		{
+			if (other.header != null) return false;
+		}
+		else if (!header.equals(other.header)) return false;
+		if (image == null)
+		{
+			if (other.image != null) return false;
+		}
+		else if (!image.equals(other.image)) return false;
+		if (subtext == null)
+		{
+			if (other.subtext != null) return false;
+		}
+		else if (!subtext.equals(other.subtext)) return false;
+		return true;
 	}
 }

@@ -59,6 +59,7 @@ import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.scripting.CalculationModeHandler;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
@@ -1237,6 +1238,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		// get all objects ordered alphabetically by name
 		Iterator<IPersist> formElementIterator = ancestorForm.getAllObjects();
 
+
+		boolean mobile = SolutionMetaData.isServoyMobileSolution(ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution());
+
 		// all named form elements must be added, as well as named fields inside
 		// portal elements
 		PlatformSimpleUserNode node;
@@ -1248,7 +1252,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			{
 				// TODO: fix multiple anonymous groups (use proper content providers and label providers)
 				IFormElement element = (IFormElement)persist;
-				if (element.getGroupID() != null)
+				if (element.getGroupID() != null & !mobile)
 				{
 					String groupName = FormElementGroup.getName(element.getGroupID());
 					String groupLabel = groupName == null ? Messages.LabelAnonymous : groupName;
@@ -1283,18 +1287,32 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						// IScriptObject)
 						node = addBeanAndBeanChildNodes((Bean)element);
 						if (node == null) continue;
-
 					}
 					else
 					{
-						node = new PlatformSimpleUserNode(element.getName(), UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { element, null }, originalForm,
+						Object model;
+						if (element instanceof Portal && ((Portal)element).isMobileInsetList())
+						{
+							model = MobileListModel.create((Form)element.getParent(), (Portal)element);
+						}
+						else if (mobile && element.getGroupID() != null)
+						{
+							model = new FormElementGroup(element.getGroupID(),
+								ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution(), (Form)persist.getParent());
+						}
+						else
+						{
+							model = element;
+						}
+
+						node = new PlatformSimpleUserNode(element.getName(), UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { model, null }, originalForm,
 							uiActivator.loadImageFromBundle("element.gif")); //$NON-NLS-1$
 						node.setDeveloperFeedback(new SimpleDeveloperFeedback(element.getName() + ".", null, null)); //$NON-NLS-1$
 					}
 					elements.add(node);
 					node.parent = parentNode;
 				}
-				if (element instanceof Portal)
+				if (element instanceof Portal && !((Portal)element).isMobileInsetList())
 				{
 					// find named child elements
 					Iterator<IPersist> portalElementIterator = ((Portal)element).getAllObjects();

@@ -28,7 +28,6 @@ import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.SnapToHelper;
 import org.eclipse.swt.widgets.Display;
 
-import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -36,6 +35,7 @@ import com.servoy.eclipse.designer.editor.BaseFormGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.mobile.MobileFormEditPolicy;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController;
 import com.servoy.j2db.IApplication;
@@ -91,7 +91,7 @@ public class MobileFormGraphicalEditPart extends BaseFormGraphicalEditPart imple
 		{
 			for (ISupportBounds element : MobileFormLayout.getBodyElementsForRecordView(editingFlattenedSolution, flattenedForm))
 			{
-				if (element instanceof Portal && ((Portal)element).getCustomMobileProperty(IMobileProperties.LIST_COMPONENT.propertyName) != null)
+				if (element instanceof Portal && ((Portal)element).isMobileInsetList())
 				{
 					// inset list
 					list.add(MobileListModel.create(FlattenedForm.getWrappedForm(flattenedForm), ((Portal)element)));

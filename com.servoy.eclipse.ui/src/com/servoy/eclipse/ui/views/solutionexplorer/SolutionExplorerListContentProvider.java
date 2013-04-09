@@ -534,19 +534,19 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			else if (type == UserNodeType.FORM_ELEMENTS_ITEM)
 			{
 				Object[] real = (Object[])un.getRealObject(); // [IPersist, Class]
-				IPersist component = (IPersist)real[0];
+				Object model = real[0];
 				Class specificClass = (Class)real[1];
 				String prefix = "elements.";
-				if (component instanceof ISupportName)
+				if (model instanceof ISupportName)
 				{
-					prefix += ((ISupportName)component).getName();
+					prefix += ((ISupportName)model).getName();
 				}
 
 				if (specificClass == null)
 				{
 					try
 					{
-						lm = getJSMethods(ElementUtil.getPersistScriptClass(Activator.getDefault().getDesignClient(), component), prefix, null,
+						lm = getJSMethods(ElementUtil.getPersistScriptClass(Activator.getDefault().getDesignClient(), model), prefix, null,
 							UserNodeType.FORM_ELEMENTS_ITEM_METHOD, null, null);
 					}
 					catch (Exception ex)
@@ -561,10 +561,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					try
 					{
 						Class beanClass = specificClass;
-						if (component instanceof Bean)
+						if (model instanceof Bean)
 						{
 							IApplication application = Activator.getDefault().getDesignClient();
-							beanClass = application.getBeanManager().getClassLoader().loadClass(((Bean)component).getBeanClassName());
+							beanClass = application.getBeanManager().getClassLoader().loadClass(((Bean)model).getBeanClassName());
 						}
 						lm = getAllMethods(beanClass, specificClass, prefix, null, UserNodeType.FORM_ELEMENTS_ITEM_METHOD);
 					}

@@ -90,12 +90,22 @@
             <adapter type="com.servoy.j2db.persistence.IPersist"/>
       </factory>
       <factory
+            adaptableType="com.servoy.eclipse.ui.node.SimpleUserNode"
+            class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
+            <adapter type="com.servoy.eclipse.ui.property.MobileListModel"/>
+      </factory>
+      <factory
             adaptableType="org.eclipse.gef.EditPart"
             class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
             <adapter type="com.servoy.j2db.persistence.IPersist"/>
       </factory>
       <factory
             adaptableType="org.eclipse.gef.EditPart"
+            class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
+            <adapter type="com.servoy.j2db.persistence.FormElementGroup"/>
+      </factory>
+      <factory
+            adaptableType="com.servoy.eclipse.ui.node.SimpleUserNode"
             class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
             <adapter type="com.servoy.j2db.persistence.FormElementGroup"/>
       </factory>
@@ -121,6 +131,11 @@
       </factory>
       <factory
             adaptableType="com.servoy.j2db.persistence.IPersist"
+            class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
+            <adapter type="org.eclipse.ui.views.properties.IPropertySource"/>
+      </factory>
+      <factory
+            adaptableType="com.servoy.eclipse.ui.property.MobileListModel"
             class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
             <adapter type="org.eclipse.ui.views.properties.IPropertySource"/>
       </factory>

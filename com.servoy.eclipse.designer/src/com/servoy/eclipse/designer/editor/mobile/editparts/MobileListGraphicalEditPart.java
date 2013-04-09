@@ -36,6 +36,7 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.ComponentDeleteEditPolicy;
 import com.servoy.eclipse.designer.editor.SetBoundsToSupportBoundsFigureListener;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileListElementEditpart.MobileListElementType;
+import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.IPersist;

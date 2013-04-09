@@ -3187,7 +3187,7 @@ public class TypeCreator extends TypeCache
 							members.add(createProperty(groupName, true, getElementType(context, RuntimeGroup.class), null, PROPERTY));
 						}
 					}
-					if (formElement instanceof Portal)
+					if (formElement instanceof Portal && !((Portal)formElement).isMobileInsetList())
 					{
 						createFormElementProperties(context, application, members, ((Portal)formElement).getAllObjects());
 					}

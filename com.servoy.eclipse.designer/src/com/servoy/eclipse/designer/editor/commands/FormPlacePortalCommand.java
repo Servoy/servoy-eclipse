@@ -64,7 +64,8 @@ public class FormPlacePortalCommand extends BaseFormPlaceElementCommand
 		if (parent instanceof Form)
 		{
 			setLabel("place portal");
-			return new IPersist[] { ElementFactory.createPortal((Form)parent, (Object[])object, fillText, fillName, placeAsLabels, placeWithLabels, location) };
+			return new IPersist[] { ElementFactory.createPortal((Form)parent, (Object[])object, fillText, fillName, placeAsLabels, placeWithLabels, location,
+				"portal") };
 		}
 		return null;
 	}

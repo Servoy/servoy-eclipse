@@ -35,6 +35,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
@@ -46,6 +47,7 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.FormEncapsulation;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IFormElement;
@@ -96,6 +98,7 @@ import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Utilities for elements and label providers.
@@ -285,11 +288,11 @@ public class ElementUtil
 
 	private static Map<String, WeakReference<Class< ? >>> beanClassCache = new ConcurrentHashMap<String, WeakReference<Class< ? >>>();
 
-	public static Class< ? > getPersistScriptClass(final IApplication application, IPersist persist)
+	public static Class< ? > getPersistScriptClass(final IApplication application, Object model)
 	{
-		if (persist instanceof GraphicalComponent)
+		if (model instanceof GraphicalComponent)
 		{
-			GraphicalComponent label = (GraphicalComponent)persist;
+			GraphicalComponent label = (GraphicalComponent)model;
 			if (ComponentFactory.isButton(label))
 			{
 				if (label.getDataProviderID() == null && !label.getDisplaysTags())
@@ -306,9 +309,9 @@ public class ElementUtil
 			return IScriptDataLabelMethods.class;
 		}
 
-		if (persist instanceof Field)
+		if (model instanceof Field)
 		{
-			Field field = (Field)persist;
+			Field field = (Field)model;
 
 			switch (field.getDisplayType())
 			{
@@ -348,12 +351,12 @@ public class ElementUtil
 			}
 		}
 
-		if (persist instanceof Bean)
+		if (model instanceof Bean)
 		{
 			if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile()) return IScriptMobileBean.class;
 			else
 			{
-				final Bean bean = (Bean)persist;
+				final Bean bean = (Bean)model;
 				String beanClassName = bean.getBeanClassName();
 				WeakReference<Class< ? >> beanClassRef = beanClassCache.get(beanClassName);
 				Class< ? > beanClass = null;
@@ -415,30 +418,39 @@ public class ElementUtil
 			}
 		}
 
-		if (persist instanceof TabPanel)
+		if (model instanceof TabPanel)
 		{
-			int orient = ((TabPanel)persist).getTabOrientation();
+			int orient = ((TabPanel)model).getTabOrientation();
 			if (orient == TabPanel.SPLIT_HORIZONTAL || orient == TabPanel.SPLIT_VERTICAL) return IScriptSplitPaneMethods.class;
 			if (orient == TabPanel.ACCORDION_PANEL) return IScriptAccordionPanelMethods.class;
 			return IScriptTabPanelMethods.class;
 		}
 
-		if (persist instanceof Portal)
+		if (model instanceof MobileListModel)
 		{
-			if (((Portal)persist).getCustomMobileProperties() != null &&
-				Boolean.TRUE.equals(((Portal)persist).getCustomMobileProperties().get(IMobileProperties.LIST_COMPONENT.propertyName)))
-			{
-				return IScriptInsetListComponentMethods.class;
-			}
-			else
-			{
-				return IScriptPortalComponentMethods.class;
-			}
+			return IScriptInsetListComponentMethods.class;
 		}
 
-		if (persist instanceof RectShape)
+		if (model instanceof Portal)
+		{
+			return IScriptPortalComponentMethods.class;
+		}
+
+		if (model instanceof RectShape)
 		{
 			return IRuntimeRectangle.class;
+		}
+
+		if (model instanceof FormElementGroup)
+		{
+			// find persist class for component in component-with-title
+			for (IFormElement elem : Utils.iterate(((FormElementGroup)model).getElements()))
+			{
+				if (elem instanceof AbstractBase && ((AbstractBase)elem).getCustomMobileProperty(IMobileProperties.COMPONENT_TITLE.propertyName) == null)
+				{
+					return getPersistScriptClass(application, elem);
+				}
+			}
 		}
 		return null;
 	}

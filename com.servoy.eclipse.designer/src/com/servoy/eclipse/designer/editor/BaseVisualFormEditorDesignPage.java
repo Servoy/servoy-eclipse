@@ -104,6 +104,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences.CoolbarLayout;
+import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
 import com.servoy.j2db.persistence.Form;
@@ -216,6 +217,10 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 							if (model == null)
 							{
 								model = Platform.getAdapterManager().getAdapter(sel, FormElementGroup.class);
+							}
+							if (model == null)
+							{
+								model = Platform.getAdapterManager().getAdapter(sel, MobileListModel.class);
 							}
 							if (model != null)
 							{
