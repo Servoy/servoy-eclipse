@@ -183,23 +183,32 @@ public class PropertiesComposite extends Composite
 				{
 					ServoyLog.logError(e1);
 				}
+				boolean deleteFile = false;
 				if (wscontents != null && wscontents.length() > 0)
 				{
 					if (UIUtils.askConfirmation(getShell(), "Unmark metadata table",
 						"Are you sure you want to unmark table as metadata table? This will also delete data file."))
 					{
-						try
-						{
-							dataFile.delete(true, null);
-						}
-						catch (CoreException e)
-						{
-							ServoyLog.logError(e);
-						}
+						deleteFile = true;
 					}
 					else
 					{
 						btnMetadataTable.setSelection(true);
+					}
+				}
+				else
+				{
+					deleteFile = true;
+				}
+				if (deleteFile)
+				{
+					try
+					{
+						dataFile.delete(true, null);
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError(e);
 					}
 				}
 			}
