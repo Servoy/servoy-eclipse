@@ -273,12 +273,6 @@ public class MarkerMessages
 	/** 
 	 * This means that the sam tab sequence position is assigned to more than one element on a form.
 	 */
-	public static ServoyMarker FormUnnamedElementDuplicateTabSequence = new ServoyMarker(
-		"Form \"{0}\" contains an element which has a duplicate tab sequence.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
-
-	/** 
-	 * This means that the sam tab sequence position is assigned to more than one element on a form.
-	 */
 	public static ServoyMarker FormNamedElementDuplicateTabSequence = new ServoyMarker(
 		"Form \"{0}\" contains an element \"{1}\" which has a duplicate tab sequence.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
@@ -301,33 +295,21 @@ public class MarkerMessages
 		"Form \"{0}\" which extends form \"{1}\" does not have the same table as its parent.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormNamedFoundsetIncorrectValue = new ServoyMarker(
 		"\"namedFoundSet\" property of form \"{0}\" is incorrect.{1}", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
-	public static ServoyMarker FormUnnamedElementOutsideBoundsOfForm = new ServoyMarker(
-		"Element in form \"{0}\" is outside the bounds of the form.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormNamedElementOutsideBoundsOfForm = new ServoyMarker(
 		"Element \"{0}\" in form \"{1}\" is outside the bounds of the form.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
-	public static ServoyMarker FormUnnamedElementOutsideBoundsOfPart = new ServoyMarker(
-		"Element in form \"{0}\" is outside the bounds of part {1}.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormNamedElementOutsideBoundsOfPart = new ServoyMarker(
 		"Element \"{0}\" in form \"{1}\" is outside the bounds of part {2}.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormTypeAheadNamedUnstoredCalculation = new ServoyMarker(
 		"Type ahead field \"{0}\" has attached a valuelist (or fallback valuelist) that contains unstored calculation(s). This is not supported.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
-	public static ServoyMarker FormTypeAheadUnnamedUnstoredCalculation = new ServoyMarker(
-		"Type ahead field has attached a valuelist (or fallback valuelist) that contains unstored calculation(s). This is not supported.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker FormEditableNamedComboboxCustomValuelist = new ServoyMarker(
 		"Editable combobox \"{0}\" has attached a valuelist that contains real values. This is not supported.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
-	public static ServoyMarker FormEditableUnnamedComboboxCustomValuelist = new ServoyMarker(
-		"Editable combobox has attached a valuelist that contains real values. This is not supported.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker FormNamedFieldRelatedValuelist = new ServoyMarker(
 		"Field \"{0}\" has attached a related valuelist \"{1}\" that doesn''t have the same datasource as form \"{2}\" .", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
-	public static ServoyMarker FormUnnamedFieldRelatedValuelist = new ServoyMarker(
-		"Field has attached a related valuelist \"{0}\" that doesn''t have the same datasource as form \"{1}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker FormNamedFieldFallbackRelatedValuelist = new ServoyMarker(
 		"Field \"{0}\" has attached a valuelist \"{1}\" whose fallback valuelist \"{2}\" is related but doesn''t have the same datasource as form \"{3}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
-	public static ServoyMarker FormUnnamedFieldFallbackRelatedValuelist = new ServoyMarker(
-		"Field has attached a valuelist \"{0}\" whose fallback valuelist \"{1}\" is related but doesn''t have the same datasource as form \"{2}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	/**
 	 * The labelfor element used by a label cannot be found.
 	 */

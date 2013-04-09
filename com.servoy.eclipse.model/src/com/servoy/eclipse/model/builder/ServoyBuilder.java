@@ -2160,8 +2160,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													((Column)dataProvider).getColumnInfo().getConverterName() == null) &&
 													field.getDisplayType() != Field.IMAGE_MEDIA)
 												{
-													ServoyMarker mk = MarkerMessages.FormIncompatibleElementType.fill(elementName != null ? elementName : "",
-														inForm);
+													ServoyMarker mk = MarkerMessages.FormIncompatibleElementType.fill(
+														elementName != null ? elementName : field.getUUID(), inForm);
 													addMarker(project, mk.getType(), mk.getText(), -1, FORM_INCOMPATIBLE_ELEMENT_TYPE, IMarker.PRIORITY_NORMAL,
 														null, o);
 												}
@@ -2281,15 +2281,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												String partName = com.servoy.j2db.persistence.Part.getDisplayName(part.getPartType());
 												if (o instanceof ISupportName && ((ISupportName)o).getName() != null) elementName = ((ISupportName)o).getName();
 												inForm = form.getName();
-												ServoyMarker mk;
 												if (elementName == null)
 												{
-													mk = MarkerMessages.FormUnnamedElementOutsideBoundsOfPart.fill(inForm, partName);
+													elementName = o.getUUID().toString();
 												}
-												else
-												{
-													mk = MarkerMessages.FormNamedElementOutsideBoundsOfPart.fill(elementName, inForm, partName);
-												}
+												ServoyMarker mk = MarkerMessages.FormNamedElementOutsideBoundsOfPart.fill(elementName, inForm, partName);
 												addMarker(project, mk.getType(), mk.getText(), -1, FORM_ELEMENT_OUTSIDE_BOUNDS, IMarker.PRIORITY_LOW, null, o);
 											}
 											int width = form.getWidth();
@@ -2342,12 +2338,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										ServoyMarker mk;
 										if (elementName == null)
 										{
-											mk = MarkerMessages.FormUnnamedElementOutsideBoundsOfForm.fill(form.getName());
+											elementName = o.getUUID().toString();
 										}
-										else
-										{
-											mk = MarkerMessages.FormNamedElementOutsideBoundsOfForm.fill(elementName, form.getName());
-										}
+										mk = MarkerMessages.FormNamedElementOutsideBoundsOfForm.fill(elementName, form.getName());
 										addMarker(project, mk.getType(), mk.getText(), -1, FORM_ELEMENT_OUTSIDE_BOUNDS, IMarker.PRIORITY_LOW, null, o);
 									}
 								}
@@ -2604,11 +2597,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									int tabSeq = ((ISupportTabSeq)persist).getTabSeq();
 									if (tabSequences.containsKey(Integer.valueOf(tabSeq)))
 									{
-										ServoyMarker mk = MarkerMessages.FormUnnamedElementDuplicateTabSequence.fill(form.getName());
+										String name = persist.getUUID().toString();
 										if (persist instanceof ISupportName && ((ISupportName)persist).getName() != null)
 										{
-											mk = MarkerMessages.FormNamedElementDuplicateTabSequence.fill(form.getName(), ((ISupportName)persist).getName());
+											name = ((ISupportName)persist).getName();
 										}
+										ServoyMarker mk = MarkerMessages.FormNamedElementDuplicateTabSequence.fill(form.getName(), name);
 										addMarker(project, mk.getType(), mk.getText(), -1, FORM_ELEMENT_DUPLICATE_TAB_SEQUENCE, IMarker.PRIORITY_NORMAL, null,
 											persist);
 									}
@@ -2809,6 +2803,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							Field field = (Field)o;
 							FlattenedSolution fieldFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(field, flattenedSolution);
 							int type = field.getDisplayType();
+							String fieldName = field.getName();
+							if (fieldName == null)
+							{
+								fieldName = field.getUUID().toString();
+							}
 							if (field.getValuelistID() > 0)
 							{
 								ValueList vl = fieldFlattenedSolution.getValueList(field.getValuelistID());
@@ -2830,15 +2829,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										}
 										if (showWarning)
 										{
-											ServoyMarker mk;
-											if (field.getName() != null)
-											{
-												mk = MarkerMessages.FormEditableNamedComboboxCustomValuelist.fill(field.getName());
-											}
-											else
-											{
-												mk = MarkerMessages.FormEditableUnnamedComboboxCustomValuelist;
-											}
+											ServoyMarker mk = MarkerMessages.FormEditableNamedComboboxCustomValuelist.fill(fieldName);
 											addMarker(project, mk.getType(), mk.getText(), -1, FORM_EDITABLE_COMBOBOX_CUSTOM_VALUELIST,
 												IMarker.PRIORITY_NORMAL, null, field);
 										}
@@ -2907,15 +2898,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										}
 										if (vlWithUnstoredCalcError)
 										{
-											ServoyMarker mk;
-											if (field.getName() != null)
-											{
-												mk = MarkerMessages.FormTypeAheadNamedUnstoredCalculation.fill(field.getName());
-											}
-											else
-											{
-												mk = MarkerMessages.FormTypeAheadUnnamedUnstoredCalculation;
-											}
+											ServoyMarker mk = MarkerMessages.FormTypeAheadNamedUnstoredCalculation.fill(fieldName);
 											addMarker(project, mk.getType(), mk.getText(), -1, FORM_TYPEAHEAD_UNSTORED_CALCULATION, IMarker.PRIORITY_NORMAL,
 												null, field);
 										}
@@ -2927,15 +2910,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										Relation relation = fieldFlattenedSolution.getRelation(parts[0]);
 										if (relation != null && !relation.isGlobal() && !relation.getPrimaryDataSource().equals(form.getDataSource()))
 										{
-											ServoyMarker mk;
-											if (field.getName() != null)
-											{
-												mk = MarkerMessages.FormNamedFieldRelatedValuelist.fill(field.getName(), vl.getName(), form.getName());
-											}
-											else
-											{
-												mk = MarkerMessages.FormUnnamedFieldRelatedValuelist.fill(vl.getName(), form.getName());
-											}
+											ServoyMarker mk = MarkerMessages.FormNamedFieldRelatedValuelist.fill(fieldName, vl.getName(), form.getName());
 											addMarker(project, mk.getType(), mk.getText(), -1, FORM_FIELD_RELATED_VALUELIST, IMarker.PRIORITY_NORMAL, null,
 												field);
 										}
@@ -2952,17 +2927,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											if (relation != null && !relation.isGlobal() && !relation.isLiteral() &&
 												!relation.getPrimaryDataSource().equals(form.getDataSource()))
 											{
-												ServoyMarker mk;
-												if (field.getName() != null)
-												{
-													mk = MarkerMessages.FormNamedFieldFallbackRelatedValuelist.fill(field.getName(), vl.getName(),
-														fallback.getName(), form.getName());
-												}
-												else
-												{
-													mk = MarkerMessages.FormUnnamedFieldFallbackRelatedValuelist.fill(vl.getName(), fallback.getName(),
-														form.getName());
-												}
+												ServoyMarker mk = MarkerMessages.FormNamedFieldFallbackRelatedValuelist.fill(fieldName, vl.getName(),
+													fallback.getName(), form.getName());
 												addMarker(project, mk.getType(), mk.getText(), -1, FORM_FIELD_RELATED_VALUELIST, IMarker.PRIORITY_NORMAL, null,
 													field);
 											}
@@ -2974,7 +2940,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							{
 								// these types of fields MUST have a valuelist
 								Form form = (Form)o.getAncestor(IRepository.FORMS);
-								ServoyMarker mk = MarkerMessages.RequiredPropertyMissingOnElement.fill("valuelist", field.getName(), form.getName()); //$NON-NLS-1$
+								ServoyMarker mk = MarkerMessages.RequiredPropertyMissingOnElement.fill("valuelist", fieldName, form.getName()); //$NON-NLS-1$
 								addMarker(project, mk.getType(), mk.getText(), -1, FORM_REQUIRED_PROPERTY_MISSING, IMarker.PRIORITY_NORMAL, null, field);
 							}
 						}
