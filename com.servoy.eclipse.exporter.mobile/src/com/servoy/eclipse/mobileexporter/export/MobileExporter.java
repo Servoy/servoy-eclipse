@@ -384,9 +384,11 @@ public class MobileExporter
 		{
 			File outputFile = new File(tmpP, "solution.js"); //$NON-NLS-1$
 			Utils.writeTXTFile(outputFile, solutionJavascript);
+			Utils.writeTXTFile(new File(outputFolder, "mobileclient/solution.js"), solutionJavascript);
 
 			outputFile = new File(tmpP, "solution_json.js");
 			Utils.writeTXTFile(outputFile, formJson);
+			Utils.writeTXTFile(new File(outputFolder, "mobileclient/solution_json.js"), formJson);
 		}
 
 		File exportedFile = null;
