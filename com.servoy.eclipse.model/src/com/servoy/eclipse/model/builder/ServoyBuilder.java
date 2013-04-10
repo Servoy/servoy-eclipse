@@ -65,6 +65,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.model.Activator;
@@ -2261,7 +2262,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							// check if not outside form
 							Form form = (Form)o.getAncestor(IRepository.FORMS);
 							form = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution).getFlattenedForm(form);
-							if (form != null)
+							if (form != null && form.getCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName) == null)
 							{
 								Point location = ((BaseComponent)o).getLocation();
 								if (location != null)
