@@ -1582,33 +1582,36 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				addDriverProblemMarker(project);
 
 				final Solution solution = servoyProject.getSolution();
-
-				if (solution.getMustAuthenticate())
+				if (servoyModel.getActiveProject().getSolution().getName().equals(solution.getName()))
 				{
-					//check if solution is used as web service
-					Iterator<Form> formsIt = Solution.getForms(solution.getAllObjectsAsList(), null, false);
-					boolean isServiceSolution = false;
-					while (formsIt.hasNext() && !isServiceSolution)
+					//skipping modules when checking for web service solutions
+					if (solution.getMustAuthenticate())
 					{
-						Iterator<ScriptMethod> methodIt = formsIt.next().getScriptMethods(false);
-						while (methodIt.hasNext())
+						//check if solution is used as web service
+						Iterator<Form> formsIt = Solution.getForms(solution.getAllObjectsAsList(), null, false);
+						boolean isServiceSolution = false;
+						while (formsIt.hasNext() && !isServiceSolution)
 						{
-							String methodName = methodIt.next().getName();
-							if (methodName.equals("ws_read") || methodName.equals("ws_create") || //$NON-NLS-1$//$NON-NLS-2$
-								methodName.equals("ws_delete") || methodName.equals("ws_update") || //$NON-NLS-1$//$NON-NLS-2$
-								methodName.equals("ws_authenticate") || methodName.equals("ws_response_headers")) //$NON-NLS-1$ //$NON-NLS-2$
+							Iterator<ScriptMethod> methodIt = formsIt.next().getScriptMethods(false);
+							while (methodIt.hasNext())
 							{
-								isServiceSolution = true;
-								break;
+								String methodName = methodIt.next().getName();
+								if (methodName.equals("ws_read") || methodName.equals("ws_create") || //$NON-NLS-1$//$NON-NLS-2$
+									methodName.equals("ws_delete") || methodName.equals("ws_update") || //$NON-NLS-1$//$NON-NLS-2$
+									methodName.equals("ws_authenticate") || methodName.equals("ws_response_headers")) //$NON-NLS-1$ //$NON-NLS-2$
+								{
+									isServiceSolution = true;
+									break;
+								}
 							}
 						}
-					}
-					if (isServiceSolution)
-					{
-						//create warning marker
-						ServoyMarker mk = MarkerMessages.SolutionUsedAsWebServiceMustAuthenticateProblem.fill(solution.getName());
-						addMarker(project, mk.getType(), mk.getText(), -1, SOLUTION_USED_AS_WEBSERVICE_MUSTAUTHENTICATE_PROBLEM, IMarker.PRIORITY_HIGH, null,
-							solution);
+						if (isServiceSolution)
+						{
+							//create warning marker
+							ServoyMarker mk = MarkerMessages.SolutionUsedAsWebServiceMustAuthenticateProblem.fill(solution.getName());
+							addMarker(project, mk.getType(), mk.getText(), -1, SOLUTION_USED_AS_WEBSERVICE_MUSTAUTHENTICATE_PROBLEM, IMarker.PRIORITY_HIGH,
+								null, solution);
+						}
 					}
 				}
 
