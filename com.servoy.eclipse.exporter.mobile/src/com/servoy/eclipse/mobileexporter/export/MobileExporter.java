@@ -378,9 +378,9 @@ public class MobileExporter
 
 		// Write files for running from java source
 		File tmpP = new File(outputFolder.getParent() + "/src/com/servoy/mobile/public");
-		File tmpWAR = new File(outputFolder.getParent() + "/war");
+		boolean developmentWorkspaceExport = "war".equals(outputFolder.getName()) && outputFolder.getParent() != null && tmpP.exists();
 
-		if (outputFolder.getParent() != null && tmpP.exists())
+		if (developmentWorkspaceExport)
 		{
 			File outputFile = new File(tmpP, "solution.js"); //$NON-NLS-1$
 			Utils.writeTXTFile(outputFile, solutionJavascript);
@@ -419,11 +419,11 @@ public class MobileExporter
 						if (entryName.equals("servoy_mobile.html") && mediaExport.length() > 0)
 						{
 							fileContent = fileContent.replaceAll(Pattern.quote("<!--SOLUTION_MEDIA_PLACEHOLDER-->"), mediaExport);
-							if (outputFolder.getParent() != null && tmpWAR.exists())
+							if (developmentWorkspaceExport)
 							{
-								String indexContent = Utils.getTXTFileContent(new FileInputStream(new File(tmpWAR, "servoy_mobile.html")),
+								String indexContent = Utils.getTXTFileContent(new FileInputStream(new File(outputFolder, "servoy_mobile.html")),
 									Charset.forName("UTF8"), false);
-								File outputFile = new File(tmpWAR, "index.html"); //$NON-NLS-1$
+								File outputFile = new File(outputFolder, "index.html"); //$NON-NLS-1$
 								indexContent = indexContent.replaceAll(Pattern.quote("<!--SOLUTION_MEDIA_PLACEHOLDER-->"), mediaExport);
 								Utils.writeTXTFile(outputFile, indexContent);
 							}
