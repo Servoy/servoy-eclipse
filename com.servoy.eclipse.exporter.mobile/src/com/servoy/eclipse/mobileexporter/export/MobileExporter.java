@@ -418,7 +418,7 @@ public class MobileExporter
 						{
 							fileContent = fileContent.replaceAll(Pattern.quote(key), renameMap.get(key));
 						}
-						if (entryName.equals("servoy_mobile.html") && mediaExport.length() > 0)
+						if (entryName.equals("servoy_mobile.html"))
 						{
 							fileContent = fileContent.replaceAll(Pattern.quote("<!--SOLUTION_MEDIA_PLACEHOLDER-->"), mediaExport);
 							if (developmentWorkspaceExport)
