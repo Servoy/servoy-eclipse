@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.mobileexporter.export;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -108,8 +109,8 @@ public class MobileExporter
 
 	private static final String MIME_JS = "text/javascript";
 	private static final String MIME_CSS = "text/css";
-	private static final String TAG_SCRIPT = "<script type=\"text/javascript\" language=\"javascript\" src=\"mobileclient/js/";
-	private static final String TAG_CSS = "<link rel=\"stylesheet\" type=\"text/css\" href=\"mobileclient/css/";
+	private static final String TAG_SCRIPT = "<script type=\"text/javascript\" language=\"javascript\" src=\"mobileclient/media/";
+	private static final String TAG_CSS = "<link rel=\"stylesheet\" type=\"text/css\" href=\"mobileclient/media/";
 	private static final String TAG_SCRIPT_END = "\"></script>\n";
 	private static final String TAG_CSS_END = "\"/>\n";
 
@@ -123,22 +124,32 @@ public class MobileExporter
 		{
 			Iterator<Media> mediasIte = flattenedSolution.getMedias(false);
 			Media media;
-			String content;
-			boolean isJS;
+			byte[] content;
+			boolean isTXTContent;
 			while (mediasIte.hasNext())
 			{
 				media = mediasIte.next();
-				if ((isJS = MIME_JS.equals(media.getMimeType())) || MIME_CSS.equals(media.getMimeType()))
+				content = media.getMediaData();
+				isTXTContent = false;
+				if (MIME_JS.equals(media.getMimeType()))
 				{
-					content = new String(media.getMediaData());
-					headerText.append(isJS ? TAG_SCRIPT : TAG_CSS).append(media.getName()).append(isJS ? TAG_SCRIPT_END : TAG_CSS_END);
-					addZipEntry("mobileclient/" + (isJS ? "js" : "css") + "/" + media.getName(), zos, Utils.getUTF8EncodedStream(content));
-					if (outputFolder != null)
-					{
-						File outputFolderJS = new File(outputFolder, (isJS ? "js" : "css"));
-						outputFolderJS.mkdirs();
-						Utils.writeTXTFile(new File(outputFolderJS, media.getName()), content);
-					}
+					headerText.append(TAG_SCRIPT).append(media.getName()).append(TAG_SCRIPT_END);
+					isTXTContent = true;
+				}
+				else if (MIME_CSS.equals(media.getMimeType()))
+				{
+					headerText.append(TAG_CSS).append(media.getName()).append(TAG_CSS_END);
+					isTXTContent = true;
+				}
+
+				addZipEntry("mobileclient/media/" + media.getName(), zos, isTXTContent ? Utils.getUTF8EncodedStream(new String(content))
+					: new ByteArrayInputStream(content));
+				if (outputFolder != null)
+				{
+					File outputFolderJS = new File(outputFolder, "media");
+					outputFolderJS.mkdirs();
+					if (isTXTContent) Utils.writeTXTFile(new File(outputFolderJS, media.getName()), new String(content));
+					else Utils.writeFile(new File(outputFolderJS, media.getName()), content);
 				}
 			}
 		}
