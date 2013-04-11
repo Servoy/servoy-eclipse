@@ -109,8 +109,8 @@ public class MobileExporter
 
 	private static final String MIME_JS = "text/javascript";
 	private static final String MIME_CSS = "text/css";
-	private static final String TAG_SCRIPT = "<script type=\"text/javascript\" language=\"javascript\" src=\"mobileclient/media/";
-	private static final String TAG_CSS = "<link rel=\"stylesheet\" type=\"text/css\" href=\"mobileclient/media/";
+	private static final String TAG_SCRIPT = "<script type=\"text/javascript\" language=\"javascript\" src=\"media/";
+	private static final String TAG_CSS = "<link rel=\"stylesheet\" type=\"text/css\" href=\"media/";
 	private static final String TAG_SCRIPT_END = "\"></script>\n";
 	private static final String TAG_CSS_END = "\"/>\n";
 
@@ -142,8 +142,7 @@ public class MobileExporter
 					isTXTContent = true;
 				}
 
-				addZipEntry("mobileclient/media/" + media.getName(), zos, isTXTContent ? Utils.getUTF8EncodedStream(new String(content))
-					: new ByteArrayInputStream(content));
+				addZipEntry("media/" + media.getName(), zos, isTXTContent ? Utils.getUTF8EncodedStream(new String(content)) : new ByteArrayInputStream(content));
 				if (outputFolder != null)
 				{
 					File outputFolderJS = new File(outputFolder, "media");
@@ -403,7 +402,7 @@ public class MobileExporter
 				exportedFile = new File(outputFolder, solutionName + (exportAsZip ? ".zip" : ".war"));
 				warStream = new ZipOutputStream(new FileOutputStream(exportedFile));
 
-				String mediaExport = doMediaExport(warStream, outputFolder.getParent() != null && tmpP.exists() ? tmpP : null);
+				String mediaExport = doMediaExport(warStream, developmentWorkspaceExport ? outputFolder : null);
 
 				ZipInputStream zipStream = new ZipInputStream(is);
 				ZipEntry entry = zipStream.getNextEntry();
