@@ -37,6 +37,7 @@ import org.eclipse.dltk.javascript.typeinfo.model.Visibility;
 import org.eclipse.dltk.javascript.validation.IMemberValidationEvent;
 import org.eclipse.dltk.javascript.validation.IValidatorExtension2;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.ui.search.ScriptVariableSearch;
 import com.servoy.j2db.FlattenedSolution;
@@ -177,6 +178,16 @@ public class ServoyScriptValidator implements IValidatorExtension2
 			visibility = member.getVisibility();
 			name = member.getName();
 			method = member instanceof IRMethod;
+		}
+		if (visibility == null && reference != null)
+		{
+			String refName = reference.getName();
+			if ((refName.equals("java") || refName.equals("javax") || refName.equals("Packages")) &&
+				ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile())
+			{
+				name = refName;
+				visibility = Visibility.INTERNAL;
+			}
 		}
 		if (visibility == Visibility.PRIVATE)
 		{
