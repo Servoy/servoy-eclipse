@@ -19560,17 +19560,17 @@ var ok = %%prefix%%foundset.addFoundSetFilterParam('companyname', '#^||=', 'serv
           </summaries>
           <deprecated><![CDATA[As of release 3.1, replaced by #clear().]]></deprecated>
         </function>
-        <function clientSupport="wc,sc" name="deleteAllRecords">
+        <function clientSupport="mc,wc,sc" name="deleteAllRecords">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[boolean true if all records could be deleted.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Delete all records in foundset, resulting in empty foundset.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Delete all records in foundset, resulting in empty foundset.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Delete all records in foundset, resulting in empty foundset.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Delete all records in foundset, resulting in empty foundset.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[var success = %%prefix%%foundset.deleteAllRecords();]]></sample>
+            <sample clientSupport="mc,wc,sc"><![CDATA[var success = %%prefix%%foundset.deleteAllRecords();]]></sample>
           </samples>
         </function>
         <function clientSupport="mc,wc,sc" name="deleteRecord">
