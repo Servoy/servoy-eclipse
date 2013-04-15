@@ -501,6 +501,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		"solutionDeserializeError", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> SOLUTION_ELEMENT_NAME_INVALID_IDENTIFIER = new Pair<String, ProblemSeverity>(
 		"solutionElementNameInvalidIdentifier", ProblemSeverity.WARNING); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> SOLUTION_ELEMENT_NAME_RESERVED_PREFIX_IDENTIFIER = new Pair<String, ProblemSeverity>(
+		"solutionElementNameReservedPrefixIdentifier", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> SOLUTION_PROPERTY_FORM_CANNOT_BE_INSTANTIATED = new Pair<String, ProblemSeverity>(
 		"solutionPropertyFormCannotBeInstantiated", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> SOLUTION_PROPERTY_TARGET_NOT_FOUND = new Pair<String, ProblemSeverity>(
@@ -2177,6 +2179,16 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 						}
 						checkCancel();
+						if (o instanceof IFormElement)
+						{
+							String name = ((ISupportName)o).getName();
+							if (name != null && name.startsWith(ComponentFactory.WEB_ID_PREFIX))
+							{
+								ServoyMarker mk = MarkerMessages.ElementNameReservedPrefixIdentifier.fill(name, ComponentFactory.WEB_ID_PREFIX);
+								addMarker(project, mk.getType(), mk.getText(), -1, SOLUTION_ELEMENT_NAME_RESERVED_PREFIX_IDENTIFIER, IMarker.PRIORITY_NORMAL,
+									null, o);
+							}
+						}
 						if (o instanceof BaseComponent && ((BaseComponent)o).getVisible())
 						{
 							// check if not outside form
