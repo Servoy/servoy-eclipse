@@ -6365,7 +6365,7 @@ redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
           <deprecated><![CDATA[the border type is handled by the bean class implementation; this solution model property is ignored]]></deprecated>
           <sample><![CDATA[//HINT: To know exactly the notation of this property set it in the designer and then read it once out through the solution model.
 var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
+field.borderType = solutionModel.createLineBorder(1,'#ff0000');]]></sample>
         </property>
         <property name="className">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -6656,7 +6656,7 @@ redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
           <summary><![CDATA[The type, color and style of border of the component.]]></summary>
           <sample><![CDATA[//HINT: To know exactly the notation of this property set it in the designer and then read it once out through the solution model.
 var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
+field.borderType = solutionModel.createLineBorder(1,'#ff0000');]]></sample>
         </property>
         <property name="dataProviderID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -8400,7 +8400,7 @@ redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
           <summary><![CDATA[The type, color and style of border of the component.]]></summary>
           <sample><![CDATA[//HINT: To know exactly the notation of this property set it in the designer and then read it once out through the solution model.
 var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
+field.borderType = solutionModel.createLineBorder(1,'#ff0000');]]></sample>
         </property>
         <property name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -10200,7 +10200,7 @@ redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
           <summary><![CDATA[The type, color and style of border of the component.]]></summary>
           <sample><![CDATA[//HINT: To know exactly the notation of this property set it in the designer and then read it once out through the solution model.
 var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
+field.borderType = solutionModel.createLineBorder(1,'#ff0000');]]></sample>
         </property>
         <property name="dataProviderID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -11042,7 +11042,7 @@ forms['products_separate'].controller.search();]]></sample>
           <summary><![CDATA[The type, color and style of border of the component.]]></summary>
           <sample><![CDATA[//HINT: To know exactly the notation of this property set it in the designer and then read it once out through the solution model.
 var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
+field.borderType = solutionModel.createLineBorder(1,'#ff0000');]]></sample>
         </property>
         <property name="dataSource">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -15102,7 +15102,7 @@ redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
           <summary><![CDATA[The type, color and style of border of the component.]]></summary>
           <sample><![CDATA[//HINT: To know exactly the notation of this property set it in the designer and then read it once out through the solution model.
 var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
+field.borderType = solutionModel.createLineBorder(1,'#ff0000');]]></sample>
         </property>
         <property name="dataProviderID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -15722,7 +15722,7 @@ redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
           <summary><![CDATA[The type, color and style of border of the component.]]></summary>
           <sample><![CDATA[//HINT: To know exactly the notation of this property set it in the designer and then read it once out through the solution model.
 var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
+field.borderType = solutionModel.createLineBorder(1,'#ff0000');]]></sample>
         </property>
         <property name="dataProviderID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -16694,7 +16694,7 @@ redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
           <summary><![CDATA[The type, color and style of border of the component.]]></summary>
           <sample><![CDATA[//HINT: To know exactly the notation of this property set it in the designer and then read it once out through the solution model.
 var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
+field.borderType = solutionModel.createLineBorder(1,'#ff0000');]]></sample>
         </property>
         <property name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -18588,7 +18588,7 @@ redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
           <summary><![CDATA[The type, color and style of border of the component.]]></summary>
           <sample><![CDATA[//HINT: To know exactly the notation of this property set it in the designer and then read it once out through the solution model.
 var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
+field.borderType = solutionModel.createLineBorder(1,'#ff0000');]]></sample>
         </property>
         <property deprecated="true" name="closeOnTabs">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
