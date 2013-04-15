@@ -9283,7 +9283,7 @@ redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
           <samples>
             <sample clientSupport="mc,wc,sc"><![CDATA[//HINT: To know exactly the notation of this property set it in the designer and then read it once out through the solution model.
 var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
+field.borderType = solutionModel.createLineBorder(1,'#ff0000');]]></sample>
           </samples>
         </property>
         <property clientSupport="wc,sc" name="className">
@@ -9712,7 +9712,7 @@ redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[//HINT: To know exactly the notation of this property set it in the designer and then read it once out through the solution model.
 var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
+field.borderType = solutionModel.createLineBorder(1,'#ff0000');]]></sample>
           </samples>
         </property>
         <property clientSupport="mc,wc,sc" name="dataProviderID">
@@ -12141,7 +12141,7 @@ redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[//HINT: To know exactly the notation of this property set it in the designer and then read it once out through the solution model.
 var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
+field.borderType = solutionModel.createLineBorder(1,'#ff0000');]]></sample>
           </samples>
         </property>
         <property clientSupport="mc,wc,sc" name="enabled">
@@ -14785,7 +14785,7 @@ redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[//HINT: To know exactly the notation of this property set it in the designer and then read it once out through the solution model.
 var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
+field.borderType = solutionModel.createLineBorder(1,'#ff0000');]]></sample>
           </samples>
         </property>
         <property clientSupport="mc,wc,sc" name="dataProviderID">
@@ -15985,7 +15985,7 @@ forms['products_separate'].controller.search();]]></sample>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[//HINT: To know exactly the notation of this property set it in the designer and then read it once out through the solution model.
 var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
+field.borderType = solutionModel.createLineBorder(1,'#ff0000');]]></sample>
           </samples>
         </property>
         <property clientSupport="mc,wc,sc" name="dataSource">
@@ -21331,7 +21331,7 @@ redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[//HINT: To know exactly the notation of this property set it in the designer and then read it once out through the solution model.
 var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
+field.borderType = solutionModel.createLineBorder(1,'#ff0000');]]></sample>
           </samples>
         </property>
         <property clientSupport="mc,wc,sc" name="dataProviderID">
@@ -22753,7 +22753,7 @@ redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[//HINT: To know exactly the notation of this property set it in the designer and then read it once out through the solution model.
 var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
+field.borderType = solutionModel.createLineBorder(1,'#ff0000');]]></sample>
           </samples>
         </property>
         <property clientSupport="wc,sc" name="enabled">
@@ -25455,7 +25455,7 @@ redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[//HINT: To know exactly the notation of this property set it in the designer and then read it once out through the solution model.
 var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-field.borderType = solutionModel.createBorder(1,'#ff0000');;]]></sample>
+field.borderType = solutionModel.createLineBorder(1,'#ff0000');]]></sample>
           </samples>
         </property>
         <property clientSupport="wc,sc" deprecated="true" name="closeOnTabs">
