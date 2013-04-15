@@ -521,6 +521,8 @@ public class MarkerMessages
 		"Solution \"{0}\" references server \"{1}\" which is not accessible (first occurrence error).", ServoyBuilder.MISSING_SERVER); //$NON-NLS-1$
 	public static ServoyMarker ElementNameInvalidIdentifier = new ServoyMarker(
 		"Element has name \"{0}\" which is not a valid identifier.", ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE); //$NON-NLS-1$
+	public static ServoyMarker ElementNameReservedPrefixIdentifier = new ServoyMarker(
+		"Element has name \"{0}\" which starts with the Servoy reserved \"{1}\" prefix.", ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker RelationPrimaryTableNotFound = new ServoyMarker(
 		"Relation \"{0}\" is referring to a primary table \"{1}\" which does not exist on server \"{2}\".", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
