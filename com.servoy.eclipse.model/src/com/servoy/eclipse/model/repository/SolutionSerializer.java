@@ -713,6 +713,7 @@ public class SolutionSerializer
 			if (index != -1)
 			{
 				int lineEnd = sb.indexOf("\n", index); //$NON-NLS-1$
+				lineEnd = lineEnd < endComment ? lineEnd : endComment;
 				sb.replace(index + PROPERTIESKEY.length(), lineEnd, obj.toString(false));
 			}
 			else if (obj.length() > 0)
@@ -754,7 +755,7 @@ public class SolutionSerializer
 		{
 			for (String line : userTemplate.split("\n"))
 			{
-				sb.append(" * ").append(line).append('\n'); //$NON-NLS-1$ //$NON-NLS-2$
+				sb.append(" * ").append(line).append('\n'); //$NON-NLS-1$ 
 			}
 			sb.append(" *\n"); //$NON-NLS-1$
 		}
