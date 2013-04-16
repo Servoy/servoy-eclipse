@@ -3327,7 +3327,7 @@ so if a user keeps clicking on other stuff this will also be handled right away 
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var form = solutionModel.getForm("someForm");
-form.borderType = solutionModel.createBorder(SM_BEVELTYPE.LOWERED,'#ff0000','#00ff00');]]></sample>
+form.borderType = solutionModel.createBevelBorder(SM_BEVELTYPE.LOWERED, '#ff0000', '#00ff00','#f0000f', '#0000ff');]]></sample>
           </samples>
         </constant>
         <constant clientSupport="wc,sc" name="RAISED">
@@ -3340,7 +3340,7 @@ form.borderType = solutionModel.createBorder(SM_BEVELTYPE.LOWERED,'#ff0000','#00
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var form = solutionModel.getForm("someForm");
-form.borderType = solutionModel.createBorder(SM_BEVELTYPE.RAISED,'#ff0000','#00ff00');]]></sample>
+form.borderType = solutionModel.createBevelBorder(SM_BEVELTYPE.RAISED, '#ff0000', '#00ff00','#f0000f', '#0000ff');]]></sample>
           </samples>
         </constant>
       </constants>
@@ -56964,7 +56964,7 @@ button.onAction = solutionModel.wrapMethodWithArguments(method, [null, true, 42,
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var form = solutionModel.getForm("someForm");
-form.borderType = solutionModel.createBorder('Test',null,'#ff0000',SM_TITLEJUSTIFICATION.CENTER,SM_TITLEPOSITION.TOP);]]></sample>
+form.borderType = solutionModel.createTitledBorder('Test',null,'#ff0000',SM_TITLEJUSTIFICATION.CENTER,SM_TITLEPOSITION.TOP);]]></sample>
           </samples>
         </constant>
         <constant clientSupport="wc,sc" name="DEFAULT">
@@ -56977,7 +56977,7 @@ form.borderType = solutionModel.createBorder('Test',null,'#ff0000',SM_TITLEJUSTI
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var form = solutionModel.getForm("someForm");
-form.borderType = solutionModel.createBorder('Test',null,'#ff0000',SM_TITLEJUSTIFICATION.DEFAULT,SM_TITLEPOSITION.TOP);]]></sample>
+form.borderType = solutionModel.createTitledBorder('Test',null,'#ff0000',SM_TITLEJUSTIFICATION.DEFAULT,SM_TITLEPOSITION.TOP);]]></sample>
           </samples>
         </constant>
         <constant clientSupport="wc,sc" name="LEADING">
@@ -56994,7 +56994,7 @@ form.borderType = solutionModel.createBorder('Test',null,'#ff0000',SM_TITLEJUSTI
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var form = solutionModel.getForm("someForm");
-form.borderType = solutionModel.createBorder('Test',null,'#ff0000',SM_TITLEJUSTIFICATION.LEADING,SM_TITLEPOSITION.TOP);]]></sample>
+form.borderType = solutionModel.createTitledBorder('Test',null,'#ff0000',SM_TITLEJUSTIFICATION.LEADING,SM_TITLEPOSITION.TOP);]]></sample>
           </samples>
         </constant>
         <constant clientSupport="wc,sc" name="LEFT">
@@ -57007,7 +57007,7 @@ form.borderType = solutionModel.createBorder('Test',null,'#ff0000',SM_TITLEJUSTI
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var form = solutionModel.getForm("someForm");
-form.borderType = solutionModel.createBorder('Test',null,'#ff0000',SM_TITLEJUSTIFICATION.LEFT,SM_TITLEPOSITION.TOP);]]></sample>
+form.borderType = solutionModel.createTitledBorder('Test',null,'#ff0000',SM_TITLEJUSTIFICATION.LEFT,SM_TITLEPOSITION.TOP);]]></sample>
           </samples>
         </constant>
         <constant clientSupport="wc,sc" name="RIGHT">
@@ -57020,7 +57020,7 @@ form.borderType = solutionModel.createBorder('Test',null,'#ff0000',SM_TITLEJUSTI
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var form = solutionModel.getForm("someForm");
-form.borderType = solutionModel.createBorder('Test',null,'#ff0000',SM_TITLEJUSTIFICATION.RIGHT,SM_TITLEPOSITION.TOP);]]></sample>
+form.borderType = solutionModel.createTitledBorder('Test',null,'#ff0000',SM_TITLEJUSTIFICATION.RIGHT,SM_TITLEPOSITION.TOP);]]></sample>
           </samples>
         </constant>
         <constant clientSupport="wc,sc" name="TRAILING">
@@ -57037,7 +57037,7 @@ form.borderType = solutionModel.createBorder('Test',null,'#ff0000',SM_TITLEJUSTI
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var form = solutionModel.getForm("someForm");
-form.borderType = solutionModel.createBorder('Test',null,'#ff0000',SM_TITLEJUSTIFICATION.TRAILING,SM_TITLEPOSITION.TOP);]]></sample>
+form.borderType = solutionModel.createTitledBorder('Test',null,'#ff0000',SM_TITLEJUSTIFICATION.TRAILING,SM_TITLEPOSITION.TOP);]]></sample>
           </samples>
         </constant>
       </constants>
@@ -57054,7 +57054,7 @@ form.borderType = solutionModel.createBorder('Test',null,'#ff0000',SM_TITLEJUSTI
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var form = solutionModel.getForm("someForm");
-form.borderType = solutionModel.createBorder('Test',null,'#ff0000',SM_TITLEJUSTIFICATION.DEFAULT,SM_TITLEPOSITION.ABOVE_BOTTOM);]]></sample>
+form.borderType = solutionModel.createTitledBorder('Test',null,'#ff0000',SM_TITLEJUSTIFICATION.DEFAULT,SM_TITLEPOSITION.ABOVE_BOTTOM);]]></sample>
           </samples>
         </constant>
         <constant clientSupport="wc,sc" name="ABOVE_TOP">
@@ -57067,7 +57067,7 @@ form.borderType = solutionModel.createBorder('Test',null,'#ff0000',SM_TITLEJUSTI
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var form = solutionModel.getForm("someForm");
-form.borderType = solutionModel.createBorder('Test',null,'#ff0000',SM_TITLEJUSTIFICATION.DEFAULT,SM_TITLEPOSITION.ABOVE_TOP);]]></sample>
+form.borderType = solutionModel.createTitledBorder('Test',null,'#ff0000',SM_TITLEJUSTIFICATION.DEFAULT,SM_TITLEPOSITION.ABOVE_TOP);]]></sample>
           </samples>
         </constant>
         <constant clientSupport="wc,sc" name="BELOW_BOTTOM">
@@ -57080,7 +57080,7 @@ form.borderType = solutionModel.createBorder('Test',null,'#ff0000',SM_TITLEJUSTI
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var form = solutionModel.getForm("someForm");
-form.borderType = solutionModel.createBorder('Test',null,'#ff0000',SM_TITLEJUSTIFICATION.DEFAULT,SM_TITLEPOSITION.BELOW_BOTTOM);]]></sample>
+form.borderType = solutionModel.createTitledBorder('Test',null,'#ff0000',SM_TITLEJUSTIFICATION.DEFAULT,SM_TITLEPOSITION.BELOW_BOTTOM);]]></sample>
           </samples>
         </constant>
         <constant clientSupport="wc,sc" name="BELOW_TOP">
@@ -57093,7 +57093,7 @@ form.borderType = solutionModel.createBorder('Test',null,'#ff0000',SM_TITLEJUSTI
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var form = solutionModel.getForm("someForm");
-form.borderType = solutionModel.createBorder('Test',null,'#ff0000',SM_TITLEJUSTIFICATION.DEFAULT,SM_TITLEPOSITION.BELOW_TOP);]]></sample>
+form.borderType = solutionModel.createTitledBorder('Test',null,'#ff0000',SM_TITLEJUSTIFICATION.DEFAULT,SM_TITLEPOSITION.BELOW_TOP);]]></sample>
           </samples>
         </constant>
         <constant clientSupport="wc,sc" name="DEFAULT">
@@ -57106,7 +57106,7 @@ form.borderType = solutionModel.createBorder('Test',null,'#ff0000',SM_TITLEJUSTI
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var form = solutionModel.getForm("someForm");
-form.borderType = solutionModel.createBorder('Test',null,'#ff0000',SM_TITLEJUSTIFICATION.DEFAULT,SM_TITLEPOSITION.DEFAULT_POSITION);]]></sample>
+form.borderType = solutionModel.createTitledBorder('Test',null,'#ff0000',SM_TITLEJUSTIFICATION.DEFAULT,SM_TITLEPOSITION.DEFAULT_POSITION);]]></sample>
           </samples>
         </constant>
         <constant clientSupport="wc,sc" name="TOP">
@@ -57119,7 +57119,7 @@ form.borderType = solutionModel.createBorder('Test',null,'#ff0000',SM_TITLEJUSTI
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var form = solutionModel.getForm("someForm");
-form.borderType = solutionModel.createBorder('Test',null,'#ff0000',SM_TITLEJUSTIFICATION.DEFAULT,SM_TITLEPOSITION.TOP);]]></sample>
+form.borderType = solutionModel.createTitledBorder('Test',null,'#ff0000',SM_TITLEJUSTIFICATION.DEFAULT,SM_TITLEPOSITION.TOP);]]></sample>
           </samples>
         </constant>
       </constants>
