@@ -149,6 +149,11 @@ public class MobilePersistPropertySource extends PersistPropertySource
 	@Override
 	protected boolean shouldShow(PropertyDescriptorWrapper propertyDescriptor) throws RepositoryException
 	{
+		if (isInternalProperty(propertyDescriptor.propertyDescriptor.getName()))
+		{
+			// Special case: add as hidden property, needed for setting value via palette
+			return true;
+		}
 		if (!AnnotationManagerReflection.getInstance().isAnnotatedForMobile(propertyDescriptor.propertyDescriptor.getReadMethod(), getPersist().getClass()))
 		{
 			// do not show the property if the read-method is not flagged for mobile client
@@ -161,6 +166,11 @@ public class MobilePersistPropertySource extends PersistPropertySource
 	@Override
 	protected boolean hideForProperties(PropertyDescriptorWrapper propertyDescriptor)
 	{
+		if (isInternalProperty(propertyDescriptor.propertyDescriptor.getName()))
+		{
+			// Special case: add as hidden property, needed for setting value via palette
+			return true;
+		}
 		if (StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName().equals(propertyDescriptor.propertyDescriptor.getName()) &&
 			getPersist() instanceof GraphicalComponent &&
 			Boolean.TRUE.equals(((GraphicalComponent)getPersist()).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName)) &&
@@ -175,6 +185,23 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			(getPersist() instanceof Field) ? ((Field)getPersist()).getDisplayType() : 0, isButton(getPersist())) ||
 
 		super.hideForProperties(propertyDescriptor);
+	}
+
+	private boolean isInternalProperty(String propertyDescriptor)
+	{
+		if (StaticContentSpecLoader.PROPERTY_EDITABLE.getPropertyName().equals(propertyDescriptor))
+		{
+			return true;
+		}
+		if (StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName().equals(propertyDescriptor))
+		{
+			return true;
+		}
+		if (StaticContentSpecLoader.PROPERTY_VIEW.getPropertyName().equals(propertyDescriptor))
+		{
+			return true;
+		}
+		return false;
 	}
 
 	@Override
