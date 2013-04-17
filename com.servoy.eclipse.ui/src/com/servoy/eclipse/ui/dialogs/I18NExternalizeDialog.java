@@ -340,7 +340,8 @@ public class I18NExternalizeDialog extends Dialog
 			i18nMessagesModel.setLanguage(Locale.getDefault());
 
 			defaultMessages = new HashMap<String, String>();
-			Collection<I18NMessagesModelEntry> messages = i18nMessagesModel.getMessages(null, null, null, null);
+			Collection<I18NMessagesModelEntry> messages = i18nMessagesModel.getMessages(null, null, null, null,
+				ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile());
 			Iterator<I18NMessagesModelEntry> messagesIte = messages.iterator();
 			I18NMessagesModelEntry message;
 			while (messagesIte.hasNext())
