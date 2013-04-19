@@ -627,8 +627,8 @@ public class MobileExporter
 	private String getAnonymousScripting(ScriptMethod method)
 	{
 		String scripting = method.getDeclaration();
-		scripting = scripting.replaceAll("function " + method.getName(), "function ");
-		int index = scripting.indexOf("function ");
+		int index = scripting.indexOf("function " + method.getName());
+		scripting = scripting.replaceAll("function " + method.getName(), "");
 		scripting = scripting.substring(index).trim();
 		// convert to JSON escaped string
 		return JSONObject.quote(scripting);

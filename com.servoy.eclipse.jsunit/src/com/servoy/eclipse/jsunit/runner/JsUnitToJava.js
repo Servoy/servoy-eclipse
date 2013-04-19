@@ -47,18 +47,25 @@ JsUnitToJava.prototype.getTestTree = JsUnitToJava_getTestTree;
 JsUnitToJava.prototype.NEXT_CHILD_GROUP = null;
 JsUnitToJava.prototype.ASSERTION_EXCEPTION_MESSAGE = "just for stack";
 
-function RhinoStackError()
+if (typeof(Packages) != 'undefined')
 {
-	this.rhinoException = new Packages.org.mozilla.javascript.EvaluatorException(JsUnitToJava.prototype.ASSERTION_EXCEPTION_MESSAGE);
-}
-RhinoStackError.prototype = new Error();
+	// if we are running under Rhino, get the stack trace using the JS engine
+	function RhinoStackError()
+	{
+		this.rhinoException = new Packages.org.mozilla.javascript.EvaluatorException(JsUnitToJava.prototype.ASSERTION_EXCEPTION_MESSAGE);
+	}
+	RhinoStackError.prototype = new Error();
 
-function JsUnitError( msg )
-{
-	RhinoStackError.call(this);
-    this.message = msg || "";   
+	function JsUnitError( msg )
+	{
+		// some browsers (opera/chrome/ie) - when the code is evaled in window scope - will define these functions anyway
+		// even if the initial check for "Packages" wouldn't pass (they define all function declarations before running the JS condition); FF doesn't do that, but still
+		if (typeof(Packages) != 'undefined') RhinoStackError.call(this);
+		
+		this.message = msg || "";   
+	}
+	JsUnitError.prototype = new RhinoStackError();
 }
-JsUnitError.prototype = new RhinoStackError();
 
 function TestSuite_addTest( test ) 
 { 

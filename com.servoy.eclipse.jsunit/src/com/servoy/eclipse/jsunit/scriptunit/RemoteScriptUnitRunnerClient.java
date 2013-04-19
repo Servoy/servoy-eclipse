@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.jsunit.scriptunit;
 
+import junit.framework.TestResult;
+
 import org.eclipse.dltk.internal.testing.model.RemoteTestRunnerClient;
 
 /**
@@ -26,11 +28,21 @@ import org.eclipse.dltk.internal.testing.model.RemoteTestRunnerClient;
 public class RemoteScriptUnitRunnerClient extends RemoteTestRunnerClient
 {
 	boolean stoprequested = false;
+	private TestResult testResult;
+
+	public void setTestResultReference(TestResult r)
+	{
+		this.testResult = r;
+	}
 
 	@Override
 	public synchronized void stopTest()
 	{
 		stoprequested = true;
+		if (testResult != null)
+		{
+			testResult.stop();
+		}
 	}
 
 	public boolean isStopRequested()

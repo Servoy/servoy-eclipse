@@ -39,7 +39,6 @@ public class RunJSUnitAction implements IObjectActionDelegate, IWorkbenchWindowA
 
 	public void run(IAction action)
 	{
-
 		JSUnitLaunchConfigurationDelegate.launchTestTarget(getTestTarget());
 	}
 
@@ -72,7 +71,6 @@ public class RunJSUnitAction implements IObjectActionDelegate, IWorkbenchWindowA
 	{
 		// not interested
 	}
-
 
 	@Override
 	public void dispose()

@@ -27,7 +27,6 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -92,7 +91,7 @@ public class AdapterFactory implements IAdapterFactory
 				UserNodeType type = node.getType();
 
 				ServoyProject ap = ServoyModelFinder.getServoyModel().getActiveProject();
-				if (ap != null && !SolutionMetaData.isServoyMobileSolution(ap.getSolution()))
+				if (ap != null)
 				{
 					if (type == UserNodeType.SOLUTION || type == UserNodeType.SOLUTION_ITEM)
 					{

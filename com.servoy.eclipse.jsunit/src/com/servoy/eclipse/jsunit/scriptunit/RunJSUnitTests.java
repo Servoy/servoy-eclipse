@@ -17,19 +17,13 @@
 
 package com.servoy.eclipse.jsunit.scriptunit;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-
-import javax.swing.SwingUtilities;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.dltk.internal.testing.ui.TestRunnerViewPart;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
@@ -45,43 +39,34 @@ import org.eclipse.jdt.internal.junit.JUnitPreferencesConstants;
 import org.eclipse.jdt.internal.junit.model.TestRunSession;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.launching.SocketUtil;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.progress.WorkbenchJob;
 
-import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
-import com.servoy.eclipse.core.util.SerialRule;
 import com.servoy.eclipse.core.util.UIUtils;
-import com.servoy.eclipse.debug.actions.StartJsUnitClientActionDelegate;
 import com.servoy.eclipse.jsunit.SolutionRemoteTestRunner;
 import com.servoy.eclipse.jsunit.launch.JSUnitLaunchConfigurationDelegate;
 import com.servoy.eclipse.jsunit.runner.JSUnitTestListenerHandler;
 import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.repository.JSUnitUserManager;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.IDebugJ2DBClient;
-import com.servoy.j2db.debug.RemoteDebugScriptEngine;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.scripting.IExecutingEnviroment;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
 /**
  * Runs the servoy unit tests on the active solution using the java JUunit runner and dltk.testing Script Unit view.
- * The hacks are still present because one can switch to junit view from open view menu and using the junit view  go to the stack line as before.
+ * The hacks are still present because one can switch to junit view from open view menu and using the junit view go to the stack line as before.
  * @author obuligan
  */
-public class RunJSUnitTests implements Runnable
+public abstract class RunJSUnitTests implements Runnable
 {
+
+	private RemoteScriptUnitRunnerClient scriptUnitRunnerClient;
 
 	public RunJSUnitTests(TestTarget testTarget, ILaunch launch)
 	{
@@ -98,13 +83,14 @@ public class RunJSUnitTests implements Runnable
 		sp = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 	}
 
-	final ServoyProject sp;
-	ILaunch launch = null;
-	TestTarget testTarget = null;
-	private IWorkbenchWindow window;
-	private boolean cancelCleanupShutDown = false;
+	private ILaunch launch = null;
 
-//	/* Here is what this method is supposed to do (without details):
+	protected TestTarget testTarget = null;
+	protected final ServoyProject sp;
+	protected IWorkbenchWindow window;
+	protected boolean cancelCleanupShutDown = false;
+
+//	/* Here is what this method is supposed to do for SmartClient runner (without details and might be obsolete):
 //	 *    - if SmartClient is open then close it.
 //	 *    - start SmartClient using standard run action
 //	 *    - wait for solution to be loaded
@@ -148,18 +134,7 @@ public class RunJSUnitTests implements Runnable
 
 			try
 			{
-				// in case debug smart client was already used, start clean
-				final IDebugJ2DBClient testApp = Activator.getDefault().getJSUnitJ2DBClient();
-				if (!testApp.isShutDown())
-				{
-					// terminate script engine (because it might be suspended (at breakpoint for example), blocking AWT)
-					// and we want to be able to stop the client right away
-					IExecutingEnviroment scriptEngine = testApp.getScriptEngine();
-					if (scriptEngine != null) scriptEngine.destroy();
-					cancelCleanupShutDown = true;
-				}
-				final JSUnitUserManager testUserManager = ((JSUnitUserManager)testApp.getUserManager());
-				testUserManager.reloadFromWorkspace();
+				prepareForTesting();
 
 				final int port = SocketUtil.findFreePort();
 				if (port == -1)
@@ -182,220 +157,73 @@ public class RunJSUnitTests implements Runnable
 
 					removeDLTKTestSessions();
 					// show the ScriptUnit test view part
-					showTestRunnerViewPartInActivePage();
+					showTestRunnerViewPartInActivePage(0);
 
 					//final Launch launch = new Launch(null, ILaunchManager.RUN_MODE, null);
-					try
+
+					// start junit test run session
+					//DebugPlugin.getDefault().getLaunchManager().addLaunch(launch);
+					//DebugUITools.launch(launch, ILaunchManager.DEBUG_MODE);
+					JUnitCorePlugin.getModel().addTestRunSession(new TestRunSession(launch, new JavaProject(sp.getProject(), null)
 					{
-						// start junit test run session
-						//DebugPlugin.getDefault().getLaunchManager().addLaunch(launch);
-						//DebugUITools.launch(launch, ILaunchManager.DEBUG_MODE);
-						JUnitCorePlugin.getModel().addTestRunSession(new TestRunSession(launch, new JavaProject(sp.getProject(), null)
+						@Override
+						public IType findType(String fullyQualifiedName, IProgressMonitor progressMonitor) throws JavaModelException
 						{
-							@Override
-							public IType findType(String fullyQualifiedName, IProgressMonitor progressMonitor) throws JavaModelException
-							{
-								return getJavaType(fullyQualifiedName);
-							}
-
-							@Override
-							public String[] getRequiredProjectNames() throws JavaModelException
-							{
-								return new String[0];
-							}
-						}, port));
-						addDLTKTestRunSession();
-
-						// start tests in AWT thread so that debugger gets attached
-						skipCleanup1 = true;
-						SwingUtilities.invokeLater(new Runnable()
-						{
-							public void run()
-							{
-								boolean skipCleanup2 = false;
-								try
-								{
-									testApp.shutDown(true);
-									testApp.getClientInfo().clearUserInfo();
-
-									final Job waitForSolutionToLoad = new Job("Running unit tests")
-									{
-										@Override
-										protected IStatus run(IProgressMonitor monitor)
-										{
-											try
-											{
-												monitor.beginTask("waiting for debugger to start...", IProgressMonitor.UNKNOWN);
-
-												int timeout = 1;// * 10; // there are lots of waitings inside "isConnected", so only try it once
-												while (!RemoteDebugScriptEngine.isConnected() && timeout > 0 && !monitor.isCanceled())
-												{
-													timeout--;
-													try
-													{
-														Thread.sleep(100);
-													}
-													catch (InterruptedException e)
-													{
-														ServoyLog.logError(e);
-													}
-												}
-												if (!RemoteDebugScriptEngine.isConnected())
-												{
-													// log this but continue anyway (but without debugging working probably
-													ServoyLog.logWarning("Debugger start timeout while running jsunit tests.", null);
-												}
-
-												monitor.setTaskName("waiting for solution to be loaded in client...");
-
-												// wait for solution to load
-												timeout = 60 * 10; // 60 sec max wait for sol. to load
-												while (!testApp.isDoneLoading() && timeout > 0 && !monitor.isCanceled())
-												{
-													timeout--;
-													try
-													{
-														Thread.sleep(100);
-													}
-													catch (InterruptedException e)
-													{
-														ServoyLog.logError(e);
-													}
-												}
-												if (!testApp.isDoneLoading())
-												{
-													ServoyLog.logError("Timeout/cancel while waiting for solution to be loaded in test app.", null);
-													if (monitor.isCanceled())
-													{
-														return Status.CANCEL_STATUS;
-													}
-													else
-													{
-														return new Status(IStatus.ERROR, com.servoy.eclipse.jsunit.Activator.PLUGIN_ID,
-															"Timeout or cancel while waiting for solution to be loaded in test app.");
-													}
-												}
-
-												monitor.setTaskName("testing...");
-												SwingUtilities.invokeAndWait(new Runnable()
-												{
-													public void run()
-													{
-
-														ScriptUnitTestSuite.setTestTarget(testApp, testTarget);
-														try
-														{
-															SolutionRemoteTestRunner.main(new String[] { "-version", "3", "-port", String.valueOf(port), "-testLoaderClass", "org.eclipse.jdt.internal.junit.runner.junit3.JUnit3TestLoader", "loaderpluginname", "org.eclipse.jdt.junit.runtime", "-classNames", ScriptUnitTestSuite.class.getCanonicalName() });
-														}
-														catch (RuntimeException e)
-														{
-															if (cancelCleanupShutDown)
-															{
-																ServoyLog.logInfo("Exception while running unit tests - probably because of force stop to restart them...");
-															}
-															else
-															{
-																throw e;
-															}
-														}
-													}
-
-												});
-											}
-											catch (InterruptedException e)
-											{
-												ServoyLog.logError(e);
-												return new Status(IStatus.ERROR, com.servoy.eclipse.jsunit.Activator.PLUGIN_ID,
-													"Problem encountered when trying to run tests.", e);
-											}
-											catch (InvocationTargetException e)
-											{
-												ServoyLog.logError(e);
-												ServoyLog.logError("Caused by:", e.getTargetException());
-												return new Status(IStatus.ERROR, com.servoy.eclipse.jsunit.Activator.PLUGIN_ID,
-													"Problem encountered when trying to run tests.", e.getTargetException());
-											}
-											finally
-											{
-												monitor.done();
-												cleanUp1(launch);
-												cleanUp2();
-											}
-											return Status.OK_STATUS;
-										}
-									};
-
-									// start smart client
-									Job startSmartClientJob = new WorkbenchJob("Starting unit test client")
-									{
-										@Override
-										public IStatus runInUIThread(IProgressMonitor monitor)
-										{
-											try
-											{
-												cancelCleanupShutDown = false; // because of the rule, last run session should have already finished by now, so no more danger in old cleanup shutting down newly open client
-												StartJsUnitClientActionDelegate startJsUnitClientAction = new StartJsUnitClientActionDelegate();
-												startJsUnitClientAction.init(window);
-												((SwitchableEclipseUserManager)ApplicationServerSingleton.get().getUserManager()).switchTo(testUserManager); // use testUserManager in app. server code as well
-												startJsUnitClientAction.run((IAction)null);
-
-												if (startJsUnitClientAction.clientStartSucceeded())
-												{
-													waitForSolutionToLoad.schedule(); // second job - will be canceled if first fails
-												}
-												else
-												{
-													// test client start aborted by user or test client could not be started
-													cleanUp1(launch);
-													cleanUp2();
-													return Status.CANCEL_STATUS;
-												}
-											}
-											catch (RuntimeException e)
-											{
-												ServoyLog.logError(e);
-												cleanUp1(launch);
-												cleanUp2();
-												return new Status(IStatus.ERROR, com.servoy.eclipse.jsunit.Activator.PLUGIN_ID,
-													"Cannot start unit test SmartClient", e);
-											}
-											return Status.OK_STATUS;
-										}
-									};
-									waitForSolutionToLoad.setRule(SerialRule.INSTANCE);
-									startSmartClientJob.setRule(SerialRule.INSTANCE);
-									skipCleanup2 = true;
-									startSmartClientJob.schedule(); // first job
-								}
-								finally
-								{
-									if (!skipCleanup2)
-									{
-										cleanUp1(launch);
-										cleanUp2();
-									}
-								}
-							}
-						});
-					}
-					finally
-					{
-						if (!skipCleanup1)
-						{
-							cleanUp1(launch);
+							return getJavaType(fullyQualifiedName);
 						}
-					}
+
+						@Override
+						public String[] getRequiredProjectNames() throws JavaModelException
+						{
+							return new String[0];
+						}
+					}, port));
+					addDLTKTestRunSession();
+
+					skipCleanup1 = true;
+					initializeAndRun(port);
 				}
 			}
 			finally
 			{
 				if (!skipCleanup1)
 				{
-					cleanUp2();
+					cleanUpAfterPrepare();
 				}
 			}
 		}
 	}
+
+	protected void runJUnitClass(final int port, Class< ? > suiteClass)
+	{
+		try
+		{
+			showTestRunnerViewPartInActivePage(200); // try to avoid JUnit view getting on top of a view stack by itself in case it was open by the user in the past - we still run the suite using JUnit implementation
+			SolutionRemoteTestRunner.main(new String[] { "-version", "3", "-port", String.valueOf(port), "-testLoaderClass", "org.eclipse.jdt.internal.junit.runner.junit3.JUnit3TestLoader", "loaderpluginname", "org.eclipse.jdt.junit.runtime", "-classNames", suiteClass.getCanonicalName() });
+			showTestRunnerViewPartInActivePage(200); // try to avoid JUnit view getting on top of a view stack by itself in case it was open by the user in the past - we still run the suite using JUnit implementation
+		}
+		catch (RuntimeException e)
+		{
+			if (cancelCleanupShutDown)
+			{
+				ServoyLog.logInfo("Exception while running unit tests - probably because of force stop to restart them...");
+			}
+			else
+			{
+				throw e;
+			}
+		}
+	}
+
+	protected abstract void prepareForTesting();
+
+	protected abstract void initializeAndRun(int port);
+
+	/**
+	 * Called for cleanup if {@link #prepareForTesting()} got called but some exception resulted in {@link #initializeAndRun(int)} not being called.
+	 * This should also be called probably after test run ends (successfully or not) - controlled by code inside {@link #initializeAndRun(int)}. (which will probably run async)
+	 */
+	protected abstract void cleanUpAfterPrepare();
 
 	// return a reference to the js file as a Java IType so that it is handled correctly by the JUnit view when presenting error/failure stacks
 	private IType getJavaType(String fullyQualifiedName)
@@ -433,103 +261,55 @@ public class RunJSUnitTests implements Runnable
 		return null;
 	}
 
-	/**
-	 * @deprecated no longer needed
-	 * @param launch
-	 */
-	@Deprecated
-	private void cleanUp1(ILaunch launch)
-	{
-		// TestRunSession expects to be notified by launch manager that the launch ended in order for
-		// it's RemoteTestRunnerClient to stop waiting for clients connections - so this has to be handled somehow
-		//DebugPlugin.getDefault().getLaunchManager().removeLaunch(launch);
-	}
+//	/**
+//	 * @deprecated no longer needed
+//	 * @param launch
+//	 */
+//	@Deprecated
+//	private void cleanUp1(ILaunch launch)
+//	{
+//		// TestRunSession expects to be notified by launch manager that the launch ended in order for
+//		// it's RemoteTestRunnerClient to stop waiting for clients connections - so this has to be handled somehow
+//		//DebugPlugin.getDefault().getLaunchManager().removeLaunch(launch);
+//	}
 
-	private void cleanUp2()
+	public void showTestRunnerViewPartInActivePage(final int t)
 	{
-		((SwitchableEclipseUserManager)ApplicationServerSingleton.get().getUserManager()).switchTo(null); // restore use of EclipseUserManager in app. server code
-		if (!cancelCleanupShutDown)
-		{
-			Activator plugin = Activator.getDefault();
-			if (plugin != null)
-			{
-				plugin.getJSUnitJ2DBClient().invokeLater(new Runnable()
-				{
-					public void run()
-					{
-						Activator plugin = Activator.getDefault();
-						if (plugin != null)
-						{
-							plugin.getJSUnitJ2DBClient().shutDown(false);
-							try
-							{
-								Thread.sleep(1000);
-								plugin = Activator.getDefault();
-								if (plugin != null)
-								{
-									plugin.getJSUnitJ2DBClient().shutDown(true);
-								}
-							}
-							catch (InterruptedException e)
-							{
-							}
-							plugin = Activator.getDefault();
-							if (plugin != null)
-							{
-								plugin.getJSUnitJ2DBClient().getClientInfo().clearUserInfo();
-							}
-						}
-					}
-				});
-			}
-		}
-	}
-
-	public void showTestRunnerViewPartInActivePage()
-	{
-		Display.getDefault().syncExec(new Runnable()
+		Display.getDefault().asyncExec(new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				showTestRunnerViewPartInActivePage(findTestRunnerViewPartInActivePage());
+				Runnable r = new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						IWorkbenchPage page = null;
+						IWorkbenchPartReference ap = null;
+						try
+						{
+							page = DLTKTestingPlugin.getActivePage();
+							if (page == null) return;
+							ap = page.getActivePartReference();
+							// show the result view if it isn't shown yet
+							page.showView(TestRunnerViewPart.NAME);
+						}
+						catch (PartInitException pie)
+						{
+							ServoyLog.logWarning("Cannot show unit test view", pie);
+						}
+						finally
+						{
+							if (ap != null && !ap.getId().equals(org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart.NAME)) page.activate(ap.getPart(true));
+						}
+					}
+				};
+				if (t == 0) r.run();
+				else Display.getCurrent().timerExec(t, r);
 			}
 		});
 
-	}
-
-	private TestRunnerViewPart showTestRunnerViewPartInActivePage(TestRunnerViewPart testRunner)
-	{
-		IWorkbenchPart activePart = null;
-		IWorkbenchPage page = null;
-		try
-		{
-			// TODO: have to force the creation of view part contents
-			// otherwise the UI will not be updated
-			if (testRunner != null && testRunner.isCreated()) return testRunner;
-			page = DLTKTestingPlugin.getActivePage();
-			if (page == null) return null;
-			activePart = page.getActivePart();
-			// show the result view if it isn't shown yet
-			return (TestRunnerViewPart)page.showView(TestRunnerViewPart.NAME);
-		}
-		catch (PartInitException pie)
-		{
-			DLTKTestingPlugin.log(pie);
-			return null;
-		}
-		finally
-		{
-			// restore focus stolen by the creation of the result view
-			if (page != null && activePart != null) page.activate(activePart);
-		}
-	}
-
-	private TestRunnerViewPart findTestRunnerViewPartInActivePage()
-	{
-		IWorkbenchPage page = DLTKTestingPlugin.getActivePage();
-		if (page == null) return null;
-		return (TestRunnerViewPart)page.findView(TestRunnerViewPart.NAME);
 	}
 
 	private void addDLTKTestRunSession()
@@ -537,14 +317,20 @@ public class RunJSUnitTests implements Runnable
 		//must be run on the UI thread because the TestView part only attaches as a listener to the test session if it is the UI thread
 		Display.getDefault().syncExec(new Runnable()
 		{
+
 			@Override
 			public void run()
 			{
 				DLTKTestingPlugin.getModel().addTestRunSession(
 					new org.eclipse.dltk.internal.testing.model.TestRunSession(launch, org.eclipse.dltk.core.DLTKCore.create(sp.getProject()),
-						new RemoteScriptUnitRunnerClient()));
+						scriptUnitRunnerClient = new RemoteScriptUnitRunnerClient()));
 			}
 		});
+	}
+
+	protected RemoteScriptUnitRunnerClient getScriptUnitRunnerClient()
+	{
+		return scriptUnitRunnerClient;
 	}
 
 	private void removeDLTKTestSessions()

@@ -70,29 +70,24 @@ public class JSUnitToJavaRunner
 
 	static
 	{
-		StringWriter writer = new StringWriter(125 * 1024);
-		writer.append("if (!this.JsUtil) {\n");
-		loadScriptFromResource(JsUnitException.class, "/JsUtil.js", writer);
-		writer.append("\n}");
-		jsUtil = writer.toString();
-
-		writer = new StringWriter(125 * 1024);
-		writer.append("if (!this.TestCase) {\n");
-		loadScriptFromResource(JsUnitException.class, "/JsUnit.js", writer);
-		writer.append("\n}");
-		jsUnit = writer.toString();
-
-		writer = new StringWriter(10 * 1024);
-		writer.append("if (!this.JsUnitToJava) {\n");
-		loadScriptFromResource(JSUnitToJavaRunner.class, "JsUnitToJava.js", writer);
-		writer.append("\n}");
-		jsUnitToJava = writer.toString();
+		jsUtil = getScriptAsStringFromResource("this.JsUtilLoaded", JsUnitException.class, "/JsUtil.js");
+		jsUnit = getScriptAsStringFromResource("this.TestCaseLoaded", JsUnitException.class, "/JsUnit.js");
+		jsUnitToJava = getScriptAsStringFromResource("this.JsUnitToJavaLoaded", JSUnitToJavaRunner.class, "JsUnitToJava.js");
 
 		// make sure that the script are compiled in interpreted mode
 		System.setProperty("servoy.disableScriptCompile", "true");
 	}
 
-	private static void loadScriptFromResource(Class locatorClass, final String name, final Writer writer)
+	public static String getScriptAsStringFromResource(String repeatSafeguardId, Class< ? > locatorClass, String name)
+	{
+		StringWriter writer = new StringWriter(125 * 1024);
+		writer.append("if (typeof(" + repeatSafeguardId + ") == 'undefined') {\n" + repeatSafeguardId + " = 1;\n");
+		loadScriptFromResource(locatorClass, name, writer);
+		writer.append("\n}");
+		return writer.toString();
+	}
+
+	private static void loadScriptFromResource(Class< ? > locatorClass, final String name, final Writer writer)
 	{
 		final InputStream is = locatorClass.getResourceAsStream(name);
 		if (is != null)
@@ -196,16 +191,16 @@ public class JSUnitToJavaRunner
 	 * @return an array representing the test tree as described above. It will only contain String objects and NEXT_CHILD_GROUP values.
 	 * @throws JsUnitException when the javaScript that inspects the test suite structure fails for some reason.
 	 */
-	public List<Object> getTestTree(String suiteName) throws JsUnitException
+	public List<String> getTestTree(String suiteName) throws JsUnitException
 	{
-		List<Object> testTree = new ArrayList<Object>();
+		List<String> testTree = new ArrayList<String>();
 		if (suiteName != null)
 		{
 			Object result = evaluateString("JsUnitToJava.prototype.getTestTree(" + suiteName + ".prototype.suite())", "Getting test tree");
 
 			if (result instanceof NativeArray)
 			{
-				testTree = new ArrayList<Object>();
+				testTree = new ArrayList<String>();
 				NativeArray nativeTestTree = (NativeArray)result;
 				Object element;
 				for (int i = 0; i < nativeTestTree.getLength(); i++)
@@ -215,7 +210,7 @@ public class JSUnitToJavaRunner
 					{
 						element = element.toString();
 					}
-					testTree.add(element);
+					testTree.add((String)element);
 				}
 			}
 		}

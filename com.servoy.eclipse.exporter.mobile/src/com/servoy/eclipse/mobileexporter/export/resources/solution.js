@@ -55,7 +55,7 @@ ${loop_variables}					${variableName} : [${defaultValue},${variableType}]${endlo
 			var history = _ServoyUtils_.history;
 			var fncs = subs.fncs;
 			for (var key in fncs) {
-				scopeToInit[key] = _ServoyUtils_.wrapFunction(eval("(" + fncs[key] + ")"), scopeToInit);
+				scopeToInit[key] = _ServoyUtils_.wrapFunction(eval("(" + this.getFunctionStart(containerName, subscope, key) + fncs[key] + ")"), scopeToInit);
 				eval("var " + key + " = scopeToInit[key];");
 			}
 
@@ -64,6 +64,11 @@ ${loop_variables}					${variableName} : [${defaultValue},${variableType}]${endlo
 				var val = vrbs[key];
 			   _ServoyUtils_.defineVariable(scopeToInit, key, oldScope ? oldScope[key] : eval("(" + val[0] + ")"), val[1]);
 			}
+		},
+		
+		getFunctionStart : function (s1Name, s2Name, fName) {
+			return "function ";
 		}
+		
 	}
 }

@@ -33,7 +33,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
- * This action is created in response to a double click on the stack trace  of ScriptUnit view.
+ * This action is created in response to a double click on the stack trace of ScriptUnit view.
  * Callback from  {@link com.servoy.eclipse.jsunit.scriptunit.JSUnitTestRunnerUI}
  * @author obuligan
  *

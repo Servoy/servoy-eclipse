@@ -33,7 +33,7 @@ import org.mozilla.javascript.Scriptable;
 public class JSUnitTestListener
 {
 
-	private final JSUnitTestListenerHandler handler;
+	private final JSUnitRhinoTestListenerHandler handler;
 
 	public JSUnitTestListener(TestResult result, List<Test> testList, boolean useFileInStackQualifiedName)
 	{
@@ -42,7 +42,7 @@ public class JSUnitTestListener
 
 	public JSUnitTestListener(TestResult result, List<Test> testList, boolean useFileInStackQualifiedName, String[] stackElementFilters)
 	{
-		handler = new JSUnitTestListenerHandler(result, testList, useFileInStackQualifiedName, stackElementFilters);
+		handler = new JSUnitRhinoTestListenerHandler(result, testList, useFileInStackQualifiedName, stackElementFilters);
 	}
 
 	// JS parameters (Test, Error)

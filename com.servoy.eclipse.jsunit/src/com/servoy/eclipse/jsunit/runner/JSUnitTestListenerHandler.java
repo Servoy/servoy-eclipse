@@ -16,13 +16,8 @@
  */
 package com.servoy.eclipse.jsunit.runner;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
-import java.util.StringTokenizer;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import junit.framework.AssertionFailedError;
@@ -31,50 +26,36 @@ import junit.framework.TestCase;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.NativeError;
-import org.mozilla.javascript.NativeJavaObject;
-import org.mozilla.javascript.RhinoException;
-import org.mozilla.javascript.ScriptRuntime;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
-
 /**
  * Class that makes the conversion between JSUnit test result and JUnit test result.
  * 
  * @author acostescu
- * 
  */
 @SuppressWarnings("nls")
-public class JSUnitTestListenerHandler
+public abstract class JSUnitTestListenerHandler<T, E>
 {
 
-
-	private static final String[] DEFAULT_STACK_ELEMENT_FILTERS = new String[] { "\\AJsUnit.js\\z", "\\AsuiteName\\z", "\\AJsUtil.js\\z", "\\AJsUnitToJava.js\\z" };
+	protected static final String[] DEFAULT_STACK_ELEMENT_FILTERS = new String[] { "\\AJsUnit.js\\z", "\\AsuiteName\\z", "\\AJsUtil.js\\z", "\\AJsUnitToJava.js\\z" };
 
 	private final TestResult result;
 	private final List<Test> testList;
 	private final Stack<Test> testStack = new Stack<Test>();
 	private int startedTestsCount;
-	private final boolean useFileInStackQualifiedName;
 	private final Pattern[] stackElementFilters;
 
-	private Scriptable jsResult;
-
-	public JSUnitTestListenerHandler(TestResult result, List<Test> testList, boolean useFileInStackQualifiedName)
+	public JSUnitTestListenerHandler(TestResult result, List<Test> testList)
 	{
-		this(result, testList, useFileInStackQualifiedName, null);
+		this(result, testList, null);
 	}
 
 	/**
 	 * @param stackElementFilters a list of regex strings (see {@link String#matches(String)}). If any of these match the file/method name in a stack element of a failure/error, that stack element
 	 * will be ignored. 
 	 */
-	public JSUnitTestListenerHandler(TestResult result, List<Test> testList, boolean useFileInStackQualifiedName, String[] stackElementFilters)
+	public JSUnitTestListenerHandler(TestResult result, List<Test> testList, String[] stackElementFilters)
 	{
 		this.result = result;
 		this.testList = testList;
-		this.useFileInStackQualifiedName = useFileInStackQualifiedName;
 
 		final int filtersSize = (stackElementFilters == null ? 0 : stackElementFilters.length);
 		final int defaultFiltersSize = DEFAULT_STACK_ELEMENT_FILTERS.length;
@@ -91,44 +72,14 @@ public class JSUnitTestListenerHandler
 	}
 
 	// JS parameters (Test, Error)
-	public void addError(Object test, Object throwable)
+	public void addError(T test, E throwable)
 	{
-		String testName = null;
-		String errorMsg = null;
-		StackTraceElement[] stackTrace = null;
-		Context context = Context.enter();
-		try
-		{
-			applyShouldStopToJSIfNeeded(context);
-			if (test instanceof Scriptable)
-			{
-				testName = context.evaluateString((Scriptable)test, "this.getName()", "Get test name", 1, null).toString();
-			}
-			JSUnitDebugger jsUnitDebugger = (JSUnitDebugger)context.getDebugger();
-			if (jsUnitDebugger != null)
-			{
-				Object exception = jsUnitDebugger.getException(testName);
-				if (exception instanceof Scriptable)
-				{
-					errorMsg = getMessage(context, (Scriptable)exception);
-					stackTrace = getStackTrace(context, (Scriptable)exception);
-				}
-				else if (exception instanceof RhinoException)
-				{
-					errorMsg = ((RhinoException)exception).getMessage();
-					stackTrace = getRhinoExceptionStackTrace((RhinoException)exception);
-				}
-			}
-			if ((stackTrace == null || stackTrace.length == 0) && throwable instanceof Scriptable)
-			{
-				errorMsg = getMessage(context, (Scriptable)throwable);
-				stackTrace = getStackTrace(context, (Scriptable)throwable);
-			}
-		}
-		finally
-		{
-			Context.exit();
-		}
+		applyShouldStopToJSIfNeeded();
+
+		String testName = getTestObjectName(test);
+		String errorMsg = getThrowableMsg(testName, throwable);
+		StackTraceElement[] stackTrace = getStackTrace(testName, throwable);
+
 		Test currentTest = testStack.peek();
 		if (!sameName(currentTest, testName))
 		{
@@ -142,29 +93,14 @@ public class JSUnitTestListenerHandler
 	}
 
 	// JS parameters (Test, AssertionFailedError)
-	public void addFailure(Object test, Object assertionfailederror)
+	public void addFailure(T test, E assertionfailederror)
 	{
-		String testName = null;
-		String failureMsg = null;
-		StackTraceElement[] stackTrace = null;
-		Context context = Context.enter();
-		try
-		{
-			applyShouldStopToJSIfNeeded(context);
-			if (test instanceof Scriptable)
-			{
-				testName = context.evaluateString((Scriptable)test, "this.getName()", "Get test name", 1, null).toString();
-			}
-			if (assertionfailederror instanceof Scriptable)
-			{
-				failureMsg = getMessage(context, (Scriptable)assertionfailederror);
-				stackTrace = getStackTrace(context, (Scriptable)assertionfailederror);
-			}
-		}
-		finally
-		{
-			Context.exit();
-		}
+		applyShouldStopToJSIfNeeded();
+
+		String testName = getTestObjectName(test);
+		String failureMsg = getThrowableMsg(testName, assertionfailederror);
+		StackTraceElement[] stackTrace = getStackTrace(testName, assertionfailederror);
+
 		Test currentTest = testStack.peek();
 		if (!sameName(currentTest, testName))
 		{
@@ -175,129 +111,16 @@ public class JSUnitTestListenerHandler
 		if (stackTrace == null) stackTrace = new StackTraceElement[0];
 		failure.setStackTrace(stackTrace);
 		result.addFailure(currentTest, failure);
-
 	}
 
-	private String getMessage(Context context, Scriptable throwable)
-	{
-		return context.evaluateString(throwable, "this.toString()", "Get error/failure message", 1, null).toString();
-	}
-
-	private StackTraceElement[] getStackTrace(Context context, Scriptable throwable)
-	{
-		StackTraceElement[] stackTrace = null;
-		Object stackObj = context.evaluateString(throwable, "this.rhinoException ? this.rhinoException : (this.javaException ? this.javaException : null)",
-			"Get error/failure stack", 1, null);
-//		Object stackObj = context.evaluateString(throwable, "JsUnitError.prototype", "Get error/failure stack", 1, null);
-		if (stackObj instanceof NativeJavaObject)
-		{
-			stackObj = ((NativeJavaObject)stackObj).unwrap();
-		}
-		if (stackObj instanceof RhinoException)
-		{
-			stackTrace = getRhinoExceptionStackTrace((RhinoException)stackObj);
-		}
-		else if (throwable instanceof NativeError)
-		{
-			stackTrace = new StackTraceElement[1];
-			if (useFileInStackQualifiedName)
-			{
-				stackTrace[0] = new StackTraceElement(getFileNameAsJavaType(getScriptablePropertyAsString(throwable, "fileName")), "javascript", "file",
-					getScriptablePropertyAsInt(throwable, "lineNumber"));
-			}
-			else
-			{
-				stackTrace[0] = new StackTraceElement("java", "script", getScriptablePropertyAsString(throwable, "fileName"), getScriptablePropertyAsInt(
-					throwable, "lineNumber"));
-			}
-		}
-		else
-		{
-			stackTrace = new StackTraceElement[0];
-		}
-		return stackTrace;
-	}
-
-	/**
-	 * @param stackObj
-	 * @return
-	 */
-	private StackTraceElement[] getRhinoExceptionStackTrace(RhinoException re)
-	{
-		StackTraceElement[] stackTrace;
-		StringWriter sr = new StringWriter();
-		re.printStackTrace(new PrintWriter(sr));
-		// This exception is either automatically attached by the RHINO engine in case of errors generated by the engine itself,
-		// or it is an exception interposed by JsUnitToJava.js into the JsUnit standard errors - thrown by JsUnit code.
-		// In the second case, the stack elements that lead to the creation of this RhinoException must be ignored (as they are not part
-		// of the useful client stack)
-		// boolean ignoreAllButClientStackTraces = (JSUnitToJavaRunner.ASSERTION_EXCEPTION_MESSAGE.equals(re.getMessage())); // this line can be uncommented to show stack inside testing code
-
-		// cannot use re.getStackTrace() instead of re.printStackTrace() for nicer stack parsing because interpreted JS stack frames would be missing
-		// - RhinoException.printStackTrace() adds some more stack info to the existing stack frames in case of interpreted JS
-		StringTokenizer completeStack = new StringTokenizer(sr.toString(), "\n");
-		List<StackTraceElement> filteredStack = new ArrayList<StackTraceElement>();
-		while (completeStack.hasMoreTokens())
-		{
-			String line = completeStack.nextToken();
-			int openBracketOffset = line.lastIndexOf('(');
-			int closeBracketOffset = line.lastIndexOf(')');
-			if (openBracketOffset < closeBracketOffset && openBracketOffset != -1)
-			{
-				String fileOrMethodAndLine = line.substring(openBracketOffset + 1, closeBracketOffset);
-				// in case of compiled runtime script, this will be "methodName:lineNumberInFile";
-				// for uncompiled/developer scripts it will be "fileName:lineNumber"
-				String fileOrMethodName = null;
-				int lineNumber = -1;
-
-				int delim = fileOrMethodAndLine.lastIndexOf(':');
-				if (delim != -1)
-				{
-					fileOrMethodName = fileOrMethodAndLine.substring(0, delim);
-					try
-					{
-						lineNumber = Integer.parseInt(fileOrMethodAndLine.substring(delim + 1));
-					}
-					catch (NumberFormatException e)
-					{
-					}
-				}
-				else
-				{
-					fileOrMethodName = fileOrMethodAndLine;
-				}
-				boolean isFile = (fileOrMethodName.endsWith(".js"));
-				boolean isMethod = ((!isFile) && (line.contains("org.mozilla.javascript.gen.") || line.contains(" script.")));
-				if (fileOrMethodName != null && lineNumber > -1 && (isFile || isMethod) &&
-					!/* (ignoreAllButClientStackTraces && */isStackElementFilterMatch(fileOrMethodName)/* ) */) // this line can be uncommented to show stack inside testing code
-				{
-					// ignoreAllButClientStackTraces = false; // this line can be uncommented to show stack inside testing code
-					if (useFileInStackQualifiedName)
-					{
-						filteredStack.add(new StackTraceElement(isFile ? getFileNameAsJavaType(fileOrMethodName) : "javascript", isMethod ? fileOrMethodName
-							: "method", "file", lineNumber));
-					}
-					else
-					{
-						filteredStack.add(new StackTraceElement("javascript", isMethod ? fileOrMethodName : "method", isFile ? fileOrMethodName : "file",
-							lineNumber));
-					}
-				}
-			}
-		}
-		stackTrace = filteredStack.toArray(new StackTraceElement[filteredStack.size()]);
-		return stackTrace;
-	}
-
-	private boolean isStackElementFilterMatch(String fileOrMethodName)
+	protected boolean isStackElementFilterMatch(String fileOrMethodName)
 	{
 		boolean match = false;
 		if (stackElementFilters != null)
 		{
 			for (int i = 0; i < (stackElementFilters.length) && !match; i++)
 			{
-				Matcher m = stackElementFilters[i].matcher(fileOrMethodName);
-				match = m.matches();
+				match = stackElementFilters[i].matcher(fileOrMethodName).find();
 			}
 		}
 		return match;
@@ -313,75 +136,31 @@ public class JSUnitTestListenerHandler
 		return javaType.replaceFirst("\\.\\.\\.", ":/").replace("..", "/").replace("._", ".");
 	}
 
-	private String getScriptablePropertyAsString(Scriptable s, String property)
-	{
-		Object value = ScriptableObject.getProperty(s, property);
-		if (value == Scriptable.NOT_FOUND) return "";
-		return ScriptRuntime.toString(value);
-	}
-
-	private int getScriptablePropertyAsInt(Scriptable s, String property)
-	{
-		String stringValue = getScriptablePropertyAsString(s, property);
-		int value;
-		try
-		{
-			value = Integer.parseInt(stringValue);
-		}
-		catch (NumberFormatException e)
-		{
-			value = 0;
-		}
-		return value;
-	}
-
 	// JS parameters (Test)
-	public void endTest(Object test)
+	public void endTest(T test)
 	{
-		String testName = null;
-		Context context = Context.enter();
-		try
-		{
-			applyShouldStopToJSIfNeeded(context);
-			if (test instanceof Scriptable)
-			{
-				testName = context.evaluateString((Scriptable)test, "this.getName()", "Get test name", 1, null).toString();
-			}
-		}
-		finally
-		{
-			Context.exit();
-		}
+		applyShouldStopToJSIfNeeded();
+		String testName = getTestObjectName(test);
+
 		Test currentTest = testStack.pop();
 		if (!sameName(currentTest, testName))
 		{
 			System.err.println("End test " + testName + " while another test end was expected:" + getTestName(currentTest));
 		}
-		if (!(currentTest instanceof TestSuite)) // for some reason JUnit normally doesn't signal the start/stop of test suites
+		if (!(currentTest instanceof TestSuite)) // for some (BAD) reason JUnit normally doesn't signal the start/stop of test suites; so we'll do the same
 		{
 			result.endTest(currentTest);
 		}
 	}
 
 	// JS parameters (Test)
-	public void startTest(Object test)
+	public void startTest(T test)
 	{
-		String testName = null;
-		Context context = Context.enter();
-		try
-		{
-			applyShouldStopToJSIfNeeded(context);
-			if (test instanceof Scriptable)
-			{
-				testName = context.evaluateString((Scriptable)test, "this.getName()", "Get test name", 1, null).toString();
-			}
-		}
-		finally
-		{
-			Context.exit();
-		}
+		String testName = getTestObjectName(test);
+		applyShouldStopToJSIfNeeded();
+
 		Test currentTest = testList.get(startedTestsCount);
-		JSUnitToJavaRunner.setCurentlyExecutingTest(getTestName(currentTest));
+		JSUnitToJavaRunner.setCurentlyExecutingTest(getTestName(currentTest)); // TODO ugly static access; this should be refactored
 
 		if (sameName(currentTest, testName))
 		{
@@ -418,18 +197,25 @@ public class JSUnitTestListenerHandler
 		return name;
 	}
 
-	public void setJSResult(Scriptable jsResult)
+	private void applyShouldStopToJSIfNeeded()
 	{
-		this.jsResult = jsResult;
-	}
-
-	public void applyShouldStopToJSIfNeeded(Context context)
-	{
-		if (jsResult != null && (result.shouldStop()))
+		if (result.shouldStop())
 		{
-			context.evaluateString(jsResult, "this.stop()", "Stopped by user", 1, null);
-			jsResult = null; // stopping it once is enough
+			applyShouldStop();
 		}
 	}
+
+	public boolean shouldStop()
+	{
+		return result.shouldStop();
+	}
+
+	protected abstract String getTestObjectName(T test);
+
+	protected abstract String getThrowableMsg(String testName, E throwable);
+
+	protected abstract StackTraceElement[] getStackTrace(String testName, E throwable);
+
+	protected abstract void applyShouldStop();
 
 }

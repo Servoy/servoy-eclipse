@@ -15,13 +15,14 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.jsunit.scriptunit;
+package com.servoy.eclipse.jsunit;
 
 import junit.framework.Test;
 import junit.framework.TestResult;
 
 import com.servoy.eclipse.jsunit.runner.ApplicationJSTestSuite;
 import com.servoy.eclipse.jsunit.runner.TestTarget;
+import com.servoy.eclipse.jsunit.scriptunit.ScriptUnitTestRunNotifier;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServiceProvider;
 import com.servoy.j2db.J2DBGlobals;
@@ -32,10 +33,10 @@ import com.servoy.j2db.J2DBGlobals;
  * @author obuligan
  *
  */
-public class ScriptUnitTestSuite extends ApplicationJSTestSuite
+public class SmartClientTestSuite extends ApplicationJSTestSuite
 {
 
-	public ScriptUnitTestSuite(IApplication application, TestTarget target)
+	public SmartClientTestSuite(IApplication application, TestTarget target)
 	{
 		super(application, target);
 	}
@@ -59,7 +60,7 @@ public class ScriptUnitTestSuite extends ApplicationJSTestSuite
 		IServiceProvider prevServiceProvider = J2DBGlobals.setSingletonServiceProvider(staticSuiteApplication);
 		try
 		{
-			return new ScriptUnitTestSuite(staticSuiteApplication, staticTarget);
+			return new SmartClientTestSuite(staticSuiteApplication, staticTarget);
 		}
 		finally
 		{

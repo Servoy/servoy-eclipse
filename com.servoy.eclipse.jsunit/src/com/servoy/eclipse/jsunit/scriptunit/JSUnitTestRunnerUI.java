@@ -54,6 +54,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.jsunit.actions.OpenEditorAtLineAction;
 import com.servoy.eclipse.jsunit.launch.JSUnitLaunchConfigurationDelegate;
+import com.servoy.eclipse.jsunit.mobile.MobileStackOpenEditorAction;
 import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
@@ -70,6 +71,9 @@ public class JSUnitTestRunnerUI extends AbstractTestRunnerUI implements ITestEle
 {
 
 	protected static final Pattern STACK_FRAME_PATTERN = Pattern.compile("(.*)\\.method\\(file:(\\d*).*"); //$NON-NLS-1$
+
+	// lines like "scopes.globals.testRoundingFailure1()(f:0)"
+	protected static final Pattern MOBILE_STACK_FRAME_PATTERN = Pattern.compile("(.*)\\.(.*)\\.(.*)\\(.*\\)\\(f:0\\)"); //$NON-NLS-1$
 
 	protected static final String FORM_TEST_ELEMENT_PATTERN = "Form '([\\w\\s]+)' tests";
 
@@ -170,7 +174,7 @@ public class JSUnitTestRunnerUI extends AbstractTestRunnerUI implements ITestEle
 	@Override
 	public boolean isStackFrame(String line)
 	{
-		return STACK_FRAME_PATTERN.matcher(line).matches();
+		return STACK_FRAME_PATTERN.matcher(line).matches() || MOBILE_STACK_FRAME_PATTERN.matcher(line).matches();
 	}
 
 	@Override
@@ -181,6 +185,13 @@ public class JSUnitTestRunnerUI extends AbstractTestRunnerUI implements ITestEle
 		{
 			return new OpenEditorAtLineAction(matcher.group(1), Integer.parseInt(matcher.group(2)));
 		}
+
+		matcher = MOBILE_STACK_FRAME_PATTERN.matcher(line);
+		if (matcher.matches())
+		{
+			return new MobileStackOpenEditorAction(matcher.group(1), matcher.group(2), matcher.group(3));
+		}
+
 		return null;
 	}
 
@@ -347,20 +358,6 @@ public class JSUnitTestRunnerUI extends AbstractTestRunnerUI implements ITestEle
 		return true;
 	}
 
-	protected String extractFileName(String line)
-	{
-		Matcher matcher = STACK_FRAME_PATTERN.matcher(line);
-		boolean matches = matcher.matches();
-		if (matches)
-		{
-			return matcher.group(1);
-		}
-		else
-		{
-			return null;
-		}
-	}
-
 	@Override
 	public boolean canRerun(ITestElement testElement)
 	{
@@ -371,7 +368,6 @@ public class JSUnitTestRunnerUI extends AbstractTestRunnerUI implements ITestEle
 		else if (testElement instanceof ITestSuiteElement)
 		{
 			ITestSuiteElement suite = (ITestSuiteElement)testElement;
-			String suiteName = suite.getSuiteTypeName();
 			if (JSUnitUIUtils.isFormSuite(suite))
 			{
 				return true;
@@ -442,7 +438,7 @@ public class JSUnitTestRunnerUI extends AbstractTestRunnerUI implements ITestEle
 			}
 		}
 		if (target != null) JSUnitLaunchConfigurationDelegate.launchTestTarget(target);
-		System.out.println("yay!! updated");
+
 		return true;
 	}
 

@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Servoy Jsunit Plug-in
+Bundle-Name: Servoy JSUnit Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.jsunit;singleton:=true
 Bundle-Version: 7.1.0.2009
 Bundle-Activator: com.servoy.eclipse.jsunit.Activator

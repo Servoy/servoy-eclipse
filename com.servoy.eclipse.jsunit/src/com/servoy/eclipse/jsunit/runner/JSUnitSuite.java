@@ -22,7 +22,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 
 import junit.framework.Test;
@@ -136,72 +135,14 @@ public class JSUnitSuite extends TestSuite
 		try
 		{
 			runner.evaluateReader(jsTestCode, testFileName);
-			List<Object> testTree = runner.getTestTree(jsSuiteClassName);
+			List<String> testTree = runner.getTestTree(jsSuiteClassName);
 
-			// we must create a hierarchy of JUnit test cases/test suites to match the JSUnit ones that are now in the tree;
-			// this is only needed for the presentation or running tests/available tests done by the JUnit Eclipse plugin,
-			// not for the actual run of the tests
-
-			// first find out which one is a test case and which one is a test suite
-			boolean[] isTestSuite = new boolean[testTree.size()];
-			int currentParent = 0;
-			boolean hasChildren = true; // always mark this as test suite
-			for (int i = 2; i < testTree.size(); i++)
-			{
-				Object currentElement = testTree.get(i);
-				if (currentElement == JSUnitToJavaRunner.NEXT_CHILD_GROUP)
-				{
-					isTestSuite[currentParent++] = hasChildren;
-					while ((currentParent < testTree.size()) && (testTree.get(currentParent) == JSUnitToJavaRunner.NEXT_CHILD_GROUP))
-					{
-						currentParent++;
-					}
-					hasChildren = false;
-				}
-				else
-				{
-					hasChildren = true;
-				}
-			}
-
-			// create & link test cases/test suites
-			TestSuite[] suites = new TestSuite[testTree.size()];
-			suites[0] = this;
-			if (testTree.size() > 0)
-			{
-				setName((String)testTree.get(0));
-			}
-			currentParent = 0;
-			for (int i = 2; i < testTree.size(); i++)
-			{
-				Object currentElement = testTree.get(i);
-				if (currentElement == JSUnitToJavaRunner.NEXT_CHILD_GROUP)
-				{
-					currentParent++;
-					while ((currentParent < testTree.size()) && (testTree.get(currentParent) == JSUnitToJavaRunner.NEXT_CHILD_GROUP))
-					{
-						currentParent++;
-					}
-				}
-				else
-				{
-					Test currentTest = null;
-					if (isTestSuite[i])
-					{
-						currentTest = new TestSuite((String)currentElement);
-						suites[i] = (TestSuite)currentTest;
-					}
-					else
-					{
-						currentTest = new DummyTestCase((String)currentElement);
-					}
-					suites[currentParent].addTest(currentTest);
-				}
-			}
+			TestTreeHandler treeHandler = new TestTreeHandler(testTree.toArray(new String[testTree.size()]), this);
+			treeHandler.createDummyTestTree();
 
 			testList = new ArrayList<Test>();
 			testList.add(this);
-			fillTestListSequencialOrder(this, testList);
+			treeHandler.fillTestListSequencialOrder(testList);
 		}
 		catch (JsUnitException e)
 		{
@@ -273,20 +214,6 @@ public class JSUnitSuite extends TestSuite
 		catch (IOException e)
 		{
 			e.printStackTrace();
-		}
-	}
-
-	private void fillTestListSequencialOrder(TestSuite suite, List<Test> list)
-	{
-		Enumeration<Test> children = suite.tests();
-		while (children.hasMoreElements())
-		{
-			Test child = children.nextElement();
-			list.add(child);
-			if (child instanceof TestSuite)
-			{
-				fillTestListSequencialOrder((TestSuite)child, list);
-			}
 		}
 	}
 
