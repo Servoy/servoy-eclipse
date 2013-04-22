@@ -4257,20 +4257,27 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													if (propertyDescriptor != null && propertyDescriptor.getType() == IPropertyDescriptor.GLOBAL_METHOD)
 													{
 														Map<String, String> parsedConverterProperties = ComponentFactory.parseJSonProperties(column.getColumnInfo().getConverterProperties());
-														String methodName = parsedConverterProperties.get(key);
-														ScriptMethod scriptMethod = getServoyModel().getFlattenedSolution().getScriptMethod(null, methodName);
-														if (scriptMethod == null)
+														if (parsedConverterProperties != null)
 														{
-															ServoyMarker mk = MarkerMessages.ColumnConverterInvalid.fill(tableName, column.getName());
-															addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_CONVERTER_INVALID, IMarker.PRIORITY_NORMAL,
-																null, null).setAttribute("columnName", column.getName());
-														}
-														else if (scriptMethod.isDeprecated())
-														{
-															ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(scriptMethod.getDisplayName() +
-																"()", "table " + tableName, converter.getName());
-															addMarker(res, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
-																IMarker.PRIORITY_NORMAL, null, null).setAttribute("columnName", column.getName());
+															String methodName = parsedConverterProperties.get(key);
+															if (methodName != null)
+															{
+																ScriptMethod scriptMethod = getServoyModel().getFlattenedSolution().getScriptMethod(null,
+																	methodName);
+																if (scriptMethod == null)
+																{
+																	ServoyMarker mk = MarkerMessages.ColumnConverterInvalid.fill(tableName, column.getName());
+																	addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_CONVERTER_INVALID,
+																		IMarker.PRIORITY_NORMAL, null, null).setAttribute("columnName", column.getName());
+																}
+																else if (scriptMethod.isDeprecated())
+																{
+																	ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(
+																		scriptMethod.getDisplayName() + "()", "table " + tableName, converter.getName());
+																	addMarker(res, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
+																		IMarker.PRIORITY_NORMAL, null, null).setAttribute("columnName", column.getName());
+																}
+															}
 														}
 													}
 												}
