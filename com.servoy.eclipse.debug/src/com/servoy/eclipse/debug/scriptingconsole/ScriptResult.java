@@ -17,8 +17,6 @@
 
 package com.servoy.eclipse.debug.scriptingconsole;
 
-import java.util.HashSet;
-
 import org.mozilla.javascript.Scriptable;
 
 import com.servoy.j2db.util.Utils;
@@ -48,14 +46,12 @@ final class ScriptResult implements IScriptExecResult
 	{
 		if (eval instanceof Scriptable)
 		{
-			String ret = Utils.getScriptableString((Scriptable)eval, new HashSet<Scriptable>());
-			return ret;
+			return Utils.getScriptableString((Scriptable)eval);
 		}
 		else if (eval instanceof Object[])
 		{
 
-			StringBuilder sb = Utils.getArrayString((Object[])eval);
-			return sb.toString();
+			return Utils.getScriptableString((Object[])eval);
 		}
 		return eval != null ? eval.toString() : null;
 	}
