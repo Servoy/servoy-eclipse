@@ -21,7 +21,7 @@ import java.util.HashSet;
 
 import org.mozilla.javascript.Scriptable;
 
-import com.servoy.j2db.scripting.JSApplication;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author jcompagner
@@ -48,13 +48,13 @@ final class ScriptResult implements IScriptExecResult
 	{
 		if (eval instanceof Scriptable)
 		{
-			String ret = JSApplication.getScriptableString((Scriptable)eval, new HashSet<Scriptable>());
+			String ret = Utils.getScriptableString((Scriptable)eval, new HashSet<Scriptable>());
 			return ret;
 		}
 		else if (eval instanceof Object[])
 		{
 
-			StringBuilder sb = JSApplication.getArrayString((Object[])eval);
+			StringBuilder sb = Utils.getArrayString((Object[])eval);
 			return sb.toString();
 		}
 		return eval != null ? eval.toString() : null;
