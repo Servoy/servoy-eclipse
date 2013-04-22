@@ -21162,8 +21162,8 @@ while(fsUpdater.next())
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Do the actual update in the database, returns true if successful.
 There are 3 types of possible use with the foundset updater
-1) update entire foundset, not possible when the table of the foundset has tracking enabled, will fall back to 3. 
-   This will not update any modification columns, because it does the update directly in the database, without getting the records.
+1) update entire foundset by a single sql statement; that is not possible when the table of the foundset has tracking enabled then it will loop over the whole foundset. 
+   When a single sql statement is done, modification columns will not be updated, because it does the update directly in the database, without getting the records.
 2) update part of foundset, for example the first 4 row (starts with selected row)
 3) safely loop through foundset (starts with selected row)]]></description>
           </descriptions>
@@ -21256,7 +21256,7 @@ while(fsUpdater.next())
               <description><![CDATA[The name of the column to update.]]></description>
             </parameter>
             <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
-              <description><![CDATA[The new value to be stored in the specified column.]]></description>
+              <description><![CDATA[The new value (can be an array with data for x number of rows) to be stored in the specified column.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -26467,22 +26467,22 @@ var isMetaDataTable = jsTable.isMetadataTable()]]></sample>
         </function>
       </functions>
     </object>
-    <object clientSupport="wc,sc" publicName="JSUnit" qualifiedName="com.servoy.j2db.scripting.JSUnitAssertFunctions" scriptingName="jsunit">
+    <object clientSupport="mc,wc,sc" publicName="JSUnit" qualifiedName="com.servoy.j2db.scripting.JSUnitAssertFunctions" scriptingName="jsunit">
       <functions>
-        <function clientSupport="wc,sc" name="assertEquals">
+        <function clientSupport="mc,wc,sc" name="assertEquals">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Asserts that two values are equal. AssertionFailedError is thrown if the actual value does not match the regular expression.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Asserts that two values are equal. AssertionFailedError is thrown if the actual value does not match the regular expression.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Asserts that two values are equal.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Asserts that two values are equal.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Asserts that two values are equal. AssertionFailedError is thrown if the actual value does not match the regular expression.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Asserts that two values are equal. AssertionFailedError is thrown if the actual value does not match the regular expression.
 jsunit.assertEquals("Solution name test", "someSolution", application.getSolutionName());
 jsunit.assertEquals("Simple math test", 2, 1 + 1);]]></sample>
           </samples>
@@ -26495,7 +26495,7 @@ jsunit.assertEquals("Simple math test", 2, 1 + 1);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="assertEquals">
+        <function clientSupport="mc,wc,sc" name="assertEquals">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
@@ -26503,13 +26503,13 @@ jsunit.assertEquals("Simple math test", 2, 1 + 1);]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Asserts that two values are equal. AssertionFailedError is thrown if the actual value does not match the regular expression.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Asserts that two values are equal. AssertionFailedError is thrown if the actual value does not match the regular expression.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Asserts that two values are equal.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Asserts that two values are equal.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Asserts that two values are equal. AssertionFailedError is thrown if the actual value does not match the regular expression.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Asserts that two values are equal. AssertionFailedError is thrown if the actual value does not match the regular expression.
 jsunit.assertEquals("Solution name test", "someSolution", application.getSolutionName());
 jsunit.assertEquals("Simple math test", 2, 1 + 1);]]></sample>
           </samples>
@@ -26525,19 +26525,19 @@ jsunit.assertEquals("Simple math test", 2, 1 + 1);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="assertFalse">
+        <function clientSupport="mc,wc,sc" name="assertFalse">
           <argumentsTypes>
             <argumentType typecode="boolean"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Asserts that a condition is false. AssertionFailedError is thrown if the evaluation was not false.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Asserts that a condition is false. AssertionFailedError is thrown if the evaluation was not false.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Asserts that a condition is false.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Asserts that a condition is false.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Asserts that a condition is false. AssertionFailedError is thrown if the evaluation was not false.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Asserts that a condition is false. AssertionFailedError is thrown if the evaluation was not false.
 jsunit.assertFalse("False test", application.isLastPrintPreviewPrinted());]]></sample>
           </samples>
           <parameters>
@@ -26546,20 +26546,20 @@ jsunit.assertFalse("False test", application.isLastPrintPreviewPrinted());]]></s
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="assertFalse">
+        <function clientSupport="mc,wc,sc" name="assertFalse">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="boolean"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Asserts that a condition is false. AssertionFailedError is thrown if the evaluation was not false.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Asserts that a condition is false. AssertionFailedError is thrown if the evaluation was not false.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Asserts that a condition is false.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Asserts that a condition is false.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Asserts that a condition is false. AssertionFailedError is thrown if the evaluation was not false.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Asserts that a condition is false. AssertionFailedError is thrown if the evaluation was not false.
 jsunit.assertFalse("False test", application.isLastPrintPreviewPrinted());]]></sample>
           </samples>
           <parameters>
@@ -26571,7 +26571,7 @@ jsunit.assertFalse("False test", application.isLastPrintPreviewPrinted());]]></s
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="assertFloatEquals">
+        <function clientSupport="mc,wc,sc" name="assertFloatEquals">
           <argumentsTypes>
             <argumentType typecode="float"/>
             <argumentType typecode="float"/>
@@ -26579,13 +26579,13 @@ jsunit.assertFalse("False test", application.isLastPrintPreviewPrinted());]]></s
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Asserts that two floating point values are equal to within a given tolerance. AssertionFailedError is thrown if the expected value is not within the tolerance of the actual one.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Asserts that two floating point values are equal to within a given tolerance. AssertionFailedError is thrown if the expected value is not within the tolerance of the actual one.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Asserts that two floating point values are equal to within a given tolerance.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Asserts that two floating point values are equal to within a given tolerance.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Asserts that two floating point values are equal to within a given tolerance. AssertionFailedError is thrown if the expected value is not within the tolerance of the actual one.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Asserts that two floating point values are equal to within a given tolerance. AssertionFailedError is thrown if the expected value is not within the tolerance of the actual one.
 jsunit.assertFloatEquals("Float equals test", 3.12, 3.121, 0.0015);]]></sample>
           </samples>
           <parameters>
@@ -26600,7 +26600,7 @@ jsunit.assertFloatEquals("Float equals test", 3.12, 3.121, 0.0015);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="assertFloatEquals">
+        <function clientSupport="mc,wc,sc" name="assertFloatEquals">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="float"/>
@@ -26609,13 +26609,13 @@ jsunit.assertFloatEquals("Float equals test", 3.12, 3.121, 0.0015);]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Asserts that two floating point values are equal to within a given tolerance. AssertionFailedError is thrown if the expected value is not within the tolerance of the actual one.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Asserts that two floating point values are equal to within a given tolerance. AssertionFailedError is thrown if the expected value is not within the tolerance of the actual one.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Asserts that two floating point values are equal to within a given tolerance.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Asserts that two floating point values are equal to within a given tolerance.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Asserts that two floating point values are equal to within a given tolerance. AssertionFailedError is thrown if the expected value is not within the tolerance of the actual one.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Asserts that two floating point values are equal to within a given tolerance. AssertionFailedError is thrown if the expected value is not within the tolerance of the actual one.
 jsunit.assertFloatEquals("Float equals test", 3.12, 3.121, 0.0015);]]></sample>
           </samples>
           <parameters>
@@ -26633,20 +26633,20 @@ jsunit.assertFloatEquals("Float equals test", 3.12, 3.121, 0.0015);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="assertMatches">
+        <function clientSupport="mc,wc,sc" name="assertMatches">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Asserts that a regular expression matches a string. AssertionFailedError is thrown if the expected value is not the actual one.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Asserts that a regular expression matches a string. AssertionFailedError is thrown if the expected value is not the actual one.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Asserts that a regular expression matches a string.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Asserts that a regular expression matches a string.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Asserts that a regular expression matches a string. AssertionFailedError is thrown if the expected value is not the actual one.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Asserts that a regular expression matches a string. AssertionFailedError is thrown if the expected value is not the actual one.
 jsunit.assertMatches(new RegExp("gr(a|e)y"), "gray");]]></sample>
           </samples>
           <parameters>
@@ -26658,7 +26658,7 @@ jsunit.assertMatches(new RegExp("gr(a|e)y"), "gray");]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="assertMatches">
+        <function clientSupport="mc,wc,sc" name="assertMatches">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
@@ -26666,13 +26666,13 @@ jsunit.assertMatches(new RegExp("gr(a|e)y"), "gray");]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Asserts that a regular expression matches a string. AssertionFailedError is thrown if the expected value is not the actual one.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Asserts that a regular expression matches a string. AssertionFailedError is thrown if the expected value is not the actual one.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Asserts that a regular expression matches a string.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Asserts that a regular expression matches a string.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Asserts that a regular expression matches a string. AssertionFailedError is thrown if the expected value is not the actual one.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Asserts that a regular expression matches a string. AssertionFailedError is thrown if the expected value is not the actual one.
 jsunit.assertMatches("Match test", new RegExp("gr(a|e)y"), "gray");]]></sample>
           </samples>
           <parameters>
@@ -26687,19 +26687,19 @@ jsunit.assertMatches("Match test", new RegExp("gr(a|e)y"), "gray");]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="assertNotNull">
+        <function clientSupport="mc,wc,sc" name="assertNotNull">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Asserts that an object is not null. AssertionFailedError is thrown if the object is not null.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Asserts that an object is not null. AssertionFailedError is thrown if the object is not null.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Asserts that an object is not null.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Asserts that an object is not null.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Asserts that an object is not null. AssertionFailedError is thrown if the object is not null.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Asserts that an object is not null. AssertionFailedError is thrown if the object is not null.
 var a; // this is undefined, not null
 jsunit.assertNotNull(a);]]></sample>
           </samples>
@@ -26709,20 +26709,20 @@ jsunit.assertNotNull(a);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="assertNotNull">
+        <function clientSupport="mc,wc,sc" name="assertNotNull">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Asserts that an object is not null. AssertionFailedError is thrown if the object is not null.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Asserts that an object is not null. AssertionFailedError is thrown if the object is not null.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Asserts that an object is not null.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Asserts that an object is not null.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Asserts that an object is not null. AssertionFailedError is thrown if the object is not null.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Asserts that an object is not null. AssertionFailedError is thrown if the object is not null.
 var a; // this is undefined, not null
 jsunit.assertNotNull("Not null test", a);]]></sample>
           </samples>
@@ -26735,20 +26735,20 @@ jsunit.assertNotNull("Not null test", a);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="assertNotSame">
+        <function clientSupport="mc,wc,sc" name="assertNotSame">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Asserts that two values are not the same. AssertionFailedError is thrown if the expected value is the actual one.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Asserts that two values are not the same. AssertionFailedError is thrown if the expected value is the actual one.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Asserts that two values are not the same.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Asserts that two values are not the same.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Asserts that two values are not the same. AssertionFailedError is thrown if the expected value is the actual one.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Asserts that two values are not the same. AssertionFailedError is thrown if the expected value is the actual one.
 var a = new Date(1990, 1, 1);
 var b = new Date(1990, 1, 1);
 jsunit.assertNotSame(a, b);
@@ -26763,7 +26763,7 @@ jsunit.assertEquals("But equals", a, b);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="assertNotSame">
+        <function clientSupport="mc,wc,sc" name="assertNotSame">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
@@ -26771,13 +26771,13 @@ jsunit.assertEquals("But equals", a, b);]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Asserts that two values are not the same. AssertionFailedError is thrown if the expected value is the actual one.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Asserts that two values are not the same. AssertionFailedError is thrown if the expected value is the actual one.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Asserts that two values are not the same.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Asserts that two values are not the same.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Asserts that two values are not the same. AssertionFailedError is thrown if the expected value is the actual one.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Asserts that two values are not the same. AssertionFailedError is thrown if the expected value is the actual one.
 var a = new Date(1990, 1, 1);
 var b = new Date(1990, 1, 1);
 jsunit.assertNotSame("Not same test", a, b);
@@ -26795,19 +26795,19 @@ jsunit.assertEquals("But equals", a, b);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="assertNotUndefined">
+        <function clientSupport="mc,wc,sc" name="assertNotUndefined">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Asserts that an object is not undefined. AssertionFailedError is thrown if the object is undefined.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Asserts that an object is not undefined. AssertionFailedError is thrown if the object is undefined.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Asserts that an object is not undefined.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Asserts that an object is not undefined.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Asserts that an object is not undefined. AssertionFailedError is thrown if the object is undefined.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Asserts that an object is not undefined. AssertionFailedError is thrown if the object is undefined.
 var a = 0;
 jsunit.assertNotUndefined(a);]]></sample>
           </samples>
@@ -26817,20 +26817,20 @@ jsunit.assertNotUndefined(a);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="assertNotUndefined">
+        <function clientSupport="mc,wc,sc" name="assertNotUndefined">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Asserts that an object is not undefined. AssertionFailedError is thrown if the object is undefined.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Asserts that an object is not undefined. AssertionFailedError is thrown if the object is undefined.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Asserts that an object is not undefined.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Asserts that an object is not undefined.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Asserts that an object is not undefined. AssertionFailedError is thrown if the object is undefined.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Asserts that an object is not undefined. AssertionFailedError is thrown if the object is undefined.
 var a = 0;
 jsunit.assertNotUndefined("Not undefined test", a);]]></sample>
           </samples>
@@ -26843,19 +26843,19 @@ jsunit.assertNotUndefined("Not undefined test", a);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="assertNull">
+        <function clientSupport="mc,wc,sc" name="assertNull">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Asserts that an object is null. AssertionFailedError is thrown if the object is not null.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Asserts that an object is null. AssertionFailedError is thrown if the object is not null.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Asserts that an object is null.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Asserts that an object is null.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Asserts that an object is null. AssertionFailedError is thrown if the object is not null.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Asserts that an object is null. AssertionFailedError is thrown if the object is not null.
 jsunit.assertNull("Null test", null);]]></sample>
           </samples>
           <parameters>
@@ -26864,20 +26864,20 @@ jsunit.assertNull("Null test", null);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="assertNull">
+        <function clientSupport="mc,wc,sc" name="assertNull">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Asserts that an object is null. AssertionFailedError is thrown if the object is not null.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Asserts that an object is null. AssertionFailedError is thrown if the object is not null.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Asserts that an object is null.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Asserts that an object is null.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Asserts that an object is null. AssertionFailedError is thrown if the object is not null.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Asserts that an object is null. AssertionFailedError is thrown if the object is not null.
 jsunit.assertNull("Null test", null);]]></sample>
           </samples>
           <parameters>
@@ -26889,20 +26889,20 @@ jsunit.assertNull("Null test", null);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="assertSame">
+        <function clientSupport="mc,wc,sc" name="assertSame">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Asserts that two values are the same. AssertionFailedError is thrown if the expected value is not the actual one.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Asserts that two values are the same. AssertionFailedError is thrown if the expected value is not the actual one.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Asserts that two values are the same.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Asserts that two values are the same.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Asserts that two values are the same. AssertionFailedError is thrown if the expected value is not the actual one.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Asserts that two values are the same. AssertionFailedError is thrown if the expected value is not the actual one.
 var a = new Date(1990, 1, 1);
 var b = a;
 jsunit.assertSame(a, b);]]></sample>
@@ -26916,7 +26916,7 @@ jsunit.assertSame(a, b);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="assertSame">
+        <function clientSupport="mc,wc,sc" name="assertSame">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
@@ -26924,13 +26924,13 @@ jsunit.assertSame(a, b);]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Asserts that two values are the same. AssertionFailedError is thrown if the expected value is not the actual one.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Asserts that two values are the same. AssertionFailedError is thrown if the expected value is not the actual one.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Asserts that two values are the same.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Asserts that two values are the same.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Asserts that two values are the same. AssertionFailedError is thrown if the expected value is not the actual one.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Asserts that two values are the same. AssertionFailedError is thrown if the expected value is not the actual one.
 var a = new Date(1990, 1, 1);
 var b = a;
 jsunit.assertSame("Same test", a, b);]]></sample>
@@ -26947,19 +26947,19 @@ jsunit.assertSame("Same test", a, b);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="assertTrue">
+        <function clientSupport="mc,wc,sc" name="assertTrue">
           <argumentsTypes>
             <argumentType typecode="boolean"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Asserts that a condition is true. AssertionFailedError is thrown if the evaluation was not true.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Asserts that a condition is true. AssertionFailedError is thrown if the evaluation was not true.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Asserts that a condition is true.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Asserts that a condition is true.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Asserts that a condition is true. AssertionFailedError is thrown if the evaluation was not true.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Asserts that a condition is true. AssertionFailedError is thrown if the evaluation was not true.
 jsunit.assertTrue("True test", application.isLastPrintPreviewPrinted());]]></sample>
           </samples>
           <parameters>
@@ -26968,20 +26968,20 @@ jsunit.assertTrue("True test", application.isLastPrintPreviewPrinted());]]></sam
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="assertTrue">
+        <function clientSupport="mc,wc,sc" name="assertTrue">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="boolean"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Asserts that a condition is true. AssertionFailedError is thrown if the evaluation was not true.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Asserts that a condition is true. AssertionFailedError is thrown if the evaluation was not true.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Asserts that a condition is true.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Asserts that a condition is true.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Asserts that a condition is true. AssertionFailedError is thrown if the evaluation was not true.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Asserts that a condition is true. AssertionFailedError is thrown if the evaluation was not true.
 jsunit.assertTrue("True test", application.isLastPrintPreviewPrinted());]]></sample>
           </samples>
           <parameters>
@@ -26993,19 +26993,19 @@ jsunit.assertTrue("True test", application.isLastPrintPreviewPrinted());]]></sam
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="assertUndefined">
+        <function clientSupport="mc,wc,sc" name="assertUndefined">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Asserts that an object is undefined. AssertionFailedError is thrown if the object is defined.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Asserts that an object is undefined. AssertionFailedError is thrown if the object is defined.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Asserts that an object is undefined.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Asserts that an object is undefined.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Asserts that an object is undefined. AssertionFailedError is thrown if the object is defined.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Asserts that an object is undefined. AssertionFailedError is thrown if the object is defined.
 jsunit.assertUndefined("Undefined test", thisIsUndefined);]]></sample>
           </samples>
           <parameters>
@@ -27014,20 +27014,20 @@ jsunit.assertUndefined("Undefined test", thisIsUndefined);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="assertUndefined">
+        <function clientSupport="mc,wc,sc" name="assertUndefined">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Asserts that an object is undefined. AssertionFailedError is thrown if the object is defined.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Asserts that an object is undefined. AssertionFailedError is thrown if the object is defined.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Asserts that an object is undefined.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Asserts that an object is undefined.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Asserts that an object is undefined. AssertionFailedError is thrown if the object is defined.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Asserts that an object is undefined. AssertionFailedError is thrown if the object is defined.
 jsunit.assertUndefined(thisIsUndefined);]]></sample>
           </samples>
           <parameters>
@@ -27039,19 +27039,19 @@ jsunit.assertUndefined(thisIsUndefined);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="fail">
+        <function clientSupport="mc,wc,sc" name="fail">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Fails a test. AssertionFailedError is always thrown.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Fails a test. AssertionFailedError is always thrown.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Fails a test.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Fails a test.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Fails a test. AssertionFailedError is always thrown.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Fails a test. AssertionFailedError is always thrown.
 jsunit.fail("Fail test");
 jsunit.fail("test", null, "Fail"); // 2nd param is not used in Servoy, params 3 and 1 get merged to form a message. The result is the same as in the line above.]]></sample>
           </samples>
@@ -27061,20 +27061,20 @@ jsunit.fail("test", null, "Fail"); // 2nd param is not used in Servoy, params 3 
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="fail">
+        <function clientSupport="mc,wc,sc" name="fail">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Fails a test. AssertionFailedError is always thrown.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Fails a test. AssertionFailedError is always thrown.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Fails a test.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Fails a test.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Fails a test. AssertionFailedError is always thrown.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Fails a test. AssertionFailedError is always thrown.
 jsunit.fail("Fail test");
 jsunit.fail("test", null, "Fail"); // 2nd param is not used in Servoy, params 3 and 1 get merged to form a message. The result is the same as in the line above.]]></sample>
           </samples>
@@ -27087,7 +27087,7 @@ jsunit.fail("test", null, "Fail"); // 2nd param is not used in Servoy, params 3 
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="fail">
+        <function clientSupport="mc,wc,sc" name="fail">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
@@ -27095,13 +27095,13 @@ jsunit.fail("test", null, "Fail"); // 2nd param is not used in Servoy, params 3 
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Fails a test. AssertionFailedError is always thrown.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Fails a test. AssertionFailedError is always thrown.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Fails a test.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Fails a test.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Fails a test. AssertionFailedError is always thrown.
+            <sample clientSupport="mc,wc,sc"><![CDATA[// Fails a test. AssertionFailedError is always thrown.
 jsunit.fail("Fail test");
 jsunit.fail("test", null, "Fail"); // 2nd param is not used in Servoy, params 3 and 1 get merged to form a message. The result is the same as in the line above.]]></sample>
           </samples>
@@ -61724,7 +61724,7 @@ i18n.setI18NMessagesFilter('message_variant', filterValue)
             <description clientSupport="mc,wc,sc"><![CDATA[Set/Overwrite the locale for this client.
 All forms not yet loaded will change (execute this in solution startup or first form).
 
-The language must be a lowercase 2 letter code defined by ISO-649.
+The language must be a lowercase 2 letter code defined by ISO-639.
 see http://www.ics.uci.edu/pub/ietf/http/related/iso639.txt
 The country must be an upper case 2 letter code defined by IS-3166
 see http://www.chemie.fu-berlin.de/diverse/doc/ISO_3166.html 
