@@ -2829,7 +2829,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								ValueList vl = fieldFlattenedSolution.getValueList(field.getValuelistID());
 								if (vl != null)
 								{
-									if (type == Field.COMBOBOX && field.getEditable())
+									if (type == Field.COMBOBOX && field.getEditable() && !SolutionMetaData.isServoyMobileSolution(servoyProject.getSolution()))
 									{
 
 										boolean showWarning = false;
