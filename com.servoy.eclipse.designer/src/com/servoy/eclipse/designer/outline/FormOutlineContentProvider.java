@@ -57,7 +57,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 	public static final Object ELEMENTS = new Object();
 	public static final Object PARTS = new Object();
 
-	private final Form form;
+	protected final Form form;
 	private static boolean displayType;
 
 	public FormOutlineContentProvider(Form form)
@@ -285,7 +285,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 		return null;
 	}
 
-	private static IPersist getFlattenedWhenForm(IPersist persist) throws RepositoryException
+	protected static IPersist getFlattenedWhenForm(IPersist persist) throws RepositoryException
 	{
 		if (persist instanceof Form)
 		{

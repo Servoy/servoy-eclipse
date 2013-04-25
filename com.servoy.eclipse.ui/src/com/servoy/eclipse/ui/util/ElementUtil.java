@@ -129,6 +129,7 @@ public class ElementUtil
 
 	public static String getPersistImageName(IPersist persist)
 	{
+		if (persist instanceof Portal && ((Portal)persist).isMobileInsetList()) return "insetlist.gif";
 		if (persist instanceof BaseComponent)
 		{
 			String lookupName = ComponentFactory.getLookupName((BaseComponent)persist);

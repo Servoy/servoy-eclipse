@@ -28,6 +28,7 @@ import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.labelproviders.IPersistLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SupportNameLabelProvider;
+import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -43,7 +44,7 @@ import com.servoy.j2db.util.Pair;
 
 public class FormOutlineLabelprovider extends LabelProvider implements IPersistLabelProvider, IColorProvider
 {
-	public static final FormOutlineLabelprovider INSTANCE = new FormOutlineLabelprovider();
+	public static final FormOutlineLabelprovider FORM_OUTLINE_LABEL_PROVIDER_INSTANCE = new FormOutlineLabelprovider();
 
 	@Override
 	public Image getImage(Object element)
@@ -62,23 +63,15 @@ public class FormOutlineLabelprovider extends LabelProvider implements IPersistL
 		}
 		if (element instanceof PersistContext)
 		{
-			Pair<String, Image> elementNameAndImage = ElementUtil.getPersistNameAndImage(((PersistContext)element).getPersist());
-			String imageName = elementNameAndImage.getLeft();
-			if (imageName == null)
-			{
-				imageName = "element.gif";
-			}
-			else return elementNameAndImage.getRight();
-			Image img = Activator.getDefault().loadImageFromOldLocation(imageName);
-			if (img == null)
-			{
-				img = Activator.getDefault().loadImageFromBundle(imageName);
-			}
-			return img;
+			return getImageForPersist(((PersistContext)element).getPersist());
 		}
 		if (element instanceof FormElementGroup)
 		{
 			return Activator.getDefault().loadImageFromBundle("group.gif");
+		}
+		if (element instanceof MobileListModel)
+		{
+			return Activator.getDefault().loadImageFromBundle("insetlist.gif");
 		}
 		return super.getImage(element);
 	}
@@ -137,5 +130,22 @@ public class FormOutlineLabelprovider extends LabelProvider implements IPersistL
 			return ((PersistContext)value).getPersist();
 		}
 		return null;
+	}
+
+	protected Image getImageForPersist(IPersist persist)
+	{
+		Pair<String, Image> elementNameAndImage = ElementUtil.getPersistNameAndImage(persist);
+		String imageName = elementNameAndImage.getLeft();
+		if (imageName == null)
+		{
+			imageName = "element.gif";
+		}
+		else return elementNameAndImage.getRight();
+		Image img = Activator.getDefault().loadImageFromOldLocation(imageName);
+		if (img == null)
+		{
+			img = Activator.getDefault().loadImageFromBundle(imageName);
+		}
+		return img;
 	}
 }

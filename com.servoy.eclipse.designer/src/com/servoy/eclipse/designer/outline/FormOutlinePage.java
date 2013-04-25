@@ -39,13 +39,17 @@ import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
+import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.designer.editor.mobile.editparts.MobileListGraphicalEditPart;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
+import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 
@@ -74,9 +78,12 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 	public void createControl(Composite parent)
 	{
 		super.createControl(parent);
+		boolean mobile = form != null && form.getCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName) != null;
 
-		getTreeViewer().setContentProvider(new FormOutlineContentProvider(form));
-		getTreeViewer().setLabelProvider(new FormContextDelegateLabelProvider(FormOutlineLabelprovider.INSTANCE, form));
+		getTreeViewer().setContentProvider(mobile ? new MobileFormOutlineContentProvider(form) : new FormOutlineContentProvider(form));
+		getTreeViewer().setLabelProvider(
+			new FormContextDelegateLabelProvider(mobile ? MobileFormOutlineLabelprovider.MOBILE_FORM_OUTLINE_LABEL_PROVIDER_INSTANCE
+				: FormOutlineLabelprovider.FORM_OUTLINE_LABEL_PROVIDER_INSTANCE, form));
 		getTreeViewer().setInput(form);
 
 		// when the outline view is reparented to another shell, you cannot use the form editor context menu here
@@ -119,23 +126,36 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 				return;
 			}
 			List<Form> formHierarchy = editingFlattenedSolution.getFormHierarchy(form);
-			List<PersistContext> persistContexts = new ArrayList<PersistContext>();
+			List<Object> selectionPath = new ArrayList<Object>();
 			Iterator iterator = ((IStructuredSelection)selection).iterator();
+			Object selectionObject;
 			while (iterator.hasNext())
 			{
-				IPersist persist = (IPersist)Platform.getAdapterManager().getAdapter(iterator.next(), IPersist.class);
+				selectionObject = iterator.next();
+				IPersist persist = (IPersist)Platform.getAdapterManager().getAdapter(selectionObject, IPersist.class);
 				if (persist != null)
 				{
 					IPersist f = persist.getAncestor(IRepository.FORMS);
 					if (f != null && formHierarchy.contains(f))
 					{
-						persistContexts.add(PersistContext.create(persist, form));
+						selectionPath.add(PersistContext.create(persist, form));
+					}
+				}
+				else
+				{
+					FormElementGroup formElementGroup = (FormElementGroup)Platform.getAdapterManager().getAdapter(selectionObject, FormElementGroup.class);
+					if (formElementGroup != null) selectionPath.add(formElementGroup);
+					else
+					{
+						MobileListModel mobileListModel = (MobileListModel)Platform.getAdapterManager().getAdapter(selectionObject, MobileListModel.class);
+						if (mobileListModel == null && selectionObject instanceof MobileListGraphicalEditPart) mobileListModel = ((MobileListGraphicalEditPart)selectionObject).getModel();
+						if (mobileListModel != null) selectionPath.add(mobileListModel);
 					}
 				}
 			}
-			if (persistContexts.size() > 0)
+			if (selectionPath.size() > 0)
 			{
-				StructuredSelection newSelection = new StructuredSelection(persistContexts);
+				StructuredSelection newSelection = new StructuredSelection(selectionPath);
 				if (!newSelection.equals(getTreeViewer().getSelection()))
 				{
 					getTreeViewer().setSelection(newSelection);
