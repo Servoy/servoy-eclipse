@@ -2292,7 +2292,8 @@ public class TypeCreator extends TypeCache
 			{
 				type = TypeCreator.this.createType(context, "RuntimeForm", com.servoy.j2db.documentation.scripting.docs.Form.class);
 				type.setKind(TypeKind.JAVA);
-
+				Member superMember = getMember("_super", type);
+				superMember.setVisible(false);
 				//type.setAttribute(IMAGE_DESCRIPTOR, FORM_IMAGE);
 				// quickly add this one to the static types.
 				return addType(null, type);
