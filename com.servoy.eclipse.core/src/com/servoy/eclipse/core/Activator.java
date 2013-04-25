@@ -559,7 +559,6 @@ public class Activator extends Plugin
 				interrupted = true;
 			}
 
-
 			Settings.getInstance().save();
 
 			// wait until webserver is stopped for case of

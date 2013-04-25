@@ -103,7 +103,7 @@ public class AddAsModuleAction extends Action implements ISelectionChangedListen
 	private ServoyProject askUserForActiveModuleToUse()
 	{
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		ServoyProject[] activeModules = servoyModel.getModulesOfActiveProject();
+		ServoyProject[] activeModules = servoyModel.getModulesOfActiveProjectWithImportHooks();
 		if (activeModules.length == 1)
 		{
 			return activeModules[0];

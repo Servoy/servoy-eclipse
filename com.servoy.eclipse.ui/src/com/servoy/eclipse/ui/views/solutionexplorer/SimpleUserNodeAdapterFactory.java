@@ -92,7 +92,7 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 
 							if (TeamPreferences.isAutomaticModulesSynch())
 							{
-								ServoyProject[] servoyModules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
+								ServoyProject[] servoyModules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProjectWithImportHooks();
 
 								for (ServoyProject moduleProject : servoyModules)
 								{

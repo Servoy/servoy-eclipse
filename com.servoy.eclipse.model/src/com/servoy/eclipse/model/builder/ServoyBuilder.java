@@ -861,8 +861,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	{
 		if (!servoyModel.isSolutionActive(scriptFile.getProject().getName())) return;
 
-		if (scriptFile.getParent() == scriptFile.getProject() && scriptFile.getName().endsWith(SolutionSerializer.JS_FILE_EXTENSION) &&
-			servoyModel.isSolutionActive(scriptFile.getProject().getName()))
+		if (scriptFile.getParent() == scriptFile.getProject() && scriptFile.getName().endsWith(SolutionSerializer.JS_FILE_EXTENSION))
 		{
 			String scopeName = scriptFile.getName().substring(0, scriptFile.getName().length() - SolutionSerializer.JS_FILE_EXTENSION.length());
 			String lowerCaseScopeName = scopeName.toLowerCase();
@@ -3232,7 +3231,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				checkI18n(project);
 				checkLoginSolution(project);
 			}
-			else if (servoyModel.shouldBeModuleOfActiveSolution(project.getName()))
+			else if (!servoyModel.isSolutionActiveImportHook(project.getName()) && servoyModel.shouldBeModuleOfActiveSolution(project.getName()))
 			{
 				// so we have an actual Servoy project that is not active, but it should be active
 				addDeserializeProblemMarkersIfNeeded(servoyProject);

@@ -122,15 +122,12 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	private static final String IMG_SOLUTION = "solution.gif"; //$NON-NLS-1$
 	private static final String IMG_SOLUTION_M = "module.gif"; //$NON-NLS-1$
 	private static final String IMG_SOLUTION_MODULE = "solution_module.gif"; //$NON-NLS-1$
-	private static final String IMG_SOLUTION_MODULE_M = "solution_module_m.gif"; //$NON-NLS-1$
 	private static final String IMG_SOLUTION_LOGIN = "solution_login.gif"; //$NON-NLS-1$
-	private static final String IMG_SOLUTION_LOGIN_M = "solution_login_m.gif"; //$NON-NLS-1$
 	private static final String IMG_SOLUTION_AUTHENTICATOR = "solution_auth.gif"; //$NON-NLS-1$
-	private static final String IMG_SOLUTION_AUTHENTICATOR_M = "solution_auth_m.gif"; //$NON-NLS-1$
 	private static final String IMG_SOLUTION_SMART_ONLY = "solution_smart_only.gif"; //$NON-NLS-1$
-	private static final String IMG_SOLUTION_SMART_ONLY_M = "solution_smart_only_m.gif"; //$NON-NLS-1$
 	private static final String IMG_SOLUTION_WEB_ONLY = "solution_web_only.gif"; //$NON-NLS-1$
-	private static final String IMG_SOLUTION_WEB_ONLY_M = "solution_web_only_m.gif"; //$NON-NLS-1$
+	private static final String IMG_SOLUTION_PREIMPORT = "solution_preimport.png"; //$NON-NLS-1$
+	private static final String IMG_SOLUTION_POSTIMPORT = "solution_postimport.png"; //$NON-NLS-1$
 
 	private PlatformSimpleUserNode invisibleRootNode;
 
@@ -404,25 +401,25 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				switch (s.getSolutionType())
 				{
 					case SolutionMetaData.MODULE :
-						imgName = isModule ? IMG_SOLUTION_MODULE_M : IMG_SOLUTION_MODULE;
+						imgName = IMG_SOLUTION_MODULE;
 						break;
 					case SolutionMetaData.LOGIN_SOLUTION :
-						imgName = isModule ? IMG_SOLUTION_LOGIN_M : IMG_SOLUTION_LOGIN;
+						imgName = IMG_SOLUTION_LOGIN;
 						break;
 					case SolutionMetaData.AUTHENTICATOR :
-						imgName = isModule ? IMG_SOLUTION_AUTHENTICATOR_M : IMG_SOLUTION_AUTHENTICATOR;
+						imgName = IMG_SOLUTION_AUTHENTICATOR;
 						break;
 					case SolutionMetaData.SMART_CLIENT_ONLY :
-						imgName = isModule ? IMG_SOLUTION_SMART_ONLY_M : IMG_SOLUTION_SMART_ONLY;
+						imgName = IMG_SOLUTION_SMART_ONLY;
 						break;
 					case SolutionMetaData.WEB_CLIENT_ONLY :
-						imgName = isModule ? IMG_SOLUTION_WEB_ONLY_M : IMG_SOLUTION_WEB_ONLY;
+						imgName = IMG_SOLUTION_WEB_ONLY;
 						break;
 					case SolutionMetaData.PRE_IMPORT_HOOK :
-						imgName = isModule ? IMG_SOLUTION_MODULE_M : IMG_SOLUTION_MODULE;
+						imgName = IMG_SOLUTION_PREIMPORT;
 						break;
 					case SolutionMetaData.POST_IMPORT_HOOK :
-						imgName = isModule ? IMG_SOLUTION_MODULE_M : IMG_SOLUTION_MODULE;
+						imgName = IMG_SOLUTION_POSTIMPORT;
 				}
 			}
 		}
@@ -464,6 +461,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				ServoyLog.logError(e);
 			}
 		}
+
+		List<ServoyProject> importHookModules = new ArrayList<ServoyProject>();
+		servoyModel.addImportHookModules(servoyModel.getActiveProject(), importHookModules);
 
 		List<PlatformSimpleUserNode> modulesNodeChildren = new ArrayList<PlatformSimpleUserNode>();
 		List<PlatformSimpleUserNode> allSolutionChildren = new ArrayList<PlatformSimpleUserNode>();
@@ -548,8 +548,12 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 				else
 				{
+					// it's probably a non-active solution/module
+					// it can also be an import hook module of the active solution that is not part of the flattened solution - create an un-expandable "module" node as well in this case
+					boolean isActiveImportHookModule = importHookModules.contains(servoyProject);
+
 					PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayValue, UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE, servoyProject,
-						getServoyProjectImage(servoyProject, false, true));
+						getServoyProjectImage(servoyProject, false, !isActiveImportHookModule));
 					node.setEnabled(false);
 					allSolutionChildren.add(node);
 					node.parent = allSolutionsNode;
@@ -559,6 +563,16 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					// above code would load all solutions
 					// do not load all solutions at startup by reading solution directly
 					node.setToolTipText(servoyProject.getProject().getName() + "(" + getSolutionTypeAsString(servoyProject) + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+
+					if (isActiveImportHookModule)
+					{
+						node = new PlatformSimpleUserNode(displayValue, UserNodeType.SOLUTION_ITEM, servoyProject, getServoyProjectImage(servoyProject, true,
+							false));
+						node.setToolTipText(Messages.TreeStrings_ImportHookTooltip);
+						node.setEnabled(false); // it is not expandable
+						modulesNodeChildren.add(node);
+						node.parent = modulesOfActiveSolution;
+					}
 				}
 			}
 		}

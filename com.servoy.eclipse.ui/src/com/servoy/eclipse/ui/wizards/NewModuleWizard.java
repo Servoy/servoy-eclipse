@@ -46,6 +46,7 @@ public class NewModuleWizard extends NewSolutionWizard
 	public void createPageControls(Composite pageContainer)
 	{
 		super.createPageControls(pageContainer);
-		page1.setSolutionType(SolutionMetaData.MODULE, true);
+		page1.setSolutionTypes(new int[] { SolutionMetaData.MODULE, SolutionMetaData.PRE_IMPORT_HOOK, SolutionMetaData.POST_IMPORT_HOOK }, 0, false);
 	}
+
 }

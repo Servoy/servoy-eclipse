@@ -811,28 +811,6 @@ public class NewFormWizard extends Wizard implements INewWizard
 			templateNameCombo.setSelection(new StructuredSelection(selected));
 		}
 
-		/**
-		 * Find all solutions that have a module reference to the project parameter.
-		 * 
-		 * @param project
-		 * @return
-		 */
-		private ServoyProject[] getReferringProjects(Form form)
-		{
-			List<ServoyProject> referringProjects = new ArrayList<ServoyProject>();
-
-			// get all modules of the active solution (related solutions)
-			for (ServoyProject sp : ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject())
-			{
-				if (sp.getEditingFlattenedSolution().getForm(form.getID()) != null)
-				{
-					referringProjects.add(sp);
-				}
-			}
-
-			return referringProjects.toArray(new ServoyProject[referringProjects.size()]);
-		}
-
 		private void handleDataSourceSelected()
 		{
 			IStructuredSelection selection = (IStructuredSelection)dataSourceViewer.getSelection();

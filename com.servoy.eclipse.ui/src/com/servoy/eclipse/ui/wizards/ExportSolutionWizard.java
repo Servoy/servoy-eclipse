@@ -418,7 +418,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		//get modules to export if needed, or just the active project
 		if (includeModules)
 		{
-			ServoyProject[] modules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
+			ServoyProject[] modules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProjectWithImportHooks(); // TODO shouldn't this be done selectively/after the developer chooses what modules he wants exported?
 			for (ServoyProject module : modules)
 			{
 				module.getEditingSolution().acceptVisitor(collector);

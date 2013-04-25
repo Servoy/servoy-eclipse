@@ -47,12 +47,13 @@ public class JSUnitSuite extends TestSuite
 	private boolean createSeparateScopeForTestCode;
 	private boolean useFileInStackQualifiedName = false;
 	private String[] stackElementFilters;
+	private boolean useDebugger;
 
 	public static Test suite()
 	{
 		InputStream is = JSUnitSuite.class.getResourceAsStream("/com/servoy/j2db/jsunit/jsTest.js");
 		Reader jsTestFileReader = (is == null) ? null : new InputStreamReader(is);
-		return jsTestFileReader == null ? new TestSuite() : new JSUnitSuite(jsTestFileReader, "JsUnitTestSuite", "jsTest.js", null, false);
+		return jsTestFileReader == null ? new TestSuite() : new JSUnitSuite(jsTestFileReader, "JsUnitTestSuite", "jsTest.js", null, false, false);
 	}
 
 	/**
@@ -70,10 +71,13 @@ public class JSUnitSuite extends TestSuite
 	 *            easier. If <code>scope</code> this should be false. If this is true and you are using glue() to associate object functions to the prototype,
 	 *            make sure you call <code>FunctionName.glue(this)</code> instead of <code>FunctionName.glue()</code>, because it needs the correct scope to
 	 *            work with.
+	 * @param useDebugger if this is true a Rhino debugger will be used for better stack trace reporting. This means interpreted mode (not compiled) will be used.
+	 * If it is false, compiled mode will be used without a debugger, resulting in not-so-useful stack traces.
 	 */
-	public JSUnitSuite(String jsTestCode, String jsSuiteClassName, String testFileName, Scriptable scope, boolean createSeparateScopeForTestCode)
+	public JSUnitSuite(String jsTestCode, String jsSuiteClassName, String testFileName, Scriptable scope, boolean createSeparateScopeForTestCode,
+		boolean useDebugger)
 	{
-		this(new StringReader(jsTestCode), jsSuiteClassName, testFileName, scope, createSeparateScopeForTestCode);
+		this(new StringReader(jsTestCode), jsSuiteClassName, testFileName, scope, createSeparateScopeForTestCode, useDebugger);
 	}
 
 	/**
@@ -91,11 +95,14 @@ public class JSUnitSuite extends TestSuite
 	 *            easier. If <code>scope</code> this should be false. If this is true and you are using glue() to associate object functions to the prototype,
 	 *            make sure you call <code>FunctionName.glue(this)</code> instead of <code>FunctionName.glue()</code>, because it needs the correct scope to
 	 *            work with.
+	 * @param useDebugger if this is true a Rhino debugger will be used for better stack trace reporting. This means interpreted mode (not compiled) will be used.
+	 * If it is false, compiled mode will be used without a debugger, resulting in not-so-useful stack traces.
 	 */
-	public JSUnitSuite(Reader jsTestCode, String jsSuiteClassName, String testFileName, Scriptable scope, boolean createSeparateScopeForTestCode)
+	public JSUnitSuite(Reader jsTestCode, String jsSuiteClassName, String testFileName, Scriptable scope, boolean createSeparateScopeForTestCode,
+		boolean useDebugger)
 	{
 		super();
-		init(jsTestCode, jsSuiteClassName, testFileName, scope, createSeparateScopeForTestCode);
+		init(jsTestCode, jsSuiteClassName, testFileName, scope, createSeparateScopeForTestCode, useDebugger);
 	}
 
 	/**
@@ -121,16 +128,20 @@ public class JSUnitSuite extends TestSuite
 	 *            easier. If <code>scope</code> this should be false. If this is true and you are using glue() to associate object functions to the prototype,
 	 *            make sure you call <code>FunctionName.glue(this)</code> instead of <code>FunctionName.glue()</code>, because it needs the correct scope to
 	 *            work with.
+	 * @param useDebugger if this is true a Rhino debugger will be used for better stack trace reporting. This means interpreted mode (not compiled) will be used.
+	 * If it is false, compiled mode will be used without a debugger, resulting in not-so-useful stack traces.
 	 */
-	protected void init(Reader jsTestCode, String jsSuiteClassName, String testFileName, Scriptable scope, boolean createSeparateScopeForTestCode)
+	protected void init(Reader jsTestCode, String jsSuiteClassName, String testFileName, Scriptable scope, boolean createSeparateScopeForTestCode,
+		boolean useDebugger)
 	{
 		setName(jsSuiteClassName);
 
 		this.testFileName = testFileName;
 		this.createSeparateScopeForTestCode = createSeparateScopeForTestCode;
+		this.useDebugger = useDebugger;
 
 		this.jsSuiteClassName = jsSuiteClassName;
-		runner = new JSUnitToJavaRunner(scope, createSeparateScopeForTestCode);
+		runner = new JSUnitToJavaRunner(scope, createSeparateScopeForTestCode, useDebugger);
 
 		try
 		{
@@ -201,7 +212,7 @@ public class JSUnitSuite extends TestSuite
 	 */
 	protected void changeScope(Scriptable scope, Reader jsTestCode)
 	{
-		runner = new JSUnitToJavaRunner(scope, createSeparateScopeForTestCode);
+		runner = new JSUnitToJavaRunner(scope, createSeparateScopeForTestCode, useDebugger);
 
 		try
 		{

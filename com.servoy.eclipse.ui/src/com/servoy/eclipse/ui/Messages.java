@@ -147,6 +147,7 @@ public class Messages extends NLS
 	public static String TreeStrings_Styles;
 	public static String TreeStrings_UserGroupSecurity;
 	public static String TreeStrings_I18NFiles;
+	public static String TreeStrings_ImportHookTooltip;
 	public static String TreeStrings_Templates;
 	public static String TreeStrings_Utils;
 	public static String TreeStrings_JSUnit;

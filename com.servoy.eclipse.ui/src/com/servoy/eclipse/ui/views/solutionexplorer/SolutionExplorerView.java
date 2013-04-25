@@ -1598,8 +1598,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			{
 				public void solutionMetaDataChanged(Solution changedSolution)
 				{
-					ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-					if (activeProject != null && activeProject.getSolution().getSolutionID() == changedSolution.getSolutionID()) SolutionExplorerView.this.refreshTreeCompletely();
+					SolutionExplorerView.this.refreshTreeCompletely(); // do this all the time to refresh "all solutions" node as well (for example in case the solution type changed)
+					// TODO can we refresh less nodes? like only change icons of existing solution nodes or anything else that could change and is not dealt with in other listeners?
 				}
 
 			};
@@ -2965,7 +2965,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				{
 					EditorUtil.openScriptEditor((Form)doubleClickedItem.getRealObject(), null, true);
 				}
-				else if (doubleClickedItem.getType() == UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE)
+				else if (doubleClickedItem.getType() == UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE ||
+					(doubleClickedItem.getType() == UserNodeType.SOLUTION_ITEM && !expandable && SolutionMetaData.isImportHook(((ServoyProject)doubleClickedItem.getRealObject()).getSolutionMetaData())))
 				{
 					Object clickedRealObject = doubleClickedItem.getRealObject();
 					if (clickedRealObject instanceof ServoyProject) ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(

@@ -109,15 +109,16 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 				{
 					try
 					{
-						boolean isActive = ServoyModelManager.getServoyModelManager().getServoyModel().isSolutionActive(oldName);
-						ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-						ServoyProject[] activeProjects = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
+						ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+						boolean isActive = servoyModel.isSolutionActiveImportHook(oldName) || servoyModel.isSolutionActive(oldName);
+						ServoyProject activeProject = servoyModel.getActiveProject();
+						ServoyProject[] activeProjects = servoyModel.getModulesOfActiveProjectWithImportHooks();
 						if (isActive)
 						{
-							ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(null, false);
+							servoyModel.setActiveProject(null, false);
 						}
 						servoyProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
-						editingSolution.updateName(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), name);
+						editingSolution.updateName(servoyModel.getNameValidator(), name);
 						IProjectDescription description = servoyProject.getProject().getDescription();
 						description.setName(name);
 						description.setLocation(null);
@@ -153,12 +154,11 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 							}
 							if (activeProject.getEditingSolution().getName().equals(name))
 							{
-								ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(
-									ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name), true);
+								servoyModel.setActiveProject(servoyModel.getServoyProject(name), true);
 							}
 							else
 							{
-								ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(activeProject, true);
+								servoyModel.setActiveProject(activeProject, true);
 							}
 						}
 					}

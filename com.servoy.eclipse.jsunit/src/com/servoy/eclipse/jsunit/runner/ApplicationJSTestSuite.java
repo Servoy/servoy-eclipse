@@ -43,6 +43,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Utils;
 
 /**
  * This class generates a javascript test suite from an existing initialized Servoy application, with a loaded Servoy solution.
@@ -51,11 +52,13 @@ import com.servoy.j2db.util.Pair;
 public class ApplicationJSTestSuite extends JSUnitSuite
 {
 
+	private static final String SERVOY_DISABLE_SCRIPT_COMPILE_PROPERTY = "servoy.disableScriptCompile"; //$NON-NLS-1$
+
 	private static final String INVALID_APP_SUITE = "CannotRunJSUnitTests";
 
-	public static final String TEST_METHOD_PREFIX = "test";
-	public static final String SET_UP_METHOD = "setUp";
-	public static final String TEAR_DOWN_METHOD = "tearDown";
+	public static final String TEST_METHOD_PREFIX = "test"; //$NON-NLS-1$
+	public static final String SET_UP_METHOD = "setUp"; //$NON-NLS-1$
+	public static final String TEAR_DOWN_METHOD = "tearDown"; //$NON-NLS-1$
 	public static final String SOLUTION_TEST_JS_NAME = "solutionTestSuite.js";
 
 	protected static IApplication staticSuiteApplication;
@@ -102,9 +105,8 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 	 */
 	public ApplicationJSTestSuite(IApplication application, TestTarget target)
 	{
-		super();
+		this();
 		setUseFileForJavaQualifiedNameInStack(true);
-		setStackElementFilters(new String[] { "\\A" + SOLUTION_TEST_JS_NAME + "\\z" });
 		init(application, target);
 	}
 
@@ -113,13 +115,19 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 	 */
 	protected ApplicationJSTestSuite()
 	{
+		// make sure that the solution scripts are compiled in interpreted mode by default
+		if (System.getProperty(SERVOY_DISABLE_SCRIPT_COMPILE_PROPERTY) == null)
+		{
+			System.setProperty(SERVOY_DISABLE_SCRIPT_COMPILE_PROPERTY, "true"); //$NON-NLS-1$
+		}
+
 		setStackElementFilters(new String[] { "\\A" + SOLUTION_TEST_JS_NAME + "\\z" });
 	}
 
 	protected void initWithError(String errorMessage)
 	{
 		Pair<String, String> jsTestCode = getErrorSuite(errorMessage);
-		super.init(new StringReader(jsTestCode.getLeft()), jsTestCode.getRight(), SOLUTION_TEST_JS_NAME, null, false);
+		super.init(new StringReader(jsTestCode.getLeft()), jsTestCode.getRight(), SOLUTION_TEST_JS_NAME, null, false, isDebugModeOn());
 	}
 
 	protected void init(IApplication application, TestTarget target)
@@ -127,7 +135,12 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 		Pair<String, String> jsTestCodeAndClassName = getSolutionTestSuiteCode(application, target);
 		Scriptable scope = initScope(application);
 		jsTestCode = jsTestCodeAndClassName.getLeft();
-		super.init(new StringReader(jsTestCode), jsTestCodeAndClassName.getRight(), SOLUTION_TEST_JS_NAME, scope, scope != null);
+		super.init(new StringReader(jsTestCode), jsTestCodeAndClassName.getRight(), SOLUTION_TEST_JS_NAME, scope, scope != null, isDebugModeOn());
+	}
+
+	private boolean isDebugModeOn()
+	{
+		return Utils.getAsBoolean(System.getProperty(SERVOY_DISABLE_SCRIPT_COMPILE_PROPERTY)); // prop. can't be null here, default would be set by constructor
 	}
 
 	/**

@@ -93,18 +93,30 @@ public abstract class AbstractServoyModel implements IServoyModel
 	}
 
 	/**
-	 * Returns an array containing the modules of the active project (including the active project). If there is no active project, will return an array of size
-	 * 0.
+	 * Returns an array containing the modules of the active project (including the active project).
+	 * If there is no active project, will return an array of size 0.
+	 * 
+	 * The result does not include the active solution's import hooks (which are not part of the flattened solution).
 	 * 
 	 * @return an array containing the modules of the active project.
+	 * @see #getModulesOfActiveProjectWithImportHooks()
 	 */
 	public ServoyProject[] getModulesOfActiveProject()
 	{
 		// the set of solutions a user can work with at a given time is determined by the active solution;
 		// this means that the only expandable solution nodes will be the active solution and it's referenced modules;
-		// all other solutions will appear grayed-out and not-expandable (still allows the user to activate them if necessary
+		// all other solutions will appear grayed-out and not-expandable (still allows the user to activate them if necessary)
 
 		List<ServoyProject> moduleProjects = new ArrayList<ServoyProject>();
+		addFlattenedSolutionModules(moduleProjects);
+		return moduleProjects.toArray(new ServoyProject[moduleProjects.size()]);
+	}
+
+	/**
+	 * Usually you would use {@link #getModulesOfActiveProject()} or {@link #getModulesOfActiveProjectWithImportHooks()} instead.
+	 */
+	public void addFlattenedSolutionModules(List<ServoyProject> moduleProjects)
+	{
 		// get all modules of the active solution (related solutions)
 		FlattenedSolution flatActiveSolution = getFlattenedSolution();
 		if (flatActiveSolution != null)
@@ -129,7 +141,45 @@ public abstract class AbstractServoyModel implements IServoyModel
 		{
 			moduleProjects.add(activeProject);
 		}
-		return moduleProjects.toArray(new ServoyProject[moduleProjects.size()]);
+	}
+
+	/**
+	 * @see #getModulesOfActiveProject()
+	 */
+	public ServoyProject[] getModulesOfActiveProjectWithImportHooks()
+	{
+		List<ServoyProject> allModules = new ArrayList<ServoyProject>();
+		addFlattenedSolutionModules(allModules);
+		addImportHookModules(getActiveProject(), allModules);
+		return allModules.toArray(new ServoyProject[allModules.size()]);
+	}
+
+	public ServoyProject[] getImportHookModulesOfActiveProject()
+	{
+		List<ServoyProject> importHookModules = new ArrayList<ServoyProject>();
+		addImportHookModules(getActiveProject(), importHookModules);
+		return importHookModules.toArray(new ServoyProject[importHookModules.size()]);
+	}
+
+	/**
+	 * Usually you would use {@link #getModulesOfActiveProjectWithImportHooks()} or {@link #getImportHookModulesOfActiveProject()} instead.
+	 */
+	public void addImportHookModules(ServoyProject p, List<ServoyProject> importHookModules)
+	{
+		if (p != null && !importHookModules.contains(p))
+		{
+			Solution s = p.getSolution();
+			if (s != null)
+			{
+				if (SolutionMetaData.isImportHook(s.getSolutionMetaData())) importHookModules.add(p);
+
+				String[] moduleNames = Utils.getTokenElements(s.getModulesNames(), ",", true);
+				for (String moduleName : moduleNames)
+				{
+					addImportHookModules(getServoyProject(moduleName), importHookModules);
+				}
+			}
+		}
 	}
 
 	/**
@@ -333,6 +383,10 @@ public abstract class AbstractServoyModel implements IServoyModel
 		}
 	}
 
+	/**
+	 *  Returns true if the given solution name is the active solution or part of the active
+	 *  solution's non-import hook modules.
+	 */
 	public boolean isSolutionActive(String name)
 	{
 		ServoyProject[] activeModules = getModulesOfActiveProject();
@@ -347,14 +401,30 @@ public abstract class AbstractServoyModel implements IServoyModel
 	}
 
 	/**
+	 *  Returns true if the given solution name matches one of the import hook modules of the active solution.
+	 */
+	public boolean isSolutionActiveImportHook(String name)
+	{
+		ServoyProject[] activeModules = getImportHookModulesOfActiveProject();
+		for (ServoyProject p : activeModules)
+		{
+			if (p.getProject().getName().equals(name))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Checks whether or not the solution with given name is or should be a module of the active solution.<br>
-	 * It checks modules listed in all current modules of flattened solution; it is able to detect modules that are not part of the actual flattened solution yet, without actually loading them (so for example solutions that the active solution or it's modules listed as a module but was not valid/present previously).
+	 * It checks modules listed in all current modules of flattened solution + import hook modules; it is able to detect modules that are not part of the actual flattened solution yet, without actually loading them (so for example solutions that the active solution or it's modules listed as a module but was not valid/present previously).
 	 */
 	public boolean shouldBeModuleOfActiveSolution(String searchForName)
 	{
 		if (activeProject != null)
 		{
-			ServoyProject[] modules = getModulesOfActiveProject();
+			ServoyProject[] modules = getModulesOfActiveProjectWithImportHooks();
 			for (ServoyProject spm : modules)
 			{
 				Solution s = spm.getSolution();

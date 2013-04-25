@@ -190,7 +190,9 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		final ServoyProject activeProject = servoyModel.getActiveProject();
 		final Solution activeEditingSolution = (activeProject != null) ? activeProject.getEditingSolution() : null;
 		final String jobName;
-		if (page1.getSolutionType() == SolutionMetaData.MODULE && activeEditingSolution != null)
+		final boolean addAsModuleToActiveSolution = ((page1.getSolutionType() == SolutionMetaData.MODULE ||
+			page1.getSolutionType() == SolutionMetaData.PRE_IMPORT_HOOK || page1.getSolutionType() == SolutionMetaData.POST_IMPORT_HOOK) && activeEditingSolution != null);
+		if (addAsModuleToActiveSolution)
 		{
 			jobName = "Adding as module to active solution";
 		}
@@ -209,20 +211,35 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				ServoyProject newProject = servoyModel.getServoyProject(page1.getNewSolutionName());
 				if (newProject != null)
 				{
-					if ((page1.getSolutionType() == SolutionMetaData.MODULE || page1.getSolutionType() == SolutionMetaData.PRE_IMPORT_HOOK || page1.getSolutionType() == SolutionMetaData.POST_IMPORT_HOOK) &&
-						activeEditingSolution != null)
+					if (addAsModuleToActiveSolution)
 					{
+						boolean doesNotHaveIt = true; // sometimes it might happen that the solution already referenced an unavailable module that was now created (so before there was an error marker); we don't want a double reference
+
 						String modules = activeEditingSolution.getModulesNames();
+
 						if (modules == null) modules = "";
-						else if (modules.trim().length() > 0) modules = modules + ",";
-						activeEditingSolution.setModulesNames(modules + newProject.getProject().getName());
-						try
+						String[] moduleNames = Utils.getTokenElements(modules, ",", true);
+						if (modules.trim().length() > 0) modules = modules + ",";
+						for (String moduleName : moduleNames)
 						{
-							activeProject.saveEditingSolutionNodes(new IPersist[] { activeEditingSolution }, false);
+							if (newProject.getProject().getName().equals(moduleName))
+							{
+								doesNotHaveIt = false;
+								break;
+							}
 						}
-						catch (RepositoryException e)
+
+						if (doesNotHaveIt)
 						{
-							ServoyLog.logError(e);
+							activeEditingSolution.setModulesNames(modules + newProject.getProject().getName());
+							try
+							{
+								activeProject.saveEditingSolutionNodes(new IPersist[] { activeEditingSolution }, false);
+							}
+							catch (RepositoryException e)
+							{
+								ServoyLog.logError(e);
+							}
 						}
 					}
 					else
@@ -255,6 +272,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 		private Text solutionNameField;
 		private Combo solutionTypeCombo;
+		private int[] solutionTypeComboValues;
 		private ResourcesProjectChooserComposite resourceProjectComposite;
 
 
@@ -327,8 +345,11 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			Label solutionTypeLabel = new Label(topLevel, SWT.NONE);
 			solutionTypeLabel.setText("Solution type");
 			solutionTypeCombo = new Combo(topLevel, SWT.DROP_DOWN | SWT.READ_ONLY);
+
 			solutionTypeCombo.setItems(SolutionMetaData.solutionTypeNames);
+			solutionTypeComboValues = SolutionMetaData.solutionTypes;
 			solutionTypeCombo.select(0);
+
 			solutionTypeCombo.addSelectionListener(new SelectionAdapter()
 			{
 				@Override
@@ -391,7 +412,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 		private void handleSolutionTypeComboSelected()
 		{
-			solutionType = SolutionMetaData.solutionTypes[solutionTypeCombo.getSelectionIndex()];
+			solutionType = solutionTypeComboValues[solutionTypeCombo.getSelectionIndex()];
 		}
 
 		private void handleSolutionNameChanged()
@@ -400,18 +421,26 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			setPageComplete(validatePage());
 		}
 
-		public void setSolutionType(int solType, boolean fixedType)
+		public void setSolutionTypes(int[] solTypes, int selected, boolean fixedType)
 		{
-			int selection = 0;
-			for (int i = 0; i < SolutionMetaData.solutionTypes.length; i++)
+			String[] solutionTypeNames = new String[solTypes.length];
+
+			for (int j = 0; j < solTypes.length; j++)
 			{
-				if (SolutionMetaData.solutionTypes[i] == solType)
+				for (int i = 0; i < SolutionMetaData.solutionTypes.length; i++)
 				{
-					selection = i;
-					break;
+					if (SolutionMetaData.solutionTypes[i] == solTypes[j])
+					{
+						solutionTypeNames[j] = SolutionMetaData.solutionTypeNames[i];
+						break;
+					}
 				}
 			}
-			solutionTypeCombo.select(selection);
+
+			solutionTypeComboValues = solTypes;
+			solutionTypeCombo.setItems(solutionTypeNames);
+			solutionTypeCombo.select(selected);
+
 			handleSolutionTypeComboSelected();
 			if (fixedType)
 			{

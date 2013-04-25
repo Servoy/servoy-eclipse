@@ -45,11 +45,19 @@ public interface IServoyModel
 
 	/**
 	 * Returns an array containing the modules of the active project (including the active project). If there is no active project, will return an array of size
-	 * 0.
+	 * 0.<br>
+	 * 
+	 * The result does not include the active solution's import hooks (which are not part of the flattened solution).
 	 * 
 	 * @return an array containing the modules of the active project.
 	 */
 	ServoyProject[] getModulesOfActiveProject();
+
+	ServoyProject[] getModulesOfActiveProjectWithImportHooks();
+
+	ServoyProject[] getImportHookModulesOfActiveProject();
+
+	boolean isSolutionActiveImportHook(String solutionName);
 
 	/**
 	 * Returns the flattened solution for the active project.

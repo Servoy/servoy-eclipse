@@ -95,7 +95,7 @@ public class RemoveModuleAction extends Action implements ISelectionChangedListe
 	private ServoyProject askUserForParentProject()
 	{
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		ServoyProject[] activeModules = servoyModel.getModulesOfActiveProject();
+		ServoyProject[] activeModules = servoyModel.getModulesOfActiveProjectWithImportHooks();
 		ArrayList<ServoyProject> activeParentModules = new ArrayList<ServoyProject>();
 		// see which ones are parents of the selected module
 		for (ServoyProject p : activeModules)

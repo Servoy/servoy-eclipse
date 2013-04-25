@@ -52,11 +52,28 @@ public class JSUnitToJavaRunner
 
 	private Scriptable baseScope;
 	private Scriptable testCodeScope;
+	private final boolean useDebugMode;
 	private static final String jsUnit;
 	private static final String jsUtil;
 	private static final String jsUnitToJava;
 	private static String curentlyExecutingTest = null;
 
+	protected static interface RhinoContextRunnable<T, X extends Exception>
+	{
+		T run(Context context) throws X;
+	}
+
+	protected abstract static class SilentRhinoContextRunnable implements RhinoContextRunnable<Void, RuntimeException>
+	{
+		public Void run(Context context) throws RuntimeException
+		{
+			runSilent(context);
+			return null;
+		}
+
+		public abstract void runSilent(Context context);
+
+	}
 
 	public static String getCurentlyExecutingTest()
 	{
@@ -73,9 +90,6 @@ public class JSUnitToJavaRunner
 		jsUtil = getScriptAsStringFromResource("this.JsUtilLoaded", JsUnitException.class, "/JsUtil.js");
 		jsUnit = getScriptAsStringFromResource("this.TestCaseLoaded", JsUnitException.class, "/JsUnit.js");
 		jsUnitToJava = getScriptAsStringFromResource("this.JsUnitToJavaLoaded", JSUnitToJavaRunner.class, "JsUnitToJava.js");
-
-		// make sure that the script are compiled in interpreted mode
-		System.setProperty("servoy.disableScriptCompile", "true");
 	}
 
 	public static String getScriptAsStringFromResource(String repeatSafeguardId, Class< ? > locatorClass, String name)
@@ -138,36 +152,34 @@ public class JSUnitToJavaRunner
 	 * @param scope the scope to be used by this runner.
 	 * @param createSeparateScopeForTestCode
 	 */
-	public JSUnitToJavaRunner(Scriptable scope, boolean createSeparateScopeForTestCode)
+	public JSUnitToJavaRunner(final Scriptable scope, final boolean createSeparateScopeForTestCode, boolean useDebugMode)
 	{
-		Context context = Context.enter();
-		if (scope == null)
+		this.useDebugMode = useDebugMode;
+
+		runInRhino(new SilentRhinoContextRunnable()
 		{
-			this.baseScope = context.initStandardObjects();
-			testCodeScope = baseScope;
-		}
-		else
-		{
-			this.baseScope = scope;
-			if (createSeparateScopeForTestCode)
+			@Override
+			public void runSilent(Context context)
 			{
-				this.testCodeScope = new TestScope(baseScope);
+				if (scope == null)
+				{
+					JSUnitToJavaRunner.this.baseScope = context.initStandardObjects();
+					testCodeScope = baseScope;
+				}
+				else
+				{
+					JSUnitToJavaRunner.this.baseScope = scope;
+					if (createSeparateScopeForTestCode)
+					{
+						JSUnitToJavaRunner.this.testCodeScope = new TestScope(baseScope);
+					}
+				}
+
+				context.evaluateString(JSUnitToJavaRunner.this.baseScope, jsUtil, "JsUtil.js", 0, null);
+				context.evaluateString(JSUnitToJavaRunner.this.baseScope, jsUnit, "JsUnit.js", 0, null);
+				context.evaluateString(JSUnitToJavaRunner.this.baseScope, jsUnitToJava, "JsUnitToJava.js", 0, null);
 			}
-		}
-		try
-		{
-			context.evaluateString(this.baseScope, jsUtil, "JsUtil.js", 0, null);
-			context.evaluateString(this.baseScope, jsUnit, "JsUnit.js", 0, null);
-			context.evaluateString(this.baseScope, jsUnitToJava, "JsUnitToJava.js", 0, null);
-		}
-		catch (final JavaScriptException e)
-		{
-			throw new JsUnitRuntimeException("Cannot evaluate JavaScript code of JsUnit", e);
-		}
-		finally
-		{
-			Context.exit();
-		}
+		}, "Cannot evaluate JavaScript code of JsUnit");
 	}
 
 	/**
@@ -226,29 +238,31 @@ public class JSUnitToJavaRunner
 	 * @throws JsUnitException
 	 * @throws IOException
 	 */
-	public Object evaluateReader(final Reader reader, String name) throws JsUnitException, IOException
+	public Object evaluateReader(final Reader reader, String n) throws JsUnitException, IOException
 	{
 		if (reader == null)
 		{
 			throw new IllegalArgumentException("The reader is null");
 		}
-		if (name == null)
+		if (n == null)
 		{
-			name = "anonymous";
+			n = "anonymous";
 		}
-		Context context = Context.enter();
+		final String name = n;
 		try
 		{
-			return context.evaluateReader(testCodeScope, reader, name, 1, null);
-		}
-		catch (final JavaScriptException e)
-		{
-			throw new JsUnitException("Cannot evaluate JavaScript code of " + name, e);
+			return runInRhino(new RhinoContextRunnable<Object, IOException>()
+			{
+				@Override
+				public Object run(Context context) throws IOException
+				{
+					return context.evaluateReader(testCodeScope, reader, name, 1, null);
+				}
+			}, "Cannot evaluate JavaScript code of " + name);
 		}
 		finally
 		{
 			close(reader);
-			Context.exit();
 		}
 	}
 
@@ -261,63 +275,70 @@ public class JSUnitToJavaRunner
 	 * @throws JsUnitException if the code was not valid
 	 * @throws IllegalArgumentException if <code>code</code>is <code>null</code>
 	 */
-	public Object evaluateString(final String code, String name) throws JsUnitException
+	public Object evaluateString(final String code, String n) throws JsUnitException
 	{
 		if (code == null)
 		{
 			throw new IllegalArgumentException("The code is null");
 		}
-		if (name == null)
+		if (n == null)
 		{
-			name = "anonymous";
+			n = "anonymous";
 		}
-		Context context = Context.enter();
-		try
+		final String name = n;
+		return runInRhino(new RhinoContextRunnable<Object, RuntimeException>()
 		{
-			return context.evaluateString(testCodeScope, code, name, 1, null);
-		}
-		catch (final JavaScriptException e)
-		{
-			throw new JsUnitException("Cannot evaluate JavaScript code of " + name, e);
-		}
-		finally
-		{
-			Context.exit();
-		}
+			@Override
+			public Object run(Context context)
+			{
+				return context.evaluateString(testCodeScope, code, name, 1, null);
+			}
+		}, "Cannot evaluate JavaScript code of " + name);
 	}
 
-	public void runSuite(JSUnitTestListener testListener, String suiteClassName)
+	public void runSuite(final JSUnitTestListener testListener, final String suiteClassName)
 	{
-		Context context = Context.enter();
-
-		Object wrappedOut = Context.javaToJS(testListener, testCodeScope);
-		ScriptableObject.putProperty(testCodeScope, TEST_LISTENER_NAME, wrappedOut);
-
-		try
+		runInRhino(new SilentRhinoContextRunnable()
 		{
-			Debugger debugger = context.getDebugger();
-			if (!(debugger instanceof JSUnitDebugger))
+			@Override
+			public void runSilent(Context context)
 			{
-				context.setGeneratingDebug(true);
-				context.setOptimizationLevel(-1);
-				context.setDebugger(new JSUnitDebugger(debugger), null);
-			}
-			try
-			{
+				Object wrappedOut = Context.javaToJS(testListener, testCodeScope);
+				ScriptableObject.putProperty(testCodeScope, TEST_LISTENER_NAME, wrappedOut);
+
 				context.evaluateString(testCodeScope, "var result = new TestResult();\n" + TEST_LISTENER_NAME + ".setResult(result);\nresult.addListener(" +
 					TEST_LISTENER_NAME + ");\n" + suiteClassName + ".prototype.suite().run(result)", "suiteName", 1, null);
 			}
+		}, "Cannot evaluate internal JavaScript code");
+	}
+
+	protected <T, X extends Exception> T runInRhino(RhinoContextRunnable<T, X> rhinoContextRunnable, String exceptionMessage) throws X
+	{
+		Context context = Context.enter();
+		try
+		{
+			Debugger oldDebugger = context.getDebugger();
+			if (useDebugMode && !(oldDebugger instanceof JSUnitDebugger))
+			{
+				context.setGeneratingDebug(true);
+				context.setOptimizationLevel(-1);
+				context.setDebugger(new JSUnitDebugger(oldDebugger), null);
+			}
+			try
+			{
+				return rhinoContextRunnable.run(context);
+			}
 			catch (final EcmaError e)
 			{
-				throw new JsUnitRuntimeException("JavaScript error running tests", e);
+				throw new JsUnitRuntimeException("JavaScript error running/preparing tests", e);
 			}
 			catch (final JavaScriptException e)
 			{
-				throw new JsUnitRuntimeException("Cannot evaluate internal JavaScript code", e);
+				throw new JsUnitRuntimeException(exceptionMessage, e);
 			}
 			finally
 			{
-				context.setDebugger(debugger, null);
+				if (useDebugMode) context.setDebugger(oldDebugger, null);
 			}
 		}
 		finally
