@@ -906,9 +906,9 @@ public class TypeCreator extends TypeCache
 			type.setVisible(false);
 		}
 		ServoyDocumented anno = cls.getAnnotation(ServoyDocumented.class);
-		if (anno != null && anno.extendsComponent() != null && anno.extendsComponent().trim() != null)
+		if (anno != null && anno.extendsComponent() != null && !anno.extendsComponent().trim().equals(""))
 		{
-			Type superT = getType(context, anno.extendsComponent());
+			Type superT = getType(context, anno.extendsComponent().trim());
 			if (superT != null) type.setSuperType(superT);
 			else ServoyLog.logWarning("@ServoyDocumented.extendsComponent for type '" + typeName + "' was not found. Value: " + anno.extendsComponent(), null);
 		}
