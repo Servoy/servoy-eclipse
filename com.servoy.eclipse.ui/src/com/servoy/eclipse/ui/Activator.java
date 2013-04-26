@@ -144,7 +144,7 @@ public class Activator extends AbstractUIPlugin
 		IApplicationServerSingleton applicationServer = ApplicationServerSingleton.get();
 
 		// if incompatible extensions were found or we need to automatically check for extension updates at startup (if this is the preference of the user)
-		if (needsExtensionUpdateCheckBecauseOfMinorRelease() || applicationServer.hadIncompatibleExtensionsWhenStarted() ||
+		if (needsExtensionUpdateCheckBecauseOfNewRelease() || applicationServer.hadIncompatibleExtensionsWhenStarted() ||
 			getEclipsePreferences().getBoolean(StartupPreferences.STARTUP_EXTENSION_UPDATE_CHECK, StartupPreferences.DEFAULT_STARTUP_EXTENSION_UPDATE_CHECK))
 		{
 			Job updateCheckJob = new ExtensionUpdateAndIncompatibilityCheckJob(
@@ -156,26 +156,11 @@ public class Activator extends AbstractUIPlugin
 		}
 	}
 
-	private boolean needsExtensionUpdateCheckBecauseOfMinorRelease()
+	private boolean needsExtensionUpdateCheckBecauseOfNewRelease()
 	{
 		String servoyRelease = getPreferenceStore().getString(SERVOY_VERSION);
 		getPreferenceStore().setValue(SERVOY_VERSION, ClientVersion.getBundleVersion());
-		if ((servoyRelease == null || "".equals(servoyRelease)) && ClientVersion.getMajorVersion() == 7 && ClientVersion.getMiddleVersion() == 1 &&
-			ClientVersion.getMinorVersion() == 1)
-		{
-			// we just updated to 7.1.1, have to check for updates; or maybe we just switched workspace in 7.1.1
-			return true;
-		}
-		if (servoyRelease != null)
-		{
-			int[] parts = ClientVersion.parseBundleVersion(servoyRelease);
-			if (parts != null && parts.length == 4 && parts[0] == ClientVersion.getMajorVersion() && parts[1] == ClientVersion.getMiddleVersion() &&
-				parts[2] < ClientVersion.getMinorVersion())
-			{
-				return true;
-			}
-		}
-		return false;
+		return servoyRelease == null || "".equals(servoyRelease) || !servoyRelease.equals(ClientVersion.getBundleVersion());
 	}
 
 	/**
