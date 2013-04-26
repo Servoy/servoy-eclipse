@@ -40,8 +40,8 @@ import com.servoy.eclipse.model.util.ServoyLog;
  */
 public class OpenEditorAtLineAction extends Action
 {
-	int lineNumber = 0;
-	String scriptFilePath = null;
+	private int lineNumber = 0;
+	private String scriptFilePath = null;
 
 	/**
 	 *  If lineNumber is <1 it just opens the editor and doesn't try to move the selection to the line number 
