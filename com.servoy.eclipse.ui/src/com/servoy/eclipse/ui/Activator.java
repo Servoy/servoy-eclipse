@@ -42,6 +42,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.marketplace.ExtensionUpdateAndIncompatibilityCheckJob;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
+import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
@@ -73,6 +74,7 @@ public class Activator extends AbstractUIPlugin
 
 	private final Map<String, Image> grayCacheBundle = new HashMap<String, Image>();
 
+	private static final String SERVOY_VERSION = "servoy_version";
 
 	@Override
 	public void start(BundleContext context) throws Exception
@@ -142,7 +144,7 @@ public class Activator extends AbstractUIPlugin
 		IApplicationServerSingleton applicationServer = ApplicationServerSingleton.get();
 
 		// if incompatible extensions were found or we need to automatically check for extension updates at startup (if this is the preference of the user)
-		if (applicationServer.hadIncompatibleExtensionsWhenStarted() ||
+		if (needsExtensionUpdateCheckBecauseOfMinorRelease() || applicationServer.hadIncompatibleExtensionsWhenStarted() ||
 			getEclipsePreferences().getBoolean(StartupPreferences.STARTUP_EXTENSION_UPDATE_CHECK, StartupPreferences.DEFAULT_STARTUP_EXTENSION_UPDATE_CHECK))
 		{
 			Job updateCheckJob = new ExtensionUpdateAndIncompatibilityCheckJob(
@@ -152,6 +154,28 @@ public class Activator extends AbstractUIPlugin
 			updateCheckJob.schedule();
 			updateCheckJob.setPriority(applicationServer.hadIncompatibleExtensionsWhenStarted() ? Job.INTERACTIVE : Job.LONG);
 		}
+	}
+
+	private boolean needsExtensionUpdateCheckBecauseOfMinorRelease()
+	{
+		String servoyRelease = getPreferenceStore().getString(SERVOY_VERSION);
+		getPreferenceStore().setValue(SERVOY_VERSION, ClientVersion.getBundleVersion());
+		if ((servoyRelease == null || "".equals(servoyRelease)) && ClientVersion.getMajorVersion() == 7 && ClientVersion.getMiddleVersion() == 1 &&
+			ClientVersion.getMinorVersion() == 1)
+		{
+			// we just updated to 7.1.1, have to check for updates; or maybe we just switched workspace in 7.1.1
+			return true;
+		}
+		if (servoyRelease != null)
+		{
+			int[] parts = ClientVersion.parseBundleVersion(servoyRelease);
+			if (parts != null && parts.length == 4 && parts[0] == ClientVersion.getMajorVersion() && parts[1] == ClientVersion.getMiddleVersion() &&
+				parts[2] < ClientVersion.getMinorVersion())
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
