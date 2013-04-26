@@ -21,7 +21,9 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.RootEditPart;
 import org.eclipse.gef.ui.palette.PaletteCustomizer;
+import org.eclipse.jface.viewers.StructuredSelection;
 
+import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
@@ -29,6 +31,15 @@ import com.servoy.eclipse.designer.editor.IPaletteFactory;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileFormGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileFormGraphicalRootEditPart;
 import com.servoy.eclipse.designer.editor.mobile.palette.MobilePaletteItemTransferDropTargetListener;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.ui.property.MobileListModel;
+import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IFormElement;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.Portal;
 
 /**
  * Design page for mobile form editor.
@@ -97,5 +108,45 @@ public class MobileVisualFormEditorDesignPage extends BaseVisualFormEditorDesign
 		getSite().registerContextMenu(id, cmProvider, viewer);
 
 		//  refreshToolBars();
+	}
+
+	@Override
+	public boolean showPersist(IPersist persist)
+	{
+		Object element = null;
+		if (persist instanceof IFormElement)
+		{
+			IFormElement formElement = (IFormElement)persist;
+			if (formElement.getGroupID() != null)
+			{
+				Form form = (Form)formElement.getAncestor(IRepository.FORMS);
+				element = new FormElementGroup(((IFormElement)persist).getGroupID(), ModelUtils.getEditingFlattenedSolution(form), form);
+			}
+		}
+		if (element == null && persist instanceof AbstractBase)
+		{
+			AbstractBase ab = (AbstractBase)persist;
+			if (ab.getCustomMobileProperty(IMobileProperties.LIST_ITEM_HEADER.propertyName) != null ||
+				ab.getCustomMobileProperty(IMobileProperties.LIST_ITEM_BUTTON.propertyName) != null ||
+				ab.getCustomMobileProperty(IMobileProperties.LIST_ITEM_SUBTEXT.propertyName) != null ||
+				ab.getCustomMobileProperty(IMobileProperties.LIST_ITEM_COUNT.propertyName) != null ||
+				ab.getCustomMobileProperty(IMobileProperties.LIST_ITEM_IMAGE.propertyName) != null ||
+				ab.getCustomMobileProperty(IMobileProperties.LIST_COMPONENT.propertyName) != null)
+			{
+				Portal portal = (Portal)ab.getAncestor(IRepository.PORTALS);
+				if (portal != null && portal.isMobileInsetList()) element = MobileListModel.create((Form)portal.getAncestor(IRepository.FORMS), portal);
+			}
+		}
+		if (element == null) element = persist;
+
+		Object editPart = getGraphicalViewer().getRootEditPart().getViewer().getEditPartRegistry().get(element);
+		if (editPart instanceof EditPart)
+		{
+			// select the marked element
+			getGraphicalViewer().setSelection(new StructuredSelection(editPart));
+			getGraphicalViewer().reveal((EditPart)editPart);
+			return true;
+		}
+		return false;
 	}
 }
