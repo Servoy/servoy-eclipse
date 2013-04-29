@@ -55,7 +55,7 @@ public class PersistGraphicalEditPartFigureFactory implements IFigureFactory<Per
 
 	public PersistImageFigure createFigure(final GraphicalEditPart editPart)
 	{
-		PersistImageFigure fig = new PersistImageFigure(application, (IPersist)editPart.getModel(), form);
+		final PersistImageFigure fig = new PersistImageFigure(application, (IPersist)editPart.getModel(), form);
 
 		fig.setBorder(new OutlineBorder(125, ((PersistGraphicalEditPart)editPart).isInherited() ? ColorConstants.red : ColorConstants.gray, null,
 			Graphics.LINE_DOT));
@@ -65,6 +65,11 @@ public class PersistGraphicalEditPartFigureFactory implements IFigureFactory<Per
 		{
 			public void imageChanged()
 			{
+				if (fig.getImage() == null)
+				{
+					return; // disposed
+				}
+
 				Color paintedBackground = null;
 				if (editPart.getModel() instanceof AbstractBase)
 				{
