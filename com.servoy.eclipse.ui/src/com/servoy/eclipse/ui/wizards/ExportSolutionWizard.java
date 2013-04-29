@@ -346,7 +346,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 					{
 						TableDef tableInfo = dmm.deserializeTableInfo(dbiFileContent);
 						tableDefs.add(tableInfo);
-						if (exportModel.isExportMetaData() && tableInfo.isMetaData)
+						if (exportModel.isExportMetaData() && tableInfo.isMetaData != null && tableInfo.isMetaData.booleanValue())
 						{
 							String ds = DataSourceUtils.createDBTableDataSource(serverName, tableInfo.name);
 							IFile mdf = dmm.getMetaDataFile(ds);
