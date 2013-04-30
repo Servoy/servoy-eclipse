@@ -3675,7 +3675,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -3693,7 +3693,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -3724,7 +3724,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -3742,7 +3742,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -3773,7 +3773,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -3791,7 +3791,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -3822,7 +3822,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -3840,7 +3840,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -3871,7 +3871,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -3889,7 +3889,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -3920,7 +3920,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -3938,7 +3938,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -3969,7 +3969,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -3987,7 +3987,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -4018,7 +4018,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -4036,7 +4036,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -4067,7 +4067,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -4085,7 +4085,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -4116,7 +4116,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -4134,7 +4134,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -4165,7 +4165,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -4183,7 +4183,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -4226,7 +4226,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -4244,7 +4244,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -4275,7 +4275,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -4293,7 +4293,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -4324,7 +4324,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -4342,7 +4342,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -4373,7 +4373,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -4391,7 +4391,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -4422,7 +4422,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -4440,7 +4440,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -4471,7 +4471,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -4489,7 +4489,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -4520,7 +4520,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -4538,7 +4538,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -4569,7 +4569,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -4587,7 +4587,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -4618,7 +4618,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -4636,7 +4636,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -4667,7 +4667,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -4685,7 +4685,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -4716,7 +4716,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -4734,7 +4734,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -4765,7 +4765,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -4783,7 +4783,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -4814,7 +4814,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -4832,7 +4832,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -4864,7 +4864,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -4882,7 +4882,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -4913,7 +4913,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -4931,7 +4931,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -4963,7 +4963,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -4981,7 +4981,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -5011,7 +5011,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -5029,7 +5029,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -5119,7 +5119,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -5137,7 +5137,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -5167,7 +5167,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -5185,7 +5185,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -5274,7 +5274,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -5292,7 +5292,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -6164,7 +6164,7 @@ Using this variation of createDataSourceByQuery any Tablefilter on the involved 
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[// select customer data for order 1234
-/** @type {QBSelect<db:/example_data/customers>} *&#47;
+/** @type {QBSelect<db:/example_data/customers>} */
 var q = databaseManager.createSelect("db:/example_data/customers");
 q.result.add(q.columns.address).add(q.columns.city).add(q.columns.country);
 q.where.add(q.joins.customers_to_orders.columns.orderid.eq(1234));
@@ -6211,7 +6211,7 @@ Using this variation of createDataSourceByQuery any Tablefilter on the involved 
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[// select customer data for order 1234
-/** @type {QBSelect<db:/example_data/customers>} *&#47;
+/** @type {QBSelect<db:/example_data/customers>} */
 var q = databaseManager.createSelect("db:/example_data/customers");
 q.result.add(q.columns.address).add(q.columns.city).add(q.columns.country);
 q.where.add(q.joins.customers_to_orders.columns.orderid.eq(1234));
@@ -6423,7 +6423,7 @@ var dataset2 = databaseManager.createEmptyDataSet(10,new Array ('a','b','c','d')
             <summary clientSupport="wc,sc"><![CDATA[Create a QueryBuilder object for a datasource.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/book_nodes>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/book_nodes>} */
 var q = databaseManager.createSelect('db:/example_data/book_nodes')
 q.result.addPk()
 q.where.add(q.columns.label_text.not.isin(null))
@@ -6551,14 +6551,14 @@ Using this variation of getDataSetByQuery any Tablefilter on the involved tables
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[// use the query froma foundset and add a condition
-/** @type {QBSelect<db:/example_data/orders>} *&#47;
+/** @type {QBSelect<db:/example_data/orders>} */
 var q = foundset.getQuery()
 q.where.add(q.joins.orders_to_order_details.columns.discount.eq(2))
 var maxReturnedRows = 10;//useful to limit number of rows
 var ds = databaseManager.getDataSetByQuery(q, maxReturnedRows);
 
 // query: select PK from example.book_nodes where parent = 111 and(note_date is null or note_date > now)
-/** @type {QBSelect<db:/example_data/book_nodes>} *&#47;
+/** @type {QBSelect<db:/example_data/book_nodes>} */
 var query = databaseManager.createSelect('db:/example_data/book_nodes').result.addPk().root
 query.where.add(query.columns.parent_id.eq(111))
 	.add(query.or
@@ -6879,7 +6879,7 @@ for( var i = 0 ; i < array.length ; i++ )
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[// type the foundset returned from the call with JSDoc, fill in the right server/tablename
-/** @type {JSFoundset<db:/servername/tablename>} *&#47;
+/** @type {JSFoundset<db:/servername/tablename>} */
 var fs = databaseManager.getFoundSet(controller.getDataSource())
 var ridx = fs.newRecord()
 var record = fs.getRecord(ridx)
@@ -6905,7 +6905,7 @@ databaseManager.saveData()]]></sample>
           </summaries>
           <samples>
             <sample clientSupport="mc,wc,sc"><![CDATA[// type the foundset returned from the call with JSDoc, fill in the right server/tablename
-/** @type {JSFoundset<db:/servername/tablename>} *&#47;
+/** @type {JSFoundset<db:/servername/tablename>} */
 var fs = databaseManager.getFoundSet(controller.getDataSource())
 var ridx = fs.newRecord()
 var record = fs.getRecord(ridx)
@@ -6932,7 +6932,7 @@ databaseManager.saveData()]]></sample>
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[// type the foundset returned from the call with JSDoc, fill in the right server/tablename
-/** @type {JSFoundset<db:/servername/tablename>} *&#47;
+/** @type {JSFoundset<db:/servername/tablename>} */
 var fs = databaseManager.getFoundSet(controller.getDataSource())
 var ridx = fs.newRecord()
 var record = fs.getRecord(ridx)
@@ -12889,7 +12889,7 @@ If it has a name the getElementName() is the name of this component.]]></descrip
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[// cast to runtime text field (change to anoter kind of type if you know the type)
-/** @type {RuntimeTextField} *&#47;
+/** @type {RuntimeTextField} */
 var source = event.getSource();
 var sourceDataProvider = source.getDataProviderID();]]></sample>
           </samples>
@@ -14420,7 +14420,7 @@ If it has a name the getElementName() is the name of this component.]]></descrip
           </summaries>
           <samples>
             <sample clientSupport="mc,wc,sc"><![CDATA[// cast to runtime text field (change to anoter kind of type if you know the type)
-/** @type {RuntimeTextField} *&#47;
+/** @type {RuntimeTextField} */
 var source = event.getSource();
 var sourceDataProvider = source.getDataProviderID();]]></sample>
           </samples>
@@ -19864,11 +19864,11 @@ if (count == 0)
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="find">
+        <function clientSupport="mc,wc,sc" name="find">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the foundset is now in find mode, false otherwise.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Set the foundset in find mode. (Start a find request), use the "search" function to perform/exit the find.
+            <description clientSupport="mc,wc,sc"><![CDATA[Set the foundset in find mode. (Start a find request), use the "search" function to perform/exit the find.
 
 Before going into find mode, all unsaved records will be saved in the database.
 If this fails (due to validation failures or sql errors) or is not allowed (autosave off), the foundset will not go into find mode.
@@ -19920,10 +19920,10 @@ The values are not restricted to strings but can be any type that matches the co
 For example, "record.department_id = [1, 33, 99]"]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Set the foundset in find mode.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Set the foundset in find mode.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[if (%%prefix%%foundset.find()) //find will fail if autosave is disabled and there are unsaved records
+            <sample clientSupport="mc,wc,sc"><![CDATA[if (%%prefix%%foundset.find()) //find will fail if autosave is disabled and there are unsaved records
 {
 	columnTextDataProvider = 'a search value'
 	// for numbers you have to make sure to format it correctly so that the decimal point is in your locales notation (. or ,)
@@ -20276,25 +20276,25 @@ All records that are not in the foundset will become the current foundset.]]></d
             <sample clientSupport="wc,sc"><![CDATA[%%prefix%%foundset.invertRecords();]]></sample>
           </samples>
         </function>
-        <function clientSupport="wc,sc" name="isInFind">
+        <function clientSupport="mc,wc,sc" name="isInFind">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[boolean is in find mode.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Check if this foundset is in find mode.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Check if this foundset is in find mode.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Check if this foundset is in find mode.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Check if this foundset is in find mode.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[//Returns true when find was called on this foundset and search has not been called yet
+            <sample clientSupport="mc,wc,sc"><![CDATA[//Returns true when find was called on this foundset and search has not been called yet
 %%prefix%%foundset.isInFind();]]></sample>
           </samples>
         </function>
-        <function clientSupport="wc,sc" name="loadAllRecords">
+        <function clientSupport="mc,wc,sc" name="loadAllRecords">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if records are loaded, false otherwise.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Loads all accessible records from the datasource into the foundset.
+            <description clientSupport="mc,wc,sc"><![CDATA[Loads all accessible records from the datasource into the foundset.
 Filters on the foundset are applied.
 
 Before loading the records, all unsaved records will be saved in the database.
@@ -20302,10 +20302,10 @@ If this fails (due to validation failures or sql errors) or is not allowed (auto
 records will not be loaded,]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Loads all accessible records from the datasource into the foundset.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Loads all accessible records from the datasource into the foundset.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[%%prefix%%foundset.loadAllRecords();]]></sample>
+            <sample clientSupport="mc,wc,sc"><![CDATA[%%prefix%%foundset.loadAllRecords();]]></sample>
           </samples>
         </function>
         <function clientSupport="wc,sc" name="loadOmittedRecords">
@@ -20859,20 +20859,20 @@ Use clear() or loadAllRecords() to make the filter effective.]]></description>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="search">
+        <function clientSupport="mc,wc,sc" name="search">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[the recordCount]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.
+            <description clientSupport="mc,wc,sc"><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.
 Clear results from previous searches.
 
 Note: Omitted records are automatically excluded when performing a search - meaning that the foundset result by default will not include omitted records.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[var recordCount = %%prefix%%foundset.search();
+            <sample clientSupport="mc,wc,sc"><![CDATA[var recordCount = %%prefix%%foundset.search();
 //var recordCount = %%prefix%%foundset.search(false,false); //to extend foundset]]></sample>
           </samples>
         </function>
@@ -24234,7 +24234,7 @@ NOTE: To return an array of records with outstanding changed data, see the funct
             <summary clientSupport="wc,sc"><![CDATA[Returns a JSDataSet with outstanding (not saved) changed data of this record.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {JSDataSet} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {JSDataSet} */
 var dataset = record.getChangedData()
 for( var i = 1 ; i <= dataset.getMaxRowIndex() ; i++ )
 {
@@ -24366,9 +24366,9 @@ record.save();]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Constant for the joinType of a Query Builder join.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
- /** @type {QBJoin<db:/example_data/order_details>} *&#47;
+ /** @type {QBJoin<db:/example_data/order_details>} */
 	var join = query.joins.add('db:/example_data/order_details', JSRelation.RIGHT_OUTER_JOIN, 'odetail')
 	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
           </samples>
@@ -24385,9 +24385,9 @@ record.save();]]></sample>
             <sample clientSupport="wc,sc"><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
 relation.joinType = JSRelation.LEFT_OUTER_JOIN;
 
- /** @type {QBSelect<db:/example_data/orders>} *&#47;
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
- /** @type {QBJoin<db:/example_data/order_details>} *&#47;
+ /** @type {QBJoin<db:/example_data/order_details>} */
 	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
 	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
           </samples>
@@ -24404,9 +24404,9 @@ relation.joinType = JSRelation.LEFT_OUTER_JOIN;
             <sample clientSupport="wc,sc"><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
 relation.joinType = JSRelation.LEFT_OUTER_JOIN;
 
- /** @type {QBSelect<db:/example_data/orders>} *&#47;
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
- /** @type {QBJoin<db:/example_data/order_details>} *&#47;
+ /** @type {QBJoin<db:/example_data/order_details>} */
 	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
 	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
           </samples>
@@ -24420,9 +24420,9 @@ relation.joinType = JSRelation.LEFT_OUTER_JOIN;
             <summary clientSupport="wc,sc"><![CDATA[Constant for the joinType of a Query Builder join.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
- /** @type {QBJoin<db:/example_data/order_details>} *&#47;
+ /** @type {QBJoin<db:/example_data/order_details>} */
 	var join = query.joins.add('db:/example_data/order_details', JSRelation.RIGHT_OUTER_JOIN, 'odetail')
 	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
           </samples>
@@ -24539,9 +24539,9 @@ Can be "inner join" or "left outer join".]]></description>
             <sample clientSupport="wc,sc"><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
 relation.joinType = JSRelation.LEFT_OUTER_JOIN;
 
- /** @type {QBSelect<db:/example_data/orders>} *&#47;
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
- /** @type {QBJoin<db:/example_data/order_details>} *&#47;
+ /** @type {QBJoin<db:/example_data/order_details>} */
 	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
 	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
           </samples>
@@ -24820,7 +24820,7 @@ This is null for elements of type form when they are in table view mode.]]></des
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[// type the record returned from the call with JSDoc, fill in the right server/tablename
-/** @type {JSRecord<db:/servername/tablename>} *&#47;
+/** @type {JSRecord<db:/servername/tablename>} */
 var record = event.getRecord();]]></sample>
           </samples>
         </function>
@@ -27267,9 +27267,9 @@ In find mode the record with be the FindRecord which is just like a normal JSRec
             <sample clientSupport="wc,sc"><![CDATA[var listProvider = solutionModel.newGlobalMethod('globals', 'function getDataSetForValueList(displayValue, realValue, record, valueListName, findMode) {' +
 		'	' +
 		'var args = null;' +
-		'/** @type QBSelect<db:/example_data/employees> *&#47;' +
+		'/** @type QBSelect<db:/example_data/employees> */' +
 		'var query = databaseManager.createSelect('db:/example_data/employees');' + 
-		'/** @type  {JSDataSet} *&#47;' + 
+		'/** @type  {JSDataSet} */' + 
 		'var result = null;' + 
 		'if (displayValue == null && realValue == null) {' +
 		'  // TODO think about caching this result. can be called often!' +
@@ -29070,7 +29070,7 @@ forms['printForm'].controller.showPrintPreview();]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create an ascending sort expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders')
 query.sort
 .add(query.joins.orders_to_order_details.columns.quantity.asc)
@@ -29087,7 +29087,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.avg.eq(1))
@@ -29127,7 +29127,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
@@ -29155,7 +29155,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create an descending sort expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders')
 query.sort
 .add(query.joins.orders_to_order_details.columns.quantity.desc)
@@ -29232,7 +29232,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.max(10))
@@ -29248,7 +29248,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.min(10))
@@ -29300,7 +29300,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
 	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
@@ -29315,10 +29315,10 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
 	var subquery = databaseManager.createSelect('db:/example_data/order_details')
 	
- /** @type {QBSelect<db:/example_data/orders>} *&#47;
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -29377,7 +29377,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.sum(10))
@@ -29890,7 +29890,7 @@ Operator: lessThan]]></description>
             <summary clientSupport="wc,sc"><![CDATA[Create an ascending sort expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders')
 query.sort
 .add(query.joins.orders_to_order_details.columns.quantity.asc)
@@ -29907,7 +29907,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.avg.eq(1))
@@ -29947,7 +29947,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
@@ -29975,7 +29975,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create an descending sort expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders')
 query.sort
 .add(query.joins.orders_to_order_details.columns.quantity.desc)
@@ -30052,7 +30052,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.max(10))
@@ -30068,7 +30068,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.min(10))
@@ -30120,7 +30120,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
 	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
@@ -30135,10 +30135,10 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
 	var subquery = databaseManager.createSelect('db:/example_data/order_details')
 	
- /** @type {QBSelect<db:/example_data/orders>} *&#47;
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -30197,7 +30197,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.sum(10))
@@ -30699,7 +30699,7 @@ Operator: lessThan]]></description>
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
 	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
@@ -30714,10 +30714,10 @@ Operator: lessThan]]></description>
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
 	var subquery = databaseManager.createSelect('db:/example_data/order_details')
 	
- /** @type {QBSelect<db:/example_data/orders>} *&#47;
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -30756,7 +30756,7 @@ Operator: lessThan]]></description>
             <summary clientSupport="wc,sc"><![CDATA[Create an ascending sort expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders')
 query.sort
 .add(query.joins.orders_to_order_details.columns.quantity.asc)
@@ -30773,7 +30773,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.avg.eq(1))
@@ -30813,7 +30813,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
@@ -30841,7 +30841,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create an descending sort expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders')
 query.sort
 .add(query.joins.orders_to_order_details.columns.quantity.desc)
@@ -30918,7 +30918,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.max(10))
@@ -30934,7 +30934,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.min(10))
@@ -30986,7 +30986,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
 	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
@@ -31001,10 +31001,10 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
 	var subquery = databaseManager.createSelect('db:/example_data/order_details')
 	
- /** @type {QBSelect<db:/example_data/orders>} *&#47;
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -31063,7 +31063,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.sum(10))
@@ -31564,7 +31564,7 @@ Operator: lessThan]]></description>
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
 	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
@@ -31579,10 +31579,10 @@ Operator: lessThan]]></description>
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
 	var subquery = databaseManager.createSelect('db:/example_data/order_details')
 	
- /** @type {QBSelect<db:/example_data/orders>} *&#47;
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -31610,7 +31610,7 @@ Operator: lessThan]]></description>
             <summary clientSupport="wc,sc"><![CDATA[Create abs(column) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.mynum.abs.eq(query.functions.abs(myval))) 
 foundset.loadRecords(query);]]></sample>
@@ -31631,7 +31631,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create bit_length(column) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.shipname.bit_length.eq(query.functions.bit_length('Sample'))) 
 foundset.loadRecords(query);]]></sample>
@@ -31653,7 +31653,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Cast using type name.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
@@ -31679,7 +31679,7 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="wc,sc"><![CDATA[Create ceil(column) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.mynumcol.ceil.eq(query.functions.ceil(myvar)) 
 foundset.loadRecords(query);]]></sample>
@@ -31702,7 +31702,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create year(date) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.mycol.coalesce('defval').eq(query.functions.coalesce(myvar, 'defval')) 
 foundset.loadRecords(query);]]></sample>
@@ -31726,7 +31726,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create concat(args, arg2) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/udm/contacts>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/udm/contacts>} */
 	var query = databaseManager.createSelect('db:/udm/contacts') //$NON-NLS-1$
 	query.result.add(query.columns.name_first.concat(' ').concat(query.columns.name_last))
 	var ds = databaseManager.getDataSetByQuery(query, -1)]]></sample>
@@ -31748,7 +31748,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create day(date) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.mydatecol.day.eq(query.functions.day(mydatevar)) 
 foundset.loadRecords(query);]]></sample>
@@ -31772,7 +31772,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create divide(args, arg2) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.mynumcol.divide(2).eq(query.functions.divide(myvar, 2)) 
 foundset.loadRecords(query);]]></sample>
@@ -31794,7 +31794,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create floor(column) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.mynumcol.floor.eq(query.functions.floor(myvar)) 
 foundset.loadRecords(query);]]></sample>
@@ -31817,7 +31817,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create hour(date) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.mydatecol.hour.eq(query.functions.hour(mydatevar)) 
 foundset.loadRecords(query);]]></sample>
@@ -31840,7 +31840,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create length(column) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.shipname.len.eq(query.functions.len('Sample'))) 
 foundset.loadRecords(query);]]></sample>
@@ -31862,7 +31862,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create locate(str1, str2) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.shipname.locate('amp').eq(query.functions.locate('Sample', 'amp'))) 
 foundset.loadRecords(query);]]></sample>
@@ -31890,7 +31890,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create locate(str1, str2, start) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.shipname.locate('amp', 1).eq(query.functions.locate('Sample', 'amp', 1))) 
 foundset.loadRecords(query);]]></sample>
@@ -31919,7 +31919,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create lower(column) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.shipname.lower.eq(query.functions.lower('Sample'))) 
 foundset.loadRecords(query);]]></sample>
@@ -31941,7 +31941,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create minus(args, arg2) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.mynumcol.minus(2).eq(query.functions.minus(myvar, 2)) 
 foundset.loadRecords(query);]]></sample>
@@ -31963,7 +31963,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create minute(date) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.mydatecol.minute.eq(query.functions.minute(mydatevar)) 
 foundset.loadRecords(query);]]></sample>
@@ -31987,7 +31987,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create mod(dividend, divisor) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.mynumcol.mod(2).eq(query.functions.mod(myvar, 2)) 
 foundset.loadRecords(query);]]></sample>
@@ -32009,7 +32009,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create month(date) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.mydatecol.month.eq(query.functions.month(mydatevar)) 
 foundset.loadRecords(query);]]></sample>
@@ -32033,7 +32033,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create multiply(args, arg2) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.mynumcol.multiply(2).eq(query.functions.multiply(myvar, 2)) 
 foundset.loadRecords(query);]]></sample>
@@ -32056,7 +32056,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create nullif(arg1, arg2) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.shipname.nullif('none').eq(query.functions.nullif('Sample', 'none'))) 
 foundset.loadRecords(query);]]></sample>
@@ -32079,7 +32079,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create plus(args, arg2) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.mynumcol.plus(2).eq(query.functions.plus(myvar, 2)) 
 foundset.loadRecords(query);]]></sample>
@@ -32101,7 +32101,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create round(column) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.mynumcol.round.eq(query.functions.round(myvar)) 
 foundset.loadRecords(query);]]></sample>
@@ -32124,7 +32124,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create second(date) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.mydatecol.second.eq(query.functions.second(mydatevar)) 
 foundset.loadRecords(query);]]></sample>
@@ -32147,7 +32147,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create sqrt(column) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.mynum.sqrt.eq(query.functions.sqrt(myval))) 
 foundset.loadRecords(query);]]></sample>
@@ -32169,7 +32169,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create substring(column, pos) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.shipname.substring(3).eq(query.functions.substring('Sample', 3))) 
 foundset.loadRecords(query);]]></sample>
@@ -32197,7 +32197,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create substring(column, pos, len) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.shipname.substring(3, 2).eq(query.functions.substring('Sample', 3, 2))) 
 foundset.loadRecords(query);]]></sample>
@@ -32226,7 +32226,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create trim(column) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.shipname.trim.eq(query.functions.trim('Sample'))) 
 foundset.loadRecords(query);]]></sample>
@@ -32247,7 +32247,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create upper(column) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.shipname.upper.eq(query.functions.upper('Sample'))) 
 foundset.loadRecords(query);]]></sample>
@@ -32268,7 +32268,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Create year(date) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.mydatecol.year.eq(query.functions.year(mydatevar)) 
 foundset.loadRecords(query);]]></sample>
@@ -32292,7 +32292,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
 	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
@@ -32307,10 +32307,10 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
 	var subquery = databaseManager.createSelect('db:/example_data/order_details')
 	
- /** @type {QBSelect<db:/example_data/orders>} *&#47;
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -32340,7 +32340,7 @@ Same as query.groupBy().add(join.getColumn("value"))]]></description>
             <summary clientSupport="wc,sc"><![CDATA[Add column name to group-by clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders')
 query.groupBy.add(query.columns.orderid) // have to group by on pk when using having-conditions in (foundset) pk queries
 .root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
@@ -32366,7 +32366,7 @@ Same as query.groupBy().add(join.getColumn("value"))]]></description>
             <summary clientSupport="wc,sc"><![CDATA[Add column name to group-by clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders')
 query.groupBy.add(query.columns.orderid) // have to group by on pk when using having-conditions in (foundset) pk queries
 .root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
@@ -32388,7 +32388,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Add the tables' primary pk columns in alphabetical order to the group by clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders')
 query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 .root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
@@ -32449,12 +32449,12 @@ Joins added to this clause will be based on this table clauses table.]]></descri
             <summary clientSupport="wc,sc"><![CDATA[Get the on clause for the join.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
 var query = databaseManager.createSelect('db:/example_data/person')
-/** @type {QBJoin<db:/example_data/person>} *&#47;
+/** @type {QBJoin<db:/example_data/person>} */
 var join1 = query.joins.add('db:/example_data/person')
 join1.on.add(query.columns.parent_person_id.eq(join1.columns.person_id))
-/** @type {QBJoin<db:/example_data/person>} *&#47;
+/** @type {QBJoin<db:/example_data/person>} */
 var join2 = query.joins.add('db:/example_data/person')
 join2.on.add(join1.columns.parent_person_id.eq(join2.columns.person_id))
 	
@@ -32471,7 +32471,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
 	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
@@ -32486,10 +32486,10 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
 	var subquery = databaseManager.createSelect('db:/example_data/order_details')
 	
- /** @type {QBSelect<db:/example_data/orders>} *&#47;
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -32563,7 +32563,7 @@ The alias may be of the main table or any level deep joined table.]]></descripti
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
 	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
@@ -32578,10 +32578,10 @@ The alias may be of the main table or any level deep joined table.]]></descripti
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
 	var subquery = databaseManager.createSelect('db:/example_data/order_details')
 		
- /** @type {QBSelect<db:/example_data/orders>} *&#47;
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -32609,9 +32609,9 @@ The alias may be of the main table or any level deep joined table.]]></descripti
             <summary clientSupport="wc,sc"><![CDATA[Add a join with join type IQueryBuilderJoin#LEFT_OUTER_JOIN and no alias for the joining table.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
- /** @type {QBJoin<db:/example_data/order_details>} *&#47;
+ /** @type {QBJoin<db:/example_data/order_details>} */
 	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
 	join.on.add(join.columns.orderid.eq(query.columns.orderid))
  // to add a join based on a relation, use the relation name
@@ -32638,9 +32638,9 @@ The alias may be of the main table or any level deep joined table.]]></descripti
             <summary clientSupport="wc,sc"><![CDATA[Add a join with no alias for the joining table.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
- /** @type {QBJoin<db:/example_data/order_details>} *&#47;
+ /** @type {QBJoin<db:/example_data/order_details>} */
 	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
 	join.on.add(join.columns.orderid.eq(query.columns.orderid))
  // to add a join based on a relation, use the relation name
@@ -32671,9 +32671,9 @@ The alias may be of the main table or any level deep joined table.]]></descripti
             <summary clientSupport="wc,sc"><![CDATA[Add a join clause from the parent query builder part to the specified data source.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
- /** @type {QBJoin<db:/example_data/order_details>} *&#47;
+ /** @type {QBJoin<db:/example_data/order_details>} */
 	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
 	join.on.add(join.columns.orderid.eq(query.columns.orderid))
  // to add a join based on a relation, use the relation name
@@ -32708,9 +32708,9 @@ When dataSourceOrRelation is a data source, an empty join will be added with joi
             <summary clientSupport="wc,sc"><![CDATA[Add a join based on relation or add a manual join.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
- /** @type {QBJoin<db:/example_data/order_details>} *&#47;
+ /** @type {QBJoin<db:/example_data/order_details>} */
 	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
 	join.on.add(join.columns.orderid.eq(query.columns.orderid))
  // to add a join based on a relation, use the relation name
@@ -32740,7 +32740,7 @@ When dataSourceOrRelation is a data source, an empty join will be added with joi
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
 	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
@@ -32755,10 +32755,10 @@ When dataSourceOrRelation is a data source, an empty join will be added with joi
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
 	var subquery = databaseManager.createSelect('db:/example_data/order_details')
 	
- /** @type {QBSelect<db:/example_data/orders>} *&#47;
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -32786,7 +32786,7 @@ When dataSourceOrRelation is a data source, an empty join will be added with joi
             <summary clientSupport="wc,sc"><![CDATA[Add a condition to the AND or OR condition list.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders')
 query.where.add(query.columns.orderdate.isNull)]]></sample>
           </samples>
@@ -32809,7 +32809,7 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
 	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
@@ -32824,10 +32824,10 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
 	var subquery = databaseManager.createSelect('db:/example_data/order_details')
 	
- /** @type {QBSelect<db:/example_data/orders>} *&#47;
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -32855,7 +32855,7 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
 	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
@@ -32870,10 +32870,10 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
 	var subquery = databaseManager.createSelect('db:/example_data/order_details')
 	
- /** @type {QBSelect<db:/example_data/orders>} *&#47;
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -32912,7 +32912,7 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
 	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
@@ -32927,10 +32927,10 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
 	var subquery = databaseManager.createSelect('db:/example_data/order_details')
 	
- /** @type {QBSelect<db:/example_data/orders>} *&#47;
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -33197,7 +33197,7 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Get the functions clause from a query, used for functions that are not tied to a column.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.where.add(query.columns.shipname.upper.eq(query.functions.upper('servoy'))) //$NON-NLS-1$
 foundset.loadRecords(query)]]></sample>
@@ -33212,7 +33212,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Get the group by clause from a query]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders')
 query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 .root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
@@ -33229,7 +33229,7 @@ The conditions added here are AND-ed.]]></description>
             <summary clientSupport="wc,sc"><![CDATA[Get the having-part of the query, used to add conditions.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders')
 query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 .root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
@@ -33282,7 +33282,7 @@ Joins added to this clause will be based on this table clauses table.]]></descri
             <summary clientSupport="wc,sc"><![CDATA[Get the named parameters from a query.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query.columns.contact_id.eq(query.getParameter('mycontactid')))
 	
@@ -33304,7 +33304,7 @@ Joins added to this clause will be based on this table clauses table.]]></descri
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
 	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
@@ -33331,10 +33331,10 @@ Joins added to this clause will be based on this table clauses table.]]></descri
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
 	var subquery = databaseManager.createSelect('db:/example_data/order_details')
 	
- /** @type {QBSelect<db:/example_data/orders>} *&#47;
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -33357,7 +33357,7 @@ Joins added to this clause will be based on this table clauses table.]]></descri
             <summary clientSupport="wc,sc"><![CDATA[Get the sorting part of the query.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders')
 query.sort
 .add(query.joins.orders_to_order_details.columns.quantity.desc)
@@ -33469,7 +33469,7 @@ The alias may be of the main table or any level deep joined table.]]></descripti
             <summary clientSupport="wc,sc"><![CDATA[Get or create a parameter for the query, this used to parameterize queries.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query.columns.contact_id.eq(query.getParameter('mycontactid')))
 	
@@ -33535,7 +33535,7 @@ The alias may be of the main table or any level deep joined table.]]></descripti
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
 	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
@@ -33550,10 +33550,10 @@ The alias may be of the main table or any level deep joined table.]]></descripti
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
 	var subquery = databaseManager.createSelect('db:/example_data/order_details')
 	
- /** @type {QBSelect<db:/example_data/orders>} *&#47;
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -33580,7 +33580,7 @@ The alias may be of the main table or any level deep joined table.]]></descripti
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
 	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
@@ -33595,10 +33595,10 @@ The alias may be of the main table or any level deep joined table.]]></descripti
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
 	var subquery = databaseManager.createSelect('db:/example_data/order_details')
 	
- /** @type {QBSelect<db:/example_data/orders>} *&#47;
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -33738,7 +33738,7 @@ Joins added to this clause will be based on this table clauses table.]]></descri
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
 	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
@@ -33753,10 +33753,10 @@ Joins added to this clause will be based on this table clauses table.]]></descri
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
 	var subquery = databaseManager.createSelect('db:/example_data/order_details')
 	
- /** @type {QBSelect<db:/example_data/orders>} *&#47;
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -33846,7 +33846,7 @@ for (var c in q.where.conditionnames)
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
 	var query = databaseManager.createSelect('db:/example_data/person')
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
@@ -33861,10 +33861,10 @@ for (var c in q.where.conditionnames)
             <summary clientSupport="wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
 	var subquery = databaseManager.createSelect('db:/example_data/order_details')
 	
- /** @type {QBSelect<db:/example_data/orders>} *&#47;
+ /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
 		.or 
@@ -33892,7 +33892,7 @@ for (var c in q.where.conditionnames)
             <summary clientSupport="wc,sc"><![CDATA[Add a condition to the AND or OR condition list.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders')
 query.where.add(query.columns.orderdate.isNull)]]></sample>
           </samples>
@@ -33915,7 +33915,7 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Add a named condition to the AND or OR condition list.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders')
 query.where.add("mycond", query.columns.orderdate.isNull)]]></sample>
           </samples>
@@ -33938,7 +33938,7 @@ query.where.add("mycond", query.columns.orderdate.isNull)]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Clear the conditions in the query where-clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders')
 query.where.clear()]]></sample>
           </samples>
@@ -33974,7 +33974,7 @@ for (var c in q.where.conditionnames)
             <summary clientSupport="wc,sc"><![CDATA[Remove a named condition from the AND or OR condition list.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders')
 query.where.remove("mycond")]]></sample>
           </samples>
@@ -33992,7 +33992,7 @@ query.where.remove("mycond")]]></sample>
             <summary clientSupport="wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
@@ -34007,7 +34007,7 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
@@ -34022,7 +34022,7 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
@@ -34037,7 +34037,7 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
@@ -34052,7 +34052,7 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
@@ -34067,7 +34067,7 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
@@ -34082,7 +34082,7 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
@@ -34097,7 +34097,7 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
@@ -34112,7 +34112,7 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
@@ -34127,7 +34127,7 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
@@ -34142,7 +34142,7 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
@@ -34157,7 +34157,7 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
@@ -34172,7 +34172,7 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
@@ -34187,7 +34187,7 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
@@ -34202,7 +34202,7 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
@@ -34217,7 +34217,7 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
@@ -34232,7 +34232,7 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
@@ -34247,7 +34247,7 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} *&#47;
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
 query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
@@ -40579,7 +40579,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object clientSupport="mc,wc,sc" publicName="RuntimeForm" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Form" scriptingName="RuntimeForm ">
+    <object clientSupport="mc,wc,sc" publicName="RuntimeForm" qualifiedName="com.servoy.j2db.documentation.scripting.docs.Form" scriptingName="RuntimeForm">
       <properties>
         <property clientSupport="wc,sc" name="_super">
           <return type="com.servoy.j2db.documentation.scripting.docs.Form" typecode="com.servoy.j2db.scripting.FormScope"/>
@@ -52927,7 +52927,7 @@ for(var i=1 ; i<=dsUsers.getMaxRowIndex() ; i++)
 	application.output("user:" + dsUsers.getValue(i,2));
 
 	//set p to the user group for the current user
-	/** @type {JSDataSet} *&#47;
+	/** @type {JSDataSet} */
 	var p = security.getUserGroups(dsUsers.getValue(i,1));
 
 	for(k=1;k<=p.getMaxRowIndex();k++)
@@ -52962,7 +52962,7 @@ for(var i=1 ; i<=dsUsers.getMaxRowIndex() ; i++)
 	application.output("user:" + dsUsers.getValue(i,2));
 
 	//set p to the user group for the current user
-	/** @type {JSDataSet} *&#47;
+	/** @type {JSDataSet} */
 	var p = security.getUserGroups(dsUsers.getValue(i,1));
 
 	for(k=1;k<=p.getMaxRowIndex();k++)
@@ -53085,7 +53085,7 @@ for(var i=1 ; i<=dsUsers.getMaxRowIndex() ; i++)
 	application.output("user:" + dsUsers.getValue(i,2));
 
 	//set p to the user group for the current user
-	/** @type {JSDataSet} *&#47;
+	/** @type {JSDataSet} */
 	var p = security.getUserGroups(dsUsers.getValue(i,1));
 
 	for(k=1;k<=p.getMaxRowIndex();k++)
@@ -53120,7 +53120,7 @@ for(var i=1 ; i<=dsUsers.getMaxRowIndex() ; i++)
 	application.output("user:" + dsUsers.getValue(i,2));
 
 	//set p to the user group for the current user
-	/** @type {JSDataSet} *&#47;
+	/** @type {JSDataSet} */
 	var p = security.getUserGroups(dsUsers.getValue(i,1));
 
 	for(k=1;k<=p.getMaxRowIndex();k++)
@@ -53546,7 +53546,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -53564,7 +53564,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -53595,7 +53595,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -53613,7 +53613,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -53644,7 +53644,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -53662,7 +53662,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -53693,7 +53693,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -53711,7 +53711,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -53742,7 +53742,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -53760,7 +53760,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -53791,7 +53791,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -53809,7 +53809,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -53840,7 +53840,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -53858,7 +53858,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -53889,7 +53889,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -53907,7 +53907,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -53938,7 +53938,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -53956,7 +53956,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -53987,7 +53987,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -54005,7 +54005,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -54036,7 +54036,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -54054,7 +54054,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -54097,7 +54097,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -54115,7 +54115,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -54146,7 +54146,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -54164,7 +54164,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -54195,7 +54195,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -54213,7 +54213,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -54244,7 +54244,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -54262,7 +54262,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -54293,7 +54293,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -54311,7 +54311,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -54342,7 +54342,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -54360,7 +54360,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -54391,7 +54391,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -54409,7 +54409,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -54440,7 +54440,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -54458,7 +54458,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -54489,7 +54489,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -54507,7 +54507,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -54538,7 +54538,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -54556,7 +54556,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -54587,7 +54587,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -54605,7 +54605,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -54636,7 +54636,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -54654,7 +54654,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -54685,7 +54685,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -54703,7 +54703,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -54735,7 +54735,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -54753,7 +54753,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -54784,7 +54784,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -54802,7 +54802,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -54834,7 +54834,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -54852,7 +54852,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -54882,7 +54882,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -54900,7 +54900,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -54930,7 +54930,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -54948,7 +54948,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -54978,7 +54978,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -54996,7 +54996,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -55027,7 +55027,7 @@ application.output('Exception Object: '+ex)
 application.output('MSG: '+ex.getMessage())
 if (ex instanceof ServoyException)
 {
-	/** @type {ServoyException} *&#47;
+	/** @type {ServoyException} */
 	var servoyException = ex;
 	application.output("is a ServoyException")
 	application.output("Errorcode: "+servoyException.getErrorCode())
@@ -55045,7 +55045,7 @@ if (ex instanceof ServoyException)
 			application.output(record.exception);
 			if (record.exception instanceof DataException)
 			{
-				/** @type {DataException} *&#47;
+				/** @type {DataException} */
 				var dataException = record.exception;
 				application.output('SQL: '+dataException.getSQL())
 				application.output('SQLState: '+dataException.getSQLState())
@@ -58729,70 +58729,14 @@ if (count == 0)
         </function>
         <function clientSupport="wc,sc" name="find">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the foundset is now in find mode, false otherwise.]]></return>
-          <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Set the foundset in find mode. (Start a find request), use the "search" function to perform/exit the find.
-
-Before going into find mode, all unsaved records will be saved in the database.
-If this fails (due to validation failures or sql errors) or is not allowed (autosave off), the foundset will not go into find mode.
-Make sure the operator and the data (value) are part of the string passed to dataprovider (included inside a pair of quotation marks).
-Note: always make sure to check the result of the find() method.
-
-When in find mode, columns can be assigned string expressions (including operators) that are evaluated as:
-General:
-      c1||c2    (condition1 or condition2)
-      c|format  (apply format on condition like 'x|dd-MM-yyyy')
-      !c        (not condition)
-      #c        (modify condition, depends on column type)
-      ^         (is null)
-      ^=        (is null or empty)
-      &lt;x     (less than value x)
-      &gt;x     (greater than value x)
-      &lt;=x    (less than or equals value x)
-      &gt;=x    (greater than or equals value x)
-      x...y     (between values x and y, including values)
-      x         (equals value x)
-
- Number fields:
-      =x       (equals value x)
-      ^=       (is null or zero)
-
- Date fields:
-      #c       (equals value x, entire day)
-      now      (equals now, date and or time)
-      //       (equals today)
-      today    (equals today)
-
- Text fields:
-      #c	        (case insensitive condition)
-      = x      (equals a space and 'x')
-      ^=       (is null or empty)
-      %x%      (contains 'x')
-      %x_y%    (contains 'x' followed by any char and 'y')
-      \%      (contains char '%')
-      \_      (contains char '_')
-
-Related columns can be assigned, they will result in related searches.
-For example, "employees_to_department.location_id = headoffice" finds all employees in the specified location).
-
-Searching on related aggregates is supported.
-For example, "orders_to_details.total_amount = '&gt;1000'" finds all orders with total order details amount more than 1000.
-
-Arrays can be used for searching a number of values, this will result in an 'IN' condition that will be used in the search.
-The values are not restricted to strings but can be any type that matches the column type.
-For example, "record.department_id = [1, 33, 99]"]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Set the foundset in find mode.]]></summary>
-          </summaries>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[if (%%prefix%%foundset.find()) //find will fail if autosave is disabled and there are unsaved records
+            <sample clientSupport="wc,sc"><![CDATA[if (%%prefix%%controller.find()) //find will fail if autosave is disabled and there are unsaved records
 {
 	columnTextDataProvider = 'a search value'
-	// for numbers you have to make sure to format it correctly so that the decimal point is in your locales notation (. or ,)
-	columnNumberDataProvider = '>' + utils.numberFormat(anumber, '####.00');
+	columnNumberDataProvider = '>10'
 	columnDateDataProvider = '31-12-2010|dd-MM-yyyy'
-	%%prefix%%foundset.search()
+	%%prefix%%controller.search()
 }]]></sample>
           </samples>
         </function>
@@ -58957,7 +58901,7 @@ Note2: tabindex is 1 (left) or 2 (right) for a SplitPane and 0 based for the oth
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[//dataset columns: [containername(1),formname(2),tabpanel or beanname(3),tabname(4),tabindex(5),tabindex1based(6)]
 //dataset rows: mainform(1) -> parent(2)  -> current form(3) (when 3 forms deep)
-/** @type {JSDataSet} *&#47;
+/** @type {JSDataSet} */
 var dataset = %%prefix%%controller.getFormContext();
 if (dataset.getMaxRowIndex() > 1) 
 {
@@ -59685,19 +59629,10 @@ Lookups are defined in the dataprovider (columns) auto-enter setting and are nor
         </function>
         <function clientSupport="wc,sc" name="search">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[the recordCount]]></return>
-          <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.
-Clear results from previous searches.
-
-Note: Omitted records are automatically excluded when performing a search - meaning that the foundset result by default will not include omitted records.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.]]></summary>
-          </summaries>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[var recordCount = %%prefix%%foundset.search();
-//var recordCount = %%prefix%%foundset.search(false,false); //to extend foundset]]></sample>
+            <sample clientSupport="wc,sc"><![CDATA[var recordCount = %%prefix%%controller.search();
+//var recordCount = %%prefix%%controller.search(false,false); //to extend foundset]]></sample>
           </samples>
         </function>
         <function clientSupport="wc,sc" name="search">
