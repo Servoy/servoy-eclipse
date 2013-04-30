@@ -954,111 +954,8 @@ public class ValueListEditor extends PersistEditor
 				return "The table name field is invalid"; //$NON-NLS-1$
 			}
 
-			boolean box1 = false;
-			boolean box2 = false;
-			boolean box3 = false;
-			int boxesUsed = 0;
-			int showUsed = 0;
-			int returnUsed = 0;
-			if (dp_select1.getShowInFieldFlag() || dp_select1.getReturnInDataproviderFlag())
-			{
-				if (dp_select1.getDataProvider() != null)
-				{
-					box1 = true;//filled
-					boxesUsed++;
-					if (dp_select1.getShowInFieldFlag())
-					{
-						showUsed++;
-					}
-					if (dp_select1.getReturnInDataproviderFlag())
-					{
-						returnUsed++;
-					}
-				}
-				else
-				{
-					box1 = false;
-				}
-			}
-			else
-			{
-				box1 = true;//still oke
-			}
-
-			if (dp_select2.getShowInFieldFlag() || dp_select2.getReturnInDataproviderFlag())
-			{
-				if (dp_select2.getDataProvider() != null)
-				{
-					box2 = true;//filled
-					boxesUsed++;
-					if (dp_select2.getShowInFieldFlag())
-					{
-						showUsed++;
-					}
-					if (dp_select2.getReturnInDataproviderFlag())
-					{
-						returnUsed++;
-					}
-				}
-				else
-				{
-					box2 = false;
-				}
-			}
-			else
-			{
-				box2 = true;//still oke
-			}
-
-			if (dp_select3.getShowInFieldFlag() || dp_select3.getReturnInDataproviderFlag())
-			{
-				if (dp_select3.getDataProvider() != null)
-				{
-					box3 = true;//filled
-					boxesUsed++;
-					if (dp_select3.getShowInFieldFlag())
-					{
-						showUsed++;
-					}
-					if (dp_select3.getReturnInDataproviderFlag())
-					{
-						returnUsed++;
-					}
-				}
-				else
-				{
-					box3 = false;
-				}
-			}
-			else
-			{
-				box3 = true;//still oke
-			}
-
-			if (boxesUsed == 0)
-			{
-				return "You must use at least one definition box."; //$NON-NLS-1$
-			}
-			if (showUsed == 0)
-			{
-				return "You must check at least one Show in field/list from a selected column."; //$NON-NLS-1$
-			}
-			if (returnUsed == 0)
-			{
-				return "You must check at least one Return in dataprovider from a selected column."; //$NON-NLS-1$
-			}
-			if (!box1)
-			{
-				return "There is an error in the first definition box"; //$NON-NLS-1$
-			}
-			if (!box2)
-			{
-				return "There is an error in the second definition box"; //$NON-NLS-1$
-			}
-			if (!box3)
-			{
-				return "There is an error in the third definition box"; //$NON-NLS-1$
-			}
+			String warningMessage = validateFlags();
+			if (warningMessage != null) return warningMessage;
 		}
 		else if (relatedValuesButton.getSelection())
 		{
@@ -1066,6 +963,9 @@ public class ValueListEditor extends PersistEditor
 			{
 				return "The relation name field is invalid"; //$NON-NLS-1$
 			}
+			String warningMessage = validateFlags();
+			if (warningMessage != null) return warningMessage;
+
 		}
 		else if (globalMethodValuesButton.getSelection())
 		{
@@ -1085,6 +985,116 @@ public class ValueListEditor extends PersistEditor
 			return "The fallback value list is invalid"; //$NON-NLS-1$
 		}
 
+		return null;
+	}
+
+	private String validateFlags()
+	{
+		boolean box1 = false;
+		boolean box2 = false;
+		boolean box3 = false;
+		int boxesUsed = 0;
+		int showUsed = 0;
+		int returnUsed = 0;
+		if (dp_select1.getShowInFieldFlag() || dp_select1.getReturnInDataproviderFlag())
+		{
+			if (dp_select1.getDataProvider() != null)
+			{
+				box1 = true;//filled
+				boxesUsed++;
+				if (dp_select1.getShowInFieldFlag())
+				{
+					showUsed++;
+				}
+				if (dp_select1.getReturnInDataproviderFlag())
+				{
+					returnUsed++;
+				}
+			}
+			else
+			{
+				box1 = false;
+			}
+		}
+		else
+		{
+			box1 = true;//still oke
+		}
+
+		if (dp_select2.getShowInFieldFlag() || dp_select2.getReturnInDataproviderFlag())
+		{
+			if (dp_select2.getDataProvider() != null)
+			{
+				box2 = true;//filled
+				boxesUsed++;
+				if (dp_select2.getShowInFieldFlag())
+				{
+					showUsed++;
+				}
+				if (dp_select2.getReturnInDataproviderFlag())
+				{
+					returnUsed++;
+				}
+			}
+			else
+			{
+				box2 = false;
+			}
+		}
+		else
+		{
+			box2 = true;//still oke
+		}
+
+		if (dp_select3.getShowInFieldFlag() || dp_select3.getReturnInDataproviderFlag())
+		{
+			if (dp_select3.getDataProvider() != null)
+			{
+				box3 = true;//filled
+				boxesUsed++;
+				if (dp_select3.getShowInFieldFlag())
+				{
+					showUsed++;
+				}
+				if (dp_select3.getReturnInDataproviderFlag())
+				{
+					returnUsed++;
+				}
+			}
+			else
+			{
+				box3 = false;
+			}
+		}
+		else
+		{
+			box3 = true;//still oke
+		}
+
+		if (boxesUsed == 0)
+		{
+			return "You must use at least one definition box."; //$NON-NLS-1$
+		}
+		if (showUsed == 0)
+		{
+			return "You must check at least one Show in field/list from a selected column."; //$NON-NLS-1$
+		}
+		if (returnUsed == 0)
+		{
+			return "You must check at least one Return in dataprovider from a selected column."; //$NON-NLS-1$
+		}
+		if (!box1)
+		{
+			return "There is an error in the first definition box"; //$NON-NLS-1$
+		}
+		if (!box2)
+		{
+			return "There is an error in the second definition box"; //$NON-NLS-1$
+		}
+		if (!box3)
+		{
+			return "There is an error in the third definition box"; //$NON-NLS-1$
+		}
 		return null;
 	}
 
