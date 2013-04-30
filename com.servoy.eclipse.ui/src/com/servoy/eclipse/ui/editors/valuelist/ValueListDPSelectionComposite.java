@@ -266,10 +266,11 @@ public class ValueListDPSelectionComposite extends Composite
 		this.showInField = showInField;
 		if (valueList != null)
 		{
-			int showValues = valueList.getShowDataProviders();
+			int showValues;
+			int oldShowValues = showValues = valueList.getShowDataProviders();
 			if ((showValues & mask) != 0 && !showInField) showValues = showValues - mask;
 			if ((showValues & mask) == 0 && showInField) showValues = showValues + mask;
-			valueList.setShowDataProviders(showValues);
+			if (showValues != oldShowValues) valueList.setShowDataProviders(showValues);
 		}
 	}
 
@@ -283,10 +284,11 @@ public class ValueListDPSelectionComposite extends Composite
 		this.returnInDataProvider = returnInDataProvider;
 		if (valueList != null)
 		{
-			int returnValues = valueList.getReturnDataProviders();
+			int returnValues;
+			int oldReturnValues = returnValues = valueList.getReturnDataProviders();
 			if ((returnValues & mask) != 0 && !returnInDataProvider) returnValues = returnValues - mask;
 			if ((returnValues & mask) == 0 && returnInDataProvider) returnValues = returnValues + mask;
-			valueList.setReturnDataProviders(returnValues);
+			if (returnValues != oldReturnValues) valueList.setReturnDataProviders(returnValues);
 		}
 	}
 
