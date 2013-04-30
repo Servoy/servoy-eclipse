@@ -223,7 +223,7 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 		if (browsersImagesList == null) browsersImagesList = new HashMap<String, Image>();
 		if (!name.equals("") && !browsersImagesList.containsKey(name)) //$NON-NLS-1$
 		{
-			ImageDescriptor id = AbstractUIPlugin.imageDescriptorFromPlugin(com.servoy.eclipse.debug.Activator.PLUGIN_ID, "icons/" + name); //$NON-NLS-1$
+			ImageDescriptor id = AbstractUIPlugin.imageDescriptorFromPlugin(com.servoy.eclipse.ui.Activator.PLUGIN_ID, "icons/" + name); //$NON-NLS-1$
 			browsersImagesList.put(name, id.createImage());
 		}
 		return browsersImagesList.get(name);

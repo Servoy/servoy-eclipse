@@ -19,5 +19,80 @@
             name="Provides Solution Mobile Export">
       </provider>
    </extension>
+  
+   
+   <!-- define mobile action set -->
+    <extension point="org.eclipse.ui.actionSets">
+    <actionSet
+    	  label="Start Mobile Client"
+          id="com.servoy.eclipse.ui.start_mobile_actionSet"
+          visible="true">
+          <action 
+               class="com.servoy.eclipse.expoter.mobile.action.StartMobileClientActionDelegate"
+               definitionId="com.servoy.eclipse.ui.StartMobileClient"
+               icon="icons/mobile.png"
+               id="com.servoy.eclipse.ui.StartMobileClient"
+               label="Start Mobile Client"
+               menubarPath="org.eclipse.ui.run/start"
+               style="pulldown"
+               toolbarPath="Normal/additions"
+               tooltip="Start Mobile Client in Browser">
+         </action>
+    </actionSet>                 
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            categoryId="com.servoy.eclipse.ui"
+            description="Start Mobile Client"
+            id="com.servoy.eclipse.ui.StartMobileClient"
+            name="Start Mobile Client">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="com.servoy.eclipse.ui.StartMobileClient"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M3+M2+M">
+      </key>
+   </extension> 
+   
+    <!-- define launch configuration info-->
+    <extension point="org.eclipse.debug.ui.launchGroups">
+	  <launchGroup
+	     id="com.servoy.eclipse.mobile.launch.GroupId"
+	     mode="run"
+	     label="Run"
+	     image="icons\mobile.png"
+	     category="servoy.mobile.cathegory"
+	     bannerImage="icons\mobile.png">
+	  </launchGroup>
+   </extension>
+   <extension
+         point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+            delegate="com.servoy.eclipse.exporter.mobile.launch.MobileLaunchConfigurationDelegate"
+            id="com.servoy.eclipse.mobile.launch"
+            modes="run"
+            name=" Servoy Mobile"
+            category = "servoy.mobile.cathegory"
+            public="true">
+      </launchConfigurationType>
+   </extension>
+   <extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+	    <launchConfigurationTypeImage
+	        icon="icons/mobile.png"
+	        configTypeID="com.servoy.eclipse.mobile.launch"
+	        id="com.servoy.eclipse.mobile.launch.icon">
+	    </launchConfigurationTypeImage>
+	</extension>
+	<extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+		  <launchConfigurationTabGroup
+		      id="com.servoy.eclipse.mobile.launch.tabGroup"
+		      type="com.servoy.eclipse.mobile.launch"
+		      class="com.servoy.eclipse.exporter.mobile.launch.MobileLaunchConfigurationTabGroup">
+		  </launchConfigurationTabGroup>
+ 	</extension>
 
 </plugin>

@@ -108,7 +108,7 @@
 	         class="com.servoy.eclipse.jsunit.scriptunit.JSUnitTestingEngine"
 	         id="com.servoy.eclipse.jsunit.scriptunit.JSUnitTestingEngine"
 	         name="JSUnit"
-	         nature="org.eclipse.dltk.javascript.core.nature"
+	         nature="com.servoy.eclipse.core.ServoyProject"
 	         priority="20">
 	   </testingEngine>
    </extension>
@@ -117,9 +117,9 @@
       <launchConfigurationType
             delegate="com.servoy.eclipse.jsunit.launch.JSUnitLaunchConfigurationDelegate"
             id="com.servoy.eclipse.jsunit.launch"
-            modes="run,debug"
+            modes="debug"
             name=" Servoy JSunit"
-            public="true">
+            public="false">
       </launchConfigurationType>
    </extension>
    <extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">

@@ -10,7 +10,9 @@ Require-Bundle: com.servoy.eclipse.model,
  org.eclipse.ui,
  org.eclipse.core.runtime,
  servoy_shared,
- com.servoy.eclipse.ui
+ com.servoy.eclipse.ui,
+ org.eclipse.debug.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
+Import-Package: org.eclipse.ui.internal.browser
