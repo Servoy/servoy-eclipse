@@ -213,7 +213,8 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			return new String[] { IMobileProperties.DATA_ICON.propertyName };
 		}
 
-		if (GraphicalComponent.class == clazz && !isButton(getPersist()))
+		if (GraphicalComponent.class == clazz && !isButton(getPersist()) &&
+			((AbstractBase)getPersist()).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName) == null)
 		{
 			// script label
 			return new String[] { IMobileProperties.HEADER_SIZE.propertyName };
