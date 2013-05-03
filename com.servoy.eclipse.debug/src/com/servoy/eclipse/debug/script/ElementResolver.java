@@ -33,6 +33,7 @@ import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
 import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
 import org.eclipse.dltk.javascript.typeinfo.model.Method;
+import org.eclipse.dltk.javascript.typeinfo.model.Parameter;
 import org.eclipse.dltk.javascript.typeinfo.model.Property;
 import org.eclipse.dltk.javascript.typeinfo.model.SimpleType;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
@@ -341,6 +342,25 @@ public class ElementResolver implements IElementResolver
 				}
 			}
 			return null;
+		}
+		// some stuff that should just not report anything. 
+		if ("document".equals(name)) // dom model
+		{
+			Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+			property.setName(name);
+			property.setReadOnly(true);
+			property.setType(TypeInfoModelFactory.eINSTANCE.createAnyType());
+			return property;
+		}
+		else if ("$".equals(name))
+		{
+			Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
+			Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
+			param.setName("selector");
+			method.getParameters().add(param);
+			method.setType(TypeInfoModelFactory.eINSTANCE.createAnyType());
+			method.setName("$");
+			return method;
 		}
 
 		// try to resolve first based on existing types as defined by TypeCreator (so that deprecated & other things are in sync)
