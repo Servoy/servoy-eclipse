@@ -915,7 +915,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 				return;
 			}
 			int mode = x11handler.getUserChannel().askUserImportPolicy();
-			if (mode == 0)
+			if (mode == IXMLImportUserChannel.IMPORT_USER_POLICY_DONT)
 			{
 				x11handler.getUserChannel().info("Skipped import of user information", ILogLevel.INFO);
 				return;
@@ -933,7 +933,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 				int userId = userManager.getUserIdByUserName(ApplicationServerSingleton.get().getClientId(), userInfo.name);
 
 				// If override users is set, delete the user first.
-				if (userId != -1 && mode == 2)
+				if (userId != -1 && mode == IXMLImportUserChannel.IMPORT_USER_POLICY_OVERWRITE_COMPLETELY)
 				{
 					userManager.deleteUser(ApplicationServerSingleton.get().getClientId(), userId);
 					userId = -1;

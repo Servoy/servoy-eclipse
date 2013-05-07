@@ -403,7 +403,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 			{
 				public void run()
 				{
-					retval = dialog.open();
+					dialog.open();
 				}
 			});
 		}
@@ -528,7 +528,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 			int ret = super.open();
 			if (ret != Window.OK)
 			{
-				userImportPolicy = new Integer(0);
+				userImportPolicy = new Integer(IXMLImportUserChannel.IMPORT_USER_POLICY_DONT);
 			}
 			return ret;
 		}
@@ -536,7 +536,9 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 		private void fillValues()
 		{
 			addUsersToAdminGroup = addUsersToAdminGroupButton.getSelection();
-			userImportPolicy = new Integer(updateUsers.getSelection() ? 1 : (overwriteUsers.getSelection() ? 2 : 0));
+			userImportPolicy = new Integer(updateUsers.getSelection() ? IXMLImportUserChannel.IMPORT_USER_POLICY_CREATE_U_UPDATE_G
+				: (overwriteUsers.getSelection() ? IXMLImportUserChannel.IMPORT_USER_POLICY_OVERWRITE_COMPLETELY
+					: IXMLImportUserChannel.IMPORT_USER_POLICY_DONT));
 		}
 
 		@Override
