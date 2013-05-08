@@ -26,29 +26,37 @@
     <actionSet
     	  label="Start Mobile Client"
           id="com.servoy.eclipse.ui.start_mobile_actionSet"
-          visible="true">
-          <action 
-               class="com.servoy.eclipse.expoter.mobile.action.StartMobileClientActionDelegate"
-               definitionId="com.servoy.eclipse.ui.StartMobileClient"
-               icon="icons/mobile.png"
-               id="com.servoy.eclipse.ui.StartMobileClient"
-               label="Start Mobile Client"
-               menubarPath="org.eclipse.ui.run/start"
-               style="pulldown"
-               toolbarPath="Normal/additions"
-               tooltip="Start Mobile Client in Browser">
-         </action>
+          visible="false">
+          <action
+                class="com.servoy.eclipse.expoter.mobile.action.StartMobileClientActionDelegate"
+                definitionId="com.servoy.eclipse.ui.StartMobileClient"
+                icon="icons/mobile.png"
+                id="com.servoy.eclipse.ui.StartMobileClient"
+                label="Start Mobile Client"
+                menubarPath="org.eclipse.ui.run/start"
+                style="pulldown"
+                toolbarPath="Normal/additions"
+                tooltip="Start Mobile Client in Browser">  
+                <enablement>
+                    <pluginState
+                          id="com.servoy.eclipse.exporter.mobile.pluginState5" value="activated">
+                    </pluginState>
+                </enablement>         
+         </action>         
     </actionSet>                 
    </extension>
+    
    <extension
          point="org.eclipse.ui.commands">
       <command
             categoryId="com.servoy.eclipse.ui"
             description="Start Mobile Client"
             id="com.servoy.eclipse.ui.StartMobileClient"
-            name="Start Mobile Client">
+            name="Start Mobile Client"
+           >           
       </command>
    </extension>
+   
    <extension
          point="org.eclipse.ui.bindings">
       <key

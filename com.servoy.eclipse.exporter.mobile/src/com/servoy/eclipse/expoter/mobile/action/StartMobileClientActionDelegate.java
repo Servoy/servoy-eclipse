@@ -28,7 +28,6 @@ import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
-import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
@@ -70,15 +69,12 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 	public void run(IAction action)
 	{
 		//make sure the plugins are loaded
-		DLTKDebugUIPlugin.getDefault();
 		DebugPlugin.getDefault();
 		StartMobileClientActionDelegate.this.run();
 	}
 
 	public void run()
 	{
-
-
 		DebugUITools.launch(getCurrentLaunchConfig(), ILaunchManager.RUN_MODE);
 	}
 
@@ -253,6 +249,10 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 
 	private ILaunchConfiguration[] getLaunchConfigsForCurentProject(boolean defaultLaunchConfigs)
 	{
+		if (activeProject.getSolution().getSolutionType() != SolutionMetaData.MOBILE)
+		{
+			return new ILaunchConfiguration[0];
+		}
 		ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
 		ILaunchConfigurationType type = manager.getLaunchConfigurationType(IMobileLaunchConstants.LAUNCH_CONFIGURATION_TYPE_ID);
 		ILaunchConfiguration[] configurations = null;

@@ -59,6 +59,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -1441,6 +1442,11 @@ public class ServoyModel extends AbstractServoyModel
 	{
 		refreshGlobalScopes(false);
 
+		if (isActiveSolutionMobile())
+		{ // the enablement/disablement logic of mobile launch toolbar button is in the  exporter plugin 
+			// (the button is disabled by default)
+			Platform.getPlugin("com.servoy.eclipse.exporter.mobile");
+		}
 		List<IActiveProjectListener> clone = new ArrayList<IActiveProjectListener>(activeProjectListeners);
 		for (IActiveProjectListener listener : clone)
 		{
