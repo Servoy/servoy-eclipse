@@ -20,6 +20,7 @@ import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -311,7 +312,9 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 			{
 				Iterator<ScriptMethod> it = solution.getScriptMethods(scopeName, true);
 				// prefix the name so that we have no name conflicts with other form/module/global tests
-				TestIdentifier tmp = addTestCaseIfNecessary(it, target, scopeName, "scopes", testCode);
+				List<ScriptMethod> list = Utils.asList(it);
+				Collections.reverse(list);
+				TestIdentifier tmp = addTestCaseIfNecessary(list.iterator(), target, scopeName, "scopes", testCode);
 				if (tmp != null) allGlobalIdentifiers.add(tmp);
 			}
 		}
@@ -369,7 +372,9 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 	{
 		Iterator<ScriptMethod> it = form.getScriptMethods(true);
 		// prefix the name so that we have no name conflicts with other form/module/global tests
-		return addTestCaseIfNecessary(it, target, "Form '" + form.getName() + "' tests", "forms." + form.getName(), testCode);
+		List<ScriptMethod> list = Utils.asList(it);
+		Collections.reverse(list);
+		return addTestCaseIfNecessary(list.iterator(), target, "Form '" + form.getName() + "' tests", "forms." + form.getName(), testCode);
 	}
 
 	private TestIdentifier addTestCaseIfNecessary(Iterator<ScriptMethod> it, TestTarget target, String nameOfTest, String callPrefix, StringBuffer testCode)

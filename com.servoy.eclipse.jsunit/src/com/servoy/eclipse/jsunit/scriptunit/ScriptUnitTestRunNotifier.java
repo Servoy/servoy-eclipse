@@ -17,8 +17,6 @@
 
 package com.servoy.eclipse.jsunit.scriptunit;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import junit.framework.AssertionFailedError;
@@ -50,32 +48,10 @@ public class ScriptUnitTestRunNotifier implements TestListener
 
 	public ScriptUnitTestRunNotifier(List<Test> testList, TestResult testResult)
 	{
-		// create a copy of the test list and reverse the testCases (but not the TestSuites)
-		ArrayList<Test> copy = new ArrayList<Test>();
-		copy.addAll(testList);
-		TestSuite currentSuite = null;
-		for (Test test : copy)
-		{
-			if (test instanceof TestSuite)
-			{
-				currentSuite = (TestSuite)test;
-			}
-			else
-			{//tests are passed in reverse order from the list so calculate the Id from testCount() down
-				List<Test> sublist = copy.subList(copy.indexOf(currentSuite) + 1, copy.indexOf(currentSuite) + currentSuite.testCount() + 1);
-				Collections.reverse(sublist);
-
-//				int testId = 2 * testList.indexOf(currentSuite) + currentSuite.testCount() - testList.indexOf(test) + 1;
-//				testingClient.testTree(testId, ((TestCase)test).getName(), false, 1);
-			}
-		}
-
-
-		this.testList = copy;
+		this.testList = testList;
 		this.nrOfTests = testList.get(0).countTestCases();
 		this.testingClient = getScriptTestRunnerClient();
 		this.testResult = testResult;
-
 	}
 
 	private void sendStartRun()
