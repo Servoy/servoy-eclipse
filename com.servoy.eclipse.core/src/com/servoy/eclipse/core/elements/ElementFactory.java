@@ -485,10 +485,10 @@ public class ElementFactory
 				else
 				{
 					bc = createField(parent, dataProvider, loc);
-					java.awt.Dimension dim = bc.getSize();
-					dim.width = 140;
-					bc.setSize(dim);
 				}
+				java.awt.Dimension dim = bc.getSize();
+				dim.width = 140;
+				bc.setSize(dim);
 				lst.add(bc);
 
 
