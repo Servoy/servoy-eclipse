@@ -3169,14 +3169,16 @@ application.output(unescape(encoded)); // prints: Hello World!]]></sample>
         <function clientSupport="mc,wc,sc" name="stringify">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
-            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Function"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified.
+As a function, the replacer takes two parameters, the key and the value being stringified. Initially it gets called with an empty key representing the object being stringified, 
+and it then gets called for each property on the object or array being stringified.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="mc,wc,sc"><![CDATA[function censor(key, value) {  
@@ -3198,23 +3200,25 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object">
               <description><![CDATA[The value to convert to a JSON string.]]></description>
             </parameter>
-            <parameter name="replacer" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object">
-              <description><![CDATA[If a function, transforms values and properties encountered while stringifying; if an array, specifies the set of properties included in objects in the final string.]]></description>
+            <parameter name="replacer" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="com.servoy.j2db.documentation.scripting.docs.Function">
+              <description><![CDATA[If a function, transforms values and properties encountered while stringifying; if an array (of String or Number), specifies the set of properties included in objects in the final string.]]></description>
             </parameter>
           </parameters>
         </function>
         <function clientSupport="mc,wc,sc" name="stringify">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
-            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
-            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Function"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified.
+As a function, the replacer takes two parameters, the key and the value being stringified. Initially it gets called with an empty key representing the object being stringified,
+and it then gets called for each property on the object or array being stringified.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="mc,wc,sc"><![CDATA[JSON.stringify({ uno: 1, dos : 2 }, null, '\t')]]></sample>
@@ -3228,11 +3232,264 @@ var jsonString = JSON.stringify(foo, censor);]]></sample>
             <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object">
               <description><![CDATA[The value to convert to a JSON string.]]></description>
             </parameter>
-            <parameter name="replacer" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object">
-              <description><![CDATA[If a function, transforms values and properties encountered while stringifying; if an array, specifies the set of properties included in objects in the final string.]]></description>
+            <parameter name="replacer" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="com.servoy.j2db.documentation.scripting.docs.Function">
+              <description><![CDATA[If a function, transforms values and properties encountered while stringifying; if an array (of String or Number), specifies the set of properties included in objects in the final string.]]></description>
             </parameter>
-            <parameter name="space" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object">
-              <description><![CDATA[The space argument may be used to control spacing in the final string. If it is a number, successive levels in the stringification will each be indented by this many space characters (up to 10). If it is a string, successive levels will indented by this string (or the first ten characters of it).]]></description>
+            <parameter name="space" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+              <description><![CDATA[The space argument may be used to control spacing in the final string (causes the resulting string to be pretty-printed). If it is a number, successive levels in the stringification will each be indented by this many space characters (up to 10). If it is a string, successive levels will indented by this string (or the first ten characters of it).]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="mc,wc,sc" name="stringify">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Function"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          <descriptions>
+            <description clientSupport="mc,wc,sc"><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified.
+As a function, the replacer takes two parameters, the key and the value being stringified. Initially it gets called with an empty key representing the object being stringified,
+and it then gets called for each property on the object or array being stringified.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc,wc,sc"><![CDATA[JSON.stringify({ uno: 1, dos : 2 }, null, '\t')]]></sample>
+          </samples>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/JSON/stringify</url>
+            </link>
+          </links>
+          <parameters>
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object">
+              <description><![CDATA[The value to convert to a JSON string.]]></description>
+            </parameter>
+            <parameter name="replacer" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="com.servoy.j2db.documentation.scripting.docs.Function">
+              <description><![CDATA[If a function, transforms values and properties encountered while stringifying; if an array (of String or Number), specifies the set of properties included in objects in the final string.]]></description>
+            </parameter>
+            <parameter name="space" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String">
+              <description><![CDATA[The space argument may be used to control spacing in the final string (causes the resulting string to be pretty-printed). If it is a number, successive levels in the stringification will each be indented by this many space characters (up to 10). If it is a string, successive levels will indented by this string (or the first ten characters of it).]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="mc,wc,sc" name="stringify">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <argumentType typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          <descriptions>
+            <description clientSupport="mc,wc,sc"><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified.
+As a function, the replacer takes two parameters, the key and the value being stringified. Initially it gets called with an empty key representing the object being stringified, 
+and it then gets called for each property on the object or array being stringified.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc,wc,sc"><![CDATA[function censor(key, value) {  
+ if (typeof(value) == "string") {  
+   return undefined;  
+ }   
+ return value;  
+}  
+      
+var foo = {foundation: "Mozilla", model: "box", week: 45, transport: "car", month: 7};  
+var jsonString = JSON.stringify(foo, censor);]]></sample>
+          </samples>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/JSON/stringify</url>
+            </link>
+          </links>
+          <parameters>
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object">
+              <description><![CDATA[The value to convert to a JSON string.]]></description>
+            </parameter>
+            <parameter name="replacer" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;">
+              <description><![CDATA[If a function, transforms values and properties encountered while stringifying; if an array (of String or Number), specifies the set of properties included in objects in the final string.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="mc,wc,sc" name="stringify">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <argumentType typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          <descriptions>
+            <description clientSupport="mc,wc,sc"><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified.
+As a function, the replacer takes two parameters, the key and the value being stringified. Initially it gets called with an empty key representing the object being stringified,
+and it then gets called for each property on the object or array being stringified.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc,wc,sc"><![CDATA[JSON.stringify({ uno: 1, dos : 2 }, null, '\t')]]></sample>
+          </samples>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/JSON/stringify</url>
+            </link>
+          </links>
+          <parameters>
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object">
+              <description><![CDATA[The value to convert to a JSON string.]]></description>
+            </parameter>
+            <parameter name="replacer" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;">
+              <description><![CDATA[If a function, transforms values and properties encountered while stringifying; if an array (of String or Number), specifies the set of properties included in objects in the final string.]]></description>
+            </parameter>
+            <parameter name="space" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+              <description><![CDATA[The space argument may be used to control spacing in the final string (causes the resulting string to be pretty-printed). If it is a number, successive levels in the stringification will each be indented by this many space characters (up to 10). If it is a string, successive levels will indented by this string (or the first ten characters of it).]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="mc,wc,sc" name="stringify">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <argumentType typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          <descriptions>
+            <description clientSupport="mc,wc,sc"><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified.
+As a function, the replacer takes two parameters, the key and the value being stringified. Initially it gets called with an empty key representing the object being stringified,
+and it then gets called for each property on the object or array being stringified.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc,wc,sc"><![CDATA[JSON.stringify({ uno: 1, dos : 2 }, null, '\t')]]></sample>
+          </samples>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/JSON/stringify</url>
+            </link>
+          </links>
+          <parameters>
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object">
+              <description><![CDATA[The value to convert to a JSON string.]]></description>
+            </parameter>
+            <parameter name="replacer" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;">
+              <description><![CDATA[If a function, transforms values and properties encountered while stringifying; if an array (of String or Number), specifies the set of properties included in objects in the final string.]]></description>
+            </parameter>
+            <parameter name="space" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String">
+              <description><![CDATA[The space argument may be used to control spacing in the final string (causes the resulting string to be pretty-printed). If it is a number, successive levels in the stringification will each be indented by this many space characters (up to 10). If it is a string, successive levels will indented by this string (or the first ten characters of it).]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="mc,wc,sc" name="stringify">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <argumentType typecode="[Lcom.servoy.j2db.documentation.scripting.docs.String;"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          <descriptions>
+            <description clientSupport="mc,wc,sc"><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified.
+As a function, the replacer takes two parameters, the key and the value being stringified. Initially it gets called with an empty key representing the object being stringified, 
+and it then gets called for each property on the object or array being stringified.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc,wc,sc"><![CDATA[function censor(key, value) {  
+ if (typeof(value) == "string") {  
+   return undefined;  
+ }   
+ return value;  
+}  
+      
+var foo = {foundation: "Mozilla", model: "box", week: 45, transport: "car", month: 7};  
+var jsonString = JSON.stringify(foo, censor);]]></sample>
+          </samples>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/JSON/stringify</url>
+            </link>
+          </links>
+          <parameters>
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object">
+              <description><![CDATA[The value to convert to a JSON string.]]></description>
+            </parameter>
+            <parameter name="replacer" type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.String;">
+              <description><![CDATA[If a function, transforms values and properties encountered while stringifying; if an array (of String or Number), specifies the set of properties included in objects in the final string.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="mc,wc,sc" name="stringify">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <argumentType typecode="[Lcom.servoy.j2db.documentation.scripting.docs.String;"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          <descriptions>
+            <description clientSupport="mc,wc,sc"><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified.
+As a function, the replacer takes two parameters, the key and the value being stringified. Initially it gets called with an empty key representing the object being stringified,
+and it then gets called for each property on the object or array being stringified.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc,wc,sc"><![CDATA[JSON.stringify({ uno: 1, dos : 2 }, null, '\t')]]></sample>
+          </samples>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/JSON/stringify</url>
+            </link>
+          </links>
+          <parameters>
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object">
+              <description><![CDATA[The value to convert to a JSON string.]]></description>
+            </parameter>
+            <parameter name="replacer" type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.String;">
+              <description><![CDATA[If a function, transforms values and properties encountered while stringifying; if an array (of String or Number), specifies the set of properties included in objects in the final string.]]></description>
+            </parameter>
+            <parameter name="space" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number">
+              <description><![CDATA[The space argument may be used to control spacing in the final string (causes the resulting string to be pretty-printed). If it is a number, successive levels in the stringification will each be indented by this many space characters (up to 10). If it is a string, successive levels will indented by this string (or the first ten characters of it).]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="mc,wc,sc" name="stringify">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
+            <argumentType typecode="[Lcom.servoy.j2db.documentation.scripting.docs.String;"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          <descriptions>
+            <description clientSupport="mc,wc,sc"><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified.
+As a function, the replacer takes two parameters, the key and the value being stringified. Initially it gets called with an empty key representing the object being stringified,
+and it then gets called for each property on the object or array being stringified.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc,wc,sc"><![CDATA[JSON.stringify({ uno: 1, dos : 2 }, null, '\t')]]></sample>
+          </samples>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/JSON/stringify</url>
+            </link>
+          </links>
+          <parameters>
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="com.servoy.j2db.documentation.scripting.docs.Object">
+              <description><![CDATA[The value to convert to a JSON string.]]></description>
+            </parameter>
+            <parameter name="replacer" type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.String;">
+              <description><![CDATA[If a function, transforms values and properties encountered while stringifying; if an array (of String or Number), specifies the set of properties included in objects in the final string.]]></description>
+            </parameter>
+            <parameter name="space" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String">
+              <description><![CDATA[The space argument may be used to control spacing in the final string (causes the resulting string to be pretty-printed). If it is a number, successive levels in the stringification will each be indented by this many space characters (up to 10). If it is a string, successive levels will indented by this string (or the first ten characters of it).]]></description>
             </parameter>
           </parameters>
         </function>
