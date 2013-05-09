@@ -176,11 +176,11 @@ public class TagsAndI18NTextDialog extends Dialog
 
 		final GroupLayout groupLayout_1 = new GroupLayout(composite_2);
 		groupLayout_1.setHorizontalGroup(groupLayout_1.createParallelGroup(GroupLayout.TRAILING).add(
-			groupLayout_1.createSequentialGroup().add(tabFolder, GroupLayout.PREFERRED_SIZE, 389, Short.MAX_VALUE).addContainerGap()));
+			groupLayout_1.createSequentialGroup().add(tabFolder, GroupLayout.PREFERRED_SIZE, 530, Short.MAX_VALUE).addContainerGap()));
 		groupLayout_1.setVerticalGroup(groupLayout_1.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout_1.createSequentialGroup().addContainerGap().add(tabFolder, GroupLayout.PREFERRED_SIZE, 422, Short.MAX_VALUE).addContainerGap()));
 		composite_2.setLayout(groupLayout_1);
-		sashForm.setWeights(new int[] { 298, 379 });
+		sashForm.setWeights(new int[] { 298, 500 });
 
 		return composite;
 	}
