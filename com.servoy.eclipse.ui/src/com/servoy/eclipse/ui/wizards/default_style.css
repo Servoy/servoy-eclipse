@@ -15,7 +15,7 @@ label, button, field, combobox, check, radio, listbox, spinner {
 	font-size: 10px;
 }
 
-field, combobox {
+field {
 	background-color: #FFF;
 	color: #000;
 	border: 2px ridge #FFF;
@@ -23,7 +23,10 @@ field, combobox {
 	margin-right: 3px;
 }
 
-combobox {}
+combobox {
+	background-color: #FFF;
+	color: #000;
+}
 
 check {}
 
