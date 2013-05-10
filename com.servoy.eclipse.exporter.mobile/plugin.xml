@@ -26,7 +26,7 @@
     <actionSet
     	  label="Start Mobile Client"
           id="com.servoy.eclipse.ui.start_mobile_actionSet"
-          visible="false">
+          visible="true">
           <action
                 class="com.servoy.eclipse.expoter.mobile.action.StartMobileClientActionDelegate"
                 definitionId="com.servoy.eclipse.ui.StartMobileClient"
@@ -73,7 +73,7 @@
 	     mode="run"
 	     label="Run"
 	     image="icons\mobile.png"
-	     category="servoy.mobile.cathegory"
+	     category="servoy.mobile.category"
 	     bannerImage="icons\mobile.png">
 	  </launchGroup>
    </extension>
@@ -84,7 +84,7 @@
             id="com.servoy.eclipse.mobile.launch"
             modes="run"
             name=" Servoy Mobile"
-            category = "servoy.mobile.cathegory"
+            category = "servoy.mobile.category"
             public="true">
       </launchConfigurationType>
    </extension>
