@@ -134,8 +134,8 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		"displayType",
 		RepositoryHelper.getDisplayName("displayType", Field.class),
 		new ComboboxPropertyModel<Integer>(
-			new Integer[] { Integer.valueOf(Field.TEXT_FIELD), Integer.valueOf(Field.TEXT_AREA), Integer.valueOf(Field.COMBOBOX), Integer.valueOf(Field.RADIOS), Integer.valueOf(Field.CHECKS), Integer.valueOf(Field.PASSWORD) },
-			new String[] { "TEXT_FIELD", "TEXT_AREA", "COMBOBOX", "RADIOS", "CHECKS", "PASSWORD" }), Messages.LabelUnresolved);
+			new Integer[] { Integer.valueOf(Field.TEXT_FIELD), Integer.valueOf(Field.TEXT_AREA), Integer.valueOf(Field.CALENDAR), Integer.valueOf(Field.COMBOBOX), Integer.valueOf(Field.RADIOS), Integer.valueOf(Field.CHECKS), Integer.valueOf(Field.PASSWORD) },
+			new String[] { "TEXT_FIELD", "TEXT_AREA", "CALENDAR", "COMBOBOX", "RADIOS", "CHECKS", "PASSWORD" }), Messages.LabelUnresolved);
 
 	/**
 	 * @param persistContext
