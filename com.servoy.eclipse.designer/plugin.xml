@@ -378,6 +378,18 @@
           sequence="M1+M2+A">
       </key>
       <key
+            commandId="com.servoy.eclipse.designer.command.showDesigner"
+            contextId="org.eclipse.dltk.ui.javascriptEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+M2+A">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.command.showDesigner"
+            contextId="com.servoy.eclipse.ui.SolutionExplorerContext"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+M2+A">
+      </key>
+      <key
             commandId="com.servoy.eclipse.designer.anchorTop"
             contextId="com.servoy.eclipse.designer.context"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
@@ -665,6 +677,38 @@
    </extension>
       <extension
          point="org.eclipse.ui.popupMenus">
+	  <objectContribution
+         adaptable="true"
+         id="com.servoy.eclipse.designer.SolutionExplorerViewContribution"
+         objectClass="com.servoy.eclipse.ui.actions.Openable">
+         <action
+               class="com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenFormEditorAction"
+               definitionId="com.servoy.eclipse.designer.command.showDesigner"
+               icon="icons/designer.gif"
+               id="com.servoy.eclipse.ui.javascript.showDesigner"
+               label="Open in Form Editor"
+               menubarPath="open.ext"
+               tooltip="Open in Form Editor">
+         </action>
+         <visibility>
+            <objectClass
+                  name="com.servoy.eclipse.ui.actions.Openable$OpenableForm">
+            </objectClass>
+         </visibility>
+      </objectContribution>
+      <viewerContribution
+            id="com.servoy.eclipse.designer.viewer.JavascriptEditor"
+            targetID="#JavascriptEditorContext">
+         <action
+               class="com.servoy.eclipse.designer.actions.ShowDesignerAction"
+               definitionId="com.servoy.eclipse.designer.command.showDesigner"
+               icon="icons/designer.gif"
+               id="com.servoy.eclipse.ui.javascript.showDesigner"
+               label="Open in Form Editor"
+               menubarPath="open.ext"
+               tooltip="Open in Form Editor">
+         </action>
+      </viewerContribution>
       <viewerContribution
             id="com.servoy.eclipse.designer.editor.FormDesignerContext"
             targetID="#FormDesignerContext">

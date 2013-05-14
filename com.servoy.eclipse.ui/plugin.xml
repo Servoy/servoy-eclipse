@@ -700,19 +700,6 @@
    </extension>
    <extension
          point="org.eclipse.ui.popupMenus">
-      <viewerContribution
-            id="com.servoy.eclipse.ui.viewer.JavascriptEditor"
-            targetID="#JavascriptEditorContext">
-         <action
-               class="com.servoy.eclipse.ui.actions.ShowDesignerAction"
-               definitionId="com.servoy.eclipse.designer.command.showDesigner"
-               icon="icons/designer.gif"
-               id="com.servoy.eclipse.ui.javascript.showDesigner"
-               label="Open in Form Editor"
-               menubarPath="open.ext"
-               tooltip="Open in Form Editor">
-         </action>
-      </viewerContribution>
        <objectContribution
             objectClass="com.servoy.eclipse.ui.actions.Openable"
             adaptable="true"
@@ -1132,5 +1119,14 @@
                type="com.servoy.j2db.persistence.IPersist">
          </adapter>
       </factory>
+   </extension>
+   <extension
+         point="org.eclipse.ui.contexts">
+      <context
+            description="active when Solution Explorer View is active"
+            id="com.servoy.eclipse.ui.SolutionExplorerContext"
+            name="Solution Explorer Context"
+            parentId="org.eclipse.ui.contexts.window">
+      </context>
    </extension>
 </plugin>
