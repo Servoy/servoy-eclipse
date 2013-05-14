@@ -154,6 +154,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.TextActionHandler;
+import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.dialogs.PropertyDialogAction;
 import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.IShowInSource;
@@ -246,7 +247,6 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewSybaseDbAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewTableAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewValueListAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewVariableAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenFormEditorAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenI18NAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenMediaAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenNewFormWizardAction;
@@ -320,6 +320,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private final Color light_grey = new Color(null, 120, 120, 120);
 
 	public static final String PART_ID = "com.servoy.eclipse.ui.views.SolutionExplorerView"; //$NON-NLS-1$
+	public static final String SOLUTION_EXPLORER_CONTEXT = "com.servoy.eclipse.ui.SolutionExplorerContext"; //$NON-NLS-1$
 
 	private static final long TREE_FILTER_DELAY_TIME = 500;
 
@@ -524,8 +525,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private IAction importSolutionAction;
 
 	private IAction suggestForeignTypes;
-
-	private OpenFormEditorAction openFormEditorAction;
 
 	private IAction i18nExternalizeAction;
 	private IAction i18nCreateFromDBAction;
@@ -913,6 +912,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	public void init(IViewSite site, IMemento memento) throws PartInitException
 	{
 		super.init(site, memento);
+		IContextService contextService = (IContextService)getSite().getService(IContextService.class);
+		contextService.activateContext(SOLUTION_EXPLORER_CONTEXT);
 	}
 
 	/**
@@ -2268,10 +2269,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		if (openSqlEditorAction.isEnabled()) manager.add(openSqlEditorAction);
 		// extra open actions contributions
 		manager.add(new Separator(IWorkbenchActionConstants.OPEN_EXT));
-		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.FORM)
-		{
-			manager.add(openFormEditorAction);
-		}
 		manager.add(new Separator());
 		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.SERVERS)
 		{
@@ -2653,8 +2650,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		suggestForeignTypes = new SuggestForeignTypesAction(this);
 
-		openFormEditorAction = new OpenFormEditorAction();
-
 		IAction newScope = new NewScopeAction(this);
 
 		IAction newRelation = new NewRelationAction(this);
@@ -2863,8 +2858,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		addTreeSelectionChangedListener(enableServer);
 		addTreeSelectionChangedListener(toggleFormCommandsActions);
 		addTreeSelectionChangedListener(expandNodeAction);
-
-		addTreeSelectionChangedListener(openFormEditorAction);
 
 		addTreeSelectionChangedListener(createMediaFolderAction);
 		addTreeSelectionChangedListener(renameMediaFolderAction);
