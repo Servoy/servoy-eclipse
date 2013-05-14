@@ -20,20 +20,20 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 import java.util.Iterator;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.ui.IActionDelegate;
 
 import com.servoy.eclipse.ui.Activator;
-import com.servoy.eclipse.ui.node.SimpleUserNode;
-import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.eclipse.ui.actions.Openable.OpenableForm;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Form;
 
 /**
  * @author gerzse
  */
-public class OpenFormEditorAction extends Action implements ISelectionChangedListener
+public class OpenFormEditorAction extends Action implements IActionDelegate
 {
 
 	protected IStructuredSelection selection;
@@ -45,22 +45,6 @@ public class OpenFormEditorAction extends Action implements ISelectionChangedLis
 		setToolTipText(getText());
 	}
 
-	public void selectionChanged(SelectionChangedEvent event)
-	{
-		selection = (IStructuredSelection)event.getSelection();
-		Iterator< ? > it = selection.iterator();
-		boolean state = it.hasNext();
-		while (it.hasNext())
-		{
-			UserNodeType type = ((SimpleUserNode)it.next()).getType();
-			if (type != UserNodeType.FORM)
-			{
-				state = false;
-			}
-		}
-		setEnabled(state);
-	}
-
 	@Override
 	public void run()
 	{
@@ -69,17 +53,36 @@ public class OpenFormEditorAction extends Action implements ISelectionChangedLis
 			Iterator< ? > it = selection.iterator();
 			while (it.hasNext())
 			{
-				SimpleUserNode node = ((SimpleUserNode)it.next());
-				if (node != null)
+				Form form = ((OpenableForm)it.next()).getData();
+				if (form != null)
 				{
-					Object obj = node.getRealObject();
-					if (obj instanceof Form)
-					{
-						EditorUtil.openFormDesignEditor((Form)obj);
-					}
+					EditorUtil.openFormDesignEditor(form);
 				}
 			}
 		}
+	}
+
+	@Override
+	public void run(IAction action)
+	{
+		run();
+	}
+
+	@Override
+	public void selectionChanged(IAction action, ISelection selection)
+	{
+		if (selection instanceof IStructuredSelection)
+		{
+			this.selection = (IStructuredSelection)selection;
+			Iterator< ? > it = ((IStructuredSelection)selection).iterator();
+			boolean state = it.hasNext();
+			while (it.hasNext())
+			{
+				state = it.next() instanceof OpenableForm;
+			}
+			setEnabled(state);
+		}
+		else setEnabled(false);
 	}
 
 }
