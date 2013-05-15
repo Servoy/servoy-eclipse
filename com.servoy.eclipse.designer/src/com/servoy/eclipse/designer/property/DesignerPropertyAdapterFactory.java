@@ -222,7 +222,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 			if (key == Openable.class)
 			{
 				Openable tmp = Openable.getOpenable(persist);
-				if (obj instanceof EditPart && persist instanceof Form)
+				if (obj instanceof EditPart && context instanceof Form)
 				{
 					tmp.setAttribute("FormDesigner", "true");
 				}
