@@ -165,7 +165,9 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 
 			if (key == Openable.class)
 			{
-				return Openable.getOpenable(contextForm);
+				Openable tmp = Openable.getOpenable(contextForm);
+				tmp.setAttribute("FormDesigner", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+				return tmp;
 			}
 
 			Object model = editPart.getModel();

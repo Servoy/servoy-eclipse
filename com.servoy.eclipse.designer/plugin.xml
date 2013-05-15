@@ -706,9 +706,17 @@
                tooltip="Open in Form Editor">
          </action>
          <visibility>
-            <objectClass
-                  name="com.servoy.eclipse.ui.actions.Openable$OpenableForm">
-            </objectClass>
+            <and>
+            	<objectClass
+               	   name="com.servoy.eclipse.ui.actions.Openable$OpenableForm">
+            	</objectClass>
+            	<not>
+               		<objectState
+                    	 name="FormDesigner"
+                     	value="true">
+               		</objectState>
+           		</not>
+            </and>
          </visibility>
       </objectContribution>
       <viewerContribution

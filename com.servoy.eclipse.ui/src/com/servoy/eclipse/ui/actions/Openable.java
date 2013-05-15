@@ -16,11 +16,17 @@
  */
 package com.servoy.eclipse.ui.actions;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.eclipse.ui.IActionFilter;
+
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Openable items for Open menu actions.
@@ -28,7 +34,7 @@ import com.servoy.j2db.util.Pair;
  * @author rgansevles
  *
  */
-public class Openable
+public class Openable implements IActionFilter
 {
 	private final Object data;
 
@@ -40,6 +46,20 @@ public class Openable
 	public Object getData()
 	{
 		return data;
+	}
+
+	private Map<String, String> attributes = null;
+
+	public void setAttribute(String name, String value)
+	{
+		if (attributes == null) attributes = new HashMap<String, String>();
+		attributes.put(name, value);
+	}
+
+	@Override
+	public boolean testAttribute(Object target, String name, String value)
+	{
+		return attributes != null && Utils.equalObjects(value, attributes.get(name));
 	}
 
 	public static Openable getOpenable(Object data)
