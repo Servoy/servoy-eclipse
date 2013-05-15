@@ -43,6 +43,7 @@ import com.servoy.eclipse.ui.property.PointPropertySource;
 import com.servoy.eclipse.ui.property.RetargetToEditorPersistProperties;
 import com.servoy.eclipse.ui.property.SavingPersistPropertySource;
 import com.servoy.j2db.persistence.AbstractRepository;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptElement;
@@ -220,7 +221,12 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 			}
 			if (key == Openable.class)
 			{
-				return Openable.getOpenable(persist);
+				Openable tmp = Openable.getOpenable(persist);
+				if (obj instanceof EditPart && persist instanceof Form)
+				{
+					tmp.setAttribute("FormDesigner", "true");
+				}
+				return tmp;
 			}
 		}
 
