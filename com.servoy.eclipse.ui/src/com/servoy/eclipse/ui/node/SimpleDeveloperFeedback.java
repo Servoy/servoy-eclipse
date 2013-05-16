@@ -13,8 +13,11 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.node;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author jcompagner
@@ -50,12 +53,68 @@ public class SimpleDeveloperFeedback implements IDeveloperFeedback
 		return sample;
 	}
 
+	@SuppressWarnings("nls")
+	private String prettyPrintToolTipText(String originalToolTipText)
+	{
+		if (!originalToolTipText.contains("Array<")) return originalToolTipText;
+
+		String result = null;
+		String ttt = originalToolTipText;
+
+		Matcher m1 = Pattern.compile("<b>(.+?)</b>").matcher(ttt);
+		if (m1.groupCount() > 0 && m1.find())
+		{
+			ttt = m1.group(1);
+		}
+
+		if (ttt != null)
+		{
+			Matcher m2 = Pattern.compile("\\(([^\\[]*)\\)").matcher(ttt);
+			if (m2.groupCount() > 0 && m2.find())
+			{
+				String signatureMatch = m2.group(1);
+				if (signatureMatch != null)
+				{
+					StringBuilder sb = new StringBuilder();
+					sb.append("(");
+					for (String p : signatureMatch.split(","))
+					{
+						String[] arr = p.split(":");
+						sb.append(arr[0] + ":");
+						String argType = arr[1];
+						if (argType != null && argType.contains("Array"))
+						{
+							Matcher mm = Pattern.compile("\\<([^\\[]*)\\>").matcher(argType);
+							if (mm.find())
+							{
+								String type = mm.group(1);
+								argType = type + "[]";
+							}
+						}
+						sb.append(argType + ",");
+					}
+					sb.deleteCharAt(sb.length() - 1);
+					sb.append(")");
+
+					result = m2.replaceFirst(sb.toString());
+				}
+			}
+		}
+
+		if (m1.groupCount() > 0)
+		{
+			result = m1.replaceFirst("<b>" + (result != null ? result : (ttt != null ? ttt : "")) + "</b>");
+		}
+
+		return (result != null ? result : originalToolTipText);
+	}
+
 	/**
 	 * @see com.servoy.eclipse.ui.node.IDeveloperFeedback#getToolTipText()
 	 */
 	public String getToolTipText()
 	{
-		return tooltip;
+		return prettyPrintToolTipText(tooltip);
 	}
 
 	public void setToolTipText(String toolTip)
