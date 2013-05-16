@@ -74,7 +74,11 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 				ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(serviceProject, true);
 			}
 			//open browser
-			IWebBrowser webBrowser = getBrowserToLaunch(browserID);
+			IWebBrowser webBrowser = getBrowser(browserID);
+			if (webBrowser == null)
+			{
+				webBrowser = PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser();
+			}
 			webBrowser.openURL(new URL(appUrl));
 		}
 		catch (MalformedURLException e)
@@ -83,7 +87,7 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		}
 	}
 
-	private IWebBrowser getBrowserToLaunch(String browserId)
+	public static IWebBrowser getBrowser(String browserId)
 	{
 		IWebBrowser webBrowser = null;
 		Iterator iterator = BrowserManager.getInstance().getWebBrowsers().iterator();
@@ -105,14 +109,14 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 					}
 					else
 					{
-						if (ewb.getLocation() != null) webBrowser = new ExternalBrowserInstance("org.eclipse.ui.browser." +
-							ewb.getName().toLowerCase().replace(" ", "_"), ewb);
+
+						if (ewb != null && ewb.getLocation() != null)
+						{
+							String name = ewb.getName().toLowerCase().replace(" ", "_");
+							if (browserId.contains(name)) webBrowser = new ExternalBrowserInstance("org.eclipse.ui.browser." + name, ewb);
+						}
 					}
 				}
-			}
-			if (webBrowser == null)
-			{
-				webBrowser = PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser();
 			}
 		}
 		catch (Exception ex)

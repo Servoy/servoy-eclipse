@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import org.apache.commons.collections.BidiMap;
+import org.apache.commons.collections.bidimap.DualHashBidiMap;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -36,6 +38,25 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 	private static final String CONFIG_INVALID = "servoy.mobile.launchconfig.invalid";
 	String defaultServerURL = "http://localhost:8080";
 
+	// user visible browser name
+	static final String FIREFOX = "Mozilla firefox";
+	static final String CHROME = "Google Chrome";
+	static final String IE = "Internet Explorer";
+	static final String SAFARI = "Apple Safari";
+	static final String OPERA = "Opera";
+	static final String DEFAULT = "Default System browser";
+
+	protected static BidiMap possibleBrowsersNames = new DualHashBidiMap();
+	static
+	{
+		possibleBrowsersNames.put("org.eclipse.ui.browser.ie", IE);
+		possibleBrowsersNames.put("org.eclipse.ui.browser.chrome", CHROME);
+		possibleBrowsersNames.put("org.eclipse.ui.browser.firefox", FIREFOX);
+		possibleBrowsersNames.put("org.eclipse.ui.browser.safari", SAFARI);
+		possibleBrowsersNames.put("org.eclipse.ui.browser.opera", OPERA);
+		possibleBrowsersNames.put("default", DEFAULT);
+	}
+
 	protected Label lblSolution;
 	protected Label lblSolutionname;
 	protected Label lblStartUrl;
@@ -43,9 +64,10 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 	protected Label lblServerURL;
 	protected Text txtServerURL;
 	protected Button checkNoDebug;
+	protected Label lblNoDebug;
 	protected Text txtNoDebugFeedback;
 
-	protected String NODEBUG_CHECK_TXT = "No debug is checked , running this launch configuration will start the service solution without switching to it as an actice solution";
+	protected String NODEBUG_CHECK_TXT = "No debug is checked , running this launch configuration will start the service solution without switching to it as an active solution";
 	protected String NODEBUG_UNCHECK_TXT = "running this launch configuration will switch to service solution as active solution.";
 
 	protected Label lblBrowser;
@@ -78,13 +100,21 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 					ext = org.eclipse.ui.internal.browser.WebBrowserUIPlugin.findBrowsers(ewb.getLocation());
 					if (ext != null)
 					{
-						String id = ext.getId();
-						browserList.add(id.substring(id.lastIndexOf('.') + 1));
+						browserList.add((String)possibleBrowsersNames.get(ext.getId()));
 					}
 					else
 					{
-						if (ewb.getLocation() != null) browserList.add(ewb.getName().toLowerCase().replace(" ", "_"));
+						if (ewb.getLocation() != null)
+						{
+							String id = ewb.getName().toLowerCase().replace(" ", "_");
+							browserList.add((String)possibleBrowsersNames.get("org.eclipse.ui.browser." + id));
+						}
 					}
+				}
+				else if (ewb != null && ewb.getName().equals(Messages.prefSystemBrowser))
+				{
+					// default system browser					
+					browserList.add((String)possibleBrowsersNames.get("default"));
 				}
 			}
 		}
@@ -128,8 +158,8 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		txtNoDebugFeedback.setText(NODEBUG_CHECK_TXT);
 
 		checkNoDebug = new Button(container, SWT.CHECK);
-		checkNoDebug.setText("No Debug");
-
+		lblNoDebug = new Label(container, SWT.NONE);
+		lblNoDebug.setText("No Debug");
 		checkNoDebug.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -185,23 +215,25 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		GroupLayout groupLayout = new GroupLayout(container);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(checkNoDebug).add(lblBrowser).add(lblStartUrl).add(lblServerURL).add(lblSolution)).add(
+				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(lblNoDebug).add(lblBrowser).add(lblStartUrl).add(lblServerURL).add(lblSolution)).add(
 				18).add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(txtStartURL, GroupLayout.PREFERRED_SIZE, 345, Short.MAX_VALUE).add(txtServerURL,
-					GroupLayout.PREFERRED_SIZE, 345, Short.MAX_VALUE).add(combo, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(lblSolutionname, GroupLayout.DEFAULT_SIZE, 345, Short.MAX_VALUE).add(txtNoDebugFeedback,
-					GroupLayout.PREFERRED_SIZE, 345, Short.MAX_VALUE)).addContainerGap()));
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(
+					groupLayout.createSequentialGroup().add(checkNoDebug).addPreferredGap(LayoutStyle.RELATED).add(txtNoDebugFeedback,
+						GroupLayout.PREFERRED_SIZE, 345, Short.MAX_VALUE)).add(txtStartURL, GroupLayout.PREFERRED_SIZE, 345, Short.MAX_VALUE).add(txtServerURL,
+					GroupLayout.PREFERRED_SIZE, 345, Short.MAX_VALUE).add(combo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+					GroupLayout.PREFERRED_SIZE).add(lblSolutionname, GroupLayout.PREFERRED_SIZE, 345, Short.MAX_VALUE)).addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(lblSolutionname).add(lblSolution)).addPreferredGap(LayoutStyle.RELATED).add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(txtStartURL, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
 					GroupLayout.PREFERRED_SIZE).add(lblStartUrl)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(lblServerURL).add(txtServerURL, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(lblServerURL).add(txtServerURL, GroupLayout.PREFERRED_SIZE,
+					GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(lblBrowser).add(combo, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
 					GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(checkNoDebug).add(txtNoDebugFeedback, GroupLayout.PREFERRED_SIZE, 45,
-					GroupLayout.PREFERRED_SIZE)).addContainerGap(91, Short.MAX_VALUE)));
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(
+					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(lblNoDebug).add(checkNoDebug)).add(txtNoDebugFeedback,
+					GroupLayout.PREFERRED_SIZE, 45, GroupLayout.PREFERRED_SIZE)).addContainerGap(92, Short.MAX_VALUE)));
 		container.setLayout(groupLayout);
 	}
 
@@ -230,7 +262,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 			txtStartURL.setText(configuration.getAttribute(IMobileLaunchConstants.APPLICATION_URL, "http://localhost:8080?nodebug=true"));
 			checkNoDebug.setSelection(Boolean.valueOf(configuration.getAttribute(IMobileLaunchConstants.NODEBUG, "true")));
 			String browserId = configuration.getAttribute(IMobileLaunchConstants.BROWSER_ID, "default");
-			String browserName = browserId.substring(browserId.lastIndexOf('.') + 1);
+			String browserName = (String)possibleBrowsersNames.get(browserId);
 			int comboIndexToSelect = Arrays.asList(browserList).indexOf(browserName);
 			combo.select(comboIndexToSelect == -1 ? 0 : comboIndexToSelect);
 		}
@@ -249,14 +281,14 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		configuration.setAttribute(IMobileLaunchConstants.SERVER_URL, txtServerURL.getText());
 		configuration.setAttribute(IMobileLaunchConstants.APPLICATION_URL, txtStartURL.getText());
 		configuration.setAttribute(IMobileLaunchConstants.NODEBUG, Boolean.toString(checkNoDebug.getSelection()));
-		String browserId = browserList[combo.getSelectionIndex() == -1 ? 0 : combo.getSelectionIndex()];
-		configuration.setAttribute(IMobileLaunchConstants.BROWSER_ID, "org.eclipse.ui.browser." + browserId);
+		String browserId = (String)possibleBrowsersNames.getKey(browserList[combo.getSelectionIndex() == -1 ? 0 : combo.getSelectionIndex()]);
+		configuration.setAttribute(IMobileLaunchConstants.BROWSER_ID, browserId);
 	}
 
 	@Override
 	public String getName()
 	{
-		return "Miobile Client Configuration";
+		return "Mobile Client Configuration";
 	}
 
 

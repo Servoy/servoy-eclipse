@@ -47,6 +47,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.exporter.mobile.launch.IMobileLaunchConstants;
+import com.servoy.eclipse.exporter.mobile.launch.MobileLaunchConfigurationDelegate;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Solution;
@@ -319,7 +320,8 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 		workingCopy.setAttribute(IMobileLaunchConstants.APPLICATION_URL, appUrl);
 		workingCopy.setAttribute("company", "");
 		workingCopy.setAttribute("license", "");
-		workingCopy.setAttribute(IMobileLaunchConstants.BROWSER_ID, "org.eclipse.ui.browser.chrome");
+		String browser = MobileLaunchConfigurationDelegate.getBrowser("org.eclipse.ui.browser.chrome") != null ? "org.eclipse.ui.browser.chrome" : "default";
+		workingCopy.setAttribute(IMobileLaunchConstants.BROWSER_ID, browser);
 		workingCopy.setAttribute(IMobileLaunchConstants.NODEBUG, nodebug ? "true" : "false");
 		workingCopy.setAttribute(IMobileLaunchConstants.IS_DEFAULT_CONFIG, "true");
 

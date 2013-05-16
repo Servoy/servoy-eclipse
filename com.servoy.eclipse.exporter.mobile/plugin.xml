@@ -30,7 +30,7 @@
           <action
                 class="com.servoy.eclipse.expoter.mobile.action.StartMobileClientActionDelegate"
                 definitionId="com.servoy.eclipse.ui.StartMobileClient"
-                icon="icons/mobile.png"
+                icon="icons/launch_mobile.png"
                 id="com.servoy.eclipse.ui.StartMobileClient"
                 label="Start Mobile Client"
                 menubarPath="org.eclipse.ui.run/start"
