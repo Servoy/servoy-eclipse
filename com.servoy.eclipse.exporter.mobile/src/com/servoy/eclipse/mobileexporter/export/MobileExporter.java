@@ -70,6 +70,7 @@ import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.scripting.ScriptEngine;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.ServoyJSONArray;
@@ -626,12 +627,11 @@ public class MobileExporter
 
 	private String getAnonymousScripting(ScriptMethod method)
 	{
-		String scripting = method.getDeclaration();
-		int index = scripting.indexOf("function " + method.getName());
-		scripting = scripting.replace("function " + method.getName(), "");
-		scripting = scripting.substring(index).trim();
+		String declaration = method.getDeclaration();
+
+		declaration = ScriptEngine.docStripper.matcher(declaration).replaceFirst("");
 		// convert to JSON escaped string
-		return JSONObject.quote(scripting);
+		return JSONObject.quote(declaration);
 	}
 
 	/**
