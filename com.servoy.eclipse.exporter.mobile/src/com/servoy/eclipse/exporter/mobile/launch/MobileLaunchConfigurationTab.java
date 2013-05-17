@@ -154,6 +154,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		txtServerURL.addModifyListener(modifyListener);
 
 		txtNoDebugFeedback = new Text(container, SWT.WRAP | SWT.MULTI);
+		txtNoDebugFeedback.setBackground(container.getBackground());
 		txtNoDebugFeedback.setEditable(false);
 		txtNoDebugFeedback.setText(NODEBUG_CHECK_TXT);
 

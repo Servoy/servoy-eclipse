@@ -235,8 +235,18 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 				@Override
 				public void widgetSelected(SelectionEvent e)
 				{
-					DebugUITools.openLaunchConfigurationDialogOnGroup(window.getShell(), new StructuredSelection(),
-						DebugUITools.getLaunchGroup(getCurrentLaunchConfig(), "run").getIdentifier());
+					String groupId = DebugUITools.getLaunchGroup(getCurrentLaunchConfig(), "run").getIdentifier();
+					try
+					{
+						DebugUITools.openLaunchConfigurationDialogOnGroup(window.getShell(), new StructuredSelection(), groupId);
+					}
+					catch (Exception ex)
+					{
+						/*
+						 * in linux it throws a null pointer exception : java.lang.NullPointerException at
+						 * org.eclipse.debug.internal.ui.launchConfigurations.LaunchConfigurationsDialog.close(LaunchConfigurationsDialog.java:350)
+						 */
+					}
 				}
 			});
 
