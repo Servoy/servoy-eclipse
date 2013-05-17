@@ -628,7 +628,7 @@ public class MobileExporter
 	{
 		String scripting = method.getDeclaration();
 		int index = scripting.indexOf("function " + method.getName());
-		scripting = scripting.replaceAll("function " + method.getName(), "");
+		scripting = scripting.replace("function " + method.getName(), "");
 		scripting = scripting.substring(index).trim();
 		// convert to JSON escaped string
 		return JSONObject.quote(scripting);
