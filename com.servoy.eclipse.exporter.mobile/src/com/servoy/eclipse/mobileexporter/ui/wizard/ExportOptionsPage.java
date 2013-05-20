@@ -37,8 +37,10 @@ import com.servoy.eclipse.mobileexporter.export.MobileExporter;
 public class ExportOptionsPage extends WizardPage
 {
 	public static String SERVER_URL_KEY = "serverURL";
+	public static String TIMEOUT_KEY = "timeout";
 
 	private Text serverURL;
+	private Text timeout;
 	private String solution;
 	private final WizardPage nextPage;
 	private final MobileExporter mobileExporter;
@@ -62,6 +64,12 @@ public class ExportOptionsPage extends WizardPage
 		serverURL = new Text(container, SWT.BORDER);
 		serverURL.setToolTipText("This is the URL of Servoy Application Server used by mobile client to synchronize data");
 
+		Label timeoutLabel = new Label(container, SWT.NONE);
+		timeoutLabel.setText("Request Timeout Interval");
+
+		timeout = new Text(container, SWT.BORDER);
+		timeout.setToolTipText("This is the timeout interval, provided in milliseconds, used by the mobile client when waiting for a request to complete");
+
 		Label solutionLabel = new Label(container, SWT.NONE);
 		solutionLabel.setText("Solution");
 
@@ -71,14 +79,18 @@ public class ExportOptionsPage extends WizardPage
 		final GroupLayout groupLayout = new GroupLayout(container);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(solutionLabel).add(serverURLLabel)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(solutionName).add(serverURL, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE)).addContainerGap()));
+				groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(solutionLabel).add(serverURLLabel).add(timeoutLabel)).addPreferredGap(
+				LayoutStyle.RELATED).add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(solutionName).add(serverURL, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE).add(
+					timeout, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE)).addContainerGap()));
 
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(solutionName).add(solutionLabel)).add(7).add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(serverURL, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(serverURLLabel)).add(10)));
+					GroupLayout.PREFERRED_SIZE).add(serverURLLabel)).add(7).add(
+				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(timeout, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+					GroupLayout.PREFERRED_SIZE).add(timeoutLabel)).add(10)));
 
 		container.setLayout(groupLayout);
 
@@ -98,6 +110,23 @@ public class ExportOptionsPage extends WizardPage
 				ExportOptionsPage.this.getContainer().updateButtons();
 			}
 		});
+
+		String defaultTimeout = getDialogSettings().get(TIMEOUT_KEY);
+		if (defaultTimeout == null)
+		{
+			defaultTimeout = "30000";
+		}
+		timeout.setText(defaultTimeout);
+
+		timeout.addModifyListener(new ModifyListener()
+		{
+			public void modifyText(ModifyEvent e)
+			{
+				setErrorMessage(null);
+				ExportOptionsPage.this.getContainer().updateMessage();
+				ExportOptionsPage.this.getContainer().updateButtons();
+			}
+		});
 	}
 
 	private String getServerURL()
@@ -105,6 +134,10 @@ public class ExportOptionsPage extends WizardPage
 		return serverURL.getText();
 	}
 
+	private String getTimeout()
+	{
+		return timeout.getText();
+	}
 
 	public void setSolution(String solution)
 	{
@@ -127,6 +160,10 @@ public class ExportOptionsPage extends WizardPage
 		{
 			return "No server URL specified";
 		}
+		if (getTimeout() == null || "".equals(getTimeout()))
+		{
+			return "No timeout specified";
+		}
 		return super.getErrorMessage();
 	}
 
@@ -135,6 +172,7 @@ public class ExportOptionsPage extends WizardPage
 	{
 		mobileExporter.setSolutionName(getSolution());
 		mobileExporter.setServerURL(getServerURL());
+		mobileExporter.setTimeout(Integer.parseInt(getTimeout()));
 		return nextPage;
 	}
 

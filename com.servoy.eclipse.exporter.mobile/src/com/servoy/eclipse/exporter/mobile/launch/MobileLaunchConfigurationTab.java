@@ -63,6 +63,8 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 	protected Text txtStartURL;
 	protected Label lblServerURL;
 	protected Text txtServerURL;
+	protected Label lblTimeout;
+	protected Text txtTimeout;
 	protected Button checkNoDebug;
 	protected Label lblNoDebug;
 	protected Text txtNoDebugFeedback;
@@ -153,6 +155,13 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		txtServerURL.setText("http://localhost:8080");
 		txtServerURL.addModifyListener(modifyListener);
 
+		lblTimeout = new Label(container, SWT.NONE);
+		lblTimeout.setText("Timeout");
+
+		txtTimeout = new Text(container, SWT.BORDER);
+		txtTimeout.setText("30000");
+		txtTimeout.addModifyListener(modifyListener);
+
 		txtNoDebugFeedback = new Text(container, SWT.WRAP | SWT.MULTI);
 		txtNoDebugFeedback.setBackground(container.getBackground());
 		txtNoDebugFeedback.setEditable(false);
@@ -216,13 +225,14 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		GroupLayout groupLayout = new GroupLayout(container);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(lblNoDebug).add(lblBrowser).add(lblStartUrl).add(lblServerURL).add(lblSolution)).add(
-				18).add(
+				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(lblNoDebug).add(lblBrowser).add(lblTimeout).add(lblStartUrl).add(lblServerURL).add(
+					lblSolution)).add(18).add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 					groupLayout.createSequentialGroup().add(checkNoDebug).addPreferredGap(LayoutStyle.RELATED).add(txtNoDebugFeedback,
-						GroupLayout.PREFERRED_SIZE, 345, Short.MAX_VALUE)).add(txtStartURL, GroupLayout.PREFERRED_SIZE, 345, Short.MAX_VALUE).add(txtServerURL,
-					GroupLayout.PREFERRED_SIZE, 345, Short.MAX_VALUE).add(combo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(lblSolutionname, GroupLayout.PREFERRED_SIZE, 345, Short.MAX_VALUE)).addContainerGap()));
+						GroupLayout.PREFERRED_SIZE, 345, Short.MAX_VALUE)).add(txtTimeout, GroupLayout.PREFERRED_SIZE, 345, Short.MAX_VALUE).add(txtStartURL,
+					GroupLayout.PREFERRED_SIZE, 345, Short.MAX_VALUE).add(txtServerURL, GroupLayout.PREFERRED_SIZE, 345, Short.MAX_VALUE).add(combo,
+					GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(lblSolutionname, GroupLayout.PREFERRED_SIZE, 345,
+					Short.MAX_VALUE)).addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(lblSolutionname).add(lblSolution)).addPreferredGap(LayoutStyle.RELATED).add(
@@ -230,6 +240,8 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 					GroupLayout.PREFERRED_SIZE).add(lblStartUrl)).addPreferredGap(LayoutStyle.RELATED).add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(lblServerURL).add(txtServerURL, GroupLayout.PREFERRED_SIZE,
 					GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(lblTimeout).add(txtTimeout, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+					GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(lblBrowser).add(combo, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
 					GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(
@@ -247,6 +259,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		configuration.setAttribute(IMobileLaunchConstants.SOLUTION_NAME, activeProject.getSolution().getName());
 		configuration.setAttribute(IMobileLaunchConstants.SERVER_URL, "http://localhost:8080");
 		configuration.setAttribute(IMobileLaunchConstants.APPLICATION_URL, "http://localhost:8080?nodebug=true");
+		configuration.setAttribute(IMobileLaunchConstants.TIMEOUT, "30000");
 		configuration.setAttribute(IMobileLaunchConstants.NODEBUG, "true");
 		configuration.setAttribute(IMobileLaunchConstants.BROWSER_ID, "org.eclipse.ui.browser.chrome");
 	}
@@ -261,6 +274,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 			lblSolutionname.setText(configuration.getAttribute(IMobileLaunchConstants.SOLUTION_NAME, "not defined"));
 			txtServerURL.setText(configuration.getAttribute(IMobileLaunchConstants.SERVER_URL, "http://localhost:8080"));
 			txtStartURL.setText(configuration.getAttribute(IMobileLaunchConstants.APPLICATION_URL, "http://localhost:8080?nodebug=true"));
+			txtTimeout.setText(configuration.getAttribute(IMobileLaunchConstants.TIMEOUT, "30000"));
 			checkNoDebug.setSelection(Boolean.valueOf(configuration.getAttribute(IMobileLaunchConstants.NODEBUG, "true")));
 			String browserId = configuration.getAttribute(IMobileLaunchConstants.BROWSER_ID, "default");
 			String browserName = (String)possibleBrowsersNames.get(browserId);
@@ -281,6 +295,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		configuration.setAttribute(IMobileLaunchConstants.SOLUTION_NAME, lblSolutionname.getText());
 		configuration.setAttribute(IMobileLaunchConstants.SERVER_URL, txtServerURL.getText());
 		configuration.setAttribute(IMobileLaunchConstants.APPLICATION_URL, txtStartURL.getText());
+		configuration.setAttribute(IMobileLaunchConstants.TIMEOUT, txtTimeout.getText());
 		configuration.setAttribute(IMobileLaunchConstants.NODEBUG, Boolean.toString(checkNoDebug.getSelection()));
 		String browserId = (String)possibleBrowsersNames.getKey(browserList[combo.getSelectionIndex() == -1 ? 0 : combo.getSelectionIndex()]);
 		configuration.setAttribute(IMobileLaunchConstants.BROWSER_ID, browserId);

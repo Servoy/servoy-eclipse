@@ -301,6 +301,7 @@ public class MobileExporter
 			solutionModel.put("valuelists", flattenedJSon);
 			solutionModel.put("solutionName", solution.getName());
 			solutionModel.put("serverURL", serverURL);
+			solutionModel.put("timeout", timeout);
 			solutionModel.put("skipConnect", Boolean.valueOf(skipConnect));
 			solutionModel.put("mustAuthenticate", Boolean.valueOf(solution.getMustAuthenticate()));
 
@@ -370,6 +371,7 @@ public class MobileExporter
 	private File outputFolder;
 	private String serverURL;
 	private String solutionName;
+	private int timeout;
 
 	public File doExport(boolean exportAsZip)
 	{
@@ -659,6 +661,14 @@ public class MobileExporter
 	}
 
 	/**
+	 * @param timeout the request timeout interval
+	 */
+	public void setTimeout(int timeout)
+	{
+		this.timeout = timeout;
+	}
+
+	/**
 	 * @return the serverURL
 	 */
 	public String getServerURL()
@@ -672,6 +682,11 @@ public class MobileExporter
 	public String getSolutionName()
 	{
 		return solutionName;
+	}
+
+	public int getTimeout()
+	{
+		return timeout;
 	}
 
 	private boolean skipConnect = false;

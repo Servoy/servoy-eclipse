@@ -209,7 +209,7 @@ public class PhoneGapConnector
 		}
 	}
 
-	public String createOrUpdatePhoneGapApplication(PhoneGapApplication application, String solutionName, String serverURL)
+	public String createOrUpdatePhoneGapApplication(PhoneGapApplication application, String solutionName, String serverURL, int timeout)
 	{
 		File exportedFile = null;
 		try
@@ -249,6 +249,7 @@ public class PhoneGapConnector
 
 			mobileExporter.setServerURL(serverURL);
 			mobileExporter.setSolutionName(solutionName);
+			mobileExporter.setTimeout(timeout);
 			mobileExporter.setOutputFolder(new File(System.getProperty("java.io.tmpdir")));
 			exportedFile = mobileExporter.doExport(true);
 			entity.addPart("file", new FileBody(exportedFile));

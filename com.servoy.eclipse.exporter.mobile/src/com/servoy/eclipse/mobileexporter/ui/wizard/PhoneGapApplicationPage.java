@@ -68,6 +68,7 @@ public class PhoneGapApplicationPage extends WizardPage
 
 	private String solutionName;
 	private String serverURL;
+	private int timeout;
 
 	public PhoneGapApplicationPage(String name, CustomizedFinishPage finishPage)
 	{
@@ -209,7 +210,8 @@ public class PhoneGapApplicationPage extends WizardPage
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 					{
 						errorMessage[0] = getConnector().createOrUpdatePhoneGapApplication(
-							new PhoneGapApplication(appName, appVersion, appDescription, appPublic, path, selectedCertificates), solutionName, serverURL);
+							new PhoneGapApplication(appName, appVersion, appDescription, appPublic, path, selectedCertificates), solutionName, serverURL,
+							timeout);
 
 					}
 				});
@@ -262,6 +264,14 @@ public class PhoneGapApplicationPage extends WizardPage
 	public void setServerURL(String serverURL)
 	{
 		this.serverURL = serverURL;
+	}
+
+	/**
+	 * @param timeout the timeout to set
+	 */
+	public void setTimeout(int timeout)
+	{
+		this.timeout = timeout;
 	}
 
 	public void populateExistingApplications()

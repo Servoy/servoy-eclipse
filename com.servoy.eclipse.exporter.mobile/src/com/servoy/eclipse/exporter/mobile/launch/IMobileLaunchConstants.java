@@ -31,6 +31,7 @@ public interface IMobileLaunchConstants
 	public static final String APPLICATION_URL = "application_url";
 	public static final String NODEBUG = "nodebug";
 	public static final String BROWSER_ID = "browserID";
+	public static final String TIMEOUT = "timeout";
 
 	/**
 	 * used for filling the pulldown menu 

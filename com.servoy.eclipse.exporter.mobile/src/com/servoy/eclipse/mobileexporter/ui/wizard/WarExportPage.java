@@ -317,6 +317,7 @@ public class WarExportPage extends WizardPage
 				pgAppPage.populateExistingApplications();
 				pgAppPage.setSolutionName(mobileExporter.getSolutionName());
 				pgAppPage.setServerURL(mobileExporter.getServerURL());
+				pgAppPage.setTimeout(mobileExporter.getTimeout());
 				return pgAppPage;
 			}
 		}
