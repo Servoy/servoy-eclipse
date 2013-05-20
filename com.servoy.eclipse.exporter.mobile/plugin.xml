@@ -72,9 +72,9 @@
 	     id="com.servoy.eclipse.mobile.launch.GroupId"
 	     mode="run"
 	     label="Run"
-	     image="icons\mobile.png"
+	     image="icons/mobile.png"
 	     category="servoy.mobile.category"
-	     bannerImage="icons\mobile.png">
+	     bannerImage="icons/mobile.png">
 	  </launchGroup>
    </extension>
    <extension
