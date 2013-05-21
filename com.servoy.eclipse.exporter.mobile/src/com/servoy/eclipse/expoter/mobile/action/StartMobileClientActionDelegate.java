@@ -246,6 +246,7 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 						 * in linux it throws a null pointer exception : java.lang.NullPointerException at
 						 * org.eclipse.debug.internal.ui.launchConfigurations.LaunchConfigurationsDialog.close(LaunchConfigurationsDialog.java:350)
 						 */
+						ServoyLog.logError(ex);
 					}
 				}
 			});
@@ -253,7 +254,7 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			ServoyLog.logError(e);
 		}
 		return configsListMenu;
 	}
