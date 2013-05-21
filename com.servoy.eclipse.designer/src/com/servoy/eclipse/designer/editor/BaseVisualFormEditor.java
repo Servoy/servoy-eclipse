@@ -478,6 +478,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 
 	public void persistChanges(Collection<IPersist> changedPersists)
 	{
+		if (projectIsNoLongerActive() && isClosing()) return;
 		if (projectIsNoLongerActive())
 		{
 			ServoyLog.logWarning("Closing form editor for " + form.getName() + " because solution " + servoyProject + " is not part of the active solution",
