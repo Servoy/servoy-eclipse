@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors.table;
 
 import java.util.Comparator;
@@ -26,6 +26,8 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+
+import com.servoy.j2db.persistence.Column;
 
 public class ColumnsSorter extends ViewerSorter
 {
@@ -63,6 +65,7 @@ public class ColumnsSorter extends ViewerSorter
 	public int compare(Viewer viewer, Object favorite1, Object favorite2)
 	{
 		if (firstTime) return 0;
+		if (favorite2 instanceof Column && !((Column)favorite2).getExistInDB()) return 0; //do not auto sort columns until saving
 		for (SortInfo element : infos)
 		{
 			int result = 0;
