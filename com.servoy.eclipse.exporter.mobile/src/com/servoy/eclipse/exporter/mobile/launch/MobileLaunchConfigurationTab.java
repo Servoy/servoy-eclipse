@@ -156,10 +156,10 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		txtServerURL.addModifyListener(modifyListener);
 
 		lblTimeout = new Label(container, SWT.NONE);
-		lblTimeout.setText("Timeout");
+		lblTimeout.setText("Sync Timeout (in seconds)");
 
 		txtTimeout = new Text(container, SWT.BORDER);
-		txtTimeout.setText("30000");
+		txtTimeout.setText("30");
 		txtTimeout.addModifyListener(modifyListener);
 
 		txtNoDebugFeedback = new Text(container, SWT.WRAP | SWT.MULTI);
@@ -259,7 +259,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		configuration.setAttribute(IMobileLaunchConstants.SOLUTION_NAME, activeProject.getSolution().getName());
 		configuration.setAttribute(IMobileLaunchConstants.SERVER_URL, "http://localhost:8080");
 		configuration.setAttribute(IMobileLaunchConstants.APPLICATION_URL, "http://localhost:8080?nodebug=true");
-		configuration.setAttribute(IMobileLaunchConstants.TIMEOUT, "30000");
+		configuration.setAttribute(IMobileLaunchConstants.TIMEOUT, "30");
 		configuration.setAttribute(IMobileLaunchConstants.NODEBUG, "true");
 		configuration.setAttribute(IMobileLaunchConstants.BROWSER_ID, "org.eclipse.ui.browser.chrome");
 	}
@@ -274,7 +274,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 			lblSolutionname.setText(configuration.getAttribute(IMobileLaunchConstants.SOLUTION_NAME, "not defined"));
 			txtServerURL.setText(configuration.getAttribute(IMobileLaunchConstants.SERVER_URL, "http://localhost:8080"));
 			txtStartURL.setText(configuration.getAttribute(IMobileLaunchConstants.APPLICATION_URL, "http://localhost:8080?nodebug=true"));
-			txtTimeout.setText(configuration.getAttribute(IMobileLaunchConstants.TIMEOUT, "30000"));
+			txtTimeout.setText(configuration.getAttribute(IMobileLaunchConstants.TIMEOUT, "30"));
 			checkNoDebug.setSelection(Boolean.valueOf(configuration.getAttribute(IMobileLaunchConstants.NODEBUG, "true")));
 			String browserId = configuration.getAttribute(IMobileLaunchConstants.BROWSER_ID, "default");
 			String browserName = (String)possibleBrowsersNames.get(browserId);

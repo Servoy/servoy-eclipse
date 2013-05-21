@@ -65,10 +65,10 @@ public class ExportOptionsPage extends WizardPage
 		serverURL.setToolTipText("This is the URL of Servoy Application Server used by mobile client to synchronize data");
 
 		Label timeoutLabel = new Label(container, SWT.NONE);
-		timeoutLabel.setText("Request Timeout Interval");
+		timeoutLabel.setText("Sync Timeout (in seconds)");
 
 		timeout = new Text(container, SWT.BORDER);
-		timeout.setToolTipText("This is the timeout interval, provided in milliseconds, used by the mobile client when waiting for a request to complete");
+		timeout.setToolTipText("This is the sync timeout, provided in seconds, used by the mobile client when waiting for the request to complete");
 
 		Label solutionLabel = new Label(container, SWT.NONE);
 		solutionLabel.setText("Solution");
@@ -114,7 +114,7 @@ public class ExportOptionsPage extends WizardPage
 		String defaultTimeout = getDialogSettings().get(TIMEOUT_KEY);
 		if (defaultTimeout == null)
 		{
-			defaultTimeout = "30000";
+			defaultTimeout = "30";
 		}
 		timeout.setText(defaultTimeout);
 

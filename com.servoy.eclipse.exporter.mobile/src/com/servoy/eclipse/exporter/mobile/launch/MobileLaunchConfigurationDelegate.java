@@ -40,7 +40,7 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		if (warLocation.length() == 0) throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Invalid war export path"));
 		String solutionName = configuration.getAttribute(IMobileLaunchConstants.SOLUTION_NAME, "");
 		String serverUrl = configuration.getAttribute(IMobileLaunchConstants.SERVER_URL, "");
-		int timeout = Integer.valueOf(configuration.getAttribute(IMobileLaunchConstants.TIMEOUT, "30000")).intValue();
+		int timeout = Integer.valueOf(configuration.getAttribute(IMobileLaunchConstants.TIMEOUT, "30")).intValue();
 		String appUrl = configuration.getAttribute(IMobileLaunchConstants.APPLICATION_URL, "");
 		String company = configuration.getAttribute("company", "");
 		String license = configuration.getAttribute("license", "");
