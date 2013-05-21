@@ -324,7 +324,6 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 			{
 				ServoyLog.logError("Error while checking for existing data in DB ", e);
 				warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Error while checking for existing data in DB " + e.getMessage()));
-				e.printStackTrace();
 			}
 		}
 		// show warning dialog
