@@ -218,9 +218,9 @@ public class DebugStarter implements IDebuggerStarter
 			wc.setMappedResources(new IResource[] { script.getProject() });
 			config = wc.doSave();
 		}
-		catch (CoreException exception)
+		catch (CoreException e)
 		{
-			exception.printStackTrace();
+			ServoyLog.logError(e);
 		}
 		return config;
 	}

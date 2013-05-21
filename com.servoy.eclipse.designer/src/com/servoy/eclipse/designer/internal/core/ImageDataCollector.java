@@ -37,6 +37,7 @@ import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -274,7 +275,7 @@ public class ImageDataCollector implements ImageConsumer
 				}
 				catch (final Exception e)
 				{
-					e.printStackTrace();
+					ServoyLog.logError(e);
 				}
 				finally
 				{
@@ -710,7 +711,7 @@ public class ImageDataCollector implements ImageConsumer
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			ServoyLog.logError(e);
 		}
 	}
 
@@ -729,7 +730,7 @@ public class ImageDataCollector implements ImageConsumer
 			}
 			catch (Exception e)
 			{
-				e.printStackTrace();
+				ServoyLog.logError(e);
 			}
 		}
 	}

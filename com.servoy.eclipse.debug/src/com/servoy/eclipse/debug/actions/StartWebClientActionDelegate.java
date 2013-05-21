@@ -345,7 +345,7 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			ServoyLog.logError(e);
 		}
 		return broswersListMenu;
 	}

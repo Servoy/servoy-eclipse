@@ -28,6 +28,8 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.osgi.service.prefs.BackingStoreException;
 
+import com.servoy.eclipse.model.util.ServoyLog;
+
 /**
  * @author alorincz
  *
@@ -70,7 +72,7 @@ public class GroupedOutlineViewToggleAction extends Action implements IPropertyC
 		}
 		catch (BackingStoreException e)
 		{
-			e.printStackTrace();
+			ServoyLog.logError(e);
 		}
 	}
 }
