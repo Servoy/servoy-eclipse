@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core.nature;
 
 import java.util.ArrayList;
@@ -29,6 +29,8 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
+
+import com.servoy.eclipse.model.util.ServoyLog;
 
 public class ToggleNatureAction implements IObjectActionDelegate
 {
@@ -128,10 +130,10 @@ public class ToggleNatureAction implements IObjectActionDelegate
 			ArrayList<String> newNatures = new ArrayList<String>();
 
 			boolean removed = false;
-			for (int i = 0; i < natures.length; ++i)
+			for (String nature : natures)
 			{
 				boolean neutralNature = true;
-				if (natureID.equals(natures[i]))
+				if (natureID.equals(nature))
 				{
 					// Remove the nature
 					neutralNature = false;
@@ -139,7 +141,7 @@ public class ToggleNatureAction implements IObjectActionDelegate
 				}
 				else for (String secondaryNature : secondaryNatureIDs)
 				{
-					if (secondaryNature.equals(natures[i]))
+					if (secondaryNature.equals(nature))
 					{
 						neutralNature = false;
 						break;
@@ -147,7 +149,7 @@ public class ToggleNatureAction implements IObjectActionDelegate
 				}
 				if (neutralNature)
 				{
-					newNatures.add(natures[i]);
+					newNatures.add(nature);
 				}
 			}
 
@@ -166,7 +168,7 @@ public class ToggleNatureAction implements IObjectActionDelegate
 		}
 		catch (CoreException e)
 		{
-			e.printStackTrace();
+			ServoyLog.logError(e);
 		}
 	}
 
