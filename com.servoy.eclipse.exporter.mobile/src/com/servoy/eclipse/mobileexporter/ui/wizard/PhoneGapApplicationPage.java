@@ -19,6 +19,7 @@ package com.servoy.eclipse.mobileexporter.ui.wizard;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.util.Arrays;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -40,9 +41,12 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.browser.IWebBrowser;
+import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 import com.servoy.eclipse.mobileexporter.export.PhoneGapApplication;
 import com.servoy.eclipse.mobileexporter.export.PhoneGapConnector;
@@ -63,6 +67,7 @@ public class PhoneGapApplicationPage extends WizardPage
 	private Text txtDescription;
 	private Button btnPublic;
 	private Text iconPath;
+	private Text configPath;
 	private Button iconBrowseButton;
 	private CheckboxTableViewer certificatesViewer;
 
@@ -127,6 +132,45 @@ public class PhoneGapApplicationPage extends WizardPage
 		certificatesViewer.setLabelProvider(new LabelProvider());
 		certificatesViewer.setContentProvider(new ArrayContentProvider());
 
+		Link configLabel = new Link(container, SWT.NONE);
+		configLabel.setText("PhoneGap <A>Config File</A>");
+		configLabel.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				try
+				{
+					IWorkbenchBrowserSupport support = PlatformUI.getWorkbench().getBrowserSupport();
+					IWebBrowser browser = support.getExternalBrowser();
+					browser.openURL(new URL("https://build.phonegap.com/docs/config-xml"));
+				}
+				catch (Exception ex)
+				{
+					ServoyLog.logError(ex);
+				}
+			}
+		});
+
+		configPath = new Text(container, SWT.BORDER);
+		configPath.setToolTipText("PhoneGap config file location. Settings from config file (if present) have higher priority than settings from this form.");
+		Button configBrowseButton = new Button(container, SWT.NONE);
+		configBrowseButton.setText("Browse");
+
+		configBrowseButton.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				FileDialog fileDialog = new FileDialog(outputBrowseShell, SWT.NONE);
+				fileDialog.setFilterExtensions(new String[] { "*.xml" });
+				if (fileDialog.open() != null)
+				{
+					configPath.setText(fileDialog.getFilterPath() + File.separator + fileDialog.getFileName());
+				}
+			}
+		});
+
 		btnPublic = new Button(container, SWT.CHECK);
 		btnPublic.setText("Public Application");
 
@@ -134,10 +178,12 @@ public class PhoneGapApplicationPage extends WizardPage
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(lblApplicationName).add(lblVersion).add(lblDescription).add(iconLabel).add(
-					certificatesLabel)).addPreferredGap(LayoutStyle.RELATED).add(
+					configLabel).add(certificatesLabel)).addPreferredGap(LayoutStyle.RELATED).add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(applicationNameCombo, GroupLayout.DEFAULT_SIZE, 342, Short.MAX_VALUE).add(txtVersion,
 					GroupLayout.PREFERRED_SIZE, 276, Short.MAX_VALUE).add(txtDescription, GroupLayout.PREFERRED_SIZE, 276, Short.MAX_VALUE).add(
 					groupLayout.createSequentialGroup().add(iconPath, GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE).add(iconBrowseButton,
+						GroupLayout.PREFERRED_SIZE, 80, GroupLayout.PREFERRED_SIZE)).add(
+					groupLayout.createSequentialGroup().add(configPath, GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE).add(configBrowseButton,
 						GroupLayout.PREFERRED_SIZE, 80, GroupLayout.PREFERRED_SIZE)).add(certificatesViewer.getTable(), GroupLayout.DEFAULT_SIZE, 342,
 					Short.MAX_VALUE).add(btnPublic, GroupLayout.PREFERRED_SIZE, 276, Short.MAX_VALUE)).addContainerGap()));
 
@@ -150,6 +196,8 @@ public class PhoneGapApplicationPage extends WizardPage
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(txtDescription, 80, 80, 80).add(lblDescription)).add(7).add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(iconBrowseButton).add(iconPath, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 					GroupLayout.PREFERRED_SIZE).add(iconLabel)).add(7).add(
+				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(configBrowseButton).add(configPath, GroupLayout.PREFERRED_SIZE,
+					GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(configLabel)).add(7).add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(certificatesViewer.getTable(), 80, 80, 80).add(certificatesLabel)).add(10).add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(btnPublic))));
 
@@ -202,6 +250,7 @@ public class PhoneGapApplicationPage extends WizardPage
 			final String appDescription = txtDescription.getText();
 			final boolean appPublic = btnPublic.getSelection();
 			final String path = iconPath.getText();
+			final File configFile = "".equals(configPath.getText()) ? null : new File(configPath.getText());
 			final String[] selectedCertificates = getSelectedCerticates();
 			try
 			{
@@ -211,7 +260,7 @@ public class PhoneGapApplicationPage extends WizardPage
 					{
 						errorMessage[0] = getConnector().createOrUpdatePhoneGapApplication(
 							new PhoneGapApplication(appName, appVersion, appDescription, appPublic, path, selectedCertificates), solutionName, serverURL,
-							timeout);
+							timeout, configFile);
 
 					}
 				});

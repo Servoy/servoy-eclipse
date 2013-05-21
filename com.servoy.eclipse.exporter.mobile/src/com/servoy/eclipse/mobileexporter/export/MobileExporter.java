@@ -372,6 +372,7 @@ public class MobileExporter
 	private String serverURL;
 	private String solutionName;
 	private int timeout;
+	private File configFile = null;
 
 	public File doExport(boolean exportAsZip)
 	{
@@ -447,6 +448,12 @@ public class MobileExporter
 				}
 				addZipEntry("mobileclient/" + renameMap.get("solution_json.js"), warStream, Utils.getUTF8EncodedStream(formJson));
 				addZipEntry("mobileclient/" + renameMap.get("solution.js"), warStream, Utils.getUTF8EncodedStream(solutionJavascript));
+				if (exportAsZip && configFile != null && configFile.exists())
+				{
+					InputStream configStream = new FileInputStream(configFile);
+					addZipEntry(configFile.getName(), warStream, configStream);
+					Utils.closeInputStream(configStream);
+				}
 				Utils.closeInputStream(zipStream);
 			}
 			catch (IOException e)
@@ -642,6 +649,11 @@ public class MobileExporter
 	public void setOutputFolder(File outputFolder)
 	{
 		this.outputFolder = outputFolder;
+	}
+
+	public void setConfigFile(File configFile)
+	{
+		this.configFile = configFile;
 	}
 
 	/**
