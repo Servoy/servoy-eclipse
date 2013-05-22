@@ -160,7 +160,24 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 
 		txtTimeout = new Text(container, SWT.BORDER);
 		txtTimeout.setText("30");
-		txtTimeout.addModifyListener(modifyListener);
+		txtTimeout.addModifyListener(new ModifyListener()
+		{
+			@Override
+			public void modifyText(ModifyEvent e)
+			{
+				String txt = ((Text)e.widget).getText();
+				if (txt == null || "".equals(txt) || (txt != null && !txt.matches("\\d+")))
+				{
+					setErrorMessage("No valid timeout specified");
+				}
+				else
+				{
+					setErrorMessage(null);
+				}
+				setDirty(true);
+				updateLaunchConfigurationDialog();
+			}
+		});
 
 		txtNoDebugFeedback = new Text(container, SWT.WRAP | SWT.MULTI);
 		txtNoDebugFeedback.setBackground(container.getBackground());
@@ -311,6 +328,11 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 	@Override
 	public boolean isValid(ILaunchConfiguration launchConfig)
 	{
+		String txt = txtTimeout.getText();
+		if (txt == null || "".equals(txt) || (txt != null && !txt.matches("\\d+")))
+		{
+			return false;
+		}
 		return true;
 	}
 

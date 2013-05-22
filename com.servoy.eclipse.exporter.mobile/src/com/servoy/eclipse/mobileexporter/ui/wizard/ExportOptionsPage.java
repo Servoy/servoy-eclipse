@@ -160,9 +160,9 @@ public class ExportOptionsPage extends WizardPage
 		{
 			return "No server URL specified";
 		}
-		if (getTimeout() == null || "".equals(getTimeout()))
+		if (getTimeout() == null || "".equals(getTimeout()) || (getTimeout() != null && !getTimeout().matches("\\d+")))
 		{
-			return "No timeout specified";
+			return "No valid timeout specified";
 		}
 		return super.getErrorMessage();
 	}
