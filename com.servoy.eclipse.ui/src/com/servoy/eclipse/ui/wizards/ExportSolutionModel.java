@@ -32,6 +32,7 @@ public class ExportSolutionModel
 	private String[] modulesToExport = null;
 	private String password = null;
 	private int numberOfSampleDataExported = 5000;
+	private boolean exportUsingDbiFileInfoOnly = false;
 
 	private String userAcknowledgedFileToOverwrite = null;
 	private boolean checkMetadataTables = true; // default
@@ -230,5 +231,15 @@ public class ExportSolutionModel
 	public boolean isCheckMetadataTables()
 	{
 		return checkMetadataTables;
+	}
+
+	public void setExportUsingDbiFileInfoOnly(boolean exportUsingDbiFileInfoOnly)
+	{
+		this.exportUsingDbiFileInfoOnly = exportUsingDbiFileInfoOnly;
+	}
+
+	public boolean isExportUsingDbiFileInfoOnly()
+	{
+		return exportUsingDbiFileInfoOnly;
 	}
 }

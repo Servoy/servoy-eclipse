@@ -93,6 +93,7 @@ import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.dataprocessing.IDataServerInternal;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
+import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
@@ -200,10 +201,11 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 				try
 				{
-					if (dbDownErrors &&
-						(exportModel.isExportMetaData() || exportModel.isExportSampleData() || exportModel.isExportI18NData() || exportModel.isExportUsers() || exportModel.isExportReferencedModules()))
+					boolean exportDbiData = (exportModel.isExportMetaData() || exportModel.isExportSampleData() || exportModel.isExportI18NData() ||
+						exportModel.isExportUsers() || exportModel.isExportReferencedModules());
+					if ((dbDownErrors && exportDbiData) || exportModel.isExportUsingDbiFileInfoOnly())
 					{
-						prepareDbDownExportData();
+						prepareDbiFilesBasedExportData(dbDownErrors);
 					}
 
 					exporter.exportSolutionToFile(activeSolution, new File(exportModel.getFileName()), ClientVersion.getVersion(),
@@ -213,7 +215,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 					monitor.done();
 
-					if (dbDownErrors)
+					if (dbDownErrors && !exportModel.isExportUsingDbiFileInfoOnly())
 					{
 						Display.getDefault().syncExec(new Runnable()
 						{
@@ -277,17 +279,22 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 	 * It will create and initialize the table def manager and the metadata manager, which will contain server and table and metadata info
 	 * to be used at solution export.
 	 * 
-	 * NOTE: if there are no dbi files created export info will be empty
+	 * If the database is not down, it will export all needed (non-minimal) db info, based on dbi files (only). That is, if needed,
+	 * it will export all tables from referenced servers, based on dbi files.
+	 * 
+	 * NOTE: if there are no dbi files created, export info will be empty
+	 * 
+	 * @param true if the database is down, false otherwise 
 	 * 
 	 * @throws CoreException
 	 * @throws JSONException 
 	 * @throws IOException 
 	 */
-	private void prepareDbDownExportData() throws CoreException, JSONException, IOException
+	private void prepareDbiFilesBasedExportData(boolean dbDown) throws CoreException, JSONException, IOException
 	{
 		// A. get only the needed servers (and tables) 
 		final Map<String, List<String>> neededServersTables = getNeededServerTables(activeSolution, exportModel.isExportReferencedModules(),
-			exportModel.isExportI18NData());
+			exportModel.isExportI18NData(), exportModel.isExportAllTablesFromReferencedServers(), dbDown);
 
 		DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
 
@@ -412,7 +419,8 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		srvTbl.put(serverName, tablesForServer);
 	}
 
-	private Map<String, List<String>> getNeededServerTables(Solution mainActiveSolution, boolean includeModules, boolean includeI18NData)
+	private Map<String, List<String>> getNeededServerTables(Solution mainActiveSolution, boolean includeModules, boolean includeI18NData,
+		boolean includeAllTablesFromReferencedServers, boolean dbDown)
 	{
 		DataSourceCollectorVisitor collector = new DataSourceCollectorVisitor();
 		//get modules to export if needed, or just the active project
@@ -429,14 +437,34 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		Map<String, List<String>> neededServersTablesMap = new HashMap<String, List<String>>();
 		Set<String> dataSources = collector.getDataSources();
 		Set<String> serverNames = DataSourceUtils.getServerNames(dataSources);
+
 		for (String serverName : serverNames)
 		{
-			List<String> tableNames = DataSourceUtils.getServerTablenames(dataSources, serverName);
+			List<String> tableNames = null;
+			if (dbDown || !includeAllTablesFromReferencedServers)
+			{
+				tableNames = DataSourceUtils.getServerTablenames(dataSources, serverName);
+			}
+			else
+			{
+				IServerInternal s = (IServerInternal)ServoyModel.getServerManager().getServer(serverName);
+				try
+				{
+					tableNames = s.getTableNames(true);
+				}
+				catch (RepositoryException e)
+				{
+					Debug.error(e);
+					tableNames = new ArrayList<String>();
+				}
+			}
+
 			for (String tableName : tableNames)
 			{
 				addServerTable(neededServersTablesMap, serverName, tableName);
 			}
 		}
+
 
 		// check if i18n info is needed
 		if (mainActiveSolution.getI18nDataSource() != null && includeI18NData) addServerTable(neededServersTablesMap, mainActiveSolution.getI18nServerName(),
@@ -752,6 +780,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		private Spinner nrOfExportedSampleDataSpinner;
 		private Button rowsPerTableRadioButton;
 		private Button allRowsRadioButton;
+		private Button exportUsingDbiFileInfoOnlyButton;
 
 		public ExportOptionsPage()
 		{
@@ -870,6 +899,10 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			exportUsersButton.setSelection(exportModel.isExportUsers());
 			exportUsersButton.addListener(SWT.Selection, this);
 
+			exportUsingDbiFileInfoOnlyButton = new Button(composite, SWT.CHECK);
+			exportUsingDbiFileInfoOnlyButton.setText("Export based on DBI files only"); //$NON-NLS-1$
+			exportUsingDbiFileInfoOnlyButton.addListener(SWT.Selection, this);
+
 			setControl(composite);
 		}
 
@@ -912,6 +945,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			else if (event.widget == exportI18NDataButton) exportModel.setExportI18NData(exportI18NDataButton.getSelection());
 			else if (event.widget == exportUsersButton) exportModel.setExportUsers(exportUsersButton.getSelection());
 			else if (event.widget == exportAllTablesFromReferencedServers) exportModel.setExportAllTablesFromReferencedServers(exportAllTablesFromReferencedServers.getSelection());
+			else if (event.widget == exportUsingDbiFileInfoOnlyButton) exportModel.setExportUsingDbiFileInfoOnly(exportUsingDbiFileInfoOnlyButton.getSelection());
 			getWizard().getContainer().updateButtons();
 		}
 
