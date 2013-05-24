@@ -121,6 +121,7 @@ import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IDebugHeadlessClient;
 import com.servoy.j2db.smart.plugins.PluginManager;
 import com.servoy.j2db.util.CompositeIterable;
+import com.servoy.j2db.util.DeveloperURLStreamHandler;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
@@ -631,6 +632,20 @@ public class Activator extends Plugin
 					{
 						starter.testAndStartDebugger();
 					}
+				}
+
+				/*
+				 * (non-Javadoc)
+				 * 
+				 * @see com.servoy.j2db.IDesignerCallback#addURLStreamHandler(java.lang.String, java.net.URLStreamHandler)
+				 */
+				@Override
+				public void addURLStreamHandler(String protocolName, DeveloperURLStreamHandler handler)
+				{
+					Dictionary<String, String[]> properties = new Hashtable<String, String[]>(1);
+					properties.put(URLConstants.URL_HANDLER_PROTOCOL, new String[] { protocolName });
+					String serviceClass = URLStreamHandlerService.class.getName();
+					getBundle().getBundleContext().registerService(serviceClass, new DeveloperURLStreamHandlerService(handler), properties);
 				}
 			};
 			dch.setDesignerCallback(designerCallback);
