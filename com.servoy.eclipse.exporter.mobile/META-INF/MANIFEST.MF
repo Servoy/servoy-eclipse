@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Mobile Exporter Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.exporter.mobile;singleton:=true
 Bundle-Version: 7.1.0.2010
-Bundle-Activator: com.servoy.eclipse.mobileexporter.Activator
+Bundle-Activator: com.servoy.eclipse.exporter.mobile.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: com.servoy.eclipse.model,
  com.servoy.eclipse.core,
@@ -11,7 +11,9 @@ Require-Bundle: com.servoy.eclipse.model,
  org.eclipse.core.runtime,
  servoy_shared,
  com.servoy.eclipse.ui,
- org.eclipse.debug.ui
+ org.eclipse.debug.ui,
+ com.servoy.eclipse.jsunit,
+ org.eclipse.core.expressions
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .

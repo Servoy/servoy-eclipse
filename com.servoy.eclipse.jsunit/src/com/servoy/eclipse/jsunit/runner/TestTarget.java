@@ -34,7 +34,7 @@ import com.servoy.j2db.util.Pair;
 /**
  * Specifies which tests of an active solution's subtree should run.
  * If Test target is null that means the whole active solution.
- * If Test tarfet's module to test is the same as active solution  that  means the whole active solution again.
+ * If Test target's module to test is the same as active solution that  means the whole active solution again.
  * @author acostescu
  */
 public class TestTarget
@@ -143,6 +143,12 @@ public class TestTarget
 	@Override
 	public String toString()
 	{
+		return convertToString();
+	}
+
+	public String convertToString()
+	{
+		// careful - this is not for easy debugging only - it's parsed & used
 		switch (type)
 		{
 			case SOLUTION :
@@ -169,7 +175,7 @@ public class TestTarget
 		return null;
 	}
 
-	public static TestTarget fromString(String str)
+	public static TestTarget convertFromString(String str)
 	{
 		TestTarget target = new TestTarget();
 		FlattenedSolution fl = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getEditingFlattenedSolution();
@@ -245,5 +251,10 @@ public class TestTarget
 			}
 		}
 		return null;
+	}
+
+	public static TestTarget activeProjectTarget()
+	{
+		return new TestTarget(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution());
 	}
 }

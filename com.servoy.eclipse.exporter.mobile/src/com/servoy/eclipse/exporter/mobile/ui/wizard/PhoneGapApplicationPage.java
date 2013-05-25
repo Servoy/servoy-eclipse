@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.mobileexporter.ui.wizard;
+package com.servoy.eclipse.exporter.mobile.ui.wizard;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -48,9 +48,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
-import com.servoy.eclipse.mobileexporter.export.PhoneGapApplication;
-import com.servoy.eclipse.mobileexporter.export.PhoneGapConnector;
-import com.servoy.eclipse.mobileexporter.ui.wizard.ExportMobileWizard.CustomizedFinishPage;
+import com.servoy.eclipse.exporter.mobile.export.PhoneGapApplication;
+import com.servoy.eclipse.exporter.mobile.export.PhoneGapConnector;
+import com.servoy.eclipse.exporter.mobile.ui.wizard.ExportMobileWizard.CustomizedFinishPage;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 
@@ -261,7 +261,6 @@ public class PhoneGapApplicationPage extends WizardPage
 						errorMessage[0] = getConnector().createOrUpdatePhoneGapApplication(
 							new PhoneGapApplication(appName, appVersion, appDescription, appPublic, path, selectedCertificates), solutionName, serverURL,
 							timeout, configFile);
-
 					}
 				});
 			}

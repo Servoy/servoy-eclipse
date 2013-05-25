@@ -15,27 +15,18 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.exporter.mobile.launch;
+package com.servoy.eclipse.exporter.mobile.action;
 
 /**
- * @author obuligan
- *
+ * Runs (with debug - mobile service solution) mobile client js unit tests.
+ * @author acostescu
  */
-public interface IMobileLaunchConstants
+public class DebugMobileTestsHandler extends MobileTestsHandler
 {
 
-	public static final String LAUNCH_CONFIGURATION_TYPE_ID = "com.servoy.eclipse.mobile.launch";
-
-	public static final String WAR_LOCATION = "war_location";
-	public static final String SOLUTION_NAME = "solution_name";
-	public static final String SERVER_URL = "server_url";
-	public static final String APPLICATION_URL = "application_url";
-	public static final String NODEBUG = "nodebug";
-	public static final String BROWSER_ID = "browserID";
-	public static final String WAR_DEPLOYMENT_TIME = "war_deploy_time";
-	public static final String TIMEOUT = "timeout";
-
-	public final static String DEFAULT_SERVICE_URL = "http://localhost:8080";
-	public final static String DEFAULT_WAR_DEPLOYMENT_TIME = "10";
+	public DebugMobileTestsHandler()
+	{
+		super(false);
+	}
 
 }

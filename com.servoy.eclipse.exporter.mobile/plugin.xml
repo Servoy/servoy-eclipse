@@ -5,16 +5,16 @@
          point="org.eclipse.ui.exportWizards">
       <wizard
             category="com.servoy.eclipse.ui"
-            class="com.servoy.eclipse.mobileexporter.ui.wizard.ExportMobileWizard"
+            class="com.servoy.eclipse.exporter.mobile.ui.wizard.ExportMobileWizard"
             icon="icons/mobile.png"
-            id="com.servoy.eclipse.mobileexporter.ExportMobileWizard"
+            id="com.servoy.eclipse.exporter.mobile.ExportMobileWizard"
             name="Export Active Solution To Mobile File">
       </wizard>
    </extension>
    <extension
          point="com.servoy.eclipse.ui.exportSolutionProvider">
       <provider
-            class="com.servoy.eclipse.mobileexporter.ui.wizard.MobileExportProvider"
+            class="com.servoy.eclipse.exporter.mobile.ui.wizard.MobileExportProvider"
             id="com.servoy.eclipse.exporter.mobile.exportSolutionProvider"
             name="Provides Solution Mobile Export">
       </provider>
@@ -28,7 +28,7 @@
           id="com.servoy.eclipse.ui.start_mobile_actionSet"
           visible="true">
           <action
-                class="com.servoy.eclipse.expoter.mobile.action.StartMobileClientActionDelegate"
+                class="com.servoy.eclipse.exporter.mobile.action.StartMobileClientActionDelegate"
                 definitionId="com.servoy.eclipse.ui.StartMobileClient"
                 icon="icons/launch_mobile.png"
                 id="com.servoy.eclipse.ui.StartMobileClient"
@@ -75,16 +75,29 @@
 	     image="icons/mobile.png"
 	     category="servoy.mobile.category"
 	     bannerImage="icons/mobile.png">
+         title="Select or configure a mobile client or mobile client test configuration">
 	  </launchGroup>
    </extension>
    <extension
          point="org.eclipse.debug.core.launchConfigurationTypes">
       <launchConfigurationType
+            category="servoy.mobile.category"
             delegate="com.servoy.eclipse.exporter.mobile.launch.MobileLaunchConfigurationDelegate"
+            delegateDescription="Mobile Client Launcher can run a mobile solution inside a browser-based mobile test client"
+            delegateName="Mobile Client Launcher"
             id="com.servoy.eclipse.mobile.launch"
             modes="run"
             name=" Servoy Mobile"
-            category = "servoy.mobile.category"
+            public="true">
+      </launchConfigurationType>
+      <launchConfigurationType
+            category="servoy.mobile.category"
+            delegate="com.servoy.eclipse.exporter.mobile.launch.test.MobileTestLaunchConfigurationDelegate"
+            delegateDescription="Mobile Test Client Launcher can run jsunit tests in a browser-based mobile test client"
+            delegateName="Mobile Test Client Launcher"
+            id="com.servoy.eclipse.mobile.test.launch"
+            modes="run"
+            name=" Servoy Mobile Unit Tests"
             public="true">
       </launchConfigurationType>
    </extension>
@@ -94,6 +107,11 @@
 	        configTypeID="com.servoy.eclipse.mobile.launch"
 	        id="com.servoy.eclipse.mobile.launch.icon">
 	    </launchConfigurationTypeImage>
+     <launchConfigurationTypeImage
+           configTypeID="com.servoy.eclipse.mobile.test.launch"
+           icon="icons/mobile_unit_tests.png"
+           id="com.servoy.eclipse.mobile.test.launch.icon">
+     </launchConfigurationTypeImage>
 	</extension>
 	<extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
 		  <launchConfigurationTabGroup
@@ -101,6 +119,100 @@
 		      type="com.servoy.eclipse.mobile.launch"
 		      class="com.servoy.eclipse.exporter.mobile.launch.MobileLaunchConfigurationTabGroup">
 		  </launchConfigurationTabGroup>
+    <launchConfigurationTabGroup
+          class="com.servoy.eclipse.exporter.mobile.launch.test.MobileLaunchTestConfigurationTabGroup"
+          id="com.servoy.eclipse.mobile.test.launch.tabGroup"
+          type="com.servoy.eclipse.mobile.test.launch">
+    </launchConfigurationTabGroup>
  	</extension>
+ <extension
+       point="org.eclipse.ui.menus">
+    <menuContribution
+          allPopups="false"
+          locationURI="popup:org.eclipse.ui.popup.any?before=additions">
+       <menu
+             id="com.servoy.eclipse.exporter.mobile.testMenu"
+             label="Run JS Unit Test(s)"
+             mnemonic="U">
+          <visibleWhen
+                checkEnabled="false">
+             <reference
+                   definitionId="com.servoy.eclipse.exporter.mobile.selectionIsTestTargetAndMobile">
+             </reference>
+          </visibleWhen>
+          <command
+                commandId="com.servoy.eclipse.jsunit.commands.runScriptUnitTests"
+                id="com.servoy.eclipse.exporter.mobile.menu.runItem"
+                label="Run tests"
+                mnemonic="m"
+                style="push"
+                tooltip="Runs JS Unit Tests in a mobile client; tries to use the mobile service solution in &quot;nodebug&quot; mode (so it doesn&apos;t need to be active)">
+          </command>
+          <command
+                commandId="com.servoy.eclipse.jsunit.commands.debugScriptUnitTests"
+                id="com.servoy.eclipse.exporter.mobile.menu.debugItem"
+                label="Run tests (activate service solution)"
+                mnemonic="s"
+                style="push"
+                tooltip="Runs JS Unit Tests in a mobile client; activates the mobile service solution before starting the tests (so that debug works on the service solution)">
+          </command>
+          <separator
+                name="additions"
+                visible="false">
+          </separator>
+       </menu>
+    </menuContribution>
+ </extension>
+ <extension
+       point="org.eclipse.ui.handlers">
+    <handler
+          class="com.servoy.eclipse.exporter.mobile.action.RunMobileTestsHandler"
+          commandId="com.servoy.eclipse.jsunit.commands.runScriptUnitTests">
+       <activeWhen>
+          <with
+                variable="com.servoy.eclipse.core.mobileState">
+             <equals
+                   value="true">
+             </equals>
+          </with>
+       </activeWhen>
+    </handler>
+    <handler
+          class="com.servoy.eclipse.exporter.mobile.action.DebugMobileTestsHandler"
+          commandId="com.servoy.eclipse.jsunit.commands.debugScriptUnitTests">
+       <activeWhen>
+          <with
+                variable="com.servoy.eclipse.core.mobileState">
+             <equals
+                   value="true">
+             </equals>
+          </with>
+       </activeWhen>
+    </handler>
+ </extension>
+ <extension
+       point="org.eclipse.core.expressions.definitions">
+    <definition
+          id="com.servoy.eclipse.exporter.mobile.selectionIsTestTargetAndMobile">
+       <and>
+          <reference
+                definitionId="com.servoy.eclipse.jsunit.selectionIsTestTarget">
+          </reference>
+          <with
+                variable="com.servoy.eclipse.core.mobileState">
+             <equals
+                   value="true">
+             </equals>
+          </with>
+       </and>
+    </definition>
+ </extension>
+ <extension
+       point="com.servoy.eclipse.jsunit.launchConfigurationProvider">
+    <launchConfigurationProvider
+          class="com.servoy.eclipse.exporter.mobile.action.MobileTestConfigurationProvider"
+          launchConfigurationID="com.servoy.eclipse.mobile.test.launch">
+    </launchConfigurationProvider>
+ </extension>
 
 </plugin>

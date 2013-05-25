@@ -351,4 +351,14 @@
             id="com.servoy.eclipse.core.pendingInstall">
       </job>
    </extension>
+   <extension
+         point="org.eclipse.ui.services">
+      <sourceProvider
+            provider="com.servoy.eclipse.core.ActiveSolutionProvider">
+         <variable
+               name="com.servoy.eclipse.core.mobileState"
+               priorityLevel="workbench">
+         </variable>
+      </sourceProvider>
+   </extension>
 </plugin>

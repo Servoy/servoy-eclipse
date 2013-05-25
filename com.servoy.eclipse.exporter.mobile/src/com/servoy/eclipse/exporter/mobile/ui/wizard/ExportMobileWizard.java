@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.mobileexporter.ui.wizard;
+package com.servoy.eclipse.exporter.mobile.ui.wizard;
 
 import java.net.URL;
 
@@ -40,7 +40,7 @@ import org.osgi.service.prefs.BackingStoreException;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
-import com.servoy.eclipse.mobileexporter.export.MobileExporter;
+import com.servoy.eclipse.exporter.mobile.export.MobileExporter;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
@@ -112,7 +112,7 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 	@Override
 	public boolean performFinish()
 	{
-		IEclipsePreferences preferences = InstanceScope.INSTANCE.getNode(com.servoy.eclipse.mobileexporter.Activator.PLUGIN_ID);
+		IEclipsePreferences preferences = InstanceScope.INSTANCE.getNode(com.servoy.eclipse.exporter.mobile.Activator.PLUGIN_ID);
 		preferences.putBoolean(PROPERTY_IS_OPEN_URL, finishPage.isOpenUrl());
 		try
 		{
@@ -223,7 +223,7 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 		{
 			this.url = url;
 			this.urlDescription = urlDescription;
-			IEclipsePreferences preferences = InstanceScope.INSTANCE.getNode(com.servoy.eclipse.mobileexporter.Activator.PLUGIN_ID);
+			IEclipsePreferences preferences = InstanceScope.INSTANCE.getNode(com.servoy.eclipse.exporter.mobile.Activator.PLUGIN_ID);
 			this.urlSelected = preferences.getBoolean(PROPERTY_IS_OPEN_URL, defaultSelected);
 		}
 

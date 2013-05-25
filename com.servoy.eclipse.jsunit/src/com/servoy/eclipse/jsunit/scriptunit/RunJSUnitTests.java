@@ -273,7 +273,7 @@ public abstract class RunJSUnitTests implements Runnable
 //		//DebugPlugin.getDefault().getLaunchManager().removeLaunch(launch);
 //	}
 
-	public void showTestRunnerViewPartInActivePage(final int t)
+	public static void showTestRunnerViewPartInActivePage(final int t)
 	{
 		Display.getDefault().asyncExec(new Runnable()
 		{

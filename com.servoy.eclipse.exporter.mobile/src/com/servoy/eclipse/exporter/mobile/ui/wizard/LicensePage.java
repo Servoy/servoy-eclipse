@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.mobileexporter.ui.wizard;
+package com.servoy.eclipse.exporter.mobile.ui.wizard;
 
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -29,7 +29,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import com.servoy.eclipse.mobileexporter.export.MobileExporter;
+import com.servoy.eclipse.exporter.mobile.export.MobileExporter;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
 /**

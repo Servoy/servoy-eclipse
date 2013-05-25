@@ -25,10 +25,15 @@ Require-Bundle: org.eclipse.dltk.javascript.rhino,
  org.eclipse.dltk.launching,
  org.eclipse.ui.ide,
  org.eclipse.dltk.ui,
- org.eclipse.ui.workbench.texteditor
+ org.eclipse.ui.workbench.texteditor,
+ org.eclipse.core.expressions
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: jsunit-1.3.jar,
  .
-Export-Package: com.servoy.eclipse.jsunit.runner
+Export-Package: com.servoy.eclipse.jsunit,
+ com.servoy.eclipse.jsunit.launch,
+ com.servoy.eclipse.jsunit.mobile,
+ com.servoy.eclipse.jsunit.runner,
+ com.servoy.eclipse.jsunit.scriptunit
 Import-Package: org.eclipse.jface.text

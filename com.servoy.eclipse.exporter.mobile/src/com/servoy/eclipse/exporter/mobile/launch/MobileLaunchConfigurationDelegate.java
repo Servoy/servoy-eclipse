@@ -20,8 +20,8 @@ import org.eclipse.ui.internal.browser.IBrowserDescriptor;
 import org.eclipse.ui.internal.browser.Messages;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.mobileexporter.Activator;
-import com.servoy.eclipse.mobileexporter.export.MobileExporter;
+import com.servoy.eclipse.exporter.mobile.Activator;
+import com.servoy.eclipse.exporter.mobile.export.MobileExporter;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
@@ -30,63 +30,96 @@ import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelegate
 {
 
-	public static final String LAUNCH_CONFIG_INSTANCE = "com.servoy.eclipse.mobile.launch.configurationInstance";
-
 	@Override
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException
 	{
-
-		String warLocation = configuration.getAttribute(IMobileLaunchConstants.WAR_LOCATION, "");
-		if (warLocation.length() == 0) throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Invalid war export path"));
-		String solutionName = configuration.getAttribute(IMobileLaunchConstants.SOLUTION_NAME, "");
-		String serverUrl = configuration.getAttribute(IMobileLaunchConstants.SERVER_URL, "");
-		int timeout = Integer.valueOf(configuration.getAttribute(IMobileLaunchConstants.TIMEOUT, "30")).intValue();
-		String appUrl = configuration.getAttribute(IMobileLaunchConstants.APPLICATION_URL, "");
-		String company = configuration.getAttribute("company", "");
-		String license = configuration.getAttribute("license", "");
 		String browserID = configuration.getAttribute(IMobileLaunchConstants.BROWSER_ID, "");
 		boolean nodebug = Boolean.valueOf(configuration.getAttribute(IMobileLaunchConstants.NODEBUG, "true")).booleanValue();
-		boolean validLicense = ApplicationServerSingleton.get().checkMobileLicense(company, license);
 
 		MobileExporter exporter = new MobileExporter();
-		exporter.setSolutionName(solutionName);
-		exporter.setOutputFolder(new File(warLocation));
-		exporter.setServerURL(serverUrl);
-		exporter.setTimeout(timeout);
-		exporter.setSkipConnect(validLicense);
+		prepareExporter(exporter, configuration, launch);
 
 		monitor.subTask("exporting mobile solution");
 		exporter.doExport(false);
 		monitor.subTask("deploying mobile solution");
+
+		int waitTime;
 		try
 		{
-			//wait for mobile war to be deployed , TODO listen for deployment event from tomcat
-			Thread.sleep(5000);
+			waitTime = Integer.parseInt(configuration.getAttribute(IMobileLaunchConstants.WAR_DEPLOYMENT_TIME,
+				IMobileLaunchConstants.DEFAULT_WAR_DEPLOYMENT_TIME));
+		}
+		catch (NumberFormatException ex)
+		{
+			waitTime = Integer.parseInt(IMobileLaunchConstants.DEFAULT_WAR_DEPLOYMENT_TIME);
+		}
+
+		try
+		{
+			// wait for mobile war to be deployed , TODO listen for deployment event from tomcat if embedded Tomcat install is targeted
+			Thread.sleep(waitTime * 1000);
 		}
 		catch (InterruptedException e)
 		{
 			ServoyLog.logError(e);
 		}
 
+		if (!nodebug)
+		{
+			String solutionName = configuration.getAttribute(IMobileLaunchConstants.SOLUTION_NAME, "");
+			ServoyProject serviceProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName + "_service");
+			ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(serviceProject, true);
+		}
+		//open browser
+		IWebBrowser webBrowser = getBrowser(browserID);
+		if (webBrowser == null)
+		{
+			webBrowser = PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser();
+		}
+		openBrowser(webBrowser, launch, configuration);
+	}
+
+	protected void openBrowser(IWebBrowser webBrowser, ILaunch launch, ILaunchConfiguration configuration) throws CoreException
+	{
+		URL appUrl = getApplicationURL(configuration);
+		if (appUrl != null) webBrowser.openURL(appUrl);
+	}
+
+	protected URL getApplicationURL(ILaunchConfiguration configuration) throws CoreException
+	{
 		try
 		{
-			if (!nodebug)
+			boolean nodebug = Boolean.valueOf(configuration.getAttribute(IMobileLaunchConstants.NODEBUG, "true")).booleanValue();
+			String mobileClientURL = configuration.getAttribute(IMobileLaunchConstants.APPLICATION_URL, "");
+			if (nodebug && !mobileClientURL.contains("nodebug=true"))
 			{
-				ServoyProject serviceProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName + "_service");
-				ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(serviceProject, true);
+				mobileClientURL = mobileClientURL + ((mobileClientURL.indexOf('?') != -1) ? '&' : '?') + "nodebug=true";
 			}
-			//open browser
-			IWebBrowser webBrowser = getBrowser(browserID);
-			if (webBrowser == null)
-			{
-				webBrowser = PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser();
-			}
-			webBrowser.openURL(new URL(appUrl));
+			return new URL(mobileClientURL);
 		}
 		catch (MalformedURLException e)
 		{
 			ServoyLog.logError(e);
+			return null;
 		}
+	}
+
+	protected void prepareExporter(MobileExporter exporter, ILaunchConfiguration configuration, ILaunch launch) throws CoreException
+	{
+		String warLocation = configuration.getAttribute(IMobileLaunchConstants.WAR_LOCATION, "");
+		if (warLocation.length() == 0) throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Invalid war export path"));
+		String solutionName = configuration.getAttribute(IMobileLaunchConstants.SOLUTION_NAME, "");
+		String serverUrl = configuration.getAttribute(IMobileLaunchConstants.SERVER_URL, "");
+		int timeout = Integer.valueOf(configuration.getAttribute(IMobileLaunchConstants.TIMEOUT, "30")).intValue();
+		String company = configuration.getAttribute("company", "");
+		String license = configuration.getAttribute("license", "");
+		boolean validLicense = ApplicationServerSingleton.get().checkMobileLicense(company, license);
+
+		exporter.setSolutionName(solutionName);
+		exporter.setOutputFolder(new File(warLocation));
+		exporter.setServerURL(serverUrl);
+		exporter.setTimeout(timeout);
+		exporter.setSkipConnect(validLicense);
 	}
 
 	public static IWebBrowser getBrowser(String browserId)

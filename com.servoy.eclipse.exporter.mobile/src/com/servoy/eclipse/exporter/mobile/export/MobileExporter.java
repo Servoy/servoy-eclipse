@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.mobileexporter.export;
+package com.servoy.eclipse.exporter.mobile.export;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -83,8 +83,17 @@ import com.servoy.j2db.util.Utils;
  */
 public class MobileExporter
 {
+
+	public static final String TEST_WAR_SUFFIX = "_TEST";
+
 	private static final String RELATIVE_TEMPLATE_PATH = "resources/solution.js";
 	private static final String RELATIVE_WAR_PATH = "resources/servoy_mobile.war";
+	private static final String HTML_FILE = "servoy_mobile.html";
+	private static final String MOBILE_MODULE_NAME = "mobileclient";
+
+	private static final String RELATIVE_TEST_WAR_PATH = "resources/servoy_mobile_test.war";
+	private static final String HTML_TEST_FILE = "servoy_mobile_test.html";
+	private static final String MOBILE_TEST_MODULE_NAME = "mobiletestclient";
 
 	private static final String FORM_LOOP_START = "${loop_forms}";
 	private static final String FORM_LOOP_END = "${endloop_forms}";
@@ -115,6 +124,13 @@ public class MobileExporter
 	private static final String TAG_SCRIPT_END = "\"></script>\n";
 	private static final String TAG_CSS_END = "\"/>\n";
 
+	private File outputFolder;
+	private String serverURL;
+	private String solutionName;
+	private int timeout;
+	private File configFile = null;
+	private boolean skipConnect = false;
+	private boolean useTestWar = false;
 
 	private String doMediaExport(ZipOutputStream zos, File outputFolder) throws IOException
 	{
@@ -368,12 +384,6 @@ public class MobileExporter
 		return null;
 	}
 
-	private File outputFolder;
-	private String serverURL;
-	private String solutionName;
-	private int timeout;
-	private File configFile = null;
-
 	public File doExport(boolean exportAsZip)
 	{
 		String formJson = doPersistExport();
@@ -387,23 +397,25 @@ public class MobileExporter
 		{
 			File outputFile = new File(tmpP, "solution.js"); //$NON-NLS-1$
 			Utils.writeTXTFile(outputFile, solutionJavascript);
-			Utils.writeTXTFile(new File(outputFolder, "mobileclient/solution.js"), solutionJavascript);
+			Utils.writeTXTFile(new File(outputFolder, MOBILE_MODULE_NAME + "/solution.js"), solutionJavascript);
 
 			outputFile = new File(tmpP, "solution_json.js");
 			Utils.writeTXTFile(outputFile, formJson);
-			Utils.writeTXTFile(new File(outputFolder, "mobileclient/solution_json.js"), formJson);
+			Utils.writeTXTFile(new File(outputFolder, MOBILE_MODULE_NAME + "/solution_json.js"), formJson);
 		}
 
 		File exportedFile = null;
-		InputStream is = this.getClass().getResourceAsStream(RELATIVE_WAR_PATH);
+		InputStream is = this.getClass().getResourceAsStream(useTestWar ? RELATIVE_TEST_WAR_PATH : RELATIVE_WAR_PATH);
 		if (is != null)
 		{
 			ZipOutputStream warStream = null;
 			try
 			{
+				String moduleName = useTestWar ? MOBILE_TEST_MODULE_NAME : MOBILE_MODULE_NAME;
+				String htmlFile = useTestWar ? HTML_TEST_FILE : HTML_FILE;
 				Map<String, String> renameMap = new HashMap<String, String>();
 				buildRenameEntriesList(renameMap);
-				exportedFile = new File(outputFolder, solutionName + (exportAsZip ? ".zip" : ".war"));
+				exportedFile = new File(outputFolder, solutionName + (useTestWar ? "_TEST" : "") + (exportAsZip ? ".zip" : ".war"));
 				warStream = new ZipOutputStream(new FileOutputStream(exportedFile));
 
 				String mediaExport = doMediaExport(warStream, developmentWorkspaceExport ? outputFolder : null);
@@ -414,20 +426,20 @@ public class MobileExporter
 				{
 					InputStream contentStream = null;
 					String entryName = entry.getName();
-					if (entryName.equals("servoy_mobile.html") || entryName.equals("mobileclient/mobileclient.nocache.js"))
+					if (entryName.equals(htmlFile) || entryName.equals(moduleName + "/" + moduleName + ".nocache.js"))
 					{
 						String fileContent = Utils.getTXTFileContent(zipStream, Charset.forName("UTF8"), false);
 						for (String key : renameMap.keySet())
 						{
 							fileContent = fileContent.replaceAll(Pattern.quote(key), renameMap.get(key));
 						}
-						if (entryName.equals("servoy_mobile.html"))
+						if (entryName.equals(htmlFile))
 						{
 							fileContent = fileContent.replaceAll(Pattern.quote("<!--SOLUTION_MEDIA_PLACEHOLDER-->"), mediaExport);
 							if (developmentWorkspaceExport)
 							{
-								String indexContent = Utils.getTXTFileContent(new FileInputStream(new File(outputFolder, "servoy_mobile.html")),
-									Charset.forName("UTF8"), false);
+								String indexContent = Utils.getTXTFileContent(new FileInputStream(new File(outputFolder, htmlFile)), Charset.forName("UTF8"),
+									false);
 								File outputFile = new File(outputFolder, "index.html"); //$NON-NLS-1$
 								indexContent = indexContent.replaceAll(Pattern.quote("<!--SOLUTION_MEDIA_PLACEHOLDER-->"), mediaExport);
 								Utils.writeTXTFile(outputFile, indexContent);
@@ -446,8 +458,8 @@ public class MobileExporter
 					}
 					entry = zipStream.getNextEntry();
 				}
-				addZipEntry("mobileclient/" + renameMap.get("solution_json.js"), warStream, Utils.getUTF8EncodedStream(formJson));
-				addZipEntry("mobileclient/" + renameMap.get("solution.js"), warStream, Utils.getUTF8EncodedStream(solutionJavascript));
+				addZipEntry(moduleName + "/" + renameMap.get("solution_json.js"), warStream, Utils.getUTF8EncodedStream(formJson));
+				addZipEntry(moduleName + "/" + renameMap.get("solution.js"), warStream, Utils.getUTF8EncodedStream(solutionJavascript));
 				if (exportAsZip && configFile != null && configFile.exists())
 				{
 					InputStream configStream = new FileInputStream(configFile);
@@ -474,13 +486,16 @@ public class MobileExporter
 
 	private void buildRenameEntriesList(Map<String, String> renameMap)
 	{
-		renameMap.put("servoy_mobile.html", "index.html");
+		String moduleName = useTestWar ? MOBILE_TEST_MODULE_NAME : MOBILE_MODULE_NAME;
 
-		addRenameEntries(renameMap, "mobileclient/", "solution_json", ".js");
-		addRenameEntries(renameMap, "mobileclient/", "solution", ".js");
-		addRenameEntries(renameMap, "mobileclient/", "servoy_utils", ".js");
-		addRenameEntries(renameMap, "mobileclient/", "servoy", ".css");
-		addRenameEntries(renameMap, "mobileclient/", "mobileclient.nocache", ".js");
+		String htmlFile = useTestWar ? HTML_TEST_FILE : HTML_FILE;
+		renameMap.put(htmlFile, "index.html");
+
+		addRenameEntries(renameMap, moduleName + "/", "solution_json", ".js");
+		addRenameEntries(renameMap, moduleName + "/", "solution", ".js");
+		addRenameEntries(renameMap, moduleName + "/", "servoy_utils", ".js");
+		addRenameEntries(renameMap, moduleName + "/", "servoy", ".css");
+		addRenameEntries(renameMap, moduleName + "/", moduleName + ".nocache", ".js");
 	}
 
 	private void addRenameEntries(Map<String, String> renameMap, String prefixLocation, String name, String subfix)
@@ -643,17 +658,17 @@ public class MobileExporter
 		return JSONObject.quote(declaration);
 	}
 
+	public void setConfigFile(File configFile)
+	{
+		this.configFile = configFile;
+	}
+
 	/**
 	 * @param outputFolder the outputFolder to set
 	 */
 	public void setOutputFolder(File outputFolder)
 	{
 		this.outputFolder = outputFolder;
-	}
-
-	public void setConfigFile(File configFile)
-	{
-		this.configFile = configFile;
 	}
 
 	/**
@@ -701,8 +716,6 @@ public class MobileExporter
 		return timeout;
 	}
 
-	private boolean skipConnect = false;
-
 	public void setSkipConnect(boolean connect)
 	{
 		this.skipConnect = connect;
@@ -739,5 +752,13 @@ public class MobileExporter
 		{
 			return null;
 		}
+	}
+
+	/**
+	 * By default this is false. If set to true, a unit test - mobile client war will be exported instead of the normal mobile client war.
+	 */
+	public void setUseTestWar(boolean useTestWar)
+	{
+		this.useTestWar = true;
 	}
 }

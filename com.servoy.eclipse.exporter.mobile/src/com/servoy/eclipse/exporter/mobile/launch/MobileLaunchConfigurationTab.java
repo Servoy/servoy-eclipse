@@ -15,7 +15,10 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
@@ -29,6 +32,7 @@ import org.eclipse.ui.internal.browser.Messages;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.exporter.mobile.action.StartMobileClientActionDelegate;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 
@@ -36,7 +40,6 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 {
 	// CONFIG_INVALID is only used in this view , it should not be possible to create an invalid launch configuration from solex view.
 	private static final String CONFIG_INVALID = "servoy.mobile.launchconfig.invalid";
-	String defaultServerURL = "http://localhost:8080";
 
 	// user visible browser name
 	static final String FIREFOX = "Mozilla firefox";
@@ -69,12 +72,13 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 	protected Label lblNoDebug;
 	protected Text txtNoDebugFeedback;
 
-	protected String NODEBUG_CHECK_TXT = "No debug is checked , running this launch configuration will start the service solution without switching to it as an active solution";
-	protected String NODEBUG_UNCHECK_TXT = "running this launch configuration will switch to service solution as active solution.";
+	protected String NODEBUG_CHECK_TXT = "when checked, running this launch configuration will start the service solution without switching to it as an active solution";
+	protected String NODEBUG_UNCHECK_TXT = "when unchecked running this launch configuration will switch to service solution as active solution.";
 
 	protected Label lblBrowser;
 	protected Combo combo;
 	protected String[] browserList = null;
+	private Text txtWarDeployTime;
 
 	private final ModifyListener modifyListener = new ModifyListener()
 	{
@@ -84,7 +88,6 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 			updateLaunchConfigurationDialog();
 		}
 	};
-
 
 	protected String[] getAvailableBrowsers()
 	{
@@ -134,6 +137,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		Composite container = new Composite(parent, SWT.NULL);
 		setControl(container);
 		parent.setSize(new Point(500, 300));
+		container.setLayout(new FormLayout());
 
 		lblSolution = new Label(container, SWT.NONE);
 		lblSolution.setText("Solution");
@@ -145,14 +149,14 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		lblStartUrl.setText("Start URL");
 
 		txtStartURL = new Text(container, SWT.BORDER);
-		txtStartURL.setText("http://localhost:8080");
+		txtStartURL.setText(getDefaultApplicationURL());
 		txtStartURL.addModifyListener(modifyListener);
 
 		lblServerURL = new Label(container, SWT.NONE);
 		lblServerURL.setText("Application Server Url");
 
 		txtServerURL = new Text(container, SWT.BORDER);
-		txtServerURL.setText("http://localhost:8080");
+		txtServerURL.setText(IMobileLaunchConstants.DEFAULT_SERVICE_URL);
 		txtServerURL.addModifyListener(modifyListener);
 
 		lblTimeout = new Label(container, SWT.NONE);
@@ -195,23 +199,10 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 				Button button = (Button)e.widget;
 				if (button.getSelection())
 				{
-					String startURL = txtStartURL.getText();
-					int index = startURL.indexOf("?nodebug=true");
-					if (index == -1 && startURL.indexOf("?") == -1)
-					{
-						startURL += "?nodebug=true";
-						txtStartURL.setText(startURL);
-					}
 					txtNoDebugFeedback.setText(NODEBUG_CHECK_TXT);
 				}
 				else
 				{
-					String startURL = txtStartURL.getText();
-					int index = startURL.indexOf("?nodebug=true");
-					if (index + "?nodebug=true".length() == startURL.length())
-					{
-						txtStartURL.setText(startURL.substring(0, startURL.length() - "?nodebug=true".length()));
-					}
 					txtNoDebugFeedback.setText(NODEBUG_UNCHECK_TXT);
 				}
 				setDirty(true);
@@ -221,12 +212,14 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		});
 
 		lblBrowser = new Label(container, SWT.NONE);
-		lblBrowser.setToolTipText("You can define external browsers by going to : Window->Preferences ->General ->Web  Bowser");
+		String toolTip = "You can define external browsers by going to : Window -> Preferences -> General -> Web Bowser";
+		lblBrowser.setToolTipText(toolTip);
 		lblBrowser.setText("Browser");
 
 		combo = new Combo(container, SWT.NONE);
 		browserList = getAvailableBrowsers();
 		combo.setItems(browserList);
+		combo.setToolTipText(toolTip);
 		combo.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -238,33 +231,122 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 			}
 		});
 
+		Label separator = new Label(container, SWT.SEPARATOR | SWT.HORIZONTAL);
 
+		Label lblWarDeployTime = new Label(container, SWT.NONE);
+		lblWarDeployTime.setText("WAR deployment time");
+		toolTip = "The exported servoy mobile .war file will be copied to the output folder (which is normally a deployment folder of the web container (Tomcat)).\nAfter being copied, the launcher will wait for this time to pass before starting the browser - allowing the .war container to discover and re-deploy the mobile application.\n\nPlease increase this time period if you get 404 - NOT Found or old version of the application when the browser opens.";
+		lblWarDeployTime.setToolTipText(toolTip);
+		txtWarDeployTime = new Text(container, SWT.BORDER);
+		txtWarDeployTime.setText(IMobileLaunchConstants.DEFAULT_WAR_DEPLOYMENT_TIME);
+		txtWarDeployTime.setToolTipText(toolTip);
+		txtWarDeployTime.addModifyListener(modifyListener);
+		txtWarDeployTime.addVerifyListener(new VerifyListener()
+		{
+			@Override
+			public void verifyText(VerifyEvent e)
+			{
+				if (e.text == null || e.text.length() == 0) e.doit = true;
+				else
+				{
+					try
+					{
+						Integer.valueOf(e.text);
+						e.doit = true;
+					}
+					catch (NumberFormatException ex)
+					{
+						e.doit = false;
+					}
+				}
+			}
+		});
+		Label lblWarDeployUnit = new Label(container, SWT.NONE);
+		lblWarDeployUnit.setText("(sec)");
+
+		// @formatter:off
 		GroupLayout groupLayout = new GroupLayout(container);
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(lblNoDebug).add(lblBrowser).add(lblTimeout).add(lblStartUrl).add(lblServerURL).add(
-					lblSolution)).add(18).add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-					groupLayout.createSequentialGroup().add(checkNoDebug).addPreferredGap(LayoutStyle.RELATED).add(txtNoDebugFeedback,
-						GroupLayout.PREFERRED_SIZE, 345, Short.MAX_VALUE)).add(txtTimeout, GroupLayout.PREFERRED_SIZE, 345, Short.MAX_VALUE).add(txtStartURL,
-					GroupLayout.PREFERRED_SIZE, 345, Short.MAX_VALUE).add(txtServerURL, GroupLayout.PREFERRED_SIZE, 345, Short.MAX_VALUE).add(combo,
-					GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(lblSolutionname, GroupLayout.PREFERRED_SIZE, 345,
-					Short.MAX_VALUE)).addContainerGap()));
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(lblSolutionname).add(lblSolution)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(txtStartURL, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(lblStartUrl)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(lblServerURL).add(txtServerURL, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(lblTimeout).add(txtTimeout, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(lblBrowser).add(combo, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(lblNoDebug).add(checkNoDebug)).add(txtNoDebugFeedback,
-					GroupLayout.PREFERRED_SIZE, 45, GroupLayout.PREFERRED_SIZE)).addContainerGap(92, Short.MAX_VALUE)));
+		groupLayout.setHorizontalGroup(
+			groupLayout.createParallelGroup(GroupLayout.TRAILING)
+				.add(groupLayout.createSequentialGroup()
+					.addContainerGap()
+					.add(groupLayout.createParallelGroup(GroupLayout.LEADING)
+						.add(groupLayout.createSequentialGroup()
+							.add(groupLayout.createParallelGroup(GroupLayout.TRAILING)
+								.add(lblBrowser)
+								.add(lblStartUrl)
+								.add(lblServerURL)
+								.add(lblSolution)
+								.add(lblTimeout))
+							.add(18)
+							.add(groupLayout.createParallelGroup(GroupLayout.LEADING)
+								.add(combo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+								.add(lblSolutionname, GroupLayout.PREFERRED_SIZE, 364, Short.MAX_VALUE)
+								.add(txtServerURL, GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE)
+								.add(txtStartURL, GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE)
+								.add(txtTimeout, GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE)))
+						.add(separator, GroupLayout.DEFAULT_SIZE, 522, Short.MAX_VALUE)
+						.add(groupLayout.createSequentialGroup()
+							.add(14)
+							.add(groupLayout.createParallelGroup(GroupLayout.TRAILING)
+								.add(lblWarDeployTime, GroupLayout.PREFERRED_SIZE, 126, GroupLayout.PREFERRED_SIZE)
+								.add(lblNoDebug))
+							.add(18)
+							.add(groupLayout.createParallelGroup(GroupLayout.LEADING)
+								.add(groupLayout.createSequentialGroup()
+									.add(txtWarDeployTime, GroupLayout.PREFERRED_SIZE, 66, GroupLayout.PREFERRED_SIZE)
+									.addPreferredGap(LayoutStyle.RELATED)
+									.add(lblWarDeployUnit, GroupLayout.PREFERRED_SIZE, 26, GroupLayout.PREFERRED_SIZE))
+								.add(groupLayout.createSequentialGroup()
+									.add(checkNoDebug)
+									.addPreferredGap(LayoutStyle.RELATED)
+									.add(txtNoDebugFeedback, GroupLayout.PREFERRED_SIZE, 345, GroupLayout.PREFERRED_SIZE)))))
+					.addContainerGap())
+		);
+		groupLayout.setVerticalGroup(
+			groupLayout.createParallelGroup(GroupLayout.LEADING)
+				.add(groupLayout.createSequentialGroup()
+					.addContainerGap()
+					.add(groupLayout.createParallelGroup(GroupLayout.BASELINE)
+						.add(lblSolutionname)
+						.add(lblSolution))
+					.addPreferredGap(LayoutStyle.RELATED)
+					.add(groupLayout.createParallelGroup(GroupLayout.BASELINE)
+						.add(txtStartURL, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+						.add(lblStartUrl))
+					.addPreferredGap(LayoutStyle.RELATED)
+					.add(groupLayout.createParallelGroup(GroupLayout.BASELINE)
+						.add(lblServerURL)
+						.add(txtServerURL, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))
+					.addPreferredGap(LayoutStyle.RELATED)
+					.add(groupLayout.createParallelGroup(GroupLayout.BASELINE)
+						.add(lblBrowser)
+						.add(combo, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))
+					.addPreferredGap(LayoutStyle.RELATED)
+					.add(groupLayout.createParallelGroup(GroupLayout.BASELINE)
+						.add(lblTimeout)
+						.add(txtTimeout, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+					.add(29)
+					.add(separator, GroupLayout.PREFERRED_SIZE, 2, GroupLayout.PREFERRED_SIZE)
+					.add(18)
+					.add(groupLayout.createParallelGroup(GroupLayout.BASELINE)
+						.add(txtNoDebugFeedback, GroupLayout.PREFERRED_SIZE, 45, GroupLayout.PREFERRED_SIZE)
+						.add(checkNoDebug)
+						.add(lblNoDebug))
+					.addPreferredGap(LayoutStyle.RELATED)
+					.add(groupLayout.createParallelGroup(GroupLayout.BASELINE)
+						.add(txtWarDeployTime, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.add(lblWarDeployTime)
+						.add(lblWarDeployUnit))
+					.addContainerGap(72, Short.MAX_VALUE))
+		);
+		// @formatter:on
 		container.setLayout(groupLayout);
+	}
+
+	protected String getDefaultApplicationURL()
+	{
+		return StartMobileClientActionDelegate.getDefaultApplicationURL(false);
 	}
 
 	@Override
@@ -274,37 +356,36 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		final ServoyProject activeProject = servoyModel.getActiveProject();
 
 		configuration.setAttribute(IMobileLaunchConstants.SOLUTION_NAME, activeProject.getSolution().getName());
-		configuration.setAttribute(IMobileLaunchConstants.SERVER_URL, "http://localhost:8080");
-		configuration.setAttribute(IMobileLaunchConstants.APPLICATION_URL, "http://localhost:8080?nodebug=true");
+		configuration.setAttribute(IMobileLaunchConstants.SERVER_URL, IMobileLaunchConstants.DEFAULT_SERVICE_URL);
+		configuration.setAttribute(IMobileLaunchConstants.APPLICATION_URL, getDefaultApplicationURL());
 		configuration.setAttribute(IMobileLaunchConstants.TIMEOUT, "30");
 		configuration.setAttribute(IMobileLaunchConstants.NODEBUG, "true");
 		configuration.setAttribute(IMobileLaunchConstants.BROWSER_ID, "org.eclipse.ui.browser.chrome");
+		configuration.setAttribute(IMobileLaunchConstants.WAR_DEPLOYMENT_TIME, IMobileLaunchConstants.DEFAULT_WAR_DEPLOYMENT_TIME);
 	}
-
 
 	@Override
 	public void initializeFrom(ILaunchConfiguration configuration)
 	{
-
 		try
 		{
 			lblSolutionname.setText(configuration.getAttribute(IMobileLaunchConstants.SOLUTION_NAME, "not defined"));
-			txtServerURL.setText(configuration.getAttribute(IMobileLaunchConstants.SERVER_URL, "http://localhost:8080"));
-			txtStartURL.setText(configuration.getAttribute(IMobileLaunchConstants.APPLICATION_URL, "http://localhost:8080?nodebug=true"));
+			txtServerURL.setText(configuration.getAttribute(IMobileLaunchConstants.SERVER_URL, IMobileLaunchConstants.DEFAULT_SERVICE_URL));
+			txtStartURL.setText(configuration.getAttribute(IMobileLaunchConstants.APPLICATION_URL, getDefaultApplicationURL()));
 			txtTimeout.setText(configuration.getAttribute(IMobileLaunchConstants.TIMEOUT, "30"));
-			checkNoDebug.setSelection(Boolean.valueOf(configuration.getAttribute(IMobileLaunchConstants.NODEBUG, "true")));
+			checkNoDebug.setSelection(Boolean.valueOf(configuration.getAttribute(IMobileLaunchConstants.NODEBUG, "true")).booleanValue());
 			String browserId = configuration.getAttribute(IMobileLaunchConstants.BROWSER_ID, "default");
 			String browserName = (String)possibleBrowsersNames.get(browserId);
 			int comboIndexToSelect = Arrays.asList(browserList).indexOf(browserName);
 			combo.select(comboIndexToSelect == -1 ? 0 : comboIndexToSelect);
+			txtWarDeployTime.setText(configuration.getAttribute(IMobileLaunchConstants.WAR_DEPLOYMENT_TIME, IMobileLaunchConstants.DEFAULT_WAR_DEPLOYMENT_TIME));
+			if (txtWarDeployTime.getText().length() == 0) txtWarDeployTime.setText(IMobileLaunchConstants.DEFAULT_WAR_DEPLOYMENT_TIME);
 		}
 		catch (CoreException e)
 		{
 			ServoyLog.logError(e);
 		}
-
 	}
-
 
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration)
@@ -316,6 +397,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		configuration.setAttribute(IMobileLaunchConstants.NODEBUG, Boolean.toString(checkNoDebug.getSelection()));
 		String browserId = (String)possibleBrowsersNames.getKey(browserList[combo.getSelectionIndex() == -1 ? 0 : combo.getSelectionIndex()]);
 		configuration.setAttribute(IMobileLaunchConstants.BROWSER_ID, browserId);
+		configuration.setAttribute(IMobileLaunchConstants.WAR_DEPLOYMENT_TIME, txtWarDeployTime.getText());
 	}
 
 	@Override

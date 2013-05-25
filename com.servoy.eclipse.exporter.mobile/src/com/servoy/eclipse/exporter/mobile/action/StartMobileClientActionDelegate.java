@@ -14,7 +14,7 @@
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
-package com.servoy.eclipse.expoter.mobile.action;
+package com.servoy.eclipse.exporter.mobile.action;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -46,8 +46,11 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.exporter.mobile.export.MobileExporter;
 import com.servoy.eclipse.exporter.mobile.launch.IMobileLaunchConstants;
 import com.servoy.eclipse.exporter.mobile.launch.MobileLaunchConfigurationDelegate;
+import com.servoy.eclipse.exporter.mobile.launch.test.IMobileTestLaunchConstants;
+import com.servoy.eclipse.jsunit.launch.JSUnitLaunchConfigurationDelegate;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Solution;
@@ -61,6 +64,9 @@ import com.servoy.j2db.util.Utils;
  */
 public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldownDelegate2
 {
+
+	private static final String DASH = " - ";
+
 	IWorkbenchWindow window = null;
 	ServoyProject activeProject = null;
 
@@ -83,7 +89,7 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 	{
 		if (configToLaunch == null)
 		{// initialize button push action
-			ILaunchConfiguration[] defaultCfgs = getLaunchConfigsForCurentProject(true);
+			ILaunchConfiguration[] defaultCfgs = getLaunchConfigsForCurrentProject(true, IMobileLaunchConstants.LAUNCH_CONFIGURATION_TYPE_ID);
 			configToLaunch = defaultCfgs[0];
 		}
 		return configToLaunch;
@@ -112,11 +118,6 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 	private ILaunchConfiguration configToLaunch;
 	private HashMap<String, Image> browsersImagesList;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.IWorkbenchWindowPulldownDelegate#getMenu(org.eclipse.swt.widgets.Control)
-	 */
 	public Menu getMenu(Control parent)
 	{
 		return sharedGetMenu(parent);
@@ -205,29 +206,23 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 					}
 				}
 			};
-			ILaunchConfiguration[] defaultConfigs = getLaunchConfigsForCurentProject(true);
+			ILaunchConfiguration[] configs = getLaunchConfigsForCurrentProject(true, IMobileLaunchConstants.LAUNCH_CONFIGURATION_TYPE_ID);
+			addLaunchConfigurations(selectionAdapter, configs, true);
+			if (configs.length > 0) new MenuItem(configsListMenu, SWT.SEPARATOR);
 
-			for (ILaunchConfiguration cfg : defaultConfigs)
-			{
-				MenuItem menuItem = new MenuItem(configsListMenu, SWT.PUSH);
-				menuItem.setText(cfg.getName());
-				menuItem.setData(cfg);
-				Image img = getImageForName(cfg.getAttribute(IMobileLaunchConstants.BROWSER_ID, ""));
-				if (img != null) menuItem.setImage(img);
-				menuItem.addSelectionListener(selectionAdapter);
-			}
-			new MenuItem(configsListMenu, SWT.SEPARATOR);
-			ILaunchConfiguration[] cutomCfgs = getLaunchConfigsForCurentProject(false);
-			for (ILaunchConfiguration cfg : cutomCfgs)
-			{
-				MenuItem menuItem = new MenuItem(configsListMenu, SWT.PUSH);
-				menuItem.setText(cfg.getName());
-				menuItem.setData(cfg);
-				Image img = getImageForName(cfg.getAttribute(IMobileLaunchConstants.BROWSER_ID, ""));
-				if (img != null) menuItem.setImage(img);
-				menuItem.addSelectionListener(selectionAdapter);
-			}
-			//open launch prefference page
+			configs = getLaunchConfigsForCurrentProject(true, IMobileTestLaunchConstants.LAUNCH_TEST_CONFIGURATION_TYPE_ID);
+			addLaunchConfigurations(selectionAdapter, configs, true);
+			if (configs.length > 0) new MenuItem(configsListMenu, SWT.SEPARATOR);
+
+			configs = getLaunchConfigsForCurrentProject(false, IMobileLaunchConstants.LAUNCH_CONFIGURATION_TYPE_ID);
+			addLaunchConfigurations(selectionAdapter, configs, false);
+			if (configs.length > 0) new MenuItem(configsListMenu, SWT.SEPARATOR);
+
+			configs = getLaunchConfigsForCurrentProject(false, IMobileTestLaunchConstants.LAUNCH_TEST_CONFIGURATION_TYPE_ID);
+			addLaunchConfigurations(selectionAdapter, configs, false);
+			if (configs.length > 0) new MenuItem(configsListMenu, SWT.SEPARATOR);
+
+			// open launch preference page
 			MenuItem menuItem = new MenuItem(configsListMenu, SWT.PUSH);
 			menuItem.setText("Organize ...");
 			menuItem.addSelectionListener(new SelectionAdapter()
@@ -235,6 +230,7 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 				@Override
 				public void widgetSelected(SelectionEvent e)
 				{
+					configToLaunch = null;
 					String groupId = DebugUITools.getLaunchGroup(getCurrentLaunchConfig(), "run").getIdentifier();
 					try
 					{
@@ -259,43 +255,69 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 		return configsListMenu;
 	}
 
-	private ILaunchConfiguration[] getLaunchConfigsForCurentProject(boolean defaultLaunchConfigs)
+	private void addLaunchConfigurations(SelectionAdapter selectionAdapter, ILaunchConfiguration[] configs, boolean defaults) throws CoreException
 	{
-		if (activeProject.getSolution().getSolutionType() != SolutionMetaData.MOBILE)
+		for (ILaunchConfiguration cfg : configs)
+		{
+			MenuItem menuItem = new MenuItem(configsListMenu, SWT.PUSH);
+			menuItem.setText(defaults ? cfg.getName().replace(DASH + activeProject.getSolution().getName(), "") : cfg.getName());
+			menuItem.setData(cfg);
+			Image img = getImageForName(cfg.getAttribute(IMobileLaunchConstants.BROWSER_ID, ""));
+			if (img != null) menuItem.setImage(img);
+			menuItem.addSelectionListener(selectionAdapter);
+		}
+	}
+
+	private ILaunchConfiguration[] getLaunchConfigsForCurrentProject(boolean defaultLaunchConfigs, String launchConfigurationID)
+	{
+		return getLaunchConfigsForProject(activeProject, defaultLaunchConfigs, launchConfigurationID);
+	}
+
+	public static ILaunchConfiguration[] getLaunchConfigsForProject(ServoyProject project, boolean defaultLaunchConfigs, String launchConfigurationID)
+	{
+		if (project.getSolution().getSolutionType() != SolutionMetaData.MOBILE)
 		{
 			return new ILaunchConfiguration[0];
 		}
 		ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
-		ILaunchConfigurationType type = manager.getLaunchConfigurationType(IMobileLaunchConstants.LAUNCH_CONFIGURATION_TYPE_ID);
-		ILaunchConfiguration[] configurations = null;
 		ArrayList<ILaunchConfiguration> activeProjectCfgs = new ArrayList<ILaunchConfiguration>();
+		ILaunchConfigurationType type = manager.getLaunchConfigurationType(launchConfigurationID);
+		ILaunchConfiguration[] configurations = null;
 		try
 		{
 			configurations = manager.getLaunchConfigurations(type);
 			if (defaultLaunchConfigs)
 			{
+				ILaunchConfiguration nodebug = null, debug = null;
 				for (ILaunchConfiguration config : configurations)
 				{
-					if (config.getAttribute(IMobileLaunchConstants.SOLUTION_NAME, "").equals(activeProject.getSolution().getName()) &&
-						config.getAttribute(IMobileLaunchConstants.IS_DEFAULT_CONFIG, "").equals("true"))
+					if (config.getAttribute(IMobileLaunchConstants.SOLUTION_NAME, "").equals(project.getSolution().getName()) &&
+						isDefaultConfigName(config, launchConfigurationID, project.getSolution().getName()))
 					{
-						activeProjectCfgs.add(config);
+						if (config.getAttribute(IMobileLaunchConstants.NODEBUG, "true").equals("true"))
+						{
+							nodebug = config;
+						}
+						else
+						{
+							debug = config;
+						}
 					}
 				}
-				// no default configs defined , create them
-				if (activeProjectCfgs.size() == 0)
-				{
 
-					activeProjectCfgs.add(getDefaultLaunchConfig(true));
-					activeProjectCfgs.add(getDefaultLaunchConfig(false));
-				}
+				// create missing default configurations if necessary
+				if (nodebug == null) nodebug = createDefaultLaunchConfig(project, true, launchConfigurationID);
+				if (debug == null) debug = createDefaultLaunchConfig(project, false, launchConfigurationID);
+
+				activeProjectCfgs.add(nodebug);
+				activeProjectCfgs.add(debug);
 			}
 			else
 			{ // custom configs
 				for (ILaunchConfiguration config : configurations)
 				{
-					if (config.getAttribute(IMobileLaunchConstants.SOLUTION_NAME, "").equals(activeProject.getSolution().getName()) &&
-						!config.getAttribute(IMobileLaunchConstants.IS_DEFAULT_CONFIG, "").equals("true"))
+					if (config.getAttribute(IMobileLaunchConstants.SOLUTION_NAME, "").equals(project.getSolution().getName()) &&
+						!isDefaultConfigName(config, launchConfigurationID, project.getSolution().getName()))
 					{
 						activeProjectCfgs.add(config);
 					}
@@ -312,31 +334,72 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 		return Utils.asArray(activeProjectCfgs.iterator(), ILaunchConfiguration.class);
 	}
 
-	private ILaunchConfiguration getDefaultLaunchConfig(boolean nodebug) throws CoreException
+	private static boolean isDefaultConfigName(ILaunchConfiguration config, String launchConfigurationID, String solutionName) throws CoreException
+	{
+		String defaultName = getDefaultConfigName(solutionName, launchConfigurationID,
+			"true".equals(config.getAttribute(IMobileLaunchConstants.NODEBUG, "true")));
+		return config.getName().startsWith(defaultName) &&
+			(config.getName().length() == defaultName.length() || (config.getName().substring(defaultName.length()).matches("_\\p{Digit}*")));
+	}
+
+	public static String getDefaultConfigName(String solutionName, String launchConfigurationID, boolean nodebug)
+	{
+		return (launchConfigurationID.equals(IMobileLaunchConstants.LAUNCH_CONFIGURATION_TYPE_ID) ? "Run mobile client" : "Run mobile JS Unit Tests") + DASH +
+			solutionName + (nodebug ? "" : " and activate service solution (for debug)");
+	}
+
+	public static ILaunchConfiguration createDefaultLaunchConfig(ServoyProject project, boolean nodebug, String launchConfigurationID) throws CoreException
+	{
+		return createDefaultLaunchConfig(project, nodebug, launchConfigurationID,
+			getDefaultConfigName(project.getSolution().getName(), launchConfigurationID, nodebug));
+	}
+
+	public static ILaunchConfiguration createDefaultLaunchConfig(ServoyProject project, boolean nodebug, String launchConfigurationID, String launchConfigName)
+		throws CoreException
 	{
 		ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
-		ILaunchConfigurationType type = manager.getLaunchConfigurationType(IMobileLaunchConstants.LAUNCH_CONFIGURATION_TYPE_ID);
+		ILaunchConfigurationType type = manager.getLaunchConfigurationType(launchConfigurationID);
 
-		ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(null, activeProject.getSolution().getName() +
-			(nodebug ? " (No Debug)" : " (Switch to service)"));
+		String initialName = launchConfigName;
+		int i = 0;
+		while (manager.isExistingLaunchConfigurationName(launchConfigName))
+		{
+			// another launch config with this name but different type (can't be used as default) exists; generate another name
+			launchConfigName = initialName + " _" + (++i);
+		}
 
-		workingCopy.setAttribute(IMobileLaunchConstants.SOLUTION_NAME, activeProject.getSolution().getName());
+		ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(null, launchConfigName);
+
+		workingCopy.setAttribute(IMobileLaunchConstants.SOLUTION_NAME, project.getSolution().getName());
 		File webappsFolder = new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory(), "server/webapps");
 
 		workingCopy.setAttribute(IMobileLaunchConstants.WAR_LOCATION, webappsFolder.getAbsolutePath());
-		String appUrl = new StringBuilder("http://localhost:").append(ApplicationServerSingleton.get().getWebServerPort()).append("/").append( //$NON-NLS-1$ //$NON-NLS-2$
-			activeProject.getSolution().getName()).append("/index.html" + (nodebug ? "?nodebug=true" : "")).toString();
+		String appUrl = getDefaultApplicationURL(project.getSolution().getName(),
+			launchConfigurationID.equals(IMobileTestLaunchConstants.LAUNCH_TEST_CONFIGURATION_TYPE_ID));
 
-		workingCopy.setAttribute(IMobileLaunchConstants.SERVER_URL, "http://localhost:8080");
+		workingCopy.setAttribute(IMobileLaunchConstants.SERVER_URL, IMobileLaunchConstants.DEFAULT_SERVICE_URL);
 		workingCopy.setAttribute(IMobileLaunchConstants.APPLICATION_URL, appUrl);
 		workingCopy.setAttribute("company", "");
 		workingCopy.setAttribute("license", "");
 		String browser = MobileLaunchConfigurationDelegate.getBrowser("org.eclipse.ui.browser.chrome") != null ? "org.eclipse.ui.browser.chrome" : "default";
 		workingCopy.setAttribute(IMobileLaunchConstants.BROWSER_ID, browser);
 		workingCopy.setAttribute(IMobileLaunchConstants.NODEBUG, nodebug ? "true" : "false");
-		workingCopy.setAttribute(IMobileLaunchConstants.IS_DEFAULT_CONFIG, "true");
+
+		JSUnitLaunchConfigurationDelegate.prepareLaunchConfigForTesting(workingCopy);
 
 		return workingCopy.doSave();
+	}
+
+	public static String getDefaultApplicationURL(boolean testURL)
+	{
+		String solutionName = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution().getName();
+		return getDefaultApplicationURL(solutionName, testURL);
+	}
+
+	public static String getDefaultApplicationURL(String solutionName, boolean testURL)
+	{
+		return new StringBuilder("http://localhost:").append(ApplicationServerSingleton.get().getWebServerPort()).append("/").append( //$NON-NLS-1$ //$NON-NLS-2$
+			solutionName).append(testURL ? MobileExporter.TEST_WAR_SUFFIX : "").append("/index.html").toString();
 	}
 
 	public void init(IWorkbenchWindow window)

@@ -19,31 +19,22 @@ package com.servoy.eclipse.jsunit.launch;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.LaunchConfigurationDelegate;
-import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 import org.eclipse.dltk.testing.DLTKTestingConstants;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
 import org.eclipse.dltk.testing.ITestingEngine;
 import org.eclipse.dltk.testing.TestingEngineManager;
 
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.jsunit.RunSmartClientTests;
-import com.servoy.eclipse.jsunit.mobile.RunMobileClientTests;
 import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.jsunit.scriptunit.JSUnitTestingEngine;
-import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ScriptMethod;
-import com.servoy.j2db.persistence.SolutionMetaData;
 
 /**
  * TestTargets are stored in launch configurations.
@@ -67,70 +58,33 @@ public class JSUnitLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		return currentLaunch;
 	}
 
-
-	@Override
-	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException
+	// mostly preparations needed for DLTK testing view to work as expected
+	public static TestTarget prepareForLaunch(ILaunchConfiguration configuration, ILaunch launch) throws CoreException
 	{
 		currentLaunch = launch;
+
 		DLTKTestingPlugin.getModel().start();
 		final ITestingEngine engine = getTestingEngine(configuration);
 		//we don't run servoy js as an interpreter in eclipse context so first parameter  == null 
 		engine.configureLaunch(null, configuration, launch);
 		/* DO THE ACTUAL EXECUTION */
-		String testTargetStr = configuration.getAttribute(JSUnitLaunchConfigurationDelegate.LAUNCH_CONFIG_INSTANCE, (String)null);
-		TestTarget testTarget = TestTarget.fromString(testTargetStr);
-
-		ServoyProject ap = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-		if (ap != null && SolutionMetaData.isServoyMobileSolution(ap.getSolution()))
-		{
-			new RunMobileClientTests(testTarget, launch).run();
-		}
-		else
-		{
-			new RunSmartClientTests(testTarget, launch).run();
-		}
+		String testTargetStr = configuration.getAttribute(JSUnitLaunchConfigurationDelegate.LAUNCH_CONFIG_INSTANCE,
+			TestTarget.activeProjectTarget().convertToString());
+		return TestTarget.convertFromString(testTargetStr);
 	}
 
-	public static void launchTestTarget(TestTarget target)
+	@Override
+	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException
 	{
-		if (target == null)
-		{
-			// use currently active solution
-			target = new TestTarget(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution());
-		}
-		try
-		{
-			ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
-			ILaunchConfigurationType type = manager.getLaunchConfigurationType(JSUnitLaunchConfigurationDelegate.LAUNCH_CONFIGURATION_TYPE_ID);
-			ILaunchConfiguration[] configurations;
-			configurations = manager.getLaunchConfigurations(type);
-			int count = 0;
-			for (ILaunchConfiguration configuration : configurations)
-			{
-				//was this target already launched before? if yes reuse the launch configuration
-				if (target.toString().equals(configuration.getAttribute(JSUnitLaunchConfigurationDelegate.LAUNCH_CONFIG_INSTANCE, "")))
-				{
-					DebugUITools.launch(configuration, ILaunchManager.DEBUG_MODE);
-					return;
-				}
-				count++;
-				if (count > JSUnitLaunchConfigurationDelegate.MAX_CONFIG_INSTANCES) configuration.delete();
-			}
+		TestTarget testTarget = prepareForLaunch(configuration, launch);
 
-			//create a launch configuration copy 
-			ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(null, generateLaunchConfigName(target));
-			workingCopy.setAttribute(DLTKTestingConstants.ATTR_ENGINE_ID, JSUnitTestingEngine.ENGINE_ID);
+		new RunSmartClientTests(testTarget, launch).run();
+	}
 
-			workingCopy.setAttribute(ScriptLaunchConfigurationConstants.ATTR_PROJECT_NAME, generateLaunchConfigName(target));
-			workingCopy.setAttribute(JSUnitLaunchConfigurationDelegate.LAUNCH_CONFIG_INSTANCE, target.toString());
-			ILaunchConfiguration configuration = workingCopy.doSave();
-			//this call will end up in launch method of ServoyJsLaunchConfigurationDelegate
-			DebugUITools.launch(configuration, ILaunchManager.DEBUG_MODE);
-		}
-		catch (CoreException e)
-		{
-			ServoyLog.logError(e);
-		}
+	public static void prepareLaunchConfigForTesting(ILaunchConfigurationWorkingCopy workingCopy)
+	{
+		workingCopy.setAttribute(DLTKTestingConstants.ATTR_ENGINE_ID, JSUnitTestingEngine.ENGINE_ID);
+		workingCopy.setAttribute(ScriptLaunchConfigurationConstants.ATTR_PROJECT_NAME, workingCopy.getName());
 	}
 
 	public static String generateLaunchConfigName(TestTarget target)
@@ -178,10 +132,9 @@ public class JSUnitLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		return ret.equals("") ? "Dummmy Solution Name" : ret;
 	}
 
-	private ITestingEngine getTestingEngine(ILaunchConfiguration configuration) throws CoreException
+	private static ITestingEngine getTestingEngine(ILaunchConfiguration configuration) throws CoreException
 	{
 		return TestingEngineManager.getEngine(configuration.getAttribute(DLTKTestingConstants.ATTR_ENGINE_ID, (String)null));
 	}
-
 
 }

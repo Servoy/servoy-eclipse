@@ -22,6 +22,7 @@ import com.servoy.eclipse.jsunit.runner.TestTarget;
  * Classes that implement this interface should be able to provide a target for running JS Unit tests inside the active solution.
  * @author acostescu
  */
+// if you rename this class please rename it in SolutionExplorerView.init workaround as well
 public interface SolutionUnitTestTarget
 {
 

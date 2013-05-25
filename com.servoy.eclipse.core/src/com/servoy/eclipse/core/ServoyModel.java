@@ -1443,7 +1443,8 @@ public class ServoyModel extends AbstractServoyModel
 		refreshGlobalScopes(false);
 
 		if (isActiveSolutionMobile())
-		{ // the enablement/disablement logic of mobile launch toolbar button is in the  exporter plugin 
+		{
+			// the enablement/disablement logic of mobile launch toolbar button is in the  exporter plugin 
 			// (the button is disabled by default)
 			Platform.getPlugin("com.servoy.eclipse.exporter.mobile");
 		}

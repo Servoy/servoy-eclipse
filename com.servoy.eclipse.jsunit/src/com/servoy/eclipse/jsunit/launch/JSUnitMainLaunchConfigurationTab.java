@@ -73,7 +73,8 @@ public class JSUnitMainLaunchConfigurationTab extends AbstractLaunchConfiguratio
 			}
 			else
 			{
-				TestTarget target = TestTarget.fromString(configuration.getAttribute(JSUnitLaunchConfigurationDelegate.LAUNCH_CONFIG_INSTANCE, ""));
+				TestTarget target = TestTarget.convertFromString(configuration.getAttribute(JSUnitLaunchConfigurationDelegate.LAUNCH_CONFIG_INSTANCE,
+					TestTarget.activeProjectTarget().convertToString()));
 				textArea.setText(JSUnitLaunchConfigurationDelegate.generateLaunchConfigName(target));
 			}
 		}

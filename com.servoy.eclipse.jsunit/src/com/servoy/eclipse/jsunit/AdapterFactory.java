@@ -36,6 +36,8 @@ import com.servoy.j2db.util.Pair;
 public class AdapterFactory implements IAdapterFactory
 {
 
+	public final static String MOBILE_TARGET_PROPERTY = "mobile_target"; //$NON-NLS-1$
+
 	// this class is used for attaching
 	// the "run unit tests" action to the correct node
 	private class NodeSolutionUnitTestTarget implements SolutionUnitTestTarget
@@ -101,8 +103,8 @@ public class AdapterFactory implements IAdapterFactory
 							retVal = new NodeSolutionUnitTestTarget(node);
 						}
 					}
-					else if (type == UserNodeType.FORM || type == UserNodeType.GLOBALS_ITEM || type == UserNodeType.FORM_METHOD ||
-						type == UserNodeType.GLOBAL_METHOD_ITEM)
+					else if (type == UserNodeType.FORM || type == UserNodeType.GLOBALS_ITEM ||
+						((type == UserNodeType.FORM_METHOD || type == UserNodeType.GLOBAL_METHOD_ITEM) && node.getName().startsWith("test")))
 					{
 						retVal = new NodeSolutionUnitTestTarget(node);
 					}

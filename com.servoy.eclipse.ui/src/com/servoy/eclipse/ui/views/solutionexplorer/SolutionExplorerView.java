@@ -914,6 +914,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		super.init(site, memento);
 		IContextService contextService = (IContextService)getSite().getService(IContextService.class);
 		contextService.activateContext(SOLUTION_EXPLORER_CONTEXT);
+
+		// workaround until https://bugs.eclipse.org/bugs/show_bug.cgi?id=119948 gets implemented
+		Platform.getAdapterManager().loadAdapter(new SimpleUserNode("wrnd", UserNodeType.DATE), "com.servoy.eclipse.jsunit.SolutionUnitTestTarget");
 	}
 
 	/**

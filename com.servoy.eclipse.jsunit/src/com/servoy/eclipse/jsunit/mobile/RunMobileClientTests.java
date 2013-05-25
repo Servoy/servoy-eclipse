@@ -22,6 +22,7 @@ import java.util.Map;
 import org.eclipse.debug.core.ILaunch;
 
 import com.servoy.base.test.IJSUnitSuiteHandler;
+import com.servoy.eclipse.jsunit.runner.SolutionJSUnitSuiteCodeBuilder;
 import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.jsunit.scriptunit.RunJSUnitTests;
 import com.servoy.j2db.util.StaticSingletonMap;
@@ -34,26 +35,43 @@ public class RunMobileClientTests extends RunJSUnitTests
 {
 
 	private SuiteBridge bridge;
+	private final int clientConnectTimeout;
+	private final SolutionJSUnitSuiteCodeBuilder builder;
 
-	public RunMobileClientTests(TestTarget testTarget, ILaunch launch)
+	/**
+	 * @param builder 
+	 * @param clientConnectTimeout (in seconds) -1 fallsback to default value.
+	 */
+	public RunMobileClientTests(TestTarget testTarget, SolutionJSUnitSuiteCodeBuilder builder, ILaunch launch, int clientConnectTimeout)
 	{
 		super(testTarget, launch);
+		this.clientConnectTimeout = clientConnectTimeout;
+		this.builder = builder;
 	}
 
 	@Override
 	protected void prepareForTesting()
 	{
-		// TODO perform the automated mobile export using [serverUrl]/MobileTestClient/servoy_mobile_test.html?noinitsmc=true&bid=[bridgeObjId]
+		bridge = new SuiteBridge(clientConnectTimeout, -1);
+
+		bridge.setSolutionSuiteJSCode(builder.getRootTestClassName(), builder.getCode());
+
+		// perform the automated mobile export and start app. using [serverUrl]/MobileTestClient/servoy_mobile_test.html?noinitsmc=true&bid=[bridgeObjId]
 		// as start URL; deploy that .war just like it's done in the .war exporter to Servoy Developer Tomcat
 		// the service solution URL should use &nodebug = true when ran from developer
-
-		bridge = new SuiteBridge();
-		// TODO use bridge.getId() in the client url
 		Map<String, Object> sharedMap = StaticSingletonMap.instance();
 		synchronized (sharedMap)
 		{
 			sharedMap.put(IJSUnitSuiteHandler.SERVOY_BRIDGE_KEY, bridge);
 		}
+	}
+
+	/**
+	 * @throws NullPointerException if the bridge is not yet initialized.
+	 */
+	public int getBridgeId()
+	{
+		return bridge.getId();
 	}
 
 	@Override

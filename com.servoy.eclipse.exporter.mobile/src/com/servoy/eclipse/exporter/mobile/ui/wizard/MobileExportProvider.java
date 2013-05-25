@@ -15,12 +15,12 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.mobileexporter.ui.wizard;
+package com.servoy.eclipse.exporter.mobile.ui.wizard;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
-import com.servoy.eclipse.mobileexporter.Activator;
+import com.servoy.eclipse.exporter.mobile.Activator;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenWizardAction;

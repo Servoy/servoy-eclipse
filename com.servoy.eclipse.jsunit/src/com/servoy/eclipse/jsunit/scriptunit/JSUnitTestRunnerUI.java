@@ -23,13 +23,22 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
@@ -53,7 +62,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.jsunit.actions.OpenEditorAtLineAction;
-import com.servoy.eclipse.jsunit.launch.JSUnitLaunchConfigurationDelegate;
+import com.servoy.eclipse.jsunit.launch.ITestLaunchConfigurationProvider;
 import com.servoy.eclipse.jsunit.mobile.MobileStackOpenEditorAction;
 import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -69,6 +78,10 @@ import com.servoy.j2db.util.Pair;
  */
 public class JSUnitTestRunnerUI extends AbstractTestRunnerUI implements ITestElementResolver, ITestRunnerUIExtension
 {
+
+	private static final String SUPPORTED_LAUNCH_CONFIGURATION_ID = "launchConfigurationID";
+
+	public static final String LAUNCH_CONFIGURATION_FINDER_EXTENSION = "com.servoy.eclipse.jsunit.launchConfigurationProvider";
 
 	protected static final Pattern STACK_FRAME_PATTERN = Pattern.compile("(.*)\\.method\\(file:(\\d*).*"); //$NON-NLS-1$
 
@@ -437,9 +450,77 @@ public class JSUnitTestRunnerUI extends AbstractTestRunnerUI implements ITestEle
 				target = new TestTarget(solution);
 			}
 		}
-		if (target != null) JSUnitLaunchConfigurationDelegate.launchTestTarget(target);
+		if (target != null) relaunchTestTarget(target, launchMode, launch);
 
 		return true;
+	}
+
+	private void relaunchTestTarget(TestTarget target, String launchMode, ILaunch launch)
+	{
+		// find the correct launch configuration using the providers extension point and use that
+		try
+		{
+			ITestLaunchConfigurationProvider provider;
+			ILaunchConfiguration launchConfiguration = null;
+			String launchConfigurationType = launch.getLaunchConfiguration().getType().getIdentifier();
+
+			IExtensionRegistry reg = Platform.getExtensionRegistry();
+			IExtensionPoint ep = reg.getExtensionPoint(LAUNCH_CONFIGURATION_FINDER_EXTENSION);
+			IExtension[] extensions = ep.getExtensions();
+
+			if (extensions != null && extensions.length > 0)
+			{
+				for (IExtension extension : extensions)
+				{
+					IConfigurationElement[] ces = extension.getConfigurationElements();
+					if (ces != null)
+					{
+						for (IConfigurationElement ce : ces)
+						{
+							if (launchConfigurationType.equals(ce.getAttribute(SUPPORTED_LAUNCH_CONFIGURATION_ID)))
+							{
+								try
+								{
+									provider = (ITestLaunchConfigurationProvider)ce.createExecutableExtension("class"); //$NON-NLS-1$
+									launchConfiguration = provider.findOrCreateLaunchConfiguration(target, launchMode, launchConfigurationType, launch);
+									if (launchConfiguration != null) break;
+								}
+								catch (CoreException e)
+								{
+									ServoyLog.logError(e);
+								}
+							}
+						}
+					}
+					if (launchConfiguration != null) break;
+				}
+			}
+
+			if (launchConfiguration != null)
+			{
+				String newMode = null;
+				Set<Set<String>> modeCombinations = launchConfiguration.getType().getSupportedModeCombinations();
+				Iterator<Set<String>> it = modeCombinations.iterator();
+				Set<String> modes = null;
+				while (it.hasNext() && newMode == null)
+				{
+					modes = it.next();
+					if (modes.contains(launchMode)) newMode = launchMode;
+				}
+				if (newMode == null)
+				{
+					// well try anyway
+					if (modes == null) newMode = launchMode;
+					else newMode = modes.iterator().next(); // pick one of the sets, one of the modes...
+				}
+				DebugUITools.launch(launchConfiguration, newMode); // this actually doesn't support mode sets, so it's a bit strange
+			}
+			else ServoyLog.logError("Cannot find/create appropriate launch configuration for re-run.", null);
+		}
+		catch (CoreException e)
+		{
+			ServoyLog.logError(e);
+		}
 	}
 
 	public ITestingEngine getTestingEngine()

@@ -1,34 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.2"?>
 <plugin>
+   <extension-point id="com.servoy.eclipse.jsunit.launchConfigurationProvider" name="JS Unit Test Launch Configuration Finder" schema="schema/com.servoy.eclipse.jsunit.launchConfigurationProvider.exsd"/>
    <extension
          point="org.eclipse.ui.commands">
       <command
             categoryId="com.servoy.eclipse.ui"
             description="Run Solution/Scope/Form/Method Javascript Unit Test(s)"
-            id="com.servoy.eclipse.jsunit.commands.runScriptUintTests"
+            id="com.servoy.eclipse.jsunit.commands.runScriptUnitTests"
             name="Run JS Unit Test(s)">
       </command>
+      <command
+            categoryId="com.servoy.eclipse.ui"
+            description="Debug Solution/Scope/Form/Method Javascript Unit Test(s)"
+            id="com.servoy.eclipse.jsunit.commands.debugScriptUnitTests"
+            name="Run JS Unit Tests (mobile debug)">
+      </command>
    </extension>
-   <extension
-         point="org.eclipse.ui.popupMenus">
-      <objectContribution
-            adaptable="true"
-            id="com.servoy.eclipse.jsunit.solutioncontribution"
-            objectClass="com.servoy.eclipse.jsunit.SolutionUnitTestTarget">
-         <action
-               class="com.servoy.eclipse.jsunit.actions.RunJSUnitAction"
-               definitionId="com.servoy.eclipse.jsunit.commands.runScriptUintTests"
-               enablesFor="1"
-               icon="icons/jsunit.png"
-               id="com.servoy.eclipse.jsunit.actions.runScriptUnitMenuContribution"
-               label="Run JS &amp;Unit Test(s)"
-               menubarPath="additions"
-               style="push"
-               tooltip="Run Solution/Scope/Form/Method Javascript Unit Test(s)">
-         </action>
-      </objectContribution>
-   </extension>
+    <extension
+       point="org.eclipse.ui.menus">
+    <menuContribution
+          allPopups="false"
+          locationURI="popup:org.eclipse.ui.popup.any?before=additions">
+       <command
+             commandId="com.servoy.eclipse.jsunit.commands.runScriptUnitTests"
+             label="Run JS Unit Test(s)"
+             style="push">
+          <visibleWhen
+                checkEnabled="false">
+             <reference
+                   definitionId="com.servoy.eclipse.jsunit.selectionIsTestTargetButNotMobile">
+             </reference>
+          </visibleWhen>
+       </command>
+    </menuContribution>
+ </extension>
    <extension
          point="org.eclipse.core.runtime.adapters">
       <factory
@@ -42,26 +48,15 @@
    <extension
          point="org.eclipse.ui.bindings">
       <key
-            commandId="com.servoy.eclipse.jsunit.commands.runScriptUintTests"
+            commandId="com.servoy.eclipse.jsunit.commands.runScriptUnitTests"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M3+M2+U">
       </key>
-   </extension>
-    <extension
-         point="org.eclipse.ui.actionSets">
-      <actionSet
-            id="com.servoy.eclipse.jsunit.actions.runScriptUnitAction"
-            label="Run JS Unit Test(s)">
-         <action
-               class="com.servoy.eclipse.jsunit.actions.RunJSUnitAction"
-               definitionId="com.servoy.eclipse.jsunit.commands.runScriptUintTests"
-               icon="icons/jsunit.png"
-               id="com.servoy.eclipse.jsunit.actions.runScriptUnitAction"
-               label="Run JS Unit Test(s)"
-               style="push"
-               tooltip="Run Solution/Scope/Form/Method Javascript Unit Test(s)">
-         </action>
-      </actionSet>
+      <key
+            commandId="com.servoy.eclipse.jsunit.commands.debugScriptUnitTests"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M3+M2+D">
+      </key>
    </extension>
     <extension
          point="org.eclipse.ui.perspectiveExtensions">
@@ -136,4 +131,69 @@
 		      class="com.servoy.eclipse.jsunit.launch.JSUnitLaunchConfigurationTabGroup">
 		  </launchConfigurationTabGroup>
  	</extension>
+ <extension
+       point="org.eclipse.ui.commandImages">
+    <image
+          commandId="com.servoy.eclipse.jsunit.commands.runScriptUnitTests"
+          icon="icons/jsunit.png">
+    </image>
+    <image
+          commandId="com.servoy.eclipse.jsunit.commands.debugScriptUnitTests"
+          icon="icons/jsunit.png">
+    </image>
+ </extension>
+ <extension
+       point="org.eclipse.ui.handlers">
+    <handler
+          class="com.servoy.eclipse.jsunit.actions.RunJSUnitHandler"
+          commandId="com.servoy.eclipse.jsunit.commands.runScriptUnitTests">
+       <activeWhen>
+          <with
+                variable="com.servoy.eclipse.core.mobileState">
+             <equals
+                   value="false">
+             </equals>
+          </with>
+       </activeWhen>
+    </handler>
+ </extension>
+   <extension
+       point="org.eclipse.core.expressions.definitions">
+    <definition
+          id="com.servoy.eclipse.jsunit.selectionIsTestTarget">
+       <with
+             variable="activeMenuSelection">
+             <iterate
+                   ifEmpty="false">
+                <adapt
+                      type="com.servoy.eclipse.jsunit.SolutionUnitTestTarget">
+                </adapt>
+             </iterate>
+             <count
+                   value="1">
+             </count>
+       </with>
+    </definition>
+    <definition
+          id="com.servoy.eclipse.jsunit.selectionIsTestTargetButNotMobile">
+       <and>
+          <with
+                variable="com.servoy.eclipse.core.mobileState">
+             <equals
+                   value="false">
+             </equals>
+          </with>
+          <reference
+                definitionId="com.servoy.eclipse.jsunit.selectionIsTestTarget">
+          </reference>
+       </and>
+    </definition>
+ </extension>
+   <extension
+         point="com.servoy.eclipse.jsunit.launchConfigurationProvider">
+      <launchConfigurationProvider
+            class="com.servoy.eclipse.jsunit.actions.SmartClientTestConfigurationProvider"
+            launchConfigurationID="com.servoy.eclipse.jsunit.launch">
+      </launchConfigurationProvider>
+   </extension>
 </plugin>

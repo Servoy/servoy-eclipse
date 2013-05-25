@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.mobileexporter.export;
+package com.servoy.eclipse.exporter.mobile.export;
 
 import java.io.File;
 import java.net.URL;

@@ -1,4 +1,4 @@
-package com.servoy.eclipse.mobileexporter;
+package com.servoy.eclipse.exporter.mobile;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
