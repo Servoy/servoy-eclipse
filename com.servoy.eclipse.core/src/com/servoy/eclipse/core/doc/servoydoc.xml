@@ -5442,7 +5442,10 @@ var success = databaseManager.addTableFilterParam('crm', 'products', 'productcod
 var success = databaseManager.addTableFilterParam('crm', 'orders', 'countrycode', 'in', 'select country code from countries where region = "Europe"')
 
 // you can use modifiers in the operator as well, filter on companies where companyname is null or equals-ignore-case 'servoy'
-var success = databaseManager.addTableFilterParam('crm', 'companies', 'companyname', '#^||=', 'servoy')]]></sample>
+var success = databaseManager.addTableFilterParam('crm', 'companies', 'companyname', '#^||=', 'servoy')
+
+//if you want to add a filter for a column (created by you) in the i18n table 
+databaseManager.addTableFilterParam('database', 'your_i18n_table', 'message_variant', 'in', [1, 2])]]></sample>
           </samples>
           <parameters>
             <parameter name="datasource" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
@@ -5492,7 +5495,10 @@ var success = databaseManager.addTableFilterParam('crm', 'products', 'productcod
 var success = databaseManager.addTableFilterParam('crm', 'orders', 'countrycode', 'in', 'select country code from countries where region = "Europe"')
 
 // you can use modifiers in the operator as well, filter on companies where companyname is null or equals-ignore-case 'servoy'
-var success = databaseManager.addTableFilterParam('crm', 'companies', 'companyname', '#^||=', 'servoy')]]></sample>
+var success = databaseManager.addTableFilterParam('crm', 'companies', 'companyname', '#^||=', 'servoy')
+
+//if you want to add a filter for a column (created by you) in the i18n table 
+databaseManager.addTableFilterParam('database', 'your_i18n_table', 'message_variant', 'in', [1, 2])]]></sample>
           </samples>
           <parameters>
             <parameter name="datasource" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
@@ -5545,7 +5551,10 @@ var success = databaseManager.addTableFilterParam('crm', 'products', 'productcod
 var success = databaseManager.addTableFilterParam('crm', 'orders', 'countrycode', 'in', 'select country code from countries where region = "Europe"')
 
 // you can use modifiers in the operator as well, filter on companies where companyname is null or equals-ignore-case 'servoy'
-var success = databaseManager.addTableFilterParam('crm', 'companies', 'companyname', '#^||=', 'servoy')]]></sample>
+var success = databaseManager.addTableFilterParam('crm', 'companies', 'companyname', '#^||=', 'servoy')
+
+//if you want to add a filter for a column (created by you) in the i18n table 
+databaseManager.addTableFilterParam('database', 'your_i18n_table', 'message_variant', 'in', [1, 2])]]></sample>
           </samples>
           <parameters>
             <parameter name="serverName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
@@ -5599,7 +5608,10 @@ var success = databaseManager.addTableFilterParam('crm', 'products', 'productcod
 var success = databaseManager.addTableFilterParam('crm', 'orders', 'countrycode', 'in', 'select country code from countries where region = "Europe"')
 
 // you can use modifiers in the operator as well, filter on companies where companyname is null or equals-ignore-case 'servoy'
-var success = databaseManager.addTableFilterParam('crm', 'companies', 'companyname', '#^||=', 'servoy')]]></sample>
+var success = databaseManager.addTableFilterParam('crm', 'companies', 'companyname', '#^||=', 'servoy')
+
+//if you want to add a filter for a column (created by you) in the i18n table 
+databaseManager.addTableFilterParam('database', 'your_i18n_table', 'message_variant', 'in', [1, 2])]]></sample>
           </samples>
           <parameters>
             <parameter name="serverName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
@@ -61634,7 +61646,8 @@ You can use filter fall back by setting the filter value as an array of strings.
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Call this if you want to add a filter for a column (created by you) in the i18n table.]]></summary>
           </summaries>
-          <deprecated><![CDATA[use table filters on the i18n table using databaseManager.addTableFilterParam]]></deprecated>
+          <deprecated><![CDATA[use table filters on the i18n table using databaseManager.addTableFilterParam, for example: </br>
+databaseManager.addTableFilterParam('database', 'your_i18n_table', 'message_variant', 'in', [1, 2])]]></deprecated>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[// Puts i18n in filter mode - this allows you to have multiple default/per locale
 // values for one key and to use one of them based on the filter parameters.
