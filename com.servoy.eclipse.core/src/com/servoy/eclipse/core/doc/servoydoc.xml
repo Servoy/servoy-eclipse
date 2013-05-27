@@ -100,7 +100,7 @@ rightAlignedLabel.horizontalAlignment = SM_ALIGNMENT.RIGHT;]]></sample>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Constant used for creating horizontal split pane from tab panel, by setting its tabOrientation.]]></summary>
           </summaries>
-          <deprecated><![CDATA[please use ISMTabPanel#SPLIT_HORIZONTAL instead.]]></deprecated>
+          <deprecated><![CDATA[please use JSTabPanel#SPLIT_HORIZONTAL instead.]]></deprecated>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var splitPane = myForm.newTabPanel('splitPane', 10, 10, 620, 460);
 splitPane.tabOrientation = SM_ALIGNMENT.SPLIT_HORIZONTAL;]]></sample>
@@ -114,7 +114,7 @@ splitPane.tabOrientation = SM_ALIGNMENT.SPLIT_HORIZONTAL;]]></sample>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Constant used for creating vertical split pane from tab panel, by setting its tabOrientation.]]></summary>
           </summaries>
-          <deprecated><![CDATA[please use ISMTabPanel#SPLIT_VERTICAL instead.]]></deprecated>
+          <deprecated><![CDATA[please use JSTabPanel#SPLIT_VERTICAL instead.]]></deprecated>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var splitPane = myForm.newTabPanel('splitPane', 10, 10, 620, 460);
 splitPane.tabOrientation = SM_ALIGNMENT.SPLIT_VERTICAL;]]></sample>
@@ -20441,7 +20441,8 @@ of records are updated or added that belong to that relation. It will only be a 
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query builder object (also known as 'Form by query').
-When the founset is in find mode, the find states are discarded, the foundset will go out of find mode and the foundset will be loaded using the query.]]></description>
+When the founset is in find mode, the find states are discarded, the foundset will go out of find mode and the foundset will be loaded using the query.
+If the foundset is related, the relation-condition will be added to the query.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query builder object (also known as 'Form by query').]]></summary>
@@ -20570,7 +20571,10 @@ Deprecated method to handle pre-6.1 calls to varargs function foundset.loadRecor
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.
+If the foundset is related this function is not allowed.
+
+see foundset.loadRecords(QBSelect).]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
@@ -20592,7 +20596,10 @@ Deprecated method to handle pre-6.1 calls to varargs function foundset.loadRecor
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.
+If the foundset is related this function is not allowed.
+
+see foundset.loadRecords(QBSelect).]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
@@ -59329,7 +59336,10 @@ Deprecated method to handle pre-6.1 calls to varargs function controller.loadRec
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.
+If the foundset is related this function is not allowed.
+
+see foundset.loadRecords(QBSelect).]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
@@ -59350,7 +59360,10 @@ Deprecated method to handle pre-6.1 calls to varargs function controller.loadRec
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.
+If the foundset is related this function is not allowed.
+
+see foundset.loadRecords(QBSelect).]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
