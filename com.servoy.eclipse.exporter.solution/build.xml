@@ -20,7 +20,10 @@
 	<property name="javacSource" value="1.3"/>
 	<property name="javacTarget" value="1.2"/>
 	<condition property="dir_bootclasspath" value="${java.home}/../Classes">
-		<os family="mac"/>
+		<and>
+			<os family="mac"/>
+			<available file="${java.home}/../Classes" type="dir"/>
+		</and>
 	</condition>
 	<property name="dir_bootclasspath" value="${java.home}/lib"/>
 	<path id="path_bootclasspath">
@@ -117,99 +120,99 @@
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.expressions_3.4.300.v20110228.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.filesystem_1.3.100.v20110423-0524.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.win32.x86_64_1.1.300.v20110423-0524.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.aix.ppc_1.1.0.v20110423-0524.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.hpux.ia64_32_1.0.100.v20110423-0524.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.linux.x86_1.4.0.v20110423-0524.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.linux.x86_64_1.2.0.v20110423-0524.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.win32.x86_1.1.300.v20110423-0524.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.solaris.sparc_1.2.0.v20110423-0524.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.macosx_1.3.0.v20110423-0524.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.linux.x86_1.4.0.v20110423-0524.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.hpux.ia64_32_1.0.100.v20110423-0524.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.aix.ppc_1.1.0.v20110423-0524.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.solaris.sparc_1.2.0.v20110423-0524.jar"/>
 			<pathelement path="../servoy_shared/bin/"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/bin/"/>
 			<pathelement path="${build.result.folder}/../servoy_shared/@dot"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/@dot"/>
 			<pathelement path="../servoy_shared/bin"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/bin"/>
 			<pathelement path="../servoy_shared/lib/annotations-1.0.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/annotations-1.0.jar"/>
 			<pathelement path="../servoy_shared/lib/BrowserLauncher2.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/BrowserLauncher2.jar"/>
 			<pathelement path="../servoy_shared/lib/commons-codec.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/commons-codec.jar"/>
 			<pathelement path="../servoy_shared/lib/commons-collections.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/commons-collections.jar"/>
 			<pathelement path="../servoy_shared/lib/commons-dbcp.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/commons-dbcp.jar"/>
 			<pathelement path="../servoy_shared/lib/commons-io.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/commons-io.jar"/>
 			<pathelement path="../servoy_shared/lib/commons-logging.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/commons-logging.jar"/>
 			<pathelement path="../servoy_shared/lib/dom4j.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/dom4j.jar"/>
 			<pathelement path="../servoy_shared/lib/jabsorb.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/jabsorb.jar"/>
 			<pathelement path="../servoy_shared/lib/joda-time.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/joda-time.jar"/>
 			<pathelement path="../servoy_shared/lib/log4j.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/log4j.jar"/>
 			<pathelement path="../servoy_shared/lib/servlet-api.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/servlet-api.jar"/>
 			<pathelement path="../servoy_shared/lib/slf4j-api.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/slf4j-api.jar"/>
 			<pathelement path="../servoy_shared/lib/slf4j-log4j.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/slf4j-log4j.jar"/>
 			<pathelement path="../servoy_shared/lib/wicket-extentions.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/wicket-extentions.jar"/>
 			<pathelement path="../servoy_shared/lib/wicket.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/wicket.jar"/>
 			<pathelement path="../servoy_shared/lib/commons-pool.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/commons-pool.jar"/>
 			<pathelement path="../servoy_shared/lib/activation.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/activation.jar"/>
 			<pathelement path="../servoy_shared/lib/mail.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/mail.jar"/>
 			<pathelement path="../servoy_shared/lib/httpclient.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/httpclient.jar"/>
 			<pathelement path="../servoy_shared/lib/httpcore.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/httpcore.jar"/>
 			<pathelement path="../servoy_shared/lib/jcifs.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/jcifs.jar"/>
 			<pathelement path="../servoy_shared/lib/apache-mime4j.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/apache-mime4j.jar"/>
 			<pathelement path="../servoy_shared/lib/httpmime.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/httpmime.jar"/>
 			<pathelement path="../servoy_shared/lib/antlr.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/antlr.jar"/>
 			<pathelement path="../servoy_shared/lib/l2fprod-common-outlookbar.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/l2fprod-common-outlookbar.jar"/>
 			<pathelement path="../servoy_shared/lib/wiquery.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/wiquery.jar"/>
 			<pathelement path="../servoy_shared/lib/fs-parser.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/fs-parser.jar"/>
 			<pathelement path="../servoy_shared/lib/fs-commons.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/fs-commons.jar"/>
 			<pathelement path="../servoy_shared/lib/PBKDF2.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/PBKDF2.jar"/>
 			<pathelement path="../servoy_shared/lib/minis.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/minis.jar"/>
 			<pathelement path="../servoy_shared/lib/xstream.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/xstream.jar"/>
 			<pathelement path="../servoy_shared/lib/prompt.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/prompt.jar"/>
 			<pathelement path="../servoy_shared/lib/wicket-calendar.jar"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_shared_7.1.0.2010/lib/wicket-calendar.jar"/>
 			<pathelement path="../org.eclipse.dltk.javascript.rhino/bin/"/>
-			
+			<pathelement path="${build.result.folder}/../org.eclipse.dltk.javascript.rhino_7.1.0.2010/bin/"/>
 			<pathelement path="${build.result.folder}/../org.eclipse.dltk.javascript.rhino/@dot"/>
-			
+			<pathelement path="${build.result.folder}/../org.eclipse.dltk.javascript.rhino_7.1.0.2010/@dot"/>
 			<pathelement path="../servoy_base/bin/"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_base_7.1.0.2010/bin/"/>
 			<pathelement path="${build.result.folder}/../servoy_base/@dot"/>
-			
+			<pathelement path="${build.result.folder}/../servoy_base_7.1.0.2010/@dot"/>
 			<pathelement path="../com.servoy.eclipse.model/bin/"/>
-			
+			<pathelement path="${build.result.folder}/../com.servoy.eclipse.model_7.1.0.2010/bin/"/>
 			<pathelement path="${build.result.folder}/../com.servoy.eclipse.model/@dot"/>
-			
+			<pathelement path="${build.result.folder}/../com.servoy.eclipse.model_7.1.0.2010/@dot"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.wst.css.core_1.1.401.v201008161749.jar"/>
 			<pathelement path="${buildDirectory}/nestedJars/com.ibm.icu_4.4.2.v20110823/icu-data.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/com.ibm.icu_4.4.2.v20110823.jar"/>
@@ -288,14 +291,14 @@
 	<target name="checkCompilationResults" if="compilation.error.occured">
 		<echo file="${compilation.problem.marker}" message="com.servoy.eclipse.exporter.solution_7.1.0.2010${line.separator}compilation.error.occured=${compilation.error.occured}"/>
 		<eclipse.logCompileError bundle="com.servoy.eclipse.exporter.solution_7.1.0.2010" log="${compilation.prereq.log}">
-			<include name="C:/Users/Administrator/dev_trunk/servoy_base/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_base_7.1.0.2010/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_trunk/com.servoy.eclipse.model/compilation.problem"/>
-			<include name="${pluginTemp}/com.servoy.eclipse.model_7.1.0.2010/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_trunk/org.eclipse.dltk.javascript.rhino/compilation.problem"/>
-			<include name="${pluginTemp}/org.eclipse.dltk.javascript.rhino_7.1.0.2010/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_trunk/servoy_shared/compilation.problem"/>
+			<include name="E:/Workspaces/HEAD/servoy_shared/compilation.problem"/>
 			<include name="${pluginTemp}/servoy_shared_7.1.0.2010/compilation.problem"/>
+			<include name="E:/Workspaces/HEAD/servoy_base/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_base_7.1.0.2010/compilation.problem"/>
+			<include name="E:/Workspaces/HEAD/com.servoy.eclipse.model/compilation.problem"/>
+			<include name="${pluginTemp}/com.servoy.eclipse.model_7.1.0.2010/compilation.problem"/>
+			<include name="E:/Workspaces/HEAD/org.eclipse.dltk.javascript.rhino/compilation.problem"/>
+			<include name="${pluginTemp}/org.eclipse.dltk.javascript.rhino_7.1.0.2010/compilation.problem"/>
 		</eclipse.logCompileError>
 	</target>
 
@@ -391,7 +394,7 @@
 	</target>
 
 	<target name="refresh" depends="init" if="eclipse.running" description="Refresh this folder.">
-		<eclipse.convertPath fileSystemPath="C:/Users/Administrator/dev_trunk/com.servoy.eclipse.exporter.solution" property="resourcePath"/>
+		<eclipse.convertPath fileSystemPath="E:/Workspaces/HEAD/com.servoy.eclipse.exporter.solution" property="resourcePath"/>
 		<eclipse.refreshLocal resource="${resourcePath}" depth="infinite"/>
 	</target>
 
