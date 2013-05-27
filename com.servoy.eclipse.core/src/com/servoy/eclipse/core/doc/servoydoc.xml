@@ -14417,7 +14417,8 @@ of records are updated or added that belong to that relation. It will only be a 
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
           <description><![CDATA[Loads records into form foundset based on a query builder object (also known as 'Form by query').
-When the founset is in find mode, the find states are discarded, the foundset will go out of find mode and the foundset will be loaded using the query.]]></description>
+When the founset is in find mode, the find states are discarded, the foundset will go out of find mode and the foundset will be loaded using the query.
+If the foundset is related, the relation-condition will be added to the query.]]></description>
           <summary><![CDATA[Loads records into form foundset based on a query builder object (also known as 'Form by query').]]></summary>
           <sample><![CDATA[%%prefix%%foundset.loadRecords(qbselect);]]></sample>
           <parameters>
@@ -14519,7 +14520,10 @@ Deprecated method to handle pre-6.1 calls to varargs function foundset.loadRecor
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.]]></description>
+          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.
+If the foundset is related this function is not allowed.
+
+see foundset.loadRecords(QBSelect).]]></description>
           <summary><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
           <sample><![CDATA[//loads records in to the foundset based on a query (also known as 'Form by query')
 %%prefix%%foundset.loadRecords(sqlstring);]]></sample>
@@ -14535,7 +14539,10 @@ Deprecated method to handle pre-6.1 calls to varargs function foundset.loadRecor
             <argumentType typecode="[Ljava.lang.Object;"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.]]></description>
+          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.
+If the foundset is related this function is not allowed.
+
+see foundset.loadRecords(QBSelect).]]></description>
           <summary><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
           <sample><![CDATA[//loads records in to the foundset based on a query (also known as 'Form by query')
 %%prefix%%foundset.loadRecords(sqlstring,parameters);]]></sample>
@@ -25522,7 +25529,8 @@ of records are updated or added that belong to that relation. It will only be a 
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
           <description><![CDATA[Loads records into form foundset based on a query builder object (also known as 'Form by query').
-When the founset is in find mode, the find states are discarded, the foundset will go out of find mode and the foundset will be loaded using the query.]]></description>
+When the founset is in find mode, the find states are discarded, the foundset will go out of find mode and the foundset will be loaded using the query.
+If the foundset is related, the relation-condition will be added to the query.]]></description>
           <summary><![CDATA[Loads records into form foundset based on a query builder object (also known as 'Form by query').]]></summary>
           <sample><![CDATA[%%prefix%%foundset.loadRecords(qbselect);]]></sample>
           <parameters>
@@ -25624,7 +25632,10 @@ Deprecated method to handle pre-6.1 calls to varargs function foundset.loadRecor
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.]]></description>
+          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.
+If the foundset is related this function is not allowed.
+
+see foundset.loadRecords(QBSelect).]]></description>
           <summary><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
           <sample><![CDATA[//loads records in to the foundset based on a query (also known as 'Form by query')
 %%prefix%%foundset.loadRecords(sqlstring);]]></sample>
@@ -25640,7 +25651,10 @@ Deprecated method to handle pre-6.1 calls to varargs function foundset.loadRecor
             <argumentType typecode="[Ljava.lang.Object;"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.]]></description>
+          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.
+If the foundset is related this function is not allowed.
+
+see foundset.loadRecords(QBSelect).]]></description>
           <summary><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
           <sample><![CDATA[//loads records in to the foundset based on a query (also known as 'Form by query')
 %%prefix%%foundset.loadRecords(sqlstring,parameters);]]></sample>
@@ -43947,7 +43961,10 @@ Deprecated method to handle pre-6.1 calls to varargs function controller.loadRec
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.]]></description>
+          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.
+If the foundset is related this function is not allowed.
+
+see foundset.loadRecords(QBSelect).]]></description>
           <summary><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
           <sample><![CDATA[%%prefix%%controller.loadRecords(sqlstring);]]></sample>
           <parameters>
@@ -43962,7 +43979,10 @@ Deprecated method to handle pre-6.1 calls to varargs function controller.loadRec
             <argumentType typecode="[Ljava.lang.Object;"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
-          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.]]></description>
+          <description><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.
+If the foundset is related this function is not allowed.
+
+see foundset.loadRecords(QBSelect).]]></description>
           <summary><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
           <sample><![CDATA[%%prefix%%controller.loadRecords(sqlstring,parameters);]]></sample>
           <parameters>
