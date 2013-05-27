@@ -23,7 +23,7 @@ import java.net.URLConnection;
 
 import org.osgi.service.url.AbstractURLStreamHandlerService;
 
-import com.servoy.j2db.util.DeveloperURLStreamHandler;
+import com.servoy.j2db.util.IDeveloperURLStreamHandler;
 
 /**
  * @author jcompagner
@@ -32,12 +32,12 @@ import com.servoy.j2db.util.DeveloperURLStreamHandler;
 public class DeveloperURLStreamHandlerService extends AbstractURLStreamHandlerService
 {
 
-	private final DeveloperURLStreamHandler handler;
+	private final IDeveloperURLStreamHandler handler;
 
 	/**
 	 * @param handler
 	 */
-	public DeveloperURLStreamHandlerService(DeveloperURLStreamHandler handler)
+	public DeveloperURLStreamHandlerService(IDeveloperURLStreamHandler handler)
 	{
 		this.handler = handler;
 	}
