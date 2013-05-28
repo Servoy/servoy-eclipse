@@ -43,6 +43,7 @@ import org.json.JSONObject;
 import com.servoy.base.persistence.constants.IComponentConstants;
 import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.exporter.mobile.Activator;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -287,8 +288,8 @@ public class MobileExporter
 						json.put("uuid", valuelist.getUUID().toString());
 						JSONArray displayValues = new JSONArray();
 						JSONArray realValues = new JSONArray();
-						IValueList realValueList = ComponentFactory.getRealValueList(com.servoy.eclipse.core.Activator.getDefault().getDesignClient(),
-							valuelist, true, Types.OTHER, null, null);
+						IValueList realValueList = ComponentFactory.getRealValueList(Activator.getDefault().getExportClient(), valuelist, true, Types.OTHER,
+							null, null);
 						for (int i = 0; i < realValueList.getSize(); i++)
 						{
 							displayValues.put(realValueList.getElementAt(i));
