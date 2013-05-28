@@ -111,7 +111,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	private IBeanManager beanManager;
 	private ClientPluginAccessProvider pluginAccess;
 
-	DesignApplication()
+	public DesignApplication()
 	{
 	}
 
