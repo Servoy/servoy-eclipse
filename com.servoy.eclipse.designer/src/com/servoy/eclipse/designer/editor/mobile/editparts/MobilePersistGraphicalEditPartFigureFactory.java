@@ -37,6 +37,7 @@ import javax.swing.JRadioButton;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
+import javax.swing.plaf.basic.BasicButtonUI;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 
 import org.eclipse.gef.GraphicalEditPart;
@@ -113,8 +114,10 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 							((JComponent)component).setBorder(rborder);
 						}
 
+
 						if (component instanceof JButton)
 						{
+							((JButton)component).setUI(new BasicButtonUI());
 							if (persist instanceof AbstractBase)
 							{
 								String dataIcon = (String)((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.DATA_ICON.propertyName);
