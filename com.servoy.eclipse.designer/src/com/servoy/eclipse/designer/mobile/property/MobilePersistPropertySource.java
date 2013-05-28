@@ -137,6 +137,22 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			new Integer[] { Integer.valueOf(Field.TEXT_FIELD), Integer.valueOf(Field.TEXT_AREA), Integer.valueOf(Field.CALENDAR), Integer.valueOf(Field.COMBOBOX), Integer.valueOf(Field.RADIOS), Integer.valueOf(Field.CHECKS), Integer.valueOf(Field.PASSWORD) },
 			new String[] { "TEXT_FIELD", "TEXT_AREA", "CALENDAR", "COMBOBOX", "RADIOS", "CHECKS", "PASSWORD" }), Messages.LabelUnresolved);
 
+	public static final PropertyController<Boolean, Boolean> MOBILE_PART_FIXED_CONTROLLER = new DelegatePropertySetterController<Boolean, MobilePersistPropertySource>(
+		new CheckboxPropertyDescriptor(IMobileProperties.FIXED_POSITION.propertyName, IMobileProperties.FIXED_POSITION.propertyName),
+		IMobileProperties.FIXED_POSITION.propertyName)
+	{
+		public void setProperty(MobilePersistPropertySource propertySource, Boolean value)
+		{
+			((AbstractBase)propertySource.getPersist()).putCustomMobileProperty(IMobileProperties.FIXED_POSITION.propertyName, value);
+			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, propertySource.getPersist(), false);
+		}
+
+		public Boolean getProperty(MobilePersistPropertySource propertySource)
+		{
+			return Boolean.valueOf(Boolean.TRUE.equals(((AbstractBase)propertySource.getPersist()).getCustomMobileProperty(IMobileProperties.FIXED_POSITION.propertyName)));
+		}
+	};
+
 	/**
 	 * @param persistContext
 	 * @param readonly
@@ -230,6 +246,11 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			}
 		}
 
+		if (Part.class == clazz)
+		{
+			return new String[] { IMobileProperties.FIXED_POSITION.propertyName };
+		}
+
 		return null;
 	}
 
@@ -259,6 +280,11 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		if (name.equals(IMobileProperties.DATA_ICON.propertyName))
 		{
 			return MOBILE_ICONS_CONTROLLER;
+		}
+
+		if (name.equals(IMobileProperties.FIXED_POSITION.propertyName))
+		{
+			return MOBILE_PART_FIXED_CONTROLLER;
 		}
 
 		return super.getPropertiesPropertyDescriptor(propertySource, id, displayName, name, flattenedEditingSolution, form);
