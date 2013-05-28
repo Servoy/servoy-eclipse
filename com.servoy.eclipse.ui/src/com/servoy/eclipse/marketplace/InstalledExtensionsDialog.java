@@ -213,7 +213,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 		MarketPlaceExtensionProvider marketPlaceProvider;
 		synchronized (dataLock)
 		{
-			monitor.beginTask("Checking for available Servoy Extension upgrades...", extensions.length * 10 + 2); //$NON-NLS-1$
+			monitor.beginTask("Checking for available Servoy Extension updates...", extensions.length * 10 + 2); //$NON-NLS-1$
 			installedDmds = new DependencyMetadata[extensions.length];
 			availableUpdates = new DependencyMetadata[extensions.length];
 			for (int i = extensions.length - 1; i >= 0; i--)
@@ -269,7 +269,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 			Message[] msgs = marketPlaceProvider.getMessages();
 			if (msgs.length > 0)
 			{
-				ServoyLog.logInfo("While checking for upgrades, problems were found: " + Arrays.asList(msgs).toString()); //$NON-NLS-1$
+				ServoyLog.logInfo("While checking for updates, problems were found: " + Arrays.asList(msgs).toString()); //$NON-NLS-1$
 				warnings = msgs;
 			}
 			marketPlaceProvider.dispose();
@@ -330,7 +330,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 		col = new TableColumn(table, SWT.CENTER);
 		col.setResizable(false);
 		col.setText("Version"); //$NON-NLS-1$
-		col = new TableColumn(table, SWT.CENTER, CI_UPDATE); // upgrade button
+		col = new TableColumn(table, SWT.CENTER, CI_UPDATE); // update button
 		col.setResizable(false);
 		col = new TableColumn(table, SWT.CENTER, CI_UNINSTALL); // remove button
 		col.setResizable(false);
@@ -437,7 +437,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 	protected void onUpdate(Pair<DependencyMetadata, DependencyMetadata> data)
 	{
 		DependencyMetadata dmd = data.getRight();
-		// start upgrade
+		// start update
 		if (dmd != null)
 		{
 			InstallExtensionWizard installExtensionWizard = new InstallExtensionWizard(dmd.id, dmd.version);
@@ -532,7 +532,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 			{
 				if (table == null || getShell().isDisposed()) return;
 
-				Image upgradeIcon = Activator.getDefault().loadImageFromBundle("upgrade.gif"); //$NON-NLS-1$
+				Image updateIcon = Activator.getDefault().loadImageFromBundle("upgrade.gif"); //$NON-NLS-1$
 				Image uninstallIcon = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 
 				table.setVisible(false);
@@ -564,8 +564,8 @@ public class InstalledExtensionsDialog extends TrayDialog
 							}
 							if (extension.getRight() != null)
 							{
-//								createButton(upgradeIcon, item, 3, extension.getRight()).addSelectionListener(upgradeListener);
-								item.setImage(3, upgradeIcon);
+//								createButton(updateIcon, item, 3, extension.getRight()).addSelectionListener(updateListener);
+								item.setImage(3, updateIcon);
 							}
 //							Button b = createButton(uninstallIcon, item, 4, extension.getLeft());
 //							b.addSelectionListener(uninstallListener);
@@ -709,7 +709,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 		if (buttonId == UPDATE_CHECK_BUTTON_ID)
 		{
 			getButton(UPDATE_CHECK_BUTTON_ID).setEnabled(false);
-			Job job = new Job("Checking for Servoy Extension upgrades") //$NON-NLS-1$
+			Job job = new Job("Checking for Servoy Extension updates") //$NON-NLS-1$
 			{
 				@Override
 				protected IStatus run(IProgressMonitor monitor)
