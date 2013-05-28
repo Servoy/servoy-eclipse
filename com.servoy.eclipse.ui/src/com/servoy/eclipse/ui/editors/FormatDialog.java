@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Widget;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.dataprocessing.IUIConverter;
 import com.servoy.j2db.persistence.Column;
@@ -114,6 +115,8 @@ public class FormatDialog extends Dialog
 
 		useConvertersCheckbutton = new Button(uiConverterContainer, SWT.CHECK);
 		useConvertersCheckbutton.setText("Use a UI converter");
+
+		useConvertersCheckbutton.setEnabled(!ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile());
 
 		formatContainer = new Composite(composite, SWT.NONE);
 		formatContainer.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true, 1, 1));

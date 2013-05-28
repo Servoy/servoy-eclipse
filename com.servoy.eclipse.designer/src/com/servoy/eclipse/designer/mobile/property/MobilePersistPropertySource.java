@@ -21,7 +21,10 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.base.persistence.IMobileProperties;
+import com.servoy.base.persistence.constants.IColumnTypeConstants;
+import com.servoy.base.persistence.constants.IFieldConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.DatabaseUtils;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.property.CheckboxPropertyDescriptor;
 import com.servoy.eclipse.ui.property.ComboboxPropertyController;
@@ -173,6 +176,17 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		if (!AnnotationManagerReflection.getInstance().isAnnotatedForMobile(propertyDescriptor.propertyDescriptor.getReadMethod(), getPersist().getClass()))
 		{
 			// do not show the property if the read-method is not flagged for mobile client
+			return false;
+		}
+		if (propertyDescriptor.propertyDescriptor.getName().equals(StaticContentSpecLoader.PROPERTY_FORMAT.getPropertyName()))
+		{
+			int dataproviderType = DatabaseUtils.getDataproviderType(getPersist());
+			if (dataproviderType == IColumnTypeConstants.INTEGER || dataproviderType == IColumnTypeConstants.NUMBER ||
+				dataproviderType == IColumnTypeConstants.DATETIME)
+			{
+				return getPersist() instanceof GraphicalComponent ||
+					(getPersist() instanceof Field && ((Field)getPersist()).getDisplayType() == IFieldConstants.TEXT_FIELD);
+			}
 			return false;
 		}
 

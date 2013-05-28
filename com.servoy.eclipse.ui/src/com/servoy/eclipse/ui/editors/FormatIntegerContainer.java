@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.editors.FormatDialog.IFormatTextContainer;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.FormatParser.ParsedFormat;
@@ -90,6 +91,8 @@ public class FormatIntegerContainer extends Composite implements IFormatTextCont
 		Label lblDisplayFormat = new Label(this, SWT.NONE);
 		lblDisplayFormat.setText("Display Format");
 
+		boolean mobile = ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile();
+
 		displayFormat = new Combo(this, SWT.NONE);
 		displayFormat.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		displayFormat.setItems(new String[] { "#.00", "#,###", "\u00A4#.00" });
@@ -115,6 +118,7 @@ public class FormatIntegerContainer extends Composite implements IFormatTextCont
 		lblEditFormat.setText("Edit Format");
 
 		editFormat = new Combo(this, SWT.NONE);
+		editFormat.setEnabled(!mobile);
 		editFormat.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		editFormat.setItems(new String[] { "#.00", "#,###", "\u00A4#.00" });
 		editFormat.addKeyListener(new KeyAdapter()
@@ -137,6 +141,7 @@ public class FormatIntegerContainer extends Composite implements IFormatTextCont
 		});
 		new Label(this, SWT.NONE).setText("Max length");
 		maxLength = new Text(this, SWT.BORDER);
+		maxLength.setEnabled(!mobile);
 		maxLength.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		maxLength.addVerifyListener(new VerifyListener()
 		{

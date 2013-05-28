@@ -21,19 +21,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import com.servoy.eclipse.core.Activator;
-import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.component.ComponentFormat;
-import com.servoy.j2db.persistence.Field;
-import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IDataProvider;
-import com.servoy.j2db.persistence.IDataProviderLookup;
+import com.servoy.eclipse.core.util.DatabaseUtils;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.ISupportChilds;
-import com.servoy.j2db.persistence.ISupportDataProviderID;
-import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.IColumnTypes;
 
 /**
  * @author jcompagner
@@ -60,49 +49,7 @@ public class FormatCellEditor extends TextDialogCellEditor
 	@Override
 	public Object openDialogBox(Control cellEditorWindow)
 	{
-		int type = IColumnTypes.TEXT;
-		if (persist instanceof ISupportDataProviderID)
-		{
-			String dataProviderID = ((ISupportDataProviderID)persist).getDataProviderID();
-
-			ISupportChilds supportChilds = persist.getParent();
-			while (supportChilds != null && !(supportChilds instanceof Form))
-			{
-				supportChilds = supportChilds.getParent();
-			}
-			if (supportChilds instanceof Form)
-			{
-				Form form = (Form)supportChilds;
-				IDataProviderLookup dataproviderLookup = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getDataproviderLookup(
-					null, form);
-				ComponentFormat componentFormat = null;
-				if (persist instanceof Field)
-				{
-					componentFormat = ComponentFormat.getComponentFormat(((Field)persist).getFormat(), dataProviderID, dataproviderLookup,
-						Activator.getDefault().getDesignClient());
-
-				}
-				if (componentFormat != null)
-				{
-					type = componentFormat.dpType;
-				}
-				else
-				{
-					try
-					{
-						IDataProvider dataProvider = dataproviderLookup.getDataProvider(dataProviderID);
-						if (dataProvider != null)
-						{
-							type = dataProvider.getDataProviderType();
-						}
-					}
-					catch (RepositoryException re)
-					{
-						ServoyLog.logError(re);
-					}
-				}
-			}
-		}
+		int type = DatabaseUtils.getDataproviderType(persist);
 		FormatDialog dialog = new FormatDialog(cellEditorWindow.getShell(), (String)getValue(), type);
 		dialog.open();
 		if (dialog.getReturnCode() == Window.CANCEL)

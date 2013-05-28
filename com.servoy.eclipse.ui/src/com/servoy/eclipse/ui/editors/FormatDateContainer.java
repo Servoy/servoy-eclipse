@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.editors.FormatDialog.IFormatTextContainer;
 import com.servoy.j2db.util.FormatParser.ParsedFormat;
 
@@ -87,6 +88,8 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 		super(parent, style);
 		setLayout(new GridLayout(2, false));
 
+		boolean mobile = ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile();
+
 		Label lblDisplayFormat = new Label(this, SWT.NONE);
 		lblDisplayFormat.setText("Display Format");
 
@@ -119,6 +122,7 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 		lblEditFormat.setText("Edit Format");
 
 		editFormat = new Combo(this, SWT.NONE);
+		editFormat.setEnabled(!mobile);
 		GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 		gridData.widthHint = 411;
 		editFormat.setLayoutData(gridData);
@@ -144,6 +148,7 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 		new Label(this, SWT.NONE);
 
 		useMask = new Button(this, SWT.CHECK);
+		useMask.setEnabled(!mobile);
 		useMask.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -159,6 +164,7 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 		lblPlaceholder.setText("Placeholder");
 
 		placeholder = new Text(this, SWT.BORDER);
+		placeholder.setEnabled(!mobile);
 		GridData gridData_2 = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gridData_2.widthHint = 29;
 		placeholder.setLayoutData(gridData_2);
@@ -260,19 +266,20 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 	@SuppressWarnings("nls")
 	public void setParsedFormat(ParsedFormat parsedFormat)
 	{
+		boolean mobile = ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile();
 		displayFormat.setText("");
 		editFormat.setText("");
 		placeholder.setText("");
 		useMask.setSelection(false);
 		placeholder.setEnabled(false);
-		editFormat.setEnabled(true);
+		editFormat.setEnabled(true && !mobile);
 		if (parsedFormat != null)
 		{
 			displayFormat.setText(parsedFormat.getDisplayFormat() != null ? parsedFormat.getDisplayFormat() : "");
 			if (parsedFormat.isMask())
 			{
-				useMask.setSelection(true);
-				placeholder.setEnabled(true);
+				useMask.setSelection(true && !mobile);
+				placeholder.setEnabled(true && !mobile);
 				editFormat.setEnabled(false);
 				if (parsedFormat.getPlaceHolderCharacter() != 0) placeholder.setText(Character.toString(parsedFormat.getPlaceHolderCharacter()));
 			}
