@@ -65,8 +65,10 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationList;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.HtmlUtils;
+import com.servoy.j2db.util.Utils;
 
 public class TagsAndI18NTextDialog extends Dialog
 {
@@ -80,8 +82,17 @@ public class TagsAndI18NTextDialog extends Dialog
 	private Button addButton;
 
 	private static final String STANDARD_TAGS_LABEL = "Standard tags";
-	public static final String[] STANDARD_TAGS = new String[] { "selectedIndex", "maxRecordIndex", "lazyMaxRecordIndex", "serverURL", "currentRecordIndex", "pageNumber", "totalNumberOfPages", "i18n:<messagekey>" };
-	public static final String[] STANDARD_TAGS_ON_RELATION = new String[] { "maxRecordIndex", "lazyMaxRecordIndex" };
+
+
+	private static final String I18N_TAG = "i18n:<messagekey>";
+	private static final String[] STANDARD_TAGS_COMMON = new String[] { "selectedIndex", "maxRecordIndex", "lazyMaxRecordIndex", "currentRecordIndex" };
+
+	private static final String[] STANDARD_TAGS_MOBILE = Utils.arrayAdd(STANDARD_TAGS_COMMON, I18N_TAG, true);
+
+	private static final String[] STANDARD_TAGS_REGULAR = Utils.arrayAdd(
+		Utils.arrayJoin(STANDARD_TAGS_COMMON, new String[] { "serverURL", "pageNumber", "totalNumberOfPages" }), I18N_TAG, true);
+	private static final String[] STANDARD_TAGS_ON_RELATION_MOBILE = new String[] { "maxRecordIndex", "lazyMaxRecordIndex" };
+	private static final String[] STANDARD_TAGS_ON_RELATION_REGULAR = STANDARD_TAGS_ON_RELATION_MOBILE;
 
 	private final FlattenedSolution flattenedSolution;
 	private final PersistContext persistContext;
@@ -116,11 +127,12 @@ public class TagsAndI18NTextDialog extends Dialog
 		final SashForm sashForm = new SashForm(composite, SWT.BORDER);
 
 		final Composite composite_1 = new Composite(sashForm, SWT.NONE);
+		boolean mobile = SolutionMetaData.isServoyMobileSolution(flattenedSolution.getSolution());
 		dpTree = new DataProviderTreeViewer(composite_1, new CombinedLabelProvider(StandardTagsLabelProvider.INSTANCE_HIDEPREFIX,
 			new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(DataProviderLabelProvider.INSTANCE_HIDEPREFIX,
 				persistContext.getContext()))), new CombinedTreeContentProvider(new DataProviderContentProvider(persistContext, flattenedSolution, table),
-			StandardTagsContentProvider.INSTANCE), new DataProviderTreeViewer.DataProviderOptions(false, true, true, true, true, true, true, true,
-			INCLUDE_RELATIONS.NESTED, true, true, null), true, true, TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(),
+			StandardTagsContentProvider.getInstance(mobile)), new DataProviderTreeViewer.DataProviderOptions(false, true, !mobile, !mobile, true, true,
+			!mobile, !mobile, INCLUDE_RELATIONS.NESTED, true, true, null), true, true, TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(),
 			TreePatternFilter.FILTER_PARENTS), SWT.MULTI);
 
 		addButton = new Button(composite_1, SWT.NONE);
@@ -294,17 +306,30 @@ public class TagsAndI18NTextDialog extends Dialog
 		return super.close();
 	}
 
-
 	public static class StandardTagsContentProvider extends ArrayContentProvider implements ITreeContentProvider, com.servoy.eclipse.ui.util.IKeywordChecker
 	{
-		public static final StandardTagsContentProvider INSTANCE = new StandardTagsContentProvider();
+		private static final StandardTagsContentProvider INSTANCE_REGULAR = new StandardTagsContentProvider(false);
+		private static final StandardTagsContentProvider INSTANCE_MOBILE = new StandardTagsContentProvider(true);
+
+		public static final StandardTagsContentProvider getInstance(boolean mobile)
+		{
+			return mobile ? INSTANCE_MOBILE : INSTANCE_REGULAR;
+		}
+
+		private final boolean mobile;
+
+		private StandardTagsContentProvider(boolean mobile)
+		{
+			this.mobile = mobile;
+		}
 
 		public Object[] getChildren(Object parentElement)
 		{
 			if (parentElement instanceof StandardTagsRelationNode)
 			{
 				Relation relation = ((StandardTagsRelationNode)parentElement).relation;
-				String[] standardTags = relation != null ? STANDARD_TAGS_ON_RELATION : STANDARD_TAGS;
+				String[] standardTags = relation != null ? (mobile ? STANDARD_TAGS_ON_RELATION_MOBILE : STANDARD_TAGS_ON_RELATION_REGULAR) : (mobile
+					? STANDARD_TAGS_MOBILE : STANDARD_TAGS_REGULAR);
 				Object[] tags = new Object[standardTags.length];
 				for (int i = 0; i < standardTags.length; i++)
 				{
