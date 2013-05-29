@@ -11,7 +11,7 @@
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Constant used for creating accordion panel from tab panel, by setting its tabOrientation.]]></summary>
           </summaries>
-          <deprecated><![CDATA[please use ISMTabPanel#ACCORDION_PANEL instead.]]></deprecated>
+          <deprecated><![CDATA[please use JSTabPanel#ACCORDION_PANEL instead.]]></deprecated>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var accordion = myForm.newTabPanel('accordion', 10, 10, 620, 460);
 accordion.tabOrientation = SM_ALIGNMENT.ACCORDION_PANEL;]]></sample>
