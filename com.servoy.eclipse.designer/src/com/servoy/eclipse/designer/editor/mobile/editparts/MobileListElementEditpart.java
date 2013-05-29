@@ -37,6 +37,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.SetBoundsToSupportBoundsFigureListener;
+import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.resource.ImageResource;
@@ -197,10 +198,12 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 
 			case Button :
 				updateFigureForGC(fig, gc, "<button>");
+				fig.setForegroundColor(getFgColor(gc, application, editorPart.getForm(), Color.black));
 				break;
 
 			case Subtext :
 				updateFigureForGC(fig, gc, "<subtext>");
+				fig.setForegroundColor(getFgColor(((MobileListModel)getParent().getModel()).button, application, editorPart.getForm(), Color.black));
 				break;
 
 			case Icon :
