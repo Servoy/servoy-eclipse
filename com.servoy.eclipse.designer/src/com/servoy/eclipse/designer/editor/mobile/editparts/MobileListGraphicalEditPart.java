@@ -149,7 +149,7 @@ public class MobileListGraphicalEditPart extends AbstractGraphicalEditPart imple
 
 	private Color getListBackground()
 	{
-		return MobileListElementEditpart.getGcColor(getModel().button, application, editorPart.getForm(), java.awt.Color.white);
+		return MobileListElementEditpart.getBgColor(getModel().button, application, editorPart.getForm(), java.awt.Color.white);
 	}
 
 	@Override

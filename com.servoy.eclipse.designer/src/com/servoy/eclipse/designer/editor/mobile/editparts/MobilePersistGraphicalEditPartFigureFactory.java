@@ -56,11 +56,13 @@ import com.servoy.eclipse.designer.internal.core.PersistImageNotifier;
 import com.servoy.eclipse.designer.mobile.property.MobilePersistPropertySource;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.CustomValueList;
 import com.servoy.j2db.dataprocessing.IValueList;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
@@ -101,6 +103,16 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 					@Override
 					protected Component createComponent()
 					{
+						if (persist instanceof AbstractBase)
+						{
+							String styleLookupname = null;
+							if (persist instanceof GraphicalComponent &&
+								((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName) != null)
+							{
+								styleLookupname = "headertext";
+							}
+							((AbstractBase)persist).setRuntimeProperty(ComponentFactory.STYLE_LOOKUP_NAME, styleLookupname);
+						}
 						Component component = super.createComponent();
 						component.setFont(component.getFont().deriveFont(12f)); // 12 pt font
 

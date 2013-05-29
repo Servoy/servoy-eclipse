@@ -142,7 +142,7 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 		return fig;
 	}
 
-	public static org.eclipse.swt.graphics.Color getGcColor(GraphicalComponent gc, IApplication application, Form form, Color def)
+	public static org.eclipse.swt.graphics.Color getBgColor(GraphicalComponent gc, IApplication application, Form form, Color def)
 	{
 		Color awtColor = null;
 		if (gc.getBackground() != null)
@@ -161,28 +161,50 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 		return ColorResource.INSTANCE.getColor(ColorResource.ColorAwt2Rgb(awtColor == null ? def : awtColor));
 	}
 
+	public static org.eclipse.swt.graphics.Color getFgColor(GraphicalComponent gc, IApplication application, Form form, Color def)
+	{
+		Color awtColor = null;
+		if (gc.getForeground() != null)
+		{
+			awtColor = gc.getForeground();
+		}
+		else
+		{
+			Pair<IStyleSheet, IStyleRule> elementStyle = ComponentFactory.getStyleForBasicComponent(application, gc, form);
+			if (elementStyle != null && elementStyle.getRight() != null && elementStyle.getRight().hasAttribute(CSSName.COLOR.toString()))
+			{
+				awtColor = elementStyle.getLeft().getForeground(elementStyle.getRight());
+			}
+		}
+
+		return ColorResource.INSTANCE.getColor(ColorResource.ColorAwt2Rgb(awtColor == null ? def : awtColor));
+	}
+
 	/*
 	 * Apply dynamic changes to the figure, like text from a property.
 	 */
 	public void updateFigure(IFigure fig)
 	{
+		GraphicalComponent gc = (GraphicalComponent)getModel().getLeft();
 		switch (getType())
 		{
 			case Header :
-				updateFigureForGC(fig, (GraphicalComponent)getModel().getLeft(), "<header>");
-				fig.setBackgroundColor(getGcColor((GraphicalComponent)getModel().getLeft(), application, editorPart.getForm(), Color.white));
+				updateFigureForGC(fig, gc, "<header>");
+				gc.setRuntimeProperty(ComponentFactory.STYLE_LOOKUP_NAME, "headertext");
+				fig.setBackgroundColor(getBgColor(gc, application, editorPart.getForm(), Color.white));
+				fig.setForegroundColor(getFgColor(gc, application, editorPart.getForm(), Color.black));
 				break;
 
 			case Button :
-				updateFigureForGC(fig, (GraphicalComponent)getModel().getLeft(), "<button>");
+				updateFigureForGC(fig, gc, "<button>");
 				break;
 
 			case Subtext :
-				updateFigureForGC(fig, (GraphicalComponent)getModel().getLeft(), "<subtext>");
+				updateFigureForGC(fig, gc, "<subtext>");
 				break;
 
 			case Icon :
-				updateIcon((ImageFigure)fig, (GraphicalComponent)getModel().getLeft());
+				updateIcon((ImageFigure)fig, gc);
 				break;
 
 			default :
