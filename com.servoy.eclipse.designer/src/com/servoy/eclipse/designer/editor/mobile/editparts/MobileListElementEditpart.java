@@ -186,28 +186,33 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 	 */
 	public void updateFigure(IFigure fig)
 	{
-		GraphicalComponent gc = (GraphicalComponent)getModel().getLeft();
 		switch (getType())
 		{
 			case Header :
+			{
+				GraphicalComponent gc = (GraphicalComponent)getModel().getLeft();
 				updateFigureForGC(fig, gc, "<header>");
 				gc.setRuntimeProperty(ComponentFactory.STYLE_LOOKUP_NAME, "headertext");
 				fig.setBackgroundColor(getBgColor(gc, application, editorPart.getForm(), Color.white));
 				fig.setForegroundColor(getFgColor(gc, application, editorPart.getForm(), Color.black));
+			}
 				break;
 
 			case Button :
+			{
+				GraphicalComponent gc = (GraphicalComponent)getModel().getLeft();
 				updateFigureForGC(fig, gc, "<button>");
 				fig.setForegroundColor(getFgColor(gc, application, editorPart.getForm(), Color.black));
+			}
 				break;
 
 			case Subtext :
-				updateFigureForGC(fig, gc, "<subtext>");
+				updateFigureForGC(fig, (GraphicalComponent)getModel().getLeft(), "<subtext>");
 				fig.setForegroundColor(getFgColor(((MobileListModel)getParent().getModel()).button, application, editorPart.getForm(), Color.black));
 				break;
 
 			case Icon :
-				updateIcon((ImageFigure)fig, gc);
+				updateIcon((ImageFigure)fig, (GraphicalComponent)getModel().getLeft());
 				break;
 
 			default :
