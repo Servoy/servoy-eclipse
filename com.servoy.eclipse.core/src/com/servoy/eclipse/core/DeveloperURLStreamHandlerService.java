@@ -32,7 +32,7 @@ import com.servoy.j2db.util.IDeveloperURLStreamHandler;
 public class DeveloperURLStreamHandlerService extends AbstractURLStreamHandlerService
 {
 
-	private final IDeveloperURLStreamHandler handler;
+	private IDeveloperURLStreamHandler handler;
 
 	/**
 	 * @param handler
@@ -51,5 +51,13 @@ public class DeveloperURLStreamHandlerService extends AbstractURLStreamHandlerSe
 	public URLConnection openConnection(URL u) throws IOException
 	{
 		return handler.openConnection(u);
+	}
+
+	/**
+	 * @param handler2
+	 */
+	public void setHandler(IDeveloperURLStreamHandler handler)
+	{
+		this.handler = handler;
 	}
 }

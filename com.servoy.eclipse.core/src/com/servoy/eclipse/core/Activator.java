@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
@@ -634,6 +635,8 @@ public class Activator extends Plugin
 					}
 				}
 
+				private final HashMap<String, DeveloperURLStreamHandlerService> urlStreamServices = new HashMap<String, DeveloperURLStreamHandlerService>();
+
 				/*
 				 * (non-Javadoc)
 				 * 
@@ -642,10 +645,20 @@ public class Activator extends Plugin
 				@Override
 				public void addURLStreamHandler(String protocolName, IDeveloperURLStreamHandler handler)
 				{
-					Dictionary<String, String[]> properties = new Hashtable<String, String[]>(1);
-					properties.put(URLConstants.URL_HANDLER_PROTOCOL, new String[] { protocolName });
-					String serviceClass = URLStreamHandlerService.class.getName();
-					getBundle().getBundleContext().registerService(serviceClass, new DeveloperURLStreamHandlerService(handler), properties);
+					DeveloperURLStreamHandlerService service = urlStreamServices.get(protocolName);
+					if (service == null)
+					{
+						Dictionary<String, String[]> properties = new Hashtable<String, String[]>(1);
+						properties.put(URLConstants.URL_HANDLER_PROTOCOL, new String[] { protocolName });
+						String serviceClass = URLStreamHandlerService.class.getName();
+						service = new DeveloperURLStreamHandlerService(handler);
+						getBundle().getBundleContext().registerService(serviceClass, service, properties);
+						urlStreamServices.put(protocolName, service);
+					}
+					else
+					{
+						service.setHandler(handler);
+					}
 				}
 			};
 			dch.setDesignerCallback(designerCallback);
