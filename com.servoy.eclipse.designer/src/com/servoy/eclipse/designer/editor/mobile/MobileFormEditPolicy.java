@@ -73,10 +73,10 @@ public class MobileFormEditPolicy extends ComponentEditPolicy
 
 			Object createType = ((CreateRequest)request).getNewObjectType();
 
-			if ((createType == VisualFormEditor.REQ_PLACE_HEADER && !form.hasPart(Part.HEADER)) ||
-				(createType == VisualFormEditor.REQ_PLACE_FOOTER && !form.hasPart(Part.FOOTER)))
+			if ((createType == VisualFormEditor.REQ_PLACE_HEADER && !form.hasPart(Part.HEADER) && !form.hasPart(Part.TITLE_HEADER)) ||
+				(createType == VisualFormEditor.REQ_PLACE_FOOTER && !form.hasPart(Part.FOOTER) && !form.hasPart(Part.TITLE_FOOTER)))
 			{
-				command = new AddPartsCommand(form, new int[] { createType == VisualFormEditor.REQ_PLACE_HEADER ? Part.HEADER : Part.FOOTER })
+				command = new AddPartsCommand(form, new int[] { createType == VisualFormEditor.REQ_PLACE_HEADER ? Part.TITLE_HEADER : Part.TITLE_FOOTER })
 				{
 					@Override
 					protected Part createPart(int partTypeId) throws RepositoryException

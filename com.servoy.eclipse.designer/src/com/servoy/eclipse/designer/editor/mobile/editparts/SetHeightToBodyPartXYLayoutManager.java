@@ -129,7 +129,7 @@ public class SetHeightToBodyPartXYLayoutManager extends XYLayout implements Layo
 			Rectangle bounds = child.getBounds();
 			if (child instanceof MobilePartFigure)
 			{
-				if (((MobilePartFigure)child).getPartType() == Part.FOOTER)
+				if (((MobilePartFigure)child).getPartType() == Part.FOOTER || ((MobilePartFigure)child).getPartType() == Part.TITLE_FOOTER)
 				{
 					max = bounds.y;
 					break; // align to footer

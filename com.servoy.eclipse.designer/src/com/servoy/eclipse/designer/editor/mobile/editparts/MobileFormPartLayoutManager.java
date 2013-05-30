@@ -55,7 +55,7 @@ public class MobileFormPartLayoutManager extends XYLayout
 			elements.add(new FigureLayoutWrapper(child));
 		}
 
-		if (partType == Part.HEADER)
+		if (partType == Part.HEADER || partType == Part.TITLE_HEADER)
 		{
 			MobileFormLayout.layoutHeader(elements, containerBounds.x, containerBounds.y, containerBounds.width);
 		}
@@ -69,7 +69,7 @@ public class MobileFormPartLayoutManager extends XYLayout
 	protected Dimension calculatePreferredSize(IFigure container, int wHint, int hHint)
 	{
 		int height;
-		if (partType == Part.HEADER)
+		if (partType == Part.HEADER || partType == Part.TITLE_HEADER)
 		{
 			height = 40; // always 1 row
 		}

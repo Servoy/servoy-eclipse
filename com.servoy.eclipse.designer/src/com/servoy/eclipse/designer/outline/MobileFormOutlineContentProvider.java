@@ -70,8 +70,8 @@ public class MobileFormOutlineContentProvider extends FormOutlineContentProvider
 					for (IPersist persist : flattenedForm.getAllObjectsAsList())
 					{
 						if (persist instanceof IScriptElement ||
-							(persist instanceof Part && ((Part)persist).getPartType() != Part.HEADER && ((Part)persist).getPartType() != Part.FOOTER) ||
-							isMobilePersist(persist))
+							(persist instanceof Part && ((Part)persist).getPartType() != Part.HEADER && ((Part)persist).getPartType() != Part.TITLE_HEADER &&
+								((Part)persist).getPartType() != Part.FOOTER && ((Part)persist).getPartType() != Part.TITLE_FOOTER) || isMobilePersist(persist))
 						{
 							continue;
 						}
@@ -133,8 +133,10 @@ public class MobileFormOutlineContentProvider extends FormOutlineContentProvider
 							availableCategories.add(ElementUtil.getPersistNameAndImage(persist));
 							continue;
 						}
-						if ((parentElement == PARTS) && (persist instanceof Part) &&
-							(((Part)persist).getPartType() == Part.HEADER || ((Part)persist).getPartType() == Part.FOOTER))
+						if ((parentElement == PARTS) &&
+							(persist instanceof Part) &&
+							(((Part)persist).getPartType() == Part.HEADER || ((Part)persist).getPartType() == Part.TITLE_HEADER ||
+								((Part)persist).getPartType() == Part.FOOTER || ((Part)persist).getPartType() == Part.TITLE_FOOTER))
 						{
 							availableCategories.add(PersistContext.create(persist, form));
 							continue;

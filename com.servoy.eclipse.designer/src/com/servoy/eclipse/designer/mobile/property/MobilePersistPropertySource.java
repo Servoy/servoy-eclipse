@@ -23,6 +23,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.constants.IColumnTypeConstants;
 import com.servoy.base.persistence.constants.IFieldConstants;
+import com.servoy.base.persistence.constants.IPartConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.DatabaseUtils;
 import com.servoy.eclipse.ui.Messages;
@@ -140,19 +141,34 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			new Integer[] { Integer.valueOf(Field.TEXT_FIELD), Integer.valueOf(Field.TEXT_AREA), Integer.valueOf(Field.CALENDAR), Integer.valueOf(Field.COMBOBOX), Integer.valueOf(Field.RADIOS), Integer.valueOf(Field.CHECKS), Integer.valueOf(Field.PASSWORD) },
 			new String[] { "TEXT_FIELD", "TEXT_AREA", "CALENDAR", "COMBOBOX", "RADIOS", "CHECKS", "PASSWORD" }), Messages.LabelUnresolved);
 
-	public static final PropertyController<Boolean, Boolean> MOBILE_PART_FIXED_CONTROLLER = new DelegatePropertySetterController<Boolean, MobilePersistPropertySource>(
-		new CheckboxPropertyDescriptor(IMobileProperties.FIXED_POSITION.propertyName, IMobileProperties.FIXED_POSITION.propertyName),
-		IMobileProperties.FIXED_POSITION.propertyName)
+	public static final String STICKY_PART_NAME = "sticky"; //$NON-NLS-1$
+
+	public static final PropertyController<Boolean, Boolean> MOBILE_STICKY_PART_CONTROLLER = new DelegatePropertySetterController<Boolean, MobilePersistPropertySource>(
+		new CheckboxPropertyDescriptor(STICKY_PART_NAME, STICKY_PART_NAME), STICKY_PART_NAME)
 	{
 		public void setProperty(MobilePersistPropertySource propertySource, Boolean value)
 		{
-			((AbstractBase)propertySource.getPersist()).putCustomMobileProperty(IMobileProperties.FIXED_POSITION.propertyName, value);
+			Part part = (Part)propertySource.getPersist();
+			int partType = part.getPartType();
+			if (value.booleanValue())
+			{
+				if (partType == IPartConstants.HEADER) part.setPartType(IPartConstants.TITLE_HEADER);
+				else if (partType == IPartConstants.FOOTER) part.setPartType(IPartConstants.TITLE_FOOTER);
+			}
+			else
+			{
+				if (partType == IPartConstants.TITLE_HEADER) part.setPartType(IPartConstants.HEADER);
+				else if (partType == IPartConstants.TITLE_FOOTER) part.setPartType(IPartConstants.FOOTER);
+			}
+
 			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, propertySource.getPersist(), false);
 		}
 
 		public Boolean getProperty(MobilePersistPropertySource propertySource)
 		{
-			return Boolean.valueOf(Boolean.TRUE.equals(((AbstractBase)propertySource.getPersist()).getCustomMobileProperty(IMobileProperties.FIXED_POSITION.propertyName)));
+			Part part = (Part)propertySource.getPersist();
+			int partType = part.getPartType();
+			return Boolean.valueOf(partType == IPartConstants.TITLE_HEADER || partType == IPartConstants.TITLE_FOOTER);
 		}
 	};
 
@@ -262,7 +278,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 
 		if (Part.class == clazz)
 		{
-			return new String[] { IMobileProperties.FIXED_POSITION.propertyName };
+			return new String[] { STICKY_PART_NAME };
 		}
 
 		return null;
@@ -296,9 +312,9 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			return MOBILE_ICONS_CONTROLLER;
 		}
 
-		if (name.equals(IMobileProperties.FIXED_POSITION.propertyName))
+		if (name.equals(STICKY_PART_NAME))
 		{
-			return MOBILE_PART_FIXED_CONTROLLER;
+			return MOBILE_STICKY_PART_CONTROLLER;
 		}
 
 		return super.getPropertiesPropertyDescriptor(propertySource, id, displayName, name, flattenedEditingSolution, form);
@@ -330,7 +346,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			Form form = (Form)getContext();
 			for (Part part : Utils.iterate(form.getParts()))
 			{
-				if (part.getPartType() == Part.HEADER)
+				if (part.getPartType() == Part.HEADER || part.getPartType() == Part.TITLE_HEADER)
 				{
 					new PersistPropertySource(PersistContext.create(part, form), false).setPersistPropertyValue(id, value);
 				}

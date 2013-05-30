@@ -86,11 +86,11 @@ public class FigureLayoutWrapper implements ILayoutWrapper
 	{
 		if (figure instanceof MobilePartFigure)
 		{
-			if (((MobilePartFigure)figure).getPartType() == Part.HEADER)
+			if (((MobilePartFigure)figure).getPartType() == Part.HEADER || ((MobilePartFigure)figure).getPartType() == Part.TITLE_HEADER)
 			{
 				return MobileFormSection.Header;
 			}
-			if (((MobilePartFigure)figure).getPartType() == Part.FOOTER)
+			if (((MobilePartFigure)figure).getPartType() == Part.FOOTER || ((MobilePartFigure)figure).getPartType() == Part.TITLE_FOOTER)
 			{
 				return MobileFormSection.Footer;
 			}

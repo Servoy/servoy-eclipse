@@ -76,7 +76,7 @@ public class MobileFormGraphicalEditPart extends BaseFormGraphicalEditPart imple
 
 		for (Part part : Utils.iterate(flattenedForm.getParts()))
 		{
-			if (part.getPartType() == Part.HEADER)
+			if (part.getPartType() == Part.HEADER || part.getPartType() == Part.TITLE_HEADER)
 			{
 				list.add(part);
 			}
@@ -105,7 +105,7 @@ public class MobileFormGraphicalEditPart extends BaseFormGraphicalEditPart imple
 
 		for (Part part : Utils.iterate(flattenedForm.getParts()))
 		{
-			if (part.getPartType() == Part.FOOTER)
+			if (part.getPartType() == Part.FOOTER || part.getPartType() == Part.TITLE_FOOTER)
 			{
 				list.add(part);
 			}
@@ -188,11 +188,11 @@ public class MobileFormGraphicalEditPart extends BaseFormGraphicalEditPart imple
 
 	public static EditPart createChild(IApplication application, BaseVisualFormEditor editorPart, Form form, Object child)
 	{
-		if (child instanceof Part && ((Part)child).getPartType() == Part.HEADER)
+		if (child instanceof Part && (((Part)child).getPartType() == Part.HEADER || ((Part)child).getPartType() == Part.TITLE_HEADER))
 		{
 			return new MobileHeaderGraphicalEditPart(application, editorPart, (Part)child);
 		}
-		if (child instanceof Part && ((Part)child).getPartType() == Part.FOOTER)
+		if (child instanceof Part && (((Part)child).getPartType() == Part.FOOTER || ((Part)child).getPartType() == Part.TITLE_FOOTER))
 		{
 			return new MobileFooterGraphicalEditPart(application, editorPart, (Part)child);
 		}

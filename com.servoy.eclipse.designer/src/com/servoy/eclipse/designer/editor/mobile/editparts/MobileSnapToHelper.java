@@ -96,11 +96,11 @@ public class MobileSnapToHelper extends SnapToHelper
 			RequestType requestType = (RequestType)((CreateRequest)request).getNewObjectType();
 			if (target.getModel() instanceof Part)
 			{
-				if (((Part)target.getModel()).getPartType() == Part.HEADER)
+				if (((Part)target.getModel()).getPartType() == Part.HEADER || ((Part)target.getModel()).getPartType() == Part.TITLE_HEADER)
 				{
 					return calculateSnappingToHeader(requestType, target, ((CreateRequest)request).getSize(), x, y);
 				}
-				if (((Part)target.getModel()).getPartType() == Part.FOOTER)
+				if (((Part)target.getModel()).getPartType() == Part.FOOTER || ((Part)target.getModel()).getPartType() == Part.TITLE_FOOTER)
 				{
 					return calculateSnappingToFooter(target, x, y);
 				}
