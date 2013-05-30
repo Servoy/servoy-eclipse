@@ -70,6 +70,7 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 
 	private static final String ELEMENTS_ID = "elements";
 	private static final String ELEMENTS_TEXT_FIELD_ID = "text field";
+	private static final String ELEMENTS_CALENDAR_ID = "calendar";
 	private static final String ELEMENTS_TEXTAREA_ID = "text area";
 	private static final String ELEMENTS_COMBOBOX_ID = "combobox";
 	private static final String ELEMENTS_CHECKBOXES_ID = "checkboxes";
@@ -81,6 +82,7 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 	private static final String[] ELEMENTS_IDS = new String[] {
 	/* */ELEMENTS_TEXT_FIELD_ID
 	/* */, ELEMENTS_TEXTAREA_ID
+	/* */, ELEMENTS_CALENDAR_ID
 	/* */, ELEMENTS_COMBOBOX_ID
 	/* */, ELEMENTS_CHECKBOXES_ID
 	/* */, ELEMENTS_RADIOBUTTONS_ID
@@ -263,6 +265,13 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 		{
 			icon = Activator.loadImageDescriptorFromBundle("mobile/textarea.png");
 			displayType = Field.TEXT_AREA;
+		}
+
+		else if (ELEMENTS_CALENDAR_ID.equals(id))
+		{
+			icon = Activator.loadImageDescriptorFromBundle("mobile/calendar.png");
+			displayType = Field.CALENDAR;
+			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_EDITABLE, Boolean.FALSE);
 		}
 
 		else if (ELEMENTS_COMBOBOX_ID.equals(id))

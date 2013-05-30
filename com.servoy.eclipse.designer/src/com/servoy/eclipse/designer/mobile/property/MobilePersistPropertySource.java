@@ -205,9 +205,16 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			}
 			return false;
 		}
-
+		if (propertyDescriptor.propertyDescriptor.getName().equals(StaticContentSpecLoader.PROPERTY_VALUELISTID.getPropertyName()))
+		{
+			if ((getPersist() instanceof Field && ((Field)getPersist()).getDisplayType() == IFieldConstants.CALENDAR))
+			{
+				return false;
+			}
+		}
 		return super.shouldShow(propertyDescriptor);
 	}
+
 
 	@Override
 	protected boolean hideForProperties(PropertyDescriptorWrapper propertyDescriptor)
