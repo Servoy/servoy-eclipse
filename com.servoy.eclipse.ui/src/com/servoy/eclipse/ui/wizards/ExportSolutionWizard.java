@@ -148,12 +148,10 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 				{
 					ITableDefinitionsManager tableDefManager = null;
 					IMetadataDefManager metadataDefManager = null;
-					boolean exportDbiData = (exportModel.isExportMetaData() || exportModel.isExportSampleData() || exportModel.isExportI18NData() ||
-						exportModel.isExportUsers() || exportModel.isExportReferencedModules());
-					if ((dbDownErrors && exportDbiData) || exportModel.isExportUsingDbiFileInfoOnly())
+					if (dbDownErrors || exportModel.isExportUsingDbiFileInfoOnly())
 					{
 						Pair<ITableDefinitionsManager, IMetadataDefManager> defManagers = ServoyExporterUtils.getInstance().prepareDbiFilesBasedExportData(
-							dbDownErrors, activeSolution, exportModel.isExportReferencedModules(), exportModel.isExportI18NData(),
+							activeSolution, exportModel.isExportReferencedModules(), exportModel.isExportI18NData(),
 							exportModel.isExportAllTablesFromReferencedServers(), exportModel.isExportMetaData());
 						if (defManagers != null)
 						{

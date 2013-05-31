@@ -215,7 +215,7 @@ public class ArgumentChest implements IXMLExportUserChannel
 				{
 					exportAllTablesFromReferencedServers = true;
 				}
-				else if ("-dbi_based_export".equalsIgnoreCase(args[i]))
+				else if ("-dbi".equalsIgnoreCase(args[i]))
 				{
 					exportUsingDbiFileInfoOnly = true;
 				}
@@ -288,7 +288,7 @@ public class ArgumentChest implements IXMLExportUserChannel
 			+ "        -users ... exports users\n"
 			+ "        -tables ... export  all table  information  about  tables from  referenced  servers.\n"
 			+ "             IMPORTANT: all needed DB servers must already be started\n"
-			+ "		   -dbi_based_export ... export based on dbi files\n"
+			+ "		   -dbi ... export based on dbi files\n"
 			+ "        -pwd <protection_password> ... protect  the exported  solution with given  password.\n"
 			+ "        -modules [<module1_name> <module2_name> ... <moduleN_name>] ... MUST   be  the  last\n"
 			+ "             argument  specified in command line. Includes all or part of referenced modules\n"

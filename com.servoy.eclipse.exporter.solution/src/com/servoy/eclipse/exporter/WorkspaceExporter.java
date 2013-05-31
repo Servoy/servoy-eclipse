@@ -421,14 +421,12 @@ public class WorkspaceExporter implements IApplication
 		{
 			ITableDefinitionsManager tableDefManager = null;
 			IMetadataDefManager metadataDefManager = null;
-			boolean exportDbiData = (configuration.shouldExportMetaData() || configuration.shouldExportSampleData() || configuration.shouldExportI18NData() ||
-				configuration.shouldExportUsers() || configuration.getExportAllTablesFromReferencedServers());
-			if ((dbDown && exportDbiData) || configuration.getExportUsingDbiFileInfoOnly())
+			if (dbDown || configuration.getExportUsingDbiFileInfoOnly())
 			{
 				Pair<ITableDefinitionsManager, IMetadataDefManager> defManagers;
 				try
 				{
-					defManagers = ServoyExporterUtils.getInstance().prepareDbiFilesBasedExportData(dbDown, solution, configuration.shouldExportModules(),
+					defManagers = ServoyExporterUtils.getInstance().prepareDbiFilesBasedExportData(solution, configuration.shouldExportModules(),
 						configuration.shouldExportI18NData(), configuration.getExportAllTablesFromReferencedServers(), configuration.shouldExportMetaData());
 				}
 				catch (CoreException e)

@@ -20,7 +20,6 @@ package com.servoy.eclipse.model.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,12 +41,8 @@ import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
-import com.servoy.j2db.persistence.IServer;
-import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.DataSourceUtils;
-import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.IMetadataDefManager;
@@ -93,14 +88,12 @@ public class ServoyExporterUtils
 	 * @throws JSONException 
 	 * @throws IOException 
 	 */
-	public Pair<ITableDefinitionsManager, IMetadataDefManager> prepareDbiFilesBasedExportData(boolean dbDown, Solution activeSolution,
-		boolean exportReferencedModules, boolean exportI18NData, boolean exportAllTablesFromReferencedServers, boolean exportMetaData) throws CoreException,
-		JSONException, IOException
+	public Pair<ITableDefinitionsManager, IMetadataDefManager> prepareDbiFilesBasedExportData(Solution activeSolution, boolean exportReferencedModules,
+		boolean exportI18NData, boolean exportAllTablesFromReferencedServers, boolean exportMetaData) throws CoreException, JSONException, IOException
 	{
 		// A. get only the needed servers (and tables) 
-		final Map<String, List<String>> neededServersTables = getNeededServerTables(activeSolution, exportReferencedModules, exportI18NData,
-			exportAllTablesFromReferencedServers, dbDown);
-
+		final Map<String, List<String>> neededServersTables = getNeededServerTables(activeSolution, exportReferencedModules, exportI18NData);
+		final boolean exportAll = exportAllTablesFromReferencedServers;
 		DataModelManager dmm = ServoyModelFinder.getServoyModel().getDataModelManager();
 
 		// B. for needed tables, get dbi files (db is down)
@@ -123,7 +116,10 @@ public class ServoyExporterUtils
 							//we found a dbi file
 							String tableName = resource.getName().substring(0,
 								resource.getName().length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
-							if (tables.contains(tableName)) dbiz.add((IFile)resource);
+							if (tables.contains(tableName) || exportAll)
+							{
+								dbiz.add((IFile)resource);
+							}
 						}
 						return true;
 					}
@@ -229,8 +225,7 @@ public class ServoyExporterUtils
 		srvTbl.put(serverName, tablesForServer);
 	}
 
-	private Map<String, List<String>> getNeededServerTables(Solution mainActiveSolution, boolean includeModules, boolean includeI18NData,
-		boolean includeAllTablesFromReferencedServers, boolean dbDown)
+	private Map<String, List<String>> getNeededServerTables(Solution mainActiveSolution, boolean includeModules, boolean includeI18NData)
 	{
 		DataSourceCollectorVisitor collector = new DataSourceCollectorVisitor();
 		//get modules to export if needed, or just the active project
@@ -250,35 +245,11 @@ public class ServoyExporterUtils
 
 		for (String serverName : serverNames)
 		{
-			List<String> tableNames = null;
-			if (dbDown || !includeAllTablesFromReferencedServers)
-			{
-				tableNames = DataSourceUtils.getServerTablenames(dataSources, serverName);
-			}
-			else
-			{
-				IServer s = ApplicationServerSingleton.get().getServerManager().getServer(serverName);
-				try
-				{
-					tableNames = s.getTableNames(true);
-				}
-				catch (RepositoryException repEx)
-				{
-					Debug.error(repEx);
-					tableNames = new ArrayList<String>();
-				}
-				catch (RemoteException remEx)
-				{
-					Debug.error(remEx);
-				}
-			}
-
-			for (String tableName : tableNames)
+			for (String tableName : DataSourceUtils.getServerTablenames(dataSources, serverName))
 			{
 				addServerTable(neededServersTablesMap, serverName, tableName);
 			}
 		}
-
 
 		// check if i18n info is needed
 		if (mainActiveSolution.getI18nDataSource() != null && includeI18NData) addServerTable(neededServersTablesMap, mainActiveSolution.getI18nServerName(),
