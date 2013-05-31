@@ -95,6 +95,9 @@ import com.servoy.j2db.util.xmlxport.IXMLExporter;
 
 public class ExportSolutionWizard extends Wizard implements IExportWizard
 {
+
+	private static final String DB_DOWN_WARNING = "Error markers will be ignored because the DB seems to be offline (.dbi files will be used instead)."; //$NON-NLS-1$
+
 	private Solution activeSolution;
 	private ExportSolutionModel exportModel;
 	private FileSelectionPage fileSelectionPage;
@@ -167,7 +170,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 					monitor.done();
 
-					if (dbDownErrors && !exportModel.isExportUsingDbiFileInfoOnly())
+					if (dbDownErrors)
 					{
 						Display.getDefault().syncExec(new Runnable()
 						{
@@ -366,9 +369,10 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 	private class FileSelectionPage extends WizardPage implements Listener
 	{
+
 		private Text fileNameText;
 		private Button browseButton;
-		private final int projectProblemsType;
+		private int projectProblemsType;
 
 		public FileSelectionPage()
 		{
@@ -376,14 +380,19 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			setTitle("Choose the destination file"); //$NON-NLS-1$
 			setDescription("Select the file where you want your solution exported to"); //$NON-NLS-1$
 			projectProblemsType = BuilderUtils.getMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
-			if (projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS && !dbDownErrors)
+			if (projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS)
 			{
-				setErrorMessage("There are errors in the solution that will prevent it from functioning well. Solve errors from problems view first."); //$NON-NLS-1$
+				if (dbDownErrors)
+				{
+					projectProblemsType = BuilderUtils.HAS_WARNING_MARKERS;
+					setMessage(DB_DOWN_WARNING, IMessageProvider.WARNING);
+				}
+				else setErrorMessage("Errors in the solution will prevent it from functioning well. Please solve errors (problems view) first."); //$NON-NLS-1$
 			}
-			if (projectProblemsType == BuilderUtils.HAS_WARNING_MARKERS)
+			else if (projectProblemsType == BuilderUtils.HAS_WARNING_MARKERS)
 			{
 				setMessage(
-					"There are warnings in the solution that may prevent it from functioning well. You may want to solve warnings from problems view first.", IMessageProvider.WARNING); //$NON-NLS-1$
+					"Warnings in the solution may prevent it from functioning well. You may want to solve warnings (problems view) first.", IMessageProvider.WARNING); //$NON-NLS-1$
 			}
 		}
 
@@ -535,12 +544,56 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		private Button rowsPerTableRadioButton;
 		private Button allRowsRadioButton;
 		private Button exportUsingDbiFileInfoOnlyButton;
+		private final int resourcesProjectProblemsType;
 
 		public ExportOptionsPage()
 		{
 			super("page2"); //$NON-NLS-1$
 			setTitle("Choose export options"); //$NON-NLS-1$
 			setDescription("Specify the options for your export"); //$NON-NLS-1$
+
+			ServoyModel model = ServoyModelManager.getServoyModelManager().getServoyModel();
+			resourcesProjectProblemsType = model.getActiveResourcesProject() != null
+				? BuilderUtils.getMarkers(new String[] { model.getActiveResourcesProject().getProject().getName() }) : BuilderUtils.HAS_ERROR_MARKERS;
+
+			updateMessages();
+		}
+
+		@Override
+		public boolean canFlipToNextPage()
+		{
+			return (dbDownErrors || (exportUsingDbiFileInfoOnlyButton != null && exportUsingDbiFileInfoOnlyButton.getSelection()) ||
+				resourcesProjectProblemsType == BuilderUtils.HAS_NO_MARKERS || resourcesProjectProblemsType == BuilderUtils.HAS_WARNING_MARKERS) &&
+				super.canFlipToNextPage();
+		}
+
+		private void updateMessages()
+		{
+			setMessage(null);
+			setErrorMessage(null);
+			if (resourcesProjectProblemsType == BuilderUtils.HAS_ERROR_MARKERS && exportUsingDbiFileInfoOnlyButton != null &&
+				exportUsingDbiFileInfoOnlyButton.getSelection())
+			{
+				// if this is selected ignore error markers (to allow exporting out-of-sync dbi files) // TODO limit marker check to all but dbi? (the same must happen in command line exporter then)
+				setMessage("Error markers will be ignored in resources project to allow .dbi based export.", IMessageProvider.WARNING); //$NON-NLS-1$
+			}
+			else
+			{
+				if (resourcesProjectProblemsType == BuilderUtils.HAS_ERROR_MARKERS)
+				{
+					if (dbDownErrors)
+					{
+						setMessage(DB_DOWN_WARNING, IMessageProvider.WARNING);
+					}
+					else setErrorMessage("Errors in the resources project will make the solution misbehave. Please solve errors (problems view) first."); //$NON-NLS-1$
+				}
+				else if (resourcesProjectProblemsType == BuilderUtils.HAS_WARNING_MARKERS)
+				{
+					setMessage(
+						"Warnings in the resources project may make the solution misbehave. You may want to solve warnings (problems view) first.", IMessageProvider.WARNING); //$NON-NLS-1$
+				}
+			}
+			if (isCurrentPage()) getWizard().getContainer().updateButtons();
 		}
 
 		public void createControl(Composite parent)
@@ -699,7 +752,14 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			else if (event.widget == exportI18NDataButton) exportModel.setExportI18NData(exportI18NDataButton.getSelection());
 			else if (event.widget == exportUsersButton) exportModel.setExportUsers(exportUsersButton.getSelection());
 			else if (event.widget == exportAllTablesFromReferencedServers) exportModel.setExportAllTablesFromReferencedServers(exportAllTablesFromReferencedServers.getSelection());
-			else if (event.widget == exportUsingDbiFileInfoOnlyButton) exportModel.setExportUsingDbiFileInfoOnly(exportUsingDbiFileInfoOnlyButton.getSelection());
+			else if (event.widget == exportUsingDbiFileInfoOnlyButton)
+			{
+				exportModel.setExportUsingDbiFileInfoOnly(exportUsingDbiFileInfoOnlyButton.getSelection());
+				if (!dbDownErrors)
+				{
+					updateMessages();
+				}
+			}
 			getWizard().getContainer().updateButtons();
 		}
 
@@ -789,15 +849,22 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			initializeModulesToExport();
 			projectProblemsType = BuilderUtils.getMarkers(exportModel.getModulesToExport());
 			setErrorMessage(null);
-			if (projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS && !dbDownErrors)
+			setMessage(null);
+			if (projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS)
 			{
-				setErrorMessage("There are errors in the solution that will prevent it from functioning well. Solve errors from problems view first.");
+				if (dbDownErrors)
+				{
+					projectProblemsType = BuilderUtils.HAS_WARNING_MARKERS;
+					setMessage(DB_DOWN_WARNING, IMessageProvider.WARNING);
+				}
+				else setErrorMessage("There are errors in the modules that will prevent the solution from functioning well. Please solve errors (problems view) first.");
 			}
-			if (projectProblemsType == BuilderUtils.HAS_WARNING_MARKERS)
+			else if (projectProblemsType == BuilderUtils.HAS_WARNING_MARKERS)
 			{
 				setMessage(
-					"There are warnings in the solution that may prevent it from functioning well. You may want to solve warnings from problems view first.", IMessageProvider.WARNING); //$NON-NLS-1$
+					"There are warnings in the modules that may prevent the solution from functioning well. You may want to solve warnings (problems view) first.", IMessageProvider.WARNING); //$NON-NLS-1$
 			}
+
 			if (isCurrentPage()) getWizard().getContainer().updateButtons();
 		}
 

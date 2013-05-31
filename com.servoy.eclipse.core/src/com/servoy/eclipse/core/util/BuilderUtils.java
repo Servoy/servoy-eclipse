@@ -20,9 +20,10 @@ package com.servoy.eclipse.core.util;
 import java.util.ArrayList;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Solution;
@@ -59,12 +60,12 @@ public class BuilderUtils
 			boolean hasWarnings = false;
 			try
 			{
-				for (String moduleName : projects)
+				for (String projectName : projects)
 				{
-					ServoyProject module = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(moduleName);
-					if (module != null)
+					IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+					if (project != null && project.exists() && project.isOpen())
 					{
-						IMarker[] markers = module.getProject().findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+						IMarker[] markers = project.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
 						for (IMarker marker : markers)
 						{
 							if (marker.getAttribute(IMarker.SEVERITY) != null && marker.getAttribute(IMarker.SEVERITY).equals(IMarker.SEVERITY_ERROR))
@@ -76,6 +77,11 @@ public class BuilderUtils
 								hasWarnings = true;
 							}
 						}
+					}
+					else
+					{
+						ServoyLog.logWarning("Cannot find project (or it is closed) \"" + projectName + "\" in workspace while searching for problem markers.",
+							null);
 					}
 				}
 			}

@@ -91,6 +91,7 @@ public class WorkspaceExporter implements IApplication
 
 	private boolean verbose;
 	private boolean initialAutoBuild = false;
+	private boolean dbDownMode = false;
 
 	public Object start(IApplicationContext context)
 	{
@@ -329,12 +330,27 @@ public class WorkspaceExporter implements IApplication
 						{
 							splitMarkers(module.getProject(), errors, warnings);
 						}
-						splitMarkers(sm.getActiveResourcesProject().getProject(), errors, warnings);
+						if (!configuration.getExportUsingDbiFileInfoOnly()) splitMarkers(sm.getActiveResourcesProject().getProject(), errors, warnings);
+						// else we currently ignore error markers to allow dbi differences during export // TODO maybe check for non-dbi markers only here? (the same must happen in export wizard then)
 
-						dbDown = ServoyExporterUtils.getInstance().hasDbDownErrorMarkers(
+						dbDownMode = ServoyExporterUtils.getInstance().hasDbDownErrorMarkers(
 							new String[] { ServoyModelFinder.getServoyModel().getActiveProject().getProject().getName() }).booleanValue();
+						if (dbDownMode)
+						{
+							output("Found error markers that would suggest the DB is down."); //$NON-NLS-1$
+							if (configuration.exportIfDBDown())
+							{
+								output("Exporting with DB down is allowed. Proceeding..."); //$NON-NLS-1$
+							}
+							else
+							{
+								outputError("Please use -dbd argument to allow exports when DB is down."); //$NON-NLS-1$
+								dbDownMode = false; // so that it fails because of error markers
+							}
+						}
+
 						// if db is down we still try to export (using dbi files)
-						if (errors.size() > 0 && !dbDown)
+						if (errors.size() > 0 && !dbDownMode)
 						{
 							exitCode = EXIT_EXPORT_FAILED;
 							outputError("Found error markers in projects for solution '" + configuration.getSolutionName() + "'."); //$NON-NLS-1$//$NON-NLS-2$
@@ -349,7 +365,7 @@ public class WorkspaceExporter implements IApplication
 						}
 						else if (!mustStop)
 						{
-							if (warnings.size() > 0)
+							if (warnings.size() > 0 && !dbDownMode)
 							{
 								output("Found warning markers in projects for solution " + configuration.getSolutionName()); //$NON-NLS-1$
 								if (verbose)
@@ -404,8 +420,6 @@ public class WorkspaceExporter implements IApplication
 		}
 	}
 
-	private boolean dbDown = false;
-
 	private void exportActiveSolution(ArgumentChest configuration)
 	{
 		IApplicationServerSingleton as = ApplicationServerSingleton.get();
@@ -421,7 +435,7 @@ public class WorkspaceExporter implements IApplication
 		{
 			ITableDefinitionsManager tableDefManager = null;
 			IMetadataDefManager metadataDefManager = null;
-			if (dbDown || configuration.getExportUsingDbiFileInfoOnly())
+			if (dbDownMode || configuration.getExportUsingDbiFileInfoOnly())
 			{
 				Pair<ITableDefinitionsManager, IMetadataDefManager> defManagers;
 				try
