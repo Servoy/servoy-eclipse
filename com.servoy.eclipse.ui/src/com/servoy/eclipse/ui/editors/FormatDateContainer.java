@@ -272,14 +272,14 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 		placeholder.setText("");
 		useMask.setSelection(false);
 		placeholder.setEnabled(false);
-		editFormat.setEnabled(true && !mobile);
+		editFormat.setEnabled(!mobile);
 		if (parsedFormat != null)
 		{
 			displayFormat.setText(parsedFormat.getDisplayFormat() != null ? parsedFormat.getDisplayFormat() : "");
 			if (parsedFormat.isMask())
 			{
-				useMask.setSelection(true && !mobile);
-				placeholder.setEnabled(true && !mobile);
+				useMask.setSelection(!mobile);
+				placeholder.setEnabled(!mobile);
 				editFormat.setEnabled(false);
 				if (parsedFormat.getPlaceHolderCharacter() != 0) placeholder.setText(Character.toString(parsedFormat.getPlaceHolderCharacter()));
 			}
