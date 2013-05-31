@@ -35,7 +35,7 @@ import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 public class ExtensionUpdateAndIncompatibilityCheckJob extends Job
 {
 
-	private Thread checkingForUpdates;
+	private volatile Thread checkingForUpdates;
 
 	public ExtensionUpdateAndIncompatibilityCheckJob(String name)
 	{
