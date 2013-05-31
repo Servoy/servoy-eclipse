@@ -21,12 +21,11 @@ import java.rmi.RemoteException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.grouplayout.GroupLayout;
-import org.eclipse.swt.layout.grouplayout.LayoutStyle;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -43,14 +42,15 @@ import com.servoy.j2db.util.Utils;
 public class ColumnAutoEnterServoySeqComposite extends Composite implements SelectionListener
 {
 
-	private final Text stepSizeText;
-	private final Text nextValueText;
+	private final Label stepSizeText;
+	private final Label nextValueText;
 
 	private final Button updateRepositoryButton;
 	private final Button calculateFromDataButton;
 	private final Button refreshFromRepositoryButton;
 
 	private Column column;
+	private final Label devInfo;
 
 	/**
 	 * Create the composite
@@ -63,47 +63,55 @@ public class ColumnAutoEnterServoySeqComposite extends Composite implements Sele
 		super(parent, style);
 
 		Label nextValueLabel;
+		GridLayout gridLayout = new GridLayout(4, false);
+		gridLayout.marginTop = 5;
+		setLayout(gridLayout);
 		nextValueLabel = new Label(this, SWT.NONE);
 		nextValueLabel.setText("Next value");
 
-		nextValueText = new Text(this, SWT.BORDER);
+		nextValueText = new Label(this, SWT.BORDER);
+		nextValueText.setText("test");
+		nextValueText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 3, 1));
 
 		Label stepSizeLabel;
 		stepSizeLabel = new Label(this, SWT.NONE);
 		stepSizeLabel.setText("Step size");
 
-		stepSizeText = new Text(this, SWT.BORDER);
-
-		updateRepositoryButton = new Button(this, SWT.NONE);
-		updateRepositoryButton.setText("Update repository");
-		updateRepositoryButton.addSelectionListener(this);
-
-		calculateFromDataButton = new Button(this, SWT.NONE);
-		calculateFromDataButton.setText("Calculate from data");
-		calculateFromDataButton.addSelectionListener(this);
+		stepSizeText = new Label(this, SWT.BORDER);
+		stepSizeText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1));
+//		stepSizeText.addModifyListener(new ModifyListener()
+//		{
+//			@Override
+//			public void modifyText(ModifyEvent e)
+//			{
+//				if (column != null && column.getColumnInfo() != null)
+//				{
+//					int stepSize = Utils.getAsInteger(stepSizeText.getText());
+//					if (stepSize <= 0) stepSize = 1;
+//					column.getColumnInfo().setSequenceStepSize(stepSize);
+//					column.flagColumnInfoChanged();
+//				}
+//			}
+//		});
+		new Label(this, SWT.NONE);
 
 		refreshFromRepositoryButton = new Button(this, SWT.NONE);
 		refreshFromRepositoryButton.setText("Refresh from repository");
 		refreshFromRepositoryButton.addSelectionListener(this);
 
-		final GroupLayout groupLayout = new GroupLayout(this);
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-					groupLayout.createSequentialGroup().addContainerGap().add(
-						groupLayout.createParallelGroup(GroupLayout.LEADING).add(nextValueLabel).add(stepSizeLabel)).addPreferredGap(LayoutStyle.RELATED).add(
-						groupLayout.createParallelGroup(GroupLayout.LEADING).add(stepSizeText, GroupLayout.PREFERRED_SIZE, 326, Short.MAX_VALUE).add(
-							nextValueText, GroupLayout.PREFERRED_SIZE, 326, Short.MAX_VALUE))).add(
-					groupLayout.createSequentialGroup().addContainerGap(43, Short.MAX_VALUE).add(refreshFromRepositoryButton).addPreferredGap(
-						LayoutStyle.RELATED).add(calculateFromDataButton).addPreferredGap(LayoutStyle.RELATED).add(updateRepositoryButton))).addContainerGap()));
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(nextValueLabel).add(nextValueText, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(stepSizeLabel).add(stepSizeText, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(calculateFromDataButton).add(refreshFromRepositoryButton).add(updateRepositoryButton)).addContainerGap()));
-		setLayout(groupLayout);
+		calculateFromDataButton = new Button(this, SWT.NONE);
+		calculateFromDataButton.setText("Calculate from data");
+		calculateFromDataButton.addSelectionListener(this);
+
+		updateRepositoryButton = new Button(this, SWT.NONE);
+		updateRepositoryButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+		updateRepositoryButton.setText("Update repository");
+		updateRepositoryButton.addSelectionListener(this);
+		new Label(this, SWT.NONE);
+
+		devInfo = new Label(this, SWT.NONE);
+		devInfo.setText("test");
+		devInfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 3, 1));
 		//
 	}
 
@@ -133,11 +141,11 @@ public class ColumnAutoEnterServoySeqComposite extends Composite implements Sele
 					nextValueText.setText(sq == null ? "" : sq.toString()); //$NON-NLS-1$
 					if (!(sp instanceof IColumnInfoBasedSequenceProvider))
 					{
+						nextValueText.setToolTipText("Developer uses 'select max(pk)' to get a new pk, so this can't be controlled in the developer"); //$NON-NLS-1$
+						devInfo.setText("Developer uses 'select max(pk)' to get a new pk, so this can't be controlled in the developer"); //$NON-NLS-1$
 						updateRepositoryButton.setEnabled(false);
 						refreshFromRepositoryButton.setEnabled(false);
 						calculateFromDataButton.setEnabled(false);
-						nextValueText.setEditable(false);
-						stepSizeText.setEditable(false);
 					}
 				}
 				else
