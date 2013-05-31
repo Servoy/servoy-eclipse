@@ -35,9 +35,18 @@ import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 public class ExtensionUpdateAndIncompatibilityCheckJob extends Job
 {
 
+	private Thread checkingForUpdates;
+
 	public ExtensionUpdateAndIncompatibilityCheckJob(String name)
 	{
 		super(name);
+	}
+
+	@Override
+	protected void canceling()
+	{
+		super.canceling();
+		if (checkingForUpdates != null) checkingForUpdates.interrupt(); // it's probably doing network I/O
 	}
 
 	@Override
@@ -57,7 +66,17 @@ public class ExtensionUpdateAndIncompatibilityCheckJob extends Job
 			// inside else, because there is no use doing this if incompatible extensions were found, because the user will be prompted to check for updates anyway;
 			// it would be a bit strange if the user said "ignore" but still a check for updates would be done in background
 
-			if (dialog.checkForUpdates(monitor))
+			checkingForUpdates = Thread.currentThread(); // make sure user cancel can interrupt a possibly long duration network connection attempt
+			boolean updatesFound = false;
+			try
+			{
+				updatesFound = dialog.checkForUpdates(monitor);
+			}
+			finally
+			{
+				checkingForUpdates = null;
+			}
+			if (updatesFound)
 			{
 				showInstalledExtensionsDialog(dialog,
 					"Extension update checker", "New versions are available for installed extensions.", "Show updates", "Ignore", false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$

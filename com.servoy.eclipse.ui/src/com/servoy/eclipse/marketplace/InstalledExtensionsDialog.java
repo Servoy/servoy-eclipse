@@ -722,7 +722,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 					finally
 					{
 						final Pair<Boolean, Message[]> updatesFound = updFnd;
-						if (!getShell().isDisposed())
+						if (getShell() != null && !getShell().isDisposed())
 						{
 							getShell().getDisplay().asyncExec(new Runnable()
 							{

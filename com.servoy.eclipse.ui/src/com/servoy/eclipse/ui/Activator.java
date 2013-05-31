@@ -159,7 +159,7 @@ public class Activator extends AbstractUIPlugin
 	private boolean needsExtensionUpdateCheckBecauseOfNewRelease()
 	{
 		String servoyRelease = getPreferenceStore().getString(SERVOY_VERSION);
-		getPreferenceStore().setValue(SERVOY_VERSION, ClientVersion.getBundleVersion());
+		getPreferenceStore().setValue(SERVOY_VERSION, ClientVersion.getBundleVersion()); // shouldn't we do this only if the update check is successful?
 		return servoyRelease == null || "".equals(servoyRelease) || !servoyRelease.equals(ClientVersion.getBundleVersion());
 	}
 
