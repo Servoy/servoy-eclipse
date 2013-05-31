@@ -22433,35 +22433,35 @@ Each Subsummary part can contain summary fields, which will be printed once for 
             <sample clientSupport="wc,sc"><![CDATA[var leadingSubsummary = form.newPart(JSPart.LEADING_SUBSUMMARY, 160);]]></sample>
           </samples>
         </constant>
-        <constant clientSupport="wc,sc" name="TITLE_FOOTER">
+        <constant clientSupport="mc,wc,sc" name="TITLE_FOOTER">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Constant use for specifying the type of form parts. 
+            <description clientSupport="mc,wc,sc"><![CDATA[Constant use for specifying the type of form parts. 
 
 Appears once on the first page of a printed report. If a Footer is available, it is
 replaced by the Title Footer on the first page.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Constant use for specifying the type of form parts.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Constant use for specifying the type of form parts.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[var titleFooter = form.newPart(JSPart.TITLE_FOOTER, 500);]]></sample>
+            <sample clientSupport="mc,wc,sc"><![CDATA[var titleFooter = form.newPart(JSPart.TITLE_FOOTER, 500);]]></sample>
           </samples>
         </constant>
-        <constant clientSupport="wc,sc" name="TITLE_HEADER">
+        <constant clientSupport="mc,wc,sc" name="TITLE_HEADER">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Constant use for specifying the type of form parts. 
+            <description clientSupport="mc,wc,sc"><![CDATA[Constant use for specifying the type of form parts. 
 
 Appears only once on the first page of a printed report or on top of the first screen
 of a foundset. If a Header is available it is replace by the Title Header on the first
 page.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Constant use for specifying the type of form parts.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Constant use for specifying the type of form parts.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[var titleHeader = form.newPart(JSPart.TITLE_HEADER, 40);]]></sample>
+            <sample clientSupport="mc,wc,sc"><![CDATA[var titleHeader = form.newPart(JSPart.TITLE_HEADER, 40);]]></sample>
           </samples>
         </constant>
         <constant clientSupport="wc,sc" name="TRAILING_GRAND_SUMMARY">
