@@ -18,21 +18,10 @@ package com.servoy.eclipse.ui.wizards;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -79,11 +68,10 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
 import com.servoy.eclipse.core.util.SerialRule;
-import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseExportI18NHelper;
 import com.servoy.eclipse.model.util.IFileAccess;
+import com.servoy.eclipse.model.util.ServoyExporterUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
@@ -92,22 +80,18 @@ import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.dataprocessing.IDataServerInternal;
 import com.servoy.j2db.persistence.AbstractRepository;
-import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
-import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IUserManager;
-import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.IMetadataDefManager;
 import com.servoy.j2db.util.xmlxport.ITableDefinitionsManager;
 import com.servoy.j2db.util.xmlxport.IXMLExporter;
-import com.servoy.j2db.util.xmlxport.MetadataDef;
-import com.servoy.j2db.util.xmlxport.TableDef;
 
 public class ExportSolutionWizard extends Wizard implements IExportWizard
 {
@@ -137,45 +121,6 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 	}
 
 
-	/** 
-	 * 
-	 * @return true if the database is down (servers or tables are inaccessible)
-	 */
-	private Boolean hasDbErrorMarkers(String[] projects)
-	{
-		if (projects != null && projects.length > 0)
-		{
-			try
-			{
-				for (String moduleName : projects)
-				{
-					ServoyProject module = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(moduleName);
-					if (module != null)
-					{
-						IMarker[] markers = module.getProject().findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-						for (IMarker marker : markers)
-						{
-							// db down errors = missing server (what other cases?)
-							if (marker.getAttribute(IMarker.SEVERITY) != null && marker.getAttribute(IMarker.SEVERITY).equals(IMarker.SEVERITY_ERROR) &&
-								ServoyBuilder.MISSING_SERVER.equals(marker.getType()))
-							{
-								return Boolean.TRUE;
-							}
-						}
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				ServoyLog.logError(ex);
-			}
-		}
-		return Boolean.FALSE;
-	}
-
-	private ITableDefinitionsManager tableDefManager = null;
-	private IMetadataDefManager metadataDefManager = null;
-
 	@Override
 	public boolean performFinish()
 	{
@@ -201,11 +146,20 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 				try
 				{
+					ITableDefinitionsManager tableDefManager = null;
+					IMetadataDefManager metadataDefManager = null;
 					boolean exportDbiData = (exportModel.isExportMetaData() || exportModel.isExportSampleData() || exportModel.isExportI18NData() ||
 						exportModel.isExportUsers() || exportModel.isExportReferencedModules());
 					if ((dbDownErrors && exportDbiData) || exportModel.isExportUsingDbiFileInfoOnly())
 					{
-						prepareDbiFilesBasedExportData(dbDownErrors);
+						Pair<ITableDefinitionsManager, IMetadataDefManager> defManagers = ServoyExporterUtils.getInstance().prepareDbiFilesBasedExportData(
+							dbDownErrors, activeSolution, exportModel.isExportReferencedModules(), exportModel.isExportI18NData(),
+							exportModel.isExportAllTablesFromReferencedServers(), exportModel.isExportMetaData());
+						if (defManagers != null)
+						{
+							tableDefManager = defManagers.getLeft();
+							metadataDefManager = defManagers.getRight();
+						}
 					}
 
 					exporter.exportSolutionToFile(activeSolution, new File(exportModel.getFileName()), ClientVersion.getVersion(),
@@ -274,205 +228,6 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		});
 	}
 
-	/**
-	 * This method takes care of minimal db info to be used in export in the case in which the db is down.
-	 * It will create and initialize the table def manager and the metadata manager, which will contain server and table and metadata info
-	 * to be used at solution export.
-	 * 
-	 * If the database is not down, it will export all needed (non-minimal) db info, based on dbi files (only). That is, if needed,
-	 * it will export all tables from referenced servers, based on dbi files.
-	 * 
-	 * NOTE: if there are no dbi files created, export info will be empty
-	 * 
-	 * @param true if the database is down, false otherwise 
-	 * 
-	 * @throws CoreException
-	 * @throws JSONException 
-	 * @throws IOException 
-	 */
-	private void prepareDbiFilesBasedExportData(boolean dbDown) throws CoreException, JSONException, IOException
-	{
-		// A. get only the needed servers (and tables) 
-		final Map<String, List<String>> neededServersTables = getNeededServerTables(activeSolution, exportModel.isExportReferencedModules(),
-			exportModel.isExportI18NData(), exportModel.isExportAllTablesFromReferencedServers(), dbDown);
-
-		DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
-
-		// B. for needed tables, get dbi files (db is down)
-		Map<String, List<IFile>> server_tableDbiFiles = new HashMap<String, List<IFile>>();
-		for (Entry<String, List<String>> neededServersTableEntry : neededServersTables.entrySet())
-		{
-			final String serverName = neededServersTableEntry.getKey();
-			final List<String> tables = neededServersTableEntry.getValue();
-			IFolder serverInformationFolder = dmm.getDBIFileContainer(serverName);
-			final List<IFile> dbiz = new ArrayList<IFile>();
-			if (serverInformationFolder.exists())
-			{
-				serverInformationFolder.accept(new IResourceVisitor()
-				{
-					public boolean visit(IResource resource) throws CoreException
-					{
-						String extension = resource.getFileExtension();
-						if (extension != null && extension.equalsIgnoreCase(DataModelManager.COLUMN_INFO_FILE_EXTENSION))
-						{
-							//we found a dbi file
-							String tableName = resource.getName().substring(0,
-								resource.getName().length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
-							if (tables.contains(tableName)) dbiz.add((IFile)resource);
-						}
-						return true;
-					}
-
-				}, IResource.DEPTH_ONE, false);
-			}
-			server_tableDbiFiles.put(serverName, dbiz);
-		}
-
-		// C. deserialize table dbis to get tabledefs and metadata info
-		Map<String, List<TableDef>> serverTableDefs = new HashMap<String, List<TableDef>>();
-		List<MetadataDef> metadataDefs = new ArrayList<MetadataDef>();
-		for (Entry<String, List<IFile>> server_tableDbiFile : server_tableDbiFiles.entrySet())
-		{
-			String serverName = server_tableDbiFile.getKey();
-			List<TableDef> tableDefs = new ArrayList<TableDef>();
-			for (IFile file : server_tableDbiFile.getValue())
-			{
-				if (file.exists())
-				{
-					InputStream is = file.getContents(true);
-					String dbiFileContent = null;
-					try
-					{
-						dbiFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF-8"));
-					}
-					finally
-					{
-						is = Utils.closeInputStream(is);
-					}
-					if (dbiFileContent != null)
-					{
-						TableDef tableInfo = dmm.deserializeTableInfo(dbiFileContent);
-						tableDefs.add(tableInfo);
-						if (exportModel.isExportMetaData() && tableInfo.isMetaData != null && tableInfo.isMetaData.booleanValue())
-						{
-							String ds = DataSourceUtils.createDBTableDataSource(serverName, tableInfo.name);
-							IFile mdf = dmm.getMetaDataFile(ds);
-							if (mdf != null && mdf.exists())
-							{
-								String wscontents = null;
-								wscontents = new WorkspaceFileAccess(ServoyModel.getWorkspace()).getUTF8Contents(mdf.getFullPath().toString());
-								if (wscontents != null)
-								{
-									MetadataDef mdd = new MetadataDef(ds, wscontents);
-									if (!metadataDefs.contains(mdd)) metadataDefs.add(mdd);
-								}
-							}
-						}
-					}
-				}
-			}
-			serverTableDefs.put(serverName, tableDefs);
-		}
-
-		// D. make use of tabledef info and metadata for the managers
-		tableDefManager = new ITableDefinitionsManager()
-		{
-			private Map<String, List<TableDef>> serverTableDefsMap = new HashMap<String, List<TableDef>>();
-
-			public void setServerTableDefs(Map<String, List<TableDef>> serverTableDefsMap)
-			{
-				this.serverTableDefsMap = serverTableDefsMap;
-			}
-
-			public Map<String, List<TableDef>> getServerTableDefs()
-			{
-				return this.serverTableDefsMap;
-			}
-		};
-		tableDefManager.setServerTableDefs(serverTableDefs);
-
-		metadataDefManager = new IMetadataDefManager()
-		{
-			private List<MetadataDef> metadataDefList = new ArrayList<MetadataDef>();
-
-			public void setMetadataDefsList(List<MetadataDef> metadataDefList)
-			{
-				this.metadataDefList = metadataDefList;
-			}
-
-			public List<MetadataDef> getMetadataDefsList()
-			{
-				return this.metadataDefList;
-			}
-		};
-		metadataDefManager.setMetadataDefsList(metadataDefs);
-	}
-
-	private void addServerTable(Map<String, List<String>> srvTbl, String serverName, String tableName)
-	{
-		List<String> tablesForServer = srvTbl.get(serverName);
-		if (tablesForServer == null)
-		{
-			tablesForServer = new ArrayList<String>();
-		}
-		if (!tablesForServer.contains(tableName)) tablesForServer.add(tableName);
-		srvTbl.put(serverName, tablesForServer);
-	}
-
-	private Map<String, List<String>> getNeededServerTables(Solution mainActiveSolution, boolean includeModules, boolean includeI18NData,
-		boolean includeAllTablesFromReferencedServers, boolean dbDown)
-	{
-		DataSourceCollectorVisitor collector = new DataSourceCollectorVisitor();
-		//get modules to export if needed, or just the active project
-		if (includeModules)
-		{
-			ServoyProject[] modules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProjectWithImportHooks(); // TODO shouldn't this be done selectively/after the developer chooses what modules he wants exported?
-			for (ServoyProject module : modules)
-			{
-				module.getEditingSolution().acceptVisitor(collector);
-			}
-		}
-		else mainActiveSolution.acceptVisitor(collector);
-
-		Map<String, List<String>> neededServersTablesMap = new HashMap<String, List<String>>();
-		Set<String> dataSources = collector.getDataSources();
-		Set<String> serverNames = DataSourceUtils.getServerNames(dataSources);
-
-		for (String serverName : serverNames)
-		{
-			List<String> tableNames = null;
-			if (dbDown || !includeAllTablesFromReferencedServers)
-			{
-				tableNames = DataSourceUtils.getServerTablenames(dataSources, serverName);
-			}
-			else
-			{
-				IServerInternal s = (IServerInternal)ServoyModel.getServerManager().getServer(serverName);
-				try
-				{
-					tableNames = s.getTableNames(true);
-				}
-				catch (RepositoryException e)
-				{
-					Debug.error(e);
-					tableNames = new ArrayList<String>();
-				}
-			}
-
-			for (String tableName : tableNames)
-			{
-				addServerTable(neededServersTablesMap, serverName, tableName);
-			}
-		}
-
-
-		// check if i18n info is needed
-		if (mainActiveSolution.getI18nDataSource() != null && includeI18NData) addServerTable(neededServersTablesMap, mainActiveSolution.getI18nServerName(),
-			mainActiveSolution.getI18nTableName());
-
-		return neededServersTablesMap;
-	}
-
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
 		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
@@ -499,7 +254,8 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		int hasErrs = BuilderUtils.getMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
 		if (hasErrs == BuilderUtils.HAS_ERROR_MARKERS)
 		{
-			if (hasDbErrorMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() }) == Boolean.TRUE)
+			if (ServoyExporterUtils.getInstance().hasDbDownErrorMarkers(
+				new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() }) == Boolean.TRUE)
 			{
 				dbDownErrors = true;
 			}
