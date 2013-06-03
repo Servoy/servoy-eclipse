@@ -16,7 +16,9 @@
  */
 package com.servoy.eclipse.ui.editors.table;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -65,7 +67,30 @@ public class ColumnsSorter extends ViewerSorter
 	public int compare(Viewer viewer, Object favorite1, Object favorite2)
 	{
 		if (firstTime) return 0;
-		if (favorite2 instanceof Column && !((Column)favorite2).getExistInDB()) return 0; //do not auto sort columns until saving
+
+		//for table columns, let newly created columns add up at the end of the list, and allow full sorting only at save time
+		if ((favorite1 instanceof Column && !((Column)favorite1).getExistInDB()) && (favorite2 instanceof Column && !((Column)favorite2).getExistInDB()))
+		{
+			List<Column> columns = new ArrayList<Column>();
+			for (Column c : ((Column)favorite1).getTable().getColumns())
+			{
+				columns.add(c);
+			}
+			if (columns.indexOf(favorite1) < columns.indexOf(favorite2))
+			{
+				return -1;
+			}
+			return 1;
+		}
+		else if (favorite1 instanceof Column && !((Column)favorite1).getExistInDB())
+		{
+			return 1;
+		}
+		else if (favorite2 instanceof Column && !((Column)favorite2).getExistInDB())
+		{
+			return -1;
+		}
+
 		for (SortInfo element : infos)
 		{
 			int result = 0;
