@@ -66,6 +66,8 @@ public class ArgumentChest implements IXMLExportUserChannel
 	private String protectionPassword = null;
 	private String settingsFile = null;
 	private String appServerDir = "../../application_server"; //$NON-NLS-1$
+	private boolean exportUsingDbiFileInfoOnly = false;
+	private boolean exportIfDBDown = false;
 
 	@SuppressWarnings("nls")
 	public ArgumentChest(String[] args)
@@ -214,6 +216,14 @@ public class ArgumentChest implements IXMLExportUserChannel
 				{
 					exportAllTablesFromReferencedServers = true;
 				}
+				else if ("-dbi".equalsIgnoreCase(args[i]))
+				{
+					exportUsingDbiFileInfoOnly = true;
+				}
+				else if ("-dbd".equalsIgnoreCase(args[i]))
+				{
+					exportIfDBDown = true;
+				}
 				else if ("-pwd".equalsIgnoreCase(args[i]))
 				{
 					if (i < (args.length - 1))
@@ -283,6 +293,8 @@ public class ArgumentChest implements IXMLExportUserChannel
 			+ "        -users ... exports users\n"
 			+ "        -tables ... export  all table  information  about  tables from  referenced  servers.\n"
 			+ "             IMPORTANT: all needed DB servers must already be started\n"
+			+ "        -dbi ... export based on dbi files (even if database servers are available)\n"
+			+ "        -dbd ... try to export even if the database is offline; uses the .dbi files\n"
 			+ "        -pwd <protection_password> ... protect  the exported  solution with given  password.\n"
 			+ "        -modules [<module1_name> <module2_name> ... <moduleN_name>] ... MUST   be  the  last\n"
 			+ "             argument  specified in command line. Includes all or part of referenced modules\n"
@@ -370,6 +382,11 @@ public class ArgumentChest implements IXMLExportUserChannel
 		return exportAllTablesFromReferencedServers;
 	}
 
+	public boolean getExportUsingDbiFileInfoOnly()
+	{
+		return exportUsingDbiFileInfoOnly;
+	}
+
 	public SortedList<String> getModuleIncludeList(SortedList<String> allModules)
 	{
 		if (moduleList != null)
@@ -386,6 +403,11 @@ public class ArgumentChest implements IXMLExportUserChannel
 	public String getProtectionPassword()
 	{
 		return protectionPassword;
+	}
+
+	public boolean exportIfDBDown()
+	{
+		return exportIfDBDown;
 	}
 
 	public void info(String message, int priority)
@@ -442,4 +464,5 @@ public class ArgumentChest implements IXMLExportUserChannel
 
 		return wscontents;
 	}
+
 }

@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
+import org.json.JSONException;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.servoy.eclipse.exporter.config.ArgumentChest;
@@ -50,6 +51,7 @@ import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.EclipseRepositoryFactory;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyExporterUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.ClientVersion;
@@ -65,7 +67,11 @@ import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IApplicationServerStarter;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.server.shared.IUserManagerFactory;
+import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
+import com.servoy.j2db.util.xmlxport.IMetadataDefManager;
+import com.servoy.j2db.util.xmlxport.ITableDefinitionsManager;
 import com.servoy.j2db.util.xmlxport.IXMLExporter;
 
 /**
@@ -85,6 +91,7 @@ public class WorkspaceExporter implements IApplication
 
 	private boolean verbose;
 	private boolean initialAutoBuild = false;
+	private boolean dbDownMode = false;
 
 	public Object start(IApplicationContext context)
 	{
@@ -323,8 +330,27 @@ public class WorkspaceExporter implements IApplication
 						{
 							splitMarkers(module.getProject(), errors, warnings);
 						}
-						splitMarkers(sm.getActiveResourcesProject().getProject(), errors, warnings);
-						if (errors.size() > 0)
+						if (!configuration.getExportUsingDbiFileInfoOnly()) splitMarkers(sm.getActiveResourcesProject().getProject(), errors, warnings);
+						// else we currently ignore error markers to allow dbi differences during export // TODO maybe check for non-dbi markers only here? (the same must happen in export wizard then)
+
+						dbDownMode = ServoyExporterUtils.getInstance().hasDbDownErrorMarkers(
+							new String[] { ServoyModelFinder.getServoyModel().getActiveProject().getProject().getName() }).booleanValue();
+						if (dbDownMode)
+						{
+							output("Found error markers that would suggest the DB is down."); //$NON-NLS-1$
+							if (configuration.exportIfDBDown())
+							{
+								output("Exporting with DB down is allowed. Proceeding..."); //$NON-NLS-1$
+							}
+							else
+							{
+								outputError("Please use -dbd argument to allow exports when DB is down."); //$NON-NLS-1$
+								dbDownMode = false; // so that it fails because of error markers
+							}
+						}
+
+						// if db is down we still try to export (using dbi files)
+						if (errors.size() > 0 && !dbDownMode)
 						{
 							exitCode = EXIT_EXPORT_FAILED;
 							outputError("Found error markers in projects for solution '" + configuration.getSolutionName() + "'."); //$NON-NLS-1$//$NON-NLS-2$
@@ -339,7 +365,7 @@ public class WorkspaceExporter implements IApplication
 						}
 						else if (!mustStop)
 						{
-							if (warnings.size() > 0)
+							if (warnings.size() > 0 && !dbDownMode)
 							{
 								output("Found warning markers in projects for solution " + configuration.getSolutionName()); //$NON-NLS-1$
 								if (verbose)
@@ -407,12 +433,44 @@ public class WorkspaceExporter implements IApplication
 
 		if (solution != null)
 		{
+			ITableDefinitionsManager tableDefManager = null;
+			IMetadataDefManager metadataDefManager = null;
+			if (dbDownMode || configuration.getExportUsingDbiFileInfoOnly())
+			{
+				Pair<ITableDefinitionsManager, IMetadataDefManager> defManagers;
+				try
+				{
+					defManagers = ServoyExporterUtils.getInstance().prepareDbiFilesBasedExportData(solution, configuration.shouldExportModules(),
+						configuration.shouldExportI18NData(), configuration.getExportAllTablesFromReferencedServers(), configuration.shouldExportMetaData());
+				}
+				catch (CoreException e)
+				{
+					Debug.error(e);
+					defManagers = null;
+				}
+				catch (JSONException e)
+				{
+					Debug.error(e);
+					defManagers = null;
+				}
+				catch (IOException e)
+				{
+					Debug.error(e);
+					defManagers = null;
+				}
+				if (defManagers != null)
+				{
+					tableDefManager = defManagers.getLeft();
+					metadataDefManager = defManagers.getRight();
+				}
+			}
+
 			try
 			{
 				exporter.exportSolutionToFile(solution, new File(configuration.getExportFileName()), ClientVersion.getVersion(),
 					ClientVersion.getReleaseNumber(), configuration.shouldExportMetaData(), configuration.shouldExportSampleData(),
 					configuration.getNumberOfSampleDataExported(), configuration.shouldExportI18NData(), configuration.shouldExportUsers(),
-					configuration.shouldExportModules(), configuration.shouldProtectWithPassword(), null, null);
+					configuration.shouldExportModules(), configuration.shouldProtectWithPassword(), tableDefManager, metadataDefManager);
 			}
 			catch (final RepositoryException e)
 			{
