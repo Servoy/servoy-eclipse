@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.model.util;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -126,6 +127,14 @@ public class ServoyExporterUtils
 
 				}, IResource.DEPTH_ONE, false);
 			}
+
+			// minimum requirement for dbi files based export: all needed dbi files must be found
+			if (!allNeededDbiFilesExist(tables, dbiz))
+			{
+				throw new FileNotFoundException(
+					"Could not locate all needed dbi files for server '" + serverName + "'.\nPlease make sure the necessary files exist."); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+
 			server_tableDbiFiles.put(serverName, dbiz);
 		}
 
@@ -212,6 +221,33 @@ public class ServoyExporterUtils
 		metadataDefManager.setMetadataDefsList(metadataDefs);
 
 		return new Pair<ITableDefinitionsManager, IMetadataDefManager>(tableDefManager, metadataDefManager);
+	}
+
+	private boolean allNeededDbiFilesExist(List<String> neededTableNames, List<IFile> existingDbiFiles)
+	{
+		if (neededTableNames != null && existingDbiFiles != null && neededTableNames.size() > 0 && existingDbiFiles.size() == 0) return false;
+
+		boolean allFound = true;
+		List<String> dbiFileNames = new ArrayList<String>(existingDbiFiles.size());
+		for (IFile f : existingDbiFiles)
+		{
+			if (f != null)
+			{
+				int i = f.getName().indexOf(".dbi");
+				dbiFileNames.add(f.getName().substring(0, i));
+			}
+		}
+
+		for (String tableName : neededTableNames)
+		{
+			if (!dbiFileNames.contains(tableName))
+			{
+				allFound = false;
+				break;
+			}
+		}
+
+		return allFound;
 	}
 
 	private void addServerTable(Map<String, List<String>> srvTbl, String serverName, String tableName)

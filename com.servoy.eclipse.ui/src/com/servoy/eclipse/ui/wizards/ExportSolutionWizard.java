@@ -195,7 +195,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 				}
 				catch (IOException ioex)
 				{
-					handleExportException(ioex, "Exception getting metadata files.", monitor); //$NON-NLS-1$
+					handleExportException(ioex, "Exception getting files.", monitor); //$NON-NLS-1$
 					return Status.CANCEL_STATUS;
 				}
 
