@@ -35,6 +35,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -46,6 +47,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.editors.FormatDialog.IFormatTextContainer;
 import com.servoy.j2db.util.FormatParser.ParsedFormat;
 
@@ -197,6 +199,14 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 		TableColumn tblclmnMeaning = tableViewerColumn_2_1.getColumn();
 		tblclmnMeaning.setWidth(300);
 		tblclmnMeaning.setText("Description");
+
+		if (mobile)
+		{
+			Label mobileClientFormatWarning = new Label(this, SWT.NONE);
+			mobileClientFormatWarning.setForeground(Activator.getDefault().getSharedTextColors().getColor(new RGB(255, 102, 51)));
+			mobileClientFormatWarning.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
+			mobileClientFormatWarning.setText("A format for a Calendar field is not used to format the data when it is mapped on a native date field.\r\nIts only used to determine of a \"date\", \"time\" or \"datetime\" should be used.");
+		}
 
 		tableViewer.setLabelProvider(new TableLabelProvider());
 		tableViewer.setContentProvider(ArrayContentProvider.getInstance());

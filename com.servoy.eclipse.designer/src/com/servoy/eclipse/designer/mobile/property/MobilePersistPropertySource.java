@@ -201,7 +201,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 				dataproviderType == IColumnTypeConstants.DATETIME)
 			{
 				return getPersist() instanceof GraphicalComponent ||
-					(getPersist() instanceof Field && ((Field)getPersist()).getDisplayType() == IFieldConstants.TEXT_FIELD);
+					(getPersist() instanceof Field && ((((Field)getPersist()).getDisplayType() == IFieldConstants.TEXT_FIELD) || ((Field)getPersist()).getDisplayType() == IFieldConstants.CALENDAR));
 			}
 			return false;
 		}
@@ -214,7 +214,6 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		}
 		return super.shouldShow(propertyDescriptor);
 	}
-
 
 	@Override
 	protected boolean hideForProperties(PropertyDescriptorWrapper propertyDescriptor)
