@@ -233,7 +233,7 @@ public class ServoyExporterUtils
 		{
 			if (f != null)
 			{
-				int i = f.getName().indexOf(".dbi");
+				int i = f.getName().lastIndexOf(".dbi"); //$NON-NLS-1$
 				dbiFileNames.add(f.getName().substring(0, i));
 			}
 		}
