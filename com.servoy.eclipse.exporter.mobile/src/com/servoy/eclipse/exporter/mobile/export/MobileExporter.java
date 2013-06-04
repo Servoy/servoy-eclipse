@@ -120,10 +120,6 @@ public class MobileExporter
 
 	private static final String MIME_JS = "text/javascript";
 	private static final String MIME_CSS = "text/css";
-	private static final String TAG_SCRIPT = "<script type=\"text/javascript\" language=\"javascript\" src=\"media/";
-	private static final String TAG_CSS = "<link rel=\"stylesheet\" type=\"text/css\" href=\"media/";
-	private static final String TAG_SCRIPT_END = "\"></script>\n";
-	private static final String TAG_CSS_END = "\"/>\n";
 
 	private File outputFolder;
 	private String serverURL;
@@ -135,7 +131,8 @@ public class MobileExporter
 
 	private String doMediaExport(ZipOutputStream zos, File outputFolder) throws IOException
 	{
-		StringBuilder headerText = new StringBuilder();
+		StringBuilder headerJS = new StringBuilder("var mediaJS = ["); //$NON-NLS-1$
+		StringBuilder headerCSS = new StringBuilder("var mediaCSS = ["); //$NON-NLS-1$
 
 		FlattenedSolution flattenedSolution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
 		if (flattenedSolution != null)
@@ -144,6 +141,7 @@ public class MobileExporter
 			Media media;
 			byte[] content;
 			boolean isTXTContent;
+			boolean headerJSEmpty = true, headerCSSEmpty = true;
 			while (mediasIte.hasNext())
 			{
 				media = mediasIte.next();
@@ -151,19 +149,23 @@ public class MobileExporter
 				isTXTContent = false;
 				if (MIME_JS.equals(media.getMimeType()))
 				{
-					headerText.append(TAG_SCRIPT).append(media.getName()).append(TAG_SCRIPT_END);
+					if (headerJSEmpty) headerJSEmpty = false;
+					else headerJS.append(","); //$NON-NLS-1$
+					headerJS.append("\"").append(media.getName()).append("\""); //$NON-NLS-1$ //$NON-NLS-2$
 					isTXTContent = true;
 				}
 				else if (MIME_CSS.equals(media.getMimeType()))
 				{
-					headerText.append(TAG_CSS).append(media.getName()).append(TAG_CSS_END);
+					if (headerCSSEmpty) headerCSSEmpty = false;
+					else headerCSS.append(","); //$NON-NLS-1$
+					headerCSS.append("\"").append(media.getName()).append("\""); //$NON-NLS-1$ //$NON-NLS-2$
 					isTXTContent = true;
 				}
 
-				addZipEntry("media/" + media.getName(), zos, isTXTContent ? Utils.getUTF8EncodedStream(new String(content)) : new ByteArrayInputStream(content));
+				addZipEntry("media/" + media.getName(), zos, isTXTContent ? Utils.getUTF8EncodedStream(new String(content)) : new ByteArrayInputStream(content)); //$NON-NLS-1$
 				if (outputFolder != null)
 				{
-					File outputFolderJS = new File(outputFolder, "media");
+					File outputFolderJS = new File(outputFolder, "media"); //$NON-NLS-1$
 					outputFolderJS.mkdirs();
 					if (isTXTContent) Utils.writeTXTFile(new File(outputFolderJS, media.getName()), new String(content));
 					else Utils.writeFile(new File(outputFolderJS, media.getName()), content);
@@ -171,7 +173,7 @@ public class MobileExporter
 			}
 		}
 
-		return headerText.toString();
+		return headerJS.append("];\n").append(headerCSS).append("];").toString(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private String doPersistExport()
@@ -436,13 +438,13 @@ public class MobileExporter
 						}
 						if (entryName.equals(htmlFile))
 						{
-							fileContent = fileContent.replaceAll(Pattern.quote("<!--SOLUTION_MEDIA_PLACEHOLDER-->"), mediaExport);
+							fileContent = fileContent.replaceAll(Pattern.quote("<!--SOLUTION_MEDIA_JS_PLACEHOLDER-->"), mediaExport);
 							if (developmentWorkspaceExport)
 							{
 								String indexContent = Utils.getTXTFileContent(new FileInputStream(new File(outputFolder, htmlFile)), Charset.forName("UTF8"),
 									false);
 								File outputFile = new File(outputFolder, "index.html"); //$NON-NLS-1$
-								indexContent = indexContent.replaceAll(Pattern.quote("<!--SOLUTION_MEDIA_PLACEHOLDER-->"), mediaExport);
+								indexContent = indexContent.replaceAll(Pattern.quote("<!--SOLUTION_MEDIA_JS_PLACEHOLDER-->"), mediaExport);
 								Utils.writeTXTFile(outputFile, indexContent);
 							}
 						}
