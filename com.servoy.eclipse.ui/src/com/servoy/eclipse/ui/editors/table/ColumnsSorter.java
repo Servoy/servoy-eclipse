@@ -71,11 +71,7 @@ public class ColumnsSorter extends ViewerSorter
 		//for table columns, let newly created columns add up at the end of the list, and allow full sorting only at save time
 		if ((favorite1 instanceof Column && !((Column)favorite1).getExistInDB()) && (favorite2 instanceof Column && !((Column)favorite2).getExistInDB()))
 		{
-			List<Column> columns = new ArrayList<Column>();
-			for (Column c : ((Column)favorite1).getTable().getColumns())
-			{
-				columns.add(c);
-			}
+			List<Column> columns = new ArrayList<Column>(((Column)favorite1).getTable().getColumns());
 			if (columns.indexOf(favorite1) < columns.indexOf(favorite2))
 			{
 				return -1;
