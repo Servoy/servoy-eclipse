@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.wizards;
 
 import org.eclipse.swt.widgets.Composite;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.j2db.persistence.SolutionMetaData;
 
 /**
@@ -46,7 +47,14 @@ public class NewModuleWizard extends NewSolutionWizard
 	public void createPageControls(Composite pageContainer)
 	{
 		super.createPageControls(pageContainer);
-		page1.setSolutionTypes(new int[] { SolutionMetaData.MODULE, SolutionMetaData.PRE_IMPORT_HOOK, SolutionMetaData.POST_IMPORT_HOOK }, 0, false);
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile())
+		{
+			page1.setSolutionTypes(new int[] { SolutionMetaData.MODULE, SolutionMetaData.MOBILE }, 0, false);
+		}
+		else
+		{
+			page1.setSolutionTypes(new int[] { SolutionMetaData.MODULE, SolutionMetaData.PRE_IMPORT_HOOK, SolutionMetaData.POST_IMPORT_HOOK }, 0, false);
+		}
 	}
 
 }

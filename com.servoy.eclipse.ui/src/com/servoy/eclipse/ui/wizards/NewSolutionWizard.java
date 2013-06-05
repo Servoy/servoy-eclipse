@@ -191,7 +191,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		final Solution activeEditingSolution = (activeProject != null) ? activeProject.getEditingSolution() : null;
 		final String jobName;
 		final boolean addAsModuleToActiveSolution = ((page1.getSolutionType() == SolutionMetaData.MODULE ||
-			page1.getSolutionType() == SolutionMetaData.PRE_IMPORT_HOOK || page1.getSolutionType() == SolutionMetaData.POST_IMPORT_HOOK) && activeEditingSolution != null);
+			page1.getSolutionType() == SolutionMetaData.MOBILE || page1.getSolutionType() == SolutionMetaData.PRE_IMPORT_HOOK || page1.getSolutionType() == SolutionMetaData.POST_IMPORT_HOOK) && activeEditingSolution != null);
 		if (addAsModuleToActiveSolution)
 		{
 			jobName = "Adding as module to active solution";
