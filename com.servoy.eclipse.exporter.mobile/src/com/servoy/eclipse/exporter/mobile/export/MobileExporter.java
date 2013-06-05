@@ -62,17 +62,20 @@ import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.I18NUtil;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.ISupportScriptProviders;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.scripting.ScriptEngine;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -369,7 +372,7 @@ public class MobileExporter
 			int allVariablesLoopEndIndex = template.indexOf(VARIABLES_LOOP_END, scopesLoopEndIndex);
 			builder.append(template.substring(scopesLoopEndIndex + SCOPES_LOOP_END.length(), allVariablesLoopStartIndex));
 			builder.append(replaceVariablesScripting(template.substring(allVariablesLoopStartIndex + VARIABLES_LOOP_START.length(), allVariablesLoopEndIndex),
-				flattenedSolution.getSolution(), null));
+				flattenedSolution, null));
 
 			formsLoopStartIndex = template.indexOf(FORM_LOOP_START, allVariablesLoopEndIndex);
 			formsLoopEndIndex = template.indexOf(FORM_LOOP_END, allVariablesLoopEndIndex);
@@ -535,7 +538,7 @@ public class MobileExporter
 		return formsScript.toString();
 	}
 
-	private void addVariablesAndFunctionsScripting(String template, StringBuffer appender, IPersist parent, String scopeName)
+	private void addVariablesAndFunctionsScripting(String template, StringBuffer appender, ISupportScriptProviders parent, String scopeName)
 	{
 		int functionsLoopStartIndex = template.indexOf(FUNCTIONS_LOOP_START);
 		int functionsLoopEndIndex = template.indexOf(FUNCTIONS_LOOP_END);
@@ -563,40 +566,43 @@ public class MobileExporter
 		FlattenedSolution flattenedSolution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
 		if (flattenedSolution != null)
 		{
-			Iterator<String> scopeIterator = flattenedSolution.getScopeNames().iterator();
+			Iterator<Pair<String, IRootObject>> scopeIterator = flattenedSolution.getScopes().iterator();
 			while (scopeIterator.hasNext())
 			{
-				String scopeName = scopeIterator.next();
-				addVariablesAndFunctionsScripting(template.replace(PROPERTY_SCOPE_NAME, scopeName), scopesScript, flattenedSolution.getSolution(), scopeName);
-				if (separator != null && scopeIterator.hasNext()) scopesScript.append(separator);
+				Pair<String, IRootObject> scope = scopeIterator.next();
+				if (((Solution)scope.getRight()).getSolutionType() == SolutionMetaData.MOBILE)
+				{
+					addVariablesAndFunctionsScripting(template.replace(PROPERTY_SCOPE_NAME, scope.getLeft()), scopesScript, flattenedSolution, scope.getLeft());
+					if (separator != null && scopeIterator.hasNext()) scopesScript.append(separator);
+				}
 			}
 		}
 		return scopesScript.toString();
 	}
 
-	private String replaceVariablesScripting(String template, IPersist parent, String scopeName)
+	private String replaceVariablesScripting(String template, ISupportScriptProviders parent, String scopeName)
 	{
 		StringBuffer variablesScript = new StringBuffer();
 		if (parent instanceof Form)
 		{
-			variablesScript.append(buildVariablesScripting(template, ((Form)parent).getScriptVariables(false), ",\n")); //$NON-NLS-1$
+			variablesScript.append(buildVariablesScripting(template, parent.getScriptVariables(false), ",\n")); //$NON-NLS-1$
 		}
-		if (parent instanceof Solution)
+		if (parent instanceof FlattenedSolution)
 		{
 			if (scopeName != null)
 			{
-				variablesScript.append(buildVariablesScripting(template, ((Solution)parent).getScriptVariables(scopeName, false), ",\n")); //$NON-NLS-1$
+				variablesScript.append(buildVariablesScripting(template, ((FlattenedSolution)parent).getScriptVariables(scopeName, false), ",\n")); //$NON-NLS-1$
 			}
 			else
 			{
 				// allvariables
-				Iterator<Form> formIterator = ((Solution)parent.getRootObject()).getForms(null, true);
+				Iterator<Form> formIterator = ((FlattenedSolution)parent).getForms(false);
 				while (formIterator.hasNext())
 				{
 					Form form = formIterator.next();
 					variablesScript.append(buildVariablesScripting(template, form.getScriptVariables(false), null));
 				}
-				variablesScript.append(buildVariablesScripting(template, ((Solution)parent).getScriptVariables(false), null));
+				variablesScript.append(buildVariablesScripting(template, ((FlattenedSolution)parent).getScriptVariables(false), null));
 			}
 		}
 		return variablesScript.toString();
@@ -610,35 +616,38 @@ public class MobileExporter
 			while (variableIterator.hasNext())
 			{
 				ScriptVariable variable = variableIterator.next();
-				String variableScripting = template;
-				variableScripting = variableScripting.replace(PROPERTY_VARIABLE_NAME, variable.getName());
-				variableScripting = variableScripting.replace(PROPERTY_VARIABLE_DEFAULT_VALUE,
-					variable.getDefaultValue() == null ? "\"null\"" : JSONObject.quote(variable.getDefaultValue()));
-				variableScripting = variableScripting.replace(PROPERTY_VARIABLE_TYPE, String.valueOf(variable.getVariableType()));
-				variablesScript.append(variableScripting);
-				if (separator != null && variableIterator.hasNext()) variablesScript.append(separator);
+				if (((Solution)variable.getRootObject()).getSolutionType() == SolutionMetaData.MOBILE)
+				{
+					String variableScripting = template;
+					variableScripting = variableScripting.replace(PROPERTY_VARIABLE_NAME, variable.getName());
+					variableScripting = variableScripting.replace(PROPERTY_VARIABLE_DEFAULT_VALUE,
+						variable.getDefaultValue() == null ? "\"null\"" : JSONObject.quote(variable.getDefaultValue()));
+					variableScripting = variableScripting.replace(PROPERTY_VARIABLE_TYPE, String.valueOf(variable.getVariableType()));
+					variablesScript.append(variableScripting);
+					if (separator != null && variableIterator.hasNext()) variablesScript.append(separator);
+				}
 			}
 		}
 		return variablesScript.toString();
 	}
 
-	private String replaceFunctionsScripting(String template, IPersist parent, String scopeName)
+	private String replaceFunctionsScripting(String template, ISupportScriptProviders parent, String scopeName)
 	{
 		StringBuffer functionsScript = new StringBuffer();
-		Iterator<ScriptMethod> methodIterator = null;
+		Iterator< ? extends IScriptProvider> methodIterator = null;
 		if (parent instanceof Form)
 		{
-			methodIterator = ((Form)parent).getScriptMethods(true);
+			methodIterator = parent.getScriptMethods(false);
 		}
-		if (parent instanceof Solution)
+		else if (parent instanceof FlattenedSolution)
 		{
-			methodIterator = ((Solution)parent).getScriptMethods(scopeName, true);
+			methodIterator = ((FlattenedSolution)parent).getScriptMethods(scopeName, false);
 		}
 		if (methodIterator != null)
 		{
 			while (methodIterator.hasNext())
 			{
-				ScriptMethod method = methodIterator.next();
+				IScriptProvider method = methodIterator.next();
 				String methodScripting = template;
 				methodScripting = methodScripting.replace(PROPERTY_FUNCTION_NAME, method.getName());
 				methodScripting = methodScripting.replace(PROPERTY_FUNCTION_CODE, getAnonymousScripting(method));
@@ -652,7 +661,7 @@ public class MobileExporter
 		return functionsScript.toString();
 	}
 
-	private String getAnonymousScripting(ScriptMethod method)
+	private String getAnonymousScripting(IScriptProvider method)
 	{
 		String declaration = method.getDeclaration();
 
