@@ -190,8 +190,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		final ServoyProject activeProject = servoyModel.getActiveProject();
 		final Solution activeEditingSolution = (activeProject != null) ? activeProject.getEditingSolution() : null;
 		final String jobName;
-		final boolean addAsModuleToActiveSolution = ((page1.getSolutionType() == SolutionMetaData.MODULE ||
-			page1.getSolutionType() == SolutionMetaData.MOBILE || page1.getSolutionType() == SolutionMetaData.PRE_IMPORT_HOOK || page1.getSolutionType() == SolutionMetaData.POST_IMPORT_HOOK) && activeEditingSolution != null);
+		final boolean addAsModuleToActiveSolution = shouldAddAsModule(activeEditingSolution);
 		if (addAsModuleToActiveSolution)
 		{
 			jobName = "Adding as module to active solution";
@@ -263,6 +262,16 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		}
 
 		return true;
+	}
+
+	/**
+	 * @param activeEditingSolution
+	 * @return
+	 */
+	protected boolean shouldAddAsModule(final Solution activeEditingSolution)
+	{
+		return (page1.getSolutionType() == SolutionMetaData.MODULE || page1.getSolutionType() == SolutionMetaData.PRE_IMPORT_HOOK || page1.getSolutionType() == SolutionMetaData.POST_IMPORT_HOOK) &&
+			activeEditingSolution != null;
 	}
 
 	public static class NewSolutionWizardPage extends WizardPage implements Listener, IValidator
