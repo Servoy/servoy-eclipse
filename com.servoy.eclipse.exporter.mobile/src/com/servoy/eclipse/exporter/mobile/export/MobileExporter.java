@@ -442,12 +442,15 @@ public class MobileExporter
 						if (entryName.equals(htmlFile))
 						{
 							fileContent = fileContent.replaceAll(Pattern.quote("<!--SOLUTION_MEDIA_JS_PLACEHOLDER-->"), mediaExport);
+							fileContent = fileContent.replaceAll(Pattern.quote("<!--PHONEGAP_JS_PLACEHOLDER-->"), exportAsZip
+								? "<script src=\"phonegap.js\"></script>" : "");
 							if (developmentWorkspaceExport)
 							{
 								String indexContent = Utils.getTXTFileContent(new FileInputStream(new File(outputFolder, htmlFile)), Charset.forName("UTF8"),
 									false);
 								File outputFile = new File(outputFolder, "index.html"); //$NON-NLS-1$
 								indexContent = indexContent.replaceAll(Pattern.quote("<!--SOLUTION_MEDIA_JS_PLACEHOLDER-->"), mediaExport);
+								indexContent = indexContent.replaceAll(Pattern.quote("<!--PHONEGAP_JS_PLACEHOLDER-->"), "");
 								Utils.writeTXTFile(outputFile, indexContent);
 							}
 						}
