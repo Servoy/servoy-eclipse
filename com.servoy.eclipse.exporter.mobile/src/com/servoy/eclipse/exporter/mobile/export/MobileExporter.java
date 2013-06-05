@@ -153,15 +153,15 @@ public class MobileExporter
 				if (MIME_JS.equals(media.getMimeType()))
 				{
 					if (headerJSEmpty) headerJSEmpty = false;
-					else headerJS.append(","); //$NON-NLS-1$
-					headerJS.append("\"").append(media.getName()).append("\""); //$NON-NLS-1$ //$NON-NLS-2$
+					else headerJS.append(',');
+					headerJS.append('"').append(media.getName()).append('"');
 					isTXTContent = true;
 				}
 				else if (MIME_CSS.equals(media.getMimeType()))
 				{
 					if (headerCSSEmpty) headerCSSEmpty = false;
-					else headerCSS.append(","); //$NON-NLS-1$
-					headerCSS.append("\"").append(media.getName()).append("\""); //$NON-NLS-1$ //$NON-NLS-2$
+					else headerCSS.append(',');
+					headerCSS.append('"').append(media.getName()).append('"');
 					isTXTContent = true;
 				}
 
