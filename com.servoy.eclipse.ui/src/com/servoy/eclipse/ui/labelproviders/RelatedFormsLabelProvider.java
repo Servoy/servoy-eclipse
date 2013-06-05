@@ -27,11 +27,14 @@ import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.UnresolvedValue;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.util.PersistHelper;
 
 /**
  * label provider for forms with relations.
@@ -45,10 +48,17 @@ public class RelatedFormsLabelProvider extends LabelProvider implements IPersist
 	public static final RelatedFormsLabelProvider INSTANCE_NO_IMAGE = new RelatedFormsLabelProvider(false);
 
 	private final boolean showImage;
+	private IPersist persist;
 
 	public RelatedFormsLabelProvider(boolean showImage)
 	{
 		this.showImage = showImage;
+	}
+
+	public RelatedFormsLabelProvider(boolean showImage, IPersist persist)
+	{
+		this.showImage = showImage;
+		this.persist = persist;
 	}
 
 	@Override
@@ -76,7 +86,16 @@ public class RelatedFormsLabelProvider extends LabelProvider implements IPersist
 			return ((Table)element).getName() + "[" + ((Table)element).getServerName() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
-		return super.getText(element);
+		String superText = super.getText(element);
+		if (element instanceof Form)
+		{
+			if (persist instanceof ISupportExtendsID && PersistHelper.isOverrideElement((ISupportExtendsID)persist) &&
+				((AbstractBase)persist).hasProperty("containsFormID"))
+			{
+				superText = (superText != null ? superText : "") + " (" + Messages.LabelOverride + ')'; //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		}
+		return superText;
 	}
 
 	@Override

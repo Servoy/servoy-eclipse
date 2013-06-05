@@ -31,6 +31,7 @@ import com.servoy.eclipse.ui.labelproviders.RelatedFormsLabelProvider;
 import com.servoy.eclipse.ui.util.UnresolvedValue;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IPersist;
 
 /**
  * Property controller that combines containsFormID and relationName in 1 selector.
@@ -42,13 +43,20 @@ public class RelatedTabController extends PropertyController<String, Object> imp
 	private final String title;
 	private final Form form;
 	private final FlattenedSolution flattenedEditingSolution;
+	private final IPersist persist;
+	private final RelatedFormsLabelProvider labelProviderNoImage;
+	private final RelatedFormsLabelProvider labelProviderWithImage;
 
-	public RelatedTabController(String id, String displayName, String title, boolean readOnly, Form form, FlattenedSolution flattenedEditingSolution)
+	public RelatedTabController(String id, String displayName, String title, boolean readOnly, Form form, FlattenedSolution flattenedEditingSolution,
+		IPersist persist)
 	{
 		super(id, displayName);
 		this.title = title;
 		this.form = form;
 		this.flattenedEditingSolution = flattenedEditingSolution;
+		this.persist = persist;
+		labelProviderWithImage = new RelatedFormsLabelProvider(true, persist);
+		labelProviderNoImage = new RelatedFormsLabelProvider(false, persist);
 		setReadonly(readOnly);
 		setSupportsReadonly(true);
 	}
@@ -92,27 +100,36 @@ public class RelatedTabController extends PropertyController<String, Object> imp
 
 	public void resetPropertyValue(IPropertySource propertySource)
 	{
-		// tab should always have a form id
-//		propertySource.resetPropertyValue("containsFormID");
-//		propertySource.resetPropertyValue("relationName");
+		// allow reset only for inherited forms
+		if (form.getExtendsID() > 0)
+		{
+			Object oldValue = getProperty(propertySource);
+			propertySource.resetPropertyValue("containsFormID");
+			propertySource.resetPropertyValue("relationName");
+			//update the text as well if it hasn't been changed yet
+			if (oldValue instanceof RelatedForm && ((RelatedForm)oldValue).form.getName().equals(propertySource.getPropertyValue("text")))
+			{
+				propertySource.resetPropertyValue("text");
+			}
+		}
 	}
 
 	public boolean isPropertySet(IPropertySource propertySource)
 	{
-		return propertySource.isPropertySet("containsFormID") && propertySource.isPropertySet("relationName");
+		return form.getExtendsID() > 0 ? propertySource.isPropertySet("containsFormID") : false;
 	}
 
 	@Override
 	public ILabelProvider getLabelProvider()
 	{
-		return RelatedFormsLabelProvider.INSTANCE_NO_IMAGE;
+		return labelProviderNoImage;
 	}
 
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		ListSelectCellEditor listSelectCellEditor = new ListSelectCellEditor(parent, title, new RelatedFormsContentProvider(form),
-			RelatedFormsLabelProvider.INSTANCE, RelatedFormValueEditor.INSTANCE, isReadOnly(), form, SWT.NONE, null, "relatedFormDialog");
+		ListSelectCellEditor listSelectCellEditor = new ListSelectCellEditor(parent, title, new RelatedFormsContentProvider(form), labelProviderWithImage,
+			RelatedFormValueEditor.INSTANCE, isReadOnly(), form, SWT.NONE, null, "relatedFormDialog");
 		listSelectCellEditor.setShowFilterMenu(true);
 		return listSelectCellEditor;
 	}

@@ -777,7 +777,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			&&
 			persistContext != null &&
 			persistContext.getPersist() != null &&
-			persistContext.getPersist().getParent() == persistContext.getContext() // only show overrides when element is shown in its 'own' form
+			(persistContext.getPersist().getParent() == persistContext.getContext() || (persistContext.getPersist().getParent() instanceof TabPanel && persistContext.getPersist().getParent().getParent() == persistContext.getContext())) // only show overrides when element is shown in its 'own' form or in a tabPanel of the same form
 			&&
 			// skip some specific properties
 			!(persistContext.getPersist() instanceof Form && StaticContentSpecLoader.PROPERTY_NAME.getPropertyName().equals(id)) &&
@@ -1676,7 +1676,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			if (name.equals("containsFormID"))
 			{
 				return new RelatedTabController("containsForm", "containsForm", "Select tab form", readOnly, form,
-					ModelUtils.getEditingFlattenedSolution(persistContext.getPersist()));
+					ModelUtils.getEditingFlattenedSolution(persistContext.getPersist()), persistContext.getPersist());
 			}
 		}
 		return null;
