@@ -3035,10 +3035,12 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				@Override
 				public CellEditor createPropertyEditor(Composite parent)
 				{
-					return new ListSelectCellEditor(parent, "Select navigator form", new FormContentProvider(flattenedEditingSolution,
-						(Form)persistContext.getPersist()), formLabelProvider, new FormValueEditor(flattenedEditingSolution), readOnly,
-						new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, Boolean.FALSE, true, true, true), SWT.NONE, null,
-						"navigatorFormDialog");
+					Form f = (Form)persistContext.getPersist();
+					boolean isMobile = f != null && f.getSolution().getSolutionMetaData().getSolutionType() == SolutionMetaData.MOBILE;
+
+					return new ListSelectCellEditor(parent, "Select navigator form", new FormContentProvider(flattenedEditingSolution, f), formLabelProvider,
+						new FormValueEditor(flattenedEditingSolution), readOnly, new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS,
+							Boolean.valueOf(isMobile), true, !isMobile, !isMobile), SWT.NONE, null, "navigatorFormDialog");
 				}
 			};
 			pd.setLabelProvider(formLabelProvider);
