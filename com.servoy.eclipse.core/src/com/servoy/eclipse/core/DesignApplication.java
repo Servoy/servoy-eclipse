@@ -188,7 +188,8 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	{
 		if (beanManager == null)
 		{
-			beanManager = ApplicationServerSingleton.get().createBeanManager(getPluginManager().getClassLoader());
+			// don't create bean manager again, this is needed for jfxpanel bean, its native libraries cannot be loaded twice
+			beanManager = ApplicationServerSingleton.get().getBeanManager();
 		}
 		return beanManager;
 	}
