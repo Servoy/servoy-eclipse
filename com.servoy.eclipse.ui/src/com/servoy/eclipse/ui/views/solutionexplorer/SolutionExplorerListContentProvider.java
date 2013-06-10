@@ -1287,7 +1287,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				Context.enter();
 			}
-			jm = new DeclaringClassJavaMembers(null, beanClazz, specificClazz);
+			jm = new DeclaringClassJavaMembers(null, specificClazz, specificClazz);
 		}
 		finally
 		{
