@@ -31,7 +31,6 @@ import com.servoy.eclipse.ui.labelproviders.RelatedFormsLabelProvider;
 import com.servoy.eclipse.ui.util.UnresolvedValue;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IPersist;
 
 /**
  * Property controller that combines containsFormID and relationName in 1 selector.
@@ -43,20 +42,13 @@ public class RelatedTabController extends PropertyController<String, Object> imp
 	private final String title;
 	private final Form form;
 	private final FlattenedSolution flattenedEditingSolution;
-	private final IPersist persist;
-	private final RelatedFormsLabelProvider labelProviderNoImage;
-	private final RelatedFormsLabelProvider labelProviderWithImage;
 
-	public RelatedTabController(String id, String displayName, String title, boolean readOnly, Form form, FlattenedSolution flattenedEditingSolution,
-		IPersist persist)
+	public RelatedTabController(String id, String displayName, String title, boolean readOnly, Form form, FlattenedSolution flattenedEditingSolution)
 	{
 		super(id, displayName);
 		this.title = title;
 		this.form = form;
 		this.flattenedEditingSolution = flattenedEditingSolution;
-		this.persist = persist;
-		labelProviderWithImage = new RelatedFormsLabelProvider(true, persist);
-		labelProviderNoImage = new RelatedFormsLabelProvider(false, persist);
 		setReadonly(readOnly);
 		setSupportsReadonly(true);
 	}
@@ -122,14 +114,14 @@ public class RelatedTabController extends PropertyController<String, Object> imp
 	@Override
 	public ILabelProvider getLabelProvider()
 	{
-		return labelProviderNoImage;
+		return RelatedFormsLabelProvider.INSTANCE_NO_IMAGE;
 	}
 
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		ListSelectCellEditor listSelectCellEditor = new ListSelectCellEditor(parent, title, new RelatedFormsContentProvider(form), labelProviderWithImage,
-			RelatedFormValueEditor.INSTANCE, isReadOnly(), form, SWT.NONE, null, "relatedFormDialog");
+		ListSelectCellEditor listSelectCellEditor = new ListSelectCellEditor(parent, title, new RelatedFormsContentProvider(form),
+			RelatedFormsLabelProvider.INSTANCE, RelatedFormValueEditor.INSTANCE, isReadOnly(), form, SWT.NONE, null, "relatedFormDialog");
 		listSelectCellEditor.setShowFilterMenu(true);
 		return listSelectCellEditor;
 	}

@@ -783,21 +783,27 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			!(persistContext.getPersist() instanceof Form && StaticContentSpecLoader.PROPERTY_NAME.getPropertyName().equals(id)) &&
 			!StaticContentSpecLoader.PROPERTY_EXTENDSID.getPropertyName().equals(id))
 		{
-			return new DelegatePropertyController(desc, id)
-			{
-				@Override
-				public ILabelProvider getLabelProvider()
-				{
-					String propertyId = id;
-					if (persistContext.getPersist() instanceof Form && StaticContentSpecLoader.PROPERTY_WIDTH.getPropertyName().equals(id))
-					{
-						propertyId = StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName();
-					}
-					return new PersistInheritenceDelegateLabelProvider(persistContext.getPersist(), super.getLabelProvider(), propertyId);
-				}
-			};
+			return createDelegatePropertyControllerForInheritance(persistContext.getPersist(), desc, desc.getId().toString());
 		}
 		return desc;
+	}
+
+	private static DelegatePropertyController createDelegatePropertyControllerForInheritance(final IPersist persist, final IPropertyDescriptor desc,
+		final String id)
+	{
+		return new DelegatePropertyController(desc, desc.getId())
+		{
+			@Override
+			public ILabelProvider getLabelProvider()
+			{
+				String propertyId = id;
+				if (persist instanceof Form && StaticContentSpecLoader.PROPERTY_WIDTH.getPropertyName().equals(propertyId))
+				{
+					propertyId = StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName();
+				}
+				return new PersistInheritenceDelegateLabelProvider(persist, super.getLabelProvider(), propertyId);
+			}
+		};
 	}
 
 	private static void setCategory(IPropertyDescriptor desc, PropertyCategory category)
@@ -818,16 +824,13 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	protected IPropertyDescriptor createCombinedPropertyDescriptor(PropertyDescriptorWrapper propertyDescriptor, Form form)
 	{
 		PropertyCategory category = PropertyCategory.createPropertyCategory(propertyDescriptor.propertyDescriptor.getName());
-		IPropertyDescriptor desc = getCombinedPropertyDescriptor(propertyDescriptor, getDisplayName(propertyDescriptor.propertyDescriptor.getName()), category,
-			form);
-		if (desc instanceof org.eclipse.ui.views.properties.PropertyDescriptor)
+		DelegatePropertyController desc = getCombinedPropertyDescriptor(propertyDescriptor, getDisplayName(propertyDescriptor.propertyDescriptor.getName()),
+			category, form);
+		if (desc != null)
 		{
-			((org.eclipse.ui.views.properties.PropertyDescriptor)desc).setCategory(category.name());
+			desc.setCategory(category.name());
 		}
-		else if (desc instanceof DelegatePropertyController)
-		{
-			((DelegatePropertyController)desc).setCategory(category.name());
-		}
+
 		return desc;
 	}
 
@@ -1666,8 +1669,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	 * @param category
 	 * @return
 	 */
-	private IPropertyDescriptor getCombinedPropertyDescriptor(PropertyDescriptorWrapper propertyDescriptor, String displayName, PropertyCategory category,
-		Form form)
+	private DelegatePropertyController getCombinedPropertyDescriptor(PropertyDescriptorWrapper propertyDescriptor, String displayName,
+		PropertyCategory category, Form form)
 	{
 		if (propertyDescriptor.valueObject == persistContext.getPersist()) // name based props for IPersists only
 		{
@@ -1675,8 +1678,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 			if (name.equals("containsFormID"))
 			{
-				return new RelatedTabController("containsForm", "containsForm", "Select tab form", readOnly, form,
-					ModelUtils.getEditingFlattenedSolution(persistContext.getPersist()), persistContext.getPersist());
+				return createDelegatePropertyControllerForInheritance(persistContext.getPersist(), new RelatedTabController("containsForm", "containsForm",
+					"Select tab form", readOnly, form, ModelUtils.getEditingFlattenedSolution(persistContext.getPersist())), "containsFormID");
 			}
 		}
 		return null;
