@@ -42,7 +42,7 @@ import org.eclipse.swt.widgets.Composite;
  */
 public class DirectorySelectionPage extends WizardPage implements ICheckStateListener
 {
-	private static final String REQUIRED_LABEL = " (required)";
+	public static final String REQUIRED_LABEL = " (required)";
 
 	private final File directory;
 	private final IWizardPage nextPage;

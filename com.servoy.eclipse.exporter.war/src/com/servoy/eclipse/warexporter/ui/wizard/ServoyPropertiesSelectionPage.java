@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
+import com.servoy.j2db.persistence.IServer;
 
 /**
  * 
@@ -156,13 +157,31 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 				{
 					fis = new FileInputStream(f);
 					prop.load(fis);
-					if (prop.getProperty("ServerManager.numberOfServers") == null)
+					String numberOfServers = prop.getProperty("ServerManager.numberOfServers");
+					if (numberOfServers != null)
+					{
+						int nrOfServers = Integer.parseInt(numberOfServers);
+						boolean repositoryExists = false;
+						for (int i = 0; i < nrOfServers && !repositoryExists; i++)
+						{
+							String serverName = prop.getProperty("server." + i + ".serverName");
+							if (serverName.equals(IServer.REPOSITORY_SERVER)) repositoryExists = true;
+						}
+						if (!repositoryExists)
+						{
+							setMessage("Servoy properties file: " + exportModel.getServoyPropertiesFileName() +
+								" is not valid because it doesn't contain repository_server database which is required.", IMessageProvider.WARNING);
+							messageSet = true;
+							result = false;
+						}
+
+					}
+					else
 					{
 						setMessage("Servoy properties file: " + exportModel.getServoyPropertiesFileName() +
-							" doesnt look like a valid servoy properties file, no servers configured", IMessageProvider.WARNING);
+							" doesn't look like a valid servoy properties file, no servers configured", IMessageProvider.WARNING);
 						messageSet = true;
 						result = false;
-
 					}
 				}
 				catch (IOException e)

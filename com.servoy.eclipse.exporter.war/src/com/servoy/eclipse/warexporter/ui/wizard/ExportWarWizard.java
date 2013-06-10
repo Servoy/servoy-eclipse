@@ -35,6 +35,7 @@ import com.servoy.eclipse.warexporter.Activator;
 import com.servoy.eclipse.warexporter.export.ExportException;
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
 import com.servoy.eclipse.warexporter.export.Exporter;
+import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.Debug;
 
@@ -138,7 +139,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		HashMap<String, IWizardPage> serverConfigurationPages = new HashMap<String, IWizardPage>();
 
 		serversSelectionPage = new ServersSelectionPage("serverspage", "Choose the database servernames to export",
-			"Select the database server names that will be used on the application server", exportModel.getSelectedServerNames(), serverConfigurationPages);
+			"Select the database server names that will be used on the application server", exportModel.getSelectedServerNames(),
+			new String[] { IServer.REPOSITORY_SERVER }, serverConfigurationPages);
 		servoyPropertiesConfigurationPage = new ServoyPropertiesConfigurationPage("propertiespage", exportModel, serversSelectionPage);
 		servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel, servoyPropertiesConfigurationPage);
 		driverSelectionPage = new DirectorySelectionPage("driverpage", "Choose the jdbc drivers to export",
@@ -176,6 +178,10 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 	public boolean canFinish()
 	{
 		IWizardPage currentPage = getContainer().getCurrentPage();
+		if (currentPage instanceof ServoyPropertiesSelectionPage && !((ServoyPropertiesSelectionPage)currentPage).canFlipToNextPage())
+		{
+			return false; //if any warning about the selected properties file, disable finish
+		}
 		if (currentPage instanceof ServersSelectionPage || currentPage instanceof ServerConfigurationPage ||
 			currentPage instanceof ServoyPropertiesSelectionPage)
 		{
