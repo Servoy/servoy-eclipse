@@ -132,7 +132,7 @@ public class ServoyScriptValidator implements IValidatorExtension2
 		}
 		else if (visibility == Visibility.INTERNAL)
 		{
-			return generateValidationStatusForMobile(member.getName(), member instanceof Method);
+			return generateValidationStatusForCurrentSolutionType(member.getName(), member instanceof Method);
 		}
 		return null;
 	}
@@ -206,7 +206,7 @@ public class ServoyScriptValidator implements IValidatorExtension2
 		}
 		else if (visibility == Visibility.INTERNAL)
 		{
-			return generateValidationStatusForMobile(name, method);
+			return generateValidationStatusForCurrentSolutionType(name, method);
 		}
 		return null;
 	}
@@ -229,7 +229,7 @@ public class ServoyScriptValidator implements IValidatorExtension2
 	}
 
 	@SuppressWarnings("nls")
-	private ValidationStatus generateValidationStatusForMobile(String name, boolean isMethod)
+	private ValidationStatus generateValidationStatusForCurrentSolutionType(String name, boolean isMethod)
 	{
 		if (isMethod)
 		{
