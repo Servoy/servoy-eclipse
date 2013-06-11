@@ -585,6 +585,10 @@ public class ElementResolver implements IElementResolver
 				typeRef = TypeUtil.ref(type);
 			}
 			if (description == null) description = type.getDescription();
+			if ("currentcontroller".equals(name))
+			{
+				description = TypeCreator.getDoc("currentcontroller", com.servoy.j2db.documentation.scripting.docs.Globals.class, null);
+			}
 			Property property = TypeCreator.createProperty(name, readOnly, typeRef, description, image, resource);
 			property.setHideAllowed(hideAllowed);
 			if (deprecated.contains(name))
