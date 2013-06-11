@@ -318,7 +318,7 @@ public class TypeCreator extends TypeCache
 	private final ConcurrentMap<String, IScopeTypeCreator> scopeTypes = new ConcurrentHashMap<String, IScopeTypeCreator>();
 	protected final ConcurrentMap<Class< ? >, Class< ? >[]> linkedTypes = new ConcurrentHashMap<Class< ? >, Class< ? >[]>();
 	protected final ConcurrentMap<Class< ? >, String> prefixedTypes = new ConcurrentHashMap<Class< ? >, String>();
-	private final ConcurrentMap<String, Boolean> mobileAllowedTypes = new ConcurrentHashMap<String, Boolean>();
+	private final ConcurrentMap<String, ClientSupport> typesClientSupport = new ConcurrentHashMap<String, ClientSupport>();
 	private volatile boolean initialized;
 	protected static final List<String> objectMethods = Arrays.asList(new String[] { "wait", "toString", "hashCode", "equals", "notify", "notifyAll", "getClass" });
 
@@ -825,7 +825,15 @@ public class TypeCreator extends TypeCache
 				}
 				else
 				{
-					addType(element.getSimpleName(), element);
+					String name = element.getSimpleName();
+					ServoyDocumented sd = element.getAnnotation(ServoyDocumented.class);
+					if (sd != null && sd.scriptingName() != null && sd.scriptingName().trim().length() > 0)
+					{
+						// documentation has overridden scripting name
+						name = sd.scriptingName().trim();
+					}
+
+					addType(name, element);
 					if (prefix != null)
 					{
 						addType(prefix + element.getSimpleName(), element);
@@ -1069,9 +1077,11 @@ public class TypeCreator extends TypeCache
 								method.setVisible(false);
 							}
 
-							if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile() &&
-								(mobileAllowedTypes.get(typeName) == null || !AnnotationManagerReflection.getInstance().isAnnotatedForMobile(
-									memberbox[i].method(), scriptObjectClass)))
+							ClientSupport clientType = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
+							ClientSupport csp = typesClientSupport.get(typeName);
+							if ((csp != null && !csp.supports(clientType)) ||
+								!AnnotationManagerReflection.getInstance().supportsClientType(memberbox[i].method(), scriptObjectClass, clientType,
+									ClientSupport.Default))
 							{
 								method.setVisibility(Visibility.INTERNAL);
 							}
@@ -1191,19 +1201,23 @@ public class TypeCreator extends TypeCache
 						if (!visible) property.setVisible(false);
 						property.setStatic(type == STATIC_FIELD);
 
-						if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile() &&
-							(object instanceof BeanProperty || (object instanceof Field && property.isStatic())))
+						if (object instanceof BeanProperty || (object instanceof Field && property.isStatic()))
 						{
-							boolean visibility = false;
-							if (object instanceof BeanProperty)
+							ClientSupport clientType = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
+							ClientSupport csp = typesClientSupport.get(typeName);
+							boolean visibility = (csp == null ? ClientSupport.Default : csp).supports(clientType);
+							if (visibility)
 							{
-								visibility = mobileAllowedTypes.get(typeName) != null &&
-									AnnotationManagerReflection.getInstance().isAnnotatedForMobile(((BeanProperty)object).getGetter(), scriptObjectClass);
-							}
-							else if (object instanceof Field && descriptor == CONSTANT)
-							{
-								visibility = mobileAllowedTypes.get(typeName) != null &&
-									AnnotationManagerReflection.getInstance().isAnnotatedForMobile(((Field)object));
+								if (object instanceof BeanProperty)
+								{
+									visibility = AnnotationManagerReflection.getInstance().supportsClientType(((BeanProperty)object).getGetter(),
+										scriptObjectClass, clientType, ClientSupport.Default);
+								}
+								else if (object instanceof Field && descriptor == CONSTANT)
+								{
+									visibility = AnnotationManagerReflection.getInstance().supportsClientType(((Field)object), clientType,
+										ClientSupport.Default);
+								}
 							}
 							if (!visibility)
 							{
@@ -1298,13 +1312,19 @@ public class TypeCreator extends TypeCache
 		}
 		else
 		{
-			typeName = DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(memberReturnType);
+			Class< ? > cls = classTypes.get(memberReturnType.getSimpleName());
+			if (cls == null)
+			{
+				// a type was not yet added under this name
+				cls = memberReturnType;
+			}
+			typeName = DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(cls);
 			// always just convert plain Object to Any so that it will map on both js and java Object
 			if ("Object".equals(typeName))
 			{
 				return TypeInfoModelFactory.eINSTANCE.createAnyType();
 			}
-			else addAnonymousClassType(typeName, memberReturnType);
+			addAnonymousClassType(typeName, cls);
 		}
 		return getTypeRef(context, typeName);
 	}
@@ -1312,7 +1332,7 @@ public class TypeCreator extends TypeCache
 	public final void addType(String name, Class< ? > cls)
 	{
 		classTypes.put(name, cls);
-		mobileAllowedTypes.put(name, Boolean.valueOf(AnnotationManagerReflection.getInstance().isAnnotatedForMobile(cls)));
+		typesClientSupport.put(name, AnnotationManagerReflection.getInstance().getClientSupport(cls, ClientSupport.Default));
 	}
 
 	protected void addAnonymousClassType(String name, Class< ? > cls)
@@ -1320,14 +1340,14 @@ public class TypeCreator extends TypeCache
 		if (!classTypes.containsKey(name) && !scopeTypes.containsKey(name) && !BASE_TYPES.contains(name))
 		{
 			anonymousClassTypes.put(name, cls);
-			mobileAllowedTypes.put(name, Boolean.valueOf(AnnotationManagerReflection.getInstance().isAnnotatedForMobile(cls)));
+			typesClientSupport.put(name, AnnotationManagerReflection.getInstance().getClientSupport(cls, ClientSupport.Default));
 		}
 	}
 
 	public final void addScopeType(String name, IScopeTypeCreator creator)
 	{
 		scopeTypes.put(name, creator);
-		mobileAllowedTypes.put(name, Boolean.valueOf(creator.isTypeAllowedForMobile()));
+		typesClientSupport.put(name, creator.getClientSupport());
 	}
 
 	/**
@@ -1374,7 +1394,7 @@ public class TypeCreator extends TypeCache
 	{
 		Type createType(String context, String fullTypeName);
 
-		boolean isTypeAllowedForMobile();
+		ClientSupport getClientSupport();
 	}
 
 	@SuppressWarnings("deprecation")
@@ -1531,24 +1551,22 @@ public class TypeCreator extends TypeCache
 //		{
 //			javaTypes.add(type.getName());
 //		}
-		if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile())
+
+		ClientSupport clientType = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
+		if (clientType == ClientSupport.mc && type.getMetaType() != null && type.getMetaType() == javaMetaType)
 		{
-			if (type.getMetaType() != null && type.getMetaType() == javaMetaType)
+			type.setVisible(false);
+		}
+		else
+		{
+			String properTypeName = type.getName();
+			int index = properTypeName.indexOf("<");
+			if (index != -1)
 			{
-				type.setVisible(false);
+				properTypeName = properTypeName.substring(0, index);
 			}
-			else
-			{
-				String properTypeName = type.getName();
-				int index = properTypeName.indexOf("<");
-				if (index != -1)
-				{
-					properTypeName = properTypeName.substring(0, index);
-				}
-				Boolean visible = mobileAllowedTypes.get(properTypeName);
-				if (visible != null) type.setVisible(visible.booleanValue());
-				else type.setVisible(false);
-			}
+			ClientSupport csp = typesClientSupport.get(properTypeName);
+			if (!(csp == null ? ClientSupport.Default : csp).supports(clientType)) type.setVisible(false);
 		}
 		return super.addType(bucket, type);
 	}
@@ -1725,8 +1743,8 @@ public class TypeCreator extends TypeCache
 				String sampleDoc = null;
 				IParameter[] parameters = null;
 				String returnText = null;
-				ClientSupport csp = (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile() ? ClientSupport.mc
-					: ClientSupport.Default);
+				ClientSupport clientType = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
+
 				if (scriptObject instanceof ITypedScriptObject)
 				{
 					if (((ITypedScriptObject)scriptObject).isDeprecated(name, parameterTypes))
@@ -1743,14 +1761,14 @@ public class TypeCreator extends TypeCache
 							docBuilder.append("<br/><b>@deprecated</b><br/>");
 						}
 					}
-					String toolTip = ((ITypedScriptObject)scriptObject).getToolTip(name, parameterTypes, csp);
+					String toolTip = ((ITypedScriptObject)scriptObject).getToolTip(name, parameterTypes, clientType);
 					if (toolTip != null && toolTip.trim().length() != 0)
 					{
 						docBuilder.append("<br/>");
 						docBuilder.append(toolTip);
 						docBuilder.append("<br/>");
 					}
-					sampleDoc = ((ITypedScriptObject)scriptObject).getSample(name, parameterTypes, csp);
+					sampleDoc = ((ITypedScriptObject)scriptObject).getSample(name, parameterTypes, clientType);
 					if (parameterTypes != null)
 					{
 						parameters = ((ITypedScriptObject)scriptObject).getParameters(name, parameterTypes);
@@ -2031,9 +2049,9 @@ public class TypeCreator extends TypeCache
 			return type;
 		}
 
-		public boolean isTypeAllowedForMobile()
+		public ClientSupport getClientSupport()
 		{
-			return true;
+			return ClientSupport.All;
 		}
 	}
 
@@ -2076,9 +2094,9 @@ public class TypeCreator extends TypeCache
 			return type;
 		}
 
-		public boolean isTypeAllowedForMobile()
+		public ClientSupport getClientSupport()
 		{
-			return true;
+			return ClientSupport.All;
 		}
 	}
 
@@ -2143,9 +2161,9 @@ public class TypeCreator extends TypeCache
 			return description;
 		}
 
-		public boolean isTypeAllowedForMobile()
+		public ClientSupport getClientSupport()
 		{
-			return true;
+			return ClientSupport.All;
 		}
 	}
 
@@ -2238,9 +2256,9 @@ public class TypeCreator extends TypeCache
 			return type;
 		}
 
-		public boolean isTypeAllowedForMobile()
+		public ClientSupport getClientSupport()
 		{
-			return true;
+			return ClientSupport.All;
 		}
 	}
 
@@ -2268,9 +2286,9 @@ public class TypeCreator extends TypeCache
 			return type;
 		}
 
-		public boolean isTypeAllowedForMobile()
+		public ClientSupport getClientSupport()
 		{
-			return false;
+			return ClientSupport.wc_sc;
 		}
 	}
 
@@ -2362,8 +2380,8 @@ public class TypeCreator extends TypeCache
 					addAnonymousClassType("Plugin<" + clientPlugin.getName() + '>', scriptObject.getClass());
 					property.setType(getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'));
 
-					if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile() &&
-						!AnnotationManagerReflection.getInstance().isAnnotatedForMobile(scriptObject.getClass()))
+					if (!AnnotationManagerReflection.getInstance().supportsClientType(scriptObject.getClass(),
+						ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType(), ClientSupport.Default))
 					{
 						property.setVisibility(Visibility.INTERNAL);
 					}
@@ -2390,7 +2408,6 @@ public class TypeCreator extends TypeCache
 						deprecatedPluginProperty.setDeprecated(true);
 						deprecatedPluginProperty.setVisible(false);
 						members.add(deprecatedPluginProperty);
-
 					}
 
 					Image clientImage = null;
@@ -2424,9 +2441,9 @@ public class TypeCreator extends TypeCache
 			return addType(null, type);
 		}
 
-		public boolean isTypeAllowedForMobile()
+		public ClientSupport getClientSupport()
 		{
-			return true;
+			return ClientSupport.All;
 		}
 	}
 
@@ -2513,9 +2530,9 @@ public class TypeCreator extends TypeCache
 			return type;
 		}
 
-		public boolean isTypeAllowedForMobile()
+		public ClientSupport getClientSupport()
 		{
-			return true;
+			return ClientSupport.All;
 		}
 	}
 
@@ -2610,9 +2627,9 @@ public class TypeCreator extends TypeCache
 
 		}
 
-		public boolean isTypeAllowedForMobile()
+		public ClientSupport getClientSupport()
 		{
-			return false;
+			return ClientSupport.wc_sc;
 		}
 	}
 
@@ -2663,9 +2680,9 @@ public class TypeCreator extends TypeCache
 			}
 		}
 
-		public boolean isTypeAllowedForMobile()
+		public ClientSupport getClientSupport()
 		{
-			return false;
+			return ClientSupport.wc_sc;
 		}
 	}
 
@@ -2771,9 +2788,9 @@ public class TypeCreator extends TypeCache
 			return true;
 		}
 
-		public boolean isTypeAllowedForMobile()
+		public ClientSupport getClientSupport()
 		{
-			return true;
+			return ClientSupport.All;
 		}
 	}
 
@@ -2916,9 +2933,9 @@ public class TypeCreator extends TypeCache
 			return true;
 		}
 
-		public boolean isTypeAllowedForMobile()
+		public ClientSupport getClientSupport()
 		{
-			return true;
+			return ClientSupport.All;
 		}
 	}
 
@@ -3209,9 +3226,9 @@ public class TypeCreator extends TypeCache
 			return getTypeRef(context, name);
 		}
 
-		public boolean isTypeAllowedForMobile()
+		public ClientSupport getClientSupport()
 		{
-			return true;
+			return ClientSupport.All;
 		}
 	}
 

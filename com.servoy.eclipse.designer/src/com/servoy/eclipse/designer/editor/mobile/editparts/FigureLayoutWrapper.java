@@ -21,11 +21,11 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Rectangle;
 
 import com.servoy.base.persistence.IMobileProperties.MobileProperty;
+import com.servoy.base.persistence.PersistUtils;
 import com.servoy.eclipse.designer.editor.PersistImageFigure;
 import com.servoy.j2db.debug.layout.ILayoutWrapper;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.Part;
 
 /**
  * Layout wrapper for Figures.
@@ -86,11 +86,11 @@ public class FigureLayoutWrapper implements ILayoutWrapper
 	{
 		if (figure instanceof MobilePartFigure)
 		{
-			if (((MobilePartFigure)figure).getPartType() == Part.HEADER || ((MobilePartFigure)figure).getPartType() == Part.TITLE_HEADER)
+			if (PersistUtils.isHeaderPart(((MobilePartFigure)figure).getPartType()))
 			{
 				return MobileFormSection.Header;
 			}
-			if (((MobilePartFigure)figure).getPartType() == Part.FOOTER || ((MobilePartFigure)figure).getPartType() == Part.TITLE_FOOTER)
+			if (PersistUtils.isFooterPart(((MobilePartFigure)figure).getPartType()))
 			{
 				return MobileFormSection.Footer;
 			}

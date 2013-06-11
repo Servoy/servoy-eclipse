@@ -28,6 +28,7 @@ import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.SnapToHelper;
 import org.eclipse.swt.widgets.Display;
 
+import com.servoy.base.persistence.PersistUtils;
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -76,7 +77,7 @@ public class MobileFormGraphicalEditPart extends BaseFormGraphicalEditPart imple
 
 		for (Part part : Utils.iterate(flattenedForm.getParts()))
 		{
-			if (part.getPartType() == Part.HEADER || part.getPartType() == Part.TITLE_HEADER)
+			if (PersistUtils.isHeaderPart(part.getPartType()))
 			{
 				list.add(part);
 			}
@@ -105,7 +106,7 @@ public class MobileFormGraphicalEditPart extends BaseFormGraphicalEditPart imple
 
 		for (Part part : Utils.iterate(flattenedForm.getParts()))
 		{
-			if (part.getPartType() == Part.FOOTER || part.getPartType() == Part.TITLE_FOOTER)
+			if (PersistUtils.isFooterPart(part.getPartType()))
 			{
 				list.add(part);
 			}
@@ -113,7 +114,6 @@ public class MobileFormGraphicalEditPart extends BaseFormGraphicalEditPart imple
 
 		return list;
 	}
-
 
 	@Override
 	public void activate()
@@ -188,11 +188,11 @@ public class MobileFormGraphicalEditPart extends BaseFormGraphicalEditPart imple
 
 	public static EditPart createChild(IApplication application, BaseVisualFormEditor editorPart, Form form, Object child)
 	{
-		if (child instanceof Part && (((Part)child).getPartType() == Part.HEADER || ((Part)child).getPartType() == Part.TITLE_HEADER))
+		if (child instanceof Part && PersistUtils.isHeaderPart(((Part)child).getPartType()))
 		{
 			return new MobileHeaderGraphicalEditPart(application, editorPart, (Part)child);
 		}
-		if (child instanceof Part && (((Part)child).getPartType() == Part.FOOTER || ((Part)child).getPartType() == Part.TITLE_FOOTER))
+		if (child instanceof Part && PersistUtils.isFooterPart(((Part)child).getPartType()))
 		{
 			return new MobileFooterGraphicalEditPart(application, editorPart, (Part)child);
 		}

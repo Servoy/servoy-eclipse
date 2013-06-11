@@ -21,6 +21,7 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.base.persistence.IMobileProperties;
+import com.servoy.base.persistence.PersistUtils;
 import com.servoy.base.persistence.constants.IColumnTypeConstants;
 import com.servoy.base.persistence.constants.IFieldConstants;
 import com.servoy.base.persistence.constants.IPartConstants;
@@ -37,6 +38,7 @@ import com.servoy.eclipse.ui.property.PropertyCategory;
 import com.servoy.eclipse.ui.property.PropertyController;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
+import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
@@ -76,7 +78,6 @@ public class MobilePersistPropertySource extends PersistPropertySource
 	};
 
 	public static final String RADIO_STYLE_NAME = "horizontal"; //$NON-NLS-1$
-	public static final Integer RADIO_STYLE_HORIZONTAL = Integer.valueOf(IMobileProperties.RADIO_STYLE_HORIZONTAL);
 	public static final PropertyController<Boolean, Boolean> MOBILE_RADIO_STYLE_CONTROLLER = new DelegatePropertySetterController<Boolean, MobilePersistPropertySource>(
 		new CheckboxPropertyDescriptor(RADIO_STYLE_NAME, RADIO_STYLE_NAME), RADIO_STYLE_NAME)
 	{
@@ -86,13 +87,13 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		public void setProperty(MobilePersistPropertySource propertySource, Boolean value)
 		{
 			((AbstractBase)propertySource.getPersist()).putCustomMobileProperty(IMobileProperties.RADIO_STYLE.propertyName, Boolean.TRUE.equals(value)
-				? RADIO_STYLE_HORIZONTAL : null);
+				? IMobileProperties.RADIO_STYLE_HORIZONTAL : null);
 			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, propertySource.getPersist(), false);
 		}
 
 		public Boolean getProperty(MobilePersistPropertySource propertySource)
 		{
-			return Boolean.valueOf(RADIO_STYLE_HORIZONTAL.equals(((AbstractBase)propertySource.getPersist()).getCustomMobileProperty(IMobileProperties.RADIO_STYLE.propertyName)));
+			return Boolean.valueOf(IMobileProperties.RADIO_STYLE_HORIZONTAL.equals(((AbstractBase)propertySource.getPersist()).getCustomMobileProperty(IMobileProperties.RADIO_STYLE.propertyName)));
 		}
 	};
 
@@ -103,9 +104,11 @@ public class MobilePersistPropertySource extends PersistPropertySource
 	"arrow-r", //$NON-NLS-1$
 	"arrow-u", //$NON-NLS-1$
 	"back", //$NON-NLS-1$
+	"bars", //$NON-NLS-1$
 	"check", //$NON-NLS-1$
 //	"custom", //$NON-NLS-1$
 	"delete", //$NON-NLS-1$
+	"edit", //$NON-NLS-1$
 	"forward", //$NON-NLS-1$
 	"gear", //$NON-NLS-1$
 	"grid", //$NON-NLS-1$
@@ -189,7 +192,8 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			// Special case: add as hidden property, needed for setting value via palette
 			return true;
 		}
-		if (!AnnotationManagerReflection.getInstance().isAnnotatedForMobile(propertyDescriptor.propertyDescriptor.getReadMethod(), getPersist().getClass()))
+		if (!AnnotationManagerReflection.getInstance().supportsClientType(propertyDescriptor.propertyDescriptor.getReadMethod(), getPersist().getClass(),
+			ClientSupport.mc, ClientSupport.Default))
 		{
 			// do not show the property if the read-method is not flagged for mobile client
 			return false;
@@ -352,7 +356,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			Form form = (Form)getContext();
 			for (Part part : Utils.iterate(form.getParts()))
 			{
-				if (part.getPartType() == Part.HEADER || part.getPartType() == Part.TITLE_HEADER)
+				if (PersistUtils.isHeaderPart(part.getPartType()))
 				{
 					new PersistPropertySource(PersistContext.create(part, form), false).setPersistPropertyValue(id, value);
 				}

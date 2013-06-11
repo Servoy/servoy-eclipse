@@ -233,11 +233,11 @@ public class ServoyScriptValidator implements IValidatorExtension2
 	{
 		if (isMethod)
 		{
-			return new ValidationStatus(JavaScriptProblems.PRIVATE_FUNCTION, "The function " + name + "() is not visible in mobile");
+			return new ValidationStatus(JavaScriptProblems.PRIVATE_FUNCTION, "The function " + name + "() is not visible in current solution type");
 		}
 		else
 		{
-			return new ValidationStatus(JavaScriptProblems.PRIVATE_VARIABLE, "The property " + name + " is not visible in mobile");
+			return new ValidationStatus(JavaScriptProblems.PRIVATE_VARIABLE, "The property " + name + " is not visible in current solution type");
 		}
 	}
 

@@ -25,9 +25,9 @@ import org.eclipse.draw2d.XYLayout;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Rectangle;
 
+import com.servoy.base.persistence.PersistUtils;
 import com.servoy.j2db.debug.layout.ILayoutWrapper;
 import com.servoy.j2db.debug.layout.MobileFormLayout;
-import com.servoy.j2db.persistence.Part;
 
 /** 
  * Layout for header or footer elements in mobile form editor.
@@ -55,7 +55,7 @@ public class MobileFormPartLayoutManager extends XYLayout
 			elements.add(new FigureLayoutWrapper(child));
 		}
 
-		if (partType == Part.HEADER || partType == Part.TITLE_HEADER)
+		if (PersistUtils.isHeaderPart(partType))
 		{
 			MobileFormLayout.layoutHeader(elements, containerBounds.x, containerBounds.y, containerBounds.width);
 		}
@@ -69,7 +69,7 @@ public class MobileFormPartLayoutManager extends XYLayout
 	protected Dimension calculatePreferredSize(IFigure container, int wHint, int hHint)
 	{
 		int height;
-		if (partType == Part.HEADER || partType == Part.TITLE_HEADER)
+		if (PersistUtils.isHeaderPart(partType))
 		{
 			height = 40; // always 1 row
 		}

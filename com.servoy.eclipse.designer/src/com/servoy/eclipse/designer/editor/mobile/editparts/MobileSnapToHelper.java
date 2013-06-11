@@ -28,6 +28,7 @@ import org.eclipse.gef.Request;
 import org.eclipse.gef.SnapToHelper;
 import org.eclipse.gef.requests.CreateRequest;
 
+import com.servoy.base.persistence.PersistUtils;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor.RequestType;
 import com.servoy.j2db.debug.layout.MobileFormLayout;
 import com.servoy.j2db.persistence.Part;
@@ -96,11 +97,11 @@ public class MobileSnapToHelper extends SnapToHelper
 			RequestType requestType = (RequestType)((CreateRequest)request).getNewObjectType();
 			if (target.getModel() instanceof Part)
 			{
-				if (((Part)target.getModel()).getPartType() == Part.HEADER || ((Part)target.getModel()).getPartType() == Part.TITLE_HEADER)
+				if (PersistUtils.isHeaderPart(((Part)target.getModel()).getPartType()))
 				{
 					return calculateSnappingToHeader(requestType, target, ((CreateRequest)request).getSize(), x, y);
 				}
-				if (((Part)target.getModel()).getPartType() == Part.FOOTER || ((Part)target.getModel()).getPartType() == Part.TITLE_FOOTER)
+				if (PersistUtils.isFooterPart(((Part)target.getModel()).getPartType()))
 				{
 					return calculateSnappingToFooter(target, x, y);
 				}

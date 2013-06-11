@@ -53,7 +53,6 @@ import com.servoy.eclipse.designer.internal.core.IImageNotifier;
 import com.servoy.eclipse.designer.internal.core.ImageDataCollector;
 import com.servoy.eclipse.designer.internal.core.ImageNotifierSupport;
 import com.servoy.eclipse.designer.internal.core.PersistImageNotifier;
-import com.servoy.eclipse.designer.mobile.property.MobilePersistPropertySource;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.component.ComponentFactory;
@@ -202,7 +201,7 @@ public class MobilePersistGraphicalEditPartFigureFactory implements IFigureFacto
 							(((DataChoice)component).getChoiceType() == Field.RADIOS || ((DataChoice)component).getChoiceType() == Field.CHECKS))
 						{
 							DataChoice dataChoice = (DataChoice)component;
-							boolean horizontal = MobilePersistPropertySource.RADIO_STYLE_HORIZONTAL.equals(((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.RADIO_STYLE.propertyName));
+							boolean horizontal = IMobileProperties.RADIO_STYLE_HORIZONTAL.equals(((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.RADIO_STYLE.propertyName));
 
 							component.setFont(component.getFont().deriveFont(Font.BOLD));
 							if (dataChoice.getChoiceType() == Field.RADIOS)
