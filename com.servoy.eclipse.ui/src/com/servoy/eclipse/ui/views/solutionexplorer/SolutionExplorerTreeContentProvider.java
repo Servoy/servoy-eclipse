@@ -906,7 +906,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			List<PlatformSimpleUserNode> exceptionsChildren = new ArrayList<PlatformSimpleUserNode>();
 			for (Class< ? > cls : clss)
 			{
-				if (cls != null && !IDeprecated.class.isAssignableFrom(cls))
+				if (cls != null && !IDeprecated.class.isAssignableFrom(cls) && !cls.isAnnotationPresent(Deprecated.class))
 				{
 					String nodeName = null;
 					if (cls.isAnnotationPresent(ServoyDocumented.class))
