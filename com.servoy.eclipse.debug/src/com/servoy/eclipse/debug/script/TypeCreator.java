@@ -837,7 +837,7 @@ public class TypeCreator extends TypeCache
 					addType(name, element);
 					if (prefix != null)
 					{
-						addType(prefix + element.getSimpleName(), element);
+						addType(prefix + name, element);
 					}
 				}
 
