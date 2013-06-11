@@ -65,7 +65,7 @@ public class ClientSupportViewerFilter extends ViewerFilter
 				csp = node.getClientSupport();
 			}
 
-			return csp.supports(clientType);
+			return csp.hasSupport(clientType);
 		}
 		return false;
 	}
