@@ -449,6 +449,12 @@ public class MarkerMessages
 		"Roll over image and cursor are not supported in Smart client tableview/listview forms.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	/**
+	 * The mobile form navigator overlaps the left header button
+	 */
+	public static ServoyMarker MobileFormNavigatorOverlapsHeaderButton = new ServoyMarker(
+		"Mobile form navigator and left header button cannot be used in the same time, as the navigator toggle button overlaps the left header button.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+
+	/**
 	 * The HTML or RTF field has as dataprovider a column whose length may be too small.
 	 */
 	public static ServoyMarker FormColumnLengthTooSmall = new ServoyMarker(

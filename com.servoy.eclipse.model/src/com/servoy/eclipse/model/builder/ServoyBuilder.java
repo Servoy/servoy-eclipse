@@ -317,6 +317,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		"calculationFormAccess", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> IMAGE_MEDIA_NOT_SET = new Pair<String, ProblemSeverity>("imageMediaNotSet", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> ROLLOVER_NOT_WORKING = new Pair<String, ProblemSeverity>("rolloverNotWorking", ProblemSeverity.WARNING); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> MOBILE_NAVIGATOR_OVERLAPS_HEADER_BUTTON = new Pair<String, ProblemSeverity>(
+		"mobileNavigatorOverlapsHeaderButton", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> DATAPROVIDER_MISSING_CONVERTER = new Pair<String, ProblemSeverity>(
 		"dataproviderMissingConverter", ProblemSeverity.WARNING); //$NON-NLS-1$
 
@@ -3221,6 +3223,17 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 							addMarker(file, mk.getType(), mk.getText(), -1, RESERVED_WINDOW_OBJECT_PROPERTY, IMarker.PRIORITY_NORMAL, path, o);
 						}
+						if (o instanceof AbstractBase &&
+							Boolean.TRUE.equals(((AbstractBase)o).getCustomMobileProperty(IMobileProperties.HEADER_LEFT_BUTTON.propertyName)))
+						{
+							IPersist parentForm = o.getAncestor(IRepository.FORMS);
+							if (parentForm != null && ((Form)parentForm).getNavigatorID() != Form.NAVIGATOR_NONE)
+							{
+								ServoyMarker mk = MarkerMessages.MobileFormNavigatorOverlapsHeaderButton.fill();
+								addMarker(project, mk.getType(), mk.getText(), -1, MOBILE_NAVIGATOR_OVERLAPS_HEADER_BUTTON, IMarker.PRIORITY_NORMAL, null, o);
+							}
+						}
+
 						checkCancel();
 						return IPersistVisitor.CONTINUE_TRAVERSAL;
 					}
