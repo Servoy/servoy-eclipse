@@ -3178,7 +3178,26 @@ public class ServoyModel extends AbstractServoyModel
 		{
 			return null;
 		}
-		return SolutionMetaData.isServoyMobileSolution(aProject.getSolution()) ? ClientSupport.mc : ClientSupport.Default;
+
+		Solution solution = aProject.getSolution();
+		if (solution == null)
+		{
+			return null;
+		}
+
+		switch (solution.getSolutionType())
+		{
+			case SolutionMetaData.MOBILE :
+				return ClientSupport.mc;
+
+			case SolutionMetaData.WEB_CLIENT_ONLY :
+				return ClientSupport.wc;
+
+			case SolutionMetaData.SMART_CLIENT_ONLY :
+				return ClientSupport.sc;
+		}
+
+		return ClientSupport.Default;
 	}
 
 	public boolean isActiveSolutionMobile()

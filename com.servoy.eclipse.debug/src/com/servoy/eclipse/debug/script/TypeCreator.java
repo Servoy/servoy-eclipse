@@ -1083,8 +1083,8 @@ public class TypeCreator extends TypeCache
 
 							ClientSupport clientType = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
 							ClientSupport csp = typesClientSupport.get(typeName);
-							if ((csp != null && !csp.supports(clientType)) ||
-								!AnnotationManagerReflection.getInstance().supportsClientType(memberbox[i].method(), scriptObjectClass, clientType,
+							if ((csp != null && !csp.hasSupport(clientType)) ||
+								!AnnotationManagerReflection.getInstance().hasSupportForClientType(memberbox[i].method(), scriptObjectClass, clientType,
 									ClientSupport.Default))
 							{
 								method.setVisibility(Visibility.INTERNAL);
@@ -1209,17 +1209,17 @@ public class TypeCreator extends TypeCache
 						{
 							ClientSupport clientType = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
 							ClientSupport csp = typesClientSupport.get(typeName);
-							boolean visibility = (csp == null ? ClientSupport.Default : csp).supports(clientType);
+							boolean visibility = (csp == null ? ClientSupport.Default : csp).hasSupport(clientType);
 							if (visibility)
 							{
 								if (object instanceof BeanProperty)
 								{
-									visibility = AnnotationManagerReflection.getInstance().supportsClientType(((BeanProperty)object).getGetter(),
+									visibility = AnnotationManagerReflection.getInstance().hasSupportForClientType(((BeanProperty)object).getGetter(),
 										scriptObjectClass, clientType, ClientSupport.Default);
 								}
 								else if (object instanceof Field && descriptor == CONSTANT)
 								{
-									visibility = AnnotationManagerReflection.getInstance().supportsClientType(((Field)object), clientType,
+									visibility = AnnotationManagerReflection.getInstance().hasSupportForClientType(((Field)object), clientType,
 										ClientSupport.Default);
 								}
 							}
@@ -1569,7 +1569,7 @@ public class TypeCreator extends TypeCache
 				properTypeName = properTypeName.substring(0, index);
 			}
 			ClientSupport csp = typesClientSupport.get(properTypeName);
-			if (!(csp == null ? ClientSupport.Default : csp).supports(clientType)) type.setVisible(false);
+			if (!(csp == null ? ClientSupport.Default : csp).hasSupport(clientType)) type.setVisible(false);
 		}
 		return super.addType(bucket, type);
 	}
@@ -2383,7 +2383,7 @@ public class TypeCreator extends TypeCache
 					addAnonymousClassType("Plugin<" + clientPlugin.getName() + '>', scriptObject.getClass());
 					property.setType(getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'));
 
-					if (!AnnotationManagerReflection.getInstance().supportsClientType(scriptObject.getClass(),
+					if (!AnnotationManagerReflection.getInstance().hasSupportForClientType(scriptObject.getClass(),
 						ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType(), ClientSupport.Default))
 					{
 						property.setVisibility(Visibility.INTERNAL);
