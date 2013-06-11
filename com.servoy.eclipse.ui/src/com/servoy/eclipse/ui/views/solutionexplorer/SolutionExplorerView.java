@@ -106,7 +106,6 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
@@ -287,6 +286,7 @@ import com.servoy.eclipse.ui.wizards.NewModuleWizard;
 import com.servoy.eclipse.ui.wizards.NewSolutionWizard;
 import com.servoy.eclipse.ui.wizards.NewStyleWizard;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
@@ -756,6 +756,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		labelProvider = new ViewLabelProvider();
 		labelDecorator = new ViewLabelDecorator();
+
+		clientSupportViewerFilter = new ClientSupportViewerFilter();
+		clientSupportViewerFilter.setClientType(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType());
 
 		createSplitter(parent);
 //		createPersistListener();
@@ -1414,38 +1417,16 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			}
 		});
 
-		if (SolutionMetaData.isServoyMobileSolution(getActiveSolution()))
-		{
-			if (mobileViewerFilter == null) mobileViewerFilter = new MobileViewerFilter();
-			list.addFilter(mobileViewerFilter);
-		}
-		else
-		{
-			if (mobileViewerFilter != null) list.removeFilter(mobileViewerFilter);
-		}
+		list.addFilter(clientSupportViewerFilter);
 	}
 
-	private Solution getActiveSolution()
-	{
-		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-		return (activeProject != null ? activeProject.getSolution() : null);
-	}
-
-	private MobileViewerFilter mobileViewerFilter;
+	private ClientSupportViewerFilter clientSupportViewerFilter;
 
 	private void createTreeViewer(Composite parent)
 	{
 		tree = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 
-		if (SolutionMetaData.isServoyMobileSolution(getActiveSolution()))
-		{
-			if (mobileViewerFilter == null) mobileViewerFilter = new MobileViewerFilter();
-			tree.addFilter(mobileViewerFilter);
-		}
-		else
-		{
-			if (mobileViewerFilter != null) tree.removeFilter(mobileViewerFilter);
-		}
+		tree.addFilter(clientSupportViewerFilter);
 
 		tree.setUseHashlookup(true);
 		ColumnViewerToolTipSupport.enableFor(tree);
@@ -1610,31 +1591,20 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			servoyModel.addSolutionMetaDataChangeListener(solutionMetaDataChangeListener);
 		}
 
-		List<ViewerFilter> vf = Arrays.asList(tree.getFilters());
-		List<ViewerFilter> lvf = Arrays.asList(list.getFilters());
-		if (SolutionMetaData.isServoyMobileSolution(getActiveSolution()))
+		ClientSupport activeSolutionClientType = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
+		clientSupportViewerFilter.setClientType(activeSolutionClientType);
+
+		if (openNewSubFormWizardAction != null && newActionInTreeSecondary != null)
 		{
-			if (mobileViewerFilter == null) mobileViewerFilter = new MobileViewerFilter();
-
-			if (!vf.contains(mobileViewerFilter)) tree.addFilter(mobileViewerFilter);
-			if (!lvf.contains(mobileViewerFilter)) list.addFilter(mobileViewerFilter);
-
-			if (openNewSubFormWizardAction != null && newActionInTreeSecondary != null)
+			if (activeSolutionClientType == ClientSupport.mc)
 			{
 				newActionInTreeSecondary.unregisterAction(UserNodeType.FORM);
 			}
-		}
-		else
-		{
-			if (mobileViewerFilter != null && vf.contains(mobileViewerFilter)) tree.removeFilter(mobileViewerFilter);
-			if (mobileViewerFilter != null && lvf.contains(mobileViewerFilter)) list.removeFilter(mobileViewerFilter);
-
-			if (openNewSubFormWizardAction != null && newActionInTreeSecondary != null)
+			else
 			{
 				newActionInTreeSecondary.registerAction(UserNodeType.FORM, openNewSubFormWizardAction);
 			}
 		}
-
 
 		tree.setInput(roots);
 		drillDownAdapter.reset();
@@ -2543,17 +2513,18 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		{
 			treeFilter = new TextFilter(labelProvider, true, false);
 			treeFilter.setSupplementalContentProvider((IStructuredContentProvider)list.getContentProvider());
-			treeFilter.setText(text);
-			treeFilter.setIsInMobile(SolutionMetaData.isServoyMobileSolution(getActiveSolution()));
-			// cache contents as it may take a while the first time... (filter once outside of SWT UI thread - so we can show progress dialog)
-			treeFilter.filter(tree, tree.getInput(), ((IStructuredContentProvider)tree.getContentProvider()).getElements(tree.getInput()));
 			wasNull = true;
 		}
 		else
 		{
-			treeFilter.setIsInMobile(SolutionMetaData.isServoyMobileSolution(getActiveSolution()));
-			treeFilter.setText(text);
 			wasNull = false;
+		}
+		treeFilter.setText(text);
+		treeFilter.setClientType(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType());
+		if (wasNull)
+		{
+			// cache contents as it may take a while the first time... (filter once outside of SWT UI thread - so we can show progress dialog)
+			treeFilter.filter(tree, tree.getInput(), ((IStructuredContentProvider)tree.getContentProvider()).getElements(tree.getInput()));
 		}
 
 		Runnable updateUI = new Runnable()
@@ -3077,7 +3048,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 //		ServoyProject[] currentRoots = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
 //		registerPersistListener(currentRoots, null);
 
-		if (mobileViewerFilter != null) mobileViewerFilter = null;
+		if (clientSupportViewerFilter != null) clientSupportViewerFilter = null;
 
 		yellow.dispose();
 

@@ -75,7 +75,6 @@ import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
@@ -191,7 +190,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 	protected boolean activeSolutionIsMobile()
 	{
-		return ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolutionMetaData().getSolutionType() == SolutionMetaData.MOBILE;
+		return ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile();
 	}
 
 	private void createColumnPage()

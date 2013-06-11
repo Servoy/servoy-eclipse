@@ -71,6 +71,7 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
+import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.ServoyDocumented;
 import com.servoy.j2db.documentation.scripting.docs.JSLib;
 import com.servoy.j2db.persistence.Bean;
@@ -207,21 +208,21 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, invisibleRootNode);
 
-		Class< ? >[] applicationClasses1 = ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class).getAllReturnedTypes();
-		Class< ? >[] applicationClasses2 = new ServoyException(0).getAllReturnedTypes();
-		Class< ? >[] applicationClasses = new Class[applicationClasses1.length + applicationClasses2.length];
-		System.arraycopy(applicationClasses1, 0, applicationClasses, 0, applicationClasses1.length);
-		System.arraycopy(applicationClasses2, 0, applicationClasses, applicationClasses1.length, applicationClasses2.length);
-		addReturnTypeNodes(application, applicationClasses);
+		addReturnTypeNodes(
+			application,
+			Utils.arrayJoin(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class).getAllReturnedTypes(),
+				new ServoyException(0).getAllReturnedTypes()));
 
 		resources = new PlatformSimpleUserNode(Messages.TreeStrings_Resources, UserNodeType.RESOURCES, null, uiActivator.loadImageFromBundle("resources.png")); //$NON-NLS-1$
 		resources.parent = invisibleRootNode;
 
 		stylesNode = new PlatformSimpleUserNode(Messages.TreeStrings_Styles, UserNodeType.STYLES, null, uiActivator.loadImageFromBundle("styles.gif")); //$NON-NLS-1$
+		stylesNode.setClientSupport(ClientSupport.wc_sc);
 		stylesNode.parent = resources;
 
 		userGroupSecurityNode = new PlatformSimpleUserNode(Messages.TreeStrings_UserGroupSecurity, UserNodeType.USER_GROUP_SECURITY, null,
 			uiActivator.loadImageFromBundle("lock.gif")); //$NON-NLS-1$
+		userGroupSecurityNode.setClientSupport(ClientSupport.wc_sc);
 		userGroupSecurityNode.parent = resources;
 
 		i18nFilesNode = new PlatformSimpleUserNode(Messages.TreeStrings_I18NFiles, UserNodeType.I18N_FILES, null, uiActivator.loadImageFromBundle("i18n.gif")); //$NON-NLS-1$
@@ -229,6 +230,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 		templatesNode = new PlatformSimpleUserNode(Messages.TreeStrings_Templates, UserNodeType.TEMPLATES, null,
 			uiActivator.loadImageFromBundle("template.gif")); //$NON-NLS-1$
+		templatesNode.setClientSupport(ClientSupport.wc_sc);
 		templatesNode.parent = resources;
 
 		activeSolutionNode = new PlatformSimpleUserNode(Messages.TreeStrings_NoActiveSolution, UserNodeType.SOLUTION, null,
@@ -956,7 +958,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				{
 					c.parent = constants;
 				}
-				constants.checkVisibleForMobileInChildren();
+				constants.checkClientSupportInChildren();
 			}
 
 			PlatformSimpleUserNode exceptions = null;

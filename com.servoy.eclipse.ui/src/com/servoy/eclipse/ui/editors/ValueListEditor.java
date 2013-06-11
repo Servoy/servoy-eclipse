@@ -520,7 +520,7 @@ public class ValueListEditor extends PersistEditor
 	@Override
 	protected void doRefresh()
 	{
-		boolean activeSolutionIsMobile = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolutionMetaData().getSolutionType() == SolutionMetaData.MOBILE;
+		boolean activeSolutionIsMobile = ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile();
 
 		removeListeners();
 

@@ -28,6 +28,8 @@ import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
+import com.servoy.j2db.documentation.ClientSupport;
+
 /**
  * Filter for viewers, used on top of Solution Explorer Tree.
  * 
@@ -62,8 +64,8 @@ public class TextFilter extends ViewerFilter
 	public boolean select(Viewer viewer, Object parentElement, Object node)
 	{
 		if (fPattern.trim().length() == 0) return true;
-		boolean result = (matchingNodes.contains(node) || parentsOfMatchingNodes.contains(node) || childrenOfMatchingNodes.contains(node));
-		return (isInMobile ? (MobileViewerFilter.isNodeAllowedInMobile(node) && result) : result);
+		return (matchingNodes.contains(node) || parentsOfMatchingNodes.contains(node) || childrenOfMatchingNodes.contains(node)) &&
+			ClientSupportViewerFilter.isNodeAllowedInClient(clientType, node);
 	}
 
 	/**
@@ -89,7 +91,7 @@ public class TextFilter extends ViewerFilter
 			}
 			else if (ancestorsMatched)
 			{
-				if (!isInMobile || (isInMobile && MobileViewerFilter.isNodeAllowedInMobile(element)))
+				if (ClientSupportViewerFilter.isNodeAllowedInClient(clientType, element))
 				{
 					childrenOfMatchingNodes.add(element);
 				}
@@ -122,7 +124,7 @@ public class TextFilter extends ViewerFilter
 					{
 						// this means that some of the children of this element matched - so if this
 						// node itself does not match - store it in parentsOfMatchingNodes
-						if (!isInMobile || (isInMobile && MobileViewerFilter.isNodeAllowedInMobile(element)))
+						if (ClientSupportViewerFilter.isNodeAllowedInClient(clientType, element))
 						{
 							parentsOfMatchingNodes.add(element);
 							match = true;
@@ -146,7 +148,7 @@ public class TextFilter extends ViewerFilter
 			{
 				if (match(labelProvider.getText(node)))
 				{
-					if (!isInMobile || (isInMobile && MobileViewerFilter.isNodeAllowedInMobile(node)))
+					if (ClientSupportViewerFilter.isNodeAllowedInClient(clientType, node))
 					{
 						matchingNodes.add(node); // for text decoration in list
 						matched = true;
@@ -177,7 +179,7 @@ public class TextFilter extends ViewerFilter
 
 	protected boolean fIgnoreCase;
 
-	protected boolean isInMobile;
+	protected ClientSupport clientType;
 
 	protected boolean fHasLeadingStar;
 
@@ -236,7 +238,7 @@ public class TextFilter extends ViewerFilter
 		this.labelProvider = labelProvider;
 		fIgnoreCase = ignoreCase;
 		fIgnoreWildCards = ignoreWildCards;
-		this.isInMobile = false;
+		this.clientType = ClientSupport.Default;
 	}
 
 	/**
@@ -727,8 +729,11 @@ public class TextFilter extends ViewerFilter
 		return -1;
 	}
 
-	public void setIsInMobile(boolean isInMobile)
+	/**
+	 * @param clientType the clientType to set
+	 */
+	public void setClientType(ClientSupport clientType)
 	{
-		this.isInMobile = isInMobile;
+		this.clientType = clientType;
 	}
 }

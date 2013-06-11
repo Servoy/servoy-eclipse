@@ -873,8 +873,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 				else
 				{
-					dlm.add(new UserNode(tableName, UserNodeType.TABLE, new TableFeedback(s.getName(), tableName), new TableWrapper(s.getName(), tableName,
-						EditorUtil.isViewTypeTable(s.getName(), tableName)), uiActivator.loadImageFromBundle("portal.gif")));
+					UserNode node = new UserNode(tableName, UserNodeType.TABLE, new TableFeedback(s.getName(), tableName), new TableWrapper(s.getName(),
+						tableName, EditorUtil.isViewTypeTable(s.getName(), tableName)), uiActivator.loadImageFromBundle("portal.gif"));
+					node.setClientSupport(ClientSupport.All);
+					dlm.add(node);
 				}
 			}
 			if (hiddenTables != null)
@@ -1413,9 +1415,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				constantsElementName = elementName + constantsElementName;
 			}
 
-			List fields = ijm.getFieldIds(true);
-			Object[] arrays = new Object[fields.size()];
-			arrays = fields.toArray(arrays);
+			List<String> fields = ijm.getFieldIds(true);
+			Object[] arrays = fields.toArray(new Object[fields.size()]);
 			Arrays.sort(arrays);
 
 			UserNode node;
@@ -1431,10 +1432,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 					// this field is a constant
 					Field field = (Field)ijm.getField((String)element, true);
-					if (AnnotationManagerReflection.getInstance().isAnnotatedForMobile(field))
-					{
-						node.setIsVisibleInMobile(true);
-					}
+					node.setClientSupport(AnnotationManagerReflection.getInstance().getClientSupport(field, ClientSupport.Default));
 				}
 				else
 				{
@@ -1484,10 +1482,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 
 			UserNode node = new UserNode(name, actionType, new FieldFeedback(name, codePrefix, resolver, scriptObject, ijm), real, pIcon);
-			if ((bp instanceof JavaMembers.BeanProperty) &&
-				AnnotationManagerReflection.getInstance().isAnnotatedForMobile(((JavaMembers.BeanProperty)bp).getGetter(), originalClass))
+			if (bp instanceof JavaMembers.BeanProperty)
 			{
-				node.setIsVisibleInMobile(true);
+				node.setClientSupport(AnnotationManagerReflection.getInstance().getClientSupport(((JavaMembers.BeanProperty)bp).getGetter(), originalClass,
+					ClientSupport.Default));
 			}
 			dlm.add(node);
 		}
@@ -1568,7 +1566,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				SimpleUserNode node = new UserNode(displayName, actionType, new MethodFeedback(id, parameterTypes, codePrefix, resolver, scriptObject, njm),
 					(Object)null, functionIcon);
 
-				if (AnnotationManagerReflection.getInstance().isAnnotatedForMobile(method.method(), originalClass)) node.setIsVisibleInMobile(true);
+				node.setClientSupport(AnnotationManagerReflection.getInstance().getClientSupport(method.method(), originalClass, ClientSupport.Default));
 
 				dlm.add(node);
 			}
@@ -1806,21 +1804,16 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				if (parameterTypes != null && scriptObject instanceof XMLScriptObjectAdapter)
 				{
-					if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile())
-					{
-						sample = ((XMLScriptObjectAdapter)scriptObject).getSample(name, parameterTypes, ClientSupport.mc);
-						if (sample == null) sample = ((XMLScriptObjectAdapter)scriptObject).getSample(name, parameterTypes);
-					}
-					else
-					{
-						sample = ((XMLScriptObjectAdapter)scriptObject).getSample(name, parameterTypes);
-					}
+					sample = ((XMLScriptObjectAdapter)scriptObject).getSample(name, parameterTypes,
+						ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType());
+					if (sample == null) sample = ((XMLScriptObjectAdapter)scriptObject).getSample(name, parameterTypes);
 				}
 				else
 				{
-					if (scriptObject instanceof XMLScriptObjectAdapter && ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile())
+					if (scriptObject instanceof XMLScriptObjectAdapter)
 					{
-						sample = ((XMLScriptObjectAdapter)scriptObject).getSample(name, ClientSupport.mc);
+						sample = ((XMLScriptObjectAdapter)scriptObject).getSample(name,
+							ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType());
 					}
 					if (sample == null || "".equals(sample))
 					{
@@ -1873,11 +1866,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				String description = "";
 				if (scriptObject instanceof XMLScriptObjectAdapter && parameterTypes != null)
 				{
-					ClientSupport csp = ClientSupport.Default;
-					if ((ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile()))
-					{
-						csp = ClientSupport.mc;
-					}
+					ClientSupport csp = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
 					description = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name, parameterTypes, csp);
 					IParameter[] parameters = ((XMLScriptObjectAdapter)scriptObject).getParameters(name, parameterTypes);
 					if (parameters != null)
@@ -2007,11 +1996,15 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			String sample = null;
 			if (scriptObject != null)
 			{
-				if (scriptObject instanceof XMLScriptObjectAdapter && ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile())
+				if (scriptObject instanceof XMLScriptObjectAdapter)
 				{
-					sample = ((XMLScriptObjectAdapter)scriptObject).getSample(name, ClientSupport.mc);
+					sample = ((XMLScriptObjectAdapter)scriptObject).getSample(name,
+						ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType());
 				}
-				if (sample == null || "".equals(sample)) sample = scriptObject.getSample(name);
+				if (sample == null || "".equals(sample))
+				{
+					sample = scriptObject.getSample(name);
+				}
 				sample = Text.processTags(sample, resolver);
 			}
 			return sample;
@@ -2027,11 +2020,13 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				if (scriptObject instanceof XMLScriptObjectAdapter)
 				{
-					ClientSupport csp = ClientSupport.Default;
-					if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile()) csp = ClientSupport.mc;
-					toolTip = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name, csp);
+					toolTip = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name,
+						ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType());
 				}
-				else toolTip = scriptObject.getToolTip(name);
+				else
+				{
+					toolTip = scriptObject.getToolTip(name);
+				}
 				toolTip = Text.processTags(toolTip, resolver);
 			}
 			if (toolTip == null) toolTip = ""; //$NON-NLS-1$

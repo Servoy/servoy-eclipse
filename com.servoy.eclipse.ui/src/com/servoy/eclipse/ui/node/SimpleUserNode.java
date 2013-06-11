@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.ui.node;
 
+import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRootObject;
@@ -50,7 +51,7 @@ public class SimpleUserNode
 
 	protected boolean hidden = false;
 
-	protected boolean visibleInMobile = false;
+	protected ClientSupport clientSupport = null;
 
 	public SimpleUserNode(String displayName, UserNodeType type)
 	{
@@ -72,7 +73,7 @@ public class SimpleUserNode
 		this._realObject = realObject;
 		storeContainingPersistIfNeeded(_realObject);
 		this.icon = icon;
-		this.visibleInMobile = AnnotationManagerReflection.getInstance().isAnnotatedForMobile(realType);
+		this.clientSupport = AnnotationManagerReflection.getInstance().getClientSupport(realType, ClientSupport.Default);
 	}
 
 	public SimpleUserNode(String displayName, UserNodeType type, Object realObject, IPersist containingPersist, Object icon)
@@ -97,7 +98,9 @@ public class SimpleUserNode
 		if (hidden && this.children != null)
 		{
 			for (SimpleUserNode un : children)
+			{
 				un.hide();
+			}
 		}
 	}
 
@@ -118,9 +121,9 @@ public class SimpleUserNode
 		return developerFeedback;
 	}
 
-	public void setDeveloperFeedback(IDeveloperFeedback rob)
+	public void setDeveloperFeedback(IDeveloperFeedback developerFeedback)
 	{
-		this.developerFeedback = rob;
+		this.developerFeedback = developerFeedback;
 	}
 
 	public void setToolTipText(final String txt)
@@ -217,15 +220,11 @@ public class SimpleUserNode
 		return hidden;
 	}
 
-	public void checkVisibleForMobileInChildren()
+	public void checkClientSupportInChildren()
 	{
-		if (!visibleInMobile)
+		for (int i = 0; clientSupport != ClientSupport.All && i < children.length; i++)
 		{
-			for (SimpleUserNode c : children)
-			{
-				visibleInMobile = c.isVisibleInMobile();
-				if (visibleInMobile) break;
-			}
+			clientSupport = clientSupport == null ? children[i].getClientSupport() : clientSupport.union(children[i].getClientSupport());
 		}
 	}
 
@@ -256,14 +255,20 @@ public class SimpleUserNode
 		}
 	}
 
-	public boolean isVisibleInMobile()
+	/**
+	 * @return the clientSupport
+	 */
+	public ClientSupport getClientSupport()
 	{
-		return visibleInMobile;
+		return clientSupport;
 	}
 
-	public void setIsVisibleInMobile(boolean isVisibleInMobile)
+	/**
+	 * @param clientSupport the clientSupport to set
+	 */
+	public void setClientSupport(ClientSupport clientSupport)
 	{
-		this.visibleInMobile = isVisibleInMobile;
+		this.clientSupport = clientSupport;
 	}
 
 	/**
