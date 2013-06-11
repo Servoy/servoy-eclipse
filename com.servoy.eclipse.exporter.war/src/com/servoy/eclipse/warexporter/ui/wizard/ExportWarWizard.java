@@ -18,6 +18,8 @@ package com.servoy.eclipse.warexporter.ui.wizard;
 
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -164,9 +166,29 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		addPage(serversSelectionPage);
 
 		String[] serverNames = ApplicationServerSingleton.get().getServerManager().getServerNames(true, true, true, false);
-		for (String serverName : serverNames)
+		ArrayList<String> srvNames = new ArrayList<String>(Arrays.asList(serverNames));
+		boolean repositoryServerPresent = true;
+		if (!srvNames.contains(IServer.REPOSITORY_SERVER))
 		{
-			ServerConfigurationPage configurationPage = new ServerConfigurationPage("serverconf:" + serverName, exportModel.getServerConfiguration(serverName),
+			repositoryServerPresent = false;
+			srvNames.add(IServer.REPOSITORY_SERVER);
+		}
+		for (String serverName : srvNames)
+		{
+			ServerConfiguration serverConfiguration = exportModel.getServerConfiguration(serverName);
+			//handle required repository_server if not present in the servers list
+			if (serverName.equals(IServer.REPOSITORY_SERVER) && !repositoryServerPresent)
+			{
+				serverConfiguration = new ServerConfiguration(serverName);
+				//set some default configuration
+				serverConfiguration.setDriver((exportModel.getServerConfiguration(srvNames.get(0))).getDriver());
+				serverConfiguration.setUserName((exportModel.getServerConfiguration(srvNames.get(0))).getUserName());
+				serverConfiguration.setPassword((exportModel.getServerConfiguration(srvNames.get(0))).getPassword());
+				serverConfiguration.setMaxActive((exportModel.getServerConfiguration(srvNames.get(0))).getMaxActive());
+				serverConfiguration.setMaxIdle((exportModel.getServerConfiguration(srvNames.get(0))).getMaxIdle());
+				serverConfiguration.setMaxPreparedStatementsIdle((exportModel.getServerConfiguration(srvNames.get(0))).getMaxPreparedStatementsIdle());
+			}
+			ServerConfigurationPage configurationPage = new ServerConfigurationPage("serverconf:" + serverName, serverConfiguration,
 				exportModel.getSelectedServerNames(), serverConfigurationPages);
 			addPage(configurationPage);
 			serverConfigurationPages.put(serverName, configurationPage);

@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.wb.swt.layout.grouplayout.LayoutStyle;
 
+import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ServerConfig;
 
 /**
@@ -79,8 +80,11 @@ public class ServerConfigurationPage extends WizardPage
 		this.serverConfigurationPages = serverConfigurationPages;
 		this.config = serverConfig;
 
-		setTitle("Database server configuration for: " + serverConfig.getName());
-		setDescription("Specify the configuration for the database server '" + serverConfig.getName() + "' as it is used on the application server");
+		// if repository_server, mark configuration required
+		boolean isRepositoryServer = serverConfig.getName().equals(IServer.REPOSITORY_SERVER);
+		setTitle("Database server configuration for: " + serverConfig.getName() + (isRepositoryServer ? " (required)" : ""));
+		setDescription("Specify the configuration for the database server '" + serverConfig.getName() + "' as it is used on the application server" +
+			(isRepositoryServer ? ". This server configuration is required" : ""));
 	}
 
 	/*
@@ -235,13 +239,19 @@ public class ServerConfigurationPage extends WizardPage
 	public IWizardPage getNextPage()
 	{
 		boolean next = false;
-		for (String selectedServerName : selectedServerNames)
+		//check for the required repository_server and add it if not present in the selected servers list
+		SortedSet<String> serverNames = selectedServerNames;
+		if (!serverNames.contains(IServer.REPOSITORY_SERVER))
+		{
+			serverNames.add(IServer.REPOSITORY_SERVER);
+		}
+		for (String serverName : serverNames)
 		{
 			if (next)
 			{
-				return serverConfigurationPages.get(selectedServerName);
+				return serverConfigurationPages.get(serverName);
 			}
-			if (config.getName().equals(selectedServerName))
+			if (config.getName().equals(serverName))
 			{
 				next = true;
 			}
