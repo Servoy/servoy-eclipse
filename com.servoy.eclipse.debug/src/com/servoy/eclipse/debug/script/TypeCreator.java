@@ -56,6 +56,7 @@ import org.eclipse.dltk.javascript.typeinfo.MetaType;
 import org.eclipse.dltk.javascript.typeinfo.TypeCache;
 import org.eclipse.dltk.javascript.typeinfo.TypeMemberQuery;
 import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
+import org.eclipse.dltk.javascript.typeinfo.model.Element;
 import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
 import org.eclipse.dltk.javascript.typeinfo.model.Method;
@@ -907,10 +908,10 @@ public class TypeCreator extends TypeCache
 			ImageDescriptor desc = IconProvider.instance().descriptor(cls);
 			type.setAttribute(IMAGE_DESCRIPTOR, desc);
 		}
-		if (IDeprecated.class.isAssignableFrom(cls) || (prefixedTypes.containsKey(cls) && typeName.equals(cls.getSimpleName())))
+		if (IDeprecated.class.isAssignableFrom(cls) || cls.isAnnotationPresent(Deprecated.class) ||
+			(prefixedTypes.containsKey(cls) && typeName.equals(cls.getSimpleName())))
 		{
-			type.setDeprecated(true);
-			type.setVisible(false);
+			makeDeprecated(type);
 		}
 		ServoyDocumented anno = cls.getAnnotation(ServoyDocumented.class);
 		if (anno != null && anno.extendsComponent() != null && !anno.extendsComponent().trim().equals(""))
@@ -967,7 +968,12 @@ public class TypeCreator extends TypeCache
 					continue;
 				}
 				String prefix = PLUGIN_TYPE_PREFIX + config + ".";
-				members.add(createProperty(name, true, TypeUtil.classType(getType(context, prefix + name)), null, null));
+				Property property = createProperty(name, true, TypeUtil.classType(getType(context, prefix + name)), null, null);
+				if (IDeprecated.class.isAssignableFrom(returnTypeClass) || returnTypeClass.isAnnotationPresent(Deprecated.class))
+				{
+					makeDeprecated(property);
+				}
+				members.add(property);
 			}
 		}
 		return type;
@@ -1067,14 +1073,12 @@ public class TypeCreator extends TypeCache
 							{
 								if (((ITypedScriptObject)scriptObject).isDeprecated(name, parameterTypes))
 								{
-									method.setDeprecated(true);
-									method.setVisible(false);
+									makeDeprecated(method);
 								}
 							}
 							else if (scriptObject != null && scriptObject.isDeprecated(name))
 							{
-								method.setDeprecated(true);
-								method.setVisible(false);
+								makeDeprecated(method);
 							}
 
 							ClientSupport clientType = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
@@ -1227,8 +1231,7 @@ public class TypeCreator extends TypeCache
 
 						if (scriptObject != null && scriptObject.isDeprecated(name))
 						{
-							property.setDeprecated(true);
-							property.setVisible(false);
+							makeDeprecated(property);
 						}
 						newMembers.add(property);
 					}
@@ -2248,11 +2251,11 @@ public class TypeCreator extends TypeCache
 
 			Property maxRecordIndex = TypeInfoModelFactory.eINSTANCE.createProperty();
 			maxRecordIndex.setName("maxRecordIndex");
-			type.getMembers().add(makeDeprected(maxRecordIndex));
+			type.getMembers().add(makeDeprecated(maxRecordIndex));
 
 			Property selectedIndex = TypeInfoModelFactory.eINSTANCE.createProperty();
 			selectedIndex.setName("selectedIndex");
-			type.getMembers().add(makeDeprected(selectedIndex));
+			type.getMembers().add(makeDeprecated(selectedIndex));
 			return type;
 		}
 
@@ -2388,26 +2391,14 @@ public class TypeCreator extends TypeCache
 
 					if (clientPlugin.getName().equals("window"))
 					{
-						Property deprecatedPluginProperty = createProperty("kioskmode", true, getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'),
-							"Window plugin", null);
-						deprecatedPluginProperty.setDeprecated(true);
-						deprecatedPluginProperty.setVisible(false);
-						members.add(deprecatedPluginProperty);
-						deprecatedPluginProperty = createProperty("popupmenu", true, getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'),
-							"Window plugin", null);
-						deprecatedPluginProperty.setDeprecated(true);
-						deprecatedPluginProperty.setVisible(false);
-						members.add(deprecatedPluginProperty);
-						deprecatedPluginProperty = createProperty("menubar", true, getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'),
-							"Window plugin", null);
-						deprecatedPluginProperty.setDeprecated(true);
-						deprecatedPluginProperty.setVisible(false);
-						members.add(deprecatedPluginProperty);
-						deprecatedPluginProperty = createProperty("it2be_menubar", true, getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'),
-							"Window plugin", null);
-						deprecatedPluginProperty.setDeprecated(true);
-						deprecatedPluginProperty.setVisible(false);
-						members.add(deprecatedPluginProperty);
+						members.add(makeDeprecated(createProperty("kioskmode", true, getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'),
+							"Window plugin", null)));
+						members.add(makeDeprecated(createProperty("popupmenu", true, getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'),
+							"Window plugin", null)));
+						members.add(makeDeprecated(createProperty("menubar", true, getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'),
+							"Window plugin", null)));
+						members.add(makeDeprecated(createProperty("it2be_menubar", true, getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'),
+							"Window plugin", null)));
 					}
 
 					Image clientImage = null;
@@ -3055,11 +3046,11 @@ public class TypeCreator extends TypeCache
 	 * @param createProperty
 	 * @return
 	 */
-	private static Member makeDeprected(Property property)
+	private static <T extends Element> T makeDeprecated(T element)
 	{
-		property.setDeprecated(true);
-		property.setVisible(false);
-		return property;
+		element.setDeprecated(true);
+		element.setVisible(false);
+		return element;
 	}
 
 
