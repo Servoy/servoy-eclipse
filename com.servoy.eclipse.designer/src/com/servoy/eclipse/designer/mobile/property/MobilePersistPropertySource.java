@@ -192,7 +192,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			// Special case: add as hidden property, needed for setting value via palette
 			return true;
 		}
-		if (!AnnotationManagerReflection.getInstance().supportsClientType(propertyDescriptor.propertyDescriptor.getReadMethod(), getPersist().getClass(),
+		if (!AnnotationManagerReflection.getInstance().hasSupportForClientType(propertyDescriptor.propertyDescriptor.getReadMethod(), getPersist().getClass(),
 			ClientSupport.mc, ClientSupport.Default))
 		{
 			// do not show the property if the read-method is not flagged for mobile client
