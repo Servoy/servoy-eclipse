@@ -124,6 +124,7 @@ import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.IDataServer;
 import com.servoy.j2db.debug.DebugClientHandler;
 import com.servoy.j2db.debug.DebugWebClientSession;
+import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -3170,14 +3171,18 @@ public class ServoyModel extends AbstractServoyModel
 		ignoreOnceFiles.add(file);
 	}
 
+	public ClientSupport getActiveSolutionClientType()
+	{
+		ServoyProject aProject = getActiveProject();
+		if (aProject == null)
+		{
+			return null;
+		}
+		return SolutionMetaData.isServoyMobileSolution(aProject.getSolution()) ? ClientSupport.mc : ClientSupport.Default;
+	}
+
 	public boolean isActiveSolutionMobile()
 	{
-		boolean isServoyMobileSolution = false;
-		ServoyProject aProject = getActiveProject();
-		if (aProject != null && aProject.getSolution() != null)
-		{
-			isServoyMobileSolution = (aProject.getSolution().getSolutionType() == SolutionMetaData.MOBILE);
-		}
-		return isServoyMobileSolution;
+		return getActiveSolutionClientType() == ClientSupport.mc;
 	}
 }
