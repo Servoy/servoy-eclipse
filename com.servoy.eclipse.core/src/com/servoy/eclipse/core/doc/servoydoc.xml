@@ -10897,7 +10897,7 @@ else application.output("The calculation is not stored");]]></sample>
         </function>
       </functions>
     </object>
-    <object clientSupport="mc,wc,sc" publicName="JSCalendar" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSCalendar">
+    <object clientSupport="mc" publicName="JSCalendar" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSCalendar">
       <constants>
         <constant clientSupport="wc,sc" name="CALENDAR">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -11964,7 +11964,7 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
         </function>
       </functions>
     </object>
-    <object clientSupport="mc,wc,sc" publicName="JSChecks" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSChecks">
+    <object clientSupport="mc" publicName="JSChecks" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSChecks">
       <constants>
         <constant clientSupport="wc,sc" name="CALENDAR">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -14481,7 +14481,7 @@ if (server)
         </function>
       </functions>
     </object>
-    <object clientSupport="mc,wc,sc" publicName="JSCombobox" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSCombobox">
+    <object clientSupport="mc" publicName="JSCombobox" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSCombobox">
       <constants>
         <constant clientSupport="wc,sc" name="CALENDAR">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -19032,7 +19032,7 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
         </function>
       </functions>
     </object>
-    <object clientSupport="mc,wc,sc" publicName="JSFooter" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSFooter">
+    <object clientSupport="mc" publicName="JSFooter" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSFooter">
       <constants>
         <constant clientSupport="wc,sc" name="BODY">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -26234,7 +26234,7 @@ while(fsUpdater.next())
         </function>
       </functions>
     </object>
-    <object clientSupport="mc,wc,sc" publicName="JSHeader" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSHeader">
+    <object clientSupport="mc" publicName="JSHeader" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSHeader">
       <constants>
         <constant clientSupport="wc,sc" name="BODY">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -28272,7 +28272,7 @@ application.output(button_uuid.toString());]]></sample>
         </function>
       </functions>
     </object>
-    <object clientSupport="mc,wc,sc" publicName="JSPassword" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSPassword">
+    <object clientSupport="mc" publicName="JSPassword" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSPassword">
       <constants>
         <constant clientSupport="wc,sc" name="CALENDAR">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -30833,7 +30833,7 @@ childrenPortal.setIntercellSpacing(5,10);]]></sample>
         </function>
       </functions>
     </object>
-    <object clientSupport="mc,wc,sc" publicName="JSRadios" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSRadios">
+    <object clientSupport="mc" publicName="JSRadios" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSRadios">
       <constants>
         <constant clientSupport="wc,sc" name="CALENDAR">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -34201,7 +34201,7 @@ var isMetaDataTable = jsTable.isMetadataTable()]]></sample>
         </function>
       </functions>
     </object>
-    <object clientSupport="mc,wc,sc" publicName="JSText" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSText">
+    <object clientSupport="mc" publicName="JSText" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSText">
       <constants>
         <constant clientSupport="wc,sc" name="CALENDAR">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -35268,7 +35268,7 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
         </function>
       </functions>
     </object>
-    <object clientSupport="mc,wc,sc" publicName="JSTextArea" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSTextArea">
+    <object clientSupport="mc" publicName="JSTextArea" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSTextArea">
       <constants>
         <constant clientSupport="wc,sc" name="CALENDAR">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
@@ -45391,7 +45391,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object clientSupport="mc,wc,sc" extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeBean" qualifiedName="com.servoy.j2db.ui.IScriptMobileBean">
+    <object clientSupport="mc" extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeBean" qualifiedName="com.servoy.j2db.ui.IScriptMobileBean">
       <properties>
         <property clientSupport="wc,sc" name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -52424,7 +52424,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object clientSupport="mc,wc,sc" extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeInsetList" qualifiedName="com.servoy.j2db.ui.IScriptInsetListComponentMethods">
+    <object clientSupport="mc" extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeInsetList" qualifiedName="com.servoy.j2db.ui.IScriptInsetListComponentMethods">
       <properties>
         <property clientSupport="wc,sc" name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
