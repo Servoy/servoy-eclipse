@@ -3249,39 +3249,39 @@ application.sleep(3000);]]></sample>
             <sample clientSupport="wc,sc"><![CDATA[application.undo();]]></sample>
           </samples>
         </function>
-        <function clientSupport="wc,sc" name="updateUI">
+        <function clientSupport="sc" name="updateUI">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Updates the UI (painting). If in a script an element changed and the script continues doing 
+            <description clientSupport="sc"><![CDATA[Updates the UI (painting). If in a script an element changed and the script continues doing 
 things, you can give an number in ms how long this can take.
 Warning: this gives the UI time to paint, but this also means that it will give the ui time to respond to all other events,
 so if a user keeps clicking on other stuff this will also be handled right away inside this call.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Updates the UI (painting).]]></summary>
+            <summary clientSupport="sc"><![CDATA[Updates the UI (painting).]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[application.updateUI(500);
+            <sample clientSupport="sc"><![CDATA[application.updateUI(500);
 //continue doing things]]></sample>
           </samples>
         </function>
-        <function clientSupport="wc,sc" name="updateUI">
+        <function clientSupport="sc" name="updateUI">
           <argumentsTypes>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Updates the UI (painting). If in a script an element changed and the script continues doing 
+            <description clientSupport="sc"><![CDATA[Updates the UI (painting). If in a script an element changed and the script continues doing 
 things, you can give an number in ms how long this can take.
 Warning: this gives the UI time to paint, but this also means that it will give the ui time to respond to all other events,
 so if a user keeps clicking on other stuff this will also be handled right away inside this call.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Updates the UI (painting).]]></summary>
+            <summary clientSupport="sc"><![CDATA[Updates the UI (painting).]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[application.updateUI(500);
+            <sample clientSupport="sc"><![CDATA[application.updateUI(500);
 //continue doing things]]></sample>
           </samples>
           <parameters>
@@ -10145,22 +10145,14 @@ rightAlignedLabel.horizontalAlignment = SM_ALIGNMENT.RIGHT;]]></sample>
         <property clientSupport="mc" name="iconType">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <descriptions>
-            <description clientSupport="mc"><![CDATA[Horizontal alignment of the text inside the component. Can be one of
-LEFT, CENTER or RIGHT.
-
-Note that this property does not refer to the horizontal alignment
-of the component inside the form.]]></description>
+            <description clientSupport="mc"><![CDATA[Icon shown on a button.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc"><![CDATA[Horizontal alignment of the text inside the component.]]></summary>
+            <summary clientSupport="mc"><![CDATA[Icon shown on a button.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc"><![CDATA[var leftAlignedLabel = form.newLabel('LEFT', 10, 10, 300, 20);
-leftAlignedLabel.horizontalAlignment = SM_ALIGNMENT.LEFT;
-var hCenteredLabel = form.newLabel('CENTER', 10, 40, 300, 20);
-hCenteredLabel.horizontalAlignment = SM_ALIGNMENT.CENTER;
-var rightAlignedLabel = form.newLabel('RIGHT', 10, 70, 300, 20);
-rightAlignedLabel.horizontalAlignment = SM_ALIGNMENT.RIGHT;]]></sample>
+            <sample clientSupport="mc"><![CDATA[var btn = form.newButton('I am a button', 1, null);
+btn.iconType = JSButton.ICON_STAR]]></sample>
           </samples>
         </property>
         <property clientSupport="wc,sc" name="imageMedia">
@@ -19348,10 +19340,10 @@ trailingGrandSummary.sinkWhenLast = true;]]></sample>
         <property clientSupport="mc" name="sticky">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <descriptions>
-            <description clientSupport="mc"><![CDATA[Flag to set a set the header sticky so it will not scroll out of view.]]></description>
+            <description clientSupport="mc"><![CDATA[Flag to set a set the footer sticky so it will not scroll out of view.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc"><![CDATA[Flag to set a set the header sticky so it will not scroll out of view.]]></summary>
+            <summary clientSupport="mc"><![CDATA[Flag to set a set the footer sticky so it will not scroll out of view.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="mc"><![CDATA[var form = solutionModel.newForm('newForm1', myDatasource);
@@ -22236,7 +22228,33 @@ for (var i in variables)
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc,wc,sc" name="newBean">
+        <function clientSupport="mc" name="newBean">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSBean" typecode="com.servoy.j2db.scripting.solutionmodel.JSBean"><![CDATA[a IBaseSMBean object]]></return>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[Creates a new IBaseSMBean object on the form.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[Creates a new IBaseSMBean object on the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var form = solutionModel.newForm('newForm1', 'db:/server1/table1');
+var bean = form.newBean('bean', 1);
+forms['newForm1'].controller.show();]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified name of the IBaseSMBean object]]></description>
+            </parameter>
+            <parameter name="y" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the vertical "y" position of the IBaseSMBean object, defines the order of elements on the form]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="wc,sc" name="newBean">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
@@ -22247,13 +22265,13 @@ for (var i in variables)
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSBean" typecode="com.servoy.j2db.scripting.solutionmodel.JSBean"><![CDATA[a JSBean object]]></return>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[Creates a new JSBean object on the form - including the name of the JSBean object; the classname the JSBean object is based on, the "x" and "y" position of the JSBean object in pixels, as well as the width and height of the JSBean object in pixels.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Creates a new JSBean object on the form - including the name of the JSBean object; the classname the JSBean object is based on, the "x" and "y" position of the JSBean object in pixels, as well as the width and height of the JSBean object in pixels.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[Creates a new JSBean object on the form - including the name of the JSBean object; the classname the JSBean object is based on, the "x" and "y" position of the JSBean object in pixels, as well as the width and height of the JSBean object in pixels.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[Creates a new JSBean object on the form - including the name of the JSBean object; the classname the JSBean object is based on, the "x" and "y" position of the JSBean object in pixels, as well as the width and height of the JSBean object in pixels.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var form = solutionModel.newForm('newForm1', 'db:/server1/table1', null, true, 800, 600);
+            <sample clientSupport="wc,sc"><![CDATA[var form = solutionModel.newForm('newForm1', 'db:/server1/table1', null, true, 800, 600);
 var bean = form.newBean('bean','com.servoy.extensions.beans.dbtreeview.DBTreeView',200,200,300,300);
 forms['newForm1'].controller.show();]]></sample>
           </samples>

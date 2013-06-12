@@ -56,7 +56,7 @@ public class ClientSupportViewerFilter extends ViewerFilter
 			ClientSupport csp = node.getClientSupport();
 			while (csp == null)
 			{
-				if (node.parent == null || node.parent.getRealType() == UserNodeType.ARRAY && "root".equals(node.parent.getName()))
+				if (node.parent == null || (node.parent.getRealType() == UserNodeType.ARRAY && "root".equals(node.parent.getName())))
 				{
 					// at the root, show by default if we have no ClientSupport
 					return true;
