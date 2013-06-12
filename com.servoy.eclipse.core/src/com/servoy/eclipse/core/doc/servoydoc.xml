@@ -22296,7 +22296,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc,wc,sc" name="newButton">
+        <function clientSupport="wc,sc" name="newButton">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="int"/>
@@ -22307,13 +22307,13 @@ forms['newForm1'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSButton" typecode="com.servoy.j2db.scripting.solutionmodel.JSButton"><![CDATA[a new JSButton object]]></return>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[Creates a new button on the form with the given text, place, size and JSMethod as the onAction event triggered action.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Creates a new button on the form with the given text, place, size and JSMethod as the onAction event triggered action.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[Creates a new button on the form with the given text, place, size and JSMethod as the onAction event triggered action.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[Creates a new button on the form with the given text, place, size and JSMethod as the onAction event triggered action.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var form = solutionModel.newForm('newForm1', myDatasource, null, true, 800, 600);
+            <sample clientSupport="wc,sc"><![CDATA[var form = solutionModel.newForm('newForm1', myDatasource, null, true, 800, 600);
 var method = form.newMethod('function onAction(event) { application.output("onAction intercepted on " + event.getFormName()); }');
 var button = form.newButton('myButton', 10, 10, 100, 30, method);
 application.output("The new button: " + button.name + " has the following onAction event handling method assigned " + button.onAction.getName());]]></sample>
@@ -22413,7 +22413,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc,wc,sc" name="newCheck">
+        <function clientSupport="wc,sc" name="newCheck">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="int"/>
@@ -22423,13 +22423,13 @@ forms['newForm1'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSCalendar" typecode="com.servoy.j2db.scripting.solutionmodel.JSField"><![CDATA[a new JSField object on the form with the displayType of CHECK (checkbox)]]></return>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[Creates a new JSField object on the form with the displayType of CHECK (checkbox) - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Creates a new JSField object on the form with the displayType of CHECK (checkbox) - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[Creates a new JSField object on the form with the displayType of CHECK (checkbox) - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[Creates a new JSField object on the form with the displayType of CHECK (checkbox) - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var form = solutionModel.newForm('newForm1', myDatasource, null, true, 800, 600);
+            <sample clientSupport="wc,sc"><![CDATA[var form = solutionModel.newForm('newForm1', myDatasource, null, true, 800, 600);
 var calendar = form.newCheck(myDataProvider, 100, 100, 200, 200);
 forms['newForm1'].controller.show();]]></sample>
           </samples>
@@ -22487,7 +22487,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc,wc,sc" name="newComboBox">
+        <function clientSupport="wc,sc" name="newComboBox">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="int"/>
@@ -22497,13 +22497,13 @@ forms['newForm1'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSCalendar" typecode="com.servoy.j2db.scripting.solutionmodel.JSField"><![CDATA[a new JSField object on the form with the displayType of COMBOBOX]]></return>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[Creates a new JSField object on the form with the displayType of COMBOBOX - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Creates a new JSField object on the form with the displayType of COMBOBOX - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[Creates a new JSField object on the form with the displayType of COMBOBOX - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[Creates a new JSField object on the form with the displayType of COMBOBOX - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var form = solutionModel.newForm('newForm1', myDatasource, null, true, 800, 600);
+            <sample clientSupport="wc,sc"><![CDATA[var form = solutionModel.newForm('newForm1', myDatasource, null, true, 800, 600);
 var calendar = form.newComboBox(myDataProvider, 100, 100, 200, 200);
 forms['newForm1'].controller.show();]]></sample>
           </samples>
@@ -22654,19 +22654,19 @@ forms['newForm1'].controller.show();]]></sample>
             <sample clientSupport="mc"><![CDATA[var footer = form.newFooter();]]></sample>
           </samples>
         </function>
-        <function clientSupport="mc,wc,sc" name="newFooterPart">
+        <function clientSupport="wc,sc" name="newFooterPart">
           <argumentsTypes>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSFooter" typecode="com.servoy.j2db.scripting.solutionmodel.JSPart"><![CDATA[A JSFooter instance corresponding to the newly created Footer form part.]]></return>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[Creates a new Footer part on the form.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Creates a new Footer part on the form.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[Creates a new Footer part on the form.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[Creates a new Footer part on the form.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var footer = form.newFooterPart(440);]]></sample>
+            <sample clientSupport="wc,sc"><![CDATA[var footer = form.newFooterPart(440);]]></sample>
           </samples>
           <parameters>
             <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -22702,19 +22702,19 @@ forms['newForm1'].controller.show();]]></sample>
             <sample clientSupport="mc"><![CDATA[var header = form.newHeader();]]></sample>
           </samples>
         </function>
-        <function clientSupport="mc,wc,sc" name="newHeaderPart">
+        <function clientSupport="wc,sc" name="newHeaderPart">
           <argumentsTypes>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSFooter" typecode="com.servoy.j2db.scripting.solutionmodel.JSPart"><![CDATA[A JSPart instance corresponding to the newly created Header form part.]]></return>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[Creates a new Header part on the form.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Creates a new Header part on the form.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[Creates a new Header part on the form.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[Creates a new Header part on the form.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var header = form.newHeaderPart(80);]]></sample>
+            <sample clientSupport="wc,sc"><![CDATA[var header = form.newHeaderPart(80);]]></sample>
           </samples>
           <parameters>
             <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -22837,7 +22837,7 @@ insetList.onAction = f.newMethod("function buttonPressed() { plugins.dialogs.sho
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc,wc,sc" name="newLabel">
+        <function clientSupport="wc,sc" name="newLabel">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="int"/>
@@ -22847,13 +22847,13 @@ insetList.onAction = f.newMethod("function buttonPressed() { plugins.dialogs.sho
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSLabel" typecode="com.servoy.j2db.scripting.solutionmodel.JSLabel"><![CDATA[a JSLabel object]]></return>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[Creates a new JSLabel object on the form - including the text of the label, the "x" and "y" position of the label object in pixels, the width and height of the label object in pixels.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Creates a new JSLabel object on the form - including the text of the label, the "x" and "y" position of the label object in pixels, the width and height of the label object in pixels.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[Creates a new JSLabel object on the form - including the text of the label, the "x" and "y" position of the label object in pixels, the width and height of the label object in pixels.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[Creates a new JSLabel object on the form - including the text of the label, the "x" and "y" position of the label object in pixels, the width and height of the label object in pixels.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var form = solutionModel.newForm('newForm1', myDatasource, null, true, 800, 600);
+            <sample clientSupport="wc,sc"><![CDATA[var form = solutionModel.newForm('newForm1', myDatasource, null, true, 800, 600);
 var label = form.newLabel('The text on the label', 140, 140, 50, 20);
 forms['newForm1'].controller.show();]]></sample>
           </samples>
@@ -23121,7 +23121,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc,wc,sc" name="newPassword">
+        <function clientSupport="wc,sc" name="newPassword">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="int"/>
@@ -23131,13 +23131,13 @@ forms['newForm1'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSCalendar" typecode="com.servoy.j2db.scripting.solutionmodel.JSField"><![CDATA[a new JSField object on the form with the displayType of PASSWORD]]></return>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[Creates a new JSField object on the form with the displayType of PASSWORD - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Creates a new JSField object on the form with the displayType of PASSWORD - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[Creates a new JSField object on the form with the displayType of PASSWORD - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[Creates a new JSField object on the form with the displayType of PASSWORD - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var form = solutionModel.newForm('newForm1', myDatasource, null, true, 800, 600);
+            <sample clientSupport="wc,sc"><![CDATA[var form = solutionModel.newForm('newForm1', myDatasource, null, true, 800, 600);
 var pass = form.newPassword(scopes.globals.aVariable, 100, 100, 70, 30);
 forms['newForm1'].controller.show();]]></sample>
           </samples>
@@ -23274,7 +23274,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc,wc,sc" name="newRadios">
+        <function clientSupport="wc,sc" name="newRadios">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="int"/>
@@ -23284,13 +23284,13 @@ forms['newForm1'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSCalendar" typecode="com.servoy.j2db.scripting.solutionmodel.JSField"><![CDATA[a JSField object with the displayType of RADIOS (radio buttons)]]></return>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[Creates a new JSField object on the form with the displayType of RADIOS (radio buttons) - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Creates a new JSField object on the form with the displayType of RADIOS (radio buttons) - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[Creates a new JSField object on the form with the displayType of RADIOS (radio buttons) - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[Creates a new JSField object on the form with the displayType of RADIOS (radio buttons) - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var form = solutionModel.newForm('newForm1', myDatasource, null, true, 800, 600);
+            <sample clientSupport="wc,sc"><![CDATA[var form = solutionModel.newForm('newForm1', myDatasource, null, true, 800, 600);
 var vlist = solutionModel.newValueList('options',JSValueList.CUSTOM_VALUES); 
 vlist.customValues = "value1\nvalue2\nvalue3"; 
 var radios = form.newRadios('columnDataProvider',100,100,200,200);
@@ -23508,7 +23508,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc,wc,sc" name="newTextArea">
+        <function clientSupport="wc,sc" name="newTextArea">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="int"/>
@@ -23518,13 +23518,13 @@ forms['newForm1'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSCalendar" typecode="com.servoy.j2db.scripting.solutionmodel.JSField"><![CDATA[a JSField object with the displayType of TEXT_AREA]]></return>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[Creates a new JSField object on the form with the displayType of TEXT_AREA - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Creates a new JSField object on the form with the displayType of TEXT_AREA - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[Creates a new JSField object on the form with the displayType of TEXT_AREA - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[Creates a new JSField object on the form with the displayType of TEXT_AREA - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var form = solutionModel.newForm('newForm1',myDatasource,null,true,800,600);
+            <sample clientSupport="wc,sc"><![CDATA[var form = solutionModel.newForm('newForm1',myDatasource,null,true,800,600);
 var globalVar = solutionModel.newGlobalVariable('globals', 'myGlobal',JSVariable.TEXT);
 globalVar.defaultValue = "'Type your text in here'";
 var textArea = form.newTextArea(globalVar,100,100,300,150);
@@ -23620,7 +23620,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc,wc,sc" name="newTextField">
+        <function clientSupport="wc,sc" name="newTextField">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="int"/>
@@ -23630,13 +23630,13 @@ forms['newForm1'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSCalendar" typecode="com.servoy.j2db.scripting.solutionmodel.JSField"><![CDATA[a JSField object with the displayType of TEXT_FIELD]]></return>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[Creates a new JSField object on the form with the displayType of TEXT_FIELD - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Creates a new JSField object on the form with the displayType of TEXT_FIELD - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[Creates a new JSField object on the form with the displayType of TEXT_FIELD - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[Creates a new JSField object on the form with the displayType of TEXT_FIELD - including the dataprovider/JSVariable of the JSField object, the "x" and "y" position of the JSField object in pixels, as well as the width and height of the JSField object in pixels.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var form = solutionModel.newForm('newForm1',myDatasource,null,true,800,600); 
+            <sample clientSupport="wc,sc"><![CDATA[var form = solutionModel.newForm('newForm1',myDatasource,null,true,800,600); 
 //choose the dataprovider or jsvariable you want for the Text Field
 var x = null;
 //global jsvariable as the dataprovider 
