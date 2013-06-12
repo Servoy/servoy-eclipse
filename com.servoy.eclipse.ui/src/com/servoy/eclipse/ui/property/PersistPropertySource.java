@@ -3043,7 +3043,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 					return new ListSelectCellEditor(parent, "Select navigator form", new FormContentProvider(flattenedEditingSolution, f), formLabelProvider,
 						new FormValueEditor(flattenedEditingSolution), readOnly, new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS,
-							Boolean.valueOf(isMobile), true, !isMobile, !isMobile), SWT.NONE, null, "navigatorFormDialog");
+							Boolean.valueOf(isMobile), true, !isMobile, true), SWT.NONE, null, "navigatorFormDialog");
 				}
 			};
 			pd.setLabelProvider(formLabelProvider);
