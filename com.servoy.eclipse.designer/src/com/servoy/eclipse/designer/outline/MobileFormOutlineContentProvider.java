@@ -18,17 +18,15 @@ package com.servoy.eclipse.designer.outline;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import org.eclipse.swt.graphics.Image;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.property.PersistContext;
-import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -37,9 +35,8 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
+import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.util.Pair;
-import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -58,20 +55,29 @@ public class MobileFormOutlineContentProvider extends FormOutlineContentProvider
 	@Override
 	public Object[] getChildrenNonGrouped(Object parentElement)
 	{
-		if (parentElement == ELEMENTS || parentElement == PARTS)
+		if (parentElement instanceof FormElementGroup)
+		{
+			return null;
+		}
+		if (parentElement == ELEMENTS || parentElement instanceof PersistContext && ((PersistContext)parentElement).getPersist() instanceof Part)
 		{
 			try
 			{
 				Form flattenedForm = (Form)getFlattenedWhenForm(form);
 				List<Object> nodes = new ArrayList<Object>();
 				Set<FormElementGroup> groups = new HashSet<FormElementGroup>();
+				Part parentPart = null;
+				if (parentElement instanceof PersistContext && ((PersistContext)parentElement).getPersist() instanceof Part)
+				{
+					parentPart = (Part)((PersistContext)parentElement).getPersist();
+				}
 				if (flattenedForm != null)
 				{
-					for (IPersist persist : flattenedForm.getAllObjectsAsList())
+					Iterator<IPersist> it = flattenedForm.getAllObjects(PositionComparator.XY_PERSIST_COMPARATOR);
+					while (it.hasNext())
 					{
-						if (persist instanceof IScriptElement ||
-							(persist instanceof Part && ((Part)persist).getPartType() != Part.HEADER && ((Part)persist).getPartType() != Part.TITLE_HEADER &&
-								((Part)persist).getPartType() != Part.FOOTER && ((Part)persist).getPartType() != Part.TITLE_FOOTER) || isMobilePersist(persist))
+						IPersist persist = it.next();
+						if (persist instanceof IScriptElement || isMobilePersist(persist) || persist instanceof Part)
 						{
 							continue;
 						}
@@ -90,15 +96,26 @@ public class MobileFormOutlineContentProvider extends FormOutlineContentProvider
 							}
 							continue;
 						}
-						if ((parentElement == PARTS) != (persist instanceof Part))
+						if (parentPart != null)
 						{
-							continue;
+							if ((parentPart.getPartType() == Part.HEADER || parentPart.getPartType() == Part.TITLE_HEADER) && !isHeaderMobilePersist(persist))
+							{
+								continue;
+							}
+							if ((parentPart.getPartType() == Part.FOOTER || parentPart.getPartType() == Part.TITLE_FOOTER) && !isFooterMobilePersist(persist))
+							{
+								continue;
+							}
+						}
+						else
+						{
+							if (isHeaderMobilePersist(persist) || isFooterMobilePersist(persist)) continue;
 						}
 
 						nodes.add(PersistContext.create(persist, form));
 					}
 				}
-				return (parentElement == ELEMENTS) ? new SortedList(PersistContextNameComparator.INSTANCE, nodes).toArray() : nodes.toArray();
+				return nodes.toArray();
 			}
 			catch (RepositoryException e)
 			{
@@ -111,101 +128,39 @@ public class MobileFormOutlineContentProvider extends FormOutlineContentProvider
 	}
 
 	@Override
-	public Object[] getChildrenGrouped(Object parentElement)
+	public Object[] getChildren(Object parentElement)
 	{
-		if (parentElement == ELEMENTS || parentElement == PARTS)
-		{
-			HashSet<Object> availableCategories = null;
-			try
-			{
-				Form flattenedForm = (Form)getFlattenedWhenForm(form);
-				if (flattenedForm != null)
-				{
-					availableCategories = new HashSet<Object>();
-					for (IPersist persist : flattenedForm.getAllObjectsAsList())
-					{
-						if (persist instanceof IScriptElement || isMobilePersist(persist))
-						{
-							continue;
-						}
-						if (parentElement == ELEMENTS && persist instanceof IFormElement)
-						{
-							availableCategories.add(ElementUtil.getPersistNameAndImage(persist));
-							continue;
-						}
-						if ((parentElement == PARTS) &&
-							(persist instanceof Part) &&
-							(((Part)persist).getPartType() == Part.HEADER || ((Part)persist).getPartType() == Part.TITLE_HEADER ||
-								((Part)persist).getPartType() == Part.FOOTER || ((Part)persist).getPartType() == Part.TITLE_FOOTER))
-						{
-							availableCategories.add(PersistContext.create(persist, form));
-							continue;
-						}
-					}
-				}
-				return availableCategories.toArray();
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError("Could not create flattened form for form " + form, e); //$NON-NLS-1$
-			}
-			return null;
-		}
-		else if (parentElement instanceof Pair)
-		{
-			try
-			{
-				Form flattenedForm = (Form)getFlattenedWhenForm(form);
-				List<Object> nodes = new ArrayList<Object>();
-				if (flattenedForm != null)
-				{
-					for (IPersist persist : flattenedForm.getAllObjectsAsList())
-					{
-						if (persist instanceof IScriptElement || persist instanceof Part || isMobilePersist(persist))
-						{
-							continue;
-						}
-						if (persist instanceof IFormElement)
-						{
-							Pair<String, Image> nameAndImage = ElementUtil.getPersistNameAndImage(persist);
-							if (nameAndImage.equals(parentElement))
-							{
-								if (((IFormElement)persist).getGroupID() != null) nodes.add(new FormElementGroup(((IFormElement)persist).getGroupID(),
-									ModelUtils.getEditingFlattenedSolution(form), form));
-								else if (persist instanceof Portal && ((Portal)persist).isMobileInsetList()) nodes.add(MobileListModel.create(form,
-									(Portal)persist));
-								else nodes.add(PersistContext.create(persist, form));
-							}
-						}
-					}
-				}
-				return new SortedList(PersistContextNameComparator.INSTANCE, nodes).toArray();
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError("Could not create flattened form for form " + form, e); //$NON-NLS-1$
-			}
-		}
+		return getChildrenNonGrouped(parentElement);
+	}
 
-		return super.getChildrenGrouped(parentElement);
+	@Override
+	public Object getParent(Object element)
+	{
+		return getParentNonGrouped(element);
 	}
 
 	@Override
 	public Object getParentNonGrouped(Object element)
 	{
 		if (element instanceof MobileListModel || element instanceof FormElementGroup) return ELEMENTS;
-		else return super.getParentNonGrouped(element);
-	}
 
-	@Override
-	public Object getGroupedParent(Object element)
-	{
-		if (element instanceof MobileListModel) return ElementUtil.getPersistNameAndImage(((MobileListModel)element).component);
-		else if (element instanceof FormElementGroup)
+		if (element instanceof PersistContext)
 		{
-			return ElementUtil.getPersistNameAndImage(getGroupMainComponent((FormElementGroup)element));
+			IPersist persist = ((PersistContext)element).getPersist();
+			if (persist != null)
+			{
+				if (persist instanceof Part)
+				{
+					return null;
+				}
+				if (isHeaderMobilePersist(persist) || isFooterMobilePersist(persist))
+				{
+					return PersistContext.create(persist.getParent(), ((PersistContext)element).getContext());
+				}
+			}
+			return ELEMENTS;
 		}
-		else return super.getGroupedParent(element);
+		return null;
 	}
 
 	static IFormElement getGroupMainComponent(FormElementGroup formElementGroup)
@@ -234,9 +189,75 @@ public class MobileFormOutlineContentProvider extends FormOutlineContentProvider
 		return false;
 	}
 
+	static boolean isHeaderMobilePersist(IPersist persist)
+	{
+		if (persist instanceof AbstractBase)
+		{
+			return ((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.HEADER_ITEM.propertyName) != null;
+		}
+		return false;
+	}
+
+	static boolean isFooterMobilePersist(IPersist persist)
+	{
+		if (persist instanceof AbstractBase)
+		{
+			return ((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.FOOTER_ITEM.propertyName) != null;
+		}
+		return false;
+	}
+
 	@Override
 	public boolean hasChildren(Object element)
 	{
+		if (element instanceof PersistContext && ((PersistContext)element).getPersist() instanceof Part)
+		{
+			Part parentPart = (Part)((PersistContext)element).getPersist();
+			try
+			{
+				Form flattenedForm = (Form)getFlattenedWhenForm(form);
+				if (flattenedForm != null)
+				{
+					for (IPersist persist : flattenedForm.getAllObjectsAsList())
+					{
+						if ((parentPart.getPartType() == Part.HEADER || parentPart.getPartType() == Part.TITLE_HEADER) && isHeaderMobilePersist(persist))
+						{
+							return true;
+						}
+						if ((parentPart.getPartType() == Part.FOOTER || parentPart.getPartType() == Part.TITLE_FOOTER) && isFooterMobilePersist(persist))
+						{
+							return true;
+						}
+					}
+				}
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError("Could not create flattened form for form " + form, e);
+				return false;
+			}
+		}
 		return !(element instanceof FormElementGroup) && super.hasChildren(element);
+	}
+
+	@Override
+	public Object[] getElements(Object inputElement)
+	{
+		List<Object> elements = new ArrayList<Object>();
+		elements.add(ELEMENTS);
+		Iterator<Part> it = form.getParts();
+		while (it.hasNext())
+		{
+			Part part = it.next();
+			if (part.getPartType() == Part.HEADER || part.getPartType() == Part.TITLE_HEADER)
+			{
+				elements.add(elements.indexOf(ELEMENTS), PersistContext.create(part, form));
+			}
+			if (part.getPartType() == Part.FOOTER || part.getPartType() == Part.TITLE_FOOTER)
+			{
+				elements.add(PersistContext.create(part, form));
+			}
+		}
+		return elements.toArray();
 	}
 }
