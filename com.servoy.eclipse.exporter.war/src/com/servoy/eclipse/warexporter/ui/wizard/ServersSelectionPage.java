@@ -35,6 +35,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
@@ -90,38 +91,38 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 
 	}
 
-	private String[] appendRequiredLabel(Object[] fileNames)
+	private String[] appendRequiredLabel(Object[] serverNames)
 	{
-		ArrayList<String> appendRequiredFileNames = new ArrayList<String>();
-		List<String> requiredFilesAsList = requiredServers != null && requiredServers.length > 0 ? Arrays.asList(requiredServers) : null;
-		String sFileName;
-		for (Object fileName : fileNames)
+		ArrayList<String> appendRequiredServerNames = new ArrayList<String>();
+		List<String> requiredServersAsList = requiredServers != null && requiredServers.length > 0 ? Arrays.asList(requiredServers) : null;
+		String sServerName;
+		for (Object serverName : serverNames)
 		{
-			sFileName = fileName.toString();
-			if (requiredFilesAsList != null && requiredFilesAsList.indexOf(sFileName) != -1) appendRequiredFileNames.add(0, sFileName +
+			sServerName = serverName.toString();
+			if (requiredServersAsList != null && requiredServersAsList.indexOf(sServerName) != -1) appendRequiredServerNames.add(0, sServerName +
 				DirectorySelectionPage.REQUIRED_LABEL);
-			else appendRequiredFileNames.add(sFileName);
+			else appendRequiredServerNames.add(sServerName);
 		}
-		return appendRequiredFileNames.toArray(new String[appendRequiredFileNames.size()]);
+		return appendRequiredServerNames.toArray(new String[appendRequiredServerNames.size()]);
 
 	}
 
-	private String[] removeRequiredLabel(Object[] fileNames)
+	private String[] removeRequiredLabel(Object[] serverNames)
 	{
-		ArrayList<String> removeRequiedFileNames = new ArrayList<String>();
-		List<String> requiredFilesAsList = requiredServers != null && requiredServers.length > 0 ? Arrays.asList(requiredServers) : null;
-		String sFileName, requiredFileName;
-		for (Object fileName : fileNames)
+		ArrayList<String> removeRequiedServerNames = new ArrayList<String>();
+		List<String> requiredServersAsList = requiredServers != null && requiredServers.length > 0 ? Arrays.asList(requiredServers) : null;
+		String sServerName, requiredServerName;
+		for (Object serverName : serverNames)
 		{
-			sFileName = fileName.toString();
-			if (requiredFilesAsList != null && sFileName.endsWith(DirectorySelectionPage.REQUIRED_LABEL))
+			sServerName = serverName.toString();
+			if (requiredServersAsList != null && sServerName.endsWith(DirectorySelectionPage.REQUIRED_LABEL))
 			{
-				requiredFileName = sFileName.substring(0, sFileName.length() - DirectorySelectionPage.REQUIRED_LABEL.length());
-				if (requiredFilesAsList.indexOf(requiredFileName) != -1) sFileName = requiredFileName;
+				requiredServerName = sServerName.substring(0, sServerName.length() - DirectorySelectionPage.REQUIRED_LABEL.length());
+				if (requiredServersAsList.indexOf(requiredServerName) != -1) sServerName = requiredServerName;
 			}
-			removeRequiedFileNames.add(sFileName);
+			removeRequiedServerNames.add(sServerName);
 		}
-		return removeRequiedFileNames.toArray(new String[removeRequiedFileNames.size()]);
+		return removeRequiedServerNames.toArray(new String[removeRequiedServerNames.size()]);
 	}
 
 	public void storeInput()
@@ -132,6 +133,7 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 		{
 			selectedServers.add(object.toString());
 		}
+		if (!selectedServers.contains(IServer.REPOSITORY_SERVER)) selectedServers.add(IServer.REPOSITORY_SERVER);
 	}
 
 	/*

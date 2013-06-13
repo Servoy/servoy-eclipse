@@ -179,7 +179,6 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 			//handle required repository_server if not present in the servers list
 			if (serverName.equals(IServer.REPOSITORY_SERVER) && !repositoryServerPresent)
 			{
-				serverConfiguration = new ServerConfiguration(serverName);
 				//set some default configuration
 				serverConfiguration.setDriver((exportModel.getServerConfiguration(srvNames.get(0))).getDriver());
 				serverConfiguration.setUserName((exportModel.getServerConfiguration(srvNames.get(0))).getUserName());

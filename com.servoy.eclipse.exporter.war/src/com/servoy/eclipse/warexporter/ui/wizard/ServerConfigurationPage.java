@@ -240,12 +240,7 @@ public class ServerConfigurationPage extends WizardPage
 	{
 		boolean next = false;
 		//check for the required repository_server and add it if not present in the selected servers list
-		SortedSet<String> serverNames = selectedServerNames;
-		if (!serverNames.contains(IServer.REPOSITORY_SERVER))
-		{
-			serverNames.add(IServer.REPOSITORY_SERVER);
-		}
-		for (String serverName : serverNames)
+		for (String serverName : selectedServerNames)
 		{
 			if (next)
 			{

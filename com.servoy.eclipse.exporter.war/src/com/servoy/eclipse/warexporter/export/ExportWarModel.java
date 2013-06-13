@@ -26,6 +26,7 @@ import java.util.TreeSet;
 import org.eclipse.jface.dialogs.IDialogSettings;
 
 import com.servoy.eclipse.warexporter.ui.wizard.ServerConfiguration;
+import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.Utils;
@@ -281,6 +282,11 @@ public class ExportWarModel
 			if (server != null)
 			{
 				serverConfiguration = new ServerConfiguration(serverName, server.getConfig());
+				servers.put(serverName, serverConfiguration);
+			}
+			else if (serverName.equals(IServer.REPOSITORY_SERVER))
+			{
+				serverConfiguration = new ServerConfiguration(serverName);
 				servers.put(serverName, serverConfiguration);
 			}
 		}
