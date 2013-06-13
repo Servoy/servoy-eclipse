@@ -141,8 +141,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		HashMap<String, IWizardPage> serverConfigurationPages = new HashMap<String, IWizardPage>();
 
 		serversSelectionPage = new ServersSelectionPage("serverspage", "Choose the database servernames to export",
-			"Select the database server names that will be used on the application server. At least one database server name needs to be selected",
-			exportModel.getSelectedServerNames(), new String[] { IServer.REPOSITORY_SERVER }, serverConfigurationPages);
+			"Select the database server names that will be used on the application server", exportModel.getSelectedServerNames(),
+			new String[] { IServer.REPOSITORY_SERVER }, serverConfigurationPages);
 		servoyPropertiesConfigurationPage = new ServoyPropertiesConfigurationPage("propertiespage", exportModel, serversSelectionPage);
 		servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel, servoyPropertiesConfigurationPage);
 		driverSelectionPage = new DirectorySelectionPage("driverpage", "Choose the jdbc drivers to export",
