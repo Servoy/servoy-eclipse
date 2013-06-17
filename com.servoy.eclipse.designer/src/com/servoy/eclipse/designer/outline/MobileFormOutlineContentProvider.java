@@ -18,11 +18,11 @@ package com.servoy.eclipse.designer.outline;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import com.servoy.base.persistence.IMobileProperties;
+import com.servoy.base.persistence.PersistUtils;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.MobileListModel;
@@ -73,10 +73,8 @@ public class MobileFormOutlineContentProvider extends FormOutlineContentProvider
 				}
 				if (flattenedForm != null)
 				{
-					Iterator<IPersist> it = flattenedForm.getAllObjects(PositionComparator.XY_PERSIST_COMPARATOR);
-					while (it.hasNext())
+					for (IPersist persist : Utils.iterate(flattenedForm.getAllObjects(PositionComparator.XY_PERSIST_COMPARATOR)))
 					{
-						IPersist persist = it.next();
 						if (persist instanceof IScriptElement || isMobilePersist(persist) || persist instanceof Part)
 						{
 							continue;
@@ -98,11 +96,11 @@ public class MobileFormOutlineContentProvider extends FormOutlineContentProvider
 						}
 						if (parentPart != null)
 						{
-							if ((parentPart.getPartType() == Part.HEADER || parentPart.getPartType() == Part.TITLE_HEADER) && !isHeaderMobilePersist(persist))
+							if (PersistUtils.isHeaderPart(parentPart.getPartType()) && !isHeaderMobilePersist(persist))
 							{
 								continue;
 							}
-							if ((parentPart.getPartType() == Part.FOOTER || parentPart.getPartType() == Part.TITLE_FOOTER) && !isFooterMobilePersist(persist))
+							if (PersistUtils.isFooterPart(parentPart.getPartType()) && !isFooterMobilePersist(persist))
 							{
 								continue;
 							}
@@ -220,11 +218,11 @@ public class MobileFormOutlineContentProvider extends FormOutlineContentProvider
 				{
 					for (IPersist persist : flattenedForm.getAllObjectsAsList())
 					{
-						if ((parentPart.getPartType() == Part.HEADER || parentPart.getPartType() == Part.TITLE_HEADER) && isHeaderMobilePersist(persist))
+						if (PersistUtils.isHeaderPart(parentPart.getPartType()) && isHeaderMobilePersist(persist))
 						{
 							return true;
 						}
-						if ((parentPart.getPartType() == Part.FOOTER || parentPart.getPartType() == Part.TITLE_FOOTER) && isFooterMobilePersist(persist))
+						if (PersistUtils.isFooterPart(parentPart.getPartType()) && isFooterMobilePersist(persist))
 						{
 							return true;
 						}
@@ -245,15 +243,13 @@ public class MobileFormOutlineContentProvider extends FormOutlineContentProvider
 	{
 		List<Object> elements = new ArrayList<Object>();
 		elements.add(ELEMENTS);
-		Iterator<Part> it = form.getParts();
-		while (it.hasNext())
+		for (Part part : Utils.iterate(form.getParts()))
 		{
-			Part part = it.next();
-			if (part.getPartType() == Part.HEADER || part.getPartType() == Part.TITLE_HEADER)
+			if (PersistUtils.isHeaderPart(part.getPartType()))
 			{
 				elements.add(elements.indexOf(ELEMENTS), PersistContext.create(part, form));
 			}
-			if (part.getPartType() == Part.FOOTER || part.getPartType() == Part.TITLE_FOOTER)
+			else if (PersistUtils.isFooterPart(part.getPartType()))
 			{
 				elements.add(PersistContext.create(part, form));
 			}

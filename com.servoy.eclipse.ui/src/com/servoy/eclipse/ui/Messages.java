@@ -69,6 +69,8 @@ public class Messages extends NLS
 	public static String LabelMulipleSelections;
 	public static String LabelAnonymous;
 	public static String LabelNoTable;
+	public static String LabelHeader;
+	public static String LabelFooter;
 
 	public static String LabelSolution;
 	public static String LabelModule;

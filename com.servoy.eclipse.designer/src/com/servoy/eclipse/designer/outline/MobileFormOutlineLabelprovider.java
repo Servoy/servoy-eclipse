@@ -18,11 +18,24 @@ package com.servoy.eclipse.designer.outline;
 
 import org.eclipse.swt.graphics.Image;
 
+import com.servoy.base.persistence.IMobileProperties;
+import com.servoy.base.persistence.PersistUtils;
+import com.servoy.base.persistence.constants.IFieldConstants;
+import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.property.MobileListModel;
+import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.eclipse.ui.resource.ImageResource;
+import com.servoy.j2db.component.ComponentFactory;
+import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.Bean;
+import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IFormElement;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 
 /**
@@ -36,12 +49,96 @@ public class MobileFormOutlineLabelprovider extends FormOutlineLabelprovider
 	public static final MobileFormOutlineLabelprovider MOBILE_FORM_OUTLINE_LABEL_PROVIDER_INSTANCE = new MobileFormOutlineLabelprovider();
 
 	@Override
-	public Image getImage(Object element)
+	public Image getImage(Object object)
 	{
-		if (element instanceof FormElementGroup)
+		Object element;
+		if (object instanceof FormElementGroup)
 		{
-			return getImageForPersist(MobileFormOutlineContentProvider.getGroupMainComponent((FormElementGroup)element));
+			element = MobileFormOutlineContentProvider.getGroupMainComponent((FormElementGroup)object);
 		}
+		else if (object instanceof PersistContext)
+		{
+			element = ((PersistContext)object).getPersist();
+		}
+		else
+		{
+			element = object;
+		}
+
+		if (element instanceof MobileListModel)
+		{
+			return ImageResource.INSTANCE.getImage(Activator.loadImageDescriptorFromBundle("mobile/insetlist16.png"));
+		}
+
+		if (element instanceof IPersist)
+		{
+			String image;
+			if (element instanceof Field)
+			{
+				switch (((Field)element).getDisplayType())
+				{
+					case IFieldConstants.RADIOS :
+						image = "mobile/radios16.png";
+						break;
+					case IFieldConstants.CALENDAR :
+						image = "mobile/calendar16.png";
+						break;
+					case IFieldConstants.CHECKS :
+						image = "mobile/checks16.png";
+						break;
+					case IFieldConstants.TEXT_AREA :
+						image = "mobile/textarea16.png";
+						break;
+					case IFieldConstants.PASSWORD :
+						image = "mobile/password16.png";
+						break;
+					case IFieldConstants.COMBOBOX :
+						image = "mobile/combo16.png";
+						break;
+					default :
+						image = "mobile/text16.png";
+				}
+			}
+			else if (element instanceof GraphicalComponent)
+			{
+				if (ComponentFactory.isButton((GraphicalComponent)element))
+				{
+					image = "mobile/button16.png";
+				}
+				else
+				{
+					image = "mobile/label16.png";
+				}
+			}
+			else if (element instanceof Bean)
+			{
+				image = "mobile/bean16.png";
+			}
+			else if (element instanceof Part)
+			{
+				int partType = ((Part)element).getPartType();
+				if (PersistUtils.isHeaderPart(partType))
+				{
+					image = "mobile/header16.png";
+				}
+				else if (PersistUtils.isFooterPart(partType))
+				{
+					image = "mobile/footer16.png";
+				}
+				else return null;
+			}
+			else if (element instanceof AbstractBase && ((AbstractBase)element).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName) != null)
+			{
+				image = "mobile/headertitle16.png";
+			}
+			else
+			{
+				return getImageForPersist((IPersist)element);
+			}
+
+			return ImageResource.INSTANCE.getImage(Activator.loadImageDescriptorFromBundle(image));
+		}
+
 		return super.getImage(element);
 	}
 
@@ -58,6 +155,23 @@ public class MobileFormOutlineLabelprovider extends FormOutlineLabelprovider
 			IFormElement component = MobileFormOutlineContentProvider.getGroupMainComponent((FormElementGroup)element);
 			String name = component != null ? component.getName() : null;
 			return name == null ? Messages.LabelAnonymous : name;
+		}
+
+		if (element instanceof PersistContext)
+		{
+			IPersist persist = ((PersistContext)element).getPersist();
+			if (persist instanceof Part)
+			{
+				int partType = ((Part)persist).getPartType();
+				if (PersistUtils.isHeaderPart(partType))
+				{
+					return Messages.LabelHeader;
+				}
+				if (PersistUtils.isFooterPart(partType))
+				{
+					return Messages.LabelFooter;
+				}
+			}
 		}
 
 		return super.getText(element);

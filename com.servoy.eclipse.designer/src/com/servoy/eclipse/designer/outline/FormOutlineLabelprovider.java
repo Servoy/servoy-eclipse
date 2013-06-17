@@ -28,7 +28,6 @@ import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.labelproviders.IPersistLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SupportNameLabelProvider;
-import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -68,10 +67,6 @@ public class FormOutlineLabelprovider extends LabelProvider implements IPersistL
 		if (element instanceof FormElementGroup)
 		{
 			return Activator.getDefault().loadImageFromBundle("group.gif");
-		}
-		if (element instanceof MobileListModel)
-		{
-			return Activator.getDefault().loadImageFromBundle("insetlist.gif");
 		}
 		return super.getImage(element);
 	}
