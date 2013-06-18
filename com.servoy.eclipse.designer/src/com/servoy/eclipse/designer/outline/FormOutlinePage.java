@@ -127,7 +127,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 			}
 			List<Form> formHierarchy = editingFlattenedSolution.getFormHierarchy(form);
 			List<Object> selectionPath = new ArrayList<Object>();
-			Iterator iterator = ((IStructuredSelection)selection).iterator();
+			Iterator< ? > iterator = ((IStructuredSelection)selection).iterator();
 			Object selectionObject;
 			while (iterator.hasNext())
 			{
@@ -191,12 +191,18 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 				{
 					public void run()
 					{
-						Control control = getControl();
-						if (control != null && !control.isDisposed())
+						try
 						{
-							getTreeViewer().refresh();
+							Control control = getControl();
+							if (control != null && !control.isDisposed())
+							{
+								getTreeViewer().refresh();
+							}
 						}
-						refreshing = false;
+						finally
+						{
+							refreshing = false;
+						}
 					}
 				});
 				return;
