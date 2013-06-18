@@ -66,6 +66,7 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import com.servoy.base.persistence.IMobileProperties;
+import com.servoy.base.persistence.PersistUtils;
 import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.model.Activator;
@@ -2306,8 +2307,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												addMarker(project, mk.getType(), mk.getText(), -1, FORM_ELEMENT_OUTSIDE_BOUNDS, IMarker.PRIORITY_LOW, null, o);
 											}
 											int width = form.getWidth();
-											if (part.getPartType() == Part.TITLE_HEADER || part.getPartType() == Part.HEADER ||
-												part.getPartType() == Part.FOOTER || part.getPartType() == Part.TITLE_FOOTER)
+											if (PersistUtils.isHeaderPart(part.getPartType()) || PersistUtils.isFooterPart(part.getPartType()))
 											{
 												String defaultPageFormat = form.getDefaultPageFormat();
 												PageFormat currentPageFormat = null;
