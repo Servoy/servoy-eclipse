@@ -821,6 +821,21 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					}
 					else if (SolutionMetaData.isServoyMobileSolution(servoyProject.getSolution()) &&
 						!SolutionMetaData.isServoyMobileSolution(module.getSolution())) checkMobileModule(servoyProject, module);
+					if (SolutionMetaData.isServoyMobileSolution(servoyProject.getSolution()) &&
+						module != null &&
+						(module.getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE && module.getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE_MODULE))
+					{
+						String message = "Module " + module.getSolution().getName() + " is a mobile solution module, it should have solution type Mobile or Mobile shared module."; //$NON-NLS-1$//$NON-NLS-2$
+						IMarker marker = addMarker(project, MISPLACED_MODULES_MARKER_TYPE, message, -1, MODULE_MISPLACED, IMarker.PRIORITY_LOW, null, null);
+						try
+						{
+							marker.setAttribute("SolutionName", module.getSolution().getName());
+						}
+						catch (CoreException e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
 				}
 
 				// import hook modules should not contain other modules

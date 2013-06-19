@@ -50,7 +50,7 @@ public class NewModuleWizard extends NewSolutionWizard
 		super.createPageControls(pageContainer);
 		if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile())
 		{
-			page1.setSolutionTypes(new int[] { SolutionMetaData.MODULE, SolutionMetaData.MOBILE }, 0, false);
+			page1.setSolutionTypes(new int[] { SolutionMetaData.MOBILE_MODULE, SolutionMetaData.MOBILE }, 0, false);
 		}
 		else
 		{

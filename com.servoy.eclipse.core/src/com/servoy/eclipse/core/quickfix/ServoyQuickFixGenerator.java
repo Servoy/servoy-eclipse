@@ -69,6 +69,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -252,6 +253,16 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				String uuid = (String)marker.getAttribute("elementUuid"); //$NON-NLS-1$
 				String solName = (String)marker.getAttribute("SolutionName"); //$NON-NLS-1$
 				fixes = new IMarkerResolution[] { new ClearLabelForElementProperty(uuid, solName) };
+			}
+			else if (type.equals(ServoyBuilder.MISPLACED_MODULES_MARKER_TYPE))
+			{
+				String solName = (String)marker.getAttribute("SolutionName"); //$NON-NLS-1$
+				if (solName != null)
+				{
+					fixes = new IMarkerResolution[] { new ChangeSolutionTypeQuickFix(solName, SolutionMetaData.MOBILE), new ChangeSolutionTypeQuickFix(solName,
+						SolutionMetaData.MOBILE_MODULE) };
+				}
+
 			}
 		}
 		catch (CoreException e)
