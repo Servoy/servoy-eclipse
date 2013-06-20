@@ -1047,7 +1047,6 @@ public class TypeCreator extends TypeCache
 
 				if (object != null)
 				{
-					Class< ? > returnTypeClz = getReturnType(object);
 					if (type == INSTANCE_METHOD || type == STATIC_METHOD)
 					{
 						MemberBox[] memberbox = null;
@@ -1058,6 +1057,7 @@ public class TypeCreator extends TypeCache
 						int membersSize = memberbox == null ? 0 : memberbox.length;
 						for (int i = 0; i < membersSize; i++)
 						{
+							Class< ? > returnTypeClz = getReturnType(memberbox[i]);
 							Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
 							method.setName(name);
 							Class< ? >[] parameterTypes = memberbox[i].getParameterTypes();
@@ -1167,6 +1167,7 @@ public class TypeCreator extends TypeCache
 					}
 					else
 					{
+						Class< ? > returnTypeClz = getReturnType(object);
 						JSType returnType = null;
 						if (returnTypeClz != null)
 						{
@@ -1858,6 +1859,10 @@ public class TypeCreator extends TypeCache
 			{
 				returnType = methods[0].getReturnType();
 			}
+		}
+		else if (object instanceof MemberBox)
+		{
+			return ((MemberBox)object).getReturnType();
 		}
 		else if (object instanceof BeanProperty)
 		{

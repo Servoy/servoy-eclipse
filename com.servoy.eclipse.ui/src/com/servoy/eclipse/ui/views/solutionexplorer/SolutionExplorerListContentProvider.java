@@ -131,6 +131,7 @@ import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.Text;
 import com.servoy.j2db.util.UUID;
+import com.servoy.j2db.util.Utils;
 
 public class SolutionExplorerListContentProvider implements IStructuredContentProvider, IImageLookup, IPersistChangeListener, IColumnListener
 {
@@ -1859,6 +1860,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		public String getToolTipText()
 		{
 			String tooltip = null;
+			Class< ? > returnType = null;
 			String[] paramNames = null;
 			boolean namesOnly = false;
 			if (scriptObject != null)
@@ -1868,6 +1870,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				{
 					ClientSupport csp = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
 					description = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name, parameterTypes, csp);
+					returnType = ((XMLScriptObjectAdapter)scriptObject).getReturnedType(name, parameterTypes);
 					IParameter[] parameters = ((XMLScriptObjectAdapter)scriptObject).getParameters(name, parameterTypes);
 					if (parameters != null)
 					{
@@ -1884,12 +1887,21 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					namesOnly = true;
 					description = scriptObject.getToolTip(name);
 					paramNames = scriptObject.getParameterNames(name);
+					MemberBox method = njm.getMethods()[0];
+					for (MemberBox mthd : njm.getMethods())
+					{
+						if (Utils.equalObjects(mthd.getParameterTypes(), parameterTypes))
+						{
+							method = mthd;
+						}
+					}
+					returnType = method.getReturnType();
 					tooltip = Text.processTags(description, resolver);
 				}
 			}
 			if (tooltip == null) tooltip = ""; //$NON-NLS-1$
 
-			String tmp = "<html><body><b>" + getReturnTypeString(njm.getMethods()[0].getReturnType()) + " " + name + "(" + getPrettyParameterTypesString(paramNames, namesOnly) + ")</b>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			String tmp = "<html><body><b>" + getReturnTypeString(returnType) + " " + name + "(" + getPrettyParameterTypesString(paramNames, namesOnly) + ")</b>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			if ("".equals(tooltip)) //$NON-NLS-1$
 			{
 				tooltip = tmp + "</body></html>"; //$NON-NLS-1$
