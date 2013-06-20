@@ -201,6 +201,11 @@ public class NewFormWizard extends Wizard implements INewWizard
 			createErrorPage("No active Servoy solution project found", "No active Servoy solution project found",
 				"Please activate a Servoy solution project before trying to create a new form");
 		}
+		else if (servoyProject.getSolutionMetaData().getSolutionType() == SolutionMetaData.MOBILE_MODULE)
+		{
+			createErrorPage("Cannot create form in mobile shared module", "Cannot create form in mobile shared module",
+				"Mobile shared module should only contain relations and calculations.");
+		}
 		else if (SolutionMetaData.isServoyMobileSolution(activeProject.getSolution()) && !SolutionMetaData.isServoyMobileSolution(servoyProject.getSolution()))
 		{
 			createErrorPage("Selected module is not of type mobile", "Selected module is not of type mobile",

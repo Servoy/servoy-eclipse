@@ -209,15 +209,11 @@ public class StartSmartClientActionDelegate extends StartDebugAction implements 
 	{
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		final ServoyProject activeProject = servoyModel.getActiveProject();
-		boolean enabled = true;
+		boolean enabled = false;
 		if (activeProject != null && activeProject.getSolution() != null)
 		{
 			final Solution solution = activeProject.getSolution();
-			if (solution.getSolutionType() == SolutionMetaData.WEB_CLIENT_ONLY || solution.getSolutionType() == SolutionMetaData.MOBILE) enabled = false;
-		}
-		else
-		{
-			enabled = false;
+			if (solution.getSolutionType() == SolutionMetaData.SMART_CLIENT_ONLY || solution.getSolutionType() == SolutionMetaData.SOLUTION) enabled = true;
 		}
 		action.setEnabled(enabled);
 	}

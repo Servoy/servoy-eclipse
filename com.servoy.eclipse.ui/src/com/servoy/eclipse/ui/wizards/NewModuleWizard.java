@@ -54,7 +54,9 @@ public class NewModuleWizard extends NewSolutionWizard
 		}
 		else
 		{
-			page1.setSolutionTypes(new int[] { SolutionMetaData.MODULE, SolutionMetaData.PRE_IMPORT_HOOK, SolutionMetaData.POST_IMPORT_HOOK }, 0, false);
+			page1.setSolutionTypes(
+				new int[] { SolutionMetaData.MODULE, SolutionMetaData.MOBILE_MODULE, SolutionMetaData.PRE_IMPORT_HOOK, SolutionMetaData.POST_IMPORT_HOOK }, 0,
+				false);
 		}
 	}
 
