@@ -1862,7 +1862,7 @@ public class TypeCreator extends TypeCache
 		}
 		else if (object instanceof MemberBox)
 		{
-			return ((MemberBox)object).getReturnType();
+			returnType = ((MemberBox)object).getReturnType();
 		}
 		else if (object instanceof BeanProperty)
 		{
