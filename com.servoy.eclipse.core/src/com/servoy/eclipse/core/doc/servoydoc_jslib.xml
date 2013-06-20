@@ -5382,17 +5382,42 @@ application.output(s.localeCompare("Hello"));]]></sample>
         <function clientSupport="mc,wc,sc" name="replace">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.RegExp"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Function"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          <descriptions>
+            <description clientSupport="mc,wc,sc"><![CDATA[returns a new string where all matches of the regexp are replaced.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc,wc,sc"><![CDATA[returns a new string where all matches of the regexp are replaced.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc,wc,sc"><![CDATA[string.replace(regexp,callback);]]></sample>
+          </samples>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/String/replace</url>
+            </link>
+          </links>
+          <parameters>
+            <parameter name="regexp" type="com.servoy.j2db.documentation.scripting.docs.RegExp" typecode="com.servoy.j2db.documentation.scripting.docs.RegExp"/>
+            <parameter name="function" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="com.servoy.j2db.documentation.scripting.docs.Function"/>
+          </parameters>
+        </function>
+        <function clientSupport="mc,wc,sc" name="replace">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.RegExp"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[returns a strings where all matches of the regexp are replaced.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[returns a new string where all matches of the regexp are replaced.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[returns a strings where all matches of the regexp are replaced.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[returns a new string where all matches of the regexp are replaced.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[string.replace(regexpr,replacestring);]]></sample>
+            <sample clientSupport="mc,wc,sc"><![CDATA[string.replace(regexp,newSubStr);]]></sample>
           </samples>
           <links>
             <link>
@@ -5404,16 +5429,66 @@ application.output(s.localeCompare("Hello"));]]></sample>
             <parameter name="newSubStr" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           </parameters>
         </function>
+        <function clientSupport="mc,wc,sc" name="replace">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Function"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          <descriptions>
+            <description clientSupport="mc,wc,sc"><![CDATA[returns a new string where all matches of the string are replaced.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc,wc,sc"><![CDATA[returns a new string where all matches of the string are replaced.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc,wc,sc"><![CDATA[string.replace(substr,callback);]]></sample>
+          </samples>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/String/replace</url>
+            </link>
+          </links>
+          <parameters>
+            <parameter name="substr" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+            <parameter name="function" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="com.servoy.j2db.documentation.scripting.docs.Function"/>
+          </parameters>
+        </function>
+        <function clientSupport="mc,wc,sc" name="replace">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+            <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          <descriptions>
+            <description clientSupport="mc,wc,sc"><![CDATA[returns a new string where all matches of the string are replaced.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc,wc,sc"><![CDATA[returns a new string where all matches of the string are replaced.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc,wc,sc"><![CDATA[string.replace(substr,newSubStr);]]></sample>
+          </samples>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/String/replace</url>
+            </link>
+          </links>
+          <parameters>
+            <parameter name="substr" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+            <parameter name="newSubStr" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          </parameters>
+        </function>
         <function clientSupport="mc,wc,sc" name="search">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.RegExp"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[returns a index where the first match is found of the regexp]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[returns an index where the first match is found of the regexp]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[returns a index where the first match is found of the regexp]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[returns an index where the first match is found of the regexp]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="mc,wc,sc"><![CDATA[string.search(regexpr);]]></sample>
