@@ -78,7 +78,7 @@ public class JSUnitLaunchConfigurationDelegate extends LaunchConfigurationDelega
 	{
 		TestTarget testTarget = prepareForLaunch(configuration, launch);
 
-		new RunSmartClientTests(testTarget, launch).run();
+		new RunSmartClientTests(testTarget, launch, monitor).run();
 	}
 
 	public static void prepareLaunchConfigForTesting(ILaunchConfigurationWorkingCopy workingCopy)

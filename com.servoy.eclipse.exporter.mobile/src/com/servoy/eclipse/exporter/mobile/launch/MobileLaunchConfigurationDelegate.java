@@ -37,11 +37,13 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		boolean nodebug = Boolean.valueOf(configuration.getAttribute(IMobileLaunchConstants.NODEBUG, "true")).booleanValue();
 
 		MobileExporter exporter = new MobileExporter();
-		prepareExporter(exporter, configuration, launch);
+		prepareExporter(exporter, configuration, launch, monitor);
+		if (monitor != null && monitor.isCanceled()) return;
 
-		monitor.subTask("exporting mobile solution");
+		if (monitor != null) monitor.subTask("exporting mobile solution");
 		exporter.doExport(false);
-		monitor.subTask("deploying mobile solution");
+		if (monitor != null && monitor.isCanceled()) return;
+		if (monitor != null) monitor.subTask("deploying mobile solution");
 
 		int waitTime;
 		try
@@ -56,8 +58,12 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 
 		try
 		{
-			// wait for mobile war to be deployed , TODO listen for deployment event from tomcat if embedded Tomcat install is targeted
-			Thread.sleep(waitTime * 1000);
+			for (int i = 0; i < waitTime; i++)
+			{
+				// wait for mobile war to be deployed , TODO listen for deployment event from tomcat if embedded Tomcat install is targeted
+				Thread.sleep(1000);
+				if (monitor != null && monitor.isCanceled()) return;
+			}
 		}
 		catch (InterruptedException e)
 		{
@@ -66,6 +72,7 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 
 		if (!nodebug)
 		{
+			if (monitor != null) monitor.subTask("switching to service solution (so that it can be debugged)");
 			String solutionName = configuration.getAttribute(IMobileLaunchConstants.SOLUTION_NAME, "");
 			ServoyProject serviceProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName + "_service");
 			ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(serviceProject, true);
@@ -76,11 +83,12 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		{
 			webBrowser = PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser();
 		}
-		openBrowser(webBrowser, launch, configuration);
+		openBrowser(webBrowser, launch, configuration, monitor);
 	}
 
-	protected void openBrowser(IWebBrowser webBrowser, ILaunch launch, ILaunchConfiguration configuration) throws CoreException
+	protected void openBrowser(IWebBrowser webBrowser, ILaunch launch, ILaunchConfiguration configuration, IProgressMonitor monitor) throws CoreException
 	{
+		if (monitor != null) monitor.subTask("opening mobile client in browser");
 		URL appUrl = getApplicationURL(configuration);
 		if (appUrl != null) webBrowser.openURL(appUrl);
 	}
@@ -104,7 +112,7 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		}
 	}
 
-	protected void prepareExporter(MobileExporter exporter, ILaunchConfiguration configuration, ILaunch launch) throws CoreException
+	protected void prepareExporter(MobileExporter exporter, ILaunchConfiguration configuration, ILaunch launch, IProgressMonitor monitor) throws CoreException
 	{
 		String warLocation = configuration.getAttribute(IMobileLaunchConstants.WAR_LOCATION, "");
 		if (warLocation.length() == 0) throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Invalid war export path"));

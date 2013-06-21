@@ -314,8 +314,13 @@ public class TypeCreator extends TypeCache
 		BASE_TYPES.add("Math");
 	}
 
+	/*
+	 * JAVASCRIPT TYPE NAME (not java class name for those that have a different name in JS! See
+	 * DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(cls)) -> java class
+	 */
 	private final ConcurrentMap<String, Class< ? >> classTypes = new ConcurrentHashMap<String, Class< ? >>();
 	private final ConcurrentMap<String, Class< ? >> anonymousClassTypes = new ConcurrentHashMap<String, Class< ? >>();
+
 	private final ConcurrentMap<String, IScopeTypeCreator> scopeTypes = new ConcurrentHashMap<String, IScopeTypeCreator>();
 	protected final ConcurrentMap<Class< ? >, Class< ? >[]> linkedTypes = new ConcurrentHashMap<Class< ? >, Class< ? >[]>();
 	protected final ConcurrentMap<Class< ? >, String> prefixedTypes = new ConcurrentHashMap<Class< ? >, String>();
@@ -398,7 +403,6 @@ public class TypeCreator extends TypeCache
 		addScopeType(QBParameters.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBColumns.class.getSimpleName(), new QueryBuilderColumnsCreator());
 		addScopeType(QBFunctions.class.getSimpleName(), new QueryBuilderCreator());
-
 	}
 
 
@@ -913,20 +917,22 @@ public class TypeCreator extends TypeCache
 		{
 			makeDeprecated(type);
 		}
+
+		Type superT = null;
 		ServoyDocumented anno = cls.getAnnotation(ServoyDocumented.class);
 		if (anno != null && anno.extendsComponent() != null && !anno.extendsComponent().trim().equals(""))
 		{
-			Type superT = getType(context, anno.extendsComponent().trim());
-			if (superT != null) type.setSuperType(superT);
-			else ServoyLog.logWarning("@ServoyDocumented.extendsComponent for type '" + typeName + "' was not found. Value: " + anno.extendsComponent(), null);
+			superT = getType(context, anno.extendsComponent().trim());
+			if (superT == null) ServoyLog.logWarning(
+				"@ServoyDocumented.extendsComponent for type '" + typeName + "' was not found. Value: " + anno.extendsComponent(), null);
 		}
 		else if (cls != IRuntimeComponent.class && IRuntimeComponent.class.isAssignableFrom(cls))
 		{
-			type.setSuperType(getType(context, "RuntimeComponent"));
+			superT = getType(context, "RuntimeComponent");
 		}
 		else if (cls.getSuperclass() != null)
 		{
-			Class< ? > superCls = classTypes.get(cls.getSuperclass().getSimpleName());
+			Class< ? > superCls = classTypes.get(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(cls));
 			if (superCls != null)
 			{
 				JavaMembers superClassMembers = ScriptObjectRegistry.getJavaMembers(superCls, null);
@@ -934,10 +940,15 @@ public class TypeCreator extends TypeCache
 				// only add the super type if both are of the same javamembers class (instance or not) or the super class is a specific js class.
 				if (classMembers.getClass() == superClassMembers.getClass() || superClassMembers instanceof InstanceJavaMembers)
 				{
-					type.setSuperType(getType(context, cls.getSuperclass().getSimpleName()));
+					superT = getType(context, cls.getSuperclass().getSimpleName());
 				}
 			}
 		}
+		if (superT != null)
+		{
+			type.setSuperType(superT);
+		}
+
 		Class< ? >[] returnTypes = linkedTypes.get(cls);
 		if (returnTypes != null)
 		{
@@ -1316,19 +1327,13 @@ public class TypeCreator extends TypeCache
 		}
 		else
 		{
-			Class< ? > cls = classTypes.get(memberReturnType.getSimpleName());
-			if (cls == null)
-			{
-				// a type was not yet added under this name
-				cls = memberReturnType;
-			}
-			typeName = DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(cls);
+			typeName = DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(memberReturnType);
 			// always just convert plain Object to Any so that it will map on both js and java Object
 			if ("Object".equals(typeName))
 			{
 				return TypeInfoModelFactory.eINSTANCE.createAnyType();
 			}
-			addAnonymousClassType(typeName, cls);
+			else addAnonymousClassType(typeName, memberReturnType);
 		}
 		return getTypeRef(context, typeName);
 	}

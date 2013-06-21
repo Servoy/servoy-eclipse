@@ -19,6 +19,7 @@ package com.servoy.eclipse.jsunit.mobile;
 
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 
 import com.servoy.base.test.IJSUnitSuiteHandler;
@@ -41,10 +42,12 @@ public class RunMobileClientTests extends RunJSUnitTests
 	/**
 	 * @param builder 
 	 * @param clientConnectTimeout (in seconds) -1 fallsback to default value.
+	 * @param monitor the monitor that can be used to check for stop requests before the tests start running.
 	 */
-	public RunMobileClientTests(TestTarget testTarget, SolutionJSUnitSuiteCodeBuilder builder, ILaunch launch, int clientConnectTimeout)
+	public RunMobileClientTests(TestTarget testTarget, SolutionJSUnitSuiteCodeBuilder builder, ILaunch launch, int clientConnectTimeout,
+		IProgressMonitor monitor)
 	{
-		super(testTarget, launch);
+		super(testTarget, launch, monitor);
 		this.clientConnectTimeout = clientConnectTimeout;
 		this.builder = builder;
 	}
@@ -78,7 +81,7 @@ public class RunMobileClientTests extends RunJSUnitTests
 	protected void initializeAndRun(int port)
 	{
 		// TODO start browser and wait a while so that we get calls from the mobile browser app. - calls needed to set-up the test-suite hierarchy
-		MobileClientTestSuite.prepare(bridge, testTarget, getScriptUnitRunnerClient());
+		MobileClientTestSuite.prepare(bridge, testTarget, getScriptUnitRunnerClient(), getLaunchMonitor());
 		runJUnitClass(port, MobileClientTestSuite.class);
 	}
 

@@ -51,9 +51,9 @@ public class RunSmartClientTests extends RunJSUnitTests
 	private IDebugJ2DBClient testApp;
 	private JSUnitUserManager testUserManager;
 
-	public RunSmartClientTests(TestTarget testTarget, ILaunch launch)
+	public RunSmartClientTests(TestTarget testTarget, ILaunch launch, IProgressMonitor monitor)
 	{
-		super(testTarget, launch);
+		super(testTarget, launch, monitor);
 	}
 
 	@Override

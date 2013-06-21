@@ -21,6 +21,8 @@ import junit.framework.Test;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.jsunit.scriptunit.RemoteScriptUnitRunnerClient;
 import com.servoy.eclipse.jsunit.scriptunit.ScriptUnitTestRunNotifier;
@@ -35,6 +37,7 @@ public class MobileClientTestSuite extends TestSuite
 	private static SuiteBridge staticBridge;
 	private static TestTarget staticTarget;
 	private static RemoteScriptUnitRunnerClient staticRemoteScriptUnitRunnerClient;
+	private static IProgressMonitor staticLaunchMonitor;
 	private final SuiteBridge bridge;
 	private final TestTarget target; // TODO
 	private final RemoteScriptUnitRunnerClient remoteScriptUnitRunnerClient;
@@ -45,14 +48,15 @@ public class MobileClientTestSuite extends TestSuite
 		this.target = target;
 		this.remoteScriptUnitRunnerClient = remoteScriptUnitRunnerClient;
 
-		bridge.createTestTree(this);
+		bridge.createTestTree(this, staticLaunchMonitor);
 	}
 
-	public static void prepare(SuiteBridge bridge, TestTarget target, RemoteScriptUnitRunnerClient remoteScriptUnitRunnerClient)
+	public static void prepare(SuiteBridge bridge, TestTarget target, RemoteScriptUnitRunnerClient remoteScriptUnitRunnerClient, IProgressMonitor launchMonitor)
 	{
 		staticBridge = bridge;
 		staticTarget = target;
 		staticRemoteScriptUnitRunnerClient = remoteScriptUnitRunnerClient;
+		staticLaunchMonitor = launchMonitor;
 	}
 
 	public static Test suite()

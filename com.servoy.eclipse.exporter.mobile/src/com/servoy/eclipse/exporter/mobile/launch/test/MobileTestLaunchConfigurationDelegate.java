@@ -65,9 +65,9 @@ public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigura
 	}
 
 	@Override
-	protected void prepareExporter(MobileExporter exporter, ILaunchConfiguration configuration, ILaunch launch) throws CoreException
+	protected void prepareExporter(MobileExporter exporter, ILaunchConfiguration configuration, ILaunch launch, IProgressMonitor monitor) throws CoreException
 	{
-		super.prepareExporter(exporter, configuration, launch);
+		super.prepareExporter(exporter, configuration, launch, monitor);
 
 		exporter.setUseTestWar(true);
 
@@ -77,6 +77,7 @@ public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigura
 		Solution s;
 		builder = new SolutionJSUnitSuiteCodeBuilder();
 		testTarget = JSUnitLaunchConfigurationDelegate.prepareForLaunch(configuration, launch);
+		if (monitor != null && monitor.isCanceled()) return;
 
 		FlattenedSolution flattenedSolution = model.getFlattenedSolution();
 		if (sp == null || (s = sp.getSolution()) == null || flattenedSolution == null)
@@ -90,8 +91,10 @@ public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigura
 	}
 
 	@Override
-	protected void openBrowser(final IWebBrowser webBrowser, final ILaunch launch, final ILaunchConfiguration configuration) throws CoreException
+	protected void openBrowser(final IWebBrowser webBrowser, final ILaunch launch, final ILaunchConfiguration configuration, IProgressMonitor monitor)
+		throws CoreException
 	{
+		if (monitor != null) monitor.subTask("starting test session");
 		this.webBrowser = webBrowser;
 
 		int clientConnectTimeout;
@@ -105,7 +108,9 @@ public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigura
 			clientConnectTimeout = Integer.parseInt(IMobileTestLaunchConstants.DEFAULT_CLIENT_CONNECT_TIMEOUT);
 		}
 
-		RunMobileClientTests runner = new RunMobileClientTests(testTarget, builder, launch, clientConnectTimeout)
+		if (monitor != null && monitor.isCanceled()) return;
+
+		RunMobileClientTests runner = new RunMobileClientTests(testTarget, builder, launch, clientConnectTimeout, monitor)
 		{
 			@Override
 			protected void prepareForTesting()
@@ -114,7 +119,8 @@ public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigura
 				MobileTestLaunchConfigurationDelegate.this.bridgeID = getBridgeId();
 				try
 				{
-					MobileTestLaunchConfigurationDelegate.super.openBrowser(webBrowser, launch, configuration); // non-blocking
+					MobileTestLaunchConfigurationDelegate.super.openBrowser(webBrowser, launch, configuration, getLaunchMonitor()); // non-blocking
+					if (getLaunchMonitor() != null) getLaunchMonitor().subTask("connecting to mobile test client"); //$NON-NLS-1$
 				}
 				catch (CoreException e)
 				{
@@ -134,7 +140,11 @@ public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigura
 		finally
 		{
 			if (Boolean.parseBoolean(configuration.getAttribute(IMobileTestLaunchConstants.CLOSE_BROWSER_WHEN_DONE,
-				IMobileTestLaunchConstants.DEFAULT_CLOSE_BROWSER_WHEN_DONE))) webBrowser.close(); // when tests are done, close the browser
+				IMobileTestLaunchConstants.DEFAULT_CLOSE_BROWSER_WHEN_DONE)))
+			{
+				if (monitor != null) monitor.subTask("test session finished - closing browser"); //$NON-NLS-1$
+				webBrowser.close(); // when tests are done, close the browser
+			}
 			this.webBrowser = null;
 		}
 	}
@@ -144,9 +154,15 @@ public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigura
 	{
 		String appURL = configuration.getAttribute(IMobileLaunchConstants.APPLICATION_URL, "");
 		if (appURL == null) return null;
+		boolean nodebug = Boolean.valueOf(configuration.getAttribute(IMobileLaunchConstants.NODEBUG, "true")).booleanValue();
 
 		boolean hasArgs = (appURL.indexOf("?") != -1);
 		appURL = appURL + (hasArgs ? "&" : "?") + "log_level=DEBUG&noinitsmc=true&bid=" + bridgeID;
+		if (nodebug && !appURL.contains("nodebug=true"))
+		{
+			appURL = appURL + "&nodebug=true";
+		}
+
 		try
 		{
 

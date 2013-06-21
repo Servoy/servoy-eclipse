@@ -68,8 +68,11 @@ public abstract class RunJSUnitTests implements Runnable
 
 	private RemoteScriptUnitRunnerClient scriptUnitRunnerClient;
 
-	public RunJSUnitTests(TestTarget testTarget, ILaunch launch)
+	private final IProgressMonitor monitor;
+
+	public RunJSUnitTests(TestTarget testTarget, ILaunch launch, IProgressMonitor monitor)
 	{
+		this.monitor = monitor;
 		this.testTarget = testTarget;
 		this.launch = launch;
 		Display.getDefault().syncExec(new Runnable()
@@ -135,6 +138,7 @@ public abstract class RunJSUnitTests implements Runnable
 			try
 			{
 				prepareForTesting();
+				if (getLaunchMonitor() != null && getLaunchMonitor().isCanceled()) return;
 
 				final int port = SocketUtil.findFreePort();
 				if (port == -1)
@@ -158,6 +162,7 @@ public abstract class RunJSUnitTests implements Runnable
 					removeDLTKTestSessions();
 					// show the ScriptUnit test view part
 					showTestRunnerViewPartInActivePage(0);
+					if (getLaunchMonitor() != null && getLaunchMonitor().isCanceled()) return;
 
 					//final Launch launch = new Launch(null, ILaunchManager.RUN_MODE, null);
 
@@ -181,6 +186,7 @@ public abstract class RunJSUnitTests implements Runnable
 					addDLTKTestRunSession();
 
 					skipCleanup1 = true;
+					if (getLaunchMonitor() != null && getLaunchMonitor().isCanceled()) return;
 					initializeAndRun(port);
 				}
 			}
@@ -331,6 +337,11 @@ public abstract class RunJSUnitTests implements Runnable
 	protected RemoteScriptUnitRunnerClient getScriptUnitRunnerClient()
 	{
 		return scriptUnitRunnerClient;
+	}
+
+	protected IProgressMonitor getLaunchMonitor()
+	{
+		return monitor;
 	}
 
 	private void removeDLTKTestSessions()
