@@ -932,7 +932,7 @@ public class TypeCreator extends TypeCache
 		}
 		else if (cls.getSuperclass() != null)
 		{
-			Class< ? > superCls = classTypes.get(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(cls));
+			Class< ? > superCls = classTypes.get(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(cls.getSuperclass()));
 			if (superCls != null)
 			{
 				JavaMembers superClassMembers = ScriptObjectRegistry.getJavaMembers(superCls, null);
