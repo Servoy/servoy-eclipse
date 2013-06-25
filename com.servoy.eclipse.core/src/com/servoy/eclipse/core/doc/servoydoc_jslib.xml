@@ -5386,10 +5386,10 @@ application.output(s.localeCompare("Hello"));]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[returns a new string where all matches of the regexp are replaced.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[returns a new string where some or all matches of the regexp are replaced.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[returns a new string where all matches of the regexp are replaced.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[returns a new string where some or all matches of the regexp are replaced.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="mc,wc,sc"><![CDATA[string.replace(regexp,callback);]]></sample>
@@ -5411,10 +5411,10 @@ application.output(s.localeCompare("Hello"));]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[returns a new string where all matches of the regexp are replaced.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[returns a new string where some or all matches of the regexp are replaced.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[returns a new string where all matches of the regexp are replaced.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[returns a new string where some or all matches of the regexp are replaced.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="mc,wc,sc"><![CDATA[string.replace(regexp,newSubStr);]]></sample>
@@ -5436,10 +5436,10 @@ application.output(s.localeCompare("Hello"));]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[returns a new string where all matches of the string are replaced.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[returns a new string where the first match of the string is replaced.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[returns a new string where all matches of the string are replaced.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[returns a new string where the first match of the string is replaced.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="mc,wc,sc"><![CDATA[string.replace(substr,callback);]]></sample>
@@ -5461,10 +5461,10 @@ application.output(s.localeCompare("Hello"));]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[returns a new string where all matches of the string are replaced.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[returns a new string where the first match of the string is replaced.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[returns a new string where all matches of the string are replaced.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[returns a new string where the first match of the string is replaced.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="mc,wc,sc"><![CDATA[string.replace(substr,newSubStr);]]></sample>
