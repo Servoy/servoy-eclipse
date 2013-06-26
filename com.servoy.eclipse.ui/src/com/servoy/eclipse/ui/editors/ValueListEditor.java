@@ -235,6 +235,7 @@ public class ValueListEditor extends PersistEditor
 			{
 				IStructuredSelection selection = (IStructuredSelection)tableSelect.getSelection();
 				handleTableSelected(selection.isEmpty() ? null : (TableWrapper)selection.getFirstElement());
+				handleDataProvidersProperties();
 				flagModified();
 				refresh();
 			}
@@ -278,6 +279,7 @@ public class ValueListEditor extends PersistEditor
 			{
 				IStructuredSelection selection = (IStructuredSelection)relationSelect.getSelection();
 				handleRelationSelected(selection.isEmpty() ? null : (RelationsWrapper)selection.getFirstElement());
+				handleDataProvidersProperties();
 				flagModified();
 				refresh();
 			}
@@ -941,6 +943,9 @@ public class ValueListEditor extends PersistEditor
 		nameField.forceFocus();
 	}
 
+	int lastReturnDataProvidersValue = 0;
+	int lastShowDataProviders = 0;
+
 	@Override
 	public void doSave(IProgressMonitor monitor)
 	{
@@ -950,8 +955,17 @@ public class ValueListEditor extends PersistEditor
 			IValidateName validator = servoyModel.getNameValidator();
 			try
 			{
-				getValueList().updateName(validator, nameField.getText());
+				ValueList valuelist = getValueList();
+				valuelist.updateName(validator, nameField.getText());
 				updateTitle();
+				if (valuelist.getValueListType() == IValueListConstants.CUSTOM_VALUES ||
+					valuelist.getValueListType() == IValueListConstants.GLOBAL_METHOD_VALUES)
+				{
+					lastReturnDataProvidersValue = valuelist.getReturnDataProviders();
+					lastShowDataProviders = valuelist.getShowDataProviders();
+					valuelist.setReturnDataProviders(0);
+					valuelist.setShowDataProviders(0);
+				}
 			}
 			catch (RepositoryException e)
 			{
@@ -1237,5 +1251,17 @@ public class ValueListEditor extends PersistEditor
 		}
 
 		return defineObservablesAndBindingContext();
+	}
+
+	private void handleDataProvidersProperties()
+	{
+		if (getValueList().getReturnDataProviders() == 0)
+		{
+			getValueList().setReturnDataProviders(lastReturnDataProvidersValue);
+		}
+		if (getValueList().getShowDataProviders() == 0)
+		{
+			getValueList().setShowDataProviders(lastShowDataProviders);
+		}
 	}
 }
