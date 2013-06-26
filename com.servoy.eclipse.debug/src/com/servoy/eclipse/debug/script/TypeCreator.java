@@ -221,7 +221,6 @@ import com.servoy.j2db.util.Utils;
 @SuppressWarnings("nls")
 public class TypeCreator extends TypeCache
 {
-	private static final String SCOPE_QBCOLUMNS = "scope:qbcolumns";
 	private static final String SCOPE_TABLES = "scope:tables";
 
 	private static final int INSTANCE_METHOD = 1;
@@ -416,7 +415,7 @@ public class TypeCreator extends TypeCache
 	@Override
 	protected String[] getAccessibleBuckets(String context)
 	{
-		return new String[] { null, SCOPE_TABLES, SCOPE_QBCOLUMNS };
+		return new String[] { null, SCOPE_TABLES };
 	}
 
 	@Override
@@ -2606,8 +2605,7 @@ public class TypeCreator extends TypeCache
 			type.setKind(TypeKind.JAVA);
 //			type.setAttribute(IMAGE_DESCRIPTOR, imageDescriptor);
 			type.setSuperType(getType(context, superTypeName));
-			// these types don't contain solution specific members or properties, they only have 
-			return addType(SCOPE_QBCOLUMNS, type);
+			return type;
 		}
 
 		/**
@@ -2647,7 +2645,7 @@ public class TypeCreator extends TypeCache
 			if (fsAndTable != null && fsAndTable.table != null)
 			{
 				addDataProviders(context, fsAndTable.table.getColumns().iterator(), type.getMembers(), fsAndTable.table.getDataSource());
-				return addType(SCOPE_QBCOLUMNS, type);
+				return type;
 			}
 
 			return type;
