@@ -38,6 +38,8 @@ public class RunMobileClientTests extends RunJSUnitTests
 	private SuiteBridge bridge;
 	private final int clientConnectTimeout;
 	private final SolutionJSUnitSuiteCodeBuilder builder;
+	private String userName = null;
+	private String password = null;
 
 	/**
 	 * @param builder 
@@ -52,12 +54,19 @@ public class RunMobileClientTests extends RunJSUnitTests
 		this.builder = builder;
 	}
 
+	public void setCredentials(String userName, String password)
+	{
+		this.userName = userName;
+		this.password = password;
+	}
+
 	@Override
 	protected void prepareForTesting()
 	{
 		bridge = new SuiteBridge(clientConnectTimeout, -1);
 
 		bridge.setSolutionSuiteJSCode(builder.getRootTestClassName(), builder.getCode());
+		bridge.setCredentials(userName, password);
 
 		// perform the automated mobile export and start app. using [serverUrl]/MobileTestClient/servoy_mobile_test.html?noinitsmc=true&bid=[bridgeObjId]
 		// as start URL; deploy that .war just like it's done in the .war exporter to Servoy Developer Tomcat

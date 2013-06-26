@@ -27,10 +27,15 @@ public interface IMobileTestLaunchConstants
 {
 	public static final String LAUNCH_TEST_CONFIGURATION_TYPE_ID = "com.servoy.eclipse.mobile.test.launch";
 
-	public static final String CLOSE_BROWSER_WHEN_DONE = "close_when_done";
+	public static final String CLOSE_BROWSER_WHEN_DONE = "test_close_browser_when_done";
+	public static final String CLIENT_CONNECT_TIMEOUT = "test_client_connect_timeout";
+	public static final String USERNAME = "test_username";
+	public static final String PASSWORD = "test_password";
+
 	public static final String DEFAULT_CLOSE_BROWSER_WHEN_DONE = "true";
-	public static final String CLIENT_CONNECT_TIMEOUT = "client_connect_timeout";
 	public static final String DEFAULT_CLIENT_CONNECT_TIMEOUT = String.valueOf(SuiteBridge.DEFAULT_TEST_TREE_WAIT_TIMEOUT / 1000);
+	public static final String DEFAULT_USERNAME = "demo";
+	public static final String DEFAULT_PASSWORD = "demo";
 	public static final String AUTO_GENERATED = "auto_generated_#"; // launch configs that are generated automatically based on TestTarget from SolEx.
 	// are are limited in number; running different methods each time should not result in too many launch configs;
 	// the contents of this attribute is an int; the higher the int value, the more recent that config launch was used

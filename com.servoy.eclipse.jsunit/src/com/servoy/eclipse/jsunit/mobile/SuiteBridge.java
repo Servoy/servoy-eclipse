@@ -61,11 +61,13 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 	private JSUnitTestListenerHandler<String, Throwable> junitHandler;
 
 	private final Object runLock = new Object();
+	String unexpectedRunProblemMessage = null;
 	private Throwable unexpectedRunThrowable = null;
 	private boolean doneTesting = false;
 	private TestCycleListener testCycleListener;
 	private String solutionSuiteName;
 	private String solutionSuiteJSCode;
+	private String[] credentials = null;
 
 	public SuiteBridge()
 	{
@@ -97,6 +99,14 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 		this.solutionSuiteName = suiteName;
 	}
 
+	public void setCredentials(String userName, String password)
+	{
+		if (userName != null && password != null)
+		{
+			credentials = new String[] { userName, password };
+		}
+	}
+
 	/**
 	 * This id identifies the JUnit run session. It helps to make sure the right bridge instance is used in case of multiple executions...
 	 */
@@ -116,6 +126,12 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 		return libs;
 	}
 
+	@Override
+	public String[] getCredentials()
+	{
+		return credentials;
+	}
+
 	/**
 	 * Waits for the client to transmit the flattened test tree then reconstructs it as a JUnit test suite hierarchy.
 	 * @param testSuite the root test-suite to use.
@@ -126,7 +142,7 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 		synchronized (testTreeLock)
 		{
 			long ct = System.currentTimeMillis();
-			while (testTree == null && (System.currentTimeMillis() - ct) < testTreeWaitTimeout && unexpectedRunThrowable == null)
+			while (testTree == null && (System.currentTimeMillis() - ct) < testTreeWaitTimeout && !unexpectedProblemOccurred())
 			{
 				try
 				{
@@ -135,9 +151,7 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 					{
 						// if the user is in a hurry or not going to wait for "testTreeWaitTimeout" when something went wrong
 						testSuite.setName("Stop requested"); //$NON-NLS-1$
-						unexpectedRunThrowable = new Throwable(
-							"Stopped manually after " + ((System.currentTimeMillis() - ct) / 1000 + " sec of waiting for mobile client to connect... ")); //$NON-NLS-1$ //$NON-NLS-2$
-						unexpectedRunThrowable.setStackTrace(new StackTraceElement[0]);
+						unexpectedRunProblemMessage = "Stopped manually after " + ((System.currentTimeMillis() - ct) / 1000 + " sec of waiting for mobile client to connect... "); //$NON-NLS-1$ //$NON-NLS-2$
 						break;
 					}
 				}
@@ -146,16 +160,15 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 					log.error(e);
 				}
 			}
-			if (testTree == null && unexpectedRunThrowable == null)
+			if (testTree == null && !unexpectedProblemOccurred())
 			{
 				testSuite.setName("Connection problem"); //$NON-NLS-1$
-				unexpectedRunThrowable = new Throwable(
-					"Timed out - " + ((System.currentTimeMillis() - ct) / 1000 + " sec - waiting for mobile client to connect... ")); //$NON-NLS-1$ //$NON-NLS-2$
-				unexpectedRunThrowable.setStackTrace(new StackTraceElement[0]);
+				unexpectedRunProblemMessage = "Timed out - " + ((System.currentTimeMillis() - ct) / 1000 + " sec - waiting for mobile client to connect... "); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			if (unexpectedRunThrowable != null)
+			if (unexpectedProblemOccurred())
 			{
-				testSuite.addTest(new TestCase(unexpectedRunThrowable.getMessage())
+				if (testSuite.getName() == null) testSuite.setName("Test session failed"); //$NON-NLS-1$
+				testSuite.addTest(new TestCase(getUnexpectedProblemDescription())
 				{
 				});
 			}
@@ -166,6 +179,11 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 		TestTreeHandler tth = new TestTreeHandler(testTree, testSuite);
 		if (testTree != null) tth.createDummyTestTree();
 		tth.fillTestListSequencialOrder(testList);
+	}
+
+	private String getUnexpectedProblemDescription()
+	{
+		return unexpectedRunProblemMessage != null ? unexpectedRunProblemMessage : (unexpectedRunThrowable != null ? unexpectedRunThrowable.getMessage() : ""); //$NON-NLS-1$
 	}
 
 	/**
@@ -180,15 +198,15 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 
 		synchronized (runLock)
 		{
-			if (unexpectedRunThrowable != null)
+			if (unexpectedProblemOccurred())
 			{
 				// if it has already errored out, we need to fake some starts to simulate the dummy testcase start
 				junitHandler.startTest(((TestSuite)testList.get(0)).getName());
-				junitHandler.startTest(unexpectedRunThrowable.getMessage());
+				junitHandler.startTest(getUnexpectedProblemDescription());
 			}
 			else
 			{
-				while (!doneTesting && unexpectedRunThrowable == null)
+				while (!doneTesting && !unexpectedProblemOccurred())
 				{
 					try
 					{
@@ -198,7 +216,7 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 							// normally when this happens a "done" should be generated clientside;
 							// but if something bad happened and the client is no longer available, just end it after a reasonable amount of time
 							runLock.wait(stopRequestedWait);
-							if (!doneTesting && unexpectedRunThrowable == null)
+							if (!doneTesting && !unexpectedProblemOccurred())
 							{
 								log.warn("Stop requested; Shutting down server side because client side didn't report as stopped in under " + (stopRequestedWait / 1000) + " seconds."); //$NON-NLS-1$//$NON-NLS-2$
 								break; // end anyway
@@ -219,10 +237,21 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 
 	private void showUnexpectedThrowableIfNeeded()
 	{
-		if (unexpectedRunThrowable != null)
+		if (unexpectedProblemOccurred())
 		{
-			junitHandler.addError(unexpectedRunThrowable.getMessage(), unexpectedRunThrowable);
+			if (unexpectedRunThrowable == null)
+			{
+				// if the message is large enough it gets truncated when used as a test name...
+				unexpectedRunThrowable = new Exception(getUnexpectedProblemDescription());
+				unexpectedRunThrowable.setStackTrace(new StackTraceElement[0]);
+			}
+			junitHandler.addError(getUnexpectedProblemDescription(), unexpectedRunThrowable);
 		}
+	}
+
+	private boolean unexpectedProblemOccurred()
+	{
+		return (unexpectedRunProblemMessage != null) || (unexpectedRunThrowable != null);
 	}
 
 	@Override
@@ -284,6 +313,7 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 		{
 			synchronized (testTreeLock)
 			{
+				unexpectedRunProblemMessage = msg;
 				unexpectedRunThrowable = t;
 				runLock.notifyAll();
 				testTreeLock.notifyAll();

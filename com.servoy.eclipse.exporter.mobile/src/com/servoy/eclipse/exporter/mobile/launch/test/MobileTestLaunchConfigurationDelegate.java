@@ -98,6 +98,9 @@ public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigura
 		this.webBrowser = webBrowser;
 
 		int clientConnectTimeout;
+		String userName, password;
+		userName = configuration.getAttribute(IMobileTestLaunchConstants.USERNAME, IMobileTestLaunchConstants.DEFAULT_USERNAME);
+		password = configuration.getAttribute(IMobileTestLaunchConstants.PASSWORD, IMobileTestLaunchConstants.DEFAULT_PASSWORD);
 		try
 		{
 			clientConnectTimeout = Integer.parseInt(configuration.getAttribute(IMobileTestLaunchConstants.CLIENT_CONNECT_TIMEOUT,
@@ -128,6 +131,8 @@ public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigura
 				}
 			}
 		};
+		runner.setCredentials(userName, password);
+
 		try
 		{
 			runner.run();
