@@ -398,11 +398,15 @@ public class SolutionSerializer
 		}
 		catch (IOException e)
 		{
-			throw new RepositoryException("Could not write object " + node + " to workspace directory " + fileAccess.toOSPath(), e); //$NON-NLS-1$ //$NON-NLS-2$
+			Solution s = (Solution)node.getAncestor(IRepository.SOLUTIONS);
+			throw new RepositoryException(
+				"Could not write object " + node + " to workspace directory " + fileAccess.getProjectParentOSPath(s != null ? s.getName() : null), e); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		catch (JSONException e)
 		{
-			throw new RepositoryException("Could not write object " + node + " to workspace directory " + fileAccess.toOSPath(), e); //$NON-NLS-1$ //$NON-NLS-2$
+			Solution s = (Solution)node.getAncestor(IRepository.SOLUTIONS);
+			throw new RepositoryException(
+				"Could not write object " + node + " to workspace directory " + fileAccess.getProjectParentOSPath(s != null ? s.getName() : null), e); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 

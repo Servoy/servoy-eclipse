@@ -29,6 +29,7 @@ import java.io.StringWriter;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -294,8 +295,13 @@ public class WorkspaceFileAccess implements IFileAccess
 		return workspaceRoot.getFile(new Path(relativeFilePath)).getLocation().toFile().length();
 	}
 
-	public String toOSPath()
+	public String getProjectParentOSPath(String projectName)
 	{
+		if (projectName != null)
+		{
+			IProject project = workspaceRoot.getProject(projectName);
+			if (project != null) return project.getLocation().removeLastSegments(1).toOSString();
+		}
 		return workspaceRoot.getLocation().toOSString();
 	}
 
@@ -308,7 +314,7 @@ public class WorkspaceFileAccess implements IFileAccess
 		}
 		catch (CoreException e)
 		{
-			ServoyLog.logError("Could not list members for " + toOSPath(), e);
+			ServoyLog.logError("Could not list members for " + getProjectParentOSPath(null), e);
 			return new String[0];
 		}
 		String[] names = new String[members.length];
@@ -319,8 +325,13 @@ public class WorkspaceFileAccess implements IFileAccess
 		return names;
 	}
 
-	public File toFile()
+	public File getProjectParentFile(String projectName)
 	{
+		if (projectName != null)
+		{
+			IProject project = workspaceRoot.getProject(projectName);
+			if (project != null) return project.getLocation().removeLastSegments(1).toFile();
+		}
 		return workspaceRoot.getLocation().toFile();
 	}
 

@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.model.util;
 
 import java.io.IOException;
@@ -54,11 +54,11 @@ public interface IFileAccess
 
 	long getFileLength(String relativeFilePath) throws IOException;
 
-	String toOSPath();
+	String getProjectParentOSPath(String projectName);
 
 	String[] list();
 
-	java.io.File toFile();
+	java.io.File getProjectParentFile(String projectName);
 
 	/**
 	 * Create if not existing yet. Also create parents when not existing yet.

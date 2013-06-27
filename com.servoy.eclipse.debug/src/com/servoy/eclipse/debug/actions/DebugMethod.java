@@ -34,6 +34,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
@@ -65,7 +66,7 @@ public class DebugMethod implements IViewActionDelegate
 			if (servoyProject != null && servoyProject.getProject().isOpen())
 			{
 				Solution sol = servoyProject.getSolution();
-				File workspaceDir = ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile();
+				File workspaceDir = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getProjectParentFile(sol.getName());
 				File parentFile = SolutionSerializer.getParentFile(workspaceDir, new File(workspaceDir, path.toString()));
 				UUID uuid = SolutionDeserializer.getUUID(parentFile);
 
