@@ -178,6 +178,7 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.repository.StringResourceDeserializer;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
@@ -2997,7 +2998,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		if (resourceFile == null) return false;
 
 		UUID uuid;
-		File workspace = resourceFile.getWorkspace().getRoot().getLocation().toFile();
+		File workspace = new WorkspaceFileAccess(resourceFile.getWorkspace()).getProjectParentFile(resourceFile.getProject().getName());
 		File f = resourceFile.getRawLocation().toFile();
 		uuid = SolutionDeserializer.getUUID(f);
 		ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(resourceFile.getProject().getName());

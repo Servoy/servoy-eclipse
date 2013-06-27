@@ -623,8 +623,8 @@ public class EditorUtil
 				IProjectNature nature = file.getProject().getNature(ServoyProject.NATURE_ID);
 				if (nature instanceof ServoyProject)
 				{
-					File workspaceFile = ServoyModel.getWorkspace().getRoot().getRawLocation().toFile();
-					File formFile = SolutionSerializer.getParentFile(workspaceFile, file.getRawLocation().toFile());
+					File formFile = SolutionSerializer.getParentFile(new WorkspaceFileAccess(ServoyModel.getWorkspace()).getProjectParentFile(file.getProject().getName()),
+						file.getRawLocation().toFile());
 					if (formFile != null)
 					{
 						UUID formUuid = SolutionDeserializer.getUUID(formFile);

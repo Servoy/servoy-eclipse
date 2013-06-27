@@ -118,6 +118,7 @@ import com.servoy.eclipse.model.util.AtomicIntegerWithListener;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.Messages;
 import com.servoy.j2db.component.ComponentFactory;
@@ -2159,7 +2160,7 @@ public class ServoyModel extends AbstractServoyModel
 			final IContainer workspace = project.getParent();
 
 			SolutionDeserializer sd = new SolutionDeserializer(getDeveloperRepository(), servoyProject);
-			final Set<IPersist> changedScriptElements = handleChangedFiles(project, solution, changedFiles, servoyProject, workspace, sd);
+			final Set<IPersist> changedScriptElements = handleChangedFiles(project, solution, changedFiles, servoyProject, sd);
 			// Regenerate script files for parents that have changed script elements.
 			if (changedScriptElements.size() > 0)
 			{
@@ -2307,7 +2308,7 @@ public class ServoyModel extends AbstractServoyModel
 	 * @throws RepositoryException
 	 */
 	public Set<IPersist> handleChangedFiles(IProject project, Solution solution, List<File> changedFiles, final ServoyProject servoyProject,
-		final IContainer workspace, SolutionDeserializer sd) throws RepositoryException
+		SolutionDeserializer sd) throws RepositoryException
 	{
 		// TODO refresh modules when solution type was changed
 		List<IPersist> strayCats = new ArrayList<IPersist>();
@@ -2354,7 +2355,7 @@ public class ServoyModel extends AbstractServoyModel
 			}
 		});
 
-		File wsDir = workspace.getLocation().toFile();
+		File wsDir = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getProjectParentFile(project.getName());
 		File mediaDir = new File(project.getLocation().toFile(), SolutionSerializer.MEDIAS_DIR);
 
 		boolean securityInfoChanged = false;

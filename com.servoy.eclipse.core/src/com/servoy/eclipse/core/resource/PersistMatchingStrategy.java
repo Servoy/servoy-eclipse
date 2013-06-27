@@ -13,11 +13,12 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.core.resource;
 
 import java.io.File;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorMatchingStrategy;
 import org.eclipse.ui.IEditorReference;
@@ -27,6 +28,7 @@ import org.eclipse.ui.part.FileEditorInput;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -61,8 +63,8 @@ public class PersistMatchingStrategy implements IEditorMatchingStrategy
 			// FUTURE: remove this if when form methods are edited in form editor
 			if (!fileInput.getFile().getFileExtension().equals(SolutionSerializer.JS_FILE_EXTENSION_WITHOUT_DOT))
 			{
-				return findUuidParent(fileInput.getFile().getWorkspace().getRoot().getLocation().toFile(), fileInput.getFile().getLocation().toFile(),
-					((PersistEditorInput)editorInput).getUuid()) != null;
+				File wsFile = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getProjectParentFile(fileInput.getFile().getProject().getName());
+				return findUuidParent(wsFile, fileInput.getFile().getLocation().toFile(), ((PersistEditorInput)editorInput).getUuid()) != null;
 			}
 		}
 

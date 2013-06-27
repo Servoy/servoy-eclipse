@@ -180,7 +180,7 @@ public class ServoyTeamProvider extends RepositoryProvider
 	{
 		super.setProject(project);
 		baseFileAccess = new IOFileAccess(new File(project.getLocation().toFile(), ResourcesUtils.STP_DIR));
-		File baseFile = baseFileAccess.toFile();
+		File baseFile = baseFileAccess.getProjectParentFile(project.getName());
 		if (!baseFile.exists())
 		{
 			WorkspaceFileAccess baseWSFileAccess = new WorkspaceFileAccess(project.getWorkspace());
@@ -905,7 +905,7 @@ public class ServoyTeamProvider extends RepositoryProvider
 	{
 		if (baseFileAccess != null && baseFileAccess.exists(resource.getFullPath().toOSString()))
 		{
-			return new File(baseFileAccess.toOSPath(), resource.getFullPath().toOSString());
+			return new File(baseFileAccess.getProjectParentOSPath(resource.getProject().getName()), resource.getFullPath().toOSString());
 		}
 
 		return null;
