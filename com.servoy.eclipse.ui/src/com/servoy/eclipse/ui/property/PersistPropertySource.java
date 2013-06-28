@@ -2084,7 +2084,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					((AbstractBase)persistContext.getPersist()).clearProperty((String)id);
 					if (persistContext.getPersist() instanceof ISupportExtendsID &&
 						PersistHelper.isOverrideElement((ISupportExtendsID)persistContext.getPersist()) &&
-						!((AbstractBase)persistContext.getPersist()).hasOverrideProperties())
+						!((AbstractBase)persistContext.getPersist()).hasOverrideProperties() && !PersistHelper.hasOverrideChildren(persistContext.getPersist()))
 					{
 						// last property was reset, remove overriding persist
 						IPersist superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)persistContext.getPersist());
