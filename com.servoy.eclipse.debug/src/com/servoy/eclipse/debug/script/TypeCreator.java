@@ -1158,15 +1158,17 @@ public class TypeCreator extends TypeCache
 									if (paramClass.isArray())
 									{
 										Class< ? > componentType = paramClass.getComponentType();
-										parameter.setName(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(componentType));
-										parameter.setType(TypeUtil.arrayOf(getTypeRef(context,
-											DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(componentType))));
+										String jsTypeName = DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(componentType);
+										parameter.setType(TypeUtil.arrayOf(getTypeRef(context, jsTypeName)));
+										int index = jsTypeName.lastIndexOf('.');
+										parameter.setName(index == -1 ? jsTypeName : jsTypeName.substring(index + 1));
 									}
 									else
 									{
-										parameter.setName(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(paramClass));
-										parameter.setType(getTypeRef(context,
-											DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(paramClass)));
+										String jsTypeName = DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(paramClass);
+										parameter.setType(getTypeRef(context, jsTypeName));
+										int index = jsTypeName.lastIndexOf('.');
+										parameter.setName(index == -1 ? jsTypeName : jsTypeName.substring(index + 1));
 									}
 									parameter.setKind(ParameterKind.NORMAL);
 									parameters.add(parameter);
