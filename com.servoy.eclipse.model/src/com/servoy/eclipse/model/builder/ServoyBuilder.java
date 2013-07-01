@@ -839,7 +839,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					if (!SolutionMetaData.isServoyMobileSolution(servoyProject.getSolution()) && module != null &&
 						SolutionMetaData.isServoyMobileSolution(module.getSolution()))
 					{
-						String message = "Module " + module.getSolution().getName() + " is a non-mobile solution module, it should have solution type Mobile shared module or orther non-mobile type."; //$NON-NLS-1$//$NON-NLS-2$
+						String message = "Module " + module.getSolution().getName() + " is a non-mobile solution module, it should have solution type Mobile shared module or other non-mobile type."; //$NON-NLS-1$//$NON-NLS-2$
 						IMarker marker = addMarker(project, MISPLACED_MODULES_MARKER_TYPE, message, -1, MODULE_MISPLACED, IMarker.PRIORITY_LOW, null, null);
 						try
 						{
