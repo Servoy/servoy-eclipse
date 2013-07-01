@@ -78,7 +78,6 @@ public class AddInsetListCommand extends BaseFormPlaceElementCommand
 			// set labelfor for display in webclient
 			model.button.setName("button" + UUID.randomUUID().toString().replace('-', '_').toLowerCase());
 			header.setLabelFor(model.button.getName());
-			header.setDisplaysTags(false);
 			header.putCustomMobileProperty(IMobileProperties.LIST_ITEM_HEADER.propertyName, Boolean.TRUE);
 			// for debug in developer
 			header.setStyleClass("b"); // default for headers
