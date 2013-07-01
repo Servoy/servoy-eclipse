@@ -56,7 +56,7 @@ public class AddLabelCommand extends BaseFormPlaceElementCommand
 			String groupID = UUID.randomUUID().toString();
 			Point loc = location == null ? new Point(0, 0) : location;
 			GraphicalComponent label = ElementFactory.createLabel(form, "Title", loc);
-			label.setDisplaysTags(true);
+			label.setDisplaysTags(false);
 			label.setGroupID(groupID);
 			label.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST | IAnchorConstants.NORTH);
 			GraphicalComponent textLabel = ElementFactory.createLabel(form, "Text", new Point(loc.x, loc.y + 1)); // enforce order by y-pos

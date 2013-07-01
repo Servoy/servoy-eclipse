@@ -64,7 +64,7 @@ public class AddFieldCommand extends BaseFormPlaceElementCommand
 			String groupID = UUID.randomUUID().toString();
 			Point loc = location == null ? new Point(0, 0) : location;
 			GraphicalComponent label = ElementFactory.createLabel(form, "Title", loc);
-			label.setDisplaysTags(true);
+			label.setDisplaysTags(false);
 			label.setGroupID(groupID);
 			label.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST | IAnchorConstants.NORTH);
 			label.putCustomMobileProperty(IMobileProperties.COMPONENT_TITLE.propertyName, Boolean.TRUE);
