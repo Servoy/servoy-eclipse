@@ -17,7 +17,6 @@
 package com.servoy.eclipse.debug.actions;
 
 import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -59,6 +58,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.debug.FlattenedSolutionDebugListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.IDebugWebClient;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -148,19 +148,7 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 								String url = "http://localhost:" + ApplicationServerSingleton.get().getWebServerPort() + "/servoy-webclient/solutions/solution/" + solution.getName(); //$NON-NLS-1$ //$NON-NLS-2$
 								IWorkbenchBrowserSupport support = PlatformUI.getWorkbench().getBrowserSupport();
 								if (webBrowser == null) webBrowser = support.getExternalBrowser();
-								// temporary implementation until we upgrade to eclipse 4.3
-								// see https://bugs.eclipse.org/bugs/show_bug.cgi?format=multiple&id=405942
-								if (browserDescriptor != null && browserDescriptor.getLocation().contains(" "))
-								{
-									String[] command = new String[2];
-									command[0] = browserDescriptor.getLocation();
-									command[1] = url;
-									Runtime.getRuntime().exec(command);
-								}
-								else
-								{
-									webBrowser.openURL(new URL(url));
-								}
+								EditorUtil.openURL(webBrowser, browserDescriptor, url);
 							}
 							catch (final Throwable e)//catch all for apple mac
 							{

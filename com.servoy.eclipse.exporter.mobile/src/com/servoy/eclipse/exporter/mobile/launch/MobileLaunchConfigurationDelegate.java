@@ -1,8 +1,6 @@
 package com.servoy.eclipse.exporter.mobile.launch;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Iterator;
 
 import org.eclipse.core.runtime.CoreException;
@@ -24,6 +22,7 @@ import com.servoy.eclipse.exporter.mobile.Activator;
 import com.servoy.eclipse.exporter.mobile.export.MobileExporter;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
 
@@ -83,33 +82,25 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		{
 			webBrowser = PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser();
 		}
-		openBrowser(webBrowser, launch, configuration, monitor);
+		openBrowser(webBrowser, getBrowserDescriptor(browserID), launch, configuration, monitor);
 	}
 
-	protected void openBrowser(IWebBrowser webBrowser, ILaunch launch, ILaunchConfiguration configuration, IProgressMonitor monitor) throws CoreException
+	protected void openBrowser(IWebBrowser webBrowser, IBrowserDescriptor browserDescriptor, ILaunch launch, ILaunchConfiguration configuration,
+		IProgressMonitor monitor) throws CoreException
 	{
 		if (monitor != null) monitor.subTask("opening mobile client in browser");
-		URL appUrl = getApplicationURL(configuration);
-		if (appUrl != null) webBrowser.openURL(appUrl);
+		EditorUtil.openURL(webBrowser, browserDescriptor, getApplicationURL(configuration));
 	}
 
-	protected URL getApplicationURL(ILaunchConfiguration configuration) throws CoreException
+	protected String getApplicationURL(ILaunchConfiguration configuration) throws CoreException
 	{
-		try
+		boolean nodebug = Boolean.valueOf(configuration.getAttribute(IMobileLaunchConstants.NODEBUG, "true")).booleanValue();
+		String mobileClientURL = configuration.getAttribute(IMobileLaunchConstants.APPLICATION_URL, "");
+		if (nodebug && !mobileClientURL.contains("nodebug=true"))
 		{
-			boolean nodebug = Boolean.valueOf(configuration.getAttribute(IMobileLaunchConstants.NODEBUG, "true")).booleanValue();
-			String mobileClientURL = configuration.getAttribute(IMobileLaunchConstants.APPLICATION_URL, "");
-			if (nodebug && !mobileClientURL.contains("nodebug=true"))
-			{
-				mobileClientURL = mobileClientURL + ((mobileClientURL.indexOf('?') != -1) ? '&' : '?') + "nodebug=true";
-			}
-			return new URL(mobileClientURL);
+			mobileClientURL = mobileClientURL + ((mobileClientURL.indexOf('?') != -1) ? '&' : '?') + "nodebug=true";
 		}
-		catch (MalformedURLException e)
-		{
-			ServoyLog.logError(e);
-			return null;
-		}
+		return mobileClientURL;
 	}
 
 	protected void prepareExporter(MobileExporter exporter, ILaunchConfiguration configuration, ILaunch launch, IProgressMonitor monitor) throws CoreException
@@ -130,9 +121,8 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		exporter.setSkipConnect(validLicense);
 	}
 
-	public static IWebBrowser getBrowser(String browserId)
+	public static IBrowserDescriptor getBrowserDescriptor(String browserId)
 	{
-		IWebBrowser webBrowser = null;
 		Iterator iterator = BrowserManager.getInstance().getWebBrowsers().iterator();
 		try
 		{
@@ -146,9 +136,7 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 					ext = org.eclipse.ui.internal.browser.WebBrowserUIPlugin.findBrowsers(ewb.getLocation());
 					if (ext != null && ext.getId().equals(browserId))
 					{
-						webBrowser = ext.createBrowser(ext.getId(), ewb.getLocation(), ewb.getParameters());
-						if (webBrowser == null) webBrowser = new ExternalBrowserInstance(ext.getId(), ewb);
-						break;
+						return ewb;
 					}
 					else
 					{
@@ -156,7 +144,7 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 						if (ewb != null && ewb.getLocation() != null)
 						{
 							String name = ewb.getName().toLowerCase().replace(" ", "_");
-							if (browserId.contains(name)) webBrowser = new ExternalBrowserInstance("org.eclipse.ui.browser." + name, ewb);
+							if (browserId.contains(name)) return ewb;
 						}
 					}
 				}
@@ -165,6 +153,31 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		catch (Exception ex)
 		{
 			ServoyLog.logError(ex);
+		}
+		return null;
+	}
+
+	public static IWebBrowser getBrowser(String browserId)
+	{
+		IWebBrowser webBrowser = null;
+		IBrowserDescriptor browserDescriptor = getBrowserDescriptor(browserId);
+		if (browserDescriptor != null)
+		{
+			org.eclipse.ui.internal.browser.IBrowserExt ext = org.eclipse.ui.internal.browser.WebBrowserUIPlugin.findBrowsers(browserDescriptor.getLocation());
+			if (ext != null && ext.getId().equals(browserId))
+			{
+				webBrowser = ext.createBrowser(ext.getId(), browserDescriptor.getLocation(), browserDescriptor.getParameters());
+				if (webBrowser == null) webBrowser = new ExternalBrowserInstance(ext.getId(), browserDescriptor);
+			}
+			else
+			{
+
+				if (browserDescriptor.getLocation() != null)
+				{
+					String name = browserDescriptor.getName().toLowerCase().replace(" ", "_");
+					if (browserId.contains(name)) webBrowser = new ExternalBrowserInstance("org.eclipse.ui.browser." + name, browserDescriptor);
+				}
+			}
 		}
 		return webBrowser;
 	}

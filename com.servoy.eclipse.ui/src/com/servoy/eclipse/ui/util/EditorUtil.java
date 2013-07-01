@@ -18,6 +18,7 @@ package com.servoy.eclipse.ui.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,6 +65,8 @@ import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.browser.IWebBrowser;
+import org.eclipse.ui.internal.browser.IBrowserDescriptor;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 
@@ -638,8 +641,8 @@ public class EditorUtil
 				IProjectNature nature = file.getProject().getNature(ServoyProject.NATURE_ID);
 				if (nature instanceof ServoyProject)
 				{
-					File formFile = SolutionSerializer.getParentFile(new WorkspaceFileAccess(ServoyModel.getWorkspace()).getProjectParentFile(file.getProject().getName()),
-						file.getRawLocation().toFile());
+					File formFile = SolutionSerializer.getParentFile(
+						new WorkspaceFileAccess(ServoyModel.getWorkspace()).getProjectParentFile(file.getProject().getName()), file.getRawLocation().toFile());
 					if (formFile != null)
 					{
 						UUID formUuid = SolutionDeserializer.getUUID(formFile);
@@ -864,5 +867,29 @@ public class EditorUtil
 			}
 		}
 		return null;
+	}
+
+	public static void openURL(IWebBrowser webBrowser, IBrowserDescriptor browserDescriptor, String url)
+	{
+		try
+		{
+			// temporary implementation until we upgrade to eclipse 4.3
+			// see https://bugs.eclipse.org/bugs/show_bug.cgi?format=multiple&id=405942
+			if (browserDescriptor != null && browserDescriptor.getLocation().contains(" "))
+			{
+				String[] command = new String[2];
+				command[0] = browserDescriptor.getLocation();
+				command[1] = url;
+				Runtime.getRuntime().exec(command);
+			}
+			else
+			{
+				webBrowser.openURL(new URL(url));
+			}
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
+		}
 	}
 }
