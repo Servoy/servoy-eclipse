@@ -257,6 +257,7 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_mediaTiff;
 	public static String ErrorWarningPreferencePage_calculationFormAccess;
 	public static String ErrorWarningPreferencePage_imageMediaNotSet;
+	public static String ErrorWarningPreferencePage_methodNumberOfArgsMismatch;
 
 	static
 	{

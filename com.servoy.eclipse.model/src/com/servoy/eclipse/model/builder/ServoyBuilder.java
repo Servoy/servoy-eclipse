@@ -129,6 +129,7 @@ import com.servoy.j2db.persistence.ISupportTabSeq;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.LiteralDataprovider;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
@@ -153,6 +154,7 @@ import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.FormatParser;
 import com.servoy.j2db.util.FormatParser.ParsedFormat;
 import com.servoy.j2db.util.IntHashMap;
+import com.servoy.j2db.util.JSONWrapperList;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.RoundHalfUpDecimalFormat;
@@ -298,6 +300,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String INVALID_MOBILE_MODULE_MARKER_TYPE = _PREFIX + ".invalidMobileModuleProblem"; //$NON-NLS-1$
 	public static final String FORM_DUPLICATE_PART_MARKER_TYPE = _PREFIX + ".formDuplicatePart"; //$NON-NLS-1$
 	public static final String DEPRECATED_SCRIPT_ELEMENT_USAGE = _PREFIX + ".deprecatedScriptElementUsage"; //$NON-NLS-1$
+	public static final String METHOD_NUMBER_OF_ARGUMENTS_MISMATCH_TYPE = _PREFIX + ".methodNumberOfArgsMismatch";
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels"; //$NON-NLS-1$
@@ -457,6 +460,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		"formPropertyMultipleMethodsOnSameElement", ProblemSeverity.INFO); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> NON_ACCESSIBLE_FORM_IN_MODULE_USED_IN_PARENT_SOLUTION = new Pair<String, ProblemSeverity>(
 		"nonAccessibleFormInModuleUsedInParentSolution", ProblemSeverity.WARNING); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> METHOD_NUMBER_OF_ARGUMENTS_MISMATCH = new Pair<String, ProblemSeverity>(
+		"methodNumberOfArgsMismatch", ProblemSeverity.WARNING); //$NON-NLS-1$
 
 	// relations related
 	public final static Pair<String, ProblemSeverity> RELATION_PRIMARY_SERVER_WITH_PROBLEMS = new Pair<String, ProblemSeverity>(
@@ -1576,6 +1581,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, MISSING_CONVERTER);
 		deleteMarkers(project, LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE);
 		deleteMarkers(project, FORM_DUPLICATE_PART_MARKER_TYPE);
+		deleteMarkers(project, METHOD_NUMBER_OF_ARGUMENTS_MISMATCH_TYPE);
 
 		try
 		{
@@ -1943,6 +1949,18 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														"form " + parentForm.getName(), element.getName());
 													addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
 														IMarker.PRIORITY_NORMAL, null, o);
+												}
+												if (o instanceof BaseComponent)
+												{
+													JSONWrapperList customProperty = (JSONWrapperList)((BaseComponent)o).getCustomProperty(new String[] { "methods", element.getName(), "arguments" }); //$NON-NLS-1$//$NON-NLS-2$
+													MethodArgument[] methodArguments = ((ScriptMethod)foundPersist).getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
+													if (customProperty != null && customProperty.size() > methodArguments.length)
+													{
+														ServoyMarker mk = MarkerMessages.MethodNumberOfArgumentsMismatch.fill(
+															((ScriptMethod)foundPersist).getName(), parentForm.getName());
+														addMarker(project, mk.getType(), mk.getText(), -1, METHOD_NUMBER_OF_ARGUMENTS_MISMATCH,
+															IMarker.PRIORITY_LOW, null, foundPersist);
+													}
 												}
 											}
 											else if (scriptMethod.isDeprecated())
