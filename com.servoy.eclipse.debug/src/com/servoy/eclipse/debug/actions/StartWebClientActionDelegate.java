@@ -148,6 +148,7 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 								String url = "http://localhost:" + ApplicationServerSingleton.get().getWebServerPort() + "/servoy-webclient/solutions/solution/" + solution.getName(); //$NON-NLS-1$ //$NON-NLS-2$
 								IWorkbenchBrowserSupport support = PlatformUI.getWorkbench().getBrowserSupport();
 								if (webBrowser == null) webBrowser = support.getExternalBrowser();
+								if (browserDescriptor == null) browserDescriptor = BrowserManager.getInstance().getCurrentWebBrowser();
 								EditorUtil.openURL(webBrowser, browserDescriptor, url);
 							}
 							catch (final Throwable e)//catch all for apple mac
