@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 
 import com.servoy.base.test.IJSUnitSuiteHandler;
-import com.servoy.eclipse.jsunit.runner.SolutionJSUnitSuiteCodeBuilder;
 import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.jsunit.scriptunit.RunJSUnitTests;
 import com.servoy.j2db.util.StaticSingletonMap;
@@ -37,7 +36,6 @@ public class RunMobileClientTests extends RunJSUnitTests
 
 	private SuiteBridge bridge;
 	private final int clientConnectTimeout;
-	private final SolutionJSUnitSuiteCodeBuilder builder;
 	private String userName = null;
 	private String password = null;
 
@@ -46,12 +44,10 @@ public class RunMobileClientTests extends RunJSUnitTests
 	 * @param clientConnectTimeout (in seconds) -1 fallsback to default value.
 	 * @param monitor the monitor that can be used to check for stop requests before the tests start running.
 	 */
-	public RunMobileClientTests(TestTarget testTarget, SolutionJSUnitSuiteCodeBuilder builder, ILaunch launch, int clientConnectTimeout,
-		IProgressMonitor monitor)
+	public RunMobileClientTests(TestTarget testTarget, ILaunch launch, int clientConnectTimeout, IProgressMonitor monitor)
 	{
 		super(testTarget, launch, monitor);
 		this.clientConnectTimeout = clientConnectTimeout;
-		this.builder = builder;
 	}
 
 	public void setCredentials(String userName, String password)
@@ -63,19 +59,7 @@ public class RunMobileClientTests extends RunJSUnitTests
 	@Override
 	protected void prepareForTesting()
 	{
-		bridge = new SuiteBridge(clientConnectTimeout, -1);
-
-		bridge.setSolutionSuiteJSCode(builder.getRootTestClassName(), builder.getCode());
-		bridge.setCredentials(userName, password);
-
-		// perform the automated mobile export and start app. using [serverUrl]/MobileTestClient/servoy_mobile_test.html?noinitsmc=true&bid=[bridgeObjId]
-		// as start URL; deploy that .war just like it's done in the .war exporter to Servoy Developer Tomcat
-		// the service solution URL should use &nodebug = true when ran from developer
-		Map<String, Object> sharedMap = StaticSingletonMap.instance();
-		synchronized (sharedMap)
-		{
-			sharedMap.put(IJSUnitSuiteHandler.SERVOY_BRIDGE_KEY, bridge);
-		}
+		bridge = SuiteBridge.prepareNewInstance(clientConnectTimeout, userName, password);
 	}
 
 	/**
@@ -89,7 +73,6 @@ public class RunMobileClientTests extends RunJSUnitTests
 	@Override
 	protected void initializeAndRun(int port)
 	{
-		// TODO start browser and wait a while so that we get calls from the mobile browser app. - calls needed to set-up the test-suite hierarchy
 		MobileClientTestSuite.prepare(bridge, testTarget, getScriptUnitRunnerClient(), getLaunchMonitor());
 		runJUnitClass(port, MobileClientTestSuite.class);
 	}
@@ -104,7 +87,7 @@ public class RunMobileClientTests extends RunJSUnitTests
 			if (sharedMap.get(IJSUnitSuiteHandler.SERVOY_BRIDGE_KEY) == bridge) sharedMap.remove(IJSUnitSuiteHandler.SERVOY_BRIDGE_KEY);
 		}
 
-		// TODO notify the client to change browser displayed contents to something like "Please close me?" just in case
+		// TODO notify the client to change browser displayed contents to something like "Please close me?" just in case browser was not closed automatically
 	}
 
 }

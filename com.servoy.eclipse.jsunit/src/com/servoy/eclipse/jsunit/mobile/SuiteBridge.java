@@ -20,6 +20,7 @@ package com.servoy.eclipse.jsunit.mobile;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -28,14 +29,12 @@ import junit.framework.TestSuite;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import com.servoy.base.test.IJSUnitSuiteHandler;
 import com.servoy.eclipse.jsunit.runner.JSUnitTestListenerHandler;
 import com.servoy.eclipse.jsunit.runner.JSUnitToJavaRunner;
 import com.servoy.eclipse.jsunit.runner.TestTreeHandler;
-
-import de.berlios.jsunit.JsUnitException;
+import com.servoy.j2db.util.StaticSingletonMap;
 
 /**
  * A simulated JUnit test suite helper that is driven by something else behind the scenes. (eg. a jsUnit mobile suite running in a browser)
@@ -69,7 +68,25 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 	private String solutionSuiteJSCode;
 	private String[] credentials = null;
 
-	public SuiteBridge()
+	public static SuiteBridge prepareNewInstance(int clientConnectTimeout, String userName, String password)
+	{
+		SuiteBridge bridge = new SuiteBridge(clientConnectTimeout, -1);
+
+		bridge.setCredentials(userName, password);
+
+		// perform the automated mobile export and start app. using [serverUrl]/MobileTestClient/servoy_mobile_test.html?noinitsmc=true&bid=[bridgeObjId]
+		// as start URL; deploy that .war just like it's done in the .war exporter to Servoy Developer Tomcat
+		// the service solution URL should use &nodebug = true when ran from developer
+		Map<String, Object> sharedMap = StaticSingletonMap.instance();
+		synchronized (sharedMap)
+		{
+			sharedMap.put(IJSUnitSuiteHandler.SERVOY_BRIDGE_KEY, bridge);
+		}
+
+		return bridge;
+	}
+
+	protected SuiteBridge()
 	{
 		this.id = idCount++;
 //		this.id = 0; // use this one instead for debugging test client
@@ -79,24 +96,12 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 	 * @param treeWaitTimeout in seconds; the time to wait for mobile client to connect with tests. After it expires tests will fail and stop execution. -1 will fall back to default value.
 	 * @param stopRequestedWait in seconds; the time to wait for client tests to finish nicely when the user presses the "stop" buton on tests; after it expires the tests will be terminated anyway. -1 will fallback to default value.
 	 */
-	public SuiteBridge(int treeWaitTimeout, int stopRequestedWait)
+	protected SuiteBridge(int treeWaitTimeout, int stopRequestedWait)
 	{
 		this();
 		this.testTreeWaitTimeout = treeWaitTimeout > 0 ? treeWaitTimeout * 1000 : DEFAULT_TEST_TREE_WAIT_TIMEOUT;
 //		this.testTreeWaitTimeout = 600000; // use this one instead for debugging test client
 		this.stopRequestedWait = stopRequestedWait > 0 ? stopRequestedWait * 1000 : DEFAULT_STOP_REQUESTED_WAIT;
-	}
-
-	/**
-	 * Call this if the javascript js unit suite code is generated serverside and should be pushed to the client - instead
-	 * of letting the client create it.
-	 * @param suiteName root suite class name.
-	 * @param code the complete js unit suite code.
-	 */
-	public void setSolutionSuiteJSCode(String suiteName, String code)
-	{
-		this.solutionSuiteJSCode = code;
-		this.solutionSuiteName = suiteName;
 	}
 
 	public void setCredentials(String userName, String password)
@@ -115,17 +120,6 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 		return id;
 	}
 
-	public String[] getJsUnitJavascriptCode()
-	{
-		log.info("[.......] Getting javascript library code"); //$NON-NLS-1$
-		String[] libs = new String[3];
-		libs[0] = JSUnitToJavaRunner.getScriptAsStringFromResource("this.JsUtilLoaded", JsUnitException.class, "/JsUtil.js").replace( //$NON-NLS-1$//$NON-NLS-2$
-			"var r = /function (\\w+)(", "var r = /function *(\\w*)(\\("); // if you had "function(){}" with no space after "function", a wrong function name could appear in the call stack //$NON-NLS-1$//$NON-NLS-2$ 
-		libs[1] = JSUnitToJavaRunner.getScriptAsStringFromResource("this.TestCaseLoaded", JsUnitException.class, "/JsUnit.js"); //$NON-NLS-1$//$NON-NLS-2$
-		libs[2] = JSUnitToJavaRunner.getScriptAsStringFromResource("this.JsUnitToJavaLoaded", JSUnitToJavaRunner.class, "JsUnitToJava.js"); //$NON-NLS-1$//$NON-NLS-2$
-		return libs;
-	}
-
 	@Override
 	public String[] getCredentials()
 	{
@@ -137,7 +131,7 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 	 * @param testSuite the root test-suite to use.
 	 * @param staticLaunchMonitor launch monitor that can be used to check for stop requests from the user.
 	 */
-	public void createTestTree(TestSuite testSuite, IProgressMonitor staticLaunchMonitor)
+	public void createTestTree(TestSuite testSuite, ICancelMonitor staticLaunchMonitor)
 	{
 		synchronized (testTreeLock)
 		{
@@ -332,10 +326,11 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 		return testList;
 	}
 
-	@Override
-	public String[] getSolutionJsUnitJavascriptCode()
+	public static interface ICancelMonitor
 	{
-		return (solutionSuiteJSCode != null && solutionSuiteName != null) ? new String[] { solutionSuiteName, solutionSuiteJSCode } : null;
+
+		boolean isCanceled();
+
 	}
 
 }

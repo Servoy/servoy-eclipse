@@ -160,7 +160,7 @@ public abstract class JSUnitTestListenerHandler<T, E>
 		applyShouldStopToJSIfNeeded();
 
 		Test currentTest = testList.get(startedTestsCount);
-		JSUnitToJavaRunner.setCurentlyExecutingTest(getTestName(currentTest)); // TODO ugly static access; this should be refactored
+		testStarted(currentTest);
 
 		if (sameName(currentTest, testName))
 		{
@@ -177,13 +177,22 @@ public abstract class JSUnitTestListenerHandler<T, E>
 		}
 	}
 
+	/**
+	 * Subclasses can override when they need to do something extra.
+	 */
+	protected void testStarted(@SuppressWarnings("unused")
+	Test currentTest)
+	{
+		// nothing to do here
+	}
+
 	private boolean sameName(Test test, String testName)
 	{
 		String name = getTestName(test);
 		return (name == testName) || (name != null && name.equals(testName));
 	}
 
-	private String getTestName(Test test)
+	protected String getTestName(Test test)
 	{
 		String name = null;
 		if (test instanceof TestCase)

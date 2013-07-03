@@ -249,6 +249,13 @@ public class JSUnitRhinoTestListenerHandler extends JSUnitTestListenerHandler<Ob
 		});
 	}
 
+	@Override
+	protected void testStarted(Test currentTest)
+	{
+		super.testStarted(currentTest);
+		JSUnitToJavaRunner.setCurentlyExecutingTest(getTestName(currentTest)); // TODO ugly static access; this should be refactored
+	}
+
 	private void wrapInContext(Runnable r)
 	{
 		boolean contextEntered = false;

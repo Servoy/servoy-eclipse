@@ -42,9 +42,14 @@ import org.json.JSONObject;
 
 import com.servoy.base.persistence.constants.IComponentConstants;
 import com.servoy.base.persistence.constants.IValueListConstants;
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.exporter.mobile.Activator;
+import com.servoy.eclipse.jsunit.runner.JSUnitToJavaRunner;
+import com.servoy.eclipse.jsunit.runner.SolutionJSUnitSuiteCodeBuilder;
+import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.IValueFilter;
@@ -80,6 +85,8 @@ import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
+
+import de.berlios.jsunit.JsUnitException;
 
 /**
  * @author lvostinar
@@ -131,6 +138,8 @@ public class MobileExporter
 	private File configFile = null;
 	private boolean skipConnect = false;
 	private boolean useTestWar = false;
+	private String testSuiteCode;
+
 
 	private String doMediaExport(ZipOutputStream zos, File outputFolder) throws IOException
 	{
@@ -421,7 +430,8 @@ public class MobileExporter
 				String htmlFile = useTestWar ? HTML_TEST_FILE : HTML_FILE;
 				Map<String, String> renameMap = new HashMap<String, String>();
 				buildRenameEntriesList(renameMap);
-				exportedFile = new File(outputFolder, solutionName + (useTestWar ? "_TEST" : "") + (exportAsZip ? ".zip" : ".war"));
+				String fileNameWithoutExtension = solutionName + (useTestWar ? "_TEST" : "");
+				exportedFile = new File(outputFolder, fileNameWithoutExtension + (exportAsZip ? ".zip" : ".war"));
 				warStream = new ZipOutputStream(new FileOutputStream(exportedFile));
 
 				String mediaExport = doMediaExport(warStream, developmentWorkspaceExport ? outputFolder : null);
@@ -456,6 +466,13 @@ public class MobileExporter
 						}
 						contentStream = Utils.getUTF8EncodedStream(fileContent);
 					}
+					else if (useTestWar && entryName.equals("WEB-INF/web.xml"))
+					{
+						String fileContent = Utils.getTXTFileContent(zipStream, Charset.forName("UTF8"), false);
+						fileContent = fileContent.replaceAll(Pattern.quote("___DEPLOYED_CONTEXT_NAME___"), fileNameWithoutExtension);
+						contentStream = Utils.getUTF8EncodedStream(fileContent);
+					}
+
 					if (renameMap.containsKey(entryName))
 					{
 						entryName = renameMap.get(entryName);
@@ -469,6 +486,8 @@ public class MobileExporter
 				}
 				addZipEntry(moduleName + "/" + renameMap.get("solution_json.js"), warStream, Utils.getUTF8EncodedStream(formJson));
 				addZipEntry(moduleName + "/" + renameMap.get("solution.js"), warStream, Utils.getUTF8EncodedStream(solutionJavascript));
+				if (useTestWar && testSuiteCode != null) addZipEntry(moduleName + "/" + renameMap.get("testSuite_generatedCode.js"), warStream,
+					Utils.getUTF8EncodedStream(testSuiteCode));
 				if (exportAsZip && configFile != null && configFile.exists())
 				{
 					InputStream configStream = new FileInputStream(configFile);
@@ -505,6 +524,8 @@ public class MobileExporter
 		addRenameEntries(renameMap, moduleName + "/", "servoy_utils", ".js");
 		addRenameEntries(renameMap, moduleName + "/", "servoy", ".css");
 		addRenameEntries(renameMap, moduleName + "/", moduleName + ".nocache", ".js");
+
+		if (useTestWar && testSuiteCode != null) addRenameEntries(renameMap, moduleName + "/", "testSuite_generatedCode", ".js");
 	}
 
 	private void addRenameEntries(Map<String, String> renameMap, String prefixLocation, String name, String subfix)
@@ -772,8 +793,47 @@ public class MobileExporter
 	/**
 	 * By default this is false. If set to true, a unit test - mobile client war will be exported instead of the normal mobile client war.
 	 */
-	public void setUseTestWar(boolean useTestWar)
+	public void useTestWar(TestTarget testTarget)
 	{
 		this.useTestWar = true;
+
+		// include js code needed for testing inside the .war file
+		// this means the actual JS unit test suite code for the solution & the starting test suite class to be given to the jsunit runner
+		// + needed jsunit libs and related needed code
+
+		// libs & other needed JS code
+		StringBuffer testCode = new StringBuffer(1024);
+		appendTestingJSCodeDependencies(testCode);
+
+		// actual custom test suite code
+		ServoyModel model = ServoyModelManager.getServoyModelManager().getServoyModel();
+		ServoyProject sp = model.getActiveProject();
+		Solution s;
+		FlattenedSolution flattenedSolution = model.getFlattenedSolution();
+		SolutionJSUnitSuiteCodeBuilder builder = new SolutionJSUnitSuiteCodeBuilder();
+		if (sp == null || (s = sp.getSolution()) == null || flattenedSolution == null)
+		{
+			builder.initializeWithError("Cannot create JS Unit suite. Can't find active solution."); //$NON-NLS-1$
+		}
+		else
+		{
+			builder.initializeWithSolution(s, flattenedSolution, testTarget);
+		}
+
+		testCode.append("if (typeof(this.CustonTestSuiteCodeLoaded) == 'undefined') {\nthis.CustonTestSuiteCodeLoaded = 1;\n"); //$NON-NLS-1$
+		testCode.append("var __rootTestSuiteClassName = '" + builder.getRootTestClassName() + "';\n\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		testCode.append(builder.getCode());
+		testCode.append("\n}"); //$NON-NLS-1$
+
+		this.testSuiteCode = testCode.toString();
 	}
+
+	public void appendTestingJSCodeDependencies(StringBuffer testCode)
+	{
+		testCode.append(JSUnitToJavaRunner.getScriptAsStringFromResource("this.JsUtilLoaded", JsUnitException.class, "/JsUtil.js").replace( //$NON-NLS-1$//$NON-NLS-2$
+			"var r = /function (\\w+)(", "var r = /function *(\\w*)(\\(")); // if you had "function(){}" with no space after "function", a wrong function name could appear in the call stack //$NON-NLS-1$//$NON-NLS-2$ 
+		testCode.append(JSUnitToJavaRunner.getScriptAsStringFromResource("this.TestCaseLoaded", JsUnitException.class, "/JsUnit.js")); //$NON-NLS-1$//$NON-NLS-2$
+		testCode.append(JSUnitToJavaRunner.getScriptAsStringFromResource("this.JsUnitToJavaLoaded", JSUnitToJavaRunner.class, "JsUnitToJava.js")); //$NON-NLS-1$//$NON-NLS-2$
+	}
+
 }

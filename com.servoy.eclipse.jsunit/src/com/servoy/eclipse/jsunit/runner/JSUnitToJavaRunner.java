@@ -46,7 +46,6 @@ import de.berlios.jsunit.JsUnitRuntimeException;
 @SuppressWarnings("nls")
 public class JSUnitToJavaRunner
 {
-	public final static Object NEXT_CHILD_GROUP = null;
 	public final static String ASSERTION_EXCEPTION_MESSAGE = "just for stack";
 	private final static String TEST_LISTENER_NAME = "javaTestListener";
 

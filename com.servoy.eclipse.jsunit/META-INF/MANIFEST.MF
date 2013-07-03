@@ -35,5 +35,6 @@ Export-Package: com.servoy.eclipse.jsunit,
  com.servoy.eclipse.jsunit.launch,
  com.servoy.eclipse.jsunit.mobile,
  com.servoy.eclipse.jsunit.runner,
- com.servoy.eclipse.jsunit.scriptunit
+ com.servoy.eclipse.jsunit.scriptunit,
+ de.berlios.jsunit
 Import-Package: org.eclipse.jface.text

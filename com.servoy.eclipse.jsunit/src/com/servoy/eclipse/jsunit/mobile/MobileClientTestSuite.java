@@ -23,6 +23,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import com.servoy.eclipse.jsunit.mobile.SuiteBridge.ICancelMonitor;
 import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.jsunit.scriptunit.RemoteScriptUnitRunnerClient;
 import com.servoy.eclipse.jsunit.scriptunit.ScriptUnitTestRunNotifier;
@@ -48,7 +49,14 @@ public class MobileClientTestSuite extends TestSuite
 		this.target = target;
 		this.remoteScriptUnitRunnerClient = remoteScriptUnitRunnerClient;
 
-		bridge.createTestTree(this, staticLaunchMonitor);
+		bridge.createTestTree(this, new ICancelMonitor()
+		{
+			@Override
+			public boolean isCanceled()
+			{
+				return staticLaunchMonitor.isCanceled();
+			}
+		});
 	}
 
 	public static void prepare(SuiteBridge bridge, TestTarget target, RemoteScriptUnitRunnerClient remoteScriptUnitRunnerClient, IProgressMonitor launchMonitor)
@@ -70,7 +78,7 @@ public class MobileClientTestSuite extends TestSuite
 		if (remoteScriptUnitRunnerClient != null) remoteScriptUnitRunnerClient.setTestResultReference(result); // this direct reference to "result" is needed so that
 		// a potential STOP from the UI reaches the "result" directly instead of waiting for the next listener event;
 		// because in this case that flag can be tested from time to time while waiting for the client to connect - so it could actually STOP while waiting indefinitely (or a long time) for the client.
-		// otherwise it could just wait forever or until you use the stop in the JUnit view...
+		// otherwise it could just wait forever or until a timeout occurs...
 
 		ScriptUnitTestRunNotifier scriptUnitNotifier = new ScriptUnitTestRunNotifier(bridge.getTestList(), result);
 		result.addListener(scriptUnitNotifier);

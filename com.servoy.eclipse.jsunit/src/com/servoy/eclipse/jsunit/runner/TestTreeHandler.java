@@ -31,6 +31,8 @@ import junit.framework.TestSuite;
 public class TestTreeHandler
 {
 
+	public final static Object NEXT_CHILD_GROUP = null;
+
 	protected String[] sourceTestTree;
 	protected TestSuite rootSuite;
 
@@ -57,10 +59,10 @@ public class TestTreeHandler
 		for (int i = 2; i < sourceTestTree.length; i++)
 		{
 			String currentElement = sourceTestTree[i];
-			if (currentElement == JSUnitToJavaRunner.NEXT_CHILD_GROUP)
+			if (currentElement == NEXT_CHILD_GROUP)
 			{
 				isTestSuite[currentParent++] = hasChildren;
-				while ((currentParent < sourceTestTree.length) && (sourceTestTree[currentParent] == JSUnitToJavaRunner.NEXT_CHILD_GROUP))
+				while ((currentParent < sourceTestTree.length) && (sourceTestTree[currentParent] == NEXT_CHILD_GROUP))
 				{
 					currentParent++;
 				}
@@ -83,10 +85,10 @@ public class TestTreeHandler
 		for (int i = 2; i < sourceTestTree.length; i++)
 		{
 			String currentElement = sourceTestTree[i];
-			if (currentElement == JSUnitToJavaRunner.NEXT_CHILD_GROUP)
+			if (currentElement == NEXT_CHILD_GROUP)
 			{
 				currentParent++;
-				while ((currentParent < sourceTestTree.length) && (sourceTestTree[currentParent] == JSUnitToJavaRunner.NEXT_CHILD_GROUP))
+				while ((currentParent < sourceTestTree.length) && (sourceTestTree[currentParent] == NEXT_CHILD_GROUP))
 				{
 					currentParent++;
 				}

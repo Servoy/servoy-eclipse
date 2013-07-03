@@ -14,20 +14,16 @@ import com.servoy.eclipse.exporter.mobile.launch.IMobileLaunchConstants;
 import com.servoy.eclipse.exporter.mobile.launch.MobileLaunchConfigurationDelegate;
 import com.servoy.eclipse.jsunit.launch.JSUnitLaunchConfigurationDelegate;
 import com.servoy.eclipse.jsunit.mobile.RunMobileClientTests;
-import com.servoy.eclipse.jsunit.runner.SolutionJSUnitSuiteCodeBuilder;
 import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.jsunit.scriptunit.RunJSUnitTests;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.Solution;
 
 public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigurationDelegate
 {
 
 	private IWebBrowser webBrowser;
 	protected int bridgeID;
-	private SolutionJSUnitSuiteCodeBuilder builder;
 	private TestTarget testTarget;
 
 	@Override
@@ -67,25 +63,12 @@ public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigura
 	{
 		super.prepareExporter(exporter, configuration, launch, monitor);
 
-		exporter.setUseTestWar(true);
+		exporter.useTestWar(testTarget);
 
-		// prepare javascript suite and link launcher to dltk unit test view
-		ServoyModel model = ServoyModelManager.getServoyModelManager().getServoyModel();
-		ServoyProject sp = model.getActiveProject();
-		Solution s;
-		builder = new SolutionJSUnitSuiteCodeBuilder();
-		testTarget = JSUnitLaunchConfigurationDelegate.prepareForLaunch(configuration, launch);
 		if (monitor != null && monitor.isCanceled()) return;
 
-		FlattenedSolution flattenedSolution = model.getFlattenedSolution();
-		if (sp == null || (s = sp.getSolution()) == null || flattenedSolution == null)
-		{
-			builder.initializeWithError("Cannot create JS Unit suite. Can't find active solution."); //$NON-NLS-1$
-		}
-		else
-		{
-			builder.initializeWithSolution(s, flattenedSolution, testTarget);
-		}
+		// prepare javascript suite and link launcher to dltk unit test view
+		testTarget = JSUnitLaunchConfigurationDelegate.prepareForLaunch(configuration, launch);
 	}
 
 	@Override
@@ -111,7 +94,7 @@ public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigura
 
 		if (monitor != null && monitor.isCanceled()) return;
 
-		RunMobileClientTests runner = new RunMobileClientTests(testTarget, builder, launch, clientConnectTimeout, monitor)
+		RunMobileClientTests runner = new RunMobileClientTests(testTarget, launch, clientConnectTimeout, monitor)
 		{
 			@Override
 			protected void prepareForTesting()
