@@ -54,11 +54,11 @@ public interface IFileAccess
 
 	long getFileLength(String relativeFilePath) throws IOException;
 
-	String getProjectParentOSPath(String projectName);
+	String getWorkspaceOSPath(String projectName);
 
 	String[] list();
 
-	java.io.File getProjectParentFile(String projectName);
+	java.io.File getProjectFile(String projectName);
 
 	/**
 	 * Create if not existing yet. Also create parents when not existing yet.

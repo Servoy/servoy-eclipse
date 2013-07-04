@@ -63,15 +63,15 @@ public class PersistMatchingStrategy implements IEditorMatchingStrategy
 			// FUTURE: remove this if when form methods are edited in form editor
 			if (!fileInput.getFile().getFileExtension().equals(SolutionSerializer.JS_FILE_EXTENSION_WITHOUT_DOT))
 			{
-				File wsFile = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getProjectParentFile(fileInput.getFile().getProject().getName());
-				return findUuidParent(wsFile, fileInput.getFile().getLocation().toFile(), ((PersistEditorInput)editorInput).getUuid()) != null;
+				File projectFile = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getProjectFile(fileInput.getFile().getProject().getName());
+				return findUuidParent(projectFile, fileInput.getFile().getLocation().toFile(), ((PersistEditorInput)editorInput).getUuid()) != null;
 			}
 		}
 
 		return input.equals(editorInput);
 	}
 
-	protected File findUuidParent(File workspace, File file, UUID uuid)
+	protected File findUuidParent(File projectFile, File file, UUID uuid)
 	{
 		if (uuid == null || file == null)
 		{
@@ -81,7 +81,7 @@ public class PersistMatchingStrategy implements IEditorMatchingStrategy
 		{
 			return file;
 		}
-		File parentFile = SolutionSerializer.getParentFile(workspace, file);
-		return findUuidParent(workspace, parentFile, uuid);
+		File parentFile = SolutionSerializer.getParentFile(projectFile, file);
+		return findUuidParent(projectFile, parentFile, uuid);
 	}
 }

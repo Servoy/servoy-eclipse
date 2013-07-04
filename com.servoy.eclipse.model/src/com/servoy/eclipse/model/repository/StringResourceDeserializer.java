@@ -66,12 +66,12 @@ public class StringResourceDeserializer
 	 * @param resourcesProjectName the name of the resources project to use.
 	 * @return a list of root object meta datas deserialized from the given project (an empty array if no resources are found).
 	 */
-	public static RootObjectMetaData[] deserializeMetadatas(IDeveloperRepository eclipseRepository, File wsd, String resourcesProjectName, int objectTypeId)
-		throws RepositoryException
+	public static RootObjectMetaData[] deserializeMetadatas(IDeveloperRepository eclipseRepository, File projectFile, String resourcesProjectName,
+		int objectTypeId) throws RepositoryException
 	{
 		List<RootObjectMetaData> solutionMetadatas = new ArrayList<RootObjectMetaData>();
 
-		if (wsd != null && resourcesProjectName != null)
+		if (projectFile != null && resourcesProjectName != null)
 		{
 			String dirName;
 			switch (objectTypeId)
@@ -86,7 +86,7 @@ public class StringResourceDeserializer
 					throw new IllegalArgumentException("Unknown resource type: " + objectTypeId);
 
 			}
-			File[] files = new File(new File(wsd, resourcesProjectName), dirName).listFiles();
+			File[] files = new File(projectFile, dirName).listFiles();
 			if (files != null)
 			{
 				for (File resourceFile : files)
@@ -197,11 +197,12 @@ public class StringResourceDeserializer
 		}
 	}
 
-	public static StringResource readStringResource(IDeveloperRepository eclipseRepository, File wsd, String resourcesProjectName, RootObjectMetaData romd)
-		throws RepositoryException
+	public static StringResource readStringResource(IDeveloperRepository eclipseRepository, File projectFile, String resourcesProjectName,
+		RootObjectMetaData romd) throws RepositoryException
 	{
 		StringResource resource = (StringResource)eclipseRepository.createRootObject(romd);
-		File contentFile = new File(wsd, getStringResourceContentFilePath(resourcesProjectName, resource.getName(), romd.getObjectTypeId()));
+		File contentFile = new File(projectFile.getParentFile(), getStringResourceContentFilePath(resourcesProjectName, resource.getName(),
+			romd.getObjectTypeId()));
 		if (contentFile.exists())
 		{
 			resource.loadFromFile(contentFile);

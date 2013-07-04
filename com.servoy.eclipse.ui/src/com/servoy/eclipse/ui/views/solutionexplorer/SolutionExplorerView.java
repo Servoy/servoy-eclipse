@@ -3094,14 +3094,14 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		if (resourceFile == null) return false;
 
 		UUID uuid;
-		File workspace = new WorkspaceFileAccess(resourceFile.getWorkspace()).getProjectParentFile(resourceFile.getProject().getName());
+		File projectFile = new WorkspaceFileAccess(resourceFile.getWorkspace()).getProjectFile(resourceFile.getProject().getName());
 		File f = resourceFile.getRawLocation().toFile();
 		uuid = SolutionDeserializer.getUUID(f);
 		ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(resourceFile.getProject().getName());
 		IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), uuid);
 		if (!(persist instanceof Form))
 		{
-			File parentFile = SolutionSerializer.getParentFile(workspace, f);
+			File parentFile = SolutionSerializer.getParentFile(projectFile, f);
 			if (parentFile != null) uuid = SolutionDeserializer.getUUID(parentFile);
 		}
 

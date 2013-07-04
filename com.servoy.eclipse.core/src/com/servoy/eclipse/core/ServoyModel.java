@@ -2336,7 +2336,7 @@ public class ServoyModel extends AbstractServoyModel
 			}
 		});
 
-		File wsDir = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getProjectParentFile(project.getName());
+		File projectFile = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getProjectFile(project.getName());
 		File mediaDir = new File(project.getLocation().toFile(), SolutionSerializer.MEDIAS_DIR);
 
 		boolean securityInfoChanged = false;
@@ -2438,7 +2438,7 @@ public class ServoyModel extends AbstractServoyModel
 				eclipseRepository.updateNodesInWorkspace(new IPersist[] { media }, false, false);
 			}
 
-			File parentFile = SolutionSerializer.getParentFile(wsDir, file);
+			File parentFile = SolutionSerializer.getParentFile(projectFile, file);
 			if (parentFile == null || !parentFile.exists())
 			{
 				// parent also deleted
@@ -2461,7 +2461,7 @@ public class ServoyModel extends AbstractServoyModel
 			for (IPersist child : Utils.asArray(((ISupportChilds)parent).getAllObjects(), IPersist.class))
 			{
 				Pair<String, String> filePath = SolutionSerializer.getFilePath(child, false);
-				if (!new File(wsDir, filePath.getLeft() + filePath.getRight()).exists())
+				if (!new File(projectFile.getParentFile(), filePath.getLeft() + filePath.getRight()).exists())
 				{
 					// deleted persist
 					// delete the persist from the real solution

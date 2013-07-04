@@ -642,7 +642,7 @@ public class EditorUtil
 				if (nature instanceof ServoyProject)
 				{
 					File formFile = SolutionSerializer.getParentFile(
-						new WorkspaceFileAccess(ServoyModel.getWorkspace()).getProjectParentFile(file.getProject().getName()), file.getRawLocation().toFile());
+						new WorkspaceFileAccess(ServoyModel.getWorkspace()).getProjectFile(file.getProject().getName()), file.getRawLocation().toFile());
 					if (formFile != null)
 					{
 						UUID formUuid = SolutionDeserializer.getUUID(formFile);

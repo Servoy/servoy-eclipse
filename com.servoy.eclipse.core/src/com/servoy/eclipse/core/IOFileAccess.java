@@ -170,7 +170,7 @@ public class IOFileAccess implements IFileAccess
 		return getFile(relativeFilePath).length();
 	}
 
-	public String getProjectParentOSPath(String projectName)
+	public String getWorkspaceOSPath(String projectName)
 	{
 		return baseDir.getPath();
 	}
@@ -180,9 +180,9 @@ public class IOFileAccess implements IFileAccess
 		return baseDir.list();
 	}
 
-	public File getProjectParentFile(String projectName)
+	public File getProjectFile(String projectName)
 	{
-		return baseDir;
+		return projectName != null ? new File(baseDir, projectName) : null;
 	}
 
 	@Override

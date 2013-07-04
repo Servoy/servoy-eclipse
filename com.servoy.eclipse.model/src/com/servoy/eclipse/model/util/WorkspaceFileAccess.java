@@ -295,7 +295,7 @@ public class WorkspaceFileAccess implements IFileAccess
 		return workspaceRoot.getFile(new Path(relativeFilePath)).getLocation().toFile().length();
 	}
 
-	public String getProjectParentOSPath(String projectName)
+	public String getWorkspaceOSPath(String projectName)
 	{
 		if (projectName != null)
 		{
@@ -314,7 +314,7 @@ public class WorkspaceFileAccess implements IFileAccess
 		}
 		catch (CoreException e)
 		{
-			ServoyLog.logError("Could not list members for " + getProjectParentOSPath(null), e);
+			ServoyLog.logError("Could not list members for " + workspaceRoot.getLocation().toOSString(), e);
 			return new String[0];
 		}
 		String[] names = new String[members.length];
@@ -325,14 +325,14 @@ public class WorkspaceFileAccess implements IFileAccess
 		return names;
 	}
 
-	public File getProjectParentFile(String projectName)
+	public File getProjectFile(String projectName)
 	{
 		if (projectName != null)
 		{
 			IProject project = workspaceRoot.getProject(projectName);
-			if (project != null) return project.getLocation().removeLastSegments(1).toFile();
+			if (project != null) return project.getLocation().toFile();
 		}
-		return workspaceRoot.getLocation().toFile();
+		return null;
 	}
 
 	@Override

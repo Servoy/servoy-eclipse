@@ -400,13 +400,13 @@ public class SolutionSerializer
 		{
 			Solution s = (Solution)node.getAncestor(IRepository.SOLUTIONS);
 			throw new RepositoryException(
-				"Could not write object " + node + " to workspace directory " + fileAccess.getProjectParentOSPath(s != null ? s.getName() : null), e); //$NON-NLS-1$ //$NON-NLS-2$
+				"Could not write object " + node + " to workspace directory " + fileAccess.getWorkspaceOSPath(s != null ? s.getName() : null), e); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		catch (JSONException e)
 		{
 			Solution s = (Solution)node.getAncestor(IRepository.SOLUTIONS);
 			throw new RepositoryException(
-				"Could not write object " + node + " to workspace directory " + fileAccess.getProjectParentOSPath(s != null ? s.getName() : null), e); //$NON-NLS-1$ //$NON-NLS-2$
+				"Could not write object " + node + " to workspace directory " + fileAccess.getWorkspaceOSPath(s != null ? s.getName() : null), e); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
@@ -1174,9 +1174,9 @@ public class SolutionSerializer
 	 * @param file
 	 * @return
 	 */
-	public static File getParentFile(File workspace, File file)
+	public static File getParentFile(File projectFile, File file)
 	{
-		if (file == null || file.equals(workspace))
+		if (file == null || file.equals(projectFile.getParentFile()))
 		{
 			// at the root
 			return null;
@@ -1184,7 +1184,7 @@ public class SolutionSerializer
 
 		File dir = file.getParentFile();
 		String fileName = file.getName();
-		if (dir.getParentFile().equals(workspace))
+		if (dir.equals(projectFile))
 		{
 			// in the solution directory
 
@@ -1241,7 +1241,7 @@ public class SolutionSerializer
 			}
 		}
 		// try one level up
-		return getParentFile(workspace, dir);
+		return getParentFile(projectFile, dir);
 	}
 
 	public static String getFormNameForJSFile(IResource resource)

@@ -133,7 +133,7 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 		String[] dirs = wsa.list();
 		for (String element : dirs)
 		{
-			SolutionMetaData smd = SolutionDeserializer.deserializeRootMetaData(this, wsa.getProjectParentFile(element), element);
+			SolutionMetaData smd = SolutionDeserializer.deserializeRootMetaData(this, wsa.getProjectFile(element), element);
 			if (smd != null) retval.add(smd);
 		}
 		return retval;
@@ -195,7 +195,7 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 					ServoyResourcesProject resourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
 					if (resourcesProject != null)
 					{
-						rootObject = StringResourceDeserializer.readStringResource(this, wsa.getProjectParentFile(resourcesProject.getProject().getName()),
+						rootObject = StringResourceDeserializer.readStringResource(this, wsa.getProjectFile(resourcesProject.getProject().getName()),
 							resourcesProject.getProject().getName(), romd);
 						if (rootObject == null)
 						{
@@ -217,7 +217,7 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 					ServoyProject sp = ServoyModelFinder.getServoyModel().getServoyProject(romd.getName());
 					SolutionDeserializer sd = new SolutionDeserializer(this, sp);
 					long time = System.currentTimeMillis();
-					rootObject = sd.readSolution(wsa.getProjectParentFile(romd.getName()), (SolutionMetaData)romd, null, false);
+					rootObject = sd.readSolution(wsa.getProjectFile(romd.getName()), (SolutionMetaData)romd, null, false);
 					if (rootObject == null)
 					{
 						ServoyLog.logError("Could not read solution " + romd.getName(), null);
@@ -300,7 +300,7 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 		// register new styles/templates	
 		try
 		{
-			RootObjectMetaData[] rmds = StringResourceDeserializer.deserializeMetadatas(this, wsa.getProjectParentFile(resourcesProjectName), resourcesProjectName,
+			RootObjectMetaData[] rmds = StringResourceDeserializer.deserializeMetadatas(this, wsa.getProjectFile(resourcesProjectName), resourcesProjectName,
 				objectTypeId);
 			for (RootObjectMetaData meta : rmds)
 			{
@@ -315,7 +315,7 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 
 	public RootObjectMetaData[] deserializeMetaDatas(String resourcesProjectName, int objectTypeId) throws RepositoryException
 	{
-		return StringResourceDeserializer.deserializeMetadatas(this, wsa.getProjectParentFile(resourcesProjectName), resourcesProjectName, objectTypeId);
+		return StringResourceDeserializer.deserializeMetadatas(this, wsa.getProjectFile(resourcesProjectName), resourcesProjectName, objectTypeId);
 	}
 
 	/**
@@ -330,7 +330,7 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 		SolutionMetaData smd = null;
 		try
 		{
-			smd = SolutionDeserializer.deserializeRootMetaData(this, wsa.getProjectParentFile(projectName), projectName);
+			smd = SolutionDeserializer.deserializeRootMetaData(this, wsa.getProjectFile(projectName), projectName);
 			if (smd != null)
 			{
 				addRootObjectMetaData(smd);

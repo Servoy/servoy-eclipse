@@ -508,8 +508,8 @@ public class RepositoryOperations
 			if (bResourceProject)
 			{
 				List<RootObjectMetaData> metaDatas = new ArrayList<RootObjectMetaData>();
-				for (RootObjectMetaData metaData : StringResourceDeserializer.deserializeMetadatas(eclipseRepository, tempWsDir, project.getName(),
-					IRepository.STYLES))
+				for (RootObjectMetaData metaData : StringResourceDeserializer.deserializeMetadatas(eclipseRepository, new File(tempWsDir, project.getName()),
+					project.getName(), IRepository.STYLES))
 				{
 					if (changedStyles.contains(metaData.getName()))
 					{
@@ -517,8 +517,8 @@ public class RepositoryOperations
 						metaDatas.add(metaData);
 					}
 				}
-				for (RootObjectMetaData metaData : StringResourceDeserializer.deserializeMetadatas(eclipseRepository, tempWsDir, project.getName(),
-					IRepository.TEMPLATES))
+				for (RootObjectMetaData metaData : StringResourceDeserializer.deserializeMetadatas(eclipseRepository, new File(tempWsDir, project.getName()),
+					project.getName(), IRepository.TEMPLATES))
 				{
 					if (changedTemplates.contains(metaData.getName()))
 					{
@@ -532,8 +532,8 @@ public class RepositoryOperations
 					RootObjectMetaData remoteRootObjectMetaData = repo.getRootObjectMetaData(metaData.getName(), metaData.getObjectTypeId());
 					if (remoteRootObjectMetaData != null) remoteResource = (StringResource)repo.getRootObject(metaData.getName(), metaData.getObjectTypeId(),
 						remoteRootObjectMetaData.getLatestRelease());
-					StringResource resource = StringResourceDeserializer.readStringResource(eclipseRepository, tempWsDir, project.getName(),
-						remoteResource == null ? metaData : (RootObjectMetaData)remoteResource.getMetaData());
+					StringResource resource = StringResourceDeserializer.readStringResource(eclipseRepository, new File(tempWsDir, project.getName()),
+						project.getName(), remoteResource == null ? metaData : (RootObjectMetaData)remoteResource.getMetaData());
 
 					if (remoteResource != null)
 					{
@@ -609,9 +609,10 @@ public class RepositoryOperations
 				if (remoteSolution != null) eclipseRepository.loadForeignElementsIDs(remoteSolution);
 				SolutionDeserializer solutionDeserializer = new SolutionDeserializer(eclipseRepository, null);
 
-				SolutionMetaData smd = SolutionDeserializer.deserializeRootMetaData(eclipseRepository, tempWsDir, pTeamProperties.getSolutionName());
+				SolutionMetaData smd = SolutionDeserializer.deserializeRootMetaData(eclipseRepository, new File(tempWsDir, pTeamProperties.getSolutionName()),
+					pTeamProperties.getSolutionName());
 				if (smd != null) smd.flagChanged();
-				final Solution solution = solutionDeserializer.readSolution(tempWsDir, smd, changedFiles, true);
+				final Solution solution = solutionDeserializer.readSolution(new File(tempWsDir, smd.getName()), smd, changedFiles, true);
 				if (solution != null)
 				{
 					solution.setRepository(repo);

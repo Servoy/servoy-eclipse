@@ -194,7 +194,7 @@ public class SolutionDeserializer
 		return solutionUUIDs;
 	}
 
-	public Solution readSolution(File workspace_dir, SolutionMetaData smd, List<File> changedFiles, boolean useFilesForDirtyMark) throws RepositoryException
+	public Solution readSolution(File projectDir, SolutionMetaData smd, List<File> changedFiles, boolean useFilesForDirtyMark) throws RepositoryException
 	{
 		if (smd == null) return null;
 
@@ -204,7 +204,7 @@ public class SolutionDeserializer
 		HashSet<UUID> solutionUUIDs = getAlreadyUsedUUIDsForSolution(solution.getUUID());
 		solutionUUIDs.clear();
 
-		updateSolution(new File(workspace_dir, smd.getName()), solution, changedFiles, null, true, useFilesForDirtyMark);
+		updateSolution(projectDir, solution, changedFiles, null, true, useFilesForDirtyMark);
 
 		if (!useFilesForDirtyMark)
 		{
@@ -2035,11 +2035,11 @@ public class SolutionDeserializer
 		return null;
 	}
 
-	public static SolutionMetaData deserializeRootMetaData(IDeveloperRepository repository, File wsd, String name) throws RepositoryException
+	public static SolutionMetaData deserializeRootMetaData(IDeveloperRepository repository, File projectFile, String name) throws RepositoryException
 	{
 		try
 		{
-			File frmd = new File(wsd, name + '/' + SolutionSerializer.ROOT_METADATA);
+			File frmd = new File(projectFile, SolutionSerializer.ROOT_METADATA);
 			String solutionmetadata = Utils.getTXTFileContent(frmd);
 			if (solutionmetadata == null) return null;
 
@@ -2079,7 +2079,7 @@ public class SolutionDeserializer
 		}
 		catch (JSONException e)
 		{
-			throw new RepositoryException("Cannot get root meta data from file " + wsd, e); //$NON-NLS-1$
+			throw new RepositoryException("Cannot get root meta data from file " + projectFile, e); //$NON-NLS-1$
 		}
 	}
 

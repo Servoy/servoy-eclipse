@@ -66,8 +66,8 @@ public class DebugMethod implements IViewActionDelegate
 			if (servoyProject != null && servoyProject.getProject().isOpen())
 			{
 				Solution sol = servoyProject.getSolution();
-				File workspaceDir = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getProjectParentFile(sol.getName());
-				File parentFile = SolutionSerializer.getParentFile(workspaceDir, new File(workspaceDir, path.toString()));
+				File projectFile = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getProjectFile(sol.getName());
+				File parentFile = SolutionSerializer.getParentFile(projectFile, new File(projectFile.getParentFile(), path.toString()));
 				UUID uuid = SolutionDeserializer.getUUID(parentFile);
 
 				IPersist parent = AbstractRepository.searchPersist(sol, uuid);
