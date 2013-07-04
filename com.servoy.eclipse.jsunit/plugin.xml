@@ -162,7 +162,7 @@
     <definition
           id="com.servoy.eclipse.jsunit.selectionIsTestTarget">
        <with
-             variable="activeMenuSelection">
+             variable="selection">
              <iterate
                    ifEmpty="false">
                 <adapt
