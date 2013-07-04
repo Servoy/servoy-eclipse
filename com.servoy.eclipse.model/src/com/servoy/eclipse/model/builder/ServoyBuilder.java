@@ -1390,7 +1390,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName(), "Solution '" + solution.getName() +
 								"' has a loginForm property set which is overridden by the loginSolutionName property.");
 					}
-					else if (solution.getSolutionType() != SolutionMetaData.WEB_CLIENT_ONLY)
+					else if (solution.getSolutionType() != SolutionMetaData.WEB_CLIENT_ONLY && solution.getSolutionType() != SolutionMetaData.MOBILE)
 					{
 						// loginForm is deprecated
 						addDeprecatedPropertyUsageMarker(persist, project, DEPRECATED_PROPERTY_USAGE_PROBLEM,

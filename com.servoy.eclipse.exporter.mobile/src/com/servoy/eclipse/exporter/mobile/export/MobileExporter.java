@@ -343,6 +343,10 @@ public class MobileExporter
 					generateMethodCall(solution, solution, StaticContentSpecLoader.PROPERTY_ONOPENMETHODID.getPropertyName(), onOpenMethodID));
 			}
 
+			if (solution.getLoginFormID() > 0)
+			{
+				solutionModel.put("loginForm", flattenedSolution.getForm(solution.getLoginFormID()).getName());
+			}
 			if (flattenedSolution.getSolution().getI18nDataSource() != null)
 			{
 				EclipseMessages messagesManager = ServoyModelManager.getServoyModelManager().getServoyModel().getMessagesManager();

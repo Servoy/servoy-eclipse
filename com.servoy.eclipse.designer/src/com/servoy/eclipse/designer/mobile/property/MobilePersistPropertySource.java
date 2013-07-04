@@ -216,6 +216,10 @@ public class MobilePersistPropertySource extends PersistPropertySource
 				return false;
 			}
 		}
+		if (propertyDescriptor.propertyDescriptor.getName().equals("loginFormID"))
+		{
+			return true;
+		}
 		return super.shouldShow(propertyDescriptor);
 	}
 
