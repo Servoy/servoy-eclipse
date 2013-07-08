@@ -179,12 +179,15 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 	{
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		final ServoyProject activeProject = servoyModel.getActiveProject();
-		boolean enabled = false;
+		boolean enabled = true;
 		if (activeProject != null && activeProject.getSolution() != null)
 		{
 			final Solution solution = activeProject.getSolution();
-			if (solution.getSolutionType() == SolutionMetaData.SOLUTION || solution.getSolutionType() == SolutionMetaData.WEB_CLIENT_ONLY ||
-				solution.getSolutionType() == SolutionMetaData.MOBILE) enabled = true;
+			if (solution.getSolutionType() == SolutionMetaData.SMART_CLIENT_ONLY || solution.getSolutionType() == SolutionMetaData.MOBILE_MODULE) enabled = false;
+		}
+		else
+		{
+			enabled = false;
 		}
 		action.setEnabled(enabled);
 	}
