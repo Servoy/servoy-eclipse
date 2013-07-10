@@ -18613,7 +18613,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc" name="newCalendar">
+        <function clientSupport="mc" deprecated="true" name="newCalendar">
           <argumentsTypes>
             <argumentType typecode="com.servoy.base.solutionmodel.IBaseSMVariable"/>
             <argumentType typecode="int"/>
@@ -18625,6 +18625,7 @@ forms['newForm1'].controller.show();]]></sample>
           <summaries>
             <summary clientSupport="mc"><![CDATA[Creates a new JSCalendar object on the footer.]]></summary>
           </summaries>
+          <deprecated><![CDATA[Possible future api]]></deprecated>
           <samples>
             <sample clientSupport="mc"><![CDATA[var form = solutionModel.getForm('myform')
 var footer = form.getForm('myform').newFooter()
@@ -18640,7 +18641,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc" name="newCalendar">
+        <function clientSupport="mc" deprecated="true" name="newCalendar">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="int"/>
@@ -18652,6 +18653,7 @@ forms['newForm1'].controller.show();]]></sample>
           <summaries>
             <summary clientSupport="mc"><![CDATA[Creates a new JSCalendar object on the footer.]]></summary>
           </summaries>
+          <deprecated><![CDATA[Possible future api]]></deprecated>
           <samples>
             <sample clientSupport="mc"><![CDATA[var form = solutionModel.getForm('myform')
 var footer = form.getForm('myform').newFooter()
@@ -18667,7 +18669,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc" name="newCheck">
+        <function clientSupport="mc" deprecated="true" name="newCheck">
           <argumentsTypes>
             <argumentType typecode="com.servoy.base.solutionmodel.IBaseSMVariable"/>
             <argumentType typecode="int"/>
@@ -18679,6 +18681,7 @@ forms['newForm1'].controller.show();]]></sample>
           <summaries>
             <summary clientSupport="mc"><![CDATA[Creates a new JSChecks object on the footer.]]></summary>
           </summaries>
+          <deprecated><![CDATA[Possible future api]]></deprecated>
           <samples>
             <sample clientSupport="mc"><![CDATA[var form = solutionModel.getForm('myform')
 var footer = form.getForm('myform').newFooter()
@@ -18694,7 +18697,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc" name="newCheck">
+        <function clientSupport="mc" deprecated="true" name="newCheck">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="int"/>
@@ -18706,6 +18709,7 @@ forms['newForm1'].controller.show();]]></sample>
           <summaries>
             <summary clientSupport="mc"><![CDATA[Creates a new JSChecks object on the footer.]]></summary>
           </summaries>
+          <deprecated><![CDATA[Possible future api]]></deprecated>
           <samples>
             <sample clientSupport="mc"><![CDATA[var form = solutionModel.getForm('myform')
 var footer = form.getForm('myform').newFooter()
@@ -18721,7 +18725,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc" name="newCombobox">
+        <function clientSupport="mc" deprecated="true" name="newCombobox">
           <argumentsTypes>
             <argumentType typecode="com.servoy.base.solutionmodel.IBaseSMVariable"/>
             <argumentType typecode="int"/>
@@ -18733,6 +18737,7 @@ forms['newForm1'].controller.show();]]></sample>
           <summaries>
             <summary clientSupport="mc"><![CDATA[Creates a new JSCombobox object on the footer.]]></summary>
           </summaries>
+          <deprecated><![CDATA[Possible future api]]></deprecated>
           <samples>
             <sample clientSupport="mc"><![CDATA[var form = solutionModel.getForm('myform')
 var footer = form.getForm('myform').newFooter()
@@ -18748,7 +18753,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc" name="newCombobox">
+        <function clientSupport="mc" deprecated="true" name="newCombobox">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="int"/>
@@ -18760,6 +18765,7 @@ forms['newForm1'].controller.show();]]></sample>
           <summaries>
             <summary clientSupport="mc"><![CDATA[Creates a new JSCombobox object on the footer.]]></summary>
           </summaries>
+          <deprecated><![CDATA[Possible future api]]></deprecated>
           <samples>
             <sample clientSupport="mc"><![CDATA[var form = solutionModel.getForm('myform')
 var footer = form.getForm('myform').newFooter()
@@ -18775,7 +18781,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc" name="newField">
+        <function clientSupport="mc" deprecated="true" name="newField">
           <argumentsTypes>
             <argumentType typecode="com.servoy.base.solutionmodel.IBaseSMVariable"/>
             <argumentType typecode="int"/>
@@ -18788,6 +18794,7 @@ forms['newForm1'].controller.show();]]></sample>
           <summaries>
             <summary clientSupport="mc"><![CDATA[Creates a new JSField object on the footer.]]></summary>
           </summaries>
+          <deprecated><![CDATA[Possible future api]]></deprecated>
           <samples>
             <sample clientSupport="mc"><![CDATA[var form = solutionModel.getForm('myform')
 var footer = form.getForm('myform').newFooter()
@@ -18806,7 +18813,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc" name="newField">
+        <function clientSupport="mc" deprecated="true" name="newField">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="int"/>
@@ -18819,6 +18826,7 @@ forms['newForm1'].controller.show();]]></sample>
           <summaries>
             <summary clientSupport="mc"><![CDATA[Creates a new JSField object on the footer.]]></summary>
           </summaries>
+          <deprecated><![CDATA[Possible future api]]></deprecated>
           <samples>
             <sample clientSupport="mc"><![CDATA[var form = solutionModel.getForm('myform')
 var footer = form.getForm('myform').newFooter()
@@ -18837,7 +18845,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc" name="newLabel">
+        <function clientSupport="mc" deprecated="true" name="newLabel">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="int"/>
@@ -18849,6 +18857,7 @@ forms['newForm1'].controller.show();]]></sample>
           <summaries>
             <summary clientSupport="mc"><![CDATA[Creates a new label on the footer.]]></summary>
           </summaries>
+          <deprecated><![CDATA[Possible future api]]></deprecated>
           <samples>
             <sample clientSupport="mc"><![CDATA[var form = solutionModel.getForm('myform')
 var footer = form.getForm('myform').newFooter()
@@ -18864,7 +18873,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc" name="newPassword">
+        <function clientSupport="mc" deprecated="true" name="newPassword">
           <argumentsTypes>
             <argumentType typecode="com.servoy.base.solutionmodel.IBaseSMVariable"/>
             <argumentType typecode="int"/>
@@ -18876,6 +18885,7 @@ forms['newForm1'].controller.show();]]></sample>
           <summaries>
             <summary clientSupport="mc"><![CDATA[Creates a new JSPassword object on the footer.]]></summary>
           </summaries>
+          <deprecated><![CDATA[Possible future api]]></deprecated>
           <samples>
             <sample clientSupport="mc"><![CDATA[var form = solutionModel.getForm('myform')
 var footer = form.getForm('myform').newFooter()
@@ -18891,7 +18901,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc" name="newPassword">
+        <function clientSupport="mc" deprecated="true" name="newPassword">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="int"/>
@@ -18903,6 +18913,7 @@ forms['newForm1'].controller.show();]]></sample>
           <summaries>
             <summary clientSupport="mc"><![CDATA[Creates a new JSPassword object on the footer.]]></summary>
           </summaries>
+          <deprecated><![CDATA[Possible future api]]></deprecated>
           <samples>
             <sample clientSupport="mc"><![CDATA[var form = solutionModel.getForm('myform')
 var footer = form.getForm('myform').newFooter()
@@ -18918,7 +18929,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc" name="newRadios">
+        <function clientSupport="mc" deprecated="true" name="newRadios">
           <argumentsTypes>
             <argumentType typecode="com.servoy.base.solutionmodel.IBaseSMVariable"/>
             <argumentType typecode="int"/>
@@ -18930,6 +18941,7 @@ forms['newForm1'].controller.show();]]></sample>
           <summaries>
             <summary clientSupport="mc"><![CDATA[Creates a new JSRadios object on the footer.]]></summary>
           </summaries>
+          <deprecated><![CDATA[Possible future api]]></deprecated>
           <samples>
             <sample clientSupport="mc"><![CDATA[var form = solutionModel.getForm('myform')
 var footer = form.getForm('myform').newFooter()
@@ -18945,7 +18957,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc" name="newRadios">
+        <function clientSupport="mc" deprecated="true" name="newRadios">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="int"/>
@@ -18957,6 +18969,7 @@ forms['newForm1'].controller.show();]]></sample>
           <summaries>
             <summary clientSupport="mc"><![CDATA[Creates a new JSRadios object on the footer.]]></summary>
           </summaries>
+          <deprecated><![CDATA[Possible future api]]></deprecated>
           <samples>
             <sample clientSupport="mc"><![CDATA[var form = solutionModel.getForm('myform')
 var footer = form.getForm('myform').newFooter()
@@ -18972,7 +18985,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc" name="newTextArea">
+        <function clientSupport="mc" deprecated="true" name="newTextArea">
           <argumentsTypes>
             <argumentType typecode="com.servoy.base.solutionmodel.IBaseSMVariable"/>
             <argumentType typecode="int"/>
@@ -18984,6 +18997,7 @@ forms['newForm1'].controller.show();]]></sample>
           <summaries>
             <summary clientSupport="mc"><![CDATA[Creates a new JSTextArea object on the footer.]]></summary>
           </summaries>
+          <deprecated><![CDATA[Possible future api]]></deprecated>
           <samples>
             <sample clientSupport="mc"><![CDATA[var form = solutionModel.getForm('myform')
 var footer = form.getForm('myform').newFooter()
@@ -18999,7 +19013,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc" name="newTextArea">
+        <function clientSupport="mc" deprecated="true" name="newTextArea">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="int"/>
@@ -19011,6 +19025,7 @@ forms['newForm1'].controller.show();]]></sample>
           <summaries>
             <summary clientSupport="mc"><![CDATA[Creates a new JSTextArea object on the footer.]]></summary>
           </summaries>
+          <deprecated><![CDATA[Possible future api]]></deprecated>
           <samples>
             <sample clientSupport="mc"><![CDATA[var form = solutionModel.getForm('myform')
 var footer = form.getForm('myform').newFooter()
@@ -19026,7 +19041,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc" name="newTextField">
+        <function clientSupport="mc" deprecated="true" name="newTextField">
           <argumentsTypes>
             <argumentType typecode="com.servoy.base.solutionmodel.IBaseSMVariable"/>
             <argumentType typecode="int"/>
@@ -19038,6 +19053,7 @@ forms['newForm1'].controller.show();]]></sample>
           <summaries>
             <summary clientSupport="mc"><![CDATA[Creates a new JSText object on the footer.]]></summary>
           </summaries>
+          <deprecated><![CDATA[Possible future api]]></deprecated>
           <samples>
             <sample clientSupport="mc"><![CDATA[var form = solutionModel.getForm('myform')
 var footer = form.getForm('myform').newFooter()
@@ -19053,7 +19069,7 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc" name="newTextField">
+        <function clientSupport="mc" deprecated="true" name="newTextField">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="int"/>
@@ -19065,6 +19081,7 @@ forms['newForm1'].controller.show();]]></sample>
           <summaries>
             <summary clientSupport="mc"><![CDATA[Creates a new JSText object on the footer.]]></summary>
           </summaries>
+          <deprecated><![CDATA[Possible future api]]></deprecated>
           <samples>
             <sample clientSupport="mc"><![CDATA[var form = solutionModel.getForm('myform')
 var footer = form.getForm('myform').newFooter()
