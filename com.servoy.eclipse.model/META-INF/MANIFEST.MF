@@ -10,13 +10,18 @@ Require-Bundle: servoy_shared,
  org.eclipse.core.runtime,
  org.eclipse.wst.css.core,
  org.eclipse.dltk.javascript.parser,
- org.eclipse.dltk.core
+ org.eclipse.dltk.core,
+ servoy_debug,
+ servoy_smart_client,
+ servoy_headless_client
 Export-Package: com.servoy.eclipse.model,
  com.servoy.eclipse.model.builder,
  com.servoy.eclipse.model.extensions,
+ com.servoy.eclipse.model.mobile.exporter,
  com.servoy.eclipse.model.nature,
  com.servoy.eclipse.model.preferences,
  com.servoy.eclipse.model.repository,
+ com.servoy.eclipse.model.test,
  com.servoy.eclipse.model.util
 Bundle-Activator: com.servoy.eclipse.model.Activator
 Bundle-ActivationPolicy: lazy

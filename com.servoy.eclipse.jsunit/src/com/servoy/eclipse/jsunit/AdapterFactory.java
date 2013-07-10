@@ -19,9 +19,9 @@ package com.servoy.eclipse.jsunit;
 import org.eclipse.core.runtime.IAdapterFactory;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.test.TestTarget;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.Form;

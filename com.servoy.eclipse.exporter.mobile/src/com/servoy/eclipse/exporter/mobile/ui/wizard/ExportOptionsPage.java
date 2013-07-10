@@ -28,7 +28,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import com.servoy.eclipse.exporter.mobile.export.MobileExporter;
+import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 
 /**
  * @author lvostinar
@@ -97,7 +97,7 @@ public class ExportOptionsPage extends WizardPage
 		String defaultServerURL = getDialogSettings().get(SERVER_URL_KEY);
 		if (defaultServerURL == null)
 		{
-			defaultServerURL = "http://localhost:8080";
+			defaultServerURL = MobileExporter.DEFAULT_SERVER_URL;
 		}
 		serverURL.setText(defaultServerURL);
 

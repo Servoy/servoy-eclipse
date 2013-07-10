@@ -29,7 +29,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import com.servoy.eclipse.exporter.mobile.export.MobileExporter;
+import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
 /**

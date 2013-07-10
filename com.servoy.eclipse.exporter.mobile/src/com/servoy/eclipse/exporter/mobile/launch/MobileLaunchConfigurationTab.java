@@ -358,7 +358,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		configuration.setAttribute(IMobileLaunchConstants.SOLUTION_NAME, activeProject.getSolution().getName());
 		configuration.setAttribute(IMobileLaunchConstants.SERVER_URL, IMobileLaunchConstants.DEFAULT_SERVICE_URL);
 		configuration.setAttribute(IMobileLaunchConstants.APPLICATION_URL, getDefaultApplicationURL());
-		configuration.setAttribute(IMobileLaunchConstants.TIMEOUT, "30");
+		configuration.setAttribute(IMobileLaunchConstants.TIMEOUT, IMobileLaunchConstants.DEFAULT_TIMEOUT);
 		configuration.setAttribute(IMobileLaunchConstants.NODEBUG, "true");
 		configuration.setAttribute(IMobileLaunchConstants.BROWSER_ID, "org.eclipse.ui.browser.chrome");
 		configuration.setAttribute(IMobileLaunchConstants.WAR_DEPLOYMENT_TIME, IMobileLaunchConstants.DEFAULT_WAR_DEPLOYMENT_TIME);
@@ -372,7 +372,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 			lblSolutionname.setText(configuration.getAttribute(IMobileLaunchConstants.SOLUTION_NAME, "not defined"));
 			txtServerURL.setText(configuration.getAttribute(IMobileLaunchConstants.SERVER_URL, IMobileLaunchConstants.DEFAULT_SERVICE_URL));
 			txtStartURL.setText(configuration.getAttribute(IMobileLaunchConstants.APPLICATION_URL, getDefaultApplicationURL()));
-			txtTimeout.setText(configuration.getAttribute(IMobileLaunchConstants.TIMEOUT, "30"));
+			txtTimeout.setText(configuration.getAttribute(IMobileLaunchConstants.TIMEOUT, IMobileLaunchConstants.DEFAULT_TIMEOUT));
 			checkNoDebug.setSelection(Boolean.valueOf(configuration.getAttribute(IMobileLaunchConstants.NODEBUG, "true")).booleanValue());
 			String browserId = configuration.getAttribute(IMobileLaunchConstants.BROWSER_ID, "default");
 			String browserName = (String)possibleBrowsersNames.get(browserId);

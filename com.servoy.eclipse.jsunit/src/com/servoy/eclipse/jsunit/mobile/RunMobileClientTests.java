@@ -23,8 +23,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 
 import com.servoy.base.test.IJSUnitSuiteHandler;
-import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.jsunit.scriptunit.RunJSUnitTests;
+import com.servoy.eclipse.model.test.TestTarget;
 import com.servoy.j2db.util.StaticSingletonMap;
 
 /**

@@ -53,8 +53,8 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.jsunit.SolutionRemoteTestRunner;
 import com.servoy.eclipse.jsunit.launch.JSUnitLaunchConfigurationDelegate;
 import com.servoy.eclipse.jsunit.runner.JSUnitTestListenerHandler;
-import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.test.TestTarget;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.RepositoryException;
 

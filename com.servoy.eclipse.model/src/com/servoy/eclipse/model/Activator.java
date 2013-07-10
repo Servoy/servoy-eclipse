@@ -23,12 +23,18 @@ import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.osgi.framework.BundleContext;
 
+import com.servoy.j2db.IApplication;
+
 /**
  * The activator class controls the plug-in life cycle
  * @author acostescu
  */
 public class Activator extends Plugin
 {
+
+	private IApplication mobileExportClient;
+
+	private DesignApplication designClient;
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "com.servoy.eclipse.model";
@@ -73,6 +79,43 @@ public class Activator extends Plugin
 	public IEclipsePreferences getEclipsePreferences(IProject project)
 	{
 		return new ProjectScope(project).getNode(PLUGIN_ID);
+	}
+
+	public DesignApplication getDesignClient()
+	{
+		if (designClient == null)
+		{
+			designClient = new DesignApplication();
+		}
+		return designClient;
+	}
+
+	public IApplication getMobileExportClient()
+	{
+		if (mobileExportClient == null)
+		{
+			mobileExportClient = new DesignApplication()
+			{
+				@Override
+				public String getI18NMessage(String i18nKey)
+				{
+					return i18nKey;
+				}
+
+				@Override
+				public String getI18NMessage(String i18nKey, Object[] array)
+				{
+					return i18nKey;
+				}
+
+				@Override
+				public String getI18NMessageIfPrefixed(String i18nKey)
+				{
+					return i18nKey;
+				}
+			};
+		}
+		return mobileExportClient;
 	}
 
 }

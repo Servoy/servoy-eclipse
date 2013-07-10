@@ -28,13 +28,19 @@ import org.eclipse.dltk.testing.DLTKTestingConstants;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
 import org.eclipse.dltk.testing.ITestingEngine;
 import org.eclipse.dltk.testing.TestingEngineManager;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.jsunit.RunSmartClientTests;
-import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.jsunit.scriptunit.JSUnitTestingEngine;
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.test.TestTarget;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.Solution;
 
 /**
  * TestTargets are stored in launch configurations.
@@ -70,7 +76,31 @@ public class JSUnitLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		/* DO THE ACTUAL EXECUTION */
 		String testTargetStr = configuration.getAttribute(JSUnitLaunchConfigurationDelegate.LAUNCH_CONFIG_INSTANCE,
 			TestTarget.activeProjectTarget().convertToString());
-		return TestTarget.convertFromString(testTargetStr);
+
+		TestTarget target = TestTarget.convertFromString(testTargetStr);
+
+		ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
+		Solution actualActiveSolution = activeProject != null ? activeProject.getSolution() : null;
+		final String actualActiveSolutionName = actualActiveSolution != null ? actualActiveSolution.getName() : null;
+		if (!target.getActiveSolution().getName().equals(actualActiveSolutionName))
+		{
+			final TestTarget tt = target;
+			UIUtils.runInUI(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+					UIUtils.showInformation(shell, "Cannot run target", "The currently launched configuration expects the active solution to be : " +
+						tt.getActiveSolution().getName() + " instead of " + actualActiveSolutionName + "\n Running current active solution");
+				}
+
+			}, false);
+			target = TestTarget.activeProjectTarget();
+		}
+
+		return target;
 	}
 
 	@Override

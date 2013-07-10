@@ -24,9 +24,9 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import com.servoy.eclipse.jsunit.mobile.SuiteBridge.ICancelMonitor;
-import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.jsunit.scriptunit.RemoteScriptUnitRunnerClient;
 import com.servoy.eclipse.jsunit.scriptunit.ScriptUnitTestRunNotifier;
+import com.servoy.eclipse.model.test.TestTarget;
 
 /**
  * Test suite that is generated and ran remotely from inside a mobile client browser.

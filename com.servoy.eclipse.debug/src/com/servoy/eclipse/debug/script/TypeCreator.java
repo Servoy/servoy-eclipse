@@ -82,7 +82,6 @@ import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.Scriptable;
 
 import com.servoy.base.util.DataSourceUtilsBase;
-import com.servoy.eclipse.core.DesignApplication;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.JSDeveloperSolutionModel;
@@ -90,6 +89,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.debug.Activator;
+import com.servoy.eclipse.model.DesignApplication;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;

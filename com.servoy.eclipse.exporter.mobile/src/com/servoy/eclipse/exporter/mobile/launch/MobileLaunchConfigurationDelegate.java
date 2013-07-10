@@ -19,7 +19,7 @@ import org.eclipse.ui.internal.browser.Messages;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.exporter.mobile.Activator;
-import com.servoy.eclipse.exporter.mobile.export.MobileExporter;
+import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -109,7 +109,7 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		if (warLocation.length() == 0) throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Invalid war export path"));
 		String solutionName = configuration.getAttribute(IMobileLaunchConstants.SOLUTION_NAME, "");
 		String serverUrl = configuration.getAttribute(IMobileLaunchConstants.SERVER_URL, "");
-		int timeout = Integer.valueOf(configuration.getAttribute(IMobileLaunchConstants.TIMEOUT, "30")).intValue();
+		int timeout = Integer.valueOf(configuration.getAttribute(IMobileLaunchConstants.TIMEOUT, IMobileLaunchConstants.DEFAULT_TIMEOUT)).intValue();
 		String company = configuration.getAttribute("company", "");
 		String license = configuration.getAttribute("license", "");
 		boolean validLicense = ApplicationServerSingleton.get().checkMobileLicense(company, license);

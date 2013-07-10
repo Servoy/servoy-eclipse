@@ -16,7 +16,7 @@
  */
 package com.servoy.eclipse.jsunit;
 
-import com.servoy.eclipse.jsunit.runner.TestTarget;
+import com.servoy.eclipse.model.test.TestTarget;
 
 /**
  * Classes that implement this interface should be able to provide a target for running JS Unit tests inside the active solution.

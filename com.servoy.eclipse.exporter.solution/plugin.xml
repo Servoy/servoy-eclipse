@@ -9,14 +9,26 @@
             thread="main"
             visible="true">
          <run
-               class="com.servoy.eclipse.exporter.WorkspaceExporter">
+               class="com.servoy.eclipse.exporter.apps.solution.WorkspaceExporter">
+         </run>
+      </application>
+   </extension>
+   <extension
+         id="com.servoy.eclipse.exporter.mobile.application"
+         point="org.eclipse.core.runtime.applications">
+      <application
+            cardinality="singleton-global"
+            thread="main"
+            visible="true">
+         <run
+               class="com.servoy.eclipse.exporter.apps.mobile.MobileWorkspaceExporter">
          </run>
       </application>
    </extension>
    <extension
          point="com.servoy.eclipse.model.modelProvider">
       <provider
-            class="com.servoy.eclipse.exporter.ServoyModelProvider"
+            class="com.servoy.eclipse.exporter.apps.common.ServoyModelProvider"
             id="com.servoy.eclipse.exporter.modelProvider"
             instance="exporter">
       </provider>

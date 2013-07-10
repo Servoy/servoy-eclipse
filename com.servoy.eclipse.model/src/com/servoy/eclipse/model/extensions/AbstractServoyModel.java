@@ -36,10 +36,12 @@ import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.util.AtomicIntegerWithListener;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.AbstractActiveSolutionHandler;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.Messages;
 import com.servoy.j2db.persistence.IActiveSolutionHandler;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -63,7 +65,15 @@ public abstract class AbstractServoyModel implements IServoyModel
 	private FlattenedSolution flattenedSolution;
 	private IActiveSolutionHandler activeSolutionHandler;
 
+	private final EclipseMessages messagesManager;
+
 	private final AtomicIntegerWithListener resourceChangesHandlerCounter = new AtomicIntegerWithListener();
+
+	public AbstractServoyModel()
+	{
+		messagesManager = new EclipseMessages();
+		Messages.customMessageLoader = messagesManager;
+	}
 
 	public ServoyProject getActiveProject()
 	{
@@ -455,6 +465,11 @@ public abstract class AbstractServoyModel implements IServoyModel
 	public AtomicIntegerWithListener getResourceChangesHandlerCounter()
 	{
 		return resourceChangesHandlerCounter;
+	}
+
+	public EclipseMessages getMessagesManager()
+	{
+		return messagesManager;
 	}
 
 	public void reportSaveError(Exception e)

@@ -18,7 +18,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.jsunit.SolutionUnitTestTarget;
 import com.servoy.eclipse.jsunit.launch.JSUnitLaunchConfigurationDelegate;
-import com.servoy.eclipse.jsunit.runner.TestTarget;
+import com.servoy.eclipse.model.test.TestTarget;
 import com.servoy.eclipse.model.util.ServoyLog;
 
 public class RunJSUnitHandler extends AbstractHandler

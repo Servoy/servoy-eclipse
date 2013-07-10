@@ -90,6 +90,7 @@ import org.osgi.service.url.URLStreamHandlerService;
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.DesignApplication;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.JSUnitUserManager;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -137,8 +138,6 @@ public class Activator extends Plugin
 	private volatile boolean defaultAccessed = false;
 
 	private Boolean sqlExplorerLoaded = null;
-
-	private DesignApplication designClient;
 
 	private IDesignerCallback designerCallback;
 
@@ -724,11 +723,7 @@ public class Activator extends Plugin
 
 	public DesignApplication getDesignClient()
 	{
-		if (designClient == null)
-		{
-			designClient = new DesignApplication();
-		}
-		return designClient;
+		return com.servoy.eclipse.model.Activator.getDefault().getDesignClient();
 	}
 
 	/**
@@ -778,9 +773,9 @@ public class Activator extends Plugin
 					{
 						public void activeProjectChanged(final ServoyProject project)
 						{
-							if (designClient != null)
+							if (getDesignClient() != null)
 							{
-								designClient.refreshI18NMessages();
+								getDesignClient().refreshI18NMessages();
 							}
 							// can this be really later? or should we wait?
 							// its much nice to do that later in the event thread.

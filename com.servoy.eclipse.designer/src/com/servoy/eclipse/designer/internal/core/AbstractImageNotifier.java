@@ -22,8 +22,8 @@ import javax.swing.JLabel;
 
 import org.eclipse.swt.graphics.ImageData;
 
-import com.servoy.eclipse.core.DesignApplication;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.DesignApplication;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IApplication;
 

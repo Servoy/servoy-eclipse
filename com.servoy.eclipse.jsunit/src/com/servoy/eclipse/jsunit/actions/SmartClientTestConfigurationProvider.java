@@ -7,8 +7,8 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.jsunit.launch.ITestLaunchConfigurationProvider;
-import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.test.TestTarget;
 
 
 public class SmartClientTestConfigurationProvider implements ITestLaunchConfigurationProvider

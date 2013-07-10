@@ -46,11 +46,11 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.exporter.mobile.export.MobileExporter;
 import com.servoy.eclipse.exporter.mobile.launch.IMobileLaunchConstants;
 import com.servoy.eclipse.exporter.mobile.launch.MobileLaunchConfigurationDelegate;
 import com.servoy.eclipse.exporter.mobile.launch.test.IMobileTestLaunchConstants;
 import com.servoy.eclipse.jsunit.launch.JSUnitLaunchConfigurationDelegate;
+import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Solution;

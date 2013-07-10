@@ -4,7 +4,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 
-import com.servoy.eclipse.jsunit.runner.TestTarget;
+import com.servoy.eclipse.model.test.TestTarget;
 
 /*
  This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2013 Servoy BV

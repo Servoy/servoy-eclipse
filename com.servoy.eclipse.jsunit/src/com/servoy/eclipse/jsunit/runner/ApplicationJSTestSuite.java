@@ -26,6 +26,8 @@ import junit.framework.TestResult;
 
 import org.mozilla.javascript.Scriptable;
 
+import com.servoy.eclipse.model.test.SolutionJSUnitSuiteCodeBuilder;
+import com.servoy.eclipse.model.test.TestTarget;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServiceProvider;
 import com.servoy.j2db.J2DBGlobals;

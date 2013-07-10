@@ -36,6 +36,8 @@ import com.servoy.eclipse.jsunit.runner.JSUnitToJavaRunner;
 import com.servoy.eclipse.jsunit.runner.TestTreeHandler;
 import com.servoy.j2db.util.StaticSingletonMap;
 
+import de.berlios.jsunit.JsUnitException;
+
 /**
  * A simulated JUnit test suite helper that is driven by something else behind the scenes. (eg. a jsUnit mobile suite running in a browser)
  * 
@@ -126,6 +128,17 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 		return credentials;
 	}
 
+	public String[] getJsUnitJavascriptCode()
+	{
+		log.info("[.......] Getting javascript library code"); //$NON-NLS-1$
+		String[] libs = new String[3];
+		libs[0] = JSUnitToJavaRunner.getScriptAsStringFromResource("this.JsUtilLoaded", JsUnitException.class, "/JsUtil.js").replace( //$NON-NLS-1$//$NON-NLS-2$
+			"var r = /function (\\w+)(", "var r = /function *(\\w*)(\\("); // if you had "function(){}" with no space after "function", a wrong function name could appear in the call stack //$NON-NLS-1$//$NON-NLS-2$ 
+		libs[1] = JSUnitToJavaRunner.getScriptAsStringFromResource("this.TestCaseLoaded", JsUnitException.class, "/JsUnit.js"); //$NON-NLS-1$//$NON-NLS-2$
+		libs[2] = JSUnitToJavaRunner.getScriptAsStringFromResource("this.JsUnitToJavaLoaded", JSUnitToJavaRunner.class, "JsUnitToJava.js"); //$NON-NLS-1$//$NON-NLS-2$
+		return libs;
+	}
+
 	/**
 	 * Waits for the client to transmit the flattened test tree then reconstructs it as a JUnit test suite hierarchy.
 	 * @param testSuite the root test-suite to use.
@@ -145,7 +158,7 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 					{
 						// if the user is in a hurry or not going to wait for "testTreeWaitTimeout" when something went wrong
 						testSuite.setName("Stop requested"); //$NON-NLS-1$
-						unexpectedRunProblemMessage = "Stopped manually after " + ((System.currentTimeMillis() - ct) / 1000 + " sec of waiting for mobile client to connect... "); //$NON-NLS-1$ //$NON-NLS-2$
+						unexpectedRunProblemMessage = "Stop requested after " + ((System.currentTimeMillis() - ct) / 1000 + " sec of waiting for the mobile test client to connect... "); //$NON-NLS-1$ //$NON-NLS-2$
 						break;
 					}
 				}

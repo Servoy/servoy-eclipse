@@ -29,9 +29,9 @@ Require-Bundle: org.eclipse.core.runtime,
  servoy_headless_client,
  servoy_debug,
  com.servoy.eclipse.model,
+ org.eclipse.ui.editors,
  com.servoy.eclipse.core,
- com.servoy.eclipse.ui,
- org.eclipse.ui.editors
+ com.servoy.eclipse.ui
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Export-Package: com.servoy.eclipse.debug.actions

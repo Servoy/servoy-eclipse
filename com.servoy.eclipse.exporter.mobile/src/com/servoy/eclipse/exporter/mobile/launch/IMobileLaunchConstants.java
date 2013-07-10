@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.exporter.mobile.launch;
 
+import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
+
 /**
  * @author obuligan
  *
@@ -35,7 +37,9 @@ public interface IMobileLaunchConstants
 	public static final String WAR_DEPLOYMENT_TIME = "war_deploy_time";
 	public static final String TIMEOUT = "timeout";
 
-	public final static String DEFAULT_SERVICE_URL = "http://localhost:8080";
+
+	public final static String DEFAULT_SERVICE_URL = MobileExporter.DEFAULT_SERVER_URL;
+	public final static String DEFAULT_TIMEOUT = String.valueOf(MobileExporter.DEFAULT_SYNC_TIMEOUT);
 	public final static String DEFAULT_WAR_DEPLOYMENT_TIME = "10";
 
 }

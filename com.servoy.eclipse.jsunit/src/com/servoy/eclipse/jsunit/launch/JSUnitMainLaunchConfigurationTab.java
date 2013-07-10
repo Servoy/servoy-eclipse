@@ -26,7 +26,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 
-import com.servoy.eclipse.jsunit.runner.TestTarget;
+import com.servoy.eclipse.model.test.TestTarget;
 import com.servoy.eclipse.model.util.ServoyLog;
 
 /**

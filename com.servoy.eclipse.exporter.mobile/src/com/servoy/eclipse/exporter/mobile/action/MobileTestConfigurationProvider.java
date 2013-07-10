@@ -25,8 +25,8 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.exporter.mobile.launch.IMobileLaunchConstants;
 import com.servoy.eclipse.jsunit.launch.ITestLaunchConfigurationProvider;
-import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.test.TestTarget;
 
 /**
  * Provides launch configurations for mobile solutions.

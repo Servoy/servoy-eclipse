@@ -120,7 +120,6 @@ import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.Messages;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.IDataServer;
 import com.servoy.j2db.debug.DebugClientHandler;
@@ -190,8 +189,6 @@ public class ServoyModel extends AbstractServoyModel
 	private final Job fireRealPersistchangesJob;
 	private List<IPersist> realOutstandingChanges;
 
-	private final EclipseMessages messagesManager;
-
 	private TeamShareMonitor teamShareMonitor;
 
 	private final List<IResourceDelta> outstandingChangedFiles = new ArrayList<IResourceDelta>();
@@ -226,8 +223,6 @@ public class ServoyModel extends AbstractServoyModel
 		i18nChangeListeners = new ArrayList<I18NChangeListener>();
 		fireRealPersistchangesJob = createFireRealPersistchangesJob();
 		realOutstandingChanges = new ArrayList<IPersist>();
-		messagesManager = new EclipseMessages();
-		Messages.customMessageLoader = messagesManager;
 
 		startAppServer();
 
@@ -695,11 +690,6 @@ public class ServoyModel extends AbstractServoyModel
 		{
 			ServoyLog.logError("Failed to start the appserver", ex);
 		}
-	}
-
-	public EclipseMessages getMessagesManager()
-	{
-		return messagesManager;
 	}
 
 	/**

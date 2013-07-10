@@ -64,7 +64,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.jsunit.actions.OpenEditorAtLineAction;
 import com.servoy.eclipse.jsunit.launch.ITestLaunchConfigurationProvider;
 import com.servoy.eclipse.jsunit.mobile.MobileStackOpenEditorAction;
-import com.servoy.eclipse.jsunit.runner.TestTarget;
+import com.servoy.eclipse.model.test.TestTarget;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;

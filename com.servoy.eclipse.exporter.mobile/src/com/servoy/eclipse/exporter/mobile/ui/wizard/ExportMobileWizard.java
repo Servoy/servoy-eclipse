@@ -40,7 +40,7 @@ import org.osgi.service.prefs.BackingStoreException;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
-import com.servoy.eclipse.exporter.mobile.export.MobileExporter;
+import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;

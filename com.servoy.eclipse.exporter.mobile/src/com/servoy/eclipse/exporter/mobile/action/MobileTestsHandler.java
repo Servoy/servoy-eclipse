@@ -43,8 +43,8 @@ import com.servoy.eclipse.exporter.mobile.launch.IMobileLaunchConstants;
 import com.servoy.eclipse.exporter.mobile.launch.test.IMobileTestLaunchConstants;
 import com.servoy.eclipse.jsunit.SolutionUnitTestTarget;
 import com.servoy.eclipse.jsunit.launch.JSUnitLaunchConfigurationDelegate;
-import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.test.TestTarget;
 import com.servoy.eclipse.model.util.ServoyLog;
 
 /**

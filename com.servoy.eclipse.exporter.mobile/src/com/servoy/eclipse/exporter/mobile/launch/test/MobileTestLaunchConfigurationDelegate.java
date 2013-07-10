@@ -9,14 +9,14 @@ import org.eclipse.ui.internal.browser.IBrowserDescriptor;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.exporter.mobile.export.MobileExporter;
 import com.servoy.eclipse.exporter.mobile.launch.IMobileLaunchConstants;
 import com.servoy.eclipse.exporter.mobile.launch.MobileLaunchConfigurationDelegate;
 import com.servoy.eclipse.jsunit.launch.JSUnitLaunchConfigurationDelegate;
 import com.servoy.eclipse.jsunit.mobile.RunMobileClientTests;
-import com.servoy.eclipse.jsunit.runner.TestTarget;
 import com.servoy.eclipse.jsunit.scriptunit.RunJSUnitTests;
+import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.test.TestTarget;
 import com.servoy.eclipse.model.util.ServoyLog;
 
 public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigurationDelegate
