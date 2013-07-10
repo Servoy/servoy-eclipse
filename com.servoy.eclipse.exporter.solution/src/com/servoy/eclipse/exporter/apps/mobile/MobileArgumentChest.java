@@ -107,6 +107,12 @@ public class MobileArgumentChest extends AbstractArgumentChest
 		// @formatter:on
 	}
 
+	@Override
+	protected String getHelpMessageDbiDbd()
+	{
+		return ""; //$NON-NLS-1$
+	}
+
 	public boolean shouldExportForTesting()
 	{
 		return testing;
