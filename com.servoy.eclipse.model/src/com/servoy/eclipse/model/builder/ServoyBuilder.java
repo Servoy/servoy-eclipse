@@ -1950,18 +1950,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
 														IMarker.PRIORITY_NORMAL, null, o);
 												}
-												if (o instanceof BaseComponent)
-												{
-													JSONWrapperList customProperty = (JSONWrapperList)((BaseComponent)o).getCustomProperty(new String[] { "methods", element.getName(), "arguments" }); //$NON-NLS-1$//$NON-NLS-2$
-													MethodArgument[] methodArguments = ((ScriptMethod)foundPersist).getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
-													if (customProperty != null && customProperty.size() > methodArguments.length)
-													{
-														ServoyMarker mk = MarkerMessages.MethodNumberOfArgumentsMismatch.fill(
-															((ScriptMethod)foundPersist).getName(), parentForm.getName());
-														addMarker(project, mk.getType(), mk.getText(), -1, METHOD_NUMBER_OF_ARGUMENTS_MISMATCH,
-															IMarker.PRIORITY_LOW, null, foundPersist);
-													}
-												}
+
 											}
 											else if (scriptMethod.isDeprecated())
 											{
@@ -2029,6 +2018,30 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											else
 											{
 												methodsReferences.put(foundPersist, Boolean.TRUE);
+											}
+											if (o instanceof AbstractBase)
+											{
+												JSONWrapperList customProperty = (JSONWrapperList)((AbstractBase)o).getCustomProperty(new String[] { "methods", element.getName(), "arguments" }); //$NON-NLS-1$//$NON-NLS-2$
+												MethodArgument[] methodArguments = ((ScriptMethod)foundPersist).getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
+												if (customProperty != null && customProperty.size() > methodArguments.length)
+												{
+													String handlerName = element.getName().substring(
+														0,
+														(element.getName().indexOf("MethodID") > 0 ? element.getName().indexOf("MethodID")
+															: element.getName().length()));
+													String functionDefinitionName = ((ScriptMethod)foundPersist).getScopeName() + '.' +
+														((ScriptMethod)foundPersist).getName();
+													String componentName = "";
+													if (o instanceof ISupportName && ((ISupportName)o).getName() != null &&
+														((ISupportName)o).getName().length() > 1)
+													{
+														componentName = " \"" + ((ISupportName)o).getName() + "\"";
+													}
+													ServoyMarker mk = MarkerMessages.MethodNumberOfArgumentsMismatch.fill(handlerName,
+														RepositoryHelper.getObjectTypeName(o.getTypeID()), componentName, functionDefinitionName);
+													addMarker(project, mk.getType(), mk.getText(), -1, METHOD_NUMBER_OF_ARGUMENTS_MISMATCH,
+														IMarker.PRIORITY_LOW, null, o);
+												}
 											}
 										}
 									}
