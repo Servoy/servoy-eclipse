@@ -538,6 +538,8 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 				Messages.ErrorWarningPreferencePage_nonAccessibleFormInModuleUsedInParentSolutionForm, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.METHOD_NUMBER_OF_ARGUMENTS_MISMATCH,
 				Messages.ErrorWarningPreferencePage_methodNumberOfArgsMismatch, true));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.ROLLOVER_NOT_WORKING,
+				Messages.ErrorWarningPreferencePage_rolloverImageAndCursorNotWorking, true));
 		}
 		else if (ERROR_WARNING_STYLES_PROBLEMS.equals(problemSection))
 		{
