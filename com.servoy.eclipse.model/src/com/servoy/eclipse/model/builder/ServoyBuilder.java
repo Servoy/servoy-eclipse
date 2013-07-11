@@ -2029,8 +2029,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														0,
 														(element.getName().indexOf("MethodID") > 0 ? element.getName().indexOf("MethodID")
 															: element.getName().length()));
-													String functionDefinitionName = ((ScriptMethod)foundPersist).getScopeName() + '.' +
-														((ScriptMethod)foundPersist).getName();
+
+													String functionDefinitionName = ((ScriptMethod)foundPersist).getName();
+													if (((ScriptMethod)foundPersist).getScopeName() != null)
+													{
+														functionDefinitionName = ((ScriptMethod)foundPersist).getScopeName() + "." + functionDefinitionName;
+													}
+
 													String componentName = "";
 													if (o instanceof ISupportName && ((ISupportName)o).getName() != null &&
 														((ISupportName)o).getName().length() > 1)
