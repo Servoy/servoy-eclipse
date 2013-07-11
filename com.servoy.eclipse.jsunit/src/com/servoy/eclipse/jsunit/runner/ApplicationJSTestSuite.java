@@ -95,11 +95,22 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 		}
 		else
 		{
-			SolutionJSUnitSuiteCodeBuilder suiteBuilder = new SolutionJSUnitSuiteCodeBuilder();
-			suiteBuilder.initializeWithSolution(application.getSolution(), application.getFlattenedSolution(), target);
-			Scriptable scope = initScope(application);
-			jsTestCode = suiteBuilder.getCode();
-			super.init(new StringReader(jsTestCode), suiteBuilder.getRootTestClassName(), SOLUTION_TEST_JS_NAME, scope, scope != null, isDebugModeOn());
+			try
+			{
+				SolutionJSUnitSuiteCodeBuilder suiteBuilder = new SolutionJSUnitSuiteCodeBuilder();
+				suiteBuilder.initializeWithSolution(application.getSolution(), application.getFlattenedSolution(), target);
+				Scriptable scope = initScope(application);
+				jsTestCode = suiteBuilder.getCode();
+				super.init(new StringReader(jsTestCode), suiteBuilder.getRootTestClassName(), SOLUTION_TEST_JS_NAME, scope, scope != null, isDebugModeOn());
+			}
+			catch (NoClassDefFoundError e)
+			{
+				// show nice message when SolutionJSUnitSuiteCodeBuilder is not found - cause classpath needs to be updated since 7.3
+				String msg = "Please include latest 'com.servoy.eclipse.model*.jar' in classpath (required since 7.3)."; //$NON-NLS-1$
+				Debug.log(msg, e);
+				System.err.println(msg);
+				throw e;
+			}
 		}
 	}
 
