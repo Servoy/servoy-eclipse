@@ -43213,9 +43213,6 @@ forms.company.elements.faxBtn.visible = !currentState;]]></sample>
             <parameter name="relatedfoundset/relationname" optional="true">
               <description><![CDATA[the specified name of the related foundset (default is null)]]></description>
             </parameter>
-            <parameter name="index" optional="true">
-              <description><![CDATA[the specified index of a tab, default is -1, will add tab to the end]]></description>
-            </parameter>
           </parameters>
         </function>
         <function clientSupport="wc,sc" name="getAbsoluteFormLocationY">
@@ -43519,6 +43516,58 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var w = %%prefix%%%%elementName%%.getWidth();]]></sample>
           </samples>
+        </function>
+        <function clientSupport="wc,sc" name="insertTab">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[a boolean value indicating if tab was successfully added]]></return>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Adds a relationless or related form as a tab in a specified tabpanel at specified index. The difference to addTab method is that tabIndex is 1 based.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Adds a relationless or related form as a tab in a specified tabpanel at specified index.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[%%prefix%%%%elementName%%.insertTab('orders','ordersTab','Orders',null,null,'#000000','#BBCCEE',null,1);]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="formName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified form/form name you wish to add as a tab]]></description>
+            </parameter>
+            <parameter name="tabName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified name for the tab or null]]></description>
+            </parameter>
+            <parameter name="tabText" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified text for the tab]]></description>
+            </parameter>
+            <parameter name="tooltip" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[a specified tooltip for the tab]]></description>
+            </parameter>
+            <parameter name="iconURL" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[a specified icon image or icon URL for the tab]]></description>
+            </parameter>
+            <parameter name="fg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the HTML RGB Hexadecimal foreground color for the tab]]></description>
+            </parameter>
+            <parameter name="bg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the HTML RGB Hexadecimal background color for the tab]]></description>
+            </parameter>
+            <parameter name="relationName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified name of the related foundset or null]]></description>
+            </parameter>
+            <parameter name="tabIndex" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the specified index of a tab, -1 will add tab to the end; is 1 based]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function clientSupport="wc,sc" name="isTabEnabledAt">
           <argumentsTypes>
@@ -57582,6 +57631,31 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
             <sample clientSupport="wc,sc"><![CDATA[var w = %%prefix%%%%elementName%%.getWidth();]]></sample>
           </samples>
         </function>
+        <function clientSupport="wc,sc" deprecated="true" name="insertTab" undocumented="true">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <parameters>
+            <parameter name="formName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabText" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tooltip" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="iconURL" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="fg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="bg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="relationName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+            <parameter name="tabIndex" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          </parameters>
+        </function>
         <function clientSupport="wc,sc" deprecated="true" name="isTabEnabledAt" undocumented="true">
           <argumentsTypes>
             <argumentType typecode="int"/>
@@ -58091,9 +58165,6 @@ forms.company.elements.faxBtn.visible = !currentState;]]></sample>
             <parameter name="relatedfoundset/relationname" optional="true">
               <description><![CDATA[the specified name of the related foundset (default is null)]]></description>
             </parameter>
-            <parameter name="index" optional="true">
-              <description><![CDATA[the specified index of a tab, default is -1, will add tab to the end]]></description>
-            </parameter>
           </parameters>
         </function>
         <function clientSupport="wc,sc" name="getAbsoluteFormLocationY">
@@ -58409,6 +58480,58 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var w = %%prefix%%%%elementName%%.getWidth();]]></sample>
           </samples>
+        </function>
+        <function clientSupport="wc,sc" name="insertTab">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[a boolean value indicating if tab was successfully added]]></return>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Adds a relationless or related form as a tab in a specified tabpanel at specified index. The difference to addTab method is that tabIndex is 1 based.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Adds a relationless or related form as a tab in a specified tabpanel at specified index.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[%%prefix%%%%elementName%%.insertTab('orders','ordersTab','Orders',null,null,'#000000','#BBCCEE',null,1);]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="formName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified form/form name you wish to add as a tab]]></description>
+            </parameter>
+            <parameter name="tabName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified name for the tab or null]]></description>
+            </parameter>
+            <parameter name="tabText" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified text for the tab]]></description>
+            </parameter>
+            <parameter name="tooltip" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[a specified tooltip for the tab]]></description>
+            </parameter>
+            <parameter name="iconURL" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[a specified icon image or icon URL for the tab]]></description>
+            </parameter>
+            <parameter name="fg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the HTML RGB Hexadecimal foreground color for the tab]]></description>
+            </parameter>
+            <parameter name="bg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the HTML RGB Hexadecimal background color for the tab]]></description>
+            </parameter>
+            <parameter name="relationName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified name of the related foundset or null]]></description>
+            </parameter>
+            <parameter name="tabIndex" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the specified index of a tab, -1 will add tab to the end; is 1 based]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function clientSupport="wc,sc" deprecated="true" name="isTabEnabled">
           <argumentsTypes>
