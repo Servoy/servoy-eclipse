@@ -1887,17 +1887,13 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					namesOnly = true;
 					description = scriptObject.getToolTip(name);
 					paramNames = scriptObject.getParameterNames(name);
-					MemberBox method = njm.getMethods()[0];
-					for (MemberBox mthd : njm.getMethods())
-					{
-						if (Utils.equalObjects(mthd.getParameterTypes(), parameterTypes))
-						{
-							method = mthd;
-						}
-					}
-					returnType = method.getReturnType();
+					returnType = getMethodReturnType();
 					tooltip = Text.processTags(description, resolver);
 				}
+			}
+			else
+			{
+				returnType = getMethodReturnType();
 			}
 			if (tooltip == null) tooltip = ""; //$NON-NLS-1$
 
@@ -1911,6 +1907,19 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				tooltip = tmp + "<br><pre>" + tooltip + "</pre></body></html>"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			return tooltip;
+		}
+
+		private Class getMethodReturnType()
+		{
+			MemberBox method = njm.getMethods()[0];
+			for (MemberBox mthd : njm.getMethods())
+			{
+				if (Utils.equalObjects(mthd.getParameterTypes(), parameterTypes))
+				{
+					method = mthd;
+				}
+			}
+			return method.getReturnType();
 		}
 
 		private String getPrettyParameterTypesString(String[] names, boolean namesOnly)
