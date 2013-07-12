@@ -34,4 +34,6 @@ public interface IServoyEnvironmentProvider
 
 	IServiceProvider getServiceProvider();
 
+	void startAppServerIfNeeded();
+
 }

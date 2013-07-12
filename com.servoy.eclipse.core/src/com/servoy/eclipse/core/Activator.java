@@ -735,8 +735,8 @@ public class Activator extends Plugin
 	{
 		if (plugin != null && !plugin.defaultAccessed)
 		{
-			plugin.defaultAccessed = true;
 			plugin.initialize();
+			plugin.defaultAccessed = true;
 		}
 		return plugin;
 	}

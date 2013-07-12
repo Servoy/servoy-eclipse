@@ -499,7 +499,8 @@ public abstract class AbstractWorkspaceExporter implements IApplication, IBundle
 				exitCode = EXIT_EXPORT_FAILED;
 			}
 
-			ServoyModelFinder.initializeServoyModel("exporter"); //$NON-NLS-1$
+			ServoyModelFinder.initializeServoyModelProvider("exporter"); //$NON-NLS-1$
+			ServoyModelFinder.getServoyModel(); // initialise servoy model as well
 		}
 		else
 		{

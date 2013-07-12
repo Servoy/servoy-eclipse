@@ -554,7 +554,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 			// may be blocked on the awt thread which causes problems on the mac (debug SC does not paint)
 
 			// make sure appserver is started here, plugin manager depends on Settings being initialized
-			ServoyModelFinder.getServoyModel(); // this, in case of UI developer, will make sure app. server is initialized; for command line exporters it should not be needed (the app server should be initialized before accessing any IApplication instances)
+			ServoyModelFinder.getServoyModelProvider().startAppServerIfNeeded();
 
 			synchronized (this)
 			{

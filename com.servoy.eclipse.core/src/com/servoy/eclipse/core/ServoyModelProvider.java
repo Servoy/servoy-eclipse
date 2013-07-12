@@ -17,8 +17,8 @@
 
 package com.servoy.eclipse.core;
 
-import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.extensions.IServoyEnvironmentProvider;
+import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.j2db.IServiceProvider;
 
 /**
@@ -33,14 +33,15 @@ public class ServoyModelProvider implements IServoyEnvironmentProvider
 		return ServoyModelManager.getServoyModelManager().getServoyModel();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.servoy.eclipse.model.extensions.IServoyEnvironmentProvider#getServiceProvider()
-	 */
 	public IServiceProvider getServiceProvider()
 	{
 		return Activator.getDefault().getDesignClient();
+	}
+
+	@Override
+	public void startAppServerIfNeeded()
+	{
+		ServoyModel.startAppServer();
 	}
 
 }

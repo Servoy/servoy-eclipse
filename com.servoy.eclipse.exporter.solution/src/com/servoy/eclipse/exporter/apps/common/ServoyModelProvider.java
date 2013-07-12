@@ -45,4 +45,10 @@ public class ServoyModelProvider implements IServoyEnvironmentProvider
 		return Activator.getDefault().getDesignClient();
 	}
 
+	@Override
+	public void startAppServerIfNeeded()
+	{
+		// Exporter always initializes the app. server before using ServoyModelFinder; so nothing to do here
+	}
+
 }

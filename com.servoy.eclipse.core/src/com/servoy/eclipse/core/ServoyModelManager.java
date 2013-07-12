@@ -16,7 +16,7 @@
  */
 package com.servoy.eclipse.core;
 
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Semaphore;
 
 import org.eclipse.swt.widgets.Display;
 
@@ -34,7 +34,10 @@ public class ServoyModelManager
 	 * The singleton manager
 	 */
 	private static ServoyModelManager MANAGER = new ServoyModelManager();
+	private static boolean initializingModel = false;
+
 	private volatile ServoyModel servoyModel = null;
+	private final Semaphore asyncWaiter = new Semaphore(0);
 
 	/**
 	 * Constructs a new manager
@@ -51,13 +54,12 @@ public class ServoyModelManager
 		return MANAGER;
 	}
 
-	private final CountDownLatch latch = new CountDownLatch(1);
-
 	public ServoyModel getServoyModel()
 	{
 		if (servoyModel == null)
 		{
 			// create servoy model in the display thread.
+			final boolean async[] = { false };
 
 			Runnable run = new Runnable()
 			{
@@ -65,17 +67,21 @@ public class ServoyModelManager
 				{
 					synchronized (ServoyModelManager.this)
 					{
-						if (servoyModel == null)
+						try
 						{
-							try
+							if (servoyModel == null)
 							{
+								if (initializingModel) throw new RuntimeException("Error: recursive attempt to create ServoyModel detected!"); //$NON-NLS-1$
+								initializingModel = true; // to avoid multiple creations of ServoyModel (reentrant calls) and fail fast (for example ServoyModel() -> Activator.getDefault() -> ServoyModel())
 								servoyModel = new ServoyModel();
+								initializingModel = false;
 								servoyModel.initialize();
 							}
-							finally
-							{
-								latch.countDown();
-							}
+						}
+						finally
+						{
+							initializingModel = false;
+							if (async[0]) asyncWaiter.release();
 						}
 					}
 				}
@@ -87,16 +93,22 @@ public class ServoyModelManager
 			}
 			else
 			{
+				async[0] = true;
 				Display.getDefault().asyncExec(run);
+
 				try
 				{
-					latch.await();
+					asyncWaiter.acquire(); // in case of async exec it will wait
 				}
 				catch (InterruptedException e)
 				{
 					ServoyLog.logError(e);
 				}
 			}
+
+			// this access to servoyModel is not exactly thread safe, but as servoyModel can only be set to something as opposed to being null - it's a turn for the better
+			if (servoyModel == null) throw new RuntimeException("Error: ServoyModel creation failed!"); //$NON-NLS-1$
+
 			// notify the client debug handler that servoy model has been initialized.
 			// on the mac the debug smart client must wait until the swt main thread is not busy,
 			// otherwise the smart client frame will not paint.
@@ -105,6 +117,7 @@ public class ServoyModelManager
 				ApplicationServerSingleton.get().getDebugClientHandler().flagModelInitialised();
 			}
 		}
+		// this access to servoyModel is not exactly thread safe, but as servoyModel can only be set to something as opposed to being null - it's a turn for the better
 		return servoyModel;
 	}
 

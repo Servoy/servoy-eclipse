@@ -24,8 +24,8 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 
-import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.extensions.IServoyEnvironmentProvider;
+import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IServiceProvider;
 
@@ -40,16 +40,23 @@ public class ServoyModelFinder
 
 	public static IServoyModel getServoyModel()
 	{
-		return initializeServoyModel(null);
+		initializeServoyModelProvider(null);
+		return (modelProvider != null) ? modelProvider.getServoyModel() : null;
 	}
 
 	public static IServiceProvider getServiceProvider()
 	{
-		initializeServoyModel(null);
+		initializeServoyModelProvider(null);
 		return modelProvider == null ? null : modelProvider.getServiceProvider();
 	}
 
-	public static IServoyModel initializeServoyModel(String instance)
+	public static IServoyEnvironmentProvider getServoyModelProvider()
+	{
+		if (modelProvider == null) initializeServoyModelProvider(null);
+		return modelProvider;
+	}
+
+	public static void initializeServoyModelProvider(String instance)
 	{
 		// if the instance name is given, make sure that that one is created.
 		if (modelProvider == null || instance != null)
@@ -106,8 +113,6 @@ public class ServoyModelFinder
 				}
 			}
 		}
-
-		return (modelProvider != null) ? modelProvider.getServoyModel() : null;
 	}
 
 }
