@@ -68,9 +68,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.EnableServerAction;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
-import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
-import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.ServoyDocumented;
 import com.servoy.j2db.documentation.scripting.docs.JSLib;
@@ -246,30 +244,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 		databaseManager = createTypeNode(Messages.TreeStrings_DatabaseManager, UserNodeType.FOUNDSET_MANAGER, JSDatabaseManager.class, invisibleRootNode);
 		addReturnTypeNodes(databaseManager, ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class).getAllReturnedTypes());
-		PlatformSimpleUserNode[] children = (PlatformSimpleUserNode[])databaseManager.children;
-		PlatformSimpleUserNode[] newChildren = new PlatformSimpleUserNode[children.length];
-		for (int i = 0; i < children.length; i++)
-		{
-			if (FoundSet.class.equals(children[i].getRealObject()))
-			{
-				newChildren[i] = new PlatformSimpleUserNode(FoundSet.JS_FOUNDSET, UserNodeType.RETURNTYPE, FoundSet.class, (Object)null, FoundSet.class);
-				newChildren[i].parent = databaseManager;
-			}
-			else if (Record.class.equals(children[i].getRealObject()))
-			{
-				newChildren[i] = new PlatformSimpleUserNode(Record.JS_RECORD, UserNodeType.RETURNTYPE, Record.class, (Object)null, Record.class);
-				newChildren[i].parent = databaseManager;
-			}
-			else newChildren[i] = children[i];
-		}
-		Arrays.sort(newChildren, new Comparator<PlatformSimpleUserNode>()
-		{
-			public int compare(PlatformSimpleUserNode o1, PlatformSimpleUserNode o2)
-			{
-				return o1.getName().compareTo(o2.getName());
-			}
-		});
-		databaseManager.children = newChildren;
 
 		PlatformSimpleUserNode utils = createTypeNode(Messages.TreeStrings_Utils, UserNodeType.UTILS, JSUtils.class, invisibleRootNode);
 
