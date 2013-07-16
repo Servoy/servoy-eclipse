@@ -59280,7 +59280,7 @@ myForm.newTextField('dataProviderNameHere', 2)]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc,wc,sc" name="newForm">
+        <function clientSupport="wc,sc" name="newForm">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
@@ -59291,15 +59291,15 @@ myForm.newTextField('dataProviderNameHere', 2)]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSForm" typecode="com.servoy.j2db.scripting.solutionmodel.JSForm"><![CDATA[a new JSForm object]]></return>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[Creates a new JSForm Object.
+            <description clientSupport="wc,sc"><![CDATA[Creates a new JSForm Object.
 
 NOTE: See the JSForm node for more information about form objects that can be added to the new form.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[Creates a new JSForm Object.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[Creates a new JSForm Object.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var myForm = solutionModel.newForm('newForm', 'db:/my_server/my_table', 'myStyleName', false, 800, 600)
+            <sample clientSupport="wc,sc"><![CDATA[var myForm = solutionModel.newForm('newForm', 'db:/my_server/my_table', 'myStyleName', false, 800, 600)
 //now you can add stuff to the form (under JSForm node)
 //add a label
 myForm.newLabel('Name', 20, 20, 120, 30)
@@ -59327,7 +59327,7 @@ myForm.newTextField('dataProviderNameHere', 140, 20, 140,20)]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc,wc,sc" name="newForm">
+        <function clientSupport="wc,sc" name="newForm">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
@@ -59339,15 +59339,15 @@ myForm.newTextField('dataProviderNameHere', 140, 20, 140,20)]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSForm" typecode="com.servoy.j2db.scripting.solutionmodel.JSForm"><![CDATA[a new JSForm object]]></return>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[Creates a new JSForm Object.
+            <description clientSupport="wc,sc"><![CDATA[Creates a new JSForm Object.
 
 NOTE: See the JSForm node for more information about form objects that can be added to the new form.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[Creates a new JSForm Object.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[Creates a new JSForm Object.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var myForm = solutionModel.newForm('newForm', 'my_server', 'my_table', 'myStyleName', false, 800, 600)
+            <sample clientSupport="wc,sc"><![CDATA[var myForm = solutionModel.newForm('newForm', 'my_server', 'my_table', 'myStyleName', false, 800, 600)
 //With only a datasource:
 //var myForm = solutionModel.newForm('newForm', datasource, 'myStyleName', false, 800, 600)
 //now you can add stuff to the form (under JSForm node)
