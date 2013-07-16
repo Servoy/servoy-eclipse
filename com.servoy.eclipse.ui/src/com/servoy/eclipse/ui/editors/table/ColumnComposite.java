@@ -166,14 +166,12 @@ public class ColumnComposite extends Composite
 							container.setLayout(groupLayout);
 							myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 							container.layout(true);
-							ColumnComposite.this.layout(true, true);
 						}
 						if (!b && tabFolder.isVisible())
 						{
 							container.setLayout(tableLayout);
 							myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 							container.layout(true);
-							ColumnComposite.this.layout(true, true);
 						}
 						tabFolder.setVisible(b);
 						if (b) propagateSelection(c);
@@ -222,9 +220,7 @@ public class ColumnComposite extends Composite
 						MessageDialog.openConfirm(getShell(), "Delete column", "Are you sure you want to delete column '" + ((Column)column).getName() + "'?"))
 					{
 						ArrayList<Column> columns = new ArrayList<Column>(t.getColumns());
-						int index = 0;
-						while (index < columns.size() && !columns.get(index).equals(column))
-							index++;
+						int index = columns.indexOf(column);
 						t.removeColumn((Column)column);
 						WritableList columnsList = new WritableList(new ArrayList<Column>(t.getColumns()), Column.class);
 						if (columnsList.size() > 0) tableViewer.setSelection(
