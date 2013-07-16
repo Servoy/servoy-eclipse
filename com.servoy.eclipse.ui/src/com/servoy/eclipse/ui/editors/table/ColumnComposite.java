@@ -166,16 +166,19 @@ public class ColumnComposite extends Composite
 							container.setLayout(groupLayout);
 							myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 							container.layout(true);
+							ColumnComposite.this.layout(true, true);
 						}
 						if (!b && tabFolder.isVisible())
 						{
 							container.setLayout(tableLayout);
 							myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 							container.layout(true);
+							ColumnComposite.this.layout(true, true);
 						}
 						tabFolder.setVisible(b);
 						if (b) propagateSelection(c);
 						tableViewer.getTable().setToolTipText(c.getNote());
+						ColumnComposite.this.layout(true, true);
 
 						Display.getDefault().asyncExec(new Runnable()
 						{
@@ -218,9 +221,14 @@ public class ColumnComposite extends Composite
 					if (column instanceof Column &&
 						MessageDialog.openConfirm(getShell(), "Delete column", "Are you sure you want to delete column '" + ((Column)column).getName() + "'?"))
 					{
+						ArrayList<Column> columns = new ArrayList<Column>(t.getColumns());
+						int index = 0;
+						while (index < columns.size() && !columns.get(index).equals(column))
+							index++;
 						t.removeColumn((Column)column);
 						WritableList columnsList = new WritableList(new ArrayList<Column>(t.getColumns()), Column.class);
-						if (columnsList.size() > 0) tableViewer.setSelection(new StructuredSelection(columnsList.get(0)), true);
+						if (columnsList.size() > 0) tableViewer.setSelection(
+							new StructuredSelection(columnsList.get(index >= columnsList.size() ? index - 1 : index)), true);
 					}
 				}
 			}
