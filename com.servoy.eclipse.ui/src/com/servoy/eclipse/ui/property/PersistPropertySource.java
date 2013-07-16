@@ -1752,8 +1752,14 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		EclipseRepository repository = (EclipseRepository)persistContext.getPersist().getRootObject().getRepository();
 		Element element = repository.getContentSpec().getPropertyForObjectTypeByName(persistContext.getPersist().getTypeID(), name);
 
+		int dispType = -1;
+		if (persistContext.getPersist() instanceof Field)
+		{
+			Field field = (Field)persistContext.getPersist();
+			dispType = field.getDisplayType();
+		}
 
-		if (!RepositoryHelper.shouldShow(name, element, persistContext.getPersist().getClass()))
+		if (!RepositoryHelper.shouldShow(name, element, persistContext.getPersist().getClass(), dispType))
 		{
 			return false;
 		}
@@ -1795,16 +1801,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			}
 		}
 
-
-		if (name.equals("placeholderText") && persistContext.getPersist() instanceof Field)
-		{
-			Field field = (Field)persistContext.getPersist();
-			if (field.getDisplayType() != Field.TEXT_FIELD && field.getDisplayType() != Field.PASSWORD && field.getDisplayType() != Field.TYPE_AHEAD &&
-				field.getDisplayType() != Field.TEXT_AREA)
-			{
-				return false;
-			}
-		}
 		return true;
 	}
 
