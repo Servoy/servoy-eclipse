@@ -13672,7 +13672,7 @@ forms['newForm1'].controller.recreateUI();]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="JSFoundSet" qualifiedName="com.servoy.j2db.dataprocessing.FoundSet">
+    <object publicName="JSFoundSet" qualifiedName="com.servoy.j2db.dataprocessing.FoundSet" scriptingName="JSFoundSet">
       <properties>
         <property name="alldataproviders" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"/>
@@ -17765,7 +17765,7 @@ childrenPortal.setIntercellSpacing(5,10);]]></sample>
         </function>
       </functions>
     </object>
-    <object publicName="JSRecord" qualifiedName="com.servoy.j2db.dataprocessing.Record">
+    <object publicName="JSRecord" qualifiedName="com.servoy.j2db.dataprocessing.Record" scriptingName="JSRecord">
       <properties>
         <property name="exception">
           <return type="com.servoy.j2db.util.ServoyException" typecode="java.lang.Exception"><![CDATA[The occurred exception.]]></return>
