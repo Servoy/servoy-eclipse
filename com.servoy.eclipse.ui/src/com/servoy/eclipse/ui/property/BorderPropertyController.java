@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import javax.swing.BorderFactory;
+import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
@@ -59,6 +60,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.IStyleSheet;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.gui.RoundedBorder;
@@ -96,20 +98,54 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		super(id, displayName);
 		this.propertySource = propertySource;
 		this.persistContext = persistContext;
-		populateDefaultBorderValuesMap();
+		getDefaultBorderValuesMap(false);
 	}
 
-	private void populateDefaultBorderValuesMap()
+	private static HashMap<BorderType, Border> getDefaultBorderValuesMap()
 	{
-		defaultBorderValues.put(BorderType.Default, null);
-		defaultBorderValues.put(BorderType.Empty, new EmptyBorder(0, 0, 0, 0));
-		defaultBorderValues.put(BorderType.Etched, new EtchedBorder(EtchedBorder.RAISED));
-		defaultBorderValues.put(BorderType.Bevel, new BevelBorder(BevelBorder.RAISED));
-		defaultBorderValues.put(BorderType.Line, new LineBorder(Color.BLACK));
-		defaultBorderValues.put(BorderType.Title, new TitledBorder("Title")); //$NON-NLS-1$
-		defaultBorderValues.put(BorderType.Matte, new MatteBorder(0, 0, 0, 0, Color.BLACK));
-		defaultBorderValues.put(BorderType.SpecialMatte, new SpecialMatteBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK));
-		defaultBorderValues.put(BorderType.RoundedWebBorder, new RoundedBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK));
+		return getDefaultBorderValuesMap(true);
+	}
+
+	private static HashMap<BorderType, Border> getDefaultBorderValuesMap(boolean wait)
+	{
+		synchronized (defaultBorderValues)
+		{
+
+			if (defaultBorderValues.size() == 0)
+			{
+				try
+				{
+					SwingUtilities.invokeLater(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							synchronized (defaultBorderValues)
+							{
+								defaultBorderValues.put(BorderType.Default, null);
+								defaultBorderValues.put(BorderType.Empty, new EmptyBorder(0, 0, 0, 0));
+								defaultBorderValues.put(BorderType.Etched, new EtchedBorder(EtchedBorder.RAISED));
+								defaultBorderValues.put(BorderType.Bevel, new BevelBorder(BevelBorder.RAISED));
+								defaultBorderValues.put(BorderType.Line, new LineBorder(Color.BLACK));
+								defaultBorderValues.put(BorderType.Title, new TitledBorder("Title")); //$NON-NLS-1$
+								defaultBorderValues.put(BorderType.Matte, new MatteBorder(0, 0, 0, 0, Color.BLACK));
+								defaultBorderValues.put(BorderType.SpecialMatte, new SpecialMatteBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK,
+									Color.BLACK));
+								defaultBorderValues.put(BorderType.RoundedWebBorder, new RoundedBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK,
+									Color.BLACK));
+								defaultBorderValues.notifyAll();
+							}
+						}
+					});
+					if (wait) defaultBorderValues.wait();
+				}
+				catch (Exception e)
+				{
+					Debug.error(e);
+				}
+			}
+		}
+		return defaultBorderValues;
 	}
 
 	private static BorderType getBorderTypeConstant(Border border)
@@ -351,7 +387,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		@Override
 		public Object resetComplexPropertyValue(Object id)
 		{
-			EmptyBorder defVal = (EmptyBorder)defaultBorderValues.get(BorderType.Empty);
+			EmptyBorder defVal = (EmptyBorder)getDefaultBorderValuesMap().get(BorderType.Empty);
 			if (id instanceof String && ((String)id).contains("top")) //$NON-NLS-1$
 			{
 				return defVal.getBorderInsets().top;
@@ -442,7 +478,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		@Override
 		public Object resetComplexPropertyValue(Object id)
 		{
-			MatteBorder defVal = (MatteBorder)defaultBorderValues.get(BorderType.Matte);
+			MatteBorder defVal = (MatteBorder)getDefaultBorderValuesMap().get(BorderType.Matte);
 			if (COLOR.equals(id))
 			{
 				return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty(id, defVal.getMatteColor());
@@ -971,7 +1007,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		@Override
 		public Object resetComplexPropertyValue(Object id)
 		{
-			RoundedBorder defVal = (RoundedBorder)defaultBorderValues.get(BorderType.RoundedWebBorder);
+			RoundedBorder defVal = (RoundedBorder)getDefaultBorderValuesMap().get(BorderType.RoundedWebBorder);
 			if (ROUNDING_RADIUS.equals(id))
 			{
 				return defVal.getRadius();
@@ -1151,7 +1187,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		@Override
 		public Object resetComplexPropertyValue(Object id)
 		{
-			SpecialMatteBorder defVal = (SpecialMatteBorder)defaultBorderValues.get(BorderType.SpecialMatte);
+			SpecialMatteBorder defVal = (SpecialMatteBorder)getDefaultBorderValuesMap().get(BorderType.SpecialMatte);
 			if (WIDTH.equals(id))
 			{
 				return new Insets((int)defVal.getTop(), (int)defVal.getLeft(), (int)defVal.getBottom(), (int)defVal.getRight());
@@ -1404,7 +1440,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		@Override
 		public Object resetComplexPropertyValue(Object id)
 		{
-			LineBorder defVal = (LineBorder)defaultBorderValues.get(BorderType.Line);
+			LineBorder defVal = (LineBorder)getDefaultBorderValuesMap().get(BorderType.Line);
 			if (COLOR.equals(id))
 			{
 				//even though this worked (default color work with null values); was added for the sake of completeness
@@ -1569,7 +1605,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		public Object resetComplexPropertyValue(@SuppressWarnings("unused")
 		Object id)
 		{
-			TitledBorder defVal = (TitledBorder)defaultBorderValues.get(BorderType.Title);
+			TitledBorder defVal = (TitledBorder)getDefaultBorderValuesMap().get(BorderType.Title);
 			if (TITLE.equals(id))
 			{
 				return defVal.getTitle();
