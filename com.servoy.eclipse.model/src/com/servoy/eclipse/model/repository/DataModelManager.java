@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -363,44 +362,41 @@ public class DataModelManager implements IColumnInfoManager
 	public void removeAllColumnInfo(Table t) throws RepositoryException
 	{
 		if (t == null) return;
-		for (String serverName : getAllServerClones(t.getServerName()))
+		IFile file = getDBIFile(t.getServerName(), t.getName());
+		if (file.exists())
 		{
-			IFile file = getDBIFile(serverName, t.getName());
-			if (file.exists())
+			writingMarkerFreeDBIFile = file;
+			try
 			{
-				writingMarkerFreeDBIFile = file;
-				try
-				{
-					file.delete(true, null);
-				}
-				catch (CoreException e)
-				{
-					throw new RepositoryException(e);
-				}
-				finally
-				{
-					writingMarkerFreeDBIFile = null;
-				}
+				file.delete(true, null);
 			}
-			else
+			catch (CoreException e)
 			{
-				// there may be a marker on the resources project saying that the .dbi file for the table that has
-				// just been deleted is missing; remove it
-				removeErrorMarker(serverName, t.getName());
+				throw new RepositoryException(e);
 			}
+			finally
+			{
+				writingMarkerFreeDBIFile = null;
+			}
+		}
+		else
+		{
+			// there may be a marker on the resources project saying that the .dbi file for the table that has
+			// just been deleted is missing; remove it
+			removeErrorMarker(t.getServerName(), t.getName());
+		}
 
-			// also remove the data file if it exists
-			IFile dataFile = getMetaDataFile(DataSourceUtilsBase.createDBTableDataSource(serverName, t.getName()));
-			if (dataFile != null && dataFile.exists())
+		// also remove the data file if it exists
+		IFile dataFile = getMetaDataFile(t.getDataSource());
+		if (dataFile != null && dataFile.exists())
+		{
+			try
 			{
-				try
-				{
-					dataFile.delete(true, null);
-				}
-				catch (CoreException e)
-				{
-					throw new RepositoryException(e);
-				}
+				dataFile.delete(true, null);
+			}
+			catch (CoreException e)
+			{
+				throw new RepositoryException(e);
 			}
 		}
 	}
@@ -421,10 +417,7 @@ public class DataModelManager implements IColumnInfoManager
 		try
 		{
 			String out = serializeTable(t);
-			for (String serverName : getAllServerClones(t.getServerName()))
-			{
-				fileAccess.setUTF8Contents(projectName + '/' + getRelativeServerPath(serverName) + IPath.SEPARATOR + getFileName(t.getName()), out);
-			}
+			fileAccess.setUTF8Contents(projectName + '/' + getRelativeServerPath(t.getServerName()) + IPath.SEPARATOR + getFileName(t.getName()), out);
 		}
 		catch (JSONException e)
 		{
@@ -528,13 +521,13 @@ public class DataModelManager implements IColumnInfoManager
 						writingMarkerFreeDBIFile = null;
 					}
 
+					file.setContents(source, true, false, null);
 				}
 				else
 				{
 					writingMarkerFreeDBIFile = null; // do not inhibit reload of dbi file - because we could have error markers saying that the file does not exist - and they need to be cleared
+					ResourcesUtils.createFileAndParentContainers(file, source, true);
 				}
-				writeContentToAllDBIClones(source, t.getServerName(), t.getName());
-
 			}
 			catch (UnsupportedEncodingException e)
 			{
@@ -552,33 +545,6 @@ public class DataModelManager implements IColumnInfoManager
 		catch (JSONException e)
 		{
 			throw new RepositoryException(e);
-		}
-	}
-
-	private void writeContentToAllDBIClones(InputStream source, String server, String tableName) throws CoreException
-	{
-		if (source != null)
-		{
-			for (String serverName : getAllServerClones(server))
-			{
-				IFile file = getDBIFile(serverName, tableName);
-				if (file.exists())
-				{
-					file.setContents(source, true, false, null);
-				}
-				else
-				{
-					ResourcesUtils.createFileAndParentContainers(file, source, true);
-				}
-				try
-				{
-					source.reset();
-				}
-				catch (IOException e)
-				{
-					ServoyLog.logError(e);
-				}
-			}
 		}
 	}
 
@@ -606,7 +572,6 @@ public class DataModelManager implements IColumnInfoManager
 		try
 		{
 			IFile file = getDBIFile(t.getServerName(), t.getName());
-			InputStream source = null;
 			if (file.exists())
 			{
 				is = file.getContents(true);
@@ -626,7 +591,8 @@ public class DataModelManager implements IColumnInfoManager
 					{
 						t.releaseReadLock();
 					}
-					source = new ByteArrayInputStream(tObj.getBytes("UTF8"));
+					InputStream source = new ByteArrayInputStream(tObj.getBytes("UTF8"));
+					file.setContents(source, true, false, null);
 				}
 			}
 			else
@@ -644,10 +610,10 @@ public class DataModelManager implements IColumnInfoManager
 						t.releaseReadLock();
 					}
 
-					source = new ByteArrayInputStream(tObj.getBytes("UTF8"));
+					InputStream source = new ByteArrayInputStream(tObj.getBytes("UTF8"));
+					ResourcesUtils.createFileAndParentContainers(file, source, true);
 				}
 			}
-			writeContentToAllDBIClones(source, t.getServerName(), t.getName());
 		}
 		catch (JSONException e)
 		{
@@ -1099,29 +1065,6 @@ public class DataModelManager implements IColumnInfoManager
 		return resourceProject.getFile(path);
 	}
 
-	// returns the master dbi with all its clones
-	private String[] getAllServerClones(String serverName)
-	{
-		List<String> clones = new ArrayList<String>();
-		IServer[] serverClones = sm.getValidDataModelCloneServers(serverName);
-		if (serverClones != null && serverClones.length > 0)
-		{
-			for (IServer clone : serverClones)
-			{
-				try
-				{
-					clones.add(clone.getName());
-				}
-				catch (RemoteException e)
-				{
-					ServoyLog.logError(e);
-				}
-			}
-		}
-		clones.add(0, serverName);
-		return clones.toArray(new String[0]);
-	}
-
 	public IFile getMetaDataFile(String dataSource)
 	{
 		String[] stn = DataSourceUtilsBase.getDBServernameTablename(dataSource);
@@ -1218,7 +1161,7 @@ public class DataModelManager implements IColumnInfoManager
 					// the project might have disappeared before this job was started... (delete)
 					try
 					{
-						if (columnDifference.getTable() == null || !columnDifference.getTable().isMarkedAsHiddenInDeveloper())
+						if (columnDifference.getTable() != null && !columnDifference.getTable().isMarkedAsHiddenInDeveloper())
 						{
 							IMarker marker = resource.createMarker(ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE);
 							marker.setAttribute(IMarker.MESSAGE, columnDifference.getUserFriendlyMessage());
