@@ -33,6 +33,8 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
+import org.eclipse.ui.internal.browser.BrowserManager;
+import org.eclipse.ui.internal.browser.IBrowserDescriptor;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
@@ -130,7 +132,20 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 								String url = "http://localhost:" + ApplicationServerSingleton.get().getWebServerPort() + "/servoy-webclient/solutions/solution/" + solution.getName(); //$NON-NLS-1$ //$NON-NLS-2$
 								IWorkbenchBrowserSupport support = PlatformUI.getWorkbench().getBrowserSupport();
 								IWebBrowser browser = support.getExternalBrowser();
-								browser.openURL(new URL(url));
+								IBrowserDescriptor browserDescriptor = BrowserManager.getInstance().getCurrentWebBrowser();
+								// temporary implementation until we upgrade to eclipse 4.3
+								// see https://bugs.eclipse.org/bugs/show_bug.cgi?format=multiple&id=405942
+								if (browserDescriptor != null && browserDescriptor.getLocation().contains(" "))
+								{
+									String[] command = new String[2];
+									command[0] = browserDescriptor.getLocation();
+									command[1] = url;
+									Runtime.getRuntime().exec(command);
+								}
+								else
+								{
+									browser.openURL(new URL(url));
+								}
 							}
 							catch (final Throwable e)//catch all for apple mac
 							{
