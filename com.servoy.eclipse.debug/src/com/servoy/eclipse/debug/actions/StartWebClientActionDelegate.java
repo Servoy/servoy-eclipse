@@ -148,7 +148,20 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 								String url = "http://localhost:" + ApplicationServerSingleton.get().getWebServerPort() + "/servoy-webclient/solutions/solution/" + solution.getName(); //$NON-NLS-1$ //$NON-NLS-2$
 								IWorkbenchBrowserSupport support = PlatformUI.getWorkbench().getBrowserSupport();
 								if (webBrowser == null) webBrowser = support.getExternalBrowser();
-								webBrowser.openURL(new URL(url));
+								if (browserDescriptor == null) browserDescriptor = BrowserManager.getInstance().getCurrentWebBrowser();
+								// temporary implementation until we upgrade to eclipse 4.3
+								// see https://bugs.eclipse.org/bugs/show_bug.cgi?format=multiple&id=405942
+								if (browserDescriptor != null && browserDescriptor.getLocation().contains(" "))
+								{
+									String[] command = new String[2];
+									command[0] = browserDescriptor.getLocation();
+									command[1] = url;
+									Runtime.getRuntime().exec(command);
+								}
+								else
+								{
+									webBrowser.openURL(new URL(url));
+								}
 							}
 							catch (final Throwable e)//catch all for apple mac
 							{
@@ -193,6 +206,7 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 
 	private Menu broswersListMenu;
 	private IWebBrowser webBrowser;
+	private IBrowserDescriptor browserDescriptor;
 	private HashMap<String, Image> browsersImagesList;
 
 	/*
@@ -311,6 +325,7 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 								webBrowser = support.getExternalBrowser(); //default to system web browser
 							}
 
+							browserDescriptor = ewb;
 							Job job = new Job("Web client start") //$NON-NLS-1$
 							{
 								@Override
