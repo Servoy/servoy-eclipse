@@ -17,7 +17,6 @@
 
 package com.servoy.eclipse.designer.editor.palette;
 
-import java.awt.Color;
 import java.awt.Image;
 import java.beans.BeanDescriptor;
 import java.beans.BeanInfo;
@@ -28,7 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.BorderFactory;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 
@@ -56,6 +54,8 @@ import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.BeanClassContentProvider;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences.PaletteCustomization;
+import com.servoy.eclipse.ui.property.BorderPropertyController;
+import com.servoy.eclipse.ui.property.BorderPropertyController.BorderType;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.IServoyBeanFactory;
@@ -71,7 +71,6 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader.TypedProperty;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.util.Utils;
-import com.servoy.j2db.util.gui.SpecialMatteBorder;
 
 
 /**
@@ -458,7 +457,8 @@ public class VisualFormEditorPaletteFactory
 		{
 			icon = Activator.loadImageDescriptorFromBundle("titledBorder.gif");
 			shapeType = RectShape.BORDER_PANEL;
-			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_BORDERTYPE, new ComplexProperty<Border>(BorderFactory.createTitledBorder("xy")));
+			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_BORDERTYPE, new ComplexProperty<Border>(
+				BorderPropertyController.getDefaultBorderValuesMap().get(BorderType.Title)));
 		}
 
 		else if (SHAPES_RECTANGLE_ID.equals(id))
@@ -501,8 +501,8 @@ public class VisualFormEditorPaletteFactory
 
 			requestType = VisualFormEditor.REQ_PLACE_LABEL;
 			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_TEXT, "");
-			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_BORDERTYPE, new ComplexProperty<Border>(new SpecialMatteBorder(top, left, 0, 0,
-				Color.black, Color.black, Color.black, Color.black)));
+			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_BORDERTYPE, new ComplexProperty<Border>(
+				BorderPropertyController.getDefaultBorderValuesMap().get(BorderType.SpecialMatte)));
 			setProperty(
 				extendedData,
 				StaticContentSpecLoader.PROPERTY_HORIZONTALALIGNMENT,
