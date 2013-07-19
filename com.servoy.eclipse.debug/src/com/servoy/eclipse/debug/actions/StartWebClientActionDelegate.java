@@ -142,7 +142,7 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 								IBrowserDescriptor browserDescriptor = BrowserManager.getInstance().getCurrentWebBrowser();
 								// temporary implementation until we upgrade to eclipse 4.3
 								// see https://bugs.eclipse.org/bugs/show_bug.cgi?format=multiple&id=405942
-								if (browserDescriptor != null && browserDescriptor.getLocation().contains(" "))
+								if (browserDescriptor != null && browserDescriptor.getLocation() != null && browserDescriptor.getLocation().contains(" "))
 								{
 									String[] command = new String[2];
 									command[0] = browserDescriptor.getLocation();
