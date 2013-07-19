@@ -101,7 +101,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		getDefaultBorderValuesMap(false);
 	}
 
-	private static HashMap<BorderType, Border> getDefaultBorderValuesMap()
+	public static HashMap<BorderType, Border> getDefaultBorderValuesMap()
 	{
 		return getDefaultBorderValuesMap(true);
 	}
