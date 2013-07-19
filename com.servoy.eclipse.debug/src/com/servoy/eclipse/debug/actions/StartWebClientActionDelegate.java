@@ -17,7 +17,6 @@
 package com.servoy.eclipse.debug.actions;
 
 import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -59,6 +58,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.debug.FlattenedSolutionDebugListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.IDebugWebClient;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -148,7 +148,8 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 								String url = "http://localhost:" + ApplicationServerSingleton.get().getWebServerPort() + "/servoy-webclient/solutions/solution/" + solution.getName(); //$NON-NLS-1$ //$NON-NLS-2$
 								IWorkbenchBrowserSupport support = PlatformUI.getWorkbench().getBrowserSupport();
 								if (webBrowser == null) webBrowser = support.getExternalBrowser();
-								webBrowser.openURL(new URL(url));
+								if (browserDescriptor == null) browserDescriptor = BrowserManager.getInstance().getCurrentWebBrowser();
+								EditorUtil.openURL(webBrowser, browserDescriptor, url);
 							}
 							catch (final Throwable e)//catch all for apple mac
 							{
@@ -178,17 +179,22 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 	{
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		final ServoyProject activeProject = servoyModel.getActiveProject();
-		boolean enabled = false;
+		boolean enabled = true;
 		if (activeProject != null && activeProject.getSolution() != null)
 		{
 			final Solution solution = activeProject.getSolution();
-			if (solution.getSolutionType() == SolutionMetaData.SOLUTION || solution.getSolutionType() == SolutionMetaData.WEB_CLIENT_ONLY || solution.getSolutionType() == SolutionMetaData.MOBILE) enabled = true;
+			if (solution.getSolutionType() == SolutionMetaData.SMART_CLIENT_ONLY || solution.getSolutionType() == SolutionMetaData.MOBILE_MODULE) enabled = false;
+		}
+		else
+		{
+			enabled = false;
 		}
 		action.setEnabled(enabled);
 	}
 
 	private Menu broswersListMenu;
 	private IWebBrowser webBrowser;
+	private IBrowserDescriptor browserDescriptor;
 	private HashMap<String, Image> browsersImagesList;
 
 	/*
@@ -307,6 +313,7 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 								webBrowser = support.getExternalBrowser(); //default to system web browser
 							}
 
+							browserDescriptor = ewb;
 							Job job = new Job("Web client start") //$NON-NLS-1$
 							{
 								@Override

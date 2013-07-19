@@ -1,13 +1,11 @@
 package com.servoy.eclipse.exporter.mobile.launch.test;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.ui.browser.IWebBrowser;
+import org.eclipse.ui.internal.browser.IBrowserDescriptor;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -91,8 +89,8 @@ public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigura
 	}
 
 	@Override
-	protected void openBrowser(final IWebBrowser webBrowser, final ILaunch launch, final ILaunchConfiguration configuration, IProgressMonitor monitor)
-		throws CoreException
+	protected void openBrowser(final IWebBrowser webBrowser, final IBrowserDescriptor browserDescriptor, final ILaunch launch,
+		final ILaunchConfiguration configuration, IProgressMonitor monitor) throws CoreException
 	{
 		if (monitor != null) monitor.subTask("starting test session");
 		this.webBrowser = webBrowser;
@@ -122,7 +120,7 @@ public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigura
 				MobileTestLaunchConfigurationDelegate.this.bridgeID = getBridgeId();
 				try
 				{
-					MobileTestLaunchConfigurationDelegate.super.openBrowser(webBrowser, launch, configuration, getLaunchMonitor()); // non-blocking
+					MobileTestLaunchConfigurationDelegate.super.openBrowser(webBrowser, browserDescriptor, launch, configuration, getLaunchMonitor()); // non-blocking
 					if (getLaunchMonitor() != null) getLaunchMonitor().subTask("connecting to mobile test client"); //$NON-NLS-1$
 				}
 				catch (CoreException e)
@@ -155,7 +153,7 @@ public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigura
 	}
 
 	@Override
-	protected URL getApplicationURL(ILaunchConfiguration configuration) throws CoreException
+	protected String getApplicationURL(ILaunchConfiguration configuration) throws CoreException
 	{
 		String appURL = configuration.getAttribute(IMobileLaunchConstants.APPLICATION_URL, "");
 		if (appURL == null) return null;
@@ -168,16 +166,6 @@ public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigura
 			appURL = appURL + "&nodebug=true";
 		}
 
-		try
-		{
-
-			return new URL(appURL);
-		}
-		catch (MalformedURLException e)
-		{
-			ServoyLog.logError(e);
-			return null;
-		}
+		return appURL;
 	}
-
 }

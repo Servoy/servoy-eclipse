@@ -105,7 +105,11 @@ public class UninstallExtensionWizard extends Wizard implements IImportWizard
 			else
 			{
 				// should never happen
-				Message[] msgs = new Message[] { new Message("Cannot find extension to uninstall with id '" + state.extensionID + "'.", Message.ERROR) }; //$NON-NLS-1$ //$NON-NLS-2$
+				Message m1 = new Message("Cannot identify extension to uninstall with id '" + state.extensionID + "'.", Message.ERROR); //$NON-NLS-1$ //$NON-NLS-2$
+				Message m2 = (allV != null && allV.length > 1)
+					? new Message(
+						"Invalid state for '" + state.extensionID + "'. Multiple versions of this extension are marked as installed but this is not supported/allowed!", Message.ERROR) : null; //$NON-NLS-1$ //$NON-NLS-2$
+				Message[] msgs = (m2 != null) ? new Message[] { m2, m1 } : new Message[] { m1 };
 				addPage(new ShowMessagesPage(
 					"Error page", "Cannot uninstall extension", "A problem was encountered when looking for extension to uninstall.", null, msgs, false, null)); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 			}

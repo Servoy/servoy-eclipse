@@ -29,6 +29,7 @@ import java.io.StringWriter;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -78,6 +79,16 @@ public class WorkspaceFileAccess implements IFileAccess
 		{
 			Utils.closeInputStream(byteArrayStream);
 		}
+	}
+
+	public File getProjectParentFile(String projectName)
+	{
+		if (projectName != null)
+		{
+			IProject project = workspaceRoot.getProject(projectName);
+			if (project != null) return project.getLocation().removeLastSegments(1).toFile();
+		}
+		return workspaceRoot.getLocation().toFile();
 	}
 
 	public String getUTF8Contents(String relativeFilePath) throws IOException

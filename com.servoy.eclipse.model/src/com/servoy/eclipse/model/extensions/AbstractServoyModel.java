@@ -20,8 +20,10 @@ package com.servoy.eclipse.model.extensions;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -166,8 +168,14 @@ public abstract class AbstractServoyModel implements IServoyModel
 	 */
 	public void addImportHookModules(ServoyProject p, List<ServoyProject> importHookModules)
 	{
-		if (p != null && !importHookModules.contains(p))
+		addImportHookModules(p, importHookModules, new HashSet<ServoyProject>());
+	}
+
+	private void addImportHookModules(ServoyProject p, List<ServoyProject> importHookModules, Set<ServoyProject> visited)
+	{
+		if (p != null && !visited.contains(p))
 		{
+			visited.add(p);
 			Solution s = p.getSolution();
 			if (s != null)
 			{
@@ -176,7 +184,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 				String[] moduleNames = Utils.getTokenElements(s.getModulesNames(), ",", true);
 				for (String moduleName : moduleNames)
 				{
-					addImportHookModules(getServoyProject(moduleName), importHookModules);
+					addImportHookModules(getServoyProject(moduleName), importHookModules, visited);
 				}
 			}
 		}
