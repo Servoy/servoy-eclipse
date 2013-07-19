@@ -2,7 +2,7 @@
 <feature
       id="com.servoy.eclipse.feature"
       label="Servoy Feature"
-      version="7.2.0.2012"
+      version="7.2.0.2013"
       provider-name="Servoy"
       plugin="com.servoy.eclipse.core">
 
