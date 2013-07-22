@@ -11,6 +11,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.exporter.mobile.launch.IMobileLaunchConstants;
 import com.servoy.eclipse.exporter.mobile.launch.MobileLaunchConfigurationDelegate;
+import com.servoy.eclipse.exporter.mobile.launch.MobileLaunchUtils;
 import com.servoy.eclipse.jsunit.launch.JSUnitLaunchConfigurationDelegate;
 import com.servoy.eclipse.jsunit.mobile.RunMobileClientTests;
 import com.servoy.eclipse.jsunit.scriptunit.RunJSUnitTests;
@@ -138,17 +139,11 @@ public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigura
 	@Override
 	protected String getApplicationURL(ILaunchConfiguration configuration) throws CoreException
 	{
-		String appURL = configuration.getAttribute(IMobileLaunchConstants.APPLICATION_URL, "");
-		if (appURL == null) return null;
+		String baseAppURL = configuration.getAttribute(IMobileLaunchConstants.APPLICATION_URL, "");
+		if (baseAppURL == null) return null;
 		boolean nodebug = Boolean.valueOf(configuration.getAttribute(IMobileLaunchConstants.NODEBUG, "true")).booleanValue();
 
-		boolean hasArgs = (appURL.indexOf("?") != -1);
-		appURL = appURL + (hasArgs ? "&" : "?") + "log_level=DEBUG&noinitsmc=true&bid=" + bridgeID;
-		if (nodebug && !appURL.contains("nodebug=true"))
-		{
-			appURL = appURL + "&nodebug=true";
-		}
-
-		return appURL;
+		return MobileLaunchUtils.getTestApplicationURL(baseAppURL, nodebug, bridgeID);
 	}
+
 }

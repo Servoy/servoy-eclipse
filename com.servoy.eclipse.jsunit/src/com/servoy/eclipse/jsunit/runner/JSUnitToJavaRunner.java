@@ -16,14 +16,8 @@
  */
 package com.servoy.eclipse.jsunit.runner;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,47 +80,9 @@ public class JSUnitToJavaRunner
 
 	static
 	{
-		jsUtil = getScriptAsStringFromResource("this.JsUtilLoaded", JsUnitException.class, "/JsUtil.js");
-		jsUnit = getScriptAsStringFromResource("this.TestCaseLoaded", JsUnitException.class, "/JsUnit.js");
-		jsUnitToJava = getScriptAsStringFromResource("this.JsUnitToJavaLoaded", JSUnitToJavaRunner.class, "JsUnitToJava.js");
-	}
-
-	public static String getScriptAsStringFromResource(String repeatSafeguardId, Class< ? > locatorClass, String name)
-	{
-		StringWriter writer = new StringWriter(125 * 1024);
-		writer.append("if (typeof(" + repeatSafeguardId + ") == 'undefined') {\n" + repeatSafeguardId + " = 1;\n");
-		loadScriptFromResource(locatorClass, name, writer);
-		writer.append("\n}");
-		return writer.toString();
-	}
-
-	private static void loadScriptFromResource(Class< ? > locatorClass, final String name, final Writer writer)
-	{
-		final InputStream is = locatorClass.getResourceAsStream(name);
-		if (is != null)
-		{
-			try
-			{
-				final Reader reader = new InputStreamReader(is, "ISO-8859-1");
-				copy(reader, writer);
-			}
-			catch (final UnsupportedEncodingException e)
-			{
-				throw new InternalError("Missing standard character set ISO-8859-1");
-			}
-			catch (final IOException e)
-			{
-				throw new InternalError("Cannot load resource " + name);
-			}
-			finally
-			{
-				close(is);
-			}
-		}
-		else
-		{
-			throw new InternalError("Cannot find resource " + name);
-		}
+		jsUtil = CodeFinderUtils.getScriptAsStringFromResource("this.JsUtilLoaded", JsUnitException.class, "/JsUtil.js");
+		jsUnit = CodeFinderUtils.getScriptAsStringFromResource("this.TestCaseLoaded", JsUnitException.class, "/JsUnit.js");
+		jsUnitToJava = CodeFinderUtils.getScriptAsStringFromResource("this.JsUnitToJavaLoaded", JSUnitToJavaRunner.class, "JsUnitToJava.js");
 	}
 
 	public static class TestScope extends ScriptableObject
@@ -346,18 +302,18 @@ public class JSUnitToJavaRunner
 		}
 	}
 
-	private static void close(final Writer writer)
-	{
-		try
-		{
-			writer.close();
-		}
-		catch (final IOException e)
-		{
-			// ignore
-		}
-	}
-
+//	private static void close(final Writer writer)
+//	{
+//		try
+//		{
+//			writer.close();
+//		}
+//		catch (final IOException e)
+//		{
+//			// ignore
+//		}
+//	}
+//
 	private static void close(final Reader reader)
 	{
 		try
@@ -367,28 +323,6 @@ public class JSUnitToJavaRunner
 		catch (final IOException e)
 		{
 			// ignore
-		}
-	}
-
-	private static void close(final InputStream is)
-	{
-		try
-		{
-			is.close();
-		}
-		catch (final IOException e)
-		{
-			// ignore
-		}
-	}
-
-	private static void copy(final Reader reader, final Writer writer) throws IOException
-	{
-		final Reader in = new BufferedReader(reader, 1024 * 16);
-		int i;
-		while ((i = in.read()) != -1)
-		{
-			writer.write(i);
 		}
 	}
 

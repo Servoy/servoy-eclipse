@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.servoy.base.test.IJSUnitSuiteHandler;
+import com.servoy.eclipse.jsunit.runner.CodeFinderUtils;
 import com.servoy.eclipse.jsunit.runner.JSUnitTestListenerHandler;
 import com.servoy.eclipse.jsunit.runner.JSUnitToJavaRunner;
 import com.servoy.eclipse.jsunit.runner.TestTreeHandler;
@@ -132,10 +133,10 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 	{
 		log.info("[.......] Getting javascript library code"); //$NON-NLS-1$
 		String[] libs = new String[3];
-		libs[0] = JSUnitToJavaRunner.getScriptAsStringFromResource("this.JsUtilLoaded", JsUnitException.class, "/JsUtil.js").replace( //$NON-NLS-1$//$NON-NLS-2$
+		libs[0] = CodeFinderUtils.getScriptAsStringFromResource("this.JsUtilLoaded", JsUnitException.class, "/JsUtil.js").replace( //$NON-NLS-1$//$NON-NLS-2$
 			"var r = /function (\\w+)(", "var r = /function *(\\w*)(\\("); // if you had "function(){}" with no space after "function", a wrong function name could appear in the call stack //$NON-NLS-1$//$NON-NLS-2$ 
-		libs[1] = JSUnitToJavaRunner.getScriptAsStringFromResource("this.TestCaseLoaded", JsUnitException.class, "/JsUnit.js"); //$NON-NLS-1$//$NON-NLS-2$
-		libs[2] = JSUnitToJavaRunner.getScriptAsStringFromResource("this.JsUnitToJavaLoaded", JSUnitToJavaRunner.class, "JsUnitToJava.js"); //$NON-NLS-1$//$NON-NLS-2$
+		libs[1] = CodeFinderUtils.getScriptAsStringFromResource("this.TestCaseLoaded", JsUnitException.class, "/JsUnit.js"); //$NON-NLS-1$//$NON-NLS-2$
+		libs[2] = CodeFinderUtils.getScriptAsStringFromResource("this.JsUnitToJavaLoaded", JSUnitToJavaRunner.class, "JsUnitToJava.js"); //$NON-NLS-1$//$NON-NLS-2$
 		return libs;
 	}
 

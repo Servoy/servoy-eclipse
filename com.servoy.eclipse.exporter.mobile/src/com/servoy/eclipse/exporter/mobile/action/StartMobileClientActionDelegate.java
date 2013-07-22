@@ -48,9 +48,9 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.exporter.mobile.launch.IMobileLaunchConstants;
 import com.servoy.eclipse.exporter.mobile.launch.MobileLaunchConfigurationDelegate;
+import com.servoy.eclipse.exporter.mobile.launch.MobileLaunchUtils;
 import com.servoy.eclipse.exporter.mobile.launch.test.IMobileTestLaunchConstants;
 import com.servoy.eclipse.jsunit.launch.JSUnitLaunchConfigurationDelegate;
-import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Solution;
@@ -374,8 +374,10 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 		File webappsFolder = new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory(), "server/webapps");
 
 		workingCopy.setAttribute(IMobileLaunchConstants.WAR_LOCATION, webappsFolder.getAbsolutePath());
-		String appUrl = getDefaultApplicationURL(project.getSolution().getName(),
-			launchConfigurationID.equals(IMobileTestLaunchConstants.LAUNCH_TEST_CONFIGURATION_TYPE_ID));
+		String appUrl = MobileLaunchUtils.getDefaultApplicationURL(
+			MobileLaunchUtils.getWarFileName(project.getSolution().getName(),
+				launchConfigurationID.equals(IMobileTestLaunchConstants.LAUNCH_TEST_CONFIGURATION_TYPE_ID)),
+			ApplicationServerSingleton.get().getWebServerPort());
 
 		workingCopy.setAttribute(IMobileLaunchConstants.SERVER_URL, IMobileLaunchConstants.DEFAULT_SERVICE_URL);
 		workingCopy.setAttribute(IMobileLaunchConstants.APPLICATION_URL, appUrl);
@@ -393,13 +395,8 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 	public static String getDefaultApplicationURL(boolean testURL)
 	{
 		String solutionName = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution().getName();
-		return getDefaultApplicationURL(solutionName, testURL);
-	}
-
-	public static String getDefaultApplicationURL(String solutionName, boolean testURL)
-	{
-		return new StringBuilder("http://localhost:").append(ApplicationServerSingleton.get().getWebServerPort()).append("/").append( //$NON-NLS-1$ //$NON-NLS-2$
-			solutionName).append(testURL ? MobileExporter.TEST_WAR_SUFFIX : "").append("/index.html").toString();
+		return MobileLaunchUtils.getDefaultApplicationURL(MobileLaunchUtils.getWarFileName(solutionName, testURL),
+			ApplicationServerSingleton.get().getWebServerPort());
 	}
 
 	public void init(IWorkbenchWindow window)

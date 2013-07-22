@@ -28,9 +28,9 @@ import com.servoy.j2db.util.ILogLevel;
 public class MobileArgumentChest extends AbstractArgumentChest
 {
 
-	private boolean testing = true; // test war by default
-	private String serverURL = MobileExporter.DEFAULT_SERVER_URL;
-	private int syncTimeout = MobileExporter.DEFAULT_SYNC_TIMEOUT;
+	private boolean testing; // test war by default
+	private String serverURL;
+	private int syncTimeout;
 
 	public MobileArgumentChest(String[] args)
 	{
@@ -43,6 +43,12 @@ public class MobileArgumentChest extends AbstractArgumentChest
 	{
 		if (!mustShowHelp())
 		{
+			// set defaults; these can't be set when declaring the member because this method is called from the super class constructor
+			testing = true; // test war by default
+			serverURL = MobileExporter.DEFAULT_SERVER_URL;
+			syncTimeout = MobileExporter.DEFAULT_SYNC_TIMEOUT;
+
+			// now check command line arguments
 			int i = 0;
 			while (i < args.length)
 			{
