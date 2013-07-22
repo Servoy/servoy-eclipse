@@ -31,6 +31,7 @@ public interface IMobileLaunchConstants
 	public static final String WAR_LOCATION = "war_location";
 	public static final String SOLUTION_NAME = "solution_name";
 	public static final String SERVER_URL = "server_url";
+	public static final String SERVICE_SOLUTION = "service_solution";
 	public static final String APPLICATION_URL = "application_url";
 	public static final String NODEBUG = "nodebug";
 	public static final String BROWSER_ID = "browserID";

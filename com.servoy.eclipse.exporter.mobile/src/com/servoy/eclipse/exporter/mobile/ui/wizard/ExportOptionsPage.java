@@ -37,9 +37,11 @@ import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 public class ExportOptionsPage extends WizardPage
 {
 	public static String SERVER_URL_KEY = "serverURL";
+	public static String SERVICE_SOLUTION_KEY = "serviceSolution";
 	public static String TIMEOUT_KEY = "timeout";
 
 	private Text serverURL;
+	private Text serviceSolutionName;
 	private Text timeout;
 	private String solution;
 	private final WizardPage nextPage;
@@ -76,19 +78,27 @@ public class ExportOptionsPage extends WizardPage
 		Label solutionName = new Label(container, SWT.NONE);
 		solutionName.setText(solution);
 
+		Label serviceSolutionLabel = new Label(container, SWT.NONE);
+		serviceSolutionLabel.setText("Service Solution Name");
+
+		serviceSolutionName = new Text(container, SWT.BORDER);
+		serviceSolutionName.setToolTipText("This is the name of service solution mobile client connects to (must be available at serverURL url).");
+
 		final GroupLayout groupLayout = new GroupLayout(container);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(solutionLabel).add(serverURLLabel).add(timeoutLabel)).addPreferredGap(
+				groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(solutionLabel).add(serverURLLabel).add(serviceSolutionLabel).add(timeoutLabel)).addPreferredGap(
 				LayoutStyle.RELATED).add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(solutionName).add(serverURL, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE).add(
-					timeout, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE)).addContainerGap()));
+					serviceSolutionName, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE).add(timeout, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE)).addContainerGap()));
 
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(solutionName).add(solutionLabel)).add(7).add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(serverURL, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 					GroupLayout.PREFERRED_SIZE).add(serverURLLabel)).add(7).add(
+				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(serviceSolutionName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+					GroupLayout.PREFERRED_SIZE).add(serviceSolutionLabel)).add(7).add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(timeout, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 					GroupLayout.PREFERRED_SIZE).add(timeoutLabel)).add(10)));
 
@@ -101,7 +111,14 @@ public class ExportOptionsPage extends WizardPage
 		}
 		serverURL.setText(defaultServerURL);
 
-		serverURL.addModifyListener(new ModifyListener()
+		String defaultServiceSolutionName = getDialogSettings().get(SERVICE_SOLUTION_KEY);
+		if (defaultServiceSolutionName == null)
+		{
+			defaultServiceSolutionName = getSolution() + "_service";
+		}
+		serviceSolutionName.setText(defaultServiceSolutionName);
+
+		serviceSolutionName.addModifyListener(new ModifyListener()
 		{
 			public void modifyText(ModifyEvent e)
 			{
@@ -132,7 +149,13 @@ public class ExportOptionsPage extends WizardPage
 
 	private String getServerURL()
 	{
-		return serverURL.getText();
+		String url = serverURL.getText();
+		return "".equals(url) ? null : url;
+	}
+
+	private String getServiceSolutionName()
+	{
+		return serviceSolutionName.getText();
 	}
 
 	private String getTimeout()
@@ -157,9 +180,9 @@ public class ExportOptionsPage extends WizardPage
 		{
 			return "No solution specified";
 		}
-		if (getServerURL() == null || "".equals(getServerURL()))
+		if (getServiceSolutionName() == null || "".equals(getServiceSolutionName()))
 		{
-			return "No server URL specified";
+			return "No service solution specified";
 		}
 		if (getTimeout() == null || "".equals(getTimeout()) || (getTimeout() != null && !getTimeout().matches("\\d+")))
 		{
@@ -173,7 +196,11 @@ public class ExportOptionsPage extends WizardPage
 	{
 		mobileExporter.setSolutionName(getSolution());
 		mobileExporter.setServerURL(getServerURL());
+		mobileExporter.setServiceSolutionName(getServiceSolutionName());
 		mobileExporter.setTimeout(Integer.parseInt(getTimeout()));
+		getDialogSettings().put(ExportOptionsPage.SERVER_URL_KEY, serverURL.getText());
+		getDialogSettings().put(ExportOptionsPage.SERVICE_SOLUTION_KEY, getServiceSolutionName());
+		getDialogSettings().put(ExportOptionsPage.TIMEOUT_KEY, getTimeout());
 		return nextPage;
 	}
 

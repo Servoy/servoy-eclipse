@@ -132,6 +132,7 @@ public class MobileExporter
 	private File outputFolder;
 	private String serverURL;
 	private String solutionName;
+	private String serviceSolutionName;
 	private int timeout = DEFAULT_SYNC_TIMEOUT;
 	private File configFile = null;
 	private boolean skipConnect = false;
@@ -328,7 +329,8 @@ public class MobileExporter
 			flattenedJSon = new ServoyJSONArray(valuelistJSons);
 			solutionModel.put("valuelists", flattenedJSon);
 			solutionModel.put("solutionName", solution.getName());
-			solutionModel.put("serverURL", serverURL);
+			if (serverURL != null) solutionModel.put("serverURL", serverURL);
+			if (serviceSolutionName != null) solutionModel.put("serviceSolutionName", serviceSolutionName);
 			solutionModel.put("timeout", timeout);
 			solutionModel.put("skipConnect", Boolean.valueOf(skipConnect));
 			solutionModel.put("mustAuthenticate", Boolean.valueOf(solution.getMustAuthenticate()));
@@ -750,6 +752,22 @@ public class MobileExporter
 	public String getServerURL()
 	{
 		return serverURL;
+	}
+
+	/**
+	 * @return the serviceSolutionName
+	 */
+	public String getServiceSolutionName()
+	{
+		return serviceSolutionName;
+	}
+
+	/**
+	 * @param serviceSolutionName the serviceSolutionName to set
+	 */
+	public void setServiceSolutionName(String serviceSolutionName)
+	{
+		this.serviceSolutionName = serviceSolutionName;
 	}
 
 	/**

@@ -317,6 +317,7 @@ public class WarExportPage extends WizardPage
 				pgAppPage.populateExistingApplications();
 				pgAppPage.setSolutionName(mobileExporter.getSolutionName());
 				pgAppPage.setServerURL(mobileExporter.getServerURL());
+				pgAppPage.setServiceSolutionName(mobileExporter.getServiceSolutionName());
 				pgAppPage.setTimeout(mobileExporter.getTimeout());
 				return pgAppPage;
 			}
@@ -348,7 +349,6 @@ public class WarExportPage extends WizardPage
 
 
 		getDialogSettings().put(WarExportPage.OUTPUT_PATH_KEY, getOutputFolder());
-		getDialogSettings().put(ExportOptionsPage.SERVER_URL_KEY, mobileExporter.getServerURL());
 		return "War file was successfully exported to: " + new File(outputFile.getAbsolutePath(), mobileExporter.getSolutionName() + ".war").getAbsolutePath();
 	}
 

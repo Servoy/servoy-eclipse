@@ -31,6 +31,7 @@ public class MobileArgumentChest extends AbstractArgumentChest
 	private boolean testing; // test war by default
 	private String serverURL;
 	private int syncTimeout;
+	private String serviceSolutionName = null;
 
 	public MobileArgumentChest(String[] args)
 	{
@@ -61,6 +62,18 @@ public class MobileArgumentChest extends AbstractArgumentChest
 					else
 					{
 						info("server url was not specified after '-server_url' argument.", ILogLevel.ERROR);
+						markInvalid();
+					}
+				}
+				else if ("-service_solution".equalsIgnoreCase(args[i]))
+				{
+					if (i < (args.length - 1))
+					{
+						serviceSolutionName = args[++i];
+					}
+					else
+					{
+						info("service solution was not specified after '-service_solution' argument.", ILogLevel.ERROR);
 						markInvalid();
 					}
 				}
@@ -108,6 +121,7 @@ public class MobileArgumentChest extends AbstractArgumentChest
 			+ "        -production ... export normal mobile client. Default: false (exports unit test war).\n"
 			+ "        -server_url <url> ... application server URL.  Used to find mobile service solution.\n"
 			+ "             Default: " + MobileExporter.DEFAULT_SERVER_URL + "\n"
+			+ "        -service_solution ... name of the service solution (default will be mySolutionName_service).\n"
 			+ "        -sync_timeout <seconds> ... client sync call timeout. Default: " + MobileExporter.DEFAULT_SYNC_TIMEOUT + " sec.\n"
 			+ getHelpMessageExistCodes();
 		// @formatter:on
@@ -127,6 +141,14 @@ public class MobileArgumentChest extends AbstractArgumentChest
 	public String getServerURL()
 	{
 		return serverURL;
+	}
+
+	/**
+	 * @return the serviceSolutionName
+	 */
+	public String getServiceSolutionName()
+	{
+		return serviceSolutionName;
 	}
 
 	public int getSyncTimeout()

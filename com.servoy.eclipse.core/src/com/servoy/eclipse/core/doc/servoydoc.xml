@@ -2300,6 +2300,27 @@ application.setErrorCapture(true);]]></sample>
             </parameter>
           </parameters>
         </function>
+        <function clientSupport="mc" name="setServerURL">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[Sets the application server URL for mobile client to connect to.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[Sets the application server URL for mobile client to connect to.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[// if server URL is not set at mobile solution export, setServerURL should be called from custom login form, before authentication is done
+application.setServerURL('http://localhost:8080');]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="applicationServerURL" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[The URL to connect.]]></description>
+            </parameter>
+          </parameters>
+        </function>
         <function clientSupport="wc,sc" name="setStatusText">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>

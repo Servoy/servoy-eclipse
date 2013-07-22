@@ -57,6 +57,7 @@ public class MobileWorkspaceExporter extends AbstractWorkspaceExporter
 			exporter.setOutputFolder(new File(configuration.getExportFilePath()));
 			exporter.setServerURL(configuration.getServerURL());
 			exporter.setTimeout(configuration.getSyncTimeout());
+			exporter.setServiceSolutionName(configuration.getServiceSolutionName());
 			if (configuration.shouldExportForTesting()) exporter.useTestWar(null);
 //			exporter.setSkipConnect(..allow user to specify license and check it..); // TODO a separate case was created for this: SVY-4807
 			exporter.doExport(false);

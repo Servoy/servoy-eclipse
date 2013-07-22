@@ -71,6 +71,7 @@ public class PhoneGapApplicationPage extends WizardPage
 
 	private String solutionName;
 	private String serverURL;
+	private String serviceSolutionName;
 	private int timeout;
 
 	public PhoneGapApplicationPage(String name, CustomizedFinishPage finishPage)
@@ -258,7 +259,7 @@ public class PhoneGapApplicationPage extends WizardPage
 					{
 						errorMessage[0] = getConnector().createOrUpdatePhoneGapApplication(
 							new PhoneGapApplication(appName, appVersion, appDescription, appPublic, path, selectedCertificates), solutionName, serverURL,
-							timeout, configFile);
+							serviceSolutionName, timeout, configFile);
 					}
 				});
 			}
@@ -310,6 +311,14 @@ public class PhoneGapApplicationPage extends WizardPage
 	public void setServerURL(String serverURL)
 	{
 		this.serverURL = serverURL;
+	}
+
+	/**
+	 * @param serviceSolutionName the serviceSolutionName to set
+	 */
+	public void setServiceSolutionName(String serviceSolutionName)
+	{
+		this.serviceSolutionName = serviceSolutionName;
 	}
 
 	/**

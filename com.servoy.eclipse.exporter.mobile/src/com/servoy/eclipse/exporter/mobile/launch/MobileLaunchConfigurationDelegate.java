@@ -73,8 +73,12 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		{
 			if (monitor != null) monitor.subTask("switching to service solution (so that it can be debugged)");
 			String solutionName = configuration.getAttribute(IMobileLaunchConstants.SOLUTION_NAME, "");
-			ServoyProject serviceProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName + "_service");
-			ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(serviceProject, true);
+			String serviceSolutionName = configuration.getAttribute(IMobileLaunchConstants.SERVICE_SOLUTION, solutionName + "_service");
+			ServoyProject serviceProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(serviceSolutionName);
+			if (serviceProject != null)
+			{
+				ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(serviceProject, true);
+			}
 		}
 		//open browser
 		IWebBrowser webBrowser = getBrowser(browserID);
@@ -109,6 +113,7 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		if (warLocation.length() == 0) throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Invalid war export path"));
 		String solutionName = configuration.getAttribute(IMobileLaunchConstants.SOLUTION_NAME, "");
 		String serverUrl = configuration.getAttribute(IMobileLaunchConstants.SERVER_URL, "");
+		String serviceSolutionName = configuration.getAttribute(IMobileLaunchConstants.SERVICE_SOLUTION, (String)null);
 		int timeout = Integer.valueOf(configuration.getAttribute(IMobileLaunchConstants.TIMEOUT, IMobileLaunchConstants.DEFAULT_TIMEOUT)).intValue();
 		String company = configuration.getAttribute("company", "");
 		String license = configuration.getAttribute("license", "");
@@ -117,6 +122,7 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		exporter.setSolutionName(solutionName);
 		exporter.setOutputFolder(new File(warLocation));
 		exporter.setServerURL(serverUrl);
+		exporter.setServiceSolutionName(serviceSolutionName);
 		exporter.setTimeout(timeout);
 		exporter.setSkipConnect(validLicense);
 	}

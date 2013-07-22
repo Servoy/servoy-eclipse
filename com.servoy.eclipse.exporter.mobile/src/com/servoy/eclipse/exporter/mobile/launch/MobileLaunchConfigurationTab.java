@@ -66,6 +66,8 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 	protected Text txtStartURL;
 	protected Label lblServerURL;
 	protected Text txtServerURL;
+	protected Label lblServiceSolution;
+	protected Text txtServiceSolution;
 	protected Label lblTimeout;
 	protected Text txtTimeout;
 	protected Button checkNoDebug;
@@ -158,6 +160,12 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		txtServerURL = new Text(container, SWT.BORDER);
 		txtServerURL.setText(IMobileLaunchConstants.DEFAULT_SERVICE_URL);
 		txtServerURL.addModifyListener(modifyListener);
+
+		lblServiceSolution = new Label(container, SWT.NONE);
+		lblServiceSolution.setText("Service Solution");
+
+		txtServiceSolution = new Text(container, SWT.BORDER);
+		txtServiceSolution.addModifyListener(modifyListener);
 
 		lblTimeout = new Label(container, SWT.NONE);
 		lblTimeout.setText("Sync Timeout (in seconds)");
@@ -276,6 +284,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 								.add(lblBrowser)
 								.add(lblStartUrl)
 								.add(lblServerURL)
+								.add(lblServiceSolution)
 								.add(lblSolution)
 								.add(lblTimeout))
 							.add(18)
@@ -283,6 +292,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 								.add(combo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 								.add(lblSolutionname, GroupLayout.PREFERRED_SIZE, 364, Short.MAX_VALUE)
 								.add(txtServerURL, GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE)
+								.add(txtServiceSolution, GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE)
 								.add(txtStartURL, GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE)
 								.add(txtTimeout, GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE)))
 						.add(separator, GroupLayout.DEFAULT_SIZE, 522, Short.MAX_VALUE)
@@ -320,6 +330,10 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 						.add(txtServerURL, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))
 					.addPreferredGap(LayoutStyle.RELATED)
 					.add(groupLayout.createParallelGroup(GroupLayout.BASELINE)
+						.add(lblServiceSolution)
+						.add(txtServiceSolution, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))
+					.addPreferredGap(LayoutStyle.RELATED)
+					.add(groupLayout.createParallelGroup(GroupLayout.BASELINE)
 						.add(lblBrowser)
 						.add(combo, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))
 					.addPreferredGap(LayoutStyle.RELATED)
@@ -338,7 +352,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 						.add(txtWarDeployTime, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.add(lblWarDeployTime)
 						.add(lblWarDeployUnit))
-					.addContainerGap(72, Short.MAX_VALUE))
+					.addContainerGap(30, Short.MAX_VALUE))
 		);
 		// @formatter:on
 		container.setLayout(groupLayout);
@@ -369,10 +383,12 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 	{
 		try
 		{
-			lblSolutionname.setText(configuration.getAttribute(IMobileLaunchConstants.SOLUTION_NAME, "not defined"));
+			String solutionName = configuration.getAttribute(IMobileLaunchConstants.SOLUTION_NAME, "not defined");
+			lblSolutionname.setText(solutionName);
 			txtServerURL.setText(configuration.getAttribute(IMobileLaunchConstants.SERVER_URL, IMobileLaunchConstants.DEFAULT_SERVICE_URL));
 			txtStartURL.setText(configuration.getAttribute(IMobileLaunchConstants.APPLICATION_URL, getDefaultApplicationURL()));
 			txtTimeout.setText(configuration.getAttribute(IMobileLaunchConstants.TIMEOUT, IMobileLaunchConstants.DEFAULT_TIMEOUT));
+			txtServiceSolution.setText(solutionName + "_service");
 			checkNoDebug.setSelection(Boolean.valueOf(configuration.getAttribute(IMobileLaunchConstants.NODEBUG, "true")).booleanValue());
 			String browserId = configuration.getAttribute(IMobileLaunchConstants.BROWSER_ID, "default");
 			String browserName = (String)possibleBrowsersNames.get(browserId);
@@ -392,6 +408,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 	{
 		configuration.setAttribute(IMobileLaunchConstants.SOLUTION_NAME, lblSolutionname.getText());
 		configuration.setAttribute(IMobileLaunchConstants.SERVER_URL, txtServerURL.getText());
+		configuration.setAttribute(IMobileLaunchConstants.SERVICE_SOLUTION, txtServiceSolution.getText());
 		configuration.setAttribute(IMobileLaunchConstants.APPLICATION_URL, txtStartURL.getText());
 		configuration.setAttribute(IMobileLaunchConstants.TIMEOUT, txtTimeout.getText());
 		configuration.setAttribute(IMobileLaunchConstants.NODEBUG, Boolean.toString(checkNoDebug.getSelection()));
