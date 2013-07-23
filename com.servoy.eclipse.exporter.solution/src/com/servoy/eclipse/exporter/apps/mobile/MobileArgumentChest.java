@@ -121,7 +121,8 @@ public class MobileArgumentChest extends AbstractArgumentChest
 			+ "        -production ... export normal mobile client. Default: false (exports unit test war).\n"
 			+ "        -server_url <url> ... application server URL.  Used to find mobile service solution.\n"
 			+ "             Default: " + MobileExporter.DEFAULT_SERVER_URL + "\n"
-			+ "        -service_solution ... name of the service solution (default will be mySolutionName_service).\n"
+			+ "        -service_solution ... name    of    the   service   solution    (default   will   be\n"
+			+ "                              mySolutionName_service).\n"
 			+ "        -sync_timeout <seconds> ... client sync call timeout. Default: " + MobileExporter.DEFAULT_SYNC_TIMEOUT + " sec.\n"
 			+ getHelpMessageExistCodes();
 		// @formatter:on

@@ -339,7 +339,6 @@ public class ElementFactory
 			catch (Exception e)
 			{
 				ServoyLog.logError("Error creating border from " + form.getBorderType(), e);
-				e.printStackTrace();
 			}
 			border = fBorder[0];
 		}

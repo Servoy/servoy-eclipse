@@ -82,7 +82,7 @@ public class ExportOptionsPage extends WizardPage
 		serviceSolutionLabel.setText("Service Solution Name");
 
 		serviceSolutionName = new Text(container, SWT.BORDER);
-		serviceSolutionName.setToolTipText("This is the name of service solution mobile client connects to (must be available at serverURL url).");
+		serviceSolutionName.setToolTipText("This is the name of the service solution mobile clients connects to (must be available at serverURL url).");
 
 		final GroupLayout groupLayout = new GroupLayout(container);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
