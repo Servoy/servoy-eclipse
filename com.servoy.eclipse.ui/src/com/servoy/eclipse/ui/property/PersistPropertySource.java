@@ -268,7 +268,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					catch (Exception e)
 					{
 						ServoyLog.logError("Error creating border from " + value, e);
-						e.printStackTrace();
 					}
 					border = fBorder[0];
 				}

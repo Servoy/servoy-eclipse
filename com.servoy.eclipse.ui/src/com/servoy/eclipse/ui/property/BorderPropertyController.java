@@ -80,7 +80,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		Default, Empty, Etched, Bevel, Line, Title, Matte, SpecialMatte, RoundedWebBorder
 	}
 
-	public static HashMap<BorderType, Border> defaultBorderValues = new HashMap<BorderType, Border>();
+	private static HashMap<BorderType, Border> defaultBorderValues = new HashMap<BorderType, Border>();
 	private final PersistContext persistContext;
 
 	final static ComboboxPropertyController<BorderType> comboboxController = new ComboboxPropertyController<BorderType>("BORDER_TYPE", "borderTypes",
