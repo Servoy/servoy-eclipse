@@ -54,6 +54,7 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServiceProvider;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.component.ComponentFormat;
+import com.servoy.j2db.debug.DebugUtils;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
@@ -314,13 +315,37 @@ public class ElementFactory
 		return null;
 	}
 
-	public static Border getFormBorder(IServiceProvider sp, Form form)
+	public static Border getFormBorder(IServiceProvider sp, final Form form)
 	{
 		if (form == null)
 		{
 			return null;
 		}
-		Border border = ComponentFactoryHelper.createBorder(form.getBorderType(), true);
+		Border border = null;
+		if (Utils.isAppleMacOS())
+		{
+			final Border[] fBorder = { null };
+			try
+			{
+				DebugUtils.invokeAndWaitWhileDispatchingOnSWT(new Runnable()
+				{
+					public void run()
+					{
+						fBorder[0] = ComponentFactoryHelper.createBorder(form.getBorderType(), true);
+					}
+				});
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError("Error creating border from " + form.getBorderType(), e);
+			}
+			border = fBorder[0];
+		}
+		else
+		{
+			border = ComponentFactoryHelper.createBorder(form.getBorderType(), true);
+		}
+
 		if (border != null)
 		{
 			return border;

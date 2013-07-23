@@ -27,6 +27,7 @@ import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.draw2d.geometry.Insets;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.Handle;
 import org.eclipse.gef.LayerConstants;
@@ -81,33 +82,37 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 	protected void createHandles()
 	{
 		removeHandles();
-		LayerManager layermanager = (LayerManager)getViewer().getEditPartRegistry().get(LayerManager.ID);
-		if (layermanager != null)
+		EditPartViewer viewer = getViewer();
+		if (viewer != null)
 		{
-			handles = new ArrayList<Handle>();
-			handles.add(new FormResizeHandle(this, PositionConstants.EAST)); // resize form via right side of form
-
-			Iterator<Part> parts = getModel().flattenedForm.getParts();
-			while (parts.hasNext())
+			LayerManager layermanager = (LayerManager)viewer.getEditPartRegistry().get(LayerManager.ID);
+			if (layermanager != null)
 			{
-				Part next = parts.next();
-				PartMoveHandle handle = new PartMoveHandle(next, this, PositionConstants.NORTH);
-				handles.add(handle);
-				if (!parts.hasNext())
-				{
-					// resize form via handle in right-bottom corner
-					handles.add(new ResizeFormAndMovePartHandle(next, this, PositionConstants.SOUTH_EAST));
-				}
-				else
-				{
-					handle.setOpaque(true); // paint all but the last one
-				}
-			}
+				handles = new ArrayList<Handle>();
+				handles.add(new FormResizeHandle(this, PositionConstants.EAST)); // resize form via right side of form
 
-			IFigure layer = layermanager.getLayer(LayerConstants.HANDLE_LAYER);
-			for (int i = 0; i < handles.size(); i++)
-			{
-				layer.add((IFigure)handles.get(i));
+				Iterator<Part> parts = getModel().flattenedForm.getParts();
+				while (parts.hasNext())
+				{
+					Part next = parts.next();
+					PartMoveHandle handle = new PartMoveHandle(next, this, PositionConstants.NORTH);
+					handles.add(handle);
+					if (!parts.hasNext())
+					{
+						// resize form via handle in right-bottom corner
+						handles.add(new ResizeFormAndMovePartHandle(next, this, PositionConstants.SOUTH_EAST));
+					}
+					else
+					{
+						handle.setOpaque(true); // paint all but the last one
+					}
+				}
+
+				IFigure layer = layermanager.getLayer(LayerConstants.HANDLE_LAYER);
+				for (int i = 0; i < handles.size(); i++)
+				{
+					layer.add((IFigure)handles.get(i));
+				}
 			}
 		}
 	}
