@@ -37,7 +37,7 @@ import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 public class ExportOptionsPage extends WizardPage
 {
 	public static String SERVER_URL_KEY = "serverURL";
-	public static String SERVICE_SOLUTION_KEY = "serviceSolution";
+	public static String SERVICE_SOLUTION_KEY_PREFIX = "serviceSolution_";
 	public static String TIMEOUT_KEY = "timeout";
 
 	private Text serverURL;
@@ -111,7 +111,7 @@ public class ExportOptionsPage extends WizardPage
 		}
 		serverURL.setText(defaultServerURL);
 
-		String defaultServiceSolutionName = getDialogSettings().get(SERVICE_SOLUTION_KEY);
+		String defaultServiceSolutionName = getDialogSettings().get(SERVICE_SOLUTION_KEY_PREFIX + solution);
 		if (defaultServiceSolutionName == null)
 		{
 			defaultServiceSolutionName = getSolution() + "_service";
@@ -199,7 +199,7 @@ public class ExportOptionsPage extends WizardPage
 		mobileExporter.setServiceSolutionName(getServiceSolutionName());
 		mobileExporter.setTimeout(Integer.parseInt(getTimeout()));
 		getDialogSettings().put(ExportOptionsPage.SERVER_URL_KEY, serverURL.getText());
-		getDialogSettings().put(ExportOptionsPage.SERVICE_SOLUTION_KEY, getServiceSolutionName());
+		getDialogSettings().put(ExportOptionsPage.SERVICE_SOLUTION_KEY_PREFIX + getSolution(), getServiceSolutionName());
 		getDialogSettings().put(ExportOptionsPage.TIMEOUT_KEY, getTimeout());
 		return nextPage;
 	}

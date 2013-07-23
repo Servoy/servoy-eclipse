@@ -370,6 +370,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		final ServoyProject activeProject = servoyModel.getActiveProject();
 
 		configuration.setAttribute(IMobileLaunchConstants.SOLUTION_NAME, activeProject.getSolution().getName());
+		configuration.setAttribute(IMobileLaunchConstants.SERVICE_SOLUTION, activeProject.getSolution().getName() + "_service");
 		configuration.setAttribute(IMobileLaunchConstants.SERVER_URL, IMobileLaunchConstants.DEFAULT_SERVICE_URL);
 		configuration.setAttribute(IMobileLaunchConstants.APPLICATION_URL, getDefaultApplicationURL());
 		configuration.setAttribute(IMobileLaunchConstants.TIMEOUT, IMobileLaunchConstants.DEFAULT_TIMEOUT);
@@ -388,7 +389,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 			txtServerURL.setText(configuration.getAttribute(IMobileLaunchConstants.SERVER_URL, IMobileLaunchConstants.DEFAULT_SERVICE_URL));
 			txtStartURL.setText(configuration.getAttribute(IMobileLaunchConstants.APPLICATION_URL, getDefaultApplicationURL()));
 			txtTimeout.setText(configuration.getAttribute(IMobileLaunchConstants.TIMEOUT, IMobileLaunchConstants.DEFAULT_TIMEOUT));
-			txtServiceSolution.setText(solutionName + "_service");
+			txtServiceSolution.setText(configuration.getAttribute(IMobileLaunchConstants.SERVICE_SOLUTION, solutionName + "_service"));
 			checkNoDebug.setSelection(Boolean.valueOf(configuration.getAttribute(IMobileLaunchConstants.NODEBUG, "true")).booleanValue());
 			String browserId = configuration.getAttribute(IMobileLaunchConstants.BROWSER_ID, "default");
 			String browserName = (String)possibleBrowsersNames.get(browserId);

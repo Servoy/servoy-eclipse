@@ -380,6 +380,7 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 			ApplicationServerSingleton.get().getWebServerPort());
 
 		workingCopy.setAttribute(IMobileLaunchConstants.SERVER_URL, IMobileLaunchConstants.DEFAULT_SERVICE_URL);
+		workingCopy.setAttribute(IMobileLaunchConstants.SERVICE_SOLUTION, project.getSolutionMetaData().getName() + "_service");
 		workingCopy.setAttribute(IMobileLaunchConstants.APPLICATION_URL, appUrl);
 		workingCopy.setAttribute("company", "");
 		workingCopy.setAttribute("license", "");
