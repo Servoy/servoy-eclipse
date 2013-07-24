@@ -402,7 +402,7 @@ public class MobileExporter
 		return null;
 	}
 
-	public File doExport(boolean exportAsZip)
+	public File doExport(boolean exportAsZip) throws IOException
 	{
 		String formJson = doPersistExport();
 		String solutionJavascript = doScriptingExport();
@@ -510,6 +510,7 @@ public class MobileExporter
 			catch (IOException e)
 			{
 				ServoyLog.logError(e);
+				throw e;
 			}
 			finally
 			{
@@ -518,7 +519,8 @@ public class MobileExporter
 		}
 		else
 		{
-			ServoyLog.logError("mobile.war file was not found in exporter project", null);
+			ServoyLog.logError("servoy_mobile.war file was not found in com.servoy.eclipse.model project", null);
+			throw new RuntimeException("War file was not found inside com.servoy.eclipse.model project");
 		}
 		return exportedFile;
 	}

@@ -60,7 +60,15 @@ public class MobileWorkspaceExporter extends AbstractWorkspaceExporter
 			exporter.setServiceSolutionName(configuration.getServiceSolutionName());
 			if (configuration.shouldExportForTesting()) exporter.useTestWar(null);
 //			exporter.setSkipConnect(..allow user to specify license and check it..); // TODO a separate case was created for this: SVY-4807
-			exporter.doExport(false);
+			try
+			{
+				exporter.doExport(false);
+			}
+			catch (Exception ex)
+			{
+				outputError("Unexpected error while exporting solution - '" + activeProject.getProject().getName() + "': " + ex.getMessage()); //$NON-NLS-1$//$NON-NLS-2$
+				exitCode = EXIT_EXPORT_FAILED;
+			}
 		}
 		else
 		{

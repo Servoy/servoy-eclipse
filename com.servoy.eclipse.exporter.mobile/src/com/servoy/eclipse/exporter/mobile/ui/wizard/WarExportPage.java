@@ -329,12 +329,21 @@ public class WarExportPage extends WizardPage
 	{
 		File outputFile = new File(getOutputFolder());
 		mobileExporter.setOutputFolder(outputFile);
+		final String[] errorMessage = new String[1];
 
 		IRunnableWithProgress job = new IRunnableWithProgress()
 		{
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 			{
-				mobileExporter.doExport(false);
+				try
+				{
+					mobileExporter.doExport(false);
+				}
+				catch (Exception ex)
+				{
+					ServoyLog.logError(ex);
+					errorMessage[0] = ex.getMessage();
+				}
 				if (delayAfterExport > 0) Thread.sleep(delayAfterExport);
 			}
 		};
@@ -349,7 +358,9 @@ public class WarExportPage extends WizardPage
 
 
 		getDialogSettings().put(WarExportPage.OUTPUT_PATH_KEY, getOutputFolder());
-		return "War file was successfully exported to: " + new File(outputFile.getAbsolutePath(), mobileExporter.getSolutionName() + ".war").getAbsolutePath();
+		return errorMessage[0] == null ? "War file was successfully exported to: " +
+			new File(outputFile.getAbsolutePath(), mobileExporter.getSolutionName() + ".war").getAbsolutePath()
+			: "Unexpected exception while exporting war file: " + errorMessage[0];
 	}
 
 	@Override

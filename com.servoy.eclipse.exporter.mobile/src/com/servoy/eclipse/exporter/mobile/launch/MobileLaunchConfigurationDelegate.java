@@ -40,7 +40,15 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		if (monitor != null && monitor.isCanceled()) return;
 
 		if (monitor != null) monitor.subTask("exporting mobile solution");
-		exporter.doExport(false);
+		try
+		{
+			exporter.doExport(false);
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
+			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unexpected error: " + ex.getMessage()));
+		}
 		if (monitor != null && monitor.isCanceled()) return;
 		if (monitor != null) monitor.subTask("deploying mobile solution");
 
