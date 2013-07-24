@@ -189,7 +189,7 @@ public class BackgroundTableLoader implements IActiveProjectListener
 
 								// if there is a dbi file for this table - add a dbi marker as well (as it might be helpful to use quick-fixes to create the table used by solution)
 								DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
-								if (dmm.getDBIFile(dataSource).exists())
+								if (dmm != null && dmm.getDBIFile(dataSource).exists())
 								{
 									dmm.updateMarkerStatesForMissingTable(null, serverAndTable[0], serverAndTable[1]);
 								}
