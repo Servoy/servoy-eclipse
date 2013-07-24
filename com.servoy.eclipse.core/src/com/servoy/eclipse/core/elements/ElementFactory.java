@@ -18,7 +18,6 @@ package com.servoy.eclipse.core.elements;
 
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -33,7 +32,6 @@ import java.util.Random;
 import java.util.Set;
 
 import javax.swing.ImageIcon;
-import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
 import org.eclipse.swt.graphics.Point;
@@ -56,6 +54,7 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServiceProvider;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.component.ComponentFormat;
+import com.servoy.j2db.debug.DebugUtils;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
@@ -324,12 +323,13 @@ public class ElementFactory
 			return null;
 		}
 		Border border = null;
-		if (Utils.isAppleMacOS() && !EventQueue.isDispatchThread())
+		//TODO: find better way to handle this for MAC running with java 1.7
+		if (Utils.isAppleMacOS() && System.getProperty("java.version").startsWith("1.7")) //$NON-NLS-1$//$NON-NLS-2$
 		{
 			final Border[] fBorder = { null };
 			try
 			{
-				SwingUtilities.invokeAndWait(new Runnable()
+				DebugUtils.invokeAndWaitWhileDispatchingOnSWT(new Runnable()
 				{
 					public void run()
 					{
