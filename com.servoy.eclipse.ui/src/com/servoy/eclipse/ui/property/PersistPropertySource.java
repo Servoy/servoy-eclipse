@@ -252,7 +252,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			public Border convertProperty(Object property, final String value)
 			{
 				Border border = null;
-				if (Utils.isAppleMacOS())
+				//TODO: find better way to handle this for MAC running with java 1.7
+				if (Utils.isAppleMacOS() && System.getProperty("java.version").startsWith("1.7")) //$NON-NLS-1$//$NON-NLS-2$
 				{
 					final Border[] fBorder = { null };
 					try

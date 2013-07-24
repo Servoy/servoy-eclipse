@@ -40,10 +40,13 @@ import com.servoy.eclipse.designer.internal.core.FormImageNotifier;
 import com.servoy.eclipse.designer.internal.core.IImageNotifier;
 import com.servoy.eclipse.designer.internal.core.ImageFigureController;
 import com.servoy.eclipse.designer.util.BoundsImageFigure;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.debug.DebugUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.util.ComponentFactoryHelper;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Edit part for painting the form border.
@@ -152,10 +155,35 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 		java.awt.Dimension size = getModel().flattenedForm.getSize();
 		// add border size
 		Insets insets = IFigure.NO_INSETS;
-		javax.swing.border.Border border = ElementFactory.getFormBorder(application, getModel().flattenedForm);
+		final javax.swing.border.Border border = ElementFactory.getFormBorder(application, getModel().flattenedForm);
 		if (border != null)
 		{
-			java.awt.Insets borderInsets = ComponentFactoryHelper.getBorderInsetsForNoComponent(border);
+			java.awt.Insets borderInsets;
+			//TODO: find better way to handle this for MAC running with java 1.7
+			if (Utils.isAppleMacOS() && System.getProperty("java.version").startsWith("1.7")) //$NON-NLS-1$//$NON-NLS-2$
+			{
+				final java.awt.Insets[] fInset = { null };
+				try
+				{
+					DebugUtils.invokeAndWaitWhileDispatchingOnSWT(new Runnable()
+					{
+						public void run()
+						{
+							fInset[0] = ComponentFactoryHelper.getBorderInsetsForNoComponent(border);
+						}
+					});
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError("Error getting border insets for border  " + border, e);
+				}
+				borderInsets = fInset[0];
+			}
+			else
+			{
+				borderInsets = ComponentFactoryHelper.getBorderInsetsForNoComponent(border);
+			}
+
 			insets = new Insets(borderInsets.top, borderInsets.left, borderInsets.bottom, borderInsets.right);
 		}
 

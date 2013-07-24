@@ -322,7 +322,8 @@ public class ElementFactory
 			return null;
 		}
 		Border border = null;
-		if (Utils.isAppleMacOS())
+		//TODO: find better way to handle this for MAC running with java 1.7
+		if (Utils.isAppleMacOS() && System.getProperty("java.version").startsWith("1.7")) //$NON-NLS-1$//$NON-NLS-2$
 		{
 			final Border[] fBorder = { null };
 			try
@@ -698,11 +699,34 @@ public class ElementFactory
 		}
 
 		// include border size
-		Border border = getFormBorder(application, form);
+		final Border border = getFormBorder(application, form);
 		Insets borderInsets;
 		if (border != null)
 		{
-			borderInsets = ComponentFactoryHelper.getBorderInsetsForNoComponent(border);
+			//TODO: find better way to handle this for MAC running with java 1.7
+			if (Utils.isAppleMacOS() && System.getProperty("java.version").startsWith("1.7")) //$NON-NLS-1$//$NON-NLS-2$
+			{
+				final java.awt.Insets[] fInset = { null };
+				try
+				{
+					DebugUtils.invokeAndWaitWhileDispatchingOnSWT(new Runnable()
+					{
+						public void run()
+						{
+							fInset[0] = ComponentFactoryHelper.getBorderInsetsForNoComponent(border);
+						}
+					});
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError("Error getting border insets for border  " + border, e);
+				}
+				borderInsets = fInset[0];
+			}
+			else
+			{
+				borderInsets = ComponentFactoryHelper.getBorderInsetsForNoComponent(border);
+			}
 		}
 		else
 		{
