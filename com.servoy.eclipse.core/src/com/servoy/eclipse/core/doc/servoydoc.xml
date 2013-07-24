@@ -6277,6 +6277,60 @@ fs.loadAllRecords();]]></sample>
         <function clientSupport="wc,sc" name="createDataSourceByQuery">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
+            <argumentType typecode="java.lang.Number"/>
+            <argumentType typecode="[I"/>
+            <argumentType typecode="[Ljava.lang.String;"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[datasource containing the results of the query or null if the parameters are wrong.]]></return>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Performs a query and saves the result in a datasource.
+Will throw an exception if anything went wrong when executing the query.
+Column types in the datasource are inferred from the query result or can be explicitly specified.
+
+Using this variation of createDataSourceByQuery any Tablefilter on the involved tables will be taken into account.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Performs a query and saves the result in a datasource.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[// select customer data for order 1234
+/** @type {QBSelect<db:/example_data/customers>} */
+var q = databaseManager.createSelect("db:/example_data/customers");
+q.result.add(q.columns.customer_id).add(q.columns.city).add(q.columns.country);
+q.where.add(q.joins.customers_to_orders.columns.orderid.eq(1234));
+var uri = databaseManager.createDataSourceByQuery('mydata', q, 999, null, ['customer_id']); 
+//var uri = databaseManager.createDataSourceByQuery('mydata', q, 999, [JSColumn.TEXT, JSColumn.TEXT, JSColumn.TEXT], ['customer_id']); 
+
+// the uri can be used to create a form using solution model
+var myForm = solutionModel.newForm('newForm', uri, 'myStyleName', false, 800, 600);
+myForm.newTextField('city', 140, 20, 140,20);
+
+// the uri can be used to acces a foundset directly
+var fs = databaseManager.getFoundSet(uri);
+fs.loadAllRecords();]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[Data source name]]></description>
+            </parameter>
+            <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
+              <description><![CDATA[The query builder to be executed.]]></description>
+            </parameter>
+            <parameter name="max_returned_rows" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
+              <description><![CDATA[The maximum number of rows returned by the query.]]></description>
+            </parameter>
+            <parameter name="types" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[I">
+              <description><![CDATA[The column types]]></description>
+            </parameter>
+            <parameter name="pkNames" type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;">
+              <description><![CDATA[array of pk names, when null a hidden pk-column will be added]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="wc,sc" name="createDataSourceByQuery">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="[Ljava.lang.Object;"/>
@@ -6375,6 +6429,64 @@ fs.loadAllRecords();]]></sample>
             </parameter>
             <parameter name="types" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[I">
               <description><![CDATA[The column types]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="wc,sc" name="createDataSourceByQuery">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="int"/>
+            <argumentType typecode="[I"/>
+            <argumentType typecode="[Ljava.lang.String;"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[datasource containing the results of the query or null if the parameters are wrong.]]></return>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Performs a sql query on the specified server, saves the the result in a datasource.
+Will throw an exception if anything went wrong when executing the query.
+Column types in the datasource are inferred from the query result or can be explicitly specified.
+
+Using this variation of createDataSourceByQuery any Tablefilter on the involved tables will be disregarded.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Performs a sql query on the specified server, saves the the result in a datasource.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[var query = 'select customer_id, address, city, country  from customers';
+var uri = databaseManager.createDataSourceByQuery('mydata', 'example_data', query, null, 999);
+//var uri = databaseManager.createDataSourceByQuery('mydata', 'example_data', query, null, 999, [JSColumn.TEXT, JSColumn.TEXT, JSColumn.TEXT], ['customer_id']);
+
+// the uri can be used to create a form using solution model
+var myForm = solutionModel.newForm('newForm', uri, 'myStyleName', false, 800, 600)
+myForm.newTextField('city', 140, 20, 140,20)
+
+// the uri can be used to acces a foundset directly
+var fs = databaseManager.getFoundSet(uri)
+fs.loadAllRecords();]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[data source name]]></description>
+            </parameter>
+            <parameter name="server_name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[The name of the server where the query should be executed.]]></description>
+            </parameter>
+            <parameter name="sql_query" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[The custom sql.]]></description>
+            </parameter>
+            <parameter name="arguments" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
+              <description><![CDATA[Specified arguments or null if there are no arguments.]]></description>
+            </parameter>
+            <parameter name="max_returned_rows" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[The maximum number of rows returned by the query.]]></description>
+            </parameter>
+            <parameter name="types" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[I">
+              <description><![CDATA[The column types]]></description>
+            </parameter>
+            <parameter name="pkNames" type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;">
+              <description><![CDATA[array of pk names, when null a hidden pk-column will be added]]></description>
             </parameter>
           </parameters>
         </function>
@@ -14292,6 +14404,41 @@ var uri2 = ds2.createDataSource('mydata2'); // types are inferred from query res
             </parameter>
           </parameters>
         </function>
+        <function clientSupport="wc,sc" name="createDataSource">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.Object"/>
+            <argumentType typecode="[Ljava.lang.String;"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String uri reference to the created data source.]]></return>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Create a data source from the data set with specified name and using specified types, add .]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Create a data source from the data set with specified name and using specified types, add .]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[ds.addColumn('my_id'); // note: use regular javascript identifiers so they can be used in scripting
+ds.addColumn('my_label');
+var uri = ds.createDataSource('mydata', [JSColumn.INTEGER, JSColumn.TEXT], ['my_id']);
+var jsform = solutionModel.newForm(fname, uri, null, true, 300, 300);
+
+var query = 'select customerid, address, city, country  from customers';
+var ds2 = databaseManager.getDataSetByQuery('example_data', query, null, 999);
+var uri2 = ds2.createDataSource('mydata2', null, ['customerid']); // types are inferred from query result, use customerid as pk]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[data source name]]></description>
+            </parameter>
+            <parameter name="types" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[array of types as defined in JSColumn, when null types are inferred from the query result]]></description>
+            </parameter>
+            <parameter name="pkNames" type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;">
+              <description><![CDATA[array of pk names, when null a hidden pk-column will be added]]></description>
+            </parameter>
+          </parameters>
+        </function>
         <function clientSupport="wc,sc" name="getAsHTML">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String html.]]></return>
@@ -19677,6 +19824,40 @@ application.output("The new button: " + button.name + " has the following onActi
             </parameter>
           </parameters>
         </function>
+        <function clientSupport="mc" name="newCalendar">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.base.solutionmodel.IBaseSMVariable"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSCalendar" typecode="com.servoy.j2db.scripting.solutionmodel.JSCalendar"><![CDATA[a new JSCalendar field]]></return>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[Creates a new JSCalendar field on the form.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[Creates a new JSCalendar field on the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var form = solutionModel.newForm('newForm1',myDatasource); 
+//choose the dataprovider or JSVariable you want for the field
+var x = null;
+//global JSVariable as the dataprovider 
+//x = solutionModel.newGlobalVariable('globals', 'myGlobal', JSVariable.DATETIME);
+//or a form JSVariable as the dataprovider 
+//x = form.newVariable('myFormVar', JSVariable.DATETIME);
+var field = form.newCalendar(x,1);
+//or a column data provider as the dataprovider
+//field.dataProviderID = columnTextDataProvider;
+forms['newForm1'].controller.show();]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="dataprovider" type="com.servoy.j2db.scripting.solutionmodel.JSVariable" typecode="com.servoy.base.solutionmodel.IBaseSMVariable">
+              <description><![CDATA[the specified dataprovider name/JSVariable of the JSField object]]></description>
+            </parameter>
+            <parameter name="y" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the vertical "y" position of the JSField object, defines the order of elements on the form]]></description>
+            </parameter>
+          </parameters>
+        </function>
         <function clientSupport="wc,sc" name="newCalendar">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
@@ -19712,6 +19893,40 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
             <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[the height of the JSField object in pixels]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="mc" name="newCalendar">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSCalendar" typecode="com.servoy.j2db.scripting.solutionmodel.JSCalendar"><![CDATA[a new JSCalendar field]]></return>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[Creates a new JSCalendar field on the form.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[Creates a new JSCalendar field on the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var form = solutionModel.newForm('newForm1',myDatasource); 
+//choose the dataprovider or JSVariable you want for the field
+var x = null;
+//global JSVariable as the dataprovider 
+//x = solutionModel.newGlobalVariable('globals', 'myGlobal', JSVariable.DATETIME);
+//or a form JSVariable as the dataprovider 
+//x = form.newVariable('myFormVar', JSVariable.DATETIME);
+var field = form.newCalendar(x,1);
+//or a column data provider as the dataprovider
+//field.dataProviderID = columnTextDataProvider;
+forms['newForm1'].controller.show();]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="dataprovider" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified dataprovider name/JSVariable of the JSField object]]></description>
+            </parameter>
+            <parameter name="y" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the vertical "y" position of the JSField object, defines the order of elements on the form]]></description>
             </parameter>
           </parameters>
         </function>
@@ -40086,7 +40301,7 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
         </function>
       </functions>
     </object>
-    <object clientSupport="wc,sc" extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeCalendar" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeCalendar">
+    <object clientSupport="mc,wc,sc" extendsComponent="com.servoy.j2db.ui.runtime.IRuntimeComponent" publicName="RuntimeCalendar" qualifiedName="com.servoy.j2db.ui.runtime.IRuntimeCalendar">
       <properties>
         <property clientSupport="wc,sc" name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -40146,10 +40361,10 @@ NOTE the "!" operator can be used to invert the editable state.]]></description>
 %%prefix%%%%elementName%%.editable = !currentState;]]></sample>
           </samples>
         </property>
-        <property clientSupport="wc,sc" name="enabled">
+        <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
+            <description clientSupport="mc,wc,sc"><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".
 true - enabled; false - not enabled; ! - the enabled state is inverted (the opposite).
 
 NOTE: A disabled element cannot be selected by clicking the element (or by pressing the TAB key even if this option is supported by the operating system).
@@ -40159,10 +40374,10 @@ NOTE: A label or button element will not disable if the "displayType" design tim
 NOTE: The disabled "grayed" color is dependent on the LAF set in the Servoy Client Application Preferences. For more information see Preferences: Look And Feel in the Servoy Developer User's Guide.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Gets or sets the enabled state of a specified field, also known as "grayed".]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[//gets the enabled state of the field
+            <sample clientSupport="mc,wc,sc"><![CDATA[//gets the enabled state of the field
 var currState = %%prefix%%%%elementName%%.enabled;
 
 //sets the enabled state of the field
@@ -40301,18 +40516,18 @@ var currentState = %%prefix%%%%elementName%%.transparent;
 %%prefix%%%%elementName%%.transparent = !currentState;]]></sample>
           </samples>
         </property>
-        <property clientSupport="wc,sc" name="visible">
+        <property clientSupport="mc,wc,sc" name="visible">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
+            <description clientSupport="mc,wc,sc"><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).
 
 NOTE: The visibility of an element is not persistent; the state of visibility only applies to the current user in his/her current session.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Gets or sets the visibility of an element; true - visible; false - not visible; ! - the visibility state is inverted (the opposite).]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[//sets the element as visible
+            <sample clientSupport="mc,wc,sc"><![CDATA[//sets the element as visible
 forms.company.elements.faxBtn.visible = true;
 
 //gets the visibility of the element
@@ -40485,17 +40700,17 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
             <sample clientSupport="wc,sc"><![CDATA[var y =  %%prefix%%%%elementName%%.getLocationY();]]></sample>
           </samples>
         </function>
-        <function clientSupport="wc,sc" name="getName">
+        <function clientSupport="mc,wc,sc" name="getName">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the element.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the name of an element. (may be null as well)]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Returns the name of an element. (may be null as well)]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Returns the name of an element.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Returns the name of an element.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getName();]]></sample>
+            <sample clientSupport="mc,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getName();]]></sample>
           </samples>
         </function>
         <function clientSupport="wc,sc" name="getWidth">
