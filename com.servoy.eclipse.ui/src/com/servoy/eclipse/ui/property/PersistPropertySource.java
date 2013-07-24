@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.property;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.print.PageFormat;
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
 import org.eclipse.core.runtime.IAdaptable;
@@ -122,7 +124,6 @@ import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.dataui.PropertyEditorClass;
 import com.servoy.j2db.dataui.PropertyEditorHint;
 import com.servoy.j2db.dataui.PropertyEditorOption;
-import com.servoy.j2db.debug.DebugUtils;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
@@ -249,12 +250,12 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			public Border convertProperty(Object property, final String value)
 			{
 				Border border = null;
-				if (Utils.isAppleMacOS())
+				if (Utils.isAppleMacOS() && !EventQueue.isDispatchThread())
 				{
 					final Border[] fBorder = { null };
 					try
 					{
-						DebugUtils.invokeAndWaitWhileDispatchingOnSWT(new Runnable()
+						SwingUtilities.invokeAndWait(new Runnable()
 						{
 							public void run()
 							{
