@@ -1161,7 +1161,20 @@ public class DataModelManager implements IColumnInfoManager
 					// the project might have disappeared before this job was started... (delete)
 					try
 					{
-						if (columnDifference.getTable() != null && !columnDifference.getTable().isMarkedAsHiddenInDeveloper())
+						boolean hiddenInDeveloper;
+						if (columnDifference.getTable() != null)
+						{
+							hiddenInDeveloper = columnDifference.getTable().isMarkedAsHiddenInDeveloper();
+						}
+						else
+						{
+							// this does actual parsing of the .dbi file, but it seems like the Table doesn't exist in the DB so the flag is not cached anywhere;
+							// currently this will only happen when a missing table is used in a solution or when the user manually chooses to sync tables
+							hiddenInDeveloper = isHiddenInDeveloper((IServerInternal)sm.getServer(columnDifference.getServerName()),
+								columnDifference.getTableName());
+						}
+
+						if (!hiddenInDeveloper)
 						{
 							IMarker marker = resource.createMarker(ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE);
 							marker.setAttribute(IMarker.MESSAGE, columnDifference.getUserFriendlyMessage());

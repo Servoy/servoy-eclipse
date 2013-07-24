@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -185,6 +186,13 @@ public class BackgroundTableLoader implements IActiveProjectListener
 							if (s.getTable(serverAndTable[1]) == null) // loads all columns names as well - this is the main purpose
 							{
 								missingTablesUsedByActive = true;
+
+								// if there is a dbi file for this table - add a dbi marker as well (as it might be helpful to use quick-fixes to create the table used by solution)
+								DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
+								if (dmm.getDBIFile(dataSource).exists())
+								{
+									dmm.updateMarkerStatesForMissingTable(null, serverAndTable[0], serverAndTable[1]);
+								}
 							}
 						}
 					}
