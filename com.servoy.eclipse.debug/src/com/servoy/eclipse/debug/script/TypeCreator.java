@@ -439,6 +439,15 @@ public class TypeCreator extends TypeCache
 			if (ignorePackages.containsKey(name)) return null;
 			try
 			{
+				int lastDot = name.lastIndexOf('.');
+				if (lastDot != -1)
+				{
+					if (findType(context, name.substring(0, lastDot)) != null)
+					{
+						// type found, so this is a inner class
+						name = name.substring(0, lastDot) + '$' + name.substring(lastDot + 1);
+					}
+				}
 				Class< ? > clz = null;
 				try
 				{
