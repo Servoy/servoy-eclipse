@@ -54,6 +54,7 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServiceProvider;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.component.ComponentFormat;
+import com.servoy.j2db.debug.DebugUtils;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
@@ -315,13 +316,39 @@ public class ElementFactory
 		return null;
 	}
 
-	public static Border getFormBorder(IServiceProvider sp, Form form)
+	public static Border getFormBorder(IServiceProvider sp, final Form form)
 	{
 		if (form == null)
 		{
 			return null;
 		}
-		Border border = ComponentFactoryHelper.createBorder(form.getBorderType(), true);
+		Border border = null;
+		//TODO: find better way to handle this for MAC running with java 1.7
+		if (Utils.isAppleMacOS() && System.getProperty("java.version").startsWith("1.7")) //$NON-NLS-1$//$NON-NLS-2$
+		{
+			final Border[] fBorder = { null };
+			try
+			{
+				DebugUtils.invokeAndWaitWhileDispatchingOnSWT(new Runnable()
+				{
+					public void run()
+					{
+						fBorder[0] = ComponentFactoryHelper.createBorder(form.getBorderType(), true);
+					}
+				});
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError("Error creating border from " + form.getBorderType(), e);
+				e.printStackTrace();
+			}
+			border = fBorder[0];
+		}
+		else
+		{
+			border = ComponentFactoryHelper.createBorder(form.getBorderType(), true);
+		}
+
 		if (border != null)
 		{
 			return border;
@@ -674,11 +701,34 @@ public class ElementFactory
 		}
 
 		// include border size
-		Border border = getFormBorder(application, form);
+		final Border border = getFormBorder(application, form);
 		Insets borderInsets;
 		if (border != null)
 		{
-			borderInsets = ComponentFactoryHelper.getBorderInsetsForNoComponent(border);
+			//TODO: find better way to handle this for MAC running with java 1.7
+			if (Utils.isAppleMacOS() && System.getProperty("java.version").startsWith("1.7")) //$NON-NLS-1$//$NON-NLS-2$
+			{
+				final java.awt.Insets[] fInset = { null };
+				try
+				{
+					DebugUtils.invokeAndWaitWhileDispatchingOnSWT(new Runnable()
+					{
+						public void run()
+						{
+							fInset[0] = ComponentFactoryHelper.getBorderInsetsForNoComponent(border);
+						}
+					});
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError("Error getting border insets for border  " + border, e);
+				}
+				borderInsets = fInset[0];
+			}
+			else
+			{
+				borderInsets = ComponentFactoryHelper.getBorderInsetsForNoComponent(border);
+			}
 		}
 		else
 		{

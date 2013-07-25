@@ -27,6 +27,7 @@ import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.draw2d.geometry.Insets;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.Handle;
 import org.eclipse.gef.LayerConstants;
@@ -39,10 +40,13 @@ import com.servoy.eclipse.designer.internal.core.FormImageNotifier;
 import com.servoy.eclipse.designer.internal.core.IImageNotifier;
 import com.servoy.eclipse.designer.internal.core.ImageFigureController;
 import com.servoy.eclipse.designer.util.BoundsImageFigure;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.debug.DebugUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.util.ComponentFactoryHelper;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Edit part for painting the form border.
@@ -81,33 +85,37 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 	protected void createHandles()
 	{
 		removeHandles();
-		LayerManager layermanager = (LayerManager)getViewer().getEditPartRegistry().get(LayerManager.ID);
-		if (layermanager != null)
+		EditPartViewer viewer = getViewer();
+		if (viewer != null)
 		{
-			handles = new ArrayList<Handle>();
-			handles.add(new FormResizeHandle(this, PositionConstants.EAST)); // resize form via right side of form
-
-			Iterator<Part> parts = getModel().flattenedForm.getParts();
-			while (parts.hasNext())
+			LayerManager layermanager = (LayerManager)viewer.getEditPartRegistry().get(LayerManager.ID);
+			if (layermanager != null)
 			{
-				Part next = parts.next();
-				PartMoveHandle handle = new PartMoveHandle(next, this, PositionConstants.NORTH);
-				handles.add(handle);
-				if (!parts.hasNext())
-				{
-					// resize form via handle in right-bottom corner
-					handles.add(new ResizeFormAndMovePartHandle(next, this, PositionConstants.SOUTH_EAST));
-				}
-				else
-				{
-					handle.setOpaque(true); // paint all but the last one
-				}
-			}
+				handles = new ArrayList<Handle>();
+				handles.add(new FormResizeHandle(this, PositionConstants.EAST)); // resize form via right side of form
 
-			IFigure layer = layermanager.getLayer(LayerConstants.HANDLE_LAYER);
-			for (int i = 0; i < handles.size(); i++)
-			{
-				layer.add((IFigure)handles.get(i));
+				Iterator<Part> parts = getModel().flattenedForm.getParts();
+				while (parts.hasNext())
+				{
+					Part next = parts.next();
+					PartMoveHandle handle = new PartMoveHandle(next, this, PositionConstants.NORTH);
+					handles.add(handle);
+					if (!parts.hasNext())
+					{
+						// resize form via handle in right-bottom corner
+						handles.add(new ResizeFormAndMovePartHandle(next, this, PositionConstants.SOUTH_EAST));
+					}
+					else
+					{
+						handle.setOpaque(true); // paint all but the last one
+					}
+				}
+
+				IFigure layer = layermanager.getLayer(LayerConstants.HANDLE_LAYER);
+				for (int i = 0; i < handles.size(); i++)
+				{
+					layer.add((IFigure)handles.get(i));
+				}
 			}
 		}
 	}
@@ -147,10 +155,35 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 		java.awt.Dimension size = getModel().flattenedForm.getSize();
 		// add border size
 		Insets insets = IFigure.NO_INSETS;
-		javax.swing.border.Border border = ElementFactory.getFormBorder(application, getModel().flattenedForm);
+		final javax.swing.border.Border border = ElementFactory.getFormBorder(application, getModel().flattenedForm);
 		if (border != null)
 		{
-			java.awt.Insets borderInsets = ComponentFactoryHelper.getBorderInsetsForNoComponent(border);
+			java.awt.Insets borderInsets;
+			//TODO: find better way to handle this for MAC running with java 1.7
+			if (Utils.isAppleMacOS() && System.getProperty("java.version").startsWith("1.7")) //$NON-NLS-1$//$NON-NLS-2$
+			{
+				final java.awt.Insets[] fInset = { null };
+				try
+				{
+					DebugUtils.invokeAndWaitWhileDispatchingOnSWT(new Runnable()
+					{
+						public void run()
+						{
+							fInset[0] = ComponentFactoryHelper.getBorderInsetsForNoComponent(border);
+						}
+					});
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError("Error getting border insets for border  " + border, e);
+				}
+				borderInsets = fInset[0];
+			}
+			else
+			{
+				borderInsets = ComponentFactoryHelper.getBorderInsetsForNoComponent(border);
+			}
+
 			insets = new Insets(borderInsets.top, borderInsets.left, borderInsets.bottom, borderInsets.right);
 		}
 

@@ -439,9 +439,20 @@ public class TypeCreator extends TypeCache
 			if (ignorePackages.containsKey(name)) return null;
 			try
 			{
-				ClassLoader cl = com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getBeanManager().getClassLoader();
-				if (cl == null) cl = Thread.currentThread().getContextClassLoader();
-				Class< ? > clz = Class.forName(name, false, cl);
+				Class< ? > clz = null;
+				try
+				{
+					clz = Class.forName(name);
+				}
+				catch (Exception e)
+				{
+				}
+				if (clz == null)
+				{
+					ClassLoader cl = com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getBeanManager().getClassLoader();
+					if (cl == null) cl = Thread.currentThread().getContextClassLoader();
+					clz = Class.forName(name, false, cl);
+				}
 				type = getClassType(context, clz, name);
 			}
 			catch (ClassNotFoundException e)

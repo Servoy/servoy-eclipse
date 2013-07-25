@@ -122,6 +122,7 @@ import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.dataui.PropertyEditorClass;
 import com.servoy.j2db.dataui.PropertyEditorHint;
 import com.servoy.j2db.dataui.PropertyEditorOption;
+import com.servoy.j2db.debug.DebugUtils;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
@@ -245,9 +246,36 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 		BORDER_STRING_CONVERTER = new IPropertyConverter<String, Border>()
 		{
-			public Border convertProperty(Object property, String value)
+			public Border convertProperty(Object property, final String value)
 			{
-				return ComponentFactoryHelper.createBorder(value, true);
+				Border border = null;
+				//TODO: find better way to handle this for MAC running with java 1.7
+				if (Utils.isAppleMacOS() && System.getProperty("java.version").startsWith("1.7")) //$NON-NLS-1$//$NON-NLS-2$
+				{
+					final Border[] fBorder = { null };
+					try
+					{
+						DebugUtils.invokeAndWaitWhileDispatchingOnSWT(new Runnable()
+						{
+							public void run()
+							{
+								fBorder[0] = ComponentFactoryHelper.createBorder(value, true);
+							}
+						});
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError("Error creating border from " + value, e);
+						e.printStackTrace();
+					}
+					border = fBorder[0];
+				}
+				else
+				{
+					border = ComponentFactoryHelper.createBorder(value, true);
+				}
+
+				return border;
 			}
 
 			public String convertValue(Object property, Border value)

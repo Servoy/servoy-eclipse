@@ -2123,14 +2123,15 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	public static String getReturnTypeString(Class returnType)
 	{
-		StringBuffer returnTypeStringBuffer = new StringBuffer();
+		if (returnType == null) return "*unknown*";
+		StringBuilder sb = new StringBuilder();
 		while (returnType.isArray())
 		{
-			returnTypeStringBuffer.append("[]"); //$NON-NLS-1$
+			sb.append("[]"); //$NON-NLS-1$
 			returnType = returnType.getComponentType();
 		}
-		returnTypeStringBuffer.insert(0, DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(returnType));
-		return returnTypeStringBuffer.toString();
+		sb.insert(0, DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(returnType));
+		return sb.toString();
 	}
 
 }
