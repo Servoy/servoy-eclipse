@@ -54,7 +54,6 @@ public class PhoneGapConnector
 {
 	private ServoyJSONObject jsonContent;
 	private final DefaultHttpClient client = new DefaultHttpClient();
-	private final MobileExporter mobileExporter = new MobileExporter();
 	private JSONArray iosCertificates;
 	private JSONArray androidCertificates;
 	private JSONArray blackberryCertificates;
@@ -210,8 +209,7 @@ public class PhoneGapConnector
 		}
 	}
 
-	public String createOrUpdatePhoneGapApplication(PhoneGapApplication application, String solutionName, String serverURL, String serviceSolutionName,
-		int timeout, File configFile)
+	public String createOrUpdatePhoneGapApplication(PhoneGapApplication application, MobileExporter mobileExporter, File configFile)
 	{
 		File exportedFile = null;
 		try
@@ -249,10 +247,6 @@ public class PhoneGapConnector
 			MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
 			entity.addPart("data", new StringBody(application.getJSON()));
 
-			mobileExporter.setServerURL(serverURL);
-			mobileExporter.setServiceSolutionName(serviceSolutionName);
-			mobileExporter.setSolutionName(solutionName);
-			mobileExporter.setTimeout(timeout);
 			mobileExporter.setOutputFolder(new File(System.getProperty("java.io.tmpdir")));
 			mobileExporter.setConfigFile(configFile);
 			exportedFile = mobileExporter.doExport(true);

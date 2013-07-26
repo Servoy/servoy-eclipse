@@ -49,6 +49,7 @@ import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 import com.servoy.eclipse.exporter.mobile.ui.wizard.ExportMobileWizard.CustomizedFinishPage;
+import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 
@@ -69,16 +70,14 @@ public class PhoneGapApplicationPage extends WizardPage
 	private Button iconBrowseButton;
 	private CheckboxTableViewer certificatesViewer;
 
-	private String solutionName;
-	private String serverURL;
-	private String serviceSolutionName;
-	private int timeout;
+	private final MobileExporter exporter;
 
-	public PhoneGapApplicationPage(String name, CustomizedFinishPage finishPage)
+	public PhoneGapApplicationPage(String name, CustomizedFinishPage finishPage, MobileExporter mobileExporter)
 	{
 		super(name);
 		this.finishPage = finishPage;
 		this.connector = new PhoneGapConnector();
+		this.exporter = mobileExporter;
 		setTitle("PhoneGap Application");
 	}
 
@@ -258,8 +257,7 @@ public class PhoneGapApplicationPage extends WizardPage
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 					{
 						errorMessage[0] = getConnector().createOrUpdatePhoneGapApplication(
-							new PhoneGapApplication(appName, appVersion, appDescription, appPublic, path, selectedCertificates), solutionName, serverURL,
-							serviceSolutionName, timeout, configFile);
+							new PhoneGapApplication(appName, appVersion, appDescription, appPublic, path, selectedCertificates), exporter, configFile);
 					}
 				});
 			}
@@ -295,38 +293,6 @@ public class PhoneGapApplicationPage extends WizardPage
 	public PhoneGapConnector getConnector()
 	{
 		return connector;
-	}
-
-	/**
-	 * @param solutionName the solutionName to set
-	 */
-	public void setSolutionName(String solutionName)
-	{
-		this.solutionName = solutionName;
-	}
-
-	/**
-	 * @param serverURL the serverURL to set
-	 */
-	public void setServerURL(String serverURL)
-	{
-		this.serverURL = serverURL;
-	}
-
-	/**
-	 * @param serviceSolutionName the serviceSolutionName to set
-	 */
-	public void setServiceSolutionName(String serviceSolutionName)
-	{
-		this.serviceSolutionName = serviceSolutionName;
-	}
-
-	/**
-	 * @param timeout the timeout to set
-	 */
-	public void setTimeout(int timeout)
-	{
-		this.timeout = timeout;
 	}
 
 	public void populateExistingApplications()

@@ -54,7 +54,7 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 
 	private final CustomizedFinishPage finishPage = new CustomizedFinishPage("lastPage");
 
-	private final PhoneGapApplicationPage pgAppPage = new PhoneGapApplicationPage("PhoneGap Application", finishPage);
+	private final PhoneGapApplicationPage pgAppPage = new PhoneGapApplicationPage("PhoneGap Application", finishPage, mobileExporter);
 
 	private final WarExportPage warExportPage = new WarExportPage("outputPage", "Choose output", null, finishPage, pgAppPage, mobileExporter);
 

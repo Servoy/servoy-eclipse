@@ -58,6 +58,7 @@ import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 public class WarExportPage extends WizardPage
 {
 	public static String OUTPUT_PATH_KEY = "initialOutputPath";
+	public static String PHONEGAP_EMAIL = "phonegapEmail";
 
 	private Text outputText;
 	private Button outputBrowseButton;
@@ -187,6 +188,11 @@ public class WarExportPage extends WizardPage
 			File webappsFolder = new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory(), "server/webapps");
 			outputText.setText(webappsFolder.getAbsolutePath());
 		}
+		String phonegapEmail = getDialogSettings().get(PHONEGAP_EMAIL);
+		if (phonegapEmail != null)
+		{
+			phoneGapUsername.setText(phonegapEmail);
+		}
 		ModifyListener errorMessageDetecter = new ModifyListener()
 		{
 			public void modifyText(ModifyEvent e)
@@ -294,6 +300,7 @@ public class WarExportPage extends WizardPage
 				final String[] errorMessage = new String[1];
 				final String username = phoneGapUsername.getText();
 				final String password = phoneGapPassword.getText();
+				getDialogSettings().put(WarExportPage.PHONEGAP_EMAIL, username);
 				try
 				{
 					PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress()
@@ -315,10 +322,6 @@ public class WarExportPage extends WizardPage
 					return null;
 				}
 				pgAppPage.populateExistingApplications();
-				pgAppPage.setSolutionName(mobileExporter.getSolutionName());
-				pgAppPage.setServerURL(mobileExporter.getServerURL());
-				pgAppPage.setServiceSolutionName(mobileExporter.getServiceSolutionName());
-				pgAppPage.setTimeout(mobileExporter.getTimeout());
 				return pgAppPage;
 			}
 		}
