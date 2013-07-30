@@ -31359,6 +31359,20 @@ vlist.setDisplayDataProviderIds('parent_table_text');
 vlist.setReturnDataProviderIds('parent_table_text');]]></sample>
           </samples>
         </property>
+        <property clientSupport="wc,sc" name="fallbackValueList">
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSValueList" typecode="com.servoy.j2db.scripting.solutionmodel.JSValueList"/>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Gets or sets the fallback valuelist.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Gets or sets the fallback valuelist.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[var myValueList = solutionModel.getValueList('myValueListHere')
+ //get fallback value list
+var fallbackValueList = myValueList.fallbackValueList]]></sample>
+          </samples>
+        </property>
         <property clientSupport="wc,sc" name="globalMethod">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"/>
           <descriptions>
@@ -31492,6 +31506,12 @@ vlist.setReturnDataProviderIds('parent_table_text', 'parent_table_id');
 vlist.separator = ' ## ';
 vlist.sortOptions = 'parent_table_text desc';]]></sample>
           </samples>
+        </property>
+        <property clientSupport="wc,sc" name="setFallbackValueList" undocumented="true">
+          <return type="void" typecode="void"/>
+          <parameters>
+            <parameter name="vl" type="com.servoy.j2db.scripting.solutionmodel.JSValueList" typecode="com.servoy.j2db.solutionmodel.ISMValueList"/>
+          </parameters>
         </property>
         <property clientSupport="wc,sc" name="sortOptions">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
