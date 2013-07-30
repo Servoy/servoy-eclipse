@@ -274,63 +274,78 @@ stickToTopLeftCornerLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST;]]></sample
         </constant>
       </constants>
     </object>
-    <object clientSupport="wc,sc" publicName="APPLICATION_TYPES" qualifiedName="com.servoy.j2db.scripting.info.APPLICATION_TYPES">
+    <object clientSupport="mc,wc,sc" publicName="APPLICATION_TYPES" qualifiedName="com.servoy.j2db.scripting.info.APPLICATION_TYPES">
       <constants>
-        <constant clientSupport="wc,sc" name="HEADLESS_CLIENT">
+        <constant clientSupport="mc,wc,sc" name="HEADLESS_CLIENT">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Constant for application type headless_client.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Constant for application type headless_client.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Constant for application type headless_client.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Constant for application type headless_client.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[if (application.getApplicationType() == APPLICATION_TYPES.HEADLESS_CLIENT)
+            <sample clientSupport="mc,wc,sc"><![CDATA[if (application.getApplicationType() == APPLICATION_TYPES.HEADLESS_CLIENT)
 {
 	//we are in headless_client
 }]]></sample>
           </samples>
         </constant>
-        <constant clientSupport="wc,sc" name="RUNTIME_CLIENT">
+        <constant clientSupport="mc,wc,sc" name="MOBILE_CLIENT">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Constant for application type runtime_client.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Constant for application type mobile client.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Constant for application type runtime_client.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Constant for application type mobile client.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[if (application.getApplicationType() == APPLICATION_TYPES.RUNTIME_CLIENT)
+            <sample clientSupport="mc,wc,sc"><![CDATA[if (application.getApplicationType() == APPLICATION_TYPES.MOBILE_CLIENT)
+{
+	//we are in mobile client
+}]]></sample>
+          </samples>
+        </constant>
+        <constant clientSupport="mc,wc,sc" name="RUNTIME_CLIENT">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <descriptions>
+            <description clientSupport="mc,wc,sc"><![CDATA[Constant for application type runtime_client.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Constant for application type runtime_client.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc,wc,sc"><![CDATA[if (application.getApplicationType() == APPLICATION_TYPES.RUNTIME_CLIENT)
 {
 	//we are in runtime_client
 }]]></sample>
           </samples>
         </constant>
-        <constant clientSupport="wc,sc" name="SMART_CLIENT">
+        <constant clientSupport="mc,wc,sc" name="SMART_CLIENT">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Constant for application type smart_client.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Constant for application type smart_client.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Constant for application type smart_client.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Constant for application type smart_client.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[if (application.getApplicationType() == APPLICATION_TYPES.SMART_CLIENT)
+            <sample clientSupport="mc,wc,sc"><![CDATA[if (application.getApplicationType() == APPLICATION_TYPES.SMART_CLIENT)
 {
 	//we are in smart_client
 }]]></sample>
           </samples>
         </constant>
-        <constant clientSupport="wc,sc" name="WEB_CLIENT">
+        <constant clientSupport="mc,wc,sc" name="WEB_CLIENT">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Constant for application type web_client.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Constant for application type web_client.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Constant for application type web_client.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Constant for application type web_client.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[if (application.getApplicationType() == APPLICATION_TYPES.WEB_CLIENT)
+            <sample clientSupport="mc,wc,sc"><![CDATA[if (application.getApplicationType() == APPLICATION_TYPES.WEB_CLIENT)
 {
 	//we are in web_client
 }]]></sample>
@@ -1253,17 +1268,17 @@ will give you the actual tab in the browser. Another call would be form.controll
 var activeWindow = application.getActiveWindow();]]></sample>
           </samples>
         </function>
-        <function clientSupport="wc,sc" name="getApplicationType">
+        <function clientSupport="mc,wc,sc" name="getApplicationType">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[Constant application type]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Get the application type.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Get the application type.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Get the application type.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Get the application type.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[var type = application.getApplicationType();
+            <sample clientSupport="mc,wc,sc"><![CDATA[var type = application.getApplicationType();
 //see application type contstant]]></sample>
           </samples>
         </function>
