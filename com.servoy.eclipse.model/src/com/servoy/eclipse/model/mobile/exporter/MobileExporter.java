@@ -582,7 +582,7 @@ public class MobileExporter
 	private void addVariablesAndFunctionsScripting(String template, StringBuffer appender, ISupportScriptProviders parent, String scopeName)
 	{
 		int functionsLoopStartIndex = template.indexOf(FUNCTIONS_LOOP_START);
-		int functionsLoopEndIndex = template.indexOf(FUNCTIONS_LOOP_END);
+		int functionsLoopEndIndex = template.indexOf(FUNCTIONS_LOOP_END, functionsLoopStartIndex);
 		if (functionsLoopStartIndex >= 0)
 		{
 			appender.append(template.substring(0, functionsLoopStartIndex));
@@ -691,11 +691,11 @@ public class MobileExporter
 				IScriptProvider method = methodIterator.next();
 				String methodScripting = template;
 				methodScripting = methodScripting.replace(PROPERTY_FUNCTION_NAME, method.getName());
-				methodScripting = methodScripting.replace(PROPERTY_FUNCTION_CODE, getAnonymousScripting(method));
+				methodScripting = methodScripting.replace(PROPERTY_FUNCTION_CODE, '\n' + getAnonymousScripting(method));
 				functionsScript.append(methodScripting);
 				if (methodIterator.hasNext())
 				{
-					functionsScript.append(",\n"); //$NON-NLS-1$
+					functionsScript.append("\n"); //$NON-NLS-1$
 				}
 			}
 		}
@@ -704,11 +704,7 @@ public class MobileExporter
 
 	private String getAnonymousScripting(IScriptProvider method)
 	{
-		String declaration = method.getDeclaration();
-
-		declaration = ScriptEngine.docStripper.matcher(declaration).replaceFirst("");
-		// convert to JSON escaped string
-		return JSONObject.quote(declaration);
+		return ScriptEngine.docStripper.matcher(method.getDeclaration()).replaceFirst("function");
 	}
 
 	public void setConfigFile(File configFile)
