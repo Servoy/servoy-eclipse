@@ -5386,13 +5386,23 @@ application.output(s.localeCompare("Hello"));]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[returns a new string where some or all matches of the regexp are replaced.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[returns a new string where the matches of the given regexp are replaced by the return value of the function.
+The function parameter is the function to be invoked to create the new substring (to put in place of the substring received from parameter #1).]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[returns a new string where some or all matches of the regexp are replaced.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[returns a new string where the matches of the given regexp are replaced by the return value of the function.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[string.replace(regexp,callback);]]></sample>
+            <sample clientSupport="mc,wc,sc"><![CDATA[//the callback definition
+function replacer(match, p1, p2, p3, offset, string){
+		// match is the matched substring
+		// p1 is non-digits, p2 digits, and p3 non-alphanumerics
+		// offset is the offset of the matched substring within the total string being examined
+		// string is the total string being examined
+ 	return [p1, p2, p3].join(' - ');
+}
+// using replace method with replacer callback
+newString = "abc12345#$*%".replace(/([^\d]*)(\d*)([^\w]*)/, replacer);]]></sample>
           </samples>
           <links>
             <link>
@@ -5411,13 +5421,17 @@ application.output(s.localeCompare("Hello"));]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[returns a new string where some or all matches of the regexp are replaced.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[returns a new string where the matches of the given regexp are replaced by newSubStr.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[returns a new string where some or all matches of the regexp are replaced.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[returns a new string where the matches of the given regexp are replaced by newSubStr.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[string.replace(regexp,newSubStr);]]></sample>
+            <sample clientSupport="mc,wc,sc"><![CDATA[string.replace(regexp,newSubStr);
+//var re = /(\w+)\s(\w+)/;
+//var str = "John Smith";
+//var newstr = str.replace(re, "$2, $1");
+//application.output(newstr);]]></sample>
           </samples>
           <links>
             <link>
@@ -5436,13 +5450,19 @@ application.output(s.localeCompare("Hello"));]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[returns a new string where the first match of the string is replaced.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[returns a new string where the first match of the given substr is replaced by the return value of the function.
+The function parameter is the function to be invoked to create the new substring (to put in place of the substring received from parameter #1).]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[returns a new string where the first match of the string is replaced.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[returns a new string where the first match of the given substr is replaced by the return value of the function.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[string.replace(substr,callback);]]></sample>
+            <sample clientSupport="mc,wc,sc"><![CDATA[// the callback definition
+function replacer(match){
+		return match.toUpperCase()
+}
+// using replace method with replacer callback
+var newString = "abc".replace("a", replacer);]]></sample>
           </samples>
           <links>
             <link>
@@ -5461,10 +5481,10 @@ application.output(s.localeCompare("Hello"));]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[returns a new string where the first match of the string is replaced.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[returns a new string where the first match of the given substr is replaced by newSubStr.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[returns a new string where the first match of the string is replaced.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[returns a new string where the first match of the given substr is replaced by newSubStr.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="mc,wc,sc"><![CDATA[string.replace(substr,newSubStr);]]></sample>
