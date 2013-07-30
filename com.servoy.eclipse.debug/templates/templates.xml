@@ -32,5 +32,15 @@
 	name="for">for (var ${index}=1; ${index}&lt;=${dataset}.getMaxRowIndex(); ${index}++) {
 	var row = ${dataset}.getRowAsArray(${index});
 	${line_selection}${cursor}
-}</template>	
+}</template>
+	
+<template 
+	context="javascriptUniversalTemplateContextType" 
+	description="%forfoundset.description" 
+	id="com.servoy.eclipse.template.forfoundset" 
+	name="for">for (var ${index}=1; ${index}&lt;=${foundset}.getSize(); ${index}++) {
+	 var record = ${foundset}.getRecord(${index});
+	${line_selection}${cursor}
+}</template>
+
 </templates>
