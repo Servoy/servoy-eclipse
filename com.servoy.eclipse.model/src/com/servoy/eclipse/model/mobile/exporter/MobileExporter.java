@@ -350,29 +350,29 @@ public class MobileExporter
 			{
 				solutionModel.put("loginForm", flattenedSolution.getForm(solution.getLoginFormID()).getName());
 			}
-			if (flattenedSolution.getSolution().getI18nDataSource() != null)
+			I18NMessagesModel i18nModel = new I18NMessagesModel(solution.getI18nDataSource(), null, null, null, null);
+			// load default and german translations for now
+			i18nModel.setLanguage(Locale.GERMANY);
+			Map<String, I18NMessagesModelEntry> defaultProperties = i18nModel.getDefaultMap();
+			TreeMap<String, I18NUtil.MessageEntry> allI18nData = new TreeMap<String, I18NUtil.MessageEntry>();
+			Iterator<Map.Entry<String, I18NMessagesModelEntry>> it = defaultProperties.entrySet().iterator();
+			while (it.hasNext())
 			{
-				I18NMessagesModel i18nModel = new I18NMessagesModel(solution.getI18nDataSource(), null, null, null, null);
-				// load default and german translations for now
-				i18nModel.setLanguage(Locale.GERMANY);
-				Map<String, I18NMessagesModelEntry> defaultProperties = i18nModel.getDefaultMap();
-				TreeMap<String, I18NUtil.MessageEntry> allI18nData = new TreeMap<String, I18NUtil.MessageEntry>();
-				Iterator<Map.Entry<String, I18NMessagesModelEntry>> it = defaultProperties.entrySet().iterator();
-				while (it.hasNext())
+				Map.Entry<String, I18NMessagesModelEntry> entry = it.next();
+				if (entry.getKey().toLowerCase().startsWith(I18NProvider.MOBILE_KEY_PREFIX))
 				{
-					Map.Entry<String, I18NMessagesModelEntry> entry = it.next();
-					if (entry.getKey().toLowerCase().startsWith(I18NProvider.MOBILE_KEY_PREFIX))
-					{
-						allI18nData.put("." + entry.getKey(), new I18NUtil.MessageEntry("", entry.getKey(), entry.getValue().defaultvalue));
-						allI18nData.put("de." + entry.getKey(), new I18NUtil.MessageEntry("de", entry.getKey(), entry.getValue().localeValue));
-					}
+					allI18nData.put("." + entry.getKey(), new I18NUtil.MessageEntry("", entry.getKey(), entry.getValue().defaultvalue));
+					allI18nData.put("de." + entry.getKey(), new I18NUtil.MessageEntry("de", entry.getKey(), entry.getValue().localeValue));
 				}
+			}
+			if (solution.getI18nDataSource() != null)
+			{
 				EclipseMessages messagesManager = ServoyModelFinder.getServoyModel().getMessagesManager();
 				allI18nData.putAll(messagesManager.getDatasourceMessages(solution.getI18nDataSource()));
-				if (allI18nData.size() > 0)
-				{
-					solutionModel.put("i18n", allI18nData);
-				}
+			}
+			if (allI18nData.size() > 0)
+			{
+				solutionModel.put("i18n", allI18nData);
 			}
 			ServoyJSONObject jsonObject = new ServoyJSONObject(solutionModel);
 			jsonObject.setNoQuotes(false);
