@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
@@ -42,6 +43,7 @@ import org.json.JSONObject;
 
 import com.servoy.base.persistence.constants.IComponentConstants;
 import com.servoy.base.persistence.constants.IValueListConstants;
+import com.servoy.base.util.I18NProvider;
 import com.servoy.eclipse.model.Activator;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IServoyModel;
@@ -76,6 +78,8 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.property.I18NMessagesModel;
+import com.servoy.j2db.property.I18NMessagesModel.I18NMessagesModelEntry;
 import com.servoy.j2db.scripting.ScriptEngine;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.Pair;
@@ -348,11 +352,26 @@ public class MobileExporter
 			}
 			if (flattenedSolution.getSolution().getI18nDataSource() != null)
 			{
-				EclipseMessages messagesManager = ServoyModelFinder.getServoyModel().getMessagesManager();
-				TreeMap<String, I18NUtil.MessageEntry> i18nData = messagesManager.getDatasourceMessages(solution.getI18nDataSource());
-				if (i18nData.size() > 0)
+				I18NMessagesModel i18nModel = new I18NMessagesModel(solution.getI18nDataSource(), null, null, null, null);
+				// load default and german translations for now
+				i18nModel.setLanguage(Locale.GERMANY);
+				Map<String, I18NMessagesModelEntry> defaultProperties = i18nModel.getDefaultMap();
+				TreeMap<String, I18NUtil.MessageEntry> allI18nData = new TreeMap<String, I18NUtil.MessageEntry>();
+				Iterator<Map.Entry<String, I18NMessagesModelEntry>> it = defaultProperties.entrySet().iterator();
+				while (it.hasNext())
 				{
-					solutionModel.put("i18n", i18nData);
+					Map.Entry<String, I18NMessagesModelEntry> entry = it.next();
+					if (entry.getKey().toLowerCase().startsWith(I18NProvider.MOBILE_KEY_PREFIX))
+					{
+						allI18nData.put("." + entry.getKey(), new I18NUtil.MessageEntry("", entry.getKey(), entry.getValue().defaultvalue));
+						allI18nData.put("de." + entry.getKey(), new I18NUtil.MessageEntry("de", entry.getKey(), entry.getValue().localeValue));
+					}
+				}
+				EclipseMessages messagesManager = ServoyModelFinder.getServoyModel().getMessagesManager();
+				allI18nData.putAll(messagesManager.getDatasourceMessages(solution.getI18nDataSource()));
+				if (allI18nData.size() > 0)
+				{
+					solutionModel.put("i18n", allI18nData);
 				}
 			}
 			ServoyJSONObject jsonObject = new ServoyJSONObject(solutionModel);
