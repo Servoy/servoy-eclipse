@@ -555,9 +555,12 @@ public class ServerEditor extends EditorPart
 
 		dataModel_cloneFromField.removeAll();
 		dataModel_cloneFromField.add(ServerConfig.NONE);
+		String serverName = serverConfigObservable.getObject().getServerName();
+		String cloneServerName;
 		for (ServerConfig sc : ServoyModel.getServerManager().getServerConfigs())
 		{
-			dataModel_cloneFromField.add(sc.getServerName());
+			cloneServerName = sc.getServerName();
+			if (cloneServerName != null && !cloneServerName.equals(serverName)) dataModel_cloneFromField.add(cloneServerName);
 		}
 
 	}

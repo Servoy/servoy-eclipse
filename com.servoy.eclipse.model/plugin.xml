@@ -659,4 +659,15 @@
             type="com.servoy.eclipse.core.builderProblem">
       </super>
    </extension>
+   <extension
+         id="com.servoy.eclipse.core.serverCloneCycle"
+         name="Server clone data model cycle"
+         point="org.eclipse.core.resources.markers">
+      <persistent
+      		value="true">
+      </persistent>
+      <super
+            type="com.servoy.eclipse.core.builderProblem">
+      </super>
+   </extension>   
 </plugin>

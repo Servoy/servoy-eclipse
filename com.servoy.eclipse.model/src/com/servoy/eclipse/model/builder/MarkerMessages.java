@@ -580,6 +580,9 @@ public class MarkerMessages
 	public static ServoyMarker MissingConverter = new ServoyMarker(
 		"Converter \"{0}\" has been configured on dataprovider \"{1}\" but cannot be found.", ServoyBuilder.MISSING_CONVERTER); //$NON-NLS-1$
 
+	public static ServoyMarker ServerCloneCycle = new ServoyMarker(
+		"Server \"{0}\" clone data model, cannot reference itself.", ServoyBuilder.SERVER_CLONE_CYCLE_TYPE); //$NON-NLS-1$
+
 	/**
 	 * The element uses deprecated script element. 
 	 */

@@ -300,7 +300,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String INVALID_MOBILE_MODULE_MARKER_TYPE = _PREFIX + ".invalidMobileModuleProblem"; //$NON-NLS-1$
 	public static final String FORM_DUPLICATE_PART_MARKER_TYPE = _PREFIX + ".formDuplicatePart"; //$NON-NLS-1$
 	public static final String DEPRECATED_SCRIPT_ELEMENT_USAGE = _PREFIX + ".deprecatedScriptElementUsage"; //$NON-NLS-1$
-	public static final String METHOD_NUMBER_OF_ARGUMENTS_MISMATCH_TYPE = _PREFIX + ".methodNumberOfArgsMismatch";
+	public static final String METHOD_NUMBER_OF_ARGUMENTS_MISMATCH_TYPE = _PREFIX + ".methodNumberOfArgsMismatch"; //$NON-NLS-1$
+	public static final String SERVER_CLONE_CYCLE_TYPE = _PREFIX + ".serverCloneCycle"; //$NON-NLS-1$
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels"; //$NON-NLS-1$
@@ -333,6 +334,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> PROPERTY_MULTIPLE_METHODS_ON_SAME_TABLE = new Pair<String, ProblemSeverity>(
 		"propertyMultipleMethodsOnSameTable", ProblemSeverity.INFO); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> SERVER_MISSING_DRIVER = new Pair<String, ProblemSeverity>("severMissingDriver", ProblemSeverity.WARNING); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> SERVER_CLONE_CYCLE = new Pair<String, ProblemSeverity>("serverCloneCycle", ProblemSeverity.WARNING); //$NON-NLS-1$
 
 	// login problems 
 	public final static Pair<String, ProblemSeverity> LOGIN_FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION = new Pair<String, ProblemSeverity>(
@@ -1582,6 +1584,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE);
 		deleteMarkers(project, FORM_DUPLICATE_PART_MARKER_TYPE);
 		deleteMarkers(project, METHOD_NUMBER_OF_ARGUMENTS_MISMATCH_TYPE);
+		deleteMarkers(project, SERVER_CLONE_CYCLE_TYPE);
 
 		try
 		{
@@ -1620,7 +1623,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				addDeserializeProblemMarkersIfNeeded(servoyProject);
 				refreshDBIMarkers();
 				checkPersistDuplication();
-				addDriverProblemMarker(project);
+				checkServers(project);
 
 				final Solution solution = servoyProject.getSolution();
 				if (servoyModel.getActiveProject().getSolution().getName().equals(solution.getName()))
@@ -3843,7 +3846,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
-	private void addDriverProblemMarker(IProject project)
+	private void checkServers(IProject project)
 	{
 		ServoyProject activeProject = getServoyModel().getActiveProject();
 		if (activeProject != null && activeProject.getProject().getName().equals(project.getName()))
@@ -3877,8 +3880,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 					}
 				}
-			}
 
+				if (server_name.equals(server.getConfig().getDataModelCloneFrom()))
+				{
+					ServoyMarker mk = MarkerMessages.ServerCloneCycle.fill(server_name);
+					addMarker(project, mk.getType(), mk.getText(), -1, SERVER_CLONE_CYCLE, IMarker.PRIORITY_NORMAL, null, null);
+				}
+			}
 		}
 	}
 
