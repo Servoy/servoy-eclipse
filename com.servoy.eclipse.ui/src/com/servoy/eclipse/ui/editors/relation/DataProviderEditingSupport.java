@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.ui.editors.relation;
 
+import java.sql.Types;
 import java.util.Arrays;
 import java.util.List;
 
@@ -47,10 +48,13 @@ import com.servoy.eclipse.ui.property.DataProviderConverter;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.LiteralDataprovider;
 import com.servoy.j2db.persistence.Relation;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptVariable;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
 public class DataProviderEditingSupport extends EditingSupport
@@ -249,12 +253,32 @@ public class DataProviderEditingSupport extends EditingSupport
 					currentValue = intValue != -1 ? dataProviders[intValue] : ((CCombo)editor.getControl()).getText();
 					if (intValue == -1 && !currentValue.equals(""))
 					{
-						Object parsed = Utils.parseJSExpression(currentValue);
+						Object parsed = null;
+						int foreignKeyColumnSQLType = Types.OTHER;
+						try
+						{
+							if (relationEditor.getRelation().getForeignTable() != null)
+							{
+								String colName = relationEditor.getDataProvidersIndex(RelationEditor.CI_TO, pi.getCITo());
+								Column c = relationEditor.getRelation().getForeignTable().getColumn(colName);
+								if (c != null)
+								{
+									foreignKeyColumnSQLType = c.getColumnType().getSqlType();
+
+								}
+							}
+						}
+						catch (RepositoryException e)
+						{
+							Debug.log(e);
+						}
+						parsed = Utils.parseJSExpression(currentValue, foreignKeyColumnSQLType);
 						if (parsed == null)
 						{
 							// not a bool, number or string, convert to quoted string
 							currentValue = Utils.makeJSExpression(currentValue);
 						}
+
 						currentValue = LiteralDataprovider.LITERAL_PREFIX + currentValue;
 					}
 					previousValue = pi.getCIFrom();
