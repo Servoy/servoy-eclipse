@@ -49,6 +49,7 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.LiteralDataprovider;
 import com.servoy.j2db.persistence.Relation;
@@ -259,7 +260,7 @@ public class DataProviderEditingSupport extends EditingSupport
 						{
 							if (relationEditor.getRelation().getForeignTable() != null)
 							{
-								String colName = relationEditor.getDataProvidersIndex(RelationEditor.CI_TO, pi.getCITo());
+								String colName = pi.getCITo();
 								Column c = relationEditor.getRelation().getForeignTable().getColumn(colName);
 								if (c != null)
 								{
@@ -273,7 +274,7 @@ public class DataProviderEditingSupport extends EditingSupport
 							Debug.log(e);
 						}
 						parsed = Utils.parseJSExpression(currentValue, foreignKeyColumnSQLType);
-						if (parsed == null)
+						if (parsed == null && (foreignKeyColumnSQLType == Types.OTHER || IColumnTypes.TEXT == Column.mapToDefaultType(foreignKeyColumnSQLType)))
 						{
 							// not a bool, number or string, convert to quoted string
 							currentValue = Utils.makeJSExpression(currentValue);
