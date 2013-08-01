@@ -61,4 +61,10 @@ public class AnyType implements IRType
 	{
 		return this;
 	}
+
+	@Override
+	public String toString()
+	{
+		return getName();
+	}
 }

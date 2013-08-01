@@ -53,6 +53,19 @@ public class CalculationsTypeStructureHandler implements IStructureHandler
 		private JSType type;
 		private String name;
 		private ReferenceLocation location;
+		private JSType typeDef;
+
+		@Override
+		public JSType getTypeDef()
+		{
+			return typeDef;
+		}
+
+		@Override
+		public void setTypeDef(JSType typeDef)
+		{
+			this.typeDef = typeDef;
+		}
 
 		public void setType(JSType type)
 		{
