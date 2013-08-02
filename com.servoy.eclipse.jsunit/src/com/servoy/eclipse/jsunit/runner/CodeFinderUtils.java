@@ -26,6 +26,8 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 
+import de.berlios.jsunit.JsUnitException;
+
 /**
  * Utility class for loading JS code from files in jars.
  * 
@@ -41,6 +43,28 @@ public class CodeFinderUtils
 		loadScriptFromResource(locatorClass, name, writer);
 		writer.append("\n}");
 		return writer.toString();
+	}
+
+	@SuppressWarnings("nls")
+	public static String getFixedJSUtilScriptFromResource()
+	{
+		// @formatter:off
+		return CodeFinderUtils.getScriptAsStringFromResource("this.JsUtilLoaded", JsUnitException.class, "/JsUtil.js")
+			.replace(
+			    "var r = /function (\\w+)(",
+			    "var r = /function *(\\w*)(\\("); // if you had "function(){}" with no space after "function", a wrong function name could appear in the call stack 
+		// @formatter:on
+	}
+
+	@SuppressWarnings("nls")
+	public static String getFixedJSUnitScriptFromResource()
+	{
+		// @formatter:off
+		return CodeFinderUtils.getScriptAsStringFromResource("this.TestCaseLoaded", JsUnitException.class, "/JsUnit.js")
+			.replace(
+			    "( usermsg ? usermsg + \" \" : \"\" ) + msg, stack );",
+			    "( usermsg ? usermsg + \" \" : \"\" ) + msg, stack ? stack : new CallStack());"); // if you would simply use jsunit.fail() you would get no stack... 
+		// @formatter:on
 	}
 
 	private static void loadScriptFromResource(Class< ? > locatorClass, final String name, final Writer writer)

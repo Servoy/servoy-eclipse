@@ -37,8 +37,6 @@ import com.servoy.eclipse.jsunit.runner.JSUnitToJavaRunner;
 import com.servoy.eclipse.jsunit.runner.TestTreeHandler;
 import com.servoy.j2db.util.StaticSingletonMap;
 
-import de.berlios.jsunit.JsUnitException;
-
 /**
  * A simulated JUnit test suite helper that is driven by something else behind the scenes. (eg. a jsUnit mobile suite running in a browser)
  * 
@@ -133,9 +131,8 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 	{
 		log.info("[.......] Getting javascript library code"); //$NON-NLS-1$
 		String[] libs = new String[3];
-		libs[0] = CodeFinderUtils.getScriptAsStringFromResource("this.JsUtilLoaded", JsUnitException.class, "/JsUtil.js").replace( //$NON-NLS-1$//$NON-NLS-2$
-			"var r = /function (\\w+)(", "var r = /function *(\\w*)(\\("); // if you had "function(){}" with no space after "function", a wrong function name could appear in the call stack //$NON-NLS-1$//$NON-NLS-2$ 
-		libs[1] = CodeFinderUtils.getScriptAsStringFromResource("this.TestCaseLoaded", JsUnitException.class, "/JsUnit.js"); //$NON-NLS-1$//$NON-NLS-2$
+		libs[0] = CodeFinderUtils.getFixedJSUtilScriptFromResource();
+		libs[1] = CodeFinderUtils.getFixedJSUnitScriptFromResource();
 		libs[2] = CodeFinderUtils.getScriptAsStringFromResource("this.JsUnitToJavaLoaded", JSUnitToJavaRunner.class, "JsUnitToJava.js"); //$NON-NLS-1$//$NON-NLS-2$
 		return libs;
 	}

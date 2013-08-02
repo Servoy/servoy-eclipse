@@ -80,8 +80,8 @@ public class JSUnitToJavaRunner
 
 	static
 	{
-		jsUtil = CodeFinderUtils.getScriptAsStringFromResource("this.JsUtilLoaded", JsUnitException.class, "/JsUtil.js");
-		jsUnit = CodeFinderUtils.getScriptAsStringFromResource("this.TestCaseLoaded", JsUnitException.class, "/JsUnit.js");
+		jsUtil = CodeFinderUtils.getFixedJSUtilScriptFromResource();
+		jsUnit = CodeFinderUtils.getFixedJSUnitScriptFromResource();
 		jsUnitToJava = CodeFinderUtils.getScriptAsStringFromResource("this.JsUnitToJavaLoaded", JSUnitToJavaRunner.class, "JsUnitToJava.js");
 	}
 

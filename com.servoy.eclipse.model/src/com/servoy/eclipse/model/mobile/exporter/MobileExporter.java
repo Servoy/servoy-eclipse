@@ -133,6 +133,9 @@ public class MobileExporter
 	private static final String MIME_JS = "text/javascript";
 	private static final String MIME_CSS = "text/css";
 
+	// this constant is also defined in testing.js inside servoy_mobile_testing and TestSuiteController.java; please update those as well if you change the value
+	private static final String SCOPE_NAME_SEPARATOR = "_sNS_"; //$NON-NLS-1$
+
 	private File outputFolder;
 	private String serverURL;
 	private String solutionName;
@@ -723,7 +726,17 @@ public class MobileExporter
 
 	private String getAnonymousScripting(IScriptProvider method)
 	{
-		return ScriptEngine.docStripper.matcher(method.getDeclaration()).replaceFirst("function");
+		String functionAndName = "function";
+		if (useTestWar)
+		{
+			// see also testing.js -> this function name helps show failed functions in test failures/errors
+			// "function " + scopes/forms + _ServoyTesting_.SCOPE_NAME_SEPARATOR + s2Name + _ServoyTesting_.SCOPE_NAME_SEPARATOR + fName;
+			functionAndName += " " +
+				(method.getParent().getTypeID() == IRepository.FORMS ? "forms" + SCOPE_NAME_SEPARATOR + ((Form)method.getParent()).getName() : "scopes" +
+					SCOPE_NAME_SEPARATOR + method.getScopeName()) + SCOPE_NAME_SEPARATOR + method.getName();
+		}
+
+		return ScriptEngine.docStripper.matcher(method.getDeclaration()).replaceFirst(functionAndName);
 	}
 
 	public void setConfigFile(File configFile)
