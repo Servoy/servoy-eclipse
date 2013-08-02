@@ -16,7 +16,7 @@
             description="%productBlurb">
          <property
                name="windowImages"
-               value="icons/windowicon16.png,icons/windowIcon.png,icons/windowIcon48.png,icons/windowIcon64.png,icons/windowIcon128.png">
+               value="icons/windowicon16.png,icons/windowicon.png,icons/windowicon48.png,icons/windowicon64.png,icons/windowicon128.png">
          </property>
          <property
                name="appName"
@@ -28,7 +28,17 @@
          </property>
          <property
                name="aboutText"
-               value="%productBlurb">
+               value="Servoy
+
+Version: @VERSION@
+
+Copyright © 1997-2012 Servoy BV. All rights reserved.
+Visit http://www.servoy.com
+
+This computer program is protected by copyright law and international treaties.
+Unauthorized reproduction or distribution of this program, or any
+portion of it, may result in severe civil and criminal penalties,
+and will be prosecuted to the maximum extent possible under law.">
          </property>
          <property name="preferenceCustomization" value="plugin_customization.ini"/>
       </product>
