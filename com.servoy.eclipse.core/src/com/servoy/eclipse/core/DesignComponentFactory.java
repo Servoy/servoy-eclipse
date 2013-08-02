@@ -18,22 +18,21 @@
 package com.servoy.eclipse.core;
 
 import java.awt.Component;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 
-import org.eclipse.swt.widgets.Display;
 import org.mozilla.javascript.Scriptable;
 
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.IDisplayData;
 import com.servoy.j2db.dataprocessing.IFoundSet;
 import com.servoy.j2db.dataprocessing.IRecord;
+import com.servoy.j2db.debug.DebugUtils;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
@@ -77,68 +76,22 @@ public class DesignComponentFactory extends ComponentFactory
 	public static Component createDesignComponent(final IApplication application, final FlattenedSolution flattenedSolution, final IPersist meta,
 		final Form form)
 	{
-		if (SwingUtilities.isEventDispatchThread())
-		{
-			return createDesignComponentEx(application, flattenedSolution, meta, form);
-		}
-
-		// apply workaround from https://bugs.eclipse.org/bugs/show_bug.cgi?id=291326
 		final Component[] comp = { null };
-		final AtomicBoolean awtFinished = new AtomicBoolean(false);
-		final Display display = Display.getCurrent();
-		SwingUtilities.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				// do some AWT stuff here
-				comp[0] = createDesignComponentEx(application, flattenedSolution, meta, form);
 
-				awtFinished.set(true);
-				if (display != null)
-				{
-					display.asyncExec(new Runnable()
-					{
-						public void run()
-						{
-							// deliberately empty, this is only to wake up a
-							// potentially waiting SWT-thread below
-						}
-					});
-				}
-				else
-				{
-					synchronized (awtFinished)
-					{
-						awtFinished.notifyAll();
-					}
-				}
-			}
-		});
-
-		if (display != null)
+		try
 		{
-			while (!awtFinished.get())
+			DebugUtils.invokeAndWaitWhileDispatchingOnSWT(new Runnable()
 			{
-				display.sleep();
-			}
+				public void run()
+				{
+					comp[0] = createDesignComponentEx(application, flattenedSolution, meta, form);
+				}
+			});
 		}
-		else
+		catch (Exception ex)
 		{
-			synchronized (awtFinished)
-			{
-				while (!awtFinished.get())
-				{
-					try
-					{
-						awtFinished.wait();
-					}
-					catch (InterruptedException e)
-					{
-					}
-				}
-			}
+			ServoyLog.logError("Error creating design component  " + meta, ex);
 		}
-
 
 		return comp[0];
 	}
