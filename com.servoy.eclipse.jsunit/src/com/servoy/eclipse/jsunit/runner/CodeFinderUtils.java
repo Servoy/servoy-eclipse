@@ -45,6 +45,7 @@ public class CodeFinderUtils
 		return writer.toString();
 	}
 
+	// these methods containing "fixes" were also sent as an SVN patch to the author of jsunit (see http://jsunit.berlios.de/index.html)
 	@SuppressWarnings("nls")
 	public static String getFixedJSUtilScriptFromResource()
 	{
