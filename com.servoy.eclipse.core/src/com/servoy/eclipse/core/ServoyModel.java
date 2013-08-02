@@ -2087,7 +2087,7 @@ public class ServoyModel extends AbstractServoyModel
 				if (file.getName().endsWith(DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT))
 				{
 					String serverName = file.getParent().getName();
-					final IServer[] servers = serverManager.getValidDataModelCloneServers(serverName);
+					final IServer[] servers = serverManager.getDataModelCloneServers(serverName);
 					if (servers != null && servers.length > 0)
 					{
 						final String tableName = file.getName().substring(0,

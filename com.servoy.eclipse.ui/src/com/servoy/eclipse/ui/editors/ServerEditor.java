@@ -24,6 +24,7 @@ import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.value.AbstractObservableValue;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.databinding.swt.SWTObservables;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -43,6 +44,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.team.internal.ui.Utils;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
@@ -53,6 +55,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.ServerEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
@@ -469,6 +472,12 @@ public class ServerEditor extends EditorPart
 			IServerManagerInternal serverManager = ServoyModel.getServerManager();
 			ServerConfig serverConfig = serverConfigObservable.getObject();
 			String currentServerName = serverConfig.getServerName();
+			String dataModelCloneFrom = null;
+			ServerConfig oldConfig = serverManager.getServerConfig(oldServerName);
+			if (oldConfig != null)
+			{
+				dataModelCloneFrom = oldConfig.getDataModelCloneFrom();
+			}
 			boolean log_server = logServerButton.getSelection();
 
 			if (serverConfig.isEnabled())
@@ -507,6 +516,25 @@ public class ServerEditor extends EditorPart
 					getSite().getShell(),
 					"Oracle server",
 					"You should add a 'schema' for Oracle servers = the Oracle user name.\n\nNot specifying a schema will probably result in seing lots of system tables/views in this server, not just user tables/views.");
+			}
+			if (serverConfig.getDataModelCloneFrom() != null && !Utils.equalObject(dataModelCloneFrom, serverConfig.getDataModelCloneFrom()))
+			{
+				DataModelManager dataModelManager = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
+				if (dataModelManager != null &&
+					MessageDialog.openQuestion(getSite().getShell(), "Copy dbi files", "Server '" + currentServerName + "' was marked as clone of '" +
+						serverConfig.getDataModelCloneFrom() + "'. Do you want to copy(overwrite) all dbi files from parent server?"))
+				{
+					IFolder sourceFolder = dataModelManager.getDBIFileContainer(serverConfig.getDataModelCloneFrom());
+					IFolder cloneFolder = dataModelManager.getDBIFileContainer(currentServerName);
+					if (cloneFolder.exists())
+					{
+						cloneFolder.delete(true, null);
+					}
+					if (sourceFolder.exists())
+					{
+						sourceFolder.copy(cloneFolder.getFullPath(), true, null);
+					}
+				}
 			}
 
 		}
