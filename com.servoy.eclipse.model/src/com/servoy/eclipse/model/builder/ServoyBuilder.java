@@ -3881,7 +3881,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					}
 				}
 
-				if (server_name.equals(server.getConfig().getDataModelCloneFrom()))
+				if (ApplicationServerSingleton.get().getServerManager().isServerDataModelCloneCycling(server))
 				{
 					ServoyMarker mk = MarkerMessages.ServerCloneCycle.fill(server_name);
 					addMarker(project, mk.getType(), mk.getText(), -1, SERVER_CLONE_CYCLE, IMarker.PRIORITY_NORMAL, null, null);
