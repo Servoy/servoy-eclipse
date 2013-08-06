@@ -39,7 +39,9 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.util.SerialRule;
 import com.servoy.eclipse.marketplace.ExtensionUpdateAndIncompatibilityCheckJob;
+import com.servoy.eclipse.marketplace.InstalledExtensionsDialog;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
 import com.servoy.j2db.ClientVersion;
@@ -149,6 +151,7 @@ public class Activator extends AbstractUIPlugin
 		{
 			Job updateCheckJob = new ExtensionUpdateAndIncompatibilityCheckJob(
 				"Checking for Servoy Extension " + (applicationServer.hadIncompatibleExtensionsWhenStarted() ? " incompatibilities." : "updates.")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			updateCheckJob.setRule(new SerialRule(InstalledExtensionsDialog.SERIAL_RULE_ID));
 			updateCheckJob.setUser(false);
 			updateCheckJob.setSystem(false);
 			updateCheckJob.schedule();

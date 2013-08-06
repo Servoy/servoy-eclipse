@@ -15,7 +15,7 @@
 <booleanAttribute key="includeOptional" value="false"/>
 <stringAttribute key="location" value="${servoy_install}\workspace"/>
 <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -help -s byteArrayToASCII -o E:\temp -data ${servoy_install}\workspace -verbose -sd -dbi -i18n -users -modules"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -help -s servoy_sample_mobile_service -o E:\temp\2 -data ${servoy_install}\workspace -verbose -sd -i18n -users -modules"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dservoy.application_server.dir=&quot;${servoy_install}/application_server/&quot; -Xms40m -Xmx512m -XX:MaxPermSize=256M"/>
 <stringAttribute key="pde.version" value="3.3"/>

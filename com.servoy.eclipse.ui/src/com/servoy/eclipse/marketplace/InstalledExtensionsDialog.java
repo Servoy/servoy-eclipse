@@ -711,16 +711,27 @@ public class InstalledExtensionsDialog extends TrayDialog
 			getButton(UPDATE_CHECK_BUTTON_ID).setEnabled(false);
 			Job job = new Job("Checking for Servoy Extension updates") //$NON-NLS-1$
 			{
+				private volatile Thread checkingForUpdates;
+
+				@Override
+				protected void canceling()
+				{
+					super.canceling();
+					if (checkingForUpdates != null) checkingForUpdates.interrupt(); // it's probably doing network I/O
+				}
+
 				@Override
 				protected IStatus run(IProgressMonitor monitor)
 				{
 					Pair<Boolean, Message[]> updFnd = null;
 					try
 					{
+						checkingForUpdates = Thread.currentThread(); // make sure user cancel can interrupt a possibly long duration network connection attempt
 						updFnd = checkForUpdatesInternal(monitor);
 					}
 					finally
 					{
+						checkingForUpdates = null;
 						final Pair<Boolean, Message[]> updatesFound = updFnd;
 						if (getShell() != null && !getShell().isDisposed())
 						{

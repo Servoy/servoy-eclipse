@@ -129,7 +129,7 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 
 	public String[] getJsUnitJavascriptCode()
 	{
-		log.info("[.......] Getting javascript library code"); //$NON-NLS-1$
+		log.trace("[.......] Getting javascript library code"); //$NON-NLS-1$
 		String[] libs = new String[3];
 		libs[0] = CodeFinderUtils.getFixedJSUtilScriptFromResource();
 		libs[1] = CodeFinderUtils.getFixedJSUnitScriptFromResource();
@@ -237,7 +237,7 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 		}
 		showUnexpectedThrowableIfNeeded();
 		if (testCycleListener != null) testCycleListener.finished();
-		log.info("Test session finished."); //$NON-NLS-1$
+		log.trace("Test session finished."); //$NON-NLS-1$
 	}
 
 	private void showUnexpectedThrowableIfNeeded()
@@ -262,7 +262,7 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 	@Override
 	public void setFlattenedTestTree(String[] testTree)
 	{
-		log.info("[.......] setFlattenedTestTree - " + Arrays.asList(testTree).toString()); //$NON-NLS-1$
+		log.trace("[.......] setFlattenedTestTree - " + Arrays.asList(testTree).toString()); //$NON-NLS-1$
 		synchronized (testTreeLock)
 		{
 			this.testTree = testTree;
@@ -272,25 +272,25 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 
 	public void addError(final String testName, final Throwable throwable)
 	{
-		log.info("[.......] addError - " + testName + "; throwable: " + throwable); //$NON-NLS-1$ //$NON-NLS-2$
+		log.trace("[.......] addError - " + testName + "; throwable: " + throwable); //$NON-NLS-1$ //$NON-NLS-2$
 		junitHandler.addError(testName, throwable);
 	}
 
 	public void addFailure(final String testName, final Throwable throwable)
 	{
-		log.info("[.......] addFailure - " + testName + "; throwable: " + throwable); //$NON-NLS-1$ //$NON-NLS-2$
+		log.trace("[.......] addFailure - " + testName + "; throwable: " + throwable); //$NON-NLS-1$ //$NON-NLS-2$
 		junitHandler.addFailure(testName, throwable);
 	}
 
 	public void startTest(final String testName)
 	{
-		log.info("[.......] startTest - " + testName); //$NON-NLS-1$
+		log.trace("[.......] startTest - " + testName); //$NON-NLS-1$
 		junitHandler.startTest(testName);
 	}
 
 	public void endTest(final String testName)
 	{
-		log.info("[.......] endTest - " + testName); //$NON-NLS-1$
+		log.trace("[.......] endTest - " + testName); //$NON-NLS-1$
 		junitHandler.endTest(testName);
 	}
 
@@ -302,7 +302,7 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 	@Override
 	public void doneTesting()
 	{
-		log.info("[.......] DONE TESTING."); //$NON-NLS-1$
+		log.trace("[.......] DONE TESTING."); //$NON-NLS-1$
 		synchronized (runLock)
 		{
 			doneTesting = true;
