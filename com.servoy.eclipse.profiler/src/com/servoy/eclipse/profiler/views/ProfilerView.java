@@ -45,6 +45,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -62,6 +63,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.dnd.Clipboard;
@@ -150,6 +152,8 @@ public class ProfilerView extends ViewPart
 	public static final int TRANSACTION_TABLE_COLUMN_WIDTH_DEFAULT = 100;
 	public static final int TREE_WIDTH_DEFAULT = 50;
 	public static final int TABLE_WIDTH_DEFAULT = 50;
+
+	public static int MAXIMUM_NR_OF_ROOTS = 400;
 
 	private static final class AggregateData
 	{
@@ -392,6 +396,8 @@ public class ProfilerView extends ViewPart
 
 	private Action exportData;
 
+	private Action configureContents;
+
 	private Action toggleAggregateView;
 
 	private Action toggleProfile;
@@ -477,7 +483,7 @@ public class ProfilerView extends ViewPart
 
 			invisibleRoot.add(0, profileData);
 
-			if (invisibleRoot.size() > 400)
+			if (invisibleRoot.size() > MAXIMUM_NR_OF_ROOTS)
 			{
 				invisibleRoot.remove(invisibleRoot.size() - 1);
 			}
@@ -1123,6 +1129,8 @@ public class ProfilerView extends ViewPart
 		manager.add(clearData);
 		manager.add(new Separator());
 		manager.add(exportData);
+		manager.add(new Separator());
+		manager.add(configureContents);
 	}
 
 	private void fillContextMenu(IMenuManager manager)
@@ -1333,6 +1341,16 @@ public class ProfilerView extends ViewPart
 				}
 			}
 		};
+
+		configureContents = new Action()
+		{
+			@Override
+			public void run()
+			{
+				configureContents();
+			}
+		};
+		configureContents.setText("Configure Contents...");
 	}
 
 	/**
@@ -1380,6 +1398,18 @@ public class ProfilerView extends ViewPart
 			}
 		};
 		job.schedule();
+	}
+
+	private void configureContents()
+	{
+		InputDialog dialog = new InputDialog(null, "Configure Contents", "Set the maximum number of root nodes.", Integer.toString(MAXIMUM_NR_OF_ROOTS), null);
+		dialog.setBlockOnOpen(true);
+		dialog.open();
+
+		if (dialog.getReturnCode() != Window.CANCEL)
+		{
+			MAXIMUM_NR_OF_ROOTS = Integer.parseInt(dialog.getValue());
+		}
 	}
 
 	private void hookDoubleClickAction()
