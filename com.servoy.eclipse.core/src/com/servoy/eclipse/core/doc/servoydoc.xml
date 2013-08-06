@@ -8397,9 +8397,13 @@ if (cancel || !databaseManager.commitTransaction())
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the save was done without an error.]]></return>
           <descriptions>
             <description clientSupport="mc,wc,sc"><![CDATA[Saves all outstanding (unsaved) data and exits the current record. 
-Optionally, by specifying a record or foundset, can save a single record or all reacords from foundset instead of all the data.
+Optionally, by specifying a record or foundset, can save a single record or all records from foundset instead of all the data.
 
-NOTE: The fields focus may be lost in user interface in order to determine the edits.]]></description>
+NOTE: The fields focus may be lost in user interface in order to determine the edits.
+		 SaveData called from table events (like afterRecordInsert) is only partially supported depeding on how first saveData (that triggers the event) is called. 
+		 If first saveData is called with no arguments, all saveData from table events are returning immediatelly with true value and records will be saved as part of first save.
+      If first saveData is called with record(s) as arguments, saveData from table event will try to save record(s) from arguments that are different than those in first call. 
+      SaveData with no arguments inside table events will always return true without saving anything.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="mc,wc,sc"><![CDATA[Saves all outstanding (unsaved) data and exits the current record.]]></summary>
@@ -8426,9 +8430,13 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the save was done without an error.]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Saves all outstanding (unsaved) data and exits the current record. 
-Optionally, by specifying a record or foundset, can save a single record or all reacords from foundset instead of all the data.
+Optionally, by specifying a record or foundset, can save a single record or all records from foundset instead of all the data.
 
-NOTE: The fields focus may be lost in user interface in order to determine the edits.]]></description>
+NOTE: The fields focus may be lost in user interface in order to determine the edits.
+		 SaveData called from table events (like afterRecordInsert) is only partially supported depeding on how first saveData (that triggers the event) is called. 
+		 If first saveData is called with no arguments, all saveData from table events are returning immediatelly with true value and records will be saved as part of first save.
+      If first saveData is called with record(s) as arguments, saveData from table event will try to save record(s) from arguments that are different than those in first call. 
+      SaveData with no arguments inside table events will always return true without saving anything.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Saves all outstanding (unsaved) data and exits the current record.]]></summary>
@@ -8460,9 +8468,13 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the save was done without an error.]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Saves all outstanding (unsaved) data and exits the current record. 
-Optionally, by specifying a record or foundset, can save a single record or all reacords from foundset instead of all the data.
+Optionally, by specifying a record or foundset, can save a single record or all records from foundset instead of all the data.
 
-NOTE: The fields focus may be lost in user interface in order to determine the edits.]]></description>
+NOTE: The fields focus may be lost in user interface in order to determine the edits.
+		 SaveData called from table events (like afterRecordInsert) is only partially supported depeding on how first saveData (that triggers the event) is called. 
+		 If first saveData is called with no arguments, all saveData from table events are returning immediatelly with true value and records will be saved as part of first save.
+      If first saveData is called with record(s) as arguments, saveData from table event will try to save record(s) from arguments that are different than those in first call. 
+      SaveData with no arguments inside table events will always return true without saving anything.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Saves all outstanding (unsaved) data and exits the current record.]]></summary>
@@ -9551,16 +9563,16 @@ field.groupID = 'someGroup';
 forms['someForm'].elements.someGroup.enabled = false;]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="height">
+        <property clientSupport="wc,sc" name="height">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The height in pixels of the component.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[The height in pixels of the component.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The height in pixels of the component.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[The height in pixels of the component.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
+            <sample clientSupport="wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 application.output('original width: ' + field.width);
 application.output('original height: ' + field.height);
 field.width = 200;
@@ -9689,16 +9701,16 @@ var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 
 field.visible = false;]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="width">
+        <property clientSupport="wc,sc" name="width">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The width in pixels of the component.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[The width in pixels of the component.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The width in pixels of the component.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[The width in pixels of the component.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
+            <sample clientSupport="wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 application.output('original width: ' + field.width);
 application.output('original height: ' + field.height);
 field.width = 200;
@@ -10257,16 +10269,16 @@ field.groupID = 'someGroup';
 forms['someForm'].elements.someGroup.enabled = false;]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="height">
+        <property clientSupport="wc,sc" name="height">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The height in pixels of the component.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[The height in pixels of the component.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The height in pixels of the component.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[The height in pixels of the component.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
+            <sample clientSupport="wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 application.output('original width: ' + field.width);
 application.output('original height: ' + field.height);
 field.width = 200;
@@ -10801,16 +10813,16 @@ var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 
 field.visible = false;]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="width">
+        <property clientSupport="wc,sc" name="width">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The width in pixels of the component.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[The width in pixels of the component.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The width in pixels of the component.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[The width in pixels of the component.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
+            <sample clientSupport="wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 application.output('original width: ' + field.width);
 application.output('original height: ' + field.height);
 field.width = 200;
@@ -11116,24 +11128,6 @@ This property is applicable only for types: TEXT_FIELD, COMBOBOX, TYPE_AHEAD, CA
 field.format = '$#.00';]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="height">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The height in pixels of the component.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The height in pixels of the component.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-application.output('original width: ' + field.width);
-application.output('original height: ' + field.height);
-field.width = 200;
-field.height = 100;
-application.output('modified width: ' + field.width);
-application.output('modified height: ' + field.height);]]></sample>
-          </samples>
-        </property>
         <property clientSupport="mc,wc,sc" name="name">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <descriptions>
@@ -11187,34 +11181,6 @@ field.onDataChange = onDataChangeMethod;
 forms['someForm'].controller.show();]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="placeholderText">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[field.placeholderText = 'Search';]]></sample>
-          </samples>
-        </property>
-        <property clientSupport="mc,wc,sc" name="valuelist">
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSValueList" typecode="com.servoy.j2db.scripting.solutionmodel.JSValueList"/>
-          <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The valuelist that is used by this field when displaying data. Can be used
-with fields of type CHECKS, COMBOBOX, RADIOS and TYPE_AHEAD.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The valuelist that is used by this field when displaying data.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.customValues = "one\ntwo\nthree\nfour";
-var cmb = form.newField('my_table_options', JSField.COMBOBOX, 10, 100, 100, 20);
-cmb.valuelist = vlist;]]></sample>
-          </samples>
-        </property>
         <property clientSupport="mc,wc,sc" name="visible">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <descriptions>
@@ -11227,24 +11193,6 @@ cmb.valuelist = vlist;]]></sample>
             <sample clientSupport="mc,wc,sc"><![CDATA[var form = solutionModel.newForm('printForm', 'db:/example_data/parent_table', null, false, 400, 300);
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 field.visible = false;]]></sample>
-          </samples>
-        </property>
-        <property clientSupport="mc,wc,sc" name="width">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The width in pixels of the component.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The width in pixels of the component.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-application.output('original width: ' + field.width);
-application.output('original height: ' + field.height);
-field.width = 200;
-field.height = 100;
-application.output('modified width: ' + field.width);
-application.output('modified height: ' + field.height);]]></sample>
           </samples>
         </property>
         <property clientSupport="mc,wc,sc" name="x">
@@ -11372,24 +11320,6 @@ This property is applicable only for types: TEXT_FIELD, COMBOBOX, TYPE_AHEAD, CA
 field.format = '$#.00';]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="height">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The height in pixels of the component.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The height in pixels of the component.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-application.output('original width: ' + field.width);
-application.output('original height: ' + field.height);
-field.width = 200;
-field.height = 100;
-application.output('modified width: ' + field.width);
-application.output('modified height: ' + field.height);]]></sample>
-          </samples>
-        </property>
         <property clientSupport="mc,wc,sc" name="name">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <descriptions>
@@ -11443,18 +11373,6 @@ field.onDataChange = onDataChangeMethod;
 forms['someForm'].controller.show();]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="placeholderText">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[field.placeholderText = 'Search';]]></sample>
-          </samples>
-        </property>
         <property clientSupport="mc,wc,sc" name="styleClass">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <descriptions>
@@ -11479,17 +11397,17 @@ form.styleName = 'myStyle'; // First set the style on the form.
 field.styleClass = 'fancy'; // Then set the style class on the field.]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="valuelist">
+        <property clientSupport="mc" name="valuelist">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSValueList" typecode="com.servoy.j2db.scripting.solutionmodel.JSValueList"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The valuelist that is used by this field when displaying data. Can be used
+            <description clientSupport="mc"><![CDATA[The valuelist that is used by this field when displaying data. Can be used
 with fields of type CHECKS, COMBOBOX, RADIOS and TYPE_AHEAD.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The valuelist that is used by this field when displaying data.]]></summary>
+            <summary clientSupport="mc"><![CDATA[The valuelist that is used by this field when displaying data.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+            <sample clientSupport="mc"><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
 vlist.customValues = "one\ntwo\nthree\nfour";
 var cmb = form.newField('my_table_options', JSField.COMBOBOX, 10, 100, 100, 20);
 cmb.valuelist = vlist;]]></sample>
@@ -11507,24 +11425,6 @@ cmb.valuelist = vlist;]]></sample>
             <sample clientSupport="mc,wc,sc"><![CDATA[var form = solutionModel.newForm('printForm', 'db:/example_data/parent_table', null, false, 400, 300);
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 field.visible = false;]]></sample>
-          </samples>
-        </property>
-        <property clientSupport="mc,wc,sc" name="width">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The width in pixels of the component.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The width in pixels of the component.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-application.output('original width: ' + field.width);
-application.output('original height: ' + field.height);
-field.width = 200;
-field.height = 100;
-application.output('modified width: ' + field.width);
-application.output('modified height: ' + field.height);]]></sample>
           </samples>
         </property>
         <property clientSupport="mc,wc,sc" name="x">
@@ -13102,24 +13002,6 @@ This property is applicable only for types: TEXT_FIELD, COMBOBOX, TYPE_AHEAD, CA
 field.format = '$#.00';]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="height">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The height in pixels of the component.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The height in pixels of the component.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-application.output('original width: ' + field.width);
-application.output('original height: ' + field.height);
-field.width = 200;
-field.height = 100;
-application.output('modified width: ' + field.width);
-application.output('modified height: ' + field.height);]]></sample>
-          </samples>
-        </property>
         <property clientSupport="mc,wc,sc" name="name">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <descriptions>
@@ -13173,29 +13055,17 @@ field.onDataChange = onDataChangeMethod;
 forms['someForm'].controller.show();]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="placeholderText">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[field.placeholderText = 'Search';]]></sample>
-          </samples>
-        </property>
-        <property clientSupport="mc,wc,sc" name="valuelist">
+        <property clientSupport="mc" name="valuelist">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSValueList" typecode="com.servoy.j2db.scripting.solutionmodel.JSValueList"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The valuelist that is used by this field when displaying data. Can be used
+            <description clientSupport="mc"><![CDATA[The valuelist that is used by this field when displaying data. Can be used
 with fields of type CHECKS, COMBOBOX, RADIOS and TYPE_AHEAD.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The valuelist that is used by this field when displaying data.]]></summary>
+            <summary clientSupport="mc"><![CDATA[The valuelist that is used by this field when displaying data.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+            <sample clientSupport="mc"><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
 vlist.customValues = "one\ntwo\nthree\nfour";
 var cmb = form.newField('my_table_options', JSField.COMBOBOX, 10, 100, 100, 20);
 cmb.valuelist = vlist;]]></sample>
@@ -13213,24 +13083,6 @@ cmb.valuelist = vlist;]]></sample>
             <sample clientSupport="mc,wc,sc"><![CDATA[var form = solutionModel.newForm('printForm', 'db:/example_data/parent_table', null, false, 400, 300);
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 field.visible = false;]]></sample>
-          </samples>
-        </property>
-        <property clientSupport="mc,wc,sc" name="width">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The width in pixels of the component.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The width in pixels of the component.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-application.output('original width: ' + field.width);
-application.output('original height: ' + field.height);
-field.width = 200;
-field.height = 100;
-application.output('modified width: ' + field.width);
-application.output('modified height: ' + field.height);]]></sample>
           </samples>
         </property>
         <property clientSupport="mc,wc,sc" name="x">
@@ -13441,16 +13293,16 @@ field.groupID = 'someGroup';
 forms['someForm'].elements.someGroup.enabled = false;]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="height">
+        <property clientSupport="wc,sc" name="height">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The height in pixels of the component.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[The height in pixels of the component.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The height in pixels of the component.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[The height in pixels of the component.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
+            <sample clientSupport="wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 application.output('original width: ' + field.width);
 application.output('original height: ' + field.height);
 field.width = 200;
@@ -13576,16 +13428,16 @@ var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 
 field.visible = false;]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="width">
+        <property clientSupport="wc,sc" name="width">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The width in pixels of the component.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[The width in pixels of the component.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The width in pixels of the component.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[The width in pixels of the component.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
+            <sample clientSupport="wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 application.output('original width: ' + field.width);
 application.output('original height: ' + field.height);
 field.width = 200;
@@ -16213,16 +16065,16 @@ field.groupID = 'someGroup';
 forms['someForm'].elements.someGroup.enabled = false;]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="height">
+        <property clientSupport="wc,sc" name="height">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The height in pixels of the component.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[The height in pixels of the component.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The height in pixels of the component.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[The height in pixels of the component.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
+            <sample clientSupport="wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 application.output('original width: ' + field.width);
 application.output('original height: ' + field.height);
 field.width = 200;
@@ -16389,16 +16241,16 @@ btn.onDoubleClick = onDoubleClickMethod;
 btn.onRightClick = onRightClickMethod;]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="placeholderText">
+        <property clientSupport="wc,sc" name="placeholderText">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[field.placeholderText = 'Search';]]></sample>
+            <sample clientSupport="wc,sc"><![CDATA[field.placeholderText = 'Search';]]></sample>
           </samples>
         </property>
         <property clientSupport="wc,sc" name="printSliding">
@@ -16590,17 +16442,17 @@ var transparentField = form.newField('parent_table_text', JSField.TEXT_FIELD, 10
 transparentField.transparent = true;]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="valuelist">
+        <property clientSupport="wc,sc" name="valuelist">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSValueList" typecode="com.servoy.j2db.scripting.solutionmodel.JSValueList"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The valuelist that is used by this field when displaying data. Can be used
+            <description clientSupport="wc,sc"><![CDATA[The valuelist that is used by this field when displaying data. Can be used
 with fields of type CHECKS, COMBOBOX, RADIOS and TYPE_AHEAD.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The valuelist that is used by this field when displaying data.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[The valuelist that is used by this field when displaying data.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+            <sample clientSupport="wc,sc"><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
 vlist.customValues = "one\ntwo\nthree\nfour";
 var cmb = form.newField('my_table_options', JSField.COMBOBOX, 10, 100, 100, 20);
 cmb.valuelist = vlist;]]></sample>
@@ -16642,16 +16494,16 @@ var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 
 field.visible = false;]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="width">
+        <property clientSupport="wc,sc" name="width">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The width in pixels of the component.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[The width in pixels of the component.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The width in pixels of the component.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[The width in pixels of the component.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
+            <sample clientSupport="wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 application.output('original width: ' + field.width);
 application.output('original height: ' + field.height);
 field.width = 200;
@@ -24188,6 +24040,12 @@ var removed = header.removeRightButton()]]></sample>
         <property clientSupport="mc" name="textDataProviderID" undocumented="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
         </property>
+        <property clientSupport="mc" name="x" undocumented="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+        </property>
+        <property clientSupport="mc" name="y" undocumented="true">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+        </property>
       </properties>
     </object>
     <object clientSupport="mc,wc,sc" extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSLabel" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSLabel" scriptingName="JSLabel">
@@ -24396,16 +24254,16 @@ field.groupID = 'someGroup';
 forms['someForm'].elements.someGroup.enabled = false;]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="height">
+        <property clientSupport="wc,sc" name="height">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The height in pixels of the component.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[The height in pixels of the component.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The height in pixels of the component.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[The height in pixels of the component.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
+            <sample clientSupport="wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 application.output('original width: ' + field.width);
 application.output('original height: ' + field.height);
 field.width = 200;
@@ -24592,16 +24450,16 @@ forms['someForm'].controller.show()
 forms['someForm'].elements['myLabel'].text = 'Updated text';]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="onAction">
+        <property clientSupport="wc,sc" name="onAction">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The method that is executed when the component is clicked.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[The method that is executed when the component is clicked.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The method that is executed when the component is clicked.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[The method that is executed when the component is clicked.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var doNothingMethod = form.newMethod('function doNothing() { application.output("Doing nothing."); }');
+            <sample clientSupport="wc,sc"><![CDATA[var doNothingMethod = form.newMethod('function doNothing() { application.output("Doing nothing."); }');
 var onClickMethod = form.newMethod('function onClick(event) { application.output("I was clicked at " + event.getTimestamp()); }');
 var onDoubleClickMethod = form.newMethod('function onDoubleClick(event) { application.output("I was double-clicked at " + event.getTimestamp()); }');
 var onRightClickMethod = form.newMethod('function onRightClick(event) { application.output("I was right-clicked at " + event.getTimestamp()); }');
@@ -24940,16 +24798,16 @@ var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 
 field.visible = false;]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="width">
+        <property clientSupport="wc,sc" name="width">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The width in pixels of the component.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[The width in pixels of the component.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The width in pixels of the component.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[The width in pixels of the component.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
+            <sample clientSupport="wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 application.output('original width: ' + field.width);
 application.output('original height: ' + field.height);
 field.width = 200;
@@ -25760,24 +25618,6 @@ This property is applicable only for types: TEXT_FIELD, COMBOBOX, TYPE_AHEAD, CA
 field.format = '$#.00';]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="height">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The height in pixels of the component.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The height in pixels of the component.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-application.output('original width: ' + field.width);
-application.output('original height: ' + field.height);
-field.width = 200;
-field.height = 100;
-application.output('modified width: ' + field.width);
-application.output('modified height: ' + field.height);]]></sample>
-          </samples>
-        </property>
         <property clientSupport="mc,wc,sc" name="name">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <descriptions>
@@ -25831,32 +25671,16 @@ field.onDataChange = onDataChangeMethod;
 forms['someForm'].controller.show();]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="placeholderText">
+        <property clientSupport="mc" name="placeholderText">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></description>
+            <description clientSupport="mc"><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></summary>
+            <summary clientSupport="mc"><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[field.placeholderText = 'Search';]]></sample>
-          </samples>
-        </property>
-        <property clientSupport="mc,wc,sc" name="valuelist">
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSValueList" typecode="com.servoy.j2db.scripting.solutionmodel.JSValueList"/>
-          <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The valuelist that is used by this field when displaying data. Can be used
-with fields of type CHECKS, COMBOBOX, RADIOS and TYPE_AHEAD.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The valuelist that is used by this field when displaying data.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.customValues = "one\ntwo\nthree\nfour";
-var cmb = form.newField('my_table_options', JSField.COMBOBOX, 10, 100, 100, 20);
-cmb.valuelist = vlist;]]></sample>
+            <sample clientSupport="mc"><![CDATA[field.placeholderText = 'Search';]]></sample>
           </samples>
         </property>
         <property clientSupport="mc,wc,sc" name="visible">
@@ -25871,24 +25695,6 @@ cmb.valuelist = vlist;]]></sample>
             <sample clientSupport="mc,wc,sc"><![CDATA[var form = solutionModel.newForm('printForm', 'db:/example_data/parent_table', null, false, 400, 300);
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 field.visible = false;]]></sample>
-          </samples>
-        </property>
-        <property clientSupport="mc,wc,sc" name="width">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The width in pixels of the component.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The width in pixels of the component.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-application.output('original width: ' + field.width);
-application.output('original height: ' + field.height);
-field.width = 200;
-field.height = 100;
-application.output('modified width: ' + field.width);
-application.output('modified height: ' + field.height);]]></sample>
           </samples>
         </property>
         <property clientSupport="mc,wc,sc" name="x">
@@ -27510,24 +27316,6 @@ This property is applicable only for types: TEXT_FIELD, COMBOBOX, TYPE_AHEAD, CA
 field.format = '$#.00';]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="height">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The height in pixels of the component.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The height in pixels of the component.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-application.output('original width: ' + field.width);
-application.output('original height: ' + field.height);
-field.width = 200;
-field.height = 100;
-application.output('modified width: ' + field.width);
-application.output('modified height: ' + field.height);]]></sample>
-          </samples>
-        </property>
         <property clientSupport="mc" name="horizontal">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <descriptions>
@@ -27593,18 +27381,6 @@ field.onDataChange = onDataChangeMethod;
 forms['someForm'].controller.show();]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="placeholderText">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[field.placeholderText = 'Search';]]></sample>
-          </samples>
-        </property>
         <property clientSupport="mc,wc,sc" name="styleClass">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <descriptions>
@@ -27629,17 +27405,17 @@ form.styleName = 'myStyle'; // First set the style on the form.
 field.styleClass = 'fancy'; // Then set the style class on the field.]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="valuelist">
+        <property clientSupport="mc" name="valuelist">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSValueList" typecode="com.servoy.j2db.scripting.solutionmodel.JSValueList"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The valuelist that is used by this field when displaying data. Can be used
+            <description clientSupport="mc"><![CDATA[The valuelist that is used by this field when displaying data. Can be used
 with fields of type CHECKS, COMBOBOX, RADIOS and TYPE_AHEAD.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The valuelist that is used by this field when displaying data.]]></summary>
+            <summary clientSupport="mc"><![CDATA[The valuelist that is used by this field when displaying data.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+            <sample clientSupport="mc"><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
 vlist.customValues = "one\ntwo\nthree\nfour";
 var cmb = form.newField('my_table_options', JSField.COMBOBOX, 10, 100, 100, 20);
 cmb.valuelist = vlist;]]></sample>
@@ -27657,24 +27433,6 @@ cmb.valuelist = vlist;]]></sample>
             <sample clientSupport="mc,wc,sc"><![CDATA[var form = solutionModel.newForm('printForm', 'db:/example_data/parent_table', null, false, 400, 300);
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 field.visible = false;]]></sample>
-          </samples>
-        </property>
-        <property clientSupport="mc,wc,sc" name="width">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The width in pixels of the component.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The width in pixels of the component.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-application.output('original width: ' + field.width);
-application.output('original height: ' + field.height);
-field.width = 200;
-field.height = 100;
-application.output('modified width: ' + field.width);
-application.output('modified height: ' + field.height);]]></sample>
           </samples>
         </property>
         <property clientSupport="mc,wc,sc" name="x">
@@ -30091,24 +29849,6 @@ This property is applicable only for types: TEXT_FIELD, COMBOBOX, TYPE_AHEAD, CA
 field.format = '$#.00';]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="height">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The height in pixels of the component.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The height in pixels of the component.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-application.output('original width: ' + field.width);
-application.output('original height: ' + field.height);
-field.width = 200;
-field.height = 100;
-application.output('modified width: ' + field.width);
-application.output('modified height: ' + field.height);]]></sample>
-          </samples>
-        </property>
         <property clientSupport="mc,wc,sc" name="name">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <descriptions>
@@ -30162,32 +29902,16 @@ field.onDataChange = onDataChangeMethod;
 forms['someForm'].controller.show();]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="placeholderText">
+        <property clientSupport="mc" name="placeholderText">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></description>
+            <description clientSupport="mc"><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></summary>
+            <summary clientSupport="mc"><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[field.placeholderText = 'Search';]]></sample>
-          </samples>
-        </property>
-        <property clientSupport="mc,wc,sc" name="valuelist">
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSValueList" typecode="com.servoy.j2db.scripting.solutionmodel.JSValueList"/>
-          <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The valuelist that is used by this field when displaying data. Can be used
-with fields of type CHECKS, COMBOBOX, RADIOS and TYPE_AHEAD.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The valuelist that is used by this field when displaying data.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.customValues = "one\ntwo\nthree\nfour";
-var cmb = form.newField('my_table_options', JSField.COMBOBOX, 10, 100, 100, 20);
-cmb.valuelist = vlist;]]></sample>
+            <sample clientSupport="mc"><![CDATA[field.placeholderText = 'Search';]]></sample>
           </samples>
         </property>
         <property clientSupport="mc,wc,sc" name="visible">
@@ -30202,24 +29926,6 @@ cmb.valuelist = vlist;]]></sample>
             <sample clientSupport="mc,wc,sc"><![CDATA[var form = solutionModel.newForm('printForm', 'db:/example_data/parent_table', null, false, 400, 300);
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 field.visible = false;]]></sample>
-          </samples>
-        </property>
-        <property clientSupport="mc,wc,sc" name="width">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The width in pixels of the component.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The width in pixels of the component.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-application.output('original width: ' + field.width);
-application.output('original height: ' + field.height);
-field.width = 200;
-field.height = 100;
-application.output('modified width: ' + field.width);
-application.output('modified height: ' + field.height);]]></sample>
           </samples>
         </property>
         <property clientSupport="mc,wc,sc" name="x">
@@ -30347,24 +30053,6 @@ This property is applicable only for types: TEXT_FIELD, COMBOBOX, TYPE_AHEAD, CA
 field.format = '$#.00';]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="height">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The height in pixels of the component.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The height in pixels of the component.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-application.output('original width: ' + field.width);
-application.output('original height: ' + field.height);
-field.width = 200;
-field.height = 100;
-application.output('modified width: ' + field.width);
-application.output('modified height: ' + field.height);]]></sample>
-          </samples>
-        </property>
         <property clientSupport="mc,wc,sc" name="name">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <descriptions>
@@ -30418,32 +30106,16 @@ field.onDataChange = onDataChangeMethod;
 forms['someForm'].controller.show();]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc,wc,sc" name="placeholderText">
+        <property clientSupport="mc" name="placeholderText">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></description>
+            <description clientSupport="mc"><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></summary>
+            <summary clientSupport="mc"><![CDATA[The text that is displayed in field when the field doesn't have a text value.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[field.placeholderText = 'Search';]]></sample>
-          </samples>
-        </property>
-        <property clientSupport="mc,wc,sc" name="valuelist">
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSValueList" typecode="com.servoy.j2db.scripting.solutionmodel.JSValueList"/>
-          <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The valuelist that is used by this field when displaying data. Can be used
-with fields of type CHECKS, COMBOBOX, RADIOS and TYPE_AHEAD.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The valuelist that is used by this field when displaying data.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.customValues = "one\ntwo\nthree\nfour";
-var cmb = form.newField('my_table_options', JSField.COMBOBOX, 10, 100, 100, 20);
-cmb.valuelist = vlist;]]></sample>
+            <sample clientSupport="mc"><![CDATA[field.placeholderText = 'Search';]]></sample>
           </samples>
         </property>
         <property clientSupport="mc,wc,sc" name="visible">
@@ -30458,24 +30130,6 @@ cmb.valuelist = vlist;]]></sample>
             <sample clientSupport="mc,wc,sc"><![CDATA[var form = solutionModel.newForm('printForm', 'db:/example_data/parent_table', null, false, 400, 300);
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
 field.visible = false;]]></sample>
-          </samples>
-        </property>
-        <property clientSupport="mc,wc,sc" name="width">
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The width in pixels of the component.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The width in pixels of the component.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
-application.output('original width: ' + field.width);
-application.output('original height: ' + field.height);
-field.width = 200;
-field.height = 100;
-application.output('modified width: ' + field.width);
-application.output('modified height: ' + field.height);]]></sample>
           </samples>
         </property>
         <property clientSupport="mc,wc,sc" name="x">
@@ -31525,7 +31179,7 @@ vlist.sortOptions = 'parent_table_text desc';]]></sample>
         <property clientSupport="wc,sc" name="setFallbackValueList" undocumented="true">
           <return type="void" typecode="void"/>
           <parameters>
-            <parameter name="vl" type="com.servoy.j2db.scripting.solutionmodel.JSValueList" typecode="com.servoy.j2db.solutionmodel.ISMValueList"/>
+            <parameter name="vl" type="com.servoy.base.solutionmodel.IBaseSMValueList" typecode="com.servoy.base.solutionmodel.IBaseSMValueList"/>
           </parameters>
         </property>
         <property clientSupport="wc,sc" name="sortOptions">

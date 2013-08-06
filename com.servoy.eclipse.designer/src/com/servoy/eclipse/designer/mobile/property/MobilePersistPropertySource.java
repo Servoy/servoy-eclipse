@@ -240,6 +240,15 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			return false;
 		}
 
+		if ((StaticContentSpecLoader.PROPERTY_ENABLED.getPropertyName().equals(propertyDescriptor.propertyDescriptor.getName()) ||
+			StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(propertyDescriptor.propertyDescriptor.getName()) || StaticContentSpecLoader.PROPERTY_NAME.getPropertyName().equals(
+			propertyDescriptor.propertyDescriptor.getName())) &&
+			getPersist() instanceof GraphicalComponent &&
+			Boolean.TRUE.equals(((GraphicalComponent)getPersist()).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName)) &&
+			getContext() instanceof Form)
+		{
+			return true;
+		}
 
 		return RepositoryHelper.hideForMobileProperties(propertyDescriptor.propertyDescriptor.getName(), getPersist().getClass(),
 			(getPersist() instanceof Field) ? ((Field)getPersist()).getDisplayType() : 0, isButton(getPersist())) ||
