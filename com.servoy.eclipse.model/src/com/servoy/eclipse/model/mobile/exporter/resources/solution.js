@@ -32,7 +32,7 @@ ${endloop_scopes}
 			${formName} : {
 				_sv_init: function(_$form$, _$oldScope$, _$tmpScope$) {
 					var history = _ServoyUtils_.history;
-${loop_functions}					if (!this._sv_fncs[${functionName}])
+${loop_functions}					if (!this._sv_fncs['${functionName}'])
 					{
 						var ${functionName} = _ServoyUtils_.wrapFunction(${functionCode},_$form$);
 						_$form$.${functionName} = ${functionName};
@@ -61,7 +61,7 @@ ${loop_variables}					${variableName} : [${defaultValue}, ${variableType}]${endl
 			${scopeName} : {
 				_sv_init: function(_$scope$,_$oldScope$, _$tmpScope$) {
 					var history = _ServoyUtils_.history;
-${loop_functions}					if (!this._sv_fncs[${functionName}])
+${loop_functions}					if (!this._sv_fncs['${functionName}'])
 					{
 						var ${functionName} = _ServoyUtils_.wrapFunction( ${functionCode} ,_$scope$);
 						_$scope$.${functionName} = ${functionName};
