@@ -45,6 +45,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -1402,7 +1403,24 @@ public class ProfilerView extends ViewPart
 
 	private void configureContents()
 	{
-		InputDialog dialog = new InputDialog(null, "Configure Contents", "Set the maximum number of root nodes.", Integer.toString(MAXIMUM_NR_OF_ROOTS), null);
+		InputDialog dialog = new InputDialog(null, "Configure Contents", "Set the maximum number of root nodes.", Integer.toString(MAXIMUM_NR_OF_ROOTS),
+			new IInputValidator()
+			{
+
+				@Override
+				public String isValid(String newText)
+				{
+					try
+					{
+						Integer.parseInt(newText);
+					}
+					catch (NumberFormatException e)
+					{
+						return "Enter a number.";
+					}
+					return null;
+				}
+			});
 		dialog.setBlockOnOpen(true);
 		dialog.open();
 
