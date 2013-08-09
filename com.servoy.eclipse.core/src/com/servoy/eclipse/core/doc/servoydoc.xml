@@ -23998,53 +23998,243 @@ var removed = header.removeRightButton()]]></sample>
     </object>
     <object clientSupport="mc" publicName="JSInsetList" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSInsetList">
       <properties>
-        <property clientSupport="mc" name="countDataProviderID" undocumented="true">
+        <property clientSupport="mc" name="countDataProviderID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[This dataprovider's value will be presented as a 'count bubble' in each item of the list.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[This dataprovider's value will be presented as a 'count bubble' in each item of the list.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var list = solutionModel.getForm('created_by_sm_1').getInsetList(solutionModel.getForm('il1');
+
+var newList = solutionModel.newListForm('created_by_sm_3', list.dataSource, list.textDataProviderID);
+newList.onAction = newList.getForm().newMethod('function aMethod(event){application.output("Hello world!");}');]]></sample>
+          </samples>
         </property>
-        <property clientSupport="mc" name="dataIconDataProviderID" undocumented="true">
+        <property clientSupport="mc" name="dataIconDataProviderID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[The predefined icon of this data-provider will appear on items in the list; if not specified, 'dataIconType' will be used instead.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[The predefined icon of this data-provider will appear on items in the list; if not specified, 'dataIconType' will be used instead.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var list = solutionModel.getForm('created_by_sm_1').getInsetList(solutionModel.getForm('il1');
+
+var newList = solutionModel.newListForm('created_by_sm_3', list.dataSource, list.textDataProviderID);
+newList.onAction = newList.getForm().newMethod('function aMethod(event){application.output("Hello world!");}');]]></sample>
+          </samples>
         </property>
-        <property clientSupport="mc" name="dataIconType" undocumented="true">
+        <property clientSupport="mc" name="dataIconType">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[This predefined icon will appear on items in the list if 'dataIconDataProviderID' is not set.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[This predefined icon will appear on items in the list if 'dataIconDataProviderID' is not set.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var list = solutionModel.getForm('created_by_sm_1').getInsetList(solutionModel.getForm('il1');
+
+var newList = solutionModel.newListForm('created_by_sm_3', list.dataSource, list.textDataProviderID);
+newList.onAction = newList.getForm().newMethod('function aMethod(event){application.output("Hello world!");}');]]></sample>
+          </samples>
         </property>
-        <property clientSupport="mc" name="headerDataProviderID" undocumented="true">
+        <property clientSupport="mc" name="headerDataProviderID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[The text of this data-provider will appear on top of the inset list; if not specified, 'headerText' will be used instead.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[The text of this data-provider will appear on top of the inset list; if not specified, 'headerText' will be used instead.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var insetList = jsform.getInsetList('il1');
+
+var newInsetList = jsform.newInsetList(8,insetList.dataSource,insetList.relationName,insetList.headerText,insetList.textDataProviderID);
+newInsetList.name = 'il2';]]></sample>
+          </samples>
         </property>
-        <property clientSupport="mc" name="headerStyleClass" undocumented="true">
+        <property clientSupport="mc" name="headerStyleClass">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[The styleClass of the list header. Can have values from 'a' to 'e'.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[The styleClass of the list header.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var newInsetList = jsform.newInsetList(8,insetList.dataSource,insetList.relationName,insetList.headerText,insetList.textDataProviderID);
+newInsetList.headerStyleClass = 'e';]]></sample>
+          </samples>
         </property>
-        <property clientSupport="mc" name="headerText" undocumented="true">
+        <property clientSupport="mc" name="headerText">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[This text will appear on top of the inset list if 'headerDataProviderID' is not set.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[This text will appear on top of the inset list if 'headerDataProviderID' is not set.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var insetList = jsform.getInsetList('il1');
+
+var newInsetList = jsform.newInsetList(8,insetList.dataSource,insetList.relationName,insetList.headerText,insetList.textDataProviderID);
+newInsetList.name = 'il2';]]></sample>
+          </samples>
         </property>
-        <property clientSupport="mc" name="listStyleClass" undocumented="true">
+        <property clientSupport="mc" name="listStyleClass">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[The styleClass of the list. Can have values from 'a' to 'e'.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[The styleClass of the list.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var list = solutionModel.getForm('created_by_sm_1').getInsetList('il1');
+
+var newList = solutionModel.newListForm('created_by_sm_3', list.dataSource, list.textDataProviderID);
+newList.listStyleClass = 'e';]]></sample>
+          </samples>
         </property>
-        <property clientSupport="mc" name="name" undocumented="true">
+        <property clientSupport="mc" name="name">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[The name of this inset list.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[The name of this inset list.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var insetList = jsform.getInsetList('il1');
+
+var newInsetList = jsform.newInsetList(8,insetList.dataSource,insetList.relationName,insetList.headerText,insetList.textDataProviderID);
+newInsetList.name = 'il2';]]></sample>
+          </samples>
         </property>
-        <property clientSupport="mc" name="onAction" undocumented="true">
+        <property clientSupport="mc" name="onAction">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.base.solutionmodel.IBaseSMMethod"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[This action will be executed when an item in the list is clicked.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[This action will be executed when an item in the list is clicked.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var list = solutionModel.getForm('created_by_sm_1').getInsetList(solutionModel.getForm('il1');
+
+var newList = solutionModel.newListForm('created_by_sm_3', list.dataSource, list.textDataProviderID);
+newList.onAction = newList.getForm().newMethod('function aMethod(event){application.output("Hello world!");}');]]></sample>
+          </samples>
         </property>
-        <property clientSupport="mc" name="relationName" undocumented="true">
+        <property clientSupport="mc" name="relationName">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[Name of the relation to be used by the inset list.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[Name of the relation to be used by the inset list.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var insetList = jsform.getInsetList('il1');
+
+var newInsetList = jsform.newInsetList(8,insetList.dataSource,insetList.relationName,insetList.headerText,insetList.textDataProviderID);
+newInsetList.name = 'il2';]]></sample>
+          </samples>
         </property>
-        <property clientSupport="mc" name="subtext" undocumented="true">
+        <property clientSupport="mc" name="subtext">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[This text will appear as the secondary (smaller) text of items in the list if 'subtextDataProviderID' is not set.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[This text will appear as the secondary (smaller) text of items in the list if 'subtextDataProviderID' is not set.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var list = solutionModel.getForm('created_by_sm_1').getInsetList(solutionModel.getForm('il1');
+
+var newList = solutionModel.newListForm('created_by_sm_3', list.dataSource, list.textDataProviderID);
+newList.onAction = newList.getForm().newMethod('function aMethod(event){application.output("Hello world!");}');]]></sample>
+          </samples>
         </property>
-        <property clientSupport="mc" name="subtextDataProviderID" undocumented="true">
+        <property clientSupport="mc" name="subtextDataProviderID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[The text of this data-provider will appear as the secondary (smaller) text of items in the list; if not specified, 'subtext' will be used instead.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[The text of this data-provider will appear as the secondary (smaller) text of items in the list; if not specified, 'subtext' will be used instead.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var list = solutionModel.getForm('created_by_sm_1').getInsetList(solutionModel.getForm('il1');
+
+var newList = solutionModel.newListForm('created_by_sm_3', list.dataSource, list.textDataProviderID);
+newList.onAction = newList.getForm().newMethod('function aMethod(event){application.output("Hello world!");}');]]></sample>
+          </samples>
         </property>
-        <property clientSupport="mc" name="text" undocumented="true">
+        <property clientSupport="mc" name="text">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[This text will appear as the main text of items in the list if 'textDataProviderID' is not set.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[This text will appear as the main text of items in the list if 'textDataProviderID' is not set.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var list = solutionModel.getForm('created_by_sm_1').getInsetList(solutionModel.getForm('il1');
+
+var newList = solutionModel.newListForm('created_by_sm_3', list.dataSource, list.textDataProviderID);
+newList.onAction = newList.getForm().newMethod('function aMethod(event){application.output("Hello world!");}');]]></sample>
+          </samples>
         </property>
-        <property clientSupport="mc" name="textDataProviderID" undocumented="true">
+        <property clientSupport="mc" name="textDataProviderID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[The text of this data-provider will appear as the main text of items in the list; if not specified, 'text' will be used instead.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[The text of this data-provider will appear as the main text of items in the list; if not specified, 'text' will be used instead.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var list = solutionModel.getForm('created_by_sm_1').getInsetList(solutionModel.getForm('il1');
+
+var newList = solutionModel.newListForm('created_by_sm_3', list.dataSource, list.textDataProviderID);
+newList.onAction = newList.getForm().newMethod('function aMethod(event){application.output("Hello world!");}');]]></sample>
+          </samples>
         </property>
-        <property clientSupport="mc" name="x" undocumented="true">
+        <property clientSupport="mc" name="x">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[The x coordinate of the component on the form.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[The x coordinate of the component on the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var newInsetList = jsform.newInsetList(8,insetList.dataSource,insetList.relationName,insetList.headerText,insetList.textDataProviderID);
+newInsetList.x = 90;
+newInsetList.y = 90;
+application.output('location of newInsetList: ' + newInsetList.x + ', ' + newInsetList.y);]]></sample>
+          </samples>
         </property>
-        <property clientSupport="mc" name="y" undocumented="true">
+        <property clientSupport="mc" name="y">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[The y coordinate of the component on the form.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[The y coordinate of the component on the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var newInsetList = jsform.newInsetList(8,insetList.dataSource,insetList.relationName,insetList.headerText,insetList.textDataProviderID);
+newInsetList.x = 90;
+newInsetList.y = 90;
+application.output('location of newInsetList: ' + newInsetList.x + ', ' + newInsetList.y);]]></sample>
+          </samples>
         </property>
       </properties>
     </object>
@@ -24957,32 +25147,140 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
     </object>
     <object clientSupport="mc" publicName="JSList" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSList">
       <properties>
-        <property clientSupport="mc" name="countDataProviderID" undocumented="true">
+        <property clientSupport="mc" name="countDataProviderID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[This dataprovider's value will be presented as a 'count bubble' in each item of the list.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[This dataprovider's value will be presented as a 'count bubble' in each item of the list.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var list = solutionModel.getForm('created_by_sm_1').getInsetList(solutionModel.getForm('il1');
+
+var newList = solutionModel.newListForm('created_by_sm_3', list.dataSource, list.textDataProviderID);
+newList.onAction = newList.getForm().newMethod('function aMethod(event){application.output("Hello world!");}');]]></sample>
+          </samples>
         </property>
-        <property clientSupport="mc" name="dataIconDataProviderID" undocumented="true">
+        <property clientSupport="mc" name="dataIconDataProviderID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[The predefined icon of this data-provider will appear on items in the list; if not specified, 'dataIconType' will be used instead.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[The predefined icon of this data-provider will appear on items in the list; if not specified, 'dataIconType' will be used instead.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var list = solutionModel.getForm('created_by_sm_1').getInsetList(solutionModel.getForm('il1');
+
+var newList = solutionModel.newListForm('created_by_sm_3', list.dataSource, list.textDataProviderID);
+newList.onAction = newList.getForm().newMethod('function aMethod(event){application.output("Hello world!");}');]]></sample>
+          </samples>
         </property>
-        <property clientSupport="mc" name="dataIconType" undocumented="true">
+        <property clientSupport="mc" name="dataIconType">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[This predefined icon will appear on items in the list if 'dataIconDataProviderID' is not set.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[This predefined icon will appear on items in the list if 'dataIconDataProviderID' is not set.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var list = solutionModel.getForm('created_by_sm_1').getInsetList(solutionModel.getForm('il1');
+
+var newList = solutionModel.newListForm('created_by_sm_3', list.dataSource, list.textDataProviderID);
+newList.onAction = newList.getForm().newMethod('function aMethod(event){application.output("Hello world!");}');]]></sample>
+          </samples>
         </property>
-        <property clientSupport="mc" name="listStyleClass" undocumented="true">
+        <property clientSupport="mc" name="listStyleClass">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[The styleClass of the list. Can have values from 'a' to 'e'.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[The styleClass of the list.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var list = solutionModel.getForm('created_by_sm_1').getInsetList('il1');
+
+var newList = solutionModel.newListForm('created_by_sm_3', list.dataSource, list.textDataProviderID);
+newList.listStyleClass = 'e';]]></sample>
+          </samples>
         </property>
-        <property clientSupport="mc" name="onAction" undocumented="true">
+        <property clientSupport="mc" name="onAction">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.base.solutionmodel.IBaseSMMethod"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[This action will be executed when an item in the list is clicked.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[This action will be executed when an item in the list is clicked.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var list = solutionModel.getForm('created_by_sm_1').getInsetList(solutionModel.getForm('il1');
+
+var newList = solutionModel.newListForm('created_by_sm_3', list.dataSource, list.textDataProviderID);
+newList.onAction = newList.getForm().newMethod('function aMethod(event){application.output("Hello world!");}');]]></sample>
+          </samples>
         </property>
-        <property clientSupport="mc" name="subtext" undocumented="true">
+        <property clientSupport="mc" name="subtext">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[This text will appear as the secondary (smaller) text of items in the list if 'subtextDataProviderID' is not set.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[This text will appear as the secondary (smaller) text of items in the list if 'subtextDataProviderID' is not set.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var list = solutionModel.getForm('created_by_sm_1').getInsetList(solutionModel.getForm('il1');
+
+var newList = solutionModel.newListForm('created_by_sm_3', list.dataSource, list.textDataProviderID);
+newList.onAction = newList.getForm().newMethod('function aMethod(event){application.output("Hello world!");}');]]></sample>
+          </samples>
         </property>
-        <property clientSupport="mc" name="subtextDataProviderID" undocumented="true">
+        <property clientSupport="mc" name="subtextDataProviderID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[The text of this data-provider will appear as the secondary (smaller) text of items in the list; if not specified, 'subtext' will be used instead.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[The text of this data-provider will appear as the secondary (smaller) text of items in the list; if not specified, 'subtext' will be used instead.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var list = solutionModel.getForm('created_by_sm_1').getInsetList(solutionModel.getForm('il1');
+
+var newList = solutionModel.newListForm('created_by_sm_3', list.dataSource, list.textDataProviderID);
+newList.onAction = newList.getForm().newMethod('function aMethod(event){application.output("Hello world!");}');]]></sample>
+          </samples>
         </property>
-        <property clientSupport="mc" name="text" undocumented="true">
+        <property clientSupport="mc" name="text">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[This text will appear as the main text of items in the list if 'textDataProviderID' is not set.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[This text will appear as the main text of items in the list if 'textDataProviderID' is not set.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var list = solutionModel.getForm('created_by_sm_1').getInsetList(solutionModel.getForm('il1');
+
+var newList = solutionModel.newListForm('created_by_sm_3', list.dataSource, list.textDataProviderID);
+newList.onAction = newList.getForm().newMethod('function aMethod(event){application.output("Hello world!");}');]]></sample>
+          </samples>
         </property>
-        <property clientSupport="mc" name="textDataProviderID" undocumented="true">
+        <property clientSupport="mc" name="textDataProviderID">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[The text of this data-provider will appear as the main text of items in the list; if not specified, 'text' will be used instead.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[The text of this data-provider will appear as the main text of items in the list; if not specified, 'text' will be used instead.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var list = solutionModel.getForm('created_by_sm_1').getInsetList(solutionModel.getForm('il1');
+
+var newList = solutionModel.newListForm('created_by_sm_3', list.dataSource, list.textDataProviderID);
+newList.onAction = newList.getForm().newMethod('function aMethod(event){application.output("Hello world!");}');]]></sample>
+          </samples>
         </property>
       </properties>
       <functions>
