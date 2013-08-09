@@ -39,6 +39,7 @@ import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewMethodAction;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.ArgumentType;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -46,6 +47,7 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.SafeArrayList;
 import com.servoy.j2db.util.Utils;
 
@@ -109,7 +111,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 		};
 	}
 
-	public static IPropertyDescriptor[] createMethodPropertyDescriptors(IScriptProvider scriptMethod, final IPersist context, final String methodKey)
+	public static IPropertyDescriptor[] createMethodPropertyDescriptors(IScriptProvider scriptMethod, final PersistContext context, final String methodKey)
 	{
 		if (!(scriptMethod instanceof AbstractBase))
 		{
@@ -117,10 +119,11 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 		}
 		List<IPropertyDescriptor> descs = new ArrayList<IPropertyDescriptor>();
 
-		MethodArgument[] formalArguments = ((AbstractBase)scriptMethod).getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
+		final MethodArgument[] formalArguments = ((AbstractBase)scriptMethod).getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
+		MethodArgument[] combinedArguments = getCombinedParams(formalArguments, context.getPersist(), scriptMethod, methodKey);
 		final MethodTemplate template = MethodTemplate.getTemplate(scriptMethod.getClass(), methodKey);
-		int nargs = formalArguments != null && (template.getArguments() == null || formalArguments.length > template.getArguments().length)
-			? formalArguments.length : ((template.getArguments() == null) ? 0 : template.getArguments().length);
+		int nargs = combinedArguments != null && (template.getArguments() == null || combinedArguments.length > template.getArguments().length)
+			? combinedArguments.length : ((template.getArguments() == null) ? 0 : template.getArguments().length);
 		for (int i = 0; i < nargs; i++)
 		{
 			PropertyController<String, String> propertyController;
@@ -128,7 +131,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 			{
 				// arguments defined in template, will be overridden at runtime
 				final MethodArgument templateArgument = template.getArguments()[i];
-				String argName = (formalArguments != null && i < formalArguments.length) ? formalArguments[i].getName() : "arguments[" + i + ']'; //$NON-NLS-1$
+				String argName = (combinedArguments != null && i < combinedArguments.length) ? combinedArguments[i].getName() : "arguments[" + i + ']'; //$NON-NLS-1$
 				propertyController = new PropertyController<String, String>(Integer.valueOf(i), argName, null, new LabelProvider()
 				{
 					@Override
@@ -142,7 +145,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 			else
 			{
 				final int index = i;
-				propertyController = new PropertyController<String, String>(Integer.valueOf(i), formalArguments[i].getName(), null, new LabelProvider()
+				propertyController = new PropertyController<String, String>(Integer.valueOf(i), combinedArguments[i].getName(), null, new LabelProvider()
 				{
 					@Override
 					public String getText(Object element)
@@ -150,10 +153,10 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 						if (element == null || "".equals(element)) //$NON-NLS-1$
 						{
 							// argument is not set in method call in subform, show inherited value
-							Form contextForm = (Form)context.getAncestor(IRepository.FORMS);
+							Form contextForm = (Form)context.getContext().getAncestor(IRepository.FORMS);
 							if (contextForm != null)
 							{
-								List<Form> formHierarchy = ModelUtils.getEditingFlattenedSolution(context).getFormHierarchy(contextForm);
+								List<Form> formHierarchy = ModelUtils.getEditingFlattenedSolution(context.getContext()).getFormHierarchy(contextForm);
 								for (Form form : formHierarchy)
 								{
 									List<Object> instanceMethodArguments = form.getInstanceMethodArguments(methodKey);
@@ -174,7 +177,14 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 				{
 					public CellEditor createPropertyEditor(Composite parent)
 					{
-						return new TextCellEditor(parent);
+						if (index >= formalArguments.length)
+						{
+							return new TextAndButtonCellEditor(parent);
+						}
+						else
+						{
+							return new TextCellEditor(parent);
+						}
 					}
 				});
 			}
@@ -183,7 +193,44 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 		return descs.toArray(new IPropertyDescriptor[descs.size()]);
 	}
 
-	public static void setInstancMethodArguments(IPersist persist, Object id, List<Object> arguments)
+	/**
+	 * Returns the combined instance parameters (from the frm File) with the actual formal parameters in the function deffinition
+	 * Adds  when a name mismatch at position i happens the display name in the properties view will be  formalName (previewsName)
+	 */
+	private static MethodArgument[] getCombinedParams(MethodArgument[] formalArguments, IPersist context, IScriptProvider scriptMethod, String methodKey)
+	{
+		if (formalArguments == null) return null;
+		ArrayList<MethodArgument> finalParamsList = new ArrayList<MethodArgument>(); // the returned computed list 
+		Pair<List<Object>, List<Object>> instanceParamsArgs = ((AbstractBase)context).getInstanceMethodParameters(methodKey);
+		List<Object> persistParamNames = instanceParamsArgs.getLeft() != null ? instanceParamsArgs.getLeft() : new ArrayList<Object>();
+
+		for (int i = 0; i < formalArguments.length; i++)
+		{
+			MethodArgument methodArgument = formalArguments[i];
+			Object persistParamName = persistParamNames.size() > i ? persistParamNames.get(i) : "";
+			if (persistParamNames.size() > i && !methodArgument.getName().equals(persistParamName) && !methodArgument.getName().contains("("))
+			{
+				finalParamsList.add(new MethodArgument(methodArgument.getName() + " (" + persistParamName + ")", methodArgument.getType(),
+					methodArgument.getDescription()));
+			}
+			else
+			{
+				finalParamsList.add(methodArgument);
+			}
+		}
+		// add used extra arguments not present in the formal parameter list
+		if (formalArguments.length < persistParamNames.size())
+		{
+			for (int i = formalArguments.length; i < persistParamNames.size(); i++)
+			{
+				Object persistParamName = persistParamNames.get(i);
+				finalParamsList.add(new MethodArgument(" -missing- (" + persistParamName + ")", ArgumentType.Object, null));
+			}
+		}
+		return finalParamsList.toArray(new MethodArgument[finalParamsList.size()]);//Utils.arrayJoin(formalArguments, paramsList.toArray());
+	}
+
+	public static void setInstancMethodArguments(IPersist persist, Object id, List<Object> paramNames, List<Object> arguments)
 	{
 		if (persist instanceof AbstractBase)
 		{
@@ -194,7 +241,8 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 				if (arguments.get(i) != null) len = i + 1;
 			}
 			// save a copy of the mwa.arguments list so that changes in mwa.arguments are not affecting customProperties
-			((AbstractBase)persist).putInstanceMethodArguments(id.toString(), len == 0 ? null : new ArrayList<Object>(arguments.subList(0, len)));
+			((AbstractBase)persist).putInstanceMethodParameters(id.toString(), len == 0 ? null : paramNames.subList(0, len), len == 0 ? null
+				: new ArrayList<Object>(arguments.subList(0, len)));
 		}
 	}
 
@@ -264,8 +312,8 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 				}
 				IScriptProvider scriptMethod = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), table, methodId);
 				// make sure sub-properties are sorted in defined order
-				propertyDescriptors = PropertyController.applySequencePropertyComparator(createMethodPropertyDescriptors(scriptMethod,
-					persistContext.getContext(), methodKey));
+				propertyDescriptors = PropertyController.applySequencePropertyComparator(createMethodPropertyDescriptors(scriptMethod, persistContext,
+					methodKey));
 			}
 			return propertyDescriptors;
 		}
@@ -290,7 +338,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 			MethodWithArguments mwa = getEditableValue();
 			if (mwa.arguments == null)
 			{
-				mwa = new MethodWithArguments(mwa.methodId, new SafeArrayList<Object>(), mwa.table);
+				mwa = new MethodWithArguments(mwa.methodId, new SafeArrayList<Object>(), new SafeArrayList<Object>(), mwa.table);
 			}
 			String value;
 			if (v instanceof String && ((String)v).length() > 0)
@@ -311,7 +359,48 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 				value = null;
 			}
 
-			mwa.arguments.set(idx, value);
+			{
+				IScriptProvider scriptMethod = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), mwa.table, mwa.methodId);
+				MethodArgument[] formalArguments = ((AbstractBase)scriptMethod).getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
+				MethodArgument[] combinedArguments = getCombinedParams(formalArguments, persistContext.getPersist(), scriptMethod, methodKey);
+
+				if (idx < formalArguments.length)
+				{
+					mwa.arguments.set(idx, value);
+					for (int i = 0; i < formalArguments.length && idx < formalArguments.length; i++)
+					{
+						mwa.paramNames.set(i, formalArguments[i].getName());
+					}
+					// one edit by the user should make the props view valid with current jsfunction signature
+					// clear the rest of the missing args 
+					if (idx < formalArguments.length)
+					{
+						for (int i = formalArguments.length; i < mwa.arguments.size(); i++)
+						{
+							mwa.arguments.set(i, null);
+						}
+					}
+				}
+				else
+				{ // delete was pressed on a missing argument , shift the missing arguments up
+					mwa.arguments.set(idx, value);
+					//shift missing arguments
+					for (int i = idx; i < combinedArguments.length; i++)
+					{
+						if (i + 1 < combinedArguments.length)
+						{
+							mwa.arguments.set(i, mwa.arguments.get(i + 1));
+							mwa.paramNames.set(i, mwa.paramNames.get(i + 1));
+						}
+						else
+						{
+							//clear the misssing last argument from list
+							mwa.arguments.set(i, null);
+							mwa.paramNames.set(i, null);
+						}
+					}
+				}
+			}
 			return mwa;
 		}
 	}

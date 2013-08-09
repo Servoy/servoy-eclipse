@@ -36,17 +36,19 @@ public class MethodWithArguments
 
 	public final int methodId;
 	public final SafeArrayList<Object> arguments;
+	public final SafeArrayList<Object> paramNames;
 	public final ITable table;
 
 	public MethodWithArguments(int methodId, ITable table)
 	{
-		this(methodId, null, table);
+		this(methodId, null, null, table);
 	}
 
-	public MethodWithArguments(int methodId, SafeArrayList<Object> arguments, ITable table)
+	public MethodWithArguments(int methodId, SafeArrayList<Object> paramNames, SafeArrayList<Object> arguments, ITable table)
 	{
 		this.methodId = methodId;
 		this.arguments = arguments;
+		this.paramNames = paramNames;
 		this.table = methodId > 0 ? table : null;
 	}
 
@@ -68,7 +70,7 @@ public class MethodWithArguments
 				Debug.error(e);
 			}
 		}
-		return new MethodWithArguments(script.getID(), arguments, table);
+		return new MethodWithArguments(script.getID(), new SafeArrayList<Object>(), arguments, table);
 	}
 
 	@Override

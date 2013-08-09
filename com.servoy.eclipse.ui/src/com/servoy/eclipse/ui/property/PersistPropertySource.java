@@ -173,6 +173,7 @@ import com.servoy.j2db.scripting.FunctionDefinition;
 import com.servoy.j2db.smart.dataui.InvisibleBean;
 import com.servoy.j2db.util.ComponentFactoryHelper;
 import com.servoy.j2db.util.IDelegate;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.SafeArrayList;
 import com.servoy.j2db.util.Utils;
@@ -887,20 +888,24 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 						public MethodWithArguments convertProperty(Object id, Integer value)
 						{
 							SafeArrayList<Object> args = null;
+							SafeArrayList<Object> params = null;
 							if (persistContext != null && persistContext.getPersist() instanceof AbstractBase)
 							{
-								List<Object> instanceArgs = ((AbstractBase)persistContext.getPersist()).getInstanceMethodArguments(id.toString());
-								if (instanceArgs != null)
+								Pair<List<Object>, List<Object>> instanceParamsArgs = ((AbstractBase)persistContext.getPersist()).getInstanceMethodParameters(id.toString());
+								if (instanceParamsArgs != null)
 								{
-									args = new SafeArrayList<Object>(instanceArgs);
+									params = new SafeArrayList<Object>(instanceParamsArgs.getLeft() == null ? new ArrayList<Object>()
+										: instanceParamsArgs.getLeft());
+									args = new SafeArrayList<Object>(instanceParamsArgs.getRight() == null ? new ArrayList<Object>()
+										: instanceParamsArgs.getRight());
 								}
 							}
-							return new MethodWithArguments(value.intValue(), args, table);
+							return new MethodWithArguments(value.intValue(), params, args, table);
 						}
 
 						public Integer convertValue(Object id, MethodWithArguments value)
 						{
-							if (persistContext != null) setInstancMethodArguments(persistContext.getPersist(), id, value.arguments);
+							if (persistContext != null) setInstancMethodArguments(persistContext.getPersist(), id, value.paramNames, value.arguments);
 							return Integer.valueOf(value.methodId);
 						}
 					};

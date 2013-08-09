@@ -115,8 +115,8 @@ public class MarkerMessages
 	/**
 	 * This message appears when the number of arguments of a script method which is used on an element of a form is lower than the the number of arguments stored in the custom properties of that element.
 	 */
-	public static ServoyMarker MethodNumberOfArgumentsMismatch = new ServoyMarker(
-		"Event handler \"{0}\" for {1}{2} called with more arguments than the function definition \"{3}\".", ServoyBuilder.METHOD_NUMBER_OF_ARGUMENTS_MISMATCH_TYPE); //$NON-NLS-1$
+	public static ServoyMarker EventHandlerSignatureMismatch = new ServoyMarker("Signature mismatch between {0} and its use as event handler {1} on {2}{3}.",
+		ServoyBuilder.METHOD_NUMBER_OF_ARGUMENTS_MISMATCH_TYPE);
 
 	/*
 	 * The items below should work fine, they were tested.

@@ -154,7 +154,6 @@ import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.FormatParser;
 import com.servoy.j2db.util.FormatParser.ParsedFormat;
 import com.servoy.j2db.util.IntHashMap;
-import com.servoy.j2db.util.JSONWrapperList;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.RoundHalfUpDecimalFormat;
@@ -2024,31 +2023,64 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											}
 											if (o instanceof AbstractBase)
 											{
-												JSONWrapperList customProperty = (JSONWrapperList)((AbstractBase)o).getCustomProperty(new String[] { "methods", element.getName(), "arguments" }); //$NON-NLS-1$//$NON-NLS-2$
+												Pair<List<Object>, List<Object>> isntanceParameters = ((AbstractBase)o).getInstanceMethodParameters(element.getName());
 												MethodArgument[] methodArguments = ((ScriptMethod)foundPersist).getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
-												if (customProperty != null && customProperty.size() > methodArguments.length)
+												if (isntanceParameters != null && isntanceParameters.getRight() != null)
 												{
-													String handlerName = element.getName().substring(
-														0,
-														(element.getName().indexOf("MethodID") > 0 ? element.getName().indexOf("MethodID")
-															: element.getName().length()));
-
-													String functionDefinitionName = ((ScriptMethod)foundPersist).getName();
-													if (((ScriptMethod)foundPersist).getScopeName() != null)
+													boolean signatureMismatch = false;
+													if (isntanceParameters.getLeft() != null)
 													{
-														functionDefinitionName = ((ScriptMethod)foundPersist).getScopeName() + "." + functionDefinitionName;
+														// check for parameter name differences
+														for (int i = 0; i < isntanceParameters.getLeft().size(); i++)
+														{
+															String name = (String)isntanceParameters.getLeft().get(i);
+															if (i >= methodArguments.length)
+															{
+																signatureMismatch = true;
+																break;
+															}
+															else if (!name.equals(methodArguments[i].getName()))
+															{
+																signatureMismatch = true;
+																break;
+															}
+														}
 													}
-
-													String componentName = "";
-													if (o instanceof ISupportName && ((ISupportName)o).getName() != null &&
-														((ISupportName)o).getName().length() > 1)
+													if (isntanceParameters.getRight().size() > methodArguments.length)
 													{
-														componentName = " \"" + ((ISupportName)o).getName() + "\"";
+														signatureMismatch = true;
 													}
-													ServoyMarker mk = MarkerMessages.MethodNumberOfArgumentsMismatch.fill(handlerName,
-														RepositoryHelper.getObjectTypeName(o.getTypeID()), componentName, functionDefinitionName);
-													addMarker(project, mk.getType(), mk.getText(), -1, METHOD_NUMBER_OF_ARGUMENTS_MISMATCH,
-														IMarker.PRIORITY_LOW, null, o);
+													// add marker if signature mismach
+													if (signatureMismatch)
+													{
+														String handlerName = element.getName().substring(
+															0,
+															(element.getName().indexOf("MethodID") > 0 ? element.getName().indexOf("MethodID")
+																: element.getName().length()));
+
+														String functionDefinitionName = ((ScriptMethod)foundPersist).getName();
+														if (((ScriptMethod)foundPersist).getScopeName() != null)
+														{
+															functionDefinitionName = ((ScriptMethod)foundPersist).getScopeName() + "." + functionDefinitionName;
+														}
+														else
+														{
+															functionDefinitionName = "forms." +
+																((ISupportName)((ScriptMethod)foundPersist).getParent()).getName() + "." +
+																functionDefinitionName;
+														}
+
+														String componentName = "";
+														if (o instanceof ISupportName && ((ISupportName)o).getName() != null &&
+															((ISupportName)o).getName().length() > 1)
+														{
+															componentName = " \"" + ((ISupportName)o).getName() + "\"";
+														}
+														ServoyMarker mk = MarkerMessages.EventHandlerSignatureMismatch.fill(functionDefinitionName,
+															handlerName, RepositoryHelper.getObjectTypeName(o.getTypeID()), componentName);
+														addMarker(project, mk.getType(), mk.getText(), -1, METHOD_NUMBER_OF_ARGUMENTS_MISMATCH,
+															IMarker.PRIORITY_LOW, null, o);
+													}
 												}
 											}
 										}

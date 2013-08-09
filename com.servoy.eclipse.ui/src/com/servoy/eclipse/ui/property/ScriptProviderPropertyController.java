@@ -137,13 +137,12 @@ public class ScriptProviderPropertyController extends PropertyController<String,
 				}
 				if (mwa != null)
 				{
-					MethodPropertyController.setInstancMethodArguments(persistContext.getPersist(), id, mwa.arguments);
+					MethodPropertyController.setInstancMethodArguments(persistContext.getPersist(), id, mwa.paramNames, mwa.arguments);
 					IScriptProvider scriptProvider = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), mwa.table,
 						mwa.methodId);
 					if (scriptProvider != null)
 					{
-						return scriptProvider.getParent() instanceof IRootObject ? ScopesUtils.getScopeString(scriptProvider)
-							: scriptProvider.getDisplayName();
+						return scriptProvider.getParent() instanceof IRootObject ? ScopesUtils.getScopeString(scriptProvider) : scriptProvider.getDisplayName();
 					}
 				}
 				return null;
