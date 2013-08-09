@@ -139,6 +139,7 @@ public class ProfilerView extends ViewPart
 	public static final String TRANSACTION_TABLE_COLUMN_WIDTH_SETTING = "profilerView.transactionTableColumnWidth";
 	public static final String TREE_WIDTH_SETTING = "profilerView.treeWidth";
 	public static final String TABLE_WIDTH_SETTING = "profilerView.tableWidth";
+	public static final String MAX_NUMBER_OF_ROOTS_SETTING = "profilerView.maxNrOfRoots";
 
 	public static final int METHOD_NAME_COLUMN_WIDTH_DEFAULT = 200;
 	public static final int OWN_TIME_COLUMN_WIDTH_DEFAULT = 100;
@@ -153,8 +154,9 @@ public class ProfilerView extends ViewPart
 	public static final int TRANSACTION_TABLE_COLUMN_WIDTH_DEFAULT = 100;
 	public static final int TREE_WIDTH_DEFAULT = 50;
 	public static final int TABLE_WIDTH_DEFAULT = 50;
+	public static final int MAX_NUMBER_OF_ROOTS_DEFAULT = 400;
 
-	public static int MAXIMUM_NR_OF_ROOTS = 400;
+	private int maxNrOfRoots = MAX_NUMBER_OF_ROOTS_DEFAULT;
 
 	private static final class AggregateData
 	{
@@ -484,7 +486,7 @@ public class ProfilerView extends ViewPart
 
 			invisibleRoot.add(0, profileData);
 
-			if (invisibleRoot.size() > MAXIMUM_NR_OF_ROOTS)
+			if (invisibleRoot.size() > maxNrOfRoots)
 			{
 				invisibleRoot.remove(invisibleRoot.size() - 1);
 			}
@@ -974,6 +976,7 @@ public class ProfilerView extends ViewPart
 		int datasourceTableColumnWidth = getSavedState(DATASOURCE_TABLE_COLUMN_WIDTH_SETTING, DATASOURCE_TABLE_COLUMN_WIDTH_DEFAULT);
 		int transactionTableColumnWidth = getSavedState(TRANSACTION_TABLE_COLUMN_WIDTH_SETTING, TRANSACTION_TABLE_COLUMN_WIDTH_DEFAULT);
 		int[] sashFormWeights = new int[] { getSavedState(TREE_WIDTH_SETTING, TREE_WIDTH_DEFAULT), getSavedState(TABLE_WIDTH_SETTING, TABLE_WIDTH_DEFAULT) };
+		maxNrOfRoots = getSavedState(MAX_NUMBER_OF_ROOTS_SETTING, MAX_NUMBER_OF_ROOTS_DEFAULT);
 
 		methodCallContentProvider = new MethodCallContentProvider();
 
@@ -1403,7 +1406,7 @@ public class ProfilerView extends ViewPart
 
 	private void configureContents()
 	{
-		InputDialog dialog = new InputDialog(null, "Configure Contents", "Set the maximum number of root nodes.", Integer.toString(MAXIMUM_NR_OF_ROOTS),
+		InputDialog dialog = new InputDialog(null, "Configure Contents", "Set the maximum number of root nodes.", Integer.toString(maxNrOfRoots),
 			new IInputValidator()
 			{
 
@@ -1426,7 +1429,7 @@ public class ProfilerView extends ViewPart
 
 		if (dialog.getReturnCode() != Window.CANCEL)
 		{
-			MAXIMUM_NR_OF_ROOTS = Integer.parseInt(dialog.getValue());
+			maxNrOfRoots = Integer.parseInt(dialog.getValue());
 		}
 	}
 
@@ -1528,5 +1531,6 @@ public class ProfilerView extends ViewPart
 		mem.putInteger(TRANSACTION_TABLE_COLUMN_WIDTH_SETTING, transaction.getWidth());
 		mem.putInteger(TREE_WIDTH_SETTING, sashForm.getWeights()[0]);
 		mem.putInteger(TABLE_WIDTH_SETTING, sashForm.getWeights()[1]);
+		mem.putInteger(MAX_NUMBER_OF_ROOTS_SETTING, maxNrOfRoots);
 	}
 }
