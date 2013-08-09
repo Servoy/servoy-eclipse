@@ -24,6 +24,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -46,6 +47,7 @@ public class ExportOptionsPage extends WizardPage
 	private String solution;
 	private final WizardPage nextPage;
 	private final MobileExporter mobileExporter;
+	private Button debugCheck;
 
 	public ExportOptionsPage(String pageName, WizardPage nextPage, MobileExporter mobileExporter)
 	{
@@ -84,13 +86,21 @@ public class ExportOptionsPage extends WizardPage
 		serviceSolutionName = new Text(container, SWT.BORDER);
 		serviceSolutionName.setToolTipText("This is the name of the service solution mobile clients connects to (must be available at serverURL url).");
 
+		Label debugLabel = new Label(container, SWT.NONE);
+		debugLabel.setText("Export as debug");
+
+		debugCheck = new Button(container, SWT.CHECK);
+		debugCheck.setToolTipText("Export this solution as a debuggable solution so that you can debug it right from the developer");
+
+
 		final GroupLayout groupLayout = new GroupLayout(container);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(solutionLabel).add(serverURLLabel).add(serviceSolutionLabel).add(timeoutLabel)).addPreferredGap(
-				LayoutStyle.RELATED).add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(solutionLabel).add(serverURLLabel).add(serviceSolutionLabel).add(timeoutLabel).add(
+					debugLabel)).addPreferredGap(LayoutStyle.RELATED).add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(solutionName).add(serverURL, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE).add(
-					serviceSolutionName, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE).add(timeout, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE)).addContainerGap()));
+					serviceSolutionName, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE).add(timeout, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE).add(
+					debugCheck, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE)).addContainerGap()));
 
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
@@ -100,7 +110,9 @@ public class ExportOptionsPage extends WizardPage
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(serviceSolutionName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 					GroupLayout.PREFERRED_SIZE).add(serviceSolutionLabel)).add(7).add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(timeout, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(timeoutLabel)).add(10)));
+					GroupLayout.PREFERRED_SIZE).add(timeoutLabel)).add(7).add(
+				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(debugCheck, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+					GroupLayout.PREFERRED_SIZE).add(debugLabel)).add(10)));
 
 		container.setLayout(groupLayout);
 
@@ -158,6 +170,11 @@ public class ExportOptionsPage extends WizardPage
 		return serviceSolutionName.getText();
 	}
 
+	public boolean useDebugMode()
+	{
+		return debugCheck.getSelection();
+	}
+
 	private String getTimeout()
 	{
 		return timeout.getText();
@@ -198,6 +215,7 @@ public class ExportOptionsPage extends WizardPage
 		mobileExporter.setServerURL(getServerURL());
 		mobileExporter.setServiceSolutionName(getServiceSolutionName());
 		mobileExporter.setTimeout(Integer.parseInt(getTimeout()));
+		mobileExporter.setDebugMode(useDebugMode());
 		getDialogSettings().put(ExportOptionsPage.SERVER_URL_KEY, serverURL.getText());
 		getDialogSettings().put(ExportOptionsPage.SERVICE_SOLUTION_KEY_PREFIX + getSolution(), getServiceSolutionName());
 		getDialogSettings().put(ExportOptionsPage.TIMEOUT_KEY, getTimeout());

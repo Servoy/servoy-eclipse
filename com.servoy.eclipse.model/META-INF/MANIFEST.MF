@@ -25,3 +25,9 @@ Export-Package: com.servoy.eclipse.model,
  com.servoy.eclipse.model.util
 Bundle-Activator: com.servoy.eclipse.model.Activator
 Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: lib/js.jar,
+ lib/jshybugger.jar,
+ lib/json-20090211.jar,
+ lib/netty-3.6.5.Final.jar,
+ lib/webbit-0.4.15.jar,
+ .

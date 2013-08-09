@@ -18,6 +18,7 @@
 package com.servoy.eclipse.model.mobile.exporter;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -31,15 +32,22 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.jshybugger.instrumentation.DebugInstrumentator;
+import org.jshybugger.instrumentation.JsCodeLoader;
+import org.jshybugger.proxy.DebugWebAppService;
+import org.jshybugger.proxy.ScriptSourceProvider;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mozilla.javascript.ast.AstRoot;
 
 import com.servoy.base.persistence.constants.IComponentConstants;
 import com.servoy.base.persistence.constants.IValueListConstants;
@@ -55,6 +63,7 @@ import com.servoy.eclipse.model.test.TestTarget;
 import com.servoy.eclipse.model.util.IValueFilter;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.IValueList;
@@ -92,6 +101,7 @@ import com.servoy.j2db.util.Utils;
  * @author lvostinar
  *
  */
+@SuppressWarnings("nls")
 public class MobileExporter
 {
 
@@ -145,6 +155,8 @@ public class MobileExporter
 	private boolean skipConnect = false;
 	private boolean useTestWar = false;
 	private String testSuiteCode;
+	private boolean debugMode = false;
+	private final Map<String, Integer> filenameEndings = new HashMap<String, Integer>();
 
 	private String doMediaExport(ZipOutputStream zos, File outputFolder) throws IOException
 	{
@@ -392,6 +404,28 @@ public class MobileExporter
 			String template = Utils.getTXTFileContent(getClass().getResourceAsStream(RELATIVE_TEMPLATE_PATH), Charset.forName("UTF8")); //$NON-NLS-1$
 			StringBuilder builder = new StringBuilder();
 
+			if (debugMode)
+			{
+				String url = serverURL;
+				int port = url.lastIndexOf(':');
+				if (port > 7)
+				{ // ship the http://
+					url = url.substring(0, port);
+				}
+				builder.append("JsHybuggerConfig = {\n");
+				builder.append("endpoint: '");
+				builder.append(url);
+				builder.append(":8889/jshybugger/'\n"); // for now hard coded 8889 port
+				builder.append("};\n");
+
+				InputStream resourceAsStream = JsCodeLoader.class.getResourceAsStream("/jshybugger.js");
+				String txtFileContent = Utils.getTXTFileContent(resourceAsStream, Charset.forName("UTF8"), true);
+				builder.append(txtFileContent);
+				builder.append('\n');
+
+			}
+
+
 			int formsLoopStartIndex = template.indexOf(FORM_LOOP_START);
 			int formsLoopEndIndex = template.indexOf(FORM_LOOP_END);
 			builder.append(template.substring(0, formsLoopStartIndex));
@@ -419,6 +453,18 @@ public class MobileExporter
 			builder.append(replaceScopesScripting(template.substring(scopesLoopStartIndex + SCOPES_LOOP_START.length(), scopesLoopEndIndex), ",\n"));
 
 			builder.append(template.substring(scopesLoopEndIndex + SCOPES_LOOP_END.length()));
+			if (debugMode && filenameEndings.size() > 0)
+			{
+				for (Entry<String, Integer> entry : filenameEndings.entrySet())
+				{
+					builder.append('\n');
+					builder.append("JsHybugger.loadFile('"); //$NON-NLS-1$
+					builder.append(entry.getKey());
+					builder.append("', "); //$NON-NLS-1$
+					builder.append(entry.getValue());
+					builder.append(");"); //$NON-NLS-1$
+				}
+			}
 			return builder.toString();
 		}
 		return null;
@@ -426,6 +472,24 @@ public class MobileExporter
 
 	public File doExport(boolean exportAsZip) throws IOException
 	{
+		if (debugMode)
+		{
+			try
+			{
+				DebugWebAppService.startDebugWebAppService(8889, new ScriptSourceProvider()
+				{
+					@Override
+					public String loadScriptResourceById(String scriptUri, boolean encode) throws IOException
+					{
+						return new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getUTF8Contents(scriptUri);
+					}
+				});
+			}
+			catch (InterruptedException e)
+			{
+				e.printStackTrace();
+			}
+		}
 		String formJson = doPersistExport();
 		String solutionJavascript = doScriptingExport();
 
@@ -727,6 +791,28 @@ public class MobileExporter
 	private String getAnonymousScripting(IScriptProvider method)
 	{
 		String functionAndName = "function";
+		String code = method.getDeclaration();
+		if (debugMode)
+		{
+			try
+			{
+				String scriptPath = SolutionSerializer.getScriptPath(method, false);
+				code = ScriptEngine.docStripper.matcher(code).replaceFirst("function $1");
+				byte[] bytes = code.getBytes(Charset.forName("UTF8"));
+				ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+				ByteArrayOutputStream baos = new ByteArrayOutputStream(bytes.length * 2);
+				ServoyDebugInstrumentator instrumenator = new ServoyDebugInstrumentator();
+				JsCodeLoader.instrumentFile(scriptPath, bais, baos, new HashMap<String, Object>(), method.getLineNumberOffset() - 1, instrumenator);
+				code = new String(baos.toByteArray(), Charset.forName("UTF8"));
+
+				Integer linenr = filenameEndings.get(scriptPath);
+				if (linenr == null || linenr.intValue() < instrumenator.endLine) filenameEndings.put(scriptPath, instrumenator.endLine);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
 		if (useTestWar)
 		{
 			// see also testing.js -> this function name helps show failed functions in test failures/errors
@@ -736,7 +822,7 @@ public class MobileExporter
 					SCOPE_NAME_SEPARATOR + method.getScopeName()) + SCOPE_NAME_SEPARATOR + method.getName();
 		}
 
-		return ScriptEngine.docStripper.matcher(method.getDeclaration()).replaceFirst(functionAndName);
+		return ScriptEngine.docStripper.matcher(code).replaceFirst(functionAndName);
 	}
 
 	public void setConfigFile(File configFile)
@@ -774,6 +860,11 @@ public class MobileExporter
 	public void setTimeout(int timeout)
 	{
 		this.timeout = timeout;
+	}
+
+	public void setDebugMode(boolean debugMode)
+	{
+		this.debugMode = debugMode;
 	}
 
 	/**
@@ -886,4 +977,19 @@ public class MobileExporter
 		this.testSuiteCode = testCode.toString();
 	}
 
+	private class ServoyDebugInstrumentator extends DebugInstrumentator
+	{
+		private int endLine;
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.jshybugger.instrumentation.DebugInstrumentator#loadFile(org.mozilla.javascript.ast.AstRoot)
+		 */
+		@Override
+		protected void loadFile(AstRoot node)
+		{
+			endLine = node.getEndLineno();
+		}
+	}
 }
