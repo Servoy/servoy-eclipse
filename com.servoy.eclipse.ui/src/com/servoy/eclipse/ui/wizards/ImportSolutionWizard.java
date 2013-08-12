@@ -41,6 +41,8 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -52,6 +54,7 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
@@ -374,6 +377,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 						finishPage.setTitle("Solution not imported"); //$NON-NLS-1$
 						importMessageDetails = "Could not import solution: " + mymsg; //$NON-NLS-1$
 					}
+
 				}
 			};
 			try
@@ -388,6 +392,22 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			{
 				ServoyLog.logError(e);
 			}
+
+			// trigger start debug action delegate for refreshing enablement of debug client buttons by refreshing selection
+			Display.getDefault().syncExec(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					IWorkbenchPage iwpage = PlatformUI.getWorkbench().getWorkbenchWindows()[0].getActivePage();
+					if (iwpage != null && iwpage.getActivePart() instanceof SolutionExplorerView)
+					{
+						SolutionExplorerView view = (SolutionExplorerView)iwpage.getActivePart();
+						view.refreshSelection();
+					}
+				}
+			});
+
 			return true;
 		}
 

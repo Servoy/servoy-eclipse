@@ -19,6 +19,11 @@
                style="pulldown"
                toolbarPath="Normal/additions"
                tooltip="Start Debug Web Client">
+               <enablement>
+                    <pluginState
+                          id="com.servoy.eclipse.debug" value="activated">
+                    </pluginState>
+                </enablement>
          </action>
          <action
                class="com.servoy.eclipse.debug.actions.StartSmartClientActionDelegate"
@@ -30,6 +35,11 @@
                style="push"
                toolbarPath="Normal/additions"
                tooltip="Start Debug Smart Client">
+               <enablement>
+                    <pluginState
+                          id="com.servoy.eclipse.debug" value="activated">
+                    </pluginState>
+                </enablement>
          </action>
       </actionSet>
    </extension>
