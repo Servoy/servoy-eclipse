@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer;
 
+import java.awt.Dimension;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,6 +37,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -298,6 +300,7 @@ import com.servoy.j2db.persistence.IServerListener;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportDeprecatedAnnotation;
+import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.Relation;
@@ -307,6 +310,7 @@ import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.util.ImageLoader;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -3184,14 +3188,34 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		MediaNode[] mediaNodes = mediaFolder.getChildren(mediaNodeTypeFilter);
 		if (mediaNodes != null)
 		{
+			IWorkspace ws = ResourcesPlugin.getWorkspace();
+
 			SimpleUserNode node = null;
 			for (MediaNode mediaNode : mediaNodes)
 			{
 				if (mediaNode.getType() == MediaNode.TYPE.IMAGE && mediaNodeTypeFilter.contains(MediaNode.TYPE.IMAGE))
 				{
+					IFile imageFile = ws.getRoot().getFile(
+						new Path(((ISupportName)mediaNode.getMediaProvider()).getName() + "/" + SolutionSerializer.MEDIAS_DIR + "/" + mediaNode.getPath()));
+					File javaFile = imageFile.getRawLocation().makeAbsolute().toFile();
+					Dimension dimension = ImageLoader.getSize(imageFile.getRawLocation().makeAbsolute().toFile());
+					Image scaledImage = null;
+					if (dimension.getWidth() < 128 && dimension.getHeight() < 128)
+					{
+						Image origImage = new Image(Display.getCurrent(), imageFile.getRawLocation().toOSString());
+						final int width = origImage.getBounds().width;
+						final int height = origImage.getBounds().height;
+						int largest = width > height ? width : height;
+						double zoom = 16d / largest;
+						scaledImage = new Image(Display.getDefault(), origImage.getImageData().scaledTo((int)(width * zoom), (int)(height * zoom)));
+					}
+					else
+					{
+						scaledImage = uiActivator.loadImageFromBundle("image.gif");
+					}
 					String mediaInfo = mediaNode.getInfo();
 					node = new UserNode(mediaNode.getName(), UserNodeType.MEDIA_IMAGE, new SimpleDeveloperFeedback(mediaInfo, mediaInfo, mediaInfo),
-						mediaNode.getMedia(), uiActivator.loadImageFromBundle("image.gif")); //$NON-NLS-1$
+						mediaNode.getMedia(), scaledImage);
 				}
 				else if (mediaNode.getType() == MediaNode.TYPE.FOLDER && mediaNodeTypeFilter.contains(MediaNode.TYPE.FOLDER))
 				{
