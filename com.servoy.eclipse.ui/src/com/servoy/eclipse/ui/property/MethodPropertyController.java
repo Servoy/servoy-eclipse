@@ -122,7 +122,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 		final MethodArgument[] formalArguments = ((AbstractBase)scriptMethod).getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
 		MethodArgument[] combinedArguments = getCombinedParams(formalArguments, context.getPersist(), scriptMethod, methodKey);
 		final MethodTemplate template = MethodTemplate.getTemplate(scriptMethod.getClass(), methodKey);
-		int nargs = combinedArguments != null && (template.getArguments() == null || combinedArguments.length > template.getArguments().length)
+		final int nargs = combinedArguments != null && (template.getArguments() == null || combinedArguments.length > template.getArguments().length)
 			? combinedArguments.length : ((template.getArguments() == null) ? 0 : template.getArguments().length);
 		for (int i = 0; i < nargs; i++)
 		{
@@ -177,7 +177,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 				{
 					public CellEditor createPropertyEditor(Composite parent)
 					{
-						if (index >= formalArguments.length)
+						if (nargs > formalArguments.length)
 						{
 							return new TextAndButtonCellEditor(parent);
 						}
@@ -271,6 +271,8 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 
 	public static class MethodPropertySource extends ComplexPropertySource<MethodWithArguments>
 	{
+		public static final String DELETED_ARGUMENT = "-DELETED-ARGUMENT-"; //$NON-NLS-1$
+
 		private IPropertyDescriptor[] propertyDescriptors = null;
 		private final PersistContext persistContext;
 		private final String methodKey;
@@ -340,8 +342,14 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 			{
 				mwa = new MethodWithArguments(mwa.methodId, new SafeArrayList<Object>(), new SafeArrayList<Object>(), mwa.table);
 			}
+			boolean delete = false;
 			String value;
-			if (v instanceof String && ((String)v).length() > 0)
+			if (DELETED_ARGUMENT.equals(v))
+			{
+				value = null;
+				delete = true;
+			}
+			else if (v instanceof String && ((String)v).length() > 0)
 			{
 				Object parsed = Utils.parseJSExpression(v);
 				if (parsed == null)
@@ -362,9 +370,8 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 			{
 				IScriptProvider scriptMethod = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), mwa.table, mwa.methodId);
 				MethodArgument[] formalArguments = ((AbstractBase)scriptMethod).getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
-				MethodArgument[] combinedArguments = getCombinedParams(formalArguments, persistContext.getPersist(), scriptMethod, methodKey);
 
-				if (idx < formalArguments.length)
+				if (!delete && idx < formalArguments.length)
 				{
 					mwa.arguments.set(idx, value);
 					for (int i = 0; i < formalArguments.length && idx < formalArguments.length; i++)
@@ -383,20 +390,14 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 				}
 				else
 				{ // delete was pressed on a missing argument , shift the missing arguments up
-					mwa.arguments.set(idx, value);
-					//shift missing arguments
-					for (int i = idx; i < combinedArguments.length; i++)
+					mwa.arguments.remove(idx);
+					mwa.paramNames.remove(idx);
+					// if they now are in sync, make sure the names line up
+					if (formalArguments.length == mwa.paramNames.size())
 					{
-						if (i + 1 < combinedArguments.length)
+						for (int i = 0; i < formalArguments.length; i++)
 						{
-							mwa.arguments.set(i, mwa.arguments.get(i + 1));
-							mwa.paramNames.set(i, mwa.paramNames.get(i + 1));
-						}
-						else
-						{
-							//clear the misssing last argument from list
-							mwa.arguments.set(i, null);
-							mwa.paramNames.set(i, null);
+							mwa.paramNames.set(i, formalArguments[i].getName());
 						}
 					}
 				}
