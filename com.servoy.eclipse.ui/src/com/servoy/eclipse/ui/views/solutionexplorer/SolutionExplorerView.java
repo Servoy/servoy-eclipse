@@ -18,6 +18,7 @@ package com.servoy.eclipse.ui.views.solutionexplorer;
 
 import java.awt.Dimension;
 import java.io.File;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -109,6 +110,7 @@ import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.dnd.DND;
@@ -3197,16 +3199,33 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				{
 					IFile imageFile = ws.getRoot().getFile(
 						new Path(((ISupportName)mediaNode.getMediaProvider()).getName() + "/" + SolutionSerializer.MEDIAS_DIR + "/" + mediaNode.getPath()));
-					Dimension dimension = ImageLoader.getSize(imageFile.getRawLocation().makeAbsolute().toFile());
+					String mimetype = URLConnection.guessContentTypeFromName(imageFile.getName());
+					String type = (mimetype == null ? "other" : mimetype.split("/")[0]);
 					Image scaledImage = null;
-					if (dimension.getWidth() < 128 && dimension.getHeight() < 128)
+					if (type.equals("image"))
 					{
-						Image origImage = new Image(Display.getCurrent(), imageFile.getRawLocation().toOSString());
-						final int width = origImage.getBounds().width;
-						final int height = origImage.getBounds().height;
-						int largest = width > height ? width : height;
-						double zoom = 16d / largest;
-						scaledImage = new Image(Display.getDefault(), origImage.getImageData().scaledTo((int)(width * zoom), (int)(height * zoom)));
+						try
+						{
+							Dimension dimension = ImageLoader.getSize(imageFile.getRawLocation().makeAbsolute().toFile());
+							if (dimension.getWidth() <= 128 && dimension.getHeight() <= 128)
+							{
+								Image origImage = new Image(Display.getCurrent(), imageFile.getRawLocation().toOSString());
+								final int width = origImage.getBounds().width;
+								final int height = origImage.getBounds().height;
+								int largest = width > height ? width : height;
+								double zoom = 16d / largest;
+								scaledImage = new Image(Display.getDefault(), origImage.getImageData().scaledTo((int)(width * zoom), (int)(height * zoom)));
+
+							}
+							else
+							{
+								scaledImage = uiActivator.loadImageFromBundle("image.gif");
+							}
+						}
+						catch (SWTException e)
+						{
+							scaledImage = uiActivator.loadImageFromBundle("image.gif");
+						}
 					}
 					else
 					{
