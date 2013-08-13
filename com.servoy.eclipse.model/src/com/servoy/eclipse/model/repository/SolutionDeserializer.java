@@ -1108,7 +1108,11 @@ public class SolutionDeserializer
 						if (prop_newline_idx < commentString.length() && prop_newline_idx >= prop_idx + SolutionSerializer.PROPERTIESKEY.length())
 						{
 							String sobj = commentString.substring(prop_idx + SolutionSerializer.PROPERTIESKEY.length(), prop_newline_idx + 1);
-							json = new ServoyJSONObject(sobj, false);
+							if (sobj.indexOf(VARIABLE_TYPE_JSON_ATTRIBUTE) != -1)
+							{
+								json = new ServoyJSONObject(sobj, false);
+							}
+							else json = new ServoyJSONObject();
 							newField = false;
 						}
 						else
@@ -1356,7 +1360,11 @@ public class SolutionDeserializer
 						if (prop_newline_idx < comment.length() && prop_newline_idx >= prop_idx + SolutionSerializer.PROPERTIESKEY.length())
 						{
 							String sobj = comment.substring(prop_idx + SolutionSerializer.PROPERTIESKEY.length(), prop_newline_idx + 1);
-							json = new ServoyJSONObject(sobj, false);
+							if (sobj.indexOf(VARIABLE_TYPE_JSON_ATTRIBUTE) == -1)
+							{
+								json = new ServoyJSONObject(sobj, false);
+							}
+							else json = new ServoyJSONObject();
 						}
 						else
 						{
