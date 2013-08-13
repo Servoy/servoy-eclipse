@@ -566,6 +566,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private MediaNode currentMediaFolder;
 
+	private final HashMap<String, HashMap<String, Image>> swtImageCache = new HashMap<String, HashMap<String, Image>>();
+
 	public SolutionExplorerTreeContentProvider getTreeContentProvider()
 	{
 		if (tree != null)
@@ -3188,6 +3190,15 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	{
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
 		MediaNode[] mediaNodes = mediaFolder.getChildren(mediaNodeTypeFilter);
+		String mediaFolderPath = mediaFolder.getPath() == null ? "" : mediaFolder.getPath();
+		HashMap<String, Image> folderCache = swtImageCache.get(mediaFolderPath);
+		HashMap<String, Object> usedFolderCaches = new HashMap<String, Object>();
+		if (folderCache == null)
+		{
+			folderCache = new HashMap<String, Image>();
+			swtImageCache.put(mediaFolderPath, folderCache);
+		}
+
 		if (mediaNodes != null)
 		{
 			IWorkspace ws = ResourcesPlugin.getWorkspace();
@@ -3199,14 +3210,24 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				{
 					IFile imageFile = ws.getRoot().getFile(
 						new Path(((ISupportName)mediaNode.getMediaProvider()).getName() + "/" + SolutionSerializer.MEDIAS_DIR + "/" + mediaNode.getPath()));
+					File javaFile = imageFile.getRawLocation().makeAbsolute().toFile();
+					Image scaledImage = null;
+					Image cachedImage = folderCache.get(mediaNode.getPath() + javaFile.lastModified());
+					if (cachedImage != null)
+					{
+						scaledImage = cachedImage;
+					}
+					usedFolderCaches.put(mediaNode.getPath() + javaFile.lastModified(), new Object());
+
+
 					String mimetype = URLConnection.guessContentTypeFromName(imageFile.getName());
 					String type = (mimetype == null ? "other" : mimetype.split("/")[0]);
-					Image scaledImage = null;
-					if (type.equals("image"))
+
+					if (scaledImage == null && type.equals("image"))
 					{
 						try
 						{
-							Dimension dimension = ImageLoader.getSize(imageFile.getRawLocation().makeAbsolute().toFile());
+							Dimension dimension = ImageLoader.getSize(javaFile);
 							if (dimension.getWidth() <= 128 && dimension.getHeight() <= 128)
 							{
 								Image origImage = new Image(Display.getCurrent(), imageFile.getRawLocation().toOSString());
@@ -3215,7 +3236,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 								int largest = width > height ? width : height;
 								double zoom = 16d / largest;
 								scaledImage = new Image(Display.getDefault(), origImage.getImageData().scaledTo((int)(width * zoom), (int)(height * zoom)));
-
+								origImage.dispose();
+								folderCache.put(mediaNode.getPath() + javaFile.lastModified(), scaledImage);
 							}
 							else
 							{
@@ -3229,7 +3251,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					}
 					else
 					{
-						scaledImage = uiActivator.loadImageFromBundle("image.gif");
+						if (scaledImage == null) scaledImage = uiActivator.loadImageFromBundle("image.gif");
 					}
 					String mediaInfo = mediaNode.getInfo();
 					node = new UserNode(mediaNode.getName(), UserNodeType.MEDIA_IMAGE, new SimpleDeveloperFeedback(mediaInfo, mediaInfo, mediaInfo),
@@ -3244,8 +3266,21 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				if (node != null) dlm.add(node);
 			}
 		}
-
+		clearFolderCache(folderCache, usedFolderCaches);
 		return dlm.toArray(new SimpleUserNode[dlm.size()]);
+	}
+
+	private void clearFolderCache(HashMap<String, Image> folderCache, HashMap<String, Object> usedFolderCaches)
+	{
+		for (String key : folderCache.keySet())
+		{
+			if (folderCache.get(key) == null)
+			{
+				Image img = folderCache.get(key);
+				img.dispose();
+				folderCache.remove(key);
+			}
+		}
 	}
 
 	/**
