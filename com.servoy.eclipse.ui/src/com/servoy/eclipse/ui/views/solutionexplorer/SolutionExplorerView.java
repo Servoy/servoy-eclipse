@@ -3197,7 +3197,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				{
 					IFile imageFile = ws.getRoot().getFile(
 						new Path(((ISupportName)mediaNode.getMediaProvider()).getName() + "/" + SolutionSerializer.MEDIAS_DIR + "/" + mediaNode.getPath()));
-					File javaFile = imageFile.getRawLocation().makeAbsolute().toFile();
 					Dimension dimension = ImageLoader.getSize(imageFile.getRawLocation().makeAbsolute().toFile());
 					Image scaledImage = null;
 					if (dimension.getWidth() < 128 && dimension.getHeight() < 128)
