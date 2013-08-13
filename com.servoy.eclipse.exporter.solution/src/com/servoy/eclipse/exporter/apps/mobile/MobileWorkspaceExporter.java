@@ -27,6 +27,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.SolutionMetaData;
 
 /**
  * Eclipse application that can be used for exporting servoy solutions in .servoy format (that can be used to import solutions afterwards in developer/app. server). 
@@ -52,21 +53,29 @@ public class MobileWorkspaceExporter extends AbstractWorkspaceExporter
 
 		if (solution != null)
 		{
-			MobileExporter exporter = new MobileExporter();
-			exporter.setSolutionName(configuration.getSolutionName());
-			exporter.setOutputFolder(new File(configuration.getExportFilePath()));
-			exporter.setServerURL(configuration.getServerURL());
-			exporter.setTimeout(configuration.getSyncTimeout());
-			exporter.setServiceSolutionName(configuration.getServiceSolutionName());
-			if (configuration.shouldExportForTesting()) exporter.useTestWar(null);
+			if (solution.getSolutionType() == SolutionMetaData.MOBILE)
+			{
+				MobileExporter exporter = new MobileExporter();
+				exporter.setSolutionName(configuration.getSolutionName());
+				exporter.setOutputFolder(new File(configuration.getExportFilePath()));
+				exporter.setServerURL(configuration.getServerURL());
+				exporter.setTimeout(configuration.getSyncTimeout());
+				exporter.setServiceSolutionName(configuration.getServiceSolutionName());
+				if (configuration.shouldExportForTesting()) exporter.useTestWar(null);
 //			exporter.setSkipConnect(..allow user to specify license and check it..); // TODO a separate case was created for this: SVY-4807
-			try
-			{
-				exporter.doExport(false);
+				try
+				{
+					exporter.doExport(false);
+				}
+				catch (Exception ex)
+				{
+					outputError("Error while exporting solution - '" + activeProject.getProject().getName() + "': " + ex.getMessage()); //$NON-NLS-1$//$NON-NLS-2$
+					exitCode = EXIT_EXPORT_FAILED;
+				}
 			}
-			catch (Exception ex)
+			else
 			{
-				outputError("Unexpected error while exporting solution - '" + activeProject.getProject().getName() + "': " + ex.getMessage()); //$NON-NLS-1$//$NON-NLS-2$
+				outputError("Solution '" + activeProject.getProject().getName() + "' is not a mobile solution. EXPORT FAILED for this solution."); //$NON-NLS-1$//$NON-NLS-2$
 				exitCode = EXIT_EXPORT_FAILED;
 			}
 		}
