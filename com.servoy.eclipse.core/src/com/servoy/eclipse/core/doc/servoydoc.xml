@@ -13055,6 +13055,30 @@ field.onDataChange = onDataChangeMethod;
 forms['someForm'].controller.show();]]></sample>
           </samples>
         </property>
+        <property clientSupport="mc,wc,sc" name="styleClass">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="mc,wc,sc"><![CDATA[The name of the style class that should be applied to this component.
+
+When defining style classes for specific component types, their names
+must be prefixed according to the type of the component. For example 
+in order to define a class names 'fancy' for fields, in the style
+definition the class must be named 'field.fancy'. If it would be 
+intended for labels, then it would be named 'label.fancy'. When specifying
+the class name for a component, the prefix is dropped however. Thus the
+field or the label will have its styleClass property set to 'fancy' only.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc,wc,sc"><![CDATA[The name of the style class that should be applied to this component.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc,wc,sc"><![CDATA[var form = solutionModel.newForm('printForm', 'db:/example_data/parent_table', null, false, 400, 300);
+var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
+var style = solutionModel.newStyle('myStyle','field.fancy { background-color: yellow; }');
+form.styleName = 'myStyle'; // First set the style on the form.
+field.styleClass = 'fancy'; // Then set the style class on the field.]]></sample>
+          </samples>
+        </property>
         <property clientSupport="mc" name="valuelist">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSValueList" typecode="com.servoy.j2db.scripting.solutionmodel.JSValueList"/>
           <descriptions>
