@@ -39,11 +39,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.jshybugger.instrumentation.DebugInstrumentator;
 import org.jshybugger.instrumentation.JsCodeLoader;
-import org.jshybugger.proxy.DebugWebAppService;
-import org.jshybugger.proxy.ScriptSourceProvider;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,7 +60,6 @@ import com.servoy.eclipse.model.test.TestTarget;
 import com.servoy.eclipse.model.util.IValueFilter;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.IValueList;
@@ -472,24 +468,6 @@ public class MobileExporter
 
 	public File doExport(boolean exportAsZip) throws IOException
 	{
-		if (debugMode)
-		{
-			try
-			{
-				DebugWebAppService.startDebugWebAppService(8889, new ScriptSourceProvider()
-				{
-					@Override
-					public String loadScriptResourceById(String scriptUri, boolean encode) throws IOException
-					{
-						return new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getUTF8Contents(scriptUri);
-					}
-				});
-			}
-			catch (InterruptedException e)
-			{
-				e.printStackTrace();
-			}
-		}
 		String formJson = doPersistExport();
 		String solutionJavascript = doScriptingExport();
 

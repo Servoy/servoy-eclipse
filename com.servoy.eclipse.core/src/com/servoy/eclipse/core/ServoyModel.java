@@ -17,6 +17,7 @@
 package com.servoy.eclipse.core;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
@@ -95,6 +96,8 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.progress.UIJob;
+import org.jshybugger.proxy.DebugWebAppService;
+import org.jshybugger.proxy.ScriptSourceProvider;
 
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
@@ -256,6 +259,25 @@ public class ServoyModel extends AbstractServoyModel
 					if (solution != null && (solution.getI18nDataSource() != null || aProject.getModules().length > 1) && resourceProject != null &&
 						resourceProject.getProject().findMember(EclipseMessages.MESSAGES_DIR) == null) EclipseMessages.writeProjectI18NFiles(aProject, false,
 						false);
+
+					if (solution.getSolutionType() == SolutionMetaData.MOBILE)
+					{
+						try
+						{
+							DebugWebAppService.startDebugWebAppService(8889, new ScriptSourceProvider()
+							{
+								@Override
+								public String loadScriptResourceById(String scriptUri, boolean encode) throws IOException
+								{
+									return new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getUTF8Contents(scriptUri);
+								}
+							});
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError("Couldn't start the mobile debug service", e);
+						}
+					}
 
 				}
 			}
