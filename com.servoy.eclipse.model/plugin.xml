@@ -638,8 +638,8 @@
       </super>
    </extension>
     <extension
-         id="com.servoy.eclipse.core.reservedWindowObjectPropertyProblem"
-         name="Reserved browser window object property"
+         id="com.servoy.eclipse.core.reservedWindowObjectUsageProblem"
+         name="Reserved browser window object usage"
          point="org.eclipse.core.resources.markers">
       <persistent
             value="true">

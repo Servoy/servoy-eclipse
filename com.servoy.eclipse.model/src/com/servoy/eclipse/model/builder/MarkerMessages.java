@@ -155,7 +155,13 @@ public class MarkerMessages
 	 * This means that for a mobile solution, they use for variables names that are reserved because of the window object in a browser.
 	 */
 	public static ServoyMarker ReservedWindowObjectProperty = new ServoyMarker(
-		"Reserved browser window object property name \"{0}\" found.", ServoyBuilder.RESERVED_WINDOW_OBJECT_PROPERTY_TYPE); //$NON-NLS-1$
+		"Reserved browser window object property name \"{0}\" found.", ServoyBuilder.RESERVED_WINDOW_OBJECT_USAGE_TYPE); //$NON-NLS-1$
+
+	/**
+	 * This means that for a mobile solution, they use table column names that are reserved because of the window object in a browser.
+	 */
+	public static ServoyMarker ReservedWindowObjectColumn = new ServoyMarker(
+		"Reserved browser window object table column name \"{0}\" found.", ServoyBuilder.RESERVED_WINDOW_OBJECT_USAGE_TYPE); //$NON-NLS-1$
 
 	/**
 	 * This means that a solution is used as a web service, and has mustAuthenticate property checked.

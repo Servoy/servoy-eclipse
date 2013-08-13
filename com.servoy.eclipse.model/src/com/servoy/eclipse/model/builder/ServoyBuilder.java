@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.StringTokenizer;
 
 import javax.swing.ImageIcon;
@@ -275,7 +276,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String DUPLICATE_UUID = _PREFIX + ".duplicateUUID"; //$NON-NLS-1$
 	public static final String DUPLICATE_SIBLING_UUID = _PREFIX + ".duplicateSiblingUUID"; //$NON-NLS-1$
 	public static final String DUPLICATE_NAME_MARKER_TYPE = _PREFIX + ".duplicateNameProblem"; //$NON-NLS-1$
-	public static final String RESERVED_WINDOW_OBJECT_PROPERTY_TYPE = _PREFIX + ".reservedWindowObjectPropertyProblem"; //$NON-NLS-1$
+	public static final String RESERVED_WINDOW_OBJECT_USAGE_TYPE = _PREFIX + ".reservedWindowObjectUsageProblem"; //$NON-NLS-1$
 	public static final String DUPLICATE_SCOPE_NAME_MARKER_TYPE = _PREFIX + ".duplicateScopeNameProblem"; //$NON-NLS-1$
 	public static final String INVALID_SORT_OPTION = _PREFIX + ".invalidSortOption"; //$NON-NLS-1$
 	public static final String PORTAL_DIFFERENT_RELATION_NAME_MARKER_TYPE = _PREFIX + ".differentRelationName"; //$NON-NLS-1$
@@ -354,6 +355,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		"duplicationDuplicateEntityFound", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> RESERVED_WINDOW_OBJECT_PROPERTY = new Pair<String, ProblemSeverity>(
 		"reservedWindowObjectProperty", ProblemSeverity.WARNING); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> RESERVED_WINDOW_OBJECT_COLUMN = new Pair<String, ProblemSeverity>(
+		"reservedWindowObjectColumn", ProblemSeverity.WARNING); //$NON-NLS-1$
 
 	// database information problems
 	public final static Pair<String, ProblemSeverity> DBI_BAD_INFO = new Pair<String, ProblemSeverity>("DBIBadDBInfo", ProblemSeverity.ERROR); //$NON-NLS-1$
@@ -1560,7 +1563,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, DUPLICATE_UUID);
 		deleteMarkers(project, DUPLICATE_SIBLING_UUID);
 		deleteMarkers(project, DUPLICATE_NAME_MARKER_TYPE);
-		deleteMarkers(project, RESERVED_WINDOW_OBJECT_PROPERTY_TYPE);
+		deleteMarkers(project, RESERVED_WINDOW_OBJECT_USAGE_TYPE);
 		deleteMarkers(project, MISSING_SERVER);
 		deleteMarkers(project, BAD_STRUCTURE_MARKER_TYPE);
 		deleteMarkers(project, MISSING_STYLE);
@@ -1594,6 +1597,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					if (referenced.exists() && referenced.isOpen() && referenced.hasNature(ServoyResourcesProject.NATURE_ID))
 					{
 						deleteMarkers(referenced, DEPRECATED_SCRIPT_ELEMENT_USAGE);
+						deleteMarkers(referenced, RESERVED_WINDOW_OBJECT_USAGE_TYPE);
 					}
 				}
 			}
@@ -4155,7 +4159,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	private void checkColumns(final IProject project)
 	{
 		deleteMarkers(project, COLUMN_MARKER_TYPE);
-		if (!hasDeletedMarkers) deleteMarkers(project, DEPRECATED_SCRIPT_ELEMENT_USAGE); //deprecation markers are also deleted from checkServoyProject method. we need to not delete markers twice.
+		if (!hasDeletedMarkers)
+		{
+			deleteMarkers(project, DEPRECATED_SCRIPT_ELEMENT_USAGE); //deprecation markers are also deleted from checkServoyProject method. we need to not delete markers twice.
+			deleteMarkers(project, RESERVED_WINDOW_OBJECT_USAGE_TYPE); //reserved words markers are also deleted from checkServoyProject method. we need to not delete markers twice.
+		}
 		try
 		{
 			if (project.getReferencedProjects() != null && project.isOpen())
@@ -4165,7 +4173,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					if (referenced.exists() && referenced.isOpen() && referenced.hasNature(ServoyResourcesProject.NATURE_ID))
 					{
 						deleteMarkers(referenced, COLUMN_MARKER_TYPE);
-						if (!hasDeletedMarkers) deleteMarkers(referenced, DEPRECATED_SCRIPT_ELEMENT_USAGE);
+						if (!hasDeletedMarkers)
+						{
+							deleteMarkers(referenced, DEPRECATED_SCRIPT_ELEMENT_USAGE);
+							deleteMarkers(referenced, RESERVED_WINDOW_OBJECT_USAGE_TYPE);
+						}
 					}
 				}
 			}
@@ -4180,6 +4192,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		{
 			try
 			{
+				//get the tables used in current solution
+				Set<String> dataSources = getDataSourceCollectorVisitor().getDataSources();
+				SortedSet<String> serverNames = DataSourceUtils.getServerNames(dataSources);
+
 				IServerInternal server = (IServerInternal)ApplicationServerSingleton.get().getServerManager().getServer(server_name, true, true);
 				if (server != null) // server may have become invalid in the mean time
 				{
@@ -4401,6 +4417,15 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												}
 											}
 										}
+									}
+
+									if (getServoyModel().getServoyProject(project.getName()).getSolution().getSolutionType() == SolutionMetaData.MOBILE &&
+										serverNames.contains(server_name) &&
+										DataSourceUtils.getServerTablenames(dataSources, server_name).contains(tableName) && column.hasBadNaming(true))
+									{
+										ServoyMarker mk = MarkerMessages.ReservedWindowObjectColumn.fill(column.getName());
+										addMarker(res, mk.getType(), mk.getText(), -1, RESERVED_WINDOW_OBJECT_COLUMN, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
+											"columnName", column.getName());
 									}
 								}
 								String columnName = column.getName();
