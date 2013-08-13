@@ -4419,7 +4419,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										}
 									}
 
-									if (getServoyModel().getServoyProject(project.getName()).getSolution().getSolutionType() == SolutionMetaData.MOBILE &&
+									if ((getServoyModel().getServoyProject(project.getName()).getSolution().getSolutionType() == SolutionMetaData.MOBILE || getServoyModel().getServoyProject(
+										project.getName()).getSolution().getSolutionType() == SolutionMetaData.MOBILE_MODULE) &&
 										serverNames.contains(server_name) &&
 										DataSourceUtils.getServerTablenames(dataSources, server_name).contains(tableName) && column.hasBadNaming(true))
 									{
