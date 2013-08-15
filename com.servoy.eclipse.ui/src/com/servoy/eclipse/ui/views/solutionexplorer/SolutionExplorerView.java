@@ -566,7 +566,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private MediaNode currentMediaFolder;
 
-	private final HashMap<String, HashMap<String, Image>> swtImageCache = new HashMap<String, HashMap<String, Image>>();
+	private HashMap<String, Image> swtImageCache = new HashMap<String, Image>();
 
 	public SolutionExplorerTreeContentProvider getTreeContentProvider()
 	{
@@ -3063,6 +3063,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		labelProvider.dispose();
 		if (decoratingLabelProvider != null) decoratingLabelProvider.removeListener(labelProviderListener);
+		clearFolderCache(swtImageCache);
 		super.dispose();
 	}
 
@@ -3186,21 +3187,21 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		return false;
 	}
 
+	@SuppressWarnings("nls")
 	SimpleUserNode[] createMediaFolderChildrenNodes(MediaNode mediaFolder, Activator uiActivator, EnumSet<MediaNode.TYPE> mediaNodeTypeFilter)
 	{
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
 		MediaNode[] mediaNodes = mediaFolder.getChildren(mediaNodeTypeFilter);
-		String mediaFolderPath = mediaFolder.getPath() == null ? "" : mediaFolder.getPath();
-		HashMap<String, Image> folderCache = swtImageCache.get(mediaFolderPath);
-		HashMap<String, Object> usedFolderCaches = new HashMap<String, Object>();
-		if (folderCache == null)
-		{
-			folderCache = new HashMap<String, Image>();
-			swtImageCache.put(mediaFolderPath, folderCache);
-		}
 
-		if (mediaNodes != null)
+		if (mediaNodes != null && mediaNodes.length > 0)
 		{
+			HashMap<String, Image> oldFolderCache = null;
+			if (mediaNodeTypeFilter.contains(MediaNode.TYPE.IMAGE))
+			{
+				oldFolderCache = swtImageCache;
+				swtImageCache = new HashMap<String, Image>();
+			}
+
 			IWorkspace ws = ResourcesPlugin.getWorkspace();
 
 			SimpleUserNode node = null;
@@ -3209,49 +3210,48 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				if (mediaNode.getType() == MediaNode.TYPE.IMAGE && mediaNodeTypeFilter.contains(MediaNode.TYPE.IMAGE))
 				{
 					IFile imageFile = ws.getRoot().getFile(
-						new Path(((ISupportName)mediaNode.getMediaProvider()).getName() + "/" + SolutionSerializer.MEDIAS_DIR + "/" + mediaNode.getPath()));
+						new Path(((ISupportName)mediaNode.getMediaProvider()).getName() + '/' + SolutionSerializer.MEDIAS_DIR + '/' + mediaNode.getPath()));
 					File javaFile = imageFile.getRawLocation().makeAbsolute().toFile();
-					Image scaledImage = null;
-					Image cachedImage = folderCache.get(mediaNode.getPath() + javaFile.lastModified());
-					if (cachedImage != null)
+					Image scaledImage = oldFolderCache == null ? null : oldFolderCache.remove(mediaNode.getPath() + javaFile.lastModified());
+					if (scaledImage != null)
 					{
-						scaledImage = cachedImage;
+						swtImageCache.put(mediaNode.getPath() + javaFile.lastModified(), scaledImage);
 					}
-					usedFolderCaches.put(mediaNode.getPath() + javaFile.lastModified(), new Object());
-
-
-					String mimetype = URLConnection.guessContentTypeFromName(imageFile.getName());
-					String type = (mimetype == null ? "other" : mimetype.split("/")[0]);
-
-					if (scaledImage == null && type.equals("image"))
+					else
 					{
-						try
+						String mimetype = URLConnection.guessContentTypeFromName(imageFile.getName());
+						String type = (mimetype == null ? "other" : mimetype.split("/")[0]);
+
+						if (scaledImage == null && type.equals("image"))
 						{
-							Dimension dimension = ImageLoader.getSize(javaFile);
-							if (dimension.getWidth() <= 128 && dimension.getHeight() <= 128)
+							try
 							{
-								Image origImage = new Image(Display.getCurrent(), imageFile.getRawLocation().toOSString());
-								final int width = origImage.getBounds().width;
-								final int height = origImage.getBounds().height;
-								int largest = width > height ? width : height;
-								double zoom = 16d / largest;
-								scaledImage = new Image(Display.getDefault(), origImage.getImageData().scaledTo((int)(width * zoom), (int)(height * zoom)));
-								origImage.dispose();
-								folderCache.put(mediaNode.getPath() + javaFile.lastModified(), scaledImage);
+								Dimension dimension = ImageLoader.getSize(javaFile);
+								if (dimension.getWidth() <= 128 && dimension.getHeight() <= 128)
+								{
+									Image origImage = new Image(Display.getCurrent(), imageFile.getRawLocation().toOSString());
+									final int width = origImage.getBounds().width;
+									final int height = origImage.getBounds().height;
+									int largest = width > height ? width : height;
+									double zoom = 16d / largest;
+									scaledImage = new Image(Display.getDefault(), origImage.getImageData().scaledTo((int)(width * zoom), (int)(height * zoom)));
+									origImage.dispose();
+									swtImageCache.put(mediaNode.getPath() + javaFile.lastModified(), scaledImage);
+								}
+								else
+								{
+									scaledImage = uiActivator.loadImageFromBundle("image.gif");
+								}
 							}
-							else
+							catch (SWTException e)
 							{
 								scaledImage = uiActivator.loadImageFromBundle("image.gif");
 							}
 						}
-						catch (SWTException e)
+						else
 						{
-							scaledImage = uiActivator.loadImageFromBundle("image.gif");
+							if (scaledImage == null) scaledImage = uiActivator.loadImageFromBundle("image.gif");
 						}
-					}
-					else
-					{
-						if (scaledImage == null) scaledImage = uiActivator.loadImageFromBundle("image.gif");
 					}
 					String mediaInfo = mediaNode.getInfo();
 					node = new UserNode(mediaNode.getName(), UserNodeType.MEDIA_IMAGE, new SimpleDeveloperFeedback(mediaInfo, mediaInfo, mediaInfo),
@@ -3265,21 +3265,16 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 				if (node != null) dlm.add(node);
 			}
+			if (oldFolderCache != null) clearFolderCache(oldFolderCache);
 		}
-		clearFolderCache(folderCache, usedFolderCaches);
 		return dlm.toArray(new SimpleUserNode[dlm.size()]);
 	}
 
-	private void clearFolderCache(HashMap<String, Image> folderCache, HashMap<String, Object> usedFolderCaches)
+	private void clearFolderCache(HashMap<String, Image> folderCache)
 	{
-		for (String key : folderCache.keySet())
+		for (Image image : folderCache.values())
 		{
-			if (folderCache.get(key) == null)
-			{
-				Image img = folderCache.get(key);
-				img.dispose();
-				folderCache.remove(key);
-			}
+			image.dispose();
 		}
 	}
 
