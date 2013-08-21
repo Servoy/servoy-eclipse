@@ -20,8 +20,11 @@ package com.servoy.eclipse.warexporter.ui.wizard;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
@@ -41,6 +44,7 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 {
 	private final ExportWarModel exportModel;
 	private final IWizardPage nextPage;
+	private Button useRMI;
 	private Text startRMIPortText;
 
 	public ServoyPropertiesConfigurationPage(String title, ExportWarModel exportModel, IWizardPage nextPage)
@@ -59,15 +63,47 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 		composite.setLayout(gridLayout);
 
 		Label label = new Label(composite, SWT.NONE);
+		label.setText("Allow running smart clients"); //$NON-NLS-1$
+
+		useRMI = new Button(composite, SWT.CHECK);
+		GridData gd = new GridData();
+		gd.horizontalSpan = 3;
+		useRMI.setLayoutData(gd);
+		useRMI.setSelection(true);
+		exportModel.setStartRMI(true);
+		useRMI.addSelectionListener(new SelectionListener()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				boolean bUseRMI = useRMI.getSelection();
+				startRMIPortText.setEnabled(bUseRMI);
+				exportModel.setStartRMI(bUseRMI);
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+			}
+		});
+
+		label = new Label(composite, SWT.NONE);
 		label.setText("Port used by RMI Registry "); //$NON-NLS-1$
 
 		startRMIPortText = new Text(composite, SWT.BORDER);
-		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 3;
 		startRMIPortText.setLayoutData(gd);
 		startRMIPortText.setText("1099"); //$NON-NLS-1$
 		exportModel.setStartRMIPort("1099"); //$NON-NLS-1$
 		startRMIPortText.addListener(SWT.KeyUp, this);
+
+		label = new Label(composite, SWT.NONE);
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 4;
+		label.setLayoutData(gd);
+		label.setText("\nNOTE: If running of smart clients is enabled, please take in consideration\nthat on each restart of the application context in the web container,\nRMI related classes cannot be GC and that may lead to out-of-memory errors."); //$NON-NLS-1$
+
 
 		setControl(composite);
 	}
