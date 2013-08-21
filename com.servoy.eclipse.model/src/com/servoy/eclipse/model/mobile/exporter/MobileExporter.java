@@ -780,7 +780,7 @@ public class MobileExporter
 				ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 				ByteArrayOutputStream baos = new ByteArrayOutputStream(bytes.length * 2);
 				ServoyDebugInstrumentator instrumenator = new ServoyDebugInstrumentator();
-				JsCodeLoader.instrumentFile(scriptPath, bais, baos, new HashMap<String, Object>(), method.getLineNumberOffset() - 1, instrumenator);
+				JsCodeLoader.instrumentFile(scriptPath, bais, baos, new HashMap<String, Object>(), method.getLineNumberOffset() - 1, instrumenator, false);
 				code = new String(baos.toByteArray(), Charset.forName("UTF8"));
 
 				Integer linenr = filenameEndings.get(scriptPath);

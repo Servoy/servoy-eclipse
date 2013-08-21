@@ -16,10 +16,13 @@
  */
 package com.servoy.eclipse.core;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.Charset;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -96,8 +99,12 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.progress.UIJob;
+import org.jshybugger.instrumentation.DebugInstrumentator;
+import org.jshybugger.instrumentation.JsCodeLoader;
 import org.jshybugger.proxy.DebugWebAppService;
 import org.jshybugger.proxy.ScriptSourceProvider;
+import org.json.JSONObject;
+import org.mozilla.javascript.ast.AstRoot;
 
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
@@ -141,6 +148,7 @@ import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptElement;
+import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISequenceProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerConfigListener;
@@ -157,6 +165,7 @@ import com.servoy.j2db.persistence.IVariable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectMetaData;
+import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptNameValidator;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -164,6 +173,7 @@ import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.scripting.ScriptEngine;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.server.shared.IUserManagerFactory;
@@ -270,6 +280,107 @@ public class ServoyModel extends AbstractServoyModel
 								public String loadScriptResourceById(String scriptUri, boolean encode) throws IOException
 								{
 									return new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getUTF8Contents(scriptUri);
+								}
+
+								public String setScriptSource(String scriptUri, String scriptSource)
+								{
+									try
+									{
+										new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).setUTF8Contents(scriptUri, scriptSource);
+										Path path = new Path(scriptUri);
+										ServoyProject servoyProject = getServoyProject(path.segment(0));
+										if (servoyProject != null && servoyProject.getProject().isOpen())
+										{
+											String scopeKind = "forms";
+											String scopeName = null;
+											Solution sol = servoyProject.getSolution();
+											Iterator<ScriptMethod> scriptMethods = null;
+											if (path.segmentCount() == 2)
+											{
+												scopeKind = "scopes";
+												// globals/scopes
+												scopeName = path.segment(1);
+												if (scopeName.endsWith(SolutionSerializer.JS_FILE_EXTENSION))
+												{
+													scopeName = scopeName.substring(0, scopeName.length() - SolutionSerializer.JS_FILE_EXTENSION.length());
+												}
+												scriptMethods = sol.getScriptMethods(scopeName, false);
+											}
+											else if (path.segmentCount() == 3 && path.segment(1).equals(SolutionSerializer.FORMS_DIR))
+											{
+												// forms
+												scopeName = path.segment(2);
+												if (scopeName.endsWith(SolutionSerializer.JS_FILE_EXTENSION))
+												{
+													scopeName = scopeName.substring(0, scopeName.length() - SolutionSerializer.JS_FILE_EXTENSION.length());
+												}
+												scriptMethods = sol.getForm(scopeName).getScriptMethods(false);
+
+											}
+											StringBuilder sb = new StringBuilder();
+											while (scriptMethods.hasNext())
+											{
+												ScriptMethod sm = scriptMethods.next();
+												sb.append("_ServoyInit_.");
+												sb.append(scopeKind);
+												sb.append(".");
+												sb.append(scopeName);
+												sb.append("._sv_pushedfncs['");
+												sb.append(sm.getName());
+												sb.append("']=");
+												sb.append(parseScriptMethod(sm));
+												sb.append(";\n");
+											}
+											if (scopeKind.equals("forms"))
+											{
+												sb.append("_ServoyUtils_.reloadFormScope('");
+												sb.append(scopeName);
+												sb.append("')");
+											}
+											else
+											{
+												sb.append("_ServoyUtils_.reloadGlobalScope('");
+												sb.append(scopeName);
+												sb.append("')");
+											}
+											return sb.toString();
+										}
+										return null;
+									}
+									catch (IOException e)
+									{
+										ServoyLog.logError("error saving chagnes from debugger", e);
+									}
+									return null;
+								}
+
+								private String parseScriptMethod(IScriptProvider method)
+								{
+									try
+									{
+										String code = method.getDeclaration();
+										String scriptPath = SolutionSerializer.getScriptPath(method, false);
+										code = ScriptEngine.docStripper.matcher(code).replaceFirst("function $1");
+										byte[] bytes = code.getBytes(Charset.forName("UTF8"));
+										ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+										ByteArrayOutputStream baos = new ByteArrayOutputStream(bytes.length * 2);
+										DebugInstrumentator instrumenator = new DebugInstrumentator()
+										{
+											@Override
+											protected void loadFile(AstRoot node)
+											{
+											}
+										};
+										JsCodeLoader.instrumentFile(scriptPath, bais, baos, new HashMap<String, Object>(), method.getLineNumberOffset() - 1,
+											instrumenator, false);
+										code = new String(baos.toByteArray(), Charset.forName("UTF8"));
+										return JSONObject.quote(ScriptEngine.docStripper.matcher(code).replaceFirst(""));
+									}
+									catch (Exception e)
+									{
+										e.printStackTrace();
+									}
+									return null;
 								}
 							});
 						}

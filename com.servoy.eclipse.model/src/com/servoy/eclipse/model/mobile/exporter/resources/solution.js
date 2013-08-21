@@ -32,7 +32,7 @@ ${endloop_scopes}
 			${formName} : {
 				_sv_init: function(_$form$, _$oldScope$, _$tmpScope$) {
 					var history = _ServoyUtils_.history;
-${loop_functions}					if (!this._sv_fncs['${functionName}'])
+${loop_functions}					if (!this._sv_fncs['${functionName}']  && !this._sv_pushedfncs['${functionName}'])
 					{
 						var ${functionName} = _ServoyUtils_.wrapFunction(${functionCode},_$form$);
 						_$form$.${functionName} = ${functionName};
@@ -43,6 +43,12 @@ ${endloop_functions}
 							_$form$[key] = _ServoyUtils_.wrapFunction(eval("(" + _ServoyInit_.getFunctionStart("forms", "${formName}", key) + this._sv_fncs[key] + ")"), _$form$);
 							eval("var " + key + " = _$form$[key];");
 						}
+						for (var key in this._sv_pushedfncs) {
+							if (!this._sv_fncs[key]) {
+								_$form$[key] = _ServoyUtils_.wrapFunction(eval("(" + _ServoyInit_.getFunctionStart("forms", "${formName}", key) + this._sv_pushedfncs[key] + ")"), _$form$);
+								eval("var " + key + " = _$form$[key];");
+							}
+						}
 						for (var key in this._sv_vrbs) {
 							var val = this._sv_vrbs[key];
 						   _ServoyUtils_.defineVariable(_$form$, key, _$oldScope$ ? _$oldScope$[key] : eval("(" + val[0] + ")"), val[1]);
@@ -50,6 +56,8 @@ ${endloop_functions}
 					}
 				},
 				_sv_fncs: {
+				},
+				_sv_pushedfncs: {
 				},
 				_sv_vrbs: {
 ${loop_variables}					${variableName} : [${defaultValue}, ${variableType}]${endloop_variables}
@@ -61,7 +69,7 @@ ${loop_variables}					${variableName} : [${defaultValue}, ${variableType}]${endl
 			${scopeName} : {
 				_sv_init: function(_$scope$,_$oldScope$, _$tmpScope$) {
 					var history = _ServoyUtils_.history;
-${loop_functions}					if (!this._sv_fncs['${functionName}'])
+${loop_functions}					if (!this._sv_fncs['${functionName}'] && !this._sv_pushedfncs['${functionName}'])
 					{
 						var ${functionName} = _ServoyUtils_.wrapFunction( ${functionCode} ,_$scope$);
 						_$scope$.${functionName} = ${functionName};
@@ -72,6 +80,12 @@ ${endloop_functions}
 							_$scope$[key] = _ServoyUtils_.wrapFunction(eval("(" + _ServoyInit_.getFunctionStart("globals", "${scopeName}", key) + this._sv_fncs[key] + ")"), _$scope$);
 							eval("var " + key + " = _$scope$[key];");
 						}				
+						for (var key in this._sv_pushedfncs) {
+							if (!this._sv_fncs[key]) {
+								_$scope$[key] = _ServoyUtils_.wrapFunction(eval("(" + _ServoyInit_.getFunctionStart("globals", "${scopeName}", key) + this._sv_pushedfncs[key] + ")"), _$scope$);
+								eval("var " + key + " = _$scope$[key];");
+							}
+						}				
 						for (var key in this._sv_vrbs) {
 							var val = this._sv_vrbs[key];
 						   _ServoyUtils_.defineVariable(_$scope$, key, _$oldScope$ ? _$oldScope$[key] : eval("(" + val[0] + ")"), val[1]);
@@ -79,6 +93,8 @@ ${endloop_functions}
 					}
 				},
 				_sv_fncs: {
+				},
+				_sv_pushedfncs: {
 				},
 				_sv_vrbs: {
 ${loop_variables}					${variableName} : [${defaultValue}, ${variableType}]${endloop_variables}

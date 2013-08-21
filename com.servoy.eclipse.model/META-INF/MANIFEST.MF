@@ -23,6 +23,7 @@ Export-Package: com.servoy.eclipse.model,
  com.servoy.eclipse.model.repository,
  com.servoy.eclipse.model.test,
  com.servoy.eclipse.model.util,
+ org.jshybugger.instrumentation,
  org.jshybugger.proxy
 Bundle-Activator: com.servoy.eclipse.model.Activator
 Bundle-ActivationPolicy: lazy
