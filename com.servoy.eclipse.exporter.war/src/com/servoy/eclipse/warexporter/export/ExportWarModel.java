@@ -49,6 +49,7 @@ public class ExportWarModel
 	private final SortedSet<String> selectedServerNames = new TreeSet<String>();
 	private String servoyPropertiesFileName;
 	private String startRMIPort;
+	private boolean startRMI;
 
 	/**
 	 * @param dialogSettings
@@ -303,4 +304,13 @@ public class ExportWarModel
 		startRMIPort = port;
 	}
 
+	public boolean getStartRMI()
+	{
+		return startRMI;
+	}
+
+	public void setStartRMI(boolean startRMI)
+	{
+		this.startRMI = startRMI;
+	}
 }
