@@ -42,7 +42,7 @@ public class SerialRule implements ISchedulingRule
 
 	public boolean isConflicting(ISchedulingRule rule)
 	{
-		return rule instanceof SerialRule && ((SerialRule)rule).id == id;
+		return (rule instanceof SerialRule && ((SerialRule)rule).id == id) || (rule instanceof IResource);
 	}
 
 	@Override
