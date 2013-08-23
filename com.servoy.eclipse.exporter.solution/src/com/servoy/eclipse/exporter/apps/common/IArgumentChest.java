@@ -35,7 +35,9 @@ public interface IArgumentChest
 
 	public boolean mustShowHelp();
 
-	public String getSolutionName();
+	public String[] getSolutionNames();
+
+	public String getSolutionNamesAsString();
 
 	public void info(String message, int priority);
 

@@ -56,7 +56,7 @@ public class MobileWorkspaceExporter extends AbstractWorkspaceExporter
 			if (solution.getSolutionType() == SolutionMetaData.MOBILE)
 			{
 				MobileExporter exporter = new MobileExporter();
-				exporter.setSolutionName(configuration.getSolutionName());
+				exporter.setSolutionName(solution.getName());
 				exporter.setOutputFolder(new File(configuration.getExportFilePath()));
 				exporter.setServerURL(configuration.getServerURL());
 				exporter.setTimeout(configuration.getSyncTimeout());

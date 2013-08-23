@@ -166,7 +166,7 @@ public abstract class AbstractWorkspaceExporter implements IApplication, IBundle
 							{
 								ServoyLog.logError(e);
 								// continuing would only lead to potential deadlock, if auto-build cannot be turned off
-								outputError("Cannot export solution '" + configuration.getSolutionName() + "'; unable to turn off auto-build. Check workspace log."); //$NON-NLS-1$//$NON-NLS-2$
+								outputError("Cannot export solution(s) '" + configuration.getSolutionNamesAsString() + "'; unable to turn off auto-build. Check workspace log."); //$NON-NLS-1$//$NON-NLS-2$
 								exitCode = EXIT_EXPORT_FAILED;
 							}
 						}
@@ -179,7 +179,7 @@ public abstract class AbstractWorkspaceExporter implements IApplication, IBundle
 							if (!mustStop)
 							{
 								// export
-								checkAndExportSolution(configuration);
+								checkAndExportSolutions(configuration);
 							}
 						}
 					}
@@ -210,7 +210,7 @@ public abstract class AbstractWorkspaceExporter implements IApplication, IBundle
 		return exitCode;
 	}
 
-	protected boolean isDbDown()
+	protected boolean isDbDownForCurrentlyActiveSolution()
 	{
 		return dbDownMode;
 	}
@@ -244,7 +244,7 @@ public abstract class AbstractWorkspaceExporter implements IApplication, IBundle
 		}
 	}
 
-	private void checkAndExportSolution(IArgumentChest configuration)
+	private void checkAndExportSolutions(IArgumentChest configuration)
 	{
 		List<IProject> importedProjects = new ArrayList<IProject>();
 		List<IProject> existingClosedProjects = new ArrayList<IProject>();
@@ -307,83 +307,88 @@ public abstract class AbstractWorkspaceExporter implements IApplication, IBundle
 
 			ExportServoyModel sm = ServoyModelProvider.getModel();
 
-			outputExtra("Refreshing and loading projects used by solution " + configuration.getSolutionName() + "."); //$NON-NLS-1$ //$NON-NLS-2$
-			sm.initialize(configuration.getSolutionName()); // the actual refresh of solution projects happens in the modified EclipseRepository load; this just loads all modules (because it reloads all form security info)
-
-			if (!mustStop)
+			for (String solutionName : configuration.getSolutionNames())
 			{
-				if (sm.getActiveProject() != null && sm.getActiveResourcesProject() != null)
+				dbDownMode = false;
+
+				outputExtra("Refreshing and loading projects used by solution " + solutionName + "."); //$NON-NLS-1$ //$NON-NLS-2$
+				sm.initialize(solutionName); // the actual refresh of solution projects happens in the modified EclipseRepository load; this just loads all modules (because it reloads all form security info)
+
+				if (!mustStop)
 				{
-					ServoyProject[] modules = sm.getModulesOfActiveProject();
-
-					if (!mustStop)
+					if (sm.getActiveProject() != null && sm.getActiveResourcesProject() != null)
 					{
-						outputExtra("Checking for problem markers"); //$NON-NLS-1$
-						sm.buildActiveProjects(null, true);
+						ServoyProject[] modules = sm.getModulesOfActiveProject();
 
-						// check project markers
-						List<IMarker> errors = new ArrayList<IMarker>();
-						List<IMarker> warnings = new ArrayList<IMarker>();
-						for (ServoyProject module : modules)
+						if (!mustStop)
 						{
-							splitMarkers(module.getProject(), errors, warnings);
-						}
-						if (!configuration.getExportUsingDbiFileInfoOnly()) splitMarkers(sm.getActiveResourcesProject().getProject(), errors, warnings);
-						// else we currently ignore error markers to allow dbi differences during export // TODO maybe check for non-dbi markers only here? (the same must happen in export wizard then)
+							outputExtra("Checking for problem markers"); //$NON-NLS-1$
+							sm.buildActiveProjects(null, true);
 
-						dbDownMode = ServoyExporterUtils.getInstance().hasDbDownErrorMarkers(
-							new String[] { ServoyModelFinder.getServoyModel().getActiveProject().getProject().getName() }).booleanValue();
-						if (dbDownMode)
-						{
-							output("Found error markers that would suggest the DB is down."); //$NON-NLS-1$
-							if (configuration.exportIfDBDown())
+							// check project markers
+							List<IMarker> errors = new ArrayList<IMarker>();
+							List<IMarker> warnings = new ArrayList<IMarker>();
+							for (ServoyProject module : modules)
 							{
-								output("Exporting with DB down is allowed. Proceeding..."); //$NON-NLS-1$
+								splitMarkers(module.getProject(), errors, warnings);
 							}
-							else
-							{
-								outputError("Please use -dbd argument to allow exports when DB is down."); //$NON-NLS-1$
-								dbDownMode = false; // so that it fails because of error markers
-							}
-						}
+							if (!configuration.getExportUsingDbiFileInfoOnly()) splitMarkers(sm.getActiveResourcesProject().getProject(), errors, warnings);
+							// else we currently ignore error markers to allow dbi differences during export // TODO maybe check for non-dbi markers only here? (the same must happen in export wizard then)
 
-						// if db is down we still try to export (using dbi files)
-						if (errors.size() > 0 && !dbDownMode)
-						{
-							exitCode = EXIT_EXPORT_FAILED;
-							outputError("Found error markers in projects for solution '" + configuration.getSolutionName() + "'."); //$NON-NLS-1$//$NON-NLS-2$
-							if (verbose)
+							dbDownMode = ServoyExporterUtils.getInstance().hasDbDownErrorMarkers(
+								new String[] { ServoyModelFinder.getServoyModel().getActiveProject().getProject().getName() }).booleanValue();
+							if (dbDownMode)
 							{
-								for (IMarker marker : errors)
+								output("Found error markers that would suggest at least a DB used by this solution is down."); //$NON-NLS-1$
+								if (configuration.exportIfDBDown())
 								{
-									outputExtra(marker.getAttribute(IMarker.MESSAGE, "Unknown marker message.")); //$NON-NLS-1$
+									output("Exporting with DB down is allowed. Proceeding..."); //$NON-NLS-1$
+								}
+								else
+								{
+									outputError("Please use -dbd argument to allow exports when DB is down."); //$NON-NLS-1$
+									dbDownMode = false; // so that it fails because of error markers
 								}
 							}
-							outputError("EXPORT FAILED."); //$NON-NLS-1$
-						}
-						else if (!mustStop)
-						{
-							if (warnings.size() > 0 && !dbDownMode)
+
+							// if db is down we still try to export (using dbi files)
+							if (errors.size() > 0 && !dbDownMode)
 							{
-								output("Found warning markers in projects for solution " + configuration.getSolutionName()); //$NON-NLS-1$
+								exitCode = EXIT_EXPORT_FAILED;
+								outputError("Found error markers in projects for solution '" + solutionName + "'."); //$NON-NLS-1$//$NON-NLS-2$
 								if (verbose)
 								{
-									for (IMarker marker : warnings)
+									for (IMarker marker : errors)
 									{
 										outputExtra(marker.getAttribute(IMarker.MESSAGE, "Unknown marker message.")); //$NON-NLS-1$
 									}
 								}
+								outputError("EXPORT FAILED."); //$NON-NLS-1$
 							}
+							else if (!mustStop)
+							{
+								if (warnings.size() > 0 && !dbDownMode)
+								{
+									output("Found warning markers in projects for solution " + solutionName); //$NON-NLS-1$
+									if (verbose)
+									{
+										for (IMarker marker : warnings)
+										{
+											outputExtra(marker.getAttribute(IMarker.MESSAGE, "Unknown marker message.")); //$NON-NLS-1$
+										}
+									}
+								}
 
-							// now we really export
-							exportActiveSolution(configuration);
+								// now we really export
+								exportActiveSolution(configuration);
+							}
 						}
 					}
-				}
-				else
-				{
-					outputError("Solution '" + configuration.getSolutionName() + "' will NOT be exported."); //$NON-NLS-1$//$NON-NLS-2$
-					exitCode = EXIT_EXPORT_FAILED;
+					else
+					{
+						outputError("Solution '" + solutionName + "' will NOT be exported. It cannot be activated."); //$NON-NLS-1$//$NON-NLS-2$
+						exitCode = EXIT_EXPORT_FAILED;
+					}
 				}
 			}
 		}

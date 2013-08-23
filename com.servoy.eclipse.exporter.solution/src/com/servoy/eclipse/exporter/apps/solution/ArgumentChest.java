@@ -191,7 +191,7 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 		return "Workspace exporter. Exports workspace solutions into .servoy files.\n"
 			+ super.getHelpMessageCore()
 			+ "        -md ws|db|none|both ... take table  metadata from workspace / database / both+check.\n"
-			+ "             Default: ws\n"
+			+ "             Usually you will want to use 'ws'.\n"
 			+ "        -sd ... exports sample data. IMPORTANT: all needed DB\n"
 			+ "             servers must already be started\n"
 			+ "        -sdcount <count> ... number of rows to  export per table. Only  makes sense when -sd\n"
@@ -318,9 +318,9 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 		return wscontents;
 	}
 
-	public String getExportFileName()
+	public String getExportFileName(String solutionName)
 	{
-		File f = new File(getExportFilePath(), getSolutionName() + FILE_EXTENSION);
+		File f = new File(getExportFilePath(), solutionName + FILE_EXTENSION);
 		return f.getAbsolutePath();
 	}
 

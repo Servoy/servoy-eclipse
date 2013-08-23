@@ -79,7 +79,7 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter
 		{
 			ITableDefinitionsManager tableDefManager = null;
 			IMetadataDefManager metadataDefManager = null;
-			if (isDbDown() || configuration.getExportUsingDbiFileInfoOnly())
+			if (isDbDownForCurrentlyActiveSolution() || configuration.getExportUsingDbiFileInfoOnly())
 			{
 				Pair<ITableDefinitionsManager, IMetadataDefManager> defManagers;
 				try
@@ -111,7 +111,7 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter
 
 			try
 			{
-				exporter.exportSolutionToFile(solution, new File(configuration.getExportFileName()), ClientVersion.getVersion(),
+				exporter.exportSolutionToFile(solution, new File(configuration.getExportFileName(solution.getName())), ClientVersion.getVersion(),
 					ClientVersion.getReleaseNumber(), configuration.shouldExportMetaData(), configuration.shouldExportSampleData(),
 					configuration.getNumberOfSampleDataExported(), configuration.shouldExportI18NData(), configuration.shouldExportUsers(),
 					configuration.shouldExportModules(), configuration.shouldProtectWithPassword(), tableDefManager, metadataDefManager);
