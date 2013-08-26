@@ -5247,6 +5247,30 @@ default:
             <parameter name="size" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           </parameters>
         </function>
+        <function clientSupport="mc,wc,sc" name="fromCharCode" varargs="true">
+          <argumentsTypes>
+            <argumentType typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
+          <descriptions>
+            <description clientSupport="mc,wc,sc"><![CDATA[returns a string created by using the specified sequence of Unicode values.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc,wc,sc"><![CDATA[returns a string created by using the specified sequence of Unicode values.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc,wc,sc"><![CDATA[String.fromCharCode(num)
+// String.fromCharCode(num1,num2,num3)]]></sample>
+          </samples>
+          <links>
+            <link>
+              <url>https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/fromCharCode</url>
+            </link>
+          </links>
+          <parameters>
+            <parameter name="num" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[Lcom.servoy.j2db.documentation.scripting.docs.Number;"/>
+          </parameters>
+        </function>
         <function clientSupport="mc,wc,sc" name="indexOf">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.String"/>
