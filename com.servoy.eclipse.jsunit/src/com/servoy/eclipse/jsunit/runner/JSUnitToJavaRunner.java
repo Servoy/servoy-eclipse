@@ -129,10 +129,16 @@ public class JSUnitToJavaRunner
 						JSUnitToJavaRunner.this.testCodeScope = new TestScope(baseScope);
 					}
 				}
-
-				context.evaluateString(JSUnitToJavaRunner.this.baseScope, jsUtil, "JsUtil.js", 0, null);
-				context.evaluateString(JSUnitToJavaRunner.this.baseScope, jsUnit, "JsUnit.js", 0, null);
-				context.evaluateString(JSUnitToJavaRunner.this.baseScope, jsUnitToJava, "JsUnitToJava.js", 0, null);
+				// find the real toplevel scope and evalute the jsunit libs against that.
+				// this way things like "Error" are seen and matched
+				Scriptable topLevelScope = JSUnitToJavaRunner.this.baseScope;
+				while (topLevelScope.getParentScope() != null)
+				{
+					topLevelScope = topLevelScope.getParentScope();
+				}
+				context.evaluateString(topLevelScope, jsUtil, "JsUtil.js", 0, null);
+				context.evaluateString(topLevelScope, jsUnit, "JsUnit.js", 0, null);
+				context.evaluateString(topLevelScope, jsUnitToJava, "JsUnitToJava.js", 0, null);
 			}
 		}, "Cannot evaluate JavaScript code of JsUnit");
 	}
