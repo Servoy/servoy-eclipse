@@ -43,7 +43,6 @@ public class JSUnitToJavaRunner
 	public final static String ASSERTION_EXCEPTION_MESSAGE = "just for stack";
 	private final static String TEST_LISTENER_NAME = "javaTestListener";
 
-	private Scriptable baseScope;
 	private Scriptable testCodeScope;
 	private final boolean useDebugMode;
 	private static final String jsUnit;
@@ -104,7 +103,7 @@ public class JSUnitToJavaRunner
 	/**
 	 * Creates a new JSUnit runner using the given scope. If scope is null a new scope will be created.
 	 * 
-	 * @param scope the scope to be used by this runner.
+	 * @param scope the scope to be used by this runner. (the library will be loaded in the toplevel scope in this scope's parent chain)
 	 * @param createSeparateScopeForTestCode
 	 */
 	public JSUnitToJavaRunner(final Scriptable scope, final boolean createSeparateScopeForTestCode, boolean useDebugMode)
@@ -116,22 +115,27 @@ public class JSUnitToJavaRunner
 			@Override
 			public void runSilent(Context context)
 			{
+				Scriptable baseScope;
 				if (scope == null)
 				{
-					JSUnitToJavaRunner.this.baseScope = context.initStandardObjects();
+					baseScope = context.initStandardObjects();
 					testCodeScope = baseScope;
 				}
 				else
 				{
-					JSUnitToJavaRunner.this.baseScope = scope;
+					baseScope = scope;
 					if (createSeparateScopeForTestCode)
 					{
 						JSUnitToJavaRunner.this.testCodeScope = new TestScope(baseScope);
 					}
+					else
+					{
+						JSUnitToJavaRunner.this.testCodeScope = baseScope;
+					}
 				}
 				// find the real toplevel scope and evalute the jsunit libs against that.
 				// this way things like "Error" are seen and matched
-				Scriptable topLevelScope = JSUnitToJavaRunner.this.baseScope;
+				Scriptable topLevelScope = baseScope;
 				while (topLevelScope.getParentScope() != null)
 				{
 					topLevelScope = topLevelScope.getParentScope();
