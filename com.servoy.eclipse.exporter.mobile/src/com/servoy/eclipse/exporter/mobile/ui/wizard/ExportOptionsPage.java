@@ -22,6 +22,8 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
@@ -87,11 +89,27 @@ public class ExportOptionsPage extends WizardPage
 		serviceSolutionName.setToolTipText("This is the name of the service solution mobile clients connects to (must be available at serverURL url).");
 
 		Label debugLabel = new Label(container, SWT.NONE);
-		debugLabel.setText("Export as debug");
+		debugLabel.setText("Export in debug mode"); //, .
+
+		final Label label = new Label(container, SWT.NONE);
+		label.setText("Starts a connection between the mobile device and the developer.\nSo the developer must run and the mobile solution must be active.\nThen connect chrome to: localhost:8889 on the developer machine after the mobile solution is started");
+		label.setVisible(false);
 
 		debugCheck = new Button(container, SWT.CHECK);
-		debugCheck.setToolTipText("Export this solution as a debuggable solution so that you can debug it right from the developer");
+		debugCheck.addSelectionListener(new SelectionListener()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				label.setVisible(debugCheck.getSelection());
+			}
 
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+				label.setVisible(debugCheck.getSelection());
+			}
+		});
 
 		final GroupLayout groupLayout = new GroupLayout(container);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
@@ -100,7 +118,8 @@ public class ExportOptionsPage extends WizardPage
 					debugLabel)).addPreferredGap(LayoutStyle.RELATED).add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(solutionName).add(serverURL, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE).add(
 					serviceSolutionName, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE).add(timeout, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE).add(
-					debugCheck, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE)).addContainerGap()));
+					debugCheck, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE)).addContainerGap()).add(
+			groupLayout.createSequentialGroup().addContainerGap().add(label)));
 
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
@@ -112,7 +131,7 @@ public class ExportOptionsPage extends WizardPage
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(timeout, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 					GroupLayout.PREFERRED_SIZE).add(timeoutLabel)).add(7).add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(debugCheck, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(debugLabel)).add(10)));
+					GroupLayout.PREFERRED_SIZE).add(debugLabel)).add(10).add(label)));
 
 		container.setLayout(groupLayout);
 
