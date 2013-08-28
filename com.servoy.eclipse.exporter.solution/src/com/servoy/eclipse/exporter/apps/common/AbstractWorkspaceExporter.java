@@ -307,8 +307,10 @@ public abstract class AbstractWorkspaceExporter implements IApplication, IBundle
 
 			ExportServoyModel sm = ServoyModelProvider.getModel();
 
-			for (String solutionName : configuration.getSolutionNames())
+			String[] solutionNames = configuration.getSolutionNames();
+			for (int i = 0; i < solutionNames.length && exitCode == EXIT_OK; i++)
 			{
+				String solutionName = solutionNames[i];
 				dbDownMode = false;
 
 				outputExtra("Refreshing and loading projects used by solution " + solutionName + "."); //$NON-NLS-1$ //$NON-NLS-2$
