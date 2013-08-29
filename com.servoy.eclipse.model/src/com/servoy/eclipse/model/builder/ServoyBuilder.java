@@ -2148,7 +2148,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											{
 												try
 												{
-													dataProvider = persistFlattenedSolution.getGlobalDataProvider(id);
+													dataProvider = persistFlattenedSolution.getGlobalDataProvider(id, true);
 												}
 												catch (Exception e)
 												{
@@ -4276,7 +4276,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											boolean invalid = false;
 											if (ScopesUtils.isVariableScope(lookup))
 											{
-												IDataProvider globalDataProvider = getServoyModel().getFlattenedSolution().getGlobalDataProvider(lookup);
+												IDataProvider globalDataProvider = getServoyModel().getFlattenedSolution().getGlobalDataProvider(lookup, true);
 												ScriptMethod scriptMethod = getServoyModel().getFlattenedSolution().getScriptMethod(null, lookup);
 												if (globalDataProvider == null && scriptMethod == null)
 												{
@@ -4892,14 +4892,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							{
 								if (ScopesUtils.isVariableScope(primaryDataProvider))
 								{
-									dataProvider = relationFlattenedSolution.getGlobalDataProvider(primaryDataProvider);
+									dataProvider = relationFlattenedSolution.getGlobalDataProvider(primaryDataProvider, true);
 									if (dataProvider == null)
 									{
 										String[] enumParts = primaryDataProvider.split("\\."); //$NON-NLS-1$
 										if (enumParts.length > 3)
 										{
 											String dp = enumParts[0] + '.' + enumParts[1] + '.' + enumParts[2];
-											IDataProvider globalDataProvider = relationFlattenedSolution.getGlobalDataProvider(dp);
+											IDataProvider globalDataProvider = relationFlattenedSolution.getGlobalDataProvider(dp, true);
 											if (globalDataProvider instanceof ScriptVariable)
 											{
 												if (((ScriptVariable)globalDataProvider).isEnum())
