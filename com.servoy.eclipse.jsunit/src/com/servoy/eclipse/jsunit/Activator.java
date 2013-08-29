@@ -20,6 +20,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 import com.servoy.base.test.IJSUnitSuiteHandler;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.util.StaticSingletonMap;
 
 /**
@@ -44,6 +45,8 @@ public class Activator extends AbstractUIPlugin
 	@Override
 	public void start(BundleContext context) throws Exception
 	{
+		ModelUtils.assertUIRunning(PLUGIN_ID);
+
 		super.start(context);
 		plugin = this;
 	}

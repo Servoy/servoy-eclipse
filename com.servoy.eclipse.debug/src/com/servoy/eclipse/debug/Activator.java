@@ -32,6 +32,7 @@ import org.eclipse.ui.IStartup;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.util.Utils;
 
@@ -65,6 +66,8 @@ public class Activator extends AbstractUIPlugin implements IStartup
 	@Override
 	public void start(BundleContext context) throws Exception
 	{
+		ModelUtils.assertUIRunning(PLUGIN_ID);
+
 		super.start(context);
 		plugin = this;
 

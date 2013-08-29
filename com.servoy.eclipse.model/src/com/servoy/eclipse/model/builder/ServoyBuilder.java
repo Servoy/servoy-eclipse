@@ -82,7 +82,6 @@ import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController;
@@ -5205,7 +5204,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	{
 		if (markerContributors == null)
 		{
-			List<IMarkerAttributeContributor> contributors = ResourcesUtils.getExtensions(IMarkerAttributeContributor.EXTENSION_ID);
+			List<IMarkerAttributeContributor> contributors = ModelUtils.getExtensions(IMarkerAttributeContributor.EXTENSION_ID);
 			markerContributors = contributors.toArray(new IMarkerAttributeContributor[contributors.size()]);
 		}
 

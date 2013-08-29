@@ -38,10 +38,9 @@ import com.servoy.eclipse.model.DeveloperFlattenedSolution;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ErrorKeeper;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
-import com.servoy.eclipse.model.extensions.IUnexpectedSituationHandler;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
-import com.servoy.eclipse.model.util.ResourcesUtils;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.AbstractActiveSolutionHandler;
 import com.servoy.j2db.FlattenedSolution;
@@ -135,11 +134,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 		}
 		else
 		{
-			List<IUnexpectedSituationHandler> l = ResourcesUtils.getExtensions(IUnexpectedSituationHandler.EXTENSION_ID);
-			for (IUnexpectedSituationHandler e : l)
-			{
-				e.cannotFindRepository();
-			}
+			ModelUtils.getUnexpectedSituationHandler().cannotFindRepository();
 			ServoyLog.logError("Repository error. Cannot find Servoy Eclipse repository.", null); //$NON-NLS-1$
 		}
 		return solution;

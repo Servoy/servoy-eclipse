@@ -19,6 +19,8 @@ package com.servoy.eclipse.warexporter;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import com.servoy.eclipse.model.util.ModelUtils;
+
 /**
  * The activator class controls the plug-in life cycle
  * @since 6.1
@@ -47,6 +49,8 @@ public class Activator extends AbstractUIPlugin
 	@Override
 	public void start(BundleContext context) throws Exception
 	{
+		ModelUtils.assertUIRunning(PLUGIN_ID);
+
 		super.start(context);
 		plugin = this;
 	}

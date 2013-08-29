@@ -51,13 +51,12 @@ public class Activator extends Plugin
 	@Override
 	public void start(BundleContext context) throws Exception
 	{
+		ModelUtils.assertUIRunning(PLUGIN_ID);
+
 		super.start(context);
 		plugin = this;
 
-		if (ModelUtils.isUIRunning())
-		{
-			ServoyTeamProvider.startup();
-		}
+		ServoyTeamProvider.startup();
 	}
 
 	/*

@@ -252,6 +252,8 @@ public class Activator extends Plugin
 	@Override
 	public void start(BundleContext context) throws Exception
 	{
+		ModelUtils.assertUIRunning(PLUGIN_ID);
+
 		super.start(context);
 		plugin = this;
 
@@ -265,7 +267,7 @@ public class Activator extends Plugin
 
 		// We need to hook a listener and detect when the Welcome page is closed.
 		// (And for that we need to hook another listener to detect when the workbench window is opened).
-		if (ModelUtils.isUIRunning()) PlatformUI.getWorkbench().addWindowListener(new IWindowListener()
+		PlatformUI.getWorkbench().addWindowListener(new IWindowListener()
 		{
 			public void windowActivated(IWorkbenchWindow window)
 			{
@@ -475,99 +477,96 @@ public class Activator extends Plugin
 
 		plugin = null;
 		super.stop(context);
-		if (ModelUtils.isUIRunning())
+		IApplication debugReadyClient = getDebugClientHandler().getDebugReadyClient();
+		if (debugReadyClient != null && debugReadyClient.getScriptEngine() instanceof RemoteDebugScriptEngine &&
+			((RemoteDebugScriptEngine)debugReadyClient.getScriptEngine()).isAWTSuspendedRunningScript())
 		{
-			IApplication debugReadyClient = getDebugClientHandler().getDebugReadyClient();
-			if (debugReadyClient != null && debugReadyClient.getScriptEngine() instanceof RemoteDebugScriptEngine &&
-				((RemoteDebugScriptEngine)debugReadyClient.getScriptEngine()).isAWTSuspendedRunningScript())
-			{
-				((RemoteDebugScriptEngine)debugReadyClient.getScriptEngine()).getDebugger().close();
-			}
-
-			// shutdown all non-swing clients; no need to run this in AWT EDT
-			try
-			{
-				List<ClientState> nonSwingApps = getDebugClientHandler().getActiveDebugClients();
-				for (ClientState application : nonSwingApps)
-				{
-					ClientInfo ci = application.getClientInfo();
-					if (ci != null && !Utils.isSwingClient(ci.getApplicationType())) application.shutDown(true);
-				}
-			}
-			catch (Exception e)
-			{
-				ServoyLog.logError(e);
-			}
-
-			// shutdown swing clients
-			boolean interrupted = false;
-			try
-			{
-				Runnable run = new Runnable()
-				{
-					public void run()
-					{
-						try
-						{
-							List<ClientState> swingApps = getDebugClientHandler().getActiveDebugClients();
-							for (ClientState application : swingApps)
-							{
-								ClientInfo ci = application.getClientInfo();
-								if (ci != null && Utils.isSwingClient(ci.getApplicationType())) application.shutDown(true);
-							}
-						}
-						catch (Exception e)
-						{
-							ServoyLog.logError(e);
-						}
-					}
-				};
-				if (Utils.isAppleMacOS())
-				{
-					boolean allDisplaysDisposed = true;
-					// in mac os 10.8 with java 1.6_43 the display is disposed before the clients are closed
-					//  -- test first if we are in that specific case
-					//loop through all the threads to see if there is still a display associated with any of them 
-					// if there is a display associated
-					Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-					for (Thread thread : threadSet)
-					{
-						if (Display.findDisplay(thread) != null)
-						{
-							allDisplaysDisposed = false;
-							DebugUtils.invokeAndWaitWhileDispatchingOnSWT(run);
-							break;
-						}
-					}
-					// -- display disposed case
-					if (allDisplaysDisposed)
-					{ // create a display
-						Display d = Display.getDefault();
-						DebugUtils.invokeAndWaitWhileDispatchingOnSWT(run);
-						d.dispose();
-					}
-				}
-				else
-				{
-					SwingUtilities.invokeAndWait(run);
-				}
-
-
-			}
-			catch (InterruptedException e)
-			{
-				ServoyLog.logWarning("Interrupted while waiting for clients to shut down on stop. Continuing with server shutdown.", null); //$NON-NLS-1$
-				interrupted = true;
-			}
-
-			Settings.getInstance().save();
-
-			// wait until webserver is stopped for case of
-			// restart (webserver cannot re-start when port is still in use, this may even cause a freeze after restart)
-			ApplicationServerSingleton.get().shutDown();
-
-			if (interrupted) Thread.interrupted(); // someone is in a hurry, let callers know about that
+			((RemoteDebugScriptEngine)debugReadyClient.getScriptEngine()).getDebugger().close();
 		}
+
+		// shutdown all non-swing clients; no need to run this in AWT EDT
+		try
+		{
+			List<ClientState> nonSwingApps = getDebugClientHandler().getActiveDebugClients();
+			for (ClientState application : nonSwingApps)
+			{
+				ClientInfo ci = application.getClientInfo();
+				if (ci != null && !Utils.isSwingClient(ci.getApplicationType())) application.shutDown(true);
+			}
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+		}
+
+		// shutdown swing clients
+		boolean interrupted = false;
+		try
+		{
+			Runnable run = new Runnable()
+			{
+				public void run()
+				{
+					try
+					{
+						List<ClientState> swingApps = getDebugClientHandler().getActiveDebugClients();
+						for (ClientState application : swingApps)
+						{
+							ClientInfo ci = application.getClientInfo();
+							if (ci != null && Utils.isSwingClient(ci.getApplicationType())) application.shutDown(true);
+						}
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
+			};
+			if (Utils.isAppleMacOS())
+			{
+				boolean allDisplaysDisposed = true;
+				// in mac os 10.8 with java 1.6_43 the display is disposed before the clients are closed
+				//  -- test first if we are in that specific case
+				//loop through all the threads to see if there is still a display associated with any of them 
+				// if there is a display associated
+				Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+				for (Thread thread : threadSet)
+				{
+					if (Display.findDisplay(thread) != null)
+					{
+						allDisplaysDisposed = false;
+						DebugUtils.invokeAndWaitWhileDispatchingOnSWT(run);
+						break;
+					}
+				}
+				// -- display disposed case
+				if (allDisplaysDisposed)
+				{ // create a display
+					Display d = Display.getDefault();
+					DebugUtils.invokeAndWaitWhileDispatchingOnSWT(run);
+					d.dispose();
+				}
+			}
+			else
+			{
+				SwingUtilities.invokeAndWait(run);
+			}
+
+
+		}
+		catch (InterruptedException e)
+		{
+			ServoyLog.logWarning("Interrupted while waiting for clients to shut down on stop. Continuing with server shutdown.", null); //$NON-NLS-1$
+			interrupted = true;
+		}
+
+		Settings.getInstance().save();
+
+		// wait until webserver is stopped for case of
+		// restart (webserver cannot re-start when port is still in use, this may even cause a freeze after restart)
+		ApplicationServerSingleton.get().shutDown();
+
+		if (interrupted) Thread.interrupted(); // someone is in a hurry, let callers know about that
 	}
 
 	/**
@@ -760,157 +759,154 @@ public class Activator extends Plugin
 		// install servoy model listeners in separate job, when ServoyModel is created in bundle.activator thread
 		// a deadlock may occur (display thread waits for loading of ui bundle which waits for core bundle 
 		// which waits for ServoyModel latch, but the ServoyModel runnable is never running because display thread is blocking in wait)
-		if (ModelUtils.isUIRunning())
+		new Job("HookupToServoyModel") //$NON-NLS-1$
 		{
-			new Job("HookupToServoyModel") //$NON-NLS-1$
+			@Override
+			protected IStatus run(IProgressMonitor monitor)
 			{
-				@Override
-				protected IStatus run(IProgressMonitor monitor)
+				final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+
+				IActiveProjectListener apl = new IActiveProjectListener()
 				{
-					final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-
-					IActiveProjectListener apl = new IActiveProjectListener()
+					public void activeProjectChanged(final ServoyProject project)
 					{
-						public void activeProjectChanged(final ServoyProject project)
+						if (getDesignClient() != null)
 						{
-							if (getDesignClient() != null)
+							getDesignClient().refreshI18NMessages();
+						}
+						// can this be really later? or should we wait?
+						// its much nice to do that later in the event thread.
+						UIUtils.invokeLaterOnAWT(new Runnable()
+						{
+							public void run()
 							{
-								getDesignClient().refreshI18NMessages();
+								IDebugClientHandler dch = getDebugClientHandler();
+								if (project != null)
+								{
+									dch.reloadDebugSolution(project.getSolution());
+									dch.reloadDebugSolutionSecurity();
+								}
+								else
+								{
+									dch.reloadDebugSolution(null);
+								}
 							}
-							// can this be really later? or should we wait?
-							// its much nice to do that later in the event thread.
+						});
+					}
+
+					public void activeProjectUpdated(final ServoyProject activeProject, int updateInfo)
+					{
+						if (activeProject == null) return;
+						if (updateInfo == IActiveProjectListener.MODULES_UPDATED)
+						{
+							// in order to have a good module cache in the flattened solution
 							UIUtils.invokeLaterOnAWT(new Runnable()
 							{
 								public void run()
 								{
 									IDebugClientHandler dch = getDebugClientHandler();
-									if (project != null)
-									{
-										dch.reloadDebugSolution(project.getSolution());
-										dch.reloadDebugSolutionSecurity();
-									}
-									else
-									{
-										dch.reloadDebugSolution(null);
-									}
+									dch.reloadDebugSolution(activeProject.getSolution());
+									dch.reloadDebugSolutionSecurity();
 								}
 							});
 						}
-
-						public void activeProjectUpdated(final ServoyProject activeProject, int updateInfo)
-						{
-							if (activeProject == null) return;
-							if (updateInfo == IActiveProjectListener.MODULES_UPDATED)
-							{
-								// in order to have a good module cache in the flattened solution
-								UIUtils.invokeLaterOnAWT(new Runnable()
-								{
-									public void run()
-									{
-										IDebugClientHandler dch = getDebugClientHandler();
-										dch.reloadDebugSolution(activeProject.getSolution());
-										dch.reloadDebugSolutionSecurity();
-									}
-								});
-							}
-							else if (updateInfo == IActiveProjectListener.RESOURCES_UPDATED_ON_ACTIVE_PROJECT)
-							{
-								UIUtils.invokeLaterOnAWT(new Runnable()
-								{
-									public void run()
-									{
-										IDebugClientHandler dch = getDebugClientHandler();
-										dch.reloadDebugSolutionSecurity();
-										dch.reloadAllStyles();
-									}
-								});
-							}
-							else if (updateInfo == IActiveProjectListener.STYLES_ADDED_OR_REMOVED)
-							{
-								UIUtils.invokeLaterOnAWT(new Runnable()
-								{
-									public void run()
-									{
-										IDebugClientHandler dch = getDebugClientHandler();
-										dch.reloadAllStyles();
-									}
-								});
-							}
-							else if (updateInfo == IActiveProjectListener.SECURITY_INFO_CHANGED)
-							{
-								UIUtils.invokeLaterOnAWT(new Runnable()
-								{
-									public void run()
-									{
-										IDebugClientHandler dch = getDebugClientHandler();
-										dch.reloadDebugSolutionSecurity();
-									}
-								});
-							}
-						}
-
-						public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
-						{
-							return true;
-						}
-					};
-
-					servoyModel.addActiveProjectListener(apl);
-					apl.activeProjectChanged(servoyModel.getActiveProject());
-
-					servoyModel.addPersistChangeListener(true, new IPersistChangeListener()
-					{
-						public void persistChanges(final Collection<IPersist> changes)
+						else if (updateInfo == IActiveProjectListener.RESOURCES_UPDATED_ON_ACTIVE_PROJECT)
 						{
 							UIUtils.invokeLaterOnAWT(new Runnable()
 							{
 								public void run()
 								{
 									IDebugClientHandler dch = getDebugClientHandler();
-									dch.refreshDebugClients(changes);
+									dch.reloadDebugSolutionSecurity();
+									dch.reloadAllStyles();
 								}
 							});
 						}
-					});
-
-					// flush bean design instances of changed beans
-					servoyModel.addPersistChangeListener(false, new IPersistChangeListener()
-					{
-						public void persistChanges(final Collection<IPersist> changes)
+						else if (updateInfo == IActiveProjectListener.STYLES_ADDED_OR_REMOVED)
 						{
-							for (IPersist persist : changes)
-							{
-								if (persist instanceof Bean)
-								{
-									FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
-									if (editingFlattenedSolution != null)
-									{
-										editingFlattenedSolution.flushBeanDesignInstance((Bean)persist);
-									}
-								}
-							}
-						}
-					});
-
-					servoyModel.addI18NChangeListener(new I18NChangeListener()
-					{
-						public void i18nChanged()
-						{
-							servoyModel.getMessagesManager().removeCachedMessages();
 							UIUtils.invokeLaterOnAWT(new Runnable()
 							{
 								public void run()
 								{
 									IDebugClientHandler dch = getDebugClientHandler();
-									dch.refreshDebugClientsI18N(getEclipsePreferences().getBoolean(RECREATE_ON_I18N_CHANGE_PREFERENCE, true));
+									dch.reloadAllStyles();
 								}
 							});
 						}
-					});
-					return Status.OK_STATUS;
-				}
-			}.schedule();
-		}
+						else if (updateInfo == IActiveProjectListener.SECURITY_INFO_CHANGED)
+						{
+							UIUtils.invokeLaterOnAWT(new Runnable()
+							{
+								public void run()
+								{
+									IDebugClientHandler dch = getDebugClientHandler();
+									dch.reloadDebugSolutionSecurity();
+								}
+							});
+						}
+					}
+
+					public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
+					{
+						return true;
+					}
+				};
+
+				servoyModel.addActiveProjectListener(apl);
+				apl.activeProjectChanged(servoyModel.getActiveProject());
+
+				servoyModel.addPersistChangeListener(true, new IPersistChangeListener()
+				{
+					public void persistChanges(final Collection<IPersist> changes)
+					{
+						UIUtils.invokeLaterOnAWT(new Runnable()
+						{
+							public void run()
+							{
+								IDebugClientHandler dch = getDebugClientHandler();
+								dch.refreshDebugClients(changes);
+							}
+						});
+					}
+				});
+
+				// flush bean design instances of changed beans
+				servoyModel.addPersistChangeListener(false, new IPersistChangeListener()
+				{
+					public void persistChanges(final Collection<IPersist> changes)
+					{
+						for (IPersist persist : changes)
+						{
+							if (persist instanceof Bean)
+							{
+								FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
+								if (editingFlattenedSolution != null)
+								{
+									editingFlattenedSolution.flushBeanDesignInstance((Bean)persist);
+								}
+							}
+						}
+					}
+				});
+
+				servoyModel.addI18NChangeListener(new I18NChangeListener()
+				{
+					public void i18nChanged()
+					{
+						servoyModel.getMessagesManager().removeCachedMessages();
+						UIUtils.invokeLaterOnAWT(new Runnable()
+						{
+							public void run()
+							{
+								IDebugClientHandler dch = getDebugClientHandler();
+								dch.refreshDebugClientsI18N(getEclipsePreferences().getBoolean(RECREATE_ON_I18N_CHANGE_PREFERENCE, true));
+							}
+						});
+					}
+				});
+				return Status.OK_STATUS;
+			}
+		}.schedule();
 
 		// Try to load documentation XML from plugin and bean jars.
 		PluginManager pluginManager = (PluginManager)getDesignClient().getPluginManager();
@@ -938,17 +934,14 @@ public class Activator extends Plugin
 			}
 		}
 
-		if (ModelUtils.isUIRunning())
+		String[] actionIds = { "org.eclipse.ui.edit.text.actionSet.convertLineDelimitersTo" }; //$NON-NLS-1$
+		ActionSetRegistry reg = WorkbenchPlugin.getDefault().getActionSetRegistry();
+		IActionSetDescriptor[] actionSets = reg.getActionSets();
+		for (IActionSetDescriptor element : actionSets)
 		{
-			String[] actionIds = { "org.eclipse.ui.edit.text.actionSet.convertLineDelimitersTo" }; //$NON-NLS-1$
-			ActionSetRegistry reg = WorkbenchPlugin.getDefault().getActionSetRegistry();
-			IActionSetDescriptor[] actionSets = reg.getActionSets();
-			for (IActionSetDescriptor element : actionSets)
+			for (String actionSetId : actionIds)
 			{
-				for (String actionSetId : actionIds)
-				{
-					if (Utils.stringSafeEquals(element.getId(), actionSetId)) element.setInitiallyVisible(false);
-				}
+				if (Utils.stringSafeEquals(element.getId(), actionSetId)) element.setInitiallyVisible(false);
 			}
 		}
 	}

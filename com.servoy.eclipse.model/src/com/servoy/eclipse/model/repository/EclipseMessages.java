@@ -24,7 +24,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -46,11 +45,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
-import com.servoy.eclipse.model.extensions.IUnexpectedSituationHandler;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.util.IFileAccess;
-import com.servoy.eclipse.model.util.ResourcesUtils;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.ICustomMessageLoader;
@@ -325,11 +323,7 @@ public class EclipseMessages implements ICustomMessageLoader
 				catch (final Exception ex)
 				{
 					ServoyLog.logError(ex);
-					List<IUnexpectedSituationHandler> l = ResourcesUtils.getExtensions(IUnexpectedSituationHandler.EXTENSION_ID);
-					for (IUnexpectedSituationHandler ush : l)
-					{
-						ush.cannotWriteI18NFiles(ex);
-					}
+					ModelUtils.getUnexpectedSituationHandler().cannotWriteI18NFiles(ex);
 				}
 				return Status.OK_STATUS;
 			}

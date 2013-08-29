@@ -25,8 +25,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.Platform;
+
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IServoyModel;
+import com.servoy.eclipse.model.extensions.IUnexpectedSituationHandler;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
@@ -58,6 +66,9 @@ import com.servoy.j2db.util.PersistHelper;
 
 public class ModelUtils
 {
+
+	public static final String ONLY_WHEN_UI_RUNNING_ATTRIBUTE_NAME = "whenUIRunningStateIs"; //$NON-NLS-1$
+
 	public static String getTokenValue(Object[] value, String delim)
 	{
 		if (value == null || value.length == 0)
@@ -303,6 +314,19 @@ public class ModelUtils
 
 	private static boolean uiRunning = true;
 
+	/**
+	 * Servoy plugins that are not supposed to start when developer is started with no UI (for example by workspace exporter apps)
+	 * should call this method first thing in their bundle activator's start() method.
+	 * @throws RuntimeException if UI is not supposed to be used
+	 */
+	public static void assertUIRunning(String bundleName) throws RuntimeException
+	{
+		// probably Servoy developer was started via a workspace exporter app. - it must not initialize core/ui and other related projects
+		// but some extension points these use (for example DLTK extension points) will cause them to get loaded; do not allow this!
+		if (!ModelUtils.isUIRunning()) throw new RuntimeException(bundleName != null
+			? "'" + bundleName + "' bundle will not be started as Servoy is started without UI." : "Assertion failed. UI is marked as not running."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+
 	public static boolean isUIRunning()
 	{
 		return uiRunning;
@@ -396,6 +420,51 @@ public class ModelUtils
 				updateSolutionServerProxies(solution, repository);
 			}
 		}
+	}
+
+	public static <T> List<T> getExtensions(String extensionID)
+	{
+		List<T> ts = new ArrayList<T>();
+		IExtensionRegistry reg = Platform.getExtensionRegistry();
+		IExtensionPoint ep = reg.getExtensionPoint(extensionID);
+		IExtension[] extensions = ep.getExtensions();
+
+		for (IExtension extension : extensions)
+		{
+			IConfigurationElement[] ces = extension.getConfigurationElements();
+			for (IConfigurationElement ce : ces)
+			{
+				try
+				{
+					String expectedUIRunningState = ce.getAttribute(ONLY_WHEN_UI_RUNNING_ATTRIBUTE_NAME);
+					if (expectedUIRunningState == null || expectedUIRunningState.equals(Boolean.toString(ModelUtils.isUIRunning())))
+					{
+						T t = (T)ce.createExecutableExtension("class"); //$NON-NLS-1$
+						if (t != null)
+						{
+							ts.add(t);
+						}
+					}
+				}
+				catch (CoreException e)
+				{
+					ServoyLog.logError("Could not load extension (extension point " + extensionID + ", " + ce.getAttribute("class") + ")", e);
+				}
+				catch (ClassCastException e)
+				{
+					ServoyLog.logError("Extension class has wrong type (extension point " + extensionID + ", " + ce.getAttribute("class") + ")", e);
+				}
+			}
+		}
+		return ts;
+	}
+
+	public static IUnexpectedSituationHandler getUnexpectedSituationHandler()
+	{
+		List<IUnexpectedSituationHandler> handlers = getExtensions(IUnexpectedSituationHandler.EXTENSION_ID);
+		if (handlers.size() == 1) return handlers.get(0);
+
+		throw new RuntimeException("Expected to find exactly one compatible '" + IUnexpectedSituationHandler.EXTENSION_ID + "' extension. Found:\n" + handlers); //$NON-NLS-1$//$NON-NLS-2$
 	}
 
 }

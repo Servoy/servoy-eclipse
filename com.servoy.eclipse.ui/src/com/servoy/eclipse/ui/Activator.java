@@ -42,6 +42,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.util.SerialRule;
 import com.servoy.eclipse.marketplace.ExtensionUpdateAndIncompatibilityCheckJob;
 import com.servoy.eclipse.marketplace.InstalledExtensionsDialog;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
 import com.servoy.j2db.ClientVersion;
@@ -81,6 +82,8 @@ public class Activator extends AbstractUIPlugin
 	@Override
 	public void start(BundleContext context) throws Exception
 	{
+		ModelUtils.assertUIRunning(PLUGIN_ID);
+
 		super.start(context);
 		plugin = this;
 

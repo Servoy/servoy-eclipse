@@ -73,6 +73,13 @@
                </appinfo>
             </annotation>
          </attribute>
+         <attribute name="whenUIRunningStateIs" type="boolean">
+            <annotation>
+               <documentation>
+                  If this optional attribute is specified, it will make this extension be used only if it&apos;s value matches the current &quot;uiRunning&quot; state of Servoy Developer. This flag is false when running for example command line workspace exporter applications.
+               </documentation>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 

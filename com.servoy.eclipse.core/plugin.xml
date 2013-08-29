@@ -309,7 +309,8 @@
       <contributor
             class="com.servoy.eclipse.core.builder.OpenWithEditor"
             id="com.servoy.eclipse.core.builder.preferredEditorContributor"
-            name="Suggests preferred editor to open for markers">
+            name="Suggests preferred editor to open for markers"
+            whenUIRunningStateIs="true">
       </contributor>
    </extension>
    <extension
@@ -317,7 +318,8 @@
       <contributor
             class="com.servoy.eclipse.core.repository.UnexpectedSituationHandler"
             id="com.servoy.eclipse.core.unexpectedModelSituationHandler"
-            name="Asks/notifies user when relevant">
+            name="Asks/notifies user when relevant"
+            whenUIRunningStateIs="true">
       </contributor>
    </extension>
    <extension

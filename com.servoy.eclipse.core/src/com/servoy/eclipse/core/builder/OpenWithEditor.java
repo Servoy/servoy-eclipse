@@ -27,7 +27,6 @@ import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.resource.ServerEditorInput;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.extensions.IMarkerAttributeContributor;
-import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -76,13 +75,10 @@ public class OpenWithEditor implements IMarkerAttributeContributor
 		{
 			try
 			{
-				if (ModelUtils.isUIRunning())
-				{
-					marker.setAttribute(
-						IDE.EDITOR_ID_ATTR,
-						PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-							Platform.getContentTypeManager().getContentType(contentTypeIdentifier)).getId());
-				}
+				marker.setAttribute(
+					IDE.EDITOR_ID_ATTR,
+					PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null, Platform.getContentTypeManager().getContentType(contentTypeIdentifier)).getId());
+
 				if (persist != null)
 				{
 					marker.setAttribute("elementUuid", persist.getUUID().toString()); //$NON-NLS-1$

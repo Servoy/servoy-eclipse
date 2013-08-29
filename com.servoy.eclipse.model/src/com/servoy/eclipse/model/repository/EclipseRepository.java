@@ -43,11 +43,10 @@ import org.eclipse.core.runtime.Status;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IServoyModel;
-import com.servoy.eclipse.model.extensions.IUnexpectedSituationHandler;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.util.IFileAccess;
-import com.servoy.eclipse.model.util.ResourcesUtils;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -753,11 +752,7 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 					String fileContent = SolutionSerializer.generateScriptFile(scriptToRegenerate.getParent(), scriptPath, repository, null);
 					if (fileContent.trim().length() > 0)
 					{
-						List<IUnexpectedSituationHandler> l = ResourcesUtils.getExtensions(IUnexpectedSituationHandler.EXTENSION_ID);
-						for (IUnexpectedSituationHandler e : l)
-						{
-							e.writeOverExistingScriptFile(scriptFile, fileContent);
-						}
+						ModelUtils.getUnexpectedSituationHandler().writeOverExistingScriptFile(scriptFile, fileContent);
 					}
 					else
 					{

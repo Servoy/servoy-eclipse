@@ -33,5 +33,13 @@
             instance="exporter">
       </provider>
    </extension>
+   <extension
+         point="com.servoy.eclipse.model.unexpectedSituationHandler">
+      <contributor
+            class="com.servoy.eclipse.exporter.apps.UnexpectedSituationHandler"
+            id="com.servoy.eclipse.exporter.solution.uexpectedSituationHandler"
+            whenUIRunningStateIs="false">
+      </contributor>
+   </extension>
 
 </plugin>
