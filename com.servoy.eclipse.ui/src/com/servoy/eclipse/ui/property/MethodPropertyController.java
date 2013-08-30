@@ -203,6 +203,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 		ArrayList<MethodArgument> finalParamsList = new ArrayList<MethodArgument>(); // the returned computed list 
 		Pair<List<Object>, List<Object>> instanceParamsArgs = ((AbstractBase)context).getInstanceMethodParameters(methodKey);
 		List<Object> persistParamNames = instanceParamsArgs.getLeft() != null ? instanceParamsArgs.getLeft() : new ArrayList<Object>();
+		List<Object> actualArguments = instanceParamsArgs.getRight() != null ? instanceParamsArgs.getRight() : new ArrayList<Object>();
 
 		for (int i = 0; i < formalArguments.length; i++)
 		{
@@ -219,12 +220,16 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 			}
 		}
 		// add used extra arguments not present in the formal parameter list
-		if (formalArguments.length < persistParamNames.size())
+		if (formalArguments.length < actualArguments.size())
 		{
-			for (int i = formalArguments.length; i < persistParamNames.size(); i++)
+			for (int i = formalArguments.length; i < actualArguments.size(); i++)
 			{
-				Object persistParamName = persistParamNames.get(i);
-				finalParamsList.add(new MethodArgument(" -missing- (" + persistParamName + ")", ArgumentType.Object, null));
+				String missingText = "-missing-";
+				if (i < persistParamNames.size())
+				{
+					missingText += " (" + persistParamNames.get(i) + ")";
+				}
+				finalParamsList.add(new MethodArgument(missingText, ArgumentType.Object, null));
 			}
 		}
 		return finalParamsList.toArray(new MethodArgument[finalParamsList.size()]);//Utils.arrayJoin(formalArguments, paramsList.toArray());
@@ -391,7 +396,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 				else
 				{ // delete was pressed on a missing argument , shift the missing arguments up
 					mwa.arguments.remove(idx);
-					mwa.paramNames.remove(idx);
+					if (mwa.arguments.size() < mwa.paramNames.size()) mwa.paramNames.remove(idx);
 					// if they now are in sync, make sure the names line up
 					if (formalArguments.length == mwa.paramNames.size())
 					{

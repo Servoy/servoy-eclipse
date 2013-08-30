@@ -148,6 +148,7 @@ import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
 import com.servoy.j2db.persistence.ITableDisplay;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RectShape;
@@ -894,8 +895,28 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 								Pair<List<Object>, List<Object>> instanceParamsArgs = ((AbstractBase)persistContext.getPersist()).getInstanceMethodParameters(id.toString());
 								if (instanceParamsArgs != null)
 								{
-									params = new SafeArrayList<Object>(instanceParamsArgs.getLeft() == null ? new ArrayList<Object>()
-										: instanceParamsArgs.getLeft());
+									if (instanceParamsArgs.getLeft() == null)
+									{ //solution is transitioning to updated frm version which includes parameter names in the frm json
+										IScriptProvider scriptMethod = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(),
+											table, value);
+										if (scriptMethod != null)
+										{
+											MethodArgument[] formalArguments = ((AbstractBase)scriptMethod).getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
+											params = new SafeArrayList<Object>();
+											for (MethodArgument methodArgument : formalArguments)
+											{
+												params.add(methodArgument.getName());
+											}
+										}
+										else
+										{
+											params = new SafeArrayList<Object>(new ArrayList<Object>());
+										}
+									}
+									else
+									{
+										params = new SafeArrayList<Object>(instanceParamsArgs.getLeft());
+									}
 									args = new SafeArrayList<Object>(instanceParamsArgs.getRight() == null ? new ArrayList<Object>()
 										: instanceParamsArgs.getRight());
 								}

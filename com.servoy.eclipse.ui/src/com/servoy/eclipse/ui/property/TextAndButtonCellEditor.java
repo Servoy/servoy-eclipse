@@ -12,6 +12,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.ui.property.MethodPropertyController.MethodPropertySource;
 
@@ -60,12 +62,13 @@ public class TextAndButtonCellEditor extends CellEditor
 
 
 		button = new Button(composite, SWT.NONE);
+		button.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE));
 		FormData fd_button = new FormData();
 		fd_button.top = new FormAttachment(text, 0, SWT.TOP);
 		fd_button.right = new FormAttachment(100);
 		fd_button.bottom = new FormAttachment(100);
 		button.setLayoutData(fd_button);
-		button.setText("delete");
+		button.setText("");
 
 		text = new Text(composite, SWT.READ_ONLY);
 		FormData fd_text = new FormData();
@@ -101,7 +104,6 @@ public class TextAndButtonCellEditor extends CellEditor
 	@Override
 	public void activate()
 	{
-		//clicked();
 	}
 
 	protected void clicked()
