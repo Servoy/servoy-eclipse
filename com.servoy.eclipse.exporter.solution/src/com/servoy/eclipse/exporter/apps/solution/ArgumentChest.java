@@ -62,7 +62,8 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 
 	public ArgumentChest(String[] args)
 	{
-		super(args);
+		super();
+		initialize(args);
 	}
 
 	@Override

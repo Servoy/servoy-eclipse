@@ -37,7 +37,8 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 	private boolean exportUsingDbiFileInfoOnly = false;
 	private boolean exportIfDBDown = false;
 
-	public AbstractArgumentChest(String[] args)
+	// this must not be done in constructor as it calls an abstract method that can end up setting fields in an extending class - fields that are not yet set to default values and will be after the constructor of this class finishes
+	public void initialize(String[] args)
 	{
 		if (args.length == 0) mustShowHelp = true;
 		else

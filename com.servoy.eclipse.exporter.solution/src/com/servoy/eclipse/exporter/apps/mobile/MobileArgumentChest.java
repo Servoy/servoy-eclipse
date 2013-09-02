@@ -35,7 +35,8 @@ public class MobileArgumentChest extends AbstractArgumentChest
 
 	public MobileArgumentChest(String[] args)
 	{
-		super(args);
+		super();
+		initialize(args);
 	}
 
 	@Override
