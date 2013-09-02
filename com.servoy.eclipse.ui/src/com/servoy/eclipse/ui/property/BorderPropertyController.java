@@ -56,6 +56,7 @@ import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
 import com.servoy.eclipse.ui.util.ModifiedComboBoxCellEditor;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.debug.DebugUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -108,19 +109,19 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 
 	private static HashMap<BorderType, Border> getDefaultBorderValuesMap(boolean wait)
 	{
+		Runnable runnable = null;
 		synchronized (defaultBorderValues)
 		{
-
 			if (defaultBorderValues.size() == 0)
 			{
-				try
+				runnable = new Runnable()
 				{
-					SwingUtilities.invokeLater(new Runnable()
+					@Override
+					public void run()
 					{
-						@Override
-						public void run()
+						synchronized (defaultBorderValues)
 						{
-							synchronized (defaultBorderValues)
+							if (defaultBorderValues.size() == 0)
 							{
 								defaultBorderValues.put(BorderType.Default, null);
 								defaultBorderValues.put(BorderType.Empty, new EmptyBorder(0, 0, 0, 0));
@@ -133,16 +134,28 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 									Color.BLACK));
 								defaultBorderValues.put(BorderType.RoundedWebBorder, new RoundedBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK,
 									Color.BLACK));
-								defaultBorderValues.notifyAll();
 							}
 						}
-					});
-					if (wait) defaultBorderValues.wait();
+					}
+				};
+			}
+		}
+		if (runnable != null)
+		{
+			if (wait)
+			{
+				try
+				{
+					DebugUtils.invokeAndWaitWhileDispatchingOnSWT(runnable);
 				}
 				catch (Exception e)
 				{
 					Debug.error(e);
 				}
+			}
+			else
+			{
+				SwingUtilities.invokeLater(runnable);
 			}
 		}
 		return defaultBorderValues;
