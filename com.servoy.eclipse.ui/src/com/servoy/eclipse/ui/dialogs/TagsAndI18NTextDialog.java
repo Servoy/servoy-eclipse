@@ -21,6 +21,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.IFontProvider;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -97,6 +98,9 @@ public class TagsAndI18NTextDialog extends Dialog
 	private final FlattenedSolution flattenedSolution;
 	private final PersistContext persistContext;
 
+	/**
+	 * if the Dialog is independent of the solution/form/dataprovider context , then pass null as a value for persistContext (this is the case when it is used in table editor for the title of a column) 
+	 */
 	public TagsAndI18NTextDialog(Shell shell, PersistContext persistContext, FlattenedSolution flattenedSolution, Table table, Object value, String title,
 		IApplication application)
 	{
@@ -127,13 +131,35 @@ public class TagsAndI18NTextDialog extends Dialog
 		final SashForm sashForm = new SashForm(composite, SWT.BORDER);
 
 		final Composite composite_1 = new Composite(sashForm, SWT.NONE);
-		boolean mobile = SolutionMetaData.isServoyMobileSolution(flattenedSolution.getSolution());
-		dpTree = new DataProviderTreeViewer(composite_1, new CombinedLabelProvider(StandardTagsLabelProvider.INSTANCE_HIDEPREFIX,
-			new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(DataProviderLabelProvider.INSTANCE_HIDEPREFIX,
-				persistContext.getContext()))), new CombinedTreeContentProvider(new DataProviderContentProvider(persistContext, flattenedSolution, table),
-			StandardTagsContentProvider.getInstance(mobile)), new DataProviderTreeViewer.DataProviderOptions(false, true, !mobile, !mobile, true, true,
-			!mobile, !mobile, INCLUDE_RELATIONS.NESTED, true, true, null), true, true, TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(),
-			TreePatternFilter.FILTER_PARENTS), SWT.MULTI);
+		boolean mobile = flattenedSolution == null ? false : SolutionMetaData.isServoyMobileSolution(flattenedSolution.getSolution());
+
+		ILabelProvider solutionContextLabelProvider = null;
+		if (persistContext != null)
+		{
+			solutionContextLabelProvider = new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(
+				DataProviderLabelProvider.INSTANCE_HIDEPREFIX, persistContext.getContext()));
+		}
+		else
+		{// i18n dialog is not dependent of solution (ex : table editor -> column detail -> title )
+			solutionContextLabelProvider = new LabelProvider();
+		}
+		DataProviderTreeViewer.DataProviderOptions dataProviderOptions = null;
+
+		if (persistContext != null)
+		{
+			dataProviderOptions = new DataProviderTreeViewer.DataProviderOptions(false, true, !mobile, !mobile, true, true, !mobile, !mobile,
+				INCLUDE_RELATIONS.NESTED, true, true, null);
+		}
+		else
+		{ // i18n dialog is not dependent of solution (ex : table editor -> column detail -> title )
+			dataProviderOptions = new DataProviderTreeViewer.DataProviderOptions(false, true, false, false, false, false, false, false, INCLUDE_RELATIONS.NO,
+				false, false, null);
+		}
+
+		dpTree = new DataProviderTreeViewer(composite_1,
+			new CombinedLabelProvider(StandardTagsLabelProvider.INSTANCE_HIDEPREFIX, solutionContextLabelProvider), new CombinedTreeContentProvider(
+				new DataProviderContentProvider(persistContext, flattenedSolution, table), StandardTagsContentProvider.getInstance(mobile)),
+			dataProviderOptions, true, true, TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(), TreePatternFilter.FILTER_PARENTS), SWT.MULTI);
 
 		addButton = new Button(composite_1, SWT.NONE);
 		addButton.setText(">>");

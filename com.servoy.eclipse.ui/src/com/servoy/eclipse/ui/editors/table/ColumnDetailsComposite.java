@@ -54,6 +54,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
+import com.servoy.eclipse.ui.dialogs.TagsAndI18NTextDialog;
 import com.servoy.eclipse.ui.editors.FormatDialog;
 import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
 import com.servoy.eclipse.ui.property.TableValueEditor;
@@ -61,6 +62,7 @@ import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.views.TreeSelectObservableValue;
 import com.servoy.eclipse.ui.views.TreeSelectViewer;
 import com.servoy.eclipse.ui.wizards.SuggestForeignTypesWizard;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.dataprocessing.IColumnConverter;
@@ -84,6 +86,7 @@ public class ColumnDetailsComposite extends Composite
 	private final TreeSelectViewer foreignTypeTreeSelect;
 	private final Composite formatComposite;
 	private final Text defaultFormat;
+	private final Composite titleComposite;
 	private final Text titleText;
 	private final Text descriptionText;
 	private final Button suggestForeignTypeButton;
@@ -124,10 +127,37 @@ public class ColumnDetailsComposite extends Composite
 
 		descriptionText = new Text(this, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
 
-		titleText = new Text(this, SWT.BORDER);
+		titleComposite = new Composite(this, SWT.NONE);
+		GridLayout layout = new GridLayout(2, false);
+		layout.marginWidth = 0;
+
+		titleComposite.setLayout(layout);
+		titleText = new Text(titleComposite, SWT.BORDER);
+		titleText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		Button titleButton = new Button(titleComposite, SWT.PUSH);
+		titleButton.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
+		titleButton.setText("...");
+		titleButton.addListener(SWT.Selection, new Listener()
+		{
+			public void handleEvent(Event event)
+			{
+				if (column != null)
+				{
+					FlattenedSolution fl = Activator.getDefault().getDesignClient().getFlattenedSolution();
+					TagsAndI18NTextDialog dialog = new TagsAndI18NTextDialog(getShell(), null, fl, column.getTable(), titleText.getText(), "Edit title",
+						Activator.getDefault().getDesignClient());
+					dialog.open();
+					if (dialog.getReturnCode() != Window.CANCEL)
+					{
+						String value = (String)dialog.getValue();
+						titleText.setText(value == null ? "" : value); // TODO: use label provider to hide json format
+					}
+				}
+			}
+		});
 
 		formatComposite = new Composite(this, SWT.NONE);
-		GridLayout layout = new GridLayout(2, false);
+		layout = new GridLayout(2, false);
 		layout.marginWidth = 0;
 
 		formatComposite.setLayout(layout);
@@ -264,7 +294,7 @@ public class ColumnDetailsComposite extends Composite
 		//start parallel group
 		groupLayout.createParallelGroup(GroupLayout.LEADING).
 		//add the title text-box;
-		add(GroupLayout.TRAILING, titleText, GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE).
+		add(titleComposite, GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE).
 		//add the default format combo-box;
 		add(formatComposite, GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE).
 		//add the foreign-type combo-box
@@ -302,7 +332,7 @@ public class ColumnDetailsComposite extends Composite
 		addContainerGap());
 
 		groupLayout.setVerticalGroup(groupLayout.createSequentialGroup().addContainerGap().add(
-			groupLayout.createParallelGroup(GroupLayout.CENTER, false).add(titleLabel).add(titleText)).addPreferredGap(LayoutStyle.RELATED).add(
+			groupLayout.createParallelGroup(GroupLayout.CENTER, false).add(titleLabel).add(titleComposite)).addPreferredGap(LayoutStyle.RELATED).add(
 			groupLayout.createParallelGroup(GroupLayout.CENTER, false).add(defaultFormatLabel).add(formatComposite)).addPreferredGap(LayoutStyle.RELATED).add(
 			groupLayout.createParallelGroup(GroupLayout.CENTER, false).
 			// foreign type label;
