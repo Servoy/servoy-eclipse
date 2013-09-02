@@ -105,11 +105,6 @@ public class MarkerMessages
 	public static ServoyMarker RelationForeignServerWithProblems = new ServoyMarker(
 		"Relation \"{0}\" is referring to an invalid/disabled/unknown foreign server \"{1}\".", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE); //$NON-NLS-1$
 
-	/**
-	 * This message appears when the number of arguments of a script method which is used on an element of a form is lower than the the number of arguments stored in the custom properties of that element.
-	 */
-	public static ServoyMarker MethodNumberOfArgumentsMismatch = new ServoyMarker(
-		"Event handler \"{0}\" for {1}{2} called with more arguments than the function definition \"{3}\".", ServoyBuilder.METHOD_NUMBER_OF_ARGUMENTS_MISMATCH_TYPE); //$NON-NLS-1$
 
 	/*
 	 * The items below should work fine, they were tested.
