@@ -3234,7 +3234,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 									final int height = origImage.getBounds().height;
 									int largest = width > height ? width : height;
 									double zoom = 16d / largest;
-									scaledImage = new Image(Display.getDefault(), origImage.getImageData().scaledTo((int)(width * zoom), (int)(height * zoom)));
+									int scaledWidth = (int)(width * zoom) == 0 ? width : (int)(width * zoom);
+									int scaledHeight = (int)(height * zoom) == 0 ? height : (int)(height * zoom);
+									scaledImage = new Image(Display.getDefault(), origImage.getImageData().scaledTo(scaledWidth, scaledHeight));
 									origImage.dispose();
 									swtImageCache.put(mediaNode.getPath() + javaFile.lastModified(), scaledImage);
 								}
@@ -3472,7 +3474,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						ISupportDeprecatedAnnotation isda = (ISupportDeprecatedAnnotation)unElem.getRealObject();
 						if (isda.isDeprecated())
 						{
-							resultImage = new DecorationOverlayIcon(resultImage, DLTKPluginImages.DESC_OVR_DEPRECATED, IDecoration.UNDERLAY).createImage();
+							resultImage = new DecorationOverlayIcon(resultImage, DLTKPluginImages.DESC_OVR_DEPRECATED, IDecoration.TOP_RIGHT).createImage();
 						}
 					}
 
