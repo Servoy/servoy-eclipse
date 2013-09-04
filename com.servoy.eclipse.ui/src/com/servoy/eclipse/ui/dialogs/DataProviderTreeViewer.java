@@ -280,7 +280,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					}
 
 					// relations
-					if (options.includeRelations != INCLUDE_RELATIONS.NO)
+					if (options.includeRelations != INCLUDE_RELATIONS.NO && flattenedSolution != null)
 					{
 						if (options.relations == null)
 						{
@@ -388,7 +388,8 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					}
 				}
 
-				if (parentElement instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)parentElement).node == SCOPE_VARIABLES)
+				if (parentElement instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)parentElement).node == SCOPE_VARIABLES &&
+					flattenedSolution != null)
 				{
 					Collection<Pair<String, IRootObject>> scopes = flattenedSolution.getScopes();
 					Iterator<Pair<String, IRootObject>> it = scopes.iterator();
@@ -407,7 +408,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 				}
 
 				if (parentElement instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)parentElement).scope != null &&
-					((DataProviderNodeWrapper)parentElement).type == VARIABLES)
+					((DataProviderNodeWrapper)parentElement).type == VARIABLES && flattenedSolution != null)
 				{
 					Iterator<ScriptVariable> scopeVars = flattenedSolution.getScriptVariables(((DataProviderNodeWrapper)parentElement).scope.getName(), true);
 					if (scopeVars.hasNext() && children == null) children = new ArrayList<Object>(10);
@@ -421,7 +422,8 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					}
 				}
 
-				if (parentElement instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)parentElement).node == AGGREGATES)
+				if (parentElement instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)parentElement).node == AGGREGATES &&
+					flattenedSolution != null)
 				{
 					DataProviderNodeWrapper nodeWrapper = (DataProviderNodeWrapper)parentElement;
 					Table aggsTable;
@@ -493,7 +495,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 						}
 
 						// nested relations
-						if (options.includeRelations == INCLUDE_RELATIONS.NESTED)
+						if (options.includeRelations == INCLUDE_RELATIONS.NESTED && flattenedSolution != null)
 						{
 							List<Relation> tableRelations = relationsCache.get(relation.getForeignTable());
 							if (tableRelations == null)

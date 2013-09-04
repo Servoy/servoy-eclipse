@@ -62,7 +62,6 @@ import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.views.TreeSelectObservableValue;
 import com.servoy.eclipse.ui.views.TreeSelectViewer;
 import com.servoy.eclipse.ui.wizards.SuggestForeignTypesWizard;
-import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.dataprocessing.IColumnConverter;
@@ -143,8 +142,7 @@ public class ColumnDetailsComposite extends Composite
 			{
 				if (column != null)
 				{
-					FlattenedSolution fl = Activator.getDefault().getDesignClient().getFlattenedSolution();
-					TagsAndI18NTextDialog dialog = new TagsAndI18NTextDialog(getShell(), null, fl, column.getTable(), titleText.getText(), "Edit title",
+					TagsAndI18NTextDialog dialog = new TagsAndI18NTextDialog(getShell(), null, null, column.getTable(), titleText.getText(), "Edit title",
 						Activator.getDefault().getDesignClient());
 					dialog.open();
 					if (dialog.getReturnCode() != Window.CANCEL)

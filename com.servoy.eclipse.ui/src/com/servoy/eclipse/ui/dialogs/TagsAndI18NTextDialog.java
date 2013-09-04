@@ -131,7 +131,7 @@ public class TagsAndI18NTextDialog extends Dialog
 		final SashForm sashForm = new SashForm(composite, SWT.BORDER);
 
 		final Composite composite_1 = new Composite(sashForm, SWT.NONE);
-		boolean mobile = SolutionMetaData.isServoyMobileSolution(flattenedSolution.getSolution());
+		boolean mobile = flattenedSolution != null ? SolutionMetaData.isServoyMobileSolution(flattenedSolution.getSolution()) : false;
 
 		ILabelProvider solutionContextLabelProvider = null;
 		if (persistContext != null)
