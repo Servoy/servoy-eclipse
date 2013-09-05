@@ -18,7 +18,8 @@ package com.servoy.eclipse.ui.views.solutionexplorer;
 
 import java.awt.Dimension;
 import java.io.File;
-import java.net.URLConnection;
+import java.io.FileInputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -3219,9 +3220,21 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					}
 					else
 					{
-						String mimetype = URLConnection.guessContentTypeFromName(imageFile.getName());
-						String type = (mimetype == null ? "other" : mimetype.split("/")[0]);
-
+						String type = "other";
+						try
+						{
+							ByteBuffer bytes = ByteBuffer.allocate(20);
+							FileInputStream is;
+							is = new FileInputStream(javaFile);
+							is.getChannel().read(bytes);
+							is.getChannel().close();
+							String mimetype = ImageLoader.getContentType(bytes.array());
+							type = (mimetype == null ? "other" : mimetype.split("/")[0]);
+						}
+						catch (Exception e1)
+						{
+							scaledImage = uiActivator.loadImageFromBundle("image.gif");
+						}
 						if (scaledImage == null && type.equals("image"))
 						{
 							try
@@ -3234,8 +3247,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 									final int height = origImage.getBounds().height;
 									int largest = width > height ? width : height;
 									double zoom = 16d / largest;
-									int scaledWidth = (int)(width * zoom) == 0 ? width : (int)(width * zoom);
-									int scaledHeight = (int)(height * zoom) == 0 ? height : (int)(height * zoom);
+									int scaledWidth = (int)(width * zoom) < 16 ? 16 : (int)(width * zoom);
+									int scaledHeight = (int)(height * zoom) < 16 ? 16 : (int)(height * zoom);
 									scaledImage = new Image(Display.getDefault(), origImage.getImageData().scaledTo(scaledWidth, scaledHeight));
 									origImage.dispose();
 									swtImageCache.put(mediaNode.getPath() + javaFile.lastModified(), scaledImage);
