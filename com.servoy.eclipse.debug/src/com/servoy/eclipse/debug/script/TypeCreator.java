@@ -1297,7 +1297,8 @@ public class TypeCreator extends TypeCache
 	{
 		int index = objectTypeName.indexOf('<');
 		int index2;
-		if (index != -1 && (index2 = objectTypeName.indexOf('>', index)) != -1)
+		// skip plugins that return Record or Foundset, the object type shouldnt be used to generate JSFoundset<pluginname>
+		if (!objectTypeName.startsWith("Plugin<") && index != -1 && (index2 = objectTypeName.indexOf('>', index)) != -1)
 		{
 			String config = objectTypeName.substring(index + 1, index2);
 
