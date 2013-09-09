@@ -18,8 +18,6 @@ package com.servoy.eclipse.ui.views.solutionexplorer;
 
 import java.awt.Dimension;
 import java.io.File;
-import java.io.FileInputStream;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -3220,21 +3218,10 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					}
 					else
 					{
-						String type = "other";
-						try
-						{
-							ByteBuffer bytes = ByteBuffer.allocate(20);
-							FileInputStream is;
-							is = new FileInputStream(javaFile);
-							is.getChannel().read(bytes);
-							is.getChannel().close();
-							String mimetype = ImageLoader.getContentType(bytes.array());
-							type = (mimetype == null ? "other" : mimetype.split("/")[0]);
-						}
-						catch (Exception e1)
-						{
-							scaledImage = uiActivator.loadImageFromBundle("image.gif");
-						}
+
+						String mimetype = ImageLoader.getContentType(mediaNode.getMedia().getMediaData());
+						String type = (mimetype == null ? "other" : mimetype.split("/")[0]);
+
 						if (scaledImage == null && type.equals("image"))
 						{
 							try
@@ -3487,7 +3474,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						ISupportDeprecatedAnnotation isda = (ISupportDeprecatedAnnotation)unElem.getRealObject();
 						if (isda.isDeprecated())
 						{
-							resultImage = new DecorationOverlayIcon(resultImage, DLTKPluginImages.DESC_OVR_DEPRECATED, IDecoration.TOP_RIGHT).createImage();
+							resultImage = new DecorationOverlayIcon(resultImage, DLTKPluginImages.DESC_OVR_DEPRECATED, IDecoration.UNDERLAY).createImage();
 						}
 					}
 
