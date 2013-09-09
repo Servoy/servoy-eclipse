@@ -252,7 +252,7 @@ public class Activator extends Plugin
 	@Override
 	public void start(BundleContext context) throws Exception
 	{
-		ModelUtils.assertUIRunning(PLUGIN_ID);
+		ModelUtils.assertUINotDisabled(PLUGIN_ID);
 
 		super.start(context);
 		plugin = this;

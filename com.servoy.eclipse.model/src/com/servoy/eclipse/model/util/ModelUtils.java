@@ -67,7 +67,7 @@ import com.servoy.j2db.util.PersistHelper;
 public class ModelUtils
 {
 
-	public static final String ONLY_WHEN_UI_RUNNING_ATTRIBUTE_NAME = "whenUIRunningStateIs"; //$NON-NLS-1$
+	public static final String ONLY_WHEN_UI_DISABLED_ATTRIBUTE_NAME = "whenUIDisabledStateIs"; //$NON-NLS-1$
 
 	public static String getTokenValue(Object[] value, String delim)
 	{
@@ -312,29 +312,29 @@ public class ModelUtils
 		return sm;
 	}
 
-	private static boolean uiRunning = true;
+	private static boolean uiDisabled = false;
 
 	/**
-	 * Servoy plugins that are not supposed to start when developer is started with no UI (for example by workspace exporter apps)
+	 * Servoy plugins that are not supposed to start when developer is started with UI disabled (for example by workspace exporter apps)
 	 * should call this method first thing in their bundle activator's start() method.
 	 * @throws RuntimeException if UI is not supposed to be used
 	 */
-	public static void assertUIRunning(String bundleName) throws RuntimeException
+	public static void assertUINotDisabled(String bundleName) throws RuntimeException
 	{
 		// probably Servoy developer was started via a workspace exporter app. - it must not initialize core/ui and other related projects
 		// but some extension points these use (for example DLTK extension points) will cause them to get loaded; do not allow this!
-		if (!ModelUtils.isUIRunning()) throw new RuntimeException(bundleName != null
+		if (ModelUtils.isUIDisabled()) throw new RuntimeException(bundleName != null
 			? "'" + bundleName + "' bundle will not be started as Servoy is started without UI." : "Assertion failed. UI is marked as not running."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
-	public static boolean isUIRunning()
+	public static boolean isUIDisabled()
 	{
-		return uiRunning;
+		return uiDisabled;
 	}
 
-	public static void setUIRunning(boolean running)
+	public static void setUIDisabled(boolean disabled)
 	{
-		uiRunning = running;
+		uiDisabled = disabled;
 	}
 
 	public static boolean isInheritedFormElement(Object element, IPersist context)
@@ -436,8 +436,8 @@ public class ModelUtils
 			{
 				try
 				{
-					String expectedUIRunningState = ce.getAttribute(ONLY_WHEN_UI_RUNNING_ATTRIBUTE_NAME);
-					if (expectedUIRunningState == null || expectedUIRunningState.equals(Boolean.toString(ModelUtils.isUIRunning())))
+					String expectedUIDisabledState = ce.getAttribute(ONLY_WHEN_UI_DISABLED_ATTRIBUTE_NAME);
+					if (expectedUIDisabledState == null || expectedUIDisabledState.equals(Boolean.toString(ModelUtils.isUIDisabled())))
 					{
 						T t = (T)ce.createExecutableExtension("class"); //$NON-NLS-1$
 						if (t != null)

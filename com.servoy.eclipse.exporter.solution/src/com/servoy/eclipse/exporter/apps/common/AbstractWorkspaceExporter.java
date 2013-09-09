@@ -97,7 +97,7 @@ public abstract class AbstractWorkspaceExporter implements IApplication, IBundle
 		{
 			mustStop = false;
 			exitCode = EXIT_OK;
-			ModelUtils.setUIRunning(false);
+			ModelUtils.setUIDisabled(true);
 
 			IArgumentChest configuration = createArgumentChest(context);
 			if (configuration.isInvalid())
