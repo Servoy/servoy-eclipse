@@ -15629,18 +15629,18 @@ var movedYPixels = y -yPrevious;]]></sample>
     </object>
     <object clientSupport="mc,wc,sc" extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSField" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSFieldWithConstants" scriptingName="JSField">
       <constants>
-        <constant clientSupport="wc,sc" name="CALENDAR">
+        <constant clientSupport="mc,wc,sc" name="CALENDAR">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the 
+            <description clientSupport="mc,wc,sc"><![CDATA[Constant for specifying the display type of a JSField. Sets the display type of the 
 field to calendar. The field will show a formatted date and will have a button which
 pops up a calendar for date selection.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Constant for specifying the display type of a JSField.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[var cal = form.newField('my_table_date', JSField.CALENDAR, 10, 10, 100, 20);]]></sample>
+            <sample clientSupport="mc,wc,sc"><![CDATA[var cal = form.newField('my_table_date', JSField.CALENDAR, 10, 10, 100, 20);]]></sample>
           </samples>
         </constant>
         <constant clientSupport="mc,wc,sc" name="CHECKS">
@@ -16727,7 +16727,7 @@ body.styleClass = 'myBody';]]></sample>
       <functions>
         <function clientSupport="mc" name="getComponents">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSComponent[]" typecode="[Lcom.servoy.base.solutionmodel.IBaseSMComponent;"><![CDATA[an array of all the JSComponents on the footer.]]></return>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSComponent[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSComponent;"><![CDATA[an array of all the JSComponents on the footer.]]></return>
           <descriptions>
             <description clientSupport="mc"><![CDATA[Returns a array of all the IBaseSMComponents that a footer has.]]></description>
           </descriptions>
@@ -17864,7 +17864,8 @@ frmGlobalRel.namedFoundSet = solutionModel.getRelation("g1_to_categories");]]></
         <property clientSupport="mc,wc,sc" name="navigator">
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[The navigator (previously named "controller")
+            <description clientSupport="mc"><![CDATA[The navigator is a form that usually handles navigation in application. It is displayed on left side of the screen. Can also have value SM_DEFAULTS.NONE (no navigator) or SM_DEFAULTS.IGNORE (reuse current form navigator).]]></description>
+            <description clientSupport="wc,sc"><![CDATA[The navigator (previously named "controller")
 that is used to control/navigate to the form. The navigator is shown at
 the left or at the right side of the form, depending on the page orientation. 
 
@@ -17875,7 +17876,8 @@ IGNORE - the navigator last assigned to a previous form.
 Custom - a custom navigator based on a selected form.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[The navigator (previously named "controller")
+            <summary clientSupport="mc"><![CDATA[The navigator is a form that usually handles navigation in application.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[The navigator (previously named "controller")
 that is used to control/navigate to the form.]]></summary>
           </summaries>
           <samples>
