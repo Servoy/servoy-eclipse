@@ -43,6 +43,7 @@ import com.servoy.eclipse.ui.search.ScriptVariableSearch;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.ScriptVariable;
+import com.servoy.j2db.persistence.SolutionMetaData;
 
 /**
  * @author jcompagner
@@ -231,14 +232,30 @@ public class ServoyScriptValidator implements IValidatorExtension2
 	@SuppressWarnings("nls")
 	private ValidationStatus generateValidationStatusForCurrentSolutionType(String name, boolean isMethod)
 	{
-		if (isMethod)
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() != null)
 		{
-			return new ValidationStatus(JavaScriptProblems.PRIVATE_FUNCTION, "The function " + name + "() is not visible in current solution type");
+			int solutionType = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution().getSolutionType();
+			String solTypeString = null;
+			for (int i = 0; i < SolutionMetaData.solutionTypes.length; i++)
+			{
+				if (SolutionMetaData.solutionTypes[i] == solutionType)
+				{
+					solTypeString = SolutionMetaData.solutionTypeNames[i];
+					break;
+				}
+			}
+			if (isMethod)
+			{
+				return new ValidationStatus(JavaScriptProblems.PRIVATE_FUNCTION, "The function " + name + "() is not available in solutions of type " +
+					solTypeString);
+			}
+			else
+			{
+				return new ValidationStatus(JavaScriptProblems.PRIVATE_VARIABLE, "The property " + name + " is not available in solutions of type " +
+					solTypeString);
+			}
 		}
-		else
-		{
-			return new ValidationStatus(JavaScriptProblems.PRIVATE_VARIABLE, "The property " + name + " is not visible in current solution type");
-		}
+		return null;
 	}
 
 	private Form getForm()
