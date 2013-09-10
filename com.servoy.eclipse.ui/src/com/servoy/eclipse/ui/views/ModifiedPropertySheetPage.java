@@ -222,11 +222,15 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 									RepositoryHelper.getDisplayName(StaticContentSpecLoader.PROPERTY_ONDATACHANGEMETHODID.getPropertyName(), null).equals(
 										item.getText(0)))
 								{
-									text = "Warning: Do not use dialogs as a dialog will interfere with focus";
+									text = "Warning: Do not use dialogs, as a dialog will interfere with focus";
 								}
 								if (StaticContentSpecLoader.PROPERTY_TITLETEXT.getPropertyName().equals(item.getText(0)))
 								{
 									text = "Set value <empty> for no title text";
+								}
+								if (StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName().equals(item.getText(0)))
+								{
+									text = "Set z-index of the element.";
 								}
 								if (StaticContentSpecLoader.PROPERTY_ROLLOVERCURSOR.getPropertyName().equals(item.getText(0)) ||
 									StaticContentSpecLoader.PROPERTY_ROLLOVERIMAGEMEDIAID.getPropertyName().replace("ID", "").equals(item.getText(0)))
