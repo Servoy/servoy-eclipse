@@ -323,8 +323,9 @@ public class ModelUtils
 	{
 		// probably Servoy developer was started via a workspace exporter app. - it must not initialize core/ui and other related projects
 		// but some extension points these use (for example DLTK extension points) will cause them to get loaded; do not allow this!
-		if (ModelUtils.isUIDisabled()) throw new RuntimeException(bundleName != null
-			? "'" + bundleName + "' bundle will not be started as Servoy is started without UI." : "Assertion failed. UI is marked as not running."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		if (ModelUtils.isUIDisabled()) throw new RuntimeException(
+			bundleName != null
+				? "'" + bundleName + "' bundle will not be started as Servoy is started without UI. Please ignore this log message." : "Assertion failed. UI is marked as not running."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	public static boolean isUIDisabled()
