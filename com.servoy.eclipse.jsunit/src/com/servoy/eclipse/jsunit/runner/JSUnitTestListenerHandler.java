@@ -26,6 +26,9 @@ import junit.framework.TestCase;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.Wrapper;
+
 /**
  * Class that makes the conversion between JSUnit test result and JUnit test result.
  * 
@@ -101,13 +104,28 @@ public abstract class JSUnitTestListenerHandler<T, E>
 		String failureMsg = getThrowableMsg(testName, assertionfailederror);
 		StackTraceElement[] stackTrace = getStackTrace(testName, assertionfailederror);
 
+		Object expected = null;
+		Object actual = null;
+		if (assertionfailederror instanceof Scriptable)
+		{
+			expected = ((Scriptable)assertionfailederror).get("mExpected", ((Scriptable)assertionfailederror));
+			if (expected instanceof Wrapper) expected = ((Wrapper)expected).unwrap();
+			actual = ((Scriptable)assertionfailederror).get("mActual", ((Scriptable)assertionfailederror));
+			if (actual instanceof Wrapper) actual = ((Wrapper)actual).unwrap();
+			if (expected == Scriptable.NOT_FOUND) expected = null;
+			if (actual == Scriptable.NOT_FOUND) actual = null;
+		}
+
+
 		Test currentTest = testStack.peek();
 		if (!sameName(currentTest, testName))
 		{
 			System.err.println("Failure for test " + testName + " while another test is running:" + getTestName(currentTest));
 		}
+		AssertionFailedError failure;
 
-		AssertionFailedError failure = new AssertionFailedError(failureMsg);
+		if (actual != null && expected != null) failure = new ServoyAssertionFailedError(failureMsg, actual.toString(), expected.toString());
+		else failure = new AssertionFailedError(failureMsg);
 		if (stackTrace == null) stackTrace = new StackTraceElement[0];
 		failure.setStackTrace(stackTrace);
 		result.addFailure(currentTest, failure);

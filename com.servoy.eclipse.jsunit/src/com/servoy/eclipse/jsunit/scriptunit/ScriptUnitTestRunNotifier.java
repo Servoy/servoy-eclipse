@@ -30,6 +30,7 @@ import org.eclipse.dltk.testing.ITestingClient;
 import org.eclipse.dltk.testing.model.ITestRunSession;
 
 import com.servoy.eclipse.jsunit.runner.JSUnitTestListenerHandler;
+import com.servoy.eclipse.jsunit.runner.ServoyAssertionFailedError;
 
 /**
  * Notifies the current running dltk TestRunSession about the test states .
@@ -110,9 +111,17 @@ public class ScriptUnitTestRunNotifier implements TestListener
 		{
 			AssertionFailedError fail = (AssertionFailedError)t;
 			testingClient.testFailed(ITestingClient.FAILED, testList.indexOf(test), ((TestCase)test).getName());
-			String asertionFailedPattern = "AssertionFailedError: Expected:<(.+)>, but was:<(.+)>";
-			testingClient.testExpected(fail.getMessage().replaceAll(asertionFailedPattern, "$1"));
-			testingClient.testActual(fail.getMessage().replaceAll(asertionFailedPattern, "$2"));
+			if (t instanceof ServoyAssertionFailedError)
+			{
+				testingClient.testExpected(((ServoyAssertionFailedError)t).getExpected());
+				testingClient.testActual(((ServoyAssertionFailedError)t).getActual());
+			}
+			else
+			{
+				String asertionFailedPattern = "AssertionFailedError: Expected:<(.+)>, but was:<(.+)>(.+)";
+				testingClient.testExpected(fail.getMessage().replaceAll(asertionFailedPattern, "$1"));
+				testingClient.testActual(fail.getMessage().replaceAll(asertionFailedPattern, "$2"));
+			}
 		}
 		else
 		{
