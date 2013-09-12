@@ -6093,7 +6093,7 @@ databaseManager.saveData();
           </samples>
           <parameters>
             <parameter name="source" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
-              <description><![CDATA[The source record or object to be copied.]]></description>
+              <description><![CDATA[The source record or (java/javascript)object to be copied.]]></description>
             </parameter>
             <parameter name="destination" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.IRecordInternal">
               <description><![CDATA[The destination record to copy to.]]></description>
@@ -6142,7 +6142,7 @@ databaseManager.saveData();
           </samples>
           <parameters>
             <parameter name="source" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
-              <description><![CDATA[The source record or object to be copied.]]></description>
+              <description><![CDATA[The source record or (java/javascript)object to be copied.]]></description>
             </parameter>
             <parameter name="destination" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.IRecordInternal">
               <description><![CDATA[The destination record to copy to.]]></description>
@@ -6194,7 +6194,7 @@ databaseManager.saveData();
           </samples>
           <parameters>
             <parameter name="source" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
-              <description><![CDATA[The source record or object to be copied.]]></description>
+              <description><![CDATA[The source record or (java/javascript)object to be copied.]]></description>
             </parameter>
             <parameter name="destination" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.IRecordInternal">
               <description><![CDATA[The destination record to copy to.]]></description>
@@ -22668,22 +22668,22 @@ foundset.loadRecords(q);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="getRecordIndex">
+        <function clientSupport="mc,wc,sc" name="getRecordIndex">
           <argumentsTypes>
-            <argumentType typecode="com.servoy.j2db.dataprocessing.IRecordInternal"/>
+            <argumentType typecode="com.servoy.base.scripting.api.IJSRecord"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int index.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Get the record index. Will return -1 if the record can't be found.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Get the record index. Will return -1 if the record can't be found.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Get the record index.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Get the record index.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[var index = %%prefix%%foundset.getRecordIndex(record);]]></sample>
+            <sample clientSupport="mc,wc,sc"><![CDATA[var index = %%prefix%%foundset.getRecordIndex(record);]]></sample>
           </samples>
           <parameters>
-            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.j2db.dataprocessing.IRecordInternal">
+            <parameter name="record" type="com.servoy.j2db.dataprocessing.Record" typecode="com.servoy.base.scripting.api.IJSRecord">
               <description><![CDATA[Record]]></description>
             </parameter>
           </parameters>
@@ -23737,7 +23737,10 @@ There are 3 types of possible use with the foundset updater
 1) update entire foundset by a single sql statement; that is not possible when the table of the foundset has tracking enabled then it will loop over the whole foundset. 
    When a single sql statement is done, modification columns will not be updated, because it does the update directly in the database, without getting the records.
 2) update part of foundset, for example the first 4 row (starts with selected row)
-3) safely loop through foundset (starts with selected row)]]></description>
+3) safely loop through foundset (starts with selected row)
+
+after the perform update call there are no records in edit mode, that where not already in edit mode, because all of them are saved directly to the database, 
+or in mode 1 the records are not touched at all and the database is updated directly.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Do the actual update in the database, returns true if successful.]]></summary>
