@@ -101,7 +101,7 @@ import com.servoy.j2db.util.Utils;
 public class MobileExporter
 {
 
-	public static final String TEST_WAR_SUFFIX = "_TEST";
+	public static final String TEST_WAR_SUFFIX = "_TEST"; // do not change this; or if you do update Jenkins scripts both in R&D Jenkins and on "Building a Software Factory" wiki page
 
 	public static final int DEFAULT_SYNC_TIMEOUT = 30;
 	public static final String DEFAULT_SERVER_URL = "http://localhost:8080";
