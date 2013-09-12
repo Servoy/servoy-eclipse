@@ -68,11 +68,11 @@ import com.servoy.j2db.dataprocessing.IFoundSetManagerInternal;
 import com.servoy.j2db.dataprocessing.IGlobalValueEntry;
 import com.servoy.j2db.dataprocessing.SortColumn;
 import com.servoy.j2db.dataprocessing.SwingFoundSetFactory;
-import com.servoy.j2db.debug.DebugWebClient;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.plugins.ClientPluginAccessProvider;
 import com.servoy.j2db.plugins.IPluginAccess;
 import com.servoy.j2db.plugins.IPluginManager;
@@ -247,9 +247,121 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 			return null;
 		}
 		FlattenedSolution flattenedSolution = activeProject.getEditingFlattenedSolution();
-		DebugWebClient.installServoyMobileInternalStyle(flattenedSolution);
+		installServoyMobileInternalStyle(flattenedSolution);
 		return flattenedSolution;
 	}
+
+	public static void installServoyMobileInternalStyle(FlattenedSolution flattenedSolution)
+	{
+		if (flattenedSolution == null) return;
+
+		SolutionMetaData mainSolutionMetaData = flattenedSolution.getMainSolutionMetaData();
+		if (mainSolutionMetaData != null && mainSolutionMetaData.getSolutionType() == SolutionMetaData.MOBILE)
+		{
+			// Add a built-in style for mobile schemes
+			if (flattenedSolution.getStyle("_servoy_mobile") == null)
+			{
+				String servoyMobileStyle = //
+
+				"label, label.a, label.b, label.c, label.d, label.e {"//
+					+ "color: #101010;" //  
+					+ "margin-left:5px;" //
+					+ "background-color: #414141;" //
+					+ "}"//
+
+					+ "headertext, headertext.a {"//
+					+ "color: #ffffff;" //
+					+ "background-color: #414141;" //
+					+ "font-weight:bold;" //
+					+ "}"//
+
+					+ "field {"//
+					+ "color: #101010;" //
+					+ "background-color: #F9F9F9;" //
+					+ "}"//
+
+					+ "button, button.a, combobox.a, check.a, radio.a, portal.a {"//
+					+ "color: #FFFFFF;" //
+					+ "background-color: #414141;" + "font-weight:bold;" //
+					+ "}"//
+
+					+ "header, header.a, footer.a,  title_header, title_header.a, title_footer.a {" //
+					+ "background-color: #262626;" //
+					+ "}" //
+
+					+ "headertext.b {"//
+					+ "color: #ffffff;" //
+					+ "background-color: #4C83B1;" //
+					+ "font-weight:bold;" //
+					+ "}" //
+
+					+ "button.b, combobox.b, check.b, radio.b, portal.b {"//
+					+ "color: #FFFFFF;" //
+					+ "background-color: #4C83B1;" //
+					+ "font-weight:bold;" //
+					+ "}" //
+
+					+ "header.b, footer.b, title_header.b, title_footer.b {" //
+					+ "background-color: #5A91BF;" //
+					+ "}" //
+
+					+ "headertext.c {"//
+					+ "color: #101010;" //
+					+ "background-color: #4C83B1;" //
+					+ "font-weight:bold;" //
+					+ "}" //
+
+					+ "button.c, combobox.c, check.c, radio.c, portal.c {" //
+					+ "color: #363636;" //
+					+ "background-color: #F6F6F6;"//
+					+ "font-weight:bold;" //
+					+ "}"//
+
+					+ "header.c, footer.c, title_header.c, title_footer.c {" //
+					+ "background-color: #E4E4E4;" //
+					+ "}" //
+
+					+ "headertext.d {"//
+					+ "color: #101010;" //
+					+ "background-color: #4C83B1;" //
+					+ "font-weight:bold;" //
+					+ "}" //
+
+					+ "button.d, combobox.d, check.d, radio.d, portal.d {" //
+					+ "color: #363636;" //
+					+ "background-color: #F8F8F8;" //
+					+ "font-weight:bold;" //
+					+ "}"//
+
+					+ "header.d, footer.d, title_header.d, title_footer.d {" //
+					+ "background-color: #C7C7C7;" //
+					+ "}" //
+
+					+ "headertext.e {"//
+					+ "color: #101010;" //
+					+ "background-color: #4C83B1;" //
+					+ "font-weight:bold;" //
+					+ "}" //
+
+					+ "button.e, combobox.e, check.e, radio.e, portal.e {" //
+					+ "color: #363636;" //
+					+ "background-color: #FFE87C;" //
+					+ "font-weight:bold;" //
+					+ "}" //
+
+					+ "header.e, footer.e, title_header.e, title_footer.e {" //
+					+ "background-color: #FBEE90;" //
+					+ "}" //
+				;
+				flattenedSolution.createStyle("_servoy_mobile", servoyMobileStyle);
+			}
+		}
+		else
+		{
+			flattenedSolution.removeStyle("_servoy_mobile");
+		}
+	}
+
 
 	public IFormManager getFormManager()
 	{

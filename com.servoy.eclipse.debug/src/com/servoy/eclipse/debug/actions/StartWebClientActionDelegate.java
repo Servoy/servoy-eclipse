@@ -183,7 +183,8 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 		if (activeProject != null && activeProject.getSolution() != null)
 		{
 			final Solution solution = activeProject.getSolution();
-			if (solution.getSolutionType() == SolutionMetaData.SMART_CLIENT_ONLY || solution.getSolutionType() == SolutionMetaData.MOBILE_MODULE) enabled = false;
+			if (solution.getSolutionType() == SolutionMetaData.SMART_CLIENT_ONLY || solution.getSolutionType() == SolutionMetaData.MOBILE_MODULE ||
+				solution.getSolutionType() == SolutionMetaData.MOBILE) enabled = false;
 		}
 		else
 		{
