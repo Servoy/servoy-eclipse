@@ -46,7 +46,7 @@ public class ExportServoyModel extends AbstractServoyModel implements IServoyMod
 			activeResourcesProject = activeProject.getResourcesProject();
 			try
 			{
-				activeResourcesProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
+				if (activeResourcesProject != null) activeResourcesProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
 			}
 			catch (CoreException e)
 			{
