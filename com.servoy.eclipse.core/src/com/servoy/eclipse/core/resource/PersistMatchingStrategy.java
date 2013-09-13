@@ -64,7 +64,10 @@ public class PersistMatchingStrategy implements IEditorMatchingStrategy
 			if (!fileInput.getFile().getFileExtension().equals(SolutionSerializer.JS_FILE_EXTENSION_WITHOUT_DOT))
 			{
 				File projectFile = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getProjectFile(fileInput.getFile().getProject().getName());
-				return findUuidParent(projectFile, fileInput.getFile().getLocation().toFile(), ((PersistEditorInput)editorInput).getUuid()) != null;
+				if (projectFile != null)
+				{
+					return findUuidParent(projectFile, fileInput.getFile().getLocation().toFile(), ((PersistEditorInput)editorInput).getUuid()) != null;
+				}
 			}
 		}
 

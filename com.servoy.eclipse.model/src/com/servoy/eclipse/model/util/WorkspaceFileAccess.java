@@ -330,7 +330,7 @@ public class WorkspaceFileAccess implements IFileAccess
 		if (projectName != null)
 		{
 			IProject project = workspaceRoot.getProject(projectName);
-			if (project != null) return project.getLocation().toFile();
+			if (project != null && project.getLocation() != null) return project.getLocation().toFile();
 		}
 		return null;
 	}
