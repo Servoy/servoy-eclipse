@@ -143,7 +143,7 @@ public class ColumnDetailsComposite extends Composite
 				if (column != null)
 				{
 					TagsAndI18NTextDialog dialog = new TagsAndI18NTextDialog(getShell(), null, null, column.getTable(), titleText.getText(), "Edit title",
-						Activator.getDefault().getDesignClient());
+						Activator.getDefault().getDesignClient(), false);
 					dialog.open();
 					if (dialog.getReturnCode() != Window.CANCEL)
 					{

@@ -40,6 +40,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
@@ -217,6 +218,10 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			}
 		}
 		if (propertyDescriptor.propertyDescriptor.getName().equals("loginFormID"))
+		{
+			return true;
+		}
+		if (propertyDescriptor.propertyDescriptor.getName().equals("innerHTML") && (persistContext.getPersist() instanceof Bean))
 		{
 			return true;
 		}

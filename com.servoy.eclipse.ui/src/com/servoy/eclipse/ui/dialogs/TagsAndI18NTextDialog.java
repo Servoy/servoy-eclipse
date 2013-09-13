@@ -81,6 +81,7 @@ public class TagsAndI18NTextDialog extends Dialog
 	private final IApplication application;
 	private String value;
 	private Button addButton;
+	private final boolean hideTags;
 
 	private static final String STANDARD_TAGS_LABEL = "Standard tags";
 
@@ -102,7 +103,7 @@ public class TagsAndI18NTextDialog extends Dialog
 	 * if the Dialog is independent of the solution/form/dataprovider context , then pass null as a value for persistContext (this is the case when it is used in table editor for the title of a column) 
 	 */
 	public TagsAndI18NTextDialog(Shell shell, PersistContext persistContext, FlattenedSolution flattenedSolution, Table table, Object value, String title,
-		IApplication application)
+		IApplication application, boolean hideTags)
 	{
 		super(shell);
 		this.persistContext = persistContext;
@@ -111,6 +112,7 @@ public class TagsAndI18NTextDialog extends Dialog
 		this.application = application;
 		this.value = value == null ? "" : value.toString();
 		this.title = title;
+		this.hideTags = hideTags;
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX);
 	}
 
@@ -130,48 +132,51 @@ public class TagsAndI18NTextDialog extends Dialog
 
 		final SashForm sashForm = new SashForm(composite, SWT.BORDER);
 
-		final Composite composite_1 = new Composite(sashForm, SWT.NONE);
-		boolean mobile = flattenedSolution != null ? SolutionMetaData.isServoyMobileSolution(flattenedSolution.getSolution()) : false;
-
-		ILabelProvider solutionContextLabelProvider = null;
-		if (persistContext != null)
+		if (!hideTags)
 		{
-			solutionContextLabelProvider = new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(
-				DataProviderLabelProvider.INSTANCE_HIDEPREFIX, persistContext.getContext()));
-		}
-		else
-		{// i18n dialog is not dependent of solution (ex : table editor -> column detail -> title )
-			solutionContextLabelProvider = new LabelProvider();
-		}
-		DataProviderTreeViewer.DataProviderOptions dataProviderOptions = null;
+			final Composite composite_1 = new Composite(sashForm, SWT.NONE);
+			boolean mobile = flattenedSolution != null ? SolutionMetaData.isServoyMobileSolution(flattenedSolution.getSolution()) : false;
 
-		if (persistContext != null)
-		{
-			dataProviderOptions = new DataProviderTreeViewer.DataProviderOptions(false, true, !mobile, !mobile, true, true, !mobile, !mobile,
-				INCLUDE_RELATIONS.NESTED, true, true, null);
-		}
-		else
-		{ // i18n dialog is not dependent of solution (ex : table editor -> column detail -> title )
-			dataProviderOptions = new DataProviderTreeViewer.DataProviderOptions(false, true, false, false, false, false, false, false, INCLUDE_RELATIONS.NO,
-				false, false, null);
-		}
+			ILabelProvider solutionContextLabelProvider = null;
+			if (persistContext != null)
+			{
+				solutionContextLabelProvider = new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(
+					DataProviderLabelProvider.INSTANCE_HIDEPREFIX, persistContext.getContext()));
+			}
+			else
+			{// i18n dialog is not dependent of solution (ex : table editor -> column detail -> title )
+				solutionContextLabelProvider = new LabelProvider();
+			}
+			DataProviderTreeViewer.DataProviderOptions dataProviderOptions = null;
 
-		dpTree = new DataProviderTreeViewer(composite_1,
-			new CombinedLabelProvider(StandardTagsLabelProvider.INSTANCE_HIDEPREFIX, solutionContextLabelProvider), new CombinedTreeContentProvider(
-				new DataProviderContentProvider(persistContext, flattenedSolution, table), StandardTagsContentProvider.getInstance(mobile)),
-			dataProviderOptions, true, true, TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(), TreePatternFilter.FILTER_PARENTS), SWT.MULTI);
+			if (persistContext != null)
+			{
+				dataProviderOptions = new DataProviderTreeViewer.DataProviderOptions(false, true, !mobile, !mobile, true, true, !mobile, !mobile,
+					INCLUDE_RELATIONS.NESTED, true, true, null);
+			}
+			else
+			{ // i18n dialog is not dependent of solution (ex : table editor -> column detail -> title )
+				dataProviderOptions = new DataProviderTreeViewer.DataProviderOptions(false, true, false, false, false, false, false, false,
+					INCLUDE_RELATIONS.NO, false, false, null);
+			}
 
-		addButton = new Button(composite_1, SWT.NONE);
-		addButton.setText(">>");
-		final GroupLayout groupLayout = new GroupLayout(composite_1);
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(
-			groupLayout.createSequentialGroup().add(10, 10, 10).add(dpTree, GroupLayout.PREFERRED_SIZE, 232, Short.MAX_VALUE).addPreferredGap(
-				LayoutStyle.RELATED).add(addButton, GroupLayout.PREFERRED_SIZE, 56, GroupLayout.PREFERRED_SIZE).addContainerGap()));
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().add(130, 130, 130).add(addButton)).add(
-					groupLayout.createSequentialGroup().add(10, 10, 10).add(dpTree, GroupLayout.PREFERRED_SIZE, 426, Short.MAX_VALUE))).add(24, 24, 24)));
-		composite_1.setLayout(groupLayout);
+			dpTree = new DataProviderTreeViewer(composite_1, new CombinedLabelProvider(StandardTagsLabelProvider.INSTANCE_HIDEPREFIX,
+				solutionContextLabelProvider), new CombinedTreeContentProvider(new DataProviderContentProvider(persistContext, flattenedSolution, table),
+				StandardTagsContentProvider.getInstance(mobile)), dataProviderOptions, true, true, TreePatternFilter.getSavedFilterMode(
+				getDialogBoundsSettings(), TreePatternFilter.FILTER_PARENTS), SWT.MULTI);
+
+			addButton = new Button(composite_1, SWT.NONE);
+			addButton.setText(">>");
+			final GroupLayout groupLayout = new GroupLayout(composite_1);
+			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(
+				groupLayout.createSequentialGroup().add(10, 10, 10).add(dpTree, GroupLayout.PREFERRED_SIZE, 232, Short.MAX_VALUE).addPreferredGap(
+					LayoutStyle.RELATED).add(addButton, GroupLayout.PREFERRED_SIZE, 56, GroupLayout.PREFERRED_SIZE).addContainerGap()));
+			groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
+				groupLayout.createSequentialGroup().add(
+					groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().add(130, 130, 130).add(addButton)).add(
+						groupLayout.createSequentialGroup().add(10, 10, 10).add(dpTree, GroupLayout.PREFERRED_SIZE, 426, Short.MAX_VALUE))).add(24, 24, 24)));
+			composite_1.setLayout(groupLayout);
+		}
 
 		final Composite composite_2 = new Composite(sashForm, SWT.NONE);
 
@@ -181,8 +186,12 @@ public class TagsAndI18NTextDialog extends Dialog
 		final TabItem textTabItem = new TabItem(tabFolder, SWT.NONE);
 		textTabItem.setText("Text");
 
-		final TabItem i18nTabItem = new TabItem(tabFolder, SWT.NONE);
-		i18nTabItem.setText("I18n");
+		TabItem i18nTabItem = null;
+		if (!hideTags)
+		{
+			i18nTabItem = new TabItem(tabFolder, SWT.NONE);
+			i18nTabItem.setText("I18n");
+		}
 
 		final Composite textComposite = new Composite(tabFolder, SWT.NONE);
 		textTabItem.setControl(textComposite);
@@ -201,16 +210,19 @@ public class TagsAndI18NTextDialog extends Dialog
 			textLayout.createSequentialGroup().add(10, 10, 10).add(text, GroupLayout.PREFERRED_SIZE, 379, Short.MAX_VALUE).add(10, 10, 10)));
 		textComposite.setLayout(textLayout);
 
-		i18nComposite = new I18nComposite(tabFolder, SWT.NONE, application, false);
-		i18nTabItem.setControl(i18nComposite);
-
-		i18nComposite.getTableViewer().addSelectionChangedListener(new ISelectionChangedListener()
+		if (!hideTags)
 		{
-			public void selectionChanged(SelectionChangedEvent event)
+			i18nComposite = new I18nComposite(tabFolder, SWT.NONE, application, false);
+			i18nTabItem.setControl(i18nComposite);
+
+			i18nComposite.getTableViewer().addSelectionChangedListener(new ISelectionChangedListener()
 			{
-				handleI18nSelectionChanged(event);
-			}
-		});
+				public void selectionChanged(SelectionChangedEvent event)
+				{
+					handleI18nSelectionChanged(event);
+				}
+			});
+		}
 
 		final GroupLayout groupLayout_1 = new GroupLayout(composite_2);
 		groupLayout_1.setHorizontalGroup(groupLayout_1.createParallelGroup(GroupLayout.TRAILING).add(
@@ -218,7 +230,8 @@ public class TagsAndI18NTextDialog extends Dialog
 		groupLayout_1.setVerticalGroup(groupLayout_1.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout_1.createSequentialGroup().addContainerGap().add(tabFolder, GroupLayout.PREFERRED_SIZE, 422, Short.MAX_VALUE).addContainerGap()));
 		composite_2.setLayout(groupLayout_1);
-		sashForm.setWeights(new int[] { 298, 500 });
+
+		sashForm.setWeights(hideTags ? new int[] { 500 } : new int[] { 298, 500 });
 
 		return composite;
 	}
@@ -246,33 +259,36 @@ public class TagsAndI18NTextDialog extends Dialog
 		text.setText(value);
 		text.setFocus();
 
-		dpTree.addOpenListener(new IOpenListener()
+		if (!hideTags)
 		{
-			public void open(OpenEvent event)
+			dpTree.addOpenListener(new IOpenListener()
 			{
-				handleAdd();
-			}
+				public void open(OpenEvent event)
+				{
+					handleAdd();
+				}
 
-		});
+			});
 
-		addButton.addSelectionListener(new SelectionListener()
-		{
-			public void widgetSelected(SelectionEvent e)
+			addButton.addSelectionListener(new SelectionListener()
 			{
-				handleAdd();
-			}
+				public void widgetSelected(SelectionEvent e)
+				{
+					handleAdd();
+				}
 
-			public void widgetDefaultSelected(SelectionEvent e)
-			{
-			}
-		});
+				public void widgetDefaultSelected(SelectionEvent e)
+				{
+				}
+			});
+		}
 		return control;
 	}
 
 	protected void textModified()
 	{
 		value = text.getText();
-		i18nComposite.selectKey(value);
+		if (!hideTags) i18nComposite.selectKey(value);
 		if (HtmlUtils.hasUsefulHtmlContent(value))
 		{
 			browser.setText(value);
@@ -327,8 +343,11 @@ public class TagsAndI18NTextDialog extends Dialog
 	@Override
 	public boolean close()
 	{
-		((TreePatternFilter)dpTree.getPatternFilter()).saveSettings(getDialogBoundsSettings());
-		i18nComposite.saveTableColumnWidths();
+		if (!hideTags)
+		{
+			((TreePatternFilter)dpTree.getPatternFilter()).saveSettings(getDialogBoundsSettings());
+			i18nComposite.saveTableColumnWidths();
+		}
 		return super.close();
 	}
 

@@ -1520,7 +1520,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 						public CellEditor createPropertyEditor(Composite parent)
 						{
 							return new TagsAndI18NTextCellEditor(parent, persistContext, flattenedEditingSolution, TextCutoffLabelProvider.DEFAULT, table,
-								"Edit text property", Activator.getDefault().getDesignClient());
+								"Edit text property", Activator.getDefault().getDesignClient(), false);
 						}
 
 						@Override

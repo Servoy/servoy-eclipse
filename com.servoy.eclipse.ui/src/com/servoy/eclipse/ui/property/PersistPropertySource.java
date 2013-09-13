@@ -449,7 +449,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		private static final long serialVersionUID = 1L;
 	};
 
-	private PersistContext persistContext;
+	protected PersistContext persistContext;
 	private boolean readOnly;
 
 	// Property Descriptors
@@ -2686,7 +2686,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	}
 
 	private static IPropertyDescriptor getPropertiesPropertyDescriptor(IPropertySource propertySource, final PersistContext persistContext,
-		final boolean readOnly, final String id, String displayName, String name, final FlattenedSolution flattenedEditingSolution, final Form form)
+		final boolean readOnly, final String id, String displayName, final String name, final FlattenedSolution flattenedEditingSolution, final Form form)
 		throws RepositoryException
 	{
 		if ("tabSeq".equals(name))
@@ -3412,7 +3412,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				});
 		}
 
-		if (name.equals("text") || name.equals("toolTipText") || name.equals("titleText"))
+		if (name.equals("text") || name.equals("toolTipText") || name.equals("titleText") || name.equals("innerHTML"))
 		{
 			Table table = null;
 			if (form != null)
@@ -3448,7 +3448,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				public CellEditor createPropertyEditor(Composite parent)
 				{
 					return new TagsAndI18NTextCellEditor(parent, persistContext, flattenedEditingSolution, TextCutoffLabelProvider.DEFAULT, finalTable,
-						"Edit text property", Activator.getDefault().getDesignClient());
+						"Edit text property", Activator.getDefault().getDesignClient(), name.equals("innerHTML"));
 				}
 			});
 		}
