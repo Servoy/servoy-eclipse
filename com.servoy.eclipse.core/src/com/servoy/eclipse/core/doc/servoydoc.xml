@@ -19171,19 +19171,19 @@ for (var m in methods)
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc,wc,sc" name="getPart">
+        <function clientSupport="wc,sc" name="getPart">
           <argumentsTypes>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSPartWithConstants" typecode="com.servoy.j2db.scripting.solutionmodel.JSPart"><![CDATA[A JSPart instance representing the retrieved form part.]]></return>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[Gets a part of the form from the given type (see JSPart constants).]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Gets a part of the form from the given type (see JSPart constants).]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[Gets a part of the form from the given type (see JSPart constants).]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[Gets a part of the form from the given type (see JSPart constants).]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[form.getPart(JSPart.HEADER).background = 'red';
+            <sample clientSupport="wc,sc"><![CDATA[form.getPart(JSPart.HEADER).background = 'red';
 form.getPart(JSPart.LEADING_SUBSUMMARY, 160).background = 'red';]]></sample>
           </samples>
           <parameters>
@@ -27742,22 +27742,6 @@ var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 
 var style = solutionModel.newStyle('myStyle','field.fancy { background-color: yellow; }');
 form.styleName = 'myStyle'; // First set the style on the form.
 field.styleClass = 'fancy'; // Then set the style class on the field.]]></sample>
-          </samples>
-        </property>
-        <property clientSupport="mc" name="valuelist">
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSValueList" typecode="com.servoy.j2db.scripting.solutionmodel.JSValueList"/>
-          <descriptions>
-            <description clientSupport="mc"><![CDATA[The valuelist that is used by this field when displaying data. Can be used
-with fields of type CHECKS, COMBOBOX, RADIOS and TYPE_AHEAD.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="mc"><![CDATA[The valuelist that is used by this field when displaying data.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="mc"><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
-vlist.customValues = "one\ntwo\nthree\nfour";
-var cmb = form.newField('my_table_options', JSField.COMBOBOX, 10, 100, 100, 20);
-cmb.valuelist = vlist;]]></sample>
           </samples>
         </property>
         <property clientSupport="mc,wc,sc" name="visible">
@@ -39608,7 +39592,23 @@ var currState = %%prefix%%%%elementName%%.enabled;
 %%prefix%%%%elementName%%.enabled = !currentState;]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc" name="text">
+        <property clientSupport="mc" name="innerHTML">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[Gets or sets the innerHTML that is displayed on the bean's div]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[Gets or sets the innerHTML that is displayed on the bean's div]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[//gets the innerHTML of the element
+var my_bean_innerHTML = %%prefix%%%%elementName%%.innerHTML;
+
+//sets the innerHTML of the element
+%%prefix%%%%elementName%%.innerHTML = '<div>my inner HTML</div>';]]></sample>
+          </samples>
+        </property>
+        <property clientSupport="mc" deprecated="true" name="text">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <descriptions>
             <description clientSupport="mc"><![CDATA[Gets or sets the text that is displayed on the bean]]></description>
@@ -39616,6 +39616,7 @@ var currState = %%prefix%%%%elementName%%.enabled;
           <summaries>
             <summary clientSupport="mc"><![CDATA[Gets or sets the text that is displayed on the bean]]></summary>
           </summaries>
+          <deprecated><![CDATA[by innerHTML property]]></deprecated>
           <samples>
             <sample clientSupport="mc"><![CDATA[//gets the text of the element
 var my_text = %%prefix%%%%elementName%%.text;
