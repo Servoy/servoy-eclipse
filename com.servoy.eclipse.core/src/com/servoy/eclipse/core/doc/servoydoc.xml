@@ -31241,18 +31241,18 @@ jsunit.fail("test", null, "Fail"); // 2nd param is not used in Servoy, params 3 
     </object>
     <object clientSupport="mc,wc,sc" publicName="JSValueList" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSValueList">
       <constants>
-        <constant clientSupport="wc,sc" name="CUSTOM_VALUES">
+        <constant clientSupport="mc,wc,sc" name="CUSTOM_VALUES">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Constant to set the valueListType of a JSValueList.
+            <description clientSupport="mc,wc,sc"><![CDATA[Constant to set the valueListType of a JSValueList.
 Sets the value list to use a custom list of values.
 Also used in solutionModel.newValueList(...) to create new valuelists]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Constant to set the valueListType of a JSValueList.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Constant to set the valueListType of a JSValueList.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.DATABASE_VALUES);
+            <sample clientSupport="mc,wc,sc"><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.DATABASE_VALUES);
 vlist.valueListType = JSValueList.CUSTOM_VALUES; // Change the type to custom values.
 vlist.customValues = "one\ntwo\nthree\nfour";]]></sample>
           </samples>
@@ -31327,19 +31327,19 @@ var cmb = form.newComboBox('my_table_text', 10, 10, 100, 20);
 cmb.valuelist = vlist;]]></sample>
           </samples>
         </property>
-        <property clientSupport="wc,sc" name="customValues">
+        <property clientSupport="mc,wc,sc" name="customValues">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[A string with the elements in the valuelist. The elements 
+            <description clientSupport="mc,wc,sc"><![CDATA[A string with the elements in the valuelist. The elements 
 can be separated by linefeeds (custom1
 custom2), optional with realvalues ((custom1|1
 custom2|2)).]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[A string with the elements in the valuelist.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[A string with the elements in the valuelist.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[var vl1 = solutionModel.newValueList("customtext",JSValueList.CUSTOM_VALUES);
+            <sample clientSupport="mc,wc,sc"><![CDATA[var vl1 = solutionModel.newValueList("customtext",JSValueList.CUSTOM_VALUES);
 vl1.customValues = "customvalue1\ncustomvalue2";
 var vl2 = solutionModel.newValueList("customid",JSValueList.CUSTOM_VALUES);
 vl2.customValues = "customvalue1|1\ncustomvalue2|2";
@@ -39026,6 +39026,9 @@ forms.company.elements.faxBtn.visible = !currentState;]]></sample>
             <parameter name="relatedfoundset/relationname" optional="true">
               <description><![CDATA[the specified name of the related foundset (default is null)]]></description>
             </parameter>
+            <parameter name="index" optional="true">
+              <description><![CDATA[the specified index of a tab, default is -1, will add tab to the end, this index is 0 based]]></description>
+            </parameter>
           </parameters>
         </function>
         <function clientSupport="wc,sc" name="getAbsoluteFormLocationY">
@@ -39330,58 +39333,6 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
             <sample clientSupport="wc,sc"><![CDATA[var w = %%prefix%%%%elementName%%.getWidth();]]></sample>
           </samples>
         </function>
-        <function clientSupport="wc,sc" name="insertTab">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="int"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[a boolean value indicating if tab was successfully added]]></return>
-          <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Adds a relationless or related form as a tab in a specified tabpanel at specified index. The difference to addTab method is that tabIndex is 1 based.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Adds a relationless or related form as a tab in a specified tabpanel at specified index.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="wc,sc"><![CDATA[%%prefix%%%%elementName%%.insertTab('orders','ordersTab','Orders',null,null,'#000000','#BBCCEE',null,1);]]></sample>
-          </samples>
-          <parameters>
-            <parameter name="formName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[the specified form/form name you wish to add as a tab]]></description>
-            </parameter>
-            <parameter name="tabName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[the specified name for the tab or null]]></description>
-            </parameter>
-            <parameter name="tabText" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[the specified text for the tab]]></description>
-            </parameter>
-            <parameter name="tooltip" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[a specified tooltip for the tab]]></description>
-            </parameter>
-            <parameter name="iconURL" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[a specified icon image or icon URL for the tab]]></description>
-            </parameter>
-            <parameter name="fg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[the HTML RGB Hexadecimal foreground color for the tab]]></description>
-            </parameter>
-            <parameter name="bg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[the HTML RGB Hexadecimal background color for the tab]]></description>
-            </parameter>
-            <parameter name="relationName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[the specified name of the related foundset or null]]></description>
-            </parameter>
-            <parameter name="tabIndex" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
-              <description><![CDATA[the specified index of a tab, -1 will add tab to the end; is 1 based]]></description>
-            </parameter>
-          </parameters>
-        </function>
         <function clientSupport="wc,sc" name="isTabEnabledAt">
           <argumentsTypes>
             <argumentType typecode="int"/>
@@ -39657,23 +39608,7 @@ var currState = %%prefix%%%%elementName%%.enabled;
 %%prefix%%%%elementName%%.enabled = !currentState;]]></sample>
           </samples>
         </property>
-        <property clientSupport="mc" name="innerHTML">
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-          <descriptions>
-            <description clientSupport="mc"><![CDATA[Gets or sets the innerHTML that is displayed on the bean's div]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="mc"><![CDATA[Gets or sets the innerHTML that is displayed on the bean's div]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="mc"><![CDATA[//gets the innerHTML of the element
-var my_bean_innerHTML = %%prefix%%%%elementName%%.innerHTML;
-
-//sets the innerHTML of the element
-%%prefix%%%%elementName%%.innerHTML = '<div>my inner HTML</div>';]]></sample>
-          </samples>
-        </property>
-        <property clientSupport="mc" deprecated="true" name="text">
+        <property clientSupport="mc" name="text">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <descriptions>
             <description clientSupport="mc"><![CDATA[Gets or sets the text that is displayed on the bean]]></description>
@@ -39681,7 +39616,6 @@ var my_bean_innerHTML = %%prefix%%%%elementName%%.innerHTML;
           <summaries>
             <summary clientSupport="mc"><![CDATA[Gets or sets the text that is displayed on the bean]]></summary>
           </summaries>
-          <deprecated><![CDATA[by innerHTML property]]></deprecated>
           <samples>
             <sample clientSupport="mc"><![CDATA[//gets the text of the element
 var my_text = %%prefix%%%%elementName%%.text;
@@ -52461,31 +52395,6 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
             <sample clientSupport="wc,sc"><![CDATA[var w = %%prefix%%%%elementName%%.getWidth();]]></sample>
           </samples>
         </function>
-        <function clientSupport="wc,sc" deprecated="true" name="insertTab" undocumented="true">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="int"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
-          <parameters>
-            <parameter name="formName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-            <parameter name="tabName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-            <parameter name="tabText" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-            <parameter name="tooltip" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-            <parameter name="iconURL" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-            <parameter name="fg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-            <parameter name="bg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-            <parameter name="relationName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
-            <parameter name="tabIndex" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
-          </parameters>
-        </function>
         <function clientSupport="wc,sc" deprecated="true" name="isTabEnabledAt" undocumented="true">
           <argumentsTypes>
             <argumentType typecode="int"/>
@@ -52995,6 +52904,9 @@ forms.company.elements.faxBtn.visible = !currentState;]]></sample>
             <parameter name="relatedfoundset/relationname" optional="true">
               <description><![CDATA[the specified name of the related foundset (default is null)]]></description>
             </parameter>
+            <parameter name="index" optional="true">
+              <description><![CDATA[the specified index of a tab, default is -1, will add tab to the end, this index is 0 based]]></description>
+            </parameter>
           </parameters>
         </function>
         <function clientSupport="wc,sc" name="getAbsoluteFormLocationY">
@@ -53310,58 +53222,6 @@ forms.company.elements.faxBtn.setSize(w+1,h+1);]]></description>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var w = %%prefix%%%%elementName%%.getWidth();]]></sample>
           </samples>
-        </function>
-        <function clientSupport="wc,sc" name="insertTab">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="java.lang.String"/>
-            <argumentType typecode="int"/>
-          </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[a boolean value indicating if tab was successfully added]]></return>
-          <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Adds a relationless or related form as a tab in a specified tabpanel at specified index. The difference to addTab method is that tabIndex is 1 based.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Adds a relationless or related form as a tab in a specified tabpanel at specified index.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="wc,sc"><![CDATA[%%prefix%%%%elementName%%.insertTab('orders','ordersTab','Orders',null,null,'#000000','#BBCCEE',null,1);]]></sample>
-          </samples>
-          <parameters>
-            <parameter name="formName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[the specified form/form name you wish to add as a tab]]></description>
-            </parameter>
-            <parameter name="tabName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[the specified name for the tab or null]]></description>
-            </parameter>
-            <parameter name="tabText" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[the specified text for the tab]]></description>
-            </parameter>
-            <parameter name="tooltip" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[a specified tooltip for the tab]]></description>
-            </parameter>
-            <parameter name="iconURL" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[a specified icon image or icon URL for the tab]]></description>
-            </parameter>
-            <parameter name="fg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[the HTML RGB Hexadecimal foreground color for the tab]]></description>
-            </parameter>
-            <parameter name="bg" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[the HTML RGB Hexadecimal background color for the tab]]></description>
-            </parameter>
-            <parameter name="relationName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[the specified name of the related foundset or null]]></description>
-            </parameter>
-            <parameter name="tabIndex" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
-              <description><![CDATA[the specified index of a tab, -1 will add tab to the end; is 1 based]]></description>
-            </parameter>
-          </parameters>
         </function>
         <function clientSupport="wc,sc" deprecated="true" name="isTabEnabled">
           <argumentsTypes>
@@ -59983,20 +59843,20 @@ forms['myForm'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="newValueList">
+        <function clientSupport="mc,wc,sc" name="newValueList">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSValueList" typecode="com.servoy.j2db.scripting.solutionmodel.JSValueList"><![CDATA[a JSValueList object]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Creates a new valuelist with the specified name and number type.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Creates a new valuelist with the specified name and number type.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Creates a new valuelist with the specified name and number type.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Creates a new valuelist with the specified name and number type.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[var vl1 = solutionModel.newValueList("customText",JSValueList.CUSTOM_VALUES);
+            <sample clientSupport="mc,wc,sc"><![CDATA[var vl1 = solutionModel.newValueList("customText",JSValueList.CUSTOM_VALUES);
 vl1.customValues = "customvalue1\ncustomvalue2";
 var vl2 = solutionModel.newValueList("customid",JSValueList.CUSTOM_VALUES);
 vl2.customValues = "customvalue1|1\ncustomvalue2|2";
