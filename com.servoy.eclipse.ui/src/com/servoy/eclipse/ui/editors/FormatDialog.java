@@ -109,6 +109,7 @@ public class FormatDialog extends Dialog
 		// create components
 		Composite composite = (Composite)super.createDialogArea(parent);
 		composite.setLayout(new GridLayout(1, false));
+		composite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL));
 
 		uiConverterContainer = new Composite(composite, SWT.BORDER);
 		uiConverterContainer.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
@@ -119,7 +120,7 @@ public class FormatDialog extends Dialog
 		useConvertersCheckbutton.setEnabled(!ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile());
 
 		formatContainer = new Composite(composite, SWT.NONE);
-		formatContainer.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true, 1, 1));
+		formatContainer.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL));
 		formatContainer.setLayout(new GridLayout());
 
 		uiConvertersComposite = new ConvertersComposite<IUIConverter>(uiConverterContainer, SWT.NONE)

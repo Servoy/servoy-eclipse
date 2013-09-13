@@ -180,7 +180,7 @@ public class FormatIntegerContainer extends Composite implements IFormatTextCont
 
 		TableViewerColumn tableViewerColumn_2_1 = new TableViewerColumn(tableViewer, SWT.NONE);
 		TableColumn tblclmnMeaning = tableViewerColumn_2_1.getColumn();
-		tblclmnMeaning.setWidth(340);
+		tblclmnMeaning.setWidth(400);
 		tblclmnMeaning.setText("Description");
 
 		tableViewer.setLabelProvider(new TableLabelProvider());

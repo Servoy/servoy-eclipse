@@ -197,7 +197,7 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 
 		TableViewerColumn tableViewerColumn_2_1 = new TableViewerColumn(tableViewer, SWT.NONE);
 		TableColumn tblclmnMeaning = tableViewerColumn_2_1.getColumn();
-		tblclmnMeaning.setWidth(300);
+		tblclmnMeaning.setWidth(400);
 		tblclmnMeaning.setText("Description");
 
 		if (mobile)
