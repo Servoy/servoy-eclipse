@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.exporter.mobile.action;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -371,9 +370,11 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 		ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(null, launchConfigName);
 
 		workingCopy.setAttribute(IMobileLaunchConstants.SOLUTION_NAME, project.getSolution().getName());
-		File webappsFolder = new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory(), "server/webapps");
 
-		workingCopy.setAttribute(IMobileLaunchConstants.WAR_LOCATION, webappsFolder.getAbsolutePath());
+		// this will happen anyway at each launch to make sure the right one is used - until we decide to add export war path to the launcher config. page
+		// File webappsFolder = new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory(), "server/webapps");
+		// workingCopy.setAttribute(IMobileLaunchConstants.WAR_LOCATION, webappsFolder.getAbsolutePath());
+
 		String appUrl = MobileLaunchUtils.getDefaultApplicationURL(
 			MobileLaunchUtils.getWarFileName(project.getSolution().getName(),
 				launchConfigurationID.equals(IMobileTestLaunchConstants.LAUNCH_TEST_CONFIGURATION_TYPE_ID)),

@@ -118,7 +118,11 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 	protected void prepareExporter(MobileExporter exporter, ILaunchConfiguration configuration, ILaunch launch, IProgressMonitor monitor) throws CoreException
 	{
 		String warLocation = configuration.getAttribute(IMobileLaunchConstants.WAR_LOCATION, "");
-		if (warLocation.length() == 0) throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Invalid war export path"));
+		if (warLocation.length() == 0)
+		{
+			File webappsFolder = new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory(), "server/webapps");
+			warLocation = webappsFolder.getAbsolutePath();
+		}
 		String solutionName = configuration.getAttribute(IMobileLaunchConstants.SOLUTION_NAME, "");
 		String serverUrl = configuration.getAttribute(IMobileLaunchConstants.SERVER_URL, "");
 		String serviceSolutionName = configuration.getAttribute(IMobileLaunchConstants.SERVICE_SOLUTION, (String)null);

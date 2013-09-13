@@ -664,11 +664,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				for (IProject p : monitoredProjects)
 				{
-					IResourceDelta delta = getDelta(p);
-					if (delta != null)
+					if (p.exists() && p.isOpen())
 					{
-						incrementalBuild(delta, progressMonitor);
-					}
+						IResourceDelta delta = getDelta(p);
+						if (delta != null)
+						{
+							incrementalBuild(delta, progressMonitor);
+						}
+					} // should we generate a problem marker otherwise?
 				}
 				IResourceDelta delta = getDelta(getProject());
 				if (delta != null)
