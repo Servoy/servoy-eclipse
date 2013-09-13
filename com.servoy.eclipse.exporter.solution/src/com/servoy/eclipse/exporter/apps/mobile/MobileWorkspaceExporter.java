@@ -22,7 +22,6 @@ import java.io.File;
 import org.eclipse.equinox.app.IApplicationContext;
 
 import com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter;
-import com.servoy.eclipse.exporter.apps.common.IArgumentChest;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -34,20 +33,18 @@ import com.servoy.j2db.persistence.SolutionMetaData;
  * 
  * @author acostescu
  */
-public class MobileWorkspaceExporter extends AbstractWorkspaceExporter
+public class MobileWorkspaceExporter extends AbstractWorkspaceExporter<MobileArgumentChest>
 {
 
 	@Override
-	protected IArgumentChest createArgumentChest(IApplicationContext context)
+	protected MobileArgumentChest createArgumentChest(IApplicationContext context)
 	{
 		return new MobileArgumentChest((String[])context.getArguments().get(IApplicationContext.APPLICATION_ARGS));
 	}
 
 	@Override
-	protected void exportActiveSolution(IArgumentChest config)
+	protected void exportActiveSolution(MobileArgumentChest configuration)
 	{
-		MobileArgumentChest configuration = (MobileArgumentChest)config;
-
 		ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
 		Solution solution = activeProject.getSolution();
 

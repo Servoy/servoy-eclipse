@@ -34,7 +34,6 @@ import com.servoy.j2db.dataprocessing.MetaDataUtils;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.ILogLevel;
-import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.xmlxport.IXMLExportUserChannel;
 
 /**
@@ -253,7 +252,7 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 		return exportAllTablesFromReferencedServers;
 	}
 
-	public SortedList<String> getModuleIncludeList(SortedList<String> allModules)
+	public <T extends List<String>> T getModuleIncludeList(T allModules)
 	{
 		if (moduleList != null)
 		{

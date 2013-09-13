@@ -298,7 +298,7 @@ public class ServoyExporterUtils
 	 * 
 	 * @return true if the database is down (servers or tables are inaccessible)
 	 */
-	public Boolean hasDbDownErrorMarkers(String[] projects)
+	public boolean hasDbDownErrorMarkers(String[] projects)
 	{
 		if (projects != null && projects.length > 0)
 		{
@@ -316,7 +316,7 @@ public class ServoyExporterUtils
 							if (marker.getAttribute(IMarker.SEVERITY) != null && marker.getAttribute(IMarker.SEVERITY).equals(IMarker.SEVERITY_ERROR) &&
 								ServoyBuilder.MISSING_SERVER.equals(marker.getType()))
 							{
-								return Boolean.TRUE;
+								return true;
 							}
 						}
 					}
@@ -327,6 +327,6 @@ public class ServoyExporterUtils
 				ServoyLog.logError(ex);
 			}
 		}
-		return Boolean.FALSE;
+		return false;
 	}
 }

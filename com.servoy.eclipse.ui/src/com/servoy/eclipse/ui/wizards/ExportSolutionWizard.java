@@ -107,7 +107,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 	private final IFileAccess workspace;
 
-	private boolean dbDownErrors = false;
+	private boolean activeSolutionDbDownErrors = false;
 
 	public ExportSolutionWizard()
 	{
@@ -151,7 +151,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 				{
 					ITableDefinitionsManager tableDefManager = null;
 					IMetadataDefManager metadataDefManager = null;
-					if (dbDownErrors || exportModel.isExportUsingDbiFileInfoOnly())
+					if (modulesSelectionPage.hasDBDownErrors() || exportModel.isExportUsingDbiFileInfoOnly())
 					{
 						Pair<ITableDefinitionsManager, IMetadataDefManager> defManagers = ServoyExporterUtils.getInstance().prepareDbiFilesBasedExportData(
 							activeSolution, exportModel.isExportReferencedModules(), exportModel.isExportI18NData(),
@@ -170,7 +170,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 					monitor.done();
 
-					if (dbDownErrors)
+					if (modulesSelectionPage.hasDBDownErrors())
 					{
 						Display.getDefault().syncExec(new Runnable()
 						{
@@ -255,11 +255,12 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		int hasErrs = BuilderUtils.getMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
 		if (hasErrs == BuilderUtils.HAS_ERROR_MARKERS)
 		{
-			if (ServoyExporterUtils.getInstance().hasDbDownErrorMarkers(
-				new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() }) == Boolean.TRUE)
-			{
-				dbDownErrors = true;
-			}
+			activeSolutionDbDownErrors = ServoyExporterUtils.getInstance().hasDbDownErrorMarkers(
+				new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
+		}
+		else
+		{
+			activeSolutionDbDownErrors = false;
 		}
 	}
 
@@ -294,7 +295,8 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 	@Override
 	public void addPages()
 	{
-		if (dbDownErrors)
+		modulesSelectionPage = new ModulesSelectionPage();
+		if (activeSolutionDbDownErrors)
 		{
 			exportConfirmationPage = new ExportConfirmationPage();
 			addPage(exportConfirmationPage);
@@ -303,7 +305,6 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		addPage(fileSelectionPage);
 		exportOptionsPage = new ExportOptionsPage();
 		addPage(exportOptionsPage);
-		modulesSelectionPage = new ModulesSelectionPage();
 		addPage(modulesSelectionPage);
 		passwordPage = new PasswordPage();
 		addPage(passwordPage);
@@ -318,11 +319,11 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		if (exportModel.isExportReferencedModules() && currentPage == exportOptionsPage)
 		{
 			modulesSelectionPage.checkStateChanged(null);
-			if (modulesSelectionPage.projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS && !dbDownErrors) return false;
+			if (modulesSelectionPage.projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS && !modulesSelectionPage.hasDBDownErrors()) return false;
 		}
 		if (currentPage == modulesSelectionPage)
 		{
-			if (modulesSelectionPage.projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS && !dbDownErrors) return false;
+			if (modulesSelectionPage.projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS && !modulesSelectionPage.hasDBDownErrors()) return false;
 		}
 		return exportModel.canFinish();
 	}
@@ -382,7 +383,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			projectProblemsType = BuilderUtils.getMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
 			if (projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS)
 			{
-				if (dbDownErrors)
+				if (modulesSelectionPage.hasDBDownErrors())
 				{
 					projectProblemsType = BuilderUtils.HAS_WARNING_MARKERS;
 					setMessage(DB_DOWN_WARNING, IMessageProvider.WARNING);
@@ -459,7 +460,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		public boolean canFlipToNextPage()
 		{
 			boolean result = true;
-			if (projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS && !dbDownErrors) return false;
+			if (projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS && !activeSolutionDbDownErrors) return false;
 
 			boolean messageSet = (projectProblemsType == BuilderUtils.HAS_WARNING_MARKERS);
 			if (exportModel.getFileName() == null) return false;
@@ -562,7 +563,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		@Override
 		public boolean canFlipToNextPage()
 		{
-			return (dbDownErrors || (exportUsingDbiFileInfoOnlyButton != null && exportUsingDbiFileInfoOnlyButton.getSelection()) ||
+			return (activeSolutionDbDownErrors || (exportUsingDbiFileInfoOnlyButton != null && exportUsingDbiFileInfoOnlyButton.getSelection()) ||
 				resourcesProjectProblemsType == BuilderUtils.HAS_NO_MARKERS || resourcesProjectProblemsType == BuilderUtils.HAS_WARNING_MARKERS) &&
 				super.canFlipToNextPage();
 		}
@@ -581,7 +582,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			{
 				if (resourcesProjectProblemsType == BuilderUtils.HAS_ERROR_MARKERS)
 				{
-					if (dbDownErrors)
+					if (modulesSelectionPage.hasDBDownErrors())
 					{
 						setMessage(DB_DOWN_WARNING, IMessageProvider.WARNING);
 					}
@@ -755,7 +756,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			else if (event.widget == exportUsingDbiFileInfoOnlyButton)
 			{
 				exportModel.setExportUsingDbiFileInfoOnly(exportUsingDbiFileInfoOnlyButton.getSelection());
-				if (!dbDownErrors)
+				if (!modulesSelectionPage.hasDBDownErrors())
 				{
 					updateMessages();
 				}
@@ -776,6 +777,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 	{
 		CheckboxTreeViewer treeViewer;
 		public int projectProblemsType = BuilderUtils.HAS_NO_MARKERS;
+		private boolean moduleDbDownErrors = false;
 
 		protected ModulesSelectionPage()
 		{
@@ -848,11 +850,20 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		{
 			initializeModulesToExport();
 			projectProblemsType = BuilderUtils.getMarkers(exportModel.getModulesToExport());
+			if (projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS)
+			{
+				moduleDbDownErrors = ServoyExporterUtils.getInstance().hasDbDownErrorMarkers(exportModel.getModulesToExport());
+			}
+			else
+			{
+				moduleDbDownErrors = false;
+			}
+
 			setErrorMessage(null);
 			setMessage(null);
 			if (projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS)
 			{
-				if (dbDownErrors)
+				if (hasDBDownErrors())
 				{
 					projectProblemsType = BuilderUtils.HAS_WARNING_MARKERS;
 					setMessage(DB_DOWN_WARNING, IMessageProvider.WARNING);
@@ -866,6 +877,14 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			}
 
 			if (isCurrentPage()) getWizard().getContainer().updateButtons();
+		}
+
+		/**
+		 * True if either ACTIVE solution or MODULES have db down error markers.
+		 */
+		public boolean hasDBDownErrors()
+		{
+			return activeSolutionDbDownErrors || moduleDbDownErrors;
 		}
 
 		@Override

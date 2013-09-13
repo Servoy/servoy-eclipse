@@ -19,15 +19,18 @@ package com.servoy.eclipse.exporter.apps.solution;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.json.JSONException;
 
 import com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter;
-import com.servoy.eclipse.exporter.apps.common.IArgumentChest;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseExportI18NHelper;
 import com.servoy.eclipse.model.util.ServoyExporterUtils;
@@ -52,20 +55,18 @@ import com.servoy.j2db.util.xmlxport.IXMLExporter;
  * 
  * @author acostescu
  */
-public class WorkspaceExporter extends AbstractWorkspaceExporter
+public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 {
 
 	@Override
-	protected IArgumentChest createArgumentChest(IApplicationContext context)
+	protected ArgumentChest createArgumentChest(IApplicationContext context)
 	{
 		return new ArgumentChest((String[])context.getArguments().get(IApplicationContext.APPLICATION_ARGS));
 	}
 
 	@Override
-	protected void exportActiveSolution(IArgumentChest config)
+	protected void exportActiveSolution(ArgumentChest configuration)
 	{
-		ArgumentChest configuration = (ArgumentChest)config;
-
 		IApplicationServerSingleton as = ApplicationServerSingleton.get();
 		AbstractRepository rep = (AbstractRepository)as.getDeveloperRepository();
 		IUserManager sm = as.getUserManager();
@@ -130,4 +131,28 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter
 		}
 	}
 
+	@Override
+	protected void checkProjectMarkers(ServoyProject[] solutionAndAllModuleProjects, List<IMarker> errors, List<IMarker> warnings, ArgumentChest config)
+	{
+		// check active solution + modules that are going to be exported only
+
+		IServoyModel sm = ServoyModelFinder.getServoyModel();
+		ServoyProject activeProject = sm.getActiveProject();
+
+		List<String> moduleNames = new ArrayList<String>();
+		for (ServoyProject p : solutionAndAllModuleProjects)
+		{
+			if (p != activeProject) moduleNames.add(p.getProject().getName());
+		}
+		moduleNames = config.getModuleIncludeList(moduleNames);
+
+		ServoyProject[] toCheck = new ServoyProject[moduleNames.size() + 1];
+		toCheck[0] = activeProject;
+		for (int i = moduleNames.size() - 1; i >= 0; i--)
+		{
+			toCheck[i + 1] = sm.getServoyProject(moduleNames.get(i));
+		}
+
+		super.checkProjectMarkers(toCheck, errors, warnings, config);
+	}
 }

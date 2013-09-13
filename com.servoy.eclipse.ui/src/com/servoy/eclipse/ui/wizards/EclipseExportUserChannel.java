@@ -17,6 +17,8 @@
 package com.servoy.eclipse.ui.wizards;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -29,7 +31,6 @@ import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.dataprocessing.MetaDataUtils;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Table;
-import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.xmlxport.IXMLExportUserChannel;
 
 public class EclipseExportUserChannel implements IXMLExportUserChannel
@@ -43,16 +44,11 @@ public class EclipseExportUserChannel implements IXMLExportUserChannel
 		this.monitor = monitor;
 	}
 
-	public SortedList<String> getModuleIncludeList(SortedList<String> allModules)
+	public <T extends List<String>> T getModuleIncludeList(T allModules)
 	{
-		SortedList<String> sl = new SortedList<String>();
 		String[] modules = exportModel.getModulesToExport();
-		if (modules != null)
-		{
-			for (String element : modules)
-				sl.add(element);
-		}
-		return sl;
+		allModules.retainAll(Arrays.asList(modules != null ? modules : new String[] { }));
+		return allModules;
 	}
 
 	public String getProtectionPassword()

@@ -67,7 +67,7 @@ import com.servoy.j2db.util.Settings;
  * 
  * @author acostescu
  */
-public abstract class AbstractWorkspaceExporter implements IApplication, IBundleStopListener
+public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implements IApplication, IBundleStopListener
 {
 
 	public final static Integer EXIT_STOPPED = Integer.valueOf(1);
@@ -99,7 +99,7 @@ public abstract class AbstractWorkspaceExporter implements IApplication, IBundle
 			exitCode = EXIT_OK;
 			ModelUtils.setUIDisabled(true);
 
-			IArgumentChest configuration = createArgumentChest(context);
+			T configuration = createArgumentChest(context);
 			if (configuration.isInvalid())
 			{
 				outputError(configuration.getHelpMessage());
@@ -215,7 +215,7 @@ public abstract class AbstractWorkspaceExporter implements IApplication, IBundle
 		return dbDownMode;
 	}
 
-	protected abstract IArgumentChest createArgumentChest(IApplicationContext context);
+	protected abstract T createArgumentChest(IApplicationContext context);
 
 	public void bundleStopping(BundleContext context)
 	{
@@ -244,7 +244,7 @@ public abstract class AbstractWorkspaceExporter implements IApplication, IBundle
 		}
 	}
 
-	private void checkAndExportSolutions(IArgumentChest configuration)
+	private void checkAndExportSolutions(T configuration)
 	{
 		List<IProject> importedProjects = new ArrayList<IProject>();
 		List<IProject> existingClosedProjects = new ArrayList<IProject>();
@@ -328,20 +328,19 @@ public abstract class AbstractWorkspaceExporter implements IApplication, IBundle
 							sm.buildActiveProjects(null, true);
 
 							// check project markers
+
+							// for solution and/or (some) modules
 							List<IMarker> errors = new ArrayList<IMarker>();
 							List<IMarker> warnings = new ArrayList<IMarker>();
-							for (ServoyProject module : modules)
-							{
-								splitMarkers(module.getProject(), errors, warnings);
-							}
+							checkProjectMarkers(modules, errors, warnings, configuration);
+
+							// for resources project
 							if (!configuration.getExportUsingDbiFileInfoOnly()) splitMarkers(sm.getActiveResourcesProject().getProject(), errors, warnings);
 							// else we currently ignore error markers to allow dbi differences during export // TODO maybe check for non-dbi markers only here? (the same must happen in export wizard then)
 
-							dbDownMode = ServoyExporterUtils.getInstance().hasDbDownErrorMarkers(
-								new String[] { ServoyModelFinder.getServoyModel().getActiveProject().getProject().getName() }).booleanValue();
 							if (dbDownMode)
 							{
-								output("Found error markers that would suggest at least a DB used by this solution is down."); //$NON-NLS-1$
+								output("Found error markers that would suggest at least a DB used by this solution or it's exported modules is down."); //$NON-NLS-1$
 								if (configuration.exportIfDBDown())
 								{
 									output("Exporting with DB down is allowed. Proceeding..."); //$NON-NLS-1$
@@ -425,7 +424,25 @@ public abstract class AbstractWorkspaceExporter implements IApplication, IBundle
 		}
 	}
 
-	protected abstract void exportActiveSolution(IArgumentChest configuration);
+	/**
+	 * Can be overridden to change the list of solutions that are checked - to check only some modules for example.
+	 */
+	protected void checkProjectMarkers(ServoyProject[] solutionProjects, List<IMarker> errors, List<IMarker> warnings, T config)
+	{
+		int errorCount;
+		for (ServoyProject module : solutionProjects)
+		{
+			errorCount = errors.size();
+			splitMarkers(module.getProject(), errors, warnings);
+
+			if (!dbDownMode && errorCount < errors.size())
+			{
+				dbDownMode = ServoyExporterUtils.getInstance().hasDbDownErrorMarkers(new String[] { module.getProject().getName() });
+			}
+		}
+	}
+
+	protected abstract void exportActiveSolution(T configuration);
 
 	private void splitMarkers(IProject project, List<IMarker> errors, List<IMarker> warnings)
 	{
