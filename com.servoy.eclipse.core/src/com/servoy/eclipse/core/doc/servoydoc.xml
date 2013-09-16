@@ -14706,6 +14706,21 @@ for (var i = 1; i <= dataset.getMaxColumnIndex(); i++)
             </parameter>
           </parameters>
         </function>
+        <function clientSupport="wc,sc" name="getColumnNames">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"><![CDATA[String[] column names]]></return>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Get the column names of a dataset.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Get the column names of a dataset.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[var query = 'select * from customers';
+var dataset = databaseManager.getDataSetByQuery(databaseManager.getDataSourceServerName(controller.getDataSource()), query, null, 100);
+var columnNames = dataset.getColumnNames();]]></sample>
+          </samples>
+        </function>
         <function clientSupport="wc,sc" name="getColumnType" since="6.1.4">
           <argumentsTypes>
             <argumentType typecode="int"/>
