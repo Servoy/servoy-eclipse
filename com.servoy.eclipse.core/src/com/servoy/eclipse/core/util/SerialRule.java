@@ -16,15 +16,13 @@
  */
 package com.servoy.eclipse.core.util;
 
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 /**
- * Rule allows only one job to run at a time
+ * Rule allows only one job to run at a time; do not use this rule for workspace modifications
  */
 public class SerialRule implements ISchedulingRule
 {
-	public static final SerialRule INSTANCE = new SerialRule(0);
 	private final int id;
 
 	/**
@@ -37,12 +35,12 @@ public class SerialRule implements ISchedulingRule
 
 	public boolean contains(ISchedulingRule rule)
 	{
-		return (rule == this) || (rule instanceof IResource);
+		return (rule == this);
 	}
 
 	public boolean isConflicting(ISchedulingRule rule)
 	{
-		return (rule instanceof SerialRule && ((SerialRule)rule).id == id) || (rule instanceof IResource);
+		return (rule instanceof SerialRule && ((SerialRule)rule).id == id);
 	}
 
 	@Override

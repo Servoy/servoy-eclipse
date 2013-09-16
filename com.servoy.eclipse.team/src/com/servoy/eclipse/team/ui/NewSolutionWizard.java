@@ -38,7 +38,6 @@ import org.eclipse.ui.IWorkbench;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.SerialRule;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.team.RepositoryAccessPoint;
@@ -344,7 +343,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 		solutionPage.setDescription("Loading solutions ...");
 		solutionPage.setRepositorySolutionInfos(new SolutionInfo[0]);
-		solutionsListJob.setRule(SerialRule.INSTANCE);
+		solutionsListJob.setRule(ServoyModel.getWorkspace().getRoot());
 		solutionsListJob.schedule();
 	}
 

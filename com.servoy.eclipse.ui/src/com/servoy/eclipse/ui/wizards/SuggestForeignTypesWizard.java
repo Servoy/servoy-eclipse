@@ -196,7 +196,7 @@ public class SuggestForeignTypesWizard extends Wizard
 			}
 		};
 
-		exportJob.setRule(SerialRule.INSTANCE);
+		exportJob.setRule(ServoyModel.getWorkspace().getRoot());
 		exportJob.setUser(true); // we want the progress to be visible in a dialog, not to stay in the status bar
 		exportJob.schedule();
 
@@ -617,7 +617,7 @@ public class SuggestForeignTypesWizard extends Wizard
 					}
 				};
 
-				foreignTypesComputationJob.setRule(SerialRule.INSTANCE);
+				foreignTypesComputationJob.setRule(ServoyModel.getWorkspace().getRoot());
 				foreignTypesComputationJob.setUser(false);
 				foreignTypesComputationJob.schedule();
 

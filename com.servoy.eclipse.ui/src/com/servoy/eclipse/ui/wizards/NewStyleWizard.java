@@ -57,7 +57,6 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.IValidator;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectChooserComposite;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
-import com.servoy.eclipse.core.util.SerialRule;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
@@ -179,31 +178,37 @@ public class NewStyleWizard extends Wizard implements INewWizard
 		final ServoyProject activeProject = servoyModel.getActiveProject();
 		if (activeProject != null)
 		{
-			WorkspaceJob job;
-			// if there is an active resource project, the new style will be added to it; else we must add a reference to the chosen (maybe new) resource project
-			if (activeProject.getResourcesProject() == null)
+			WorkspaceJob job1 = null;
+
+			final WorkspaceJob job3 = new WorkspaceJob("Opening style")
 			{
-				IProject newResourcesProject;
-				if (page1.getResourceProjectData().getNewResourceProjectName() != null)
-				{
-					newResourcesProject = ServoyModel.getWorkspace().getRoot().getProject(page1.getResourceProjectData().getNewResourceProjectName());
-				}
-				else
-				{
-					newResourcesProject = page1.getResourceProjectData().getExistingResourceProject().getProject();
-				}
-				// create new resource project if necessary and reference it from active project
-				job = new ResourcesProjectSetupJob("Setting up resources project for active solution", newResourcesProject, null, activeProject.getProject(),
-					false);
-				job.setRule(SerialRule.INSTANCE);
-				job.setUser(true);
-				job.schedule();
-			}
 
-			// the first job normally will result in an available resources project for the active solution,
-			// so all that is left now is to create the style
+				@Override
+				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+				{
+					monitor.beginTask("Opening style", 1);
+					final Style s = (Style)servoyModel.getActiveRootObject(page1.getNewStyleName(), IRepository.STYLES);
+					if (s != null)
+					{
+						Display.getDefault().syncExec(new Runnable()
+						{
+							public void run()
+							{
+								EditorUtil.openStyleEditor(s);
+							}
+						});
+					}
+					monitor.worked(1);
+					monitor.done();
 
-			job = new WorkspaceJob("Creating style")
+					return Status.OK_STATUS;
+				}
+
+			};
+			job3.setRule(ServoyModel.getWorkspace().getRoot());
+			job3.setUser(true);
+
+			final WorkspaceJob job2 = new WorkspaceJob("Creating style")
 			{
 
 				@Override
@@ -238,44 +243,50 @@ public class NewStyleWizard extends Wizard implements INewWizard
 					}
 					monitor.worked(1);
 					monitor.done();
-
+					job3.schedule();
 					return Status.OK_STATUS;
 				}
 
 			};
-			job.setRule(SerialRule.INSTANCE);
-			job.setUser(true);
-			job.schedule();
+			job2.setRule(ServoyModel.getWorkspace().getRoot());
+			job2.setUser(true);
 
-			job = new WorkspaceJob("Opening style")
+			// if there is an active resource project, the new style will be added to it; else we must add a reference to the chosen (maybe new) resource project
+			if (activeProject.getResourcesProject() == null)
 			{
-
-				@Override
-				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+				IProject newResourcesProject;
+				if (page1.getResourceProjectData().getNewResourceProjectName() != null)
 				{
-					monitor.beginTask("Opening style", 1);
-					final Style s = (Style)servoyModel.getActiveRootObject(page1.getNewStyleName(), IRepository.STYLES);
-					if (s != null)
-					{
-						Display.getDefault().syncExec(new Runnable()
-						{
-							public void run()
-							{
-								EditorUtil.openStyleEditor(s);
-							}
-						});
-					}
-					monitor.worked(1);
-					monitor.done();
-
-					return Status.OK_STATUS;
+					newResourcesProject = ServoyModel.getWorkspace().getRoot().getProject(page1.getResourceProjectData().getNewResourceProjectName());
 				}
+				else
+				{
+					newResourcesProject = page1.getResourceProjectData().getExistingResourceProject().getProject();
+				}
+				// create new resource project if necessary and reference it from active project
+				job1 = new ResourcesProjectSetupJob("Setting up resources project for active solution", newResourcesProject, null, activeProject.getProject(),
+					false)
+				{
+					@Override
+					public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+					{
+						IStatus returnStatus = super.runInWorkspace(monitor);
+						job2.schedule();
+						return returnStatus;
+					}
+				};
+				job1.setRule(ServoyModel.getWorkspace().getRoot());
+				job1.setUser(true);
+				job1.schedule();
+			}
 
-			};
-			job.setRule(SerialRule.INSTANCE);
-			job.setUser(true);
-			job.schedule();
+			// the first job normally will result in an available resources project for the active solution,
+			// so all that is left now is to create the style
 
+			if (job1 == null)
+			{
+				job2.schedule();
+			}
 			return true;
 		}
 		else

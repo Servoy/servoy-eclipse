@@ -67,7 +67,6 @@ import org.json.JSONException;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
-import com.servoy.eclipse.core.util.SerialRule;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseExportI18NHelper;
 import com.servoy.eclipse.model.util.IFileAccess;
@@ -203,7 +202,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			}
 		};
 
-		exportJob.setRule(SerialRule.INSTANCE);
+		exportJob.setRule(ServoyModel.getWorkspace().getRoot());
 		exportJob.setUser(true); // we want the progress to be visible in a dialog, not to stay in the status bar
 		exportJob.schedule();
 

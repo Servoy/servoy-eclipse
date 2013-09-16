@@ -39,7 +39,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 import com.servoy.eclipse.core.ServoyModel;
-import com.servoy.eclipse.core.util.SerialRule;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -334,7 +333,6 @@ public class NewSybaseDbAction extends Action
 						}
 					};
 
-					createDbJob.setRule(SerialRule.INSTANCE);
 					createDbJob.setUser(true); // we want the progress to be visible in a dialog, not to stay in the status bar
 					createDbJob.schedule();
 				}
