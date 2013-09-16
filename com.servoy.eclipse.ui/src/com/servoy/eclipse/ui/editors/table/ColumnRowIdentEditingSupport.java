@@ -30,19 +30,26 @@ public class ColumnRowIdentEditingSupport extends EditingSupport
 {
 	private final CellEditor editor;
 	private String[] rowIdents;
+	private final Table table;
 
 	public ColumnRowIdentEditingSupport(Table table, TableViewer tv)
 	{
 		super(tv);
+		this.table = table;
+		editor = new FixedComboBoxCellEditor(tv.getTable(), getItems(), SWT.READ_ONLY);
+	}
+
+	private String[] getItems()
+	{
 		if (table != null && table.getExistInDB())
 		{
 			rowIdents = new String[Column.allDefinedRowIdents.length - 1];
 			int j = 0;
-			for (int element : Column.allDefinedRowIdents)
+			for (int el : Column.allDefinedRowIdents)
 			{
-				if (element != Column.PK_COLUMN)
+				if (el != Column.PK_COLUMN)
 				{
-					rowIdents[j++] = Column.getFlagsString(element);
+					rowIdents[j++] = Column.getFlagsString(el);
 				}
 			}
 		}
@@ -54,7 +61,7 @@ public class ColumnRowIdentEditingSupport extends EditingSupport
 				rowIdents[i] = Column.getFlagsString(Column.allDefinedRowIdents[i]);
 			}
 		}
-		editor = new FixedComboBoxCellEditor(tv.getTable(), rowIdents, SWT.READ_ONLY);
+		return rowIdents;
 	}
 
 	@Override
@@ -104,6 +111,7 @@ public class ColumnRowIdentEditingSupport extends EditingSupport
 	@Override
 	protected CellEditor getCellEditor(Object element)
 	{
+		((FixedComboBoxCellEditor)editor).setItems(getItems());
 		return editor;
 	}
 
@@ -122,14 +130,14 @@ public class ColumnRowIdentEditingSupport extends EditingSupport
 					{
 						return false;// pk not never allowed to change, we do allow or user_ident on null column for views
 					}
-					else
+					else if (!c.getAllowNull())
 					{
 						return true;
 					}
 				}
 				else
 				{
-					if (c.getTable().getExistInDB())
+					if (c.getTable().getExistInDB() && c.getAllowNull())
 					{
 						return false;// not possible to add non null columns and
 						// null column does not allow user_ident
