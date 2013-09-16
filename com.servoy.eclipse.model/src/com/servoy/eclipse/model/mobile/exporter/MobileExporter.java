@@ -418,6 +418,9 @@ public class MobileExporter
 				String txtFileContent = Utils.getTXTFileContent(resourceAsStream, Charset.forName("UTF8"), true);
 				builder.append(txtFileContent);
 				builder.append('\n');
+				builder.append("Debugger.setScriptSource = function(params) {\n");
+				builder.append("eval(params.source);\n");
+				builder.append("}\n");
 
 			}
 
@@ -774,7 +777,7 @@ public class MobileExporter
 		{
 			try
 			{
-				String scriptPath = SolutionSerializer.getScriptPath(method, false);
+				String scriptPath = serverURL + "/" + SolutionSerializer.getScriptPath(method, false);
 				code = ScriptEngine.docStripper.matcher(code).replaceFirst("function $1");
 				byte[] bytes = code.getBytes(Charset.forName("UTF8"));
 				ByteArrayInputStream bais = new ByteArrayInputStream(bytes);

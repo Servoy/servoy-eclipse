@@ -279,15 +279,20 @@ public class ServoyModel extends AbstractServoyModel
 								@Override
 								public String loadScriptResourceById(String scriptUri, boolean encode) throws IOException
 								{
-									return new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getUTF8Contents(scriptUri);
+									int index = scriptUri.indexOf("//");
+									index = scriptUri.indexOf('/', index + 2);
+									return new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getUTF8Contents(scriptUri.substring(index + 1));
 								}
 
 								public String setScriptSource(String scriptUri, String scriptSource)
 								{
 									try
 									{
-										new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).setUTF8Contents(scriptUri, scriptSource);
-										Path path = new Path(scriptUri);
+										int index = scriptUri.indexOf("//");
+										index = scriptUri.indexOf('/', index + 2);
+										String workspaceFile = scriptUri.substring(index + 1);
+										new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).setUTF8Contents(workspaceFile, scriptSource);
+										Path path = new Path(workspaceFile);
 										ServoyProject servoyProject = getServoyProject(path.segment(0));
 										if (servoyProject != null && servoyProject.getProject().isOpen())
 										{
