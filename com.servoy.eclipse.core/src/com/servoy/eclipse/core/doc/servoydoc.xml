@@ -55358,7 +55358,8 @@ security.setSecuritySettings(dataset);//to be called in solution startup method]
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if added]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Adds an user to a named group.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Adds an user to a named group.
+Note: this method can only be called by an admin.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Adds an user to a named group.]]></summary>
@@ -55636,7 +55637,8 @@ application.output("Can read? " + canRead);]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if changed]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Changes the groupname of a group.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Changes the groupname of a group.
+Note: this method can only be called by an admin.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Changes the groupname of a group.]]></summary>
@@ -55660,7 +55662,8 @@ application.output("Can read? " + canRead);]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if changed]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Changes the username of the specified userUID.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Changes the username of the specified userUID.
+Note: this method can be called only after login.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Changes the username of the specified userUID.]]></summary>
@@ -55717,7 +55720,8 @@ else
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the created groupname]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Creates a group, returns the groupname (or null when group couldn't be created).]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Creates a group, returns the groupname (or null when group couldn't be created).
+Note: this method can only be called by an admin.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Creates a group, returns the groupname (or null when group couldn't be created).]]></summary>
@@ -55725,7 +55729,7 @@ else
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var deleteGroup = true;
 //ceate a group
-var groupName = security.creategroup('myGroup');
+var groupName = security.createGroup('myGroup');
 if (groupName)
 {
 	//create a user
@@ -55757,7 +55761,8 @@ if (groupName)
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[the userUID the created userUID, will be same if provided]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Creates a new user, returns new uid (or null when group couldn't be created or user alreay exist).]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Creates a new user, returns new uid (or null when group couldn't be created or user alreay exist).
+Note: this method can only be called by an admin.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Creates a new user, returns new uid (or null when group couldn't be created or user alreay exist).]]></summary>
@@ -55814,7 +55819,8 @@ if (uid) //test if user was created
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[the userUID the created userUID, will be same if provided]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Creates a new user, returns new uid (or null when group couldn't be created or user alreay exist).]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Creates a new user, returns new uid (or null when group couldn't be created or user alreay exist).
+Note: this method can only be called by an admin.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Creates a new user, returns new uid (or null when group couldn't be created or user alreay exist).]]></summary>
@@ -55872,7 +55878,8 @@ if (uid) //test if user was created
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if deleted]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Deletes a group, returns true if no error was reported.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Deletes a group, returns true if no error was reported.
+Note: this method can only be called by an admin.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Deletes a group, returns true if no error was reported.]]></summary>
@@ -55880,7 +55887,7 @@ if (uid) //test if user was created
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var deleteGroup = true;
 //ceate a group
-var groupName = security.creategroup('myGroup');
+var groupName = security.createGroup('myGroup');
 if (groupName)
 {
 	//create a user
@@ -55911,7 +55918,8 @@ if (groupName)
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the user is successfully deleted.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Deletes an user. returns true if no error was reported.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Deletes an user. returns true if no error was reported.
+Note: this method can only be called by an admin.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Deletes an user.]]></summary>
@@ -56546,7 +56554,8 @@ security.logout();
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if removed]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Removes an user from a group.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Removes an user from a group.
+Note: this method can only be called by an admin.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Removes an user from a group.]]></summary>
@@ -56602,7 +56611,8 @@ if (uid) //test if user was created
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if changed]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Set a new password for the given userUID.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Set a new password for the given userUID.
+Note: this method can be called only after login.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Set a new password for the given userUID.]]></summary>
@@ -56687,7 +56697,7 @@ security.setSecuritySettings(dataset);//to be called in solution startup method]
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var deleteGroup = true;
 //ceate a group
-var groupName = security.creategroup('myGroup');
+var groupName = security.createGroup('myGroup');
 if (groupName)
 {
 	//create a user
