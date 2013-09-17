@@ -107,7 +107,6 @@ import com.servoy.j2db.persistence.EnumDataProvider;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.FlattenedPortal;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.FormEncapsulation;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
@@ -123,6 +122,7 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
+import com.servoy.j2db.persistence.ISupportEncapsulation;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportScope;
 import com.servoy.j2db.persistence.ISupportTabSeq;
@@ -131,6 +131,7 @@ import com.servoy.j2db.persistence.LiteralDataprovider;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationItem;
@@ -461,7 +462,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		"formVariableTableCol", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> FORM_PROPERTY_MULTIPLE_METHODS_ON_SAME_ELEMENT = new Pair<String, ProblemSeverity>(
 		"formPropertyMultipleMethodsOnSameElement", ProblemSeverity.INFO); //$NON-NLS-1$
-	public final static Pair<String, ProblemSeverity> NON_ACCESSIBLE_FORM_IN_MODULE_USED_IN_PARENT_SOLUTION = new Pair<String, ProblemSeverity>(
+	public final static Pair<String, ProblemSeverity> NON_ACCESSIBLE_PERSIST_IN_MODULE_USED_IN_PARENT_SOLUTION = new Pair<String, ProblemSeverity>(
 		"nonAccessibleFormInModuleUsedInParentSolution", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> METHOD_NUMBER_OF_ARGUMENTS_MISMATCH = new Pair<String, ProblemSeverity>(
 		"methodNumberOfArgsMismatch", ProblemSeverity.WARNING); //$NON-NLS-1$
@@ -1978,17 +1979,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												addMarker(project, mk.getType(), mk.getText(), -1, SOLUTION_PROPERTY_FORM_CANNOT_BE_INSTANTIATED,
 													IMarker.PRIORITY_LOW, null, o);
 											}
-											int encapsulation = ((Form)foundPersist).getEncapsulation();
-											if (context instanceof Form &&
-												((encapsulation & FormEncapsulation.PRIVATE) == FormEncapsulation.PRIVATE || (encapsulation & FormEncapsulation.MODULE_PRIVATE) == FormEncapsulation.MODULE_PRIVATE) &&
-												!(((Form)context).getParent().equals(((Form)foundPersist).getParent())))
-											{
-												ServoyMarker mk = MarkerMessages.NonAccessibleFormInModuleUsedInParentSolutionForm.fill(
-													((Form)foundPersist).getName(), ((Form)foundPersist).getSolution().getName(),
-													getServoyProject(project).getSolution().getName(), ((Form)context).getName());
-												addMarker(project, mk.getType(), mk.getText(), -1, NON_ACCESSIBLE_FORM_IN_MODULE_USED_IN_PARENT_SOLUTION,
-													IMarker.PRIORITY_LOW, null, o);
-											}
+										}
+										else if (foundPersist instanceof ISupportEncapsulation)
+										{
+											addEncapsulationMarker(project, o, foundPersist, (Form)context, flattenedSolution);
 										}
 										if (BaseComponent.isEventProperty(element.getName()) && !skipEventMethod(element.getName()) &&
 											(foundPersist instanceof ScriptMethod) && !methodsParsed.contains(foundPersist.getUUID()))
@@ -2899,6 +2893,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												tab);
 										}
 									}
+									for (Relation r : relations)
+									{
+										addEncapsulationMarker(project, tab, r, (Form)context, flattenedSolution);
+									}
 								}
 							}
 							if (tab.getImageMediaID() > 0)
@@ -3058,6 +3056,17 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											}
 										}
 									}
+									if (vl.getRelationName() != null)
+									{
+										Relation[] relations = flattenedSolution.getRelationSequence(vl.getRelationName());
+										if (relations != null)
+										{
+											for (Relation r : relations)
+											{
+												addEncapsulationMarker(project, field, r, (Form)context, flattenedSolution);
+											}
+										}
+									}
 								}
 							}
 							else if (type == Field.LIST_BOX || type == Field.MULTISELECT_LISTBOX || type == Field.SPINNER)
@@ -3147,6 +3156,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											ServoyLog.logError(ex);
 										}
 									}
+								}
+								for (Relation r : relations)
+								{
+									addEncapsulationMarker(project, portal, r, (Form)context, flattenedSolution);
 								}
 							}
 						}
@@ -5479,6 +5492,22 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	{
 		FlattenedSolution persistFlattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
 		return persistFlattenedSolution != null ? persistFlattenedSolution : fallbackFlattenedSolution;
+	}
+
+	private void addEncapsulationMarker(IProject project, IPersist persist, IPersist foundPersist, Form context, FlattenedSolution fallbackFlattenedSolution)
+	{
+		if (foundPersist instanceof ISupportEncapsulation)
+		{
+			if (PersistEncapsulation.isModulePrivate((ISupportEncapsulation)foundPersist, (Solution)persist.getRootObject()) &&
+				!(context.getSolution().equals(foundPersist.getRootObject())))
+			{
+				ServoyMarker mk = MarkerMessages.NonAccessibleFormInModuleUsedInParentSolutionForm.fill(
+					RepositoryHelper.getObjectTypeName(foundPersist.getTypeID()), ((ISupportName)foundPersist).getName(),
+					foundPersist.getRootObject().getName(), getServoyProject(project).getSolution().getName(), context.getName());
+				addMarker(project, mk.getType(), mk.getText(), -1, NON_ACCESSIBLE_PERSIST_IN_MODULE_USED_IN_PARENT_SOLUTION, IMarker.PRIORITY_LOW, null,
+					persist);
+			}
+		}
 	}
 
 	/**

@@ -280,7 +280,7 @@ public class MarkerMessages
 		"Form \"{0}\" has multiple parts of type: \"{1}\".", ServoyBuilder.FORM_DUPLICATE_PART_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker NonAccessibleFormInModuleUsedInParentSolutionForm = new ServoyMarker(
-		"Non-public form \"{0}\" from module \"{1}\" is used in solution \"{2}\", in form \"{3}\". This is not allowed.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Non-public {0} \"{1}\" from module \"{2}\" is used in solution \"{3}\", in form \"{4}\". This is not allowed.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	/** 
 	 * This means that the sam tab sequence position is assigned to more than one element on a form.

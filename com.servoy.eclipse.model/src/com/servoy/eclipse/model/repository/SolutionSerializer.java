@@ -185,6 +185,7 @@ public class SolutionSerializer
 	public static final String PROP_MIME_TYPE = "mimeType"; //$NON-NLS-1$
 	public static final String PROP_UUID = "uuid"; //$NON-NLS-1$
 	public static final String PROP_FILE_VERSION = "fileVersion"; //$NON-NLS-1$
+	public static final String PROP_ENCAPSULATION = "encapsulation"; //$NON-NLS-1$
 
 	public static final String PROPERTIESKEY = "@properties="; //$NON-NLS-1$
 	public static final String TYPEKEY = "@type"; //$NON-NLS-1$
@@ -437,6 +438,7 @@ public class SolutionSerializer
 				obj.put(PROP_TYPEID, new Integer(media.getTypeID()));//just to be sure
 				obj.put(PROP_NAME, media.getName());
 				obj.put(PROP_MIME_TYPE, media.getMimeType());
+				obj.put(PROP_ENCAPSULATION, media.getEncapsulation());
 				items.put(obj);
 			}
 			return items.toString();
