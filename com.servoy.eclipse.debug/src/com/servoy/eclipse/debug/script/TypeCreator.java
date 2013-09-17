@@ -123,7 +123,6 @@ import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
-import com.servoy.j2db.persistence.FormEncapsulation;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IFormElement;
@@ -132,6 +131,7 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.LiteralDataprovider;
+import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationItem;
@@ -269,6 +269,8 @@ public class TypeCreator extends TypeCache
 		"/icons/foundset.gif"), null));
 	protected final static ImageDescriptor RELATION_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path(
 		"/icons/relation.gif"), null));
+	protected final static ImageDescriptor RELATION_PROTECTED_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(),
+		new Path("/icons/relation_protected.gif"), null));
 
 	protected final static ImageDescriptor COLUMN_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path(
 		"/icons/column.gif"), null));
@@ -2169,7 +2171,7 @@ public class TypeCreator extends TypeCache
 					Property formProperty = createProperty(form.getName(), true, getTypeRef(context, "RuntimeForm<" + form.getName() + '>'),
 						getDescription(form.getDataSource()), getImageDescriptorForFormEncapsulation(form.getEncapsulation()));
 					formProperty.setAttribute(LAZY_VALUECOLLECTION, form);
-					if (FormEncapsulation.isPrivate(form, fs))
+					if (PersistEncapsulation.isPrivate(form, fs))
 					{
 						formProperty.setVisible(false);
 					}
@@ -2506,21 +2508,21 @@ public class TypeCreator extends TypeCache
 				String ds = formToUse.getDataSource();
 				List<Member> overwrittenMembers = new ArrayList<Member>();
 
-				if (ds != null || FormEncapsulation.hideFoundset(formToUse))
+				if (ds != null || PersistEncapsulation.hideFoundset(formToUse))
 				{
 					String foundsetType = FoundSet.JS_FOUNDSET;
 					if (ds != null) foundsetType += '<' + ds + '>';
 					Member clone = TypeCreator.clone(getMember("foundset", baseType), getTypeRef(context, foundsetType));
 					overwrittenMembers.add(clone);
-					clone.setVisible(!FormEncapsulation.hideFoundset(formToUse));
+					clone.setVisible(!PersistEncapsulation.hideFoundset(formToUse));
 				}
-				if (FormEncapsulation.hideController(formToUse))
+				if (PersistEncapsulation.hideController(formToUse))
 				{
 					Member clone = TypeCreator.clone(getMember("controller", baseType), null);
 					overwrittenMembers.add(clone);
 					clone.setVisible(false);
 				}
-				if (FormEncapsulation.hideDataproviders(formToUse))
+				if (PersistEncapsulation.hideDataproviders(formToUse))
 				{
 					Member clone = TypeCreator.clone(getMember("alldataproviders", baseType), TypeUtil.arrayOf("String"));
 					overwrittenMembers.add(clone);
@@ -2544,10 +2546,10 @@ public class TypeCreator extends TypeCache
 
 				clone = TypeCreator.clone(getMember("elements", baseType), getTypeRef(context, "Elements<" + config + '>'));
 				overwrittenMembers.add(clone);
-				clone.setVisible(!FormEncapsulation.hideElements(formToUse));
+				clone.setVisible(!PersistEncapsulation.hideElements(formToUse));
 
 				type = getCombinedType(fs, context, typeName, ds, overwrittenMembers, superForm,
-					getImageDescriptorForFormEncapsulation(form.getEncapsulation()), !FormEncapsulation.hideDataproviders(formToUse));
+					getImageDescriptorForFormEncapsulation(form.getEncapsulation()), !PersistEncapsulation.hideDataproviders(formToUse));
 				if (type != null) type.setAttribute(LAZY_VALUECOLLECTION, form);
 			}
 			return type;
@@ -3285,8 +3287,14 @@ public class TypeCreator extends TypeCache
 							property.setDescription(property.getDescription() + "<br><b>This relation is based on a table marked as HIDDEN in developer</b>.");
 						}
 					}
-
-					property.setVisible(visible);
+					if (PersistEncapsulation.isPrivate(relation, fs))
+					{
+						property.setVisible(false);
+					}
+					else
+					{
+						property.setVisible(visible);
+					}
 					members.add(property);
 				}
 			}
@@ -3577,8 +3585,8 @@ public class TypeCreator extends TypeCache
 	protected static ImageDescriptor getImageDescriptorForFormEncapsulation(int encapsulation)
 	{
 		String imgPath = "/icons/designer.gif";
-		if ((encapsulation & FormEncapsulation.MODULE_PRIVATE) == FormEncapsulation.MODULE_PRIVATE) imgPath = "/icons/designer_protected.gif";
-		else if ((encapsulation & FormEncapsulation.PRIVATE) == FormEncapsulation.PRIVATE) imgPath = "/icons/designer_private.gif";
+		if ((encapsulation & PersistEncapsulation.MODULE_PRIVATE) == PersistEncapsulation.MODULE_PRIVATE) imgPath = "/icons/designer_protected.gif";
+		else if ((encapsulation & PersistEncapsulation.PRIVATE) == PersistEncapsulation.PRIVATE) imgPath = "/icons/designer_private.gif";
 		else if ((encapsulation & DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) == DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) imgPath = "/icons/designer_public.gif";
 		return ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path(imgPath), null));
 	}

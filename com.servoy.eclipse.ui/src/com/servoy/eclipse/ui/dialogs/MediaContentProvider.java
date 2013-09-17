@@ -24,6 +24,7 @@ import org.eclipse.jface.viewers.Viewer;
 import com.servoy.eclipse.ui.labelproviders.MediaLabelProvider;
 import com.servoy.eclipse.ui.util.MediaNode;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.IPersist;
 
 /**
  * Content provider class for media.
@@ -35,10 +36,12 @@ import com.servoy.j2db.FlattenedSolution;
 public class MediaContentProvider implements ITreeContentProvider
 {
 	private final FlattenedSolution flattenedSolution;
+	private final IPersist context;
 
-	public MediaContentProvider(FlattenedSolution flattenedSolution)
+	public MediaContentProvider(FlattenedSolution flattenedSolution, IPersist context)
 	{
 		this.flattenedSolution = flattenedSolution;
+		this.context = context;
 	}
 
 	/*
@@ -67,7 +70,7 @@ public class MediaContentProvider implements ITreeContentProvider
 	{
 		if (inputElement instanceof MediaListOptions)
 		{
-			MediaNode rootMediaNode = new MediaNode(null, null, MediaNode.TYPE.FOLDER, flattenedSolution);
+			MediaNode rootMediaNode = new MediaNode(null, null, MediaNode.TYPE.FOLDER, flattenedSolution, context);
 			MediaNode[] children = rootMediaNode.getChildren(EnumSet.of(MediaNode.TYPE.IMAGE, MediaNode.TYPE.FOLDER));
 
 			MediaListOptions options = (MediaListOptions)inputElement;

@@ -121,7 +121,7 @@ public class RelatedTabController extends PropertyController<String, Object> imp
 	public CellEditor createPropertyEditor(Composite parent)
 	{
 		ListSelectCellEditor listSelectCellEditor = new ListSelectCellEditor(parent, title, new RelatedFormsContentProvider(form),
-			RelatedFormsLabelProvider.INSTANCE, RelatedFormValueEditor.INSTANCE, isReadOnly(), form, SWT.NONE, null, "relatedFormDialog");
+				RelatedFormsLabelProvider.INSTANCE, RelatedFormValueEditor.INSTANCE, isReadOnly(), form, SWT.NONE, null, "relatedFormDialog");
 		listSelectCellEditor.setShowFilterMenu(true);
 		return listSelectCellEditor;
 	}

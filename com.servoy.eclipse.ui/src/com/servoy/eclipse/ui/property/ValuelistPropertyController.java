@@ -61,9 +61,9 @@ public class ValuelistPropertyController<P> extends PropertyController<P, Intege
 	{
 
 		final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext());
-		return new ListSelectCellEditor(parent, "Select value list", new ValuelistContentProvider(flattenedEditingSolution), getLabelProvider(),
-			new ValueListValueEditor(flattenedEditingSolution), isReadOnly(), new ValuelistContentProvider.ValuelistListOptions(includeNone), SWT.NONE,
-			new ListSelectControlFactory()
+		return new ListSelectCellEditor(parent, "Select value list", new ValuelistContentProvider(flattenedEditingSolution, persistContext.getContext()),
+			getLabelProvider(), new ValueListValueEditor(flattenedEditingSolution), isReadOnly(),
+			new ValuelistContentProvider.ValuelistListOptions(includeNone), SWT.NONE, new ListSelectControlFactory()
 			{
 				private TreeSelectDialog dialog = null;
 

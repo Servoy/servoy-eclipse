@@ -29,8 +29,11 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.Utils;
 
@@ -47,12 +50,13 @@ public class RelationContentProvider extends CachingContentProvider implements I
 
 	private final FlattenedSolution flattenedSolution;
 	private RelationListOptions options;
-
+	private final IPersist context;
 	private final Map<Table, List<Relation>> relationCache = new HashMap<Table, List<Relation>>();
 
-	public RelationContentProvider(FlattenedSolution flattenedSolution)
+	public RelationContentProvider(FlattenedSolution flattenedSolution, IPersist context)
 	{
 		this.flattenedSolution = flattenedSolution;
+		this.context = context;
 	}
 
 	@Override
@@ -113,7 +117,10 @@ public class RelationContentProvider extends CachingContentProvider implements I
 		while (primaryrelations.hasNext())
 		{
 			Relation relation = primaryrelations.next();
-
+			if (context != null && PersistEncapsulation.isModulePrivate(relation, (Solution)context.getRootObject()))
+			{
+				continue;
+			}
 			if (!relationNames.contains(relation.getName()) //
 				&&
 				(!excludeGlobalRelations || !relation.isGlobal()) //

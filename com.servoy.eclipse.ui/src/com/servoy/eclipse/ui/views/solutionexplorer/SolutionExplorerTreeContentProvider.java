@@ -56,6 +56,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
 import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -1465,7 +1466,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				if (r.usesScope(solutionAndScope.getRight()))
 				{
 					PlatformSimpleUserNode un = new PlatformSimpleUserNode(r.getName(), UserNodeType.RELATION, r,
-						uiActivator.loadImageFromBundle("global_relation.gif")); //$NON-NLS-1$
+						RelationLabelProvider.INSTANCE_ALL.getImage(r));
 					un.parent = globalRelations;
 					rels.add(un);
 				}
@@ -1530,7 +1531,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				Solution rootSolution = (Solution)r.getRootObject();
 				if (solution == rootSolution) displayName = r.getName();
 				else displayName = r.getName() + " [" + rootSolution.getName() + "]";
-				PlatformSimpleUserNode un = new PlatformSimpleUserNode(displayName, type, r, solution, uiActivator.loadImageFromBundle("relation.gif")); //$NON-NLS-1$
+				PlatformSimpleUserNode un = new PlatformSimpleUserNode(displayName, type, r, solution, RelationLabelProvider.INSTANCE_ALL.getImage(r));
 				un.parent = relationsNode;
 				relationNodes.add(un);
 			}

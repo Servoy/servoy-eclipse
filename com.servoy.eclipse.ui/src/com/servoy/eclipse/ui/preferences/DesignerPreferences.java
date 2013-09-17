@@ -33,7 +33,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.persistence.ColumnInfo;
-import com.servoy.j2db.persistence.FormEncapsulation;
+import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
@@ -131,9 +131,9 @@ public class DesignerPreferences
 	public static final int PK_SEQUENCE_TYPE_DEFAULT = ColumnInfo.SERVOY_SEQUENCE;
 	public static final boolean SHOW_NAVIGATOR_DEFAULT = true;
 
-	public static final int ENCAPSULATION_PUBLIC_HIDE_ALL = FormEncapsulation.HIDE_CONTROLLER | FormEncapsulation.HIDE_DATAPROVIDERS |
-		FormEncapsulation.HIDE_ELEMENTS | FormEncapsulation.HIDE_FOUNDSET;
-	public static final int ENCAPSULATION_PUBLIC = FormEncapsulation.DEFAULT;
+	public static final int ENCAPSULATION_PUBLIC_HIDE_ALL = PersistEncapsulation.HIDE_CONTROLLER | PersistEncapsulation.HIDE_DATAPROVIDERS |
+		PersistEncapsulation.HIDE_ELEMENTS | PersistEncapsulation.HIDE_FOUNDSET;
+	public static final int ENCAPSULATION_PUBLIC = PersistEncapsulation.DEFAULT;
 
 	protected final IEclipsePreferences eclipsePreferences;
 

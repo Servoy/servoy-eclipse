@@ -48,7 +48,7 @@ import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
-import com.servoy.j2db.persistence.FormEncapsulation;
+import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
@@ -642,8 +642,8 @@ public class ElementUtil
 		{
 			//designer.gif
 			int encapsulation = f.getEncapsulation();
-			if ((encapsulation & FormEncapsulation.MODULE_PRIVATE) == FormEncapsulation.MODULE_PRIVATE) relPath = "icons/designer_protected.gif"; //$NON-NLS-1$
-			else if ((encapsulation & FormEncapsulation.PRIVATE) == FormEncapsulation.PRIVATE) relPath = "icons/designer_private.gif"; //$NON-NLS-1$
+			if ((encapsulation & PersistEncapsulation.MODULE_PRIVATE) == PersistEncapsulation.MODULE_PRIVATE) relPath = "icons/designer_protected.gif"; //$NON-NLS-1$
+			else if ((encapsulation & PersistEncapsulation.PRIVATE) == PersistEncapsulation.PRIVATE) relPath = "icons/designer_private.gif"; //$NON-NLS-1$
 			else if ((encapsulation & DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) == DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) relPath = "icons/designer_public.gif"; //$NON-NLS-1$
 			else relPath = "icons/designer.gif"; //$NON-NLS-1$
 		}
@@ -662,9 +662,9 @@ public class ElementUtil
 		if (form != null)
 		{
 			int encapsulation = (form).getEncapsulation();
-			if ((encapsulation & FormEncapsulation.MODULE_PRIVATE) == FormEncapsulation.MODULE_PRIVATE) image = Activator.getDefault().loadImageFromBundle(
+			if ((encapsulation & PersistEncapsulation.MODULE_PRIVATE) == PersistEncapsulation.MODULE_PRIVATE) image = Activator.getDefault().loadImageFromBundle(
 				"designer_protected.gif"); //$NON-NLS-1$
-			else if ((encapsulation & FormEncapsulation.PRIVATE) == FormEncapsulation.PRIVATE) image = Activator.getDefault().loadImageFromBundle(
+			else if ((encapsulation & PersistEncapsulation.PRIVATE) == PersistEncapsulation.PRIVATE) image = Activator.getDefault().loadImageFromBundle(
 				"designer_private.gif"); //$NON-NLS-1$
 			else if ((encapsulation & DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) == DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) image = Activator.getDefault().loadImageFromBundle(
 				"designer_public.gif"); //$NON-NLS-1$

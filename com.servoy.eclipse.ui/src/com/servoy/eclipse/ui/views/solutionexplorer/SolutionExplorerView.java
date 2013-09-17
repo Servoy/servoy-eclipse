@@ -294,7 +294,7 @@ import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.FormEncapsulation;
+import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerListener;
@@ -737,10 +737,10 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					ImageDescriptor imgd = Activator.loadImageDescriptorFromBundle("designer_public.gif");
 					switch (f.getEncapsulation())
 					{
-						case FormEncapsulation.MODULE_PRIVATE :
+						case PersistEncapsulation.MODULE_PRIVATE :
 							imgd = Activator.loadImageDescriptorFromBundle("designer_protected.gif");
 							break;
-						case FormEncapsulation.PRIVATE :
+						case PersistEncapsulation.PRIVATE :
 							imgd = Activator.loadImageDescriptorFromBundle("designer_private.gif");
 							break;
 					}

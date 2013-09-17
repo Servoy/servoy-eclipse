@@ -16,13 +16,19 @@
  */
 package com.servoy.eclipse.ui.property;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
-import com.servoy.j2db.persistence.FormEncapsulation;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.PersistEncapsulation;
+import com.servoy.j2db.persistence.Relation;
 
 /**
  * Property controller for encapsulation properties.
@@ -32,9 +38,12 @@ import com.servoy.j2db.persistence.FormEncapsulation;
  */
 public class EncapsulationPropertyController extends PropertyController<Integer, Object>
 {
-	public EncapsulationPropertyController(String id, String displayName)
+	private final IPersist persist;
+
+	public EncapsulationPropertyController(String id, String displayName, IPersist persist)
 	{
 		super(id, displayName, null, EncapsulationLabelProvider.LABEL_INSTANCE, new DummyCellEditorFactory(EncapsulationLabelProvider.LABEL_INSTANCE));
+		this.persist = persist;
 	}
 
 	@Override
@@ -48,12 +57,12 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 		@Override
 		public Object convertProperty(Object id, Integer value)
 		{
-			return new ComplexProperty<Integer>(new Integer(0).equals(value) ? new Integer(FormEncapsulation.DEFAULT) : value)
+			return new ComplexProperty<Integer>(new Integer(0).equals(value) ? new Integer(PersistEncapsulation.DEFAULT) : value)
 			{
 				@Override
 				public IPropertySource getPropertySource()
 				{
-					EncapsulationPropertySource encapsulationPropertySource = new EncapsulationPropertySource(this);
+					EncapsulationPropertySource encapsulationPropertySource = new EncapsulationPropertySource(this, persist);
 					encapsulationPropertySource.setReadonly(EncapsulationPropertyController.this.isReadOnly());
 					return encapsulationPropertySource;
 				}
@@ -64,8 +73,8 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 	@SuppressWarnings("nls")
 	public static class EncapsulationPropertySource extends ComplexPropertySource<Integer>
 	{
-		private static final int ALL = FormEncapsulation.PRIVATE + FormEncapsulation.MODULE_PRIVATE + FormEncapsulation.HIDE_CONTROLLER +
-			FormEncapsulation.HIDE_DATAPROVIDERS + FormEncapsulation.HIDE_ELEMENTS + FormEncapsulation.HIDE_FOUNDSET;
+		private static final int ALL = PersistEncapsulation.PRIVATE + PersistEncapsulation.MODULE_PRIVATE + PersistEncapsulation.HIDE_CONTROLLER +
+			PersistEncapsulation.HIDE_DATAPROVIDERS + PersistEncapsulation.HIDE_ELEMENTS + PersistEncapsulation.HIDE_FOUNDSET;
 
 		private static final String PRIVATE = "private";
 		private static final String MODULE_PRIVATE = "module private";
@@ -74,31 +83,43 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 		private static final String HIDE_CONTROLLER = "hide controller";
 		private static final String HIDE_ELEMENTS = "hide elements";
 
-		public EncapsulationPropertySource(ComplexProperty<Integer> complexProperty)
+		private final IPersist persist;
+
+		public EncapsulationPropertySource(ComplexProperty<Integer> complexProperty, IPersist persist)
 		{
 			super(complexProperty);
+			this.persist = persist;
 		}
 
 		@Override
 		public Object resetComplexPropertyValue(Object id)
 		{
-			return Integer.valueOf(FormEncapsulation.DEFAULT);
+			return Integer.valueOf(PersistEncapsulation.DEFAULT);
 		}
 
 		@Override
 		public IPropertyDescriptor[] createPropertyDescriptors()
 		{
-			// make sure sub-properties are sorted in defined order
-			return PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] { new CheckboxPropertyDescriptor(PRIVATE,
-				EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(FormEncapsulation.PRIVATE))),//
-			new CheckboxPropertyDescriptor(MODULE_PRIVATE, EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(FormEncapsulation.MODULE_PRIVATE))),//
-			new CheckboxPropertyDescriptor(HIDE_DATAPROVIDERS,
-				EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(FormEncapsulation.HIDE_DATAPROVIDERS))),//
-			new CheckboxPropertyDescriptor(HIDE_FOUNDSET, EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(FormEncapsulation.HIDE_FOUNDSET))),//
-			new CheckboxPropertyDescriptor(HIDE_CONTROLLER,
-				EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(FormEncapsulation.HIDE_CONTROLLER))),//
-			new CheckboxPropertyDescriptor(HIDE_ELEMENTS, EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(FormEncapsulation.HIDE_ELEMENTS))) //
-			});
+			List<IPropertyDescriptor> propertyDescriptors = new ArrayList<IPropertyDescriptor>();
+			if (persist instanceof Form || persist instanceof Relation)
+			{
+				propertyDescriptors.add(new CheckboxPropertyDescriptor(PRIVATE,
+					EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.PRIVATE))));
+			}
+			propertyDescriptors.add(new CheckboxPropertyDescriptor(MODULE_PRIVATE,
+				EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.MODULE_PRIVATE))));
+			if (persist instanceof Form)
+			{
+				propertyDescriptors.add(new CheckboxPropertyDescriptor(HIDE_DATAPROVIDERS,
+					EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_DATAPROVIDERS))));
+				propertyDescriptors.add(new CheckboxPropertyDescriptor(HIDE_FOUNDSET,
+					EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_FOUNDSET))));
+				propertyDescriptors.add(new CheckboxPropertyDescriptor(HIDE_CONTROLLER,
+					EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_CONTROLLER))));
+				propertyDescriptors.add(new CheckboxPropertyDescriptor(HIDE_ELEMENTS,
+					EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_ELEMENTS))));
+			}
+			return propertyDescriptors.toArray(new IPropertyDescriptor[0]);
 		}
 
 		@Override
@@ -107,12 +128,12 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 			int encapsulation = getEditableValue().intValue();
 			if (encapsulation == -1) return Boolean.FALSE;
 
-			if (PRIVATE.equals(id)) return (encapsulation & FormEncapsulation.PRIVATE) == 0 ? Boolean.FALSE : Boolean.TRUE;
-			if (MODULE_PRIVATE.equals(id)) return (encapsulation & FormEncapsulation.MODULE_PRIVATE) == 0 ? Boolean.FALSE : Boolean.TRUE;
-			if (HIDE_DATAPROVIDERS.equals(id)) return (encapsulation & FormEncapsulation.HIDE_DATAPROVIDERS) == 0 ? Boolean.FALSE : Boolean.TRUE;
-			if (HIDE_FOUNDSET.equals(id)) return (encapsulation & FormEncapsulation.HIDE_FOUNDSET) == 0 ? Boolean.FALSE : Boolean.TRUE;
-			if (HIDE_CONTROLLER.equals(id)) return (encapsulation & FormEncapsulation.HIDE_CONTROLLER) == 0 ? Boolean.FALSE : Boolean.TRUE;
-			if (HIDE_ELEMENTS.equals(id)) return (encapsulation & FormEncapsulation.HIDE_ELEMENTS) == 0 ? Boolean.FALSE : Boolean.TRUE;
+			if (PRIVATE.equals(id)) return (encapsulation & PersistEncapsulation.PRIVATE) == 0 ? Boolean.FALSE : Boolean.TRUE;
+			if (MODULE_PRIVATE.equals(id)) return (encapsulation & PersistEncapsulation.MODULE_PRIVATE) == 0 ? Boolean.FALSE : Boolean.TRUE;
+			if (HIDE_DATAPROVIDERS.equals(id)) return (encapsulation & PersistEncapsulation.HIDE_DATAPROVIDERS) == 0 ? Boolean.FALSE : Boolean.TRUE;
+			if (HIDE_FOUNDSET.equals(id)) return (encapsulation & PersistEncapsulation.HIDE_FOUNDSET) == 0 ? Boolean.FALSE : Boolean.TRUE;
+			if (HIDE_CONTROLLER.equals(id)) return (encapsulation & PersistEncapsulation.HIDE_CONTROLLER) == 0 ? Boolean.FALSE : Boolean.TRUE;
+			if (HIDE_ELEMENTS.equals(id)) return (encapsulation & PersistEncapsulation.HIDE_ELEMENTS) == 0 ? Boolean.FALSE : Boolean.TRUE;
 			return null;
 		}
 
@@ -125,12 +146,12 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 				encapsulation = 0;
 			}
 			int flag;
-			if (PRIVATE.equals(id)) flag = FormEncapsulation.PRIVATE;
-			else if (MODULE_PRIVATE.equals(id)) flag = FormEncapsulation.MODULE_PRIVATE;
-			else if (HIDE_DATAPROVIDERS.equals(id)) flag = FormEncapsulation.HIDE_DATAPROVIDERS;
-			else if (HIDE_FOUNDSET.equals(id)) flag = FormEncapsulation.HIDE_FOUNDSET;
-			else if (HIDE_CONTROLLER.equals(id)) flag = FormEncapsulation.HIDE_CONTROLLER;
-			else if (HIDE_ELEMENTS.equals(id)) flag = FormEncapsulation.HIDE_ELEMENTS;
+			if (PRIVATE.equals(id)) flag = PersistEncapsulation.PRIVATE;
+			else if (MODULE_PRIVATE.equals(id)) flag = PersistEncapsulation.MODULE_PRIVATE;
+			else if (HIDE_DATAPROVIDERS.equals(id)) flag = PersistEncapsulation.HIDE_DATAPROVIDERS;
+			else if (HIDE_FOUNDSET.equals(id)) flag = PersistEncapsulation.HIDE_FOUNDSET;
+			else if (HIDE_CONTROLLER.equals(id)) flag = PersistEncapsulation.HIDE_CONTROLLER;
+			else if (HIDE_ELEMENTS.equals(id)) flag = PersistEncapsulation.HIDE_ELEMENTS;
 			else return null;
 
 			if (Boolean.TRUE.equals(v))
@@ -162,31 +183,31 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 			}
 
 			StringBuilder retval = new StringBuilder();
-			if ((encapsulation & FormEncapsulation.PRIVATE) == FormEncapsulation.PRIVATE)
+			if ((encapsulation & PersistEncapsulation.PRIVATE) == PersistEncapsulation.PRIVATE)
 			{
 				retval.append(Messages.Private);
 			}
-			if ((encapsulation & FormEncapsulation.MODULE_PRIVATE) == FormEncapsulation.MODULE_PRIVATE)
+			if ((encapsulation & PersistEncapsulation.MODULE_PRIVATE) == PersistEncapsulation.MODULE_PRIVATE)
 			{
 				if (retval.length() != 0) retval.append(',');
 				retval.append(Messages.ModulePrivate);
 			}
-			if ((encapsulation & FormEncapsulation.HIDE_CONTROLLER) == FormEncapsulation.HIDE_CONTROLLER)
+			if ((encapsulation & PersistEncapsulation.HIDE_CONTROLLER) == PersistEncapsulation.HIDE_CONTROLLER)
 			{
 				if (retval.length() != 0) retval.append(',');
 				retval.append(Messages.HideController);
 			}
-			if ((encapsulation & FormEncapsulation.HIDE_DATAPROVIDERS) == FormEncapsulation.HIDE_DATAPROVIDERS)
+			if ((encapsulation & PersistEncapsulation.HIDE_DATAPROVIDERS) == PersistEncapsulation.HIDE_DATAPROVIDERS)
 			{
 				if (retval.length() != 0) retval.append(',');
 				retval.append(Messages.HideDataproviders);
 			}
-			if ((encapsulation & FormEncapsulation.HIDE_FOUNDSET) == FormEncapsulation.HIDE_FOUNDSET)
+			if ((encapsulation & PersistEncapsulation.HIDE_FOUNDSET) == PersistEncapsulation.HIDE_FOUNDSET)
 			{
 				if (retval.length() != 0) retval.append(',');
 				retval.append(Messages.HideFoundset);
 			}
-			if ((encapsulation & FormEncapsulation.HIDE_ELEMENTS) == FormEncapsulation.HIDE_ELEMENTS)
+			if ((encapsulation & PersistEncapsulation.HIDE_ELEMENTS) == PersistEncapsulation.HIDE_ELEMENTS)
 			{
 				if (retval.length() != 0) retval.append(',');
 				retval.append(Messages.HideElements);

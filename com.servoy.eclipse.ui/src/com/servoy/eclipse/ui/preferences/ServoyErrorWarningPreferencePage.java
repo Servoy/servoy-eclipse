@@ -534,7 +534,7 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 				Messages.ErrorWarningPreferencePage_formTypeAheadUnstoredCalculation, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_VARIABLE_TYPE_COL,
 				Messages.ErrorWarningPreferencePage_formVariableTableCol, true));
-			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.NON_ACCESSIBLE_FORM_IN_MODULE_USED_IN_PARENT_SOLUTION,
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.NON_ACCESSIBLE_PERSIST_IN_MODULE_USED_IN_PARENT_SOLUTION,
 				Messages.ErrorWarningPreferencePage_nonAccessibleFormInModuleUsedInParentSolutionForm, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.METHOD_NUMBER_OF_ARGUMENTS_MISMATCH,
 				Messages.ErrorWarningPreferencePage_methodNumberOfArgsMismatch, true));

@@ -35,7 +35,9 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IMediaProvider;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.Utils;
 
@@ -57,10 +59,15 @@ public class MediaNode
 	private final String info;
 	private final TYPE type;
 	private final Media media;
-
+	private final IPersist context;
 	private final IMediaProvider mediaProvider;
 
 	public MediaNode(String name, String path, TYPE type, IMediaProvider mediaProvider)
+	{
+		this(name, path, type, mediaProvider, null);
+	}
+
+	public MediaNode(String name, String path, TYPE type, IMediaProvider mediaProvider, IPersist context)
 	{
 		this.name = name;
 		this.path = path;
@@ -68,6 +75,7 @@ public class MediaNode
 		this.info = null;
 		this.mediaProvider = mediaProvider;
 		this.media = null;
+		this.context = context;
 	}
 
 	public MediaNode(String name, String path, TYPE type, IMediaProvider mediaProvider, String info, Media media)
@@ -78,6 +86,7 @@ public class MediaNode
 		this.info = info;
 		this.mediaProvider = mediaProvider;
 		this.media = media;
+		this.context = null;
 	}
 
 	public String getName()
@@ -151,6 +160,10 @@ public class MediaNode
 		String mediaFolder = getPath();
 		for (Media mediaItem : Utils.asList(mediaProvider.getMedias(false)))
 		{
+			if (context != null && PersistEncapsulation.isModulePrivate(mediaItem, (Solution)context.getRootObject()))
+			{
+				continue;
+			}
 			String mediaName = mediaItem.getName();
 
 			if (mediaName != null && (mediaFolder == null || mediaName.startsWith(mediaFolder)))
@@ -163,7 +176,7 @@ public class MediaNode
 					{
 						String dirName = mediaPath.substring(0, pathSepIdx);
 						node = new MediaNode(dirName, ((mediaFolder == null ? "" //$NON-NLS-1$
-							: mediaFolder) + dirName + '/'), TYPE.FOLDER, mediaProvider);
+							: mediaFolder) + dirName + '/'), TYPE.FOLDER, mediaProvider, context);
 					}
 				}
 				else

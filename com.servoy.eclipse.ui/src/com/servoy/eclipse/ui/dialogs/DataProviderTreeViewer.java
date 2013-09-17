@@ -63,6 +63,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationList;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -289,6 +290,11 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 							while (relations.hasNext())
 							{
 								Relation relation = relations.next();
+								if (persistContext != null && persistContext.getContext() != null &&
+									PersistEncapsulation.isModulePrivate(relation, (Solution)persistContext.getContext().getRootObject()))
+								{
+									continue;
+								}
 								if ((options.includeGlobalRelations || !relation.isGlobal()) && relationNames.add(relation.getName()))
 								{
 									input.add(new DataProviderNodeWrapper(RELATIONS, new RelationList(relation)));
@@ -506,6 +512,11 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 								while (relations.hasNext())
 								{
 									Relation rel = relations.next();
+									if (persistContext != null && persistContext.getContext() != null &&
+										PersistEncapsulation.isModulePrivate(relation, (Solution)persistContext.getContext().getRootObject()))
+									{
+										continue;
+									}
 									if (!rel.isGlobal() && relationNames.add(rel.getName()))
 									{
 										tableRelations.add(rel);

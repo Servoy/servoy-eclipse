@@ -205,7 +205,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	public static final IPropertyController<Integer, Integer> JOIN_TYPE_CONTROLLER;
 	public static final IPropertyController<Integer, Object> SLIDING_OPTIONS_CONTROLLER;
 	public static final IPropertyController<Integer, Object> ANCHOR_CONTROLLER;
-	public static final IPropertyController<Integer, Object> ENCAPSULATION_CONTROLLER;
 	public static final IPropertyController<String, PageFormat> PAGE_FORMAT_CONTROLLER;
 	public static final IPropertyController<String, String> LOGIN_SOLUTION_CONTROLLER;
 	public static final IPropertyController<Map<String, Object>, Map<String, Object>> DESIGN_PROPERTIES_CONTROLLER;
@@ -333,7 +332,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			GraphicalComponent.class));
 
 		ANCHOR_CONTROLLER = new AnchorPropertyController("anchors", RepositoryHelper.getDisplayName("anchors", GraphicalComponent.class));
-		ENCAPSULATION_CONTROLLER = new EncapsulationPropertyController("encapsulation", RepositoryHelper.getDisplayName("encapsulation", Form.class));
 
 		PAGE_FORMAT_CONTROLLER = new PropertyController<String, PageFormat>("defaultPageFormat", RepositoryHelper.getDisplayName("defaultPageFormat",
 			Form.class), new IPropertyConverter<String, PageFormat>()
@@ -3288,7 +3286,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		}
 		if (name.equals("encapsulation"))
 		{
-			return ENCAPSULATION_CONTROLLER;
+			return new EncapsulationPropertyController(id, displayName, persistContext.getPersist());
 		}
 
 		if (name.equals("rotation"))

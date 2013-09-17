@@ -37,8 +37,8 @@ import com.servoy.eclipse.ui.dialogs.ISearchKeyAdapter;
 import com.servoy.eclipse.ui.util.IKeywordChecker;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.FormEncapsulation;
 import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
@@ -123,7 +123,7 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 			while (forms.hasNext())
 			{
 				Form form = forms.next();
-				if (form == rootForm || FormEncapsulation.isModulePrivate(form, flattenedSolution)) continue; //is rootForm accessible via self ref relation
+				if (form == rootForm || PersistEncapsulation.isModulePrivate(form, flattenedSolution.getSolution())) continue; //is rootForm accessible via self ref relation
 
 				IServer formServer = flattenedSolution.getSolution().getServer(form.getServerName());
 				if (formServer == null) continue;
@@ -198,7 +198,7 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 				while (forms.hasNext())
 				{
 					Form form = forms.next();
-					if (!FormEncapsulation.isModulePrivate(form, flattenedSolution)) children.add(new RelatedForm(rf.relations, form));
+					if (!PersistEncapsulation.isModulePrivate(form, flattenedSolution.getSolution())) children.add(new RelatedForm(rf.relations, form));
 				}
 
 				// add relations 1 level deeper
@@ -219,7 +219,7 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 				while (forms.hasNext())
 				{
 					Form form = forms.next();
-					if (form == rootForm || FormEncapsulation.isModulePrivate(form, flattenedSolution)) continue; //is rootForm accessible via self ref relation
+					if (form == rootForm || PersistEncapsulation.isModulePrivate(form, flattenedSolution.getSolution())) continue; //is rootForm accessible via self ref relation
 					try
 					{
 						Table table = form.getTable();
@@ -255,7 +255,7 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 				while (forms.hasNext())
 				{
 					Form form = forms.next();
-					if (form == rootForm || FormEncapsulation.isModulePrivate(form, flattenedSolution)) continue; //is rootForm accessible via self ref relation
+					if (form == rootForm || PersistEncapsulation.isModulePrivate(form, flattenedSolution.getSolution())) continue; //is rootForm accessible via self ref relation
 					try
 					{
 						if (form.getTable() == parentElement || (form.getDataSource() == null && Messages.LabelNoTable == parentElement))

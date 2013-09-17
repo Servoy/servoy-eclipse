@@ -267,7 +267,7 @@ public class ValueListEditor extends PersistEditor
 		disableInMobileControls.add(relatedValuesButton);
 
 		relationSelect = new TreeSelectViewer(valueListEditorComposite, SWT.NONE, RelationPropertyController.RelationValueEditor.INSTANCE);
-		relationSelect.setContentProvider(new RelationContentProvider(editingFlattenedSolution));
+		relationSelect.setContentProvider(new RelationContentProvider(editingFlattenedSolution, getPersist()));
 		relationSelect.setLabelProvider(RelationLabelProvider.INSTANCE_LAST_NAME_ONLY);
 		relationSelect.setTextLabelProvider(new RelationLabelProvider("", false, false));
 		relationSelect.setSelectionFilter(AcceptAllFilter.getInstance()); // by default only leaf nodes can be selected

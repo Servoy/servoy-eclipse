@@ -59,8 +59,8 @@ public class MediaPropertyController<P> extends PropertyController<P, MediaNode>
 	public CellEditor createPropertyEditor(Composite parent)
 	{
 		final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext());
-		return new ListSelectCellEditor(parent, "Select image", new MediaContentProvider(flattenedEditingSolution), getLabelProvider(),
-			new IValueEditor<MediaNode>()
+		return new ListSelectCellEditor(parent, "Select image", new MediaContentProvider(flattenedEditingSolution, persistContext.getContext()),
+			getLabelProvider(), new IValueEditor<MediaNode>()
 			{
 				public void openEditor(MediaNode value)
 				{

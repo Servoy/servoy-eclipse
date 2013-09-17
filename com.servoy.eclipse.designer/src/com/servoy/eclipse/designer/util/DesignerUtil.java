@@ -31,10 +31,12 @@ import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.FormEncapsulation;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportEncapsulation;
 import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.persistence.PersistEncapsulation;
+import com.servoy.j2db.persistence.Solution;
 
 /**
  * Utility methods for form designer.
@@ -141,12 +143,9 @@ public class DesignerUtil
 
 	private static boolean isDropAllowed(IPersist dropTargetPersist, IPersist draggedPersist)
 	{
-		if (dropTargetPersist.getParent() != null && draggedPersist instanceof Form)
+		if (dropTargetPersist.getParent() != null && draggedPersist instanceof ISupportEncapsulation)
 		{
-			Form f = (Form)draggedPersist;
-			int encapsulation = f.getEncapsulation();
-			if (((encapsulation & FormEncapsulation.MODULE_PRIVATE) == FormEncapsulation.MODULE_PRIVATE || (encapsulation & FormEncapsulation.PRIVATE) == FormEncapsulation.PRIVATE) &&
-				!(dropTargetPersist.getParent().equals(f.getParent())))
+			if (PersistEncapsulation.isModulePrivate((ISupportEncapsulation)draggedPersist, (Solution)dropTargetPersist.getRootObject()))
 			{
 				return false;
 			}

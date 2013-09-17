@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.dialogs;
 
 import java.util.ArrayList;
@@ -22,6 +22,9 @@ import java.util.List;
 
 import com.servoy.eclipse.ui.labelproviders.ValuelistLabelProvider;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.PersistEncapsulation;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.ValueList;
 
 /**
@@ -35,10 +38,12 @@ public class ValuelistContentProvider extends FlatTreeContentProvider
 {
 
 	private final FlattenedSolution flattenedSolution;
+	private final IPersist context;
 
-	public ValuelistContentProvider(FlattenedSolution flattenedSolution)
+	public ValuelistContentProvider(FlattenedSolution flattenedSolution, IPersist context)
 	{
 		this.flattenedSolution = flattenedSolution;
+		this.context = context;
 	}
 
 	@Override
@@ -55,6 +60,10 @@ public class ValuelistContentProvider extends FlatTreeContentProvider
 			while (it.hasNext())
 			{
 				ValueList obj = it.next();
+				if (context != null && PersistEncapsulation.isModulePrivate(obj, (Solution)context.getRootObject()))
+				{
+					continue;
+				}
 				vlIds.add(new Integer(obj.getID()));
 			}
 

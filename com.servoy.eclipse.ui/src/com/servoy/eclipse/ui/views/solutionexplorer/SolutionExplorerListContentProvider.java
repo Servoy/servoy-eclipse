@@ -54,6 +54,7 @@ import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
 import com.servoy.eclipse.ui.node.IDeveloperFeedback;
 import com.servoy.eclipse.ui.node.IImageLookup;
 import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
@@ -96,6 +97,7 @@ import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.NameComparator;
+import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
@@ -715,8 +717,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				Relation relation = (Relation)persist;
 				SimpleUserNode un = new UserNode(getDisplayName(relation, solution), UserNodeType.RELATION, new SimpleDeveloperFeedback(relation.getName(),
-					null, null), relation, relation.isGlobal() ? uiActivator.loadImageFromBundle("global_relation.gif")
-					: uiActivator.loadImageFromBundle("relation.gif"));
+					null, null), relation, RelationLabelProvider.INSTANCE_ALL.getImage(relation));
 				rels.add(un);
 			}
 		}
@@ -1179,7 +1180,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			ValueList var = (ValueList)persist;
 			SimpleUserNode node = new UserNode(getDisplayName(var, s), UserNodeType.VALUELIST_ITEM, null, var.getName(), var,
-				uiActivator.loadImageFromBundle("valuelists.gif")); //$NON-NLS-1$ 
+				uiActivator.loadImageFromBundle(PersistEncapsulation.isModulePrivate(var, null) ? "valuelist_protected.gif" : "valuelists.gif")); //$NON-NLS-1$ //$NON-NLS-2$ 
 			dlm.add(node);
 		}
 		return dlm.toArray();

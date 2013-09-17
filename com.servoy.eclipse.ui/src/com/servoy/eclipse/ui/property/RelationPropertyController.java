@@ -74,9 +74,9 @@ public class RelationPropertyController extends PropertyController<String, Objec
 		FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext());
 		final RelationContentProvider.RelationListOptions relationListOptions = new RelationContentProvider.RelationListOptions(primaryTable, foreignTable,
 			incudeNone, includeNested);
-		ListSelectCellEditor editor = new ListSelectCellEditor(parent, "Select relation", new RelationContentProvider(flattenedEditingSolution),
-			new SolutionContextDelegateLabelProvider(RelationLabelProvider.INSTANCE_LAST_NAME_ONLY, persistContext.getContext()), RelationValueEditor.INSTANCE,
-			isReadOnly(), relationListOptions, SWT.NONE, null, "selectRelationDialog"); //$NON-NLS-1$
+		ListSelectCellEditor editor = new ListSelectCellEditor(parent, "Select relation", new RelationContentProvider(flattenedEditingSolution,
+			persistContext.getContext()), new SolutionContextDelegateLabelProvider(RelationLabelProvider.INSTANCE_LAST_NAME_ONLY, persistContext.getContext()), RelationValueEditor.INSTANCE, isReadOnly(), relationListOptions, SWT.NONE, null,
+			"selectRelationDialog"); //$NON-NLS-1$
 		editor.setShowFilterMenu(true);
 
 		editor.setSelectionFilter(new IFilter()

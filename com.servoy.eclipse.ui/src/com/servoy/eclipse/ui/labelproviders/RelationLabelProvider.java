@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.labelproviders;
 
 import org.eclipse.swt.graphics.Image;
@@ -23,6 +23,7 @@ import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider.RelationsWrapper;
 import com.servoy.eclipse.ui.util.UnresolvedValue;
+import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Relation;
 
 /**
@@ -37,9 +38,11 @@ public class RelationLabelProvider extends SupportNameLabelProvider implements I
 	public static final RelationLabelProvider INSTANCE_ALL_NO_IMAGE = new RelationLabelProvider(Messages.LabelNone, false, false);
 	public static final RelationLabelProvider INSTANCE_LAST_NAME_ONLY = new RelationLabelProvider(Messages.LabelNone, true, true);
 	public static final RelationLabelProvider INSTANCE_ALL = new RelationLabelProvider(Messages.LabelNone, true, false);
-
-	public static final Image RELATION_IMAGE = Activator.getDefault().loadImageFromBundle("relation.gif");
-	public static final Image GLOBAL_RELATION_IMAGE = Activator.getDefault().loadImageFromBundle("global_relation.gif");
+	
+	private static final Image RELATION_IMAGE = Activator.getDefault().loadImageFromBundle("relation.gif");
+	private static final Image GLOBAL_RELATION_IMAGE = Activator.getDefault().loadImageFromBundle("global_relation.gif");
+	private static final Image RELATION_PROTECTED_IMAGE = Activator.getDefault().loadImageFromBundle("relation_protected.gif");
+	private static final Image GLOBAL_RELATION_PROTECTED_IMAGE = Activator.getDefault().loadImageFromBundle("global_relation_protected.gif");
 
 	private final boolean lastNameOnly;
 	private final boolean showImage;
@@ -80,6 +83,10 @@ public class RelationLabelProvider extends SupportNameLabelProvider implements I
 		{
 			if (element instanceof Relation)
 			{
+				if (PersistEncapsulation.isModulePrivate((Relation)element, null))
+				{
+					return ((Relation)element).isGlobal() ? GLOBAL_RELATION_PROTECTED_IMAGE : RELATION_PROTECTED_IMAGE;
+				}
 				return ((Relation)element).isGlobal() ? GLOBAL_RELATION_IMAGE : RELATION_IMAGE;
 			}
 			if (element instanceof Relation[] && ((Relation[])element).length > 0)

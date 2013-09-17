@@ -34,7 +34,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.FormEncapsulation;
+import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.util.Debug;
@@ -142,7 +142,7 @@ public class TypeProvider implements ITypeProvider
 							{
 								String name = "forms." + formName;
 								if (name.toLowerCase().startsWith(prefixLower) &&
-									!FormEncapsulation.isPrivate(flattenedSolution.getForm(formName), flattenedSolution))
+									!PersistEncapsulation.isPrivate(flattenedSolution.getForm(formName), flattenedSolution))
 								{
 									names.add(name);
 								}
@@ -184,7 +184,7 @@ public class TypeProvider implements ITypeProvider
 					while (forms.hasNext())
 					{
 						Form form = forms.next();
-						if (currentForm != form && !FormEncapsulation.isPrivate(form, flattenedSolution))
+						if (currentForm != form && !PersistEncapsulation.isPrivate(form, flattenedSolution))
 						{
 							scriptMethods = form.getScriptMethods(false);
 							while (scriptMethods.hasNext())
