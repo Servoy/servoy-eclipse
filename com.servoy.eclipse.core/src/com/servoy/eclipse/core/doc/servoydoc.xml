@@ -1682,19 +1682,19 @@ var uuid_object2 = application.getUUID(new_uuid_object.toBytes());  // convert a
             <sample clientSupport="wc,sc"><![CDATA[var uname = application.getUserName();]]></sample>
           </samples>
         </function>
-        <function clientSupport="mc,wc,sc" name="getUserProperty">
+        <function clientSupport="wc,sc" name="getUserProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[Property value]]></return>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[Get a persistent user property.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Get a persistent user property.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[Get a persistent user property.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[Get a persistent user property.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var value = application.getUserProperty('showOrders');]]></sample>
+            <sample clientSupport="wc,sc"><![CDATA[var value = application.getUserProperty('showOrders');]]></sample>
           </samples>
           <parameters>
             <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
@@ -2421,20 +2421,20 @@ application.setToolbarVisible('text',false);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc,wc,sc" name="setUserProperty">
+        <function clientSupport="wc,sc" name="setUserProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[Set a persistent user property.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Set a persistent user property.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[Set a persistent user property.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[Set a persistent user property.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[application.setUserProperty('showOrders','1');]]></sample>
+            <sample clientSupport="wc,sc"><![CDATA[application.setUserProperty('showOrders','1');]]></sample>
           </samples>
           <parameters>
             <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
@@ -9782,6 +9782,21 @@ var fld = frm.getField('fld')
 var prop = fld.getDesignTimeProperty('myprop')]]></sample>
           </samples>
         </function>
+        <function clientSupport="wc,sc" name="getDesignTimePropertyNames">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"/>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Get the design-time properties of an element.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Get the design-time properties of an element.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[var frm = solutionModel.getForm('orders')
+var fld = frm.getField('fld')
+var propNames = fld.getDesignTimePropertyNames()]]></sample>
+          </samples>
+        </function>
         <function clientSupport="wc,sc" name="getUUID">
           <argumentsTypes/>
           <return type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID"/>
@@ -10892,6 +10907,21 @@ application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
             <sample clientSupport="wc,sc"><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
 var prop = fld.getDesignTimeProperty('myprop')]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="wc,sc" name="getDesignTimePropertyNames">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"/>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Get the design-time properties of an element.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Get the design-time properties of an element.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[var frm = solutionModel.getForm('orders')
+var fld = frm.getField('fld')
+var propNames = fld.getDesignTimePropertyNames()]]></sample>
           </samples>
         </function>
         <function clientSupport="wc,sc" name="getUUID">
@@ -13531,6 +13561,21 @@ application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
             <sample clientSupport="wc,sc"><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
 var prop = fld.getDesignTimeProperty('myprop')]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="wc,sc" name="getDesignTimePropertyNames">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"/>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Get the design-time properties of an element.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Get the design-time properties of an element.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[var frm = solutionModel.getForm('orders')
+var fld = frm.getField('fld')
+var propNames = fld.getDesignTimePropertyNames()]]></sample>
           </samples>
         </function>
         <function clientSupport="wc,sc" name="getUUID">
@@ -16612,6 +16657,21 @@ application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
             <sample clientSupport="wc,sc"><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
 var prop = fld.getDesignTimeProperty('myprop')]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="wc,sc" name="getDesignTimePropertyNames">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"/>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Get the design-time properties of an element.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Get the design-time properties of an element.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[var frm = solutionModel.getForm('orders')
+var fld = frm.getField('fld')
+var propNames = fld.getDesignTimePropertyNames()]]></sample>
           </samples>
         </function>
         <function clientSupport="mc" name="getTitle">
@@ -25113,6 +25173,21 @@ var fld = frm.getField('fld')
 var prop = fld.getDesignTimeProperty('myprop')]]></sample>
           </samples>
         </function>
+        <function clientSupport="wc,sc" name="getDesignTimePropertyNames">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"/>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Get the design-time properties of an element.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Get the design-time properties of an element.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[var frm = solutionModel.getForm('orders')
+var fld = frm.getField('fld')
+var propNames = fld.getDesignTimePropertyNames()]]></sample>
+          </samples>
+        </function>
         <function clientSupport="mc" name="getTitle">
           <argumentsTypes/>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSTitle" typecode="com.servoy.j2db.scripting.solutionmodel.JSTitle"/>
@@ -26839,6 +26914,21 @@ btnBackAgain.foreground = 'red';]]></sample>
             <sample clientSupport="wc,sc"><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
 var prop = fld.getDesignTimeProperty('myprop')]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="wc,sc" name="getDesignTimePropertyNames">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"/>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Get the design-time properties of an element.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Get the design-time properties of an element.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[var frm = solutionModel.getForm('orders')
+var fld = frm.getField('fld')
+var propNames = fld.getDesignTimePropertyNames()]]></sample>
           </samples>
         </function>
         <function clientSupport="wc,sc" name="getField">
@@ -29482,6 +29572,21 @@ application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
             <sample clientSupport="wc,sc"><![CDATA[var frm = solutionModel.getForm('orders')
 var fld = frm.getField('fld')
 var prop = fld.getDesignTimeProperty('myprop')]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="wc,sc" name="getDesignTimePropertyNames">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"/>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Get the design-time properties of an element.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Get the design-time properties of an element.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[var frm = solutionModel.getForm('orders')
+var fld = frm.getField('fld')
+var propNames = fld.getDesignTimePropertyNames()]]></sample>
           </samples>
         </function>
         <function clientSupport="wc,sc" name="getTab">
@@ -56689,7 +56794,8 @@ security.setSecuritySettings(dataset);//to be called in solution startup method]
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if changed]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Set a new userUID for the given userUID.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Set a new userUID for the given userUID.
+Note: this method can only be called by an admin.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Set a new userUID for the given userUID.]]></summary>
