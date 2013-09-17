@@ -3111,7 +3111,7 @@ application.showFormInWindow(forms.contacts,100,80,500,300,'my own window title'
 //webclient specific additional parameters...
 //2nd parameter: target frame or named dialog/window, so its possible to control in which (internal) frame or dialog the url is loaded, '_self' is current window,'_blank' is new dialog, '_top' is main window
 //3rd parameter: dialog options used when a dialog is specified, example: 'height=200,width=400,status=yes,toolbar=no,menubar=no,location=no'
-//3th or 4th parameter: a timeout in seconds when the url should be shown, immediantly/0 is default']]></sample>
+//3rd or 4th parameter: a timeout in seconds when the url should be shown, immediately/0 is default']]></sample>
           </samples>
           <parameters>
             <parameter name="url" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
@@ -3137,7 +3137,7 @@ application.showFormInWindow(forms.contacts,100,80,500,300,'my own window title'
 //webclient specific additional parameters...
 //2nd parameter: target frame or named dialog/window, so its possible to control in which (internal) frame or dialog the url is loaded, '_self' is current window,'_blank' is new dialog, '_top' is main window
 //3rd parameter: dialog options used when a dialog is specified, example: 'height=200,width=400,status=yes,toolbar=no,menubar=no,location=no'
-//3th or 4th parameter: a timeout in seconds when the url should be shown, immediantly/0 is default']]></sample>
+//3rd or 4th parameter: a timeout in seconds when the url should be shown, immediately/0 is default']]></sample>
           </samples>
           <parameters>
             <parameter name="url" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
@@ -3167,7 +3167,7 @@ application.showFormInWindow(forms.contacts,100,80,500,300,'my own window title'
 //webclient specific additional parameters...
 //2nd parameter: target frame or named dialog/window, so its possible to control in which (internal) frame or dialog the url is loaded, '_self' is current window,'_blank' is new dialog, '_top' is main window
 //3rd parameter: dialog options used when a dialog is specified, example: 'height=200,width=400,status=yes,toolbar=no,menubar=no,location=no'
-//3th or 4th parameter: a timeout in seconds when the url should be shown, immediantly/0 is default']]></sample>
+//3rd or 4th parameter: a timeout in seconds when the url should be shown, immediately/0 is default']]></sample>
           </samples>
           <parameters>
             <parameter name="url" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
@@ -3200,7 +3200,7 @@ application.showFormInWindow(forms.contacts,100,80,500,300,'my own window title'
 //webclient specific additional parameters...
 //2nd parameter: target frame or named dialog/window, so its possible to control in which (internal) frame or dialog the url is loaded, '_self' is current window,'_blank' is new dialog, '_top' is main window
 //3rd parameter: dialog options used when a dialog is specified, example: 'height=200,width=400,status=yes,toolbar=no,menubar=no,location=no'
-//3th or 4th parameter: a timeout in seconds when the url should be shown, immediantly/0 is default']]></sample>
+//3rd or 4th parameter: a timeout in seconds when the url should be shown, immediately/0 is default']]></sample>
           </samples>
           <parameters>
             <parameter name="url" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
@@ -3234,7 +3234,7 @@ application.showFormInWindow(forms.contacts,100,80,500,300,'my own window title'
 //webclient specific additional parameters...
 //2nd parameter: target frame or named dialog/window, so its possible to control in which (internal) frame or dialog the url is loaded, '_self' is current window,'_blank' is new dialog, '_top' is main window
 //3rd parameter: dialog options used when a dialog is specified, example: 'height=200,width=400,status=yes,toolbar=no,menubar=no,location=no'
-//3th or 4th parameter: a timeout in seconds when the url should be shown, immediantly/0 is default']]></sample>
+//3rd or 4th parameter: a timeout in seconds when the url should be shown, immediately/0 is default']]></sample>
           </samples>
           <parameters>
             <parameter name="url" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
@@ -9592,6 +9592,15 @@ field.height = 100;
 application.output('modified width: ' + field.width);
 application.output('modified height: ' + field.height);]]></sample>
           </samples>
+        </property>
+        <property clientSupport="mc" name="innerHTML">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[a String object containing the mobile bean innerHTML]]></return>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[The mobile bean innerHTML.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[The mobile bean innerHTML.]]></summary>
+          </summaries>
         </property>
         <property clientSupport="mc,wc,sc" name="name">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -27847,6 +27856,22 @@ var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 
 var style = solutionModel.newStyle('myStyle','field.fancy { background-color: yellow; }');
 form.styleName = 'myStyle'; // First set the style on the form.
 field.styleClass = 'fancy'; // Then set the style class on the field.]]></sample>
+          </samples>
+        </property>
+        <property clientSupport="mc" name="valuelist">
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSValueList" typecode="com.servoy.j2db.scripting.solutionmodel.JSValueList"/>
+          <descriptions>
+            <description clientSupport="mc"><![CDATA[The valuelist that is used by this field when displaying data. Can be used
+with fields of type CHECKS, COMBOBOX, RADIOS and TYPE_AHEAD.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="mc"><![CDATA[The valuelist that is used by this field when displaying data.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[var vlist = solutionModel.newValueList('options', JSValueList.CUSTOM_VALUES);
+vlist.customValues = "one\ntwo\nthree\nfour";
+var cmb = form.newField('my_table_options', JSField.COMBOBOX, 10, 100, 100, 20);
+cmb.valuelist = vlist;]]></sample>
           </samples>
         </property>
         <property clientSupport="mc,wc,sc" name="visible">
@@ -55768,7 +55793,7 @@ Note: this method can only be called by an admin.]]></description>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if changed]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Changes the username of the specified userUID.
-Note: this method can be called only after login.]]></description>
+Note: this method can only be called by an admin user or a normal logged in user changing its own userName.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Changes the username of the specified userUID.]]></summary>
@@ -56717,7 +56742,7 @@ if (uid) //test if user was created
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if changed]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Set a new password for the given userUID.
-Note: this method can be called only after login.]]></description>
+Note: this method can only be called by an admin user or a normal logged in user changing its own password.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Set a new password for the given userUID.]]></summary>
