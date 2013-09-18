@@ -150,6 +150,7 @@ import com.servoy.j2db.persistence.ITableDisplay;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RectShape;
 import com.servoy.j2db.persistence.Relation;
@@ -204,6 +205,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	public static final IPropertyController<Integer, Integer> SOLUTION_TYPE_CONTROLLER;
 	public static final IPropertyController<Integer, Integer> JOIN_TYPE_CONTROLLER;
 	public static final IPropertyController<Integer, Object> SLIDING_OPTIONS_CONTROLLER;
+	public static final IPropertyController<Integer, Object> ENCAPSULATION_CONTROLLER;
 	public static final IPropertyController<Integer, Object> ANCHOR_CONTROLLER;
 	public static final IPropertyController<String, PageFormat> PAGE_FORMAT_CONTROLLER;
 	public static final IPropertyController<String, String> LOGIN_SOLUTION_CONTROLLER;
@@ -331,6 +333,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		SLIDING_OPTIONS_CONTROLLER = new SlidingoptionsPropertyController("printSliding", RepositoryHelper.getDisplayName("printSliding",
 			GraphicalComponent.class));
 
+		ENCAPSULATION_CONTROLLER = new EncapsulationPropertyController("encapsulation", RepositoryHelper.getDisplayName("encapsulation", Form.class));
 		ANCHOR_CONTROLLER = new AnchorPropertyController("anchors", RepositoryHelper.getDisplayName("anchors", GraphicalComponent.class));
 
 		PAGE_FORMAT_CONTROLLER = new PropertyController<String, PageFormat>("defaultPageFormat", RepositoryHelper.getDisplayName("defaultPageFormat",
@@ -3286,7 +3289,26 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		}
 		if (name.equals("encapsulation"))
 		{
-			return new EncapsulationPropertyController(id, displayName, persistContext.getPersist());
+			if (persistContext.getPersist() instanceof Form)
+			{
+				return ENCAPSULATION_CONTROLLER;
+			}
+			else
+			{
+				Integer[] values = null;
+				String[] labels = null;
+				if (persistContext.getPersist() instanceof Relation)
+				{
+					values = new Integer[] { Integer.valueOf(PersistEncapsulation.DEFAULT), Integer.valueOf(PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE), Integer.valueOf(PersistEncapsulation.MODULE_SCOPE) };
+					labels = new String[] { Messages.Public, Messages.HideInScriptingModuleScope, Messages.ModuleScope };
+				}
+				else
+				{
+					values = new Integer[] { Integer.valueOf(PersistEncapsulation.DEFAULT), Integer.valueOf(PersistEncapsulation.MODULE_SCOPE) };
+					labels = new String[] { Messages.Public, Messages.ModuleScope };
+				}
+				return new ComboboxPropertyController<Integer>(id, displayName, new ComboboxPropertyModel<Integer>(values, labels), Messages.LabelUnresolved);
+			}
 		}
 
 		if (name.equals("rotation"))

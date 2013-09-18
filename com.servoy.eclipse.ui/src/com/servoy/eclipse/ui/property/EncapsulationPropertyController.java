@@ -16,19 +16,13 @@
  */
 package com.servoy.eclipse.ui.property;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
-import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.PersistEncapsulation;
-import com.servoy.j2db.persistence.Relation;
 
 /**
  * Property controller for encapsulation properties.
@@ -38,12 +32,10 @@ import com.servoy.j2db.persistence.Relation;
  */
 public class EncapsulationPropertyController extends PropertyController<Integer, Object>
 {
-	private final IPersist persist;
 
-	public EncapsulationPropertyController(String id, String displayName, IPersist persist)
+	public EncapsulationPropertyController(String id, String displayName)
 	{
 		super(id, displayName, null, EncapsulationLabelProvider.LABEL_INSTANCE, new DummyCellEditorFactory(EncapsulationLabelProvider.LABEL_INSTANCE));
-		this.persist = persist;
 	}
 
 	@Override
@@ -62,7 +54,7 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 				@Override
 				public IPropertySource getPropertySource()
 				{
-					EncapsulationPropertySource encapsulationPropertySource = new EncapsulationPropertySource(this, persist);
+					EncapsulationPropertySource encapsulationPropertySource = new EncapsulationPropertySource(this);
 					encapsulationPropertySource.setReadonly(EncapsulationPropertyController.this.isReadOnly());
 					return encapsulationPropertySource;
 				}
@@ -84,12 +76,9 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 		private static final String HIDE_CONTROLLER = "hide controller";
 		private static final String HIDE_ELEMENTS = "hide elements";
 
-		private final IPersist persist;
-
-		public EncapsulationPropertySource(ComplexProperty<Integer> complexProperty, IPersist persist)
+		public EncapsulationPropertySource(ComplexProperty<Integer> complexProperty)
 		{
 			super(complexProperty);
-			this.persist = persist;
 		}
 
 		@Override
@@ -101,26 +90,20 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 		@Override
 		public IPropertyDescriptor[] createPropertyDescriptors()
 		{
-			List<IPropertyDescriptor> propertyDescriptors = new ArrayList<IPropertyDescriptor>();
-			if (persist instanceof Form || persist instanceof Relation)
-			{
-				propertyDescriptors.add(new CheckboxPropertyDescriptor(HIDE_IN_SCRIPTING_MODULE_SCOPE,
-					EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE))));
-			}
-			propertyDescriptors.add(new CheckboxPropertyDescriptor(MODULE_SCOPE,
-				EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.MODULE_SCOPE))));
-			if (persist instanceof Form)
-			{
-				propertyDescriptors.add(new CheckboxPropertyDescriptor(HIDE_DATAPROVIDERS,
-					EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_DATAPROVIDERS))));
-				propertyDescriptors.add(new CheckboxPropertyDescriptor(HIDE_FOUNDSET,
-					EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_FOUNDSET))));
-				propertyDescriptors.add(new CheckboxPropertyDescriptor(HIDE_CONTROLLER,
-					EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_CONTROLLER))));
-				propertyDescriptors.add(new CheckboxPropertyDescriptor(HIDE_ELEMENTS,
-					EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_ELEMENTS))));
-			}
-			return propertyDescriptors.toArray(new IPropertyDescriptor[0]);
+			// make sure sub-properties are sorted in defined order
+			return PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] { new CheckboxPropertyDescriptor(
+				HIDE_IN_SCRIPTING_MODULE_SCOPE,
+				EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE))),//
+			new CheckboxPropertyDescriptor(MODULE_SCOPE, EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.MODULE_SCOPE))),//
+			new CheckboxPropertyDescriptor(HIDE_DATAPROVIDERS,
+				EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_DATAPROVIDERS))),//
+			new CheckboxPropertyDescriptor(HIDE_FOUNDSET,
+				EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_FOUNDSET))),//
+			new CheckboxPropertyDescriptor(HIDE_CONTROLLER,
+				EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_CONTROLLER))),//
+			new CheckboxPropertyDescriptor(HIDE_ELEMENTS,
+				EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_ELEMENTS))) //
+			});
 		}
 
 		@Override
