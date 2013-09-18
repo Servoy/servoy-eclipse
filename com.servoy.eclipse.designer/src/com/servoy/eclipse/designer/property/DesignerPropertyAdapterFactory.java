@@ -146,7 +146,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 				{
 					persist = (IPersist)realObject;
 				}
-				if (persist instanceof IScriptElement)
+				if (persist instanceof IScriptElement || persist instanceof Media)
 				{
 					autoSave = true;
 				}
@@ -263,7 +263,6 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 			{
 				// for properties view
 				PersistContext persistContext = PersistContext.create(persist, context);
-				boolean readonlyPersist = isReadonlyPersist(persist);
 				PersistPropertySource persistProperties;
 				Form form = (Form)persistContext.getContext().getAncestor(IRepository.FORMS);
 				boolean mobile = form != null && form.getCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName) != null;
@@ -275,12 +274,12 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 				if (mobile)
 				{
 					// mobile form or mobile solution
-					persistProperties = new MobilePersistPropertySource(persistContext, readonlyPersist);
+					persistProperties = new MobilePersistPropertySource(persistContext, false);
 				}
 				else
 				{
 					// regular
-					persistProperties = new PersistPropertySource(persistContext, readonlyPersist);
+					persistProperties = new PersistPropertySource(persistContext, false);
 				}
 
 				if (autoSave)
@@ -392,20 +391,5 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 			formEditPart = formEditPart.getParent();
 		}
 		return null;
-	}
-
-	/**
-	 * Some persist types are not editable via the properties view.
-	 * 
-	 * @param persist
-	 * @return
-	 */
-	protected boolean isReadonlyPersist(IPersist persist)
-	{
-		if (persist instanceof Media)
-		{
-			return true;
-		}
-		return false;
 	}
 }
