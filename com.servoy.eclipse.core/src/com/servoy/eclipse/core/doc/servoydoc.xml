@@ -17367,7 +17367,7 @@ footer.removeComponent('myfield1')]]></sample>
     </object>
     <object clientSupport="mc,wc,sc" publicName="JSForm" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSForm" scriptingName="JSForm">
       <constants>
-        <constant clientSupport="wc,sc" name="DEFAULT_ENCAPSULATION">
+        <constant clientSupport="wc,sc" deprecated="true" name="DEFAULT_ENCAPSULATION">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[The constants to set or get the encapsulation property of a JSForm. 
@@ -17376,6 +17376,8 @@ They are as follows: JSForm.DEFAULT_ENCAPSULATION, JSForm.PRIVATE_ENCAPSULATION,
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[The constants to set or get the encapsulation property of a JSForm.]]></summary>
           </summaries>
+          <deprecated><![CDATA[really only useful in developer - when working with the solution. Not so much at runtime, maybe just
+if developer save form solution model api is used...]]></deprecated>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var myDefaultForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
 myDefaultForm.encapsulation = JSForm.DEFAULT_ENCAPSULATION;
@@ -17416,7 +17418,7 @@ frmEmpty.newField('productname',JSField.TEXT_FIELD,10,70,200,20);
 frmEmpty.namedFoundSet = JSForm.EMPTY_FOUNDSET;]]></sample>
           </samples>
         </constant>
-        <constant clientSupport="wc,sc" name="HIDE_CONTROLLER_ENCAPSULATION">
+        <constant clientSupport="wc,sc" deprecated="true" name="HIDE_CONTROLLER_ENCAPSULATION">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[The constants to set or get the encapsulation property of a JSForm. 
@@ -17425,6 +17427,8 @@ They are as follows: JSForm.DEFAULT_ENCAPSULATION, JSForm.PRIVATE_ENCAPSULATION,
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[The constants to set or get the encapsulation property of a JSForm.]]></summary>
           </summaries>
+          <deprecated><![CDATA[really only useful in developer - when working with the solution. Not so much at runtime, maybe just
+if developer save form solution model api is used...]]></deprecated>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var myDefaultForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
 myDefaultForm.encapsulation = JSForm.DEFAULT_ENCAPSULATION;
@@ -17448,7 +17452,7 @@ var myHideElementsForm = solutionModel.newForm('newForm7', myDatasource, myStyle
 myHideElementsForm.encapsulation = JSForm.HIDE_ELEMENTS_ENCAPSULATION;]]></sample>
           </samples>
         </constant>
-        <constant clientSupport="wc,sc" name="HIDE_DATAPROVIDERS_ENCAPSULATION">
+        <constant clientSupport="wc,sc" deprecated="true" name="HIDE_DATAPROVIDERS_ENCAPSULATION">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[The constants to set or get the encapsulation property of a JSForm. 
@@ -17457,6 +17461,8 @@ They are as follows: JSForm.DEFAULT_ENCAPSULATION, JSForm.PRIVATE_ENCAPSULATION,
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[The constants to set or get the encapsulation property of a JSForm.]]></summary>
           </summaries>
+          <deprecated><![CDATA[really only useful in developer - when working with the solution. Not so much at runtime, maybe just
+if developer save form solution model api is used...]]></deprecated>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var myDefaultForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
 myDefaultForm.encapsulation = JSForm.DEFAULT_ENCAPSULATION;
@@ -17480,7 +17486,7 @@ var myHideElementsForm = solutionModel.newForm('newForm7', myDatasource, myStyle
 myHideElementsForm.encapsulation = JSForm.HIDE_ELEMENTS_ENCAPSULATION;]]></sample>
           </samples>
         </constant>
-        <constant clientSupport="wc,sc" name="HIDE_ELEMENTS_ENCAPSULATION">
+        <constant clientSupport="wc,sc" deprecated="true" name="HIDE_ELEMENTS_ENCAPSULATION">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[The constants to set or get the encapsulation property of a JSForm. 
@@ -17489,6 +17495,8 @@ They are as follows: JSForm.DEFAULT_ENCAPSULATION, JSForm.PRIVATE_ENCAPSULATION,
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[The constants to set or get the encapsulation property of a JSForm.]]></summary>
           </summaries>
+          <deprecated><![CDATA[really only useful in developer - when working with the solution. Not so much at runtime, maybe just
+if developer save form solution model api is used...]]></deprecated>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var myDefaultForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
 myDefaultForm.encapsulation = JSForm.DEFAULT_ENCAPSULATION;
@@ -17512,7 +17520,7 @@ var myHideElementsForm = solutionModel.newForm('newForm7', myDatasource, myStyle
 myHideElementsForm.encapsulation = JSForm.HIDE_ELEMENTS_ENCAPSULATION;]]></sample>
           </samples>
         </constant>
-        <constant clientSupport="wc,sc" name="HIDE_FOUNDSET_ENCAPSULATION">
+        <constant clientSupport="wc,sc" deprecated="true" name="HIDE_FOUNDSET_ENCAPSULATION">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[The constants to set or get the encapsulation property of a JSForm. 
@@ -17521,6 +17529,8 @@ They are as follows: JSForm.DEFAULT_ENCAPSULATION, JSForm.PRIVATE_ENCAPSULATION,
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[The constants to set or get the encapsulation property of a JSForm.]]></summary>
           </summaries>
+          <deprecated><![CDATA[really only useful in developer - when working with the solution. Not so much at runtime, maybe just
+if developer save form solution model api is used...]]></deprecated>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var myDefaultForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
 myDefaultForm.encapsulation = JSForm.DEFAULT_ENCAPSULATION;
@@ -17648,7 +17658,7 @@ var myRecordViewForm = solutionModel.newForm('newForm5', myDatasource, myStyleNa
 myRecordViewForm.view = JSForm.RECORD_VIEW;]]></sample>
           </samples>
         </constant>
-        <constant clientSupport="wc,sc" name="MODULE_PRIVATE_ENCAPSULATION">
+        <constant clientSupport="wc,sc" deprecated="true" name="MODULE_PRIVATE_ENCAPSULATION">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[The constants to set or get the encapsulation property of a JSForm. 
@@ -17657,6 +17667,8 @@ They are as follows: JSForm.DEFAULT_ENCAPSULATION, JSForm.PRIVATE_ENCAPSULATION,
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[The constants to set or get the encapsulation property of a JSForm.]]></summary>
           </summaries>
+          <deprecated><![CDATA[really only useful in developer - when working with the solution. Not so much at runtime, maybe just
+if developer save form solution model api is used...]]></deprecated>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var myDefaultForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
 myDefaultForm.encapsulation = JSForm.DEFAULT_ENCAPSULATION;
@@ -17680,7 +17692,7 @@ var myHideElementsForm = solutionModel.newForm('newForm7', myDatasource, myStyle
 myHideElementsForm.encapsulation = JSForm.HIDE_ELEMENTS_ENCAPSULATION;]]></sample>
           </samples>
         </constant>
-        <constant clientSupport="wc,sc" name="PRIVATE_ENCAPSULATION">
+        <constant clientSupport="wc,sc" deprecated="true" name="PRIVATE_ENCAPSULATION">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[The constants to set or get the encapsulation property of a JSForm. 
@@ -17689,6 +17701,8 @@ They are as follows: JSForm.DEFAULT_ENCAPSULATION, JSForm.PRIVATE_ENCAPSULATION,
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[The constants to set or get the encapsulation property of a JSForm.]]></summary>
           </summaries>
+          <deprecated><![CDATA[really only useful in developer - when working with the solution. Not so much at runtime, maybe just
+if developer save form solution model api is used...]]></deprecated>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var myDefaultForm = solutionModel.newForm('newForm1', myDatasource, myStyleName, false, 800, 600);
 myDefaultForm.encapsulation = JSForm.DEFAULT_ENCAPSULATION;
@@ -28559,18 +28573,24 @@ criteria.foreignColumnName = 'child_table_text';
 criteria.operator = '<';]]></sample>
           </samples>
         </property>
-      </properties>
-      <functions>
-        <function clientSupport="wc,sc" name="getPrimaryLiteral">
-          <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the literal]]></return>
+        <property clientSupport="wc,sc" name="primaryLiteral">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Get the literal.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Get the literal.]]></summary>
           </summaries>
-        </function>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
+var criteria = relation.newRelationItem(JSRelationItem.LITERAL_PREFIX + "'hello'",'=', 'myTextField');
+criteria.primaryLiteral = 'literal_text';
+//criteria.primaryLiteral = number;
+var primaryLiteral = criteria.primaryLiteral;]]></sample>
+          </samples>
+        </property>
+      </properties>
+      <functions>
         <function clientSupport="wc,sc" name="getUUID">
           <argumentsTypes/>
           <return type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID"/>
@@ -28583,27 +28603,6 @@ criteria.operator = '<';]]></sample>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var button_uuid = solutionModel.getForm("my_form").getButton("my_button").getUUID();
 application.output(button_uuid.toString());]]></sample>
-          </samples>
-        </function>
-        <function clientSupport="wc,sc" name="setPrimaryLiteral">
-          <argumentsTypes>
-            <argumentType typecode="java.lang.Object"/>
-          </argumentsTypes>
-          <return type="void" typecode="void"/>
-          <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Set the literal.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Set the literal.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="wc,sc"><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
-var criteria = relation.newRelationItem(JSRelationItem.LITERAL_PREFIX + "'hello'",'=', 'myTextField');
-criteria.setPrimaryLiteral("'literal_text'");
-//criteria.setPrimaryLiteral(number);
-var primaryLiteral = criteria.getPrimaryLiteral();
-criteria.foreignColumnName = 'child_table_text';
-criteria.operator = '<';]]></sample>
           </samples>
         </function>
       </functions>
@@ -60310,19 +60309,19 @@ else application.output("Style removed.");]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="removeValueList">
+        <function clientSupport="mc,wc,sc" name="removeValueList">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the removal was successful, false otherwise]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Removes the specified valuelist.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Removes the specified valuelist.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Removes the specified valuelist.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Removes the specified valuelist.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[var vlName = "customValueList";
+            <sample clientSupport="mc,wc,sc"><![CDATA[var vlName = "customValueList";
 var vl = solutionModel.newValueList(vlName,JSValueList.CUSTOM_VALUES);
 vl.customValues = "customvalue1\ncustomvalue2";
 
