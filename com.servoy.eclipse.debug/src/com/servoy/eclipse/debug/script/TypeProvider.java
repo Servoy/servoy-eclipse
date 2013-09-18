@@ -142,7 +142,7 @@ public class TypeProvider implements ITypeProvider
 							{
 								String name = "forms." + formName;
 								if (name.toLowerCase().startsWith(prefixLower) &&
-									!PersistEncapsulation.isPrivate(flattenedSolution.getForm(formName), flattenedSolution))
+									!PersistEncapsulation.isHideInScriptingModuleScope(flattenedSolution.getForm(formName), flattenedSolution))
 								{
 									names.add(name);
 								}
@@ -184,7 +184,7 @@ public class TypeProvider implements ITypeProvider
 					while (forms.hasNext())
 					{
 						Form form = forms.next();
-						if (currentForm != form && !PersistEncapsulation.isPrivate(form, flattenedSolution))
+						if (currentForm != form && !PersistEncapsulation.isHideInScriptingModuleScope(form, flattenedSolution))
 						{
 							scriptMethods = form.getScriptMethods(false);
 							while (scriptMethods.hasNext())

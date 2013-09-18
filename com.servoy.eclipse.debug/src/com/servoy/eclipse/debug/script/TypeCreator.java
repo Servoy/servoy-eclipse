@@ -2173,7 +2173,7 @@ public class TypeCreator extends TypeCache
 					Property formProperty = createProperty(form.getName(), true, getTypeRef(context, "RuntimeForm<" + form.getName() + '>'),
 						getDescription(form.getDataSource()), getImageDescriptorForFormEncapsulation(form.getEncapsulation()));
 					formProperty.setAttribute(LAZY_VALUECOLLECTION, form);
-					if (PersistEncapsulation.isPrivate(form, fs))
+					if (PersistEncapsulation.isHideInScriptingModuleScope(form, fs))
 					{
 						formProperty.setVisible(false);
 					}
@@ -3277,11 +3277,11 @@ public class TypeCreator extends TypeCache
 				if (relation.isValid() && (scopeName == null || relation.usesScope(scopeName)))
 				{
 					ImageDescriptor relationImage = RELATION_IMAGE;
-					if (PersistEncapsulation.hasEncapsulation(relation, PersistEncapsulation.PRIVATE))
+					if (PersistEncapsulation.hasEncapsulation(relation, PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE))
 					{
 						relationImage = RELATION_PRIVATE_IMAGE;
 					}
-					else if (PersistEncapsulation.isModulePrivate(relation, null))
+					else if (PersistEncapsulation.isModuleScope(relation, null))
 					{
 						relationImage = RELATION_PROTECTED_IMAGE;
 					}
@@ -3298,7 +3298,7 @@ public class TypeCreator extends TypeCache
 							property.setDescription(property.getDescription() + "<br><b>This relation is based on a table marked as HIDDEN in developer</b>.");
 						}
 					}
-					if (PersistEncapsulation.isPrivate(relation, fs))
+					if (PersistEncapsulation.isHideInScriptingModuleScope(relation, fs))
 					{
 						property.setVisible(false);
 					}

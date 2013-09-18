@@ -83,11 +83,11 @@ public class RelationLabelProvider extends SupportNameLabelProvider implements I
 		String fileName = null;
 		if (relation != null)
 		{
-			if (PersistEncapsulation.hasEncapsulation(relation, PersistEncapsulation.PRIVATE))
+			if (PersistEncapsulation.hasEncapsulation(relation, PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE))
 			{
 				fileName = relation.isGlobal() ? "global_relation_private.gif" : "relation_private.gif";
 			}
-			else if (PersistEncapsulation.isModulePrivate(relation, null))
+			else if (PersistEncapsulation.isModuleScope(relation, null))
 			{
 				fileName = relation.isGlobal() ? "global_relation_protected.gif" : "relation_protected.gif";
 			}
@@ -106,11 +106,11 @@ public class RelationLabelProvider extends SupportNameLabelProvider implements I
 		{
 			if (element instanceof Relation)
 			{
-				if (PersistEncapsulation.hasEncapsulation((Relation)element, PersistEncapsulation.PRIVATE))
+				if (PersistEncapsulation.hasEncapsulation((Relation)element, PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE))
 				{
 					return ((Relation)element).isGlobal() ? GLOBAL_RELATION_PRIVATE_IMAGE : RELATION_PRIVATE_IMAGE;
 				}
-				if (PersistEncapsulation.isModulePrivate((Relation)element, null))
+				if (PersistEncapsulation.isModuleScope((Relation)element, null))
 				{
 					return ((Relation)element).isGlobal() ? GLOBAL_RELATION_PROTECTED_IMAGE : RELATION_PROTECTED_IMAGE;
 				}

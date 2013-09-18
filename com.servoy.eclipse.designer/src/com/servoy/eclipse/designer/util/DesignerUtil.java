@@ -145,7 +145,7 @@ public class DesignerUtil
 	{
 		if (dropTargetPersist.getParent() != null && draggedPersist instanceof ISupportEncapsulation)
 		{
-			if (PersistEncapsulation.isModulePrivate((ISupportEncapsulation)draggedPersist, (Solution)dropTargetPersist.getRootObject()))
+			if (PersistEncapsulation.isModuleScope((ISupportEncapsulation)draggedPersist, (Solution)dropTargetPersist.getRootObject()))
 			{
 				return false;
 			}

@@ -291,7 +291,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 							{
 								Relation relation = relations.next();
 								if (persistContext != null && persistContext.getContext() != null &&
-									PersistEncapsulation.isModulePrivate(relation, (Solution)persistContext.getContext().getRootObject()))
+									PersistEncapsulation.isModuleScope(relation, (Solution)persistContext.getContext().getRootObject()))
 								{
 									continue;
 								}
@@ -513,7 +513,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 								{
 									Relation rel = relations.next();
 									if (persistContext != null && persistContext.getContext() != null &&
-										PersistEncapsulation.isModulePrivate(relation, (Solution)persistContext.getContext().getRootObject()))
+										PersistEncapsulation.isModuleScope(relation, (Solution)persistContext.getContext().getRootObject()))
 									{
 										continue;
 									}

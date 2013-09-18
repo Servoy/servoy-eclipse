@@ -117,7 +117,7 @@ public class RelationContentProvider extends CachingContentProvider implements I
 		while (primaryrelations.hasNext())
 		{
 			Relation relation = primaryrelations.next();
-			if (context != null && PersistEncapsulation.isModulePrivate(relation, (Solution)context.getRootObject()))
+			if (context != null && PersistEncapsulation.isModuleScope(relation, (Solution)context.getRootObject()))
 			{
 				continue;
 			}

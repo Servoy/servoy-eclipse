@@ -60,7 +60,7 @@ public class ValuelistContentProvider extends FlatTreeContentProvider
 			while (it.hasNext())
 			{
 				ValueList obj = it.next();
-				if (context != null && PersistEncapsulation.isModulePrivate(obj, (Solution)context.getRootObject()))
+				if (context != null && PersistEncapsulation.isModuleScope(obj, (Solution)context.getRootObject()))
 				{
 					continue;
 				}

@@ -5504,7 +5504,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	{
 		if (foundPersist instanceof ISupportEncapsulation)
 		{
-			if (PersistEncapsulation.isModulePrivate((ISupportEncapsulation)foundPersist, (Solution)persist.getRootObject()) &&
+			if (PersistEncapsulation.isModuleScope((ISupportEncapsulation)foundPersist, (Solution)persist.getRootObject()) &&
 				!(context.getSolution().equals(foundPersist.getRootObject())))
 			{
 				ServoyMarker mk = MarkerMessages.NonAccessibleFormInModuleUsedInParentSolutionForm.fill(

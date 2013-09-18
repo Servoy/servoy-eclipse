@@ -160,7 +160,7 @@ public class MediaNode
 		String mediaFolder = getPath();
 		for (Media mediaItem : Utils.asList(mediaProvider.getMedias(false)))
 		{
-			if (context != null && PersistEncapsulation.isModulePrivate(mediaItem, (Solution)context.getRootObject()))
+			if (context != null && PersistEncapsulation.isModuleScope(mediaItem, (Solution)context.getRootObject()))
 			{
 				continue;
 			}
