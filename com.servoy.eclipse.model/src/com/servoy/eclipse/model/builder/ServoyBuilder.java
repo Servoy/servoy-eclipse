@@ -1980,9 +1980,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													IMarker.PRIORITY_LOW, null, o);
 											}
 										}
-										else if (foundPersist instanceof ISupportEncapsulation)
+										else if (context instanceof Form && foundPersist instanceof ISupportEncapsulation)
 										{
-											addEncapsulationMarker(project, o, foundPersist, (Form)context, flattenedSolution);
+											addEncapsulationMarker(project, o, foundPersist, (Form)context);
 										}
 										if (BaseComponent.isEventProperty(element.getName()) && !skipEventMethod(element.getName()) &&
 											(foundPersist instanceof ScriptMethod) && !methodsParsed.contains(foundPersist.getUUID()))
@@ -2893,9 +2893,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												tab);
 										}
 									}
-									for (Relation r : relations)
+									if (context instanceof Form)
 									{
-										addEncapsulationMarker(project, tab, r, (Form)context, flattenedSolution);
+										for (Relation r : relations)
+										{
+											addEncapsulationMarker(project, tab, r, (Form)context);
+										}
 									}
 								}
 							}
@@ -3059,11 +3062,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									if (vl.getRelationName() != null)
 									{
 										Relation[] relations = flattenedSolution.getRelationSequence(vl.getRelationName());
-										if (relations != null)
+										if (relations != null && context instanceof Form)
 										{
 											for (Relation r : relations)
 											{
-												addEncapsulationMarker(project, field, r, (Form)context, flattenedSolution);
+												addEncapsulationMarker(project, field, r, (Form)context);
 											}
 										}
 									}
@@ -3157,9 +3160,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										}
 									}
 								}
-								for (Relation r : relations)
+								if (context instanceof Form)
 								{
-									addEncapsulationMarker(project, portal, r, (Form)context, flattenedSolution);
+									for (Relation r : relations)
+									{
+										addEncapsulationMarker(project, portal, r, (Form)context);
+									}
 								}
 							}
 						}
@@ -5494,7 +5500,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		return persistFlattenedSolution != null ? persistFlattenedSolution : fallbackFlattenedSolution;
 	}
 
-	private void addEncapsulationMarker(IProject project, IPersist persist, IPersist foundPersist, Form context, FlattenedSolution fallbackFlattenedSolution)
+	private void addEncapsulationMarker(IProject project, IPersist persist, IPersist foundPersist, Form context)
 	{
 		if (foundPersist instanceof ISupportEncapsulation)
 		{
