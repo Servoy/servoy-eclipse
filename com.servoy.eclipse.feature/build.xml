@@ -12,114 +12,114 @@
 
 	<target name="all.plugins" depends="init">
 		<ant antfile="build.xml" dir="../org.eclipse.dltk.javascript.rhino" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="cocoa"/>
-			<property name="os" value="macosx"/>
+			<property name="arch" value="x86"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../servoy_base" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="cocoa"/>
-			<property name="os" value="macosx"/>
+			<property name="arch" value="x86"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../servoy_shared" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="cocoa"/>
-			<property name="os" value="macosx"/>
+			<property name="arch" value="x86"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../servoy_smart_client" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="cocoa"/>
-			<property name="os" value="macosx"/>
+			<property name="arch" value="x86"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../servoy_headless_client" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="cocoa"/>
-			<property name="os" value="macosx"/>
+			<property name="arch" value="x86"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../servoy_debug" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="cocoa"/>
-			<property name="os" value="macosx"/>
+			<property name="arch" value="x86"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../j2db_server" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="cocoa"/>
-			<property name="os" value="macosx"/>
+			<property name="arch" value="x86"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../j2db_tunnel" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="cocoa"/>
-			<property name="os" value="macosx"/>
+			<property name="arch" value="x86"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.model" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="cocoa"/>
-			<property name="os" value="macosx"/>
+			<property name="arch" value="x86"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.exporter.solution" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="cocoa"/>
-			<property name="os" value="macosx"/>
+			<property name="arch" value="x86"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.appserver" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="cocoa"/>
-			<property name="os" value="macosx"/>
+			<property name="arch" value="x86"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.core" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="cocoa"/>
-			<property name="os" value="macosx"/>
+			<property name="arch" value="x86"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.ui" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="cocoa"/>
-			<property name="os" value="macosx"/>
+			<property name="arch" value="x86"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.designer" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="cocoa"/>
-			<property name="os" value="macosx"/>
+			<property name="arch" value="x86"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.profiler" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="cocoa"/>
-			<property name="os" value="macosx"/>
+			<property name="arch" value="x86"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.team" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="cocoa"/>
-			<property name="os" value="macosx"/>
+			<property name="arch" value="x86"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.debug" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="cocoa"/>
-			<property name="os" value="macosx"/>
+			<property name="arch" value="x86"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../j2db_documentation" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="cocoa"/>
-			<property name="os" value="macosx"/>
+			<property name="arch" value="x86"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.exporter.war" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="cocoa"/>
-			<property name="os" value="macosx"/>
+			<property name="arch" value="x86"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../j2db_runtime" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="cocoa"/>
-			<property name="os" value="macosx"/>
+			<property name="arch" value="x86"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.jsunit" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="cocoa"/>
-			<property name="os" value="macosx"/>
+			<property name="arch" value="x86"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.exporter.mobile" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="cocoa"/>
-			<property name="os" value="macosx"/>
+			<property name="arch" value="x86"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
 		</ant>
 	</target>
 	<target name="all.features" depends="init">
@@ -159,7 +159,7 @@
 		<property name="feature.base" value="${feature.temp.folder}"/>
 		<delete dir="${feature.temp.folder}"/>
 		<mkdir dir="${feature.temp.folder}"/>
-		<mkdir dir="${feature.temp.folder}/features/com.servoy.eclipse.feature_7.2.0.2016"/>
+		<mkdir dir="${feature.temp.folder}/features/com.servoy.eclipse.feature_7.3.0.2017"/>
 		<antcall target="gather.bin.parts" inheritAll="false">
 			<param name="os" value="*"/>
 			<param name="feature.base" value="${feature.temp.folder}"/>
@@ -168,40 +168,40 @@
 			<param name="arch" value="*"/>
 			<param name="nl" value="*"/>
 		</antcall>
-		<jar destfile="${feature.destination}/com.servoy.eclipse.feature_7.2.0.2016.jar" basedir="${feature.temp.folder}/features/com.servoy.eclipse.feature_7.2.0.2016"/>
+		<jar destfile="${feature.destination}/com.servoy.eclipse.feature_7.3.0.2017.jar" basedir="${feature.temp.folder}/features/com.servoy.eclipse.feature_7.3.0.2017"/>
 		<delete dir="${feature.temp.folder}"/>
 	</target>
 
 	<target name="publish.bin.parts" depends="init" if="p2.publish.parts">
-		<mkdir dir="${feature.temp.folder}/features/com.servoy.eclipse.feature_7.2.0.2016"/>
-		<copy todir="${feature.temp.folder}/features/com.servoy.eclipse.feature_7.2.0.2016" failonerror="true" overwrite="true">
+		<mkdir dir="${feature.temp.folder}/features/com.servoy.eclipse.feature_7.3.0.2017"/>
+		<copy todir="${feature.temp.folder}/features/com.servoy.eclipse.feature_7.3.0.2017" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}">
 				<include name="feature.xml"/>
 				<include name="feature.properties"/>
 			</fileset>
 		</copy>
-		<eclipse.idReplacer featureFilePath="${feature.temp.folder}/features/com.servoy.eclipse.feature_7.2.0.2016/feature.xml"  selfVersion="7.2.0.2016" featureIds="com.servoy.css.core:0.0.0,1.0.0.201003231300,org.eclipse.dltk.core.servoy:0.0.0,5.0.0.201309171431,org.eclipse.dltk.javascript.servoy:0.0.0,5.0.0.201309171431,org.eclipse.draw2d:0.0.0,3.7.1.v20110830-1143-4607w3122194102254,org.eclipse.gef:0.0.0,3.7.1.v20110830-1143-777D181B3Bz06C853D8863365," pluginIds="com.servoy.eclipse.core:0.0.0,7.2.0.2016,com.servoy.eclipse.debug:0.0.0,7.2.0.2016,com.servoy.eclipse.designer:0.0.0,7.2.0.2016,com.servoy.eclipse.team:0.0.0,7.2.0.2016,com.servoy.eclipse.ui:0.0.0,7.2.0.2016,com.servoy.eclipse.appserver:0.0.0,7.2.0.2016,com.servoy.eclipse.jsunit:0.0.0,7.2.0.2016,com.servoy.eclipse.profiler:0.0.0,7.2.0.2016,org.eclipse.dltk.javascript.rhino:0.0.0,7.2.0.2016,j2db_documentation:0.0.0,7.2.0.2016,j2db_tunnel:0.0.0,7.2.0.2016,j2db_runtime:0.0.0,7.2.0.2016,j2db_server:0.0.0,7.2.0.2016,servoy_debug:0.0.0,7.2.0.2016,servoy_headless_client:0.0.0,7.2.0.2016,servoy_shared:0.0.0,7.2.0.2016,servoy_smart_client:0.0.0,7.2.0.2016,com.servoy.eclipse.model:0.0.0,7.2.0.2016,org.eclipse.equinox.transforms.hook:0.0.0,1.0.300.201106061129,org.eclipse.equinox.transforms.xslt:0.0.0,1.0.200.201106061129,org.eclipse.equinox.transforms.xslt.plugin:0.0.0,1.0.0.201106061413,com.servoy.eclipse.exporter.solution:0.0.0,7.2.0.2016,com.servoy.eclipse.exporter.war:0.0.0,7.2.0.2016,servoy_base:0.0.0,7.2.0.2016,com.servoy.eclipse.exporter.mobile:0.0.0,7.2.0.2016,"/>
+		<eclipse.idReplacer featureFilePath="${feature.temp.folder}/features/com.servoy.eclipse.feature_7.3.0.2017/feature.xml"  selfVersion="7.3.0.2017" featureIds="com.servoy.css.core:0.0.0,1.0.0.201003231300,org.eclipse.dltk.core.servoy:0.0.0,5.0.0.201309171431,org.eclipse.dltk.javascript.servoy:0.0.0,5.0.0.201309171431,org.eclipse.draw2d:0.0.0,3.7.1.v20110830-1143-4607w3122194102254,org.eclipse.gef:0.0.0,3.7.1.v20110830-1143-777D181B3Bz06C853D8863365," pluginIds="com.servoy.eclipse.core:0.0.0,7.3.0.2017,com.servoy.eclipse.debug:0.0.0,7.3.0.2017,com.servoy.eclipse.designer:0.0.0,7.3.0.2017,com.servoy.eclipse.team:0.0.0,7.3.0.2017,com.servoy.eclipse.ui:0.0.0,7.3.0.2017,com.servoy.eclipse.appserver:0.0.0,7.3.0.2017,com.servoy.eclipse.jsunit:0.0.0,7.3.0.2017,com.servoy.eclipse.profiler:0.0.0,7.3.0.2017,org.eclipse.dltk.javascript.rhino:0.0.0,7.3.0.2017,j2db_documentation:0.0.0,7.3.0.2017,j2db_tunnel:0.0.0,7.3.0.2017,j2db_runtime:0.0.0,7.3.0.2017,j2db_server:0.0.0,7.3.0.2017,servoy_debug:0.0.0,7.3.0.2017,servoy_headless_client:0.0.0,7.3.0.2017,servoy_shared:0.0.0,7.3.0.2017,servoy_smart_client:0.0.0,7.3.0.2017,com.servoy.eclipse.model:0.0.0,7.3.0.2017,org.eclipse.equinox.transforms.hook:0.0.0,1.0.300.201106061129,org.eclipse.equinox.transforms.xslt:0.0.0,1.0.200.201106061129,org.eclipse.equinox.transforms.xslt.plugin:0.0.0,1.0.0.201106061413,com.servoy.eclipse.exporter.solution:0.0.0,7.3.0.2017,com.servoy.eclipse.exporter.war:0.0.0,7.3.0.2017,servoy_base:0.0.0,7.3.0.2017,com.servoy.eclipse.exporter.mobile:0.0.0,7.3.0.2017,"/>
 		<eclipse.gatherFeature 
 		   metadataRepository="${p2.build.repo}"
 		   artifactRepository="${p2.build.repo}"
-		   buildResultFolder="${feature.temp.folder}/features/com.servoy.eclipse.feature_7.2.0.2016"
+		   buildResultFolder="${feature.temp.folder}/features/com.servoy.eclipse.feature_7.3.0.2017"
 		   baseDirectory="${basedir}"
 		/>
 	</target>
 
 	<target name="gather.bin.parts" depends="init" if="feature.base">
-		<mkdir dir="${feature.base}/features/com.servoy.eclipse.feature_7.2.0.2016"/>
+		<mkdir dir="${feature.base}/features/com.servoy.eclipse.feature_7.3.0.2017"/>
 		<antcall target="children">
 			<param name="target" value="gather.bin.parts"/>
 			<param name="destination.temp.folder" value="${feature.base}/plugins"/>
 		</antcall>
-		<copy todir="${feature.base}/features/com.servoy.eclipse.feature_7.2.0.2016" failonerror="true" overwrite="false">
+		<copy todir="${feature.base}/features/com.servoy.eclipse.feature_7.3.0.2017" failonerror="true" overwrite="false">
 			<fileset dir="${basedir}">
 				<include name="feature.xml"/>
 				<include name="feature.properties"/>
 			</fileset>
 		</copy>
-		<eclipse.idReplacer featureFilePath="${feature.base}/features/com.servoy.eclipse.feature_7.2.0.2016/feature.xml"  selfVersion="7.2.0.2016" featureIds="com.servoy.css.core:0.0.0,1.0.0.201003231300,org.eclipse.dltk.core.servoy:0.0.0,5.0.0.201309171431,org.eclipse.dltk.javascript.servoy:0.0.0,5.0.0.201309171431,org.eclipse.draw2d:0.0.0,3.7.1.v20110830-1143-4607w3122194102254,org.eclipse.gef:0.0.0,3.7.1.v20110830-1143-777D181B3Bz06C853D8863365," pluginIds="com.servoy.eclipse.core:0.0.0,7.2.0.2016,com.servoy.eclipse.debug:0.0.0,7.2.0.2016,com.servoy.eclipse.designer:0.0.0,7.2.0.2016,com.servoy.eclipse.team:0.0.0,7.2.0.2016,com.servoy.eclipse.ui:0.0.0,7.2.0.2016,com.servoy.eclipse.appserver:0.0.0,7.2.0.2016,com.servoy.eclipse.jsunit:0.0.0,7.2.0.2016,com.servoy.eclipse.profiler:0.0.0,7.2.0.2016,org.eclipse.dltk.javascript.rhino:0.0.0,7.2.0.2016,j2db_documentation:0.0.0,7.2.0.2016,j2db_tunnel:0.0.0,7.2.0.2016,j2db_runtime:0.0.0,7.2.0.2016,j2db_server:0.0.0,7.2.0.2016,servoy_debug:0.0.0,7.2.0.2016,servoy_headless_client:0.0.0,7.2.0.2016,servoy_shared:0.0.0,7.2.0.2016,servoy_smart_client:0.0.0,7.2.0.2016,com.servoy.eclipse.model:0.0.0,7.2.0.2016,org.eclipse.equinox.transforms.hook:0.0.0,1.0.300.201106061129,org.eclipse.equinox.transforms.xslt:0.0.0,1.0.200.201106061129,org.eclipse.equinox.transforms.xslt.plugin:0.0.0,1.0.0.201106061413,com.servoy.eclipse.exporter.solution:0.0.0,7.2.0.2016,com.servoy.eclipse.exporter.war:0.0.0,7.2.0.2016,servoy_base:0.0.0,7.2.0.2016,com.servoy.eclipse.exporter.mobile:0.0.0,7.2.0.2016,"/>
+		<eclipse.idReplacer featureFilePath="${feature.base}/features/com.servoy.eclipse.feature_7.3.0.2017/feature.xml"  selfVersion="7.3.0.2017" featureIds="com.servoy.css.core:0.0.0,1.0.0.201003231300,org.eclipse.dltk.core.servoy:0.0.0,5.0.0.201309171431,org.eclipse.dltk.javascript.servoy:0.0.0,5.0.0.201309171431,org.eclipse.draw2d:0.0.0,3.7.1.v20110830-1143-4607w3122194102254,org.eclipse.gef:0.0.0,3.7.1.v20110830-1143-777D181B3Bz06C853D8863365," pluginIds="com.servoy.eclipse.core:0.0.0,7.3.0.2017,com.servoy.eclipse.debug:0.0.0,7.3.0.2017,com.servoy.eclipse.designer:0.0.0,7.3.0.2017,com.servoy.eclipse.team:0.0.0,7.3.0.2017,com.servoy.eclipse.ui:0.0.0,7.3.0.2017,com.servoy.eclipse.appserver:0.0.0,7.3.0.2017,com.servoy.eclipse.jsunit:0.0.0,7.3.0.2017,com.servoy.eclipse.profiler:0.0.0,7.3.0.2017,org.eclipse.dltk.javascript.rhino:0.0.0,7.3.0.2017,j2db_documentation:0.0.0,7.3.0.2017,j2db_tunnel:0.0.0,7.3.0.2017,j2db_runtime:0.0.0,7.3.0.2017,j2db_server:0.0.0,7.3.0.2017,servoy_debug:0.0.0,7.3.0.2017,servoy_headless_client:0.0.0,7.3.0.2017,servoy_shared:0.0.0,7.3.0.2017,servoy_smart_client:0.0.0,7.3.0.2017,com.servoy.eclipse.model:0.0.0,7.3.0.2017,org.eclipse.equinox.transforms.hook:0.0.0,1.0.300.201106061129,org.eclipse.equinox.transforms.xslt:0.0.0,1.0.200.201106061129,org.eclipse.equinox.transforms.xslt.plugin:0.0.0,1.0.0.201106061413,com.servoy.eclipse.exporter.solution:0.0.0,7.3.0.2017,com.servoy.eclipse.exporter.war:0.0.0,7.3.0.2017,servoy_base:0.0.0,7.3.0.2017,com.servoy.eclipse.exporter.mobile:0.0.0,7.3.0.2017,"/>
 		<antcall target="rootFiles">
 			<param name="rootTarget" value="rootFiles${os}_${ws}_${arch}"/>
 		</antcall>
@@ -210,10 +210,10 @@
 		<antcall target="${rootTarget}"/>
 	</target>
 
-	<target name="rootFilesmacosx_cocoa_x86_64">
+	<target name="rootFileswin32_win32_x86">
 	</target>
 	<target name="rootFilesgroup_group_group">
-		<antcall target="rootFilesmacosx_cocoa_x86_64"/>
+		<antcall target="rootFileswin32_win32_x86"/>
 	</target>
 
 	<target name="zip.distribution" depends="init" description="Create a zip containing all the plug-ins and features for the feature: com.servoy.eclipse.feature.">
@@ -227,7 +227,7 @@
 			<param name="nl" value="*"/>
 			<param name="include.children" value="true"/>
 		</antcall>
-		<zip destfile="${feature.destination}/com.servoy.eclipse.feature_7.2.0.2016.bin.dist.zip" basedir="${feature.temp.folder}" filesonly="false" whenempty="skip" update="false"/>
+		<zip destfile="${feature.destination}/com.servoy.eclipse.feature_7.3.0.2017.bin.dist.zip" basedir="${feature.temp.folder}" filesonly="false" whenempty="skip" update="false"/>
 		<delete dir="${feature.temp.folder}"/>
 	</target>
 
@@ -236,10 +236,10 @@
 		<mkdir dir="${feature.temp.folder}"/>
 		<antcall target="all.children">
 			<param name="target" value="gather.sources"/>
-			<param name="destination.temp.folder" value="${feature.temp.folder}/plugins/com.servoy.eclipse.feature.source_7.2.0.2016/src"/>
+			<param name="destination.temp.folder" value="${feature.temp.folder}/plugins/com.servoy.eclipse.feature.source_7.3.0.2017/src"/>
 			<param name="include.children" value="true"/>
 		</antcall>
-		<zip destfile="${feature.destination}/com.servoy.eclipse.feature_7.2.0.2016.src.zip" basedir="${feature.temp.folder}" filesonly="true" whenempty="skip" update="false"/>
+		<zip destfile="${feature.destination}/com.servoy.eclipse.feature_7.3.0.2017.src.zip" basedir="${feature.temp.folder}" filesonly="true" whenempty="skip" update="false"/>
 		<delete dir="${feature.temp.folder}"/>
 	</target>
 
@@ -255,15 +255,15 @@
 			<param name="include.children" value="true"/>
 			<param name="${logExtension.param}" value="${logExtension}"/>
 		</antcall>
-		<zip destfile="${feature.destination}/com.servoy.eclipse.feature_7.2.0.2016.log.zip" basedir="${feature.temp.folder}" filesonly="true" whenempty="skip" update="false"/>
+		<zip destfile="${feature.destination}/com.servoy.eclipse.feature_7.3.0.2017.log.zip" basedir="${feature.temp.folder}" filesonly="true" whenempty="skip" update="false"/>
 		<delete dir="${feature.temp.folder}"/>
 	</target>
 
 	<target name="clean" depends="init" description="Clean the feature: com.servoy.eclipse.feature of all the zips, jars and logs created.">
-		<delete file="${feature.destination}/com.servoy.eclipse.feature_7.2.0.2016.jar"/>
-		<delete file="${feature.destination}/com.servoy.eclipse.feature_7.2.0.2016.bin.dist.zip"/>
-		<delete file="${feature.destination}/com.servoy.eclipse.feature_7.2.0.2016.log.zip"/>
-		<delete file="${feature.destination}/com.servoy.eclipse.feature_7.2.0.2016.src.zip"/>
+		<delete file="${feature.destination}/com.servoy.eclipse.feature_7.3.0.2017.jar"/>
+		<delete file="${feature.destination}/com.servoy.eclipse.feature_7.3.0.2017.bin.dist.zip"/>
+		<delete file="${feature.destination}/com.servoy.eclipse.feature_7.3.0.2017.log.zip"/>
+		<delete file="${feature.destination}/com.servoy.eclipse.feature_7.3.0.2017.src.zip"/>
 		<delete dir="${feature.temp.folder}"/>
 		<antcall target="all.children">
 			<param name="target" value="clean"/>
@@ -271,7 +271,7 @@
 	</target>
 
 	<target name="refresh" depends="init" if="eclipse.running" description="Refresh this folder.">
-		<eclipse.convertPath fileSystemPath="/Users/servoy/Servoy/Dev/dev_trunk/com.servoy.eclipse.feature/" property="resourcePath"/>
+		<eclipse.convertPath fileSystemPath="C:/Users/Administrator/dev_trunk/com.servoy.eclipse.feature/" property="resourcePath"/>
 		<eclipse.refreshLocal resource="${resourcePath}" depth="infinite"/>
 		<antcall target="all.children">
 			<param name="target" value="refresh"/>
@@ -280,7 +280,7 @@
 	<target name="gather.sources">
 		<antcall target="children">
 			<param name="target" value="gather.sources"/>
-			<param name="destination.temp.folder" value="${feature.temp.folder}/plugins/com.servoy.eclipse.feature.source_7.2.0.2016/src"/>
+			<param name="destination.temp.folder" value="${feature.temp.folder}/plugins/com.servoy.eclipse.feature.source_7.3.0.2017/src"/>
 		</antcall>
 	</target>
 

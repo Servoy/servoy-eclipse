@@ -7,7 +7,7 @@
 	<property name="basearch" value="${arch}"/>
 	<property name="basenl" value="${nl}"/>
 	<property name="bundleId" value="com.servoy.eclipse.exporter.solution"/>
-	<property name="bundleVersion" value="7.2.0.2016"/>
+	<property name="bundleVersion" value="7.3.0.2017"/>
 	<property name="p2.publishonerror" value="false"/>
 
 	<!-- Compiler settings. -->
@@ -47,7 +47,7 @@
 			<isset property="buildTempFolder"/>
 		</condition>
 		<property name="pluginTemp" value="${basedir}"/>
-		<condition property="build.result.folder" value="${pluginTemp}/com.servoy.eclipse.exporter.solution_7.2.0.2016"		>
+		<condition property="build.result.folder" value="${pluginTemp}/com.servoy.eclipse.exporter.solution_7.3.0.2017"		>
 			<isset property="buildTempFolder"/>
 		</condition>
 		<property name="build.result.folder" value="${basedir}"/>
@@ -77,7 +77,7 @@
 		<antcall target="gather.bin.parts">
 			<param name="destination.temp.folder" value="${temp.folder}/"/>
 		</antcall>
-		<jar destfile="${plugin.destination}/com.servoy.eclipse.exporter.solution_7.2.0.2016.jar" basedir="${temp.folder}/com.servoy.eclipse.exporter.solution_7.2.0.2016" filesetmanifest="merge"/>
+		<jar destfile="${plugin.destination}/com.servoy.eclipse.exporter.solution_7.3.0.2017.jar" basedir="${temp.folder}/com.servoy.eclipse.exporter.solution_7.3.0.2017" filesetmanifest="merge"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
@@ -274,8 +274,8 @@
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.aix.ppc_3.7.2.v3740f.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.hpux.ia64_32_3.7.2.v3740f.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.linux.ppc64_3.7.2.v3740f.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.linux.s390_3.7.2.v3740f.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.linux.s390x_3.7.2.v3740f.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.linux.s390_3.7.2.v3740f.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.linux.x86_3.7.2.v3740f.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.linux.x86_64_3.7.2.v3740f.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.solaris.sparc_3.7.2.v3740f.jar"/>
@@ -326,22 +326,22 @@
 	</target>
 
 	<target name="checkCompilationResults" if="compilation.error.occured">
-		<echo file="${compilation.problem.marker}" message="com.servoy.eclipse.exporter.solution_7.2.0.2016${line.separator}compilation.error.occured=${compilation.error.occured}"/>
-		<eclipse.logCompileError bundle="com.servoy.eclipse.exporter.solution_7.2.0.2016" log="${compilation.prereq.log}">
-			<include name="/Users/servoy/Servoy/Dev/dev_trunk/servoy_base/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_base_7.2.0.2016/compilation.problem"/>
-			<include name="/Users/servoy/Servoy/Dev/dev_trunk/servoy_smart_client/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_smart_client_7.2.0.2016/compilation.problem"/>
-			<include name="/Users/servoy/Servoy/Dev/dev_trunk/com.servoy.eclipse.model/compilation.problem"/>
-			<include name="${pluginTemp}/com.servoy.eclipse.model_7.2.0.2016/compilation.problem"/>
-			<include name="/Users/servoy/Servoy/Dev/dev_trunk/servoy_headless_client/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_headless_client_7.2.0.2016/compilation.problem"/>
-			<include name="/Users/servoy/Servoy/Dev/dev_trunk/org.eclipse.dltk.javascript.rhino/compilation.problem"/>
-			<include name="${pluginTemp}/org.eclipse.dltk.javascript.rhino_7.2.0.2016/compilation.problem"/>
-			<include name="/Users/servoy/Servoy/Dev/dev_trunk/servoy_debug/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_debug_7.2.0.2016/compilation.problem"/>
-			<include name="/Users/servoy/Servoy/Dev/dev_trunk/servoy_shared/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_shared_7.2.0.2016/compilation.problem"/>
+		<echo file="${compilation.problem.marker}" message="com.servoy.eclipse.exporter.solution_7.3.0.2017${line.separator}compilation.error.occured=${compilation.error.occured}"/>
+		<eclipse.logCompileError bundle="com.servoy.eclipse.exporter.solution_7.3.0.2017" log="${compilation.prereq.log}">
+			<include name="C:/Users/Administrator/dev_trunk/servoy_smart_client/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_smart_client_7.3.0.2017/compilation.problem"/>
+			<include name="C:/Users/Administrator/dev_trunk/servoy_base/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_base_7.3.0.2017/compilation.problem"/>
+			<include name="C:/Users/Administrator/dev_trunk/com.servoy.eclipse.model/compilation.problem"/>
+			<include name="${pluginTemp}/com.servoy.eclipse.model_7.3.0.2017/compilation.problem"/>
+			<include name="C:/Users/Administrator/dev_trunk/servoy_headless_client/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_headless_client_7.3.0.2017/compilation.problem"/>
+			<include name="C:/Users/Administrator/dev_trunk/org.eclipse.dltk.javascript.rhino/compilation.problem"/>
+			<include name="${pluginTemp}/org.eclipse.dltk.javascript.rhino_7.3.0.2017/compilation.problem"/>
+			<include name="C:/Users/Administrator/dev_trunk/servoy_debug/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_debug_7.3.0.2017/compilation.problem"/>
+			<include name="C:/Users/Administrator/dev_trunk/servoy_shared/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_shared_7.3.0.2017/compilation.problem"/>
 		</eclipse.logCompileError>
 	</target>
 
@@ -351,7 +351,7 @@
 	</target>
 
 	<target name="publish.bin.parts" depends="init" if="p2.publish.parts" unless="compilation.problem.marker.exists">
-		<mkdir dir="${build.result.folder}/com.servoy.eclipse.exporter.solution_7.2.0.2016"/>
+		<mkdir dir="${build.result.folder}/com.servoy.eclipse.exporter.solution_7.3.0.2017"/>
 		<copy todir="${build.result.folder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}">
 				<include name="META-INF/MANIFEST.MF"/>
@@ -375,20 +375,20 @@
 	</target>
 
 	<target name="gather.bin.parts" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.2.0.2016"/>
-		<copy todir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.2.0.2016" failonerror="true" overwrite="false">
+		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.3.0.2017"/>
+		<copy todir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.3.0.2017" failonerror="true" overwrite="false">
 			<fileset dir="${build.result.folder}/@dot">
 				<include name="**"/>
 			</fileset>
 		</copy>
-		<copy todir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.2.0.2016" failonerror="true" overwrite="true">
+		<copy todir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.3.0.2017" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}">
 				<include name="META-INF/"/>
 				<include name="plugin.xml"/>
 			</fileset>
 		</copy>
 		<antcall target="apitools.generation">
-			<param name="target.folder" value="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.2.0.2016"/>
+			<param name="target.folder" value="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.3.0.2017"/>
 			<param name="projectLocation" value="${basedir}"/>
 			<param name="binary.folders" value="${build.result.folder}/@dot"/>
 			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
@@ -399,10 +399,10 @@
 	</target>
 
 	<target name="gather.sources" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.2.0.2016"/>
-		<copy file="${build.result.folder}/src.zip" todir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.2.0.2016" failonerror="false" overwrite="false"/>
+		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.3.0.2017"/>
+		<copy file="${build.result.folder}/src.zip" todir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.3.0.2017" failonerror="false" overwrite="false"/>
 		<antcall target="copy.src.includes">
-			<param name="source.destination.folder" value="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.2.0.2016"/>
+			<param name="source.destination.folder" value="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.3.0.2017"/>
 		</antcall>
 	</target>
 
@@ -419,8 +419,8 @@
 	</target>
 
 	<target name="gather.logs" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.2.0.2016"/>
-		<copy todir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.2.0.2016" failonerror="false" overwrite="false">
+		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.3.0.2017"/>
+		<copy todir="${destination.temp.folder}/com.servoy.eclipse.exporter.solution_7.3.0.2017" failonerror="false" overwrite="false">
 			<fileset dir="${build.result.folder}">
 				<include name="@dot${logExtension}"/>
 			</fileset>
@@ -430,14 +430,14 @@
 	<target name="clean" depends="init" description="Clean the plug-in: com.servoy.eclipse.exporter.solution of all the zips, jars and logs created.">
 		<delete dir="${build.result.folder}/@dot"/>
 		<delete file="${build.result.folder}/src.zip"/>
-		<delete file="${plugin.destination}/com.servoy.eclipse.exporter.solution_7.2.0.2016.jar"/>
-		<delete file="${plugin.destination}/com.servoy.eclipse.exporter.solution_7.2.0.2016.zip"/>
+		<delete file="${plugin.destination}/com.servoy.eclipse.exporter.solution_7.3.0.2017.jar"/>
+		<delete file="${plugin.destination}/com.servoy.eclipse.exporter.solution_7.3.0.2017.zip"/>
 		<delete dir="${temp.folder}"/>
 		<delete file="${compilation.problem.marker}" quiet="true"/>
 	</target>
 
 	<target name="refresh" depends="init" if="eclipse.running" description="Refresh this folder.">
-		<eclipse.convertPath fileSystemPath="/Users/servoy/Servoy/Dev/dev_trunk/com.servoy.eclipse.exporter.solution" property="resourcePath"/>
+		<eclipse.convertPath fileSystemPath="C:/Users/Administrator/dev_trunk/com.servoy.eclipse.exporter.solution" property="resourcePath"/>
 		<eclipse.refreshLocal resource="${resourcePath}" depth="infinite"/>
 	</target>
 
@@ -457,7 +457,7 @@
 				<include name="**/*.bin${logExtension}"/>
 			</fileset>
 		</delete>
-		<zip destfile="${plugin.destination}/com.servoy.eclipse.exporter.solution_7.2.0.2016.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
+		<zip destfile="${plugin.destination}/com.servoy.eclipse.exporter.solution_7.3.0.2017.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
