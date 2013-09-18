@@ -152,6 +152,16 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 		Form currentMethodForm = getFormForEditor(ed);
 
 		String txt = modifyCodeAccordingToUsedForms(currentMethodForm, sourceForm, codeText, replacePrefix);
+		if (currentMethodForm == null && codeText.startsWith("scopes."))
+		{
+			String scope = getScopeForEditor(ed);
+			if (scope.equals(codeText.split("\\.")[1])) //$NON-NLS-1$
+			{
+				// moving code belonging to a scope to the scope's own js file does not need the scope prefix
+				String pattern = "scopes\\.(.+)\\.(.+)"; //$NON-NLS-1$
+				txt = codeText.replaceAll(pattern, "$2"); //$NON-NLS-1$
+			}
+		}
 
 		Point textSelection = st.getSelectionRange();
 		int caretOffset = st.getCaretOffset();
@@ -250,6 +260,31 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 			}
 		}
 		return ret;
+	}
+
+	public static String getScopeForEditor(IEditorPart editor)
+	{
+		String scopeName = null;
+
+		if (editor instanceof ScriptEditor)
+		{
+			ScriptEditor scriptEditor = (ScriptEditor)editor;
+			try
+			{
+				IPath projectRelativePath = scriptEditor.getInputModelElement().getUnderlyingResource().getProjectRelativePath();
+				String[] projectRelativePathSegments = projectRelativePath.segments();
+				scopeName = projectRelativePathSegments[0];
+				if (scopeName.endsWith(SolutionSerializer.JS_FILE_EXTENSION))
+				{
+					scopeName = scopeName.substring(0, scopeName.length() - SolutionSerializer.JS_FILE_EXTENSION.length());
+				}
+			}
+			catch (ModelException e)
+			{
+				ServoyLog.logWarning("Cannot get the scope name from the script editor...", e);
+			}
+		}
+		return scopeName;
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)
