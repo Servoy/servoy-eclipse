@@ -38,11 +38,13 @@ public class RelationLabelProvider extends SupportNameLabelProvider implements I
 	public static final RelationLabelProvider INSTANCE_ALL_NO_IMAGE = new RelationLabelProvider(Messages.LabelNone, false, false);
 	public static final RelationLabelProvider INSTANCE_LAST_NAME_ONLY = new RelationLabelProvider(Messages.LabelNone, true, true);
 	public static final RelationLabelProvider INSTANCE_ALL = new RelationLabelProvider(Messages.LabelNone, true, false);
-	
+
 	private static final Image RELATION_IMAGE = Activator.getDefault().loadImageFromBundle("relation.gif");
 	private static final Image GLOBAL_RELATION_IMAGE = Activator.getDefault().loadImageFromBundle("global_relation.gif");
 	private static final Image RELATION_PROTECTED_IMAGE = Activator.getDefault().loadImageFromBundle("relation_protected.gif");
 	private static final Image GLOBAL_RELATION_PROTECTED_IMAGE = Activator.getDefault().loadImageFromBundle("global_relation_protected.gif");
+	private static final Image RELATION_PRIVATE_IMAGE = Activator.getDefault().loadImageFromBundle("relation_private.gif");
+	private static final Image GLOBAL_RELATION_PRIVATE_IMAGE = Activator.getDefault().loadImageFromBundle("global_relation_private.gif");
 
 	private final boolean lastNameOnly;
 	private final boolean showImage;
@@ -76,6 +78,27 @@ public class RelationLabelProvider extends SupportNameLabelProvider implements I
 		return super.getText(value);
 	}
 
+	public static String getImageFileName(Relation relation)
+	{
+		String fileName = null;
+		if (relation != null)
+		{
+			if (PersistEncapsulation.hasEncapsulation(relation, PersistEncapsulation.PRIVATE))
+			{
+				fileName = relation.isGlobal() ? "global_relation_private.gif" : "relation_private.gif";
+			}
+			else if (PersistEncapsulation.isModulePrivate(relation, null))
+			{
+				fileName = relation.isGlobal() ? "global_relation_protected.gif" : "relation_protected.gif";
+			}
+			else
+			{
+				fileName = relation.isGlobal() ? "global_relation.gif" : "relation.gif";
+			}
+		}
+		return fileName;
+	}
+
 	@Override
 	public Image getImage(Object element)
 	{
@@ -83,6 +106,10 @@ public class RelationLabelProvider extends SupportNameLabelProvider implements I
 		{
 			if (element instanceof Relation)
 			{
+				if (PersistEncapsulation.hasEncapsulation((Relation)element, PersistEncapsulation.PRIVATE))
+				{
+					return ((Relation)element).isGlobal() ? GLOBAL_RELATION_PRIVATE_IMAGE : RELATION_PRIVATE_IMAGE;
+				}
 				if (PersistEncapsulation.isModulePrivate((Relation)element, null))
 				{
 					return ((Relation)element).isGlobal() ? GLOBAL_RELATION_PROTECTED_IMAGE : RELATION_PROTECTED_IMAGE;

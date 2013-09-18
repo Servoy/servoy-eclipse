@@ -269,8 +269,10 @@ public class TypeCreator extends TypeCache
 		"/icons/foundset.gif"), null));
 	protected final static ImageDescriptor RELATION_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path(
 		"/icons/relation.gif"), null));
-	protected final static ImageDescriptor RELATION_PROTECTED_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(),
-		new Path("/icons/relation_protected.gif"), null));
+	protected final static ImageDescriptor RELATION_PROTECTED_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(
+		com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/relation_protected.gif"), null));
+	protected final static ImageDescriptor RELATION_PRIVATE_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(
+		com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/relation_private.gif"), null));
 
 	protected final static ImageDescriptor COLUMN_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path(
 		"/icons/column.gif"), null));
@@ -3274,8 +3276,17 @@ public class TypeCreator extends TypeCache
 				// show only relations that are valid and defined for this scope
 				if (relation.isValid() && (scopeName == null || relation.usesScope(scopeName)))
 				{
+					ImageDescriptor relationImage = RELATION_IMAGE;
+					if (PersistEncapsulation.hasEncapsulation(relation, PersistEncapsulation.PRIVATE))
+					{
+						relationImage = RELATION_PRIVATE_IMAGE;
+					}
+					else if (PersistEncapsulation.isModulePrivate(relation, null))
+					{
+						relationImage = RELATION_PROTECTED_IMAGE;
+					}
 					Property property = createProperty(relation.getName(), true, getTypeRef(context, FoundSet.JS_FOUNDSET + '<' + relation.getName() + '>'),
-						getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()), RELATION_IMAGE, relation);
+						getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()), relationImage, relation);
 					if (visible)
 					{
 						IServerInternal sp = ((IServerInternal)relation.getPrimaryServer());
