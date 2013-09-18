@@ -643,8 +643,8 @@ public class ElementUtil
 		{
 			//designer.gif
 			int encapsulation = f.getEncapsulation();
-			if ((encapsulation & PersistEncapsulation.MODULE_PRIVATE) == PersistEncapsulation.MODULE_PRIVATE) relPath = "icons/designer_protected.gif"; //$NON-NLS-1$
-			else if ((encapsulation & PersistEncapsulation.PRIVATE) == PersistEncapsulation.PRIVATE) relPath = "icons/designer_private.gif"; //$NON-NLS-1$
+			if ((encapsulation & PersistEncapsulation.MODULE_SCOPE) == PersistEncapsulation.MODULE_SCOPE) relPath = "icons/designer_protected.gif"; //$NON-NLS-1$
+			else if ((encapsulation & PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) == PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) relPath = "icons/designer_private.gif"; //$NON-NLS-1$
 			else if ((encapsulation & DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) == DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) relPath = "icons/designer_public.gif"; //$NON-NLS-1$
 			else relPath = "icons/designer.gif"; //$NON-NLS-1$
 		}
@@ -663,9 +663,9 @@ public class ElementUtil
 		if (form != null)
 		{
 			int encapsulation = (form).getEncapsulation();
-			if ((encapsulation & PersistEncapsulation.MODULE_PRIVATE) == PersistEncapsulation.MODULE_PRIVATE) image = Activator.getDefault().loadImageFromBundle(
+			if ((encapsulation & PersistEncapsulation.MODULE_SCOPE) == PersistEncapsulation.MODULE_SCOPE) image = Activator.getDefault().loadImageFromBundle(
 				"designer_protected.gif"); //$NON-NLS-1$
-			else if ((encapsulation & PersistEncapsulation.PRIVATE) == PersistEncapsulation.PRIVATE) image = Activator.getDefault().loadImageFromBundle(
+			else if ((encapsulation & PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) == PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) image = Activator.getDefault().loadImageFromBundle(
 				"designer_private.gif"); //$NON-NLS-1$
 			else if ((encapsulation & DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) == DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) image = Activator.getDefault().loadImageFromBundle(
 				"designer_public.gif"); //$NON-NLS-1$

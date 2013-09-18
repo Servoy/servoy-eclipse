@@ -737,10 +737,10 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					ImageDescriptor imgd = Activator.loadImageDescriptorFromBundle("designer_public.gif");
 					switch (f.getEncapsulation())
 					{
-						case PersistEncapsulation.MODULE_PRIVATE :
+						case PersistEncapsulation.MODULE_SCOPE :
 							imgd = Activator.loadImageDescriptorFromBundle("designer_protected.gif");
 							break;
-						case PersistEncapsulation.PRIVATE :
+						case PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE :
 							imgd = Activator.loadImageDescriptorFromBundle("designer_private.gif");
 							break;
 					}

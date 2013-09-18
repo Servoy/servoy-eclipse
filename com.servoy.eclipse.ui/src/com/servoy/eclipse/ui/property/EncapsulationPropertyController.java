@@ -73,11 +73,12 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 	@SuppressWarnings("nls")
 	public static class EncapsulationPropertySource extends ComplexPropertySource<Integer>
 	{
-		private static final int ALL = PersistEncapsulation.PRIVATE + PersistEncapsulation.MODULE_PRIVATE + PersistEncapsulation.HIDE_CONTROLLER +
-			PersistEncapsulation.HIDE_DATAPROVIDERS + PersistEncapsulation.HIDE_ELEMENTS + PersistEncapsulation.HIDE_FOUNDSET;
+		private static final int ALL = PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE + PersistEncapsulation.MODULE_SCOPE +
+			PersistEncapsulation.HIDE_CONTROLLER + PersistEncapsulation.HIDE_DATAPROVIDERS + PersistEncapsulation.HIDE_ELEMENTS +
+			PersistEncapsulation.HIDE_FOUNDSET;
 
-		private static final String PRIVATE = "private";
-		private static final String MODULE_PRIVATE = "module private";
+		private static final String HIDE_IN_SCRIPTING_MODULE_SCOPE = "hide in scripting; module scope";
+		private static final String MODULE_SCOPE = "module scope";
 		private static final String HIDE_DATAPROVIDERS = "hide dataproviders";
 		private static final String HIDE_FOUNDSET = "hide foundset";
 		private static final String HIDE_CONTROLLER = "hide controller";
@@ -103,11 +104,11 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 			List<IPropertyDescriptor> propertyDescriptors = new ArrayList<IPropertyDescriptor>();
 			if (persist instanceof Form || persist instanceof Relation)
 			{
-				propertyDescriptors.add(new CheckboxPropertyDescriptor(PRIVATE,
-					EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.PRIVATE))));
+				propertyDescriptors.add(new CheckboxPropertyDescriptor(HIDE_IN_SCRIPTING_MODULE_SCOPE,
+					EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE))));
 			}
-			propertyDescriptors.add(new CheckboxPropertyDescriptor(MODULE_PRIVATE,
-				EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.MODULE_PRIVATE))));
+			propertyDescriptors.add(new CheckboxPropertyDescriptor(MODULE_SCOPE,
+				EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.MODULE_SCOPE))));
 			if (persist instanceof Form)
 			{
 				propertyDescriptors.add(new CheckboxPropertyDescriptor(HIDE_DATAPROVIDERS,
@@ -128,8 +129,9 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 			int encapsulation = getEditableValue().intValue();
 			if (encapsulation == -1) return Boolean.FALSE;
 
-			if (PRIVATE.equals(id)) return (encapsulation & PersistEncapsulation.PRIVATE) == 0 ? Boolean.FALSE : Boolean.TRUE;
-			if (MODULE_PRIVATE.equals(id)) return (encapsulation & PersistEncapsulation.MODULE_PRIVATE) == 0 ? Boolean.FALSE : Boolean.TRUE;
+			if (HIDE_IN_SCRIPTING_MODULE_SCOPE.equals(id)) return (encapsulation & PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) == 0 ? Boolean.FALSE
+				: Boolean.TRUE;
+			if (MODULE_SCOPE.equals(id)) return (encapsulation & PersistEncapsulation.MODULE_SCOPE) == 0 ? Boolean.FALSE : Boolean.TRUE;
 			if (HIDE_DATAPROVIDERS.equals(id)) return (encapsulation & PersistEncapsulation.HIDE_DATAPROVIDERS) == 0 ? Boolean.FALSE : Boolean.TRUE;
 			if (HIDE_FOUNDSET.equals(id)) return (encapsulation & PersistEncapsulation.HIDE_FOUNDSET) == 0 ? Boolean.FALSE : Boolean.TRUE;
 			if (HIDE_CONTROLLER.equals(id)) return (encapsulation & PersistEncapsulation.HIDE_CONTROLLER) == 0 ? Boolean.FALSE : Boolean.TRUE;
@@ -146,8 +148,8 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 				encapsulation = 0;
 			}
 			int flag;
-			if (PRIVATE.equals(id)) flag = PersistEncapsulation.PRIVATE;
-			else if (MODULE_PRIVATE.equals(id)) flag = PersistEncapsulation.MODULE_PRIVATE;
+			if (HIDE_IN_SCRIPTING_MODULE_SCOPE.equals(id)) flag = PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE;
+			else if (MODULE_SCOPE.equals(id)) flag = PersistEncapsulation.MODULE_SCOPE;
 			else if (HIDE_DATAPROVIDERS.equals(id)) flag = PersistEncapsulation.HIDE_DATAPROVIDERS;
 			else if (HIDE_FOUNDSET.equals(id)) flag = PersistEncapsulation.HIDE_FOUNDSET;
 			else if (HIDE_CONTROLLER.equals(id)) flag = PersistEncapsulation.HIDE_CONTROLLER;
@@ -183,14 +185,14 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 			}
 
 			StringBuilder retval = new StringBuilder();
-			if ((encapsulation & PersistEncapsulation.PRIVATE) == PersistEncapsulation.PRIVATE)
+			if ((encapsulation & PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) == PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE)
 			{
-				retval.append(Messages.Private);
+				retval.append(Messages.HideInScriptingModuleScope);
 			}
-			if ((encapsulation & PersistEncapsulation.MODULE_PRIVATE) == PersistEncapsulation.MODULE_PRIVATE)
+			if ((encapsulation & PersistEncapsulation.MODULE_SCOPE) == PersistEncapsulation.MODULE_SCOPE)
 			{
 				if (retval.length() != 0) retval.append(',');
-				retval.append(Messages.ModulePrivate);
+				retval.append(Messages.ModuleScope);
 			}
 			if ((encapsulation & PersistEncapsulation.HIDE_CONTROLLER) == PersistEncapsulation.HIDE_CONTROLLER)
 			{
