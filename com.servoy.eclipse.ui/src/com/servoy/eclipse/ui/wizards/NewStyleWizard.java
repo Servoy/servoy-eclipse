@@ -205,7 +205,6 @@ public class NewStyleWizard extends Wizard implements INewWizard
 				}
 
 			};
-			job3.setRule(ServoyModel.getWorkspace().getRoot());
 			job3.setUser(true);
 
 			final WorkspaceJob job2 = new WorkspaceJob("Creating style")
@@ -248,7 +247,6 @@ public class NewStyleWizard extends Wizard implements INewWizard
 				}
 
 			};
-			job2.setRule(ServoyModel.getWorkspace().getRoot());
 			job2.setUser(true);
 
 			// if there is an active resource project, the new style will be added to it; else we must add a reference to the chosen (maybe new) resource project
@@ -275,7 +273,6 @@ public class NewStyleWizard extends Wizard implements INewWizard
 						return returnStatus;
 					}
 				};
-				job1.setRule(ServoyModel.getWorkspace().getRoot());
 				job1.setUser(true);
 				job1.schedule();
 			}
