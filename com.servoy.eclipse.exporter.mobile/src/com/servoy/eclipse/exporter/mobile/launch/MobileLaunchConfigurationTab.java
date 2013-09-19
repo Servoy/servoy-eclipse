@@ -80,7 +80,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 	protected Label lblBrowser;
 	protected Combo combo;
 	protected String[] browserList = null;
-	private Text txtWarDeployTime;
+	private Text maxTxtWarDeployTime;
 
 	private final ModifyListener modifyListener = new ModifyListener()
 	{
@@ -241,15 +241,15 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 
 		Label separator = new Label(container, SWT.SEPARATOR | SWT.HORIZONTAL);
 
-		Label lblWarDeployTime = new Label(container, SWT.NONE);
-		lblWarDeployTime.setText("WAR deployment time");
-		toolTip = "The exported servoy mobile .war file will be copied to the output folder (which is normally a deployment folder of the web container (Tomcat)).\nAfter being copied, the launcher will wait for this time to pass before starting the browser - allowing the .war container to discover and re-deploy the mobile application.\n\nPlease increase this time period if you get 404 - NOT Found or old version of the application when the browser opens.";
-		lblWarDeployTime.setToolTipText(toolTip);
-		txtWarDeployTime = new Text(container, SWT.BORDER);
-		txtWarDeployTime.setText(IMobileLaunchConstants.DEFAULT_WAR_DEPLOYMENT_TIME);
-		txtWarDeployTime.setToolTipText(toolTip);
-		txtWarDeployTime.addModifyListener(modifyListener);
-		txtWarDeployTime.addVerifyListener(new VerifyListener()
+		Label lblMaxWarDeployTime = new Label(container, SWT.NONE);
+		lblMaxWarDeployTime.setText("WAR deployment timeout");
+		toolTip = "The exported servoy mobile .war file will be copied to the output folder (which is normally a deployment folder of the web container (Tomcat)).\nAfter being copied, the launcher will wait for the .war file to be deployed for maximum this time period. If this time passes without the war being\ndeployed the launch will fail. If deployment happens the browser will be started.\n\nPlease increase this time period if you expect deployment to take longer for some reason.";
+		lblMaxWarDeployTime.setToolTipText(toolTip);
+		maxTxtWarDeployTime = new Text(container, SWT.BORDER);
+		maxTxtWarDeployTime.setText(IMobileLaunchConstants.DEFAULT_MAX_WAR_DEPLOYMENT_TIME);
+		maxTxtWarDeployTime.setToolTipText(toolTip);
+		maxTxtWarDeployTime.addModifyListener(modifyListener);
+		maxTxtWarDeployTime.addVerifyListener(new VerifyListener()
 		{
 			@Override
 			public void verifyText(VerifyEvent e)
@@ -297,14 +297,14 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 								.add(txtTimeout, GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE)))
 						.add(separator, GroupLayout.DEFAULT_SIZE, 522, Short.MAX_VALUE)
 						.add(groupLayout.createSequentialGroup()
-							.add(14)
 							.add(groupLayout.createParallelGroup(GroupLayout.TRAILING)
-								.add(lblWarDeployTime, GroupLayout.PREFERRED_SIZE, 126, GroupLayout.PREFERRED_SIZE)
+								.add(lblMaxWarDeployTime, GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE)
 								.add(lblNoDebug))
 							.add(18)
 							.add(groupLayout.createParallelGroup(GroupLayout.LEADING)
+								.add(14)
 								.add(groupLayout.createSequentialGroup()
-									.add(txtWarDeployTime, GroupLayout.PREFERRED_SIZE, 66, GroupLayout.PREFERRED_SIZE)
+									.add(maxTxtWarDeployTime, GroupLayout.PREFERRED_SIZE, 66, GroupLayout.PREFERRED_SIZE)
 									.addPreferredGap(LayoutStyle.RELATED)
 									.add(lblWarDeployUnit, GroupLayout.PREFERRED_SIZE, 26, GroupLayout.PREFERRED_SIZE))
 								.add(groupLayout.createSequentialGroup()
@@ -349,8 +349,8 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 						.add(lblNoDebug))
 					.addPreferredGap(LayoutStyle.RELATED)
 					.add(groupLayout.createParallelGroup(GroupLayout.BASELINE)
-						.add(txtWarDeployTime, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-						.add(lblWarDeployTime)
+						.add(maxTxtWarDeployTime, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.add(lblMaxWarDeployTime)
 						.add(lblWarDeployUnit))
 					.addContainerGap(30, Short.MAX_VALUE))
 		);
@@ -376,7 +376,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		configuration.setAttribute(IMobileLaunchConstants.TIMEOUT, IMobileLaunchConstants.DEFAULT_TIMEOUT);
 		configuration.setAttribute(IMobileLaunchConstants.NODEBUG, "true");
 		configuration.setAttribute(IMobileLaunchConstants.BROWSER_ID, "org.eclipse.ui.browser.chrome");
-		configuration.setAttribute(IMobileLaunchConstants.WAR_DEPLOYMENT_TIME, IMobileLaunchConstants.DEFAULT_WAR_DEPLOYMENT_TIME);
+		configuration.setAttribute(IMobileLaunchConstants.MAX_WAR_DEPLOYMENT_TIME, IMobileLaunchConstants.DEFAULT_MAX_WAR_DEPLOYMENT_TIME);
 	}
 
 	@Override
@@ -395,8 +395,9 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 			String browserName = (String)possibleBrowsersNames.get(browserId);
 			int comboIndexToSelect = Arrays.asList(browserList).indexOf(browserName);
 			combo.select(comboIndexToSelect == -1 ? 0 : comboIndexToSelect);
-			txtWarDeployTime.setText(configuration.getAttribute(IMobileLaunchConstants.WAR_DEPLOYMENT_TIME, IMobileLaunchConstants.DEFAULT_WAR_DEPLOYMENT_TIME));
-			if (txtWarDeployTime.getText().length() == 0) txtWarDeployTime.setText(IMobileLaunchConstants.DEFAULT_WAR_DEPLOYMENT_TIME);
+			maxTxtWarDeployTime.setText(configuration.getAttribute(IMobileLaunchConstants.MAX_WAR_DEPLOYMENT_TIME,
+				IMobileLaunchConstants.DEFAULT_MAX_WAR_DEPLOYMENT_TIME));
+			if (maxTxtWarDeployTime.getText().length() == 0) maxTxtWarDeployTime.setText(IMobileLaunchConstants.DEFAULT_MAX_WAR_DEPLOYMENT_TIME);
 		}
 		catch (CoreException e)
 		{
@@ -415,7 +416,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		configuration.setAttribute(IMobileLaunchConstants.NODEBUG, Boolean.toString(checkNoDebug.getSelection()));
 		String browserId = (String)possibleBrowsersNames.getKey(browserList[combo.getSelectionIndex() == -1 ? 0 : combo.getSelectionIndex()]);
 		configuration.setAttribute(IMobileLaunchConstants.BROWSER_ID, browserId);
-		configuration.setAttribute(IMobileLaunchConstants.WAR_DEPLOYMENT_TIME, txtWarDeployTime.getText());
+		configuration.setAttribute(IMobileLaunchConstants.MAX_WAR_DEPLOYMENT_TIME, maxTxtWarDeployTime.getText());
 	}
 
 	@Override

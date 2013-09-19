@@ -1,8 +1,10 @@
 package com.servoy.eclipse.exporter.mobile.launch;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Iterator;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -29,54 +31,110 @@ import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelegate
 {
 
+	/**
+	 * 1000 was too low - for test deployment I had a few times ~1200 sec time between timestamp changes during deployment...
+	 */
+	private static final int DEPLOYMENT_FINISH_SILENCE_PERIOD = 2000;
+
 	@Override
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException
 	{
 		String browserID = configuration.getAttribute(IMobileLaunchConstants.BROWSER_ID, "");
-		boolean nodebug = Boolean.valueOf(configuration.getAttribute(IMobileLaunchConstants.NODEBUG, "true")).booleanValue();
 
 		MobileExporter exporter = new MobileExporter();
-		prepareExporter(exporter, configuration, launch, monitor);
-		if (monitor != null && monitor.isCanceled()) return;
 
-		if (monitor != null) monitor.subTask("exporting mobile solution");
+		File tmpExportFolder = null;
 		try
 		{
+			// temporary directory where the .war file will be exported; it should be moved afterwards to IMobileLaunchConstants.WAR_LOCATION / Tomcat webapps.
+			// this is needed because otherwise Tomcat can detect and try to deploy a partially written .war file giving invalid archive exceptions
+			tmpExportFolder = File.createTempFile("servoytempwd", "");
+			if (tmpExportFolder.exists()) FileUtils.deleteQuietly(tmpExportFolder);
+			tmpExportFolder.mkdir();
+
+			prepareExporter(exporter, tmpExportFolder, configuration, launch, monitor);
+			if (monitor != null && monitor.isCanceled()) return;
+
+			if (monitor != null) monitor.subTask("exporting mobile solution");
+
 			exporter.doExport(false);
-		}
-		catch (Exception ex)
-		{
-			ServoyLog.logError(ex);
-			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unexpected error: " + ex.getMessage()));
-		}
-		if (monitor != null && monitor.isCanceled()) return;
-		if (monitor != null) monitor.subTask("deploying mobile solution");
 
-		int waitTime;
-		try
-		{
-			waitTime = Integer.parseInt(configuration.getAttribute(IMobileLaunchConstants.WAR_DEPLOYMENT_TIME,
-				IMobileLaunchConstants.DEFAULT_WAR_DEPLOYMENT_TIME));
-		}
-		catch (NumberFormatException ex)
-		{
-			waitTime = Integer.parseInt(IMobileLaunchConstants.DEFAULT_WAR_DEPLOYMENT_TIME);
-		}
+			if (monitor != null && monitor.isCanceled()) return;
+			if (monitor != null) monitor.subTask("deploying mobile solution");
 
-		try
-		{
-			for (int i = 0; i < waitTime; i++)
+			File warFinalLocation = getWarExportDir(configuration);
+			File tmpWarFile = tmpExportFolder.listFiles()[0]; // the temp dir should now contain a single .war file - otherwise we can except a RuntimeException
+			File warContextFolder = new File(warFinalLocation, tmpWarFile.getName().substring(0, tmpWarFile.getName().length() - 4)); // drop the ".war" extension
+			File finalWarFile = new File(warFinalLocation, tmpWarFile.getName());
+
+			boolean deployed = false;
+			long initialModificationTimestampOfWarContextFolder = warContextFolder.exists() ? warContextFolder.lastModified() : 0;
+
+			// actual deployment/move
+			if (finalWarFile.exists()) FileUtils.deleteQuietly(finalWarFile); // because moveFileToDirectory fails otherwise
+			FileUtils.moveFileToDirectory(tmpWarFile, warFinalLocation, false);
+
+			beforeWaitForDeployment(monitor, configuration);
+
+			if (monitor != null && monitor.isCanceled()) return;
+			if (monitor != null) monitor.subTask("deploying mobile solution; waiting for deployment");
+
+			int maxWaitTime;
+			try
 			{
-				// wait for mobile war to be deployed , TODO listen for deployment event from tomcat if embedded Tomcat install is targeted
-				Thread.sleep(1000);
-				if (monitor != null && monitor.isCanceled()) return;
+				maxWaitTime = Integer.parseInt(configuration.getAttribute(IMobileLaunchConstants.MAX_WAR_DEPLOYMENT_TIME,
+					IMobileLaunchConstants.DEFAULT_MAX_WAR_DEPLOYMENT_TIME));
+			}
+			catch (NumberFormatException ex)
+			{
+				maxWaitTime = Integer.parseInt(IMobileLaunchConstants.DEFAULT_MAX_WAR_DEPLOYMENT_TIME);
+			}
+
+			long startTimestamp = System.currentTimeMillis();
+			try
+			{
+				while (!deployed && (System.currentTimeMillis() - startTimestamp) < maxWaitTime * 1000)
+				{
+					// wait for mobile war to be deployed
+					Thread.sleep(200);
+					if (monitor != null && monitor.isCanceled()) return;
+
+
+					long mostRecentChangeTimestamp = warContextFolder.lastModified();
+					deployed = (warContextFolder.exists() && mostRecentChangeTimestamp != initialModificationTimestampOfWarContextFolder && (System.currentTimeMillis() -
+						mostRecentChangeTimestamp > DEPLOYMENT_FINISH_SILENCE_PERIOD));
+					if (warContextFolder.exists() && mostRecentChangeTimestamp != initialModificationTimestampOfWarContextFolder) System.out.println(mostRecentChangeTimestamp);
+				}
+				if (!deployed) throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "War deployment timeout after: " + maxWaitTime +
+					" seconds."));
+			}
+			catch (InterruptedException e)
+			{
+				ServoyLog.logError(e);
 			}
 		}
-		catch (InterruptedException e)
+		catch (IOException e)
 		{
 			ServoyLog.logError(e);
+			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unexpected error: " + e.getMessage()));
+		}
+		finally
+		{
+			if (tmpExportFolder != null && tmpExportFolder.exists()) FileUtils.deleteQuietly(tmpExportFolder);
 		}
 
+		//open browser
+		IWebBrowser webBrowser = getBrowser(browserID);
+		if (webBrowser == null)
+		{
+			webBrowser = PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser();
+		}
+		openBrowser(webBrowser, getBrowserDescriptor(browserID), launch, configuration, monitor);
+	}
+
+	protected void beforeWaitForDeployment(IProgressMonitor monitor, ILaunchConfiguration configuration) throws CoreException
+	{
+		boolean nodebug = Boolean.valueOf(configuration.getAttribute(IMobileLaunchConstants.NODEBUG, "true")).booleanValue();
 		if (!nodebug)
 		{
 			if (monitor != null) monitor.subTask("switching to service solution (so that it can be debugged)");
@@ -88,13 +146,21 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 				ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(serviceProject, true);
 			}
 		}
-		//open browser
-		IWebBrowser webBrowser = getBrowser(browserID);
-		if (webBrowser == null)
+	}
+
+	private File getWarExportDir(ILaunchConfiguration configuration) throws CoreException
+	{
+		File warExportDir = null;
+		String warLocation = configuration.getAttribute(IMobileLaunchConstants.WAR_LOCATION, "");
+		if (warLocation.length() == 0)
 		{
-			webBrowser = PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser();
+			warExportDir = new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory(), "server/webapps");
 		}
-		openBrowser(webBrowser, getBrowserDescriptor(browserID), launch, configuration, monitor);
+		else
+		{
+			warExportDir = new File(warLocation);
+		}
+		return warExportDir;
 	}
 
 	protected void openBrowser(IWebBrowser webBrowser, IBrowserDescriptor browserDescriptor, ILaunch launch, ILaunchConfiguration configuration,
@@ -115,14 +181,9 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		return mobileClientURL;
 	}
 
-	protected void prepareExporter(MobileExporter exporter, ILaunchConfiguration configuration, ILaunch launch, IProgressMonitor monitor) throws CoreException
+	protected void prepareExporter(MobileExporter exporter, File exportFolder, ILaunchConfiguration configuration, ILaunch launch, IProgressMonitor monitor)
+		throws CoreException
 	{
-		String warLocation = configuration.getAttribute(IMobileLaunchConstants.WAR_LOCATION, "");
-		if (warLocation.length() == 0)
-		{
-			File webappsFolder = new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory(), "server/webapps");
-			warLocation = webappsFolder.getAbsolutePath();
-		}
 		String solutionName = configuration.getAttribute(IMobileLaunchConstants.SOLUTION_NAME, "");
 		String serverUrl = configuration.getAttribute(IMobileLaunchConstants.SERVER_URL, "");
 		String serviceSolutionName = configuration.getAttribute(IMobileLaunchConstants.SERVICE_SOLUTION, (String)null);
@@ -132,7 +193,7 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		boolean validLicense = ApplicationServerSingleton.get().checkMobileLicense(company, license);
 
 		exporter.setSolutionName(solutionName);
-		exporter.setOutputFolder(new File(warLocation));
+		exporter.setOutputFolder(exportFolder);
 		exporter.setServerURL(serverUrl);
 		exporter.setServiceSolutionName(serviceSolutionName);
 		exporter.setTimeout(timeout);
