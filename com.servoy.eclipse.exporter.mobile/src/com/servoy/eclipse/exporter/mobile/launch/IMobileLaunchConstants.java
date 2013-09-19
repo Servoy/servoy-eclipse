@@ -35,12 +35,12 @@ public interface IMobileLaunchConstants
 	public static final String APPLICATION_URL = "application_url";
 	public static final String NODEBUG = "nodebug";
 	public static final String BROWSER_ID = "browserID";
-	public static final String WAR_DEPLOYMENT_TIME = "war_deploy_time";
+	public static final String MAX_WAR_DEPLOYMENT_TIME = "max_war_deploy_time";
 	public static final String TIMEOUT = "timeout";
 
 
 	public final static String DEFAULT_SERVICE_URL = MobileExporter.DEFAULT_SERVER_URL;
 	public final static String DEFAULT_TIMEOUT = String.valueOf(MobileExporter.DEFAULT_SYNC_TIMEOUT);
-	public final static String DEFAULT_WAR_DEPLOYMENT_TIME = "10";
+	public final static String DEFAULT_MAX_WAR_DEPLOYMENT_TIME = "30";
 
 }

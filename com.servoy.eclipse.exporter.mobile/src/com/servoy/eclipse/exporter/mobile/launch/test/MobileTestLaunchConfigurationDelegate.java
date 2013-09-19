@@ -1,5 +1,7 @@
 package com.servoy.eclipse.exporter.mobile.launch.test;
 
+import java.io.File;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
@@ -60,9 +62,10 @@ public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigura
 	}
 
 	@Override
-	protected void prepareExporter(MobileExporter exporter, ILaunchConfiguration configuration, ILaunch launch, IProgressMonitor monitor) throws CoreException
+	protected void prepareExporter(MobileExporter exporter, File exportFolder, ILaunchConfiguration configuration, ILaunch launch, IProgressMonitor monitor)
+		throws CoreException
 	{
-		super.prepareExporter(exporter, configuration, launch, monitor);
+		super.prepareExporter(exporter, exportFolder, configuration, launch, monitor);
 
 		exporter.useTestWar(testTarget);
 
