@@ -30,8 +30,8 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.ui.progress.WorkbenchJob;
 
 import com.servoy.eclipse.core.Activator;
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
+import com.servoy.eclipse.core.util.SerialRule;
 import com.servoy.eclipse.debug.actions.StartJsUnitClientActionDelegate;
 import com.servoy.eclipse.jsunit.scriptunit.RunJSUnitTests;
 import com.servoy.eclipse.model.repository.JSUnitUserManager;
@@ -212,8 +212,8 @@ public class RunSmartClientTests extends RunJSUnitTests
 							return Status.OK_STATUS;
 						}
 					};
-					waitForSolutionToLoad.setRule(ServoyModel.getWorkspace().getRoot());
-					startSmartClientJob.setRule(ServoyModel.getWorkspace().getRoot());
+					waitForSolutionToLoad.setRule(SerialRule.INSTANCE);
+					startSmartClientJob.setRule(SerialRule.INSTANCE);
 					skipCleanup2 = true;
 					startSmartClientJob.schedule(); // first job
 				}

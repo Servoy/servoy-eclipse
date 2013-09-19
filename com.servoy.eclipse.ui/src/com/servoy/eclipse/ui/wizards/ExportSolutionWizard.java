@@ -202,7 +202,6 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			}
 		};
 
-		exportJob.setRule(ServoyModel.getWorkspace().getRoot());
 		exportJob.setUser(true); // we want the progress to be visible in a dialog, not to stay in the status bar
 		exportJob.schedule();
 

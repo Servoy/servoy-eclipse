@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 public class SerialRule implements ISchedulingRule
 {
 	private final int id;
+	public static final SerialRule INSTANCE = new SerialRule(0);
 
 	/**
 	 * Serial rules with the same id conflict. INSTANCE has id 0.

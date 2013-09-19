@@ -73,10 +73,10 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE.SharedImages;
 
+import com.servoy.base.query.IBaseSQLCondition;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.SerialRule;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.StringMatcher;
@@ -88,6 +88,7 @@ import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumn;
+import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -96,8 +97,6 @@ import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
-import com.servoy.j2db.persistence.IColumnTypes;
-import com.servoy.j2db.query.ISQLCondition;
 import com.servoy.j2db.util.ScopesUtils;
 
 /**
@@ -196,7 +195,6 @@ public class SuggestForeignTypesWizard extends Wizard
 			}
 		};
 
-		exportJob.setRule(ServoyModel.getWorkspace().getRoot());
 		exportJob.setUser(true); // we want the progress to be visible in a dialog, not to stay in the status bar
 		exportJob.schedule();
 
@@ -653,7 +651,7 @@ public class SuggestForeignTypesWizard extends Wizard
 						for (IPersist persist : allRelationItems)
 						{
 							RelationItem relItem = (RelationItem)persist;
-							if (relItem.getOperator() == ISQLCondition.EQUALS_OPERATOR && !ScopesUtils.isVariableScope(relItem.getPrimaryDataProviderID()))
+							if (relItem.getOperator() == IBaseSQLCondition.EQUALS_OPERATOR && !ScopesUtils.isVariableScope(relItem.getPrimaryDataProviderID()))
 							{
 								// Don't use self-referencing columns.
 								if (!(rel.getPrimaryTableName().equals(rel.getForeignTableName()) && relItem.getPrimaryDataProviderID().equals(

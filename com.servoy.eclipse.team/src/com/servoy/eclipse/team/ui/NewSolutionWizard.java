@@ -343,7 +343,6 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 		solutionPage.setDescription("Loading solutions ...");
 		solutionPage.setRepositorySolutionInfos(new SolutionInfo[0]);
-		solutionsListJob.setRule(ServoyModel.getWorkspace().getRoot());
 		solutionsListJob.schedule();
 	}
 
