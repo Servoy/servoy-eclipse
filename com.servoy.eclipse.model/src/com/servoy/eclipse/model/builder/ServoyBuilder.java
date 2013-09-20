@@ -122,7 +122,9 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
+import com.servoy.j2db.persistence.ISupportDeprecated;
 import com.servoy.j2db.persistence.ISupportEncapsulation;
+import com.servoy.j2db.persistence.ISupportMedia;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportScope;
 import com.servoy.j2db.persistence.ISupportTabSeq;
@@ -302,6 +304,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String DEPRECATED_SCRIPT_ELEMENT_USAGE = _PREFIX + ".deprecatedScriptElementUsage"; //$NON-NLS-1$
 	public static final String METHOD_NUMBER_OF_ARGUMENTS_MISMATCH_TYPE = _PREFIX + ".methodNumberOfArgsMismatch"; //$NON-NLS-1$
 	public static final String SERVER_CLONE_CYCLE_TYPE = _PREFIX + ".serverCloneCycle"; //$NON-NLS-1$
+	public static final String DEPRECATED_ELEMENT_USAGE = _PREFIX + ".deprecatedElementUsage"; //$NON-NLS-1$
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels"; //$NON-NLS-1$
@@ -343,6 +346,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	// deprecated properties usage problems
 	public final static Pair<String, ProblemSeverity> DEPRECATED_PROPERTY_USAGE_PROBLEM = new Pair<String, ProblemSeverity>(
 		"deprecatedPropertyUsage", ProblemSeverity.WARNING); //$NON-NLS-1$
+
+	// deprecated element usage problems
+	public final static Pair<String, ProblemSeverity> DEPRECATED_ELEMENT_USAGE_PROBLEM = new Pair<String, ProblemSeverity>(
+		"deprecatedElementUsage", ProblemSeverity.WARNING); //$NON-NLS-1$
 
 	//deprecated script elements usage problems
 	public final static Pair<String, ProblemSeverity> DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM = new Pair<String, ProblemSeverity>(
@@ -1379,6 +1386,155 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
+	private void addDeprecatedElementWarningIfNeeded(IPersist persist, ISupportDeprecated deprecatedPersist, IProject project, String message)
+	{
+		if (deprecatedPersist != null)
+		{
+			String deprecatedInfo = deprecatedPersist.getDeprecated();
+
+			if (deprecatedInfo != null)
+			{
+				addMarker(project, DEPRECATED_ELEMENT_USAGE, message + " " + deprecatedInfo, -1, DEPRECATED_ELEMENT_USAGE_PROBLEM, IMarker.PRIORITY_NORMAL, //$NON-NLS-1$
+					null, persist);
+			}
+		}
+	}
+
+	/*
+	 * Checks usage of deprecated Form/Relation/Valuelist/Media inside elements properties
+	 */
+	private void checkDeprecatedElementUsage(IPersist persist, IProject project, FlattenedSolution flattenedSolution)
+	{
+		String elementName = null;
+		if (persist instanceof ISupportName) elementName = ((ISupportName)persist).getName();
+		if (elementName == null && persist != null) elementName = persist.getUUID().toString();
+
+		if (persist instanceof Form)
+		{
+			// check form extends of a deprecated form
+			Form extendsForm = ((Form)persist).getExtendsForm();
+			if (extendsForm != null)
+			{
+				addDeprecatedElementWarningIfNeeded(persist, extendsForm, project,
+					"Form \"" + elementName + "\" extends a deprecated form \"" + extendsForm.getName() + "\".");
+			}
+		}
+		else if (persist instanceof TabPanel)
+		{
+			Iterator<IPersist> tabs = ((TabPanel)persist).getTabs();
+			Tab tab;
+			Form tabForm;
+			String tabRelationName;
+			Relation tabRelation;
+			while (tabs.hasNext())
+			{
+				// check usage of deprecated form inside a tab
+				tab = (Tab)tabs.next();
+				tabForm = flattenedSolution.getForm(tab.getContainsFormID());
+				if (tabForm != null)
+				{
+					addDeprecatedElementWarningIfNeeded(persist, tabForm, project,
+						"Element \"" + elementName + "\" contains a deprecated form \"" + tabForm.getName() + "\".");
+				}
+				// check usage of deprecated relation for a tab
+				tabRelationName = tab.getRelationName();
+				if (tabRelationName != null)
+				{
+					tabRelation = flattenedSolution.getRelation(tabRelationName);
+					if (tabRelation != null)
+					{
+						addDeprecatedElementWarningIfNeeded(persist, tabRelation, project, "Element \"" + elementName + "\" has a deprecated relation \"" +
+							tabRelation.getName() + "\".");
+					}
+				}
+			}
+		}
+		else if (persist instanceof Field)
+		{
+			// check usage of deprecated valuelist inside a field
+			ValueList valuelist = flattenedSolution.getValueList(((Field)persist).getValuelistID());
+			if (valuelist != null)
+			{
+				addDeprecatedElementWarningIfNeeded(persist, valuelist, project,
+					"Field \"" + elementName + "\" has a deprecated valuelist \"" + valuelist.getName() + "\".");
+			}
+		}
+		else if (persist instanceof ValueList)
+		{
+			// check usage of deprecated valuelist as fallback valuelist
+			ValueList fallbackValuelist = flattenedSolution.getValueList(((ValueList)persist).getFallbackValueListID());
+			if (fallbackValuelist != null)
+			{
+				addDeprecatedElementWarningIfNeeded(persist, fallbackValuelist, project, "Valuelist \"" + elementName +
+					"\" has a deprecated fallback valuelist \"" + fallbackValuelist.getName() + "\".");
+			}
+
+			// check usage of deprecated relation inside a valuelist
+			String relationName = ((ValueList)persist).getRelationName();
+			if (relationName != null)
+			{
+				String[] relations = Utils.stringSplit(relationName, "."); //$NON-NLS-1$
+				Relation relation;
+				for (String r : relations)
+				{
+					relation = flattenedSolution.getRelation(r);
+					if (relation != null)
+					{
+						addDeprecatedElementWarningIfNeeded(persist, relation, project, "Valuelist \"" + elementName + "\" has a deprecated relation \"" +
+							relation.getName() + "\".");
+					}
+				}
+			}
+		}
+		else if (persist instanceof Portal)
+		{
+			// check usage of deprecated relation inside a portal
+			String relationName = ((Portal)persist).getRelationName();
+			if (relationName != null)
+			{
+				Relation relation = flattenedSolution.getRelation(relationName);
+				if (relation != null)
+				{
+					addDeprecatedElementWarningIfNeeded(persist, relation, project,
+						"Portal \"" + elementName + "\" has a deprecated relation \"" + relation.getName() + "\".");
+				}
+			}
+		}
+
+		if (persist instanceof ISupportMedia)
+		{
+			// check usage of deprecated media
+			Media media = flattenedSolution.getMedia(((ISupportMedia)persist).getImageMediaID());
+			if (media != null)
+			{
+				addDeprecatedElementWarningIfNeeded(persist, media, project,
+					"Element \"" + elementName + "\" has a deprecated image media \"" + media.getName() + "\".");
+			}
+		}
+		if (persist instanceof ISupportDataProviderID)
+		{
+			// check usage of deprecated relation inside dataprovider ids
+			String dataProviderID = ((ISupportDataProviderID)persist).getDataProviderID();
+			if (dataProviderID != null)
+			{
+				String[] dataProviderPath = Utils.stringSplit(dataProviderID, "."); //$NON-NLS-1$
+				if (dataProviderPath.length > 1)
+				{
+					Relation relation;
+					for (int i = 0; i < dataProviderPath.length - 1; i++)
+					{
+						relation = flattenedSolution.getRelation(dataProviderPath[i]);
+						if (relation != null)
+						{
+							addDeprecatedElementWarningIfNeeded(persist, relation, project, "Element \"" + elementName +
+								"\" has a dataprovider with a deprecated relation \"" + relation.getName() + "\".");
+						}
+					}
+				}
+			}
+		}
+	}
+
 	private void checkDeprecatedPropertyUsage(IPersist persist, IProject project)
 	{
 		if (persist instanceof Solution)
@@ -1590,6 +1746,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, FORM_DUPLICATE_PART_MARKER_TYPE);
 		deleteMarkers(project, METHOD_NUMBER_OF_ARGUMENTS_MISMATCH_TYPE);
 		deleteMarkers(project, SERVER_CLONE_CYCLE_TYPE);
+		deleteMarkers(project, DEPRECATED_ELEMENT_USAGE);
 
 		try
 		{
@@ -3242,6 +3399,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							ServoyMarker mk = MarkerMessages.ObsoleteElement.fill(((Form)o.getAncestor(IRepository.FORMS)).getName());
 							addMarker(project, mk.getType(), mk.getText(), -1, FORM_OBSOLETE_ELEMENT, IMarker.PRIORITY_NORMAL, null, o);
 						}
+						checkDeprecatedElementUsage(o, project, flattenedSolution);
 						checkDeprecatedPropertyUsage(o, project);
 						ISupportChilds parent = o.getParent();
 						if (o.getTypeID() == IRepository.SOLUTIONS && parent != null)

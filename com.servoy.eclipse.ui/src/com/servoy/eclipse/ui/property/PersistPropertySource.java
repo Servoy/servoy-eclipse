@@ -2690,6 +2690,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		final boolean readOnly, final String id, String displayName, final String name, final FlattenedSolution flattenedEditingSolution, final Form form)
 		throws RepositoryException
 	{
+		if (persistContext.getPersist() instanceof Media && ("mimeType".equals(name) || "name".equals(name)))
+		{
+			return new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, null, null);
+		}
+
 		if ("tabSeq".equals(name))
 		{
 			return new PropertyController<String, String>(id, displayName, null, null, new ICellEditorFactory()
