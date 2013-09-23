@@ -294,16 +294,17 @@ import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerListener;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportDeprecated;
 import com.servoy.j2db.persistence.ISupportDeprecatedAnnotation;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableListener;
+import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
@@ -642,6 +643,18 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				}
 			}
 			return JFaceResources.getFontRegistry().get(JFaceResources.DIALOG_FONT);
+		}
+
+		public boolean isStrikeout(Object element)
+		{
+			if (element instanceof SimpleUserNode)
+			{
+				SimpleUserNode node = (SimpleUserNode)element;
+				Object nodeObject = node.getRealObject();
+				return (nodeObject instanceof ISupportDeprecated && ((ISupportDeprecated)nodeObject).getDeprecated() != null);
+			}
+
+			return false;
 		}
 
 		@Override

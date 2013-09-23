@@ -18,7 +18,6 @@ package com.servoy.eclipse.ui.views.solutionexplorer;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DecorationContext;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.IDecorationContext;
@@ -28,7 +27,9 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.LabelDecorator;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
+import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
@@ -40,10 +41,10 @@ import com.servoy.eclipse.ui.node.UserNodeType;
  * A decorating column label provider is a label provider which combines a nested column label provider and an optional decorator. The decorator decorates the
  * label text, image, font and colors provided by the nested label provider.
  */
-public class DecoratingColumnLabelProvider extends ColumnLabelProvider
+public class DecoratingColumnLabelProvider extends StyledCellLabelProvider implements IFontProvider, IColorProvider, ILabelProvider
 {
 
-	private final ColumnLabelProvider provider;
+	private final SolutionExplorerView.ViewLabelProvider provider;
 
 	private ILabelDecorator decorator;
 
@@ -58,7 +59,7 @@ public class DecoratingColumnLabelProvider extends ColumnLabelProvider
 	 * @param provider the nested label provider
 	 * @param decorator the label decorator, or <code>null</code> if no decorator is to be used initially
 	 */
-	public DecoratingColumnLabelProvider(ColumnLabelProvider provider, ILabelDecorator decorator)
+	public DecoratingColumnLabelProvider(SolutionExplorerView.ViewLabelProvider provider, ILabelDecorator decorator)
 	{
 		Assert.isNotNull(provider);
 		this.provider = provider;
@@ -323,9 +324,30 @@ public class DecoratingColumnLabelProvider extends ColumnLabelProvider
 			LabelDecorator labelDecorator = (LabelDecorator)currentDecorator;
 			labelDecorator.prepareDecoration(element, oldText, getDecorationContext());
 		}
+
+		String newText = getText(element);
+		if (provider.isStrikeout(element) && newText != null && newText.length() > 0)
+		{
+			StyleRange[] cellStyleRanges = cell.getStyleRanges();
+			if (cellStyleRanges == null || cellStyleRanges.length == 0)
+			{
+				cellStyleRanges = new StyleRange[] { new StyleRange() };
+				cell.setStyleRanges(cellStyleRanges);
+			}
+			cellStyleRanges[0].strikeout = true;
+			cellStyleRanges[0].start = 0;
+			cellStyleRanges[0].length = newText.length();
+		}
+		else cell.setStyleRanges(null);
+		cell.setText(newText);
+		Image image = getImage(element);
+		cell.setImage(image);
+		cell.setBackground(getBackground(element));
+		cell.setForeground(getForeground(element));
+		cell.setFont(getFont(element));
+
 		super.update(cell);
 	}
-
 
 	@Override
 	public Image getToolTipImage(Object object)

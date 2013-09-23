@@ -186,6 +186,7 @@ public class SolutionSerializer
 	public static final String PROP_UUID = "uuid"; //$NON-NLS-1$
 	public static final String PROP_FILE_VERSION = "fileVersion"; //$NON-NLS-1$
 	public static final String PROP_ENCAPSULATION = "encapsulation"; //$NON-NLS-1$
+	public static final String PROP_DEPRECATED = "deprecated"; //$NON-NLS-1$
 
 	public static final String PROPERTIESKEY = "@properties="; //$NON-NLS-1$
 	public static final String TYPEKEY = "@type"; //$NON-NLS-1$
@@ -439,6 +440,7 @@ public class SolutionSerializer
 				obj.put(PROP_NAME, media.getName());
 				obj.put(PROP_MIME_TYPE, media.getMimeType());
 				obj.put(PROP_ENCAPSULATION, media.getEncapsulation());
+				obj.put(PROP_DEPRECATED, media.getDeprecated());
 				items.put(obj);
 			}
 			return items.toString();
