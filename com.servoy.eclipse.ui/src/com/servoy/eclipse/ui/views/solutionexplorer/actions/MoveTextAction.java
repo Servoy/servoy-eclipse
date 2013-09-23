@@ -160,9 +160,7 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 			if (scope.equals(scopeTxt.split("\\.")[1])) //$NON-NLS-1$
 			{
 				// moving code belonging to a scope to the scope's own js file does not need the scope prefix
-				String pattern = "scopes\\.(.+?)\\.(.+)"; //$NON-NLS-1$
-				String scopeTxtWithoutPrefix = scopeTxt.replaceAll(pattern, "$2"); //$NON-NLS-1$
-				txt = txt.replace(scopeTxt, scopeTxtWithoutPrefix);
+				txt = txt.replaceAll("scopes\\." + scope + "\\.", "");
 			}
 		}
 
