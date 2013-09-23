@@ -152,14 +152,17 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 		Form currentMethodForm = getFormForEditor(ed);
 
 		String txt = modifyCodeAccordingToUsedForms(currentMethodForm, sourceForm, codeText, replacePrefix);
-		if (currentMethodForm == null && codeText.startsWith("scopes."))
+
+		if (currentMethodForm == null && txt.contains("scopes."))
 		{
 			String scope = getScopeForEditor(ed);
-			if (scope.equals(codeText.split("\\.")[1])) //$NON-NLS-1$
+			String scopeTxt = txt.substring(txt.indexOf("scopes."));
+			if (scope.equals(scopeTxt.split("\\.")[1])) //$NON-NLS-1$
 			{
 				// moving code belonging to a scope to the scope's own js file does not need the scope prefix
-				String pattern = "scopes\\.(.+)\\.(.+)"; //$NON-NLS-1$
-				txt = codeText.replaceAll(pattern, "$2"); //$NON-NLS-1$
+				String pattern = "scopes\\.(.+?)\\.(.+)"; //$NON-NLS-1$
+				String scopeTxtWithoutPrefix = scopeTxt.replaceAll(pattern, "$2"); //$NON-NLS-1$
+				txt = txt.replace(scopeTxt, scopeTxtWithoutPrefix);
 			}
 		}
 
@@ -273,11 +276,13 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 			{
 				IPath projectRelativePath = scriptEditor.getInputModelElement().getUnderlyingResource().getProjectRelativePath();
 				String[] projectRelativePathSegments = projectRelativePath.segments();
+				if (projectRelativePathSegments.length != 1) return null; // not a scope file
 				scopeName = projectRelativePathSegments[0];
 				if (scopeName.endsWith(SolutionSerializer.JS_FILE_EXTENSION))
 				{
 					scopeName = scopeName.substring(0, scopeName.length() - SolutionSerializer.JS_FILE_EXTENSION.length());
 				}
+				else scopeName = null;
 			}
 			catch (ModelException e)
 			{
