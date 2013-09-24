@@ -1386,16 +1386,51 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
-	private void addDeprecatedElementWarningIfNeeded(IPersist persist, ISupportDeprecated deprecatedPersist, IProject project, String message)
+	private void addDeprecatedElementWarningIfNeeded(IPersist persist, Object deprecatedPersistObj, IProject project, String message,
+		FlattenedSolution flattenedSolution)
 	{
-		if (deprecatedPersist != null)
-		{
-			String deprecatedInfo = deprecatedPersist.getDeprecated();
+		ISupportDeprecated[] deprecatedPersists = null;
 
-			if (deprecatedInfo != null)
+		if (deprecatedPersistObj instanceof ISupportDeprecated)
+		{
+			deprecatedPersists = new ISupportDeprecated[] { (ISupportDeprecated)deprecatedPersistObj };
+		}
+		else if (deprecatedPersistObj instanceof String) // check if it is a multilevel relation
+		{
+			String[] aDeprecatedPersistObj = ((String)deprecatedPersistObj).split(" ");
+			if (aDeprecatedPersistObj.length > 0)
 			{
-				addMarker(project, DEPRECATED_ELEMENT_USAGE, message + " " + deprecatedInfo, -1, DEPRECATED_ELEMENT_USAGE_PROBLEM, IMarker.PRIORITY_NORMAL, //$NON-NLS-1$
-					null, persist);
+				String[] relations = Utils.stringSplit(aDeprecatedPersistObj[0], "."); //$NON-NLS-1$
+				Relation relation;
+				ArrayList<Relation> relationsA = new ArrayList<Relation>();
+				for (String r : relations)
+				{
+					relation = flattenedSolution.getRelation(r);
+					if (relation != null) relationsA.add(relation);
+				}
+				deprecatedPersists = relationsA.toArray(new ISupportDeprecated[relationsA.size()]);
+			}
+		}
+
+		if (deprecatedPersists != null)
+		{
+			for (ISupportDeprecated deprecatedPersist : deprecatedPersists)
+			{
+				if (deprecatedPersist != null)
+				{
+					String deprecatedInfo = deprecatedPersist.getDeprecated();
+
+					if (deprecatedInfo != null)
+					{
+						if (deprecatedPersist instanceof Relation)
+						{
+							message = message.replace("{r}", ((Relation)deprecatedPersist).getName());
+						}
+						addMarker(project, DEPRECATED_ELEMENT_USAGE,
+							message + " " + deprecatedInfo, -1, DEPRECATED_ELEMENT_USAGE_PROBLEM, IMarker.PRIORITY_NORMAL, //$NON-NLS-1$
+							null, persist);
+					}
+				}
 			}
 		}
 	}
@@ -1409,6 +1444,17 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		if (persist instanceof ISupportName) elementName = ((ISupportName)persist).getName();
 		if (elementName == null && persist != null) elementName = persist.getUUID().toString();
 
+		if (persist instanceof Solution)
+		{
+			// check for deprecated first form
+			Form firstForm = flattenedSolution.getForm(((Solution)persist).getFirstFormID());
+			if (firstForm != null)
+			{
+				addDeprecatedElementWarningIfNeeded(persist, firstForm, project,
+					"Solution \"" + elementName + "\" has a deprecated first form \"" + firstForm.getName() + "\".", flattenedSolution);
+			}
+		}
+
 		if (persist instanceof Form)
 		{
 			// check form extends of a deprecated form
@@ -1416,7 +1462,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			if (extendsForm != null)
 			{
 				addDeprecatedElementWarningIfNeeded(persist, extendsForm, project,
-					"Form \"" + elementName + "\" extends a deprecated form \"" + extendsForm.getName() + "\".");
+					"Form \"" + elementName + "\" extends a deprecated form \"" + extendsForm.getName() + "\".", flattenedSolution);
+			}
+
+			String initialSort = ((Form)persist).getInitialSort();
+			if (initialSort != null)
+			{
+				addDeprecatedElementWarningIfNeeded(persist, initialSort, project, "Form \"" + elementName +
+					"\" has a deprecated relation \"{r}\" as initial sort.", flattenedSolution);
 			}
 		}
 		else if (persist instanceof TabPanel)
@@ -1434,18 +1487,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				if (tabForm != null)
 				{
 					addDeprecatedElementWarningIfNeeded(persist, tabForm, project,
-						"Element \"" + elementName + "\" contains a deprecated form \"" + tabForm.getName() + "\".");
+						"Element \"" + elementName + "\" contains a deprecated form \"" + tabForm.getName() + "\".", flattenedSolution);
 				}
 				// check usage of deprecated relation for a tab
 				tabRelationName = tab.getRelationName();
 				if (tabRelationName != null)
 				{
-					tabRelation = flattenedSolution.getRelation(tabRelationName);
-					if (tabRelation != null)
-					{
-						addDeprecatedElementWarningIfNeeded(persist, tabRelation, project, "Element \"" + elementName + "\" has a deprecated relation \"" +
-							tabRelation.getName() + "\".");
-					}
+					addDeprecatedElementWarningIfNeeded(persist, tabRelationName, project,
+						"Element \"" + elementName + "\" has a deprecated relation \"{r}\".", flattenedSolution);
 				}
 			}
 		}
@@ -1456,7 +1505,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			if (valuelist != null)
 			{
 				addDeprecatedElementWarningIfNeeded(persist, valuelist, project,
-					"Field \"" + elementName + "\" has a deprecated valuelist \"" + valuelist.getName() + "\".");
+					"Field \"" + elementName + "\" has a deprecated valuelist \"" + valuelist.getName() + "\".", flattenedSolution);
 			}
 		}
 		else if (persist instanceof ValueList)
@@ -1466,24 +1515,22 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			if (fallbackValuelist != null)
 			{
 				addDeprecatedElementWarningIfNeeded(persist, fallbackValuelist, project, "Valuelist \"" + elementName +
-					"\" has a deprecated fallback valuelist \"" + fallbackValuelist.getName() + "\".");
+					"\" has a deprecated fallback valuelist \"" + fallbackValuelist.getName() + "\".", flattenedSolution);
 			}
 
 			// check usage of deprecated relation inside a valuelist
 			String relationName = ((ValueList)persist).getRelationName();
 			if (relationName != null)
 			{
-				String[] relations = Utils.stringSplit(relationName, "."); //$NON-NLS-1$
-				Relation relation;
-				for (String r : relations)
-				{
-					relation = flattenedSolution.getRelation(r);
-					if (relation != null)
-					{
-						addDeprecatedElementWarningIfNeeded(persist, relation, project, "Valuelist \"" + elementName + "\" has a deprecated relation \"" +
-							relation.getName() + "\".");
-					}
-				}
+				addDeprecatedElementWarningIfNeeded(persist, relationName, project, "Valuelist \"" + elementName + "\" has a deprecated relation \"{r}\".",
+					flattenedSolution);
+			}
+
+			String sortOptions = ((ValueList)persist).getSortOptions();
+			if (sortOptions != null)
+			{
+				addDeprecatedElementWarningIfNeeded(persist, sortOptions, project, "Valuelist \"" + elementName +
+					"\" has a deprecated relation \"{r}\" as sort option.", flattenedSolution);
 			}
 		}
 		else if (persist instanceof Portal)
@@ -1492,12 +1539,17 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			String relationName = ((Portal)persist).getRelationName();
 			if (relationName != null)
 			{
-				Relation relation = flattenedSolution.getRelation(relationName);
-				if (relation != null)
-				{
-					addDeprecatedElementWarningIfNeeded(persist, relation, project,
-						"Portal \"" + elementName + "\" has a deprecated relation \"" + relation.getName() + "\".");
-				}
+				addDeprecatedElementWarningIfNeeded(persist, relationName, project, "Portal \"" + elementName + "\" has a deprecated relation \"{r}\".",
+					flattenedSolution);
+			}
+		}
+		else if (persist instanceof Relation)
+		{
+			String initialSort = ((Relation)persist).getInitialSort();
+			if (initialSort != null)
+			{
+				addDeprecatedElementWarningIfNeeded(persist, initialSort, project, "Relation \"" + elementName +
+					"\" has a deprecated relation \"{r}\" as initial sort.", flattenedSolution);
 			}
 		}
 
@@ -1508,7 +1560,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			if (media != null)
 			{
 				addDeprecatedElementWarningIfNeeded(persist, media, project,
-					"Element \"" + elementName + "\" has a deprecated image media \"" + media.getName() + "\".");
+					"Element \"" + elementName + "\" has a deprecated image media \"" + media.getName() + "\".", flattenedSolution);
 			}
 		}
 		if (persist instanceof ISupportDataProviderID)
@@ -1517,20 +1569,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			String dataProviderID = ((ISupportDataProviderID)persist).getDataProviderID();
 			if (dataProviderID != null)
 			{
-				String[] dataProviderPath = Utils.stringSplit(dataProviderID, "."); //$NON-NLS-1$
-				if (dataProviderPath.length > 1)
-				{
-					Relation relation;
-					for (int i = 0; i < dataProviderPath.length - 1; i++)
-					{
-						relation = flattenedSolution.getRelation(dataProviderPath[i]);
-						if (relation != null)
-						{
-							addDeprecatedElementWarningIfNeeded(persist, relation, project, "Element \"" + elementName +
-								"\" has a dataprovider with a deprecated relation \"" + relation.getName() + "\".");
-						}
-					}
-				}
+				addDeprecatedElementWarningIfNeeded(persist, dataProviderID, project, "Element \"" + elementName +
+					"\" has a dataprovider with a deprecated relation \"{r}\".", flattenedSolution);
 			}
 		}
 	}
