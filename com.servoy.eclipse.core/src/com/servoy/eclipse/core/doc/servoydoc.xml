@@ -1682,19 +1682,19 @@ var uuid_object2 = application.getUUID(new_uuid_object.toBytes());  // convert a
             <sample clientSupport="wc,sc"><![CDATA[var uname = application.getUserName();]]></sample>
           </samples>
         </function>
-        <function clientSupport="wc,sc" name="getUserProperty">
+        <function clientSupport="mc,wc,sc" name="getUserProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[Property value]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Get a persistent user property.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Get a persistent user property.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Get a persistent user property.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Get a persistent user property.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[var value = application.getUserProperty('showOrders');]]></sample>
+            <sample clientSupport="mc,wc,sc"><![CDATA[var value = application.getUserProperty('showOrders');]]></sample>
           </samples>
           <parameters>
             <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
@@ -2421,20 +2421,20 @@ application.setToolbarVisible('text',false);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="setUserProperty">
+        <function clientSupport="mc,wc,sc" name="setUserProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Set a persistent user property.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Set a persistent user property.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Set a persistent user property.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Set a persistent user property.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[application.setUserProperty('showOrders','1');]]></sample>
+            <sample clientSupport="mc,wc,sc"><![CDATA[application.setUserProperty('showOrders','1');]]></sample>
           </samples>
           <parameters>
             <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
