@@ -1207,7 +1207,7 @@ public class I18NExternalizeDialog extends Dialog
 			if (parentNode instanceof VariableDeclaration) nameHint = ((VariableDeclaration)parentNode).getVariableName();
 			else if (parentNode instanceof FunctionStatement)
 			{
-				nameHint = ((FunctionStatement)parentNode).getName().getName();
+				nameHint = ((FunctionStatement)parentNode).getFunctionName();
 				break;
 			}
 			currentNode = (JSNode)parentNode;
@@ -1590,8 +1590,9 @@ public class I18NExternalizeDialog extends Dialog
 			for (TreeItem treeItem : items)
 			{
 				node = (TreeNode)treeItem.getData();
-				if (!node.isVisible()) continue;
-				if (!node.isElement() && !node.isColumnInfo() && !node.isJSText()) fillNodes(treeItem.getItems(), selectedNodes, onlySelected, onlyChanged);
+				if (node != null && !node.isVisible()) continue;
+				if (node == null || (!node.isElement() && !node.isColumnInfo() && !node.isJSText())) fillNodes(treeItem.getItems(), selectedNodes,
+					onlySelected, onlyChanged);
 				else if ((!onlySelected || treeItem.getChecked()) && (!onlyChanged || node.isChanged())) selectedNodes.add(node);
 			}
 		}
@@ -1828,6 +1829,9 @@ public class I18NExternalizeDialog extends Dialog
 				initialKey = getKey();
 				initialText = getText();
 				initialState = getState();
+
+				// by default change intern nodes to externalize
+				if (initialState == STATE.INTERNALIZE) setState(STATE.EXTERNALIZE);
 			}
 		}
 
@@ -1915,8 +1919,12 @@ public class I18NExternalizeDialog extends Dialog
 				}
 				else if (isColumnInfo())
 				{
-					text = ((Column)parent.getData()).getName();
-					text = Utils.stringInitCap(Utils.stringReplace(text, "_", " "));
+					text = ((ColumnInfo)getData()).getTitleText();
+					if (text == null)
+					{
+						text = ((Column)parent.getData()).getName();
+						text = Utils.stringInitCap(Utils.stringReplace(text, "_", " "));
+					}
 
 				}
 				else if (isJSText())
