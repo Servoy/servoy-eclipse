@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.labelproviders;
 
 
@@ -30,7 +30,7 @@ import com.servoy.j2db.util.IDelegate;
  * @author rgansevles
  * 
  */
-public abstract class DelegateLabelProvider implements ILabelProvider, IDelegate
+public abstract class DelegateLabelProvider extends StrikeoutLabelProvider implements ILabelProvider, IDelegate
 {
 	private final IBaseLabelProvider labelProvider;
 
@@ -44,21 +44,25 @@ public abstract class DelegateLabelProvider implements ILabelProvider, IDelegate
 		return labelProvider;
 	}
 
+	@Override
 	public void addListener(ILabelProviderListener listener)
 	{
 		labelProvider.addListener(listener);
 	}
 
+	@Override
 	public void dispose()
 	{
 		labelProvider.dispose();
 	}
 
+	@Override
 	public boolean isLabelProperty(Object element, String property)
 	{
 		return labelProvider.isLabelProperty(element, property);
 	}
 
+	@Override
 	public void removeListener(ILabelProviderListener listener)
 	{
 		labelProvider.removeListener(listener);
@@ -87,4 +91,9 @@ public abstract class DelegateLabelProvider implements ILabelProvider, IDelegate
 		return labelProvider;
 	}
 
+	@Override
+	public boolean isStrikeout(Object element)
+	{
+		return false;
+	}
 }

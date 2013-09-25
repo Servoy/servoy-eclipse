@@ -647,14 +647,25 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		public boolean isStrikeout(Object element)
 		{
-			if (element instanceof SimpleUserNode)
-			{
-				SimpleUserNode node = (SimpleUserNode)element;
-				Object nodeObject = node.getRealObject();
-				return (nodeObject instanceof ISupportDeprecated && ((ISupportDeprecated)nodeObject).getDeprecated() != null);
-			}
-
+			if (element instanceof SimpleUserNode) return getDeprecatedText((SimpleUserNode)element) != null;
 			return false;
+		}
+
+		/**
+		 * Get node deprecated text
+		 * @param node solex node
+		 * @return deprecated text for the node, or null if it not deprecated
+		 */
+		private String getDeprecatedText(SimpleUserNode node)
+		{
+			UserNodeType nodeType = node.getType();
+			if (nodeType == UserNodeType.FORM || nodeType == UserNodeType.RELATION || nodeType == UserNodeType.VALUELIST_ITEM ||
+				nodeType == UserNodeType.MEDIA_IMAGE)
+			{
+				Object nodeObject = node.getRealObject();
+				return nodeObject instanceof ISupportDeprecated ? ((ISupportDeprecated)nodeObject).getDeprecated() : null;
+			}
+			return null;
 		}
 
 		@Override
@@ -664,6 +675,12 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			if (element instanceof SimpleUserNode)
 			{
 				result = ((SimpleUserNode)element).getToolTipText();
+				String deprecatedText = getDeprecatedText((SimpleUserNode)element);
+				if (deprecatedText != null)
+				{
+					deprecatedText = "Deprecated: " + deprecatedText;
+					result = (result != null) ? result += ("\n" + deprecatedText) : deprecatedText;
+				}
 				// nicely remove html markup as SWT does not support it
 				result = Utils.stringReplaceCaseInsensitiveSearch(result, "<br>", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 				result = Utils.stringRemoveTags(result);

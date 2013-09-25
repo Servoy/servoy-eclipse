@@ -1681,12 +1681,28 @@ public class TypeCreator extends TypeCache
 
 	public static Property createProperty(String name, boolean readonly, JSType type, String description, ImageDescriptor image, Object resource)
 	{
+		return createProperty(name, readonly, type, description, image, resource, null);
+	}
+
+	public static Property createProperty(String name, boolean readonly, JSType type, String description, ImageDescriptor image, Object resource,
+		String deprecated)
+	{
 		Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 		property.setName(name);
 		property.setReadOnly(readonly);
-		if (description != null)
+
+		String propertyDescription = null;
+		if (deprecated != null)
 		{
-			property.setDescription(description);
+			deprecated = "<b>Deprecated:</b>" + deprecated;
+			propertyDescription = description != null ? description + "<br>" + deprecated : deprecated;
+			property.setDeprecated(true);
+		}
+		else propertyDescription = description;
+
+		if (propertyDescription != null)
+		{
+			property.setDescription(propertyDescription);
 		}
 		if (type != null)
 		{
@@ -2171,7 +2187,7 @@ public class TypeCreator extends TypeCache
 				{
 					Form form = forms.next();
 					Property formProperty = createProperty(form.getName(), true, getTypeRef(context, "RuntimeForm<" + form.getName() + '>'),
-						getDescription(form.getDataSource()), getImageDescriptorForFormEncapsulation(form.getEncapsulation()));
+						getDescription(form.getDataSource()), getImageDescriptorForFormEncapsulation(form.getEncapsulation()), null, form.getDeprecated());
 					formProperty.setAttribute(LAZY_VALUECOLLECTION, form);
 					if (PersistEncapsulation.isHideInScriptingModuleScope(form, fs))
 					{
@@ -3286,7 +3302,8 @@ public class TypeCreator extends TypeCache
 						relationImage = RELATION_PROTECTED_IMAGE;
 					}
 					Property property = createProperty(relation.getName(), true, getTypeRef(context, FoundSet.JS_FOUNDSET + '<' + relation.getName() + '>'),
-						getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()), relationImage, relation);
+						getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()), relationImage, relation,
+						relation.getDeprecated());
 					if (visible)
 					{
 						IServerInternal sp = ((IServerInternal)relation.getPrimaryServer());

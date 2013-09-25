@@ -27,21 +27,20 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.LabelDecorator;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
-import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
-import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
+import com.servoy.eclipse.ui.labelproviders.StrikeoutLabelProvider;
 import com.servoy.eclipse.ui.node.UserNodeType;
 
 /**
  * A decorating column label provider is a label provider which combines a nested column label provider and an optional decorator. The decorator decorates the
  * label text, image, font and colors provided by the nested label provider.
  */
-public class DecoratingColumnLabelProvider extends StyledCellLabelProvider implements IFontProvider, IColorProvider, ILabelProvider
+public class DecoratingColumnLabelProvider extends StrikeoutLabelProvider implements IFontProvider, IColorProvider, ILabelProvider
 {
 
 	private final SolutionExplorerView.ViewLabelProvider provider;
@@ -325,23 +324,6 @@ public class DecoratingColumnLabelProvider extends StyledCellLabelProvider imple
 			labelDecorator.prepareDecoration(element, oldText, getDecorationContext());
 		}
 
-		String newText = getText(element);
-		if (provider.isStrikeout(element) && newText != null && newText.length() > 0)
-		{
-			StyleRange[] cellStyleRanges = cell.getStyleRanges();
-			if (cellStyleRanges == null || cellStyleRanges.length == 0)
-			{
-				cellStyleRanges = new StyleRange[] { new StyleRange() };
-				cell.setStyleRanges(cellStyleRanges);
-			}
-			cellStyleRanges[0].strikeout = true;
-			cellStyleRanges[0].start = 0;
-			cellStyleRanges[0].length = newText.length();
-		}
-		else cell.setStyleRanges(null);
-		cell.setText(newText);
-		Image image = getImage(element);
-		cell.setImage(image);
 		cell.setBackground(getBackground(element));
 		cell.setForeground(getForeground(element));
 		cell.setFont(getFont(element));
@@ -407,5 +389,16 @@ public class DecoratingColumnLabelProvider extends StyledCellLabelProvider imple
 	public int getToolTipStyle(Object object)
 	{
 		return provider.getToolTipStyle(object);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.labelproviders.StrikeoutLabelProvider#isStrikeout(java.lang.Object)
+	 */
+	@Override
+	public boolean isStrikeout(Object element)
+	{
+		return provider.isStrikeout(element);
 	}
 }
