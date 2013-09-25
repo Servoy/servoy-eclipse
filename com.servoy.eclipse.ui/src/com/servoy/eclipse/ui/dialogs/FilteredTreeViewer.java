@@ -43,6 +43,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.OpenEvent;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -109,6 +110,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 	private ToolItem toolItem;
 	private ToolBar toolBar;
 	private final boolean showMenu;
+	private List<Object> orderedSelection;
 
 	public FilteredTreeViewer(Composite parent, boolean showFilter, boolean showMenu, ITreeContentProvider contentProvider, IBaseLabelProvider labelProvider,
 		ViewerComparator comparator, int treeStyle, TreePatternFilter treePatternFilter, IFilter selectionFilter)
@@ -140,6 +142,14 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 		treeViewer.setContentProvider(contentProvider);
 		treeViewer.setComparator(comparator);
 		treeViewer.addDoubleClickListener(this);
+		treeViewer.addSelectionChangedListener(new ISelectionChangedListener()
+		{
+			@Override
+			public void selectionChanged(SelectionChangedEvent event)
+			{
+				updateOrderedSelection(getSelection());
+			}
+		});
 
 		if (!filterText.isDisposed() && filterComposite != null)
 		{
@@ -681,7 +691,8 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 		}
 	}
 
-	protected void handleDispose(@SuppressWarnings("unused") DisposeEvent event)
+	protected void handleDispose(@SuppressWarnings("unused")
+	DisposeEvent event)
 	{
 		openListeners.clear();
 		labelProvider = null;
@@ -723,6 +734,44 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 			}
 		}
 		return new StructuredSelection(selectedObjects);
+	}
+
+	/**
+	 * Update the selection object, keep the selection order.
+	 */
+	protected void updateOrderedSelection(ISelection treeSelection)
+	{
+		List<Object> newSelection = new ArrayList<Object>();
+		List<Object> treeList = null;
+		if (treeSelection instanceof IStructuredSelection)
+		{
+			treeList = new ArrayList<Object>(((IStructuredSelection)treeSelection).toList());
+		}
+		if (treeList != null)
+		{
+			if (orderedSelection != null)
+			{
+				for (Object o : orderedSelection)
+				{
+					if (treeList.remove(o))
+					{
+						newSelection.add(o);
+					}
+				}
+			}
+			newSelection.addAll(treeList);
+		}
+		orderedSelection = newSelection;
+	}
+
+	public void clearOrderedSelection()
+	{
+		orderedSelection = null;
+	}
+
+	public List<Object> getOrderedSelection()
+	{
+		return orderedSelection;
 	}
 
 	/**
