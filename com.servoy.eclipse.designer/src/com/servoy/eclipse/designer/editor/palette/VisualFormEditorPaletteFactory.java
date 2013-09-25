@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.palette;
 
+import java.awt.Color;
 import java.awt.Image;
 import java.beans.BeanDescriptor;
 import java.beans.BeanInfo;
@@ -493,8 +494,11 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 
 			requestType = VisualFormEditor.REQ_PLACE_LABEL;
 			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_TEXT, "");
-			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_BORDERTYPE, new ComplexProperty<Border>(
-				BorderPropertyController.getDefaultBorderValuesMap().get(BorderType.SpecialMatte)));
+			setProperty(
+				extendedData,
+				StaticContentSpecLoader.PROPERTY_BORDERTYPE,
+				new ComplexProperty<Border>(BorderPropertyController.getDefaultBorderValues(BorderType.SpecialMatte, 1, 1, 0, 0, Color.BLACK, Color.BLACK,
+					Color.BLACK, Color.BLACK)));
 			setProperty(
 				extendedData,
 				StaticContentSpecLoader.PROPERTY_HORIZONTALALIGNMENT,
