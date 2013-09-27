@@ -16,6 +16,10 @@
  */
 package com.servoy.eclipse.designer.property;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.gef.commands.Command;
@@ -25,6 +29,7 @@ import org.eclipse.ui.views.properties.IPropertySource2;
 
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.ui.property.IModelSavePropertySource;
+import com.servoy.j2db.util.Pair;
 
 /**
  * Command to set a value on a IPropertySource target.
@@ -35,6 +40,15 @@ import com.servoy.eclipse.ui.property.IModelSavePropertySource;
 
 public class SetValueCommand extends Command
 {
+	private static Comparator<Pair<String, Object>> PAIR_LEFT_KEY_COMPARATOR = new Comparator<Pair<String, Object>>()
+	{
+		@Override
+		public int compare(Pair<String, Object> o1, Pair<String, Object> o2)
+		{
+			return o1.getLeft().compareTo(o2.getLeft());
+		}
+	};
+
 	public static final String REQUEST_PROPERTY_PREFIX = "property:";
 
 	private Object propertyValue;
@@ -121,20 +135,30 @@ public class SetValueCommand extends Command
 		{
 			return null;
 		}
-		CompoundCommand command = null;
 
+		List<Pair<String, Object>> entries = new ArrayList<Pair<String, Object>>();
 		for (Map.Entry<Object, Object> entry : extendedData.entrySet())
 		{
 			Object key = entry.getKey();
 			if (key instanceof String && ((String)key).startsWith(SetValueCommand.REQUEST_PROPERTY_PREFIX))
 			{
-				if (command == null)
-				{
-					command = new CompoundCommand();
-				}
-				command.add(createSetvalueCommand("", target, ((String)key).substring(SetValueCommand.REQUEST_PROPERTY_PREFIX.length()), entry.getValue()));
+				entries.add(new Pair<String, Object>(((String)key).substring(SetValueCommand.REQUEST_PROPERTY_PREFIX.length()), entry.getValue()));
 			}
 		}
-		return command == null ? null : command.unwrap();
+
+		if (entries.size() == 0)
+		{
+			return null;
+		}
+
+		// sort to make sure subproperties are process after main (border before border.xxx)
+		Collections.sort(entries, PAIR_LEFT_KEY_COMPARATOR);
+
+		CompoundCommand command = new CompoundCommand();
+		for (Pair<String, Object> entry : entries)
+		{
+			command.add(createSetvalueCommand("", target, entry.getLeft(), entry.getRight()));
+		}
+		return command;
 	}
 }
