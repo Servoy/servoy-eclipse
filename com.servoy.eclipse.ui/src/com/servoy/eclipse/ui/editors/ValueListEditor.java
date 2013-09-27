@@ -48,6 +48,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
@@ -65,6 +66,7 @@ import com.servoy.eclipse.model.builder.ServoyBuilder.Problem;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
+import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
 import com.servoy.eclipse.ui.dialogs.MethodDialog;
 import com.servoy.eclipse.ui.dialogs.MethodDialog.MethodListOptions;
@@ -89,6 +91,8 @@ import com.servoy.eclipse.ui.property.ValuelistPropertyController;
 import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.util.EditorUtil.Encapsulation2StringConverter;
+import com.servoy.eclipse.ui.util.EditorUtil.String2EncapsulationConverter;
 import com.servoy.eclipse.ui.util.IControlFactory;
 import com.servoy.eclipse.ui.util.IStatusChangedListener;
 import com.servoy.eclipse.ui.views.TreeSelectObservableValue;
@@ -147,6 +151,9 @@ public class ValueListEditor extends PersistEditor
 
 	private Table currentTable;
 	private TreeSelectViewer fallbackValuelist;
+
+	private Text deprecated;
+	private Combo encapsulation;
 
 	private int databaseValuesTypeOverride = -1; // used when the user clicks the related values button but realtionName has not been set yet
 
@@ -428,6 +435,16 @@ public class ValueListEditor extends PersistEditor
 			}
 		};
 
+		Label deprecatedLabel;
+		deprecatedLabel = new Label(valueListEditorComposite, SWT.NONE);
+		deprecatedLabel.setText("Deprecated");
+		deprecated = new Text(valueListEditorComposite, SWT.BORDER);
+		Label encapsulationLabel;
+		encapsulationLabel = new Label(valueListEditorComposite, SWT.NONE);
+		encapsulationLabel.setText("Encapsulation");
+		encapsulation = new Combo(valueListEditorComposite, SWT.READ_ONLY);
+		encapsulation.setItems(new String[] { Messages.Public, Messages.ModuleScope });
+
 		final GroupLayout groupLayout_1 = new GroupLayout(definitionGroup);
 		groupLayout_1.setHorizontalGroup(groupLayout_1.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout_1.createSequentialGroup().add(
@@ -459,7 +476,11 @@ public class ValueListEditor extends PersistEditor
 				Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(40, 40, 40).add(allowEmptyValueButton, GroupLayout.PREFERRED_SIZE,
 				GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(40, 40, 40).addPreferredGap(LayoutStyle.RELATED).add(sortingDefinitionControl,
 				GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).addContainerGap()).add(
-			groupLayout.createSequentialGroup().add(36, 36, 36).add(applyValuelistNameButton).addContainerGap()).add(
+			groupLayout.createSequentialGroup().addContainerGap().add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(deprecatedLabel).add(encapsulationLabel)).addPreferredGap(LayoutStyle.RELATED).add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(deprecated, GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE).add(
+					encapsulation, GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE)).addContainerGap()).add(
+		groupLayout.createSequentialGroup().add(36, 36, 36).add(applyValuelistNameButton).addContainerGap()).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 					groupLayout.createSequentialGroup().add(relatedValuesButton, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE).addPreferredGap(
@@ -478,9 +499,14 @@ public class ValueListEditor extends PersistEditor
 				LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(tableValuesButton).add(tableSelectControl)).addPreferredGap(
 				LayoutStyle.RELATED).add(applyValuelistNameButton).addPreferredGap(LayoutStyle.RELATED).add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(relatedValuesButton).add(relationSelectControl)).addPreferredGap(LayoutStyle.RELATED).add(
-				definitionGroup, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(9, 9, 9).add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(fallbackValueListControl)).add(
-					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(sortingDefinitionControl).add(allowEmptyValueButton))).add(24, 24, 24)));
+				definitionGroup, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(9, 9, 9).
+			add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(deprecatedLabel)).add(
+				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(deprecated))).add(9, 9, 9).
+			add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(encapsulationLabel)).add(
+				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(encapsulation))).add(9, 9, 9).
+			add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(fallbackValueListControl)).add(
+				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(sortingDefinitionControl).add(allowEmptyValueButton))).
+			add(24, 24, 24)));
 		valueListEditorComposite.setLayout(groupLayout);
 
 		myScrolledComposite.setMinSize(valueListEditorComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
@@ -731,6 +757,10 @@ public class ValueListEditor extends PersistEditor
 		IObservableValue getValueListAllowEmptyValueObserveValue = PojoObservables.observeValue(getValueList(), "addEmptyValue"); //$NON-NLS-1$
 		IObservableValue applyNameFilterSelectionObserveWidget = SWTObservables.observeSelection(applyValuelistNameButton);
 		IObservableValue getApplyNameFilterSelectionObserveValue = PojoObservables.observeValue(getValueList(), "useTableFilter"); //$NON-NLS-1$
+		IObservableValue deprecatedObserveWidget = SWTObservables.observeText(deprecated, SWT.Modify);
+		IObservableValue deprecatedObserveValue = PojoObservables.observeValue(getValueList(), "deprecated");
+		IObservableValue encapsulationObserveWidget = SWTObservables.observeSelection(encapsulation);
+		IObservableValue encapsulationObserveValue = PojoObservables.observeValue(getValueList(), "encapsulation");
 
 		m_bindingContext = new DataBindingContext();
 		//
@@ -823,6 +853,10 @@ public class ValueListEditor extends PersistEditor
 			}));
 		m_bindingContext.bindValue(applyNameFilterSelectionObserveWidget, getApplyNameFilterSelectionObserveValue, null, null);
 		m_bindingContext.bindValue(separatorFieldTextObserveWidget, getValueListSeparatorObserveValue, null, null);
+		m_bindingContext.bindValue(deprecatedObserveWidget, deprecatedObserveValue, new UpdateValueStrategy(), new UpdateValueStrategy());
+		m_bindingContext.bindValue(encapsulationObserveWidget, encapsulationObserveValue,
+			new UpdateValueStrategy().setConverter(String2EncapsulationConverter.INSTANCE),
+			new UpdateValueStrategy().setConverter(Encapsulation2StringConverter.INSTANCE));
 
 		BindingHelper.addGlobalChangeListener(m_bindingContext, new IChangeListener()
 		{

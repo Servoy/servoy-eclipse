@@ -19,7 +19,15 @@ package com.servoy.eclipse.ui.editors;
 import java.util.Collection;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.util.SafeRunnable;
+import org.eclipse.jface.viewers.IPostSelectionProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
@@ -227,6 +235,69 @@ public abstract class PersistEditor extends EditorPart implements IActiveProject
 			ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(this);
 			ServoyModelManager.getServoyModelManager().getServoyModel().addPersistChangeListener(false, this);
 		}
+		site.setSelectionProvider(new IPostSelectionProvider()
+		{
+			private final ListenerList listeners = new ListenerList();
+
+			private final ListenerList postListeners = new ListenerList();
+
+			public void addSelectionChangedListener(ISelectionChangedListener listener)
+			{
+				listeners.add(listener);
+			}
+
+			public void addPostSelectionChangedListener(ISelectionChangedListener listener)
+			{
+				postListeners.add(listener);
+			}
+
+			public void fireSelectionChanged(final SelectionChangedEvent event)
+			{
+				Object[] listeners = this.listeners.getListeners();
+				fireEventChange(event, listeners);
+			}
+
+			public void firePostSelectionChanged(final SelectionChangedEvent event)
+			{
+				Object[] listeners = postListeners.getListeners();
+				fireEventChange(event, listeners);
+			}
+
+			private void fireEventChange(final SelectionChangedEvent event, Object[] listeners)
+			{
+				for (int i = 0; i < listeners.length; ++i)
+				{
+					final ISelectionChangedListener l = (ISelectionChangedListener)listeners[i];
+					SafeRunner.run(new SafeRunnable()
+					{
+						public void run()
+						{
+							l.selectionChanged(event);
+						}
+					});
+				}
+			}
+
+			public ISelection getSelection()
+			{
+				IPersist p = getPersist();
+				return p != null ? new StructuredSelection(p) : StructuredSelection.EMPTY;
+			}
+
+			public void removeSelectionChangedListener(ISelectionChangedListener listener)
+			{
+				listeners.remove(listener);
+			}
+
+			public void removePostSelectionChangedListener(ISelectionChangedListener listener)
+			{
+				postListeners.remove(listener);
+			}
+
+			public void setSelection(ISelection selection)
+			{
+			}
+		});
 	}
 
 	protected IEditorInput convertInput(IEditorInput input)

@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IWorkspace;
@@ -83,6 +84,7 @@ import com.servoy.eclipse.model.repository.StringResourceDeserializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
@@ -106,6 +108,7 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
@@ -890,6 +893,60 @@ public class EditorUtil
 		catch (Exception ex)
 		{
 			ServoyLog.logError(ex);
+		}
+	}
+
+	public static class Encapsulation2StringConverter extends Converter
+	{
+		public static final Encapsulation2StringConverter INSTANCE = new Encapsulation2StringConverter();
+
+		private Encapsulation2StringConverter()
+		{
+			super(int.class, String.class);
+		}
+
+		public Object convert(Object fromObject)
+		{
+			if (fromObject instanceof Integer)
+			{
+				int enc = ((Integer)fromObject).intValue();
+				switch (enc)
+				{
+					case PersistEncapsulation.DEFAULT :
+						return Messages.Public;
+					case PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE :
+						return Messages.HideInScriptingModuleScope;
+					case PersistEncapsulation.MODULE_SCOPE :
+						return Messages.ModuleScope;
+				}
+			}
+			return Messages.LabelUnresolved;
+		}
+	}
+	public static class String2EncapsulationConverter extends Converter
+	{
+		public static final String2EncapsulationConverter INSTANCE = new String2EncapsulationConverter();
+
+		private String2EncapsulationConverter()
+		{
+			super(String.class, int.class);
+		}
+
+		public Object convert(Object fromObject)
+		{
+			if (Messages.Public.equals(fromObject))
+			{
+				return Integer.valueOf(PersistEncapsulation.DEFAULT);
+			}
+			else if (Messages.HideInScriptingModuleScope.equals(fromObject))
+			{
+				return Integer.valueOf(PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE);
+			}
+			else if (Messages.ModuleScope.equals(fromObject))
+			{
+				return Integer.valueOf(PersistEncapsulation.MODULE_SCOPE);
+			}
+			return new Integer(-1);
 		}
 	}
 }

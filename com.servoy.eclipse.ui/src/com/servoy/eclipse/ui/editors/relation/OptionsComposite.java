@@ -43,6 +43,8 @@ import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.SortDialog;
 import com.servoy.eclipse.ui.editors.RelationEditor;
 import com.servoy.eclipse.ui.util.BindingHelper;
+import com.servoy.eclipse.ui.util.EditorUtil.Encapsulation2StringConverter;
+import com.servoy.eclipse.ui.util.EditorUtil.String2EncapsulationConverter;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -57,6 +59,8 @@ public class OptionsComposite extends Group
 	private final Button allowParentDeleteButton;
 	private final Button deleteRelatedRecordsButton;
 	private RelationEditor relationEditor;
+	private final Text deprecated;
+	private final Combo encapsulation;
 
 	/**
 	 * Create the composite
@@ -125,13 +129,26 @@ public class OptionsComposite extends Group
 
 		initalSort = new Text(this, SWT.BORDER);
 		initalSort.setEditable(false);
+
+		Label deprecatedLabel;
+		deprecatedLabel = new Label(this, SWT.NONE);
+		deprecatedLabel.setText("Deprecated");
+		deprecated = new Text(this, SWT.BORDER);
+		Label encapsulationLabel;
+		encapsulationLabel = new Label(this, SWT.NONE);
+		encapsulationLabel.setText("Encapsulation");
+		encapsulation = new Combo(this, SWT.READ_ONLY);
+		encapsulation.setItems(new String[] { Messages.Public, Messages.HideInScriptingModuleScope, Messages.ModuleScope });
+
 		final GroupLayout groupLayout = new GroupLayout(this);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().add(7, 7, 7).add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(initialSortLabel).add(joinTypeLabel)).addPreferredGap(
+			groupLayout.createSequentialGroup().add(7, 7, 7).add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(initialSortLabel).add(joinTypeLabel).add(deprecatedLabel).add(encapsulationLabel)).addPreferredGap(
 				LayoutStyle.RELATED).add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(initalSort, GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE).add(
-					joinCombo, GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(button)).add(22, 22, 22).add(
+					joinCombo, GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE).add(deprecated, GroupLayout.PREFERRED_SIZE, 228,
+					GroupLayout.PREFERRED_SIZE).add(encapsulation, GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
+				LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(button)).add(22, 22, 22).add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(allowCreationOfButton).add(allowParentDeleteButton).add(deleteRelatedRecordsButton)).addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().add(
@@ -140,7 +157,8 @@ public class OptionsComposite extends Group
 						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(joinTypeLabel).add(joinCombo, GroupLayout.PREFERRED_SIZE,
 							GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
 						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(initialSortLabel).add(initalSort).add(button)).addPreferredGap(
-						LayoutStyle.RELATED)).add(
+						LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(deprecatedLabel).add(deprecated)).addPreferredGap(
+						LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(encapsulationLabel).add(encapsulation))).add(
 					groupLayout.createSequentialGroup().addContainerGap().add(allowCreationOfButton).addPreferredGap(LayoutStyle.RELATED).add(
 						groupLayout.createSequentialGroup().add(allowParentDeleteButton).addPreferredGap(LayoutStyle.RELATED).add(deleteRelatedRecordsButton)))).addContainerGap(
 				41, Short.MAX_VALUE)));
@@ -174,6 +192,12 @@ public class OptionsComposite extends Group
 		IObservableValue initialSortObserveWidget = SWTObservables.observeText(initalSort, SWT.Modify);
 		IObservableValue initialSortObserveValue = PojoObservables.observeValue(relationEditor.getRelation(), "initialSort");
 
+		IObservableValue deprecatedObserveWidget = SWTObservables.observeText(deprecated, SWT.Modify);
+		IObservableValue deprecatedObserveValue = PojoObservables.observeValue(relationEditor.getRelation(), "deprecated");
+
+		IObservableValue encapsulationObserveWidget = SWTObservables.observeSelection(encapsulation);
+		IObservableValue encapsulationObserveValue = PojoObservables.observeValue(relationEditor.getRelation(), "encapsulation");
+
 		m_bindingContext = new DataBindingContext();
 
 		m_bindingContext.bindValue(allowCreationOfButtonObserveWidget, allowCreationRelatedRecordsObserveValue, null, null);
@@ -182,6 +206,10 @@ public class OptionsComposite extends Group
 		m_bindingContext.bindValue(initialSortObserveWidget, initialSortObserveValue, new UpdateValueStrategy(), new UpdateValueStrategy());
 		m_bindingContext.bindValue(joinComboObserveWidget, joinTypeObserveValue, new UpdateValueStrategy().setConverter(String2JoinTypeConverter.INSTANCE),
 			new UpdateValueStrategy().setConverter(JoinType2StringConverter.INSTANCE));
+		m_bindingContext.bindValue(deprecatedObserveWidget, deprecatedObserveValue, new UpdateValueStrategy(), new UpdateValueStrategy());
+		m_bindingContext.bindValue(encapsulationObserveWidget, encapsulationObserveValue,
+			new UpdateValueStrategy().setConverter(String2EncapsulationConverter.INSTANCE),
+			new UpdateValueStrategy().setConverter(Encapsulation2StringConverter.INSTANCE));
 
 		BindingHelper.addGlobalChangeListener(m_bindingContext, new IChangeListener()
 		{
