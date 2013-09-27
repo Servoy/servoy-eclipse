@@ -161,60 +161,6 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		return defaultBorderValues;
 	}
 
-	/**
-	 * Use this if you want custom default values for your border types.
-	 * ex:
-	 * <p>
-	 *  getDefaultBorderValues(BorderType.SpecialMatte,0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK,Color.BLACK)
-	 *  </p>
-	 *  
-	 *  <br/><br/>
-	 *  Add more Border types in the implementation of this method as needed.
-	 * @param borderType
-	 * @param args
-	 * @return
-	 */
-	public static Border getDefaultBorderValues(BorderType borderType, Object... args)
-	{
-		Runnable runnable = null;
-		final Object[] f_args = args;
-		final Border[] ret = new Border[1];
-		switch (borderType)
-		{
-			case SpecialMatte :
-			{
-				if (args.length != 8)
-				{
-					return getDefaultBorderValuesMap().get(BorderType.SpecialMatte);
-				}
-				runnable = new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						ret[0] = new SpecialMatteBorder((Integer)f_args[0], (Integer)f_args[1], (Integer)f_args[2], (Integer)f_args[3], (Color)f_args[4],
-							(Color)f_args[5], (Color)f_args[6], (Color)f_args[7]);
-					}
-
-				};
-			}
-		}
-		if (runnable != null)
-		{
-			try
-			{
-				DebugUtils.invokeAndWaitWhileDispatchingOnSWT(runnable);
-			}
-			catch (Exception e)
-			{
-				Debug.error(e);
-			}
-
-			return ret[0];
-		}
-		return null;
-	}
-
 	private static BorderType getBorderTypeConstant(Border border)
 	{
 		if (border != null)

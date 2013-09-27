@@ -61,6 +61,11 @@ public abstract class BaseVisualFormEditorPaletteFactory implements IPaletteFact
 		map.put(SetValueCommand.REQUEST_PROPERTY_PREFIX + property.getPropertyName(), value);
 	}
 
+	protected void setProperty(Map<String, Object> map, String propertyName, Object value)
+	{
+		map.put(SetValueCommand.REQUEST_PROPERTY_PREFIX + propertyName, value);
+	}
+
 	/**
 	 * Creates the PaletteRoot and adds all palette elements. Use this factory
 	 * method to create a new palette for your graphical editor.

@@ -17,8 +17,8 @@
 
 package com.servoy.eclipse.designer.editor.palette;
 
-import java.awt.Color;
 import java.awt.Image;
+import java.awt.Insets;
 import java.beans.BeanDescriptor;
 import java.beans.BeanInfo;
 import java.util.ArrayList;
@@ -494,17 +494,16 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 
 			requestType = VisualFormEditor.REQ_PLACE_LABEL;
 			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_TEXT, "");
-			setProperty(
-				extendedData,
-				StaticContentSpecLoader.PROPERTY_BORDERTYPE,
-				new ComplexProperty<Border>(BorderPropertyController.getDefaultBorderValues(BorderType.SpecialMatte, 1, 1, 0, 0, Color.BLACK, Color.BLACK,
-					Color.BLACK, Color.BLACK)));
+			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_BORDERTYPE, new ComplexProperty<Border>(
+				BorderPropertyController.getDefaultBorderValuesMap().get(BorderType.SpecialMatte)));
+			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_BORDERTYPE.getPropertyName() + '.' + "left_color", "red");
+			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_BORDERTYPE.getPropertyName() + '.' + "width", new ComplexProperty<Insets>(new Insets(1,
+				1, 0, 0)));
 			setProperty(
 				extendedData,
 				StaticContentSpecLoader.PROPERTY_HORIZONTALALIGNMENT,
 				PersistPropertySource.HORIZONTAL_ALIGNMENT_CONTROLLER.getConverter().convertProperty(
 					StaticContentSpecLoader.PROPERTY_HORIZONTALALIGNMENT.getPropertyName(), Integer.valueOf(SwingConstants.RIGHT)));
-			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_TRANSPARENT, Boolean.TRUE);
 
 		}
 
