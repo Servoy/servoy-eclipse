@@ -496,15 +496,14 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_TEXT, "");
 			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_BORDERTYPE, new ComplexProperty<Border>(
 				BorderPropertyController.getDefaultBorderValuesMap().get(BorderType.SpecialMatte)));
-			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_BORDERTYPE.getPropertyName() + '.' + "left_color", "red");
-			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_BORDERTYPE.getPropertyName() + '.' + "width", new ComplexProperty<Insets>(new Insets(1,
-				1, 0, 0)));
+			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_BORDERTYPE.getPropertyName() + '.' + "width", new ComplexProperty<Insets>(new Insets(
+				(int)top, (int)left, 0, 0)));
 			setProperty(
 				extendedData,
 				StaticContentSpecLoader.PROPERTY_HORIZONTALALIGNMENT,
 				PersistPropertySource.HORIZONTAL_ALIGNMENT_CONTROLLER.getConverter().convertProperty(
 					StaticContentSpecLoader.PROPERTY_HORIZONTALALIGNMENT.getPropertyName(), Integer.valueOf(SwingConstants.RIGHT)));
-
+			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_TRANSPARENT, Boolean.TRUE);
 		}
 
 		if (icon != null)
