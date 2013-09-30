@@ -105,6 +105,10 @@ import org.jshybugger.proxy.DebugWebAppService;
 import org.jshybugger.proxy.ScriptSourceProvider;
 import org.json.JSONObject;
 import org.mozilla.javascript.ast.AstRoot;
+import org.webbitserver.HttpControl;
+import org.webbitserver.HttpHandler;
+import org.webbitserver.HttpRequest;
+import org.webbitserver.HttpResponse;
 
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
@@ -113,6 +117,7 @@ import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.extensions.AbstractServoyModel;
+import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.preferences.JSDocScriptTemplates;
@@ -274,7 +279,7 @@ public class ServoyModel extends AbstractServoyModel
 					{
 						try
 						{
-							DebugWebAppService.startDebugWebAppService(8889, new ScriptSourceProvider()
+							DebugWebAppService debugWebAppService = DebugWebAppService.startDebugWebAppService(8889, new ScriptSourceProvider()
 							{
 								@Override
 								public String loadScriptResourceById(String scriptUri, boolean encode) throws IOException
@@ -388,6 +393,40 @@ public class ServoyModel extends AbstractServoyModel
 									return null;
 								}
 							});
+
+							debugWebAppService.addHandler("/solution.js", new HttpHandler()
+							{
+								@Override
+								public void handleHttpRequest(HttpRequest request, HttpResponse response, HttpControl arg2) throws Exception
+								{
+									String host = request.header("Host");
+									MobileExporter exporter = new MobileExporter();
+									exporter.setDebugMode(true);
+									exporter.setServerURL("http://" + host);
+
+									String solutionJs = exporter.doScriptingExport();
+									response.header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+									response.content(solutionJs);
+									response.end();
+								}
+							});
+							debugWebAppService.addHandler("/solution_json.js", new HttpHandler()
+							{
+								@Override
+								public void handleHttpRequest(HttpRequest request, HttpResponse response, HttpControl arg2) throws Exception
+								{
+									String host = request.header("Host");
+									MobileExporter exporter = new MobileExporter();
+									exporter.setDebugMode(true);
+									exporter.setServerURL("http://" + host);
+
+									String persist_json = exporter.doPersistExport();
+									response.header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+									response.content(persist_json);
+									response.end();
+								}
+							});
+
 						}
 						catch (Exception e)
 						{

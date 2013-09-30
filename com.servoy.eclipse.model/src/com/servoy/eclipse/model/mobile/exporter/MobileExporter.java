@@ -201,7 +201,7 @@ public class MobileExporter
 		return headerJS.append("];\n").append(headerCSS).append("];").toString(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	private String doPersistExport()
+	public String doPersistExport()
 	{
 		FlattenedSolution flattenedSolution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
 		if (flattenedSolution != null)
@@ -392,7 +392,7 @@ public class MobileExporter
 		return null;
 	}
 
-	private String doScriptingExport()
+	public String doScriptingExport()
 	{
 		FlattenedSolution flattenedSolution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
 		if (flattenedSolution != null)
@@ -517,7 +517,20 @@ public class MobileExporter
 						String fileContent = Utils.getTXTFileContent(zipStream, Charset.forName("UTF8"), false);
 						for (String key : renameMap.keySet())
 						{
-							fileContent = fileContent.replaceAll(Pattern.quote(key), renameMap.get(key));
+							if (debugMode && (key.equals("solution.js") || key.equals("solution_json.js")))
+							{
+								String url = serverURL;
+								int port = url.lastIndexOf(':');
+								if (port > 7)
+								{ // ship the http://
+									url = url.substring(0, port);
+								}
+								fileContent = fileContent.replaceAll(Pattern.quote("' + base + '" + key), url + ":8889/" + key);
+							}
+							else
+							{
+								fileContent = fileContent.replaceAll(Pattern.quote(key), renameMap.get(key));
+							}
 						}
 						if (entryName.equals(htmlFile))
 						{

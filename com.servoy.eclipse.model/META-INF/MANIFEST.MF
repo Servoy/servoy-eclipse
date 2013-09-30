@@ -24,7 +24,8 @@ Export-Package: com.servoy.eclipse.model,
  com.servoy.eclipse.model.test,
  com.servoy.eclipse.model.util,
  org.jshybugger.instrumentation,
- org.jshybugger.proxy
+ org.jshybugger.proxy,
+ org.webbitserver
 Bundle-Activator: com.servoy.eclipse.model.Activator
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: lib/js.jar,
