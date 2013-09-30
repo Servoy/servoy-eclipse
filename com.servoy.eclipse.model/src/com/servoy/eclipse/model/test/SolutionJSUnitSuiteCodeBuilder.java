@@ -262,7 +262,7 @@ public class SolutionJSUnitSuiteCodeBuilder
 			ScriptMethod method = it.next();
 			if (method.getName().equals(SET_UP_METHOD) ||
 				method.getName().equals(TEAR_DOWN_METHOD) ||
-				((target == null || target.getTestMethodToTest() == null || target.getTestMethodToTest().getName().equals(method.getName())) && method.getName().startsWith(
+				((target == null || target.getTestMethodToTest() == null || target.getTestMethodToTest().getID() == method.getID()) && method.getName().startsWith(
 					TEST_METHOD_PREFIX)))
 			{
 				if (!testMethodsFound && method.getName().startsWith(TEST_METHOD_PREFIX))
