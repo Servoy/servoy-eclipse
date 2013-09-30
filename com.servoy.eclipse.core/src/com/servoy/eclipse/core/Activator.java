@@ -306,8 +306,8 @@ public class Activator extends Plugin
 					{
 						if (Utils.stringSafeEquals(element.getId(), actionSetId))
 						{
-//							IExtension ext = element.getConfigurationElement().getDeclaringExtension();
-//							reg.removeExtension(ext, new Object[] { element });
+							IExtension ext = element.getConfigurationElement().getDeclaringExtension();
+							reg.removeExtension(ext, new Object[] { element });
 						}
 					}
 				}
