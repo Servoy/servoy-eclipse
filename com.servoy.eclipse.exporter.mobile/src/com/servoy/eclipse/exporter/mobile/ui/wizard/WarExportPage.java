@@ -170,13 +170,12 @@ public class WarExportPage extends WizardPage
 						GroupLayout.PREFERRED_SIZE)).add(
 					groupLayout.createSequentialGroup().add(exportUsingPhoneGap, GroupLayout.PREFERRED_SIZE, 15, GroupLayout.PREFERRED_SIZE).add(phoneGapLink,
 						GroupLayout.PREFERRED_SIZE, 150, Short.MAX_VALUE)).add(
-					groupLayout.createSequentialGroup().add(20).add(lblPhoneGapAccount, GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE).add(
-						phoneGapAccountsCombobox, GroupLayout.PREFERRED_SIZE, 80, Short.MAX_VALUE)).add(
 					groupLayout.createSequentialGroup().add(20).add(
-						groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(lblPhoneGapUsername).add(lblPhoneGapPassword)).addPreferredGap(
+						groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(lblPhoneGapAccount).add(lblPhoneGapUsername).add(lblPhoneGapPassword)).addPreferredGap(
 						LayoutStyle.RELATED).add(
-						groupLayout.createParallelGroup(GroupLayout.LEADING).add(phoneGapUsername, GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE).add(
-							phoneGapPassword, GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)))).addContainerGap()));
+						groupLayout.createParallelGroup(GroupLayout.LEADING).add(phoneGapAccountsCombobox, GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE).add(
+							phoneGapUsername, GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE).add(phoneGapPassword, GroupLayout.DEFAULT_SIZE, 130,
+							Short.MAX_VALUE)))).addContainerGap()));
 
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
@@ -187,9 +186,9 @@ public class WarExportPage extends WizardPage
 							GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(outputLabel)).add(10).add(
 						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(phoneGapLink).add(exportUsingPhoneGap, GroupLayout.PREFERRED_SIZE,
 							GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(10).add(
-						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(phoneGapAccountsCombobox).add(lblPhoneGapAccount, GroupLayout.PREFERRED_SIZE,
-							GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(
 						groupLayout.createSequentialGroup().add(10).add(
+							groupLayout.createParallelGroup(GroupLayout.BASELINE).add(phoneGapAccountsCombobox, GroupLayout.PREFERRED_SIZE,
+								GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(lblPhoneGapAccount)).add(7).add(
 							groupLayout.createParallelGroup(GroupLayout.BASELINE).add(phoneGapUsername, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 								GroupLayout.PREFERRED_SIZE).add(lblPhoneGapUsername)).add(7).add(
 							groupLayout.createParallelGroup(GroupLayout.BASELINE).add(phoneGapPassword, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
