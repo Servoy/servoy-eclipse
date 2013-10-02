@@ -22,6 +22,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.equinox.security.storage.ISecurePreferences;
+import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
+import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -35,6 +38,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
@@ -50,6 +54,7 @@ import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.util.Debug;
 
 /**
  * @author lvostinar
@@ -59,10 +64,13 @@ public class WarExportPage extends WizardPage
 {
 	public static String OUTPUT_PATH_KEY = "initialOutputPath";
 	public static String PHONEGAP_EMAIL = "phonegapEmail";
+	public static final String SECURE_STORAGE_ACCOUNTS_NODE = "PhoneGap Account Storage";
+	public static final String NO_PHONEGAP_ACCOUNT = "-none-";
 
 	private Text outputText;
 	private Button outputBrowseButton;
 	private Button exportAsWar;
+	private Combo phoneGapAccountsCombobox;
 	private Text phoneGapUsername;
 	private Text phoneGapPassword;
 	private final CustomizedFinishPage finishPage;
@@ -134,6 +142,13 @@ public class WarExportPage extends WizardPage
 			}
 		});
 
+		Label lblPhoneGapAccount = new Label(container, SWT.NONE);
+		lblPhoneGapAccount.setText("Select a PhoneGap account:");
+
+		phoneGapAccountsCombobox = new Combo(container, SWT.BORDER);
+		phoneGapAccountsCombobox.add(NO_PHONEGAP_ACCOUNT);
+		phoneGapAccountsCombobox.select(0);
+
 		Label lblPhoneGapUsername = new Label(container, SWT.NONE);
 		lblPhoneGapUsername.setText("Email");
 
@@ -155,6 +170,8 @@ public class WarExportPage extends WizardPage
 						GroupLayout.PREFERRED_SIZE)).add(
 					groupLayout.createSequentialGroup().add(exportUsingPhoneGap, GroupLayout.PREFERRED_SIZE, 15, GroupLayout.PREFERRED_SIZE).add(phoneGapLink,
 						GroupLayout.PREFERRED_SIZE, 150, Short.MAX_VALUE)).add(
+					groupLayout.createSequentialGroup().add(20).add(lblPhoneGapAccount, GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE).add(
+						phoneGapAccountsCombobox, GroupLayout.PREFERRED_SIZE, 80, Short.MAX_VALUE)).add(
 					groupLayout.createSequentialGroup().add(20).add(
 						groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(lblPhoneGapUsername).add(lblPhoneGapPassword)).addPreferredGap(
 						LayoutStyle.RELATED).add(
@@ -169,6 +186,8 @@ public class WarExportPage extends WizardPage
 						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(outputBrowseButton).add(outputText, GroupLayout.PREFERRED_SIZE,
 							GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(outputLabel)).add(10).add(
 						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(phoneGapLink).add(exportUsingPhoneGap, GroupLayout.PREFERRED_SIZE,
+							GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(10).add(
+						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(phoneGapAccountsCombobox).add(lblPhoneGapAccount, GroupLayout.PREFERRED_SIZE,
 							GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(
 						groupLayout.createSequentialGroup().add(10).add(
 							groupLayout.createParallelGroup(GroupLayout.BASELINE).add(phoneGapUsername, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
@@ -188,11 +207,10 @@ public class WarExportPage extends WizardPage
 			File webappsFolder = new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory(), "server/webapps");
 			outputText.setText(webappsFolder.getAbsolutePath());
 		}
-		String phonegapEmail = getDialogSettings().get(PHONEGAP_EMAIL);
-		if (phonegapEmail != null)
-		{
-			phoneGapUsername.setText(phonegapEmail);
-		}
+
+		//load existing PhoneGap accounts 
+		loadPhoneGapAccounts();
+
 		ModifyListener errorMessageDetecter = new ModifyListener()
 		{
 			public void modifyText(ModifyEvent e)
@@ -215,6 +233,60 @@ public class WarExportPage extends WizardPage
 		exportAsWar.addSelectionListener(selectionListener);
 		exportUsingPhoneGap.addSelectionListener(selectionListener);
 		enableOption(true);
+	}
+
+	private void loadPhoneGapAccounts()
+	{
+		// check for PhoneGap secure storage
+		ISecurePreferences securePreferences = SecurePreferencesFactory.getDefault();
+		if (securePreferences.nodeExists(SECURE_STORAGE_ACCOUNTS_NODE))
+		{
+			final ISecurePreferences node = securePreferences.node(SECURE_STORAGE_ACCOUNTS_NODE);
+			try
+			{
+				for (String emailKey : node.keys())
+				{
+					String password = node.get(emailKey, null);
+					if (password != null) phoneGapAccountsCombobox.add(emailKey);
+					if (getDialogSettings().get(PHONEGAP_EMAIL).equals(emailKey))
+					{
+						// select last account used
+						phoneGapAccountsCombobox.select(phoneGapAccountsCombobox.indexOf(emailKey));
+						phoneGapUsername.setText(emailKey);
+						phoneGapPassword.setText(node.get(emailKey, null));
+					}
+				}
+			}
+			catch (StorageException e)
+			{
+				Debug.error(e);
+			}
+			phoneGapAccountsCombobox.addSelectionListener(new SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(SelectionEvent e)
+				{
+					if (phoneGapAccountsCombobox.getSelectionIndex() != phoneGapAccountsCombobox.indexOf(NO_PHONEGAP_ACCOUNT))
+					{
+						String userEmail = phoneGapAccountsCombobox.getItem(phoneGapAccountsCombobox.getSelectionIndex());
+						phoneGapUsername.setText(userEmail);
+						try
+						{
+							phoneGapPassword.setText(node.get(userEmail, null));
+						}
+						catch (StorageException ex)
+						{
+							Debug.error(ex);
+						}
+					}
+					else
+					{
+						phoneGapUsername.setText("");
+						phoneGapPassword.setText("");
+					}
+				}
+			});
+		}
 	}
 
 	private void updateWizardState()
@@ -240,6 +312,7 @@ public class WarExportPage extends WizardPage
 	{
 		outputText.setEnabled(enabled);
 		outputBrowseButton.setEnabled(enabled);
+		phoneGapAccountsCombobox.setEnabled(!enabled);
 		phoneGapUsername.setEnabled(!enabled);
 		phoneGapPassword.setEnabled(!enabled);
 	}
@@ -320,6 +393,20 @@ public class WarExportPage extends WizardPage
 				{
 					setErrorMessage(errorMessage[0]);
 					return null;
+				}
+				else if (phoneGapAccountsCombobox.getSelectionIndex() == phoneGapAccountsCombobox.indexOf(NO_PHONEGAP_ACCOUNT))
+				{
+					// new PhoneGap account or updating existing account
+					ISecurePreferences securePreferences = SecurePreferencesFactory.getDefault();
+					ISecurePreferences node = securePreferences.node(SECURE_STORAGE_ACCOUNTS_NODE);
+					try
+					{
+						node.put(username, password, true);
+					}
+					catch (StorageException e)
+					{
+						Debug.error(e);
+					}
 				}
 				pgAppPage.populateExistingApplications();
 				return pgAppPage;
