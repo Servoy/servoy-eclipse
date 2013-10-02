@@ -13,7 +13,8 @@ Require-Bundle: com.servoy.eclipse.model,
  com.servoy.eclipse.ui,
  org.eclipse.debug.ui,
  com.servoy.eclipse.jsunit,
- org.eclipse.core.expressions
+ org.eclipse.core.expressions,
+ org.eclipse.equinox.security
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
