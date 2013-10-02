@@ -143,7 +143,7 @@ public class WarExportPage extends WizardPage
 		});
 
 		Label lblPhoneGapAccount = new Label(container, SWT.NONE);
-		lblPhoneGapAccount.setText("Select a PhoneGap account:");
+		lblPhoneGapAccount.setText("Select a PhoneGap account");
 
 		phoneGapAccountsCombobox = new Combo(container, SWT.BORDER);
 		phoneGapAccountsCombobox.add(NO_PHONEGAP_ACCOUNT);
