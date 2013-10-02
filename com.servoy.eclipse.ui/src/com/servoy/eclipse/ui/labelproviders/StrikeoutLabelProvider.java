@@ -22,6 +22,7 @@ import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 
 /**
  * Label provider with strikeout support
@@ -51,6 +52,17 @@ public abstract class StrikeoutLabelProvider extends StyledCellLabelProvider imp
 		else cell.setStyleRanges(null);
 		cell.setText(newText);
 		Image image = getImage(element);
+		int width = image.getBounds().width;
+		int height = image.getBounds().height;
+		if (height > 16 || width > 16)
+		{
+			int largest = width > height ? width : height;
+			double zoom = 16d / largest;
+			int scaledWidth = (int)(width * zoom) < 16 ? 16 : (int)(width * zoom);
+			int scaledHeight = (int)(height * zoom) < 16 ? 16 : (int)(height * zoom);
+
+			image = new Image(Display.getDefault(), image.getImageData().scaledTo(scaledWidth, scaledHeight));
+		}
 		cell.setImage(image);
 
 		super.update(cell);
