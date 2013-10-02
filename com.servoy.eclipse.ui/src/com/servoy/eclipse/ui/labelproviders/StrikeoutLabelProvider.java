@@ -52,16 +52,19 @@ public abstract class StrikeoutLabelProvider extends StyledCellLabelProvider imp
 		else cell.setStyleRanges(null);
 		cell.setText(newText);
 		Image image = getImage(element);
-		int width = image.getBounds().width;
-		int height = image.getBounds().height;
-		if (height > 16 || width > 16)
+		if (image != null)
 		{
-			int largest = width > height ? width : height;
-			double zoom = 16d / largest;
-			int scaledWidth = (int)(width * zoom) < 16 ? 16 : (int)(width * zoom);
-			int scaledHeight = (int)(height * zoom) < 16 ? 16 : (int)(height * zoom);
+			int width = image.getBounds().width;
+			int height = image.getBounds().height;
+			if (height > 16 || width > 16)
+			{
+				int largest = width > height ? width : height;
+				double zoom = 16d / largest;
+				int scaledWidth = (int)(width * zoom) < 16 ? 16 : (int)(width * zoom);
+				int scaledHeight = (int)(height * zoom) < 16 ? 16 : (int)(height * zoom);
 
-			image = new Image(Display.getDefault(), image.getImageData().scaledTo(scaledWidth, scaledHeight));
+				image = new Image(Display.getDefault(), image.getImageData().scaledTo(scaledWidth, scaledHeight));
+			}
 		}
 		cell.setImage(image);
 
