@@ -18,12 +18,12 @@
 package com.servoy.eclipse.ui.labelproviders;
 
 
+import java.util.HashMap;
+
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
@@ -34,6 +34,8 @@ import org.eclipse.swt.widgets.Display;
  */
 public abstract class StrikeoutLabelProvider extends StyledCellLabelProvider implements ILabelProvider
 {
+	private final HashMap<Image, Image> imageCache = new HashMap<Image, Image>();
+
 	@Override
 	public void update(ViewerCell cell)
 	{
@@ -55,31 +57,49 @@ public abstract class StrikeoutLabelProvider extends StyledCellLabelProvider imp
 		else cell.setStyleRanges(null);
 		cell.setText(newText);
 		Image image = getImage(element);
+		boolean scaled = false;
 		if (image != null)
 		{
 			int width = image.getBounds().width;
 			int height = image.getBounds().height;
 			if (height > 16 || width > 16)
 			{
-				int largest = width > height ? width : height;
-				double zoom = 16d / largest;
-				int scaledWidth = (int)(width * zoom) < 16 ? 16 : (int)(width * zoom);
-				int scaledHeight = (int)(height * zoom) < 16 ? 16 : (int)(height * zoom);
-
-				image = new Image(Display.getDefault(), image.getImageData().scaledTo(scaledWidth, scaledHeight));
-
-				GC gc = new GC(image);
-				gc.setAntialias(SWT.ON);
-				gc.setInterpolation(SWT.HIGH);
-				gc.setAlpha(SWT.TRANSPARENT);
-				gc.drawImage(image, 0, 0);
-				gc.dispose();
+				Image scaledImage = null;
+				if (imageCache.get(image) == null)
+				{
+					int largest = width > height ? width : height;
+					double zoom = 16d / largest;
+					int scaledWidth = (int)(width * zoom) < 16 ? 16 : (int)(width * zoom);
+					int scaledHeight = (int)(height * zoom) < 16 ? 16 : (int)(height * zoom);
+					scaledImage = new Image(Display.getDefault(), image.getImageData().scaledTo(scaledWidth, scaledHeight));
+					imageCache.put(image, scaledImage);
+				}
+				else
+				{
+					scaledImage = imageCache.get(image);
+				}
+				cell.setImage(scaledImage);
+				scaled = true;
 			}
 		}
-		cell.setImage(image);
+		if (!scaled) cell.setImage(image);
 
 		super.update(cell);
 	}
 
 	public abstract boolean isStrikeout(Object element);
+
+	@Override
+	public void dispose()
+	{
+		clearImageCache(imageCache);
+	}
+
+	public void clearImageCache(HashMap<Image, Image> imageCache)
+	{
+		for (Image image : imageCache.values())
+		{
+			image.dispose();
+		}
+	}
 }

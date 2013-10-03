@@ -54,6 +54,7 @@ public abstract class DelegateLabelProvider extends StrikeoutLabelProvider imple
 	public void dispose()
 	{
 		labelProvider.dispose();
+		super.dispose();
 	}
 
 	@Override

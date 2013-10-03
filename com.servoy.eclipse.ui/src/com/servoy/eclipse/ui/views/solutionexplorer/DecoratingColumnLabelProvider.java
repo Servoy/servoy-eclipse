@@ -95,6 +95,7 @@ public class DecoratingColumnLabelProvider extends StrikeoutLabelProvider implem
 		{
 			decorator.dispose();
 		}
+		super.dispose();
 	}
 
 	/**
