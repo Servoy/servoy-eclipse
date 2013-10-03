@@ -17,10 +17,13 @@
 
 package com.servoy.eclipse.ui.labelproviders;
 
+
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
@@ -64,6 +67,13 @@ public abstract class StrikeoutLabelProvider extends StyledCellLabelProvider imp
 				int scaledHeight = (int)(height * zoom) < 16 ? 16 : (int)(height * zoom);
 
 				image = new Image(Display.getDefault(), image.getImageData().scaledTo(scaledWidth, scaledHeight));
+
+				GC gc = new GC(image);
+				gc.setAntialias(SWT.ON);
+				gc.setInterpolation(SWT.HIGH);
+				gc.setAlpha(SWT.TRANSPARENT);
+				gc.drawImage(image, 0, 0);
+				gc.dispose();
 			}
 		}
 		cell.setImage(image);
