@@ -516,6 +516,45 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 		return editingPersist;
 	}
 
+	public FlattenedSolution getFlattenedSolution()
+	{
+		FlattenedSolution fs = new FlattenedSolution();
+		try
+		{
+			fs.setSolution(getSolutionMetaData(), true, true, new AbstractActiveSolutionHandler()
+			{
+				@Override
+				public IRepository getRepository()
+				{
+					return ApplicationServerSingleton.get().getDeveloperRepository();
+				}
+
+				@Override
+				protected Solution loadSolution(RootObjectMetaData solutionDef) throws RemoteException, RepositoryException
+				{
+					ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solutionDef.getName());
+					if (servoyProject != null)
+					{
+						return servoyProject.getEditingSolution();
+					}
+					return null;
+				}
+
+				@Override
+				protected Solution loadLoginSolution(SolutionMetaData mainSolutionDef, SolutionMetaData loginSolutionDef) throws RemoteException,
+					RepositoryException
+				{
+					return loadSolution(loginSolutionDef);
+				}
+			});
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+		}
+		return fs;
+	}
+
 	public synchronized FlattenedSolution getEditingFlattenedSolution(boolean loadLoginSolution, boolean loadMainSolution)
 	{
 		try

@@ -275,7 +275,20 @@ public class ServoyModel extends AbstractServoyModel
 						resourceProject.getProject().findMember(EclipseMessages.MESSAGES_DIR) == null) EclipseMessages.writeProjectI18NFiles(aProject, false,
 						false);
 
-					if (solution.getSolutionType() == SolutionMetaData.MOBILE)
+					boolean isMobile = solution.getSolutionType() == SolutionMetaData.MOBILE;
+					if (!isMobile)
+					{
+						Solution[] modules = aProject.getModules();
+						for (Solution module : modules)
+						{
+							if (module.getSolutionType() == SolutionMetaData.MOBILE_MODULE)
+							{
+								isMobile = true;
+								break;
+							}
+						}
+					}
+					if (isMobile)
 					{
 						try
 						{
@@ -399,10 +412,7 @@ public class ServoyModel extends AbstractServoyModel
 								@Override
 								public void handleHttpRequest(HttpRequest request, HttpResponse response, HttpControl arg2) throws Exception
 								{
-									String host = request.header("Host");
-									MobileExporter exporter = new MobileExporter();
-									exporter.setDebugMode(true);
-									exporter.setServerURL("http://" + host);
+									MobileExporter exporter = getMobileExporter(request);
 
 									String solutionJs = exporter.doScriptingExport();
 									response.header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
@@ -415,10 +425,7 @@ public class ServoyModel extends AbstractServoyModel
 								@Override
 								public void handleHttpRequest(HttpRequest request, HttpResponse response, HttpControl arg2) throws Exception
 								{
-									String host = request.header("Host");
-									MobileExporter exporter = new MobileExporter();
-									exporter.setDebugMode(true);
-									exporter.setServerURL("http://" + host);
+									MobileExporter exporter = getMobileExporter(request);
 
 									String persist_json = exporter.doPersistExport();
 									response.header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
@@ -654,6 +661,30 @@ public class ServoyModel extends AbstractServoyModel
 				}
 
 				return true;
+			}
+
+			/**
+			 * @param request
+			 * @return
+			 */
+			private MobileExporter getMobileExporter(HttpRequest request)
+			{
+				MobileExporter exporter = new MobileExporter();
+				exporter.setDebugMode(true);
+				exporter.setServerURL(request.queryParam("u"));
+				exporter.setSolutionName(request.queryParam("s"));
+				exporter.setServiceSolutionName(request.queryParam("ss"));
+				String timeout = request.queryParam("t");
+				if (timeout != null)
+				{
+					exporter.setTimeout(Integer.parseInt(timeout));
+				}
+				String skipConnect = request.queryParam("sc");
+				if (skipConnect != null)
+				{
+					exporter.setSkipConnect(Boolean.parseBoolean(skipConnect));
+				}
+				return exporter;
 			}
 		});
 

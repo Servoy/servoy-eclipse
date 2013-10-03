@@ -154,12 +154,14 @@ public class MobileExporter
 	private boolean debugMode = false;
 	private final Map<String, Integer> filenameEndings = new HashMap<String, Integer>();
 
+	private FlattenedSolution fs;
+
 	private String doMediaExport(ZipOutputStream zos, File outputFolder) throws IOException
 	{
 		StringBuilder headerJS = new StringBuilder("var mediaJS = ["); //$NON-NLS-1$
 		StringBuilder headerCSS = new StringBuilder("var mediaCSS = ["); //$NON-NLS-1$
 
-		FlattenedSolution flattenedSolution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
+		FlattenedSolution flattenedSolution = getFlattenedSolution();
 		if (flattenedSolution != null)
 		{
 			Iterator<Media> mediasIte = flattenedSolution.getMedias(false);
@@ -203,7 +205,7 @@ public class MobileExporter
 
 	public String doPersistExport()
 	{
-		FlattenedSolution flattenedSolution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
+		FlattenedSolution flattenedSolution = getFlattenedSolution();
 		if (flattenedSolution != null)
 		{
 			Iterator<Form> formIterator = flattenedSolution.getForms(true);
@@ -392,9 +394,28 @@ public class MobileExporter
 		return null;
 	}
 
+	/**
+	 * @return
+	 */
+	private FlattenedSolution getFlattenedSolution()
+	{
+		if (fs == null)
+		{
+			fs = ServoyModelFinder.getServoyModel().getFlattenedSolution();
+			if (solutionName != null && !fs.getSolution().getName().equals(solutionName))
+			{
+				ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solutionName);
+				if (servoyProject == null) throw new RuntimeException("Mobile Exporter tries to export: " + solutionName +
+					" but that is not a project in the current workspace");
+				fs = servoyProject.getFlattenedSolution();
+			}
+		}
+		return fs;
+	}
+
 	public String doScriptingExport()
 	{
-		FlattenedSolution flattenedSolution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
+		FlattenedSolution flattenedSolution = getFlattenedSolution();
 		if (flattenedSolution != null)
 		{
 			String template = Utils.getTXTFileContent(getClass().getResourceAsStream(RELATIVE_TEMPLATE_PATH), Charset.forName("UTF8")); //$NON-NLS-1$
@@ -525,7 +546,11 @@ public class MobileExporter
 								{ // ship the http://
 									url = url.substring(0, port);
 								}
-								fileContent = fileContent.replaceAll(Pattern.quote("' + base + '" + key), url + ":8889/" + key);
+								String params = "?t=" + timeout + "&sc=" + skipConnect + "&s=" + getFlattenedSolution().getSolution().getName() + "&u=" +
+									serverURL;
+								if (serviceSolutionName != null) params += "&ss=" + serviceSolutionName;
+
+								fileContent = fileContent.replaceAll(Pattern.quote("' + base + '" + key), url + ":8889/" + key + params);
 							}
 							else
 							{
@@ -642,7 +667,7 @@ public class MobileExporter
 	private String replaceFormsScripting(String template, String separator)
 	{
 		StringBuffer formsScript = new StringBuffer();
-		FlattenedSolution flattenedSolution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
+		FlattenedSolution flattenedSolution = getFlattenedSolution();
 		if (flattenedSolution != null)
 		{
 			Iterator<Form> formIterator = flattenedSolution.getForms(true);
@@ -684,7 +709,7 @@ public class MobileExporter
 	private String replaceScopesScripting(String template, String separator)
 	{
 		StringBuffer scopesScript = new StringBuffer();
-		FlattenedSolution flattenedSolution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
+		FlattenedSolution flattenedSolution = getFlattenedSolution();
 		if (flattenedSolution != null)
 		{
 			Iterator<Pair<String, IRootObject>> scopeIterator = flattenedSolution.getScopes().iterator();
