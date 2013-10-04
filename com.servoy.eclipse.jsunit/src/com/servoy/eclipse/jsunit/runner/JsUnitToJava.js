@@ -50,21 +50,54 @@ JsUnitToJava.prototype.ASSERTION_EXCEPTION_MESSAGE = "just for stack";
 if (typeof(Packages) != 'undefined')
 {
 	// if we are running under Rhino, get the stack trace using the JS engine
-	function RhinoStackError()
-	{
-		this.rhinoException = new Packages.org.mozilla.javascript.EvaluatorException(JsUnitToJava.prototype.ASSERTION_EXCEPTION_MESSAGE);
-	}
-	RhinoStackError.prototype = new Error();
+	
+	// some browsers (opera/chrome/ie) - when the code is evaled in window scope - will define these functions anyway
+	// even if the initial check for "Packages" wouldn't pass (they define all function declarations before running the JS condition); FF doesn't do that, but still;
+	// without this ___defineTypes the main scope would still see/be overridden by these wrapped functions even if the if condition above is false
+	function ___defineTypes(scope)
+    {
+		scope.RhinoStackError = function RhinoStackError()
+		{
+			this.rhinoException = new Packages.org.mozilla.javascript.EvaluatorException(JsUnitToJava.prototype.ASSERTION_EXCEPTION_MESSAGE);
 
-	function JsUnitError( msg )
-	{
-		// some browsers (opera/chrome/ie) - when the code is evaled in window scope - will define these functions anyway
-		// even if the initial check for "Packages" wouldn't pass (they define all function declarations before running the JS condition); FF doesn't do that, but still
-		if (typeof(Packages) != 'undefined') RhinoStackError.call(this);
-		
-		this.message = msg || "";   
-	}
+			// Error.apply(this, arguments); // doesn't do what we want, ignores "this"
+			var er = new Error();
+			if (typeof (er.stack) != 'undefined' && er.stack != null) this.stack = er.stack; // only useful for non-IE, IE works nicely without it, actually it won't work with it
+		}
+	
+		scope.JsUnitError = function JsUnitError(msg)
+		{
+			RhinoStackError.call(this);
+			this.message = msg || "";
+		}
+    }
+	___defineTypes(this);
+	delete ___defineTypes;
+	
+	RhinoStackError.prototype = new Error();
+	RhinoStackError.prototype.constructor = RhinoStackError;
 	JsUnitError.prototype = new RhinoStackError();
+	JsUnitError.prototype.constructor = JsUnitError;
+}
+else
+{
+	// else try to get the trace from native browser Error objects
+	
+	// see comment for the "___defineTypes" above
+	function ___defineTypes(scope)
+    {
+		scope.JsUnitError = function JsUnitError(msg)
+		{
+			// Error.apply(this, arguments); // doesn't do what we want, ignores "this"
+			var er = new Error(msg);
+			if (typeof (er.stack) != 'undefined' && er.stack != null) this.stack = er.stack; // only useful for non-IE, IE works nicely without it, actually it won't work with it
+			this.message = msg || "";
+		}
+    }
+	___defineTypes(this);
+	delete ___defineTypes;
+	
+	JsUnitError.prototype.constructor = JsUnitError;
 }
 
 function TestSuite_addTest( test ) 

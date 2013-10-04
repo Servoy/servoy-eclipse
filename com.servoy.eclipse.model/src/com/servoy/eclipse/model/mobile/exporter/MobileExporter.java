@@ -48,6 +48,7 @@ import org.mozilla.javascript.ast.AstRoot;
 
 import com.servoy.base.persistence.constants.IComponentConstants;
 import com.servoy.base.persistence.constants.IValueListConstants;
+import com.servoy.base.test.LineMapper;
 import com.servoy.base.util.I18NProvider;
 import com.servoy.eclipse.model.Activator;
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -155,6 +156,7 @@ public class MobileExporter
 	private final Map<String, Integer> filenameEndings = new HashMap<String, Integer>();
 
 	private FlattenedSolution fs;
+	private LineMapper lineMapper;
 
 	private String doMediaExport(ZipOutputStream zos, File outputFolder) throws IOException
 	{
@@ -205,7 +207,7 @@ public class MobileExporter
 
 	public String doPersistExport()
 	{
-		FlattenedSolution flattenedSolution = getFlattenedSolution();
+		FlattenedSolution flattenedSolution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
 		if (flattenedSolution != null)
 		{
 			Iterator<Form> formIterator = flattenedSolution.getForms(true);
@@ -419,7 +421,7 @@ public class MobileExporter
 		if (flattenedSolution != null)
 		{
 			String template = Utils.getTXTFileContent(getClass().getResourceAsStream(RELATIVE_TEMPLATE_PATH), Charset.forName("UTF8")); //$NON-NLS-1$
-			StringBuilder builder = new StringBuilder();
+			ScriptStringBuilder builder = new ScriptStringBuilder(useTestWar); // when creating test war code we need to map line numbers so as to show correct stacks for failures/errors
 
 			if (debugMode)
 			{
@@ -438,8 +440,7 @@ public class MobileExporter
 				InputStream resourceAsStream = JsCodeLoader.class.getResourceAsStream("/jshybugger.js");
 				String txtFileContent = Utils.getTXTFileContent(resourceAsStream, Charset.forName("UTF8"), true);
 				builder.append(txtFileContent);
-				builder.append('\n');
-				builder.append("Debugger.setScriptSource = function(params) {\n");
+				builder.append("\nDebugger.setScriptSource = function(params) {\n");
 				builder.append("eval(params.source);\n");
 				builder.append("}\n");
 
@@ -449,12 +450,12 @@ public class MobileExporter
 			int formsLoopStartIndex = template.indexOf(FORM_LOOP_START);
 			int formsLoopEndIndex = template.indexOf(FORM_LOOP_END);
 			builder.append(template.substring(0, formsLoopStartIndex));
-			builder.append(replaceFormsScripting(template.substring(formsLoopStartIndex + FORM_LOOP_START.length(), formsLoopEndIndex), null));
+			replaceFormsScripting(builder, template.substring(formsLoopStartIndex + FORM_LOOP_START.length(), formsLoopEndIndex), null);
 
 			int scopesLoopStartIndex = template.indexOf(SCOPES_LOOP_START);
 			int scopesLoopEndIndex = template.indexOf(SCOPES_LOOP_END);
 			builder.append(template.substring(formsLoopEndIndex + FORM_LOOP_END.length(), scopesLoopStartIndex));
-			builder.append(replaceScopesScripting(template.substring(scopesLoopStartIndex + SCOPES_LOOP_START.length(), scopesLoopEndIndex), null));
+			replaceScopesScripting(builder, template.substring(scopesLoopStartIndex + SCOPES_LOOP_START.length(), scopesLoopEndIndex), null);
 
 			int allVariablesLoopStartIndex = template.indexOf(VARIABLES_LOOP_START, scopesLoopEndIndex);
 			int allVariablesLoopEndIndex = template.indexOf(VARIABLES_LOOP_END, scopesLoopEndIndex);
@@ -465,23 +466,22 @@ public class MobileExporter
 			formsLoopStartIndex = template.indexOf(FORM_LOOP_START, allVariablesLoopEndIndex);
 			formsLoopEndIndex = template.indexOf(FORM_LOOP_END, allVariablesLoopEndIndex);
 			builder.append(template.substring(allVariablesLoopEndIndex + VARIABLES_LOOP_END.length(), formsLoopStartIndex));
-			builder.append(replaceFormsScripting(template.substring(formsLoopStartIndex + FORM_LOOP_START.length(), formsLoopEndIndex), ",\n"));
+			replaceFormsScripting(builder, template.substring(formsLoopStartIndex + FORM_LOOP_START.length(), formsLoopEndIndex), ",\n");
 
 			scopesLoopStartIndex = template.indexOf(SCOPES_LOOP_START, formsLoopStartIndex);
 			scopesLoopEndIndex = template.indexOf(SCOPES_LOOP_END, formsLoopStartIndex);
 			builder.append(template.substring(formsLoopEndIndex + FORM_LOOP_END.length(), scopesLoopStartIndex));
-			builder.append(replaceScopesScripting(template.substring(scopesLoopStartIndex + SCOPES_LOOP_START.length(), scopesLoopEndIndex), ",\n"));
+			replaceScopesScripting(builder, template.substring(scopesLoopStartIndex + SCOPES_LOOP_START.length(), scopesLoopEndIndex), ",\n");
 
 			builder.append(template.substring(scopesLoopEndIndex + SCOPES_LOOP_END.length()));
 			if (debugMode && filenameEndings.size() > 0)
 			{
 				for (Entry<String, Integer> entry : filenameEndings.entrySet())
 				{
-					builder.append('\n');
-					builder.append("JsHybugger.loadFile('"); //$NON-NLS-1$
+					builder.append("\nJsHybugger.loadFile('"); //$NON-NLS-1$
 					builder.append(entry.getKey());
 					builder.append("', "); //$NON-NLS-1$
-					builder.append(entry.getValue());
+					builder.append(String.valueOf(entry.getValue()));
 					builder.append(");"); //$NON-NLS-1$
 				}
 			}
@@ -492,6 +492,7 @@ public class MobileExporter
 
 	public File doExport(boolean exportAsZip) throws IOException
 	{
+		lineMapper = useTestWar ? new LineMapper() : null;
 		String formJson = doPersistExport();
 		String solutionJavascript = doScriptingExport();
 
@@ -602,6 +603,7 @@ public class MobileExporter
 					addZipEntry(moduleName + "/" + generatedJSLocation, warStream, Utils.getUTF8EncodedStream(testSuiteCode));
 					addZipEntry(moduleName + "/" + renameMap.get("testSuite_generatedCodeLocation.js"), warStream,
 						Utils.getUTF8EncodedStream("var __generatedCodeLocation = '" + generatedJSLocation + "';"));
+					addZipEntry(moduleName + "/lineMapping.properties", warStream, lineMapper.toProperties());
 				}
 
 				if (exportAsZip && configFile != null && configFile.exists())
@@ -664,9 +666,8 @@ public class MobileExporter
 		stream.closeEntry();
 	}
 
-	private String replaceFormsScripting(String template, String separator)
+	private void replaceFormsScripting(ScriptStringBuilder scriptResult, String template, String separator)
 	{
-		StringBuffer formsScript = new StringBuffer();
 		FlattenedSolution flattenedSolution = getFlattenedSolution();
 		if (flattenedSolution != null)
 		{
@@ -674,41 +675,39 @@ public class MobileExporter
 			while (formIterator.hasNext())
 			{
 				Form form = formIterator.next();
-				addVariablesAndFunctionsScripting(template.replace(PROPERTY_FORM_NAME, form.getName()), formsScript, form, null);
+				addVariablesAndFunctionsScripting(template.replace(PROPERTY_FORM_NAME, form.getName()), scriptResult, form, null);
 				if (separator != null && formIterator.hasNext())
 				{
-					formsScript.append(separator);
+					scriptResult.append(separator);
 				}
 			}
 		}
-		return formsScript.toString();
 	}
 
-	private void addVariablesAndFunctionsScripting(String template, StringBuffer appender, ISupportScriptProviders parent, String scopeName)
+	private void addVariablesAndFunctionsScripting(String template, ScriptStringBuilder scriptResult, ISupportScriptProviders parent, String scopeName)
 	{
 		int functionsLoopStartIndex = template.indexOf(FUNCTIONS_LOOP_START);
 		int functionsLoopEndIndex = template.indexOf(FUNCTIONS_LOOP_END, functionsLoopStartIndex);
 		if (functionsLoopStartIndex >= 0)
 		{
-			appender.append(template.substring(0, functionsLoopStartIndex));
-			appender.append(replaceFunctionsScripting(template.substring(functionsLoopStartIndex + FUNCTIONS_LOOP_START.length(), functionsLoopEndIndex),
-				parent, scopeName));
+			scriptResult.append(template.substring(0, functionsLoopStartIndex));
+			replaceFunctionsScripting(scriptResult, template.substring(functionsLoopStartIndex + FUNCTIONS_LOOP_START.length(), functionsLoopEndIndex), parent,
+				scopeName);
 		}
 
 		int variablesLoopStartIndex = template.indexOf(VARIABLES_LOOP_START, functionsLoopEndIndex);
 		int variablesLoopEndIndex = template.indexOf(VARIABLES_LOOP_END, functionsLoopEndIndex);
 		if (variablesLoopStartIndex >= 0)
 		{
-			appender.append(template.substring(functionsLoopEndIndex + FUNCTIONS_LOOP_END.length(), variablesLoopStartIndex));
-			appender.append(replaceVariablesScripting(template.substring(variablesLoopStartIndex + VARIABLES_LOOP_START.length(), variablesLoopEndIndex),
+			scriptResult.append(template.substring(functionsLoopEndIndex + FUNCTIONS_LOOP_END.length(), variablesLoopStartIndex));
+			scriptResult.append(replaceVariablesScripting(template.substring(variablesLoopStartIndex + VARIABLES_LOOP_START.length(), variablesLoopEndIndex),
 				parent, scopeName));
 		}
-		appender.append(variablesLoopEndIndex >= 0 ? template.substring(variablesLoopEndIndex + VARIABLES_LOOP_END.length()) : template);
+		scriptResult.append(variablesLoopEndIndex >= 0 ? template.substring(variablesLoopEndIndex + VARIABLES_LOOP_END.length()) : template);
 	}
 
-	private String replaceScopesScripting(String template, String separator)
+	private void replaceScopesScripting(ScriptStringBuilder scriptResult, String template, String separator)
 	{
-		StringBuffer scopesScript = new StringBuffer();
 		FlattenedSolution flattenedSolution = getFlattenedSolution();
 		if (flattenedSolution != null)
 		{
@@ -718,12 +717,11 @@ public class MobileExporter
 				Pair<String, IRootObject> scope = scopeIterator.next();
 				if (((Solution)scope.getRight()).getSolutionType() == SolutionMetaData.MOBILE)
 				{
-					addVariablesAndFunctionsScripting(template.replace(PROPERTY_SCOPE_NAME, scope.getLeft()), scopesScript, flattenedSolution, scope.getLeft());
-					if (separator != null && scopeIterator.hasNext()) scopesScript.append(separator);
+					addVariablesAndFunctionsScripting(template.replace(PROPERTY_SCOPE_NAME, scope.getLeft()), scriptResult, flattenedSolution, scope.getLeft());
+					if (separator != null && scopeIterator.hasNext()) scriptResult.append(separator);
 				}
 			}
 		}
-		return scopesScript.toString();
 	}
 
 	private String replaceVariablesScripting(String template, ISupportScriptProviders parent, String scopeName)
@@ -777,9 +775,8 @@ public class MobileExporter
 		return variablesScript.toString();
 	}
 
-	private String replaceFunctionsScripting(String template, ISupportScriptProviders parent, String scopeName)
+	private void replaceFunctionsScripting(ScriptStringBuilder scriptResult, String template, ISupportScriptProviders parent, String scopeName)
 	{
-		StringBuffer functionsScript = new StringBuffer();
 		Iterator< ? extends IScriptProvider> methodIterator = null;
 		if (parent instanceof Form)
 		{
@@ -796,42 +793,22 @@ public class MobileExporter
 				IScriptProvider method = methodIterator.next();
 				String methodScripting = template;
 				methodScripting = methodScripting.replace(PROPERTY_FUNCTION_NAME, method.getName());
-				methodScripting = methodScripting.replace(PROPERTY_FUNCTION_CODE, '\n' + getAnonymousScripting(method));
-				functionsScript.append(methodScripting);
+				int functionCodeIdx = methodScripting.indexOf(PROPERTY_FUNCTION_CODE);
+				scriptResult.append(methodScripting.substring(0, functionCodeIdx));
+				scriptResult.append("\n");
+				getAnonymousScripting(scriptResult, method);
+				scriptResult.append(methodScripting.substring(functionCodeIdx + PROPERTY_FUNCTION_CODE.length()));
 				if (methodIterator.hasNext())
 				{
-					functionsScript.append("\n"); //$NON-NLS-1$
+					scriptResult.append("\n"); //$NON-NLS-1$
 				}
 			}
 		}
-		return functionsScript.toString();
 	}
 
-	private String getAnonymousScripting(IScriptProvider method)
+	private void getAnonymousScripting(ScriptStringBuilder scriptResult, IScriptProvider method)
 	{
 		String functionAndName = "function";
-		String code = method.getDeclaration();
-		if (debugMode)
-		{
-			try
-			{
-				String scriptPath = serverURL + "/" + SolutionSerializer.getScriptPath(method, false);
-				code = ScriptEngine.docStripper.matcher(code).replaceFirst("function $1");
-				byte[] bytes = code.getBytes(Charset.forName("UTF8"));
-				ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-				ByteArrayOutputStream baos = new ByteArrayOutputStream(bytes.length * 2);
-				ServoyDebugInstrumentator instrumenator = new ServoyDebugInstrumentator();
-				JsCodeLoader.instrumentFile(scriptPath, bais, baos, new HashMap<String, Object>(), method.getLineNumberOffset() - 1, instrumenator, false);
-				code = new String(baos.toByteArray(), Charset.forName("UTF8"));
-
-				Integer linenr = filenameEndings.get(scriptPath);
-				if (linenr == null || linenr.intValue() < instrumenator.endLine) filenameEndings.put(scriptPath, instrumenator.endLine);
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-		}
 		if (useTestWar)
 		{
 			// see also testing.js -> this function name helps show failed functions in test failures/errors
@@ -840,8 +817,45 @@ public class MobileExporter
 				(method.getParent().getTypeID() == IRepository.FORMS ? "forms" + SCOPE_NAME_SEPARATOR + ((Form)method.getParent()).getName() : "scopes" +
 					SCOPE_NAME_SEPARATOR + method.getScopeName()) + SCOPE_NAME_SEPARATOR + method.getName();
 		}
+		String code = ScriptEngine.docStripper.matcher(method.getDeclaration()).replaceFirst(functionAndName);
 
-		return ScriptEngine.docStripper.matcher(code).replaceFirst(functionAndName);
+		if (debugMode)
+		{
+			try
+			{
+				String workspaceRelativePath = SolutionSerializer.getScriptPath(method, false);
+				String scriptPath = serverURL + "/" + workspaceRelativePath;
+				byte[] bytes = code.getBytes(Charset.forName("UTF8"));
+				ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+				ByteArrayOutputStream baos = new ByteArrayOutputStream(bytes.length * 2);
+				ServoyDebugInstrumentator instrumenator = new ServoyDebugInstrumentator();
+				JsCodeLoader.instrumentFile(scriptPath, bais, baos, new HashMap<String, Object>(), method.getLineNumberOffset() - 1, instrumenator, false);
+				code = new String(baos.toByteArray(), Charset.forName("UTF8"));
+				if (useTestWar) lineMapper.mapFunctionDebugMode(scriptResult.getCurrentLineNumber(), workspaceRelativePath, code);
+
+				Integer linenr = filenameEndings.get(scriptPath);
+				if (linenr == null || linenr.intValue() < instrumenator.endLine) filenameEndings.put(scriptPath, Integer.valueOf(instrumenator.endLine));
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+			scriptResult.append(code);
+		}
+		else
+		{
+			if (useTestWar)
+			{
+				long beginLineNo = scriptResult.getCurrentLineNumber();
+				scriptResult.append(code);
+				lineMapper.mapFunction(beginLineNo, scriptResult.getCurrentLineNumber(), SolutionSerializer.getScriptPath(method, false),
+					method.getLineNumberOffset());
+			}
+			else
+			{
+				scriptResult.append(code);
+			}
+		}
 	}
 
 	public void setConfigFile(File configFile)

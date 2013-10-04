@@ -85,8 +85,8 @@ public class JSUnitTestRunnerUI extends AbstractTestRunnerUI implements ITestEle
 
 	protected static final Pattern STACK_FRAME_PATTERN = Pattern.compile("(.*)\\.method\\(file:(\\d*).*"); //$NON-NLS-1$
 
-	// lines like "scopes.globals.testRoundingFailure1()(f:0)"
-	protected static final Pattern MOBILE_STACK_FRAME_PATTERN = Pattern.compile("(.*)\\.(.*)\\.(.*)\\(.*\\)\\(f:0\\)"); //$NON-NLS-1$
+	// lines like "scopes.globals.testRoundingFailure1()(f:0)" - the extra () is needed for anonymous inner functions in stacks
+	protected static final Pattern MOBILE_STACK_FRAME_PATTERN = Pattern.compile("(?:(?:(.*)\\.(.*)\\.(.*))|javascript\\..*)?\\(.*\\)\\((.+):(\\d+)\\)"); //$NON-NLS-1$
 
 	protected static final String FORM_TEST_ELEMENT_PATTERN = "Form '([\\w\\s]+)' tests";
 
@@ -202,7 +202,7 @@ public class JSUnitTestRunnerUI extends AbstractTestRunnerUI implements ITestEle
 		matcher = MOBILE_STACK_FRAME_PATTERN.matcher(line);
 		if (matcher.matches())
 		{
-			return new MobileStackOpenEditorAction(matcher.group(1), matcher.group(2), matcher.group(3));
+			return new MobileStackOpenEditorAction(matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4), Integer.parseInt(matcher.group(5)));
 		}
 
 		return null;

@@ -45,7 +45,7 @@ public class CodeFinderUtils
 		return writer.toString();
 	}
 
-	// these methods containing "fixes" were also sent as an SVN patch to the author of jsunit (see http://jsunit.berlios.de/index.html)
+	// these methods containing "fixes"; some were also sent as an SVN patch to the author of jsunit (see http://jsunit.berlios.de/index.html)
 	@SuppressWarnings("nls")
 	public static String getFixedJSUtilScriptFromResource()
 	{
@@ -53,7 +53,9 @@ public class CodeFinderUtils
 		return CodeFinderUtils.getScriptAsStringFromResource("this.JsUtilLoaded", JsUnitException.class, "/JsUtil.js")
 			.replace(
 			    "var r = /function (\\w+)(",
-			    "var r = /function *(\\w*)(\\("); // if you had "function(){}" with no space after "function", a wrong function name could appear in the call stack 
+			    "var r = /function *(\\w*)(\\(") // if you had "function(){}" with no space after "function", a wrong function name could appear in the call stack
+			.replace("function Error( msg )", "function ___setCustomError() { return function Error( msg )")  // Error function would be overwritten even if the browser did provide it - so we couldn't use native Error features then
+			.replace("function Error_toString()", "} Error = ___setCustomError(); function Error_toString()");  // Error function would be overwritten even if the browser did provide it - so we couldn't use native Error features then
 		// @formatter:on
 	}
 

@@ -40,24 +40,32 @@ import com.servoy.eclipse.model.util.ServoyLog;
  */
 public class OpenEditorAtLineAction extends Action
 {
-	private int lineNumber = 0;
-	private String scriptFilePath = null;
+	protected final int lineNumber;
+	protected final String scriptFilePath;
+	private final boolean absolutePath;
+
+	public OpenEditorAtLineAction(String scriptFilePath, int lineNumber)
+	{
+		this(scriptFilePath, true, lineNumber);
+	}
 
 	/**
 	 *  If lineNumber is <1 it just opens the editor and doesn't try to move the selection to the line number 
-	 * @param scriptFilePath
-	 * @param lineNumber
 	 */
-	public OpenEditorAtLineAction(String scriptFilePath, int lineNumber)
+	public OpenEditorAtLineAction(String scriptFilePath, boolean absolutePath, int lineNumber)
 	{
 		this.scriptFilePath = scriptFilePath;
+		this.absolutePath = absolutePath;
 		this.lineNumber = lineNumber;
 	}
 
 	@Override
 	public void run()
 	{
-		IFile globalsNodeFile = ServoyModel.getWorkspace().getRoot().getFileForLocation(new Path(scriptFilePath));
+		IFile globalsNodeFile;
+		if (absolutePath) globalsNodeFile = ServoyModel.getWorkspace().getRoot().getFileForLocation(new Path(scriptFilePath));
+		else globalsNodeFile = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptFilePath));
+
 		try
 		{
 			IEditorPart openInEditor = EditorUtility.openInEditor(globalsNodeFile, true);

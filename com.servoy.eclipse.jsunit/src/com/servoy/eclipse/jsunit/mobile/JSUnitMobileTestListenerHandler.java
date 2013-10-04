@@ -36,8 +36,10 @@ public class JSUnitMobileTestListenerHandler extends JSUnitTestListenerHandler<S
 	@SuppressWarnings("nls")
 	public JSUnitMobileTestListenerHandler(TestResult result, List<Test> testList)
 	{
-		this(result, testList,
-			new String[] { "\\A\\(", "\\ATestClass", "\\ATestCase_", "\\ATestResult_", "\\ATestSuite_", "\\ATestDecorator_", "\\ATestSetup_" });
+		this(
+			result,
+			testList,
+			new String[] { "\\Ajavascript\\..*\\(f:0\\)", "\\ATestClass", "\\ATestCase_", "\\ATestResult_", "\\ATestSuite_", "\\ATestDecorator_", "\\ATestSetup_" });
 	}
 
 	public JSUnitMobileTestListenerHandler(TestResult result, List<Test> testList, String[] stackElementFilters)
@@ -65,7 +67,7 @@ public class JSUnitMobileTestListenerHandler extends JSUnitTestListenerHandler<S
 
 		for (StackTraceElement element : st)
 		{
-			if (!isStackElementFilterMatch(element.getMethodName())) filtered.add(element);
+			if (!isStackElementFilterMatch(element.getMethodName()) && !isStackElementFilterMatch(element.toString())) filtered.add(element);
 		}
 		return filtered.toArray(new StackTraceElement[filtered.size()]);
 	}

@@ -17,8 +17,7 @@
 
 package com.servoy.eclipse.jsunit.mobile;
 
-import org.eclipse.jface.action.Action;
-
+import com.servoy.eclipse.jsunit.actions.OpenEditorAtLineAction;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
@@ -29,7 +28,7 @@ import com.servoy.j2db.persistence.ScriptMethod;
  * Action that is able to point to a method based on information from a mobile client generated AssertionFailedError stack entry.
  * @author acostescu
  */
-public class MobileStackOpenEditorAction extends Action
+public class MobileStackOpenEditorAction extends OpenEditorAtLineAction
 {
 
 	private final String scope1Name;
@@ -41,8 +40,9 @@ public class MobileStackOpenEditorAction extends Action
 	 * @param scope1Name "scopes"/"forms"
 	 * @param scope2Name "[scopeName]"/"[formName]"
 	 */
-	public MobileStackOpenEditorAction(String scope1Name, String scope2Name, String methodName)
+	public MobileStackOpenEditorAction(String scope1Name, String scope2Name, String methodName, String filePath, int lineNo)
 	{
+		super(filePath, false, lineNo);
 		this.scope1Name = scope1Name;
 		this.scope2Name = scope2Name;
 		this.methodName = methodName;
@@ -51,20 +51,28 @@ public class MobileStackOpenEditorAction extends Action
 	@Override
 	public void run()
 	{
-		FlattenedSolution flattenedActiveSolution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
-		if (flattenedActiveSolution != null)
+		if (lineNumber == 0)
 		{
-			ScriptMethod sm = null;
-			if ("scopes".equals(scope1Name))
+			// then we have no line info; logs probably contain traces that would explain this; no browser native stack info or something else went wrong
+			FlattenedSolution flattenedActiveSolution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
+			if (flattenedActiveSolution != null)
 			{
-				sm = flattenedActiveSolution.getScriptMethod(scope2Name, methodName);
+				ScriptMethod sm = null;
+				if ("scopes".equals(scope1Name))
+				{
+					sm = flattenedActiveSolution.getScriptMethod(scope2Name, methodName);
+				}
+				else if ("forms".equals(scope1Name))
+				{
+					Form form = flattenedActiveSolution.getForm(scope2Name);
+					if (form != null) sm = form.getScriptMethod(methodName);
+				}
+				EditorUtil.openScriptEditor(sm, sm.getScopeName(), true);
 			}
-			else if ("forms".equals(scope1Name))
-			{
-				Form form = flattenedActiveSolution.getForm(scope2Name);
-				if (form != null) sm = form.getScriptMethod(methodName);
-			}
-			EditorUtil.openScriptEditor(sm, sm.getScopeName(), true);
+		}
+		else
+		{
+			super.run();
 		}
 	}
 
