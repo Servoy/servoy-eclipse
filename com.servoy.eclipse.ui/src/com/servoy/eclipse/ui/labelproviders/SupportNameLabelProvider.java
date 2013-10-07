@@ -76,4 +76,10 @@ public class SupportNameLabelProvider extends PersistLabelProvider implements IP
 	{
 		return null;
 	}
+
+	@Override
+	public StrikeoutLabelProvider newInstance()
+	{
+		return new SupportNameLabelProvider(defaultText);
+	}
 }

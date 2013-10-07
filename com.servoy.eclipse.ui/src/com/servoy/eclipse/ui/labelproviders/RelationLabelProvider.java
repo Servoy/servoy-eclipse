@@ -142,4 +142,10 @@ public class RelationLabelProvider extends SupportNameLabelProvider implements I
 		}
 		return super.isStrikeout(element);
 	}
+
+	@Override
+	public StrikeoutLabelProvider newInstance()
+	{
+		return new RelationLabelProvider(defaultText, showImage, lastNameOnly);
+	}
 }

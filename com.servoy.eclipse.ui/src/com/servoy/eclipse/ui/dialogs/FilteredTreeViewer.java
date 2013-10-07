@@ -78,6 +78,7 @@ import org.eclipse.ui.internal.WorkbenchImages;
 import org.eclipse.ui.progress.WorkbenchJob;
 
 import com.servoy.eclipse.ui.labelproviders.DelegateLabelProvider;
+import com.servoy.eclipse.ui.labelproviders.StrikeoutLabelProvider;
 
 /**
  * JFace-like viewer for selecting a value from a tree. A filter is built-in.
@@ -874,6 +875,12 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 				return ((IColorProvider)getLabelProvider()).getForeground(element);
 			}
 			return null;
+		}
+
+		@Override
+		public StrikeoutLabelProvider newInstance()
+		{
+			return new TreeFolderLabelProvider(treeViewer, getLabelProvider());
 		}
 	}
 }

@@ -31,7 +31,7 @@ public class TextCutoffLabelProvider extends DelegateLabelProvider
 {
 	public static final TextCutoffLabelProvider DEFAULT = new TextCutoffLabelProvider(new LabelProvider(), 50);
 
-	private final int maxLength;
+	protected final int maxLength;
 
 	public TextCutoffLabelProvider(IBaseLabelProvider labelProvider, int maxLength)
 	{
@@ -87,5 +87,17 @@ public class TextCutoffLabelProvider extends DelegateLabelProvider
 		{
 			return cutoff(getDelegate().getColumnText(element, columnIndex));
 		}
+
+		@Override
+		public StrikeoutLabelProvider newInstance()
+		{
+			return new TableCutoffLabelProvider((ITableLabelProvider)getLabelProvider(), maxLength);
+		}
+	}
+
+	@Override
+	public StrikeoutLabelProvider newInstance()
+	{
+		return new TextCutoffLabelProvider(getLabelProvider(), maxLength);
 	}
 }

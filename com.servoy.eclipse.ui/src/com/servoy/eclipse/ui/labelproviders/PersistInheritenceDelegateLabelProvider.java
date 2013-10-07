@@ -95,4 +95,10 @@ public class PersistInheritenceDelegateLabelProvider extends DelegateLabelProvid
 		return null;
 	}
 
+	@Override
+	public StrikeoutLabelProvider newInstance()
+	{
+		return new PersistInheritenceDelegateLabelProvider(persist, (ILabelProvider)getLabelProvider(), propertyId);
+	}
+
 }

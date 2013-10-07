@@ -1058,5 +1058,11 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 
 			return false;
 		}
+
+		@Override
+		public StrikeoutLabelProvider newInstance()
+		{
+			return new DataProviderDialogLabelProvider(labelProvider);
+		}
 	}
 }

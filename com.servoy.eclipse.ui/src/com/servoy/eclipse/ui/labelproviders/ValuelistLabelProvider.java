@@ -98,4 +98,10 @@ public class ValuelistLabelProvider extends PersistLabelProvider implements IFon
 	{
 		return null;
 	}
+
+	@Override
+	public StrikeoutLabelProvider newInstance()
+	{
+		return new ValuelistLabelProvider(flattenedSolution);
+	}
 }

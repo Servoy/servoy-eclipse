@@ -102,4 +102,6 @@ public abstract class StrikeoutLabelProvider extends StyledCellLabelProvider imp
 			image.dispose();
 		}
 	}
+
+	public abstract StrikeoutLabelProvider newInstance();
 }

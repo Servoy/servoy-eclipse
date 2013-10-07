@@ -402,4 +402,10 @@ public class DecoratingColumnLabelProvider extends StrikeoutLabelProvider implem
 	{
 		return provider.isStrikeout(element);
 	}
+
+	@Override
+	public StrikeoutLabelProvider newInstance()
+	{
+		return new DecoratingColumnLabelProvider(provider, decorator);
+	}
 }

@@ -55,4 +55,10 @@ public class AccesCheckingContextDelegateLabelProvider extends AbstractPersistCo
 		}
 		return baseText;
 	}
+
+	@Override
+	public StrikeoutLabelProvider newInstance()
+	{
+		return new AccesCheckingContextDelegateLabelProvider((IPersistLabelProvider)getLabelProvider(), getContext());
+	}
 }

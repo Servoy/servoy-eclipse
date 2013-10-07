@@ -59,4 +59,10 @@ public class FormContextDelegateLabelProvider extends AbstractPersistContextDele
 
 		return baseText;
 	}
+
+	@Override
+	public StrikeoutLabelProvider newInstance()
+	{
+		return new FormContextDelegateLabelProvider((IPersistLabelProvider)getLabelProvider(), getContext());
+	}
 }
