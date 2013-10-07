@@ -41,7 +41,7 @@ public class ServoyResourcesProject implements IProjectNature
 {
 	// key - working set name, paths to persist files
 	private Map<String, List<String>> workingSetPersists;
-	private IWorkingSetChangedListener listener;
+	private List<IWorkingSetChangedListener> listeners;
 	/**
 	 * ID of this project nature
 	 */
@@ -235,7 +235,7 @@ public class ServoyResourcesProject implements IProjectNature
 
 	private void fireWorkingSetChanged(List<String> pathsList)
 	{
-		if (listener != null && pathsList != null)
+		if (listeners != null && listeners.size() > 0 && pathsList != null)
 		{
 			List<String> affectedSolutions = new ArrayList<String>();
 			for (String path : pathsList)
@@ -246,7 +246,10 @@ public class ServoyResourcesProject implements IProjectNature
 					affectedSolutions.add(file.getProject().getName());
 				}
 			}
-			listener.workingSetChanged(affectedSolutions.toArray(new String[0]));
+			for (IWorkingSetChangedListener listener : listeners)
+			{
+				listener.workingSetChanged(affectedSolutions.toArray(new String[0]));
+			}
 		}
 	}
 
@@ -255,13 +258,21 @@ public class ServoyResourcesProject implements IProjectNature
 		SolutionSerializer.serializeWorkingSetInfo(fileAccess, getProject().getName(), workingSetPersists);
 	}
 
-	public void setListener(IWorkingSetChangedListener listener)
+	public void setListeners(List<IWorkingSetChangedListener> listeners)
 	{
-		this.listener = listener;
+		this.listeners = listeners;
+	}
+
+	public void removeListener(IWorkingSetChangedListener ws)
+	{
+		if (listeners != null)
+		{
+			listeners.remove(ws);
+		}
 	}
 
 	public void destroy()
 	{
-		listener = null;
+		listeners = null;
 	}
 }

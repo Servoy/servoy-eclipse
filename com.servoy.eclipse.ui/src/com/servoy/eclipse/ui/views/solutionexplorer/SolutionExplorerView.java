@@ -571,6 +571,30 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private HashMap<String, Image> swtImageCache = new HashMap<String, Image>();
 
+	private final IWorkingSetChangedListener workingSetChangedListener = new IWorkingSetChangedListener()
+	{
+		@Override
+		public void workingSetChanged(String[] affectedSolutions)
+		{
+			if (affectedSolutions != null)
+			{
+				SolutionExplorerTreeContentProvider cp = (SolutionExplorerTreeContentProvider)tree.getContentProvider();
+				for (String solutionName : affectedSolutions)
+				{
+					PlatformSimpleUserNode solutionNode = cp.getSolutionNode(solutionName);
+					if (solutionNode != null)
+					{
+						PlatformSimpleUserNode formsNode = (PlatformSimpleUserNode)cp.findChildNode(solutionNode, Messages.TreeStrings_Forms);
+						if (formsNode != null)
+						{
+							cp.refreshFormsNode(formsNode);
+						}
+					}
+				}
+			}
+		}
+	};
+
 	public SolutionExplorerTreeContentProvider getTreeContentProvider()
 	{
 		if (tree != null)
@@ -1618,29 +1642,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			servoyModel.addPersistChangeListener(true, persistChangeListener);
 		}
 
-		servoyModel.setWorkingSetChangedListener(new IWorkingSetChangedListener()
-		{
-			@Override
-			public void workingSetChanged(String[] affectedSolutions)
-			{
-				if (affectedSolutions != null)
-				{
-					SolutionExplorerTreeContentProvider cp = (SolutionExplorerTreeContentProvider)tree.getContentProvider();
-					for (String solutionName : affectedSolutions)
-					{
-						PlatformSimpleUserNode solutionNode = cp.getSolutionNode(solutionName);
-						if (solutionNode != null)
-						{
-							PlatformSimpleUserNode formsNode = (PlatformSimpleUserNode)cp.findChildNode(solutionNode, Messages.TreeStrings_Forms);
-							if (formsNode != null)
-							{
-								cp.refreshFormsNode(formsNode);
-							}
-						}
-					}
-				}
-			}
-		});
+		servoyModel.addWorkingSetChangedListener(workingSetChangedListener);
 
 		if (solutionMetaDataChangeListener == null)
 		{
@@ -3112,6 +3114,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		ServoyModelManager.getServoyModelManager().getServoyModel().removePersistChangeListener(true, persistChangeListener);
 		ServoyModelManager.getServoyModelManager().getServoyModel().removeSolutionMetaDataChangeListener(solutionMetaDataChangeListener);
+		ServoyModelManager.getServoyModelManager().getServoyModel().removeWorkingSetChangedListener(workingSetChangedListener);
 //		ServoyProject[] currentRoots = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
 //		registerPersistListener(currentRoots, null);
 

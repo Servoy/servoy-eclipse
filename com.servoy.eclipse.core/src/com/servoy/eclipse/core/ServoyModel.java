@@ -237,7 +237,7 @@ public class ServoyModel extends AbstractServoyModel
 
 	private final Boolean initRepAsTeamProvider;
 	private IPropertyChangeListener workingSetChangeListener;
-	private IWorkingSetChangedListener workingSetChangedListener;
+	private final List<IWorkingSetChangedListener> workingSetChangedListeners = new ArrayList<IWorkingSetChangedListener>();
 
 	protected ServoyModel()
 	{
@@ -1413,7 +1413,7 @@ public class ServoyModel extends AbstractServoyModel
 							dataModelManager = new DataModelManager(activeResourcesProject.getProject(), serverManager);
 							sequenceProvider = new EclipseSequenceProvider(dataModelManager);
 							readWorkingSetsFromResourcesProject();
-							activeResourcesProject.setListener(workingSetChangedListener);
+							activeResourcesProject.setListeners(workingSetChangedListeners);
 						}
 						else
 						{
@@ -3598,12 +3598,24 @@ public class ServoyModel extends AbstractServoyModel
 		}
 	}
 
-	public void setWorkingSetChangedListener(IWorkingSetChangedListener workingSetChangedListener)
+	public void addWorkingSetChangedListener(IWorkingSetChangedListener workingSetChangedListener)
 	{
-		this.workingSetChangedListener = workingSetChangedListener;
+		if (!workingSetChangedListeners.contains(workingSetChangedListener))
+		{
+			this.workingSetChangedListeners.add(workingSetChangedListener);
+		}
 		if (activeResourcesProject != null)
 		{
-			activeResourcesProject.setListener(workingSetChangedListener);
+			activeResourcesProject.setListeners(workingSetChangedListeners);
+		}
+	}
+
+	public void removeWorkingSetChangedListener(IWorkingSetChangedListener workingSetChangedListener)
+	{
+		this.workingSetChangedListeners.remove(workingSetChangedListener);
+		if (activeResourcesProject != null)
+		{
+			activeResourcesProject.removeListener(workingSetChangedListener);
 		}
 	}
 }
