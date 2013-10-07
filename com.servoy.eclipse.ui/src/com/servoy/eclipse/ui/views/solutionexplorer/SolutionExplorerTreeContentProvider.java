@@ -655,6 +655,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					{
 						addFormsNodeChildren(un);
 					}
+					else if (type == UserNodeType.WORKING_SET || (type == UserNodeType.GRAYED_OUT && un.getRealType() == UserNodeType.WORKING_SET))
+					{
+						addWorkingSetNodeChildren(un);
+					}
 					else if (type == UserNodeType.FORM || (type == UserNodeType.GRAYED_OUT && un.getRealType() == UserNodeType.FORM))
 					{
 						addFormNodeChildren(un);
@@ -703,7 +707,18 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 				else if (un.getType() == UserNodeType.FORMS || (un.getType() == UserNodeType.GRAYED_OUT && un.getRealType() == UserNodeType.FORMS))
 				{
-					return ((Solution)un.getRealObject()).getForms(null, false).hasNext();
+					if (((Solution)un.getRealObject()).getForms(null, false).hasNext()) return true;
+					if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null &&
+						ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().hasServoyWorkingSets(
+							new String[] { ((Solution)un.getRealObject()).getName() })) return true;
+					return false;
+				}
+				else if (un.getType() == UserNodeType.WORKING_SET || (un.getType() == UserNodeType.GRAYED_OUT && un.getRealType() == UserNodeType.WORKING_SET))
+				{
+					if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null &&
+						ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().hasPersistsInServoyWorkingSets(un.getName(),
+							new String[] { un.getSolution().getName() })) return true;
+					return false;
 				}
 				else if (un.getType() == UserNodeType.FORM || (un.getType() == UserNodeType.GRAYED_OUT && un.getRealType() == UserNodeType.FORM))
 				{
@@ -1080,18 +1095,66 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			solutionOfCalculation == null) globalRelations.hide();
 	}
 
+	private void addWorkingSetNodeChildren(PlatformSimpleUserNode workingSetNode)
+	{
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null && workingSetNode != null &&
+			workingSetNode.getSolution() != null)
+		{
+			List<String> forms = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getWorkingSetPersists(
+				workingSetNode.getName(), new String[] { workingSetNode.getSolution().getName() });
+			if (forms != null)
+			{
+				List<PlatformSimpleUserNode> nodes = new ArrayList<PlatformSimpleUserNode>();
+				for (String formName : forms)
+				{
+					Form form = workingSetNode.getSolution().getForm(formName);
+					if (form != null)
+					{
+						addFormNode(form, nodes, workingSetNode);
+					}
+				}
+				workingSetNode.setChildren(nodes.toArray(new PlatformSimpleUserNode[nodes.size()]));
+			}
+		}
+	}
+
+	private void addFormNode(Form f, List<PlatformSimpleUserNode> nodes, PlatformSimpleUserNode parentNode)
+	{
+		PlatformSimpleUserNode node = new PlatformSimpleUserNode(f.getName(), UserNodeType.FORM, f.getName(), f.getDataSource() == null ? "No table"
+			: ("Server: " + f.getServerName() + ", Table: " + f.getTableName()), f, ElementUtil.getImageForFormEncapsulation(f));
+		nodes.add(node);
+		node.parent = parentNode;
+	}
+
 	private void addFormsNodeChildren(PlatformSimpleUserNode formsNode)
 	{
 		Solution solution = (Solution)formsNode.getRealObject();
 		List<PlatformSimpleUserNode> nodes = new ArrayList<PlatformSimpleUserNode>();
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null)
+		{
+			List<String> workingSets = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getServoyWorkingSets(
+				new String[] { solution.getName() });
+			if (workingSets != null)
+			{
+				for (String workingSet : workingSets)
+				{
+					PlatformSimpleUserNode node = new PlatformSimpleUserNode(workingSet, UserNodeType.WORKING_SET, null, solution,
+						uiActivator.loadImageFromBundle("servoy_workingset.gif"));
+					nodes.add(node);
+					node.parent = formsNode;
+				}
+			}
+		}
 		Iterator<Form> it = solution.getForms(null, true);
 		while (it.hasNext())
 		{
 			Form f = it.next();
-			PlatformSimpleUserNode node = new PlatformSimpleUserNode(f.getName(), UserNodeType.FORM, f.getName(), f.getDataSource() == null ? "No table"
-				: ("Server: " + f.getServerName() + ", Table: " + f.getTableName()), f, ElementUtil.getImageForFormEncapsulation(f));
-			nodes.add(node);
-			node.parent = formsNode;
+			if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() == null ||
+				!ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().isContainedInWorkingSets(f.getName(),
+					new String[] { solution.getName() }))
+			{
+				addFormNode(f, nodes, formsNode);
+			}
 		}
 		formsNode.setChildren(nodes.toArray(new PlatformSimpleUserNode[nodes.size()]));
 	}
@@ -1722,7 +1785,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		}
 	}
 
-	private SimpleUserNode findChildNode(SimpleUserNode node, String name)
+	public SimpleUserNode findChildNode(SimpleUserNode node, String name)
 	{
 		SimpleUserNode result = null;
 		if (node.children != null)
@@ -1977,6 +2040,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		view.refreshTreeNodeFromModel(servers);
 	}
 
+	public void refreshFormsNode(PlatformSimpleUserNode formsNode)
+	{
+		addFormsNodeChildren(formsNode);
+		view.refreshTreeNodeFromModel(formsNode);
+	}
 
 	public void refreshServerViewsNode(IServerInternal server)
 	{

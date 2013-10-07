@@ -13,15 +13,21 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.dialogs;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.Viewer;
+
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.NameComparator;
@@ -33,10 +39,11 @@ import com.servoy.j2db.persistence.NameComparator;
  * 
  */
 
-public class FormContentProvider extends FlatTreeContentProvider
+public class FormContentProvider implements ITreeContentProvider
 {
 	private final FlattenedSolution flattenedSolution;
 	private final Form form;
+	private final Map<String, List<Integer>> workingSetForms = new HashMap<String, List<Integer>>();
 
 	public FormContentProvider(FlattenedSolution flattenedSolution, Form form)
 	{
@@ -49,12 +56,23 @@ public class FormContentProvider extends FlatTreeContentProvider
 	{
 		if (inputElement instanceof FormListOptions)
 		{
+			ServoyResourcesProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
+			List<String> workingSets = null;
+			String[] solutionNames = flattenedSolution.getSolutionNames();
+			if (activeProject != null)
+			{
+				workingSets = activeProject.getServoyWorkingSets(solutionNames);
+			}
 			FormListOptions options = (FormListOptions)inputElement;
 
-			List<Integer> formIds = new ArrayList<Integer>();
-			if (options.includeNone) formIds.add(new Integer(Form.NAVIGATOR_NONE));
-			if (options.includeDefault) formIds.add(new Integer(Form.NAVIGATOR_DEFAULT));
-			if (options.includeIgnore) formIds.add(new Integer(Form.NAVIGATOR_IGNORE));
+			List<Object> formIdsAndWorkingSets = new ArrayList<Object>();
+			if (options.includeNone) formIdsAndWorkingSets.add(new Integer(Form.NAVIGATOR_NONE));
+			if (options.includeDefault) formIdsAndWorkingSets.add(new Integer(Form.NAVIGATOR_DEFAULT));
+			if (options.includeIgnore) formIdsAndWorkingSets.add(new Integer(Form.NAVIGATOR_IGNORE));
+			if (workingSets != null)
+			{
+				formIdsAndWorkingSets.addAll(workingSets);
+			}
 
 			switch (options.type)
 			{
@@ -65,7 +83,7 @@ public class FormContentProvider extends FlatTreeContentProvider
 						Form obj = forms.next();
 						if ((options.showInMenu == null || options.showInMenu.booleanValue() == obj.getShowInMenu()) && form != obj)
 						{
-							formIds.add(new Integer(obj.getID()));
+							addFormInList(activeProject, obj, solutionNames, formIdsAndWorkingSets);
 						}
 					}
 					break;
@@ -82,18 +100,39 @@ public class FormContentProvider extends FlatTreeContentProvider
 							// do not add the form if it is already a sub-form, to prevent cycles
 							if (!flattenedSolution.getFormHierarchy(possibleParentForm).contains(form))
 							{
-								possibleParentForms.put(possibleParentForm, new Integer(possibleParentForm.getID()));
+								addFormInList(activeProject, possibleParentForm, solutionNames, formIdsAndWorkingSets);
 							}
 						}
 					}
 
-					formIds.addAll(possibleParentForms.values());
+					formIdsAndWorkingSets.addAll(possibleParentForms.values());
 					break;
 			}
-			return formIds.toArray();
+			return formIdsAndWorkingSets.toArray();
 		}
+		return null;
+	}
 
-		return super.getElements(inputElement);
+	private void addFormInList(ServoyResourcesProject activeProject, Form form, String[] solutionNames, List<Object> formIdsAndWorkingSets)
+	{
+		String workingSetName = activeProject.getContainingWorkingSet(form.getName(), solutionNames);
+		if (workingSetName == null)
+		{
+			formIdsAndWorkingSets.add(new Integer(form.getID()));
+		}
+		else
+		{
+			List<Integer> listForm = workingSetForms.get(workingSetName);
+			if (listForm == null)
+			{
+				listForm = new ArrayList<Integer>();
+				workingSetForms.put(workingSetName, listForm);
+			}
+			if (!listForm.contains(Integer.valueOf(form.getID())))
+			{
+				listForm.add(Integer.valueOf(form.getID()));
+			}
+		}
 	}
 
 	public static class FormListOptions
@@ -117,6 +156,56 @@ public class FormContentProvider extends FlatTreeContentProvider
 			this.includeDefault = includeDefault;
 			this.includeIgnore = includeIgnore;
 		}
+	}
+
+	@Override
+	public void dispose()
+	{
+
+	}
+
+	@Override
+	public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
+	{
+
+	}
+
+	@Override
+	public Object[] getChildren(Object parentElement)
+	{
+		if (parentElement instanceof String)
+		{
+			return workingSetForms.get(parentElement).toArray();
+		}
+		return null;
+	}
+
+	@Override
+	public Object getParent(Object element)
+	{
+		if (element instanceof Integer)
+		{
+			// a form
+			ServoyResourcesProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
+			Form form = flattenedSolution.getForm(((Integer)element).intValue());
+			if (form != null)
+			{
+				activeProject.getContainingWorkingSet(form.getName(), flattenedSolution.getSolutionNames());
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public boolean hasChildren(Object element)
+	{
+		if (element instanceof String)
+		{
+			// a working set
+			ServoyResourcesProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
+			return activeProject.hasPersistsInServoyWorkingSets((String)element, flattenedSolution.getSolutionNames());
+		}
+		return false;
 	}
 
 }

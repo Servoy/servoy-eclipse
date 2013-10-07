@@ -262,7 +262,7 @@ public class ServoyScriptValidator implements IValidatorExtension2
 
 	private Form getForm()
 	{
-		String formName = SolutionSerializer.getFormNameForJSFile((IResource)context.getAdapter(IResource.class));
+		String formName = SolutionSerializer.getFormNameFromFile((IResource)context.getAdapter(IResource.class));
 		if (formName != null)
 		{
 			FlattenedSolution fs = getFlattenedSolution(context);

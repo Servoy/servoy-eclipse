@@ -43,6 +43,12 @@ public class FormLabelProvider extends LabelProvider implements IPersistLabelPro
 	@Override
 	public String getText(Object value)
 	{
+		if (value instanceof String)
+		{
+			// working set
+			return value.toString();
+		}
+
 		if (!(value instanceof Integer))
 		{
 			return Messages.LabelUnresolved;
@@ -61,7 +67,6 @@ public class FormLabelProvider extends LabelProvider implements IPersistLabelPro
 		{
 			return Messages.LabelNone;
 		}
-
 		IPersist persist = getPersist(value);
 		if (!(persist instanceof Form))
 		{
@@ -74,6 +79,10 @@ public class FormLabelProvider extends LabelProvider implements IPersistLabelPro
 	public IPersist getPersist(Object value)
 	{
 		if (value == null)
+		{
+			return null;
+		}
+		if (value instanceof String)
 		{
 			return null;
 		}

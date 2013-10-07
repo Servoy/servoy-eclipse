@@ -184,6 +184,7 @@ import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.repository.StringResourceDeserializer;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.util.IWorkingSetChangedListener;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
@@ -192,7 +193,7 @@ import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNode;
 import com.servoy.eclipse.ui.node.UserNodeComparer;
-import com.servoy.eclipse.ui.node.UserNodeFileDropTargetListener;
+import com.servoy.eclipse.ui.node.UserNodeDropTargetListener;
 import com.servoy.eclipse.ui.node.UserNodeListDragSourceListener;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
@@ -223,6 +224,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteScriptAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteServerAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteSolutionAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteTableAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteWorkingSetAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DuplicatePersistAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DuplicateServerAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.EditI18nAction;
@@ -250,6 +252,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewSybaseDbAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewTableAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewValueListAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewVariableAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewWorkingSetAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenI18NAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenMediaAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenNewFormWizardAction;
@@ -1424,7 +1427,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			new UserNodeListDragSourceListener(list, FormElementTransfer.getInstance()));
 
 		list.addDropSupport(DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK | DND.DROP_DEFAULT, new Transfer[] { FileTransfer.getInstance() },
-			new UserNodeFileDropTargetListener(list, this));
+			new UserNodeDropTargetListener(list, this));
 
 		list.addDoubleClickListener(new IDoubleClickListener()
 		{
@@ -1562,8 +1565,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		tree.addDragSupport(DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK, new Transfer[] { FormElementTransfer.getInstance() },
 			new UserNodeListDragSourceListener(tree, FormElementTransfer.getInstance()));
 
-		tree.addDropSupport(DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK | DND.DROP_DEFAULT, new Transfer[] { FileTransfer.getInstance() },
-			new UserNodeFileDropTargetListener(tree, this));
+		tree.addDropSupport(DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK | DND.DROP_DEFAULT,
+			new Transfer[] { FormElementTransfer.getInstance(), FileTransfer.getInstance() }, new UserNodeDropTargetListener(tree, this));
 	}
 
 	private void initTreeViewer()
@@ -1614,6 +1617,30 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			};
 			servoyModel.addPersistChangeListener(true, persistChangeListener);
 		}
+
+		servoyModel.setWorkingSetChangedListener(new IWorkingSetChangedListener()
+		{
+			@Override
+			public void workingSetChanged(String[] affectedSolutions)
+			{
+				if (affectedSolutions != null)
+				{
+					SolutionExplorerTreeContentProvider cp = (SolutionExplorerTreeContentProvider)tree.getContentProvider();
+					for (String solutionName : affectedSolutions)
+					{
+						PlatformSimpleUserNode solutionNode = cp.getSolutionNode(solutionName);
+						if (solutionNode != null)
+						{
+							PlatformSimpleUserNode formsNode = (PlatformSimpleUserNode)cp.findChildNode(solutionNode, Messages.TreeStrings_Forms);
+							if (formsNode != null)
+							{
+								cp.refreshFormsNode(formsNode);
+							}
+						}
+					}
+				}
+			}
+		});
 
 		if (solutionMetaDataChangeListener == null)
 		{
@@ -2701,6 +2728,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInTreeSecondary.registerAction(UserNodeType.FORM, openNewSubFormWizardAction);
 
 		newActionInTreeSecondary.registerAction(UserNodeType.SOLUTION, newForm);
+		newActionInTreeSecondary.registerAction(UserNodeType.FORMS, new NewWorkingSetAction());
 
 		newActionInListPrimary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
 			"New"); //$NON-NLS-1$
@@ -2803,6 +2831,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		deleteActionInTree.registerAction(UserNodeType.SERVER, deleteServer);
 		deleteActionInTree.registerAction(UserNodeType.MEDIA_FOLDER, deleteMediaFolder);
 		deleteActionInTree.registerAction(UserNodeType.GLOBALS_ITEM, deleteScope);
+		deleteActionInTree.registerAction(UserNodeType.WORKING_SET, new DeleteWorkingSetAction());
 
 		renameActionInTree = new ContextAction(this, null, "Rename"); //$NON-NLS-1$
 

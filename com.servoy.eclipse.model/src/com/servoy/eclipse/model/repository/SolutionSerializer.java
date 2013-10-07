@@ -91,6 +91,7 @@ public class SolutionSerializer
 	public static final int VERSION_38 = 38;
 
 	public static final String FORMS_DIR = "forms"; //$NON-NLS-1$
+	public static final String WORKINGSETS_DIR = "workingsets"; //$NON-NLS-1$
 	public static final String VALUELISTS_DIR = "valuelists"; //$NON-NLS-1$
 	public static final String RELATIONS_DIR = "relations"; //$NON-NLS-1$
 
@@ -110,6 +111,7 @@ public class SolutionSerializer
 	public static final String FOUNDSET_POSTFIX_WITHOUT_EXT = "_entity"; //$NON-NLS-1$
 	public static final String FOUNDSET_POSTFIX = FOUNDSET_POSTFIX_WITHOUT_EXT + JS_FILE_EXTENSION;
 	public static final String GLOBALS_FILE = ScriptVariable.GLOBAL_SCOPE + JS_FILE_EXTENSION;
+	public static final String WORKINGSETS_FILE = "workingsets.json"; //$NON-NLS-1$
 
 	public static boolean isJSONFile(String fileName)
 	{
@@ -446,6 +448,55 @@ public class SolutionSerializer
 			return items.toString();
 		}
 		return null;
+	}
+
+	public static String getWorkingSetPath(String resourcesProjectName)
+	{
+		return resourcesProjectName + IPath.SEPARATOR + WORKINGSETS_DIR + IPath.SEPARATOR + WORKINGSETS_FILE;
+	}
+
+	public static void serializeWorkingSetInfo(IFileAccess fileAccess, String resourcesProjectName, Map<String, List<String>> workingSets)
+	{
+		if (fileAccess != null)
+		{
+			String path = getWorkingSetPath(resourcesProjectName);
+			if (workingSets != null)
+			{
+				JSONArray items = new ServoyJSONArray();
+				for (String workingSetName : workingSets.keySet())
+				{
+					try
+					{
+						ServoyJSONObject obj = new ServoyJSONObject();
+						obj.put(PROP_NAME, workingSetName);
+						JSONArray jsonPaths = new ServoyJSONArray();
+						obj.put("paths", jsonPaths);
+						List<String> paths = workingSets.get(workingSetName);
+						if (paths != null)
+						{
+							for (String filePath : paths)
+							{
+								jsonPaths.put(filePath);
+							}
+						}
+						items.put(obj);
+					}
+					catch (Exception ex)
+					{
+						ServoyLog.logError(ex);
+					}
+				}
+				String content = items.toString();
+				try
+				{
+					fileAccess.setUTF8Contents(path, content);
+				}
+				catch (Exception ex)
+				{
+					ServoyLog.logError(ex);
+				}
+			}
+		}
 	}
 
 	public static boolean isCompositeWithItems(IPersist p)
@@ -1248,17 +1299,21 @@ public class SolutionSerializer
 		return getParentFile(projectFile, dir);
 	}
 
-	public static String getFormNameForJSFile(IResource resource)
+	public static String getFormNameFromFile(IResource resource)
 	{
 		if (resource != null)
 		{
 			IPath path = resource.getProjectRelativePath();
 			if (path.segmentCount() == 2 && path.segment(0).equals(SolutionSerializer.FORMS_DIR))
 			{
-				String jsfile = path.segment(1);
-				if (jsfile.endsWith(SolutionSerializer.JS_FILE_EXTENSION))
+				String formFile = path.segment(1);
+				if (formFile.endsWith(SolutionSerializer.JS_FILE_EXTENSION))
 				{
-					return jsfile.substring(0, jsfile.length() - SolutionSerializer.JS_FILE_EXTENSION.length());
+					return formFile.substring(0, formFile.length() - SolutionSerializer.JS_FILE_EXTENSION.length());
+				}
+				if (formFile.endsWith(SolutionSerializer.FORM_FILE_EXTENSION))
+				{
+					return formFile.substring(0, formFile.length() - SolutionSerializer.FORM_FILE_EXTENSION.length());
 				}
 			}
 		}

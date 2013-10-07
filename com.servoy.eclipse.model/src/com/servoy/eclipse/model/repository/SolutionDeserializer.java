@@ -17,6 +17,7 @@
 package com.servoy.eclipse.model.repository;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,6 +79,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ErrorKeeper;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -2037,6 +2039,55 @@ public class SolutionDeserializer
 			ServoyLog.logError(e);
 		}
 		return null;
+	}
+
+	public static Map<String, List<String>> deserializeWorkingSets(IFileAccess fileAccess, String resourcesProjectName)
+	{
+		Map<String, List<String>> workingSets = new HashMap<String, List<String>>();
+		if (fileAccess != null)
+		{
+			String path = SolutionSerializer.getWorkingSetPath(resourcesProjectName);
+			if (fileAccess.exists(path))
+			{
+				try
+				{
+					JSONArray items = getJSONArray(fileAccess.getUTF8Contents(path));
+					for (int i = 0; i < items.length(); i++)
+					{
+						if (!items.isNull(i))
+						{
+							try
+							{
+								JSONObject obj = items.getJSONObject(i);
+								String name = obj.has(SolutionSerializer.PROP_NAME) ? obj.getString(SolutionSerializer.PROP_NAME) : null;
+								if (name != null)
+								{
+									List<String> paths = new ArrayList<String>();
+									workingSets.put(name, paths);
+									if (obj.has("paths"))
+									{
+										JSONArray jsonPaths = obj.getJSONArray("paths");
+										for (int j = 0; j < jsonPaths.length(); j++)
+										{
+											paths.add(jsonPaths.getString(j));
+										}
+									}
+								}
+							}
+							catch (Exception e)
+							{
+								ServoyLog.logError(e);
+							}
+						}
+					}
+				}
+				catch (IOException ex)
+				{
+					ServoyLog.logError(ex);
+				}
+			}
+		}
+		return workingSets;
 	}
 
 	public static SolutionMetaData deserializeRootMetaData(IDeveloperRepository repository, File projectFile, String name) throws RepositoryException

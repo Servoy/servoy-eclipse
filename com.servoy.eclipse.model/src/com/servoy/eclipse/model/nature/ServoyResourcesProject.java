@@ -16,9 +16,21 @@
  */
 package com.servoy.eclipse.model.nature;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
+
+import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.IFileAccess;
+import com.servoy.eclipse.model.util.IWorkingSetChangedListener;
+import com.servoy.j2db.persistence.NameComparator;
 
 /**
  * Project nature for Resources Servoy projects.
@@ -27,7 +39,9 @@ import org.eclipse.core.runtime.CoreException;
  */
 public class ServoyResourcesProject implements IProjectNature
 {
-
+	// key - working set name, paths to persist files
+	private Map<String, List<String>> workingSetPersists;
+	private IWorkingSetChangedListener listener;
 	/**
 	 * ID of this project nature
 	 */
@@ -68,4 +82,186 @@ public class ServoyResourcesProject implements IProjectNature
 		return (project != null ? project.getName() : null);
 	}
 
+	public List<String> getServoyWorkingSets(String[] solutionNames)
+	{
+		if (workingSetPersists != null)
+		{
+			List<String> workingSets = new ArrayList<String>();
+			for (String workingSetName : workingSetPersists.keySet())
+			{
+				for (String solutionName : solutionNames)
+				{
+					if (hasFilesInServoyWorkingSet(workingSetName, solutionName))
+					{
+						workingSets.add(workingSetName);
+						break;
+					}
+				}
+			}
+			Collections.sort(workingSets, NameComparator.INSTANCE);
+			return workingSets;
+		}
+		return null;
+	}
+
+	private boolean hasFilesInServoyWorkingSet(String workingSetName, String solutionName)
+	{
+		if (workingSetPersists != null)
+		{
+			List<String> pathsList = workingSetPersists.get(workingSetName);
+			if (pathsList != null)
+			{
+				for (String path : pathsList)
+				{
+					IFile file = getProject().getWorkspace().getRoot().getFile(new Path(path));
+					if (file.exists() && file.getProject().getName().equals(solutionName))
+					{
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	public boolean hasServoyWorkingSets(String[] solutionNames)
+	{
+		List<String> workingSets = getServoyWorkingSets(solutionNames);
+		if (workingSets != null && workingSets.size() > 0)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	public boolean hasPersistsInServoyWorkingSets(String workingSetName, String[] solutionNames)
+	{
+		if (workingSetPersists != null)
+		{
+			List<String> formNames = getFormNames(workingSetPersists.get(workingSetName), solutionNames);
+			if (formNames != null && formNames.size() > 0)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean isContainedInWorkingSets(String persistName, String[] solutionNames)
+	{
+		if (workingSetPersists != null)
+		{
+			for (List<String> persistList : workingSetPersists.values())
+			{
+				List<String> names = getFormNames(persistList, solutionNames);
+				if (names != null && names.contains(persistName)) return true;
+			}
+		}
+		return false;
+	}
+
+	public List<String> getWorkingSetPersists(String workingSetName, String[] solutionNames)
+	{
+		if (workingSetPersists != null && workingSetPersists.containsKey(workingSetName))
+		{
+			return getFormNames(workingSetPersists.get(workingSetName), solutionNames);
+		}
+		return null;
+	}
+
+	private List<String> getFormNames(List<String> pathsList, String[] solutionNames)
+	{
+		if (pathsList != null)
+		{
+			List<String> formNames = new ArrayList<String>();
+			for (String path : pathsList)
+			{
+				IFile file = getProject().getWorkspace().getRoot().getFile(new Path(path));
+				if (solutionNames != null)
+				{
+					for (String solutionName : solutionNames)
+					{
+						if (file.exists() && file.getProject().getName().equals(solutionName))
+						{
+							String formName = SolutionSerializer.getFormNameFromFile(file);
+							if (formName != null && !formNames.contains(formName))
+							{
+								formNames.add(formName);
+							}
+						}
+					}
+				}
+			}
+			Collections.sort(formNames, NameComparator.INSTANCE);
+			return formNames;
+		}
+		return null;
+	}
+
+	public String getContainingWorkingSet(String formName, String[] solutionNames)
+	{
+		if (workingSetPersists != null)
+		{
+			for (String workingSetName : workingSetPersists.keySet())
+			{
+				List<String> formNames = getFormNames(workingSetPersists.get(workingSetName), solutionNames);
+				if (formNames != null && formNames.contains(formName))
+				{
+					return workingSetName;
+				}
+			}
+		}
+		return null;
+	}
+
+	public void refreshServoyWorkingSets(Map<String, List<String>> workingSetPaths)
+	{
+		this.workingSetPersists = workingSetPaths;
+	}
+
+	public void addWorkingSet(IFileAccess fileAccess, String workingSetName, List<String> paths)
+	{
+		workingSetPersists.put(workingSetName, paths);
+		serializeServoyWorkingSets(fileAccess);
+		fireWorkingSetChanged(paths);
+	}
+
+	public void removeWorkingSet(IFileAccess fileAccess, String workingSetName)
+	{
+		List<String> pathsList = workingSetPersists.remove(workingSetName);
+		serializeServoyWorkingSets(fileAccess);
+		fireWorkingSetChanged(pathsList);
+	}
+
+	private void fireWorkingSetChanged(List<String> pathsList)
+	{
+		if (listener != null && pathsList != null)
+		{
+			List<String> affectedSolutions = new ArrayList<String>();
+			for (String path : pathsList)
+			{
+				IFile file = getProject().getWorkspace().getRoot().getFile(new Path(path));
+				if (file.exists() && !affectedSolutions.contains(file.getProject().getName()))
+				{
+					affectedSolutions.add(file.getProject().getName());
+				}
+			}
+			listener.workingSetChanged(affectedSolutions.toArray(new String[0]));
+		}
+	}
+
+	private void serializeServoyWorkingSets(IFileAccess fileAccess)
+	{
+		SolutionSerializer.serializeWorkingSetInfo(fileAccess, getProject().getName(), workingSetPersists);
+	}
+
+	public void setListener(IWorkingSetChangedListener listener)
+	{
+		this.listener = listener;
+	}
+
+	public void destroy()
+	{
+		listener = null;
+	}
 }

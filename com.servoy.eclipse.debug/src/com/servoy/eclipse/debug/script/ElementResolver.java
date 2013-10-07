@@ -452,7 +452,7 @@ public class ElementResolver implements IElementResolver
 				// hide in foundset method
 				return null;
 			}
-			if (SolutionSerializer.getFormNameForJSFile(context.getModelElement().getResource()) == null && formOnlyNames.contains(name))
+			if (SolutionSerializer.getFormNameFromFile(context.getModelElement().getResource()) == null && formOnlyNames.contains(name))
 			{
 				// hide in other then forms
 				return null;
@@ -780,7 +780,7 @@ public class ElementResolver implements IElementResolver
 	 */
 	public static Form getForm(ITypeInfoContext context)
 	{
-		String formName = SolutionSerializer.getFormNameForJSFile(context.getModelElement().getResource());
+		String formName = SolutionSerializer.getFormNameFromFile(context.getModelElement().getResource());
 		if (formName != null)
 		{
 			FlattenedSolution fs = getFlattenedSolution(context);

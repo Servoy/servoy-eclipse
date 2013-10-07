@@ -1138,4 +1138,15 @@
             parentId="org.eclipse.ui.contexts.window">
       </context>
    </extension>
+    <extension
+         point="org.eclipse.ui.workingSets">
+      <workingSet
+            description="Working set for Servoy elements."
+            icon="icons/servoy_workingset.gif"
+            id="com.servoy.eclipse.core.ServoyWorkingSet"
+            name="Servoy Elements"
+            pageClass="org.eclipse.ui.internal.ide.dialogs.ResourceWorkingSetPage"
+            updaterClass="org.eclipse.ui.internal.ide.ResourceWorkingSetUpdater">
+      </workingSet>
+   </extension>
 </plugin>

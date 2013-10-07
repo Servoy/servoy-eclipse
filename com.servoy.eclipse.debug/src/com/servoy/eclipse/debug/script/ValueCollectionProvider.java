@@ -351,7 +351,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 						return null;
 					}
 
-					String formName = SolutionSerializer.getFormNameForJSFile(resource);
+					String formName = SolutionSerializer.getFormNameFromFile(resource);
 					if (formName != null)
 					{
 						// forms/formname.js

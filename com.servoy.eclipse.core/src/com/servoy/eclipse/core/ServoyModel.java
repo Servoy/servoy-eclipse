@@ -84,6 +84,8 @@ import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.MultiTextEdit;
@@ -131,6 +133,8 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.repository.StringResourceDeserializer;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.util.AtomicIntegerWithListener;
+import com.servoy.eclipse.model.util.IFileAccess;
+import com.servoy.eclipse.model.util.IWorkingSetChangedListener;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -196,6 +200,11 @@ import com.servoy.j2db.util.Utils;
 @SuppressWarnings("nls")
 public class ServoyModel extends AbstractServoyModel
 {
+	/**
+	 * 
+	 */
+	public static final String SERVOY_WORKING_SET_ID = "com.servoy.eclipse.core.ServoyWorkingSet";
+
 	private static final String SERVOY_ACTIVE_PROJECT = "SERVOY_ACTIVE_PROJECT"; //$NON-NLS-1$
 
 	private final AtomicBoolean activatingProject = new AtomicBoolean(false);
@@ -227,7 +236,8 @@ public class ServoyModel extends AbstractServoyModel
 	private IColumnListener columnListener;
 
 	private final Boolean initRepAsTeamProvider;
-
+	private IPropertyChangeListener workingSetChangeListener;
+	private IWorkingSetChangedListener workingSetChangedListener;
 
 	protected ServoyModel()
 	{
@@ -687,7 +697,15 @@ public class ServoyModel extends AbstractServoyModel
 				return exporter;
 			}
 		});
-
+		workingSetChangeListener = new IPropertyChangeListener()
+		{
+			@Override
+			public void propertyChange(PropertyChangeEvent event)
+			{
+				writeServoyWorkingSets(event);
+			}
+		};
+		PlatformUI.getWorkbench().getWorkingSetManager().addPropertyChangeListener(workingSetChangeListener);
 		installServerTableColumnListener();
 	}
 
@@ -1394,11 +1412,17 @@ public class ServoyModel extends AbstractServoyModel
 							projectName = activeResourcesProject.getProject().getName();
 							dataModelManager = new DataModelManager(activeResourcesProject.getProject(), serverManager);
 							sequenceProvider = new EclipseSequenceProvider(dataModelManager);
+							readWorkingSetsFromResourcesProject();
+							activeResourcesProject.setListener(workingSetChangedListener);
 						}
 						else
 						{
 							dataModelManager = null;
 							sequenceProvider = null;
+						}
+						if (old != null)
+						{
+							old.destroy();
 						}
 
 						// refresh all tables - because the column info changed
@@ -2824,6 +2848,10 @@ public class ServoyModel extends AbstractServoyModel
 			{
 				i18nFiles.add(fileRd);
 			}
+			else if (file.getName().equals(SolutionSerializer.WORKINGSETS_FILE))
+			{
+				readWorkingSetsFromResourcesProject();
+			}
 		}
 
 		// STYLES
@@ -3477,5 +3505,106 @@ public class ServoyModel extends AbstractServoyModel
 	public boolean isActiveSolutionMobile()
 	{
 		return getActiveSolutionClientType() == ClientSupport.mc;
+	}
+
+	private void readWorkingSetsFromResourcesProject()
+	{
+		PlatformUI.getWorkbench().getWorkingSetManager().removePropertyChangeListener(workingSetChangeListener);
+		if (activeResourcesProject != null)
+		{
+			IFileAccess wsa = new WorkspaceFileAccess(getWorkspace());
+			Map<String, List<String>> servoyWorkingSets = SolutionDeserializer.deserializeWorkingSets(wsa, activeResourcesProject.getProject().getName());
+			if (servoyWorkingSets != null)
+			{
+				for (String workingSetName : servoyWorkingSets.keySet())
+				{
+					IWorkingSet workingSet = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSetName);
+					if (workingSet == null)
+					{
+						workingSet = PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(workingSetName, new IResource[0]);
+						workingSet.setId(SERVOY_WORKING_SET_ID);
+						PlatformUI.getWorkbench().getWorkingSetManager().addWorkingSet(workingSet);
+					}
+					List<String> paths = servoyWorkingSets.get(workingSet.getName());
+					List<IResource> resources = new ArrayList<IResource>();
+					if (paths != null)
+					{
+						Iterator<String> it = paths.iterator();
+						while (it.hasNext())
+						{
+							String path = it.next();
+							IResource resource = getWorkspace().getRoot().getFile(new Path(path));
+							resources.add(resource);
+							if (!resource.exists())
+							{
+								it.remove();
+							}
+						}
+					}
+					workingSet.setElements(resources.toArray(new IResource[0]));
+				}
+			}
+
+			IWorkingSet[] workingSets = PlatformUI.getWorkbench().getWorkingSetManager().getAllWorkingSets();
+			if (workingSets != null)
+			{
+				for (IWorkingSet workingSet : workingSets)
+				{
+					if (workingSet.getId() != null && workingSet.getId().equals(SERVOY_WORKING_SET_ID))
+					{
+						if (!servoyWorkingSets.containsKey(workingSet.getName()))
+						{
+							PlatformUI.getWorkbench().getWorkingSetManager().removeWorkingSet(workingSet);
+						}
+					}
+				}
+			}
+			activeResourcesProject.refreshServoyWorkingSets(servoyWorkingSets);
+		}
+		PlatformUI.getWorkbench().getWorkingSetManager().addPropertyChangeListener(workingSetChangeListener);
+	}
+
+	private void writeServoyWorkingSets(PropertyChangeEvent event)
+	{
+		if (activeResourcesProject != null &&
+			(event.getOldValue() instanceof IWorkingSet && SERVOY_WORKING_SET_ID.equals(((IWorkingSet)event.getOldValue()).getId())) ||
+			(event.getNewValue() instanceof IWorkingSet && SERVOY_WORKING_SET_ID.equals(((IWorkingSet)event.getNewValue()).getId())))
+		{
+			IFileAccess wsa = new WorkspaceFileAccess(getWorkspace());
+			if (IWorkingSetManager.CHANGE_WORKING_SET_REMOVE.equals(event.getProperty()))
+			{
+				if (event.getOldValue() instanceof IWorkingSet && SERVOY_WORKING_SET_ID.equals(((IWorkingSet)event.getOldValue()).getId()))
+				{
+					activeResourcesProject.removeWorkingSet(wsa, ((IWorkingSet)event.getOldValue()).getName());
+				}
+			}
+			else if (event.getNewValue() instanceof IWorkingSet &&
+				SERVOY_WORKING_SET_ID.equals(((IWorkingSet)event.getNewValue()).getId()))
+			{
+				IWorkingSet workingSet = (IWorkingSet)event.getNewValue();
+				List<String> paths = new ArrayList<String>();
+				IAdaptable[] resources = workingSet.getElements();
+				if (resources != null)
+				{
+					for (IAdaptable resource : resources)
+					{
+						if (resource instanceof IResource)
+						{
+							paths.add(((IResource)resource).getFullPath().toString());
+						}
+					}
+				}
+				activeResourcesProject.addWorkingSet(wsa, workingSet.getName(), paths);
+			}
+		}
+	}
+
+	public void setWorkingSetChangedListener(IWorkingSetChangedListener workingSetChangedListener)
+	{
+		this.workingSetChangedListener = workingSetChangedListener;
+		if (activeResourcesProject != null)
+		{
+			activeResourcesProject.setListener(workingSetChangedListener);
+		}
 	}
 }
