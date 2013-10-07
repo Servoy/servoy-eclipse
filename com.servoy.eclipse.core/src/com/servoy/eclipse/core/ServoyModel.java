@@ -3578,8 +3578,7 @@ public class ServoyModel extends AbstractServoyModel
 					activeResourcesProject.removeWorkingSet(wsa, ((IWorkingSet)event.getOldValue()).getName());
 				}
 			}
-			else if (event.getNewValue() instanceof IWorkingSet &&
-				SERVOY_WORKING_SET_ID.equals(((IWorkingSet)event.getNewValue()).getId()))
+			else if (event.getNewValue() instanceof IWorkingSet && SERVOY_WORKING_SET_ID.equals(((IWorkingSet)event.getNewValue()).getId()))
 			{
 				IWorkingSet workingSet = (IWorkingSet)event.getNewValue();
 				List<String> paths = new ArrayList<String>();
@@ -3588,7 +3587,7 @@ public class ServoyModel extends AbstractServoyModel
 				{
 					for (IAdaptable resource : resources)
 					{
-						if (resource instanceof IResource)
+						if (resource instanceof IResource && ((IResource)resource).exists())
 						{
 							paths.add(((IResource)resource).getFullPath().toString());
 						}
