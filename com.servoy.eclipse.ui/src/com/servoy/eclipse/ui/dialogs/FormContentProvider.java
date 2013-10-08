@@ -201,9 +201,8 @@ public class FormContentProvider implements ITreeContentProvider
 	{
 		if (element instanceof String)
 		{
-			// a working set
-			ServoyResourcesProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
-			return activeProject.hasPersistsInServoyWorkingSets((String)element, flattenedSolution.getSolutionNames());
+			// a working set, just return true because of LeafnodesSelectionFilter, this can have children
+			return true;
 		}
 		return false;
 	}
