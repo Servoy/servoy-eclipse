@@ -19,9 +19,11 @@ package com.servoy.eclipse.ui.labelproviders;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.util.IDeprecationProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportDeprecated;
 
 /**
  * LabelProvider for forms.
@@ -29,7 +31,7 @@ import com.servoy.j2db.persistence.IPersist;
  * @author rgansevles
  */
 
-public class FormLabelProvider extends LabelProvider implements IPersistLabelProvider
+public class FormLabelProvider extends LabelProvider implements IPersistLabelProvider, IDeprecationProvider
 {
 	protected final FlattenedSolution flattenedSolution;
 	private final boolean defaultIsNone;
@@ -87,6 +89,23 @@ public class FormLabelProvider extends LabelProvider implements IPersistLabelPro
 			return null;
 		}
 		return flattenedSolution.getForm(((Integer)value).intValue());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.util.IDeprecationProvider#isDeprecated(java.lang.Object)
+	 */
+	@Override
+	public Boolean isDeprecated(Object element)
+	{
+		IPersist persist = getPersist(element);
+		if (persist instanceof ISupportDeprecated)
+		{
+			return Boolean.valueOf(((ISupportDeprecated)persist).getDeprecated() != null);
+		}
+
+		return null;
 	}
 
 }
