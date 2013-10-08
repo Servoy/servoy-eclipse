@@ -37,6 +37,8 @@ public class OptionDialog extends MessageDialog
 	private Combo combo;
 	private final int defaultOptionsIndex;
 	private int selectedOption;
+	private String selectedText;
+	private final int style;
 
 	/**
 	 * Create an option dialog. Note that the dialog will have no visual representation (no widgets) until it is told to open.
@@ -61,22 +63,32 @@ public class OptionDialog extends MessageDialog
 	 * @param defaultIndex the index in the button label array of the default button
 	 * @param options the options that will be displayed to the user in a combo.
 	 * @param defaultOptionsIndex the index in the options array of the default entry
+	 * @param style the swt style of the combo
 	 */
 	public OptionDialog(Shell parentShell, String dialogTitle, Image dialogTitleImage, String dialogMessage, int dialogImageType, String[] dialogButtonLabels,
 		int defaultIndex, String options[], int defaultOptionsIndex)
+	{
+		this(parentShell, dialogTitle, dialogTitleImage, dialogMessage, dialogImageType, dialogButtonLabels, defaultIndex, options, defaultOptionsIndex,
+			SWT.DROP_DOWN | SWT.READ_ONLY);
+	}
+
+	public OptionDialog(Shell parentShell, String dialogTitle, Image dialogTitleImage, String dialogMessage, int dialogImageType, String[] dialogButtonLabels,
+		int defaultIndex, String options[], int defaultOptionsIndex, int style)
 	{
 		super(parentShell, dialogTitle, dialogTitleImage, dialogMessage, dialogImageType, dialogButtonLabels, defaultIndex);
 		this.options = options;
 		this.defaultOptionsIndex = defaultOptionsIndex;
 		setBlockOnOpen(true);
+		this.style = style;
 	}
+
 
 	@Override
 	protected Control createCustomArea(Composite parent)
 	{
 		selectedOption = -1;
 
-		combo = new Combo(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
+		combo = new Combo(parent, style);
 		UIUtils.setDefaultVisibleItemCount(combo);
 		combo.setItems(options);
 		combo.select(defaultOptionsIndex);
@@ -91,6 +103,7 @@ public class OptionDialog extends MessageDialog
 	public boolean close()
 	{
 		selectedOption = (combo != null ? combo.getSelectionIndex() : -1);
+		selectedText = (combo != null ? combo.getText() : null);
 		return super.close();
 	}
 
@@ -104,4 +117,8 @@ public class OptionDialog extends MessageDialog
 		return selectedOption;
 	}
 
+	public String getSelectedText()
+	{
+		return selectedText;
+	}
 }

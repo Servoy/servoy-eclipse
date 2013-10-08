@@ -761,6 +761,18 @@ public class UIUtils
 		return dialog.getSelectedOption();
 	}
 
+	public static String showEditableOptionDialog(Shell shell, String title, String message, final String[] options, int defaultOption)
+	{
+		OptionDialog dialog = new OptionDialog(shell, title, null, message, MessageDialog.NONE, new String[] { "OK", "Cancel" }, 0, options, defaultOption,
+			SWT.DROP_DOWN);
+		dialog.setBlockOnOpen(true);
+		if (dialog.open() != Window.OK)
+		{
+			return null;
+		}
+		return dialog.getSelectedText();
+	}
+
 	public static boolean askConfirmation(final Shell shell, final String title, final String message)
 	{
 		final boolean[] ok = new boolean[1];

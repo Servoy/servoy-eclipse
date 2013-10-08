@@ -89,7 +89,8 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 		{
 			targetNode = (SimpleUserNode)input;
 		}
-		if (input instanceof SimpleUserNode && ((SimpleUserNode)input).getRealType() == UserNodeType.WORKING_SET)
+		if (input instanceof SimpleUserNode &&
+			(((SimpleUserNode)input).getRealType() == UserNodeType.WORKING_SET || ((SimpleUserNode)input).getRealType() == UserNodeType.FORMS))
 		{
 			if (UserNodeListDragSourceListener.dragObjects != null && UserNodeListDragSourceListener.dragObjects.length == 1 &&
 				UserNodeListDragSourceListener.dragObjects[0] instanceof PersistDragData)
@@ -191,11 +192,13 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 			if (persist instanceof Form)
 			{
 				Form form = (Form)persist;
-				if (getCurrentTarget() instanceof SimpleUserNode && ((SimpleUserNode)getCurrentTarget()).getRealType() == UserNodeType.WORKING_SET)
+				if (getCurrentTarget() instanceof SimpleUserNode &&
+					(((SimpleUserNode)getCurrentTarget()).getRealType() == UserNodeType.WORKING_SET || ((SimpleUserNode)getCurrentTarget()).getRealType() == UserNodeType.FORMS))
 				{
 					Pair<String, String> formFilePath = SolutionSerializer.getFilePath(form, false);
 					IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(formFilePath.getLeft() + formFilePath.getRight()));
 
+					IFile scriptFile = ServoyModel.getWorkspace().getRoot().getFile(new Path(SolutionSerializer.getScriptPath(form, false)));
 					ServoyResourcesProject resourcesProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
 					if (resourcesProject != null)
 					{
@@ -207,7 +210,8 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 							if (ws != null)
 							{
 								List<IAdaptable> files = new ArrayList<IAdaptable>(Arrays.asList(ws.getElements()));
-								if (files.remove(file))
+								boolean modified = files.remove(scriptFile);
+								if (files.remove(file) || modified)
 								{
 									ws.setElements(files.toArray(new IAdaptable[0]));
 								}
@@ -215,11 +219,14 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 						}
 					}
 
-					String workingSetName = ((SimpleUserNode)getCurrentTarget()).getName();
-					IWorkingSet ws = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSetName);
-					if (ws != null)
+					if (((SimpleUserNode)getCurrentTarget()).getRealType() == UserNodeType.WORKING_SET)
 					{
-						PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(file, new IWorkingSet[] { ws });
+						String workingSetName = ((SimpleUserNode)getCurrentTarget()).getName();
+						IWorkingSet ws = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSetName);
+						if (ws != null)
+						{
+							PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(file, new IWorkingSet[] { ws });
+						}
 					}
 				}
 			}

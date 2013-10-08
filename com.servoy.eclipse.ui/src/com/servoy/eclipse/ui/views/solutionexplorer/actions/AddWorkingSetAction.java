@@ -17,16 +17,16 @@
 
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.IInputValidator;
-import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.window.Window;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 
@@ -44,14 +44,14 @@ import com.servoy.j2db.persistence.Solution;
  * @author lvostinar
  *
  */
-public class NewWorkingSetAction extends Action implements ISelectionChangedListener
+public class AddWorkingSetAction extends Action implements ISelectionChangedListener
 {
 	private SimpleUserNode selection = null;
 
-	public NewWorkingSetAction()
+	public AddWorkingSetAction()
 	{
-		setText("Create working set");
-		setToolTipText("Create working set");
+		setText("Add working set");
+		setToolTipText("Add working set");
 		setImageDescriptor(Activator.loadImageDescriptorFromBundle("servoy_workingset.gif")); //$NON-NLS-1$
 	}
 
@@ -72,53 +72,56 @@ public class NewWorkingSetAction extends Action implements ISelectionChangedList
 	@Override
 	public void run()
 	{
-		String workingSetName = askWorkingSetName();
-		if (workingSetName != null)
+		if (selection != null && selection.getRealObject() instanceof Solution)
 		{
-			IFile[] initialFiles = new IFile[0];
-			if (selection != null && selection.getRealObject() instanceof Solution)
+			String solName = ((Solution)selection.getRealObject()).getName();
+			String workingSetName = askWorkingSetName(solName);
+			if (workingSetName != null)
 			{
-				String solName = ((Solution)selection.getRealObject()).getName();
-				ServoyModelManager.getServoyModelManager().getServoyModel();
-				IProject project = ServoyModel.getWorkspace().getRoot().getProject(solName);
-				// add .project file so we know to which project it belongs
-				initialFiles = new IFile[] { project.getFile(IProjectDescription.DESCRIPTION_FILE_NAME) };
-			}
-			IWorkingSet ws = PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(workingSetName, initialFiles);
-			// setid shouldn't trigger a change event
-			ws.setId(ServoyModel.SERVOY_WORKING_SET_ID);
-			PlatformUI.getWorkbench().getWorkingSetManager().addWorkingSet(ws);
-		}
-	}
-
-	private String askWorkingSetName()
-	{
-		InputDialog nameDialog = new InputDialog(UIUtils.getActiveShell(), "Create working set", "Supply working set name", "", new IInputValidator()
-		{
-			public String isValid(String newText)
-			{
-				String message = null;
-				if (newText.length() == 0)
+				IFile[] projectFiles = new IFile[0];
+				if (selection != null && selection.getRealObject() instanceof Solution)
 				{
-					message = "";
+					IProject project = ServoyModel.getWorkspace().getRoot().getProject(solName);
+					// add .project file so we know to which project it belongs
+					projectFiles = new IFile[] { project.getFile(IProjectDescription.DESCRIPTION_FILE_NAME) };
+				}
+				IWorkingSet ws = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSetName);
+				if (ws == null)
+				{
+					ws = PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(workingSetName, projectFiles);
+					// setid shouldn't trigger a change event
+					ws.setId(ServoyModel.SERVOY_WORKING_SET_ID);
+					PlatformUI.getWorkbench().getWorkingSetManager().addWorkingSet(ws);
 				}
 				else
 				{
-					IWorkingSet ws = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(newText);
-					if (ws != null)
-					{
-						message = "Working set already exists.";
-					}
+					PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(projectFiles[0], new IWorkingSet[] { ws });
 				}
-				return message;
 			}
-		});
-		int res = nameDialog.open();
-		if (res == Window.OK)
-		{
-			String name = nameDialog.getValue();
-			return name;
 		}
-		return null;
+	}
+
+	private String askWorkingSetName(String solutionName)
+	{
+		List<String> servoyWorkingSets = new ArrayList<String>();
+		IWorkingSet[] allWorkingSets = PlatformUI.getWorkbench().getWorkingSetManager().getAllWorkingSets();
+		if (allWorkingSets != null)
+		{
+			List<String> existingWorkingSets = null;
+			if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null)
+			{
+				existingWorkingSets = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getServoyWorkingSets(
+					new String[] { solutionName });
+			}
+			for (IWorkingSet ws : allWorkingSets)
+			{
+				if (ServoyModel.SERVOY_WORKING_SET_ID.equals(ws.getId()) && (existingWorkingSets == null || !existingWorkingSets.contains(ws.getName())))
+				{
+					servoyWorkingSets.add(ws.getName());
+				}
+			}
+		}
+		return UIUtils.showEditableOptionDialog(UIUtils.getActiveShell(), "Add working set", "Create a new working set or add project to existing working set",
+			servoyWorkingSets.toArray(new String[0]), -1);
 	}
 }
