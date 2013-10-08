@@ -15,24 +15,18 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.ui.labelproviders;
-
-import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.ISupportDeprecated;
+package com.servoy.eclipse.ui.util;
 
 /**
- * Label provider for persists with support of strikeout deprecated elements
- * @author gboros
+ * Interface for checking if an element is deprecated.
+ * 
+ * @author rgansevles
  *
  */
-public abstract class PersistLabelProvider extends StrikeoutLabelProvider
+public interface IDeprecationProvider
 {
-	public abstract IPersist getPersist(Object value);
-
-	@Override
-	public boolean isStrikeout(Object element)
-	{
-		IPersist p = getPersist(element);
-		return p instanceof ISupportDeprecated && ((ISupportDeprecated)p).getDeprecated() != null;
-	}
+	/**
+	 * Return Boolean.TRUE/FALSE if element is marked as deprecated, return null if unknown.
+	 */
+	Boolean isDeprecated(Object element);
 }

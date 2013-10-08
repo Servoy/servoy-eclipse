@@ -42,7 +42,6 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.labelproviders.DelegateLabelProvider;
-import com.servoy.eclipse.ui.labelproviders.StrikeoutLabelProvider;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.resource.FontResource;
@@ -448,12 +447,6 @@ public class MethodDialog extends TreeSelectDialog
 					return methodDialogImage;
 				}
 			};
-		}
-
-		@Override
-		public StrikeoutLabelProvider newInstance()
-		{
-			return new MethodDialogLabelProvider((ILabelProvider)getLabelProvider());
 		}
 	}
 }

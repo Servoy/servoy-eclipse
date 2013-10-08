@@ -18,12 +18,12 @@ package com.servoy.eclipse.ui.views.solutionexplorer;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DecorationContext;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.IDecorationContext;
 import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.ILabelDecorator;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.LabelDecorator;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
@@ -33,17 +33,17 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
-import com.servoy.eclipse.ui.labelproviders.StrikeoutLabelProvider;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.j2db.util.IDelegate;
 
 /**
  * A decorating column label provider is a label provider which combines a nested column label provider and an optional decorator. The decorator decorates the
  * label text, image, font and colors provided by the nested label provider.
  */
-public class DecoratingColumnLabelProvider extends StrikeoutLabelProvider implements IFontProvider, IColorProvider, ILabelProvider
+public class DecoratingColumnLabelProvider extends ColumnLabelProvider implements IDelegate<ColumnLabelProvider>
 {
 
-	private final SolutionExplorerView.ViewLabelProvider provider;
+	private final ColumnLabelProvider provider;
 
 	private ILabelDecorator decorator;
 
@@ -58,7 +58,7 @@ public class DecoratingColumnLabelProvider extends StrikeoutLabelProvider implem
 	 * @param provider the nested label provider
 	 * @param decorator the label decorator, or <code>null</code> if no decorator is to be used initially
 	 */
-	public DecoratingColumnLabelProvider(SolutionExplorerView.ViewLabelProvider provider, ILabelDecorator decorator)
+	public DecoratingColumnLabelProvider(ColumnLabelProvider provider, ILabelDecorator decorator)
 	{
 		Assert.isNotNull(provider);
 		this.provider = provider;
@@ -150,7 +150,8 @@ public class DecoratingColumnLabelProvider extends StrikeoutLabelProvider implem
 	 * 
 	 * @return the nested label provider
 	 */
-	public ILabelProvider getLabelProvider()
+	@Override
+	public ColumnLabelProvider getDelegate()
 	{
 		return provider;
 	}
@@ -237,17 +238,17 @@ public class DecoratingColumnLabelProvider extends StrikeoutLabelProvider implem
 			Object[] listenerList = this.listeners.getListeners();
 			if (oldDecorator != null)
 			{
-				for (int i = 0; i < listenerList.length; ++i)
+				for (Object element : listenerList)
 				{
-					oldDecorator.removeListener((ILabelProviderListener)listenerList[i]);
+					oldDecorator.removeListener((ILabelProviderListener)element);
 				}
 			}
 			this.decorator = decorator;
 			if (decorator != null)
 			{
-				for (int i = 0; i < listenerList.length; ++i)
+				for (Object element : listenerList)
 				{
-					decorator.addListener((ILabelProviderListener)listenerList[i]);
+					decorator.addListener((ILabelProviderListener)element);
 				}
 			}
 			fireLabelProviderChanged(new LabelProviderChangedEvent(this));
@@ -332,6 +333,7 @@ public class DecoratingColumnLabelProvider extends StrikeoutLabelProvider implem
 		super.update(cell);
 	}
 
+
 	@Override
 	public Image getToolTipImage(Object object)
 	{
@@ -390,22 +392,5 @@ public class DecoratingColumnLabelProvider extends StrikeoutLabelProvider implem
 	public int getToolTipStyle(Object object)
 	{
 		return provider.getToolTipStyle(object);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.servoy.eclipse.ui.labelproviders.StrikeoutLabelProvider#isStrikeout(java.lang.Object)
-	 */
-	@Override
-	public boolean isStrikeout(Object element)
-	{
-		return provider.isStrikeout(element);
-	}
-
-	@Override
-	public StrikeoutLabelProvider newInstance()
-	{
-		return new DecoratingColumnLabelProvider(provider, decorator);
 	}
 }

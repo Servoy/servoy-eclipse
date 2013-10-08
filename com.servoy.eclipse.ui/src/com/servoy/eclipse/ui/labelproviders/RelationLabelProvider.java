@@ -128,24 +128,4 @@ public class RelationLabelProvider extends SupportNameLabelProvider implements I
 		}
 		return super.getImage(element);
 	}
-
-	@Override
-	public boolean isStrikeout(Object element)
-	{
-		Object elementObj = element instanceof RelationsWrapper ? ((RelationsWrapper)element).relations : element;
-		if (elementObj instanceof Relation[] && ((Relation[])elementObj).length > 0)
-		{
-			for (Relation r : (Relation[])elementObj)
-			{
-				if (r.getDeprecated() != null) return true;
-			}
-		}
-		return super.isStrikeout(element);
-	}
-
-	@Override
-	public StrikeoutLabelProvider newInstance()
-	{
-		return new RelationLabelProvider(defaultText, showImage, lastNameOnly);
-	}
 }

@@ -28,6 +28,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -37,7 +39,6 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
@@ -48,7 +49,6 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
-import com.servoy.eclipse.ui.labelproviders.StrikeoutLabelProvider;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -65,6 +65,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.ISupportDeprecated;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationList;
@@ -720,7 +721,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		}
 	}
 
-	public static class DataProviderNodeWrapper
+	public static class DataProviderNodeWrapper implements IAdaptable
 	{
 		public final String node;
 
@@ -773,6 +774,17 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 			this.relations = relations;
 			this.scope = scope;
 			this.type = type;
+		}
+
+
+		@Override
+		public Object getAdapter(Class adapter)
+		{
+			if (adapter == ISupportDeprecated.class && node == RELATIONS && relations != null)
+			{
+				return relations.getRelation();
+			}
+			return Platform.getAdapterManager().getAdapter(this, adapter);
 		}
 
 		@Override
@@ -870,8 +882,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		}
 	}
 
-	public static class DataProviderDialogLabelProvider extends StrikeoutLabelProvider implements ILabelProvider, IFontProvider, IDelegate<ILabelProvider>,
-		ISelectionChangedListener
+	public static class DataProviderDialogLabelProvider extends LabelProvider implements IFontProvider, IDelegate<ILabelProvider>, ISelectionChangedListener
 	{
 		private final ILabelProvider labelProvider;
 		private List<Object> selectedElements;
@@ -1034,35 +1045,6 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					((TreeViewer)event.getSource()).update(previousElems.toArray(), null);
 				}
 			}
-		}
-
-		@Override
-		public void update(ViewerCell cell)
-		{
-			Object element = cell.getElement();
-			cell.setFont(getFont(element));
-			super.update(cell);
-		}
-
-		@Override
-		public boolean isStrikeout(Object value)
-		{
-			if (value instanceof DataProviderNodeWrapper)
-			{
-				DataProviderNodeWrapper wrapper = (DataProviderNodeWrapper)value;
-				if (wrapper.node == RELATIONS && wrapper.relations != null)
-				{
-					return wrapper.relations.getRelation().getDeprecated() != null;
-				}
-			}
-
-			return false;
-		}
-
-		@Override
-		public StrikeoutLabelProvider newInstance()
-		{
-			return new DataProviderDialogLabelProvider(labelProvider);
 		}
 	}
 }

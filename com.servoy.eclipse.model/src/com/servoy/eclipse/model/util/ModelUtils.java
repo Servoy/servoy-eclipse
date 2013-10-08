@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
@@ -466,6 +467,31 @@ public class ModelUtils
 		if (handlers.size() == 1) return handlers.get(0);
 
 		throw new RuntimeException("Expected to find exactly one compatible '" + IUnexpectedSituationHandler.EXTENSION_ID + "' extension. Found:\n" + handlers); //$NON-NLS-1$//$NON-NLS-2$
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T getAdapter(Object object, Class< ? extends T> adapter)
+	{
+		if (object == null)
+		{
+			return null;
+		}
+
+		if (adapter.isAssignableFrom(object.getClass()))
+		{
+			return (T)object;
+		}
+
+		Object adapted = null;
+		if (object instanceof IAdaptable)
+		{
+			adapted = ((IAdaptable)object).getAdapter(adapter);
+		}
+		if (adapted == null)
+		{
+			adapted = Platform.getAdapterManager().getAdapter(object, adapter);
+		}
+		return (T)adapted;
 	}
 
 }

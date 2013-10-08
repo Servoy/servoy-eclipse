@@ -78,7 +78,7 @@ import org.eclipse.ui.internal.WorkbenchImages;
 import org.eclipse.ui.progress.WorkbenchJob;
 
 import com.servoy.eclipse.ui.labelproviders.DelegateLabelProvider;
-import com.servoy.eclipse.ui.labelproviders.StrikeoutLabelProvider;
+import com.servoy.eclipse.ui.labelproviders.DeprecationDecoratingStyledCellLabelProvider;
 
 /**
  * JFace-like viewer for selecting a value from a tree. A filter is built-in.
@@ -139,7 +139,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 		createFixedRefreshJob();
 		setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 
-		treeViewer.setLabelProvider(labelProvider);
+		treeViewer.setLabelProvider(new DeprecationDecoratingStyledCellLabelProvider(labelProvider));
 		treeViewer.setContentProvider(contentProvider);
 		treeViewer.setComparator(comparator);
 		treeViewer.addDoubleClickListener(this);
@@ -656,9 +656,9 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 	protected void fireOpen(final OpenEvent event)
 	{
 		Object[] listeners = openListeners.getListeners();
-		for (int i = 0; i < listeners.length; ++i)
+		for (Object listener : listeners)
 		{
-			final IOpenListener l = (IOpenListener)listeners[i];
+			final IOpenListener l = (IOpenListener)listener;
 			SafeRunnable.run(new SafeRunnable()
 			{
 				public void run()
@@ -875,12 +875,6 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 				return ((IColorProvider)getLabelProvider()).getForeground(element);
 			}
 			return null;
-		}
-
-		@Override
-		public StrikeoutLabelProvider newInstance()
-		{
-			return new TreeFolderLabelProvider(treeViewer, getLabelProvider());
 		}
 	}
 }

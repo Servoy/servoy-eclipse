@@ -189,6 +189,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.labelproviders.DeprecationDecoratingStyledCellLabelProvider;
 import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNode;
@@ -202,6 +203,7 @@ import com.servoy.eclipse.ui.search.SearchAction;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.FilterDelayJob;
 import com.servoy.eclipse.ui.util.FilteredEntity;
+import com.servoy.eclipse.ui.util.IDeprecationProvider;
 import com.servoy.eclipse.ui.util.MediaNode;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetEntry;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
@@ -621,7 +623,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		return currentMediaFolder;
 	}
 
-	class ViewLabelProvider extends ColumnLabelProvider
+	class ViewLabelProvider extends ColumnLabelProvider implements IDeprecationProvider
 	{
 		private Image null_image = null;
 		private final Point tooltipShift = new Point(10, 10);
@@ -672,10 +674,15 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			return JFaceResources.getFontRegistry().get(JFaceResources.DIALOG_FONT);
 		}
 
-		public boolean isStrikeout(Object element)
+		@Override
+		public Boolean isDeprecated(Object element)
 		{
-			if (element instanceof SimpleUserNode) return getDeprecatedText((SimpleUserNode)element) != null;
-			return false;
+			if (element instanceof SimpleUserNode)
+			{
+				return Boolean.valueOf(getDeprecatedText((SimpleUserNode)element) != null);
+			}
+
+			return null;
 		}
 
 		/**
@@ -1409,7 +1416,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		list = new TableViewer(viewForm, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		ColumnViewerToolTipSupport.enableFor(list);
 		list.setContentProvider(new SolutionExplorerListContentProvider(this));
-		list.setLabelProvider(new DecoratingColumnLabelProvider(labelProvider, labelDecorator));
+		list.setLabelProvider(new DeprecationDecoratingStyledCellLabelProvider(new DecoratingColumnLabelProvider(labelProvider, labelDecorator)));
 		viewForm.setContent(list.getControl());
 
 		listToolBar = new ToolBar(viewForm, SWT.FLAT | SWT.WRAP);
@@ -1556,7 +1563,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		};
 		decoratingLabelProvider.addListener(labelProviderListener);
-		tree.setLabelProvider(decoratingLabelProvider);
+		tree.setLabelProvider(new DeprecationDecoratingStyledCellLabelProvider(decoratingLabelProvider));
 
 		// comparer that sees SimpleUserNode instances equal if their important
 		// content is equal.

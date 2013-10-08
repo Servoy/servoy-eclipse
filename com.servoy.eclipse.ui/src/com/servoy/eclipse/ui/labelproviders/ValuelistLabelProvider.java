@@ -17,9 +17,9 @@
 package com.servoy.eclipse.ui.labelproviders;
 
 import org.eclipse.jface.viewers.IFontProvider;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.Image;
 
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.resource.FontResource;
@@ -34,7 +34,7 @@ import com.servoy.j2db.persistence.ValueList;
  * @author rgansevles
  */
 
-public class ValuelistLabelProvider extends PersistLabelProvider implements IFontProvider, IPersistLabelProvider
+public class ValuelistLabelProvider extends LabelProvider implements IFontProvider, IPersistLabelProvider
 {
 	public static final int VALUELIST_NONE = 0;
 	private final FlattenedSolution flattenedSolution;
@@ -78,7 +78,6 @@ public class ValuelistLabelProvider extends PersistLabelProvider implements IFon
 		return FontResource.getDefaultFont(SWT.NONE, 0);
 	}
 
-	@Override
 	public IPersist getPersist(Object value)
 	{
 		if (value instanceof Integer)
@@ -86,22 +85,5 @@ public class ValuelistLabelProvider extends PersistLabelProvider implements IFon
 			return AbstractBase.selectById(flattenedSolution.getValueLists(false), ((Integer)value).intValue());
 		}
 		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.viewers.ILabelProvider#getImage(java.lang.Object)
-	 */
-	@Override
-	public Image getImage(Object element)
-	{
-		return null;
-	}
-
-	@Override
-	public StrikeoutLabelProvider newInstance()
-	{
-		return new ValuelistLabelProvider(flattenedSolution);
 	}
 }

@@ -75,10 +75,4 @@ public class SolutionContextDelegateLabelProvider extends AbstractPersistContext
 		}
 		return baseText;
 	}
-
-	@Override
-	public StrikeoutLabelProvider newInstance()
-	{
-		return new SolutionContextDelegateLabelProvider((IPersistLabelProvider)getLabelProvider(), getContext(), prefixSolutionName);
-	}
 }

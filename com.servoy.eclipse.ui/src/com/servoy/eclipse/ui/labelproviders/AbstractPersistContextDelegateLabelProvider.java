@@ -23,7 +23,6 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.ISupportDeprecated;
 
 /**
  * Base delegate label provider that use the context of a persist.
@@ -91,12 +90,5 @@ public abstract class AbstractPersistContextDelegateLabelProvider extends Delega
 	public IPersist getPersist(Object value)
 	{
 		return ((IPersistLabelProvider)getLabelProvider()).getPersist(value);
-	}
-
-	@Override
-	public boolean isStrikeout(Object element)
-	{
-		IPersist p = getPersist(element);
-		return p instanceof ISupportDeprecated && ((ISupportDeprecated)p).getDeprecated() != null;
 	}
 }

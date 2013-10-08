@@ -30,7 +30,6 @@ import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
 import com.servoy.eclipse.ui.dialogs.LeafnodesSelectionFilter;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
-import com.servoy.eclipse.ui.labelproviders.StrikeoutLabelProvider;
 import com.servoy.eclipse.ui.util.IControlFactory;
 
 /**
@@ -114,10 +113,8 @@ public class ListSelectCellEditor extends DialogCellEditor
 		boolean allowEmptySelection = false;
 		if ((treeStyle & SWT.MULTI) != 0) allowEmptySelection = true;
 
-		ILabelProvider labelProvider = getLabelProvider();
 		TreeSelectDialog dialog = new TreeSelectDialog(cellEditorWindow.getShell(), showFilter, showFilterMenu, defaultFilterMode, contentProvider,
-			labelProvider instanceof StrikeoutLabelProvider ? ((StrikeoutLabelProvider)labelProvider).newInstance() : labelProvider, null,
-			getSelectionFilter(), treeStyle, title, input, getSelection(), allowEmptySelection, name, null);
+			getLabelProvider(), null, getSelectionFilter(), treeStyle, title, input, getSelection(), allowEmptySelection, name, null);
 		if (controlFactory != null)
 		{
 			controlFactory.setTreeSelectDialog(dialog);

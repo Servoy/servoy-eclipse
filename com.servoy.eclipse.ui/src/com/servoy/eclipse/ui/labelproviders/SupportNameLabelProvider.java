@@ -13,10 +13,10 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- */
+*/
 package com.servoy.eclipse.ui.labelproviders;
 
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.jface.viewers.LabelProvider;
 
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.j2db.persistence.IPersist;
@@ -28,7 +28,7 @@ import com.servoy.j2db.persistence.ISupportName;
  * @author rgansevles
  * 
  */
-public class SupportNameLabelProvider extends PersistLabelProvider implements IPersistLabelProvider
+public class SupportNameLabelProvider extends LabelProvider implements IPersistLabelProvider
 {
 	public static final SupportNameLabelProvider INSTANCE_DEFAULT_NONE = new SupportNameLabelProvider(Messages.LabelNone);
 	public static final SupportNameLabelProvider INSTANCE_DEFAULT_UNRESOLVED = new SupportNameLabelProvider(Messages.LabelUnresolved);
@@ -56,7 +56,6 @@ public class SupportNameLabelProvider extends PersistLabelProvider implements IP
 		return defaultText;
 	}
 
-	@Override
 	public IPersist getPersist(Object value)
 	{
 		if (value instanceof IPersist)
@@ -64,22 +63,5 @@ public class SupportNameLabelProvider extends PersistLabelProvider implements IP
 			return (IPersist)value;
 		}
 		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.viewers.ILabelProvider#getImage(java.lang.Object)
-	 */
-	@Override
-	public Image getImage(Object element)
-	{
-		return null;
-	}
-
-	@Override
-	public StrikeoutLabelProvider newInstance()
-	{
-		return new SupportNameLabelProvider(defaultText);
 	}
 }
