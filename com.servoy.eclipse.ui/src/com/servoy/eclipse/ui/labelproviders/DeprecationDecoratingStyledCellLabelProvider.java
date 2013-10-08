@@ -27,6 +27,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.util.IDeprecationProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportDeprecated;
+import com.servoy.j2db.persistence.ISupportDeprecatedAnnotation;
 import com.servoy.j2db.util.IDelegate;
 
 /**
@@ -59,22 +60,31 @@ public class DeprecationDecoratingStyledCellLabelProvider extends DelegatingDeco
 	{
 		StyledString styledText = new StyledString(getText(element));
 
-		// first ask (inner) label providers
-		Object innerLabelprovider = getStyledStringProvider();
 		boolean useDeprecated = false;
-		while (!useDeprecated && innerLabelprovider != null)
+		boolean checkMore = true;
+		// check if element supports deprecated;
+		if (element instanceof ISupportDeprecated)
+		{
+			useDeprecated = ((ISupportDeprecated)element).getDeprecated() != null;
+			checkMore = false;
+		}
+		else if (element instanceof ISupportDeprecatedAnnotation)
+		{
+			useDeprecated = ((ISupportDeprecatedAnnotation)element).isDeprecated();
+			checkMore = false;
+		}
+
+		// then ask (inner) label providers
+		Object innerLabelprovider = getStyledStringProvider();
+		while (checkMore && !useDeprecated && innerLabelprovider != null)
 		{
 			if (innerLabelprovider instanceof IDeprecationProvider)
 			{
 				Boolean isDeprecated = ((IDeprecationProvider)innerLabelprovider).isDeprecated(element);
 				if (isDeprecated != null)
 				{
-					if (!isDeprecated.booleanValue())
-					{
-						// labelprovider says no
-						return styledText;
-					}
-					useDeprecated = true;
+					checkMore = false;
+					useDeprecated = isDeprecated.booleanValue();
 				}
 			}
 			if (innerLabelprovider instanceof IDelegate< ? >)
@@ -87,7 +97,7 @@ public class DeprecationDecoratingStyledCellLabelProvider extends DelegatingDeco
 			}
 		}
 
-		if (!useDeprecated)
+		if (checkMore && !useDeprecated)
 		{
 			// then go via adapter fw
 			ISupportDeprecated supportDeprecated = ModelUtils.getAdapter(element, ISupportDeprecated.class);

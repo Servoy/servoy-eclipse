@@ -48,6 +48,7 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
+import com.servoy.eclipse.ui.labelproviders.DelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.resource.FontResource;
@@ -994,7 +995,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 				delegate = ((IDelegate)delegate).getDelegate();
 			}
 			final ILabelProvider delegateLabelProvider = (ILabelProvider)delegate;
-			delegatingLabelProvider = new LabelProvider()
+			delegatingLabelProvider = new DelegateLabelProvider(delegateLabelProvider)
 			{
 				@Override
 				public String getText(Object element)
