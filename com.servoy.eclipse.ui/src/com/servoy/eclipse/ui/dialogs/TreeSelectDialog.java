@@ -87,6 +87,8 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 
 	private final boolean allowEmptySelection;
 
+	private final ISelection selection;
+
 	private IControlFactory optionsAreaFactory;
 	private final boolean showFilterMenu;
 	private final int defaultFilterMode;
@@ -122,6 +124,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 		this.name = name;
 		this.valueEditor = valueEditor;
 		this.allowEmptySelection = allowEmptySelection;
+		this.selection = selection;
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 	}
 
@@ -181,9 +184,9 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 		treeViewer = createFilteredTreeViewer(composite);
 		treeViewer.addSelectionChangedListener(this);
 		treeViewer.addOpenListener(this);
-		if (treeViewer.getOrderedSelection() != null)
+		if (selection != null)
 		{
-			treeViewer.setSelection(new StructuredSelection(treeViewer.getOrderedSelection()));
+			treeViewer.setSelection(selection);
 		}
 
 		applyDialogFont(treeViewer);
