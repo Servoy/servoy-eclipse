@@ -18,9 +18,11 @@ package com.servoy.eclipse.core.util;
 
 import java.awt.Component;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
 import java.awt.HeadlessException;
 import java.awt.MediaTracker;
+import java.awt.RenderingHints;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
@@ -600,12 +602,20 @@ public class UIUtils
 	 * @param device the SWT device used in the Image constructor.
 	 * @return the SWT image object created based on the swing icon. Remember to dispose it when it will no longer be used.
 	 */
-	public static Image getSWTImageFromSwingIcon(Icon swingIcon, Device device)
+	public static Image getSWTImageFromSwingIcon(Icon swingIcon, Device device, int width, int height)
 	{
 		try
 		{
-			BufferedImage bufferedImage = new BufferedImage(swingIcon.getIconWidth(), swingIcon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
-			swingIcon.paintIcon(null, bufferedImage.getGraphics(), 0, 0);
+			BufferedImage bufferedImage = new BufferedImage(width > 0 ? width : swingIcon.getIconWidth(), height > 0 ? height : swingIcon.getIconHeight(),
+				BufferedImage.TYPE_INT_ARGB);
+			Graphics graphics = bufferedImage.getGraphics();
+			if (width > 0 && width != swingIcon.getIconWidth() && height > 0 && height != swingIcon.getIconHeight() && graphics instanceof Graphics2D)
+			{
+				((Graphics2D)graphics).setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+				((Graphics2D)graphics).scale(((double)width) / (double)swingIcon.getIconWidth(), ((double)height) / (double)swingIcon.getIconHeight());
+			}
+			swingIcon.paintIcon(null, graphics, 0, 0);
+
 			PipedOutputStream outBytes = new PipedOutputStream();
 			PipedInputStream inBytes = new PipedInputStream(outBytes);
 			if (Debug.tracing()) Debug.trace("Trying to get a png in thread: " + Thread.currentThread().getName());
@@ -619,7 +629,6 @@ public class UIUtils
 			return null;
 		}
 	}
-
 
 	public static ImageDescriptor createImageDescriptorFromAwtImage(java.awt.Image image, final boolean transparent)
 	{

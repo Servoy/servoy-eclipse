@@ -2460,7 +2460,7 @@ public class TypeCreator extends TypeCache
 						clientImage = images.get(clientPlugin.getName());
 						if (clientImage == null)
 						{
-							clientImage = UIUtils.getSWTImageFromSwingIcon(icon, Display.getDefault());
+							clientImage = UIUtils.getSWTImageFromSwingIcon(icon, Display.getDefault(), 16, 16);
 						}
 						if (clientImage != null)
 						{
