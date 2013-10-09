@@ -1532,17 +1532,19 @@ if ( (m & 1) == 1)
             <sample clientSupport="wc,sc"><![CDATA[var servertime = application.getServerTimeStamp();]]></sample>
           </samples>
         </function>
-        <function clientSupport="wc,sc" name="getServerURL">
+        <function clientSupport="mc,wc,sc" name="getServerURL">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[HTTP server URL]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Gets the HTTP server url.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Gets the application server URL for mobile client to connect to.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Gets the HTTP server url.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Gets the HTTP server url.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Gets the application server URL for mobile client to connect to.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Gets the HTTP server url.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[var url = application.getServerURL();]]></sample>
+            <sample clientSupport="mc,wc,sc"><![CDATA[var url = application.getServerURL();]]></sample>
           </samples>
         </function>
         <function clientSupport="wc,sc" name="getSolutionName">
@@ -2428,10 +2430,16 @@ application.setToolbarVisible('text',false);]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[Set a persistent user property.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Sets a user property for this client: <br>
+For heedless clients((including Batch Processors and Authentication clients) the user property is stored in memory and will be lost upon client restart.
+<br>
+For Web client the user property will be stored in a persistent cookie
+<br>
+For Smart Client it will be stored in client local properties file]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[Set a persistent user property.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Sets a user property for this client: <br>
+For heedless clients((including Batch Processors and Authentication clients) the user property is stored in memory and will be lost upon client restart.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="mc,wc,sc"><![CDATA[application.setUserProperty('showOrders','1');]]></sample>
@@ -18302,7 +18310,8 @@ form.onRecordSelection = form.newMethod('function onRecordSelection(event) { app
             <description clientSupport="mc,wc,sc"><![CDATA[The method that is triggered each time a record is selected. 
 If a form is in List view or Special table view - when the user clicks on it.
 In Record view - after the user navigates to another record using the slider or clicks up or down for next/previous record. 
-NOTE: Data and Servoy tag values are returned when the onRecordSelection method is executed.]]></description>
+NOTE: Data and Servoy tag values are returned when the onRecordSelection method is executed.
+NOTE: this will also fire if the selection goes to -1 because the foundset is cleared. So foundset.getSelectedRecord() can return null.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="mc,wc,sc"><![CDATA[The method that is triggered each time a record is selected.]]></summary>
