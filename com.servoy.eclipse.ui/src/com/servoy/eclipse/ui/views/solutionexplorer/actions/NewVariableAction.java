@@ -166,36 +166,8 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 				return;
 			}
 
-			VariableEditDialog askUserDialog = new VariableEditDialog(viewer.getSite().getShell(), "Create a new " + variableScopeType + " variable",
-				new IInputValidator()
-				{
-					public String isValid(String newText)
-					{
-						String message = null;
-						if (newText.length() == 0)
-						{
-							message = "";
-						}
-						else if (!IdentDocumentValidator.isJavaIdentifier(newText))
-						{
-							message = "Invalid variable name";
-						}
-						else
-						{
-							try
-							{
-								ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(newText, -1,
-									new ValidatorSearchContext(validationContext, IRepository.SCRIPTVARIABLES), false);
-							}
-							catch (RepositoryException e)
-							{
-								message = e.getMessage();
-							}
-						}
-						return message;
-					}
-				});
-			askUserDialog.open();
+			VariableEditDialog askUserDialog = showVariableEditDialog(viewer.getSite().getShell(), validationContext, variableScopeType);
+
 			String variableName = askUserDialog.getVariableName();
 			int variableType = askUserDialog.getVariableType();
 			String defaultValue = askUserDialog.getVariableDefaultValue();
@@ -207,7 +179,47 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 		}
 	}
 
+	public static VariableEditDialog showVariableEditDialog(Shell shell, final Object validationContext, String variableScopeType)
+	{
+		VariableEditDialog askUserDialog = new VariableEditDialog(shell, "Create a new " + variableScopeType + " variable", new IInputValidator()
+		{
+			public String isValid(String newText)
+			{
+				String message = null;
+				if (newText.length() == 0)
+				{
+					message = "";
+				}
+				else if (!IdentDocumentValidator.isJavaIdentifier(newText))
+				{
+					message = "Invalid variable name";
+				}
+				else
+				{
+					try
+					{
+						ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(newText, -1,
+							new ValidatorSearchContext(validationContext, IRepository.SCRIPTVARIABLES), false);
+					}
+					catch (RepositoryException e)
+					{
+						message = e.getMessage();
+					}
+				}
+				return message;
+			}
+		});
+		askUserDialog.open();
+		return askUserDialog;
+	}
+
 	public static ScriptVariable createNewVariable(Shell shell, IPersist parent, String scopeName, String variableName, int variableType, String defaultValue)
+	{
+		return createNewVariable(shell, parent, scopeName, variableName, variableType, defaultValue, true);
+	}
+
+	public static ScriptVariable createNewVariable(Shell shell, IPersist parent, String scopeName, String variableName, int variableType, String defaultValue,
+		boolean showEditor)
 	{
 		try
 		{
@@ -261,7 +273,7 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 				st.forceFocus();
 				// let the user know the change is added to the already edited
 				// file (he will not see it in the solution explorer)
-				openEditor.getSite().getPage().activate(openEditor);
+				if (showEditor) openEditor.getSite().getPage().activate(openEditor);
 			}
 			else
 			{
@@ -284,7 +296,7 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 					Utils.closeInputStream(contents);
 					Utils.closeOutputStream(baos);
 				}
-				EditorUtil.openScriptEditor(var, null, true);
+				if (showEditor) EditorUtil.openScriptEditor(var, null, true);
 			}
 			return var;
 		}
