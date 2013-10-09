@@ -87,7 +87,7 @@ public class ColumnRowIdentEditingSupport extends EditingSupport
 			{
 				MessageBox dialog = new MessageBox(Display.getCurrent().getActiveShell(), SWT.ICON_WARNING | SWT.OK);
 				dialog.setText("Warning");
-				dialog.setMessage("Row identifiers should always be not null. \nIf you really need this column to be a row identifier you should make shue the contents of this column is always not null ");
+				dialog.setMessage("Row identifiers should always be not null. \nIf you really need this column to be a row identifier you should make sure the contents of this column is always not null ");
 				dialog.open();
 			}
 			pi.setRowIdentType(type);
@@ -128,34 +128,18 @@ public class ColumnRowIdentEditingSupport extends EditingSupport
 	protected boolean canEdit(Object element)
 	{
 		// only if we have active solution
-		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() != null)
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() != null && element instanceof Column && editor != null)
 		{
-			if (element instanceof Column && editor != null)
+			Column c = (Column)element;
+			if (c.getExistInDB())
 			{
-				Column c = (Column)element;
-				if (c.getExistInDB())
-				{
-					if (c.getRowIdentType() == Column.PK_COLUMN)
-					{
-						return false;// pk not never allowed to change, we do allow or user_ident on null column for views
-					}
-					else
-					{
-						return true;
-					}
-				}
-				else
-				{
-					if (c.getTable().getExistInDB())
-					{
-						return false;// not possible to add non null columns and
-						// null column does not allow user_ident
-					}
-					else
-					{
-						return true;
-					}
-				}
+				// pk never allowed to change, we do allow for user_ident on nullable column
+				return c.getRowIdentType() != Column.PK_COLUMN;
+			}
+			else
+			{
+				// not possible to add non null columns to existing table
+				return !c.getTable().getExistInDB();
 			}
 		}
 
