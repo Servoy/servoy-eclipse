@@ -53,6 +53,7 @@ public class DeprecationDecoratingStyledCellLabelProvider extends DelegatingDeco
 	public DeprecationDecoratingStyledCellLabelProvider(IBaseLabelProvider labelProvider)
 	{
 		super(labelProvider);
+		setOwnerDrawEnabled(false);
 	}
 
 	@Override
