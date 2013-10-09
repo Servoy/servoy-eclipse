@@ -173,7 +173,7 @@ public class FormContentProvider implements ITreeContentProvider
 	@Override
 	public Object[] getChildren(Object parentElement)
 	{
-		if (parentElement instanceof String)
+		if (parentElement instanceof String && workingSetForms.containsKey(parentElement))
 		{
 			return workingSetForms.get(parentElement).toArray();
 		}
