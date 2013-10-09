@@ -154,7 +154,11 @@ public abstract class StartDebugAction implements IWorkbenchWindowActionDelegate
 		final String save = store.getString(IInternalDebugUIConstants.PREF_SAVE_DIRTY_EDITORS_BEFORE_LAUNCH);
 		if (!save.equals(MessageDialogWithToggle.NEVER))
 		{
-			EditorUtil.saveDirtyEditors(shell, save.equals(MessageDialogWithToggle.PROMPT));
+			if (EditorUtil.saveDirtyEditors(shell, save.equals(MessageDialogWithToggle.PROMPT)))
+			{
+				// there where dirty editors and the user canceled it.
+				return false;
+			}
 		}
 		store.setValue(IInternalDebugUIConstants.PREF_CONTINUE_WITH_COMPILE_ERROR, MessageDialogWithToggle.ALWAYS);
 		return DebugStarter.startDebugger(getDebuggerAboutToStartListener());
