@@ -59,7 +59,10 @@ public class DeprecationDecoratingStyledCellLabelProvider extends DelegatingDeco
 	@Override
 	public StyledString getStyledText(Object element)
 	{
-		StyledString styledText = new StyledString(getText(element));
+		String text = getText(element);
+		if (text == null) return new StyledString("");
+
+		StyledString styledText = new StyledString(text);
 
 		boolean useDeprecated = false;
 		boolean checkMore = true;
