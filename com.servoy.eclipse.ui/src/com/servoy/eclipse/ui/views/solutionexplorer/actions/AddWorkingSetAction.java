@@ -93,9 +93,15 @@ public class AddWorkingSetAction extends Action implements ISelectionChangedList
 					ws.setId(ServoyModel.SERVOY_WORKING_SET_ID);
 					PlatformUI.getWorkbench().getWorkingSetManager().addWorkingSet(ws);
 				}
-				else
+				else if (ServoyModel.SERVOY_WORKING_SET_ID.equals(ws.getId()))
 				{
 					PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(projectFiles[0], new IWorkingSet[] { ws });
+				}
+				else
+				{
+					// cannot add to non servoy working set
+					UIUtils.reportError("Cannot modify working set", "Working set '" + ws.getName() +
+						"' already exists but is not a Servoy working set. Cannot modify it.");
 				}
 			}
 		}

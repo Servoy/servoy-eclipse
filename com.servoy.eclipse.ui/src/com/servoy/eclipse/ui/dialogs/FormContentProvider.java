@@ -190,7 +190,7 @@ public class FormContentProvider implements ITreeContentProvider
 			Form form = flattenedSolution.getForm(((Integer)element).intValue());
 			if (form != null)
 			{
-				activeProject.getContainingWorkingSet(form.getName(), flattenedSolution.getSolutionNames());
+				return activeProject.getContainingWorkingSet(form.getName(), flattenedSolution.getSolutionNames());
 			}
 		}
 		return null;
