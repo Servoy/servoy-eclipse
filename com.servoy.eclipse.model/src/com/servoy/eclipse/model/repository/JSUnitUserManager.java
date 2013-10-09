@@ -18,6 +18,7 @@
 package com.servoy.eclipse.model.repository;
 
 import java.util.Arrays;
+import java.util.List;
 
 import com.servoy.j2db.dataprocessing.IDataServerInternal;
 import com.servoy.j2db.persistence.IRepository;
@@ -110,7 +111,7 @@ public final class JSUnitUserManager extends WorkspaceUserManager
 	 * @see com.servoy.eclipse.model.repository.WorkspaceUserManager#deleteGroupReferences(java.lang.String)
 	 */
 	@Override
-	protected void deleteGroupReferences(String groupName)
+	protected void deleteGroupReferences(List<String> groupNames)
 	{
 	}
 

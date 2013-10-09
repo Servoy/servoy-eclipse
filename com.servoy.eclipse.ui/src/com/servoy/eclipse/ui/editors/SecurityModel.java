@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.editors;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
@@ -61,10 +62,16 @@ public class SecurityModel
 		newGroups.add(name);
 	}
 
-	public void removeGroup(String name)
+	public void removeGroups(List<String> names)
 	{
-		if (newGroups.contains(name)) newGroups.remove(name);
-		else deletedGroups.add(name);
+		if (names != null)
+		{
+			for (String name : names)
+			{
+				if (newGroups.contains(name)) newGroups.remove(name);
+				else deletedGroups.add(name);
+			}
+		}
 	}
 
 	public void addUser(String name)
@@ -341,10 +348,8 @@ public class SecurityModel
 				manager.deleteUser(clientId, manager.getUserIdByUserName(clientId, user));
 			}
 
-			for (String group : deletedGroups)
-			{
-				manager.deleteGroup(clientId, manager.getGroupId(clientId, group));
-			}
+			manager.deleteGroups(clientId, deletedGroups);
+
 			newGroups.clear();
 			newUsers.clear();
 			deletedGroups.clear();

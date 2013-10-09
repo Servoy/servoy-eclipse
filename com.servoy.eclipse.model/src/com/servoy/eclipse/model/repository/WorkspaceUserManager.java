@@ -2283,121 +2283,143 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	public boolean deleteGroup(String clientId, int groupId) throws ServoyException
 	{
-		if (groupId < 0 || (!isOperational())) return false;
-
-		checkForAdminUser(clientId, null);
-
 		String groupName = getUUID(groupId);
 		if (groupName != null)
 		{
-			userGroups.remove(groupName);
-			refreshGroupSecurity(groupName, true);
-
-			// do not take into account writeMode
-			deleteGroupReferences(groupName);
-			return true;
+			return deleteGroups(clientId, Arrays.asList(groupName));
 		}
 		return false;
 	}
 
-	private void refreshGroupSecurity(String groupName, boolean deleteGroup)
+	public boolean deleteGroups(String clientId, List<String> groupNames) throws ServoyException
 	{
-		List<Form> affectedForms = new ArrayList<Form>();
-		List<TableWrapper> affectedTables = new ArrayList<TableWrapper>();
-		Iterator<GroupSecurityInfo> it = groupInfos.iterator();
-		GroupSecurityInfo gsi = null;
-		while (it.hasNext())
+		if (groupNames == null || (!isOperational())) return false;
+
+		checkForAdminUser(clientId, null);
+
+		for (String groupName : groupNames)
 		{
-			gsi = it.next();
-			if (groupName.equals(gsi.groupName))
-			{
-				// if tables/forms used this group, we must write those files as well (to remove the group)
-				Set<UUID> formsUsingThisGroup = gsi.formSecurity.keySet();
-				for (UUID formUUID : formsUsingThisGroup)
-				{
-					Form f = getForm(formUUID);
-					if (f != null)
-					{
-						affectedForms.add(f);
-					}
-					else
-					{
-						ServoyLog.logError("Cannot find form with UUID " + formUUID + " for delete group", null); //$NON-NLS-1$ //$NON-NLS-2$
-					}
-				}
-				Set<String> tablesUsingThisGroup = gsi.tableSecurity.keySet();
-				for (String tableString : tablesUsingThisGroup)
-				{
-					TableWrapper t = getTable(tableString.toString());
-					if (t != null)
-					{
-						affectedTables.add(t);
-					}
-					else
-					{
-						ServoyLog.logError("Cannot find table " + tableString + " for delete group", null); //$NON-NLS-1$ //$NON-NLS-2$
-					}
-				}
-				if (deleteGroup) it.remove();
-			}
+			userGroups.remove(groupName);
 		}
-		if (writeMode == WRITE_MODE_AUTOMATIC)
+		refreshGroupSecurity(groupNames, true);
+
+		// do not take into account writeMode
+		deleteGroupReferences(groupNames);
+		return true;
+	}
+
+	protected void refreshGroupSecurity(List<String> groupNames, boolean deleteGroup)
+	{
+		if (groupNames != null)
 		{
-			try
+			List<Form> affectedForms = new ArrayList<Form>();
+			List<TableWrapper> affectedTables = new ArrayList<TableWrapper>();
+			Iterator<GroupSecurityInfo> it = groupInfos.iterator();
+			GroupSecurityInfo gsi = null;
+			while (it.hasNext())
 			{
-				writeUserAndGroupInfo(false);
-				for (Form f : affectedForms)
+				gsi = it.next();
+				if (groupNames.contains(gsi.groupName))
 				{
-					writeSecurityInfo(f, false);
-				}
-				for (TableWrapper tw : affectedTables)
-				{
-					writeSecurityInfo(tw.getServerName(), tw.getTableName(), false);
+					// if tables/forms used this group, we must write those files as well (to remove the group)
+					Set<UUID> formsUsingThisGroup = gsi.formSecurity.keySet();
+					for (UUID formUUID : formsUsingThisGroup)
+					{
+						Form f = getForm(formUUID);
+						if (f != null)
+						{
+							affectedForms.add(f);
+						}
+						else
+						{
+							ServoyLog.logError("Cannot find form with UUID " + formUUID + " for delete group", null); //$NON-NLS-1$ //$NON-NLS-2$
+						}
+					}
+					Set<String> tablesUsingThisGroup = gsi.tableSecurity.keySet();
+					for (String tableString : tablesUsingThisGroup)
+					{
+						TableWrapper t = getTable(tableString.toString());
+						if (t != null)
+						{
+							affectedTables.add(t);
+						}
+						else
+						{
+							ServoyLog.logError("Cannot find table " + tableString + " for delete group", null); //$NON-NLS-1$ //$NON-NLS-2$
+						}
+					}
+					if (deleteGroup) it.remove();
 				}
 			}
-			catch (Exception e)
+			if (writeMode == WRITE_MODE_AUTOMATIC)
 			{
-				ServoyLog.logError(e);
+				try
+				{
+					writeUserAndGroupInfo(false);
+					for (Form f : affectedForms)
+					{
+						writeSecurityInfo(f, false);
+					}
+					for (TableWrapper tw : affectedTables)
+					{
+						writeSecurityInfo(tw.getServerName(), tw.getTableName(), false);
+					}
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
 			}
 		}
 	}
 
-	protected void deleteGroupReferences(String groupName)
+	protected void deleteGroupReferences(List<String> groupNames)
 	{
 		try
 		{
-			IProject[] projects = resourcesProject.getReferencingProjects();
-			if (projects != null && projects.length > 0)
+			if (groupNames != null)
 			{
-				for (IProject project : projects)
+				IProject[] projects = resourcesProject.getReferencingProjects();
+				if (projects != null && projects.length > 0)
 				{
-					Solution solution = (Solution)ApplicationServerSingleton.get().getDeveloperRepository().getActiveRootObject(project.getName(),
-						IRepository.SOLUTIONS);
-					if (solution != null)
+					for (IProject project : projects)
 					{
-						Iterator<Form> iterator = solution.getForms(null, false);
-						while (iterator.hasNext())
+						Solution solution = (Solution)ApplicationServerSingleton.get().getDeveloperRepository().getActiveRootObject(project.getName(),
+							IRepository.SOLUTIONS);
+						if (solution != null)
 						{
-							Form form = iterator.next();
-							IPath path = new Path(SolutionSerializer.getRelativePath(form, false) + IPath.SEPARATOR + getFileName(form));
-							// the path is relative to the solution project; so get the solution's project
-							IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-							if (file.exists())
+							Iterator<Form> iterator = solution.getForms(null, false);
+							while (iterator.hasNext())
 							{
-								String fileContent = Utils.getTXTFileContent(file.getContents(true), Charset.forName("UTF8")); //$NON-NLS-1$
-								ServoyJSONObject obj = new ServoyJSONObject(fileContent, true);
-								if (obj.has(groupName))
+								Form form = iterator.next();
+								IPath path = new Path(SolutionSerializer.getRelativePath(form, false) + IPath.SEPARATOR + getFileName(form));
+								// the path is relative to the solution project; so get the solution's project
+								IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+								if (file.exists())
 								{
-									obj.remove(groupName);
-									String out = obj.toString(true);
-									if (obj.length() > 0)
+									String fileContent = Utils.getTXTFileContent(file.getContents(true), Charset.forName("UTF8")); //$NON-NLS-1$
+									ServoyJSONObject obj = new ServoyJSONObject(fileContent, true);
+									boolean changed = false;
+									for (String groupName : groupNames)
 									{
-										InputStream source = Utils.getUTF8EncodedStream(out);
-										file.setContents(source, true, false, null);
+										if (obj.has(groupName))
+										{
+											changed = true;
+											obj.remove(groupName);
+										}
 									}
-									else
+									if (changed)
 									{
-										file.delete(true, null);
+										String out = obj.toString(true);
+										if (obj.length() > 0)
+										{
+											InputStream source = Utils.getUTF8EncodedStream(out);
+											file.setContents(source, true, false, null);
+										}
+										else
+										{
+											file.delete(true, null);
+										}
 									}
 								}
 							}

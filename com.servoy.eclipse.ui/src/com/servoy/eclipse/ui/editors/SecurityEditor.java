@@ -16,6 +16,9 @@
  */
 package com.servoy.eclipse.ui.editors;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -122,7 +125,7 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 
 		usersTree = new Tree(treeContainer, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION | SWT.CHECK | SWT.V_SCROLL);
 
-		groupTable = new Table(tableContainer, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.FULL_SELECTION);
+		groupTable = new Table(tableContainer, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.CHECK);
 
 		final Button removeUserButton;
 		removeUserButton = new Button(container, SWT.NONE);
@@ -132,9 +135,9 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 
 		final Button removeGroupButton;
 		removeGroupButton = new Button(container, SWT.NONE);
-		removeGroupButton.setText("Remove Group");
+		removeGroupButton.setText("Remove Group(s)");
 		removeGroupButton.setEnabled(false);
-		removeGroupButton.setToolTipText("Delete selected group");
+		removeGroupButton.setToolTipText("Delete checked group(s)");
 
 		newGroupButton.addSelectionListener(new SelectionAdapter()
 		{
@@ -195,18 +198,20 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 			{
 				if (groupTable.getSelectionCount() == 1)
 				{
-					String group = groupTable.getSelection()[0].getText();
-					if (group.equals(IRepository.ADMIN_GROUP))
+					if (e.detail == SWT.CHECK)
 					{
-						removeGroupButton.setEnabled(false);
-					}
-					else
-					{
-						removeGroupButton.setEnabled(true);
+						List<String> groups = getCheckedGroups();
+						if (groups != null && groups.size() > 0 && !groups.contains(IRepository.ADMIN_GROUP))
+						{
+							removeGroupButton.setEnabled(true);
+						}
+						else
+						{
+							removeGroupButton.setEnabled(false);
+						}
 					}
 					model.createTreeData(usersTree, groupTable.getSelection()[0].getText());
 				}
-
 			}
 		});
 
@@ -223,7 +228,6 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 			public void widgetSelected(SelectionEvent e)
 			{
 				removeUserButton.setEnabled(true);
-
 			}
 		});
 
@@ -232,20 +236,22 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				if (groupTable.getSelectionCount() == 1)
+				ArrayList<String> groups = getCheckedGroups();
+				if (groups != null && groups.size() > 0)
 				{
-					String group = groupTable.getSelection()[0].getText();
-					if (MessageDialog.openConfirm(getSite().getShell(), "Delete group", "Are you sure you want to delete the group " + group + " ?"))
+					String groupsToDelete = groups.toString();
+					if (MessageDialog.openConfirm(getSite().getShell(), "Delete group(s)", "Are you sure you want to delete the group(s): " + groupsToDelete +
+						" ?"))
 					{
-						model.removeGroup(group);
+						model.removeGroups(groups);
 						for (TableItem item : groupTable.getItems())
 						{
-							if (group.equals(item.getText()))
+							if (groups.contains(item.getText()))
 							{
 								groupTable.remove(groupTable.indexOf(item));
-								break;
 							}
 						}
+						removeGroupButton.setEnabled(false);
 						flagModified();
 					}
 				}
@@ -584,5 +590,18 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 		disposed = true;
 		ServoyModelManager.getServoyModelManager().getServoyModel().removeActiveProjectListener(this);
 		super.dispose();
+	}
+
+	private ArrayList<String> getCheckedGroups()
+	{
+		ArrayList<String> groups = new ArrayList<String>();
+		for (int i = 0; i < groupTable.getItemCount(); i++)
+		{
+			if (groupTable.getItem(i).getChecked())
+			{
+				groups.add(groupTable.getItem(i).getText());
+			}
+		}
+		return groups;
 	}
 }
