@@ -118,6 +118,9 @@ public class MarkerMessages
 	public static ServoyMarker EventHandlerSignatureMismatch = new ServoyMarker("Signature mismatch between {0} and its use as event handler {1} on {2}{3}.",
 		ServoyBuilder.METHOD_NUMBER_OF_ARGUMENTS_MISMATCH_TYPE);
 
+	public static ServoyMarker ColumnRowIdentShouldNotAllowNull = new ServoyMarker(
+		"Table \"{0}\" has column \"{1}\" which has row identity set but column allows null.Make sure column data is never null.",
+		ServoyBuilder.COLUMN_MARKER_TYPE);
 	/*
 	 * The items below should work fine, they were tested.
 	 */

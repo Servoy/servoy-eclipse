@@ -20,6 +20,8 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
@@ -81,6 +83,13 @@ public class ColumnRowIdentEditingSupport extends EditingSupport
 					break;
 				}
 			}
+			if (type != 0 && pi.getAllowNull())
+			{
+				MessageBox dialog = new MessageBox(Display.getCurrent().getActiveShell(), SWT.ICON_WARNING | SWT.OK);
+				dialog.setText("Warning");
+				dialog.setMessage("Row identifiers should always be not null. \nIf you really need this column to be a row identifier you should make shue the contents of this column is always not null ");
+				dialog.open();
+			}
 			pi.setRowIdentType(type);
 			getViewer().update(element, null);
 			pi.flagColumnInfoChanged();
@@ -130,14 +139,14 @@ public class ColumnRowIdentEditingSupport extends EditingSupport
 					{
 						return false;// pk not never allowed to change, we do allow or user_ident on null column for views
 					}
-					else if (!c.getAllowNull())
+					else
 					{
 						return true;
 					}
 				}
 				else
 				{
-					if (c.getTable().getExistInDB() && c.getAllowNull())
+					if (c.getTable().getExistInDB())
 					{
 						return false;// not possible to add non null columns and
 						// null column does not allow user_ident
