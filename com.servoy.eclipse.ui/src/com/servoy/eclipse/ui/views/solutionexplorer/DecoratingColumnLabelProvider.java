@@ -18,33 +18,32 @@ package com.servoy.eclipse.ui.views.solutionexplorer;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DecorationContext;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.IDecorationContext;
 import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.ILabelDecorator;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.LabelDecorator;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
-import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
-import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.j2db.util.IDelegate;
 
 /**
  * A decorating column label provider is a label provider which combines a nested column label provider and an optional decorator. The decorator decorates the
  * label text, image, font and colors provided by the nested label provider.
  */
-public class DecoratingColumnLabelProvider extends StyledCellLabelProvider implements IFontProvider, IColorProvider, ILabelProvider
+public class DecoratingColumnLabelProvider extends ColumnLabelProvider implements IDelegate<ColumnLabelProvider>
 {
 
-	private final SolutionExplorerView.ViewLabelProvider provider;
+	private final ColumnLabelProvider provider;
 
 	private ILabelDecorator decorator;
 
@@ -59,7 +58,7 @@ public class DecoratingColumnLabelProvider extends StyledCellLabelProvider imple
 	 * @param provider the nested label provider
 	 * @param decorator the label decorator, or <code>null</code> if no decorator is to be used initially
 	 */
-	public DecoratingColumnLabelProvider(SolutionExplorerView.ViewLabelProvider provider, ILabelDecorator decorator)
+	public DecoratingColumnLabelProvider(ColumnLabelProvider provider, ILabelDecorator decorator)
 	{
 		Assert.isNotNull(provider);
 		this.provider = provider;
@@ -96,6 +95,7 @@ public class DecoratingColumnLabelProvider extends StyledCellLabelProvider imple
 		{
 			decorator.dispose();
 		}
+		super.dispose();
 	}
 
 	/**
@@ -150,7 +150,8 @@ public class DecoratingColumnLabelProvider extends StyledCellLabelProvider imple
 	 * 
 	 * @return the nested label provider
 	 */
-	public ILabelProvider getLabelProvider()
+	@Override
+	public ColumnLabelProvider getDelegate()
 	{
 		return provider;
 	}
@@ -237,17 +238,17 @@ public class DecoratingColumnLabelProvider extends StyledCellLabelProvider imple
 			Object[] listenerList = this.listeners.getListeners();
 			if (oldDecorator != null)
 			{
-				for (int i = 0; i < listenerList.length; ++i)
+				for (Object element : listenerList)
 				{
-					oldDecorator.removeListener((ILabelProviderListener)listenerList[i]);
+					oldDecorator.removeListener((ILabelProviderListener)element);
 				}
 			}
 			this.decorator = decorator;
 			if (decorator != null)
 			{
-				for (int i = 0; i < listenerList.length; ++i)
+				for (Object element : listenerList)
 				{
-					decorator.addListener((ILabelProviderListener)listenerList[i]);
+					decorator.addListener((ILabelProviderListener)element);
 				}
 			}
 			fireLabelProviderChanged(new LabelProviderChangedEvent(this));
@@ -325,29 +326,13 @@ public class DecoratingColumnLabelProvider extends StyledCellLabelProvider imple
 			labelDecorator.prepareDecoration(element, oldText, getDecorationContext());
 		}
 
-		String newText = getText(element);
-		if (provider.isStrikeout(element) && newText != null && newText.length() > 0)
-		{
-			StyleRange[] cellStyleRanges = cell.getStyleRanges();
-			if (cellStyleRanges == null || cellStyleRanges.length == 0)
-			{
-				cellStyleRanges = new StyleRange[] { new StyleRange() };
-				cell.setStyleRanges(cellStyleRanges);
-			}
-			cellStyleRanges[0].strikeout = true;
-			cellStyleRanges[0].start = 0;
-			cellStyleRanges[0].length = newText.length();
-		}
-		else cell.setStyleRanges(null);
-		cell.setText(newText);
-		Image image = getImage(element);
-		cell.setImage(image);
 		cell.setBackground(getBackground(element));
 		cell.setForeground(getForeground(element));
 		cell.setFont(getFont(element));
 
 		super.update(cell);
 	}
+
 
 	@Override
 	public Image getToolTipImage(Object object)

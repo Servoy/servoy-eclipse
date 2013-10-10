@@ -1532,17 +1532,19 @@ if ( (m & 1) == 1)
             <sample clientSupport="wc,sc"><![CDATA[var servertime = application.getServerTimeStamp();]]></sample>
           </samples>
         </function>
-        <function clientSupport="wc,sc" name="getServerURL">
+        <function clientSupport="mc,wc,sc" name="getServerURL">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[HTTP server URL]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Gets the HTTP server url.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Gets the application server URL for mobile client to connect to.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Gets the HTTP server url.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Gets the HTTP server url.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Gets the application server URL for mobile client to connect to.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Gets the HTTP server url.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[var url = application.getServerURL();]]></sample>
+            <sample clientSupport="mc,wc,sc"><![CDATA[var url = application.getServerURL();]]></sample>
           </samples>
         </function>
         <function clientSupport="wc,sc" name="getSolutionName">
@@ -2428,10 +2430,16 @@ application.setToolbarVisible('text',false);]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Set a persistent user property.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Sets a user property for this client: <br>
+For heedless clients((including Batch Processors and Authentication clients) the user property is stored in memory and will be lost upon client restart.
+<br>
+For Web client the user property will be stored in a persistent cookie
+<br>
+For Smart Client it will be stored in client local properties file]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Set a persistent user property.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[Sets a user property for this client: <br>
+For heedless clients((including Batch Processors and Authentication clients) the user property is stored in memory and will be lost upon client restart.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[application.setUserProperty('showOrders','1');]]></sample>

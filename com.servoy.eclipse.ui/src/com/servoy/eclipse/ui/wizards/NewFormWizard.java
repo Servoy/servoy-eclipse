@@ -1133,7 +1133,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 		public Object[] getDataProviders()
 		{
-			return ((IStructuredSelection)treeViewer.getSelection()).toArray();
+			return treeViewer.getOrderedSelection() != null ? treeViewer.getOrderedSelection().toArray() : new Object[0];
 		}
 
 	}

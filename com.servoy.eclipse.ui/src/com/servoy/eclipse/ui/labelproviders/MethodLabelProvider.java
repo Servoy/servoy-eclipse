@@ -29,12 +29,14 @@ import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.MethodWithArguments.UnresolvedMethodWithArguments;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.resource.FontResource;
+import com.servoy.eclipse.ui.util.IDeprecationProvider;
 import com.servoy.eclipse.ui.util.UnresolvedValue;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.ISupportDeprecatedAnnotation;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -47,7 +49,7 @@ import com.servoy.j2db.util.ScopesUtils;
  * @author rgansevles
  */
 
-public class MethodLabelProvider extends LabelProvider implements IFontProvider, IPersistLabelProvider
+public class MethodLabelProvider extends LabelProvider implements IFontProvider, IPersistLabelProvider, IDeprecationProvider
 {
 	private final PersistContext persistContext;
 	private final boolean showPrefix;
@@ -94,23 +96,7 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 			return UnresolvedValue.getUnresolvedMessage(((UnresolvedMethodWithArguments)mwa).unresolvedValue);
 		}
 
-		ITable table = mwa.table;
-		if (table == null)
-		{
-			Form form = (Form)persistContext.getContext().getAncestor(IRepository.FORMS);
-			if (form != null)
-			{
-				try
-				{
-					table = form.getTable();
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError(e);
-				}
-			}
-		}
-		IScriptProvider sm = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), table, mwa.methodId);
+		IScriptProvider sm = getScriptProvider(mwa, persistContext);
 		if (sm == null)
 		{
 			return Messages.LabelUnresolved;
@@ -143,6 +129,49 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 		}
 
 		return sb.toString();
+	}
+
+	protected static IScriptProvider getScriptProvider(MethodWithArguments mwa, PersistContext persistContext)
+	{
+		ITable table = mwa.table;
+		if (table == null)
+		{
+			Form form = (Form)persistContext.getContext().getAncestor(IRepository.FORMS);
+			if (form != null)
+			{
+				try
+				{
+					table = form.getTable();
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+		}
+		return ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), table, mwa.methodId);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.util.IDeprecationProvider#isDeprecated(java.lang.Object)
+	 */
+	@Override
+	public Boolean isDeprecated(Object element)
+	{
+		Object val = element;
+		if (val instanceof ComplexProperty)
+		{
+			val = ((ComplexProperty)val).getValue();
+		}
+		if (val instanceof MethodWithArguments)
+		{
+			IScriptProvider sm = getScriptProvider((MethodWithArguments)val, persistContext);
+			return Boolean.valueOf(sm instanceof ISupportDeprecatedAnnotation && ((ISupportDeprecatedAnnotation)sm).isDeprecated());
+		}
+
+		return null;
 	}
 
 	public Font getFont(Object value)

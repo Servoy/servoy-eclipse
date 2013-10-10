@@ -463,6 +463,7 @@ public class ElementResolver implements IElementResolver
 		ImageDescriptor image = null;
 		Object resource = null;
 		String description = null;
+		String deprecatedText = null;
 		boolean hideAllowed = false;
 		if (type == null && name.indexOf('.') == -1)
 		{
@@ -474,6 +475,7 @@ public class ElementResolver implements IElementResolver
 					type = context.getType(FoundSet.JS_FOUNDSET + '<' + relation.getName() + '>');
 					image = TypeCreator.RELATION_IMAGE;
 					resource = relation;
+					deprecatedText = relation.getDeprecated();
 					try
 					{
 						description = TypeCreator.getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns());
@@ -589,7 +591,7 @@ public class ElementResolver implements IElementResolver
 			{
 				description = TypeCreator.getDoc("currentcontroller", com.servoy.j2db.documentation.scripting.docs.Globals.class, null);
 			}
-			Property property = TypeCreator.createProperty(name, readOnly, typeRef, description, image, resource);
+			Property property = TypeCreator.createProperty(name, readOnly, typeRef, description, image, resource, deprecatedText);
 			property.setHideAllowed(hideAllowed);
 			if (deprecated.contains(name))
 			{

@@ -28,6 +28,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -46,6 +48,7 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
+import com.servoy.eclipse.ui.labelproviders.DelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.resource.FontResource;
@@ -63,6 +66,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.ISupportDeprecated;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationList;
@@ -718,7 +722,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		}
 	}
 
-	public static class DataProviderNodeWrapper
+	public static class DataProviderNodeWrapper implements IAdaptable
 	{
 		public final String node;
 
@@ -771,6 +775,17 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 			this.relations = relations;
 			this.scope = scope;
 			this.type = type;
+		}
+
+
+		@Override
+		public Object getAdapter(Class adapter)
+		{
+			if (adapter == ISupportDeprecated.class && node == RELATIONS && relations != null)
+			{
+				return relations.getRelation();
+			}
+			return Platform.getAdapterManager().getAdapter(this, adapter);
 		}
 
 		@Override
@@ -980,7 +995,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 				delegate = ((IDelegate)delegate).getDelegate();
 			}
 			final ILabelProvider delegateLabelProvider = (ILabelProvider)delegate;
-			delegatingLabelProvider = new LabelProvider()
+			delegatingLabelProvider = new DelegateLabelProvider(delegateLabelProvider)
 			{
 				@Override
 				public String getText(Object element)

@@ -103,7 +103,7 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 					long mostRecentChangeTimestamp = warContextFolder.lastModified();
 					deployed = (warContextFolder.exists() && mostRecentChangeTimestamp != initialModificationTimestampOfWarContextFolder && (System.currentTimeMillis() -
 						mostRecentChangeTimestamp > DEPLOYMENT_FINISH_SILENCE_PERIOD));
-					if (warContextFolder.exists() && mostRecentChangeTimestamp != initialModificationTimestampOfWarContextFolder) System.out.println(mostRecentChangeTimestamp);
+//					if (warContextFolder.exists() && mostRecentChangeTimestamp != initialModificationTimestampOfWarContextFolder) System.out.println(mostRecentChangeTimestamp);
 				}
 				if (!deployed) throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "War deployment timeout after: " + maxWaitTime +
 					" seconds."));

@@ -833,7 +833,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						Image image = null; // will need SWT image
 						if (icon != null)
 						{
-							image = UIUtils.getSWTImageFromSwingIcon(icon, view.getSite().getShell().getDisplay());
+							image = UIUtils.getSWTImageFromSwingIcon(icon, view.getSite().getShell().getDisplay(), 16, 16);
 							if (image != null) imagesConvertedFromSwing.add(image);
 						}
 						if (image == null)

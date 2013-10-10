@@ -684,8 +684,14 @@ public class EditorUtil
 		return null;
 	}
 
-	public static void saveDirtyEditors(final Shell shell, final boolean prompt)
+	/**
+	 * @param shell
+	 * @param prompt
+	 * @return if it is canceled or not.
+	 */
+	public static boolean saveDirtyEditors(final Shell shell, final boolean prompt)
 	{
+		final boolean[] canceled = new boolean[1];
 		Display.getDefault().syncExec(new Runnable()
 		{
 			public void run()
@@ -728,6 +734,11 @@ public class EditorUtil
 							{
 								parts = ((IStructuredSelection)dialog.getSelection()).toArray();
 							}
+							else if (dialog.getReturnCode() == Window.CANCEL)
+							{
+								canceled[0] = true;
+								parts = null;
+							}
 							else parts = null;
 						}
 						if (parts != null)
@@ -752,6 +763,7 @@ public class EditorUtil
 				}
 			}
 		});
+		return canceled[0];
 	}
 
 	/**

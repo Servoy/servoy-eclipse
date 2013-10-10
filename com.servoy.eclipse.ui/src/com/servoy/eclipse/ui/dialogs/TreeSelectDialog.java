@@ -16,9 +16,7 @@
  */
 package com.servoy.eclipse.ui.dialogs;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -87,9 +85,9 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 
 	private final boolean showFilter;
 
-	private List<Object> selection;
-
 	private final boolean allowEmptySelection;
+
+	private final ISelection selection;
 
 	private IControlFactory optionsAreaFactory;
 	private final boolean showFilterMenu;
@@ -126,7 +124,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 		this.name = name;
 		this.valueEditor = valueEditor;
 		this.allowEmptySelection = allowEmptySelection;
-		updateSelection(selection);
+		this.selection = selection;
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 	}
 
@@ -136,7 +134,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	@Override
 	protected void cancelPressed()
 	{
-		selection = null;
+		treeViewer.clearOrderedSelection();
 		super.cancelPressed();
 	}
 
@@ -188,7 +186,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 		treeViewer.addOpenListener(this);
 		if (selection != null)
 		{
-			treeViewer.setSelection(new StructuredSelection(selection));
+			treeViewer.setSelection(selection);
 		}
 
 		applyDialogFont(treeViewer);
@@ -228,7 +226,6 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 		// Return results.
 		return composite;
 	}
-
 
 	/**
 	 * Create a new filtered tree viewer in the parent.
@@ -272,7 +269,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	 */
 	public ISelection getSelection()
 	{
-		return selection == null ? StructuredSelection.EMPTY : new StructuredSelection(selection);
+		return treeViewer.getOrderedSelection() == null ? StructuredSelection.EMPTY : new StructuredSelection(treeViewer.getOrderedSelection());
 	}
 
 	/**
@@ -295,7 +292,6 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	 */
 	public void selectionChanged(SelectionChangedEvent event)
 	{
-		updateSelection(treeViewer.getSelection());
 		updateButtons();
 	}
 
@@ -335,33 +331,6 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 		}
 	}
 
-	/**
-	 * Update the selection object, keep the selection order.
-	 */
-	protected void updateSelection(ISelection treeSelection)
-	{
-		List<Object> newSelection = new ArrayList<Object>();
-		List<Object> treeList = null;
-		if (treeSelection instanceof IStructuredSelection)
-		{
-			treeList = new ArrayList<Object>(((IStructuredSelection)treeSelection).toList());
-		}
-		if (treeList != null)
-		{
-			if (selection != null)
-			{
-				for (Object o : selection)
-				{
-					if (treeList.remove(o))
-					{
-						newSelection.add(o);
-					}
-				}
-			}
-			newSelection.addAll(treeList);
-		}
-		selection = newSelection;
-	}
 
 	public void open(OpenEvent event)
 	{

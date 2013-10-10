@@ -16,11 +16,15 @@
  */
 package com.servoy.eclipse.ui.node;
 
+import org.eclipse.core.internal.runtime.AdapterManager;
+import org.eclipse.core.runtime.IAdaptable;
+
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.ISupportDeprecated;
 import com.servoy.j2db.persistence.ISupportHTMLToolTipText;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
@@ -30,7 +34,7 @@ import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
  * 
  * @author jblok, jcompagner
  */
-public class SimpleUserNode
+public class SimpleUserNode implements IAdaptable
 {
 	private final UserNodeType type;
 	private String name;
@@ -380,5 +384,20 @@ public class SimpleUserNode
 		}
 		return searchNode;
 	}
+
+	public Object getAdapter(Class adapter)
+	{
+		if (adapter == ISupportDeprecated.class)
+		{
+			switch (type)
+			{
+				case FORM_CONTROLLER :
+					return null;
+				default :
+			}
+		}
+		return AdapterManager.getDefault().getAdapter(this, adapter);
+	}
+
 
 }

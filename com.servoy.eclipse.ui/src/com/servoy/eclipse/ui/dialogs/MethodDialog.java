@@ -31,7 +31,6 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
@@ -375,6 +374,7 @@ public class MethodDialog extends TreeSelectDialog
 			return null;
 		}
 
+		@Override
 		public Font getFont(Object value)
 		{
 			if (FORM_METHODS == value || SCOPE_METHODS == value || value instanceof Solution || value instanceof ITable || value instanceof ScopeWithContext)
@@ -423,7 +423,7 @@ public class MethodDialog extends TreeSelectDialog
 				delegate = ((IDelegate< ? >)delegate).getDelegate();
 			}
 			final ILabelProvider delegateLabelProvider = (ILabelProvider)delegate;
-			return new LabelProvider()
+			return new DelegateLabelProvider(delegateLabelProvider)
 			{
 				@Override
 				public String getText(Object element)

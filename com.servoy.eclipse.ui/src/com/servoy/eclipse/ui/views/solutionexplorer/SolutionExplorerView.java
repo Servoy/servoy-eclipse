@@ -188,6 +188,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.labelproviders.DeprecationDecoratingStyledCellLabelProvider;
 import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNode;
@@ -201,6 +202,7 @@ import com.servoy.eclipse.ui.search.SearchAction;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.FilterDelayJob;
 import com.servoy.eclipse.ui.util.FilteredEntity;
+import com.servoy.eclipse.ui.util.IDeprecationProvider;
 import com.servoy.eclipse.ui.util.MediaNode;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetEntry;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
@@ -594,7 +596,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		return currentMediaFolder;
 	}
 
-	class ViewLabelProvider extends ColumnLabelProvider
+	class ViewLabelProvider extends ColumnLabelProvider implements IDeprecationProvider
 	{
 		private Image null_image = null;
 		private final Point tooltipShift = new Point(10, 10);
@@ -645,16 +647,32 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			return JFaceResources.getFontRegistry().get(JFaceResources.DIALOG_FONT);
 		}
 
-		public boolean isStrikeout(Object element)
+		@Override
+		public Boolean isDeprecated(Object element)
 		{
 			if (element instanceof SimpleUserNode)
 			{
-				SimpleUserNode node = (SimpleUserNode)element;
-				Object nodeObject = node.getRealObject();
-				return (nodeObject instanceof ISupportDeprecated && ((ISupportDeprecated)nodeObject).getDeprecated() != null);
+				return Boolean.valueOf(getDeprecatedText((SimpleUserNode)element) != null);
 			}
 
-			return false;
+			return null;
+		}
+
+		/**
+		 * Get node deprecated text
+		 * @param node solex node
+		 * @return deprecated text for the node, or null if it not deprecated
+		 */
+		private String getDeprecatedText(SimpleUserNode node)
+		{
+			UserNodeType nodeType = node.getType();
+			if (nodeType == UserNodeType.FORM || nodeType == UserNodeType.RELATION || nodeType == UserNodeType.VALUELIST_ITEM ||
+				nodeType == UserNodeType.MEDIA_IMAGE)
+			{
+				Object nodeObject = node.getRealObject();
+				return nodeObject instanceof ISupportDeprecated ? ((ISupportDeprecated)nodeObject).getDeprecated() : null;
+			}
+			return null;
 		}
 
 		@Override
@@ -664,6 +682,12 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			if (element instanceof SimpleUserNode)
 			{
 				result = ((SimpleUserNode)element).getToolTipText();
+				String deprecatedText = getDeprecatedText((SimpleUserNode)element);
+				if (deprecatedText != null)
+				{
+					deprecatedText = "Deprecated: " + deprecatedText;
+					result = (result != null) ? result += ("\n" + deprecatedText) : deprecatedText;
+				}
 				// nicely remove html markup as SWT does not support it
 				result = Utils.stringReplaceCaseInsensitiveSearch(result, "<br>", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 				result = Utils.stringRemoveTags(result);
@@ -1365,7 +1389,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		list = new TableViewer(viewForm, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		ColumnViewerToolTipSupport.enableFor(list);
 		list.setContentProvider(new SolutionExplorerListContentProvider(this));
-		list.setLabelProvider(new DecoratingColumnLabelProvider(labelProvider, labelDecorator));
+		list.setLabelProvider(new DeprecationDecoratingStyledCellLabelProvider(new DecoratingColumnLabelProvider(labelProvider, labelDecorator)));
 		viewForm.setContent(list.getControl());
 
 		listToolBar = new ToolBar(viewForm, SWT.FLAT | SWT.WRAP);
@@ -1512,7 +1536,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		};
 		decoratingLabelProvider.addListener(labelProviderListener);
-		tree.setLabelProvider(decoratingLabelProvider);
+		tree.setLabelProvider(new DeprecationDecoratingStyledCellLabelProvider(decoratingLabelProvider));
 
 		// comparer that sees SimpleUserNode instances equal if their important
 		// content is equal.

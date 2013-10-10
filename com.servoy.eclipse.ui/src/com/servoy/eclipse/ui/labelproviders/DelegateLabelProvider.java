@@ -13,13 +13,17 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.labelproviders;
 
 
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
+import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 
 import com.servoy.j2db.util.IDelegate;
@@ -30,7 +34,7 @@ import com.servoy.j2db.util.IDelegate;
  * @author rgansevles
  * 
  */
-public abstract class DelegateLabelProvider implements ILabelProvider, IDelegate
+public class DelegateLabelProvider implements IStyledLabelProvider, ILabelProvider, IFontProvider, IDelegate
 {
 	private final IBaseLabelProvider labelProvider;
 
@@ -82,9 +86,24 @@ public abstract class DelegateLabelProvider implements ILabelProvider, IDelegate
 		return element == null ? "" : element.toString();
 	}
 
+
+	public StyledString getStyledText(Object element)
+	{
+		return labelProvider instanceof IStyledLabelProvider ? ((IStyledLabelProvider)labelProvider).getStyledText(element)
+			: new StyledString(getText(element));
+	}
+
+	public Font getFont(Object element)
+	{
+		if (labelProvider instanceof IFontProvider)
+		{
+			return ((IFontProvider)labelProvider).getFont(element);
+		}
+		return null;
+	}
+
 	public Object getDelegate()
 	{
 		return labelProvider;
 	}
-
 }

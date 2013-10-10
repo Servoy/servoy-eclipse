@@ -235,19 +235,19 @@ public class DataModelManager implements IColumnInfoManager
 			catch (JSONException e)
 			{
 				// maybe the .dbi file content is corrupt... add an error marker
-				addDeserializeErrorMarker(t, e.getMessage());
+				addDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
 				throw new RepositoryException(e);
 			}
 			catch (CoreException e)
 			{
 				// maybe the .dbi file content is corrupt... add an error marker
-				addDeserializeErrorMarker(t, e.getMessage());
+				addDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
 				throw new RepositoryException(e);
 			}
 			catch (RepositoryException e)
 			{
 				// maybe the .dbi file content is corrupt... add an error marker
-				addDeserializeErrorMarker(t, e.getMessage());
+				addDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
 				throw e;
 			}
 			finally
@@ -288,6 +288,7 @@ public class DataModelManager implements IColumnInfoManager
 		if (file.exists())
 		{
 			InputStream is = null;
+			String errMsg = null;
 			try
 			{
 				is = file.getContents(true);
@@ -303,34 +304,22 @@ public class DataModelManager implements IColumnInfoManager
 			}
 			catch (JSONException e)
 			{
-				// maybe the .dbi file content is corrupt... try to init table/load all column info (if not done already) so as to add an error marker
 				ServoyLog.logError(e);
-				try
-				{
-					server.getTable(tableName);
-				}
-				catch (RepositoryException ee)
-				{
-					// this is probably the same exception as above, but log it just the same to make sure
-					ServoyLog.logWarning("Getting table failed", ee);
-				}
+				errMsg = e.getMessage();
 			}
 			catch (CoreException e)
 			{
 				ServoyLog.logError(e);
-				// maybe the .dbi file content is corrupt... try to init table/load all column info (if not done already) so as to add an error marker
-				try
-				{
-					server.getTable(tableName);
-				}
-				catch (RepositoryException ee)
-				{
-					// this is probably the same exception as above, but log it just the same to make sure
-					ServoyLog.logWarning("Getting table failed", ee);
-				}
+				errMsg = e.getMessage();
 			}
 			finally
 			{
+				// maybe the .dbi file content is corrupt... add an error marker
+				if (errMsg != null)
+				{
+					removeErrorMarker(server.getName(), tableName);
+					addDeserializeErrorMarker(server.getName(), tableName, errMsg);
+				}
 				if (is != null)
 				{
 					Utils.closeInputStream(is);
@@ -615,13 +604,13 @@ public class DataModelManager implements IColumnInfoManager
 		catch (JSONException e)
 		{
 			// maybe the .dbi file content is corrupt... add an error marker
-			addDeserializeErrorMarker(t, e.getMessage());
+			addDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
 			throw new RepositoryException(e);
 		}
 		catch (CoreException e)
 		{
 			// maybe the .dbi file content is corrupt... add an error marker
-			addDeserializeErrorMarker(t, e.getMessage());
+			addDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
 			throw new RepositoryException(e);
 		}
 		catch (UnsupportedEncodingException e)
@@ -1217,10 +1206,10 @@ public class DataModelManager implements IColumnInfoManager
 		});
 	}
 
-	private void addDeserializeErrorMarker(final Table t, final String message)
+	private void addDeserializeErrorMarker(String serverName, String tableName, final String message)
 	{
-		differences.addDifference(new TableDifference(t));
-		final IFile file = getDBIFile(t.getServerName(), t.getName());
+		differences.addDifference(new TableDifference(serverName, tableName));
+		final IFile file = getDBIFile(serverName, tableName);
 		updateProblemMarkers(new Runnable()
 		{
 			public void run()
@@ -1443,9 +1432,9 @@ public class DataModelManager implements IColumnInfoManager
 		private final ColumnInfoDef dbiFileDefinition;
 		private boolean renamable;
 
-		private TableDifference(Table table)
+		private TableDifference(String serverName, String tableName)
 		{
-			this(table, null, DESERIALIZE_PROBLEM, null, null);
+			this(serverName, tableName, null, DESERIALIZE_PROBLEM, null, null);
 		}
 
 		private TableDifference(String serverName, String tableName, String columnName, int type, ColumnInfoDef tableDefinition, ColumnInfoDef dbiFileDefinition)
