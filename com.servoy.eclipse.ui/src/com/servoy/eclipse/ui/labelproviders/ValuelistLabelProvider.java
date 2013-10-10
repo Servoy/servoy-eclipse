@@ -23,9 +23,11 @@ import org.eclipse.swt.graphics.Font;
 
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.resource.FontResource;
+import com.servoy.eclipse.ui.util.IDeprecationProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportDeprecated;
 import com.servoy.j2db.persistence.ValueList;
 
 /**
@@ -34,7 +36,7 @@ import com.servoy.j2db.persistence.ValueList;
  * @author rgansevles
  */
 
-public class ValuelistLabelProvider extends LabelProvider implements IFontProvider, IPersistLabelProvider
+public class ValuelistLabelProvider extends LabelProvider implements IFontProvider, IPersistLabelProvider, IDeprecationProvider
 {
 	public static final int VALUELIST_NONE = 0;
 	private final FlattenedSolution flattenedSolution;
@@ -84,6 +86,23 @@ public class ValuelistLabelProvider extends LabelProvider implements IFontProvid
 		{
 			return AbstractBase.selectById(flattenedSolution.getValueLists(false), ((Integer)value).intValue());
 		}
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.util.IDeprecationProvider#isDeprecated(java.lang.Object)
+	 */
+	@Override
+	public Boolean isDeprecated(Object element)
+	{
+		IPersist persist = getPersist(element);
+		if (persist instanceof ISupportDeprecated)
+		{
+			return Boolean.valueOf(((ISupportDeprecated)persist).getDeprecated() != null);
+		}
+
 		return null;
 	}
 }
