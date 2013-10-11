@@ -217,7 +217,7 @@ public class DesignComponentFactory extends ComponentFactory
 		{
 			((ILabel)c).setText(application.getI18NMessageIfPrefixed(((GraphicalComponent)meta).getText()));
 		}
-		OrientationApplier.setOrientationToAWTComponent(c, application.getLocale(), application.getSolution().getTextOrientation());
+		if (c != null) OrientationApplier.setOrientationToAWTComponent(c, application.getLocale(), application.getSolution().getTextOrientation());
 		return c;//removeTransparencyAndScrolling(c);
 	}
 //	private static Component removeTransparencyAndScrolling(Component c)
