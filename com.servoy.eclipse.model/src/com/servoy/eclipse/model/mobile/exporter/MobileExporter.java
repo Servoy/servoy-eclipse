@@ -46,9 +46,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.mozilla.javascript.ast.AstRoot;
 
+import com.servoy.base.nongwt.test.LineMapper;
 import com.servoy.base.persistence.constants.IComponentConstants;
 import com.servoy.base.persistence.constants.IValueListConstants;
-import com.servoy.base.test.LineMapper;
 import com.servoy.base.util.I18NProvider;
 import com.servoy.eclipse.model.Activator;
 import com.servoy.eclipse.model.ServoyModelFinder;
