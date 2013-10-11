@@ -118,7 +118,7 @@ public class ScriptUnitTestRunNotifier implements TestListener
 			}
 			else
 			{
-				String asertionFailedPattern = "AssertionFailedError: Expected:<(.+)>, but was:<(.+)>(.+)";
+				String asertionFailedPattern = "AssertionFailedError: Expected:<(.+)>, but was:<(.+)>(.*)";
 				testingClient.testExpected(fail.getMessage().replaceAll(asertionFailedPattern, "$1"));
 				testingClient.testActual(fail.getMessage().replaceAll(asertionFailedPattern, "$2"));
 			}
