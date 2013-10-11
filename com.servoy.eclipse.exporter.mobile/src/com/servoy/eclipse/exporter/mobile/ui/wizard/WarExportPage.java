@@ -70,9 +70,9 @@ public class WarExportPage extends WizardPage
 	private Text outputText;
 	private Button outputBrowseButton;
 	private Button exportAsWar;
-	private Combo phoneGapAccountsCombobox;
-	private Text phoneGapUsername;
+	private Combo phoneGapUsername;
 	private Text phoneGapPassword;
+	private Button savePasswordCheck;
 	private final CustomizedFinishPage finishPage;
 	private final PhoneGapApplicationPage pgAppPage;
 	private final MobileExporter mobileExporter;
@@ -145,20 +145,20 @@ public class WarExportPage extends WizardPage
 		Label lblPhoneGapAccount = new Label(container, SWT.NONE);
 		lblPhoneGapAccount.setText("Select a PhoneGap account");
 
-		phoneGapAccountsCombobox = new Combo(container, SWT.BORDER);
-		phoneGapAccountsCombobox.add(NO_PHONEGAP_ACCOUNT);
-		phoneGapAccountsCombobox.select(0);
-
 		Label lblPhoneGapUsername = new Label(container, SWT.NONE);
 		lblPhoneGapUsername.setText("Email");
 
-		phoneGapUsername = new Text(container, SWT.BORDER);
+		phoneGapUsername = new Combo(container, SWT.BORDER);
 
 		Label lblPhoneGapPassword = new Label(container, SWT.NONE);
 		lblPhoneGapPassword.setText("Password");
 
 		phoneGapPassword = new Text(container, SWT.BORDER | SWT.PASSWORD);
 
+		savePasswordCheck = new Button(container, SWT.CHECK);
+
+		Label lblSavePassword = new Label(container, SWT.NONE);
+		lblSavePassword.setText("Save password");
 
 		final GroupLayout groupLayout = new GroupLayout(container);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
@@ -171,11 +171,12 @@ public class WarExportPage extends WizardPage
 					groupLayout.createSequentialGroup().add(exportUsingPhoneGap, GroupLayout.PREFERRED_SIZE, 15, GroupLayout.PREFERRED_SIZE).add(phoneGapLink,
 						GroupLayout.PREFERRED_SIZE, 150, Short.MAX_VALUE)).add(
 					groupLayout.createSequentialGroup().add(20).add(
-						groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(lblPhoneGapAccount).add(lblPhoneGapUsername).add(lblPhoneGapPassword)).addPreferredGap(
+						groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(lblPhoneGapUsername).add(lblPhoneGapPassword)).addPreferredGap(
 						LayoutStyle.RELATED).add(
-						groupLayout.createParallelGroup(GroupLayout.LEADING).add(phoneGapAccountsCombobox, GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE).add(
-							phoneGapUsername, GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE).add(phoneGapPassword, GroupLayout.DEFAULT_SIZE, 130,
-							Short.MAX_VALUE)))).addContainerGap()));
+						groupLayout.createParallelGroup(GroupLayout.LEADING).add(phoneGapUsername, GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE).add(
+							phoneGapPassword, GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE))).add(
+					groupLayout.createSequentialGroup().add(20).add(savePasswordCheck, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE).add(
+						lblSavePassword, GroupLayout.PREFERRED_SIZE, 80, Short.MAX_VALUE))).addContainerGap()));
 
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
@@ -187,12 +188,12 @@ public class WarExportPage extends WizardPage
 						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(phoneGapLink).add(exportUsingPhoneGap, GroupLayout.PREFERRED_SIZE,
 							GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(10).add(
 						groupLayout.createSequentialGroup().add(10).add(
-							groupLayout.createParallelGroup(GroupLayout.BASELINE).add(phoneGapAccountsCombobox, GroupLayout.PREFERRED_SIZE,
-								GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(lblPhoneGapAccount)).add(7).add(
 							groupLayout.createParallelGroup(GroupLayout.BASELINE).add(phoneGapUsername, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 								GroupLayout.PREFERRED_SIZE).add(lblPhoneGapUsername)).add(7).add(
 							groupLayout.createParallelGroup(GroupLayout.BASELINE).add(phoneGapPassword, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-								GroupLayout.PREFERRED_SIZE).add(lblPhoneGapPassword)))).add(typeLabel))));
+								GroupLayout.PREFERRED_SIZE).add(lblPhoneGapPassword))).add(7).add(
+						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(lblSavePassword).add(savePasswordCheck, GroupLayout.PREFERRED_SIZE,
+							GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))).add(typeLabel))));
 
 		container.setLayout(groupLayout);
 
@@ -243,16 +244,31 @@ public class WarExportPage extends WizardPage
 			final ISecurePreferences node = securePreferences.node(SECURE_STORAGE_ACCOUNTS_NODE);
 			try
 			{
+				boolean foundLastAccountUsed = false;
 				for (String emailKey : node.keys())
 				{
 					String password = node.get(emailKey, null);
-					if (password != null) phoneGapAccountsCombobox.add(emailKey);
-					if (getDialogSettings().get(PHONEGAP_EMAIL).equals(emailKey))
+					if (password != null) phoneGapUsername.add(emailKey);
+					if (getDialogSettings().get(PHONEGAP_EMAIL) != null && getDialogSettings().get(PHONEGAP_EMAIL).equals(emailKey))
 					{
 						// select last account used
-						phoneGapAccountsCombobox.select(phoneGapAccountsCombobox.indexOf(emailKey));
-						phoneGapUsername.setText(emailKey);
+						phoneGapUsername.select(phoneGapUsername.indexOf(emailKey));
 						phoneGapPassword.setText(node.get(emailKey, null));
+						foundLastAccountUsed = true;
+					}
+				}
+				if (!foundLastAccountUsed)
+				{
+					if (getDialogSettings().get(PHONEGAP_EMAIL) != null)
+					{
+						// fill in the last used email address 
+						phoneGapUsername.setText(getDialogSettings().get(PHONEGAP_EMAIL));
+					}
+					else
+					{
+						// select the first element in accounts list 
+						phoneGapUsername.select(0);
+						if (phoneGapUsername.getText() != null) phoneGapPassword.setText(node.get(phoneGapUsername.getText(), null));
 					}
 				}
 			}
@@ -260,32 +276,24 @@ public class WarExportPage extends WizardPage
 			{
 				Debug.error(e);
 			}
-			phoneGapAccountsCombobox.addSelectionListener(new SelectionAdapter()
+			phoneGapUsername.addSelectionListener(new SelectionAdapter()
 			{
 				@Override
 				public void widgetSelected(SelectionEvent e)
 				{
-					if (phoneGapAccountsCombobox.getSelectionIndex() != phoneGapAccountsCombobox.indexOf(NO_PHONEGAP_ACCOUNT))
+					String userEmail = phoneGapUsername.getItem(phoneGapUsername.getSelectionIndex());
+					try
 					{
-						String userEmail = phoneGapAccountsCombobox.getItem(phoneGapAccountsCombobox.getSelectionIndex());
-						phoneGapUsername.setText(userEmail);
-						try
-						{
-							phoneGapPassword.setText(node.get(userEmail, null));
-						}
-						catch (StorageException ex)
-						{
-							Debug.error(ex);
-						}
+						phoneGapPassword.setText(node.get(userEmail, null));
 					}
-					else
+					catch (StorageException ex)
 					{
-						phoneGapUsername.setText("");
-						phoneGapPassword.setText("");
+						Debug.error(ex);
 					}
 				}
 			});
 		}
+		else phoneGapUsername.setText(getDialogSettings().get(PHONEGAP_EMAIL)); // fill in the last used email address
 	}
 
 	private void updateWizardState()
@@ -311,7 +319,6 @@ public class WarExportPage extends WizardPage
 	{
 		outputText.setEnabled(enabled);
 		outputBrowseButton.setEnabled(enabled);
-		phoneGapAccountsCombobox.setEnabled(!enabled);
 		phoneGapUsername.setEnabled(!enabled);
 		phoneGapPassword.setEnabled(!enabled);
 	}
@@ -393,14 +400,17 @@ public class WarExportPage extends WizardPage
 					setErrorMessage(errorMessage[0]);
 					return null;
 				}
-				else if (phoneGapAccountsCombobox.getSelectionIndex() == phoneGapAccountsCombobox.indexOf(NO_PHONEGAP_ACCOUNT))
+				else if (savePasswordCheck.getSelection())
 				{
 					// new PhoneGap account or updating existing account
 					ISecurePreferences securePreferences = SecurePreferencesFactory.getDefault();
 					ISecurePreferences node = securePreferences.node(SECURE_STORAGE_ACCOUNTS_NODE);
 					try
 					{
-						node.put(username, password, true);
+						if (node.get(username, null) != password)
+						{
+							node.put(username, password, true);
+						}
 					}
 					catch (StorageException e)
 					{
