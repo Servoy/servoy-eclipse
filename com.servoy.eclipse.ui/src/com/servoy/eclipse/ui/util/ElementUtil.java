@@ -435,6 +435,10 @@ public class ElementUtil
 
 		if (model instanceof Portal)
 		{
+			if (((Portal)model).isMobileInsetList())
+			{
+				return IScriptInsetListComponentMethods.class;
+			}
 			return IScriptPortalComponentMethods.class;
 		}
 

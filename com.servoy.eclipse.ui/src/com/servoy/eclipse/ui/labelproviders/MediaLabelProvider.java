@@ -19,8 +19,10 @@ package com.servoy.eclipse.ui.labelproviders;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.util.IDeprecationProvider;
 import com.servoy.eclipse.ui.util.MediaNode;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportDeprecated;
 import com.servoy.j2db.persistence.Media;
 
 /**
@@ -29,7 +31,7 @@ import com.servoy.j2db.persistence.Media;
  * @author rgansevles
  * 
  */
-public class MediaLabelProvider extends LabelProvider implements IPersistLabelProvider
+public class MediaLabelProvider extends LabelProvider implements IPersistLabelProvider, IDeprecationProvider
 {
 	public static final MediaNode MEDIA_NODE_NONE = new MediaNode(Messages.LabelNone, null, MediaNode.TYPE.IMAGE, null);
 	public static final MediaNode MEDIA_NODE_UNRESOLVED = new MediaNode(Messages.LabelUnresolved, null, MediaNode.TYPE.IMAGE, null);
@@ -62,6 +64,23 @@ public class MediaLabelProvider extends LabelProvider implements IPersistLabelPr
 		if (value instanceof Media)
 		{
 			return (Media)value;
+		}
+
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.util.IDeprecationProvider#isDeprecated(java.lang.Object)
+	 */
+	@Override
+	public Boolean isDeprecated(Object element)
+	{
+		IPersist persist = getPersist(element);
+		if (persist instanceof ISupportDeprecated)
+		{
+			return Boolean.valueOf(((ISupportDeprecated)persist).getDeprecated() != null);
 		}
 
 		return null;

@@ -680,7 +680,7 @@ controller.showRecords(15, nmd); // 15 is a single-number pk in this case]]></sa
           </samples>
           <parameters>
             <parameter name="windowName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[the name of the window.]]></description>
+              <description><![CDATA[the name of the window. Should not be null.]]></description>
             </parameter>
             <parameter name="type" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[the type of the window. Can be one of JSWindow.DIALOG, JSWindow.MODAL_DIALOG, JSWindow.WINDOW.]]></description>
@@ -714,7 +714,7 @@ controller.showRecords(15, nmd); // 15 is a single-number pk in this case]]></sa
           </samples>
           <parameters>
             <parameter name="windowName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[the name of the window.]]></description>
+              <description><![CDATA[the name of the window. Should not be null.]]></description>
             </parameter>
             <parameter name="type" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[the type of the window. Can be one of JSWindow.DIALOG, JSWindow.MODAL_DIALOG, JSWindow.WINDOW.]]></description>
@@ -1536,12 +1536,12 @@ if ( (m & 1) == 1)
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[HTTP server URL]]></return>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[Gets the application server URL for mobile client to connect to.]]></description>
-            <description clientSupport="mc,wc,sc"><![CDATA[Gets the HTTP server url.]]></description>
+            <description clientSupport="mc"><![CDATA[Gets the application server URL for mobile client to connect to.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Gets the HTTP server url.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[Gets the application server URL for mobile client to connect to.]]></summary>
-            <summary clientSupport="mc,wc,sc"><![CDATA[Gets the HTTP server url.]]></summary>
+            <summary clientSupport="mc"><![CDATA[Gets the application server URL for mobile client to connect to.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[Gets the HTTP server url.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="mc,wc,sc"><![CDATA[var url = application.getServerURL();]]></sample>
@@ -1684,19 +1684,19 @@ var uuid_object2 = application.getUUID(new_uuid_object.toBytes());  // convert a
             <sample clientSupport="wc,sc"><![CDATA[var uname = application.getUserName();]]></sample>
           </samples>
         </function>
-        <function clientSupport="wc,sc" name="getUserProperty">
+        <function clientSupport="mc,wc,sc" name="getUserProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[Property value]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Get a persistent user property.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Get a persistent user property.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Get a persistent user property.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Get a persistent user property.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[var value = application.getUserProperty('showOrders');]]></sample>
+            <sample clientSupport="mc,wc,sc"><![CDATA[var value = application.getUserProperty('showOrders');]]></sample>
           </samples>
           <parameters>
             <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
@@ -2423,26 +2423,26 @@ application.setToolbarVisible('text',false);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="setUserProperty">
+        <function clientSupport="mc,wc,sc" name="setUserProperty">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Sets a user property for this client: <br>
-For heedless clients((including Batch Processors and Authentication clients) the user property is stored in memory and will be lost upon client restart.
+            <description clientSupport="mc,wc,sc"><![CDATA[Sets a user property for this client: <br>
+For headless clients(including Batch Processors and Authentication clients) the user property is stored in memory and will be lost upon client restart.
 <br>
-For Web client the user property will be stored in a persistent cookie
+For Web Client the user property will be stored in a persistent cookie
 <br>
-For Smart Client it will be stored in client local properties file]]></description>
+For Smart Client it will be stored in a properties file on the client machine.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Sets a user property for this client: <br>
-For heedless clients((including Batch Processors and Authentication clients) the user property is stored in memory and will be lost upon client restart.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Sets a user property for this client: <br>
+For headless clients(including Batch Processors and Authentication clients) the user property is stored in memory and will be lost upon client restart.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[application.setUserProperty('showOrders','1');]]></sample>
+            <sample clientSupport="mc,wc,sc"><![CDATA[application.setUserProperty('showOrders','1');]]></sample>
           </samples>
           <parameters>
             <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
@@ -9609,6 +9609,9 @@ application.output('modified height: ' + field.height);]]></sample>
           <summaries>
             <summary clientSupport="mc"><![CDATA[The mobile bean innerHTML.]]></summary>
           </summaries>
+          <samples>
+            <sample clientSupport="mc"><![CDATA[solutionModel.getForm('orders').getBean('signatureBean').innerHTML = '<div><span>My Bean</span></div>';]]></sample>
+          </samples>
         </property>
         <property clientSupport="mc,wc,sc" name="name">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -31699,7 +31702,7 @@ vlist.sortOptions = 'parent_table_text desc';]]></sample>
         <property clientSupport="wc,sc" name="setFallbackValueList" undocumented="true">
           <return type="void" typecode="void"/>
           <parameters>
-            <parameter name="vl" type="com.servoy.base.solutionmodel.IBaseSMValueList" typecode="com.servoy.base.solutionmodel.IBaseSMValueList"/>
+            <parameter name="vl" type="com.servoy.j2db.scripting.solutionmodel.JSValueList" typecode="com.servoy.base.solutionmodel.IBaseSMValueList"/>
           </parameters>
         </property>
         <property clientSupport="wc,sc" name="sortOptions">

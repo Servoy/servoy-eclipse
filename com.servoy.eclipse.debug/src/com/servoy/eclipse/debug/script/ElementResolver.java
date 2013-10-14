@@ -482,7 +482,8 @@ public class ElementResolver implements IElementResolver
 					}
 					catch (RepositoryException e)
 					{
-						ServoyLog.logError(e);
+//						ServoyLog.logInfo("Type creator - cannot read relation; problem markers probably already exist for this it: " + e.getMessage());
+						description = "Relation with errors (check for problem markers):" + e.getMessage();
 					}
 				}
 				else

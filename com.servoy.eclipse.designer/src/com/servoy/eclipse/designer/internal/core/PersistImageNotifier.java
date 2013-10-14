@@ -97,7 +97,7 @@ public class PersistImageNotifier extends AbstractImageNotifier
 				}
 			}
 			((AbstractBase)persist).setRuntimeProperty(PersistPropertySource.LastPaintedBackgroundProperty, background);
-			((AbstractBase)persist).setRuntimeProperty(PersistPropertySource.LastPaintedFontProperty, comp.getFont());
+			if (comp != null) ((AbstractBase)persist).setRuntimeProperty(PersistPropertySource.LastPaintedFontProperty, comp.getFont());
 		}
 
 		if (comp != null)

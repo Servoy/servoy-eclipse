@@ -793,6 +793,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 	public void setSelection(ISelection selection)
 	{
 		treeViewer.setSelection(selection, true);
+		updateOrderedSelection(selection);
 	}
 
 	/**
@@ -850,6 +851,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 			return image;
 		}
 
+		@Override
 		public Font getFont(Object element)
 		{
 			if (getLabelProvider() instanceof IFontProvider)
