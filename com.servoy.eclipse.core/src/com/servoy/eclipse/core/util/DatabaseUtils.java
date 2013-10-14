@@ -138,7 +138,7 @@ public final class DatabaseUtils
 
 				// Add the column with the appropriate information.
 				Column column = table.createNewColumn(validator, columnInfoInfo.name, columnInfoInfo.columnType.getSqlType(),
-					columnInfoInfo.columnType.getLength());
+					columnInfoInfo.columnType.getLength(), columnInfoInfo.columnType.getScale());
 				column.setDatabasePK((columnInfoInfo.flags & Column.PK_COLUMN) != 0);
 				column.setAllowNull(columnInfoInfo.allowNull);
 
