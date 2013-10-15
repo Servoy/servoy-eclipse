@@ -17,15 +17,22 @@
 package com.servoy.eclipse.ui.property;
 
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 public enum PropertyCategory
 {
-	Commands, Events, Properties, Elements, Beans;
+	Commands, Events, Layout, Properties, Elements, Beans;
 
 	public static PropertyCategory createPropertyCategory(String propertyName)
 	{
 		if (BaseComponent.isCommandProperty(propertyName)) return Commands;
 		if (BaseComponent.isEventProperty(propertyName)) return Events;
+		if (StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(propertyName) ||
+			StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName().equals(propertyName) ||
+			StaticContentSpecLoader.PROPERTY_ANCHORS.getPropertyName().equals(propertyName))
+		{
+			return Layout;
+		}
 		return Properties;
 	}
 }

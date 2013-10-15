@@ -1560,7 +1560,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		{
 			return retval;
 		}
-		if (category == PropertyCategory.Properties) // name based props for IPersists only (not beans)
+		if (category != PropertyCategory.Beans) // name based props for IPersists only (not beans)
 		{
 			retval = getPropertiesPropertyDescriptor(propertySource, persistContext, readOnly, id, displayName, name, flattenedEditingSolution, form);
 			if (retval != null)
