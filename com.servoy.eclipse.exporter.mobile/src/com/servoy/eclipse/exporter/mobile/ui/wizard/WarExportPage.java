@@ -293,7 +293,10 @@ public class WarExportPage extends WizardPage
 				}
 			});
 		}
-		else phoneGapUsername.setText(getDialogSettings().get(PHONEGAP_EMAIL)); // fill in the last used email address
+		else if (getDialogSettings().get(PHONEGAP_EMAIL) != null)
+		{
+			phoneGapUsername.setText(getDialogSettings().get(PHONEGAP_EMAIL)); // fill in the last used email address
+		}
 	}
 
 	private void updateWizardState()
