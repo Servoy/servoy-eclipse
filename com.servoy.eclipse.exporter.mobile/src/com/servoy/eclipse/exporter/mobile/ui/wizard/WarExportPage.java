@@ -158,7 +158,7 @@ public class WarExportPage extends WizardPage
 		savePasswordCheck = new Button(container, SWT.CHECK);
 
 		Label lblSavePassword = new Label(container, SWT.NONE);
-		lblSavePassword.setText("Save password");
+		lblSavePassword.setText("Store in Secure Store");
 
 		final GroupLayout groupLayout = new GroupLayout(container);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
@@ -175,8 +175,8 @@ public class WarExportPage extends WizardPage
 						LayoutStyle.RELATED).add(
 						groupLayout.createParallelGroup(GroupLayout.LEADING).add(phoneGapUsername, GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE).add(
 							phoneGapPassword, GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE))).add(
-					groupLayout.createSequentialGroup().add(20).add(savePasswordCheck, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE).add(
-						lblSavePassword, GroupLayout.PREFERRED_SIZE, 80, Short.MAX_VALUE))).addContainerGap()));
+					groupLayout.createSequentialGroup().add(20).add(savePasswordCheck).addPreferredGap(LayoutStyle.RELATED).add(lblSavePassword,
+						GroupLayout.PREFERRED_SIZE, 80, Short.MAX_VALUE))).addContainerGap()));
 
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
