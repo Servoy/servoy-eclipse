@@ -1143,6 +1143,57 @@ public class ServoyModel extends AbstractServoyModel
 					Display.getDefault().syncExec(uiRunnable);
 					if (((Boolean)uiRunnable.getReturnValue()).booleanValue())
 					{
+						progressMonitor.subTask("Closing active editors...");
+
+						Display.getDefault().syncExec(new Runnable()
+						{
+							public void run()
+							{
+								Solution[] modulesOfActiveProject = project != null ? project.getFlattenedSolution().getModules() : null;
+								IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
+								for (IWorkbenchWindow workbenchWindow : workbenchWindows)
+								{
+									if (workbenchWindow.getActivePage() == null) continue;
+									IEditorReference[] editorReferences = workbenchWindow.getActivePage().getEditorReferences();
+									ArrayList<IEditorReference> references = new ArrayList<IEditorReference>(editorReferences.length);
+									outer : for (IEditorReference editorReference : editorReferences)
+									{
+										try
+										{
+											IEditorInput editorInput = editorReference.getEditorInput();
+											IFile file = (IFile)editorInput.getAdapter(IFile.class);
+											if (file != null)
+											{
+												IProject p = file.getProject();
+												if (project != null && project.getResourcesProject() != null && project.getResourcesProject().getProject() == p) continue outer;
+												if (modulesOfActiveProject != null)
+												{
+													for (Solution module : modulesOfActiveProject)
+													{
+														if (Utils.equalObjects(module.getName(), p.getName()))
+														{
+															continue outer;
+														}
+													}
+												}
+												references.add(editorReference);
+											}
+											else if (editorInput instanceof PersistEditorInput &&
+												(project == null || !((PersistEditorInput)editorInput).getSolutionName().equals(project.getProject().getName())))
+											{
+												references.add(editorReference);
+											}
+										}
+										catch (PartInitException e)
+										{
+											ServoyLog.logError(e);
+										}
+									}
+									workbenchWindow.getActivePage().closeEditors(references.toArray(new IEditorReference[references.size()]), true);
+								}
+							}
+						});
+
 						progressMonitor.worked(1);
 
 						nameValidator = null;
@@ -1232,53 +1283,6 @@ public class ServoyModel extends AbstractServoyModel
 						updateWorkingSet();
 						testBuildPathsAndBuild(project, buildProject);
 
-						progressMonitor.subTask("Closing outdated editors...");
-
-						Display.getDefault().syncExec(new Runnable()
-						{
-							public void run()
-							{
-								ServoyProject[] modulesOfActiveProject = getModulesOfActiveProject();
-								IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
-								for (IWorkbenchWindow workbenchWindow : workbenchWindows)
-								{
-									if (workbenchWindow.getActivePage() == null) continue;
-									IEditorReference[] editorReferences = workbenchWindow.getActivePage().getEditorReferences();
-									ArrayList<IEditorReference> references = new ArrayList<IEditorReference>(editorReferences.length);
-									outer : for (IEditorReference editorReference : editorReferences)
-									{
-										try
-										{
-											IEditorInput editorInput = editorReference.getEditorInput();
-											IFile file = (IFile)editorInput.getAdapter(IFile.class);
-											if (file != null)
-											{
-												IProject p = file.getProject();
-												if (activeResourcesProject != null && activeResourcesProject.getProject() == p) continue outer;
-												for (ServoyProject sp : modulesOfActiveProject)
-												{
-													if (sp.getProject() == p)
-													{
-														continue outer;
-													}
-												}
-												references.add(editorReference);
-											}
-											else if (editorInput instanceof PersistEditorInput &&
-												(activeProject == null || !((PersistEditorInput)editorInput).getSolutionName().equals(activeProject.toString())))
-											{
-												references.add(editorReference);
-											}
-										}
-										catch (PartInitException e)
-										{
-											ServoyLog.logError(e);
-										}
-									}
-									workbenchWindow.getActivePage().closeEditors(references.toArray(new IEditorReference[references.size()]), true);
-								}
-							}
-						});
 						progressMonitor.worked(1);
 					}
 				}
