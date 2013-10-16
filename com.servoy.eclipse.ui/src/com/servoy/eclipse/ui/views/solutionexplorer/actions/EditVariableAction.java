@@ -123,7 +123,8 @@ public class EditVariableAction extends Action implements ISelectionChangedListe
 							{
 								try
 								{
-									nameValidator.checkName(newText, -1, new ValidatorSearchContext(variable.getParent(), IRepository.SCRIPTVARIABLES), false);
+									nameValidator.checkName(newText, -1, new ValidatorSearchContext(variable.getScopeName() != null ? variable.getScopeName()
+										: variable.getParent(), IRepository.SCRIPTVARIABLES), false);
 								}
 								catch (RepositoryException e)
 								{
