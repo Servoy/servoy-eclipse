@@ -212,34 +212,27 @@ public class EventsComposite extends Composite
 	private void setViewerInput(Table t, boolean initialExpand)
 	{
 		List<EventNode> rows = new ArrayList<EventNode>();
-		try
+		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		ServoyProject servoyProject = servoyModel.getActiveProject();
+		if (servoyProject != null)
 		{
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-			ServoyProject servoyProject = servoyModel.getActiveProject();
-			if (servoyProject != null)
+			Solution solution = (Solution)servoyProject.getEditingPersist(servoyProject.getSolution().getUUID());
+			Set<UUID> solutions = new HashSet<UUID>();
+			rows.add(new EventNode(solution, t));
+			solutions.add(solution.getUUID());
+			for (int i = 0; i < rows.size(); i++)
 			{
-				Solution solution = (Solution)servoyProject.getEditingPersist(servoyProject.getSolution().getUUID());
-				Set<UUID> solutions = new HashSet<UUID>();
-				rows.add(new EventNode(solution, t));
-				solutions.add(solution.getUUID());
-				for (int i = 0; i < rows.size(); i++)
+				Solution sol = rows.get(i).getSolution();
+				String[] modulesNames = new StringTokenizerConverter(",", true).convertProperty("modulesNames", sol.getModulesNames());
+				for (String modulename : modulesNames)
 				{
-					Solution sol = rows.get(i).getSolution();
-					String[] modulesNames = new StringTokenizerConverter(",", true).convertProperty("modulesNames", sol.getModulesNames());
-					for (String modulename : modulesNames)
+					ServoyProject moduleProject = servoyModel.getServoyProject(modulename);
+					if (moduleProject != null && moduleProject.getSolution() != null && solutions.add(moduleProject.getSolution().getUUID()))
 					{
-						ServoyProject moduleProject = servoyModel.getServoyProject(modulename);
-						if (moduleProject != null && moduleProject.getSolution() != null && solutions.add(moduleProject.getSolution().getUUID()))
-						{
-							rows.add(new EventNode((Solution)moduleProject.getEditingPersist(moduleProject.getSolution().getUUID()), t));
-						}
+						rows.add(new EventNode((Solution)moduleProject.getEditingPersist(moduleProject.getSolution().getUUID()), t));
 					}
 				}
 			}
-		}
-		catch (RepositoryException e)
-		{
-			ServoyLog.logError(e);
 		}
 
 		Object[] expandedState = treeViewer.getExpandedElements();

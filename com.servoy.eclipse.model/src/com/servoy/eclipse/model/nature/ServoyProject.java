@@ -487,33 +487,11 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 		return editingPersist;
 	}
 
-	public IPersist getEditingPersist(UUID uuid) throws RepositoryException
+	public IPersist getEditingPersist(UUID uuid)
 	{
 		if (getEditingSolution() == null) return null;
 
-		IPersist editingPersist = AbstractRepository.searchPersist(getEditingSolution(), uuid);
-		if (editingPersist == null)
-		{
-			ISupportChilds parent = null;
-			if (editingPersist != null)
-			{
-				// remove child from parent in editing solution; if found in orig solution, it will be added again
-				parent = editingPersist.getParent();
-			}
-
-			IPersist original = AbstractRepository.searchPersist(getSolution(), uuid);
-			if (original == null)
-			{
-				if (editingPersist != null && parent != null)
-				{
-					// persist is deleted.
-					parent.removeChild(editingPersist);
-				}
-				return null;
-			}
-			editingPersist = copyNodeToEditingSolution(original, true);
-		}
-		return editingPersist;
+		return AbstractRepository.searchPersist(getEditingSolution(), uuid);
 	}
 
 	public FlattenedSolution getFlattenedSolution()

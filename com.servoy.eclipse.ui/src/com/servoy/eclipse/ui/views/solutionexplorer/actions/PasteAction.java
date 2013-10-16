@@ -209,15 +209,7 @@ public class PasteAction extends Action implements ISelectionChangedListener
 					ServoyProject sp = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(data.solutionName);
 					if (sp != null)
 					{
-						IPersist sourcePersist = null;
-						try
-						{
-							sourcePersist = sp.getEditingPersist(data.uuid);
-						}
-						catch (RepositoryException e)
-						{
-							ServoyLog.logError(e);
-						}
+						IPersist sourcePersist = sp.getEditingPersist(data.uuid);
 						if (sourcePersist instanceof Form)
 						{
 							Form f = (Form)sourcePersist;

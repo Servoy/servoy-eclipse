@@ -52,15 +52,7 @@ public class RenamePersistQuickFix implements IMarkerResolution
 	{
 		UUID id = UUID.fromString(uuid);
 		ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);
-		IPersist persist = null;
-		try
-		{
-			persist = servoyProject.getEditingPersist(id);
-		}
-		catch (RepositoryException e)
-		{
-			ServoyLog.logError(e);
-		}
+		IPersist persist = servoyProject.getEditingPersist(id);
 		return "Rename element '" + ((persist instanceof ISupportName) ? ((ISupportName)persist).getName() : "") + "' from solution '" + solutionName + "'.";
 	}
 

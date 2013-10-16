@@ -42,7 +42,6 @@ import com.servoy.eclipse.dnd.FormElementDragData.DataProviderDragData;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.dnd.IDragData;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
@@ -57,7 +56,6 @@ import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportMedia;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Portal;
-import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TabPanel;
@@ -279,41 +277,35 @@ class PersistEditPolicy extends ComponentEditPolicy
 			PersistDragData dragData = (PersistDragData)((IDragData[])dropRequest.getData())[0];
 			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(dragData.solutionName);
 			if (servoyProject == null) return null;
-			try
+			IPersist persist = servoyProject.getEditingPersist(dragData.uuid);
+			if (persist instanceof ScriptMethod && (child instanceof Field || child instanceof GraphicalComponent))
 			{
-				IPersist persist = servoyProject.getEditingPersist(dragData.uuid);
-				if (persist instanceof ScriptMethod && (child instanceof Field || child instanceof GraphicalComponent))
-				{
-					return SetValueCommand.createSetvalueCommand("Drag-n-drop script method", PersistPropertySource.createPersistPropertySource(
-						(IPersist)child, (IPersist)(formEditPart == null ? null : formEditPart.getModel()), false),
-						StaticContentSpecLoader.PROPERTY_ONACTIONMETHODID.getPropertyName(), MethodWithArguments.create(persist, null));
-				}
-				if (persist instanceof Media && child instanceof ISupportMedia && child instanceof IPersist)
-				{
-					Media mediaPersist = (Media)persist;
-					String mediaPersistName = mediaPersist.getName();
-					return SetValueCommand.createSetvalueCommand("Drag-n-drop image", PersistPropertySource.createPersistPropertySource((IPersist)child,
-						(IPersist)(formEditPart == null ? null : formEditPart.getModel()), false),
-						StaticContentSpecLoader.PROPERTY_IMAGEMEDIAID.getPropertyName(), new MediaNode(mediaPersistName, mediaPersistName,
-							MediaNode.TYPE.IMAGE, servoyProject.getEditingFlattenedSolution().getSolution(), null, mediaPersist));
-				}
-				if (persist instanceof ValueList && child instanceof Field)
-				{
-					return SetValueCommand.createSetvalueCommand("Drag-n-drop value list", PersistPropertySource.createPersistPropertySource((IPersist)child,
-						(IPersist)(formEditPart == null ? null : formEditPart.getModel()), false),
-						StaticContentSpecLoader.PROPERTY_VALUELISTID.getPropertyName(), new Integer(persist.getID()));
-				}
-				if (persist instanceof Form && child instanceof IPersist && ((IPersist)child).getAncestor(IRepository.TABPANELS) != null)
-				{
-					return new FormPlaceElementCommand(application, (TabPanel)((IPersist)child).getAncestor(IRepository.TABPANELS),
-						new Object[] { new ElementFactory.RelatedForm(null, (Form)persist) }, VisualFormEditor.REQ_PLACE_TAB, null, null,
-						dropRequest.getlocation().getSWTPoint(), null, (IPersist)(formEditPart == null ? null : formEditPart.getModel()));
-				}
+				return SetValueCommand.createSetvalueCommand(
+					"Drag-n-drop script method",
+					PersistPropertySource.createPersistPropertySource((IPersist)child, (IPersist)(formEditPart == null ? null : formEditPart.getModel()), false),
+					StaticContentSpecLoader.PROPERTY_ONACTIONMETHODID.getPropertyName(), MethodWithArguments.create(persist, null));
 			}
-			catch (RepositoryException e)
+			if (persist instanceof Media && child instanceof ISupportMedia && child instanceof IPersist)
 			{
-				ServoyLog.logError(e);
-				throw new RuntimeException("Could not access project solution: " + e.getMessage());
+				Media mediaPersist = (Media)persist;
+				String mediaPersistName = mediaPersist.getName();
+				return SetValueCommand.createSetvalueCommand("Drag-n-drop image", PersistPropertySource.createPersistPropertySource((IPersist)child,
+					(IPersist)(formEditPart == null ? null : formEditPart.getModel()), false), StaticContentSpecLoader.PROPERTY_IMAGEMEDIAID.getPropertyName(),
+					new MediaNode(mediaPersistName, mediaPersistName, MediaNode.TYPE.IMAGE, servoyProject.getEditingFlattenedSolution().getSolution(), null,
+						mediaPersist));
+			}
+			if (persist instanceof ValueList && child instanceof Field)
+			{
+				return SetValueCommand.createSetvalueCommand(
+					"Drag-n-drop value list",
+					PersistPropertySource.createPersistPropertySource((IPersist)child, (IPersist)(formEditPart == null ? null : formEditPart.getModel()), false),
+					StaticContentSpecLoader.PROPERTY_VALUELISTID.getPropertyName(), new Integer(persist.getID()));
+			}
+			if (persist instanceof Form && child instanceof IPersist && ((IPersist)child).getAncestor(IRepository.TABPANELS) != null)
+			{
+				return new FormPlaceElementCommand(application, (TabPanel)((IPersist)child).getAncestor(IRepository.TABPANELS),
+					new Object[] { new ElementFactory.RelatedForm(null, (Form)persist) }, VisualFormEditor.REQ_PLACE_TAB, null, null,
+					dropRequest.getlocation().getSWTPoint(), null, (IPersist)(formEditPart == null ? null : formEditPart.getModel()));
 			}
 		}
 		return null;

@@ -23,9 +23,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -108,16 +106,7 @@ public abstract class BaseSetPropertyQuickFix implements IMarkerResolution
 			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);
 			if (servoyProject != null)
 			{
-				IPersist persist;
-				try
-				{
-					persist = servoyProject.getEditingPersist(UUID.fromString(uuid));
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError(e);
-					return;
-				}
+				IPersist persist = servoyProject.getEditingPersist(UUID.fromString(uuid));
 				if (persist != null)
 				{
 					// use standard adapter mechanism, it will follow the same logic as set-to-default-value in properties view.

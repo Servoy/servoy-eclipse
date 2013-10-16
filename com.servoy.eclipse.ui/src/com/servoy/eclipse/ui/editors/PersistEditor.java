@@ -110,15 +110,7 @@ public abstract class PersistEditor extends EditorPart implements IActiveProject
 			{
 				throw new IllegalArgumentException("Cannot open solution " + persistInput.getSolutionName());
 			}
-			try
-			{
-				persist = servoyProject.getEditingPersist(persistInput.getUuid());
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError(e);
-				throw new RuntimeException("Could not initialize persist editor: " + e.getMessage());
-			}
+			persist = servoyProject.getEditingPersist(persistInput.getUuid());
 		}
 		else
 		{
@@ -265,9 +257,9 @@ public abstract class PersistEditor extends EditorPart implements IActiveProject
 
 			private void fireEventChange(final SelectionChangedEvent event, Object[] listeners)
 			{
-				for (int i = 0; i < listeners.length; ++i)
+				for (Object listener : listeners)
 				{
-					final ISelectionChangedListener l = (ISelectionChangedListener)listeners[i];
+					final ISelectionChangedListener l = (ISelectionChangedListener)listener;
 					SafeRunner.run(new SafeRunnable()
 					{
 						public void run()

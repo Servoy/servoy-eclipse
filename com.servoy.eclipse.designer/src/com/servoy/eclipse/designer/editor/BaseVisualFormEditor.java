@@ -160,21 +160,14 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 			close(false);
 			return;
 		}
-		try
+
+		form = (Form)servoyProject.getEditingPersist(formInput.getUuid());
+		if (form == null)
 		{
-			form = (Form)servoyProject.getEditingPersist(formInput.getUuid());
-			if (form == null)
-			{
-				throw new RuntimeException("Could not find form " + formInput.getName() + " in solution " + formInput.getSolutionName());
-			}
-			setPartName(form.getName());
-			servoyModel.addPersistChangeListener(false, this);
+			throw new RuntimeException("Could not find form " + formInput.getName() + " in solution " + formInput.getSolutionName());
 		}
-		catch (RepositoryException e)
-		{
-			ServoyLog.logError(e);
-			throw new RuntimeException("Could not initialize form editor: " + e.getMessage());
-		}
+		setPartName(form.getName());
+		servoyModel.addPersistChangeListener(false, this);
 	}
 
 	@Override
@@ -662,14 +655,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 		{
 			if (servoyProject != null)
 			{
-				try
-				{
-					form = (Form)servoyProject.getEditingPersist(form.getUUID());
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError("Could not get form", e);
-				}
+				form = (Form)servoyProject.getEditingPersist(form.getUUID());
 			}
 			else
 			{
