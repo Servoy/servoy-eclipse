@@ -21,9 +21,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -33,6 +35,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ContentViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerDropAdapter;
+import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TransferData;
@@ -43,11 +46,14 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.core.util.UIUtils.YesYesToAllNoNoToAllAsker;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.util.MediaNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
@@ -55,6 +61,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.ImportMediaAction;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.Pair;
@@ -81,14 +88,7 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 	@Override
 	public boolean validateDrop(Object target, int operation, TransferData transferType)
 	{
-		SimpleUserNode targetNode = null;
-
 		Object input = (target == null && getViewer() instanceof ContentViewer) ? ((ContentViewer)getViewer()).getInput() : target;
-		if (input instanceof SimpleUserNode &&
-			(((SimpleUserNode)input).getRealType() == UserNodeType.MEDIA || ((SimpleUserNode)input).getRealType() == UserNodeType.MEDIA_FOLDER))
-		{
-			targetNode = (SimpleUserNode)input;
-		}
 		if (input instanceof SimpleUserNode &&
 			(((SimpleUserNode)input).getRealType() == UserNodeType.WORKING_SET || ((SimpleUserNode)input).getRealType() == UserNodeType.FORMS))
 		{
@@ -103,8 +103,15 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 				}
 			}
 		}
+
+		SimpleUserNode targetNode = null;
+		if (input instanceof SimpleUserNode &&
+			(((SimpleUserNode)input).getRealType() == UserNodeType.MEDIA || ((SimpleUserNode)input).getRealType() == UserNodeType.MEDIA_FOLDER))
+		{
+			targetNode = (SimpleUserNode)input;
+		}
 		project = null;
-		if (targetNode != null && FileTransfer.getInstance().isSupportedType(transferType))
+		if (targetNode != null && (FileTransfer.getInstance().isSupportedType(transferType) || UserNodeListDragSourceListener.dragObjects != null))
 		{
 			SimpleUserNode projectNode = targetNode.getAncestorOfType(ServoyProject.class);
 			if (projectNode != null)
@@ -184,51 +191,158 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 			project = null;
 			return true;
 		}
-		if (data instanceof Object[] && ((Object[])data).length == 1 && ((Object[])data)[0] instanceof PersistDragData)
+		if (data instanceof Object[])
 		{
-			PersistDragData formDragData = (PersistDragData)((Object[])data)[0];
-			ServoyProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(formDragData.solutionName);
-			IPersist persist = project.getSolution().getChild(formDragData.uuid);
-			if (persist instanceof Form)
+			final ArrayList<Media> draggedMedias = new ArrayList<Media>();
+			for (Object o : (Object[])data)
 			{
-				Form form = (Form)persist;
-				if (getCurrentTarget() instanceof SimpleUserNode &&
-					(((SimpleUserNode)getCurrentTarget()).getRealType() == UserNodeType.WORKING_SET || ((SimpleUserNode)getCurrentTarget()).getRealType() == UserNodeType.FORMS))
+				if (o instanceof PersistDragData)
 				{
-					Pair<String, String> formFilePath = SolutionSerializer.getFilePath(form, false);
-					IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(formFilePath.getLeft() + formFilePath.getRight()));
+					PersistDragData persistDragData = (PersistDragData)o;
+					ServoyProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(persistDragData.solutionName);
+					final IPersist persist = project.getSolution().getChild(persistDragData.uuid);
 
-					IFile scriptFile = ServoyModel.getWorkspace().getRoot().getFile(new Path(SolutionSerializer.getScriptPath(form, false)));
-					ServoyResourcesProject resourcesProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
-					if (resourcesProject != null)
+					if (persist instanceof Form && ((Object[])data).length == 1)
 					{
-						String workingSetName = resourcesProject.getContainingWorkingSet(form.getName(),
-							ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getFlattenedSolution().getSolutionNames());
-						if (workingSetName != null)
+						Form form = (Form)persist;
+						if (getCurrentTarget() instanceof SimpleUserNode &&
+							(((SimpleUserNode)getCurrentTarget()).getRealType() == UserNodeType.WORKING_SET || ((SimpleUserNode)getCurrentTarget()).getRealType() == UserNodeType.FORMS))
 						{
-							IWorkingSet ws = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSetName);
-							if (ws != null)
+							Pair<String, String> formFilePath = SolutionSerializer.getFilePath(form, false);
+							IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(formFilePath.getLeft() + formFilePath.getRight()));
+
+							IFile scriptFile = ServoyModel.getWorkspace().getRoot().getFile(new Path(SolutionSerializer.getScriptPath(form, false)));
+							ServoyResourcesProject resourcesProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
+							if (resourcesProject != null)
 							{
-								List<IAdaptable> files = new ArrayList<IAdaptable>(Arrays.asList(ws.getElements()));
-								boolean modified = files.remove(scriptFile);
-								if (files.remove(file) || modified)
+								String workingSetName = resourcesProject.getContainingWorkingSet(form.getName(),
+									ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getFlattenedSolution().getSolutionNames());
+								if (workingSetName != null)
 								{
-									ws.setElements(files.toArray(new IAdaptable[0]));
+									IWorkingSet ws = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSetName);
+									if (ws != null)
+									{
+										List<IAdaptable> files = new ArrayList<IAdaptable>(Arrays.asList(ws.getElements()));
+										boolean modified = files.remove(scriptFile);
+										if (files.remove(file) || modified)
+										{
+											ws.setElements(files.toArray(new IAdaptable[0]));
+										}
+									}
+								}
+							}
+
+							if (((SimpleUserNode)getCurrentTarget()).getRealType() == UserNodeType.WORKING_SET)
+							{
+								String workingSetName = ((SimpleUserNode)getCurrentTarget()).getName();
+								IWorkingSet ws = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSetName);
+								if (ws != null)
+								{
+									PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(file, new IWorkingSet[] { ws });
 								}
 							}
 						}
+						break;
 					}
-
-					if (((SimpleUserNode)getCurrentTarget()).getRealType() == UserNodeType.WORKING_SET)
+					else if (persist instanceof Media)
 					{
-						String workingSetName = ((SimpleUserNode)getCurrentTarget()).getName();
-						IWorkingSet ws = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSetName);
-						if (ws != null)
-						{
-							PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(file, new IWorkingSet[] { ws });
-						}
+						draggedMedias.add((Media)persist);
 					}
 				}
+			}
+
+			if (draggedMedias.size() > 0)
+			{
+				final YesYesToAllNoNoToAllAsker overwriteDlg = new YesYesToAllNoNoToAllAsker(UIUtils.getActiveShell(), "Warning");
+				final Object currentTarget = getCurrentTarget();
+				final int currentOp = getCurrentOperation();
+				Job job = new WorkspaceJob("Copy/Move Media") //$NON-NLS-1$
+				{
+					@Override
+					public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+					{
+						if (currentTarget instanceof PlatformSimpleUserNode)
+						{
+							Object nodeObject = ((PlatformSimpleUserNode)currentTarget).getRealObject();
+							String targetSolutionName = null;
+							String targetFolder = null;
+							if (nodeObject instanceof MediaNode && ((MediaNode)nodeObject).getType() == MediaNode.TYPE.FOLDER)
+							{
+								targetFolder = ((MediaNode)nodeObject).getName();
+								targetSolutionName = ((MediaNode)nodeObject).getMediaProvider().getName();
+							}
+							else if (nodeObject instanceof Solution)
+							{
+								targetFolder = ""; //$NON-NLS-1$
+								targetSolutionName = ((Solution)nodeObject).getName();
+							}
+							if (targetFolder != null && targetSolutionName != null)
+							{
+								for (Media m : draggedMedias)
+								{
+									String mediaName = m.getName();
+									String mediaParentName;
+									int idxPathSeparator = mediaName.lastIndexOf('/');
+									if (idxPathSeparator > 0) mediaParentName = mediaName.substring(0, idxPathSeparator);
+									else mediaParentName = ""; //$NON-NLS-1$
+
+									Solution persistSolution = (Solution)m.getAncestor(IRepository.SOLUTIONS);
+									if (!targetFolder.equals(mediaParentName) ||
+										(currentOp != DND.DROP_COPY && !targetSolutionName.equals(persistSolution.getName())))
+									{
+										ServoyProject targetProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
+											targetSolutionName);
+										IFolder dest = targetProject.getProject().getFolder(new Path(SolutionSerializer.MEDIAS_DIR + '/' + targetFolder));
+										Pair<String, String> mediaFilePath = SolutionSerializer.getFilePath(m, false);
+										IFile source = ServoyModel.getWorkspace().getRoot().getFile(
+											new Path(mediaFilePath.getLeft() + mediaFilePath.getRight()));
+
+										try
+										{
+											if (currentOp == DND.DROP_COPY || currentOp == DND.DROP_MOVE || currentOp == DND.DROP_DEFAULT)
+											{
+												WorkspaceFileAccess.mkdirs(dest);
+												IPath destFile = dest.getFullPath().append('/' + source.getName());
+												boolean doCopyMove = true;
+												if (targetProject.getProject().getWorkspace().getRoot().exists(destFile))
+												{
+													doCopyMove = false;
+													overwriteDlg.setMessage("Media '" + mediaName + "' already exist, overwrite ?");
+													if (overwriteDlg.userSaidYes())
+													{
+														IFile f = targetProject.getProject().getWorkspace().getRoot().getFile(destFile);
+														f.delete(true, null);
+														doCopyMove = true;
+													}
+												}
+												if (doCopyMove)
+												{
+													if (currentOp == DND.DROP_COPY) source.copy(destFile, true, null);
+													else source.move(destFile, true, null);
+												}
+											}
+										}
+										catch (final CoreException ex)
+										{
+											Display.getDefault().asyncExec(new Runnable()
+											{
+												public void run()
+												{
+													MessageDialog.openError(Display.getDefault().getActiveShell(), "Error",
+														"Could not copy/move media : " + ex.getMessage());
+													ServoyLog.logError("Could not copy/move media", ex);
+												}
+											});
+										}
+									}
+								}
+							}
+						}
+						return Status.OK_STATUS;
+					}
+				};
+				job.setUser(true);
+				job.schedule();
 			}
 		}
 		return false;

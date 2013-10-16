@@ -2724,19 +2724,29 @@ public class ServoyModel extends AbstractServoyModel
 				metaDataChanges.add(solution);
 				continue;
 			}
-			else if (file.getPath().startsWith(mediaDir.getPath() + File.separator) && file.exists())
+			else if (file.getPath().startsWith(mediaDir.getPath() + File.separator))
 			{
 				String name = file.getPath().substring(mediaDir.getPath().length() + 1).replace('\\', '/');
 				Solution editingSolution = servoyProject.getEditingSolution();
 				EclipseRepository eclipseRepository = (EclipseRepository)editingSolution.getRepository();
 
 				Media media = editingSolution.getMedia(name);
-				if (media == null)
+				if (media == null && file.exists())
 				{
-					media = editingSolution.createNewMedia(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), name);
+					// if there is a media in the modules with the same name, but no file on in the ws, then ignore it, because
+					// it is deleting
+					int skip_media_id = 0;
+					Media moduleMedia = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getMedia(name);
+					if (moduleMedia != null)
+					{
+						Pair<String, String> filePath = SolutionSerializer.getFilePath(moduleMedia, false);
+						if (!servoyProject.getProject().getWorkspace().getRoot().getFile(new Path(filePath.getLeft() + filePath.getRight())).exists()) skip_media_id = moduleMedia.getID();
+					}
+
+					media = editingSolution.createNewMedia(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), name, skip_media_id);
 					media.setMimeType(eclipseRepository.getContentType(name));
 				}
-				eclipseRepository.updateNodesInWorkspace(new IPersist[] { media }, false, false);
+				if (media != null) eclipseRepository.updateNodesInWorkspace(new IPersist[] { media }, false, false);
 			}
 
 			File parentFile = SolutionSerializer.getParentFile(projectFile, file);
