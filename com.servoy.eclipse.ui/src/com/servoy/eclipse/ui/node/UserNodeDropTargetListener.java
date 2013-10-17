@@ -253,30 +253,32 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 
 			if (draggedMedias.size() > 0)
 			{
-				final YesYesToAllNoNoToAllAsker overwriteDlg = new YesYesToAllNoNoToAllAsker(UIUtils.getActiveShell(), "Warning");
-				final Object currentTarget = getCurrentTarget();
-				final int currentOp = getCurrentOperation();
-				Job job = new WorkspaceJob("Copy/Move Media") //$NON-NLS-1$
+				Object currentTarget = getCurrentTarget();
+				if (currentTarget instanceof PlatformSimpleUserNode)
 				{
-					@Override
-					public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+					Object nodeObject = ((PlatformSimpleUserNode)currentTarget).getRealObject();
+					String targetSolutionName = null;
+					String targetFolder = null;
+					if (nodeObject instanceof MediaNode && ((MediaNode)nodeObject).getType() == MediaNode.TYPE.FOLDER)
 					{
-						if (currentTarget instanceof PlatformSimpleUserNode)
+						targetFolder = ((MediaNode)nodeObject).getName();
+						targetSolutionName = ((MediaNode)nodeObject).getMediaProvider().getName();
+					}
+					else if (nodeObject instanceof Solution)
+					{
+						targetFolder = ""; //$NON-NLS-1$
+						targetSolutionName = ((Solution)nodeObject).getName();
+					}
+					if (targetFolder != null && targetSolutionName != null)
+					{
+						final YesYesToAllNoNoToAllAsker overwriteDlg = new YesYesToAllNoNoToAllAsker(UIUtils.getActiveShell(), "Warning");
+						final int currentOp = getCurrentOperation();
+						final String fTargetFolder = targetFolder;
+						final String fTargetSolutionName = targetSolutionName;
+						Job job = new WorkspaceJob("Copy/Move Media") //$NON-NLS-1$
 						{
-							Object nodeObject = ((PlatformSimpleUserNode)currentTarget).getRealObject();
-							String targetSolutionName = null;
-							String targetFolder = null;
-							if (nodeObject instanceof MediaNode && ((MediaNode)nodeObject).getType() == MediaNode.TYPE.FOLDER)
-							{
-								targetFolder = ((MediaNode)nodeObject).getName();
-								targetSolutionName = ((MediaNode)nodeObject).getMediaProvider().getName();
-							}
-							else if (nodeObject instanceof Solution)
-							{
-								targetFolder = ""; //$NON-NLS-1$
-								targetSolutionName = ((Solution)nodeObject).getName();
-							}
-							if (targetFolder != null && targetSolutionName != null)
+							@Override
+							public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 							{
 								for (Media m : draggedMedias)
 								{
@@ -287,12 +289,12 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 									else mediaParentName = ""; //$NON-NLS-1$
 
 									Solution persistSolution = (Solution)m.getAncestor(IRepository.SOLUTIONS);
-									if (!targetFolder.equals(mediaParentName) ||
-										(currentOp != DND.DROP_COPY && !targetSolutionName.equals(persistSolution.getName())))
+									if (!fTargetFolder.equals(mediaParentName) ||
+										(currentOp != DND.DROP_COPY && !fTargetSolutionName.equals(persistSolution.getName())))
 									{
 										ServoyProject targetProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
-											targetSolutionName);
-										IFolder dest = targetProject.getProject().getFolder(new Path(SolutionSerializer.MEDIAS_DIR + '/' + targetFolder));
+											fTargetSolutionName);
+										IFolder dest = targetProject.getProject().getFolder(new Path(SolutionSerializer.MEDIAS_DIR + '/' + fTargetFolder));
 										Pair<String, String> mediaFilePath = SolutionSerializer.getFilePath(m, false);
 										IFile source = ServoyModel.getWorkspace().getRoot().getFile(
 											new Path(mediaFilePath.getLeft() + mediaFilePath.getRight()));
@@ -336,13 +338,13 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 										}
 									}
 								}
+								return Status.OK_STATUS;
 							}
-						}
-						return Status.OK_STATUS;
+						};
+						job.setUser(true);
+						job.schedule();
 					}
-				};
-				job.setUser(true);
-				job.schedule();
+				}
 			}
 		}
 		return false;
