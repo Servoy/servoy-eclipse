@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -342,6 +343,7 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 							}
 						};
 						job.setUser(true);
+						job.setRule(ResourcesPlugin.getWorkspace().getRoot());
 						job.schedule();
 					}
 				}
