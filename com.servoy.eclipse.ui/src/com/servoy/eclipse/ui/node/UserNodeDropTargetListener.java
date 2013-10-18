@@ -262,7 +262,7 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 					String targetFolder = null;
 					if (nodeObject instanceof MediaNode && ((MediaNode)nodeObject).getType() == MediaNode.TYPE.FOLDER)
 					{
-						targetFolder = ((MediaNode)nodeObject).getName();
+						targetFolder = ((MediaNode)nodeObject).getPath();
 						targetSolutionName = ((MediaNode)nodeObject).getMediaProvider().getName();
 					}
 					else if (nodeObject instanceof Solution)
