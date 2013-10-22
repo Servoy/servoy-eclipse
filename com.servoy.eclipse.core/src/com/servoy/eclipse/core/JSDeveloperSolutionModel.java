@@ -19,13 +19,20 @@ package com.servoy.eclipse.core;
 
 import java.util.List;
 
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.resource.PersistEditorInput;
+import com.servoy.eclipse.core.util.RunInWorkspaceJob;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -66,28 +73,39 @@ public class JSDeveloperSolutionModel
 	 */
 	public void js_save()
 	{
-		final IFileAccess wfa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
-		Solution solutionCopy = state.getFlattenedSolution().getSolutionCopy();
-		try
+		IWorkspaceRunnable saveJob = new IWorkspaceRunnable()
 		{
-			EclipseRepository eclipseRepository = (EclipseRepository)ServoyModel.getDeveloperRepository();
-			eclipseRepository.loadForeignElementsIDs(solutionCopy);
-			List<IPersist> allObjectsAsList = solutionCopy.getAllObjectsAsList();
-			for (IPersist persist : allObjectsAsList)
+			@Override
+			public void run(IProgressMonitor monitor) throws CoreException
 			{
-				checkParent(persist);
-				SolutionSerializer.writePersist(persist, wfa, ServoyModel.getDeveloperRepository(), true, false, true);
-				if (persist instanceof AbstractBase)
+				final IFileAccess wfa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
+				Solution solutionCopy = state.getFlattenedSolution().getSolutionCopy();
+				try
 				{
-					((AbstractBase)persist).setParent(solutionCopy);
+					EclipseRepository eclipseRepository = (EclipseRepository)ServoyModel.getDeveloperRepository();
+					eclipseRepository.loadForeignElementsIDs(solutionCopy);
+					List<IPersist> allObjectsAsList = solutionCopy.getAllObjectsAsList();
+					for (IPersist persist : allObjectsAsList)
+					{
+						checkParent(persist);
+						SolutionSerializer.writePersist(persist, wfa, ServoyModel.getDeveloperRepository(), true, false, true);
+						if (persist instanceof AbstractBase)
+						{
+							((AbstractBase)persist).setParent(solutionCopy);
+						}
+					}
+					eclipseRepository.clearForeignElementsIds();
+				}
+				catch (RepositoryException e)
+				{
+					Debug.error(e);
 				}
 			}
-			eclipseRepository.clearForeignElementsIds();
-		}
-		catch (RepositoryException e)
-		{
-			Debug.error(e);
-		}
+		};
+		RunInWorkspaceJob job = new RunInWorkspaceJob("Save solution data", saveJob);
+		job.setRule(ServoyModel.getWorkspace().getRoot());
+		job.setUser(false);
+		job.schedule();
 	}
 
 	/**
@@ -109,26 +127,38 @@ public class JSDeveloperSolutionModel
 		}
 		if (name != null)
 		{
-			final IFileAccess wfa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
-			Solution solutionCopy = state.getFlattenedSolution().getSolutionCopy();
-			try
+			final String formName = name;
+			WorkspaceJob saveJob = new WorkspaceJob("Save solution data")
 			{
-				Form frm = solutionCopy.getForm(name);
-				if (frm == null) throw new IllegalArgumentException("JSForm is not a solution model created/altered form"); //$NON-NLS-1$
+				@Override
+				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+				{
+					final IFileAccess wfa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
+					Solution solutionCopy = state.getFlattenedSolution().getSolutionCopy();
+					try
+					{
+						Form frm = solutionCopy.getForm(formName);
+						if (frm == null) throw new IllegalArgumentException("JSForm is not a solution model created/altered form"); //$NON-NLS-1$
 
-				checkParent(frm);
+						checkParent(frm);
 
-				EclipseRepository eclipseRepository = (EclipseRepository)ServoyModel.getDeveloperRepository();
-				eclipseRepository.loadForeignElementsIDs(frm);
-				SolutionSerializer.writePersist(frm, wfa, ServoyModel.getDeveloperRepository(), true, false, true);
-				eclipseRepository.clearForeignElementsIds();
+						EclipseRepository eclipseRepository = (EclipseRepository)ServoyModel.getDeveloperRepository();
+						eclipseRepository.loadForeignElementsIDs(frm);
+						SolutionSerializer.writePersist(frm, wfa, ServoyModel.getDeveloperRepository(), true, false, true);
+						eclipseRepository.clearForeignElementsIds();
 
-				frm.setParent(solutionCopy);
-			}
-			catch (RepositoryException e)
-			{
-				Debug.error(e);
-			}
+						frm.setParent(solutionCopy);
+					}
+					catch (RepositoryException e)
+					{
+						Debug.error(e);
+					}
+					return Status.OK_STATUS;
+				}
+			};
+			saveJob.setUser(false);
+			saveJob.setRule(ServoyModel.getWorkspace().getRoot());
+			saveJob.schedule();
 		}
 	}
 
