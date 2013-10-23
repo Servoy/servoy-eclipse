@@ -55,9 +55,9 @@ public class ValueListSearch extends AbstractPersistSearch
 	public IStatus run(IProgressMonitor monitor) throws OperationCanceledException
 	{
 		IResource[] scopes = getScopes((Solution)valueList.getRootObject());
-		TextSearchResultCollector collector = getResultCollector();
+		TextSearchResultCollector collector = getResultCollector(valueList.getName() + ".val");
 
-		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm" }, true);
+		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm", "*.val" }, true);
 		TextSearchEngine.create().search(scope, collector, Pattern.compile(valueList.getUUID().toString()), monitor);
 
 		scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.js" }, true);

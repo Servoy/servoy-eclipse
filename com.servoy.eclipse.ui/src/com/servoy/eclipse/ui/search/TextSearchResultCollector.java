@@ -36,18 +36,26 @@ class TextSearchResultCollector extends TextSearchRequestor
 {
 
 	private final AbstractTextSearchResult fResult;
+	private final String fileToSkip;
 	private ArrayList<FileMatch> fCachedMatches;
 
 	TextSearchResultCollector(AbstractTextSearchResult result)
 	{
 		fResult = result;
+		this.fileToSkip = "";
+	}
 
+	TextSearchResultCollector(AbstractTextSearchResult result, String fileToSkip)
+	{
+		fResult = result;
+		this.fileToSkip = fileToSkip;
 	}
 
 	@Override
 	public boolean acceptFile(IFile file) throws CoreException
 	{
 		flushMatches();
+		if (file.getFullPath().segment(file.getFullPath().segmentCount() - 1).equals(fileToSkip)) return false;
 		return true;
 	}
 
