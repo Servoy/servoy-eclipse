@@ -1120,15 +1120,35 @@ public class ServoyModel extends AbstractServoyModel
 					{
 						ServoyLog.logError(
 							"Error activating solution. It is not properly initialized. Please check for problems in the underlying file representation.", null);
+
 						Display.getDefault().syncExec(new Runnable()
 						{
 							public void run()
 							{
-								MessageDialog.openError(UIUtils.getActiveShell(), "Error activating solution",
-									"Solution cannot be read. Please check for problems in the underlying file representation.");
+								MessageDialog.openError(
+									UIUtils.getActiveShell(),
+									"Error activating solution",
+									"Solution " +
+										project +
+										" cannot be activated. The Solution or some of its modules was created or updated by a newer version of Servoy. Either switch to a newer version of Servoy or rollback the changes made.");
 							}
 						});
 						return;
+					}
+					else if (project != null && project.getSolutionMetaData().getFileVersion() > AbstractRepository.repository_version)
+					{
+						Display.getDefault().asyncExec(new Runnable()
+						{
+							public void run()
+							{
+								MessageDialog.openWarning(
+									UIUtils.getActiveShell(),
+									"Warning activating solution",
+									"Solution " +
+										project +
+										" was activated, but with errors! The Solution or one of its modules was created or updated by a newer version of Servoy. You should either switch to a newer version of Servoy or rollback the changes made.");
+							}
+						});
 					}
 
 					progressMonitor.worked(1);

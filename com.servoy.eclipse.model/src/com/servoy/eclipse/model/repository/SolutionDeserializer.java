@@ -2111,10 +2111,6 @@ public class SolutionDeserializer
 				{
 					throw new RepositoryException("Cannot handle files with invalid version (<= 0)"); //$NON-NLS-1$
 				}
-				if (fileVersion > AbstractRepository.repository_version)
-				{
-					throw new RepositoryException("Cannot handle file versions greater than " + AbstractRepository.repository_version); //$NON-NLS-1$
-				}
 			}
 			UUID rootObjectUuid = UUID.fromString(obj.getString(SolutionSerializer.PROP_UUID));
 			int objectTypeId = obj.getInt(SolutionSerializer.PROP_TYPEID);

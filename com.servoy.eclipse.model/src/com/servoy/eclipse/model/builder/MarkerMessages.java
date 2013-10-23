@@ -138,6 +138,12 @@ public class MarkerMessages
 	public static ServoyMarker SolutionDeserializeError = new ServoyMarker(
 		"Error while reading solution \"{0}\": {1}.", ServoyBuilder.PROJECT_DESERIALIZE_MARKER_TYPE); //$NON-NLS-1$
 
+	/**
+	 * This message appears when a checked-out solution/module has a higher fileVersion than the current version of the repository.    
+	 */
+	public static ServoyMarker SolutionWithHigherFileVersion = new ServoyMarker(
+		"{0} \"{1}\" has a higher version of Servoy.", ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE); //$NON-NLS-1$
+
 	public static ServoyMarker SolutionBadStructure_EntityManuallyMoved = new ServoyMarker(
 		"Structure of the files for solution \"{0}\" is broken (incorrect parent-child combination). Entity \"{1}\" has been manually moved?", ServoyBuilder.BAD_STRUCTURE_MARKER_TYPE); //$NON-NLS-1$
 

@@ -96,6 +96,7 @@ import com.servoy.j2db.dataprocessing.IPropertyDescriptorProvider;
 import com.servoy.j2db.dataprocessing.ITypedColumnConverter;
 import com.servoy.j2db.dataprocessing.IUIConverter;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Column;
@@ -543,6 +544,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> CONSTANTS_USED = new Pair<String, ProblemSeverity>("constantsUsed", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> SOLUTION_USED_AS_WEBSERVICE_MUSTAUTHENTICATE_PROBLEM = new Pair<String, ProblemSeverity>(
 		"solutionUsedAsWebServiceMustAuthenticateProblem", ProblemSeverity.WARNING); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> SOLUTION_WITH_HIGHER_FILE_VERSION = new Pair<String, ProblemSeverity>(
+		"solutionWithHigherFileVersion", ProblemSeverity.ERROR); //$NON-NLS-1$
 
 	private SAXParserFactory parserFactory;
 	private final HashSet<String> referencedProjectsSet = new HashSet<String>();
@@ -1851,6 +1854,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					}
 				}
 
+				if (!servoyModel.shouldBeModuleOfActiveSolution(solution.getName()) &&
+					solution.getSolutionMetaData().getFileVersion() > AbstractRepository.repository_version)
+				{
+					ServoyMarker mk = MarkerMessages.SolutionWithHigherFileVersion.fill("Solution", solution.getName());
+					addMarker(project, mk.getType(), mk.getText(), -1, SOLUTION_WITH_HIGHER_FILE_VERSION, IMarker.PRIORITY_HIGH, null, null);
+				}
+
 				solution.acceptVisitor(new IPersistVisitor()
 				{
 					private final ServoyProject[] modules = getSolutionModules(servoyProject);
@@ -1952,6 +1962,15 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 															module.getSolution().getName());
 														deleteMarkers(moduleProject, DUPLICATE_UUID);
 														deleteMarkers(moduleProject, DUPLICATE_SIBLING_UUID);
+														deleteMarkers(moduleProject, SOLUTION_PROBLEM_MARKER_TYPE);
+
+														if (module.getSolutionMetaData().getFileVersion() > AbstractRepository.repository_version)
+														{
+															ServoyMarker mk = MarkerMessages.SolutionWithHigherFileVersion.fill("Module",
+																module.getSolution().getName());
+															addMarker(moduleProject, mk.getType(), mk.getText(), -1, SOLUTION_WITH_HIGHER_FILE_VERSION,
+																IMarker.PRIORITY_HIGH, null, null);
+														}
 
 														module.getSolution().acceptVisitor(new IPersistVisitor()
 														{
