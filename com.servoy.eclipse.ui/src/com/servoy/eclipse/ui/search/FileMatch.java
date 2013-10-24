@@ -33,12 +33,19 @@ public class FileMatch extends Match
 	private final LineElement fLineElement;
 	private Region fOriginalLocation;
 	private boolean possibleMatch;
+	private boolean overrideMatch = false;
 
 	public FileMatch(IFile element, int offset, int length, LineElement lineEntry)
+	{
+		this(element, offset, length, lineEntry, false);
+	}
+
+	public FileMatch(IFile element, int offset, int length, LineElement lineEntry, boolean overrideMatch)
 	{
 		super(element, offset, length);
 		Assert.isLegal(lineEntry != null);
 		fLineElement = lineEntry;
+		this.overrideMatch = overrideMatch;
 	}
 
 	@Override
@@ -111,5 +118,13 @@ public class FileMatch extends Match
 	public boolean isPossibleMatch()
 	{
 		return possibleMatch;
+	}
+
+	/**
+	 * @return the overrideMatch
+	 */
+	public boolean isOverrideMatch()
+	{
+		return overrideMatch;
 	}
 }

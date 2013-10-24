@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.ui.search;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
@@ -31,12 +33,14 @@ import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.search.IDLTKSearchConstants;
 import org.eclipse.search.core.text.TextSearchEngine;
-import org.eclipse.search.core.text.TextSearchRequestor;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.text.FileTextSearchScope;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
@@ -66,10 +70,10 @@ public class ScriptMethodSearch extends DLTKSearchEngineSearch
 	public IStatus run(IProgressMonitor monitor) throws OperationCanceledException
 	{
 		IResource[] scopes = getScopes((Solution)method.getRootObject());
-		final TextSearchRequestor collector = getResultCollector();
+		final TextSearchResultCollector collector = getResultCollector();
 
 		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "solution_settings.obj", "*.frm", "*.tbl", "*.val" }, true);
-		TextSearchEngine.create().search(scope, collector, createSearchPattern(method.getUUID().toString()), monitor);
+		TextSearchEngine.create().search(scope, collector, createSearchPattern(new String[] { method.getUUID().toString() }), monitor);
 
 		if (method.getParent() instanceof Solution)
 		{
@@ -78,15 +82,39 @@ public class ScriptMethodSearch extends DLTKSearchEngineSearch
 			if (ScriptVariable.GLOBAL_SCOPE.equals(method.getScopeName()))
 			{
 				// legacy globals.xx, also matches scopes.globals.xx
-				TextSearchEngine.create().search(scope, collector, createSearchPattern(ScriptVariable.GLOBALS_DOT_PREFIX + method.getName()), monitor);
+				TextSearchEngine.create().search(scope, collector, createSearchPattern(new String[] { ScriptVariable.GLOBALS_DOT_PREFIX + method.getName() }),
+					monitor);
 			}
 			else
 			{
 				// scopes.scopename.xx
-				TextSearchEngine.create().search(scope, collector, createSearchPattern(method.getPrefixedName()), monitor);
+				TextSearchEngine.create().search(scope, collector, createSearchPattern(new String[] { method.getPrefixedName() }), monitor);
 			}
 		}
 
+		if (method.getParent() instanceof Form)
+		{
+			Form persistForm = (Form)method.getParent();
+			Form superForm = persistForm.getExtendsForm();
+			List<String> parentMethods = new ArrayList<String>();
+			while (superForm != null)
+			{
+				IPersist superMethod = AbstractBase.selectByName(superForm.getAllObjects(), method.getName());
+				if (superMethod instanceof ScriptMethod)
+				{
+					parentMethods.add(superMethod.getUUID().toString());
+				}
+				superForm = superForm.getExtendsForm();
+			}
+			if (parentMethods.size() > 0)
+			{
+				scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm" }, true);
+				collector.setOverrideColecting(true);
+				TextSearchEngine.create().search(scope, collector, createSearchPattern(parentMethods.toArray(new String[0])), monitor);
+				collector.setOverrideColecting(false);
+			}
+
+		}
 		String scriptPath = SolutionSerializer.getScriptPath(method, false);
 		IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
 		ISourceModule sourceModule = DLTKCore.createSourceModuleFrom(file);
@@ -96,9 +124,18 @@ public class ScriptMethodSearch extends DLTKSearchEngineSearch
 		return Status.OK_STATUS;
 	}
 
-	public static Pattern createSearchPattern(String fixedString)
+	public static Pattern createSearchPattern(String[] fixedString)
 	{
-		return Pattern.compile("\\b" + fixedString.replaceAll("\\.", "\\\\.") + "\\b"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		String pattern = "";
+		for (int i = 0; i < fixedString.length; i++)
+		{
+			if (i > 0)
+			{
+				pattern += "|";//$NON-NLS-1$
+			}
+			pattern += "\\b" + fixedString[i].replaceAll("\\.", "\\\\.") + "\\b"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		}
+		return Pattern.compile(pattern);
 	}
 
 	/*

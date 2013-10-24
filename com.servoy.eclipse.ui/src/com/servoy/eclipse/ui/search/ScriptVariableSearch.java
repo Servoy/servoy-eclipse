@@ -95,12 +95,13 @@ public class ScriptVariableSearch extends DLTKSearchEngineSearch
 			{
 				// legacy globals.xx, also matches scopes.globals.xx
 				TextSearchEngine.create().search(scope, collector,
-					ScriptMethodSearch.createSearchPattern(ScriptVariable.GLOBALS_DOT_PREFIX + variable.getName()), monitor);
+					ScriptMethodSearch.createSearchPattern(new String[] { ScriptVariable.GLOBALS_DOT_PREFIX + variable.getName() }), monitor);
 			}
 			else
 			{
 				// scopes.scopename.xx
-				TextSearchEngine.create().search(scope, collector, ScriptMethodSearch.createSearchPattern(ScopesUtils.getScopeString(variable)), monitor);
+				TextSearchEngine.create().search(scope, collector,
+					ScriptMethodSearch.createSearchPattern(new String[] { ScopesUtils.getScopeString(variable) }), monitor);
 			}
 		}
 		else

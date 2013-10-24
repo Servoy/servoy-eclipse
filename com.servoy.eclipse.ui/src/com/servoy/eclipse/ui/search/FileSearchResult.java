@@ -42,6 +42,8 @@ public class FileSearchResult extends AbstractTextSearchResult implements IEdito
 
 	private int possibleMatch;
 
+	private int overrideMatch;
+
 	public FileSearchResult(ISearchQuery job)
 	{
 		fQuery = job;
@@ -58,9 +60,14 @@ public class FileSearchResult extends AbstractTextSearchResult implements IEdito
 		String noneExactMatchLabel = "";
 		if (possibleMatch > 0)
 		{
-			noneExactMatchLabel = " (" + possibleMatch + " none exact matches)";
+			noneExactMatchLabel = " (" + possibleMatch + " non exact matches)";
 		}
-		return fQuery.getLabel() + " found " + getMatchCount() + " references" + noneExactMatchLabel;
+		String overrideLabel = "";
+		if (overrideMatch > 0)
+		{
+			overrideLabel = " (" + overrideMatch + " possible match(es) via override mechanism)";
+		}
+		return fQuery.getLabel() + " found " + getMatchCount() + " references" + noneExactMatchLabel + overrideLabel;
 	}
 
 	public String getTooltip()
@@ -130,7 +137,10 @@ public class FileSearchResult extends AbstractTextSearchResult implements IEdito
 		{
 			possibleMatch++;
 		}
-
+		if (match instanceof FileMatch && ((FileMatch)match).isOverrideMatch())
+		{
+			overrideMatch++;
+		}
 		super.addMatch(match);
 	}
 
@@ -147,6 +157,10 @@ public class FileSearchResult extends AbstractTextSearchResult implements IEdito
 			if (matche instanceof FileMatch && ((FileMatch)matche).isPossibleMatch())
 			{
 				possibleMatch++;
+			}
+			if (matche instanceof FileMatch && ((FileMatch)matche).isOverrideMatch())
+			{
+				overrideMatch++;
 			}
 		}
 		super.addMatches(matches);
