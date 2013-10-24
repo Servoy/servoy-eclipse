@@ -31577,13 +31577,15 @@ real and display params both null: return the whole list
 only display is specified, called by a typeahead, return a filtered list
 only real value is specified, called when the list doesnt contain the real value for the give record value, this will insert this value into the existing list.
 
-In find mode the record with be the FindRecord which is just like a normal JSRecord (DataRecord) it has the same properties (column/dataproviders) but doesnt have its methods (like isEditing())]]></description>
+In find mode the record with be the FindRecord which is just like a normal JSRecord (DataRecord) it has the same properties (column/dataproviders) but doesnt have its methods (like isEditing())
+
+The last argument is rawDisplayValue which contains the same text as displayValue but without converting it to lowercase.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[A global method that provides the data for the valuelist.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[var listProvider = solutionModel.newGlobalMethod('globals', 'function getDataSetForValueList(displayValue, realValue, record, valueListName, findMode) {' +
+            <sample clientSupport="wc,sc"><![CDATA[var listProvider = solutionModel.newGlobalMethod('globals', 'function getDataSetForValueList(displayValue, realValue, record, valueListName, findMode, rawDisplayValue) {' +
 		'	' +
 		'var args = null;' +
 		'/** @type QBSelect<db:/example_data/employees> */' +
