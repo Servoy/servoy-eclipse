@@ -60,30 +60,22 @@ public abstract class AbstractPersistSearch implements ISearchQuery
 	}
 
 	/**
-	 * fileToSkip an optional argument with the name of the file to skip (currently it supports only one  or none)
-	 * @param filesToSkip TODO
 	 * @return
 	 */
-	protected TextSearchResultCollector getResultCollector(String... fileToSkip)
+	protected TextSearchResultCollector getResultCollector()
 	{
-		String skipFile = fileToSkip.length == 0 ? "" : fileToSkip[0];
 		AbstractTextSearchResult searchResult = (AbstractTextSearchResult)getSearchResult();
 		searchResult.removeAll();
-		return createTextSearchCollector(searchResult, skipFile);
-	}
-
-	protected TextSearchResultCollector createTextSearchCollector(AbstractTextSearchResult searchResult)
-	{
-		return new TextSearchResultCollector(searchResult);
+		return createTextSearchCollector(searchResult);
 	}
 
 	/**
 	 * @param searchResult
 	 * @return
 	 */
-	protected TextSearchResultCollector createTextSearchCollector(AbstractTextSearchResult searchResult, String fileToSkip)
+	protected TextSearchResultCollector createTextSearchCollector(AbstractTextSearchResult searchResult)
 	{
-		return new TextSearchResultCollector(searchResult, fileToSkip);
+		return new TextSearchResultCollector(searchResult);
 	}
 
 	/**
