@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Shell;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.OptionDialog;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.core.util.UIUtils.ExtendedInputDialog;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
@@ -249,17 +250,18 @@ public class MovePersistAction extends AbstractMovePersistAction
 						}
 					}
 				}
+
+				if (duplicate != null)
+				{
+					// delete duplicate Media
+					((EclipseRepository)rootObject.getRepository()).deleteObject(editingNode);
+					servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
+				}
 			}
 			catch (IOException e)
 			{
 				ServoyLog.logError(e);
-			}
-
-			if (duplicate != null)
-			{
-				// delete duplicate Media
-				((EclipseRepository)rootObject.getRepository()).deleteObject(editingNode);
-				servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
+				UIUtils.reportError("Cannot move " + persistString, "Unexpected error while moving " + persistString + ", check log for failure reason.");
 			}
 		}
 	}
