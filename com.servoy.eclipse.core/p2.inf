@@ -8,4 +8,4 @@ addRepository(type:0,name:QuickImage,location:http${#58}//psnet.nu/eclipse/updat
 
 #Adding description for the Servoy updates
 update.id = servoy
-update.description = This Servoy update has repository version 44.
+update.description = Servoy 7.3.0, buildnumber 2018
