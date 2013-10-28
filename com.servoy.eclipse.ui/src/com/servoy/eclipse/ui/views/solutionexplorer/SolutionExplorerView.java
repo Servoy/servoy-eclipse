@@ -210,6 +210,7 @@ import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ActivateSolutionAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.AddAsModuleAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.AddModuleAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.AddWorkingSetAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ChangeResourcesProjectAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.CollapseTreeAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ContextAction;
@@ -254,7 +255,6 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewSybaseDbAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewTableAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewValueListAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewVariableAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.AddWorkingSetAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenI18NAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenMediaAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenNewFormWizardAction;
@@ -1635,10 +1635,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 							}
 						}
 					}
-					for (IPersist persist : parents)
-					{
-						((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshContent(persist);
-					}
+
+					((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshContent(parents);
 					if (list.getContentProvider() != null)
 					{
 						((SolutionExplorerListContentProvider)list.getContentProvider()).persistChanges(changes);
