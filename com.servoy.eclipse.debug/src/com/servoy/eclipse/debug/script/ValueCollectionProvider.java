@@ -272,38 +272,48 @@ public class ValueCollectionProvider implements IMemberEvaluator
 
 				superForms = ValueCollectionFactory.createScopeValueCollection();
 				List<IValueCollection> superCollections = new ArrayList<IValueCollection>();
-				while (superForm != null)
+				Boolean resolving = resolve.get();
+				try
 				{
-					String scriptPath = SolutionSerializer.getScriptPath(superForm, false);
-					IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
-					IValueCollection vc = null;
-					IValueCollection collection = getValueCollection(file);
-					if (collection != null)
+					// do resolve the whole super form structure.
+					resolve.remove();
+					while (superForm != null)
 					{
-						vc = ValueCollectionFactory.createScopeValueCollection();
-						((IValueProvider)vc).getValue().addValue(((IValueProvider)collection).getValue());
-					}
-					if (vc != null)
-					{
-						Set<String> children = vc.getDirectChildren();
-						for (String child : children)
+						String scriptPath = SolutionSerializer.getScriptPath(superForm, false);
+						IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
+						IValueCollection vc = null;
+						IValueCollection collection = getValueCollection(file);
+						if (collection != null)
 						{
-							IValueReference chld = vc.getChild(child);
-							chld.setAttribute(IReferenceAttributes.HIDE_ALLOWED, Boolean.TRUE);
-							// don't set the child to private if the form itself did also implement it.
-							if (form.getScriptMethod(child) == null && form.getScriptVariable(child) == null)
+							vc = ValueCollectionFactory.createScopeValueCollection();
+							((IValueProvider)vc).getValue().addValue(((IValueProvider)collection).getValue());
+						}
+						if (vc != null)
+						{
+							Set<String> children = vc.getDirectChildren();
+							for (String child : children)
 							{
-								Object attribute = chld.getAttribute(IReferenceAttributes.METHOD);
-								if (attribute == null) attribute = chld.getAttribute(IReferenceAttributes.VARIABLE);
-								if (attribute instanceof IMember && ((IMember)attribute).getVisibility() == Visibility.PRIVATE)
+								IValueReference chld = vc.getChild(child);
+								chld.setAttribute(IReferenceAttributes.HIDE_ALLOWED, Boolean.TRUE);
+								// don't set the child to private if the form itself did also implement it.
+								if (form.getScriptMethod(child) == null && form.getScriptVariable(child) == null)
 								{
-									chld.setAttribute(PRIVATE, Boolean.TRUE);
+									Object attribute = chld.getAttribute(IReferenceAttributes.METHOD);
+									if (attribute == null) attribute = chld.getAttribute(IReferenceAttributes.VARIABLE);
+									if (attribute instanceof IMember && ((IMember)attribute).getVisibility() == Visibility.PRIVATE)
+									{
+										chld.setAttribute(PRIVATE, Boolean.TRUE);
+									}
 								}
 							}
+							superCollections.add(vc);
 						}
-						superCollections.add(vc);
+						superForm = fs.getForm(superForm.getExtendsID());
 					}
-					superForm = fs.getForm(superForm.getExtendsID());
+				}
+				finally
+				{
+					if (resolving != null) resolve.set(Boolean.TRUE);
 				}
 				for (int i = superCollections.size(); --i >= 0;)
 				{
