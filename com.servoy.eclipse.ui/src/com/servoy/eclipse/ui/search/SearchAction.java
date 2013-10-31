@@ -34,6 +34,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
@@ -110,6 +111,10 @@ public class SearchAction extends Action implements ISelectionChangedListener
 		{
 			if (((ColumnWrapper)selectedObject).getColumn() instanceof Column) query = new DataProviderSearch(((ColumnWrapper)selectedObject).getColumn());
 		}
+		else if (selectedObject instanceof Media)
+		{
+			query = new MediaSearch((Media)selectedObject);
+		}
 		if (query != null) NewSearchUI.runQueryInBackground(query);
 	}
 
@@ -131,7 +136,8 @@ public class SearchAction extends Action implements ISelectionChangedListener
 				node.getType() == UserNodeType.GLOBAL_VARIABLE_ITEM || node.getType() == UserNodeType.FORM_VARIABLE_ITEM ||
 				node.getType() == UserNodeType.SERVER || node.getType() == UserNodeType.TABLE || node.getType() == UserNodeType.FORM_ELEMENTS_ITEM ||
 				node.getType() == UserNodeType.BEAN || node.getType() == UserNodeType.VIEW || node.getType() == UserNodeType.TABLE_COLUMNS_ITEM ||
-				node.getType() == UserNodeType.RELATION_COLUMN || node.getType() == UserNodeType.CALCULATIONS_ITEM)
+				node.getType() == UserNodeType.RELATION_COLUMN || node.getType() == UserNodeType.CALCULATIONS_ITEM ||
+				node.getType() == UserNodeType.MEDIA_IMAGE)
 			{
 				selectedObject = node.getRealObject();
 				if (selectedObject instanceof Object[])
