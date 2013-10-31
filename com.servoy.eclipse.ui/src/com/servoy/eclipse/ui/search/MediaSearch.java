@@ -32,10 +32,10 @@ import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Solution;
 
 /**
- * An {@link ISearchQuery} implementation for finding valuelists in frm and js files.
+ * An {@link ISearchQuery} implementation for finding Medias in frm and js files.
  * 
- * @author jcompagner
- * @since 6.0
+ * @author obuligan
+ * @since 7.4
  */
 public class MediaSearch extends AbstractPersistSearch
 {
