@@ -18,6 +18,7 @@
 package com.servoy.eclipse.exporter.mobile.ui.wizard;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,24 +53,52 @@ import com.servoy.j2db.util.ServoyJSONObject;
  */
 public class PhoneGapConnector
 {
+
+	private static final String AUTH_TOKEN_PARAM = "?auth_token="; //$NON-NLS-1$
+	private static final String URL_PHONEGAP_KEYS = "https://build.phonegap.com/api/v1/keys"; //$NON-NLS-1$
+	private static final String URL_PHONEGAP_CLOUD = "https://build.phonegap.com/api/v1/apps"; //$NON-NLS-1$
+
 	private ServoyJSONObject jsonContent;
 	private final DefaultHttpClient client = new DefaultHttpClient();
 	private JSONArray iosCertificates;
 	private JSONArray androidCertificates;
 	private JSONArray blackberryCertificates;
+	private String authToken = null;
+
+	public String loadPhoneGapAcount(String authorisationToken)
+	{
+		authToken = authorisationToken;
+		return loadPhoneGapAccount();
+	}
+
+	protected String getURL(String url)
+	{
+		return authToken != null ? url + AUTH_TOKEN_PARAM + authToken : url;
+	}
 
 	public String loadPhoneGapAcount(String username, String password)
 	{
 		try
 		{
-			String url = "https://build.phonegap.com/api/v1/apps";
+			URL _url = new URL(URL_PHONEGAP_CLOUD);
 
 			BasicCredentialsProvider bcp = new BasicCredentialsProvider();
-			URL _url = new URL(url);
 			bcp.setCredentials(new AuthScope(_url.getHost(), _url.getPort()), new UsernamePasswordCredentials(username, password));
 			client.setCredentialsProvider(bcp);
 
-			HttpResponse response = client.execute(new HttpGet(url));
+			return loadPhoneGapAccount();
+		}
+		catch (MalformedURLException e)
+		{
+			return e.getMessage();
+		}
+	}
+
+	protected String loadPhoneGapAccount()
+	{
+		try
+		{
+			HttpResponse response = client.execute(new HttpGet(getURL(URL_PHONEGAP_CLOUD)));
 			String content = EntityUtils.toString(response.getEntity());
 			jsonContent = new ServoyJSONObject(content, false);
 			if (jsonContent.has("error"))
@@ -77,7 +106,7 @@ public class PhoneGapConnector
 				return jsonContent.getString("error");
 			}
 
-			response = client.execute(new HttpGet("https://build.phonegap.com/api/v1/keys"));
+			response = client.execute(new HttpGet(getURL(URL_PHONEGAP_KEYS)));
 			JSONObject keys = new ServoyJSONObject(EntityUtils.toString(response.getEntity()), false);
 			if (keys.has("keys"))
 			{
@@ -111,8 +140,8 @@ public class PhoneGapConnector
 						for (int i = 0; i < apps.length(); i++)
 						{
 							int appID = apps.getJSONObject(i).getInt("id");
-							url = "https://build.phonegap.com/api/v1/apps/" + appID;
-							response = client.execute(new HttpGet(url));
+							String url = URL_PHONEGAP_CLOUD + "/" + appID;
+							response = client.execute(new HttpGet(getURL(url)));
 							JSONObject jsonApp = new ServoyJSONObject(EntityUtils.toString(response.getEntity()), false);
 							if (jsonApp.has("keys"))
 							{
@@ -214,7 +243,7 @@ public class PhoneGapConnector
 		File exportedFile = null;
 		try
 		{
-			String url = "https://build.phonegap.com/api/v1/apps";
+			String url = URL_PHONEGAP_CLOUD;
 
 			PhoneGapApplication existingApplication = getApplication(application.getTitle());
 			int appId = -1;
@@ -226,11 +255,11 @@ public class PhoneGapConnector
 			if (appId >= 0)
 			{
 				url += "/" + appId;
-				request = new HttpPut(url);
+				request = new HttpPut(getURL(url));
 			}
 			else
 			{
-				request = new HttpPost(url);
+				request = new HttpPost(getURL(url));
 			}
 			if (application.getCertificates() != null && application.getCertificates().length > 0)
 			{
@@ -268,8 +297,8 @@ public class PhoneGapConnector
 				File file = new File(application.getIconPath());
 				if (file.exists() && file.isFile())
 				{
-					url = "https://build.phonegap.com/api/v1/apps/" + appId + "/icon";
-					request = new HttpPost(url);
+					url = URL_PHONEGAP_CLOUD + "/" + appId + "/icon";
+					request = new HttpPost(getURL(url));
 					entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
 					entity.addPart("icon", new FileBody(file));
 					request.setEntity(entity);

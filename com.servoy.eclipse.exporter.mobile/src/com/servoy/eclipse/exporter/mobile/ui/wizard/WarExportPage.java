@@ -390,6 +390,9 @@ public class WarExportPage extends WizardPage
 						public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 						{
 							errorMessage[0] = pgAppPage.getConnector().loadPhoneGapAcount(username, password);
+							
+							// in case one uses his github account to login to phonegap
+//							errorMessage[0] = pgAppPage.getConnector().loadPhoneGapAcount("BTsF5NMzv2NdKxQ9noCq"); // your Phonegap Build token here (generated on the site)
 						}
 					});
 				}
