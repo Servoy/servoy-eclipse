@@ -54,6 +54,11 @@ public class MethodWithArguments
 
 	public static MethodWithArguments create(IPersist script, SafeArrayList<Object> arguments)
 	{
+		return create(script, new SafeArrayList<Object>(), arguments);
+	}
+
+	public static MethodWithArguments create(IPersist script, SafeArrayList<Object> paramNames, SafeArrayList<Object> arguments)
+	{
 		if (script == null)
 		{
 			return null;
@@ -70,7 +75,7 @@ public class MethodWithArguments
 				Debug.error(e);
 			}
 		}
-		return new MethodWithArguments(script.getID(), new SafeArrayList<Object>(), arguments, table);
+		return new MethodWithArguments(script.getID(), paramNames, arguments, table);
 	}
 
 	@Override
