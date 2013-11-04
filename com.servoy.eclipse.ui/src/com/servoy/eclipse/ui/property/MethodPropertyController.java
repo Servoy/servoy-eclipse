@@ -201,7 +201,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 	{
 		if (formalArguments == null) return null;
 		ArrayList<MethodArgument> finalParamsList = new ArrayList<MethodArgument>(); // the returned computed list 
-		Pair<List<Object>, List<Object>> instanceParamsArgs = ((AbstractBase)context).getInstanceMethodParameters(methodKey);
+		Pair<List<Object>, List<Object>> instanceParamsArgs = ((AbstractBase)context).getInstanceMethodParametersLocal(methodKey);
 		List<Object> persistParamNames = instanceParamsArgs.getLeft() != null ? instanceParamsArgs.getLeft() : new ArrayList<Object>();
 		List<Object> actualArguments = instanceParamsArgs.getRight() != null ? instanceParamsArgs.getRight() : new ArrayList<Object>();
 

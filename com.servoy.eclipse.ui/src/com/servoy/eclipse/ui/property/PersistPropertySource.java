@@ -893,7 +893,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 							SafeArrayList<Object> params = null;
 							if (persistContext != null && persistContext.getPersist() instanceof AbstractBase)
 							{
-								Pair<List<Object>, List<Object>> instanceParamsArgs = ((AbstractBase)persistContext.getPersist()).getInstanceMethodParameters(id.toString());
+								Pair<List<Object>, List<Object>> instanceParamsArgs = ((AbstractBase)persistContext.getPersist()).getInstanceMethodParametersLocal(id.toString());
 								if (instanceParamsArgs != null)
 								{
 									if (instanceParamsArgs.getLeft() == null)
