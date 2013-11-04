@@ -2228,7 +2228,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											}
 											if (o instanceof AbstractBase)
 											{
-												Pair<List<Object>, List<Object>> instanceParameters = ((AbstractBase)o).getInstanceMethodParameters(element.getName());
+												Pair<List<Object>, List<Object>> instanceParameters = ((AbstractBase)o).getInstanceMethodParametersLocal(element.getName());
 												MethodArgument[] methodArguments = ((ScriptMethod)foundPersist).getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
 												if (instanceParameters != null && instanceParameters.getRight() != null)
 												{
