@@ -245,9 +245,18 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 				// find the index of the last non-null entry
 				if (arguments.get(i) != null) len = i + 1;
 			}
-			// save a copy of the mwa.arguments list so that changes in mwa.arguments are not affecting customProperties
-			((AbstractBase)persist).putInstanceMethodParameters(id.toString(), len == 0 ? null : paramNames.subList(0, len), len == 0 ? null
-				: new ArrayList<Object>(arguments.subList(0, len)));
+
+			if (arguments != null && arguments.size() > 0 && (paramNames.size() == 0))
+			{
+				//forms can be without new parameter Names if they updated before the parameter names array was introduced
+				((AbstractBase)persist).putInstanceMethodArguments(id.toString(), new ArrayList<Object>(arguments.subList(0, len)));
+			}
+			else
+			{
+				// save a copy of the mwa.arguments list so that changes in mwa.arguments are not affecting customProperties
+				((AbstractBase)persist).putInstanceMethodParameters(id.toString(), len == 0 ? null : paramNames.subList(0, len), len == 0 ? null
+					: new ArrayList<Object>(arguments.subList(0, len)));
+			}
 		}
 	}
 
