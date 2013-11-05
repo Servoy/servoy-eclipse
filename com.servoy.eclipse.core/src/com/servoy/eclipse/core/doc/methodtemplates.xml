@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <root>
+  <event name="onActionMethodID">
+    <methodtemplate addtodo="true" name="onAction">
+      <description><![CDATA[Perform the element default action]]></description>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
   <event name="onAfterCreateMethodID">
     <methodtemplate addtodo="true" name="afterFoundSetRecordCreate">
       <description><![CDATA[Record after-create trigger]]></description>
@@ -78,6 +86,17 @@ return true]]></code>
         <methodargument name="action" type="Number"><![CDATA[see SQL_ACTION_TYPES constants]]></methodargument>
         <methodargument name="pks" type="JSDataSet"><![CDATA[affected primary keys]]></methodargument>
         <methodargument name="cached" type="Boolean"><![CDATA[data was cached]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onDataChangeMethodID">
+    <methodtemplate addtodo="true" name="onDataChange" type="Boolean">
+      <description><![CDATA[Handle changed data]]></description>
+      <code><![CDATA[return true]]></code>
+      <arguments>
+        <methodargument name="oldValue" type="${dataproviderType}"><![CDATA[old value]]></methodargument>
+        <methodargument name="newValue" type="${dataproviderType}"><![CDATA[new value]]></methodargument>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
       </arguments>
     </methodtemplate>
   </event>
