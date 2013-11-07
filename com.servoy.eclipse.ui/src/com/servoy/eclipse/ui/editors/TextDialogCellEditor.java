@@ -366,6 +366,7 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 		if (val != null)
 		{
 			stringValue = val.toString();
+			stringValue = stringValue.replaceAll("\\\\n", "\n");
 		}
 		if (contents instanceof Text)
 		{
@@ -375,7 +376,7 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 		}
 		if (contents instanceof Label)
 		{
-			((Label)contents).setText(labelProvider == null ? stringValue : labelProvider.getText(val));
+			((Label)contents).setText(labelProvider == null ? stringValue : labelProvider.getText(val).replaceAll("\\\\n", "\n"));
 		}
 	}
 
