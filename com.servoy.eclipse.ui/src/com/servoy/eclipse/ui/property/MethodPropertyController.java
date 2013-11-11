@@ -246,7 +246,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 				if (arguments.get(i) != null) len = i + 1;
 			}
 
-			if (arguments != null && arguments.size() > 0 && (paramNames.size() == 0))
+			if (arguments != null && arguments.size() > 0 && (paramNames.size() != arguments.size()))
 			{
 				//forms can be without new parameter Names if they updated before the parameter names array was introduced
 				((AbstractBase)persist).putInstanceMethodArguments(id.toString(), new ArrayList<Object>(arguments.subList(0, len)));
