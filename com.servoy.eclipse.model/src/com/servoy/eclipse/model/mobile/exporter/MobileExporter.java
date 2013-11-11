@@ -67,6 +67,7 @@ import com.servoy.j2db.dataprocessing.IValueList;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractScriptProvider;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
@@ -258,6 +259,12 @@ public class MobileExporter
 									{
 										ServoyLog.logError(ex);
 									}
+								}
+								if (persist instanceof Bean && contentSpec != null &&
+									contentSpec.getName().equals(StaticContentSpecLoader.PROPERTY_BEANXML.getPropertyName()) && value != null &&
+									value.contains("\n"))
+								{
+									return value.replaceAll("\n", "\\\\n");
 								}
 								return value;
 							}

@@ -144,10 +144,6 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 
 		// See if the value changed and if so update
 		Object newValue = editor.getValue();
-		if (newValue instanceof String)
-		{
-			newValue = ((String)newValue).replaceAll("\n", "\\\\n"); //$NON-NLS-1$ //$NON-NLS-2$
-		}
 		boolean changed = false;
 		if (values.length > 1)
 		{
