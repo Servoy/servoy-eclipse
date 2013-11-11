@@ -67,7 +67,6 @@ import com.servoy.j2db.dataprocessing.IValueList;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractScriptProvider;
 import com.servoy.j2db.persistence.BaseComponent;
-import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
@@ -247,24 +246,25 @@ public class MobileExporter
 									property_values.put(IComponentConstants.VIEW_TYPE_ATTR, ComponentFactory.isButton(((GraphicalComponent)persist))
 										? IComponentConstants.VIEW_TYPE_BUTTON : IComponentConstants.VIEW_TYPE_LABEL);
 								}
-								if (value != null && contentSpec != null &&
-									contentSpec.getName().equals(StaticContentSpecLoader.PROPERTY_CUSTOMPROPERTIES.getPropertyName()))
+								if (value != null)
 								{
-									try
+									if (contentSpec != null &&
+										contentSpec.getName().equals(StaticContentSpecLoader.PROPERTY_CUSTOMPROPERTIES.getPropertyName()))
 									{
-										ServoyJSONObject customProperties = new ServoyJSONObject(value, true, false, false);
-										return ServoyJSONObject.toString(customProperties, false, false, false);
+										try
+										{
+											ServoyJSONObject customProperties = new ServoyJSONObject(value, true, false, false);
+											return ServoyJSONObject.toString(customProperties, false, false, false);
+										}
+										catch (Exception ex)
+										{
+											ServoyLog.logError(ex);
+										}
 									}
-									catch (Exception ex)
+									else if (value.contains("\n"))
 									{
-										ServoyLog.logError(ex);
+										return value.replaceAll("\n", "\\\\n");
 									}
-								}
-								if (persist instanceof Bean && contentSpec != null &&
-									contentSpec.getName().equals(StaticContentSpecLoader.PROPERTY_BEANXML.getPropertyName()) && value != null &&
-									value.contains("\n"))
-								{
-									return value.replaceAll("\n", "\\\\n");
 								}
 								return value;
 							}
