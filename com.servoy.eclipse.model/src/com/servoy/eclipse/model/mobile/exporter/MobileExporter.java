@@ -261,10 +261,6 @@ public class MobileExporter
 											ServoyLog.logError(ex);
 										}
 									}
-									else if (value.contains("\n"))
-									{
-										return value.replaceAll("\n", "\\\\n");
-									}
 								}
 								return value;
 							}
