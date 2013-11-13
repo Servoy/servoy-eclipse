@@ -344,6 +344,7 @@ public class DataModelManager implements IColumnInfoManager
 			ci.setAutoEnterSubType(ColumnInfo.SERVOY_SEQUENCE);
 			ci.setSequenceStepSize(1);
 		}
+		ci.setFlags(c.getFlags()); // when column has no columninfo and no flags it will return Column.PK_COLUMN for db pk column.
 		c.setColumnInfo(ci);
 	}
 
