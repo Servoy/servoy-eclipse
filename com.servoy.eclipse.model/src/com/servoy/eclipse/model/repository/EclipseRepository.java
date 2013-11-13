@@ -750,21 +750,7 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 				if (scriptFile.exists())
 				{
 					String fileContent = SolutionSerializer.generateScriptFile(scriptToRegenerate.getParent(), scriptPath, repository, null);
-					if (fileContent.trim().length() > 0)
-					{
-						ModelUtils.getUnexpectedSituationHandler().writeOverExistingScriptFile(scriptFile, fileContent);
-					}
-					else
-					{
-						try
-						{
-							scriptFile.delete(false, null);
-						}
-						catch (CoreException e)
-						{
-							ServoyLog.logError(e);
-						}
-					}
+					ModelUtils.getUnexpectedSituationHandler().writeOverExistingScriptFile(scriptFile, fileContent);
 				} // else maybe the whole folder that contains the file was deleted
 			}
 		}
