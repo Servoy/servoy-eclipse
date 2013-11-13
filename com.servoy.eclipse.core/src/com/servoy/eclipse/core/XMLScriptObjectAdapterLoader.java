@@ -39,9 +39,9 @@ import com.servoy.j2db.documentation.DocumentationUtil;
 import com.servoy.j2db.documentation.IDocumentationManager;
 import com.servoy.j2db.documentation.IObjectDocumentation;
 import com.servoy.j2db.documentation.XMLScriptObjectAdapter;
+import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
-import com.servoy.j2db.smart.plugins.PluginManager;
 import com.servoy.j2db.util.JarManager;
 import com.servoy.j2db.util.JarManager.Extension;
 
