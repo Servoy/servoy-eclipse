@@ -200,7 +200,7 @@ public class XMLScriptObjectAdapterLoader
 				Manifest mf = file.getManifest();
 				if (mf != null)
 				{
-					List<String> beanClasses = JarManager.getBeanClassNames(mf);
+					List<String> beanClasses = JarManager.getClassNamesForKey(mf, JarManager.JAVA_BEAN_ATTRIBUTE);
 					Set<String> docXMLs = new TreeSet<String>();
 					for (String clz : beanClasses)
 					{
