@@ -23,6 +23,8 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -34,6 +36,7 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
 
 /**
@@ -49,6 +52,7 @@ public class FileSelectionPage extends WizardPage implements Listener
 	private final ExportWarModel exportModel;
 	private Text fileNameText;
 	private Button browseButton;
+	private Button exportActiveSolution;
 	private final IWizardPage nextPage;
 
 	public FileSelectionPage(ExportWarModel exportModel, IWizardPage nextPage)
@@ -76,6 +80,21 @@ public class FileSelectionPage extends WizardPage implements Listener
 		browseButton.setText("Browse..."); //$NON-NLS-1$
 		browseButton.addListener(SWT.Selection, this);
 
+		exportActiveSolution = new Button(composite, SWT.CHECK);
+		exportActiveSolution.setText("Export Only Active Solution");
+		exportActiveSolution.setSelection(exportModel.isExportActiveSolutionOnly());
+		exportActiveSolution.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				exportModel.setExportActiveSolutionOnly(exportActiveSolution.getSelection());
+			}
+		});
+
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.verticalIndent = 5;
+		exportActiveSolution.setLayoutData(gd);
 		setControl(composite);
 	}
 
@@ -125,6 +144,12 @@ public class FileSelectionPage extends WizardPage implements Listener
 		boolean result = true;
 		boolean messageSet = false;
 		if (exportModel.getFileName() == null) return false;
+		if (exportActiveSolution.getSelection() && ServoyModelFinder.getServoyModel().getActiveProject() == null)
+		{
+			setMessage("There is no active solution.", IMessageProvider.WARNING); //$NON-NLS-1$
+			result = false;
+			messageSet = true;
+		}
 		if (fileNameText.getText().length() == 0)
 		{
 			result = false;

@@ -49,7 +49,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.warexporter.ui.wizard.ServerConfiguration;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IBeanManagerInternal;
 import com.servoy.j2db.ILAFManagerInternal;
 import com.servoy.j2db.server.headlessclient.dataui.TemplateGenerator;
@@ -524,6 +528,19 @@ public class Exporter
 			catch (IOException e)
 			{
 				throw new ExportException("Couldn't copy the servoy properties file", e);
+			}
+		}
+		if (exportModel.isExportActiveSolutionOnly())
+		{
+			try
+			{
+				FlattenedSolution solution = ServoyModelFinder.getServoyModel().getActiveProject().getFlattenedSolution();
+				SolutionSerializer.writeRuntimeSolution(null, new File(tmpWarDir, "WEB-INF/solution.runtime"), solution.getSolution(),
+					ApplicationServerSingleton.get().getDeveloperRepository(), solution.getModules());
+			}
+			catch (Exception ex)
+			{
+				ServoyLog.logError(ex);
 			}
 		}
 		monitor.worked(1);

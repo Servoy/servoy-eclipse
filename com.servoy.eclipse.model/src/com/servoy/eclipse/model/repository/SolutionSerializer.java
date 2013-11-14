@@ -17,8 +17,11 @@
 package com.servoy.eclipse.model.repository;
 
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +30,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPOutputStream;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -55,6 +59,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportName;
@@ -72,6 +77,7 @@ import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
@@ -79,6 +85,7 @@ import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
+import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -1399,6 +1406,118 @@ public class SolutionSerializer
 			}
 		}
 		return serverNameTableName;
+	}
+
+	public static void writeRuntimeSolution(Settings properties, File file, Solution solution, IDeveloperRepository repository, Solution[] mods)
+		throws IOException, RepositoryException
+	{
+		FileOutputStream fis = new FileOutputStream(file);
+		BufferedOutputStream bis = new BufferedOutputStream(fis);
+		GZIPOutputStream zip = new GZIPOutputStream(bis);
+		ObjectOutputStream ois = new ObjectOutputStream(zip);
+		if (properties != null)
+		{
+			//write props into stream
+			ois.writeObject(properties);
+		}
+
+		//load all blobs permanently in the solution
+		Iterator itm = solution.getMedias(false);
+		while (itm.hasNext())
+		{
+			Media media = (Media)itm.next();
+			media.getMediaData();//make sure its loaded (lazy loaded normally)
+			media.makeBlobPermanent();
+		}
+
+		//load all styles permanently in the solution
+		Iterator solutionFormsIte = solution.getForms(null, false);
+		HashMap<String, Style> all_styles = new HashMap<String, Style>();
+		while (solutionFormsIte.hasNext())
+		{
+			Form solutionForm = (Form)solutionFormsIte.next();
+			if (solutionForm.getStyleName() != null)
+			{
+				Style style = (Style)repository.getActiveRootObject(solutionForm.getStyleName(), IRepository.STYLES);
+				if (style != null)
+				{
+					style.setServerProxies(null);//clear
+					style.setRepository(null);//clear
+					all_styles.put(style.getName(), style);
+				}
+			}
+		}
+		solution.setSerializableRuntimeProperty(Solution.PRE_LOADED_STYLES, all_styles);
+
+		Map<String, IServer> serverProxies = solution.getServerProxies();
+		IRepository oldRepository = solution.getRepository();
+		solution.setServerProxies(null);//clear
+		solution.setRepository(null);//clear		
+
+		//write solution into stream
+		ois.writeObject(solution);
+
+		// restore stuff that was removed only for serialize
+		solution.setRepository(oldRepository);
+		solution.setServerProxies(serverProxies);
+
+		int modCount = (mods == null ? 0 : mods.length);
+		ois.writeInt(modCount);
+		if (mods != null)
+		{
+			Map<String, IServer>[] tmpModuleServerProxies = new Map[modCount];
+			IRepository[] tmpModuleRepositories = new IRepository[modCount];
+			int i;
+			for (i = 0; i < modCount; i++)
+			{
+				Solution element = mods[i];
+				//load all styles permanently in the solution
+				solutionFormsIte = element.getForms(null, false);
+				all_styles = new HashMap<String, Style>();
+				while (solutionFormsIte.hasNext())
+				{
+					Form solutionForm = (Form)solutionFormsIte.next();
+					if (solutionForm.getStyleName() != null)
+					{
+						Style style = (Style)repository.getActiveRootObject(solutionForm.getStyleName(), IRepository.STYLES);
+						if (style != null)
+						{
+							style.setServerProxies(null);//clear
+							style.setRepository(null);//clear
+							all_styles.put(style.getName(), style);
+						}
+					}
+
+
+				}
+				element.setSerializableRuntimeProperty(Solution.PRE_LOADED_STYLES, all_styles);
+
+				//load all blobs permanently in the module
+				Iterator moduleMediaIte = element.getMedias(false);
+				while (moduleMediaIte.hasNext())
+				{
+					Media media = (Media)moduleMediaIte.next();
+					media.getMediaData();//make sure its loaded (lazy loaded normally)
+					media.makeBlobPermanent();
+				}
+
+				tmpModuleServerProxies[i] = element.getServerProxies();
+				tmpModuleRepositories[i] = element.getRepository();
+
+				element.setServerProxies(null);//clear
+				element.setRepository(null);//clear
+			}
+			//write modules into stream
+			ois.writeObject(mods);
+
+			// restore repositories and server proxies
+			for (i = 0; i < modCount; i++)
+			{
+				mods[i].setServerProxies(tmpModuleServerProxies[i]);
+				mods[i].setRepository(tmpModuleRepositories[i]);
+			}
+		}
+		ois.close();
 	}
 
 }

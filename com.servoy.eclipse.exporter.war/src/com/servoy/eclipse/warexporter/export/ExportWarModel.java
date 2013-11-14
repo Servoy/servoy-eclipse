@@ -50,6 +50,7 @@ public class ExportWarModel
 	private String servoyPropertiesFileName;
 	private String startRMIPort;
 	private boolean startRMI;
+	private boolean exportActiveSolutionOnly;
 
 	/**
 	 * @param dialogSettings
@@ -59,6 +60,7 @@ public class ExportWarModel
 	{
 		fileName = settings.get("export.filename");
 		servoyPropertiesFileName = settings.get("export.servoyPropertiesFileName");
+		exportActiveSolutionOnly = Utils.getAsBoolean(settings.get("export.exportActiveSolutionOnly"));
 
 		if (settings.get("export.plugins") != null)
 		{
@@ -128,6 +130,7 @@ public class ExportWarModel
 	public void saveSettings(IDialogSettings settings)
 	{
 		if (fileName != null) settings.put("export.filename", fileName);
+		if (exportActiveSolutionOnly) settings.put("export.exportActiveSolutionOnly", Boolean.TRUE.toString());
 		if (servoyPropertiesFileName != null) settings.put("export.servoyPropertiesFileName", servoyPropertiesFileName);
 		if (plugins.size() > 0)
 		{
@@ -229,6 +232,22 @@ public class ExportWarModel
 		}
 	}
 
+
+	/**
+	 * @return the exportActiveSolutionOnly
+	 */
+	public boolean isExportActiveSolutionOnly()
+	{
+		return exportActiveSolutionOnly;
+	}
+
+	/**
+	 * @param exportActiveSolutionOnly the exportActiveSolutionOnly to set
+	 */
+	public void setExportActiveSolutionOnly(boolean exportActiveSolutionOnly)
+	{
+		this.exportActiveSolutionOnly = exportActiveSolutionOnly;
+	}
 
 	/**
 	 * @return the plugins
