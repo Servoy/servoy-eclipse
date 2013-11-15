@@ -44,9 +44,9 @@ import javax.swing.JMenu;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.IBasicFormManager;
 import com.servoy.j2db.IBeanManager;
 import com.servoy.j2db.IDataRendererFactory;
-import com.servoy.j2db.IFormManager;
 import com.servoy.j2db.ILAFManager;
 import com.servoy.j2db.IMessagesCallback;
 import com.servoy.j2db.IModeManager;
@@ -363,7 +363,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	}
 
 
-	public IFormManager getFormManager()
+	public IBasicFormManager getFormManager()
 	{
 		return getClient().getFormManager();
 	}
