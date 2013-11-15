@@ -741,8 +741,11 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 	@Override
 	public boolean isSaveOnCloseNeeded()
 	{
-		// make sure cell editors loose focus so that value is applied
-		getSite().getShell().forceFocus();
+		if (getSite().getPage().isPartVisible(this))
+		{
+			// make sure cell editors loose focus so that value is applied
+			getSite().getShell().forceFocus();
+		}
 		return super.isSaveOnCloseNeeded();
 	}
 
