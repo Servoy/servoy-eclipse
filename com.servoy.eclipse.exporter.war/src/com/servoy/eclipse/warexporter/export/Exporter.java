@@ -51,7 +51,6 @@ import org.xml.sax.InputSource;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.warexporter.ui.wizard.ServerConfiguration;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IBeanManagerInternal;
@@ -459,7 +458,7 @@ public class Exporter
 				{
 					properties.put("server." + i + ".dataModelCloneFrom", sc.getDataModelCloneFrom()); //$NON-NLS-1$ //$NON-NLS-2$
 				}
-				properties.put("server." + i + ".enabled", Boolean.toString(true)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				properties.put("server." + i + ".enabled", Boolean.toString(true)); //$NON-NLS-1$ //$NON-NLS-2$ 
 //			if (sc.getDialectClass() != null)
 //			{
 //				properties.put("server." + i + ".dialect", sc.getDialectClass()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -540,7 +539,7 @@ public class Exporter
 			}
 			catch (Exception ex)
 			{
-				ServoyLog.logError(ex);
+				throw new ExportException("Cannot write the active solution in war file", ex);
 			}
 		}
 		monitor.worked(1);
