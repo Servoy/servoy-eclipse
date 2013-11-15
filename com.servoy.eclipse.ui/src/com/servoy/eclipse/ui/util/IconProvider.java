@@ -25,7 +25,7 @@ import java.util.Set;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 
-import com.servoy.j2db.FormController.JSForm;
+import com.servoy.j2db.BasicFormController.JSForm;
 import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
