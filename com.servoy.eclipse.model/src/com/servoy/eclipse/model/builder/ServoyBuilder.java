@@ -104,7 +104,6 @@ import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
-import com.servoy.j2db.persistence.EnumDataProvider;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.FlattenedPortal;
 import com.servoy.j2db.persistence.Form;
@@ -5128,39 +5127,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								if (ScopesUtils.isVariableScope(primaryDataProvider))
 								{
 									dataProvider = relationFlattenedSolution.getGlobalDataProvider(primaryDataProvider, true);
-									if (dataProvider == null)
-									{
-										String[] enumParts = primaryDataProvider.split("\\."); //$NON-NLS-1$
-										if (enumParts.length > 3)
-										{
-											String dp = enumParts[0] + '.' + enumParts[1] + '.' + enumParts[2];
-											IDataProvider globalDataProvider = relationFlattenedSolution.getGlobalDataProvider(dp, true);
-											if (globalDataProvider instanceof ScriptVariable)
-											{
-												if (((ScriptVariable)globalDataProvider).isEnum())
-												{
-													List<EnumDataProvider> enumDataProviders = ScriptingUtils.getEnumDataProviders((ScriptVariable)globalDataProvider);
-													for (EnumDataProvider enumProvider : enumDataProviders)
-													{
-														if (enumProvider.getDataProviderID().equals(primaryDataProvider))
-														{
-															dataProvider = enumProvider;
-															break;
-														}
-													}
-												}
-												else
-												{
-													// TODO better message
-													mk = MarkerMessages.RelationItemPrimaryEnumDataproviderNotFound.fill(element.getName(), primaryDataProvider);
-													errorsFound = true;
-													addMarker(project, mk.getType(), mk.getText(), -1, RELATION_ITEM_DATAPROVIDER_NOT_FOUND,
-														IMarker.PRIORITY_NORMAL, null, element);
-												}
-											}
-										}
-									}
-									else if (dataProvider != null && dataProvider instanceof ScriptVariable && ((ScriptVariable)dataProvider).isDeprecated())
+									if (dataProvider != null && dataProvider instanceof ScriptVariable && ((ScriptVariable)dataProvider).isDeprecated())
 									{
 										mk = MarkerMessages.ElementUsingDeprecatedVariable.fill(((ScriptVariable)dataProvider).getName(),
 											"relation " + element.getName(), "primary key");

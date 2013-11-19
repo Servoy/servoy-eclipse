@@ -23,8 +23,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.servoy.eclipse.model.builder.ScriptingUtils;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.EnumDataProvider;
+import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.util.Pair;
@@ -103,5 +108,28 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 	protected void addGlobalsScope(Map<String, Pair<String, IRootObject>> scopes)
 	{
 		//NOP
+	}
+
+	@Override
+	protected IDataProvider getEnumDataProvider(String id) throws RepositoryException
+	{
+		String[] enumParts = id.split("\\."); //$NON-NLS-1$
+		if (enumParts.length > 3)
+		{
+			IDataProvider globalDataProvider = getGlobalDataProvider(enumParts[0] + '.' + enumParts[1] + '.' + enumParts[2]);
+			if (globalDataProvider instanceof ScriptVariable && ((ScriptVariable)globalDataProvider).isEnum())
+			{
+				List<EnumDataProvider> enumDataProviders = ScriptingUtils.getEnumDataProviders((ScriptVariable)globalDataProvider);
+				for (EnumDataProvider enumProvider : enumDataProviders)
+				{
+					if (enumProvider.getDataProviderID().equals(id))
+					{
+						return enumProvider;
+					}
+				}
+			}
+		}
+
+		return null;
 	}
 }
