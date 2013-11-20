@@ -4121,7 +4121,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				boolean existing = false;
 				for (String name : ApplicationServerSingleton.get().getServerManager().getKnownDriverClassNames())
 				{
-					if (name.equals(server.getConfig().getDriver()))
+					if (server != null && name.equals(server.getConfig().getDriver()))
 					{
 						existing = true;
 						break;
