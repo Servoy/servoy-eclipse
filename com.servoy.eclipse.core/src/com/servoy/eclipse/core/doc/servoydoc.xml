@@ -9215,7 +9215,7 @@ for (var i=0; i<allVarNames.length; i++)
           </samples>
         </property>
         <property clientSupport="mc,wc,sc" deprecated="true" name="currentcontroller">
-          <return type="com.servoy.j2db.FormController$JSForm" typecode="com.servoy.j2db.FormController$JSForm"/>
+          <return type="com.servoy.j2db.BasicFormController$JSForm" typecode="com.servoy.j2db.BasicFormController$JSForm"/>
           <descriptions>
             <description clientSupport="mc,wc,sc"><![CDATA[Get the controller of the top level form in the currently active dialog.]]></description>
           </descriptions>
@@ -22117,16 +22117,16 @@ forms['newForm1'].controller.recreateUI();]]></sample>
     </object>
     <object clientSupport="mc,wc,sc" publicName="JSFoundSet" qualifiedName="com.servoy.j2db.dataprocessing.FoundSet" scriptingName="JSFoundSet">
       <properties>
-        <property clientSupport="wc,sc" name="alldataproviders" special="true">
+        <property clientSupport="mc,wc,sc" name="alldataproviders" special="true">
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Get all dataproviders of the foundset.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Get all dataproviders of the foundset.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Get all dataproviders of the foundset.]]></summary>
+            <summary clientSupport="mc,wc,sc"><![CDATA[Get all dataproviders of the foundset.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[var dataprovidersNames = %%prefix%%alldataproviders;
+            <sample clientSupport="mc,wc,sc"><![CDATA[var dataprovidersNames = %%prefix%%alldataproviders;
 application.output("This foundset has " + dataprovidersNames.length + " data providers.")
 for (var i=0; i<dataprovidersNames.length; i++)
 	application.output(dataprovidersNames[i]);]]></sample>
@@ -28657,7 +28657,7 @@ var record = event.getRecord();]]></sample>
         </function>
         <function clientSupport="wc,sc" name="getRenderable">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.ui.IScriptRenderMethodsWithFormat" typecode="com.servoy.j2db.ui.IScriptRenderMethodsWithFormat"><![CDATA[Renderable the element that is being rendered]]></return>
+          <return type="com.servoy.j2db.ui.IScriptRenderMethodsWithOptionalProps" typecode="com.servoy.j2db.ui.IScriptRenderMethodsWithOptionalProps"><![CDATA[Renderable the element that is being rendered]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Returns the element that is being rendered.]]></description>
           </descriptions>
@@ -32341,7 +32341,7 @@ myWindow.show(forms.myForm);]]></sample>
       </constants>
       <properties>
         <property clientSupport="wc,sc" name="controller">
-          <return type="com.servoy.j2db.FormController$JSForm" typecode="com.servoy.j2db.FormController$JSForm"/>
+          <return type="com.servoy.j2db.BasicFormController$JSForm" typecode="com.servoy.j2db.BasicFormController$JSForm"/>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Get the current controller from the window/dialog.]]></description>
           </descriptions>
@@ -38582,7 +38582,7 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
         </constant>
       </constants>
     </object>
-    <object clientSupport="wc,sc" publicName="Renderable" qualifiedName="com.servoy.j2db.ui.IScriptRenderMethodsWithFormat" scriptingName="Renderable">
+    <object clientSupport="wc,sc" publicName="Renderable" qualifiedName="com.servoy.j2db.ui.IScriptRenderMethodsWithOptionalProps" scriptingName="Renderable">
       <properties>
         <property clientSupport="wc,sc" name="bgcolor">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
@@ -38711,6 +38711,25 @@ It only returns it's correct value if it was explicitly set, otherwise null.]]><
 
 //gets the display formatting of the field
 var format = %%prefix%%%%elementName%%.format;]]></sample>
+          </samples>
+        </property>
+        <property clientSupport="wc,sc" name="imageURL">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Gets/Sets the image displayed on a button or label; based on URL.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Gets/Sets the image displayed on a button or label; based on URL.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[//dynamically sets an image displayed on a button or label
+%%prefix%%%%elementName%%.imageURL = "http://www.servoy.com/images/test.gif";
+
+//sets an image from your own image library
+%%prefix%%%%elementName%%.imageURL = "media:///arrow.gif";
+
+//loads an image (BLOB) from a field in a selected record into HTML
+%%prefix%%%%elementName%%.imageURL = 'media:///servoy_blobloader?datasource='+controller.getDataSource()+'&dataprovider=image_data&mimetype=image/jpeg&rowid1=2';]]></sample>
           </samples>
         </property>
         <property clientSupport="wc,sc" name="toolTipText">
@@ -44651,7 +44670,7 @@ for (var i=0; i<varNames.length; i++)
           </samples>
         </property>
         <property clientSupport="mc,wc,sc" name="controller">
-          <return type="com.servoy.j2db.FormController$JSForm" typecode="com.servoy.j2db.FormController$JSForm"/>
+          <return type="com.servoy.j2db.BasicFormController$JSForm" typecode="com.servoy.j2db.BasicFormController$JSForm"/>
           <descriptions>
             <description clientSupport="mc,wc,sc"><![CDATA[Get the controller of the form.]]></description>
           </descriptions>
@@ -61994,7 +62013,7 @@ application.putClientProperty(APP_WEB_PROPERTY.WEBCLIENT_TEMPLATES_DIR, 'myclien
         </constant>
       </constants>
     </object>
-    <object clientSupport="mc,wc,sc" publicName="controller" qualifiedName="com.servoy.j2db.FormController$JSForm" scriptingName="controller">
+    <object clientSupport="mc,wc,sc" publicName="controller" qualifiedName="com.servoy.j2db.BasicFormController$JSForm" scriptingName="controller">
       <properties>
         <property clientSupport="mc,wc,sc" name="enabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
