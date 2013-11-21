@@ -372,6 +372,7 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 		workingCopy.setAttribute(IMobileLaunchConstants.SOLUTION_NAME, project.getSolution().getName());
 
 		// this will happen anyway at each launch to make sure the right one is used - until we decide to add export war path to the launcher config. page
+		// default is "null" and the following code should be used when it's not set to get a value for it
 		// File webappsFolder = new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory(), "server/webapps");
 		// workingCopy.setAttribute(IMobileLaunchConstants.WAR_LOCATION, webappsFolder.getAbsolutePath());
 

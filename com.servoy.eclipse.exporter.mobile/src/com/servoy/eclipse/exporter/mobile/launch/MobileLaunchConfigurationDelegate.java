@@ -151,15 +151,15 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 	private File getWarExportDir(ILaunchConfiguration configuration) throws CoreException
 	{
 		File warExportDir = null;
-		String warLocation = configuration.getAttribute(IMobileLaunchConstants.WAR_LOCATION, "");
-		if (warLocation.length() == 0)
-		{
-			warExportDir = new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory(), "server/webapps");
-		}
-		else
-		{
-			warExportDir = new File(warLocation);
-		}
+//		String warLocation = configuration.getAttribute(IMobileLaunchConstants.WAR_LOCATION, ""); // this is currently never set; if we want to add it to the launcher organize dialog in the future, it might be set; see StartMobileClientActionDelegate
+//		if (warLocation.length() == 0)
+//		{
+		warExportDir = new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory(), "server/webapps");
+//		}
+//		else
+//		{
+//			warExportDir = new File(warLocation);
+//		}
 		return warExportDir;
 	}
 
