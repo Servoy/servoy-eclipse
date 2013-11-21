@@ -2739,45 +2739,39 @@ public class TypeCreator extends TypeCache
 			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 			if (fsAndTable != null && fs != null && fsAndTable.table != null)
 			{
-				String traitsConfig = fs.getSolution().getName() + ';' + fsAndTable.table.getDataSource();
-				String relationsType = "Relations<" + traitsConfig + '>';
-
-				EList<Type> traits = type.getTraits();
-				traits.add(getType(context, relationsType));
-
 				if (fsAndTable.table.isMarkedAsHiddenInDeveloper())
 				{
 					type.setDescription("<b>Based on a table that is marked as HIDDEN in developer</b>");
 					type.setDeprecated(true);
 				}
-//				try
-//				{
-//					Iterator<Relation> relations = fs.getRelations(fsAndTable.table, true, false, false, false, false);
-//					while (relations.hasNext())
-//					{
-//						try
-//						{
-//							Relation relation = relations.next();
-//							if (relation.isValid())
-//							{
-//								Property property = createProperty(relation.getName(), true,
-//									getTypeRef(context, QBJoin.class.getSimpleName() + '<' + relation.getForeignDataSource() + '>'),
-//									getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()), RELATION_IMAGE,
-//									relation);
-//								property.setVisible(true);
-//								type.getMembers().add(property);
-//							}
-//						}
-//						catch (Exception e)
-//						{
-//							ServoyLog.logError(e);
-//						}
-//					}
-//				}
-//				catch (RepositoryException e)
-//				{
-//					ServoyLog.logError(e);
-//				}
+				try
+				{
+					Iterator<Relation> relations = fs.getRelations(fsAndTable.table, true, false, false, false, false);
+					while (relations.hasNext())
+					{
+						try
+						{
+							Relation relation = relations.next();
+							if (relation.isValid())
+							{
+								Property property = createProperty(relation.getName(), true,
+									getTypeRef(context, QBJoin.class.getSimpleName() + '<' + relation.getForeignDataSource() + '>'),
+									getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()), RELATION_IMAGE,
+									relation);
+								property.setVisible(true);
+								type.getMembers().add(property);
+							}
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
 			}
 
 			return type;
