@@ -39,7 +39,6 @@ public interface IMobileLaunchConstants
 	public static final String TIMEOUT = "timeout";
 
 
-	public final static String DEFAULT_SERVICE_URL = MobileExporter.DEFAULT_SERVER_URL;
 	public final static String DEFAULT_TIMEOUT = String.valueOf(MobileExporter.DEFAULT_SYNC_TIMEOUT);
 	public final static String DEFAULT_MAX_WAR_DEPLOYMENT_TIME = "30";
 

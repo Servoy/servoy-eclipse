@@ -47,7 +47,7 @@ public class MobileArgumentChest extends AbstractArgumentChest
 		{
 			// set defaults; these can't be set when declaring the member because this method is called from the super class constructor
 			testing = true; // test war by default
-			serverURL = MobileExporter.DEFAULT_SERVER_URL;
+			serverURL = MobileExporter.getDefaultServerURL();
 			syncTimeout = MobileExporter.DEFAULT_SYNC_TIMEOUT;
 
 			// now check command line arguments
@@ -121,7 +121,7 @@ public class MobileArgumentChest extends AbstractArgumentChest
 			+ super.getHelpMessageCore()
 			+ "        -production ... export normal mobile client. Default: false (exports unit test war).\n"
 			+ "        -server_url <url> ... application server URL.  Used to find mobile service solution.\n"
-			+ "             Default: " + MobileExporter.DEFAULT_SERVER_URL + "\n"
+			+ "             Default: " + MobileExporter.getDefaultServerURL() + "\n"
 			+ "        -service_solution ... name    of    the   service   solution    (default   will   be\n"
 			+ "                              mySolutionName_service).\n"
 			+ "        -sync_timeout <seconds> ... client sync call timeout. Default: " + MobileExporter.DEFAULT_SYNC_TIMEOUT + " sec.\n"

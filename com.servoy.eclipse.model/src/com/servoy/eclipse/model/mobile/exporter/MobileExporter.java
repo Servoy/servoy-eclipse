@@ -105,7 +105,6 @@ public class MobileExporter
 	public static final String TEST_WAR_SUFFIX = "_TEST"; // do not change this; or if you do update Jenkins scripts both in R&D Jenkins and on "Building a Software Factory" wiki page
 
 	public static final int DEFAULT_SYNC_TIMEOUT = 30;
-	public static final String DEFAULT_SERVER_URL = "http://localhost:8080";
 
 	private static final String RELATIVE_TEMPLATE_PATH = "resources/solution.js";
 	private static final String RELATIVE_WAR_PATH = "resources/servoy_mobile.war";
@@ -157,6 +156,11 @@ public class MobileExporter
 
 	private FlattenedSolution fs;
 	private LineMapper lineMapper;
+
+	public static String getDefaultServerURL()
+	{
+		return "http://localhost:" + ApplicationServerSingleton.get().getWebServerPort();
+	}
 
 	private String doMediaExport(ZipOutputStream zos, File outputFolder) throws IOException
 	{

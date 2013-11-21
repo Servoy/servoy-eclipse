@@ -138,7 +138,7 @@ public class ExportOptionsPage extends WizardPage
 		String defaultServerURL = getDialogSettings().get(SERVER_URL_KEY);
 		if (defaultServerURL == null)
 		{
-			defaultServerURL = MobileExporter.DEFAULT_SERVER_URL;
+			defaultServerURL = MobileExporter.getDefaultServerURL();
 		}
 		serverURL.setText(defaultServerURL);
 

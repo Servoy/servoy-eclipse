@@ -33,6 +33,7 @@ import org.eclipse.ui.internal.browser.Messages;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.exporter.mobile.action.StartMobileClientActionDelegate;
+import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 
@@ -158,7 +159,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		lblServerURL.setText("Application Server Url");
 
 		txtServerURL = new Text(container, SWT.BORDER);
-		txtServerURL.setText(IMobileLaunchConstants.DEFAULT_SERVICE_URL);
+		txtServerURL.setText(MobileExporter.getDefaultServerURL());
 		txtServerURL.addModifyListener(modifyListener);
 
 		lblServiceSolution = new Label(container, SWT.NONE);
@@ -371,7 +372,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 
 		configuration.setAttribute(IMobileLaunchConstants.SOLUTION_NAME, activeProject.getSolution().getName());
 		configuration.setAttribute(IMobileLaunchConstants.SERVICE_SOLUTION, activeProject.getSolution().getName() + "_service");
-		configuration.setAttribute(IMobileLaunchConstants.SERVER_URL, IMobileLaunchConstants.DEFAULT_SERVICE_URL);
+		configuration.setAttribute(IMobileLaunchConstants.SERVER_URL, MobileExporter.getDefaultServerURL());
 		configuration.setAttribute(IMobileLaunchConstants.APPLICATION_URL, getDefaultApplicationURL());
 		configuration.setAttribute(IMobileLaunchConstants.TIMEOUT, IMobileLaunchConstants.DEFAULT_TIMEOUT);
 		configuration.setAttribute(IMobileLaunchConstants.NODEBUG, "true");
@@ -386,7 +387,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		{
 			String solutionName = configuration.getAttribute(IMobileLaunchConstants.SOLUTION_NAME, "not defined");
 			lblSolutionname.setText(solutionName);
-			txtServerURL.setText(configuration.getAttribute(IMobileLaunchConstants.SERVER_URL, IMobileLaunchConstants.DEFAULT_SERVICE_URL));
+			txtServerURL.setText(configuration.getAttribute(IMobileLaunchConstants.SERVER_URL, MobileExporter.getDefaultServerURL()));
 			txtStartURL.setText(configuration.getAttribute(IMobileLaunchConstants.APPLICATION_URL, getDefaultApplicationURL()));
 			txtTimeout.setText(configuration.getAttribute(IMobileLaunchConstants.TIMEOUT, IMobileLaunchConstants.DEFAULT_TIMEOUT));
 			txtServiceSolution.setText(configuration.getAttribute(IMobileLaunchConstants.SERVICE_SOLUTION, solutionName + "_service"));

@@ -50,6 +50,7 @@ import com.servoy.eclipse.exporter.mobile.launch.MobileLaunchConfigurationDelega
 import com.servoy.eclipse.exporter.mobile.launch.MobileLaunchUtils;
 import com.servoy.eclipse.exporter.mobile.launch.test.IMobileTestLaunchConstants;
 import com.servoy.eclipse.jsunit.launch.JSUnitLaunchConfigurationDelegate;
+import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Solution;
@@ -86,7 +87,7 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 
 	private ILaunchConfiguration getCurrentLaunchConfig()
 	{
-		if (configToLaunch == null)
+		if (configToLaunch == null || !configToLaunch.exists())
 		{// initialize button push action
 			ILaunchConfiguration[] defaultCfgs = getLaunchConfigsForCurrentProject(true, IMobileLaunchConstants.LAUNCH_CONFIGURATION_TYPE_ID);
 			configToLaunch = defaultCfgs[0];
@@ -381,7 +382,7 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 				launchConfigurationID.equals(IMobileTestLaunchConstants.LAUNCH_TEST_CONFIGURATION_TYPE_ID)),
 			ApplicationServerSingleton.get().getWebServerPort());
 
-		workingCopy.setAttribute(IMobileLaunchConstants.SERVER_URL, IMobileLaunchConstants.DEFAULT_SERVICE_URL);
+		workingCopy.setAttribute(IMobileLaunchConstants.SERVER_URL, MobileExporter.getDefaultServerURL());
 		workingCopy.setAttribute(IMobileLaunchConstants.SERVICE_SOLUTION, project.getSolutionMetaData().getName() + "_service");
 		workingCopy.setAttribute(IMobileLaunchConstants.APPLICATION_URL, appUrl);
 		workingCopy.setAttribute("company", "");
