@@ -47,7 +47,6 @@ public class MobileArgumentChest extends AbstractArgumentChest
 		{
 			// set defaults; these can't be set when declaring the member because this method is called from the super class constructor
 			testing = true; // test war by default
-			serverURL = MobileExporter.getDefaultServerURL();
 			syncTimeout = MobileExporter.DEFAULT_SYNC_TIMEOUT;
 
 			// now check command line arguments
@@ -121,7 +120,7 @@ public class MobileArgumentChest extends AbstractArgumentChest
 			+ super.getHelpMessageCore()
 			+ "        -production ... export normal mobile client. Default: false (exports unit test war).\n"
 			+ "        -server_url <url> ... application server URL.  Used to find mobile service solution.\n"
-			+ "             Default: " + MobileExporter.getDefaultServerURL() + "\n"
+			+ "             Default: http://localhost:[detectedInstallationPortNumber]\n"
 			+ "        -service_solution ... name    of    the   service   solution    (default   will   be\n"
 			+ "                              mySolutionName_service).\n"
 			+ "        -sync_timeout <seconds> ... client sync call timeout. Default: " + MobileExporter.DEFAULT_SYNC_TIMEOUT + " sec.\n"
@@ -142,6 +141,10 @@ public class MobileArgumentChest extends AbstractArgumentChest
 
 	public String getServerURL()
 	{
+		if (serverURL == null)
+		{
+			serverURL = MobileExporter.getDefaultServerURL(); // at this point the app. server should be initialized; if really needed before initilize we could always use WebServer.getHTTPPort() directly
+		}
 		return serverURL;
 	}
 
