@@ -2535,7 +2535,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						{
 							public void run()
 							{
-								searchFld.selectAll();
+								if (!searchFld.isDisposed()) searchFld.selectAll();
 							}
 						});
 					}

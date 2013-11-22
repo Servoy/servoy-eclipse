@@ -508,7 +508,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 							repository = new EclipseRepository(serverManager, settings);
 						}
 					}
-				}, null, null, new IUserManagerFactory()
+				}, null, getClass().getClassLoader(), null, new IUserManagerFactory()
 				{
 					public IUserManager createUserManager(IDataServer dataServer)
 					{
