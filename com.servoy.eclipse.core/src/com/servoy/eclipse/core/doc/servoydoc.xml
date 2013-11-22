@@ -60634,6 +60634,24 @@ form.borderType = solutionModel.createTitledBorder('Test',null,'#ff0000',SM_TITL
     </object>
     <object clientSupport="wc,sc" publicName="UICONSTANTS" qualifiedName="com.servoy.j2db.scripting.info.UICONSTANTS">
       <constants>
+        <constant clientSupport="wc,sc" name="ALLOW_JAVASCRIPT_LINKS_INPUT">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Property than can be set using element.putClientProperty()
+
+If set to true, the element will accept javascript links in the input
+If set to false, all 'javascript:' texts will be removed from the input
+
+The value can be true/false
+DEFAULT: false]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Property than can be set using element.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[element.putClientProperty(APP_UI_PROPERTY.ALLOW_JAVASCRIPT_LINKS_INPUT, true)]]></sample>
+          </samples>
+        </constant>
         <constant clientSupport="wc,sc" name="COMBOBOX_SHOW_POPUP_ON_FOCUS_GAIN">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <descriptions>
