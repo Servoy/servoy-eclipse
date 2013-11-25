@@ -157,6 +157,8 @@ public class MobileExporter
 	private FlattenedSolution fs;
 	private LineMapper lineMapper;
 
+	private List<String> mediaOrder;
+
 	public static String getDefaultServerURL()
 	{
 		return "http://localhost:" + ApplicationServerSingleton.get().getWebServerPort();
@@ -170,16 +172,12 @@ public class MobileExporter
 		FlattenedSolution flattenedSolution = getFlattenedSolution();
 		if (flattenedSolution != null)
 		{
-			Iterator<Media> mediasIte = flattenedSolution.getMedias(false);
-			Media media;
-			byte[] content;
-			boolean isTXTContent;
 			boolean headerJSEmpty = true, headerCSSEmpty = true;
-			while (mediasIte.hasNext())
+			for (String mediaName : getMediaOrder())
 			{
-				media = mediasIte.next();
-				content = media.getMediaData();
-				isTXTContent = false;
+				boolean isTXTContent = false;
+				Media media = flattenedSolution.getMedia(mediaName);
+				byte[] content = media.getMediaData();
 				if (MIME_JS.equals(media.getMimeType()))
 				{
 					if (headerJSEmpty) headerJSEmpty = false;
@@ -1031,5 +1029,38 @@ public class MobileExporter
 		{
 			endLine = node.getEndLineno();
 		}
+	}
+
+	/**
+	 * @param input
+	 */
+	public void setMediaOrder(List<String> mediaOrder)
+	{
+		getFlattenedSolution().getSolution().putCustomProperty(new String[] { "mobile", "mediaorder" }, mediaOrder);
+		this.mediaOrder = mediaOrder;
+	}
+
+	public List<String> getMediaOrder()
+	{
+		if (mediaOrder == null)
+		{
+			FlattenedSolution fs = getFlattenedSolution();
+			java.util.List<String> lst = (java.util.List<String>)fs.getSolution().getCustomProperty(new String[] { "mobile", "mediaorder" });
+			if (lst == null)
+			{
+				lst = new ArrayList<String>();
+			}
+			Iterator<Media> medias = fs.getMedias(false);
+			while (medias.hasNext())
+			{
+				Media m = medias.next();
+				if (!lst.contains(m.getName()))
+				{
+					lst.add(m.getName());
+				}
+			}
+			mediaOrder = new ArrayList<String>(lst);
+		}
+		return mediaOrder;
 	}
 }

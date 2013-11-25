@@ -60,9 +60,12 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 
 	private final LicensePage licensePage = new LicensePage("licensePage", warExportPage, mobileExporter);
 
-	private final ExportOptionsPage optionsPage = new ExportOptionsPage("optionsPage", licensePage, mobileExporter);
+	private final MediaOrderPage mediaOrderPage = new MediaOrderPage("mediaOrderPage", licensePage, mobileExporter);
+
+	private final ExportOptionsPage optionsPage = new ExportOptionsPage("optionsPage", mediaOrderPage, mobileExporter);
 
 	private WizardPage errorPage;
+
 
 	public ExportMobileWizard()
 	{
@@ -150,6 +153,7 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 		{
 			addPage(optionsPage);
 			addPage(warExportPage);
+			addPage(mediaOrderPage);
 			addPage(finishPage);
 			addPage(pgAppPage);
 			addPage(licensePage);
