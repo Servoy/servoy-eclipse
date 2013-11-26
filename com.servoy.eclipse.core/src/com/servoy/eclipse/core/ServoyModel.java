@@ -2348,10 +2348,10 @@ public class ServoyModel extends AbstractServoyModel
 					{
 						final String tableName = file.getName().substring(0,
 							file.getName().length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
-						final Job job = new UIJob("Writing dbi file changes to all clones - " + file.getName())
+						final Job job = new WorkspaceJob("Writing dbi file changes to all clones - " + file.getName())
 						{
 							@Override
-							public IStatus runInUIThread(IProgressMonitor monitor)
+							public IStatus runInWorkspace(IProgressMonitor monitor)
 							{
 								for (IServer server : servers)
 								{
