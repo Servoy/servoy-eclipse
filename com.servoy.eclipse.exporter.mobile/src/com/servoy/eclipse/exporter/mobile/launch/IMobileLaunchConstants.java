@@ -37,7 +37,8 @@ public interface IMobileLaunchConstants
 	public static final String BROWSER_ID = "browserID";
 	public static final String MAX_WAR_DEPLOYMENT_TIME = "max_war_deploy_time";
 	public static final String TIMEOUT = "timeout";
-
+	public static final String COMPANY_NAME = "company_name";
+	public static final String LICENSE_CODE = "license_code";
 
 	public final static String DEFAULT_TIMEOUT = String.valueOf(MobileExporter.DEFAULT_SYNC_TIMEOUT);
 	public final static String DEFAULT_MAX_WAR_DEPLOYMENT_TIME = "30";
