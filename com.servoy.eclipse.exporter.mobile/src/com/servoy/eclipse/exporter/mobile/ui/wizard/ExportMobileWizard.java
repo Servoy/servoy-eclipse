@@ -52,23 +52,30 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 
 	private final MobileExporter mobileExporter = new MobileExporter();
 
-	private final CustomizedFinishPage finishPage = new CustomizedFinishPage("lastPage");
+	private final CustomizedFinishPage finishPage;
 
-	private final PhoneGapApplicationPage pgAppPage = new PhoneGapApplicationPage("PhoneGap Application", finishPage, mobileExporter);
+	private final PhoneGapApplicationPage pgAppPage;
 
-	private final WarExportPage warExportPage = new WarExportPage("outputPage", "Choose output", null, finishPage, pgAppPage, mobileExporter);
+	private final WarExportPage warExportPage;
 
-	private final LicensePage licensePage = new LicensePage("licensePage", warExportPage, mobileExporter);
+	private final LicensePage licensePage;
 
-	private final MediaOrderPage mediaOrderPage = new MediaOrderPage("mediaOrderPage", licensePage, mobileExporter);
+	private final MediaOrderPage mediaOrderPage;
 
-	private final ExportOptionsPage optionsPage = new ExportOptionsPage("optionsPage", mediaOrderPage, mobileExporter);
+	private final ExportOptionsPage optionsPage;
 
 	private WizardPage errorPage;
 
 
 	public ExportMobileWizard()
 	{
+		finishPage = new CustomizedFinishPage("lastPage");
+		pgAppPage = new PhoneGapApplicationPage("PhoneGap Application", finishPage, mobileExporter);
+		warExportPage = new WarExportPage("outputPage", "Choose output", null, finishPage, pgAppPage, mobileExporter);
+		licensePage = new LicensePage("licensePage", warExportPage, mobileExporter);
+		mediaOrderPage = new MediaOrderPage("mediaOrderPage", licensePage, mobileExporter);
+		optionsPage = new ExportOptionsPage("optionsPage", mobileExporter.getMediaOrder().size() > 0 ? mediaOrderPage : licensePage, mobileExporter);
+
 		IDialogSettings workbenchSettings = Activator.getDefault().getDialogSettings();
 		IDialogSettings section = workbenchSettings.getSection("MobileExportWizard");//$NON-NLS-1$
 		if (section == null)
@@ -78,6 +85,8 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 		setDialogSettings(section);
 		finishPage.setTitle("Export finished");
 		setWindowTitle("Mobile Export");
+
+
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
@@ -153,7 +162,7 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 		{
 			addPage(optionsPage);
 			addPage(warExportPage);
-			addPage(mediaOrderPage);
+			if (mobileExporter.getMediaOrder().size() > 0) addPage(mediaOrderPage);
 			addPage(finishPage);
 			addPage(pgAppPage);
 			addPage(licensePage);

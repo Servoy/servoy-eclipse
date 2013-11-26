@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IPageChangedListener;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -27,12 +26,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.ServoyModel;
-import com.servoy.eclipse.model.ServoyModelFinder;
-import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.model.util.WorkspaceFileAccess;
-import com.servoy.j2db.persistence.RepositoryException;
 
 /**
  * Action for opening a wizard.
@@ -88,19 +82,6 @@ public class OpenWizardAction extends Action
 			dialog.create();
 			dialog.open();
 			wizard.dispose();
-			// if the solution is changed then export properties are added to the solution, save it
-			if (ServoyModelFinder.getServoyModel().getFlattenedSolution().getSolution().isChanged())
-			{
-				try
-				{
-					SolutionSerializer.writePersist(ServoyModelFinder.getServoyModel().getFlattenedSolution().getSolution(), new WorkspaceFileAccess(
-						ResourcesPlugin.getWorkspace()), ServoyModel.getDeveloperRepository(), true, true, false);
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError(e);
-				}
-			}
 		}
 		catch (InstantiationException e)
 		{

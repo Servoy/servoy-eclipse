@@ -131,7 +131,7 @@ public class MediaOrderPage extends WizardPage
 				{
 					Arrays.sort(selectionIndices);
 					java.util.List<String> input = (java.util.List<String>)listViewer.getInput();
-					if (selectionIndices[selectionIndices.length - 1] < input.size())
+					if (selectionIndices[selectionIndices.length - 1] < (input.size() - 1))
 					{
 						for (int i = selectionIndices.length; --i >= 0;)
 						{

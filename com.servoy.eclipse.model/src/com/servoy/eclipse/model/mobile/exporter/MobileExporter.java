@@ -1036,7 +1036,17 @@ public class MobileExporter
 	 */
 	public void setMediaOrder(List<String> mediaOrder)
 	{
-		getFlattenedSolution().getSolution().putCustomProperty(new String[] { "mobile", "mediaorder" }, mediaOrder);
+		ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solutionName);
+		Solution editingSolution = servoyProject.getEditingSolution();
+		editingSolution.putCustomProperty(new String[] { "mobileexport", "mediaorder" }, mediaOrder);
+		try
+		{
+			servoyProject.saveEditingSolutionNodes(new IPersist[] { editingSolution }, false);
+		}
+		catch (RepositoryException e)
+		{
+			ServoyLog.logError(e);
+		}
 		this.mediaOrder = mediaOrder;
 	}
 
@@ -1045,21 +1055,31 @@ public class MobileExporter
 		if (mediaOrder == null)
 		{
 			FlattenedSolution fs = getFlattenedSolution();
-			java.util.List<String> lst = (java.util.List<String>)fs.getSolution().getCustomProperty(new String[] { "mobile", "mediaorder" });
+			java.util.List<String> lst = (java.util.List<String>)fs.getSolution().getCustomProperty(new String[] { "mobileexport", "mediaorder" });
 			if (lst == null)
 			{
 				lst = new ArrayList<String>();
 			}
-			Iterator<Media> medias = fs.getMedias(false);
+			else
+			{
+				lst = new ArrayList<String>(lst);
+			}
+			ArrayList<String> allMedia = new ArrayList<String>();
+			Iterator<Media> medias = fs.getMedias(true);
 			while (medias.hasNext())
 			{
 				Media m = medias.next();
-				if (!lst.contains(m.getName()))
+				allMedia.add(m.getName());
+			}
+			lst.retainAll(allMedia);
+			for (String mediaName : allMedia)
+			{
+				if (!lst.contains(mediaName))
 				{
-					lst.add(m.getName());
+					lst.add(mediaName);
 				}
 			}
-			mediaOrder = new ArrayList<String>(lst);
+			mediaOrder = lst;
 		}
 		return mediaOrder;
 	}
