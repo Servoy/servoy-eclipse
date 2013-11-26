@@ -27,9 +27,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -64,25 +63,15 @@ public class MediaOrderPage extends WizardPage
 	{
 		Composite container = new Composite(parent, SWT.NULL);
 		setControl(container);
-		container.setLayout(new FormLayout());
+		container.setLayout(new GridLayout(2, false));
 
 		ScrolledComposite scrolledComposite = new ScrolledComposite(container, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
-		FormData fd_scrolledComposite = new FormData();
-		fd_scrolledComposite.left = new FormAttachment(0);
-		fd_scrolledComposite.top = new FormAttachment(0);
-		fd_scrolledComposite.bottom = new FormAttachment(100);
-		scrolledComposite.setLayoutData(fd_scrolledComposite);
+		scrolledComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		scrolledComposite.setExpandHorizontal(true);
 		scrolledComposite.setExpandVertical(true);
 
 		Composite composite = new Composite(container, SWT.NONE);
-		fd_scrolledComposite.right = new FormAttachment(composite, -6);
-		FormData fd_composite = new FormData();
-		fd_composite.left = new FormAttachment(100, -50);
-		fd_composite.right = new FormAttachment(100);
-		fd_composite.top = new FormAttachment(0);
-		fd_composite.bottom = new FormAttachment(100);
-		composite.setLayoutData(fd_composite);
+		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
 
 		listViewer = new ListViewer(scrolledComposite, SWT.BORDER | SWT.V_SCROLL | SWT.MULTI);
 		final List list = listViewer.getList();
