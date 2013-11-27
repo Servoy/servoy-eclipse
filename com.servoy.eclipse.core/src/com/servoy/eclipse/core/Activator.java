@@ -55,6 +55,8 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWindowListener;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchListener;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -255,6 +257,33 @@ public class Activator extends Plugin
 		String serviceClass = URLStreamHandlerService.class.getName();
 		context.registerService(serviceClass, new MediaURLStreamHandlerService(), properties);
 
+		// listen for workbench shutdown - make sure that any DLTK JS running process is stopped when this happens cause
+		// otherwise the developer might hang on shutdown. For example if you are debuggin a smart-client, a breakpoint
+		// is hit (which blocks AWT thread) then you open some forms in form designer (they don't paint, waiting for
+		// AWT to be able to paint things, but do secondary SWT event loops to keep developer responsive) then you close
+		// developer => AWT waiting in breakpoint, SWT waiting in secondary event loops for AWT although the platform is
+		// closing, platform close is waiting for root SWT worker to finish => hang
+		PlatformUI.getWorkbench().addWorkbenchListener(new IWorkbenchListener()
+		{
+
+			@Override
+			public boolean preShutdown(IWorkbench workbench, boolean forced)
+			{
+				// allow shutdown
+				return true;
+			}
+
+			@Override
+			public void postShutdown(IWorkbench workbench)
+			{
+				// workbench shutdown started; close running JS debug sessions;
+				// we can get lots of exceptions in the log because a big chunk of SWT thread
+				// pending operations can be released by this and continue running but
+				// the Display/widgets are already be disposed
+				stopAnyJSDebugSessionThatSuspendsAWT();
+			}
+		});
+
 		// We need to hook a listener and detect when the Welcome page is closed.
 		// (And for that we need to hook another listener to detect when the workbench window is opened).
 		PlatformUI.getWorkbench().addWindowListener(new IWindowListener()
@@ -366,12 +395,7 @@ public class Activator extends Plugin
 
 		plugin = null;
 		super.stop(context);
-		IApplication debugReadyClient = getDebugClientHandler().getDebugReadyClient();
-		if (debugReadyClient != null && debugReadyClient.getScriptEngine() instanceof RemoteDebugScriptEngine &&
-			((RemoteDebugScriptEngine)debugReadyClient.getScriptEngine()).isAWTSuspendedRunningScript())
-		{
-			((RemoteDebugScriptEngine)debugReadyClient.getScriptEngine()).getDebugger().close();
-		}
+		stopAnyJSDebugSessionThatSuspendsAWT();
 
 		// shutdown all non-swing clients; no need to run this in AWT EDT
 		try
@@ -456,6 +480,16 @@ public class Activator extends Plugin
 		ApplicationServerSingleton.get().shutDown();
 
 		if (interrupted) Thread.interrupted(); // someone is in a hurry, let callers know about that
+	}
+
+	protected void stopAnyJSDebugSessionThatSuspendsAWT()
+	{
+		IApplication debugReadyClient = getDebugClientHandler().getDebugReadyClient();
+		if (debugReadyClient != null && debugReadyClient.getScriptEngine() instanceof RemoteDebugScriptEngine &&
+			((RemoteDebugScriptEngine)debugReadyClient.getScriptEngine()).isAWTSuspendedRunningScript())
+		{
+			((RemoteDebugScriptEngine)debugReadyClient.getScriptEngine()).getDebugger().close();
+		}
 	}
 
 	/**
