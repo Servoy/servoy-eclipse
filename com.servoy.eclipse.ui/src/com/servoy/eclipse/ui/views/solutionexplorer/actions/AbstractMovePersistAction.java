@@ -147,12 +147,15 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 		if (persist instanceof AggregateVariable) persistString = "aggregation";//$NON-NLS-1$
 	}
 
+	protected boolean isMoving = false;
+
 	@Override
 	public void run()
 	{
 		IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 		if (selection != null)
 		{
+			isMoving = true;
 			Iterator<SimpleUserNode> it = selection.iterator();
 			while (it.hasNext())
 			{
@@ -173,10 +176,12 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 							ServoyLog.logError(e);
 							MessageDialog.openError(shell, "Cannot duplicate/move form", persistString + " " + ((ISupportName)persist).getName() + //$NON-NLS-1$ //$NON-NLS-2$
 								"cannot be duplicated/moved. Reason:\n" + e.getMessage()); //$NON-NLS-1$
+							isMoving = false;
 						}
 					}
 				}
 			}
+			isMoving = false;
 		}
 		if (selectedPersist instanceof ISupportName)
 		{

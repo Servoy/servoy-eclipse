@@ -86,7 +86,7 @@ public class MovePersistAction extends AbstractMovePersistAction
 		//excluding the active project, so we get the exact number of modules
 		if ((activeModules.length - 1) == 0) setEnabled(false);
 
-		location = null;
+		if (!isMoving) location = null; // we need to keep the location until all the selected items are moved
 	}
 
 	@Override
