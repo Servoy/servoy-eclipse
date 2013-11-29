@@ -176,6 +176,9 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 							ServoyLog.logError(e);
 							MessageDialog.openError(shell, "Cannot duplicate/move form", persistString + " " + ((ISupportName)persist).getName() + //$NON-NLS-1$ //$NON-NLS-2$
 								"cannot be duplicated/moved. Reason:\n" + e.getMessage()); //$NON-NLS-1$
+						}
+						finally
+						{
 							isMoving = false;
 						}
 					}
