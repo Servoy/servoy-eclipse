@@ -498,7 +498,8 @@ public class MarqueeSelectionTool extends AbstractTool
 				selectedRectangle = selectedRectangle.union(getStartEditpart().getFigure().getBounds());
 				for (EditPart editpart : editParts)
 				{
-					if (editpart instanceof GraphicalEditPart && selectedRectangle.intersects(((GraphicalEditPart)editpart).getFigure().getBounds()))
+					if (editpart instanceof GraphicalEditPart && ((GraphicalEditPart)editpart).isSelectable() &&
+						selectedRectangle.intersects(((GraphicalEditPart)editpart).getFigure().getBounds()))
 					{
 						newSelections.add(editpart);
 					}
