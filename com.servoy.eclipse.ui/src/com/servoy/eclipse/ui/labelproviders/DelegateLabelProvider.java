@@ -19,10 +19,12 @@ package com.servoy.eclipse.ui.labelproviders;
 
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
+import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 
@@ -34,7 +36,7 @@ import com.servoy.j2db.util.IDelegate;
  * @author rgansevles
  * 
  */
-public class DelegateLabelProvider implements IStyledLabelProvider, ILabelProvider, IFontProvider, IDelegate
+public class DelegateLabelProvider implements IStyledLabelProvider, ILabelProvider, IFontProvider, IColorProvider, IDelegate
 {
 	private final IBaseLabelProvider labelProvider;
 
@@ -98,6 +100,26 @@ public class DelegateLabelProvider implements IStyledLabelProvider, ILabelProvid
 		if (labelProvider instanceof IFontProvider)
 		{
 			return ((IFontProvider)labelProvider).getFont(element);
+		}
+		return null;
+	}
+
+	@Override
+	public Color getBackground(Object element)
+	{
+		if (labelProvider instanceof IColorProvider)
+		{
+			return ((IColorProvider)labelProvider).getBackground(element);
+		}
+		return null;
+	}
+
+	@Override
+	public Color getForeground(Object element)
+	{
+		if (labelProvider instanceof IColorProvider)
+		{
+			return ((IColorProvider)labelProvider).getForeground(element);
 		}
 		return null;
 	}
