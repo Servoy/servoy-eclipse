@@ -416,6 +416,8 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 				Messages.ErrorWarningPreferencePage_columnValidatorInvalid, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.COLUMN_CONVERTER_INVALID,
 				Messages.ErrorWarningPreferencePage_columnConverterInvalid, false));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.ROW_IDENT_SHOULD_NOT_BE_NULL,
+				Messages.ErrorWarningPreferencePage_columnRowIdentShouldNotAllowNull, false));
 		}
 		else if (ERROR_WARNING_SORT_PROBLEMS.equals(problemSection))
 		{

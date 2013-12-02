@@ -395,6 +395,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		"ColumnValidatorInvalid", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> COLUMN_CONVERTER_INVALID = new Pair<String, ProblemSeverity>(
 		"ColumnConverterInvalid", ProblemSeverity.WARNING); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> ROW_IDENT_SHOULD_NOT_BE_NULL = new Pair<String, ProblemSeverity>(
+		"ColumnRowIdentShouldNotBeNull", ProblemSeverity.WARNING); //$NON-NLS-1$
 
 	// sort problems
 	public final static Pair<String, ProblemSeverity> INVALID_SORT_OPTIONS_RELATION_NOT_FOUND = new Pair<String, ProblemSeverity>(
@@ -4438,6 +4440,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								{
 									ServoyMarker mk = MarkerMessages.ColumnIncompatibleTypeForSequence.fill(tableName, column.getName());
 									addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_INCOMPATIBLE_TYPE_FOR_SEQUENCE, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
+										"columnName", column.getName());
+								}
+								if (column.getAllowNull() && column.getRowIdentType() != Column.NORMAL_COLUMN)
+								{
+									ServoyMarker mk = MarkerMessages.ColumnRowIdentShouldNotAllowNull.fill(tableName, column.getName());
+									addMarker(res, mk.getType(), mk.getText(), -1, ROW_IDENT_SHOULD_NOT_BE_NULL, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
 										"columnName", column.getName());
 								}
 								if (column.hasFlag(Column.UUID_COLUMN))
