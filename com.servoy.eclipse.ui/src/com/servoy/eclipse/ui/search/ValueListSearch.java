@@ -19,17 +19,22 @@ package com.servoy.eclipse.ui.search;
 
 import java.util.regex.Pattern;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.search.core.text.TextSearchEngine;
 import org.eclipse.search.ui.ISearchQuery;
+import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.FileTextSearchScope;
 
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.util.Pair;
 
 /**
  * An {@link ISearchQuery} implementation for finding valuelists in frm and js files.
@@ -57,7 +62,7 @@ public class ValueListSearch extends AbstractPersistSearch
 		IResource[] scopes = getScopes((Solution)valueList.getRootObject());
 		TextSearchResultCollector collector = getResultCollector();
 
-		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm" }, true);
+		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm", "*.val" }, true);
 		TextSearchEngine.create().search(scope, collector, Pattern.compile(valueList.getUUID().toString()), monitor);
 
 		scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.js" }, true);
@@ -66,6 +71,28 @@ public class ValueListSearch extends AbstractPersistSearch
 
 
 		return Status.OK_STATUS;
+	}
+
+	@Override
+	protected TextSearchResultCollector createTextSearchCollector(AbstractTextSearchResult searchResult)
+	{
+		Pair<String, String> filePathPair = SolutionSerializer.getFilePath(valueList, false);
+		final String fileName = "/" + filePathPair.getLeft() + filePathPair.getRight(); //$NON-NLS-1$
+
+		return new TextSearchResultCollector(searchResult)
+		{
+			@Override
+			public boolean acceptFile(IFile file) throws CoreException
+			{
+				// ignore the declaration.
+				if (file.getFullPath().toPortableString().equals(fileName))
+				{
+					super.acceptFile(file);
+					return false;
+				}
+				return super.acceptFile(file);
+			}
+		};
 	}
 
 	/*
