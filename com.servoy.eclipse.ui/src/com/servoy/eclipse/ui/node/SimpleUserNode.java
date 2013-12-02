@@ -232,31 +232,35 @@ public class SimpleUserNode implements IAdaptable
 		}
 	}
 
-	public void hide()
+	public boolean hide()
 	{
+		boolean needsRefresh = !hidden;
 		hidden = true;
 		if (children != null)
 		{
 			for (SimpleUserNode un : children)
 			{
-				un.hide();
+				needsRefresh = needsRefresh || un.hide();
 			}
 		}
+		return needsRefresh;
 	}
 
-	public void unhide()
+	public boolean unhide()
 	{
+		boolean needsRefresh = hidden;
 		if (hidden)
 		{
 			if (children != null)
 			{
 				for (SimpleUserNode un : children)
 				{
-					un.unhide();
+					needsRefresh = needsRefresh || un.unhide();
 				}
 			}
 			hidden = false;
 		}
+		return needsRefresh;
 	}
 
 	/**

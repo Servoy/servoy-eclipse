@@ -1608,10 +1608,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 							}
 						}
 					}
-					for (IPersist persist : parents)
-					{
-						((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshContent(persist);
-					}
+
+					((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshContent(parents);
 					if (list.getContentProvider() != null)
 					{
 						((SolutionExplorerListContentProvider)list.getContentProvider()).persistChanges(changes);

@@ -336,9 +336,13 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	{
 		for (PlatformSimpleUserNode n : nodes)
 		{
-			if (isEnabled) n.unhide();
-			else n.hide();
-			view.refreshTreeNodeFromModel(n);
+			boolean needsRefresh = false;
+			if (isEnabled) needsRefresh = n.unhide();
+			else needsRefresh = n.hide();
+			if (needsRefresh)
+			{
+				view.refreshTreeNodeFromModel(n);
+			}
 		}
 	}
 
@@ -1544,131 +1548,157 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		}
 	}
 
-	/**
-	 * Decides whether or not the given persist changing affects the currently cached tree content, and if it does - it will refresh that content.
-	 * 
-	 * @param persist the persist that changed.
-	 */
-	public void refreshContent(IPersist persist)
+	public void refreshContent(Set<IPersist> persists)
 	{
-		if (persist instanceof IFormElement)
+		// optimize a bit so we don't refresh the same thing multiple times
+		Iterator<IPersist> it = persists.iterator();
+		List<String> solutionsRefreshedForRelations = new ArrayList<String>();
+		while (it.hasNext())
 		{
-			IPersist parent = persist.getParent();
-			if (parent instanceof Form)
-			{
-				// if the element's form was extended by other forms, the elements of those forms must be refreshed as well...
-				FlattenedSolution flatSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
-				refreshElementsForForm(flatSolution, (Form)parent, new HashSet<Form>());
-			}
-		}
-		else
-		{
+			IPersist persist = it.next();
 			IRootObject root = persist.getRootObject();
-			if (root instanceof Solution)
-			{
-				Solution s = (Solution)root;
-				PlatformSimpleUserNode node = getSolutionNode(s.getName());
+			boolean refreshedFormsNode = false;
 
-				if (node != null)
+			if (persist instanceof IFormElement)
+			{
+				// don't refresh if we also refresh the solution
+				if (persists.contains(root)) continue;
+
+				IPersist parent = persist.getParent();
+				if (parent instanceof Form)
 				{
-					// find the node and refresh it
-					if (persist instanceof Relation && ((Relation)persist).getName() != null)
+					// if the element's form was extended by other forms, the elements of those forms must be refreshed as well...
+					FlattenedSolution flatSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
+					refreshElementsForForm(flatSolution, (Form)parent, new HashSet<Form>());
+				}
+			}
+			else
+			{
+				if (root instanceof Solution)
+				{
+					Solution s = (Solution)root;
+					PlatformSimpleUserNode node = getSolutionNode(s.getName());
+
+					if (node != null)
 					{
-						// refresh global relations node - if possible
-						node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Scopes);
-						if (node != null)
+						// find the node and refresh it
+						if (persist instanceof Relation && ((Relation)persist).getName() != null)
 						{
-							String[] scopeNames = ((Solution)root).getRuntimeProperty(Solution.SCOPE_NAMES);
-							if (scopeNames != null) // when refreshScopes has not been called yet
+							if (!solutionsRefreshedForRelations.contains(s.getName()))
 							{
-								PlatformSimpleUserNode scopeNode = null;
-								for (String scopeName : scopeNames)
+								// refresh global relations node - if possible
+								node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Scopes);
+								if (node != null)
 								{
-									scopeNode = (PlatformSimpleUserNode)findChildNode(node, scopeName);
-									if (scopeNode != null)
+									String[] scopeNames = ((Solution)root).getRuntimeProperty(Solution.SCOPE_NAMES);
+									if (scopeNames != null) // when refreshScopes has not been called yet
 									{
-										scopeNode = (PlatformSimpleUserNode)findChildNode(scopeNode, Messages.TreeStrings_relations);
-									}
-									if (scopeNode != null)
-									{
-										addGlobalRelationsNodeChildren(scopeNode);
-										view.refreshTreeNodeFromModel(scopeNode);
-									}
-								}
-							}
-						}
-						try
-						{
-							// refresh all affected form relation nodes
-							node = (PlatformSimpleUserNode)findChildNode(getSolutionNode(s.getName()), Messages.TreeStrings_Forms);
-							if (node != null && node.children != null)
-							{
-								PlatformSimpleUserNode relationsNode;
-								Form form;
-								for (int i = node.children.length - 1; i >= 0; i--)
-								{
-									form = (Form)node.children[i].getRealObject();
-									if (form.getTable() != null)
-									{
-										relationsNode = (PlatformSimpleUserNode)findChildNode(node.children[i], Messages.TreeStrings_relations);
-										if (relationsNode != null)
+										PlatformSimpleUserNode scopeNode = null;
+										for (String scopeName : scopeNames)
 										{
-											addFormRelationsNodeChildren(relationsNode);
-											view.refreshTreeNodeFromModel(relationsNode);
+											scopeNode = (PlatformSimpleUserNode)findChildNode(node, scopeName);
+											if (scopeNode != null)
+											{
+												scopeNode = (PlatformSimpleUserNode)findChildNode(scopeNode, Messages.TreeStrings_relations);
+											}
+											if (scopeNode != null)
+											{
+												addGlobalRelationsNodeChildren(scopeNode);
+												view.refreshTreeNodeFromModel(scopeNode);
+											}
 										}
 									}
 								}
 							}
-
-							// if in calculation mode, refresh Relations node under
-							// solution node
-							if (solutionOfCalculation != null)
+							try
 							{
-								node = (PlatformSimpleUserNode)findChildNode(getSolutionNode(s.getName()), Messages.TreeStrings_Relations);
-								if (node != null && tableOfCalculation.equals(((Relation)persist).getPrimaryTable()))
+								if (!solutionsRefreshedForRelations.contains(s.getName()))
 								{
-									addRelationsNodeChildren(node, solutionOfCalculation, (Table)tableOfCalculation, UserNodeType.CALC_RELATION);
+									// refresh all affected form relation nodes
+									node = (PlatformSimpleUserNode)findChildNode(getSolutionNode(s.getName()), Messages.TreeStrings_Forms);
+									if (node != null && node.children != null)
+									{
+										PlatformSimpleUserNode relationsNode;
+										Form form;
+										for (int i = node.children.length - 1; i >= 0; i--)
+										{
+											form = (Form)node.children[i].getRealObject();
+											if (form.getTable() != null)
+											{
+												relationsNode = (PlatformSimpleUserNode)findChildNode(node.children[i], Messages.TreeStrings_relations);
+												if (relationsNode != null)
+												{
+													addFormRelationsNodeChildren(relationsNode);
+													view.refreshTreeNodeFromModel(relationsNode);
+												}
+											}
+										}
+									}
+								}
+								// if in calculation mode, refresh Relations node under
+								// solution node
+								if (solutionOfCalculation != null)
+								{
+									node = (PlatformSimpleUserNode)findChildNode(getSolutionNode(s.getName()), Messages.TreeStrings_Relations);
+									if (node != null && tableOfCalculation.equals(((Relation)persist).getPrimaryTable()))
+									{
+										addRelationsNodeChildren(node, solutionOfCalculation, (Table)tableOfCalculation, UserNodeType.CALC_RELATION);
+										view.refreshTreeNodeFromModel(node);
+									}
+								}
+							}
+							catch (RepositoryException e)
+							{
+								ServoyLog.logWarning("Exception while trying to refresh relation: " + persist, e); //$NON-NLS-1$
+							}
+							if (!solutionsRefreshedForRelations.contains(s.getName())) solutionsRefreshedForRelations.add(s.getName());
+						}
+						else if (persist instanceof Form)
+						{
+							// don't refresh if we also refresh the solution
+							if (persists.contains(s)) continue;
+
+							node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
+							if (node != null)
+							{
+								PlatformSimpleUserNode formNode = (PlatformSimpleUserNode)findChildNode(node, ((Form)persist).getName());
+								if (formNode == null)
+								{
+									if (!refreshedFormsNode)
+									{
+										refreshedFormsNode = true;
+										addFormsNodeChildren(node);
+									}
+									else
+									{
+										node = null;
+									}
+								}
+								else
+								{
+									node = formNode;
+									node.children = null;
+								}
+								if (node != null)
+								{
 									view.refreshTreeNodeFromModel(node);
 								}
 							}
 						}
-						catch (RepositoryException e)
+						else if (persist instanceof Solution)
 						{
-							ServoyLog.logWarning("Exception while trying to refresh relation: " + persist, e); //$NON-NLS-1$
-						}
-
-					}
-					else if (persist instanceof Form)
-					{
-						node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
-						if (node != null)
-						{
-							PlatformSimpleUserNode formNode = (PlatformSimpleUserNode)findChildNode(node, ((Form)persist).getName());
-							if (formNode == null)
+							PlatformSimpleUserNode solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
+							if (solutionChildNode != null)
 							{
-								addFormsNodeChildren(node);
+								addFormsNodeChildren(solutionChildNode);
+								view.refreshTreeNodeFromModel(solutionChildNode);
 							}
-							else
+							solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Media);
+							if (solutionChildNode != null)
 							{
-								node = formNode;
-								node.children = null;
+								addMediaFolderChildrenNodes(solutionChildNode, (Solution)persist);
+								view.refreshTreeNodeFromModel(solutionChildNode);
 							}
-							view.refreshTreeNodeFromModel(node);
-						}
-					}
-					else if (persist instanceof Solution)
-					{
-						PlatformSimpleUserNode solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
-						if (solutionChildNode != null)
-						{
-							addFormsNodeChildren(solutionChildNode);
-							view.refreshTreeNodeFromModel(solutionChildNode);
-						}
-						solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Media);
-						if (solutionChildNode != null)
-						{
-							addMediaFolderChildrenNodes(solutionChildNode, (Solution)persist);
-							view.refreshTreeNodeFromModel(solutionChildNode);
 						}
 					}
 				}
