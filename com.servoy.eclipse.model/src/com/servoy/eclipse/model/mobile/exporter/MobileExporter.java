@@ -242,17 +242,20 @@ public class MobileExporter
 									property_values.put(IComponentConstants.VIEW_TYPE_ATTR, ComponentFactory.isButton(((GraphicalComponent)persist))
 										? IComponentConstants.VIEW_TYPE_BUTTON : IComponentConstants.VIEW_TYPE_LABEL);
 								}
-								if (value != null && contentSpec != null &&
-									contentSpec.getName().equals(StaticContentSpecLoader.PROPERTY_CUSTOMPROPERTIES.getPropertyName()))
+								if (value != null)
 								{
-									try
+									if (contentSpec != null &&
+										contentSpec.getName().equals(StaticContentSpecLoader.PROPERTY_CUSTOMPROPERTIES.getPropertyName()))
 									{
-										ServoyJSONObject customProperties = new ServoyJSONObject(value, true, false, false);
-										return ServoyJSONObject.toString(customProperties, false, false, false);
-									}
-									catch (Exception ex)
-									{
-										ServoyLog.logError(ex);
+										try
+										{
+											ServoyJSONObject customProperties = new ServoyJSONObject(value, true, false, false);
+											return ServoyJSONObject.toString(customProperties, false, false, false);
+										}
+										catch (Exception ex)
+										{
+											ServoyLog.logError(ex);
+										}
 									}
 								}
 								return value;
