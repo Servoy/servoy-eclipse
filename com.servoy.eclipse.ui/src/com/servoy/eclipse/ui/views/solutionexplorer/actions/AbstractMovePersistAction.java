@@ -156,35 +156,37 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 		if (selection != null)
 		{
 			isMoving = true;
-			Iterator<SimpleUserNode> it = selection.iterator();
-			while (it.hasNext())
+			try
 			{
-				SimpleUserNode node = it.next();
-				SimpleUserNode projectNode = node.getAncestorOfType(ServoyProject.class);
-				if (projectNode != null)
+				Iterator<SimpleUserNode> it = selection.iterator();
+				while (it.hasNext())
 				{
-					IPersist persist = (IPersist)node.getRealObject();
-					if (persist instanceof ISupportName)
+					SimpleUserNode node = it.next();
+					SimpleUserNode projectNode = node.getAncestorOfType(ServoyProject.class);
+					if (projectNode != null)
 					{
-						try
+						IPersist persist = (IPersist)node.getRealObject();
+						if (persist instanceof ISupportName)
 						{
-							Location location = askForNewFormLocation(persist, nameValidator);
-							if (location != null) doWork(persist, location, nameValidator);
-						}
-						catch (RepositoryException e)
-						{
-							ServoyLog.logError(e);
-							MessageDialog.openError(shell, "Cannot duplicate/move form", persistString + " " + ((ISupportName)persist).getName() + //$NON-NLS-1$ //$NON-NLS-2$
-								"cannot be duplicated/moved. Reason:\n" + e.getMessage()); //$NON-NLS-1$
-						}
-						finally
-						{
-							isMoving = false;
+							try
+							{
+								Location location = askForNewFormLocation(persist, nameValidator);
+								if (location != null) doWork(persist, location, nameValidator);
+							}
+							catch (RepositoryException e)
+							{
+								ServoyLog.logError(e);
+								MessageDialog.openError(shell, "Cannot duplicate/move form", persistString + " " + ((ISupportName)persist).getName() + //$NON-NLS-1$ //$NON-NLS-2$
+									"cannot be duplicated/moved. Reason:\n" + e.getMessage()); //$NON-NLS-1$
+							}
 						}
 					}
 				}
 			}
-			isMoving = false;
+			finally
+			{
+				isMoving = false;
+			}
 		}
 		if (selectedPersist instanceof ISupportName)
 		{
