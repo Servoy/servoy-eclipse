@@ -383,8 +383,8 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 		workingCopy.setAttribute(IMobileLaunchConstants.SERVER_URL, IMobileLaunchConstants.DEFAULT_SERVICE_URL);
 		workingCopy.setAttribute(IMobileLaunchConstants.SERVICE_SOLUTION, project.getSolutionMetaData().getName() + "_service");
 		workingCopy.setAttribute(IMobileLaunchConstants.APPLICATION_URL, appUrl);
-		workingCopy.setAttribute("company", "");
-		workingCopy.setAttribute("license", "");
+		workingCopy.setAttribute(IMobileLaunchConstants.COMPANY_NAME, "");
+		workingCopy.setAttribute(IMobileLaunchConstants.LICENSE_CODE, "");
 		String browser = MobileLaunchConfigurationDelegate.getBrowser("org.eclipse.ui.browser.chrome") != null ? "org.eclipse.ui.browser.chrome" : "default";
 		workingCopy.setAttribute(IMobileLaunchConstants.BROWSER_ID, browser);
 		workingCopy.setAttribute(IMobileLaunchConstants.NODEBUG, nodebug ? "true" : "false");

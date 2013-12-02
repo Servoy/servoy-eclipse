@@ -188,8 +188,8 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		String serverUrl = configuration.getAttribute(IMobileLaunchConstants.SERVER_URL, "");
 		String serviceSolutionName = configuration.getAttribute(IMobileLaunchConstants.SERVICE_SOLUTION, (String)null);
 		int timeout = Integer.valueOf(configuration.getAttribute(IMobileLaunchConstants.TIMEOUT, IMobileLaunchConstants.DEFAULT_TIMEOUT)).intValue();
-		String company = configuration.getAttribute("company", "");
-		String license = configuration.getAttribute("license", "");
+		String company = configuration.getAttribute(IMobileLaunchConstants.COMPANY_NAME, "");
+		String license = configuration.getAttribute(IMobileLaunchConstants.LICENSE_CODE, "");
 		boolean validLicense = ApplicationServerSingleton.get().checkMobileLicense(company, license);
 
 		exporter.setSolutionName(solutionName);

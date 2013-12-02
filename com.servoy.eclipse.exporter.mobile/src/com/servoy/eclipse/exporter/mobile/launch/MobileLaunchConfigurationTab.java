@@ -73,6 +73,10 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 	protected Button checkNoDebug;
 	protected Label lblNoDebug;
 	protected Text txtNoDebugFeedback;
+	protected Label lblCompanyName;
+	protected Text txtCompanyName;
+	protected Label lblLicenseCode;
+	protected Text txtLicenseCode;
 
 	protected String NODEBUG_CHECK_TXT = "when checked, running this launch configuration will start the service solution without switching to it as an active solution";
 	protected String NODEBUG_UNCHECK_TXT = "when unchecked running this launch configuration will switch to service solution as active solution.";
@@ -272,6 +276,18 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		Label lblWarDeployUnit = new Label(container, SWT.NONE);
 		lblWarDeployUnit.setText("(sec)");
 
+		lblCompanyName = new Label(container, SWT.NONE);
+		lblCompanyName.setText("Company Name");
+
+		txtCompanyName = new Text(container, SWT.BORDER);
+		txtCompanyName.addModifyListener(modifyListener);
+
+		lblLicenseCode = new Label(container, SWT.NONE);
+		lblLicenseCode.setText("License Code");
+
+		txtLicenseCode = new Text(container, SWT.BORDER);
+		txtLicenseCode.addModifyListener(modifyListener);
+
 		// @formatter:off
 		GroupLayout groupLayout = new GroupLayout(container);
 		groupLayout.setHorizontalGroup(
@@ -286,7 +302,9 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 								.add(lblServerURL)
 								.add(lblServiceSolution)
 								.add(lblSolution)
-								.add(lblTimeout))
+								.add(lblTimeout)
+								.add(lblCompanyName)
+								.add(lblLicenseCode))
 							.add(18)
 							.add(groupLayout.createParallelGroup(GroupLayout.LEADING)
 								.add(combo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
@@ -294,7 +312,9 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 								.add(txtServerURL, GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE)
 								.add(txtServiceSolution, GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE)
 								.add(txtStartURL, GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE)
-								.add(txtTimeout, GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE)))
+								.add(txtTimeout, GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE)
+								.add(txtCompanyName, GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE)
+								.add(txtLicenseCode, GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE)))
 						.add(separator, GroupLayout.DEFAULT_SIZE, 522, Short.MAX_VALUE)
 						.add(groupLayout.createSequentialGroup()
 							.add(groupLayout.createParallelGroup(GroupLayout.TRAILING)
@@ -340,9 +360,17 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 					.add(groupLayout.createParallelGroup(GroupLayout.BASELINE)
 						.add(lblTimeout)
 						.add(txtTimeout, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-					.add(29)
+					.addPreferredGap(LayoutStyle.RELATED)
+					.add(groupLayout.createParallelGroup(GroupLayout.BASELINE)
+						.add(lblCompanyName)
+						.add(txtCompanyName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+					.addPreferredGap(LayoutStyle.RELATED)
+					.add(groupLayout.createParallelGroup(GroupLayout.BASELINE)
+						.add(lblLicenseCode)
+						.add(txtLicenseCode, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+					.add(19)
 					.add(separator, GroupLayout.PREFERRED_SIZE, 2, GroupLayout.PREFERRED_SIZE)
-					.add(18)
+					.add(5)
 					.add(groupLayout.createParallelGroup(GroupLayout.BASELINE)
 						.add(txtNoDebugFeedback, GroupLayout.PREFERRED_SIZE, 45, GroupLayout.PREFERRED_SIZE)
 						.add(checkNoDebug)
@@ -352,7 +380,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 						.add(maxTxtWarDeployTime, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.add(lblMaxWarDeployTime)
 						.add(lblWarDeployUnit))
-					.addContainerGap(30, Short.MAX_VALUE))
+					.addContainerGap(10, Short.MAX_VALUE))
 		);
 		// @formatter:on
 		container.setLayout(groupLayout);
@@ -377,6 +405,8 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		configuration.setAttribute(IMobileLaunchConstants.NODEBUG, "true");
 		configuration.setAttribute(IMobileLaunchConstants.BROWSER_ID, "org.eclipse.ui.browser.chrome");
 		configuration.setAttribute(IMobileLaunchConstants.MAX_WAR_DEPLOYMENT_TIME, IMobileLaunchConstants.DEFAULT_MAX_WAR_DEPLOYMENT_TIME);
+		configuration.setAttribute(IMobileLaunchConstants.COMPANY_NAME, "");
+		configuration.setAttribute(IMobileLaunchConstants.LICENSE_CODE, "");
 	}
 
 	@Override
@@ -398,6 +428,8 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 			maxTxtWarDeployTime.setText(configuration.getAttribute(IMobileLaunchConstants.MAX_WAR_DEPLOYMENT_TIME,
 				IMobileLaunchConstants.DEFAULT_MAX_WAR_DEPLOYMENT_TIME));
 			if (maxTxtWarDeployTime.getText().length() == 0) maxTxtWarDeployTime.setText(IMobileLaunchConstants.DEFAULT_MAX_WAR_DEPLOYMENT_TIME);
+			txtCompanyName.setText(configuration.getAttribute(IMobileLaunchConstants.COMPANY_NAME, ""));
+			txtLicenseCode.setText(configuration.getAttribute(IMobileLaunchConstants.LICENSE_CODE, ""));
 		}
 		catch (CoreException e)
 		{
@@ -417,6 +449,8 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		String browserId = (String)possibleBrowsersNames.getKey(browserList[combo.getSelectionIndex() == -1 ? 0 : combo.getSelectionIndex()]);
 		configuration.setAttribute(IMobileLaunchConstants.BROWSER_ID, browserId);
 		configuration.setAttribute(IMobileLaunchConstants.MAX_WAR_DEPLOYMENT_TIME, maxTxtWarDeployTime.getText());
+		configuration.setAttribute(IMobileLaunchConstants.COMPANY_NAME, txtCompanyName.getText());
+		configuration.setAttribute(IMobileLaunchConstants.LICENSE_CODE, txtLicenseCode.getText());
 	}
 
 	@Override
