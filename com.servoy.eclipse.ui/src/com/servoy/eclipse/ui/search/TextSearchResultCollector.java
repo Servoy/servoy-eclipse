@@ -37,6 +37,7 @@ class TextSearchResultCollector extends TextSearchRequestor
 
 	private final AbstractTextSearchResult fResult;
 	private ArrayList<FileMatch> fCachedMatches;
+	private boolean overrideColecting = false;
 
 	TextSearchResultCollector(AbstractTextSearchResult result)
 	{
@@ -84,7 +85,7 @@ class TextSearchResultCollector extends TextSearchRequestor
 	 */
 	protected FileMatch createFileMatch(TextSearchMatchAccess matchRequestor, int matchOffset, LineElement lineElement)
 	{
-		return new FileMatch(matchRequestor.getFile(), matchOffset, matchRequestor.getMatchLength(), lineElement);
+		return new FileMatch(matchRequestor.getFile(), matchOffset, matchRequestor.getMatchLength(), lineElement, overrideColecting);
 	}
 
 	private LineElement getLineElement(int offset, TextSearchMatchAccess matchRequestor)
@@ -175,5 +176,10 @@ class TextSearchResultCollector extends TextSearchRequestor
 			fResult.addMatches(fCachedMatches.toArray(new Match[fCachedMatches.size()]));
 			fCachedMatches.clear();
 		}
+	}
+
+	public void setOverrideColecting(boolean overrideColecting)
+	{
+		this.overrideColecting = overrideColecting;
 	}
 }
