@@ -28,8 +28,10 @@ import org.eclipse.search.core.text.TextSearchEngine;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.text.FileTextSearchScope;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.Utils;
 
 /**
  * An {@link ISearchQuery} implementation for finding Medias in frm and js files.
@@ -55,14 +57,16 @@ public class MediaSearch extends AbstractPersistSearch
 	public IStatus run(IProgressMonitor monitor) throws OperationCanceledException
 	{
 		IResource[] scopes = getScopes((Solution)mediaImage.getRootObject());
+		IResource resourceProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getProject();
+		scopes = Utils.arrayAdd(scopes, resourceProject, true);
+
 		TextSearchResultCollector collector = getResultCollector();
 
-		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm", "*.js", "*.css" }, true);
+		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm", "*.js" }, true);
 		TextSearchEngine.create().search(scope, collector, Pattern.compile(mediaImage.getUUID().toString()), monitor);
 
-		scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.js" }, true);
+		scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.js", "*.css" }, true);
 		TextSearchEngine.create().search(scope, collector, Pattern.compile("\\bmedia:///" + mediaImage.getName() + "\\b"), monitor);
-
 
 		return Status.OK_STATUS;
 	}
