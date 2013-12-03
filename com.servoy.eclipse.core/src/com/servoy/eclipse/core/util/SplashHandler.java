@@ -28,7 +28,6 @@ import org.eclipse.ui.splash.BasicSplashHandler;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
-import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -125,13 +124,9 @@ public class SplashHandler extends BasicSplashHandler
 			}
 			if (ApplicationServerSingleton.get() != null)
 			{
-				Settings settings = ApplicationServerSingleton.get().loadSettings();
-				if (settings != null)
-				{
-					String regText = ApplicationServerSingleton.get().initLicenseManagerAsDeveloper(settings);
-					text.append("\n");
-					text.append(regText);
-				}
+				String regText = ApplicationServerSingleton.get().initLicenseManagerAsDeveloper();
+				text.append("\n");
+				text.append(regText);
 			}
 		}
 		return text;
