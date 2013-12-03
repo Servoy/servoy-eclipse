@@ -27,8 +27,8 @@ import junit.framework.TestCase;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.servoy.base.test.IJSUnitSuiteHandler;
 import com.servoy.eclipse.jsunit.runner.CodeFinderUtils;
@@ -49,7 +49,7 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 	private final static int DEFAULT_STOP_REQUESTED_WAIT = 25 * 1000;
 
 	private static int idCount = 1;
-	private static final Log log = LogFactory.getLog(JSUnitToJavaRunner.class);
+	private static final Logger log = LoggerFactory.getLogger(JSUnitToJavaRunner.class);
 
 	private final int id;
 
@@ -162,7 +162,7 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 				}
 				catch (InterruptedException e)
 				{
-					log.error(e);
+					log.error("", e);
 				}
 			}
 			if (testTree == null && !unexpectedProblemOccurred())
@@ -230,7 +230,7 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 					}
 					catch (InterruptedException e)
 					{
-						log.error(e);
+						log.error("", e);
 					}
 				}
 			}
