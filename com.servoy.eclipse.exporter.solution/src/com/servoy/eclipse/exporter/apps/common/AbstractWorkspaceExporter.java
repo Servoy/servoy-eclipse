@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -502,7 +503,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 				ss.startStandalone(new EclipseRepositoryFactory()
 				{
 					@Override
-					protected void init(IServerManagerInternal serverManager, Settings settings)
+					protected void init(IServerManagerInternal serverManager, Properties settings)
 					{
 						if (repository == null)
 						{

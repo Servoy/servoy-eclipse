@@ -74,7 +74,6 @@ import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.Pair;
-import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -88,11 +87,11 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 	}
 
 	private final List<ActivityMonitor> monitors = new ArrayList<ActivityMonitor>();
-	private final Settings settings;
+	private final Properties settings;
 	private final IFileAccess wsa;
 	private String resourcesProjectName;
 
-	public EclipseRepository(IServerManagerInternal sm, Settings settings)
+	public EclipseRepository(IServerManagerInternal sm, Properties settings)
 	{
 		super(sm);
 		wsa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());

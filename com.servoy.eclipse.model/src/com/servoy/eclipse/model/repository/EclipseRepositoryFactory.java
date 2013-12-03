@@ -16,11 +16,12 @@
  */
 package com.servoy.eclipse.model.repository;
 
+import java.util.Properties;
+
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IRemoteRepository;
 import com.servoy.j2db.persistence.IRepositoryFactory;
 import com.servoy.j2db.persistence.IServerManagerInternal;
-import com.servoy.j2db.util.Settings;
 
 /**
  * @author jcompagner
@@ -30,7 +31,7 @@ public class EclipseRepositoryFactory implements IRepositoryFactory
 {
 	protected EclipseRepository repository = null;
 
-	protected void init(IServerManagerInternal serverManager, Settings settings)
+	protected void init(IServerManagerInternal serverManager, Properties settings)
 	{
 		if (repository == null)
 		{
@@ -41,7 +42,7 @@ public class EclipseRepositoryFactory implements IRepositoryFactory
 	/**
 	 * @see com.servoy.j2db.server.IRepositoryFactory#getDeveloperRepository(com.servoy.j2db.persistence.IServerManagerInternal, com.servoy.j2db.util.Settings)
 	 */
-	public IDeveloperRepository getDeveloperRepository(IServerManagerInternal serverManager, Settings settings)
+	public IDeveloperRepository getDeveloperRepository(IServerManagerInternal serverManager, Properties settings)
 	{
 		init(serverManager, settings);
 		return repository;
@@ -50,7 +51,7 @@ public class EclipseRepositoryFactory implements IRepositoryFactory
 	/**
 	 * @see com.servoy.j2db.server.IRepositoryFactory#getRemoteRepository(com.servoy.j2db.persistence.IServerManagerInternal, com.servoy.j2db.util.Settings)
 	 */
-	public IRemoteRepository getRemoteRepository(IServerManagerInternal serverManager, Settings settings)
+	public IRemoteRepository getRemoteRepository(IServerManagerInternal serverManager, Properties settings)
 	{
 		init(serverManager, settings);
 		return repository;
