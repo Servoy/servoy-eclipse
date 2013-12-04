@@ -109,6 +109,7 @@ import com.servoy.j2db.dataprocessing.IFoundSet;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
+import com.servoy.j2db.dataprocessing.RelatedFoundSet;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.DocumentationUtil;
 import com.servoy.j2db.documentation.IParameter;
@@ -374,6 +375,7 @@ public class TypeCreator extends TypeCache
 
 		addScopeType(Record.JS_RECORD, new RecordCreator());
 		addScopeType(FoundSet.JS_FOUNDSET, new FoundSetCreator());
+		addScopeType(RelatedFoundSet.JS_RELATED_FOUNDSET, new FoundSetCreator());
 		addScopeType("JSDataSet", new JSDataSetCreator());
 		addScopeType("Form", new FormScopeCreator());
 		addScopeType("RuntimeForm", new FormScopeCreator());
@@ -495,7 +497,14 @@ public class TypeCreator extends TypeCache
 
 
 		String realTypeName = typeName;
-		if (realTypeName.equals("JSFoundset")) realTypeName = FoundSet.JS_FOUNDSET;
+		if (realTypeName.equals("JSFoundset"))
+		{
+			realTypeName = FoundSet.JS_FOUNDSET;
+		}
+		else if (realTypeName.equals("JSRelatedFoundset"))
+		{
+			realTypeName = RelatedFoundSet.JS_RELATED_FOUNDSET;
+		}
 		type = createClassType(context, realTypeName, realTypeName);
 		if (type != null)
 		{
@@ -884,9 +893,14 @@ public class TypeCreator extends TypeCache
 		{
 			String fullClassName = typeNameClassName;
 			String classType = fullClassName.substring(0, index);
-			if (classType.equals("JSFoundset"))
+			if (classType.equals("JSFoundSet"))
 			{
 				classType = FoundSet.JS_FOUNDSET;
+				fullClassName = classType + fullClassName.substring(index);
+			}
+			else if (classType.equals("JSRelatedFoundSet"))
+			{
+				classType = RelatedFoundSet.JS_RELATED_FOUNDSET;
 				fullClassName = classType + fullClassName.substring(index);
 			}
 			Type type = createDynamicType(context, classType, fullClassName);
@@ -2229,7 +2243,7 @@ public class TypeCreator extends TypeCache
 		public Type createType(String context, String fullTypeName)
 		{
 			Type type;
-			if (fullTypeName.equals(FoundSet.JS_FOUNDSET))
+			if (fullTypeName.equals(FoundSet.JS_FOUNDSET) || fullTypeName.equals(RelatedFoundSet.JS_RELATED_FOUNDSET))
 			{
 				type = createBaseType(context, fullTypeName);
 
@@ -2240,9 +2254,10 @@ public class TypeCreator extends TypeCache
 			{
 				FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 				String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
+				String classType = fullTypeName.startsWith("JSFoundSet") ? FoundSet.JS_FOUNDSET : RelatedFoundSet.JS_RELATED_FOUNDSET;
 				if (cachedSuperTypeTemplateType == null)
 				{
-					cachedSuperTypeTemplateType = createBaseType(context, FoundSet.JS_FOUNDSET);
+					cachedSuperTypeTemplateType = createBaseType(context, classType);
 				}
 				EList<Member> members = cachedSuperTypeTemplateType.getMembers();
 				List<Member> overwrittenMembers = new ArrayList<Member>();
@@ -2285,7 +2300,7 @@ public class TypeCreator extends TypeCache
 						}
 					}
 				}
-				type = getCombinedType(fs, context, fullTypeName, config, overwrittenMembers, getType(context, FoundSet.JS_FOUNDSET), FOUNDSET_IMAGE, true);
+				type = getCombinedType(fs, context, fullTypeName, config, overwrittenMembers, getType(context, classType), FOUNDSET_IMAGE, true);
 			}
 			return type;
 		}
@@ -2298,7 +2313,7 @@ public class TypeCreator extends TypeCache
 		private Type createBaseType(String context, String fullTypeName)
 		{
 			Type type;
-			type = TypeCreator.this.createType(context, fullTypeName, FoundSet.class);
+			type = TypeCreator.this.createType(context, fullTypeName, fullTypeName.equals("JSFoundSet") ? FoundSet.class : RelatedFoundSet.class);
 			//type.setAttribute(IMAGE_DESCRIPTOR, FOUNDSET_IMAGE);
 
 			Property maxRecordIndex = TypeInfoModelFactory.eINSTANCE.createProperty();
@@ -3295,7 +3310,8 @@ public class TypeCreator extends TypeCache
 					{
 						relationImage = RELATION_PROTECTED_IMAGE;
 					}
-					Property property = createProperty(relation.getName(), true, getTypeRef(context, FoundSet.JS_FOUNDSET + '<' + relation.getName() + '>'),
+					Property property = createProperty(relation.getName(), true,
+						getTypeRef(context, RelatedFoundSet.JS_RELATED_FOUNDSET + '<' + relation.getName() + '>'),
 						getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()), relationImage, relation,
 						relation.getDeprecated());
 					if (visible)
