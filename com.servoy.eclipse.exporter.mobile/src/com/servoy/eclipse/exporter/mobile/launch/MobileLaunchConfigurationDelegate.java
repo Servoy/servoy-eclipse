@@ -32,7 +32,7 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 {
 
 	/**
-	 * 1000 was too low - for test deployment I had a few times ~1200 sec time between timestamp changes during deployment...
+	 * 1 sec was too low - for test deployment I had a few times ~1.2 sec time between timestamp changes during deployment...
 	 */
 	private static final int DEPLOYMENT_FINISH_SILENCE_PERIOD = 2000;
 
@@ -63,12 +63,16 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 			if (monitor != null) monitor.subTask("deploying mobile solution");
 
 			File warFinalLocation = getWarExportDir(configuration);
-			File tmpWarFile = tmpExportFolder.listFiles()[0]; // the temp dir should now contain a single .war file - otherwise we can except a RuntimeException
-			File warContextFolder = new File(warFinalLocation, tmpWarFile.getName().substring(0, tmpWarFile.getName().length() - 4)); // drop the ".war" extension
+			File tmpWarFile = tmpExportFolder.listFiles()[0]; // the temp dir should now contain a single .war file - otherwise we can accept a RuntimeException
+
+			// we initially traced actual deployment folder, but since Tomcat 7 that was not enough, there was an additional delay until app. was accessible, so
+			// now we track the internal Tomcat created one; TODO we should switch to Tomcat API in the future
+			File warDeploymentTrackingFolder = new File(warFinalLocation, "../work/Catalina/localhost/" +
+				tmpWarFile.getName().substring(0, tmpWarFile.getName().length() - 4)); // drop the ".war" extension
 			File finalWarFile = new File(warFinalLocation, tmpWarFile.getName());
 
 			boolean deployed = false;
-			long initialModificationTimestampOfWarContextFolder = warContextFolder.exists() ? warContextFolder.lastModified() : 0;
+			long initialModificationTimestampOfDeploymentTrackingFolder = warDeploymentTrackingFolder.exists() ? warDeploymentTrackingFolder.lastModified() : 0;
 
 			// actual deployment/move
 			if (finalWarFile.exists()) FileUtils.deleteQuietly(finalWarFile); // because moveFileToDirectory fails otherwise
@@ -100,8 +104,8 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 					if (monitor != null && monitor.isCanceled()) return;
 
 
-					long mostRecentChangeTimestamp = warContextFolder.lastModified();
-					deployed = (warContextFolder.exists() && mostRecentChangeTimestamp != initialModificationTimestampOfWarContextFolder && (System.currentTimeMillis() -
+					long mostRecentChangeTimestamp = warDeploymentTrackingFolder.lastModified();
+					deployed = (warDeploymentTrackingFolder.exists() && mostRecentChangeTimestamp != initialModificationTimestampOfDeploymentTrackingFolder && (System.currentTimeMillis() -
 						mostRecentChangeTimestamp > DEPLOYMENT_FINISH_SILENCE_PERIOD));
 //					if (warContextFolder.exists() && mostRecentChangeTimestamp != initialModificationTimestampOfWarContextFolder) System.out.println(mostRecentChangeTimestamp);
 				}
