@@ -53,6 +53,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbench;
@@ -61,12 +62,14 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PerspectiveAdapter;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.activities.IActivityManager;
 import org.eclipse.ui.activities.IWorkbenchActivitySupport;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.cheatsheets.OpenCheatSheetAction;
+import org.eclipse.ui.internal.WorkbenchPage;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.cheatsheets.ICheatSheetResource;
 import org.eclipse.ui.internal.registry.ActionSetRegistry;
@@ -76,6 +79,8 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.Scriptable;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.prefs.BackingStoreException;
+import org.osgi.service.prefs.Preferences;
 import org.osgi.service.url.URLConstants;
 import org.osgi.service.url.URLStreamHandlerService;
 
@@ -331,6 +336,35 @@ public class Activator extends Plugin
 					}
 				}
 
+				/* Hide the External Tools set */
+				final IEclipsePreferences eclipsePref = InstanceScope.INSTANCE.getNode(PLUGIN_ID);
+				final Preferences node = eclipsePref.node("activatedPerspectives"); //the activated perspectives will be stored in this node
+				final IWorkbenchWindow workbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+
+				WorkbenchPage workbenchPage = (WorkbenchPage)workbenchWindow.getActivePage();
+
+				//remove ExternalToolsSet from current perspective - if a restart occurs, the action set has to remain removed
+				IPerspectiveDescriptor perspectiveDescriptor = workbenchPage.getPerspective();
+				if (perspectiveDescriptor != null && node.getBoolean(perspectiveDescriptor.getId(), true))
+				{
+					turnOffExternalToolsActionSet(workbenchWindow, perspectiveDescriptor, node);
+				}
+
+				//add perspective activated listener to remove External Tools set from any activated perspective
+				workbenchWindow.addPerspectiveListener(new PerspectiveAdapter()
+				{
+
+					@Override
+					public void perspectiveActivated(IWorkbenchPage page, IPerspectiveDescriptor perspectiveDescriptor)
+					{
+						if (node.getBoolean(perspectiveDescriptor.getId(), true))
+						{
+							super.perspectiveActivated(page, perspectiveDescriptor);
+							turnOffExternalToolsActionSet(workbenchWindow, perspectiveDescriptor, node);
+						}
+					}
+				});
+
 				try
 				{
 					if (!ApplicationServerSingleton.get().hasDeveloperLicense() ||
@@ -346,6 +380,33 @@ public class Activator extends Plugin
 				}
 			}
 		});
+	}
+
+	private void turnOffExternalToolsActionSet(IWorkbenchWindow workbenchWindow, IPerspectiveDescriptor perspectiveDescriptor, Preferences node)
+	{
+		if (workbenchWindow.getActivePage() instanceof WorkbenchPage)
+		{
+			WorkbenchPage worbenchPage = (WorkbenchPage)workbenchWindow.getActivePage();
+			ActionSetRegistry reg = WorkbenchPlugin.getDefault().getActionSetRegistry();
+			IActionSetDescriptor[] actionSets = reg.getActionSets();
+			for (IActionSetDescriptor actionSetDescriptor : actionSets)
+			{
+				if (actionSetDescriptor.getId().indexOf("org.eclipse.ui.externaltools.ExternalToolsSet") > -1)
+				{
+					worbenchPage.hideActionSet(actionSetDescriptor.getId());
+					break;
+				}
+			}
+		}
+		node.putBoolean(perspectiveDescriptor.getId(), false);
+		try
+		{
+			node.flush();
+		}
+		catch (BackingStoreException e)
+		{
+			ServoyLog.logError("Failed to persist changes.", e);
+		}
 	}
 
 	public boolean isSqlExplorerLoaded()
