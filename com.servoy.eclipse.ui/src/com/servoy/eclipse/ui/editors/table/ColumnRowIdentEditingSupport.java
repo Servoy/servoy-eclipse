@@ -139,7 +139,7 @@ public class ColumnRowIdentEditingSupport extends EditingSupport
 			else
 			{
 				// not possible to add non null columns to existing table
-				return !c.getTable().getExistInDB();
+				return true;//!c.getTable().getExistInDB();
 			}
 		}
 
