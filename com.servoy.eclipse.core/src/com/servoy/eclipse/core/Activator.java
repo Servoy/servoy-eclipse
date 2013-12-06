@@ -16,7 +16,11 @@
  */
 package com.servoy.eclipse.core;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.lang.reflect.Method;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,7 +41,9 @@ import net.sourceforge.sqlexplorer.dbproduct.ManagedDriver;
 import net.sourceforge.sqlexplorer.dbproduct.User;
 import net.sourceforge.sqlexplorer.plugin.SQLExplorerPlugin;
 
+import org.apache.wicket.util.file.File;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
@@ -48,11 +54,15 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWindowListener;
@@ -79,6 +89,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.Scriptable;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 import org.osgi.service.url.URLConstants;
@@ -93,6 +104,7 @@ import com.servoy.eclipse.model.repository.JSUnitUserManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.ClientState;
+import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IBeanManager;
@@ -102,6 +114,7 @@ import com.servoy.j2db.IDebugClientHandler;
 import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.IDebugWebClient;
 import com.servoy.j2db.IDesignerCallback;
+import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.dataprocessing.ClientInfo;
 import com.servoy.j2db.debug.DebugUtils;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
@@ -109,6 +122,7 @@ import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IMethodTemplate;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepositoryFactory;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.MethodTemplate;
@@ -118,8 +132,13 @@ import com.servoy.j2db.plugins.IMethodTemplatesProvider;
 import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IDebugHeadlessClient;
+import com.servoy.j2db.server.shared.IUserManagerFactory;
+import com.servoy.j2db.server.shared.IWebClientSessionFactory;
+import com.servoy.j2db.server.starter.IServerStarter;
 import com.servoy.j2db.util.CompositeIterable;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.IDeveloperURLStreamHandler;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
@@ -132,6 +151,18 @@ public class Activator extends Plugin
 {
 	public static final String RECREATE_ON_I18N_CHANGE_PREFERENCE = "recreate.forms.on.i18n.change"; //$NON-NLS-1$
 
+	// The plug-in ID
+	public static final String PLUGIN_ID = "com.servoy.eclipse.core"; //$NON-NLS-1$
+
+	// The shared instance
+	private static Activator plugin;
+
+	private IDocumentationManagerProvider docManagerpProvider;
+
+	private IDebuggerStarter debuggerStarter;
+
+	private IServerStarter ss;
+
 	private volatile boolean defaultAccessed = false;
 
 	private Boolean sqlExplorerLoaded = null;
@@ -140,7 +171,6 @@ public class Activator extends Plugin
 
 	/**
 	 * @author jcompagner
-	 * 
 	 */
 	private static final class SQLExplorerAliasCreatorJob extends WorkbenchJob
 	{
@@ -224,28 +254,7 @@ public class Activator extends Plugin
 		}
 	}
 
-	// The plug-in ID
-	public static final String PLUGIN_ID = "com.servoy.eclipse.core"; //$NON-NLS-1$
 
-	// The shared instance
-	private static Activator plugin;
-
-	private IDocumentationManagerProvider docManagerpProvider;
-
-	private IDebuggerStarter debuggerStarter;
-
-	/**
-	 * The constructor
-	 */
-	public Activator()
-	{
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.core.runtime.Plugins#start(org.osgi.framework.BundleContext)
-	 */
 	@Override
 	public void start(BundleContext context) throws Exception
 	{
@@ -253,6 +262,14 @@ public class Activator extends Plugin
 
 		super.start(context);
 		plugin = this;
+
+		ServiceReference ref = context.getServiceReference(IServerStarter.class);
+		ss = (IServerStarter)context.getService(ref);
+		if (ss == null)
+		{
+			throw new RuntimeException("Could not load application server plugin"); //$NON-NLS-1$ 
+		}
+		ss.nativeStartup();
 
 		IPreferenceStore prefs = PlatformUI.getPreferenceStore();
 		prefs.setValue(IWorkbenchPreferenceConstants.SHOW_PROGRESS_ON_STARTUP, true);
@@ -538,7 +555,16 @@ public class Activator extends Plugin
 
 		// wait until webserver is stopped for case of
 		// restart (webserver cannot re-start when port is still in use, this may even cause a freeze after restart)
-		ApplicationServerSingleton.get().shutDown();
+		IApplicationServerSingleton appServer = ApplicationServerSingleton.get();
+		if (appServer != null)
+		{
+			appServer.shutDown();
+			appServer.doNativeShutdown();
+			J2DBGlobals.setSingletonServiceProvider(null); // avoid a null pointer exception that can happen when DLTK stops the debugger after appserver singleton gets cleared (due to a Context.enter() call)
+			J2DBGlobals.setServiceProvider(null);
+			ApplicationServerSingleton.clear();
+		}
+		super.stop(context);
 
 		if (interrupted) Thread.interrupted(); // someone is in a hurry, let callers know about that
 	}
@@ -1067,5 +1093,158 @@ public class Activator extends Plugin
 				}
 			}
 		});
+	}
+
+	public synchronized void startAppServer(IRepositoryFactory repositoryFactory, IDebugClientHandler debugClientHandler,
+		IWebClientSessionFactory webClientSessionFactory, IUserManagerFactory userManagerFactory) throws Exception
+	{
+		if (ApplicationServerSingleton.get() != null)
+		{
+			// already started
+			return;
+		}
+
+		ss.init();
+		ss.setDeveloperStartup(true);
+		ss.setRepositoryFactory(repositoryFactory);
+		ss.setDebugClientHandler(debugClientHandler);
+		ss.setUserManagerFactory(userManagerFactory);
+		ss.setWebClientSessionFactory(webClientSessionFactory);
+		ss.start();
+		ss.startWebServer();
+
+		checkApplicationServerVersion(ApplicationServerSingleton.get());
+	}
+
+	private void checkApplicationServerVersion(IApplicationServerSingleton applicationServer)
+	{
+		// check the app server dir
+		final String appServerDir = applicationServer.getServoyApplicationServerDirectory();
+		File j2dbLib = new File(appServerDir, "lib/j2db.jar"); //$NON-NLS-1$
+
+		if (!j2dbLib.exists())
+		{
+			Display.getDefault().asyncExec(new Runnable()
+			{
+				public void run()
+				{
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "No Servoy ApplicationServer found!", "No application server found at: " + //$NON-NLS-1$ //$NON-NLS-2$
+						appServerDir + "\nPlease make sure that you installed Servoy Developer correctly"); //$NON-NLS-1$
+				}
+			});
+		}
+		else
+		{
+			try
+			{
+				URLClassLoader classLoader = new URLClassLoader(new URL[] { j2dbLib.toURL() }, ClassLoader.getSystemClassLoader());
+				Class< ? > loadClass = classLoader.loadClass("com.servoy.j2db.ClientVersion"); //$NON-NLS-1$
+				Method method = loadClass.getMethod("getReleaseNumber", new Class[0]); //$NON-NLS-1$
+				Object o = method.invoke(null, new Object[0]);
+				if (o instanceof Integer)
+				{
+					final int version = ((Integer)o).intValue();
+					if (version > ClientVersion.getReleaseNumber())
+					{
+						Display.getDefault().asyncExec(new Runnable()
+						{
+							public void run()
+							{
+								MessageDialog.openError(Display.getDefault().getActiveShell(), "Servoy ApplicationServer version check", //$NON-NLS-1$
+									"Application Server version (" + version + ") is higher than the developers (" + ClientVersion.getReleaseNumber() + //$NON-NLS-1$ //$NON-NLS-2$
+										") \nPlease upgrade the developer Help->Check for updates"); //$NON-NLS-1$
+							}
+						});
+					}
+					if (version < ClientVersion.getReleaseNumber())
+					{
+						Display.getDefault().asyncExec(new Runnable()
+						{
+							public void run()
+							{
+								boolean upgrade = MessageDialog.openQuestion(
+									Display.getDefault().getActiveShell(),
+									"Servoy ApplicationServer version should be upgraded", "The ApplicationServers version (" + version + ") is lower than the Developers version (" + ClientVersion.getReleaseNumber() + ")\n Upgrade the ApplicationServer?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+
+								if (upgrade)
+								{
+									try
+									{
+										final int[] updatedToVersion = new int[] { 0 };
+										WorkspaceJob job = new WorkspaceJob("Updating Servoy ApplicationServer")
+										{
+											@Override
+											public IStatus runInWorkspace(final IProgressMonitor monitor) throws CoreException
+											{
+												try
+												{
+													monitor.beginTask("Updating...", IProgressMonitor.UNKNOWN);
+													updatedToVersion[0] = ApplicationServerSingleton.get().updateAppServerFromSerclipse(
+														new File(appServerDir).getParentFile(), version, ClientVersion.getReleaseNumber(), new ActionListener()
+														{
+															public void actionPerformed(ActionEvent e)
+															{
+																monitor.worked(1);
+															}
+														});
+												}
+												catch (Exception e)
+												{
+													getLog().log(new Status(IStatus.ERROR, getBundle().getSymbolicName(), "Unexpected error", e));
+												}
+												return Status.OK_STATUS;
+											}
+										};
+										job.setUser(true);
+										job.schedule();
+										job.addJobChangeListener(new JobChangeAdapter()
+										{
+											@Override
+											public void done(IJobChangeEvent event)
+											{
+												if (updatedToVersion[0] < ClientVersion.getReleaseNumber())
+												{
+													Display.getDefault().asyncExec(new Runnable()
+													{
+														public void run()
+														{
+															MessageDialog.openError(new Shell(), "Servoy update problem", //$NON-NLS-1$
+																"Servoy ApplicationServer didn't update, please shutdown developer and to try run the updater on the command line"); //$NON-NLS-1$
+														}
+													});
+												}
+												else
+												{
+													Display.getDefault().asyncExec(new Runnable()
+													{
+														public void run()
+														{
+															if (MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "ApplicationServer updated",
+																"It is recommended you restart the workbench for the changes to take effect. Would you like to restart now?"))
+															{
+																PlatformUI.getWorkbench().restart();
+															}
+														}
+													});
+												}
+											}
+										});
+									}
+									catch (Exception e)
+									{
+										Debug.error(e);
+									}
+								}
+							}
+						});
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+				getLog().log(new Status(IStatus.ERROR, getBundle().getSymbolicName(), "Unexpected exception", e));
+			}
+		}
 	}
 }

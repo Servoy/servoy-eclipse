@@ -893,20 +893,19 @@ public class ServoyModel extends AbstractServoyModel
 		}
 		try
 		{
-			com.servoy.eclipse.appserver.Activator.getDefault().startAppServer(new EclipseRepositoryFactory(), new DebugClientHandler(),
-				new IWebClientSessionFactory()
+			Activator.getDefault().startAppServer(new EclipseRepositoryFactory(), new DebugClientHandler(), new IWebClientSessionFactory()
+			{
+				public Session newSession(Request request, Response response)
 				{
-					public Session newSession(Request request, Response response)
-					{
-						return new DebugWebClientSession(request);
-					}
-				}, new IUserManagerFactory()
+					return new DebugWebClientSession(request);
+				}
+			}, new IUserManagerFactory()
+			{
+				public IUserManager createUserManager(IDataServer dataServer)
 				{
-					public IUserManager createUserManager(IDataServer dataServer)
-					{
-						return new SwitchableEclipseUserManager();
-					}
-				});
+					return new SwitchableEclipseUserManager();
+				}
+			});
 			// set the START_AS_TEAMPROVIDER_SETTING flag as system property, so
 			// our team plugin can use it in popupMenu enablement
 			System.setProperty(Settings.START_AS_TEAMPROVIDER_SETTING,

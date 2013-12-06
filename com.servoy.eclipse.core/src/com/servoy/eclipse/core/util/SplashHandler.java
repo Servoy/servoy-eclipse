@@ -24,16 +24,14 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.splash.BasicSplashHandler;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.Activator;
 import com.servoy.j2db.ClientVersion;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.starter.ILicenseManager;
 import com.servoy.j2db.util.Utils;
 
-/**
- * @since 3.3
- * 
- */
 public class SplashHandler extends BasicSplashHandler
 {
 	static IProgressMonitor progressMonitor;
@@ -48,7 +46,7 @@ public class SplashHandler extends BasicSplashHandler
 			{
 				public void run()
 				{
-					ServoyModel.startAppServer();
+//					ServoyModel.startAppServer();
 					if (!splash.isDisposed()) splash.getDisplay().wake();
 				}
 
@@ -81,7 +79,6 @@ public class SplashHandler extends BasicSplashHandler
 
 			StringBuffer text = getSplashText(doGetRegisterString);
 			gc.drawText(text.toString(), 10, 320);
-
 			gc.dispose();
 
 //			if (!doGetRegisterString)
@@ -107,27 +104,28 @@ public class SplashHandler extends BasicSplashHandler
 
 		if (doGetRegisterString)
 		{
-			//ugly near busy wait loop
-			try
-			{
-				int count = 0;
-				while (ApplicationServerSingleton.get() == null)
-				{
-					Thread.sleep(200);
-					count++;
-					if (count > 50) break;
-				}
-			}
-			catch (InterruptedException e)
-			{
-				//ignore
-			}
-			if (ApplicationServerSingleton.get() != null)
-			{
-				String regText = ApplicationServerSingleton.get().initLicenseManagerAsDeveloper();
-				text.append("\n");
-				text.append(regText);
-			}
+//			//ugly near busy wait loop
+//			try
+//			{
+//				int count = 0;
+//				while (ApplicationServerSingleton.get() == null)
+//				{
+//					Thread.sleep(200);
+//					count++;
+//					if (count > 50) break;
+//				}
+//			}
+//			catch (InterruptedException e)
+//			{
+//				//ignore
+//			}
+
+			BundleContext context = Activator.getDefault().getBundle().getBundleContext();
+			ServiceReference ref = context.getServiceReference(ILicenseManager.class);
+			ILicenseManager lm = context.getService(ref);
+			String regText = lm.getDeveloperRegistrationText();
+			text.append("\n");
+			text.append(regText);
 		}
 		return text;
 	}

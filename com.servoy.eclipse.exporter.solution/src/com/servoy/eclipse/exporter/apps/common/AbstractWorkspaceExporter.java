@@ -30,16 +30,12 @@ import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtension;
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.servoy.eclipse.exporter.apps.Activator;
@@ -56,12 +52,11 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.Messages;
 import com.servoy.j2db.dataprocessing.IDataServer;
-import com.servoy.j2db.debug.DebugClientHandler;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
-import com.servoy.j2db.server.shared.IApplicationServerStarter;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.server.shared.IUserManagerFactory;
+import com.servoy.j2db.server.starter.IServerStarter;
 import com.servoy.j2db.util.Settings;
 
 /**
@@ -493,14 +488,15 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 
 	private void initializeApplicationServer(Properties properties)
 	{
-		// find server starter extension
-		IApplicationServerStarter ss = getServerStarterExtension();
-
+		BundleContext bc = Activator.getDefault().getBundle().getBundleContext();
+		ServiceReference ref = bc.getServiceReference(IServerStarter.class);
+		IServerStarter ss = (IServerStarter)bc.getService(ref);
 		if (ss != null)
 		{
 			try
 			{
-				ss.startStandalone(new EclipseRepositoryFactory()
+				ss.init();
+				ss.setRepositoryFactory(new EclipseRepositoryFactory()
 				{
 					@Override
 					protected void init(IServerManagerInternal serverManager, Properties settings)
@@ -510,13 +506,15 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 							repository = new EclipseRepository(serverManager, settings);
 						}
 					}
-				}, null, DebugClientHandler.class.getClassLoader(), null, new IUserManagerFactory()
+				});
+				ss.setUserManagerFactory(new IUserManagerFactory()
 				{
 					public IUserManager createUserManager(IDataServer dataServer)
 					{
 						return new WorkspaceUserManager();
 					}
-				}, false, false, false, properties);
+				});
+				ss.start();
 			}
 			catch (Exception e)
 			{
@@ -535,54 +533,6 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 		}
 	}
 
-	private IApplicationServerStarter getServerStarterExtension()
-	{
-		IApplicationServerStarter ss = null;
-		IExtensionRegistry reg = Platform.getExtensionRegistry();
-		IExtensionPoint ep = reg.getExtensionPoint(IApplicationServerStarter.EXTENSION_ID);
-		IExtension[] extensions = ep.getExtensions();
-
-		if (extensions == null || extensions.length == 0)
-		{
-			ServoyLog.logError("Could not find app. server starter extension (extension point " + IApplicationServerStarter.EXTENSION_ID + ")", null); //$NON-NLS-1$//$NON-NLS-2$
-		}
-		else
-		{
-			if (extensions.length > 1)
-			{
-				ServoyLog.logError("Multiple app. server starter extensions found (extension point " + IApplicationServerStarter.EXTENSION_ID + ")", null); //$NON-NLS-1$ //$NON-NLS-2$
-			}
-
-			IConfigurationElement[] ce = extensions[0].getConfigurationElements();
-			if (ce == null || ce.length == 0)
-			{
-				ServoyLog.logError(
-					"Could not read app. server starter extension element (extension point " + IApplicationServerStarter.EXTENSION_ID + ")", null); //$NON-NLS-1$//$NON-NLS-2$
-			}
-			else
-			{
-				if (ce.length > 1)
-				{
-					ServoyLog.logError(
-						"Multiple app. server starter extension elements found (extension point " + IApplicationServerStarter.EXTENSION_ID + ")", null); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-				try
-				{
-					ss = (IApplicationServerStarter)ce[0].createExecutableExtension("class"); //$NON-NLS-1$
-					if (ss == null)
-					{
-						ServoyLog.logError("Could not load app. server starter (extension point " + IApplicationServerStarter.EXTENSION_ID + ")", null); //$NON-NLS-1$//$NON-NLS-2$
-					}
-				}
-				catch (CoreException e)
-				{
-					ServoyLog.logError("Could not load app. server starter (extension point " + IApplicationServerStarter.EXTENSION_ID + ")", e); //$NON-NLS-1$//$NON-NLS-2$
-				}
-			}
-		}
-		return ss;
-	}
-
 	public void outputExtra(String msg)
 	{
 		if (verbose) System.out.println(msg);
@@ -597,5 +547,4 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 	{
 		System.err.println(msg);
 	}
-
 }
