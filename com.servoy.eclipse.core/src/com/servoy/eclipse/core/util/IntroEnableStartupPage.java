@@ -26,7 +26,6 @@ import com.servoy.j2db.util.Settings;
  * Helper class to stop showing startPage
  * @author jblok
  */
-@SuppressWarnings("nls")
 public class IntroEnableStartupPage extends Action
 {
 	@Override

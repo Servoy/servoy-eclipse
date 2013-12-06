@@ -121,7 +121,6 @@ import com.servoy.j2db.persistence.ScriptVariable;
  * are presented in the same way everywhere.
  * <p>
  */
-@SuppressWarnings("nls")
 public class ProfilerView extends ViewPart
 {
 	private static final String PROFILER_VIEW = "ProfilerViewSettings";
@@ -703,7 +702,6 @@ public class ProfilerView extends ViewPart
 		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object,
 		 *      int)
 		 */
-		@SuppressWarnings("nls")
 		public String getColumnText(Object element, int columnIndex)
 		{
 			if (element instanceof ProfileData)
@@ -844,7 +842,6 @@ public class ProfilerView extends ViewPart
 		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object,
 		 *      int)
 		 */
-		@SuppressWarnings("nls")
 		public String getColumnText(Object element, int columnIndex)
 		{
 

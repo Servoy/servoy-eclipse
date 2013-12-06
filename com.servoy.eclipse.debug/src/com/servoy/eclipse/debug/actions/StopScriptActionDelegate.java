@@ -69,7 +69,6 @@ public class StopScriptActionDelegate implements IViewActionDelegate, IDebugCont
 	 * 
 	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
 	 */
-	@SuppressWarnings("nls")
 	public void run(IAction action)
 	{
 		if (stackFrame != null && stackFrame.isSuspended())

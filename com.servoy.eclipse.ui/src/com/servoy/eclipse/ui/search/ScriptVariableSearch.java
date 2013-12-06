@@ -81,7 +81,6 @@ public class ScriptVariableSearch extends DLTKSearchEngineSearch
 	 * 
 	 * @see org.eclipse.search.ui.ISearchQuery#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	@SuppressWarnings("nls")
 	public IStatus run(IProgressMonitor monitor) throws OperationCanceledException
 	{
 		IResource[] scopes = getScopes((Solution)variable.getRootObject());

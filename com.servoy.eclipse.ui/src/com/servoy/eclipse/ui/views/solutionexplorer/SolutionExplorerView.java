@@ -3253,7 +3253,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		return false;
 	}
 
-	@SuppressWarnings("nls")
 	SimpleUserNode[] createMediaFolderChildrenNodes(MediaNode mediaFolder, Activator uiActivator, EnumSet<MediaNode.TYPE> mediaNodeTypeFilter)
 	{
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();

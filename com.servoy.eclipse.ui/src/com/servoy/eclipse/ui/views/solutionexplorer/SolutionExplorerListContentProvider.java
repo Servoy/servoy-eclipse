@@ -1009,7 +1009,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return methodSignatureBuilder.toString();
 	}
 
-	@SuppressWarnings("nls")
 	private Object[] createFormScripts(Form f)
 	{
 		Form form = f;
@@ -1141,7 +1140,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return ImageResource.INSTANCE.getImage(DLTKPluginImages.DESC_METHOD_PUBLIC);
 	}
 
-	@SuppressWarnings("nls")
 	private Object[] createGlobalScripts(SimpleUserNode un)
 	{
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();

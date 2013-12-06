@@ -56,7 +56,6 @@ public class ValueListSearch extends AbstractPersistSearch
 	 * 
 	 * @see org.eclipse.search.ui.ISearchQuery#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	@SuppressWarnings("nls")
 	public IStatus run(IProgressMonitor monitor) throws OperationCanceledException
 	{
 		IResource[] scopes = getScopes((Solution)valueList.getRootObject());

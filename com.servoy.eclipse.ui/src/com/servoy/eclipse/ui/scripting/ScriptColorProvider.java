@@ -39,7 +39,6 @@ import com.servoy.j2db.scripting.IExecutingEnviroment;
 /**
  * @author jcompagner
  */
-@SuppressWarnings("nls")
 public class ScriptColorProvider
 {
 	private static final String BOLD_KEY = PreferenceConstants.EDITOR_BOLD_SUFFIX;

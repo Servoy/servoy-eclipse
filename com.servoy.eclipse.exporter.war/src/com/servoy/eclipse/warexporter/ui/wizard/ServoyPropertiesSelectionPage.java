@@ -127,7 +127,6 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 		getWizard().getContainer().updateMessage();
 	}
 
-	@SuppressWarnings("nls")
 	@Override
 	public boolean canFlipToNextPage()
 	{

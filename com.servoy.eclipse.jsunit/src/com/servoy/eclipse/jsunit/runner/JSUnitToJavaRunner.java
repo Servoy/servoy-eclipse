@@ -37,7 +37,6 @@ import de.berlios.jsunit.JsUnitRuntimeException;
  * Class that creates a bridge between JSUnit and Java. It loads needed javascript libraries, the javascript tests, then it can run the JSUnit tests and give a tree-like representation of the JSUnit test suite.
  * @author acostescu
  */
-@SuppressWarnings("nls")
 public class JSUnitToJavaRunner
 {
 	public final static String ASSERTION_EXCEPTION_MESSAGE = "just for stack";

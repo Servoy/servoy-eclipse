@@ -40,7 +40,6 @@ public class MobileArgumentChest extends AbstractArgumentChest
 	}
 
 	@Override
-	@SuppressWarnings("nls")
 	protected void parseArguments(String[] args)
 	{
 		if (!mustShowHelp())
@@ -112,7 +111,6 @@ public class MobileArgumentChest extends AbstractArgumentChest
 	}
 
 	@Override
-	@SuppressWarnings("nls")
 	public String getHelpMessage()
 	{
 		// @formatter:off

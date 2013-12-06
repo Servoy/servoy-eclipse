@@ -200,7 +200,6 @@ public class ChooseEXPFilePage extends WizardPage
 		setErrorMessage(error);
 	}
 
-	@SuppressWarnings("nls")
 	private String shortenIfNeeded(String message)
 	{
 		String shortened = message.replace("\n", " ").replace("\r", ""); // flatten to 1 line

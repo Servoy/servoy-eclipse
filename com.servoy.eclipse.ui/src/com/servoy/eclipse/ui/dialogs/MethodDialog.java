@@ -66,7 +66,6 @@ import com.servoy.j2db.util.Utils;
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
  */
-@SuppressWarnings("nls")
 public class MethodDialog extends TreeSelectDialog
 {
 	// used only in the dialog, are never selected

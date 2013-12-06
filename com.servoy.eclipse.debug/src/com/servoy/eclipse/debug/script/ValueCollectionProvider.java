@@ -64,7 +64,6 @@ import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
-@SuppressWarnings("nls")
 public class ValueCollectionProvider implements IMemberEvaluator
 {
 	public static final String PRIVATE = "PRIVATE";

@@ -134,7 +134,6 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		return !errorFlag;
 	}
 
-	@SuppressWarnings("nls")
 	@Override
 	public void addPages()
 	{

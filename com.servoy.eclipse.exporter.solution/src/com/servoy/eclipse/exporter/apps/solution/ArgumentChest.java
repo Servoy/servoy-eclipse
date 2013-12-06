@@ -66,7 +66,6 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 	}
 
 	@Override
-	@SuppressWarnings("nls")
 	protected void parseArguments(String[] args)
 	{
 		if (!mustShowHelp())
@@ -184,7 +183,6 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 	}
 
 	@Override
-	@SuppressWarnings("nls")
 	public String getHelpMessage()
 	{
 		// @formatter:off
@@ -270,7 +268,6 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 		return protectionPassword;
 	}
 
-	@SuppressWarnings("nls")
 	public String getTableMetaData(ITable table) throws IOException
 	{
 		DataModelManager dmm = ServoyModelFinder.getServoyModel().getDataModelManager();

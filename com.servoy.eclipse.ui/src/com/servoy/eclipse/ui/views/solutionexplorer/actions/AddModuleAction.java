@@ -74,7 +74,6 @@ public class AddModuleAction extends Action implements ISelectionChangedListener
 		setImageDescriptor(Activator.loadImageDescriptorFromBundle("add_as_module.gif")); //FIXME: NOK - other icon //$NON-NLS-1$
 	}
 
-	@SuppressWarnings("nls")
 	@Override
 	public void run()
 	{

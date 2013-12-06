@@ -62,7 +62,6 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 		}
 	}
 
-	@SuppressWarnings("nls")
 	public static class EncapsulationPropertySource extends ComplexPropertySource<Integer>
 	{
 		private static final int ALL = PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE + PersistEncapsulation.MODULE_SCOPE +

@@ -24,7 +24,6 @@ import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
  * 
  * @author acostescu
  */
-@SuppressWarnings("nls")
 public class MobileLaunchUtils
 {
 

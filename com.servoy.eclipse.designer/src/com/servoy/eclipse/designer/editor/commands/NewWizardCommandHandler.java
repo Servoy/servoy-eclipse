@@ -40,7 +40,6 @@ import com.servoy.j2db.persistence.Solution;
  * @author asisu
  */
 
-@SuppressWarnings("nls")
 public class NewWizardCommandHandler extends AbstractHandler
 {
 	static final String NEW_FORM = "NEW_FORM";

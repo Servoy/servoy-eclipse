@@ -32,7 +32,6 @@ import com.servoy.eclipse.designer.actions.ZOrderAction;
  * @author rgansevles
  */
 
-@SuppressWarnings("nls")
 public abstract class DesignerActionFactory extends ActionFactory
 {
 	public static final String GROUP_ELEMENTS = "group.elements";

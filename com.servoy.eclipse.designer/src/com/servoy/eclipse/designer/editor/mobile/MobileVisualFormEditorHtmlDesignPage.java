@@ -121,7 +121,6 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  *
  */
-@SuppressWarnings("nls")
 public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDesignPage
 {
 	private static final String ID_KEY = "id";

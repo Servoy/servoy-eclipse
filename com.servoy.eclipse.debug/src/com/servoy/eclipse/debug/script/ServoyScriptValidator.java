@@ -218,7 +218,6 @@ public class ServoyScriptValidator implements IValidatorExtension2
 	 * @param expression
 	 * @param member
 	 */
-	@SuppressWarnings("nls")
 	private ValidationStatus generateValidationStatus(String name, boolean isMethod)
 	{
 		if (isMethod)
@@ -231,7 +230,6 @@ public class ServoyScriptValidator implements IValidatorExtension2
 		}
 	}
 
-	@SuppressWarnings("nls")
 	private ValidationStatus generateValidationStatusForCurrentSolutionType(String name, boolean isMethod)
 	{
 		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() != null)

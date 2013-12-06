@@ -44,7 +44,6 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  *
  */
-@SuppressWarnings("nls")
 public class AddFormListCommand extends CompoundCommand
 {
 	public AddFormListCommand(IApplication application, Form form, Object requestType, Point defaultLocation)

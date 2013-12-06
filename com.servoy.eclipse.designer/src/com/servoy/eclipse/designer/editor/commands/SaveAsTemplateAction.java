@@ -82,7 +82,6 @@ public class SaveAsTemplateAction extends SelectionAction
 
 	private boolean groupTemplateElements = false;
 
-	@SuppressWarnings("nls")
 	private static Pair<String, Boolean> askForTemplateName(Shell shell, boolean grouping)
 	{
 		UIUtils.InputAndCheckDialog dialog = new UIUtils.InputAndCheckDialog(shell, "New template", "Specify a template name", null, new IInputValidator()
@@ -102,7 +101,6 @@ public class SaveAsTemplateAction extends SelectionAction
 		return new Pair<String, Boolean>(name, dialog.getExtendedValue());
 	}
 
-	@SuppressWarnings("nls")
 	protected static String validateMethodName(String templateName)
 	{
 		// see if style name is OK

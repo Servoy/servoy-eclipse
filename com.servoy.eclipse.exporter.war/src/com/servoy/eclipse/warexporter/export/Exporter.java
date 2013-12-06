@@ -85,7 +85,6 @@ public class Exporter
 	 * @param monitor 
 	 * @return
 	 */
-	@SuppressWarnings("nls")
 	public void doExport(IProgressMonitor monitor) throws ExportException
 	{
 		monitor.beginTask("Creating War File", 11);

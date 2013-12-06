@@ -219,7 +219,6 @@ import com.servoy.j2db.util.Utils;
  * @author jcompagner
  *
  */
-@SuppressWarnings("nls")
 public class TypeCreator extends TypeCache
 {
 	private static final String SCOPE_TABLES = "scope:tables";

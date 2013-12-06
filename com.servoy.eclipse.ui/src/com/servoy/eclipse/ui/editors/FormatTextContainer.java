@@ -88,7 +88,6 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 	 * @param parent
 	 * @param style
 	 */
-	@SuppressWarnings("nls")
 	public FormatTextContainer(Composite parent, int style)
 	{
 		super(parent, style);
@@ -263,7 +262,6 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 	/**
 	 * @see com.servoy.eclipse.ui.editors.FormatCellEditor.IFormatTextContainer#getFormat()
 	 */
-	@SuppressWarnings("nls")
 	public ParsedFormat getParsedFormat()
 	{
 		Integer len = null;
@@ -331,7 +329,6 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 	/**
 	 * 
 	 */
-	@SuppressWarnings("nls")
 	private void clearText()
 	{
 		ignoreTextChanges = true;

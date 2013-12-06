@@ -84,7 +84,6 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 	 * @param parent
 	 * @param style
 	 */
-	@SuppressWarnings("nls")
 	public FormatDateContainer(Composite parent, int style)
 	{
 		super(parent, style);
@@ -248,7 +247,6 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 	/**
 	 * @see com.servoy.eclipse.ui.editors.FormatCellEditor.IFormatTextContainer#getFormat()
 	 */
-	@SuppressWarnings("nls")
 	public ParsedFormat getParsedFormat()
 	{
 		String dispformat = displayFormat.getText();
@@ -273,7 +271,6 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 	/**
 	 * @see com.servoy.eclipse.ui.editors.FormatCellEditor.IFormatTextContainer#setFormat(java.lang.String)
 	 */
-	@SuppressWarnings("nls")
 	public void setParsedFormat(ParsedFormat parsedFormat)
 	{
 		boolean mobile = ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile();

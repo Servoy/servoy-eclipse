@@ -65,7 +65,6 @@ public class AddMissingNLSResolution extends TextFileEditResolution
 	 * 
 	 * @see org.eclipse.dltk.ui.text.IAnnotationResolution2#getDescription()
 	 */
-	@SuppressWarnings("nls")
 	public String getDescription()
 	{
 		ISourceModule scriptFileSourceModule = DLTKCore.createSourceModuleFrom(scriptFile);

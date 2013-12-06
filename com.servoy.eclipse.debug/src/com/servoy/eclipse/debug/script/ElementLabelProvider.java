@@ -41,7 +41,6 @@ import com.servoy.j2db.persistence.ScriptVariable;
  * @author jcompagner
  * @since 6.0
  */
-@SuppressWarnings("nls")
 public class ElementLabelProvider implements IElementLabelProviderExtension
 {
 	private final Set<String> propertyNames = new HashSet<String>();

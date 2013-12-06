@@ -24,7 +24,6 @@ import org.eclipse.swt.graphics.RGB;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 
-@SuppressWarnings("nls")
 public class ColoringPreferenceProvider implements IColoringPreferenceProvider
 {
 

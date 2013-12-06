@@ -99,7 +99,6 @@ public class StatusBarUpdater implements ISelectionChangedListener
 	}
 
 
-	@SuppressWarnings("nls")
 	protected String formatMessage(ISelection sel)
 	{
 		String result = null;

@@ -167,7 +167,6 @@ public class EventsComposite extends Composite
 		}
 	}
 
-	@SuppressWarnings("nls")
 	protected void initDataBindings(Table t, final TableEditor te)
 	{
 		Tree tree = treeViewer.getTree();

@@ -32,7 +32,6 @@ public class ServoyDebuggableEngineFactory implements IInterpreterRunnerFactory
 	{
 		return new RemoteDebuggingEngineRunner(install)
 		{
-			@SuppressWarnings("nls")
 			@Override
 			protected String getDebugPreferenceQualifier()
 			{

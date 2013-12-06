@@ -83,7 +83,6 @@ import com.servoy.j2db.util.SortedList;
  * @author rgansevles
  */
 
-@SuppressWarnings("nls")
 public class VisualFormEditorTabSequencePage extends Composite
 {
 	public static final ILabelProvider LABELPROVIDER = new LabelProvider();

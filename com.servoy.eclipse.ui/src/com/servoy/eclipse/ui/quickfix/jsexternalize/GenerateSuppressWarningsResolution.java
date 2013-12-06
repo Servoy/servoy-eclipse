@@ -73,7 +73,6 @@ class GenerateSuppressWarningsResolution extends TextFileEditResolution
 	 * 
 	 * @see org.eclipse.dltk.ui.text.IAnnotationResolution2#getDescription()
 	 */
-	@SuppressWarnings("nls")
 	public String getDescription()
 	{
 		FunctionStatement f = getFunction();

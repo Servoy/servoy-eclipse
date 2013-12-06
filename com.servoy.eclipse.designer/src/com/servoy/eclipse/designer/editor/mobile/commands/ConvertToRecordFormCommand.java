@@ -34,7 +34,6 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
  * @author rgansevles
  *
  */
-@SuppressWarnings("nls")
 public class ConvertToRecordFormCommand extends CompoundCommand
 {
 	public ConvertToRecordFormCommand(Form form)

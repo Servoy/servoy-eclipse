@@ -28,7 +28,6 @@ import org.eclipse.dltk.javascript.typeinfo.TypeQuery;
 import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 
-@SuppressWarnings("nls")
 class JavaRuntimeType extends RSimpleType
 {
 	public static final String JAVA_CLASS = "JAVA_CLASS";

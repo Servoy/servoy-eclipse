@@ -936,7 +936,6 @@ public class SolutionDeserializer
 		}
 	}
 
-	@SuppressWarnings("nls")
 	private List<JSONObject> parseJSFile(File file, boolean markAsChanged) throws JSONException
 	{
 		String fileContent = jsContent;
@@ -1441,7 +1440,6 @@ public class SolutionDeserializer
 	 * @param name
 	 * @throws JSONException
 	 */
-	@SuppressWarnings("nls")
 	private int getServoyType(String name)
 	{
 		if ("String".equals(name))
@@ -1480,7 +1478,6 @@ public class SolutionDeserializer
 		return filename;
 	}
 
-	@SuppressWarnings("nls")
 	public static IPersist deserializePersist(IDeveloperRepository repository, final ISupportChilds parent, Map<IPersist, JSONObject> persist_json_map,
 		JSONObject obj, final List<IPersist> strayCats, File file, Set<UUID> saved, boolean useFilesForDirtyMark) throws RepositoryException, JSONException
 	{
@@ -1949,7 +1946,6 @@ public class SolutionDeserializer
 		return uuid;
 	}
 
-	@SuppressWarnings("nls")
 	public static String getUUID(File file, int position)
 	{
 		if (!SolutionSerializer.isJSONFile(file.getName()) || position < 0)

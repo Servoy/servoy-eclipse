@@ -598,7 +598,6 @@ public class SolutionSerializer
 	 * @param persist
 	 * @param sb
 	 */
-	@SuppressWarnings("nls")
 	private static void generateJSDocScriptVariableType(ScriptVariable variable, StringBuilder sb)
 	{
 		int type = Column.mapToDefaultType(variable.getVariableType());
@@ -767,7 +766,6 @@ public class SolutionSerializer
 	 * @param obj
 	 * @param sb
 	 */
-	@SuppressWarnings("nls")
 	private static void replacePropertiesTag(ServoyJSONObject obj, StringBuilder sb, String userTemplate, AbstractScriptProvider abstractScriptProvider)
 	{
 		if (sb.toString().trim().startsWith(SV_COMMENT_START))
@@ -811,7 +809,6 @@ public class SolutionSerializer
 	 * @param sb
 	 * @param abstractScriptProvider TODO
 	 */
-	@SuppressWarnings("nls")
 	private static void generateDefaultJSDoc(ServoyJSONObject obj, StringBuilder sb, String userTemplate, AbstractScriptProvider abstractScriptProvider)
 	{
 		sb.append(SV_COMMENT_START);
@@ -847,7 +844,6 @@ public class SolutionSerializer
 	 * @param sb
 	 * @param abstractScriptProvider
 	 */
-	@SuppressWarnings("nls")
 	private static boolean generateParams(StringBuilder sb, AbstractScriptProvider abstractScriptProvider)
 	{
 		if (abstractScriptProvider == null) return false;

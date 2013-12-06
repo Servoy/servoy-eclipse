@@ -46,7 +46,6 @@ public class CodeFinderUtils
 	}
 
 	// these methods containing "fixes"; some were also sent as an SVN patch to the author of jsunit (see http://jsunit.berlios.de/index.html)
-	@SuppressWarnings("nls")
 	public static String getFixedJSUtilScriptFromResource()
 	{
 		// @formatter:off
@@ -59,7 +58,6 @@ public class CodeFinderUtils
 		// @formatter:on
 	}
 
-	@SuppressWarnings("nls")
 	public static String getFixedJSUnitScriptFromResource()
 	{
 		// @formatter:off

@@ -82,7 +82,6 @@ public class FormatIntegerContainer extends Composite implements IFormatTextCont
 	 * @param parent
 	 * @param style
 	 */
-	@SuppressWarnings("nls")
 	public FormatIntegerContainer(Composite parent, int style)
 	{
 		super(parent, style);
@@ -252,7 +251,6 @@ public class FormatIntegerContainer extends Composite implements IFormatTextCont
 	/**
 	 * @see com.servoy.eclipse.ui.editors.FormatCellEditor.IFormatTextContainer#setFormat(java.lang.String)
 	 */
-	@SuppressWarnings("nls")
 	public void setParsedFormat(ParsedFormat parsedFormat)
 	{
 		displayFormat.setText("");

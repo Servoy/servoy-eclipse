@@ -66,7 +66,6 @@ import com.servoy.j2db.persistence.Table;
  * @author jcompagner
  * @since 6.0
  */
-@SuppressWarnings("nls")
 public class ElementResolver implements IElementResolver
 {
 	private static final Map<String, String> constantTypeNames = new HashMap<String, String>();

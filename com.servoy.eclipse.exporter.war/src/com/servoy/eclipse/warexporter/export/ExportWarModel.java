@@ -55,7 +55,6 @@ public class ExportWarModel
 	/**
 	 * @param dialogSettings
 	 */
-	@SuppressWarnings("nls")
 	public ExportWarModel(IDialogSettings settings)
 	{
 		fileName = settings.get("export.filename");
@@ -126,7 +125,6 @@ public class ExportWarModel
 		}
 	}
 
-	@SuppressWarnings("nls")
 	public void saveSettings(IDialogSettings settings)
 	{
 		if (fileName != null) settings.put("export.filename", fileName);

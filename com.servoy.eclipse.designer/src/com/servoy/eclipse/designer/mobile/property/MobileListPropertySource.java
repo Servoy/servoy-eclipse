@@ -33,7 +33,6 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
  * @author rgansevles
  *
  */
-@SuppressWarnings("nls")
 public class MobileListPropertySource extends RetargetingPropertySource implements IModelSavePropertySource
 {
 	private static final String PREFIX_LISTITEM_BUTTON = "listitemButton";

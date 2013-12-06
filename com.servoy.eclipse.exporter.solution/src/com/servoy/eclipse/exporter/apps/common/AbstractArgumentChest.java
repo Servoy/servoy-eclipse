@@ -23,7 +23,6 @@ import com.servoy.j2db.util.ILogLevel;
  * Stores and provides the export-app-relevant arguments (reads arguments from eclipse app. arguments).
  * @author acostescu
  */
-@SuppressWarnings("nls")
 public abstract class AbstractArgumentChest implements IArgumentChest
 {
 

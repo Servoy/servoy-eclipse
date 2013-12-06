@@ -102,7 +102,6 @@ public class FormatDialog extends Dialog
 	/**
 	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
-	@SuppressWarnings("nls")
 	@Override
 	protected Control createDialogArea(Composite parent)
 	{

@@ -41,7 +41,6 @@ import com.servoy.j2db.util.Settings;
  *  
  * @author pbakker
  */
-@SuppressWarnings("nls")
 public class StartPageBrowserEditor extends EditorPart
 {
 	public static final String STARTPAGE_BROWSER_EDITOR_ID = "com.servoy.eclipse.core.StartPageBrowserEditor";

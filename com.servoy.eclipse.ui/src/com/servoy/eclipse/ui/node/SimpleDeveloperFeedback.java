@@ -53,7 +53,6 @@ public class SimpleDeveloperFeedback implements IDeveloperFeedback
 		return sample;
 	}
 
-	@SuppressWarnings("nls")
 	private String prettyPrintToolTipText(String originalToolTipText)
 	{
 		if (originalToolTipText == null || (originalToolTipText != null && !originalToolTipText.contains("Array<"))) return originalToolTipText;

@@ -34,7 +34,6 @@ import org.mozilla.javascript.Wrapper;
  * 
  * @author acostescu
  */
-@SuppressWarnings("nls")
 public abstract class JSUnitTestListenerHandler<T, E>
 {
 

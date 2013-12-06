@@ -76,7 +76,6 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
  * 
  * @author acostescu
  */
-@SuppressWarnings("nls")
 public class NewStyleWizard extends Wizard implements INewWizard
 {
 	public static final String ID = "com.servoy.eclipse.ui.NewStyleWizard"; //$NON-NLS-1$

@@ -71,7 +71,6 @@ public class ServerConfigurationPage extends WizardPage
 	 * @param selectedServerNames 
 	 * @param serverConfigurationPages 
 	 */
-	@SuppressWarnings("nls")
 	protected ServerConfigurationPage(String pageName, ServerConfiguration serverConfig, SortedSet<String> selectedServerNames,
 		HashMap<String, IWizardPage> serverConfigurationPages)
 	{

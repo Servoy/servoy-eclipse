@@ -27,7 +27,6 @@ import org.eclipse.dltk.javascript.core.JSKeywordCategory;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 
-@SuppressWarnings("nls")
 public class KeywordProvider implements IKeywordProvider
 {
 

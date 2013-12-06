@@ -54,7 +54,6 @@ public class FileSearchResult extends AbstractTextSearchResult implements IEdito
 		return null;
 	}
 
-	@SuppressWarnings("nls")
 	public String getLabel()
 	{
 		String noneExactMatchLabel = "";

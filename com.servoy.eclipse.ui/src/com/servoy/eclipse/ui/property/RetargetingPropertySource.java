@@ -33,7 +33,6 @@ import com.servoy.j2db.util.Pair;
  * @author rgansevles
  *
  */
-@SuppressWarnings("nls")
 public abstract class RetargetingPropertySource implements IPropertySource
 {
 	private final Object model;

@@ -33,7 +33,6 @@ import com.servoy.eclipse.ui.wizards.NewSolutionWizard;
 import com.servoy.eclipse.ui.wizards.NewStyleWizard;
 import com.servoy.eclipse.ui.wizards.NewValueListWizard;
 
-@SuppressWarnings("nls")
 public class DesignPerspective implements IPerspectiveFactory
 {
 

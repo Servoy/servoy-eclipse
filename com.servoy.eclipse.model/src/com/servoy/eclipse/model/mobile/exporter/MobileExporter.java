@@ -98,7 +98,6 @@ import com.servoy.j2db.util.Utils;
  * @author lvostinar
  *
  */
-@SuppressWarnings("nls")
 public class MobileExporter
 {
 

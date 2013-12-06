@@ -97,7 +97,6 @@ import com.servoy.j2db.util.toolbar.IToolbarPanel;
 /**
  * @author jcompagner
  */
-@SuppressWarnings("nls")
 public class DesignApplication implements ISmartClientApplication, IMessagesCallback
 {
 	private IApplication client;

@@ -44,7 +44,6 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  * 
  */
-@SuppressWarnings("nls")
 public class DesignerPreferences
 {
 	public static final int PX = 0;

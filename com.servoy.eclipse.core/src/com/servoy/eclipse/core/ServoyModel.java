@@ -197,7 +197,6 @@ import com.servoy.j2db.util.Utils;
  * 
  * @author jblok
  */
-@SuppressWarnings("nls")
 public class ServoyModel extends AbstractServoyModel
 {
 	/**

@@ -74,7 +74,6 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.Debug;
 
-@SuppressWarnings("nls")
 public class ColumnDetailsComposite extends Composite
 {
 

@@ -45,7 +45,6 @@ import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.util.JarManager;
 import com.servoy.j2db.util.JarManager.Extension;
 
-@SuppressWarnings("nls")
 public class XMLScriptObjectAdapterLoader
 {
 	/**
@@ -123,7 +122,6 @@ public class XMLScriptObjectAdapterLoader
 		return null;
 	}
 
-	@SuppressWarnings("nls")
 	public static String getPluginDocXMLForClass(String clz)
 	{
 		String clzCanonical = clz.replace(".", "/");

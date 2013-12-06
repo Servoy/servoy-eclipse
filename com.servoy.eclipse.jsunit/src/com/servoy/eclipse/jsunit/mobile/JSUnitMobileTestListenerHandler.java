@@ -33,7 +33,6 @@ import com.servoy.eclipse.jsunit.runner.JSUnitTestListenerHandler;
 public class JSUnitMobileTestListenerHandler extends JSUnitTestListenerHandler<String, Throwable>
 {
 
-	@SuppressWarnings("nls")
 	public JSUnitMobileTestListenerHandler(TestResult result, List<Test> testList)
 	{
 		this(

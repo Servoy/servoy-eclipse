@@ -22,7 +22,6 @@ import com.servoy.eclipse.jsunit.mobile.SuiteBridge;
 /**
  * @author acostescu
  */
-@SuppressWarnings("nls")
 public interface IMobileTestLaunchConstants
 {
 	public static final String LAUNCH_TEST_CONFIGURATION_TYPE_ID = "com.servoy.eclipse.mobile.test.launch";

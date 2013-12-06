@@ -29,7 +29,6 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.ClientMethodTemplatesLoader;
 import com.servoy.j2db.persistence.MethodTemplate;
 
-@SuppressWarnings("nls")
 public class MethodTemplatesLoader
 {
 	public static void loadMethodTemplatesFromXML()

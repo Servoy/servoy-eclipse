@@ -40,7 +40,6 @@ import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
-@SuppressWarnings("nls")
 public class TypeProvider implements ITypeProvider
 {
 	private final TypeCreator TYPES = new TypeCreator();

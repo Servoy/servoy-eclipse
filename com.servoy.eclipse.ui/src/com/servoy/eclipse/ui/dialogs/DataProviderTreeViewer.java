@@ -835,7 +835,6 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		}
 
 
-		@SuppressWarnings("nls")
 		@Override
 		public String toString()
 		{

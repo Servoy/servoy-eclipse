@@ -42,7 +42,6 @@ import com.servoy.j2db.persistence.TabPanel;
  * @author rgansevles
  */
 
-@SuppressWarnings("nls")
 public class FormPlaceElementCommand extends BaseFormPlaceElementCommand
 {
 	/**

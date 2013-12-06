@@ -40,7 +40,6 @@ import org.mozilla.javascript.ScriptableObject;
  * @author acostescu
  * 
  */
-@SuppressWarnings("nls")
 public class JSUnitRhinoTestListenerHandler extends JSUnitTestListenerHandler<Object, Object>
 {
 

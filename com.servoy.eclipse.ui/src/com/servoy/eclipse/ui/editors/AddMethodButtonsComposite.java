@@ -169,7 +169,6 @@ public class AddMethodButtonsComposite extends Composite
 		createGlobalMethodButton.setText("Scope"); //$NON-NLS-1$
 	}
 
-	@SuppressWarnings("nls")
 	private ScriptMethod createMethod(IPersist parent)
 	{
 		String scopeName = null;

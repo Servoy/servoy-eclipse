@@ -518,7 +518,6 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		return null;
 	}
 
-	@SuppressWarnings("nls")
 	private static Pair<Pair<String, String>, Integer> askForMethodName(String methodType, final IPersist parent, String methodKey, Shell shell, int tagFilter,
 		String[] listOptions, String listValue, String listDescriptionText, IPersist persist, String scopeName)
 	{
@@ -624,7 +623,6 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 			this.tagFilter = tagFilter;
 		}
 
-		@SuppressWarnings("nls")
 		@Override
 		protected void createButtonsForButtonBar(Composite compositeParent)
 		{

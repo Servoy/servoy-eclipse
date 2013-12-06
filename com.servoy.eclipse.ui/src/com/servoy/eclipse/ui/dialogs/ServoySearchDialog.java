@@ -70,7 +70,6 @@ import com.servoy.j2db.util.UUID;
  * @author jcompagner
  * 
  */
-@SuppressWarnings("nls")
 public class ServoySearchDialog extends FilteredItemsSelectionDialog
 {
 	/**
