@@ -37,6 +37,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 {
 	public static final String GROUP_ELEMENTS = "group.elements";
 	public static final String GROUP_ACTIONS = "group.actions";
+	public static final String GROUP_REFACTOR = "group.refactor";
 
 	protected DesignerActionFactory(String actionId)
 	{
@@ -47,7 +48,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 	public static final String BRING_TO_FRONT_TOOLTIP = BRING_TO_FRONT_TEXT;
 	public static final ImageDescriptor BRING_TO_FRONT_IMAGE = Activator.loadImageDescriptorFromBundle("bring_to_front.png");//$NON-NLS-1$
 	public static final ActionFactory BRING_TO_FRONT = new ActionFactory(ZOrderAction.ID_Z_ORDER_BRING_TO_FRONT)
-	{//$NON-NLS-1$
+	{
 
 		@Override
 		public IWorkbenchAction create(IWorkbenchWindow window)
@@ -69,7 +70,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 	public static final String SEND_TO_BACK_TOOLTIP = SEND_TO_BACK_TEXT;
 	public static final ImageDescriptor SEND_TO_BACK_IMAGE = Activator.loadImageDescriptorFromBundle("send_to_back.png");//$NON-NLS-1$
 	public static final ActionFactory SEND_TO_BACK = new ActionFactory(ZOrderAction.ID_Z_ORDER_SEND_TO_BACK)
-	{//$NON-NLS-1$
+	{
 
 		@Override
 		public IWorkbenchAction create(IWorkbenchWindow window)
@@ -91,7 +92,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 	public static final String BRING_TO_FRONT_ONE_STEP_TOOLTIP = BRING_TO_FRONT_ONE_STEP_TEXT;
 	public static final ImageDescriptor BRING_TO_FRONT_ONE_STEP_IMAGE = Activator.loadImageDescriptorFromBundle("bring_forward.png");//$NON-NLS-1$
 	public static final ActionFactory BRING_TO_FRONT_ONE_STEP = new ActionFactory(ZOrderAction.ID_Z_ORDER_BRING_TO_FRONT_ONE_STEP)
-	{//$NON-NLS-1$
+	{
 
 		@Override
 		public IWorkbenchAction create(IWorkbenchWindow window)
@@ -113,7 +114,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 	public static final String SEND_TO_BACK_ONE_STEP_TOOLTIP = SEND_TO_BACK_ONE_STEP_TEXT;
 	public static final ImageDescriptor SEND_TO_BACK_ONE_STEP_IMAGE = Activator.loadImageDescriptorFromBundle("send_backward.png");//$NON-NLS-1$
 	public static final ActionFactory SEND_TO_BACK_ONE_STEP = new ActionFactory(ZOrderAction.ID_Z_ORDER_SEND_TO_BACK_ONE_STEP)
-	{//$NON-NLS-1$
+	{
 
 		@Override
 		public IWorkbenchAction create(IWorkbenchWindow window)

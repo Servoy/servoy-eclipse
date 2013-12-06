@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.designer.editor.mobile.commands;
 
+import java.util.Map;
+
 import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.swt.graphics.Point;
 
@@ -40,8 +42,12 @@ public class MobileAddHeaderTitleCommand extends BaseFormPlaceElementCommand
 {
 	public MobileAddHeaderTitleCommand(IApplication application, Form form, CreateRequest request)
 	{
-		super(application, form, null, request.getType(), request.getExtendedData(), null, request.getLocation() == null ? null
-			: request.getLocation().getSWTPoint(), null, form);
+		this(application, form, request.getType(), request.getExtendedData(), request.getLocation() == null ? null : request.getLocation().getSWTPoint());
+	}
+
+	public MobileAddHeaderTitleCommand(IApplication application, Form form, Object requestType, Map<Object, Object> objectProperties, Point defaultLocation)
+	{
+		super(application, form, null, requestType, objectProperties, null, defaultLocation, null, form);
 	}
 
 	@Override
@@ -50,17 +56,21 @@ public class MobileAddHeaderTitleCommand extends BaseFormPlaceElementCommand
 		if (parent instanceof Form)
 		{
 			setLabel("place header text");
-			GraphicalComponent label = ElementFactory.createLabel((Form)parent, "Title", null);
-			label.putCustomMobileProperty(IMobileProperties.HEADER_ITEM.propertyName, Boolean.TRUE);
-			label.putCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName, Boolean.TRUE);
-			// for debug in developer
-			label.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST | IAnchorConstants.NORTH);
-			label.setHorizontalAlignment(ISupportTextSetup.CENTER);
-			label.setStyleClass("b"); // default for header text
-
-			return new Object[] { label };
+			return new Object[] { createHeaderTitle((Form)parent) };
 		}
 
 		return null;
+	}
+
+	public static GraphicalComponent createHeaderTitle(Form form) throws RepositoryException
+	{
+		GraphicalComponent label = ElementFactory.createLabel(form, "Title", null);
+		label.putCustomMobileProperty(IMobileProperties.HEADER_ITEM.propertyName, Boolean.TRUE);
+		label.putCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName, Boolean.TRUE);
+		// for debug in developer
+		label.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST | IAnchorConstants.NORTH);
+		label.setHorizontalAlignment(ISupportTextSetup.CENTER);
+		label.setStyleClass("b"); // default for header text
+		return label;
 	}
 }

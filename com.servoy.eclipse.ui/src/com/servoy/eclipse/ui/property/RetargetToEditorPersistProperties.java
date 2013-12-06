@@ -24,6 +24,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.IPropertySourceProvider;
 
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.j2db.util.IDelegate;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -32,13 +33,19 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  * 
  */
-public class RetargetToEditorPersistProperties implements IPropertySource, IAdaptable
+public class RetargetToEditorPersistProperties implements IPropertySource, IAdaptable, IDelegate<IModelSavePropertySource>
 {
 	private final IModelSavePropertySource persistProperties;
 
 	public RetargetToEditorPersistProperties(IModelSavePropertySource persistProperties)
 	{
 		this.persistProperties = persistProperties;
+	}
+
+	@Override
+	public IModelSavePropertySource getDelegate()
+	{
+		return persistProperties;
 	}
 
 	public Object getEditableValue()

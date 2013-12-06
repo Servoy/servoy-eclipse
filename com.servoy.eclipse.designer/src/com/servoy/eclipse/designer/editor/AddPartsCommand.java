@@ -21,9 +21,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.gef.commands.Command;
-
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.designer.editor.commands.AbstractModelsCommand;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Form;
@@ -37,7 +36,7 @@ import com.servoy.j2db.persistence.RepositoryException;
  * @author rgansevles
  *
  */
-public class AddPartsCommand extends Command
+public class AddPartsCommand extends AbstractModelsCommand
 {
 	private final Form form;
 	private final int[] partTypeIds;
@@ -53,6 +52,12 @@ public class AddPartsCommand extends Command
 	protected Part createPart(int partTypeId) throws RepositoryException
 	{
 		return form.createNewPart(partTypeId, Integer.MAX_VALUE); // is used in sorting in form.getParts()
+	}
+
+	@Override
+	public Object[] getModels()
+	{
+		return createdParts == null ? null : createdParts.toArray();
 	}
 
 	@Override

@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.designer.editor.mobile.commands;
 
+import java.util.Map;
+
 import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.swt.graphics.Point;
 
@@ -41,8 +43,12 @@ public class AddLabelCommand extends BaseFormPlaceElementCommand
 {
 	public AddLabelCommand(IApplication application, Form form, CreateRequest request)
 	{
-		super(application, form, null, request.getType(), request.getExtendedData(), null, request.getLocation() == null ? null
-			: request.getLocation().getSWTPoint(), null, form);
+		this(application, form, request.getType(), request.getExtendedData(), request.getLocation() == null ? null : request.getLocation().getSWTPoint());
+	}
+
+	public AddLabelCommand(IApplication application, Form form, Object requestType, Map<Object, Object> data, Point location)
+	{
+		super(application, form, null, requestType, data, null, location, null, form);
 	}
 
 	@Override

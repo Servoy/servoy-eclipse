@@ -41,6 +41,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -54,6 +55,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.servoy.base.persistence.IMobileProperties;
+import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -306,6 +308,13 @@ public class NewFormWizard extends Wizard implements INewWizard
 			{
 				// create default form, most is already set in createNewForm
 				if (superForm == null) form.createNewPart(Part.BODY, 480/* height */); // else the form just inherits parts from super; no need to add body
+
+				if (newFormWizardPage.getListForm())
+				{
+					// set view type and add list form items
+					form.setView(IFormConstants.VIEW_TYPE_TABLE_LOCKED);
+					ElementFactory.addFormListItems(form, null, null);
+				}
 			}
 			else
 			{
@@ -393,6 +402,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 		private Style style;
 
 		private Form superForm;
+
+		private Button listFormCheck;
 
 		/**
 		 * Creates a new form creation wizard page.
@@ -486,6 +497,14 @@ public class NewFormWizard extends Wizard implements INewWizard
 		}
 
 		/**
+		 * @return the listFormCheck value
+		 */
+		public boolean getListForm()
+		{
+			return listFormCheck.getSelection();
+		}
+
+		/**
 		 * (non-Javadoc) Method declared on IDialogPage.
 		 */
 		public void createControl(Composite parent)
@@ -495,8 +514,9 @@ public class NewFormWizard extends Wizard implements INewWizard
 			Composite topLevel = new Composite(parent, SWT.NONE);
 			topLevel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 
-			Label formNameLabel;
-			formNameLabel = new Label(topLevel, SWT.NONE);
+			boolean activeSolutionMobile = SolutionMetaData.isServoyMobileSolution(getActiveSolution());
+
+			Label formNameLabel = new Label(topLevel, SWT.NONE);
 			formNameLabel.setText("&Form name");
 			formNameField = new Text(topLevel, SWT.BORDER);
 			formNameField.addVerifyListener(DocumentValidatorVerifyListener.IDENT_SERVOY_VERIFIER);
@@ -546,12 +566,12 @@ public class NewFormWizard extends Wizard implements INewWizard
 				}
 			});
 			dataSourceViewer.setInput(new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, true));
-			dataSourceViewer.setEditable(!SolutionMetaData.isServoyMobileSolution(getActiveSolution()));
+			dataSourceViewer.setEditable(!activeSolutionMobile);
 			Control dataSOurceControl = dataSourceViewer.getControl();
 
 			Label extendsLabel = new Label(topLevel, SWT.NONE);
 			extendsLabel.setText("E&xtends");
-			extendsLabel.setEnabled(!SolutionMetaData.isServoyMobileSolution(getActiveSolution()));
+			extendsLabel.setEnabled(!activeSolutionMobile);
 
 			extendsFormViewer = new TreeSelectViewer(topLevel, SWT.NONE);
 			extendsFormViewer.setTitleText("Select super form");
@@ -572,13 +592,13 @@ public class NewFormWizard extends Wizard implements INewWizard
 				}
 			});
 
-			extendsFormViewer.setEnabled(!SolutionMetaData.isServoyMobileSolution(getActiveSolution()));
-			extendsFormViewer.setEditable(!SolutionMetaData.isServoyMobileSolution(getActiveSolution()));
+			extendsFormViewer.setEnabled(!activeSolutionMobile);
+			extendsFormViewer.setEditable(!activeSolutionMobile);
 			Control extendsFormControl = extendsFormViewer.getControl();
 
 			Label styleLabel = new Label(topLevel, SWT.NONE);
 			styleLabel.setText("St&yle");
-			styleLabel.setEnabled(!SolutionMetaData.isServoyMobileSolution(getActiveSolution()));
+			styleLabel.setEnabled(!activeSolutionMobile);
 
 			styleNameCombo = new ComboViewer(topLevel, SWT.BORDER | SWT.READ_ONLY);
 			styleNameCombo.setContentProvider(new ArrayContentProvider());
@@ -590,11 +610,11 @@ public class NewFormWizard extends Wizard implements INewWizard
 				}
 			});
 			Combo styleNameComboControl = styleNameCombo.getCombo();
-			styleNameComboControl.setEnabled(!SolutionMetaData.isServoyMobileSolution(getActiveSolution()));
+			styleNameComboControl.setEnabled(!activeSolutionMobile);
 
 			Label templateLabel = new Label(topLevel, SWT.NONE);
 			templateLabel.setText("T&emplate");
-			templateLabel.setEnabled(!SolutionMetaData.isServoyMobileSolution(getActiveSolution()));
+			templateLabel.setEnabled(!activeSolutionMobile);
 
 			templateNameCombo = new ComboViewer(topLevel, SWT.BORDER | SWT.READ_ONLY);
 			templateNameCombo.setContentProvider(new ArrayContentProvider());
@@ -622,10 +642,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 				}
 			});
 			Combo templateNameComboControl = templateNameCombo.getCombo();
-			templateNameComboControl.setEnabled(!SolutionMetaData.isServoyMobileSolution(getActiveSolution()));
+			templateNameComboControl.setEnabled(!activeSolutionMobile);
 
 			Label projectLabel = new Label(topLevel, SWT.NONE);
-			projectLabel.setEnabled(!SolutionMetaData.isServoyMobileSolution(getActiveSolution()));
+			projectLabel.setEnabled(!activeSolutionMobile);
 			projectLabel.setText("S&olution");
 
 			projectCombo = new ComboViewer(topLevel, SWT.BORDER | SWT.READ_ONLY);
@@ -639,15 +659,22 @@ public class NewFormWizard extends Wizard implements INewWizard
 				}
 			});
 
+			Label listFormLabel = new Label(topLevel, SWT.NONE);
+			listFormLabel.setText("&Listform");
+			listFormLabel.setVisible(activeSolutionMobile);
+
+			listFormCheck = new Button(topLevel, SWT.CHECK);
+			listFormCheck.setVisible(activeSolutionMobile);
+
 			final GroupLayout groupLayout = new GroupLayout(topLevel);
 			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 				groupLayout.createSequentialGroup().addContainerGap().add(
 					groupLayout.createParallelGroup(GroupLayout.LEADING).add(formNameLabel).add(extendsLabel).add(datasourceLabel).add(projectLabel).add(
-						styleLabel).add(templateLabel)).add(15, 15, 15).add(
-					groupLayout.createParallelGroup(GroupLayout.LEADING).add(projectComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(
-						templateNameComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(styleNameComboControl, GroupLayout.DEFAULT_SIZE, 159,
-						Short.MAX_VALUE).add(extendsFormControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(dataSOurceControl,
-						GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(
+						styleLabel).add(templateLabel).add(listFormLabel)).add(15, 15, 15).add(
+					groupLayout.createParallelGroup(GroupLayout.LEADING).add(listFormCheck, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(
+						projectComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(templateNameComboControl, GroupLayout.DEFAULT_SIZE, 159,
+						Short.MAX_VALUE).add(styleNameComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(extendsFormControl,
+						GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(dataSOurceControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(
 						groupLayout.createSequentialGroup().add(formNameField, GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE).addPreferredGap(
 							LayoutStyle.RELATED))).addContainerGap()));
 			groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
@@ -664,9 +691,11 @@ public class NewFormWizard extends Wizard implements INewWizard
 					groupLayout.createParallelGroup(GroupLayout.LEADING).add(templateNameComboControl, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 						GroupLayout.PREFERRED_SIZE).add(templateLabel)).addPreferredGap(LayoutStyle.RELATED).add(
 					groupLayout.createParallelGroup(GroupLayout.LEADING).add(projectLabel).add(projectComboControl, GroupLayout.PREFERRED_SIZE,
-						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addContainerGap(142, Short.MAX_VALUE)));
+						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(
+					groupLayout.createParallelGroup(GroupLayout.LEADING).add(listFormLabel).add(listFormCheck, GroupLayout.PREFERRED_SIZE,
+						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addContainerGap(100, Short.MAX_VALUE)));
 			topLevel.setLayout(groupLayout);
-			topLevel.setTabList(new Control[] { formNameField, dataSOurceControl, extendsFormControl, styleNameComboControl, templateNameComboControl, projectComboControl });
+			topLevel.setTabList(new Control[] { formNameField, dataSOurceControl, extendsFormControl, styleNameComboControl, templateNameComboControl, projectComboControl, listFormCheck });
 
 			if (superForm != null)
 			{

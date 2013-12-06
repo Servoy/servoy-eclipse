@@ -28,6 +28,7 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.gef.Request;
+import org.eclipse.gef.RootEditPart;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
@@ -129,6 +130,12 @@ public abstract class BasePersistGraphicalEditPart extends AbstractGraphicalEdit
 		// parent of a Tab or Portal field edit part is not the TabPanel/Portal edit part, but the Form edit part
 		EditPart parentEditPart = (EditPart)getViewer().getEditPartRegistry().get(getPersist().getParent());
 		return parentEditPart != null && parentEditPart.understandsRequest(req);
+	}
+
+	public boolean isDesignerContextActive()
+	{
+		RootEditPart root = getRoot();
+		return root instanceof BaseFormGraphicalRootEditPart && ((BaseFormGraphicalRootEditPart)root).getEditorPart().isDesignerContextActive();
 	}
 
 	/**

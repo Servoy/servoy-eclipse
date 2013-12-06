@@ -78,7 +78,7 @@ public abstract class DesignerSelectionActionDelegateHandler extends AbstractEdi
 	 * @return The command to work the selected objects.
 	 */
 	@Override
-	protected final Command createCommand()
+	protected Command createCommand()
 	{
 		IStructuredSelection objects = getSelection();
 		if (objects.isEmpty()) return null;

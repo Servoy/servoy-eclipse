@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor.commands;
 
 import org.eclipse.gef.commands.Command;
@@ -24,11 +24,11 @@ import org.eclipse.gef.commands.Command;
  * @author rgansevles
  * 
  */
-public abstract class RefreshingCommand extends Command implements ICommandWrapper
+public abstract class RefreshingCommand<T extends Command> extends Command implements ICommandWrapper<T>
 {
-	protected final Command command;
+	protected final T command;
 
-	public RefreshingCommand(Command command)
+	public RefreshingCommand(T command)
 	{
 		this.command = command;
 		if (command != null)
@@ -82,7 +82,7 @@ public abstract class RefreshingCommand extends Command implements ICommandWrapp
 		}
 	}
 
-	public Command getCommand()
+	public T getCommand()
 	{
 		return command;
 	}

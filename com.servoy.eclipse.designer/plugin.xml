@@ -139,7 +139,7 @@
             class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
             <adapter type="org.eclipse.ui.views.properties.IPropertySource"/>
       </factory>
-   </extension>
+  </extension>
    <extension
          point="org.eclipse.ui.actionSets">
       <actionSet
@@ -680,6 +680,18 @@
             id="com.servoy.eclipse.designer.revertForm"
             name="Revert Form">
       </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.mobile.commands.ConvertToListFormActionDelegateHandler"
+            id="com.servoy.eclipse.designer.convertToListForm"
+            name="Convert to List Form">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.mobile.commands.ConvertToRecordFormActionDelegateHandler"
+            id="com.servoy.eclipse.designer.convertToRecordForm"
+            name="Convert to Record Form">
+      </command>
    </extension>
       <extension
          point="org.eclipse.ui.preferencePages">
@@ -972,6 +984,26 @@
                state="true"
                style="push"
                tooltip="Revert Form">
+         </action>
+         <action
+               class="com.servoy.eclipse.designer.editor.mobile.commands.ConvertToListFormActionDelegateHandler"
+               definitionId="com.servoy.eclipse.designer.convertToListForm"
+               id="com.servoy.eclipse.designer.action.convertToListForm"
+               label="Convert to List Form"
+               menubarPath="group.refactor"
+               state="true"
+               style="push"
+               tooltip="Convert to List Form">
+         </action>
+         <action
+               class="com.servoy.eclipse.designer.editor.mobile.commands.ConvertToRecordFormActionDelegateHandler"
+               definitionId="com.servoy.eclipse.designer.convertToRecordForm"
+               id="com.servoy.eclipse.designer.action.convertToRecordForm"
+               label="Convert to Record Form"
+               menubarPath="group.refactor"
+               state="true"
+               style="push"
+               tooltip="Convert to Record Form">
          </action>
       </viewerContribution>
    </extension>

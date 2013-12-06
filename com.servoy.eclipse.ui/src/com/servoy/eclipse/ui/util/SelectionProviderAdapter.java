@@ -23,13 +23,14 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 
 /**
  * Base SelectionProvider adapter.
  * 
  * @author rgansevles
  */
-public abstract class SelectionProviderAdapter implements ISelectionProvider
+public class SelectionProviderAdapter implements ISelectionProvider
 {
 	/**
 	 * List of selection change listeners (element type: <code>ISelectionChangedListener</code>).
@@ -37,6 +38,7 @@ public abstract class SelectionProviderAdapter implements ISelectionProvider
 	 * @see #fireSelectionChanged
 	 */
 	private final ListenerList selectionChangedListeners = new ListenerList();
+	private ISelection selection;
 
 	public void addSelectionChangedListener(ISelectionChangedListener listener)
 	{
@@ -59,9 +61,9 @@ public abstract class SelectionProviderAdapter implements ISelectionProvider
 	protected void fireSelectionChanged(final SelectionChangedEvent event)
 	{
 		Object[] listeners = selectionChangedListeners.getListeners();
-		for (int i = 0; i < listeners.length; ++i)
+		for (Object listener : listeners)
 		{
-			final ISelectionChangedListener l = (ISelectionChangedListener)listeners[i];
+			final ISelectionChangedListener l = (ISelectionChangedListener)listener;
 			SafeRunnable.run(new SafeRunnable()
 			{
 				public void run()
@@ -74,10 +76,17 @@ public abstract class SelectionProviderAdapter implements ISelectionProvider
 
 	public ISelection getSelection()
 	{
-		return null;
+		return selection == null ? StructuredSelection.EMPTY : selection;
 	}
 
 	public void setSelection(ISelection selection)
 	{
+		ISelection oldSelection = getSelection();
+		this.selection = selection;
+		ISelection newSelection = getSelection();
+		if (oldSelection != newSelection)
+		{
+			fireSelectionChanged(new SelectionChangedEvent(this, newSelection));
+		}
 	}
 }

@@ -80,6 +80,7 @@ public class DesignerPreferences
 	public static final String PAINT_PAGEBREAKS_SETTING = "paintPageBreaks";
 	public static final String SHOW_RULERS_SETTING = "showRulers";
 	public static final String MARQUEE_SELECT_OUTER_SETTING = "marqueeSelectOuter";
+	public static final String CLASSIC_FORM_EDITOR_MOBILE_SETTING = "classicFormEditorMobile";
 	public static final String FORM_EVENT_HANDLER_NAMING_SETTING = "formEventHandlerNaming";
 	public static final String TABLE_EVENT_HANDLER_NAMING_SETTING = "tableEventHandlerNaming";
 	public static final String LOADED_RELATIONS_NAMING_PATTERN_SETTING = "loadedRelationsNamingPattern";
@@ -117,6 +118,7 @@ public class DesignerPreferences
 	public static final boolean PAINT_PAGEBREAKS_DEFAULT = false;
 	public static final boolean SHOW_RULERS_DEFAULT = true;
 	public static final boolean MARQUEE_SELECT_OUTER_DEFAULT = true;
+	public static final boolean CLASSIC_FORM_EDITOR_MOBILE_DEFAULT = true;
 
 	public static final int FORM_EVENT_HANDLER_NAMING_DEFAULT = 0;
 	public static final int FORM_EVENT_HANDLER_NAMING_INCLUDE_FORM_ELEMENT_NAME = 1;
@@ -328,6 +330,16 @@ public class DesignerPreferences
 	public void setMarqueeSelectOuter(boolean outer)
 	{
 		setProperty(MARQUEE_SELECT_OUTER_SETTING, outer);
+	}
+
+	public boolean getClassicFormEditorInMobile()
+	{
+		return getProperty(CLASSIC_FORM_EDITOR_MOBILE_SETTING, CLASSIC_FORM_EDITOR_MOBILE_DEFAULT);
+	}
+
+	public void setClassicFormEditorInMobile(boolean classic)
+	{
+		setProperty(CLASSIC_FORM_EDITOR_MOBILE_SETTING, classic);
 	}
 
 	public static boolean isGuideSetting(String key)

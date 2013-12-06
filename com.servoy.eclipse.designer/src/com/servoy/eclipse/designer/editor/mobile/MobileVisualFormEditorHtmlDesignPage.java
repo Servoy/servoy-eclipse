@@ -1,0 +1,1505 @@
+/*
+ This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2013 Servoy BV
+
+ This program is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Affero General Public License as published by the Free
+ Software Foundation; either version 3 of the License, or (at your option) any
+ later version.
+
+ This program is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+ You should have received a copy of the GNU Affero General Public License along
+ with this program; if not, see http://www.gnu.org/licenses or write to the Free
+ Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
+ */
+
+package com.servoy.eclipse.designer.editor.mobile;
+
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.StringTokenizer;
+
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.gef.commands.Command;
+import org.eclipse.gef.commands.CompoundCommand;
+import org.eclipse.gef.ui.actions.DeleteAction;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTError;
+import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.BrowserFunction;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.views.properties.IPropertySource;
+import org.json.JSONException;
+import org.osgi.framework.Bundle;
+
+import com.servoy.base.persistence.IBaseComponent;
+import com.servoy.base.persistence.IMobileProperties;
+import com.servoy.base.persistence.IMobileProperties.MobileProperty;
+import com.servoy.base.persistence.PersistUtils;
+import com.servoy.base.persistence.constants.IFormConstants;
+import com.servoy.base.persistence.constants.IValueListConstants;
+import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.designer.editor.AddPartsCommand;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
+import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.designer.editor.commands.AbstractModelsCommand;
+import com.servoy.eclipse.designer.editor.commands.RefreshingCommand;
+import com.servoy.eclipse.designer.editor.mobile.commands.AddBeanCommand;
+import com.servoy.eclipse.designer.editor.mobile.commands.AddFieldCommand;
+import com.servoy.eclipse.designer.editor.mobile.commands.AddInsetListCommand;
+import com.servoy.eclipse.designer.editor.mobile.commands.AddLabelCommand;
+import com.servoy.eclipse.designer.editor.mobile.commands.MobileAddButtonCommand;
+import com.servoy.eclipse.designer.editor.mobile.commands.MobileAddHeaderTitleCommand;
+import com.servoy.eclipse.designer.editor.mobile.commands.PutCustomMobilePropertyCommand;
+import com.servoy.eclipse.designer.editor.mobile.editparts.MobileFooterGraphicalEditPart;
+import com.servoy.eclipse.designer.editor.mobile.editparts.MobileFormGraphicalEditPart;
+import com.servoy.eclipse.designer.editor.mobile.editparts.MobileHeaderGraphicalEditPart;
+import com.servoy.eclipse.designer.editor.mobile.editparts.MobileSnapData.MobileSnapType;
+import com.servoy.eclipse.designer.mobile.property.MobilePersistPropertySource;
+import com.servoy.eclipse.designer.property.SetValueCommand;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.property.ComplexProperty;
+import com.servoy.eclipse.ui.property.MobileListModel;
+import com.servoy.eclipse.ui.property.RetargetToEditorPersistProperties;
+import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
+import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.component.ComponentFactory;
+import com.servoy.j2db.debug.layout.MobileFormLayout;
+import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.Bean;
+import com.servoy.j2db.persistence.Field;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.GraphicalComponent;
+import com.servoy.j2db.persistence.IFormElement;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportBounds;
+import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportDataProviderID;
+import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.persistence.Portal;
+import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.util.IMessageHandler;
+import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.ServoyJSONArray;
+import com.servoy.j2db.util.ServoyJSONObject;
+import com.servoy.j2db.util.UUID;
+import com.servoy.j2db.util.Utils;
+
+/**
+ * Design page for web based mobile form editor
+ * 
+ * @author rgansevles
+ *
+ */
+@SuppressWarnings("nls")
+public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDesignPage
+{
+	private static final String ID_KEY = "id";
+	private static final String TYPE_KEY = "type";
+	private static final String PROPERTIES_KEY = "properties";
+
+	private static final String EMPTY_VALUE = " "; // to display empty, with "" the default of a widget would be used
+
+	private static final String CONTENT_PREFIX = "content_";
+	private static final String FOOTER_PREFIX = "footer_";
+	private static final String HEADER_PREFIX = "header_";
+
+	private static final Map<String, Integer> DISPLAY_TYPE_MAPPING = new HashMap<String, Integer>();
+	static
+	{
+		DISPLAY_TYPE_MAPPING.put("TextInput", Integer.valueOf(Field.TEXT_FIELD));
+		DISPLAY_TYPE_MAPPING.put("TextArea", Integer.valueOf(Field.TEXT_AREA));
+		DISPLAY_TYPE_MAPPING.put("Calendar", Integer.valueOf(Field.CALENDAR));
+		DISPLAY_TYPE_MAPPING.put("PasswordField", Integer.valueOf(Field.PASSWORD));
+		DISPLAY_TYPE_MAPPING.put("SelectMenu", Integer.valueOf(Field.COMBOBOX));
+		DISPLAY_TYPE_MAPPING.put("CheckboxGroup", Integer.valueOf(Field.CHECKS));
+		DISPLAY_TYPE_MAPPING.put("RadioGroup", Integer.valueOf(Field.RADIOS));
+	}
+
+	private final ISelectionProvider selectionProvider = new SelectionProviderAdapter();
+	private MobileVisualFormEditorContextMenuProvider contextMenuProvider;
+	private Browser browser;
+
+	private String lastFormDesign;
+	private EditorMessageHandler editorMessageHandler;
+
+	public MobileVisualFormEditorHtmlDesignPage(BaseVisualFormEditor editorPart)
+	{
+		super(editorPart);
+	}
+
+	@Override
+	public void createPartControl(Composite parent)
+	{
+		try
+		{
+			browser = new Browser(parent, SWT.MOZILLA);
+		}
+		catch (SWTError e)
+		{
+			ServoyLog.logError(e);
+			return;
+		}
+		browser.addListener(SWT.KeyDown, new Listener()
+		{
+			@Override
+			public void handleEvent(Event event)
+			{
+				if (event.character == SWT.DEL && event.doit)
+				{
+					// DEL is filtered out in swt for Browser
+					DeleteAction deleteAction = createDeleteAction();
+					if (deleteAction != null && deleteAction.isEnabled())
+					{
+						ISelection selection = selectionProvider.getSelection();
+						if (selection instanceof StructuredSelection && !selection.isEmpty())
+						{
+							getCommandStack().execute(deleteAction.createDeleteCommand(((StructuredSelection)selection).toList()));
+						}
+					}
+				}
+			}
+		});
+
+		// create context menu
+		contextMenuProvider = new MobileVisualFormEditorContextMenuProvider("#MobileFormDesignerContext", getActionRegistry());
+		getSite().registerContextMenu(contextMenuProvider.getId(), contextMenuProvider, selectionProvider);
+		contextMenuProvider.createContextMenu(browser);
+		Listener mouseListener = new Listener()
+		{
+			@Override
+			public void handleEvent(Event event)
+			{
+				if (event.button == 3)
+				{
+					// right-click
+					contextMenuProvider.getMenu().setVisible(true);
+				}
+			}
+		};
+		browser.addListener(SWT.MouseUp, mouseListener);
+		//browser.addListener(SWT.MouseDown, mouseListener); TODO: check why this does not work
+
+		new BrowserFunction(browser, "consoleLog")
+		{
+			@Override
+			public Object function(Object[] arguments)
+			{
+				System.out.println("consoleLog: " + Arrays.toString(arguments));
+				return null;
+			}
+		};
+		new BrowserFunction(browser, "getFormDesign")
+		{
+			@Override
+			public Object function(Object[] arguments)
+			{
+				try
+				{
+					return lastFormDesign = getFormDesign();
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
+				return null;
+			}
+		};
+		new BrowserFunction(browser, "callbackSelectionChanged")
+		{
+			@Override
+			public Object function(Object[] arguments)
+			{
+				try
+				{
+					callbackSelectionChanged(asString(arguments[0]));
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
+				return null;
+			}
+		};
+		new BrowserFunction(browser, "callbackEditingStateChanged")
+		{
+			@Override
+			public Object function(Object[] arguments)
+			{
+				try
+				{
+					callbackEditingStateChanged(Boolean.TRUE.equals(arguments[0]));
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
+				return null;
+			}
+		};
+		new BrowserFunction(browser, "callbackModelUpdated")
+		{
+			@Override
+			public Object function(Object[] arguments)
+			{
+				try
+				{
+					return callbackModelUpdated(asString(arguments[0]), asString(arguments[1]), asString(arguments[2]), asString(arguments[3]),
+						asInt(arguments[4]), asString(arguments[5]));
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
+				return null;
+			}
+		};
+
+		String editorid = UUID.randomUUID().toString();
+		ApplicationServerSingleton.get().getMessageDispatcher().register(editorid, editorMessageHandler = new EditorMessageHandler(editorid));
+
+		Bundle bundle = Platform.getBundle("com.servoy.eclipse.designer.rib");
+		URL resourceUrl = bundle.getResource("/rib/index.html");
+		try
+		{
+			URL fileUrl = FileLocator.toFileURL(resourceUrl);
+			String editorUrl = fileUrl.toURI().toString() + "?editorid=" + editorid;
+			//System.err.println("Open editor: " + editorUrl);
+			browser.setUrl(editorUrl);
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError("couldn't load the editors html file: " + resourceUrl, e);
+		}
+
+	}
+
+	@Override
+	public void dispose()
+	{
+		if (editorMessageHandler != null)
+		{
+			ApplicationServerSingleton.get().getMessageDispatcher().deregister(editorMessageHandler.getId(), editorMessageHandler);
+			editorMessageHandler = null;
+		}
+		super.dispose();
+	}
+
+	private static String asString(Object s)
+	{
+		return s == null ? null : s.toString();
+	}
+
+	private static int asInt(Object i)
+	{
+		return i instanceof Number ? ((Number)i).intValue() : 0;
+	}
+
+	private static <T, E extends T> void addIfNonNull(List<T> list, E element)
+	{
+		if (element != null) list.add(element);
+	}
+
+	protected void callbackSelectionChanged(String properties) throws JSONException
+	{
+		Object element = findElement(new ServoyJSONObject(properties, false));
+		selectionProvider.setSelection(element == null ? StructuredSelection.EMPTY : new StructuredSelection(element));
+	}
+
+	protected void callbackEditingStateChanged(boolean state)
+	{
+		if (state)
+		{
+			editorPart.deactivateEditorContext();
+		}
+		else
+		{
+			editorPart.activateEditorContext();
+		}
+	}
+
+	private static UUID getUUID(String uuid)
+	{
+		if (uuid == null || uuid.length() == 0)
+		{
+			return null;
+		}
+		int index = uuid.lastIndexOf('_');
+		String name = index < 0 ? uuid : uuid.substring(index + 1); // child element indexes are prefixed
+		if (name.split("-").length != 5)
+		{
+			throw new RuntimeException("Form design was not loaded in form editor, receiving uuid '" + uuid + "'");
+		}
+
+		return UUID.fromString(name);
+	}
+
+	protected String callbackModelUpdated(String eventType, String nodeType, String parentUuid, String zoneName, final int zoneIndex, String properties)
+		throws JSONException
+	{
+		String uuid = parentUuid;
+		if (uuid == null)
+		{
+			return null;
+		}
+
+		IPersist pp = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(getUUID(uuid));
+		if (pp instanceof GraphicalComponent && ((GraphicalComponent)pp).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName) != null)
+		{
+			// header title, use header part
+			pp = getHeaderPart((GraphicalComponent)pp);
+		}
+
+		if (pp == null)
+		{
+			return null;
+		}
+		final IPersist parent = pp;
+		final Form form = (Form)parent.getAncestor(IRepository.FORMS);
+
+		Object element = null;
+		ServoyJSONObject json = properties == null ? null : new ServoyJSONObject(properties, false);
+		List<Command> commands = new ArrayList<Command>();
+		Object toFireChanged = null;
+		if ("nodeAdded".equals(eventType))
+		{
+			if (json.has(ID_KEY))
+			{
+				// node was added in refresh
+				return null;
+			}
+
+			lastFormDesign = null; // enforce refresh
+
+			if ("Button".equals(nodeType))
+			{
+				MobileSnapType snapType = MobileSnapType.ContentItem;
+				if (parent instanceof Part)
+				{
+					if (PersistUtils.isHeaderPart(((Part)parent).getPartType()))
+					{
+						snapType = null;
+						// check for existing header buttons
+						for (IFormElement headerItem : MobileHeaderGraphicalEditPart.getHeaderModelChildren(Activator.getDefault().getDesignClient(),
+							editorPart.getForm()))
+						{
+							if (headerItem instanceof AbstractBase)
+							{
+								if (((AbstractBase)headerItem).getCustomMobileProperty(IMobileProperties.HEADER_LEFT_BUTTON.propertyName) != null)
+								{
+									if (snapType == null)
+									{
+										snapType = MobileSnapType.HeaderRightButton;
+									}
+									else
+									{
+										// already have 2 buttons
+										return null;
+									}
+								}
+								else if (((AbstractBase)headerItem).getCustomMobileProperty(IMobileProperties.HEADER_RIGHT_BUTTON.propertyName) != null)
+								{
+									if (snapType == null)
+									{
+										snapType = MobileSnapType.HeaderLeftButton;
+									}
+									else
+									{
+										// already have 2 buttons
+										return null;
+									}
+								}
+							}
+						}
+						if (snapType == null)
+						{
+							// default
+							snapType = MobileSnapType.HeaderLeftButton;
+						}
+					}
+					else if (PersistUtils.isFooterPart(((Part)parent).getPartType()))
+					{
+						snapType = MobileSnapType.FooterItem;
+					}
+				}
+				commands.add(new MobileAddButtonCommand(Activator.getDefault().getDesignClient(), form, VisualFormEditor.REQ_PLACE_BUTTON, new Point(0, 0),
+					snapType));
+			}
+			else if ("Label".equals(nodeType))
+			{
+				commands.add(new AddLabelCommand(Activator.getDefault().getDesignClient(), form, VisualFormEditor.REQ_PLACE_LABEL, null, null));
+			}
+			else if ("Header".equals(nodeType) || "Footer".equals(nodeType))
+			{
+				commands.add(new AddPartsCommand(form, new int[] { "Header".equals(nodeType) ? Part.TITLE_HEADER : Part.TITLE_FOOTER })
+				{
+					@Override
+					protected Part createPart(int partTypeId) throws RepositoryException
+					{
+						Part part = super.createPart(partTypeId);
+						part.setStyleClass("b"); // default theme
+						return part;
+					}
+				});
+				if ("Header".equals(nodeType))
+				{
+					// add header title so we can set header text property
+					commands.add(new MobileAddHeaderTitleCommand(Activator.getDefault().getDesignClient(), form, VisualFormEditor.REQ_PLACE_HEADER_TITLE, null,
+						null));
+				}
+			}
+			else if ("InsetList".equals(nodeType))
+			{
+				commands.add(new AddInsetListCommand(Activator.getDefault().getDesignClient(), form, VisualFormEditor.REQ_PLACE_INSET_LIST, null));
+			}
+			else if ("Bean".equals(nodeType))
+			{
+				commands.add(new AddBeanCommand(Activator.getDefault().getDesignClient(), form, VisualFormEditor.REQ_PLACE_BEAN, null));
+			}
+			else
+			{
+				// check field type
+				boolean setValueListId = true;
+				Integer fieldType;
+				if ("SingleCheckbox".equals(nodeType))
+				{
+					setValueListId = false;
+					fieldType = Integer.valueOf(Field.CHECKS);
+				}
+				else
+				{
+					fieldType = DISPLAY_TYPE_MAPPING.get(nodeType);
+				}
+				if (fieldType != null)
+				{
+					Map<Object, Object> props = new HashMap<Object, Object>();
+					props.put(
+						SetValueCommand.REQUEST_PROPERTY_PREFIX + StaticContentSpecLoader.PROPERTY_DISPLAYTYPE.getPropertyName(),
+						MobilePersistPropertySource.MOBILE_DISPLAY_TYPE_CONTROLLER.getConverter().convertProperty(
+							StaticContentSpecLoader.PROPERTY_DISPLAYTYPE.getPropertyName(), fieldType));
+					// special case: checkboxgroup, set valuelist to -1
+					if (fieldType.intValue() == Field.CHECKS && setValueListId)
+					{
+						props.put(SetValueCommand.REQUEST_PROPERTY_PREFIX + StaticContentSpecLoader.PROPERTY_VALUELISTID.getPropertyName(), Integer.valueOf(-1));
+					}
+					commands.add(new AddFieldCommand(Activator.getDefault().getDesignClient(), form, VisualFormEditor.REQ_PLACE_FIELD, props, null));
+				}
+			}
+		}
+		else if ("nodeMoved".equals(eventType))
+		{
+			element = findElement(json);
+			if (element == null) return null;
+
+			boolean headerElement = parent instanceof Part && PersistUtils.isHeaderPart(((Part)parent).getPartType()) &&
+				element instanceof GraphicalComponent && ComponentFactory.isButton((GraphicalComponent)element);
+			if (headerElement)
+			{
+				// button moved to header
+				addIfNonNull(commands, createPutCustomMobilePropertyCommand((GraphicalComponent)element, IMobileProperties.HEADER_ITEM, Boolean.TRUE));
+				boolean right = "right".equals(zoneName);
+				addIfNonNull(commands,
+					createPutCustomMobilePropertyCommand((GraphicalComponent)element, IMobileProperties.HEADER_RIGHT_BUTTON, right ? Boolean.TRUE : null));
+				addIfNonNull(commands,
+					createPutCustomMobilePropertyCommand((GraphicalComponent)element, IMobileProperties.HEADER_LEFT_BUTTON, right ? null : Boolean.TRUE));
+			}
+			else
+			{
+				// not in header
+				if (element instanceof GraphicalComponent)
+				{
+					addIfNonNull(commands, createPutCustomMobilePropertyCommand((GraphicalComponent)element, IMobileProperties.HEADER_ITEM, null));
+					addIfNonNull(commands, createPutCustomMobilePropertyCommand((GraphicalComponent)element, IMobileProperties.HEADER_RIGHT_BUTTON, null));
+					addIfNonNull(commands, createPutCustomMobilePropertyCommand((GraphicalComponent)element, IMobileProperties.HEADER_LEFT_BUTTON, null));
+				}
+			}
+
+			if (parent instanceof Part && PersistUtils.isFooterPart(((Part)parent).getPartType()) && element instanceof GraphicalComponent)
+			{
+				// element moved to footer
+				addIfNonNull(commands, createPutCustomMobilePropertyCommand((GraphicalComponent)element, IMobileProperties.FOOTER_ITEM, Boolean.TRUE));
+			}
+			else
+			{
+				// not in footer
+				if (element instanceof GraphicalComponent)
+				{
+					addIfNonNull(commands, createPutCustomMobilePropertyCommand((GraphicalComponent)element, IMobileProperties.FOOTER_ITEM, null));
+				}
+			}
+
+			if (!headerElement)
+			{
+				// moved to correct place in content or footer
+				List<Object> elements = new ArrayList<Object>(getElementsForParent(form, parent));
+				// moved within zone, reorder elements
+				elements.remove(element);
+				elements.add(zoneIndex < 0 ? 0 : zoneIndex > elements.size() ? elements.size() : zoneIndex, element);
+				addIfNonNull(commands, applyElementOrder(elements));
+			}
+
+			if (commands.size() > 0)
+			{
+				// fire when updated/restored(undo)
+				toFireChanged = element;
+			}
+		}
+		else if ("propertyChanged".equals(eventType))
+		{
+			element = findElement(json);
+			if (element != null)
+			{
+				for (String key : Utils.iterate(json.keys()))
+				{
+					Object value = json.opt(key);
+					if (value instanceof String && ((String)value).trim().length() > 0)
+					{
+						String prop = null;
+						/* */if ("text".equals(key)) prop = key;
+						else if ("label".equals(key)) prop = "title.text";
+
+						if (prop != null)
+						{
+							addIfNonNull(commands, createSetValueCommand(element, prop, value));
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+			ServoyLog.logWarning("Unexpected model-updated event type '" + eventType + "'", null);
+		}
+
+		if (commands.size() > 0)
+		{
+			final List<Object> createdModels = new ArrayList<Object>(commands.size());
+			Command command = new CompoundCommand();
+			for (Command cmd : commands)
+			{
+				if (cmd instanceof AbstractModelsCommand)
+				{
+					((CompoundCommand)command).add(new RefreshingCommand<AbstractModelsCommand>((AbstractModelsCommand)cmd)
+					{
+						private List<Object> elements;
+
+						@Override
+						public void refresh(boolean haveExecuted)
+						{
+							elements = null;
+							Command reorderCommand = null;
+							if (haveExecuted)
+							{
+								Object[] models = command.getModels();
+								if (models != null && models.length > 0)
+								{
+									createdModels.add(models[0]);
+									Object model = getModelObject(models[0]);
+									elements = new ArrayList<Object>(getElementsForParent(form, parent));
+									elements.remove(model); // new elements is already added
+									elements.add(zoneIndex < 0 ? 0 : zoneIndex > elements.size() ? elements.size() : zoneIndex, model);
+									reorderCommand = applyElementOrder(elements);
+								}
+							}
+							else if (elements != null)
+							{
+								// undo
+								elements.remove(zoneIndex < 0 ? 0 : zoneIndex > elements.size() - 1 ? elements.size() - 1 : zoneIndex);
+								reorderCommand = applyElementOrder(elements);
+								elements = null;
+							}
+							if (reorderCommand != null && reorderCommand.canExecute())
+							{
+								reorderCommand.execute();
+							}
+						}
+					});
+				}
+				else
+				{
+					((CompoundCommand)command).add(cmd);
+				}
+			}
+
+			if (toFireChanged != null)
+			{
+				final Object toFire = toFireChanged;
+				command = new RefreshingCommand<Command>(command)
+				{
+					@Override
+					public void refresh(boolean haveExecuted)
+					{
+						ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, toFire, false);
+					}
+				};
+			}
+
+			getCommandStack().execute(command);
+
+			// commands executed, get the generated id
+			if (createdModels.size() > 0)
+			{
+				return getModelId(createdModels.get(0));
+			}
+			else
+			{
+				selectionProvider.setSelection(element == null ? StructuredSelection.EMPTY : new StructuredSelection(element));
+			}
+		}
+
+		return null;
+	}
+
+	private Object findElement(ServoyJSONObject json)
+	{
+		String servoyuuid = json.optString(ID_KEY);
+		if (servoyuuid.length() > 0)
+		{
+			return getPersistModel(ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(getUUID(servoyuuid)));
+		}
+		return null;
+	}
+
+	/**
+	 * @param elements
+	 */
+	private Command applyElementOrder(List< ? > elements)
+	{
+		CompoundCommand command = null;
+		if (elements.size() > 1)
+		{
+			int d = 0;
+			for (Object elem : elements)
+			{
+				Command setValueCommand = createSetValueCommand(elem, StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), new java.awt.Point(d, d));
+				if (setValueCommand != null)
+				{
+					if (command == null)
+					{
+						command = new CompoundCommand();
+					}
+					command.add(setValueCommand);
+				}
+				d += 100;
+			}
+		}
+
+		return command;
+	}
+
+	private static List< ? > getElementsForParent(Form form, IPersist parent)
+	{
+		if (parent == form)
+		{
+			if (form.getView() == IFormConstants.VIEW_TYPE_TABLE_LOCKED)
+			{
+				return Arrays.asList(MobileListModel.create(form, form));
+			}
+
+			FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
+			return MobileFormGraphicalEditPart.getModelsForRecordView(editingFlattenedSolution, editingFlattenedSolution.getFlattenedForm(form));
+		}
+
+		if (parent instanceof Part && PersistUtils.isFooterPart(((Part)parent).getPartType()))
+		{
+			return new ArrayList<ISupportBounds>(MobileFooterGraphicalEditPart.getFooterModelChildren(Activator.getDefault().getDesignClient(), form));
+		}
+
+		// TODO
+		return Collections.emptyList();
+	}
+
+	static Command createSetValueCommand(Object element, String id, Object value)
+	{
+		IPropertySource propertySource = (IPropertySource)Platform.getAdapterManager().getAdapter(element, IPropertySource.class);
+		if (propertySource == null)
+		{
+			return null;
+		}
+
+		Object oldValue = propertySource.getPropertyValue(id);
+		if (oldValue instanceof ComplexProperty< ? > && !(value instanceof ComplexProperty< ? >))
+		{
+			oldValue = ((ComplexProperty< ? >)oldValue).getValue();
+		}
+
+		if (Utils.equalObjects(value, oldValue))
+		{
+			// nothing changed
+			return null;
+		}
+
+		if (propertySource instanceof RetargetToEditorPersistProperties)
+		{
+			// Make sure the setter sets the value directly and does not use a delegate to a command
+			propertySource = ((RetargetToEditorPersistProperties)propertySource).getDelegate();
+		}
+		return SetValueCommand.createSetvalueCommand(null, propertySource, id, value);
+	}
+
+	static <T> Command createPutCustomMobilePropertyCommand(final AbstractBase element, MobileProperty<T> property, T value)
+	{
+		if (Utils.equalObjects(value, element.getCustomMobileProperty(property.propertyName)))
+		{
+			return null;
+		}
+
+		return new RefreshingCommand<Command>(new PutCustomMobilePropertyCommand<T>(element, property, value))
+		{
+			@Override
+			public void refresh(boolean haveExecuted)
+			{
+				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, element, false);
+			}
+		};
+	}
+
+	@Override
+	public void init(IEditorSite site, IEditorInput input) throws PartInitException
+	{
+		super.init(site, input);
+		site.setSelectionProvider(selectionProvider);
+	}
+
+	@Override
+	public void refreshAllParts()
+	{
+		sendMessage("refreshForm");
+	}
+
+	/**
+	 * @param string
+	 */
+	private void sendMessage(String message)
+	{
+		if (!browser.isDisposed())
+		{
+			browser.execute("$.servoy.handleMessage('" + message + "')");
+		}
+		if (editorMessageHandler != null)
+		{
+			ApplicationServerSingleton.get().getMessageDispatcher().sendMessage(editorMessageHandler.getId(), message, editorMessageHandler);
+		}
+	}
+
+	@Override
+	public void refreshPersists(List<IPersist> persists)
+	{
+		try
+		{
+			if (lastFormDesign == null || !lastFormDesign.equals(getFormDesign()))
+			{
+				// Form design json is regenerated and incrementally applied in js code
+				refreshAllParts();
+			}
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+		}
+	}
+
+	@Override
+	public boolean showPersist(IPersist persist)
+	{
+		return selectNode(persist);
+	}
+
+	@Override
+	public void selectionChanged(IWorkbenchPart part, ISelection selection)
+	{
+		super.selectionChanged(part, selection);
+		if (!selection.isEmpty() && selection instanceof StructuredSelection)
+		{
+			Object first = ((StructuredSelection)selection).getFirstElement();
+			Object model = Platform.getAdapterManager().getAdapter(first, IPersist.class);
+			if (model == null)
+			{
+				model = Platform.getAdapterManager().getAdapter(first, MobileListModel.class);
+			}
+			if (model == null)
+			{
+				model = Platform.getAdapterManager().getAdapter(first, FormElementGroup.class);
+			}
+			if (model == null)
+			{
+				model = first;
+			}
+			selectNode(model);
+		}
+	}
+
+	protected boolean selectNode(Object object)
+	{
+		String id = getModelId(object);
+		if (id != null)
+		{
+			sendMessage("selectNode:" + id);
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public void setFocus()
+	{
+	}
+
+//	var design = {
+//		type:'Design',
+//		zone:null,
+//		children:[
+//		{
+//			type:'Page',
+//			properties:{id:formName},
+//			children:[
+//				{type:'Header',zone:'top'},
+//				{type:'Content',zone:'content',children:[
+//					{type:'Button',properties:{text:'knop123'}}]
+//				},
+//				{type:'Footer',zone:'bottom'}
+//			]
+//			
+//		}]
+//	}
+
+	private GraphicalComponent getHeaderText(Part headerPart)
+	{
+		if (PersistUtils.isHeaderPart(headerPart.getPartType()))
+		{
+			List<IFormElement> partModelChildren = MobileHeaderGraphicalEditPart.getHeaderModelChildren(Activator.getDefault().getDesignClient(),
+				editorPart.getForm());
+
+			Iterator<IFormElement> it = partModelChildren.iterator();
+			while (it.hasNext())
+			{
+				IFormElement el = it.next();
+				if (el instanceof GraphicalComponent && ((GraphicalComponent)el).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName) != null)
+				{
+					return (GraphicalComponent)el;
+				}
+			}
+		}
+
+		return null;
+	}
+
+	private String getFormDesign() throws JSONException, RepositoryException
+	{
+		ServoyJSONArray pages;
+		ServoyJSONObject page;
+		ServoyJSONObject properties;
+		ServoyJSONArray elements;
+		ServoyJSONObject element;
+		ServoyJSONArray content = null;
+
+		ServoyJSONObject design = new ServoyJSONObject(false, false);
+		design.put(TYPE_KEY, "Design");
+		design.put("children", pages = new ServoyJSONArray());
+		pages.put(page = new ServoyJSONObject(false, false));
+		page.put(TYPE_KEY, "Page");
+		page.put(PROPERTIES_KEY, properties = new ServoyJSONObject(false, false));
+		properties.put(ID_KEY, editorPart.getForm().getUUID().toString());
+		properties.put("theme", "d"); // white background
+		page.put("children", elements = new ServoyJSONArray());
+
+		for (Object child : MobileFormGraphicalEditPart.getFormModelChildren(editorPart.getForm()))
+		{
+			element = getChildJson(child);
+			if (element != null)
+			{
+				if (child instanceof Part)
+				{
+					elements.put(element);
+
+					List<IFormElement> partModelChildren = null;
+					if (PersistUtils.isHeaderPart(((Part)child).getPartType()))
+					{
+						partModelChildren = MobileHeaderGraphicalEditPart.getHeaderModelChildren(Activator.getDefault().getDesignClient(), editorPart.getForm());
+
+						GraphicalComponent headerText = getHeaderText((Part)child);
+						// take out header title, this is not a separate element in this form editor
+						if (headerText != null)
+						{
+							partModelChildren.remove(headerText);
+						}
+					}
+					else if (PersistUtils.isFooterPart(((Part)child).getPartType()))
+					{
+						content = createContentIfNull(elements, content); // make sure there is always a content part to drop elements on
+						partModelChildren = MobileFooterGraphicalEditPart.getFooterModelChildren(Activator.getDefault().getDesignClient(), editorPart.getForm());
+					}
+
+					if (partModelChildren != null && partModelChildren.size() > 0)
+					{
+						ServoyJSONArray partChildren = new ServoyJSONArray();
+						element.put("children", partChildren);
+						for (IFormElement partItem : partModelChildren)
+						{
+							ServoyJSONObject childJson = getChildJson(partItem);
+							partChildren.put(childJson);
+						}
+					}
+				}
+				else
+				{
+					content = createContentIfNull(elements, content);
+					content.put(element);
+				}
+			}
+		}
+		content = createContentIfNull(elements, content); // make sure there is always a content part to drop elements on
+
+		return design.toString();
+	}
+
+	private ServoyJSONArray createContentIfNull(ServoyJSONArray elements, ServoyJSONArray cnt) throws JSONException
+	{
+		ServoyJSONArray content = cnt;
+		if (content == null)
+		{
+			// Content zone for body elements
+			ServoyJSONObject contentElement = new ServoyJSONObject(false, false);
+			elements.put(contentElement);
+			contentElement.put(TYPE_KEY, editorPart.getForm().getView() == IFormConstants.VIEW_TYPE_TABLE_LOCKED ? "ListFormContent" : "Content");
+			contentElement.put("zone", "content");
+			contentElement.put("children", content = new ServoyJSONArray());
+			ServoyJSONObject properties = new ServoyJSONObject(false, false);
+			contentElement.put(PROPERTIES_KEY, properties);
+			properties.put(ID_KEY, CONTENT_PREFIX + editorPart.getForm().getUUID().toString());
+		}
+		return content;
+	}
+
+	private Object getModelObject(Object object)
+	{
+		if (object instanceof IPersist)
+		{
+			return getPersistModel((IPersist)object);
+		}
+
+		return object;
+	}
+
+	private String getModelId(Object object)
+	{
+		String prefix = "";
+		UUID uuid = null;
+
+		Object model = getModelObject(object);
+
+		if (model instanceof IPersist)
+		{
+			uuid = ((IPersist)model).getUUID();
+		}
+
+		if (model instanceof FormElementGroup)
+		{
+			Pair<BaseComponent, GraphicalComponent> compWithTitle = getComponentWithTitle((FormElementGroup)model);
+			if (compWithTitle != null)
+			{
+				uuid = compWithTitle.getLeft().getUUID();
+			}
+		}
+		else if (model instanceof Part && PersistUtils.isHeaderPart(((Part)model).getPartType()))
+		{
+			// use header title
+			GraphicalComponent headerText = getHeaderText((Part)model);
+			if (headerText != null)
+			{
+				uuid = headerText.getUUID();
+			}
+			prefix = HEADER_PREFIX;
+		}
+		else if (model instanceof GraphicalComponent && ((GraphicalComponent)model).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName) != null)
+		{
+			prefix = HEADER_PREFIX;
+		}
+		else if (model instanceof Part && PersistUtils.isFooterPart(((Part)model).getPartType()))
+		{
+			prefix = FOOTER_PREFIX;
+		}
+		else if (model instanceof MobileListModel && ((MobileListModel)model).component instanceof Portal)
+		{
+			// inset list
+			uuid = ((MobileListModel)model).component.getUUID();
+		}
+		else if (model instanceof MobileListModel && ((MobileListModel)model).component == null && ((MobileListModel)model).button != null)
+		{
+			uuid = ((MobileListModel)model).button.getUUID();
+		}
+
+		return uuid == null ? null : (prefix + uuid.toString());
+	}
+
+
+	private Object getPersistModel(IPersist persist)
+	{
+		if (persist == null)
+		{
+			return null;
+		}
+
+		if (persist instanceof Portal && ((Portal)persist).isMobileInsetList())
+		{
+			// inset list
+			return MobileListModel.create(editorPart.getForm(), (ISupportChilds)persist);
+		}
+
+		if (persist.getParent() instanceof Portal && ((Portal)persist.getParent()).isMobileInsetList())
+		{
+			// inset list
+			return MobileListModel.create(editorPart.getForm(), persist.getParent());
+		}
+
+		if (persist instanceof AbstractBase &&
+			(((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.LIST_ITEM_IMAGE.propertyName) != null ||
+				((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.LIST_ITEM_BUTTON.propertyName) != null ||
+				((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.LIST_ITEM_SUBTEXT.propertyName) != null || ((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.LIST_ITEM_COUNT.propertyName) != null))
+		{
+			// list form
+			return MobileListModel.create(editorPart.getForm(), editorPart.getForm());
+		}
+
+		if (persist instanceof IFormElement)
+		{
+			String groupid = ((IFormElement)persist).getGroupID();
+			if (groupid != null)
+			{
+				return new FormElementGroup(groupid, ModelUtils.getEditingFlattenedSolution(editorPart.getForm()), editorPart.getForm());
+			}
+		}
+		return persist;
+	}
+
+	public static Part getHeaderPart(GraphicalComponent headerText)
+	{
+		// header title, use header part
+		Form form = (Form)headerText.getAncestor(IRepository.FORMS);
+		for (Part part : Utils.iterate(form.getParts()))
+		{
+			if (PersistUtils.isHeaderPart(part.getPartType()))
+			{
+				return part;
+			}
+		}
+		return null;
+	}
+
+	private ServoyJSONObject getChildJson(Object child) throws JSONException, RepositoryException
+	{
+		ServoyJSONObject element = new ServoyJSONObject(false, false);
+		ServoyJSONObject properties = new ServoyJSONObject(false, false);
+		element.put(PROPERTIES_KEY, properties);
+		IPersist persist = null;
+		String elementType = null;
+
+		if (child instanceof IPersist)
+		{
+			persist = (IPersist)child;
+
+			GraphicalComponent headerText = null;
+			if (persist instanceof GraphicalComponent &&
+				((GraphicalComponent)persist).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName) != null)
+			{
+				headerText = (GraphicalComponent)persist;
+				// header title, use header part
+				persist = getHeaderPart(headerText);
+			}
+
+			if (persist instanceof Part)
+			{
+				int partType = ((Part)persist).getPartType();
+				if (PersistUtils.isHeaderPart(partType))
+				{
+					elementType = "Header";
+					element.put("zone", "top");
+					if (headerText == null)
+					{
+						headerText = getHeaderText((Part)persist);
+						if (headerText == null)
+						{
+							// make sure one always exists, needed to get all props shown for header
+							headerText = MobileAddHeaderTitleCommand.createHeaderTitle(editorPart.getForm());
+						}
+					}
+				}
+				else if (PersistUtils.isFooterPart(partType))
+				{
+					elementType = "Footer";
+					element.put("zone", "bottom");
+				}
+				else
+				{
+					return null;
+				}
+
+				properties.put("position", partType == Part.TITLE_HEADER || partType == Part.TITLE_FOOTER ? "fixed" : "default"); // sticky
+				properties.put("theme", ((Part)persist).getStyleClass());
+				if (PersistUtils.isHeaderPart(partType))
+				{
+					properties.put(ID_KEY, HEADER_PREFIX + headerText.getUUID().toString()); // use headerText element for selection
+					properties.put("text", headerText.getDataProviderID() == null ? headerText.getText() : EMPTY_VALUE);
+					properties.put("servoydataprovider", headerText.getDataProviderID() == null ? EMPTY_VALUE : headerText.getDataProviderID());
+				}
+				else
+				{
+					// Footer
+					properties.put("text", EMPTY_VALUE);
+					properties.put(ID_KEY, FOOTER_PREFIX + persist.getUUID().toString());
+				}
+			}
+			else
+			// Components
+
+			if (persist instanceof GraphicalComponent)
+			{
+				GraphicalComponent gc = (GraphicalComponent)persist;
+				if (ComponentFactory.isButton(gc))
+				{
+					elementType = "Button";
+					properties.put("text", gc.getDataProviderID() == null ? gc.getText() : EMPTY_VALUE);
+					properties.put("icon", gc.getCustomMobileProperty(IMobileProperties.DATA_ICON.propertyName));
+
+					if (gc.getCustomMobileProperty(IMobileProperties.HEADER_ITEM.propertyName) != null)
+					{
+						// header button
+						boolean right = gc.getCustomMobileProperty(IMobileProperties.HEADER_RIGHT_BUTTON.propertyName) != null;
+						element.put("zone", right ? "right" : "left");
+						properties.put("right", Boolean.valueOf(right));
+					}
+				}
+				else
+				{
+					// label
+					elementType = "Label";
+					setLabelProperties((GraphicalComponent)persist, properties);
+				}
+			}
+			else if (persist instanceof Bean)
+			{
+				Bean bean = (Bean)persist;
+				elementType = "Bean";
+				properties.put("name", bean.getName());
+			}
+		}
+		else if (child instanceof FormElementGroup)
+		{
+			// component with title
+			Pair<BaseComponent, GraphicalComponent> compWithTitle = getComponentWithTitle((FormElementGroup)child);
+			if (compWithTitle != null)
+			{
+
+				GraphicalComponent label = compWithTitle.getRight();
+				if (label != null)
+				{
+					if (label.getDataProviderID() == null)
+					{
+						properties.put("servoytitledataprovider", EMPTY_VALUE);
+						properties.put("label", label.getText());
+					}
+					else
+					{
+						properties.put("servoytitledataprovider", label.getDataProviderID());
+						properties.put("label", EMPTY_VALUE);
+					}
+				}
+
+				persist = compWithTitle.getLeft();
+				if (persist instanceof Field)
+				{
+					Field field = (Field)persist;
+
+					for (Entry<String, Integer> mapping : DISPLAY_TYPE_MAPPING.entrySet())
+					{
+						if (mapping.getValue().intValue() == field.getDisplayType())
+						{
+							elementType = mapping.getKey();
+							break;
+						}
+					}
+
+					if (elementType == null)
+					{
+						return null;
+					}
+
+					boolean radios = false;
+					switch (field.getDisplayType())
+					{
+						case Field.COMBOBOX :
+						{
+							ServoyJSONObject comboOptions = new ServoyJSONObject(false, false);
+							comboOptions.put("children", new ServoyJSONArray());
+							properties.put("options", comboOptions);
+							break;
+						}
+
+						case Field.RADIOS :
+							radios = true;
+							properties.put("orientation",
+								IMobileProperties.RADIO_STYLE_HORIZONTAL.equals(field.getCustomMobileProperty(IMobileProperties.RADIO_STYLE.propertyName))
+									? "horizontal" : "vertical");
+							//$FALL-THROUGH$
+
+						case Field.CHECKS :
+						{
+							String customValues = null;
+							if (field.getValuelistID() != 0)
+							{
+								ValueList valuelist = Activator.getDefault().getDesignClient().getFlattenedSolution().getValueList(field.getValuelistID());
+
+								if (valuelist != null && valuelist.getValueListType() == IValueListConstants.CUSTOM_VALUES)
+								{
+									customValues = valuelist.getCustomValues();
+								}
+							}
+
+							if (customValues == null || customValues.trim().length() == 0)
+							{
+								if (radios || field.getValuelistID() != 0)
+								{
+									customValues = "One\nTwo\nThree";
+								}
+								else
+								{
+									// single checkbox
+									customValues = EMPTY_VALUE;
+								}
+							}
+
+							ServoyJSONArray children = new ServoyJSONArray();
+							element.put("children", children);
+
+							StringTokenizer tk = new StringTokenizer(customValues, "\r\n"); //$NON-NLS-1$
+							for (int i = 1; tk.hasMoreTokens(); i++)
+							{
+								String line = tk.nextToken();
+								String[] str = Utils.stringSplit(line, '|', '\\');
+
+								ServoyJSONObject check = new ServoyJSONObject(false, false);
+								children.put(check);
+								check.put(TYPE_KEY, radios ? "RadioButton" : "Checkbox");
+								ServoyJSONObject checkProperties = new ServoyJSONObject(false, false);
+								check.put(PROPERTIES_KEY, checkProperties);
+								checkProperties.put(ID_KEY, "child" + i + '_' + field.getUUID().toString());
+								checkProperties.put("label", str[0]);
+								if (i == 1)
+								{
+									checkProperties.put("checked", "checked");
+									checkProperties.put("servoydataprovider", field.getDataProviderID() == null ? EMPTY_VALUE
+										: ((ISupportDataProviderID)persist).getDataProviderID());
+								}
+
+								checkProperties.put("theme", field.getStyleClass());
+							}
+
+							break;
+						}
+					}
+				}
+				else if (persist instanceof GraphicalComponent && !ComponentFactory.isButton((GraphicalComponent)persist))
+				{
+					elementType = "Label";
+					setLabelProperties((GraphicalComponent)persist, properties);
+				}
+			}
+		}
+		else if (child instanceof MobileListModel)
+		{
+			MobileListModel model = (MobileListModel)child;
+			if (model.component == null)
+			{
+				// form list
+				elementType = "FormList";
+				persist = model.button; // Use button for list form
+			}
+			else
+			{
+				// inset list
+				elementType = "InsetList";
+				persist = model.component; // Portal
+
+				properties.put("headertext", model.header.getDataProviderID() == null ? model.header.getText() : EMPTY_VALUE);
+				properties.put("servoytitledataprovider", model.header.getDataProviderID() == null ? EMPTY_VALUE : model.header.getDataProviderID());
+				properties.put("headertheme", model.header.getStyleClass());
+				properties.put("buttontheme", model.button.getStyleClass());
+				properties.put("servoydataprovider", model.button.getDataProviderID() == null ? EMPTY_VALUE : model.button.getDataProviderID());
+			}
+
+			properties.put("text", model.button.getDataProviderID() == null ? model.button.getText() : EMPTY_VALUE);
+			properties.put("icon", model.button.getCustomMobileProperty(IMobileProperties.DATA_ICON.propertyName));
+			properties.put("countbubble", model.countBubble.getDataProviderID() == null ? EMPTY_VALUE : "10");
+			properties.put("subtext", model.subtext.getDataProviderID() == null ? model.subtext.getText() : EMPTY_VALUE);
+			properties.put("servoysubtextdataprovider", model.subtext.getDataProviderID() == null ? EMPTY_VALUE : model.subtext.getDataProviderID());
+		}
+
+		if (persist == null || elementType == null)
+		{
+			// TODO other
+			return null;
+		}
+
+		element.put(TYPE_KEY, elementType);
+		if (!properties.has(ID_KEY)) properties.put(ID_KEY, persist.getUUID().toString());
+
+		if (persist instanceof IBaseComponent)
+		{
+			properties.put("theme", ((IBaseComponent)persist).getStyleClass());
+		}
+		if (persist instanceof ISupportDataProviderID)
+		{
+			properties.put("servoydataprovider", ((ISupportDataProviderID)persist).getDataProviderID() == null ? EMPTY_VALUE
+				: ((ISupportDataProviderID)persist).getDataProviderID());
+		}
+
+		return element;
+	}
+
+	private static void setLabelProperties(GraphicalComponent labelComp, ServoyJSONObject properties) throws JSONException
+	{
+		properties.put("text", labelComp.getDataProviderID() == null ? labelComp.getText() : EMPTY_VALUE);
+		Object headerSizeProp = labelComp.getCustomMobileProperty(IMobileProperties.HEADER_SIZE.propertyName);
+		if (headerSizeProp != null)
+		{
+			properties.put("labelsize", headerSizeProp);
+		}
+	}
+
+	private Pair<BaseComponent, GraphicalComponent> getComponentWithTitle(FormElementGroup group)
+	{
+		List<IFormElement> formElements = MobileFormLayout.getGroupElements(group);
+		if (formElements.size() == 1 && formElements.get(0) instanceof BaseComponent)
+		{
+			// no label
+			return new Pair<BaseComponent, GraphicalComponent>((BaseComponent)formElements.get(0), null);
+		}
+
+		if (formElements.size() > 1 && formElements.get(0) instanceof GraphicalComponent && formElements.get(1) instanceof BaseComponent)
+		{
+			// label first
+			return new Pair<BaseComponent, GraphicalComponent>((BaseComponent)formElements.get(1), (GraphicalComponent)formElements.get(0));
+		}
+
+		return null;
+	}
+
+	@Override
+	protected DeleteAction createDeleteAction()
+	{
+		return new com.servoy.eclipse.designer.editor.html.actions.DeleteAction(getEditorPart())
+		{
+			@Override
+			public boolean isEnabled()
+			{
+				// Do not delete when user is in editing mode
+				return editorPart.isDesignerContextActive() && super.isEnabled();
+			}
+		};
+	}
+
+	public class EditorMessageHandler implements IMessageHandler
+	{
+		private final String id;
+
+		public EditorMessageHandler(String id)
+		{
+			this.id = id;
+		}
+
+		/**
+		 * @return the id
+		 */
+		public String getId()
+		{
+			return id;
+		}
+
+		@Override
+		public void messageReceived(final String message)
+		{
+			if (message != null)
+			{
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						if (message.startsWith("callbackSelectionChanged:"))
+						{
+							try
+							{
+								callbackSelectionChanged(message.substring("callbackSelectionChanged:".length()));
+							}
+							catch (JSONException e)
+							{
+								ServoyLog.logError(e);
+							}
+						}
+						else if (message.startsWith("callbackEditingStateChanged:"))
+						{
+							callbackEditingStateChanged(Boolean.parseBoolean(message.substring("callbackEditingStateChanged:".length())));
+						}
+						else if (message.startsWith("#"))
+						{
+							// message tagged with id, a response is requested
+							String[] split = message.split(":");
+							String req = message.substring(split[0].length());
+							String response = "error";
+							try
+							{
+								if (req.startsWith("getFormDesign:"))
+								{
+									lastFormDesign = null;
+									try
+									{
+										response = lastFormDesign = getFormDesign();
+									}
+									catch (Exception e)
+									{
+										ServoyLog.logError(e);
+									}
+								}
+							}
+							finally
+							{
+								sendMessage(split[0] + ':' + response);
+							}
+						}
+					}
+				});
+			}
+		}
+	}
+
+}

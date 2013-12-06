@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.designer.editor.mobile;
 
-import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.gef.ui.actions.GEFActionConstants;
 import org.eclipse.jface.action.IMenuManager;
@@ -30,7 +29,7 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditorContextMenuProvide
  * 
  * @author rgansevles
  */
-class MobileVisualFormEditorContextMenuProvider extends BaseVisualFormEditorContextMenuProvider
+public class MobileVisualFormEditorContextMenuProvider extends BaseVisualFormEditorContextMenuProvider
 {
 	/**
 	 * Instantiate a new menu context provider for the specified EditPartViewer and ActionRegistry.
@@ -39,9 +38,9 @@ class MobileVisualFormEditorContextMenuProvider extends BaseVisualFormEditorCont
 	 * @param registry the editor's action registry
 	 * @throws IllegalArgumentException if registry is <tt>null</tt>.
 	 */
-	public MobileVisualFormEditorContextMenuProvider(String id, EditPartViewer viewer, ActionRegistry registry)
+	public MobileVisualFormEditorContextMenuProvider(String id, ActionRegistry registry)
 	{
-		super(id, viewer, registry);
+		super(id, registry);
 	}
 
 	@Override

@@ -36,7 +36,12 @@ public class AddBeanCommand extends BaseFormPlaceElementCommand
 {
 	public AddBeanCommand(IApplication application, Form form, CreateRequest request)
 	{
-		super(application, form, null, request.getType(), null, null, request.getLocation().getSWTPoint(), null, form);
+		this(application, form, request.getType(), request.getLocation().getSWTPoint());
+	}
+
+	public AddBeanCommand(IApplication application, Form form, Object requestType, Point location)
+	{
+		super(application, form, null, requestType, null, null, location, null, form);
 	}
 
 	@Override

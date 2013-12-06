@@ -91,7 +91,7 @@ import com.servoy.j2db.util.Utils;
  */
 
 @SuppressWarnings("nls")
-public abstract class BaseFormPlaceElementCommand extends Command implements ISupportModels
+public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 {
 	protected ISupportChilds parent;
 	protected final IPersist context;

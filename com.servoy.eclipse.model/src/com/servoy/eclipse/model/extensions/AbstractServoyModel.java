@@ -19,6 +19,7 @@ package com.servoy.eclipse.model.extensions;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -122,6 +123,11 @@ public abstract class AbstractServoyModel implements IServoyModel
 		List<ServoyProject> moduleProjects = new ArrayList<ServoyProject>();
 		addFlattenedSolutionModules(moduleProjects);
 		return moduleProjects.toArray(new ServoyProject[moduleProjects.size()]);
+	}
+
+	public boolean isProjectActive(ServoyProject servoyProject)
+	{
+		return Arrays.asList(getModulesOfActiveProject()).contains(servoyProject);
 	}
 
 	/**

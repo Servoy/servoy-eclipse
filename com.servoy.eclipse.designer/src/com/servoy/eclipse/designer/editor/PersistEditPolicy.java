@@ -253,10 +253,13 @@ class PersistEditPolicy extends ComponentEditPolicy
 	@Override
 	protected Command createDeleteCommand(GroupRequest deleteRequest)
 	{
-		Object child = getHost().getModel();
-		if (child instanceof IPersist)
+		if (getHost() instanceof BasePersistGraphicalEditPart && ((BasePersistGraphicalEditPart)getHost()).isDesignerContextActive())
 		{
-			return new FormElementDeleteCommand((IPersist)child);
+			Object child = getHost().getModel();
+			if (child instanceof IPersist)
+			{
+				return new FormElementDeleteCommand((IPersist)child);
+			}
 		}
 		return super.createDeleteCommand(deleteRequest);
 	}

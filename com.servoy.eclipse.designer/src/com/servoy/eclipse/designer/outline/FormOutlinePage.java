@@ -87,11 +87,14 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 		getTreeViewer().setInput(form);
 
 		// when the outline view is reparented to another shell, you cannot use the form editor context menu here
-		MenuManager menuManager = viewer.getContextMenu();
-		if (menuManager != null && menuManager.getMenu() != null && !menuManager.getMenu().isDisposed() &&
-			getTreeViewer().getTree().getShell() == menuManager.getMenu().getParent().getShell())
+		if (viewer != null)
 		{
-			getTreeViewer().getTree().setMenu(menuManager.createContextMenu(getTreeViewer().getTree()));
+			MenuManager menuManager = viewer.getContextMenu();
+			if (menuManager != null && menuManager.getMenu() != null && !menuManager.getMenu().isDisposed() &&
+				getTreeViewer().getTree().getShell() == menuManager.getMenu().getParent().getShell())
+			{
+				getTreeViewer().getTree().setMenu(menuManager.createContextMenu(getTreeViewer().getTree()));
+			}
 		}
 	}
 

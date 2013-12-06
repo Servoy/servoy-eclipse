@@ -42,7 +42,12 @@ public class MobileAddButtonCommand extends BaseFormPlaceElementCommand
 
 	public MobileAddButtonCommand(IApplication application, Form form, CreateRequest request, MobileSnapType snapType)
 	{
-		super(application, form, null, request.getType(), null, null, request.getLocation().getSWTPoint(), null, form);
+		this(application, form, request.getType(), request.getLocation().getSWTPoint(), snapType);
+	}
+
+	public MobileAddButtonCommand(IApplication application, Form form, Object requestType, Point defaultLocation, MobileSnapType snapType)
+	{
+		super(application, form, null, requestType, null, null, defaultLocation, null, form);
 		this.snapType = snapType;
 	}
 

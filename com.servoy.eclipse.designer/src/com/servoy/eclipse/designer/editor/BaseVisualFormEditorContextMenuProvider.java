@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.designer.editor;
 
-import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.gef.ui.actions.GEFActionConstants;
 import org.eclipse.jface.action.IMenuListener;
@@ -35,8 +34,6 @@ import com.servoy.eclipse.designer.editor.commands.DesignerActionFactory;
  */
 public abstract class BaseVisualFormEditorContextMenuProvider extends MenuManager implements IMenuListener
 {
-	private final EditPartViewer viewer;
-
 	/** The editor's action registry. */
 	protected final ActionRegistry actionRegistry;
 
@@ -47,10 +44,9 @@ public abstract class BaseVisualFormEditorContextMenuProvider extends MenuManage
 	 * @param registry the editor's action registry
 	 * @throws IllegalArgumentException if registry is <tt>null</tt>.
 	 */
-	public BaseVisualFormEditorContextMenuProvider(String id, EditPartViewer viewer, ActionRegistry registry)
+	public BaseVisualFormEditorContextMenuProvider(String id, ActionRegistry registry)
 	{
 		super(id, id);
-		this.viewer = viewer;
 		addMenuListener(this);
 		setRemoveAllWhenShown(true);
 		if (registry == null)
@@ -61,23 +57,12 @@ public abstract class BaseVisualFormEditorContextMenuProvider extends MenuManage
 	}
 
 	/**
-	 * Returns the EditPartViewer
-	 * 
-	 * @return the viewer
-	 */
-	protected EditPartViewer getViewer()
-	{
-		return viewer;
-	}
-
-	/**
 	 * @see IMenuListener#menuAboutToShow(IMenuManager)
 	 */
 	public void menuAboutToShow(IMenuManager menu)
 	{
 		buildContextMenu(menu);
 	}
-
 
 	/**
 	 * Called when the context menu is about to show. Actions, whose state is enabled, will appear in the context menu.
@@ -90,6 +75,7 @@ public abstract class BaseVisualFormEditorContextMenuProvider extends MenuManage
 		menu.add(new Separator(GEFActionConstants.GROUP_UNDO));
 		menu.add(new Separator(GEFActionConstants.GROUP_COPY));
 		menu.add(new Separator(DesignerActionFactory.GROUP_ELEMENTS));
+		menu.add(new Separator(DesignerActionFactory.GROUP_REFACTOR));
 		menu.add(new Separator(DesignerActionFactory.GROUP_ACTIONS));
 		menu.add(new Separator(GEFActionConstants.GROUP_REST));
 		menu.add(new Separator(IWorkbenchActionConstants.SAVE_EXT));
@@ -102,6 +88,9 @@ public abstract class BaseVisualFormEditorContextMenuProvider extends MenuManage
 		addContextmenuActions(menu);
 	}
 
+	/**
+	 * @param menu  
+	 */
 	protected void addContextmenuActions(IMenuManager menu)
 	{
 	}

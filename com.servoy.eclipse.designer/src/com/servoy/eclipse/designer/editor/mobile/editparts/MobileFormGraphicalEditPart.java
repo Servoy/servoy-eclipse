@@ -71,8 +71,32 @@ public class MobileFormGraphicalEditPart extends BaseFormGraphicalEditPart imple
 	@Override
 	public List<Object> getModelChildren()
 	{
-		FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(getPersist());
-		Form flattenedForm = editingFlattenedSolution.getFlattenedForm(getPersist());
+		return getFormModelChildren(getPersist());
+	}
+
+	public static List<Object> getModelsForRecordView(FlattenedSolution editingFlattenedSolution, Form flattenedForm)
+	{
+		List<ISupportBounds> elements = MobileFormLayout.getBodyElementsForRecordView(editingFlattenedSolution, flattenedForm);
+		List<Object> models = new ArrayList<Object>(elements.size());
+		for (ISupportBounds element : elements)
+		{
+			if (element instanceof Portal && ((Portal)element).isMobileInsetList())
+			{
+				// inset list
+				models.add(MobileListModel.create(FlattenedForm.getWrappedForm(flattenedForm), ((Portal)element)));
+			}
+			else
+			{
+				models.add(element);
+			}
+		}
+		return models;
+	}
+
+	public static List<Object> getFormModelChildren(Form form)
+	{
+		FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
+		Form flattenedForm = editingFlattenedSolution.getFlattenedForm(form);
 		List<Object> list = new ArrayList<Object>();
 
 		for (Part part : Utils.iterate(flattenedForm.getParts()))
@@ -86,22 +110,11 @@ public class MobileFormGraphicalEditPart extends BaseFormGraphicalEditPart imple
 		if (flattenedForm.getView() == FormController.LOCKED_TABLE_VIEW)
 		{
 			// ignore all other elements, just the list items.
-			list.add(MobileListModel.create(getPersist(), getPersist()));
+			list.add(MobileListModel.create(form, form));
 		}
 		else
 		{
-			for (ISupportBounds element : MobileFormLayout.getBodyElementsForRecordView(editingFlattenedSolution, flattenedForm))
-			{
-				if (element instanceof Portal && ((Portal)element).isMobileInsetList())
-				{
-					// inset list
-					list.add(MobileListModel.create(FlattenedForm.getWrappedForm(flattenedForm), ((Portal)element)));
-				}
-				else
-				{
-					list.add(element);
-				}
-			}
+			list.addAll(getModelsForRecordView(editingFlattenedSolution, flattenedForm));
 		}
 
 		for (Part part : Utils.iterate(flattenedForm.getParts()))

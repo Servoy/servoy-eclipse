@@ -32,6 +32,7 @@ import org.eclipse.gef.commands.CommandStackEvent;
 import org.eclipse.gef.commands.CommandStackEventListener;
 import org.eclipse.gef.commands.CommandStackListener;
 import org.eclipse.gef.ui.actions.ActionRegistry;
+import org.eclipse.gef.ui.parts.GraphicalEditor;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -43,6 +44,7 @@ import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.eclipse.ui.views.properties.IPropertySourceProvider;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IActiveProjectListener;
@@ -50,6 +52,7 @@ import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
+import com.servoy.eclipse.designer.property.UndoablePersistPropertySourceProvider;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -73,6 +76,7 @@ import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
+
 
 /**
  * Multi-page form editor.
@@ -125,10 +129,11 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 			throw new PartInitException(getClass().getName() + " does not support input " + input.getClass() + " of " + input);
 		}
 
-		ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(this);
+		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		servoyModel.addActiveProjectListener(this);
 		super.init(site, input);
 
-		if (projectIsNoLongerActive())
+		if (!servoyModel.isProjectActive(servoyProject))
 		{
 			// editor is being restored but project is not active
 			ServoyLog.logWarning("Closing form editor for " + input.getName() + " because solution " + servoyProject + " is not part of the active solution",
@@ -137,7 +142,15 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 			return;
 		}
 
-		activateEditorContext();
+		Display.getCurrent().asyncExec(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				// part needs to be activated first
+				activateEditorContext();
+			}
+		});
 	}
 
 	/*
@@ -217,7 +230,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 	/**
 	 * @return the graphicaleditor
 	 */
-	public BaseVisualFormEditorDesignPage getGraphicaleditor()
+	public GraphicalEditor getGraphicaleditor()
 	{
 		return graphicaleditor;
 	}
@@ -271,10 +284,14 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 
 			};
 		}
+		if (adapter == IPropertySourceProvider.class)
+		{
+			return new UndoablePersistPropertySourceProvider(this);
+		}
 		Object result = super.getAdapter(adapter);
 		if (result == null && graphicaleditor != null)
 		{
-			return graphicaleditor.getAdapter(adapter);
+			result = graphicaleditor.getAdapter(adapter);
 		}
 		if (result == null && adapter.equals(ActionRegistry.class))
 		{
@@ -297,7 +314,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 
 	public CommandStack getCommandStack()
 	{
-		return graphicaleditor != null ? (CommandStack)graphicaleditor.getAdapter(CommandStack.class) : null;
+		return graphicaleditor != null ? graphicaleditor.getCommandStack() : null;
 	}
 
 	public void commandStackChanged(EventObject event)
@@ -472,7 +489,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 	public void persistChanges(Collection<IPersist> changedPersists)
 	{
 		if (isClosing()) return;
-		if (projectIsNoLongerActive())
+		if (!ServoyModelManager.getServoyModelManager().getServoyModel().isProjectActive(servoyProject))
 		{
 			ServoyLog.logWarning("Closing form editor for " + form.getName() + " because solution " + servoyProject + " is not part of the active solution",
 				null);
@@ -581,7 +598,8 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 					full_refresh = true;
 				}
 			}
-			else if (changed.getTypeID() == IRepository.SOLUTIONS && projectIsNoLongerActive())
+			else if (changed.getTypeID() == IRepository.SOLUTIONS &&
+				!ServoyModelManager.getServoyModelManager().getServoyModel().isProjectActive(servoyProject))
 			{
 				close(false);
 				return;
@@ -601,26 +619,28 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 			// refresh all
 			changedChildren.add(form);
 		}
-		refresh(changedChildren);
-
+		if (changedChildren.size() > 0)
+		{
+			refresh(changedChildren);
+		}
 	}
 
 	public void activeProjectChanged(ServoyProject activeProject)
 	{
-		if (projectIsNoLongerActive())
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().isProjectActive(servoyProject))
 		{
-			close(true);
+			refresh(null);
 		}
 		else
 		{
-			refresh(null);
+			close(true);
 		}
 	}
 
 	public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
 	{
 		// this form might be part of a previous module of the active solution - so check to see if that module is still active
-		if (updateInfo == IActiveProjectListener.MODULES_UPDATED && projectIsNoLongerActive())
+		if (updateInfo == IActiveProjectListener.MODULES_UPDATED && !ServoyModelManager.getServoyModelManager().getServoyModel().isProjectActive(servoyProject))
 		{
 			close(true);
 		}
@@ -629,21 +649,6 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 			// other stuff related to the active project has changed, so refresh the editor
 			refresh(null);
 		}
-	}
-
-	private boolean projectIsNoLongerActive()
-	{
-		ServoyProject[] modules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
-		boolean result = true;
-		for (int i = modules.length - 1; i >= 0; i--)
-		{
-			if (modules[i] == servoyProject)
-			{
-				result = false;
-				break;
-			}
-		}
-		return result;
 	}
 
 	/**

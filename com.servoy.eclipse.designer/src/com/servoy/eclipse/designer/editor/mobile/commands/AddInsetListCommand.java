@@ -26,7 +26,6 @@ import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.designer.editor.commands.BaseFormPlaceElementCommand;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
@@ -47,7 +46,12 @@ public class AddInsetListCommand extends BaseFormPlaceElementCommand
 {
 	public AddInsetListCommand(IApplication application, Form form, CreateRequest request)
 	{
-		super(application, form, null, request.getType(), null, null, request.getLocation().getSWTPoint(), null, form);
+		this(application, form, request.getLocation().getSWTPoint(), request.getLocation().getSWTPoint());
+	}
+
+	public AddInsetListCommand(IApplication application, Form form, Object requestType, Point defaultLocation)
+	{
+		super(application, form, null, requestType, null, null, defaultLocation, null, form);
 	}
 
 	@Override
@@ -71,16 +75,18 @@ public class AddInsetListCommand extends BaseFormPlaceElementCommand
 			portal.setAnchors(IAnchorConstants.ALL);
 
 			// add items for properties
-			MobileListModel model = AddFormListCommand.addlistItems(form, portal, location);
+			IPersist[] listItems = ElementFactory.addFormListItems(form, portal, location);
+			GraphicalComponent button = (GraphicalComponent)listItems[0];
 
 			// add header
 			GraphicalComponent header = ElementFactory.createLabel(portal, null, location);
 			// set labelfor for display in webclient
-			model.button.setName("button" + UUID.randomUUID().toString().replace('-', '_').toLowerCase());
-			header.setLabelFor(model.button.getName());
+			button.setName("button" + UUID.randomUUID().toString().replace('-', '_').toLowerCase()); //$NON-NLS-1$
+			header.setLabelFor(button.getName());
+			header.setText("Header");
 			header.putCustomMobileProperty(IMobileProperties.LIST_ITEM_HEADER.propertyName, Boolean.TRUE);
 			// for debug in developer
-			header.setStyleClass("b"); // default for headers
+			header.setStyleClass("b"); // default for headers //$NON-NLS-1$
 
 			// models is portal
 			return new IPersist[] { portal };

@@ -89,13 +89,13 @@ public class FormGraphicalEditPart extends BaseFormGraphicalEditPart implements 
 		{
 			for (IFormElement o : Utils.iterate(flattenedForm.getFormElementsSortedByFormIndex()))
 			{
-				if (Boolean.TRUE.equals(getViewer().getProperty(BaseVisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED)) && !getPersist().equals(o.getParent()))
+				if (Boolean.TRUE.equals(getViewer().getProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED)) && !getPersist().equals(o.getParent()))
 				{
 					// Hide inherited elements 
 					continue;
 				}
 
-				if (o instanceof ISupportExtendsID && PersistHelper.isOverrideOrphanElement((ISupportExtendsID)o))
+				if (o instanceof ISupportExtendsID && PersistHelper.isOverrideOrphanElement(o))
 				{
 					// skip orphaned overrides
 					continue;

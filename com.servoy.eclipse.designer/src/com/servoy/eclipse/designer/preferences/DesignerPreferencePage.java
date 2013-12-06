@@ -82,6 +82,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	private Button paintPagebreaksCheck;
 	private Button showRulersCheck;
 	private Button marqueeSelectOuterCheck;
+	private Button classicMobileFormeditorCheck;
 	private ColorSelectViewer sameHeightWidthIndicatorColor;
 
 	public void init(IWorkbench workbench)
@@ -96,36 +97,32 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		Composite rootPanel = new Composite(parent, SWT.NONE);
 		rootPanel.setLayout(new GridLayout(1, true));
 
-		Composite copyPastePanel = new Composite(rootPanel, SWT.NONE);
+		Composite optionsPanel = new Composite(rootPanel, SWT.NONE);
+		optionsPanel.setLayout(new GridLayout(1, false));
+
+		classicMobileFormeditorCheck = new Button(optionsPanel, SWT.CHECK);
+		classicMobileFormeditorCheck.setText("Use classic form editor for mobile forms"); //$NON-NLS-1$
+
+		Composite copyPastePanel = new Composite(optionsPanel, SWT.NONE);
 		copyPastePanel.setLayout(new GridLayout(2, false));
 
-		Label copyPasteOffsetLabel = new Label(copyPastePanel, SWT.NONE);
-		copyPasteOffsetLabel.setText("Copy/Paste offset"); //$NON-NLS-1$
+		new Label(copyPastePanel, SWT.NONE).setText("Copy/Paste offset"); //$NON-NLS-1$
 
 		copyPasteOffsetSpinner = new Spinner(copyPastePanel, SWT.BORDER);
 		copyPasteOffsetSpinner.setValues(0, 0, 100, 0, 1, 5);
 
-		Composite selectOptionsPanel = new Composite(rootPanel, SWT.NONE);
-		selectOptionsPanel.setLayout(new GridLayout(1, false));
-		selectOptionsPanel.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
-
-		marqueeSelectOuterCheck = new Button(selectOptionsPanel, SWT.CHECK);
+		marqueeSelectOuterCheck = new Button(optionsPanel, SWT.CHECK);
 		marqueeSelectOuterCheck.setText("Marquee selects only elements fully in lasso"); //$NON-NLS-1$
 
-		Composite rulerMetricsPanel = new Composite(rootPanel, SWT.NONE);
-		rulerMetricsPanel.setLayout(new GridLayout(2, false));
-		rulerMetricsPanel.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
-
-		showRulersCheck = new Button(rulerMetricsPanel, SWT.CHECK);
+		showRulersCheck = new Button(optionsPanel, SWT.CHECK);
 		showRulersCheck.setText("Show rulers"); //$NON-NLS-1$
 		GridData metricsPanelGridData = new GridData(SWT.LEFT, SWT.CENTER, true, true);
 
-		Composite metricsComboPanel = new Composite(rulerMetricsPanel, SWT.NONE);
+		Composite metricsComboPanel = new Composite(optionsPanel, SWT.NONE);
 		metricsComboPanel.setLayout(new GridLayout(2, false));
 		metricsComboPanel.setLayoutData(metricsPanelGridData);
 
-		Label metricsLabel = new Label(metricsComboPanel, SWT.NONE);
-		metricsLabel.setText("Ruler Metrics"); //$NON-NLS-1$
+		new Label(metricsComboPanel, SWT.NONE).setText("Ruler Metrics"); //$NON-NLS-1$
 
 		metricsCombo = new ComboViewer(metricsComboPanel);
 		metricsCombo.setContentProvider(new ArrayContentProvider());
@@ -149,16 +146,14 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		gridColorViewer = new ColorSelectViewer(gridColorPanel, SWT.NONE);
 
-		Label gridColorLabel = new Label(gridColorPanel, SWT.NONE);
-		gridColorLabel.setText("Grid color"); //$NON-NLS-1$
+		new Label(gridColorPanel, SWT.NONE).setText("Grid color"); //$NON-NLS-1$
 
 		Composite gridPointSizePanel = new Composite(grpFeedbackSettings, SWT.NONE);
 		gridPointSizePanel.setLayout(new GridLayout(2, false));
 
 		gridPointSizeSpinner = new Spinner(gridPointSizePanel, SWT.BORDER);
 
-		Label gridPointSizeLabel = new Label(gridPointSizePanel, SWT.NONE);
-		gridPointSizeLabel.setText("Grid point size"); //$NON-NLS-1$
+		new Label(gridPointSizePanel, SWT.NONE).setText("Grid point size"); //$NON-NLS-1$
 
 		Composite gridPointDistancePanel = new Composite(grpFeedbackSettings, SWT.NONE);
 		gridPointDistancePanel.setLayout(new GridLayout(2, false));
@@ -166,8 +161,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		gridSizeSpinner = new Spinner(gridPointDistancePanel, SWT.BORDER);
 		gridSizeSpinner.setValues(0, 3, 100, 0, 5, 20);
 
-		Label gridDefaultLabel = new Label(gridPointDistancePanel, SWT.NONE);
-		gridDefaultLabel.setText("Point distance"); //$NON-NLS-1$
+		new Label(gridPointDistancePanel, SWT.NONE).setText("Point distance"); //$NON-NLS-1$
 
 		alignmentFeedbackCheck = new Button(grpFeedbackSettings, SWT.CHECK);
 		alignmentFeedbackCheck.setText("Alignment Guides"); //$NON-NLS-1$
@@ -177,8 +171,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		alignmentGuidecolorSelectViewer = new ColorSelectViewer(alignementGuideColorPanel, 0);
 
-		Label lblGuideColor = new Label(alignementGuideColorPanel, SWT.NONE);
-		lblGuideColor.setText("Guide color"); //$NON-NLS-1$
+		new Label(alignementGuideColorPanel, SWT.NONE).setText("Guide color"); //$NON-NLS-1$
 
 		anchorFeedbackCheck = new Button(grpFeedbackSettings, SWT.CHECK);
 		anchorFeedbackCheck.setText("Show anchoring feedback"); //$NON-NLS-1$
@@ -199,8 +192,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		sameHeightWidthIndicatorColor = new ColorSelectViewer(sameHeightWidthIndicatorPanel, SWT.NONE);
 
-		Label sameHeightWidthIndicatorColorLabel = new Label(sameHeightWidthIndicatorPanel, SWT.NONE);
-		sameHeightWidthIndicatorColorLabel.setText("Same height/width indicator"); //$NON-NLS-1$
+		new Label(sameHeightWidthIndicatorPanel, SWT.NONE).setText("Same height/width indicator"); //$NON-NLS-1$
 
 		paintPagebreaksCheck = new Button(grpFeedbackSettings, SWT.CHECK);
 		paintPagebreaksCheck.setText("Paint page breaks"); //$NON-NLS-1$
@@ -241,8 +233,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		guideSizeSpinner = new Spinner(guideSizePanel, SWT.BORDER);
 		guideSizeSpinner.setValues(0, 3, 100, 0, 5, 20);
 
-		Label guideSizeLabel = new Label(guideSizePanel, SWT.NONE);
-		guideSizeLabel.setText("Guide size"); //$NON-NLS-1$
+		new Label(guideSizePanel, SWT.NONE).setText("Guide size"); //$NON-NLS-1$
 
 		snapToAlignmentRadio = new Button(grpAlignmentSettings, SWT.RADIO);
 		snapToAlignmentRadio.addSelectionListener(new SelectionAdapter()
@@ -263,8 +254,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		alignmentSmallOffsetSpinner = new Spinner(smallOffsetPanel, SWT.BORDER);
 
-		Label labelSmallOffset = new Label(smallOffsetPanel, SWT.NONE);
-		labelSmallOffset.setText("Small offset"); //$NON-NLS-1$
+		new Label(smallOffsetPanel, SWT.NONE).setText("Small offset"); //$NON-NLS-1$
 
 		Composite indentOffsetPanel = new Composite(alignementGuidesPanel, SWT.NONE);
 		indentOffsetPanel.setLayout(new GridLayout(2, false));
@@ -289,8 +279,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		alignmentThresholdSpinner = new Spinner(snapToGuidePanel, SWT.BORDER);
 
-		Label lblThreshold = new Label(snapToGuidePanel, SWT.NONE);
-		lblThreshold.setText("Snap to Guide Threshold"); //$NON-NLS-1$
+		new Label(snapToGuidePanel, SWT.NONE).setText("Snap to Guide Threshold"); //$NON-NLS-1$
 
 		Composite largeOffsetPanel = new Composite(alignementGuidesPanel, SWT.NONE);
 		largeOffsetPanel.setLayout(new GridLayout(2, false));
@@ -330,7 +319,6 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		largeStepSizeSpinner = new Spinner(largeStepPanel, SWT.BORDER);
 		largeStepSizeSpinner.setValues(0, 1, 100, 0, 1, 5);
-
 
 		initializeFields();
 		setEnabledState();
@@ -388,6 +376,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		paintPagebreaksCheck.setSelection(prefs.getPaintPageBreaks());
 		showRulersCheck.setSelection(prefs.getShowRulers());
 		marqueeSelectOuterCheck.setSelection(prefs.getMarqueeSelectOuter());
+		classicMobileFormeditorCheck.setSelection(prefs.getClassicFormEditorInMobile());
 	}
 
 	@Override
@@ -417,6 +406,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		prefs.setPaintPageBreaks(paintPagebreaksCheck.getSelection());
 		prefs.setShowRulers(showRulersCheck.getSelection());
 		prefs.setMarqueeSelectOuter(marqueeSelectOuterCheck.getSelection());
+		prefs.setClassicFormEditorInMobile(classicMobileFormeditorCheck.getSelection());
 
 		prefs.save();
 
@@ -455,6 +445,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		paintPagebreaksCheck.setSelection(DesignerPreferences.PAINT_PAGEBREAKS_DEFAULT);
 		showRulersCheck.setSelection(DesignerPreferences.SHOW_RULERS_DEFAULT);
 		marqueeSelectOuterCheck.setSelection(DesignerPreferences.MARQUEE_SELECT_OUTER_DEFAULT);
+		classicMobileFormeditorCheck.setSelection(DesignerPreferences.CLASSIC_FORM_EDITOR_MOBILE_DEFAULT);
 
 		setEnabledState();
 		super.performDefaults();

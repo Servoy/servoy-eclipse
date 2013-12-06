@@ -25,7 +25,6 @@ import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.views.properties.IPropertySource;
 
-import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.designer.editor.commands.BaseFormPlaceElementCommand;
@@ -36,9 +35,8 @@ import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.GraphicalComponent;
-import com.servoy.j2db.persistence.IAnchorConstants;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.util.UUID;
+import com.servoy.j2db.util.Pair;
 
 /**
  * Command to add a text input with label to the form
@@ -50,7 +48,12 @@ public class AddFieldCommand extends BaseFormPlaceElementCommand
 {
 	public AddFieldCommand(IApplication application, Form form, CreateRequest request)
 	{
-		super(application, form, null, request.getType(), request.getExtendedData(), null, request.getLocation().getSWTPoint(), null, form);
+		this(application, form, request.getType(), request.getExtendedData(), request.getLocation().getSWTPoint());
+	}
+
+	public AddFieldCommand(IApplication application, Form form, Object requestType, Map<Object, Object> objectProperties, Point defaultLocation)
+	{
+		super(application, form, null, requestType, objectProperties, null, defaultLocation, null, form);
 	}
 
 	@Override
@@ -58,21 +61,9 @@ public class AddFieldCommand extends BaseFormPlaceElementCommand
 	{
 		if (parent instanceof Form)
 		{
-			Form form = (Form)parent;
-
-			// create a label and a text field in a group
-			String groupID = UUID.randomUUID().toString();
-			Point loc = location == null ? new Point(0, 0) : location;
-			GraphicalComponent label = ElementFactory.createLabel(form, "Title", loc);
-			label.setGroupID(groupID);
-			label.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST | IAnchorConstants.NORTH);
-			label.putCustomMobileProperty(IMobileProperties.COMPONENT_TITLE.propertyName, Boolean.TRUE);
-			Field field = ElementFactory.createField(form, null, new Point(loc.x, loc.y + 1)); // enforce order by y-pos
-			field.setGroupID(groupID);
-			field.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST | IAnchorConstants.NORTH);
-			if (objectProperties != null && objectProperties.size() > 0) setProperiesOnModel(field, objectProperties);
-
-			return new Object[] { new FormElementGroup(groupID, ModelUtils.getEditingFlattenedSolution(parent), form) };
+			Pair<Field, GraphicalComponent> pair = ElementFactory.createMobileFieldWithTitle((Form)parent, location);
+			if (objectProperties != null && objectProperties.size() > 0) setProperiesOnModel(pair.getLeft(), objectProperties);
+			return new Object[] { new FormElementGroup(pair.getLeft().getGroupID(), ModelUtils.getEditingFlattenedSolution(parent), (Form)parent) };
 		}
 
 		return null;

@@ -26,8 +26,11 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 
 import com.servoy.base.persistence.IMobileProperties;
+import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditorDesignPage;
+import com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditorHtmlDesignPage;
 import com.servoy.eclipse.ui.editors.ITabbedEditor;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 
@@ -118,7 +121,16 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 	@Override
 	protected BaseVisualFormEditorDesignPage createGraphicaleditor()
 	{
-		return isMobile() ? new MobileVisualFormEditorDesignPage(this) : new VisualFormEditorDesignPage(this);
+		Activator.getDefault().getDesignClient().getFlattenedSolution(); // enforce loading of internal style
+		if (isMobile())
+		{
+			if (new DesignerPreferences().getClassicFormEditorInMobile())
+			{
+				return new MobileVisualFormEditorDesignPage(this);
+			}
+			return new MobileVisualFormEditorHtmlDesignPage(this);
+		}
+		return new VisualFormEditorDesignPage(this);
 	}
 
 	@Override

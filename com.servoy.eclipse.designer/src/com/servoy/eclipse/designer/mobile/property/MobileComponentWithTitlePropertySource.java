@@ -17,11 +17,13 @@
 
 package com.servoy.eclipse.designer.mobile.property;
 
+import java.awt.Point;
 import java.util.Arrays;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 
 import com.servoy.base.persistence.IMobileProperties;
+import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.IModelSavePropertySource;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.RetargetingPropertySource;
@@ -147,10 +149,31 @@ public class MobileComponentWithTitlePropertySource extends RetargetingPropertyS
 	@Override
 	public void setPropertyValue(Object id, Object value)
 	{
-		super.setPropertyValue(id, value);
-		if ("location".equals(id))
+		if (StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(id))
 		{
-			super.setPropertyValue("title.location", value);
+			// move title location as well, relative to component move
+			Object oldValue = getPropertyValue(id);
+			Point oldLoc = null;
+			if (oldValue instanceof ComplexProperty< ? >)
+			{
+				oldLoc = (Point)((ComplexProperty)oldValue).getValue();
+			}
+
+			super.setPropertyValue(id, value);
+
+			Object titeValue = getPropertyValue("title.location");
+			Point oldTitleLoc = null;
+			if (titeValue instanceof ComplexProperty< ? >)
+			{
+				oldTitleLoc = (Point)((ComplexProperty)titeValue).getValue();
+			}
+			Point newLoc = (Point)value;
+			super.setPropertyValue("title.location", oldTitleLoc == null || oldLoc == null || newLoc == null ? value : new Point(oldTitleLoc.x + newLoc.x -
+				oldLoc.x, oldTitleLoc.y + newLoc.y - oldLoc.y));
+		}
+		else
+		{
+			super.setPropertyValue(id, value);
 		}
 	}
 }

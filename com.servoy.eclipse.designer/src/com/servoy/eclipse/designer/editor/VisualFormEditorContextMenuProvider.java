@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.designer.editor;
 
-import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.gef.ui.actions.GEFActionConstants;
 import org.eclipse.jface.action.IMenuManager;
@@ -38,9 +37,9 @@ class VisualFormEditorContextMenuProvider extends BaseVisualFormEditorContextMen
 	 * @param registry the editor's action registry
 	 * @throws IllegalArgumentException if registry is <tt>null</tt>.
 	 */
-	public VisualFormEditorContextMenuProvider(String id, EditPartViewer viewer, ActionRegistry registry)
+	public VisualFormEditorContextMenuProvider(String id, ActionRegistry registry)
 	{
-		super(id, viewer, registry);
+		super(id, registry);
 	}
 
 	@Override

@@ -2199,23 +2199,27 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		PropertyDescriptorWrapper beanPropertyDescriptor = getBeansProperties().get(id);
 		if (beanPropertyDescriptor != null)
 		{
+			boolean changed = false;
 			try
 			{
 				if (createOverrideElementIfNeeded())
 				{
 					beanPropertyDescriptor = getBeansProperties().get(id);
+					changed = true;
 				}
 				boolean isInheritedValue = (value == null && persistContext.getPersist() instanceof ISupportExtendsID &&
 					beanPropertyDescriptor.valueObject == persistContext.getPersist() &&
 					PersistHelper.getSuperPersist((ISupportExtendsID)persistContext.getPersist()) != null && ((AbstractBase)PersistHelper.getSuperPersist((ISupportExtendsID)persistContext.getPersist())).getProperty((String)id) != null);
 				if (beanPropertyDescriptor.valueObject instanceof AbstractBase && value == null && !isInheritedValue)
 				{
+					changed |= (((AbstractBase)beanPropertyDescriptor.valueObject).getProperty((String)id) != null);
 					((AbstractBase)beanPropertyDescriptor.valueObject).clearProperty((String)id);
 				}
 				else if ("name".equals(id) && beanPropertyDescriptor.valueObject instanceof ISupportUpdateableName)
 				{
 					if (value instanceof String || value == null)
 					{
+						changed |= !Utils.equalObjects(value, ((ISupportUpdateableName)beanPropertyDescriptor.valueObject).getName());
 						((ISupportUpdateableName)beanPropertyDescriptor.valueObject).updateName(
 							ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), (String)value);
 					}
@@ -2228,6 +2232,9 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				}
 				else
 				{
+					changed |= !Utils.equalObjects(value,
+						beanPropertyDescriptor.propertyDescriptor.getReadMethod().invoke(beanPropertyDescriptor.valueObject, (Object[])null));
+
 					beanPropertyDescriptor.propertyDescriptor.getWriteMethod().invoke(beanPropertyDescriptor.valueObject, new Object[] { value });
 					if ("i18nDataSource".equals(id))
 					{
@@ -2238,6 +2245,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				}
 				if (persistContext.getPersist() instanceof Bean)
 				{
+					changed = true;
 					if (beanPropertyDescriptor.valueObject == persistContext.getPersist())
 					{
 						// size, location and name are set on persist, not on bean instance
@@ -2257,8 +2265,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					}
 				}
 
-
-				if (id.equals("textOrientation"))
+				if (changed && id.equals("textOrientation"))
 				{
 					Display.getDefault().asyncExec(new Runnable()
 					{
@@ -2277,15 +2284,18 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				MessageDialog.openError(Display.getDefault().getActiveShell(), "Could not update property", e.getMessage());
 			}
 
-			if ("groupID".equals(id))
+			if (changed)
 			{
-				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persistContext.getPersist().getParent(), true);
-			}
-			else
-			{
-				// fire persist change recursively if the style (or other ui related property) is changed
-				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persistContext.getPersist(),
-					"styleName".equals(id) || "extendsID".equals(id));
+				if ("groupID".equals(id))
+				{
+					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persistContext.getPersist().getParent(), true);
+				}
+				else
+				{
+					// fire persist change recursively if the style (or other ui related property) is changed
+					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persistContext.getPersist(),
+						"styleName".equals(id) || "extendsID".equals(id));
+				}
 			}
 		}
 	}

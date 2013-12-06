@@ -238,7 +238,8 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 			}
 			if (context == null)
 			{
-				context = persist;
+				IPersist form = persist.getAncestor(IRepository.FORMS);
+				context = form == null ? persist : form;
 			}
 			else
 			{

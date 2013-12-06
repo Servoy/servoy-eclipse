@@ -45,6 +45,7 @@ import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RepositoryHelper;
@@ -75,6 +76,31 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		public Integer getProperty(MobilePersistPropertySource propertySource)
 		{
 			return (Integer)((AbstractBase)propertySource.getPersist()).getCustomMobileProperty(IMobileProperties.HEADER_SIZE.propertyName);
+		}
+	};
+
+	public static final String ALIGN_RIGHT_NAME = "alignRight"; //$NON-NLS-1$
+	public static final PropertyController<Boolean, Boolean> ALIGN_RIGHT_CONTROLLER = new DelegatePropertySetterController<Boolean, MobilePersistPropertySource>(
+		new CheckboxPropertyDescriptor(ALIGN_RIGHT_NAME, ALIGN_RIGHT_NAME), ALIGN_RIGHT_NAME)
+	{
+		public void setProperty(MobilePersistPropertySource propertySource, Boolean value)
+		{
+			if (Boolean.TRUE.equals(value))
+			{
+				((AbstractBase)propertySource.getPersist()).putCustomMobileProperty(IMobileProperties.HEADER_RIGHT_BUTTON.propertyName, Boolean.TRUE);
+				((AbstractBase)propertySource.getPersist()).putCustomMobileProperty(IMobileProperties.HEADER_LEFT_BUTTON.propertyName, null);
+			}
+			else
+			{
+				((AbstractBase)propertySource.getPersist()).putCustomMobileProperty(IMobileProperties.HEADER_RIGHT_BUTTON.propertyName, null);
+				((AbstractBase)propertySource.getPersist()).putCustomMobileProperty(IMobileProperties.HEADER_LEFT_BUTTON.propertyName, Boolean.TRUE);
+			}
+			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, propertySource.getPersist(), false);
+		}
+
+		public Boolean getProperty(MobilePersistPropertySource propertySource)
+		{
+			return Boolean.valueOf(((AbstractBase)propertySource.getPersist()).getCustomMobileProperty(IMobileProperties.HEADER_RIGHT_BUTTON.propertyName) != null);
 		}
 	};
 
@@ -150,27 +176,57 @@ public class MobilePersistPropertySource extends PersistPropertySource
 	public static final PropertyController<Boolean, Boolean> MOBILE_STICKY_PART_CONTROLLER = new DelegatePropertySetterController<Boolean, MobilePersistPropertySource>(
 		new CheckboxPropertyDescriptor(STICKY_PART_NAME, STICKY_PART_NAME), STICKY_PART_NAME)
 	{
+		private Part getPart(MobilePersistPropertySource propertySource)
+		{
+			if (propertySource.getPersist() instanceof Part)
+			{
+				return (Part)propertySource.getPersist();
+			}
+			if (propertySource.getPersist() instanceof GraphicalComponent &&
+				((GraphicalComponent)propertySource.getPersist()).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName) != null)
+			{
+				// header text, find header part
+				Form form = (Form)propertySource.getContext().getAncestor(IRepository.FORMS);
+				// TODO: check flattened form?
+				for (Part part : Utils.iterate(form.getParts()))
+				{
+					if (PersistUtils.isHeaderPart(part.getPartType()))
+					{
+						return part;
+					}
+				}
+			}
+			return null;
+		}
+
 		public void setProperty(MobilePersistPropertySource propertySource, Boolean value)
 		{
-			Part part = (Part)propertySource.getPersist();
-			int partType = part.getPartType();
-			if (value.booleanValue())
+			Part part = getPart(propertySource);
+			if (part != null)
 			{
-				if (partType == IPartConstants.HEADER) part.setPartType(IPartConstants.TITLE_HEADER);
-				else if (partType == IPartConstants.FOOTER) part.setPartType(IPartConstants.TITLE_FOOTER);
-			}
-			else
-			{
-				if (partType == IPartConstants.TITLE_HEADER) part.setPartType(IPartConstants.HEADER);
-				else if (partType == IPartConstants.TITLE_FOOTER) part.setPartType(IPartConstants.FOOTER);
-			}
+				int partType = part.getPartType();
+				if (value.booleanValue())
+				{
+					if (partType == IPartConstants.HEADER) part.setPartType(IPartConstants.TITLE_HEADER);
+					else if (partType == IPartConstants.FOOTER) part.setPartType(IPartConstants.TITLE_FOOTER);
+				}
+				else
+				{
+					if (partType == IPartConstants.TITLE_HEADER) part.setPartType(IPartConstants.HEADER);
+					else if (partType == IPartConstants.TITLE_FOOTER) part.setPartType(IPartConstants.FOOTER);
+				}
 
-			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, propertySource.getPersist(), false);
+				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, part, false);
+			}
 		}
 
 		public Boolean getProperty(MobilePersistPropertySource propertySource)
 		{
-			Part part = (Part)propertySource.getPersist();
+			Part part = getPart(propertySource);
+			if (part == null)
+			{
+				return Boolean.FALSE;
+			}
 			int partType = part.getPartType();
 			return Boolean.valueOf(partType == IPartConstants.TITLE_HEADER || partType == IPartConstants.TITLE_FOOTER);
 		}
@@ -284,14 +340,26 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		if (GraphicalComponent.class == clazz && isButton(getPersist()))
 		{
 			// button
+			GraphicalComponent gc = (GraphicalComponent)getPersist();
+			if (gc.getCustomMobileProperty(IMobileProperties.HEADER_ITEM.propertyName) != null)
+			{
+				return new String[] { ALIGN_RIGHT_NAME, IMobileProperties.DATA_ICON.propertyName };
+			}
 			return new String[] { IMobileProperties.DATA_ICON.propertyName };
 		}
 
-		if (GraphicalComponent.class == clazz && !isButton(getPersist()) &&
-			((AbstractBase)getPersist()).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName) == null)
+		if (GraphicalComponent.class == clazz && !isButton(getPersist()))
 		{
-			// script label
-			return new String[] { IMobileProperties.HEADER_SIZE.propertyName };
+			if (((AbstractBase)getPersist()).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName) == null)
+			{
+				// script label
+				return new String[] { IMobileProperties.HEADER_SIZE.propertyName };
+			}
+			else
+			{
+				// header text, add header properties
+				return new String[] { STICKY_PART_NAME };
+			}
 		}
 
 		if (Field.class == clazz)
@@ -343,6 +411,11 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		if (name.equals(STICKY_PART_NAME))
 		{
 			return MOBILE_STICKY_PART_CONTROLLER;
+		}
+
+		if (name.equals(ALIGN_RIGHT_NAME))
+		{
+			return ALIGN_RIGHT_CONTROLLER;
 		}
 
 		return super.getPropertiesPropertyDescriptor(propertySource, id, displayName, name, flattenedEditingSolution, form);

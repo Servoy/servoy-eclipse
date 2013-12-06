@@ -17,8 +17,17 @@
 
 package com.servoy.eclipse.designer.editor;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.draw2d.ColorConstants;
@@ -28,41 +37,50 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.RootEditPart;
 import org.eclipse.gef.SnapToGrid;
+import org.eclipse.gef.palette.PaletteRoot;
 import org.eclipse.gef.rulers.RulerProvider;
+import org.eclipse.gef.ui.actions.ActionRegistry;
+import org.eclipse.gef.ui.actions.DeleteAction;
 import org.eclipse.gef.ui.actions.GEFActionConstants;
+import org.eclipse.gef.ui.actions.SelectionAction;
+import org.eclipse.gef.ui.palette.FlyoutPaletteComposite;
+import org.eclipse.gef.ui.palette.FlyoutPaletteComposite.FlyoutPreferences;
 import org.eclipse.gef.ui.palette.PaletteCustomizer;
 import org.eclipse.gef.ui.parts.ScrollingGraphicalViewer;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.CoolBarManager;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.action.ToolBarContributionItem;
+import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.CoolBar;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.core.Activator;
-import com.servoy.eclipse.designer.actions.AlignmentSortPartsAction;
-import com.servoy.eclipse.designer.actions.DistributeAction;
-import com.servoy.eclipse.designer.actions.DistributeRequest;
+import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.designer.actions.SelectFeedbackmodeAction;
 import com.servoy.eclipse.designer.actions.SelectSnapmodeAction;
+import com.servoy.eclipse.designer.actions.ViewerTogglePropertyAction;
 import com.servoy.eclipse.designer.actions.ZOrderAction;
 import com.servoy.eclipse.designer.dnd.FormElementTransferDropTarget;
-import com.servoy.eclipse.designer.editor.commands.AddAccordionPaneAction;
-import com.servoy.eclipse.designer.editor.commands.AddFieldAction;
-import com.servoy.eclipse.designer.editor.commands.AddMediaAction;
-import com.servoy.eclipse.designer.editor.commands.AddPortalAction;
-import com.servoy.eclipse.designer.editor.commands.AddSplitpaneAction;
-import com.servoy.eclipse.designer.editor.commands.AddTabpanelAction;
 import com.servoy.eclipse.designer.editor.commands.DesignerActionFactory;
-import com.servoy.eclipse.designer.editor.commands.GroupAction;
-import com.servoy.eclipse.designer.editor.commands.SameHeightAction;
-import com.servoy.eclipse.designer.editor.commands.SameWidthAction;
-import com.servoy.eclipse.designer.editor.commands.SaveAsTemplateAction;
-import com.servoy.eclipse.designer.editor.commands.SetTabSequenceAction;
-import com.servoy.eclipse.designer.editor.commands.UngroupAction;
 import com.servoy.eclipse.designer.editor.palette.PaletteItemTransferDropTargetListener;
 import com.servoy.eclipse.designer.editor.palette.VisualFormEditorPaletteCustomizer;
 import com.servoy.eclipse.designer.editor.palette.VisualFormEditorPaletteFactory;
@@ -70,7 +88,12 @@ import com.servoy.eclipse.designer.editor.rulers.FormRulerComposite;
 import com.servoy.eclipse.designer.editor.rulers.RulerManager;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences.CoolbarLayout;
+import com.servoy.eclipse.ui.property.MobileListModel;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.Part;
 
@@ -79,8 +102,13 @@ import com.servoy.j2db.persistence.Part;
  * 
  * @author rgansevles
  */
-public class VisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage
+public class VisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPage
 {
+	/**
+	 * A viewer property indicating whether inherited elements are hidden. The value must  be a Boolean.
+	 */
+	public static final String PROPERTY_HIDE_INHERITED = "Hide.inherited"; //$NON-NLS-1$
+
 	public static final String COOLBAR_ACTIONS = "Actions";
 	public static final String COOLBAR_ALIGN = "Alignment";
 	public static final String COOLBAR_DISTRIBUTE = "Distribution";
@@ -90,8 +118,40 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage
 	public static final String COOLBAR_LAYERING = "Layering";
 	public static final String COOLBAR_GROUPING = "Grouping";
 
+	private IPaletteFactory paletteFactory;
+	private PaletteRoot paletteModel;
+	private CoolBarManager coolBarManager;
+	private List<String> hiddenBars;
+	private MenuManager toolbarMenuManager;
+	private final Map<String, List<IAction>> toolBarActions = new LinkedHashMap<String, List<IAction>>();
+	private final Map<String, ToolBarContributionItem> toolbarContributionItems = new HashMap<String, ToolBarContributionItem>();
+	private final Map<String, IAction> toolMenuBarActions = new HashMap<String, IAction>();
+
 	private RulerManager rulerManager;
 	private FormRulerComposite rulerComposite;
+
+	private final ISelectionProvider provider = new ISelectionProvider()
+	{
+		private ISelection selection;
+
+		public void setSelection(ISelection selection)
+		{
+			this.selection = selection;
+		}
+
+		public void removeSelectionChangedListener(ISelectionChangedListener listener)
+		{
+		}
+
+		public ISelection getSelection()
+		{
+			return selection;
+		}
+
+		public void addSelectionChangedListener(ISelectionChangedListener listener)
+		{
+		}
+	};
 
 	protected final IPreferenceChangeListener preferenceChangeListener = new IPreferenceChangeListener()
 	{
@@ -123,7 +183,383 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage
 	public VisualFormEditorDesignPage(BaseVisualFormEditor editorPart)
 	{
 		super(editorPart);
+		FormSelectionTool selectionTool = new FormSelectionTool(editorPart);
+		getEditDomain().setDefaultTool(selectionTool);
+		getEditDomain().setActiveTool(selectionTool);
 		com.servoy.eclipse.ui.Activator.getDefault().getEclipsePreferences().addPreferenceChangeListener(preferenceChangeListener);
+	}
+
+	@Override
+	protected DeleteAction createDeleteAction()
+	{
+		return new DeleteAction((IWorkbenchPart)editorPart)
+		{
+			@Override
+			protected boolean calculateEnabled()
+			{
+				return !DesignerUtil.containsInheritedElement(getSelectedObjects()) && super.calculateEnabled();
+			}
+		};
+	}
+
+	@Override
+	protected ISelectionListener createSelectionChangedHandler()
+	{
+		return new ISelectionListener()
+		{
+			@Override
+			public void selectionChanged(IWorkbenchPart part, ISelection selection)
+			{
+				List<EditPart> editParts = new ArrayList<EditPart>();
+				boolean persistContext = !selection.isEmpty();
+
+				// set selection if persists are selected
+				if (selection instanceof IStructuredSelection)
+				{
+					Iterator<Object> iterator = ((IStructuredSelection)selection).iterator();
+					while (iterator.hasNext())
+					{
+						Object sel = iterator.next();
+						if (!(sel instanceof PersistContext) || (((PersistContext)sel).getPersist() instanceof Part)) persistContext = false;
+						Object model = Platform.getAdapterManager().getAdapter(sel, IPersist.class);
+						if (model == null)
+						{
+							model = Platform.getAdapterManager().getAdapter(sel, FormElementGroup.class);
+						}
+						if (model == null)
+						{
+							model = Platform.getAdapterManager().getAdapter(sel, MobileListModel.class);
+						}
+						if (model != null)
+						{
+							// if we have an editpart for the model, it is on the form
+							EditPart ep = (EditPart)getGraphicalViewer().getEditPartRegistry().get(model);
+							if (ep != null)
+							{
+								editParts.add(ep);
+							}
+						}
+					}
+				}
+
+				// If not the active editor, ignore selection changed.
+				if (editorPart.equals(getSite().getPage().getActiveEditor()))
+				{
+					List actions = getSelectionActions();
+					if (persistContext)
+					{
+						provider.setSelection(new StructuredSelection(editParts));
+						ActionRegistry registry = getActionRegistry();
+						Iterator iter = actions.iterator();
+						while (iter.hasNext())
+						{
+							IAction action = registry.getAction(iter.next());
+							if (action instanceof SelectionAction) ((SelectionAction)action).setSelectionProvider(provider);
+						}
+					}
+					updateActions(actions);
+					if (persistContext)
+					{
+						ActionRegistry registry = getActionRegistry();
+						Iterator iter = actions.iterator();
+						while (iter.hasNext())
+						{
+							IAction action = registry.getAction(iter.next());
+							if (action instanceof SelectionAction) ((SelectionAction)action).setSelectionProvider(null);
+						}
+					}
+				}
+
+				if (editParts.size() > 0)
+				{
+					StructuredSelection editpartSelection = new StructuredSelection(editParts);
+					if (!editpartSelection.equals(getGraphicalViewer().getSelection()))
+					{
+						getGraphicalViewer().setSelection(editpartSelection);
+					}
+					// reveal the last element, otherwise you have jumpy behavior when in form designer via ctl-click element 2 is 
+					// selected whilst selected element 1 is not visible.
+					if (getGraphicalViewer().getControl() != null && !getGraphicalViewer().getControl().isDisposed()) getGraphicalViewer().reveal(
+						editParts.get(editParts.size() - 1));
+				}
+			}
+		};
+	}
+
+	protected void saveCoolbarLayout()
+	{
+		coolBarManager.update(false);
+		CoolBar coolBar = coolBarManager.getControl();
+		IContributionItem[] items = coolBarManager.getItems();
+		String[] ids = new String[items.length];
+		for (int i = 0; i < items.length; i++)
+		{
+			ids[i] = items[i].getId();
+		}
+		new DesignerPreferences().saveCoolbarLayout(new CoolbarLayout(coolBar.getItemOrder(), coolBar.getWrapIndices(), coolBar.getItemSizes(),
+			hiddenBars.toArray(new String[hiddenBars.size()]), ids));
+	}
+
+	protected MenuManager getToolbarMenuManager()
+	{
+		if (toolbarMenuManager == null)
+		{
+			toolbarMenuManager = createToolbarMenuManager();
+		}
+		return toolbarMenuManager;
+	}
+
+	protected MenuManager createToolbarMenuManager()
+	{
+		MenuManager menuManager = new MenuManager();
+		menuManager.add(new Action("reset")
+		{
+			@Override
+			public void run()
+			{
+				new DesignerPreferences().saveCoolbarLayout(null);
+			}
+		});
+		menuManager.add(new Separator("bars"));
+		return menuManager;
+	}
+
+	protected IAction createCheckBarAction(final String bar)
+	{
+		Action action = new Action(bar, IAction.AS_CHECK_BOX)
+		{
+			@Override
+			public void run()
+			{
+				if (hiddenBars.remove(bar))
+				{
+					createContributionItem(bar);
+				}
+				else
+				{
+					hiddenBars.add(bar);
+					disposeContributionItem(bar);
+				}
+				saveCoolbarLayout();
+			}
+		};
+		toolMenuBarActions.put(bar, action);
+		return action;
+	}
+
+	private void createContributionItem(final String bar)
+	{
+		if (!toolbarContributionItems.containsKey(bar))
+		{
+			ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
+			ToolBarContributionItem item = new ToolBarContributionItem(toolBarManager, bar);
+			coolBarManager.add(item);
+
+			for (IAction action : toolBarActions.get(bar))
+			{
+				toolBarManager.add(action);
+			}
+
+			toolbarContributionItems.put(bar, item);
+		}
+	}
+
+	private void disposeContributionItem(String bar)
+	{
+		ToolBarContributionItem item = toolbarContributionItems.remove(bar);
+		if (item != null)
+		{
+			coolBarManager.remove(item);
+		}
+	}
+
+	protected void refreshToolBars()
+	{
+		CoolbarLayout coolbarLayout = new DesignerPreferences().getCoolbarLayout();
+
+		if (coolBarManager == null && !new DesignerPreferences().getFormToolsOnMainToolbar()) return;
+
+		if (coolbarLayout == null)
+		{
+			// reset
+			coolBarManager.removeAll();
+			toolbarContributionItems.clear();
+			hiddenBars = new ArrayList<String>();
+			coolBarManager.update(false);
+		}
+		else
+		{
+			hiddenBars = new ArrayList<String>(Arrays.asList(coolbarLayout.hiddenBars));
+		}
+
+		// determine the order to create the items
+		List<String> bars = new ArrayList<String>();
+		if (coolbarLayout != null && coolBarManager.isEmpty())
+		{
+			// use order from coolbarLayout
+			for (String id : coolbarLayout.ids)
+			{
+				bars.add(id);
+			}
+		}
+		// add default order (duplicates will be ignored later)
+		bars.addAll(toolBarActions.keySet());
+
+		// create or dispose items
+		for (String bar : bars)
+		{
+			boolean visible = !hiddenBars.contains(bar);
+			if (toolMenuBarActions.containsKey(bar))
+			{
+				toolMenuBarActions.get(bar).setChecked(visible);
+			}
+
+			if (visible)
+			{
+				createContributionItem(bar);
+			}
+			else
+			{
+				disposeContributionItem(bar);
+			}
+		}
+
+		coolBarManager.update(false);
+
+		if (coolbarLayout != null)
+		{
+			try
+			{
+				coolBarManager.getControl().setItemLayout(coolbarLayout.itemOrder, coolbarLayout.wrapIndices, coolbarLayout.sizes);
+			}
+			catch (IllegalArgumentException e)
+			{
+				// ignore, layout not applicable to current coolbar
+			}
+		}
+	}
+
+	@Override
+	public void createPartControl(Composite parent)
+	{
+		if (!new DesignerPreferences().getFormToolsOnMainToolbar())
+		{
+			super.createPartControl(parent);
+			return;
+		}
+
+		Composite c = new Composite(parent, SWT.NONE);
+		c.setLayout(new org.eclipse.swt.layout.FormLayout());
+
+		coolBarManager = new CoolBarManager(SWT.WRAP | SWT.FLAT);
+		coolBarManager.setContextMenuManager(getToolbarMenuManager());
+		CoolBar coolBar = coolBarManager.createControl(c);
+
+		FormData formData = new FormData();
+		formData.left = new FormAttachment(0);
+		formData.right = new FormAttachment(100);
+		formData.top = new FormAttachment(0);
+		coolBar.setLayoutData(formData);
+		coolBar.addListener(SWT.Resize, new Listener()
+		{
+			public void handleEvent(Event event)
+			{
+				coolBarManager.getControl().getParent().layout();
+			}
+		});
+		coolBar.addListener(SWT.MouseUp, new Listener()
+		{
+			public void handleEvent(Event event)
+			{
+				saveCoolbarLayout();
+			}
+		});
+
+		Composite composite = new Composite(c, SWT.NONE);
+		formData = new FormData();
+		formData.left = new FormAttachment(0);
+		formData.right = new FormAttachment(100);
+		formData.bottom = new FormAttachment(100);
+		formData.top = new FormAttachment(coolBar);
+		composite.setLayoutData(formData);
+
+		composite.setLayout(new FillLayout());
+
+		fillToolbar();
+
+		super.createPartControl(composite);
+	}
+
+	protected void addToolbarAction(String bar, IAction action)
+	{
+		List<IAction> list = toolBarActions.get(bar);
+		if (list == null)
+		{
+			list = new ArrayList<IAction>();
+			toolBarActions.put(bar, list);
+			getToolbarMenuManager().add(createCheckBarAction(bar));
+		}
+		if (action != null)
+		{
+			list.add(action);
+		}
+	}
+
+	@Override
+	public boolean showPersist(IPersist persist)
+	{
+		Object editPart = getGraphicalViewer().getRootEditPart().getViewer().getEditPartRegistry().get(persist);
+		if (editPart instanceof EditPart)
+		{
+			// select the marked element
+			getGraphicalViewer().setSelection(new StructuredSelection(editPart));
+			getGraphicalViewer().reveal((EditPart)editPart);
+			return true;
+		}
+		return false;
+	}
+
+	/*
+	 * Set some defaults for palette preferences.
+	 */
+	@Override
+	protected FlyoutPreferences getPalettePreferences()
+	{
+		FlyoutPreferences palettePreferences = super.getPalettePreferences();
+		if ((getEditorInput() instanceof PersistEditorInput && ((PersistEditorInput)getEditorInput()).isNew()) || palettePreferences.getPaletteState() == 0)
+		{
+			// open palette first time it is shown or when it is a new form
+			palettePreferences.setPaletteState(FlyoutPaletteComposite.STATE_PINNED_OPEN);
+		}
+		if (palettePreferences.getDockLocation() == 0)
+		{
+			// default dock location to the left
+			palettePreferences.setDockLocation(PositionConstants.WEST);
+		}
+		return palettePreferences;
+	}
+
+	@Override
+	protected PaletteRoot getPaletteRoot()
+	{
+		if (paletteModel == null)
+		{
+			paletteModel = getPaletteFactory().createPalette();
+		}
+		return paletteModel;
+	}
+
+	/**
+	 * @return
+	 */
+	@Override
+	protected IPaletteFactory getPaletteFactory()
+	{
+		if (paletteFactory == null)
+		{
+			paletteFactory = createPaletteFactory();
+		}
+		return paletteFactory;
 	}
 
 	/**
@@ -216,127 +652,6 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage
 		return new FormGraphicalRootEditPart(getEditorPart());
 	}
 
-	@Override
-	protected void createActions()
-	{
-		super.createActions();
-
-		IAction action;
-
-		action = new AlignmentSortPartsAction((IWorkbenchPart)getEditorPart(), PositionConstants.LEFT);
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new AlignmentSortPartsAction((IWorkbenchPart)getEditorPart(), PositionConstants.RIGHT);
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new AlignmentSortPartsAction((IWorkbenchPart)getEditorPart(), PositionConstants.TOP);
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new AlignmentSortPartsAction((IWorkbenchPart)getEditorPart(), PositionConstants.BOTTOM);
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new AlignmentSortPartsAction((IWorkbenchPart)getEditorPart(), PositionConstants.CENTER);
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new AlignmentSortPartsAction((IWorkbenchPart)getEditorPart(), PositionConstants.MIDDLE);
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new DistributeAction(getEditorPart(), DistributeRequest.Distribution.HORIZONTAL_SPACING);
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new DistributeAction(getEditorPart(), DistributeRequest.Distribution.HORIZONTAL_CENTERS);
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new DistributeAction(getEditorPart(), DistributeRequest.Distribution.HORIZONTAL_PACK);
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new DistributeAction(getEditorPart(), DistributeRequest.Distribution.VERTICAL_SPACING);
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new DistributeAction(getEditorPart(), DistributeRequest.Distribution.VERTICAL_CENTERS);
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new DistributeAction(getEditorPart(), DistributeRequest.Distribution.VERTICAL_PACK);
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new SameWidthAction(getEditorPart());
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new SameHeightAction(getEditorPart());
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new SetTabSequenceAction(getEditorPart());
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new GroupAction(getEditorPart());
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new UngroupAction(getEditorPart());
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new SaveAsTemplateAction(getEditorPart());
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new AddTabpanelAction(getEditorPart());
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new AddSplitpaneAction(getEditorPart());
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new AddAccordionPaneAction(getEditorPart());
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new AddPortalAction(getEditorPart());
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new AddMediaAction(getEditorPart());
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new AddFieldAction(getEditorPart());
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new ZOrderAction(getEditorPart(), ZOrderAction.ID_Z_ORDER_BRING_TO_FRONT);
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new ZOrderAction(getEditorPart(), ZOrderAction.ID_Z_ORDER_BRING_TO_FRONT_ONE_STEP);
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new ZOrderAction(getEditorPart(), ZOrderAction.ID_Z_ORDER_SEND_TO_BACK);
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-
-		action = new ZOrderAction(getEditorPart(), ZOrderAction.ID_Z_ORDER_SEND_TO_BACK_ONE_STEP);
-		getActionRegistry().registerAction(action);
-		getSelectionActions().add(action.getId());
-	}
-
-	@Override
 	protected void fillToolbar()
 	{
 		addToolbarAction(COOLBAR_ELEMENTS, getActionRegistry().getAction(DesignerActionFactory.ADD_FIELD.getId()));
@@ -380,9 +695,34 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage
 	{
 		super.initializeGraphicalViewer();
 
-		addToolbarAction(COOLBAR_PREFS, getActionRegistry().getAction(DesignerActionFactory.TOGGLE_HIDE_INHERITED.getId()));
-
 		GraphicalViewer viewer = getGraphicalViewer();
+
+		IAction action = new ViewerTogglePropertyAction(editorPart, viewer, DesignerActionFactory.TOGGLE_HIDE_INHERITED.getId(),
+			DesignerActionFactory.TOGGLE_HIDE_INHERITED_TEXT, DesignerActionFactory.TOGGLE_HIDE_INHERITED_TOOLTIP,
+			DesignerActionFactory.TOGGLE_HIDE_INHERITED_IMAGE, PROPERTY_HIDE_INHERITED)
+		{
+			@Override
+			protected boolean calculateEnabled()
+			{
+				return editorPart.getForm().getExtendsID() > 0;
+			}
+		};
+		getActionRegistry().registerAction(action);
+		getSelectionActions().add(action.getId());
+
+		viewer.addPropertyChangeListener(new PropertyChangeListener()
+		{
+			@Override
+			public void propertyChange(PropertyChangeEvent evt)
+			{
+				if (evt.getPropertyName().equals(PROPERTY_HIDE_INHERITED))
+				{
+					getGraphicalViewer().getRootEditPart().getContents().refresh();
+				}
+			}
+		});
+
+		addToolbarAction(COOLBAR_PREFS, getActionRegistry().getAction(DesignerActionFactory.TOGGLE_HIDE_INHERITED.getId()));
 
 		if (getEditorPart().getForm() != null)
 		{
@@ -392,7 +732,7 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage
 
 		// configure the context menu provider
 		String id = "#FormDesignerContext";
-		VisualFormEditorContextMenuProvider cmProvider = new VisualFormEditorContextMenuProvider(id, viewer, getActionRegistry());
+		VisualFormEditorContextMenuProvider cmProvider = new VisualFormEditorContextMenuProvider(id, getActionRegistry());
 		viewer.setContextMenu(cmProvider);
 		getSite().registerContextMenu(id, cmProvider, viewer);
 
@@ -410,7 +750,7 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage
 		// Show rulers
 		refreshRulers();
 
-		Action action = new SelectFeedbackmodeAction(getEditorPart(), viewer);
+		action = new SelectFeedbackmodeAction(getEditorPart(), viewer);
 		getActionRegistry().registerAction(action);
 
 		action = new SelectSnapmodeAction(viewer);
@@ -466,12 +806,6 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage
 
 
 	@Override
-	protected VisualFormEditorPaletteFactory getPaletteFactory()
-	{
-		return (VisualFormEditorPaletteFactory)super.getPaletteFactory();
-	}
-
-	@Override
 	protected VisualFormEditorPaletteFactory createPaletteFactory()
 	{
 		return new VisualFormEditorPaletteFactory();
@@ -480,13 +814,14 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage
 	@Override
 	protected PaletteCustomizer createPaletteCustomizer()
 	{
-		return new VisualFormEditorPaletteCustomizer(getPaletteFactory(), getPaletteRoot());
+		return new VisualFormEditorPaletteCustomizer((VisualFormEditorPaletteFactory)getPaletteFactory(), getPaletteRoot());
 	}
 
 
 	@Override
 	public void dispose()
 	{
+		getEditDomain().getCommandStack().removeCommandStackListener(editorPart);
 		com.servoy.eclipse.ui.Activator.getDefault().getEclipsePreferences().removePreferenceChangeListener(preferenceChangeListener);
 		super.dispose();
 	}

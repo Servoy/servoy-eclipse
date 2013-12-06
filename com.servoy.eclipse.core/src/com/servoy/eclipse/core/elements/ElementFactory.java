@@ -39,6 +39,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.DesignComponentFactory;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -65,6 +66,7 @@ import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.GraphicalComponent;
+import com.servoy.j2db.persistence.IAnchorConstants;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
@@ -141,24 +143,72 @@ public class ElementFactory
 		return button;
 	}
 
+	/**
+	 * @return list items [button, subtext, countBubble, image]
+	 */
+	public static IPersist[] addFormListItems(Form form, Portal portal /* for inset list */, Point location) throws RepositoryException
+	{
+		int x = 0;
+		int y = 0;
+		if (location != null)
+		{
+			x = location.x;
+			y = location.y;
+		}
+		ISupportFormElements parent = portal == null ? form : portal;
+
+		// image
+		Field image = createField(parent, null, new Point(x + 0, y + 10));
+		image.putCustomMobileProperty(IMobileProperties.LIST_ITEM_IMAGE.propertyName, Boolean.TRUE);
+		image.setEditable(false); // for debug in developer
+
+		// button
+		GraphicalComponent button = createButton(parent, null, "list", new Point(x + 10, y + 20));
+		button.putCustomMobileProperty(IMobileProperties.LIST_ITEM_BUTTON.propertyName, Boolean.TRUE);
+
+		// subtext
+		GraphicalComponent subtext = createLabel(parent, null, new Point(x + 20, y + 30));
+		subtext.putCustomMobileProperty(IMobileProperties.LIST_ITEM_SUBTEXT.propertyName, Boolean.TRUE);
+
+		// countBubble
+		Field countBubble = createField(parent, null, new Point(x + 40, y + 40));
+		countBubble.putCustomMobileProperty(IMobileProperties.LIST_ITEM_COUNT.propertyName, Boolean.TRUE);
+		countBubble.setEditable(false); // for debug in developer
+
+		return new IPersist[] { button, subtext, countBubble, image };
+	}
+
+	public static Pair<Field, GraphicalComponent> createMobileFieldWithTitle(Form form, Point location) throws RepositoryException
+	{
+		// create a label and a text field in a group
+		String groupID = UUID.randomUUID().toString();
+		Point loc = location == null ? new Point(0, 0) : location;
+		GraphicalComponent label = createLabel(form, "Title", loc);
+		label.setGroupID(groupID);
+		label.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST | IAnchorConstants.NORTH);
+		label.putCustomMobileProperty(IMobileProperties.COMPONENT_TITLE.propertyName, Boolean.TRUE);
+		Field field = createField(form, null, new Point(loc.x, loc.y + 1)); // enforce order by y-pos
+		field.setGroupID(groupID);
+		field.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST | IAnchorConstants.NORTH);
+
+		return new Pair<Field, GraphicalComponent>(field, label);
+	}
+
 	public static void placeElementOnTop(IFormElement element)
 	{
-		if (element instanceof IPersist)
+		int maxFormIndex = 0;
+		Iterator<IPersist> bros = ((IPersist)element).getParent().getAllObjects();
+		while (bros.hasNext())
 		{
-			int maxFormIndex = 0;
-			Iterator<IPersist> bros = ((IPersist)element).getParent().getAllObjects();
-			while (bros.hasNext())
+			IPersist bro = bros.next();
+			if (bro != element && bro instanceof IFormElement)
 			{
-				IPersist bro = bros.next();
-				if (bro != element && bro instanceof IFormElement)
-				{
-					maxFormIndex = Math.max(maxFormIndex, ((IFormElement)bro).getFormIndex());
-				}
+				maxFormIndex = Math.max(maxFormIndex, ((IFormElement)bro).getFormIndex());
 			}
-			if (maxFormIndex > 0)
-			{
-				element.setFormIndex(maxFormIndex + 1);
-			}
+		}
+		if (maxFormIndex > 0)
+		{
+			element.setFormIndex(maxFormIndex + 1);
 		}
 	}
 

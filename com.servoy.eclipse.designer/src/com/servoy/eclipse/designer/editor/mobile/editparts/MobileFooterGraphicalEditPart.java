@@ -46,10 +46,15 @@ public class MobileFooterGraphicalEditPart extends MobilePartGraphicalEditPart
 	@Override
 	protected List<IFormElement> getModelChildren()
 	{
+		return getFooterModelChildren(application, getEditorPart().getForm());
+	}
+
+	public static List<IFormElement> getFooterModelChildren(IApplication application, Form form)
+	{
 		List<IFormElement> list = new ArrayList<IFormElement>(5);
 
-		for (IFormElement persist : Utils.iterate(new Form.FormTypeIterator(
-			application.getFlattenedSolution().getFlattenedForm(getEditorPart().getForm()).getAllObjectsAsList(), new Comparator<IFormElement>()
+		for (IFormElement persist : Utils.iterate(new Form.FormTypeIterator(application.getFlattenedSolution().getFlattenedForm(form).getAllObjectsAsList(),
+			new Comparator<IFormElement>()
 			{
 				// sort elements by x position
 				public int compare(IFormElement element1, IFormElement element2)

@@ -18,23 +18,25 @@
 package com.servoy.eclipse.designer.editor.mobile.commands;
 
 import org.eclipse.gef.commands.CompoundCommand;
-import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.swt.graphics.Point;
 
-import com.servoy.base.persistence.IMobileProperties;
+import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.designer.editor.commands.BaseFormPlaceElementCommand;
+import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
 import com.servoy.eclipse.designer.property.SetValueCommand;
-import com.servoy.eclipse.ui.property.MobileListModel;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
-import com.servoy.j2db.FormController;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
-import com.servoy.j2db.persistence.Field;
+import com.servoy.j2db.debug.layout.MobileFormLayout;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.GraphicalComponent;
-import com.servoy.j2db.persistence.ISupportFormElements;
+import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Command to modify the current form as a list form.
@@ -45,22 +47,44 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 @SuppressWarnings("nls")
 public class AddFormListCommand extends CompoundCommand
 {
-	public AddFormListCommand(IApplication application, Form form, CreateRequest request)
+	public AddFormListCommand(IApplication application, Form form, Object requestType, Point defaultLocation)
 	{
-		add(SetValueCommand.createSetvalueCommand(
-			"",
-			PersistPropertySource.createPersistPropertySource(form, false),
-			StaticContentSpecLoader.PROPERTY_VIEW.getPropertyName(),
-			PersistPropertySource.VIEW_TYPE_CONTOLLER.getConverter().convertProperty(StaticContentSpecLoader.PROPERTY_VIEW.getPropertyName(),
-				Integer.valueOf(FormController.LOCKED_TABLE_VIEW))));
-		add(new AddFormListemsCommand(application, form, request));
+		if (form.getView() != IFormConstants.VIEW_TYPE_TABLE_LOCKED)
+		{
+			add(SetValueCommand.createSetvalueCommand(
+				"",
+				PersistPropertySource.createPersistPropertySource(form, false),
+				StaticContentSpecLoader.PROPERTY_VIEW.getPropertyName(),
+				PersistPropertySource.VIEW_TYPE_CONTOLLER.getConverter().convertProperty(StaticContentSpecLoader.PROPERTY_VIEW.getPropertyName(),
+					Integer.valueOf(IFormConstants.VIEW_TYPE_TABLE_LOCKED))));
+
+			// delete all form elements except header/footer
+			FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
+			for (ISupportBounds elem : MobileFormLayout.getBodyElementsForRecordView(editingFlattenedSolution, editingFlattenedSolution.getFlattenedForm(form)))
+			{
+				if (elem instanceof IPersist)
+				{
+					add(new FormElementDeleteCommand((IPersist)elem));
+				}
+				else if (elem instanceof FormElementGroup)
+				{
+					for (IPersist persist : Utils.iterate(((FormElementGroup)elem).getElements()))
+					{
+						add(new FormElementDeleteCommand(persist));
+					}
+				}
+			}
+
+			// add list items
+			add(new AddFormListemsCommand(application, form, requestType, defaultLocation));
+		}
 	}
 
 	private static class AddFormListemsCommand extends BaseFormPlaceElementCommand
 	{
-		public AddFormListemsCommand(IApplication application, Form form, CreateRequest request)
+		public AddFormListemsCommand(IApplication application, Form form, Object requestType, Point defaultLocation)
 		{
-			super(application, form, null, request.getType(), null, null, request.getLocation().getSWTPoint(), null, form);
+			super(application, form, null, requestType, null, null, defaultLocation, null, form);
 		}
 
 		@Override
@@ -69,43 +93,13 @@ public class AddFormListCommand extends CompoundCommand
 			if (parent instanceof Form)
 			{
 				// add items for properties
-				MobileListModel model = addlistItems((Form)parent, null, location);
-				return new Object[] { model.button, model.subtext, model.countBubble, model.image };
+				return ElementFactory.addFormListItems((Form)parent, null, location);
 			}
 
 			return null;
 		}
+
 	}
 
-	public static MobileListModel addlistItems(Form form, ISupportFormElements component, Point location) throws RepositoryException
-	{
-		int x = 0;
-		int y = 0;
-		if (location != null)
-		{
-			x = location.x;
-			y = location.y;
-		}
-		ISupportFormElements parent = component == null ? form : component;
 
-		// image
-		Field image = ElementFactory.createField(parent, null, new Point(x + 0, y + 10));
-		image.putCustomMobileProperty(IMobileProperties.LIST_ITEM_IMAGE.propertyName, Boolean.TRUE);
-		image.setEditable(false); // for debug in developer
-
-		// button
-		GraphicalComponent button = ElementFactory.createButton(parent, null, "list", new Point(x + 10, y + 20));
-		button.putCustomMobileProperty(IMobileProperties.LIST_ITEM_BUTTON.propertyName, Boolean.TRUE);
-
-		// subtext
-		GraphicalComponent subtext = ElementFactory.createLabel(parent, null, new Point(x + 20, y + 30));
-		subtext.putCustomMobileProperty(IMobileProperties.LIST_ITEM_SUBTEXT.propertyName, Boolean.TRUE);
-
-		// countBubble
-		Field countBubble = ElementFactory.createField(parent, null, new Point(x + 40, y + 40));
-		countBubble.putCustomMobileProperty(IMobileProperties.LIST_ITEM_COUNT.propertyName, Boolean.TRUE);
-		countBubble.setEditable(false); // for debug in developer
-
-		return new MobileListModel(form, button, subtext, countBubble, image);
-	}
 }

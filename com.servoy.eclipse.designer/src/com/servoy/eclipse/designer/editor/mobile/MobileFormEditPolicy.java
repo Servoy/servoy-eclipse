@@ -101,7 +101,7 @@ public class MobileFormEditPolicy extends ComponentEditPolicy
 			}
 			else if (createType == VisualFormEditor.REQ_PLACE_FORM_LIST)
 			{
-				command = new AddFormListCommand(application, form, (CreateRequest)request);
+				command = new AddFormListCommand(application, form, request.getType(), ((CreateRequest)request).getLocation().getSWTPoint());
 			}
 			else if (createType == VisualFormEditor.REQ_PLACE_BUTTON)
 			{

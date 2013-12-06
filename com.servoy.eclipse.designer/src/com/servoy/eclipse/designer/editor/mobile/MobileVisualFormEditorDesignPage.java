@@ -20,13 +20,15 @@ package com.servoy.eclipse.designer.editor.mobile;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.RootEditPart;
+import org.eclipse.gef.ui.actions.DeleteAction;
 import org.eclipse.gef.ui.palette.PaletteCustomizer;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditorGEFDesignPage;
 import com.servoy.eclipse.designer.editor.IPaletteFactory;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileFormGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileFormGraphicalRootEditPart;
@@ -47,7 +49,7 @@ import com.servoy.j2db.persistence.Portal;
  * @author rgansevles
  *
  */
-public class MobileVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage
+public class MobileVisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPage
 {
 	/**
 	 * @param editorPart
@@ -55,15 +57,6 @@ public class MobileVisualFormEditorDesignPage extends BaseVisualFormEditorDesign
 	public MobileVisualFormEditorDesignPage(BaseVisualFormEditor editorPart)
 	{
 		super(editorPart);
-	}
-
-	/**
-	 * @see AbstractGraphicalEditor#createGraphicalViewerContents()
-	 */
-	@Override
-	protected EditPart createGraphicalViewerContents()
-	{
-		return new MobileFormGraphicalEditPart(Activator.getDefault().getDesignClient(), getEditorPart());
 	}
 
 	@Override
@@ -84,9 +77,13 @@ public class MobileVisualFormEditorDesignPage extends BaseVisualFormEditorDesign
 		return null;
 	}
 
+	/**
+	 * @see AbstractGraphicalEditor#createGraphicalViewerContents()
+	 */
 	@Override
-	protected void fillToolbar()
+	protected EditPart createGraphicalViewerContents()
 	{
+		return new MobileFormGraphicalEditPart(Activator.getDefault().getDesignClient(), getEditorPart());
 	}
 
 	@Override
@@ -98,14 +95,13 @@ public class MobileVisualFormEditorDesignPage extends BaseVisualFormEditorDesign
 
 		if (getEditorPart().getForm() != null)
 		{
-			viewer.addDropTargetListener(new MobilePaletteItemTransferDropTargetListener(getGraphicalViewer(), getEditorPart()));
+			viewer.addDropTargetListener(new MobilePaletteItemTransferDropTargetListener(viewer, getEditorPart()));
 		}
 
 		// configure the context menu provider
-		String id = "#MobileFormDesignerContext";
-		MobileVisualFormEditorContextMenuProvider cmProvider = new MobileVisualFormEditorContextMenuProvider(id, viewer, getActionRegistry());
+		MobileVisualFormEditorContextMenuProvider cmProvider = new MobileVisualFormEditorContextMenuProvider("#MobileFormDesignerContext", getActionRegistry());
 		viewer.setContextMenu(cmProvider);
-		getSite().registerContextMenu(id, cmProvider, viewer);
+		getSite().registerContextMenu(cmProvider.getId(), cmProvider, viewer);
 
 		//  refreshToolBars();
 	}
@@ -148,5 +144,11 @@ public class MobileVisualFormEditorDesignPage extends BaseVisualFormEditorDesign
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	protected DeleteAction createDeleteAction()
+	{
+		return new DeleteAction((IWorkbenchPart)editorPart);
 	}
 }

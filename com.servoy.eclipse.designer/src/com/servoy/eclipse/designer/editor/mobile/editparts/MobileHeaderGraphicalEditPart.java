@@ -24,6 +24,7 @@ import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Part;
@@ -44,8 +45,13 @@ public class MobileHeaderGraphicalEditPart extends MobilePartGraphicalEditPart
 	@Override
 	protected List<IFormElement> getModelChildren()
 	{
+		return getHeaderModelChildren(application, getEditorPart().getForm());
+	}
+
+	public static List<IFormElement> getHeaderModelChildren(IApplication application, Form form)
+	{
 		List<IFormElement> list = new ArrayList<IFormElement>(3);
-		for (IPersist persist : application.getFlattenedSolution().getFlattenedForm(getEditorPart().getForm()).getAllObjectsAsList())
+		for (IPersist persist : application.getFlattenedSolution().getFlattenedForm(form).getAllObjectsAsList())
 		{
 			if (persist instanceof IFormElement && persist instanceof AbstractBase)
 			{
