@@ -2,7 +2,7 @@
 <feature
       id="com.servoy.eclipse.feature"
       label="Servoy Feature"
-      version="7.4.0.2021"
+      version="7.4.0.2022"
       provider-name="Servoy"
       plugin="com.servoy.eclipse.core">
 
@@ -892,45 +892,6 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          version="0.0.0"
          fragment="true"
          unpack="false"/>
-
-   <plugin
-         id="com.servoy.eclipse.xulrunner.win32"
-         os="win32"
-         arch="x86"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="com.servoy.eclipse.xulrunner.linux.x86_64"
-         os="linux"
-         arch="x86_64"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="com.servoy.eclipse.xulrunner.linux"
-         os="linux"
-         arch="x86"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="com.servoy.eclipse.xulrunner.macosx"
-         os="macosx"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="com.servoy.eclipse.xulrunner.win32.x86_64"
-         os="win32"
-         arch="x86_64"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
 
    <plugin
          id="com.servoy.eclipse.designer.rib"

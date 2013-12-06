@@ -7,7 +7,7 @@
 	<property name="basearch" value="${arch}"/>
 	<property name="basenl" value="${nl}"/>
 	<property name="bundleId" value="com.servoy.eclipse.ui"/>
-	<property name="bundleVersion" value="7.4.0.2021"/>
+	<property name="bundleVersion" value="7.4.0.2022"/>
 	<property name="p2.publishonerror" value="false"/>
 
 	<!-- Compiler settings. -->
@@ -45,7 +45,7 @@
 			<isset property="buildTempFolder"/>
 		</condition>
 		<property name="pluginTemp" value="${basedir}"/>
-		<condition property="build.result.folder" value="${pluginTemp}/com.servoy.eclipse.ui_7.4.0.2021"		>
+		<condition property="build.result.folder" value="${pluginTemp}/com.servoy.eclipse.ui_7.4.0.2022"		>
 			<isset property="buildTempFolder"/>
 		</condition>
 		<property name="build.result.folder" value="${basedir}"/>
@@ -75,7 +75,7 @@
 		<antcall target="gather.bin.parts">
 			<param name="destination.temp.folder" value="${temp.folder}/"/>
 		</antcall>
-		<jar destfile="${plugin.destination}/com.servoy.eclipse.ui_7.4.0.2021.jar" basedir="${temp.folder}/com.servoy.eclipse.ui_7.4.0.2021" filesetmanifest="merge"/>
+		<jar destfile="${plugin.destination}/com.servoy.eclipse.ui_7.4.0.2022.jar" basedir="${temp.folder}/com.servoy.eclipse.ui_7.4.0.2022" filesetmanifest="merge"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
@@ -105,7 +105,7 @@
 			<patternset includes="e4-ide.jar"/>
 		</unzip>
 		<mkdir dir="${buildDirectory}/nestedJars/org.eclipse.ui.win32_3.2.400.v20130516-1056"/>
-		<unzip src="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.ui.win32_3.2.400.v20130516-1056.jar" dest="${buildDirectory}/nestedJars/org.eclipse.ui.win32_3.2.400.v20130516-1056" overwrite="false">
+		<unzip src="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.win32_3.2.400.v20130516-1056.jar" dest="${buildDirectory}/nestedJars/org.eclipse.ui.win32_3.2.400.v20130516-1056" overwrite="false">
 			<patternset includes="e4-ide.jar"/>
 		</unzip>
 	</target>
@@ -129,21 +129,21 @@
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.osgi.services_3.3.100.v20130513-1956.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/javax.servlet_3.0.0.v201112011016.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.swt_3.102.1.v20130827-2021.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.linux.x86_64_3.102.1.v20130827-2048.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.aix.ppc_3.102.1.v20130827-2048.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.aix.ppc64_3.102.1.v20130827-2048.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.solaris.sparc_3.102.1.v20130827-2048.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.solaris.x86_3.102.1.v20130827-2048.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.linux.s390_3.102.1.v20130827-2048.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.linux.x86_3.102.1.v20130827-2048.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.linux.s390x_3.102.1.v20130827-2048.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.cocoa.macosx.x86_64_3.102.1.v20130827-2048.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.linux.ppc64_3.102.1.v20130827-2048.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.win32.win32.x86_64_3.102.1.v20130827-2048.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.swt.win32.win32.x86_64_3.102.1.v20130827-2048.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.win32.win32.x86_3.102.1.v20130827-2048.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.linux.ppc_3.102.1.v20130827-2048.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.hpux.ia64_3.102.1.v20130827-2048.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.solaris.x86_3.102.1.v20130827-2048.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.cocoa.macosx.x86_64_3.102.1.v20130827-2048.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.solaris.sparc_3.102.1.v20130827-2048.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.linux.s390_3.102.1.v20130827-2048.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.cocoa.macosx_3.102.1.v20130827-2048.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.aix.ppc_3.102.1.v20130827-2048.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.linux.x86_3.102.1.v20130827-2048.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.linux.ppc_3.102.1.v20130827-2048.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.linux.x86_64_3.102.1.v20130827-2048.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.linux.s390x_3.102.1.v20130827-2048.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.aix.ppc64_3.102.1.v20130827-2048.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.swt.gtk.linux.ppc64_3.102.1.v20130827-2048.jar"/>
 			<pathelement path="../com.servoy.eclipse.xulrunner/bin/"/>
 			<pathelement path="${build.result.folder}/../com.servoy.eclipse.xulrunner_10.0.0/bin/"/>
 			<pathelement path="${build.result.folder}/../com.servoy.eclipse.xulrunner/@dot"/>
@@ -171,24 +171,24 @@
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.emf.ecore_2.9.1.v20130827-0309.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.emf.common_2.9.1.v20130827-0309.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.resources_3.8.101.v20130717-0806.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.resources.win32.x86_64_3.5.0.v20121203-0906.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.resources.win32.x86_3.5.100.v20100505-1741.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.resources.win32.x86_64_3.5.0.v20121203-0906.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ant.core_3.2.500.v20130402-1746.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.variables_3.2.700.v20130402-1741.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.filesystem_1.4.0.v20130514-1240.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.hpux.ia64_1.1.0.v20130514-1240.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.aix.ppc_1.1.0.v20100215-1227.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.core.filesystem.win32.x86_64_1.4.0.v20121112-1357.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.solaris.sparc_1.2.0.v20100215-1227.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.hpux.ia64_1.1.0.v20130514-1240.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.linux.ppc64_1.4.0.v20130514-1240.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.linux.ppc_1.0.200.v20100505-1614.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.linux.x86_1.4.100.v20130430-1334.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.aix.ppc_1.1.0.v20100215-1227.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.aix.ppc64_1.1.0.v20100215-1227.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.win32.x86_1.4.0.v20121112-0948.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.linux.x86_64_1.2.100.v20130430-1334.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.win32.x86_64_1.4.0.v20121112-1357.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.macosx_1.3.0.v20100505-2103.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.aix.ppc64_1.1.0.v20100215-1227.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.linux.ppc_1.0.200.v20100505-1614.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.core.filesystem.linux.ppc64_1.4.0.v20130514-1240.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.e4.ui.services_1.0.1.v20130909-1436.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/javax.xml_1.3.4.v201005080400.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/plugins/javax.xml_1.3.4.v201005080400.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.e4.ui.di_1.0.0.v20130515-1857.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.e4.core.di.extensions_0.11.100.v20130514-1256.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.emf.ecore.change_2.9.0.v20130827-0309.jar"/>
@@ -218,95 +218,95 @@
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.help_3.6.0.v20130326-1254.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.e4.ui.workbench.addons.swt_1.0.1.v20130823-1518.jar"/>
 			<pathelement path="../com.servoy.eclipse.core/bin"/>
-			<pathelement path="${build.result.folder}/../com.servoy.eclipse.core_7.4.0.2021/bin"/>
+			
 			<pathelement path="${build.result.folder}/../com.servoy.eclipse.core/@dot"/>
-			<pathelement path="${build.result.folder}/../com.servoy.eclipse.core_7.4.0.2021/@dot"/>
+			
 			<pathelement path="../servoy_shared/bin/"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/bin/"/>
+			
 			<pathelement path="${build.result.folder}/../servoy_shared/@dot"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/@dot"/>
+			
 			<pathelement path="../servoy_shared/bin"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/bin"/>
+			
 			<pathelement path="../servoy_shared/lib/annotations-1.0.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/annotations-1.0.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/BrowserLauncher2.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/BrowserLauncher2.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/commons-codec.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/commons-codec.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/commons-collections.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/commons-collections.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/commons-dbcp.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/commons-dbcp.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/commons-io.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/commons-io.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/commons-logging.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/commons-logging.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/dom4j.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/dom4j.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/jabsorb.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/jabsorb.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/joda-time.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/joda-time.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/log4j.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/log4j.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/servlet-api.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/servlet-api.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/slf4j-api.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/slf4j-api.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/slf4j-log4j.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/slf4j-log4j.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/wicket-extentions.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/wicket-extentions.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/wicket.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/wicket.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/commons-pool.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/commons-pool.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/activation.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/activation.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/mail.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/mail.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/httpclient.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/httpclient.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/httpcore.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/httpcore.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/jcifs.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/jcifs.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/apache-mime4j.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/apache-mime4j.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/httpmime.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/httpmime.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/antlr.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/antlr.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/l2fprod-common-outlookbar.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/l2fprod-common-outlookbar.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/wiquery.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/wiquery.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/fs-parser.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/fs-parser.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/fs-commons.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/fs-commons.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/PBKDF2.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/PBKDF2.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/minis.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/minis.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/xstream.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/xstream.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/prompt.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/prompt.jar"/>
+			
 			<pathelement path="../servoy_shared/lib/wicket-calendar.jar"/>
-			<pathelement path="${build.result.folder}/../servoy_shared_7.4.0.2021/lib/wicket-calendar.jar"/>
+			
 			<pathelement path="../org.eclipse.dltk.javascript.rhino/bin/"/>
-			<pathelement path="${build.result.folder}/../org.eclipse.dltk.javascript.rhino_7.4.0.2021/bin/"/>
+			
 			<pathelement path="${build.result.folder}/../org.eclipse.dltk.javascript.rhino/@dot"/>
-			<pathelement path="${build.result.folder}/../org.eclipse.dltk.javascript.rhino_7.4.0.2021/@dot"/>
+			
 			<pathelement path="../servoy_base/bin/"/>
-			<pathelement path="${build.result.folder}/../servoy_base_7.4.0.2021/bin/"/>
+			
 			<pathelement path="${build.result.folder}/../servoy_base/@dot"/>
-			<pathelement path="${build.result.folder}/../servoy_base_7.4.0.2021/@dot"/>
+			
 			<pathelement path="../servoy_smart_client/bin/"/>
-			<pathelement path="${build.result.folder}/../servoy_smart_client_7.4.0.2021/bin/"/>
+			
 			<pathelement path="${build.result.folder}/../servoy_smart_client/@dot"/>
-			<pathelement path="${build.result.folder}/../servoy_smart_client_7.4.0.2021/@dot"/>
+			
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.core_5.0.0.201311291041.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.core_5.0.0.201311291041.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.annotations_5.0.0.201311291041.jar"/>
@@ -314,7 +314,7 @@
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.antlr.runtime_3.0.0.v200803061811.jar"/>
 			<pathelement path="${buildDirectory}/nestedJars/org.eclipse.ui.ide_3.9.1.v20130704-1828/e4-ide.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.ide_3.9.1.v20130704-1828.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.ui.win32_3.2.400.v20130516-1056.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.win32_3.2.400.v20130516-1056.jar"/>
 			<pathelement path="${buildDirectory}/nestedJars/org.eclipse.ui.win32_3.2.400.v20130516-1056/e4-ide.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.views_3.6.100.v20130326-1250.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.jface.text_3.8.101.v20130802-1147.jar"/>
@@ -326,9 +326,9 @@
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.equinox.p2.metadata.repository_1.2.100.v20130327-2119.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.equinox.p2.repository_2.3.0.v20130412-2032.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.equinox.security_1.2.0.v20130424-1801.jar"/>
+			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.equinox.security.win32.x86_64_1.0.100.v20130327-1442.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.equinox.security.macosx_1.100.200.v20130327-1442.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.equinox.security.win32.x86_1.0.300.v20130327-1442.jar"/>
-			<pathelement path="../eclipse_target/compile_target/install/deltapack/plugins/org.eclipse.equinox.security.win32.x86_64_1.0.100.v20130327-1442.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.intro_3.4.200.v20130326-1254.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.help.base_4.0.0.v20130911-1000.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.equinox.http.jetty_3.0.100.v20130327-1442.jar"/>
@@ -400,33 +400,33 @@
 			<pathelement path="../eclipse_target/compile_target/optional/net.sourceforge.sqlexplorer_3.5.1.v20100211_SR3b/lib/poi-3.5-FINAL-20090928.jar"/>
 			<pathelement path="../eclipse_target/compile_target/optional/net.sourceforge.sqlexplorer_3.5.1.v20100211_SR3b/lib/commons-logging.jar"/>
 			<pathelement path="../servoy_debug/bin/"/>
-			<pathelement path="${build.result.folder}/../servoy_debug_7.4.0.2021/bin/"/>
+			
 			<pathelement path="${build.result.folder}/../servoy_debug/@dot"/>
-			<pathelement path="${build.result.folder}/../servoy_debug_7.4.0.2021/@dot"/>
+			
 			<pathelement path="../servoy_headless_client/bin/"/>
-			<pathelement path="${build.result.folder}/../servoy_headless_client_7.4.0.2021/bin/"/>
+			
 			<pathelement path="${build.result.folder}/../servoy_headless_client/@dot"/>
-			<pathelement path="${build.result.folder}/../servoy_headless_client_7.4.0.2021/@dot"/>
+			
 			<pathelement path="../com.servoy.eclipse.appserver/bin/"/>
-			<pathelement path="${build.result.folder}/../com.servoy.eclipse.appserver_7.4.0.2021/bin/"/>
+			
 			<pathelement path="${build.result.folder}/../com.servoy.eclipse.appserver/@dot"/>
-			<pathelement path="${build.result.folder}/../com.servoy.eclipse.appserver_7.4.0.2021/@dot"/>
+			
 			<pathelement path="../com.servoy.eclipse.model/lib/js.jar"/>
-			<pathelement path="${build.result.folder}/../com.servoy.eclipse.model_7.4.0.2021/lib/js.jar"/>
+			
 			<pathelement path="../com.servoy.eclipse.model/lib/jshybugger.jar"/>
-			<pathelement path="${build.result.folder}/../com.servoy.eclipse.model_7.4.0.2021/lib/jshybugger.jar"/>
+			
 			<pathelement path="../com.servoy.eclipse.model/lib/json-20090211.jar"/>
-			<pathelement path="${build.result.folder}/../com.servoy.eclipse.model_7.4.0.2021/lib/json-20090211.jar"/>
+			
 			<pathelement path="../com.servoy.eclipse.model/lib/netty-3.6.5.Final.jar"/>
-			<pathelement path="${build.result.folder}/../com.servoy.eclipse.model_7.4.0.2021/lib/netty-3.6.5.Final.jar"/>
+			
 			<pathelement path="../com.servoy.eclipse.model/lib/webbit-0.4.15.jar"/>
-			<pathelement path="${build.result.folder}/../com.servoy.eclipse.model_7.4.0.2021/lib/webbit-0.4.15.jar"/>
+			
 			<pathelement path="../com.servoy.eclipse.model/bin"/>
-			<pathelement path="${build.result.folder}/../com.servoy.eclipse.model_7.4.0.2021/bin"/>
+			
 			<pathelement path="../com.servoy.eclipse.model/bin/"/>
-			<pathelement path="${build.result.folder}/../com.servoy.eclipse.model_7.4.0.2021/bin/"/>
+			
 			<pathelement path="${build.result.folder}/../com.servoy.eclipse.model/@dot"/>
-			<pathelement path="${build.result.folder}/../com.servoy.eclipse.model_7.4.0.2021/@dot"/>
+			
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.ui_5.0.0.201311291041.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.core.manipulation_5.0.0.201311291041.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.debug_5.0.0.201311291041.jar"/>
@@ -460,9 +460,9 @@
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.equinox.p2.operations_2.3.0.v20130711-1809.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.equinox.security.ui_1.1.100.v20130327-1442.jar"/>
 			<pathelement path="baseline.jar"/>
-			<pathelement path="${build.result.folder}/../com.servoy.eclipse.ui_7.4.0.2021/baseline.jar"/>
+			
 			<pathelement path="swt-grouplayout.jar"/>
-			<pathelement path="${build.result.folder}/../com.servoy.eclipse.ui_7.4.0.2021/swt-grouplayout.jar"/>
+			
 		</path>
 		<!-- compile the source code -->
 		<javac destdir="${build.result.folder}/@dot" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" bootclasspath="${bundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}"		>
@@ -508,28 +508,28 @@
 	</target>
 
 	<target name="checkCompilationResults" if="compilation.error.occured">
-		<echo file="${compilation.problem.marker}" message="com.servoy.eclipse.ui_7.4.0.2021${line.separator}compilation.error.occured=${compilation.error.occured}"/>
-		<eclipse.logCompileError bundle="com.servoy.eclipse.ui_7.4.0.2021" log="${compilation.prereq.log}">
-			<include name="/crypt/workspace/com.servoy.eclipse.appserver/compilation.problem"/>
-			<include name="${pluginTemp}/com.servoy.eclipse.appserver_7.4.0.2021/compilation.problem"/>
-			<include name="/crypt/workspace/servoy_base/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_base_7.4.0.2021/compilation.problem"/>
+		<echo file="${compilation.problem.marker}" message="com.servoy.eclipse.ui_7.4.0.2022${line.separator}compilation.error.occured=${compilation.error.occured}"/>
+		<eclipse.logCompileError bundle="com.servoy.eclipse.ui_7.4.0.2022" log="${compilation.prereq.log}">
 			<include name="/crypt/workspace/servoy_smart_client/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_smart_client_7.4.0.2021/compilation.problem"/>
-			<include name="/crypt/workspace/com.servoy.eclipse.model/compilation.problem"/>
-			<include name="${pluginTemp}/com.servoy.eclipse.model_7.4.0.2021/compilation.problem"/>
-			<include name="/crypt/workspace/org.eclipse.dltk.javascript.rhino/compilation.problem"/>
-			<include name="${pluginTemp}/org.eclipse.dltk.javascript.rhino_7.4.0.2021/compilation.problem"/>
-			<include name="/crypt/workspace/com.servoy.eclipse.core/compilation.problem"/>
-			<include name="${pluginTemp}/com.servoy.eclipse.core_7.4.0.2021/compilation.problem"/>
-			<include name="/crypt/workspace/servoy_headless_client/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_headless_client_7.4.0.2021/compilation.problem"/>
-			<include name="/crypt/workspace/servoy_shared/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_shared_7.4.0.2021/compilation.problem"/>
-			<include name="/crypt/workspace/servoy_debug/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_debug_7.4.0.2021/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_smart_client_7.4.0.2022/compilation.problem"/>
 			<include name="/crypt/workspace/com.servoy.eclipse.xulrunner/compilation.problem"/>
 			<include name="${pluginTemp}/com.servoy.eclipse.xulrunner_10.0.0/compilation.problem"/>
+			<include name="/crypt/workspace/servoy_headless_client/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_headless_client_7.4.0.2022/compilation.problem"/>
+			<include name="/crypt/workspace/com.servoy.eclipse.model/compilation.problem"/>
+			<include name="${pluginTemp}/com.servoy.eclipse.model_7.4.0.2022/compilation.problem"/>
+			<include name="/crypt/workspace/org.eclipse.dltk.javascript.rhino/compilation.problem"/>
+			<include name="${pluginTemp}/org.eclipse.dltk.javascript.rhino_7.4.0.2022/compilation.problem"/>
+			<include name="/crypt/workspace/com.servoy.eclipse.core/compilation.problem"/>
+			<include name="${pluginTemp}/com.servoy.eclipse.core_7.4.0.2022/compilation.problem"/>
+			<include name="/crypt/workspace/servoy_debug/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_debug_7.4.0.2022/compilation.problem"/>
+			<include name="/crypt/workspace/servoy_shared/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_shared_7.4.0.2022/compilation.problem"/>
+			<include name="/crypt/workspace/com.servoy.eclipse.appserver/compilation.problem"/>
+			<include name="${pluginTemp}/com.servoy.eclipse.appserver_7.4.0.2022/compilation.problem"/>
+			<include name="/crypt/workspace/servoy_base/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_base_7.4.0.2022/compilation.problem"/>
 			<include name="/crypt/workspace/eclipse_target/compile_target/optional/net.sourceforge.sqlexplorer_3.5.1.v20100211_SR3b/compilation.problem"/>
 			<include name="${pluginTemp}/net.sourceforge.sqlexplorer_3.5.1.v20100211_SR3b/compilation.problem"/>
 		</eclipse.logCompileError>
@@ -541,7 +541,7 @@
 	</target>
 
 	<target name="publish.bin.parts" depends="init" if="p2.publish.parts" unless="compilation.problem.marker.exists">
-		<mkdir dir="${build.result.folder}/com.servoy.eclipse.ui_7.4.0.2021"/>
+		<mkdir dir="${build.result.folder}/com.servoy.eclipse.ui_7.4.0.2022"/>
 		<copy todir="${build.result.folder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}">
 				<include name="META-INF/MANIFEST.MF"/>
@@ -565,13 +565,13 @@
 	</target>
 
 	<target name="gather.bin.parts" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.ui_7.4.0.2021"/>
-		<copy todir="${destination.temp.folder}/com.servoy.eclipse.ui_7.4.0.2021" failonerror="true" overwrite="false">
+		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.ui_7.4.0.2022"/>
+		<copy todir="${destination.temp.folder}/com.servoy.eclipse.ui_7.4.0.2022" failonerror="true" overwrite="false">
 			<fileset dir="${build.result.folder}/@dot">
 				<include name="**"/>
 			</fileset>
 		</copy>
-		<copy todir="${destination.temp.folder}/com.servoy.eclipse.ui_7.4.0.2021" failonerror="true" overwrite="true">
+		<copy todir="${destination.temp.folder}/com.servoy.eclipse.ui_7.4.0.2022" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}">
 				<include name="plugin.xml"/>
 				<include name="META-INF/"/>
@@ -582,7 +582,7 @@
 			</fileset>
 		</copy>
 		<antcall target="apitools.generation">
-			<param name="target.folder" value="${destination.temp.folder}/com.servoy.eclipse.ui_7.4.0.2021"/>
+			<param name="target.folder" value="${destination.temp.folder}/com.servoy.eclipse.ui_7.4.0.2022"/>
 			<param name="projectLocation" value="${basedir}"/>
 			<param name="binary.folders" value="${build.result.folder}/@dot:/crypt/workspace/com.servoy.eclipse.ui/swt-grouplayout.jar:/crypt/workspace/com.servoy.eclipse.ui/baseline.jar"/>
 			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
@@ -593,10 +593,10 @@
 	</target>
 
 	<target name="gather.sources" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.ui_7.4.0.2021"/>
-		<copy file="${build.result.folder}/src.zip" todir="${destination.temp.folder}/com.servoy.eclipse.ui_7.4.0.2021" failonerror="false" overwrite="false"/>
+		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.ui_7.4.0.2022"/>
+		<copy file="${build.result.folder}/src.zip" todir="${destination.temp.folder}/com.servoy.eclipse.ui_7.4.0.2022" failonerror="false" overwrite="false"/>
 		<antcall target="copy.src.includes">
-			<param name="source.destination.folder" value="${destination.temp.folder}/com.servoy.eclipse.ui_7.4.0.2021"/>
+			<param name="source.destination.folder" value="${destination.temp.folder}/com.servoy.eclipse.ui_7.4.0.2022"/>
 		</antcall>
 	</target>
 
@@ -613,8 +613,8 @@
 	</target>
 
 	<target name="gather.logs" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.ui_7.4.0.2021"/>
-		<copy todir="${destination.temp.folder}/com.servoy.eclipse.ui_7.4.0.2021" failonerror="false" overwrite="false">
+		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.ui_7.4.0.2022"/>
+		<copy todir="${destination.temp.folder}/com.servoy.eclipse.ui_7.4.0.2022" failonerror="false" overwrite="false">
 			<fileset dir="${build.result.folder}">
 				<include name="@dot${logExtension}"/>
 			</fileset>
@@ -624,8 +624,8 @@
 	<target name="clean" depends="init" description="Clean the plug-in: com.servoy.eclipse.ui of all the zips, jars and logs created.">
 		<delete dir="${build.result.folder}/@dot"/>
 		<delete file="${build.result.folder}/src.zip"/>
-		<delete file="${plugin.destination}/com.servoy.eclipse.ui_7.4.0.2021.jar"/>
-		<delete file="${plugin.destination}/com.servoy.eclipse.ui_7.4.0.2021.zip"/>
+		<delete file="${plugin.destination}/com.servoy.eclipse.ui_7.4.0.2022.jar"/>
+		<delete file="${plugin.destination}/com.servoy.eclipse.ui_7.4.0.2022.zip"/>
 		<delete dir="${temp.folder}"/>
 		<delete file="${compilation.problem.marker}" quiet="true"/>
 	</target>
@@ -651,7 +651,7 @@
 				<include name="**/*.bin${logExtension}"/>
 			</fileset>
 		</delete>
-		<zip destfile="${plugin.destination}/com.servoy.eclipse.ui_7.4.0.2021.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
+		<zip destfile="${plugin.destination}/com.servoy.eclipse.ui_7.4.0.2022.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
