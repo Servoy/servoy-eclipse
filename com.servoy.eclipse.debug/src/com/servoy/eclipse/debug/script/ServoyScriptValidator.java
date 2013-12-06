@@ -134,6 +134,10 @@ public class ServoyScriptValidator implements IValidatorExtension2
 		}
 		else if (visibility == Visibility.INTERNAL)
 		{
+			if (member.getAttribute(TypeCreator.HIDDEN_IN_RELATED) != null)
+			{
+				return new ValidationStatus(JavaScriptProblems.PRIVATE_FUNCTION, "The function " + member.getName() + " is not valid for a related foundset");
+			}
 			return generateValidationStatusForCurrentSolutionType(member.getName(), member instanceof Method);
 		}
 		return null;

@@ -221,6 +221,8 @@ import com.servoy.j2db.util.Utils;
  */
 public class TypeCreator extends TypeCache
 {
+	static final String HIDDEN_IN_RELATED = "HIDDEN_IN_RELATED";
+
 	private static final String SCOPE_TABLES = "scope:tables";
 
 	private static final int INSTANCE_METHOD = 1;
@@ -374,7 +376,6 @@ public class TypeCreator extends TypeCache
 
 		addScopeType(Record.JS_RECORD, new RecordCreator());
 		addScopeType(FoundSet.JS_FOUNDSET, new FoundSetCreator());
-		addScopeType(RelatedFoundSet.JS_RELATED_FOUNDSET, new FoundSetCreator());
 		addScopeType("JSDataSet", new JSDataSetCreator());
 		addScopeType("Form", new FormScopeCreator());
 		addScopeType("RuntimeForm", new FormScopeCreator());
@@ -496,14 +497,7 @@ public class TypeCreator extends TypeCache
 
 
 		String realTypeName = typeName;
-		if (realTypeName.equals("JSFoundset"))
-		{
-			realTypeName = FoundSet.JS_FOUNDSET;
-		}
-		else if (realTypeName.equals("JSRelatedFoundset"))
-		{
-			realTypeName = RelatedFoundSet.JS_RELATED_FOUNDSET;
-		}
+		if (realTypeName.equals("JSFoundset")) realTypeName = FoundSet.JS_FOUNDSET;
 		type = createClassType(context, realTypeName, realTypeName);
 		if (type != null)
 		{
@@ -892,14 +886,9 @@ public class TypeCreator extends TypeCache
 		{
 			String fullClassName = typeNameClassName;
 			String classType = fullClassName.substring(0, index);
-			if (classType.equals("JSFoundSet"))
+			if (classType.equals("JSFoundset"))
 			{
 				classType = FoundSet.JS_FOUNDSET;
-				fullClassName = classType + fullClassName.substring(index);
-			}
-			else if (classType.equals("JSRelatedFoundSet"))
-			{
-				classType = RelatedFoundSet.JS_RELATED_FOUNDSET;
 				fullClassName = classType + fullClassName.substring(index);
 			}
 			Type type = createDynamicType(context, classType, fullClassName);
@@ -2237,14 +2226,15 @@ public class TypeCreator extends TypeCache
 
 	private class FoundSetCreator implements IScopeTypeCreator
 	{
-		private Type cachedSuperTypeTemplateType = null;
+		private Type cachedSuperTypeTemplateTypeForFoundSet = null;
+		private Type cachedSuperTypeTemplateTypeForRelatedFoundSet = null;
 
 		public Type createType(String context, String fullTypeName)
 		{
 			Type type;
-			if (fullTypeName.equals(FoundSet.JS_FOUNDSET) || fullTypeName.equals(RelatedFoundSet.JS_RELATED_FOUNDSET))
+			if (fullTypeName.equals(FoundSet.JS_FOUNDSET))
 			{
-				type = createBaseType(context, fullTypeName);
+				type = createBaseType(context, fullTypeName, FoundSet.class);
 
 				// quickly add this one to the static types.
 				return addType(null, type);
@@ -2253,53 +2243,77 @@ public class TypeCreator extends TypeCache
 			{
 				FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 				String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
-				String classType = fullTypeName.startsWith("JSFoundSet") ? FoundSet.JS_FOUNDSET : RelatedFoundSet.JS_RELATED_FOUNDSET;
-				if (cachedSuperTypeTemplateType == null)
+				boolean isRelatedFoundSet = (fs != null && fs.getRelation(config) != null) ? true : false;
+
+				if (cachedSuperTypeTemplateTypeForFoundSet == null && !isRelatedFoundSet)
 				{
-					cachedSuperTypeTemplateType = createBaseType(context, classType);
+					cachedSuperTypeTemplateTypeForFoundSet = createBaseType(context, fullTypeName, FoundSet.class);
 				}
-				EList<Member> members = cachedSuperTypeTemplateType.getMembers();
+				else if (cachedSuperTypeTemplateTypeForRelatedFoundSet == null && isRelatedFoundSet)
+				{
+					cachedSuperTypeTemplateTypeForRelatedFoundSet = createBaseType(context, fullTypeName, RelatedFoundSet.class);
+				}
+				EList<Member> members = null;
+				if (isRelatedFoundSet)
+				{
+					members = cachedSuperTypeTemplateTypeForRelatedFoundSet.getMembers();
+				}
+				else
+				{
+					members = cachedSuperTypeTemplateTypeForFoundSet.getMembers();
+				}
 				List<Member> overwrittenMembers = new ArrayList<Member>();
 				for (Member member : members)
 				{
-					JSType memberType = member.getType();
-					if (memberType != null)
+					if (member.getVisibility() == Visibility.INTERNAL)
 					{
-						if (memberType.getName().equals("Array<" + Record.JS_RECORD + '>'))
+						// the special internal once (like clear() of related) should be also added
+						// because they should override the normal super JSFoundSet clear
+						Member cloned = TypeCreator.clone(member, member.getType());
+						cloned.setAttribute(HIDDEN_IN_RELATED, Boolean.TRUE);
+						overwrittenMembers.add(cloned);
+					}
+					else
+					{
+						JSType memberType = member.getType();
+						if (memberType != null)
 						{
-							overwrittenMembers.add(TypeCreator.clone(member, TypeUtil.arrayOf(Record.JS_RECORD + '<' + config + '>')));
-						}
-						else if (memberType.getName().equals(Record.JS_RECORD) || memberType.getName().equals(QBSelect.class.getSimpleName()))
-						{
-							overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(context, memberType.getName() + '<' + config + '>')));
-						}
-						else if (memberType.getName().equals(FoundSet.JS_FOUNDSET))
-						{
-							if (member.getName().equals("unrelate"))
+							if (memberType.getName().equals("Array<" + Record.JS_RECORD + '>'))
 							{
-								// its really a relation, unrelate it.
-								if (fs != null)
+								overwrittenMembers.add(TypeCreator.clone(member, TypeUtil.arrayOf(Record.JS_RECORD + '<' + config + '>')));
+							}
+							else if (memberType.getName().equals(Record.JS_RECORD) || memberType.getName().equals(QBSelect.class.getSimpleName()))
+							{
+								overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(context, memberType.getName() + '<' + config + '>')));
+							}
+							else if (memberType.getName().equals(FoundSet.JS_FOUNDSET))
+							{
+								if (member.getName().equals("unrelate"))
 								{
-									Relation relation = fs.getRelation(config);
-									if (relation != null)
+									// its really a relation, unrelate it.
+									if (fs != null)
 									{
-										overwrittenMembers.add(TypeCreator.clone(member,
-											getTypeRef(context, FoundSet.JS_FOUNDSET + '<' + relation.getForeignDataSource() + '>')));
-									}
-									else
-									{
-										overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(context, FoundSet.JS_FOUNDSET + '<' + config + '>')));
+										Relation relation = fs.getRelation(config);
+										if (relation != null)
+										{
+											overwrittenMembers.add(TypeCreator.clone(member,
+												getTypeRef(context, FoundSet.JS_FOUNDSET + '<' + relation.getForeignDataSource() + '>')));
+										}
+										else
+										{
+											overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(context, FoundSet.JS_FOUNDSET + '<' + config + '>')));
+										}
 									}
 								}
-							}
-							else
-							{
-								overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(context, FoundSet.JS_FOUNDSET + '<' + config + '>')));
+								else
+								{
+									overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(context, FoundSet.JS_FOUNDSET + '<' + config + '>')));
+								}
 							}
 						}
 					}
 				}
-				type = getCombinedType(fs, context, fullTypeName, config, overwrittenMembers, getType(context, classType), FOUNDSET_IMAGE, true);
+				type = getCombinedType(fs, context, fullTypeName, config, overwrittenMembers, getType(context, FoundSet.JS_FOUNDSET), FOUNDSET_IMAGE, true);
 			}
 			return type;
 		}
@@ -2307,12 +2321,13 @@ public class TypeCreator extends TypeCache
 		/**
 		 * @param context
 		 * @param fullTypeName
+		 * @param foudsetClass
 		 * @return
 		 */
-		private Type createBaseType(String context, String fullTypeName)
+		private Type createBaseType(String context, String fullTypeName, Class< ? > foundsetClass)
 		{
 			Type type;
-			type = TypeCreator.this.createType(context, fullTypeName, fullTypeName.equals("JSFoundSet") ? FoundSet.class : RelatedFoundSet.class);
+			type = TypeCreator.this.createType(context, fullTypeName, foundsetClass);
 			//type.setAttribute(IMAGE_DESCRIPTOR, FOUNDSET_IMAGE);
 
 			Property maxRecordIndex = TypeInfoModelFactory.eINSTANCE.createProperty();
@@ -3309,8 +3324,7 @@ public class TypeCreator extends TypeCache
 					{
 						relationImage = RELATION_PROTECTED_IMAGE;
 					}
-					Property property = createProperty(relation.getName(), true,
-						getTypeRef(context, RelatedFoundSet.JS_RELATED_FOUNDSET + '<' + relation.getName() + '>'),
+					Property property = createProperty(relation.getName(), true, getTypeRef(context, FoundSet.JS_FOUNDSET + '<' + relation.getName() + '>'),
 						getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns()), relationImage, relation,
 						relation.getDeprecated());
 					if (visible)
