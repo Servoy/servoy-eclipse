@@ -108,6 +108,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.IMessageHandler;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONArray;
@@ -214,7 +215,10 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 			@Override
 			public Object function(Object[] arguments)
 			{
-				System.out.println("consoleLog: " + Arrays.toString(arguments));
+				if (Debug.tracing())
+				{
+					Debug.trace("consoleLog: " + Arrays.toString(arguments));
+				}
 				return null;
 			}
 		};
