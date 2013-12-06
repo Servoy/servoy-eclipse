@@ -147,7 +147,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 				}
 
 				// initialize app server
-				initializeApplicationServer(loadSettingsFromAppServer);
+				initializeApplicationServer(loadSettingsFromAppServer ? null : Settings.getInstance());
 
 				if (ApplicationServerSingleton.get() != null)
 				{
@@ -491,7 +491,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 		}
 	}
 
-	private void initializeApplicationServer(boolean loadSettingsFromAppServer)
+	private void initializeApplicationServer(Properties properties)
 	{
 		// find server starter extension
 		IApplicationServerStarter ss = getServerStarterExtension();
@@ -516,7 +516,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 					{
 						return new WorkspaceUserManager();
 					}
-				}, false, false, false, loadSettingsFromAppServer);
+				}, false, false, false, properties);
 			}
 			catch (Exception e)
 			{
