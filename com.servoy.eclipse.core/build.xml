@@ -296,6 +296,10 @@
 			<pathelement path="${build.result.folder}/../org.eclipse.dltk.javascript.rhino/@dot"/>
 			
 			<pathelement path="../servoy_base/bin/"/>
+
+			<pathelement path="../j2db_server/bin/"/>
+			
+			<pathelement path="${build.result.folder}/../j2db_server/@dot"/>
 			
 			<pathelement path="${build.result.folder}/../servoy_base/@dot"/>
 			
