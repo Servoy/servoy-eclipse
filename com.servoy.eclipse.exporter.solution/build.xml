@@ -211,7 +211,11 @@
 			<pathelement path="../servoy_base/bin/"/>
 			
 			<pathelement path="${build.result.folder}/../servoy_base/@dot"/>
+
+			<pathelement path="../j2db_server/bin/"/>
 			
+			<pathelement path="${build.result.folder}/../j2db_server/@dot"/>
+
 			<pathelement path="../com.servoy.eclipse.model/lib/js.jar"/>
 			
 			<pathelement path="../com.servoy.eclipse.model/lib/jshybugger.jar"/>
