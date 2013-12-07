@@ -122,7 +122,7 @@ public class SplashHandler extends BasicSplashHandler
 
 			BundleContext context = Activator.getDefault().getBundle().getBundleContext();
 			ServiceReference ref = context.getServiceReference(ILicenseManager.class);
-			ILicenseManager lm = context.getService(ref);
+			ILicenseManager lm = (ILicenseManager)context.getService(ref);
 			String regText = lm.getDeveloperRegistrationText();
 			text.append("\n");
 			text.append(regText);
