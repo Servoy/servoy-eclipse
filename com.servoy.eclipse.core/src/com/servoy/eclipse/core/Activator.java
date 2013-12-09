@@ -750,6 +750,15 @@ public class Activator extends Plugin
 		return plugin;
 	}
 
+	public static BundleContext getBundleContext()
+	{
+		if (plugin != null)
+		{
+			return plugin.getBundle().getBundleContext();
+		}
+		return null;
+	}
+
 	/**
 	 * Global (workspace) preferences
 	 */
