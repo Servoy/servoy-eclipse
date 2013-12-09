@@ -58,7 +58,8 @@
             sequence="M3+M2+D">
       </key>
    </extension>
-    <extension
+<!-- these don't seem to be available or needed any more
+   <extension
          point="org.eclipse.ui.perspectiveExtensions">
       <perspectiveExtension
             targetID="com.servoy.eclipse.ui.DesignPerspective">
@@ -72,7 +73,7 @@
                id="com.servoy.eclipse.jsunit.actions.runScriptUnitAction">
          </actionSet>
       </perspectiveExtension>
-   </extension>
+   </extension> -->
    <extension
          point="org.eclipse.core.contenttype.contentTypes">
       <content-type
@@ -195,5 +196,12 @@
             class="com.servoy.eclipse.jsunit.actions.SmartClientTestConfigurationProvider"
             launchConfigurationID="com.servoy.eclipse.jsunit.launch">
       </launchConfigurationProvider>
+   </extension>
+   <extension
+         point="servoy_debug.debugClientProvider">
+      <debugClientProvider
+            class="com.servoy.eclipse.jsunit.smart.DebugClientPovider"
+            debugClientTypeID="com.servoy.eclipse.jsunit.smart.client">
+      </debugClientProvider>
    </extension>
 </plugin>

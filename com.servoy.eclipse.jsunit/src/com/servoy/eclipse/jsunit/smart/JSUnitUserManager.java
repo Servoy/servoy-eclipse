@@ -15,11 +15,12 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.model.repository;
+package com.servoy.eclipse.jsunit.smart;
 
 import java.util.Arrays;
 import java.util.List;
 
+import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.j2db.dataprocessing.IDataServerInternal;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -84,52 +85,27 @@ public final class JSUnitUserManager extends WorkspaceUserManager
 		// ok
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.servoy.eclipse.model.repository.WorkspaceUserManager#writeUserAndGroupInfo(boolean)
-	 */
 	@Override
 	protected void writeUserAndGroupInfo(boolean later) throws RepositoryException
 	{
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.servoy.eclipse.model.repository.WorkspaceUserManager#isOperational()
-	 */
 	@Override
 	public boolean isOperational()
 	{
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.servoy.eclipse.model.repository.WorkspaceUserManager#deleteGroupReferences(java.lang.String)
-	 */
 	@Override
 	protected void deleteGroupReferences(List<String> groupNames)
 	{
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.servoy.eclipse.model.repository.WorkspaceUserManager#writeSecurityInfo(java.lang.String, java.lang.String, boolean)
-	 */
 	@Override
 	public void writeSecurityInfo(String serverName, String tableName, boolean later) throws RepositoryException
 	{
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.servoy.eclipse.model.repository.WorkspaceUserManager#writeAllTableInfo()
-	 */
 	@Override
 	protected void writeAllTableInfo() throws RepositoryException
 	{

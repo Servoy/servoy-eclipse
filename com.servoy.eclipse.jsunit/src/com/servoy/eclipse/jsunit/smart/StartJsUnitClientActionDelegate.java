@@ -14,19 +14,18 @@
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
-package com.servoy.eclipse.debug.actions;
+package com.servoy.eclipse.jsunit.smart;
 
 
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.IWorkbenchWindow;
 
-import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.debug.actions.StartDebugAction;
+import com.servoy.eclipse.jsunit.Activator;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IDebugJ2DBClient;
 
@@ -42,6 +41,7 @@ public class StartJsUnitClientActionDelegate extends StartDebugAction implements
 	@Override
 	public void init(IWorkbenchWindow w)
 	{
+		super.init(w);
 		this.window = w;
 	}
 
@@ -51,9 +51,9 @@ public class StartJsUnitClientActionDelegate extends StartDebugAction implements
 	public void run(IAction action)
 	{
 		started = false;
-		//make sure the plugins are loaded
-		DLTKDebugUIPlugin.getDefault();
-		DebugPlugin.getDefault();
+
+		makeSureNeededPluginsAreStarted();
+
 		try
 		{
 			// run in the progress service thread in stead of the main swt thread.

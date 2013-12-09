@@ -24,7 +24,7 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 import org.mozilla.javascript.Wrapper;
 
-import com.servoy.j2db.ClientState;
+import com.servoy.j2db.IDebugClient;
 import com.servoy.j2db.debug.DebugWebClient;
 
 /**
@@ -47,10 +47,10 @@ public class CommandHandler implements ICommandHandler
 	 */
 	public IScriptExecResult handleCommand(final String userInput) throws IOException
 	{
-		ClientState selectedClient = provider.getSelectedClient();
+		IDebugClient selectedClient = provider.getSelectedClient();
 		if (selectedClient != null)
 		{
-			final ClientState state = selectedClient;
+			final IDebugClient state = selectedClient;
 			final Object[] retVal = new Object[1];
 			if (state instanceof DebugWebClient) ((DebugWebClient)state).addEventDispatchThread();
 			try

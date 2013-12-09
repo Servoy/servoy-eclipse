@@ -21,8 +21,10 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.IInternalDebugUIConstants;
+import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
@@ -60,9 +62,13 @@ public abstract class StartDebugAction implements IWorkbenchWindowActionDelegate
 
 	static long lastTimeStarted;
 
-	/**
-	 * 
-	 */
+	protected void makeSureNeededPluginsAreStarted()
+	{
+		//make sure the plugins are loaded
+		DLTKDebugUIPlugin.getDefault();
+		DebugPlugin.getDefault();
+	}
+
 	protected boolean testAndStartDebugger()
 	{
 		ServoyProject[] projects = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();

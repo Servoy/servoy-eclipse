@@ -60,7 +60,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.debug.script.ValueCollectionProvider;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
-import com.servoy.j2db.ClientState;
+import com.servoy.j2db.IDebugClient;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.util.Pair;
 
@@ -104,7 +104,7 @@ final class ContentAssistProcessor implements IContentAssistProcessor
 
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset)
 	{
-		ClientState selectedClient = provider.getSelectedClient();
+		IDebugClient selectedClient = provider.getSelectedClient();
 		if (selectedClient != null)
 		{
 			final ICompletionEngine engine = DLTKLanguageManager.getCompletionEngine(JavaScriptLanguageToolkit.getDefault().getNatureId());

@@ -100,16 +100,15 @@ import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.DesignApplication;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.repository.JSUnitUserManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.ClientState;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IBeanManager;
 import com.servoy.j2db.IBeanManagerInternal;
 import com.servoy.j2db.IBrowserLauncher;
+import com.servoy.j2db.IDebugClient;
 import com.servoy.j2db.IDebugClientHandler;
 import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.IDebugWebClient;
@@ -478,8 +477,8 @@ public class Activator extends Plugin
 		// shutdown all non-swing clients; no need to run this in AWT EDT
 		try
 		{
-			List<ClientState> nonSwingApps = getDebugClientHandler().getActiveDebugClients();
-			for (ClientState application : nonSwingApps)
+			List<IDebugClient> nonSwingApps = getDebugClientHandler().getActiveDebugClients();
+			for (IDebugClient application : nonSwingApps)
 			{
 				ClientInfo ci = application.getClientInfo();
 				if (ci != null && !Utils.isSwingClient(ci.getApplicationType())) application.shutDown(true);
@@ -500,8 +499,8 @@ public class Activator extends Plugin
 				{
 					try
 					{
-						List<ClientState> swingApps = getDebugClientHandler().getActiveDebugClients();
-						for (ClientState application : swingApps)
+						List<IDebugClient> swingApps = getDebugClientHandler().getActiveDebugClients();
+						for (IDebugClient application : swingApps)
 						{
 							ClientInfo ci = application.getClientInfo();
 							if (ci != null && Utils.isSwingClient(ci.getApplicationType())) application.shutDown(true);
@@ -615,7 +614,7 @@ public class Activator extends Plugin
 					});
 				}
 
-				public void addScriptObjects(ClientState client, Scriptable scope)
+				public void addScriptObjects(IDebugClient client, Scriptable scope)
 				{
 					Context.enter();
 					try
@@ -702,11 +701,6 @@ public class Activator extends Plugin
 			});
 		}
 		return debugSmartClient;
-	}
-
-	public IDebugJ2DBClient getJSUnitJ2DBClient()
-	{
-		return getDebugClientHandler().getJSUnitJ2DBClient(new JSUnitUserManager(ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager()));
 	}
 
 	/**

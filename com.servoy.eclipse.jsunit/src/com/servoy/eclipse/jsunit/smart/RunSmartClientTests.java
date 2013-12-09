@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.jsunit;
+package com.servoy.eclipse.jsunit.smart;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -29,12 +29,10 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.ui.progress.WorkbenchJob;
 
-import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
 import com.servoy.eclipse.core.util.SerialRule;
-import com.servoy.eclipse.debug.actions.StartJsUnitClientActionDelegate;
+import com.servoy.eclipse.jsunit.Activator;
 import com.servoy.eclipse.jsunit.scriptunit.RunJSUnitTests;
-import com.servoy.eclipse.model.repository.JSUnitUserManager;
 import com.servoy.eclipse.model.test.TestTarget;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IDebugJ2DBClient;
@@ -140,7 +138,7 @@ public class RunSmartClientTests extends RunJSUnitTests
 									}
 									else
 									{
-										return new Status(IStatus.ERROR, com.servoy.eclipse.jsunit.Activator.PLUGIN_ID,
+										return new Status(IStatus.ERROR, Activator.PLUGIN_ID,
 											"Timeout or cancel while waiting for solution to be loaded in test app.");
 									}
 								}
@@ -159,15 +157,13 @@ public class RunSmartClientTests extends RunJSUnitTests
 							catch (InterruptedException e)
 							{
 								ServoyLog.logError(e);
-								return new Status(IStatus.ERROR, com.servoy.eclipse.jsunit.Activator.PLUGIN_ID,
-									"Problem encountered when trying to run tests.", e);
+								return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Problem encountered when trying to run tests.", e);
 							}
 							catch (InvocationTargetException e)
 							{
 								ServoyLog.logError(e);
 								ServoyLog.logError("Caused by:", e.getTargetException());
-								return new Status(IStatus.ERROR, com.servoy.eclipse.jsunit.Activator.PLUGIN_ID,
-									"Problem encountered when trying to run tests.", e.getTargetException());
+								return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Problem encountered when trying to run tests.", e.getTargetException());
 							}
 							finally
 							{
@@ -207,7 +203,7 @@ public class RunSmartClientTests extends RunJSUnitTests
 							{
 								ServoyLog.logError(e);
 								cleanUpAfterPrepare();
-								return new Status(IStatus.ERROR, com.servoy.eclipse.jsunit.Activator.PLUGIN_ID, "Cannot start unit test SmartClient", e);
+								return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Cannot start unit test SmartClient", e);
 							}
 							return Status.OK_STATUS;
 						}

@@ -30,8 +30,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -82,9 +80,7 @@ public class StartSmartClientActionDelegate extends StartDebugAction implements 
 	 */
 	public void run(IAction action)
 	{
-		//make sure the plugins are loaded
-		DLTKDebugUIPlugin.getDefault();
-		DebugPlugin.getDefault();
+		makeSureNeededPluginsAreStarted();
 
 		Job job = new Job("Smart client start") //$NON-NLS-1$
 		{

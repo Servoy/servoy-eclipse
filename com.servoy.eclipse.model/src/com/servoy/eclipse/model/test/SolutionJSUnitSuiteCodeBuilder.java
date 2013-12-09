@@ -24,6 +24,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
+
+import com.servoy.j2db.ClientState;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -31,6 +36,7 @@ import com.servoy.j2db.persistence.RootObjectReference;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
+import com.servoy.j2db.scripting.SolutionScope;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
@@ -46,6 +52,10 @@ public class SolutionJSUnitSuiteCodeBuilder
 	public static final String TEST_METHOD_PREFIX = "test"; //$NON-NLS-1$
 	public static final String SET_UP_METHOD = "setUp"; //$NON-NLS-1$
 	public static final String TEAR_DOWN_METHOD = "tearDown"; //$NON-NLS-1$
+
+	// if this is set after a solution test method exits, it will fail that test (so at the end); it can be set by anyone that needs such behavior.
+	// when set it must be an error object; it will get thrown using JS "throw e;" it would be nice if it's a JSUnitError
+	public static final String FAIL_AFTER_CURRENT_TEST_KEY = "failAfterTest"; //$NON-NLS-1$
 
 	protected boolean initialized = false;
 	protected String code;
@@ -296,7 +306,11 @@ public class SolutionJSUnitSuiteCodeBuilder
 				tmp.append(method.getName());
 				tmp.append("(); ");
 				tmp.append(IExecutingEnviroment.TOPLEVEL_JSUNIT);
-				tmp.append(" = null; }\n");
+
+				// if someone wants this test to fail after it finished running do so here
+				tmp.append(" = null; if (this.").append(SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY).append(") { var te = this.").append(
+					SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY).append("; this.").append(
+					SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY).append(" = null; throw te; } }\n");
 			}
 		}
 		if (testMethodsFound && testIdentifier != null)
@@ -405,6 +419,39 @@ public class SolutionJSUnitSuiteCodeBuilder
 		this.rootTestClassName = INVALID_APP_SUITE;
 	}
 
+	public static void failAfterCurrentTestWithError(SolutionScope solutionScope, String message, Object error)
+	{
+		Context context = Context.enter();
+		try
+		{
+			Scriptable jsunitAssertObject = (Scriptable)solutionScope.get(IExecutingEnviroment.TOPLEVEL_JSUNIT, solutionScope); // this is the actual jsunit test object; so it must be a scriptable
+			Object failAfterTest = jsunitAssertObject.get(SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY, jsunitAssertObject); // can be null/undefined or an object like {message: "Errored out.", error: new Error()}
+
+			if (failAfterTest == null || Scriptable.NOT_FOUND == failAfterTest || Context.getUndefinedValue().equals(failAfterTest))
+			{
+				Exception scriptException;
+				if (error instanceof Exception && (scriptException = ClientState.getScriptException((Exception)error)) != null)
+				{
+					ScriptableObject.putProperty(jsunitAssertObject, SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY,
+						Context.javaToJS(scriptException, solutionScope));
+				}
+				else
+				{
+					String adjustedMessage = ((message != null) ? message + ". " : "") +
+						(error != null && !Utils.equalObjects(message, String.valueOf(error)) ? "Details: " + String.valueOf(error) : "");
+
+					context.evaluateString(solutionScope, IExecutingEnviroment.TOPLEVEL_JSUNIT + "." +
+						SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY + " = new JsUnitError();", "unhandled error detected", 1, null);
+					failAfterTest = jsunitAssertObject.get(SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY, jsunitAssertObject); // should now be the JSUnitError
+					ScriptableObject.putProperty((Scriptable)failAfterTest, "message", Context.javaToJS(adjustedMessage, solutionScope));
+				}
+			} // else it would have already failed; first reason is the most important one so leave that and discard this one (we can record multiple reasons in the future if needed)
+		}
+		finally
+		{
+			Context.exit();
+		}
+	}
 
 	private static class TestIdentifier
 	{

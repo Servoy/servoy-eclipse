@@ -65,6 +65,7 @@ import org.mozilla.javascript.Scriptable;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.ClientState;
+import com.servoy.j2db.IDebugClient;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.scripting.GlobalScope;
@@ -175,11 +176,11 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 		return null;
 	}
 
-	public static Scriptable getScope(ClientState state, boolean create)
+	public static Scriptable getScope(IDebugClient clientState, boolean create)
 	{
 		Pair<String, IRootObject> scopePair = getGlobalScope();
 		String scopeName = scopePair != null ? scopePair.getLeft() : ScriptVariable.GLOBAL_SCOPE;
-		GlobalScope ss = state.getScriptEngine().getScopesScope().getGlobalScope(scopeName);
+		GlobalScope ss = clientState.getScriptEngine().getScopesScope().getGlobalScope(scopeName);
 		Scriptable scope = null;
 		if (ss.has(TEST_SCOPE, ss))
 		{
@@ -225,7 +226,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 		private ListViewer clientsList;
 		private SashForm form;
 		private ScriptConsoleViewer text;
-		private ClientState selectedClient;
+		private IDebugClient selectedClient;
 		private final HashMap<Scriptable, StringBuilder> previousScripts = new HashMap<Scriptable, StringBuilder>();
 		private TextViewerAction proposalsAction;
 		private ActionHandler proposalsHandler;
@@ -276,7 +277,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 					IStructuredSelection selection = (IStructuredSelection)event.getSelection();
 					if (selection.getFirstElement() instanceof ClientState)
 					{
-						selectedClient = (ClientState)selection.getFirstElement();
+						selectedClient = (IDebugClient)selection.getFirstElement();
 					}
 					else selectedClient = null;
 
@@ -346,7 +347,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 					return stringBuilder;
 				}
 
-				public ClientState getSelectedClient()
+				public IDebugClient getSelectedClient()
 				{
 					return selectedClient;
 				}
@@ -390,7 +391,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 
 		private class TestClientsJob extends Job
 		{
-			private List<ClientState> activeClients;
+			private List<IDebugClient> activeClients;
 			private boolean canceled;
 
 			/**
@@ -410,7 +411,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 			@Override
 			protected IStatus run(IProgressMonitor monitor)
 			{
-				List<ClientState> activeDebugClients = ApplicationServerSingleton.get().getDebugClientHandler().getActiveDebugClients();
+				List<IDebugClient> activeDebugClients = ApplicationServerSingleton.get().getDebugClientHandler().getActiveDebugClients();
 				if (!activeDebugClients.equals(this.activeClients))
 				{
 					this.activeClients = activeDebugClients;
@@ -418,7 +419,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 					@SuppressWarnings("unchecked")
 					Map<Scriptable, StringBuilder> clone = (Map<Scriptable, StringBuilder>)previousScripts.clone();
 					previousScripts.clear();
-					for (ClientState clientState : activeDebugClients)
+					for (IDebugClient clientState : activeDebugClients)
 					{
 						Scriptable scope = getScope(clientState, false);
 						if (scope != null)

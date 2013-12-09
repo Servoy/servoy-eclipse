@@ -39,7 +39,7 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
-import com.servoy.j2db.ClientState;
+import com.servoy.j2db.IDebugClient;
 import com.servoy.j2db.IForm;
 import com.servoy.j2db.documentation.ServoyDocumented;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -60,10 +60,10 @@ import com.servoy.j2db.util.Debug;
 public class JSDeveloperSolutionModel
 {
 
-	private final ClientState state;
+	private final IDebugClient state;
 
 
-	public JSDeveloperSolutionModel(ClientState state)
+	public JSDeveloperSolutionModel(IDebugClient state)
 	{
 		this.state = state;
 	}

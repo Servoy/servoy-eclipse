@@ -20,6 +20,8 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 import com.servoy.base.test.IJSUnitSuiteHandler;
+import com.servoy.eclipse.jsunit.smart.DebugJ2DBTestClient;
+import com.servoy.eclipse.jsunit.smart.DebugSmartTestClientType;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.util.StaticSingletonMap;
 
@@ -57,6 +59,11 @@ public class Activator extends AbstractUIPlugin
 		StaticSingletonMap.instance().remove(IJSUnitSuiteHandler.SERVOY_BRIDGE_KEY);
 		plugin = null;
 		super.stop(context);
+	}
+
+	public DebugJ2DBTestClient getJSUnitJ2DBClient()
+	{
+		return com.servoy.eclipse.core.Activator.getDefault().getDebugClientHandler().getDebugClient(DebugSmartTestClientType.INSTANCE);
 	}
 
 	/**
