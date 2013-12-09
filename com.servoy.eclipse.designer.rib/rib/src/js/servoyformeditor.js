@@ -81,7 +81,7 @@ $.servoy = {
       
       getReturnvalue: function(o, func)
       {
-      	if (o.then)
+      	if (o && o.then)
       	{
       		// a promise
       		$.when(o.then(func))
@@ -89,7 +89,7 @@ $.servoy = {
       	else
       	{
 	      	// already a value, run later to mimic async behaviour
-	      	setTimeout(func.apply(this, [o]), 0)
+	      	/* setTimeout(function(){*/func.apply(this, [o])/*}, 0)*/
       	}
       },
       

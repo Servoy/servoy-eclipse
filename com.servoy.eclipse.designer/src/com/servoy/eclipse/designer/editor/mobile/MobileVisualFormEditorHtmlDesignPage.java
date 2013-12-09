@@ -1277,54 +1277,51 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 
 						case Field.CHECKS :
 						{
-							String customValues = null;
-							if (field.getValuelistID() != 0)
+							if (field.getValuelistID() == 0 && !radios)
+							{
+								elementType = "SingleCheckbox"; // special case
+								properties.put("checked", "checked");
+							}
+							else
 							{
 								ValueList valuelist = Activator.getDefault().getDesignClient().getFlattenedSolution().getValueList(field.getValuelistID());
 
+								String customValues = null;
 								if (valuelist != null && valuelist.getValueListType() == IValueListConstants.CUSTOM_VALUES)
 								{
 									customValues = valuelist.getCustomValues();
 								}
-							}
 
-							if (customValues == null || customValues.trim().length() == 0)
-							{
-								if (radios || field.getValuelistID() != 0)
+								if (customValues == null || customValues.trim().length() == 0)
 								{
 									customValues = "One\nTwo\nThree";
 								}
-								else
+
+								ServoyJSONArray children = new ServoyJSONArray();
+								element.put("children", children);
+
+								StringTokenizer tk = new StringTokenizer(customValues, "\r\n"); //$NON-NLS-1$
+								for (int i = 1; tk.hasMoreTokens(); i++)
 								{
-									// single checkbox
-									customValues = EMPTY_VALUE;
+									String line = tk.nextToken();
+									String[] str = Utils.stringSplit(line, '|', '\\');
+
+									ServoyJSONObject check = new ServoyJSONObject(false, false);
+									children.put(check);
+									check.put(TYPE_KEY, radios ? "RadioButton" : "Checkbox");
+									ServoyJSONObject checkProperties = new ServoyJSONObject(false, false);
+									check.put(PROPERTIES_KEY, checkProperties);
+									checkProperties.put(ID_KEY, "child" + i + '_' + field.getUUID().toString());
+									checkProperties.put("label", str[0]);
+									if (i == 1)
+									{
+										checkProperties.put("checked", "checked");
+										checkProperties.put("servoydataprovider", field.getDataProviderID() == null ? EMPTY_VALUE
+											: ((ISupportDataProviderID)persist).getDataProviderID());
+									}
+
+									checkProperties.put("theme", field.getStyleClass());
 								}
-							}
-
-							ServoyJSONArray children = new ServoyJSONArray();
-							element.put("children", children);
-
-							StringTokenizer tk = new StringTokenizer(customValues, "\r\n"); //$NON-NLS-1$
-							for (int i = 1; tk.hasMoreTokens(); i++)
-							{
-								String line = tk.nextToken();
-								String[] str = Utils.stringSplit(line, '|', '\\');
-
-								ServoyJSONObject check = new ServoyJSONObject(false, false);
-								children.put(check);
-								check.put(TYPE_KEY, radios ? "RadioButton" : "Checkbox");
-								ServoyJSONObject checkProperties = new ServoyJSONObject(false, false);
-								check.put(PROPERTIES_KEY, checkProperties);
-								checkProperties.put(ID_KEY, "child" + i + '_' + field.getUUID().toString());
-								checkProperties.put("label", str[0]);
-								if (i == 1)
-								{
-									checkProperties.put("checked", "checked");
-									checkProperties.put("servoydataprovider", field.getDataProviderID() == null ? EMPTY_VALUE
-										: ((ISupportDataProviderID)persist).getDataProviderID());
-								}
-
-								checkProperties.put("theme", field.getStyleClass());
 							}
 
 							break;

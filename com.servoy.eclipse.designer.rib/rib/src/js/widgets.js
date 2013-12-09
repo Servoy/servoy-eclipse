@@ -1498,12 +1498,14 @@ var BWidgetRegistry = {
                 defaultValue: "",
                 htmlAttribute: "value"
             },
-            checked: BCommonProperties.checked,
+            checked:   $.extend({}, BCommonProperties.checked, {
+				htmlSelector: "input"
+            }),
             mini: BCommonProperties.mini,
             theme: BCommonProperties.theme,
             disabled: BCommonProperties.disabled
         },
-        template: '<div data-role="fieldcontain"><fieldset data-role="controlgroup"><legend>%LABEL%</legend></fieldset>'
+        template: '<div data-role="fieldcontain"><fieldset data-role="controlgroup"><legend>%LABEL%<div class="servoydataprovider">%SERVOYTITLEDATAPROVIDER%</div></legend><input type="checkbox" name="%ID%" id="%ID%"/><label for="%ID%"><div class="servoydataprovider">%SERVOYDATAPROVIDER%</div></label></fieldset></div>'
     },
 
     /**
