@@ -100,7 +100,7 @@
 		<antcall target="apitools.generation">
 			<param name="target.folder" value="${build.result.folder}"/>
 			<param name="projectLocation" value="${basedir}"/>
-			<param name="binary.folders" value="/crypt/workspace/com.servoy.eclipse.designer.rib"/>
+			<param name="binary.folders" value="E:\Workspaces\HEAD\com.servoy.eclipse.designer.rib"/>
 			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
 		</antcall>
 		<eclipse.gatherBundle 
@@ -123,7 +123,7 @@
 		<antcall target="apitools.generation">
 			<param name="target.folder" value="${destination.temp.folder}/com.servoy.eclipse.designer.rib_7.4.0.2022"/>
 			<param name="projectLocation" value="${basedir}"/>
-			<param name="binary.folders" value="/crypt/workspace/com.servoy.eclipse.designer.rib"/>
+			<param name="binary.folders" value="E:\Workspaces\HEAD\com.servoy.eclipse.designer.rib"/>
 			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
 		</antcall>
 	</target>
@@ -157,7 +157,7 @@
 	</target>
 
 	<target name="refresh" depends="init" if="eclipse.running" description="Refresh this folder.">
-		<eclipse.convertPath fileSystemPath="/crypt/workspace/com.servoy.eclipse.designer.rib" property="resourcePath"/>
+		<eclipse.convertPath fileSystemPath="E:/Workspaces/HEAD/com.servoy.eclipse.designer.rib" property="resourcePath"/>
 		<eclipse.refreshLocal resource="${resourcePath}" depth="infinite"/>
 	</target>
 
