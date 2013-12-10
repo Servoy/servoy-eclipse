@@ -54,9 +54,11 @@ import com.servoy.j2db.Messages;
 import com.servoy.j2db.dataprocessing.IDataServer;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.IServiceRegistry;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.server.shared.IUserManagerFactory;
 import com.servoy.j2db.server.starter.IServerStarter;
+import com.servoy.j2db.util.OSGIServiceRegistry;
 import com.servoy.j2db.util.Settings;
 
 /**
@@ -111,7 +113,6 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 				verbose = configuration.isVerbose();
 
 				// load settings from given file if specified as command line argument
-				boolean loadSettingsFromAppServer = true;
 				if (configuration.getSettingsFileName() != null)
 				{
 					File f = new File(configuration.getSettingsFileName());
@@ -120,8 +121,11 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 						try
 						{
 							outputExtra("Loading settings from: " + f.getAbsolutePath()); //$NON-NLS-1$
-							Settings.getInstance().loadFromFile(f);
-							loadSettingsFromAppServer = false;
+							Settings s = Settings.getInstance();
+							s.loadFromFile(f);
+
+							IServiceRegistry registry = new OSGIServiceRegistry(Activator.getDefault().getBundle().getBundleContext());
+							registry.registerService(Settings.class, s);
 						}
 						catch (IOException e)
 						{
@@ -142,7 +146,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 				}
 
 				// initialize app server
-				initializeApplicationServer(loadSettingsFromAppServer ? null : Settings.getInstance());
+				initializeApplicationServer();
 
 				if (ApplicationServerSingleton.get() != null)
 				{
@@ -486,7 +490,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 		}
 	}
 
-	private void initializeApplicationServer(Properties properties)
+	private void initializeApplicationServer()
 	{
 		BundleContext bc = Activator.getDefault().getBundle().getBundleContext();
 		ServiceReference ref = bc.getServiceReference(IServerStarter.class);
