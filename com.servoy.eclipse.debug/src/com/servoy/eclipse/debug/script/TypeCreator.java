@@ -2247,11 +2247,11 @@ public class TypeCreator extends TypeCache
 
 				if (cachedSuperTypeTemplateTypeForFoundSet == null && !isRelatedFoundSet)
 				{
-					cachedSuperTypeTemplateTypeForFoundSet = createBaseType(context, fullTypeName, FoundSet.class);
+					cachedSuperTypeTemplateTypeForFoundSet = createBaseType(context, FoundSet.JS_FOUNDSET, FoundSet.class);
 				}
 				else if (cachedSuperTypeTemplateTypeForRelatedFoundSet == null && isRelatedFoundSet)
 				{
-					cachedSuperTypeTemplateTypeForRelatedFoundSet = createBaseType(context, fullTypeName, RelatedFoundSet.class);
+					cachedSuperTypeTemplateTypeForRelatedFoundSet = createBaseType(context, FoundSet.JS_FOUNDSET, RelatedFoundSet.class);
 				}
 				EList<Member> members = null;
 				if (isRelatedFoundSet)
