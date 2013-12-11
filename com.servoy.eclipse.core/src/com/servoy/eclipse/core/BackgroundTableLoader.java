@@ -30,7 +30,6 @@ import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 
@@ -144,7 +143,6 @@ public class BackgroundTableLoader implements IActiveProjectListener
 						if (!s.isValid()) invalidServersFound = true;
 					}
 				}
-				serverManager.initRegistry(ApplicationServerSingleton.get());
 
 				if (invalidServersFound)
 				{
