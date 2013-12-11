@@ -58,7 +58,7 @@ import com.servoy.j2db.server.shared.IServiceRegistry;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.server.shared.IUserManagerFactory;
 import com.servoy.j2db.server.starter.IServerStarter;
-import com.servoy.j2db.util.OSGIServiceRegistry;
+import com.servoy.j2db.server.starter.OSGIServiceRegistry;
 import com.servoy.j2db.util.Settings;
 
 /**
@@ -330,31 +330,50 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 
 							// check project markers
 
+							// TODO we should really be able to tell Servoy Builder to use an abstractisation of table model (dbi info)
+							// instead of the actual tables - if we want nice -dbi or -dbd export; until then, -dbi and -dbd will both ignore
+							// all error markers and allow export to start (cause builder generates errors based on database only and it would be hard
+							// to differentiate between them and also keep track of this in the future without that abstractisation);
+							// if -dbi is used then switch builder to that state here
+							// (developer exporter should be adjusted in this case as well, maybe with some subtle differences)
+
 							// for solution and/or (some) modules
 							List<IMarker> errors = new ArrayList<IMarker>();
 							List<IMarker> warnings = new ArrayList<IMarker>();
 							checkProjectMarkers(modules, errors, warnings, configuration);
 
 							// for resources project
-							if (!configuration.getExportUsingDbiFileInfoOnly()) splitMarkers(sm.getActiveResourcesProject().getProject(), errors, warnings);
-							// else we currently ignore error markers to allow dbi differences during export // TODO maybe check for non-dbi markers only here? (the same must happen in export wizard then)
+							splitMarkers(sm.getActiveResourcesProject().getProject(), errors, warnings);
 
 							if (dbDownMode)
 							{
 								output("Found error markers that would suggest at least a DB used by this solution or it's exported modules is down."); //$NON-NLS-1$
-								if (configuration.exportIfDBDown())
+								// TODO see large comment some lines above; when error markers can be generated based on dbi files only we should do a rebuild here based on that to get real markers
+								if (configuration.exportIfDBDown()) // TODO see large comment some lines above; remove this when error markers can be generated based on dbi files only
 								{
 									output("Exporting with DB down is allowed. Proceeding..."); //$NON-NLS-1$
 								}
-								else
+								else if (!configuration.getExportUsingDbiFileInfoOnly())
 								{
 									outputError("Please use -dbd argument to allow exports when DB is down."); //$NON-NLS-1$
 									dbDownMode = false; // so that it fails because of error markers
 								}
 							}
 
+							if (errors.size() > 0 && !dbDownMode && configuration.getExportUsingDbiFileInfoOnly()) // TODO see large comment some lines above; remove this when error markers can be generated based on dbi files only
+							{
+								output("Found error markers but -dbi was specified. Ignoring the following errors and exporting based on .dbi files instead of database contents..."); //$NON-NLS-1$
+								if (verbose)
+								{
+									for (IMarker marker : errors)
+									{
+										outputExtra(marker.getAttribute(IMarker.MESSAGE, "Unknown marker message.")); //$NON-NLS-1$
+									}
+								}
+							}
+
 							// if db is down we still try to export (using dbi files)
-							if (errors.size() > 0 && !dbDownMode)
+							if (errors.size() > 0 && !(dbDownMode || configuration.getExportUsingDbiFileInfoOnly())) // TODO see large comment some lines above; remove this when error markers can be generated based on dbi files only
 							{
 								exitCode = EXIT_EXPORT_FAILED;
 								outputError("Found error markers in projects for solution '" + solutionName + "'."); //$NON-NLS-1$//$NON-NLS-2$
@@ -369,7 +388,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 							}
 							else if (!mustStop)
 							{
-								if (warnings.size() > 0 && !dbDownMode)
+								if (warnings.size() > 0 && !(dbDownMode || configuration.getExportUsingDbiFileInfoOnly())) // TODO see large comment some lines above; remove this when error markers can be generated based on dbi files only
 								{
 									output("Found warning markers in projects for solution " + solutionName); //$NON-NLS-1$
 									if (verbose)
