@@ -54,11 +54,9 @@ import com.servoy.j2db.Messages;
 import com.servoy.j2db.dataprocessing.IDataServer;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
-import com.servoy.j2db.server.shared.IServiceRegistry;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.server.shared.IUserManagerFactory;
 import com.servoy.j2db.server.starter.IServerStarter;
-import com.servoy.j2db.server.starter.OSGIServiceRegistry;
 import com.servoy.j2db.util.Settings;
 
 /**
@@ -124,8 +122,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 							Settings s = Settings.getInstance();
 							s.loadFromFile(f);
 
-							IServiceRegistry registry = new OSGIServiceRegistry(Activator.getDefault().getBundle().getBundleContext());
-							registry.registerService(Settings.class, s);
+							Activator.getDefault().getBundle().getBundleContext().registerService(Settings.class, s, null);
 						}
 						catch (IOException e)
 						{
