@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -43,7 +42,6 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseMessages;
-import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.EclipseRepositoryFactory;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -53,7 +51,6 @@ import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.Messages;
 import com.servoy.j2db.dataprocessing.IDataServer;
 import com.servoy.j2db.debug.DebugClientHandler;
-import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.server.shared.IUserManagerFactory;
@@ -517,17 +514,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 			try
 			{
 				ss.init();
-				ss.setRepositoryFactory(new EclipseRepositoryFactory()
-				{
-					@Override
-					protected void init(IServerManagerInternal serverManager, Properties settings)
-					{
-						if (repository == null)
-						{
-							repository = new EclipseRepository(serverManager, settings);
-						}
-					}
-				});
+				ss.setRepositoryFactory(new EclipseRepositoryFactory());
 				ss.setUserManagerFactory(new IUserManagerFactory()
 				{
 					public IUserManager createUserManager(IDataServer dataServer)
