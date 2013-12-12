@@ -4157,8 +4157,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	private static void createAndRefreshDataSourceCollectorVisitor()
 	{
-		ServoyLog.logError(new Error("we need to see this in build server log, via ServoyLog"));
-		Debug.error(new Error("we need to see this in build server log, via Debug"));
 		dataSourceCollectorVisitor = new DataSourceCollectorVisitor();
 		for (ServoyProject sp : ServoyModelFinder.getServoyModel().getModulesOfActiveProject())
 		{
