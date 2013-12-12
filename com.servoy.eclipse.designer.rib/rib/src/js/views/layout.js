@@ -73,7 +73,6 @@
                             - parseFloat(iframe.css('padding-bottom'))
                             - parseFloat(iframe.css('padding-bottom')));
             });
-
             return this;
         },
 
@@ -116,6 +115,10 @@
                 return;
             }
 
+            if (event &&  (name === 'modelUpdated' || name === 'designReset'))
+            {
+            	this.options.iframe.css('min-height',this.options.iframe[0].contentDocument.body.childNodes[0].offsetHeight);
+            }
             if ((!event) || (name === 'load' ||
                              name === 'designReset' ||
                              name === 'modelUpdated')) {

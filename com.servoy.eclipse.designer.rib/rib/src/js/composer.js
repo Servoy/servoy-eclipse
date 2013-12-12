@@ -344,6 +344,8 @@ $(function() {
     window.handleSelect = handleSelect;
     window.ADM = window.parent.ADM;
     $('div:jqmData(role="page")').live('pageshow', function(e) {
+    	//change height of the iframe to content height
+    	window.top.document.getElementsByTagName("IFRAME")[0].style.minHeight = window.document.body.childNodes[0].offsetHeight+'px';
         setTimeout(function(){
             var focusElement = parent.focusElement;
             if (focusElement) {
