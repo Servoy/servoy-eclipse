@@ -887,6 +887,36 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          unpack="false"/>
 
    <plugin
+         id="com.servoy.eclipse.xulrunner.win32"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="com.servoy.eclipse.xulrunner.linux.x86_64"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="com.servoy.eclipse.xulrunner.linux"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="com.servoy.eclipse.xulrunner.macosx"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="com.servoy.eclipse.xulrunner.win32.x86_64"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
          id="com.servoy.eclipse.designer.rib"
          download-size="0"
          install-size="0"
