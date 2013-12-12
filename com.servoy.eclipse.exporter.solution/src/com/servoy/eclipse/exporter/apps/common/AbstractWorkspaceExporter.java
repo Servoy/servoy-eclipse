@@ -52,6 +52,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.Messages;
 import com.servoy.j2db.dataprocessing.IDataServer;
+import com.servoy.j2db.debug.DebugClientHandler;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IUserManager;
@@ -534,6 +535,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 						return new WorkspaceUserManager();
 					}
 				});
+				ss.setBaseClassloader(DebugClientHandler.class.getClassLoader());
 				ss.start();
 			}
 			catch (Exception e)
