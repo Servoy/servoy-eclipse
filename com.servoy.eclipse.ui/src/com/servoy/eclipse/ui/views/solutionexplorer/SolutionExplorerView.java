@@ -639,7 +639,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			Image retval = null;
 			if (obj instanceof SimpleUserNode)
 			{
-				retval = (Image)((SimpleUserNode)obj).getIcon();
+				retval = ((SimpleUserNode)obj).getIcon();
 			}
 			if (retval == null)
 			{

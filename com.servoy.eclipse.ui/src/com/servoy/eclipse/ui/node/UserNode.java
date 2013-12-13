@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.ui.node;
 
+import org.eclipse.swt.graphics.Image;
+
 import com.servoy.j2db.persistence.Form;
 
 /**
@@ -23,34 +25,34 @@ import com.servoy.j2db.persistence.Form;
  */
 public class UserNode extends SimpleUserNode
 {
-	public UserNode(String displayName, UserNodeType type, Object realObject, Form form, Object icon)
+	public UserNode(String displayName, UserNodeType type, Object realObject, Form form, Image icon)
 	{
 		super(displayName, type, realObject, form, icon);
 	}
 
-	public UserNode(String displayName, UserNodeType type, Object realObject, Object icon)
+	public UserNode(String displayName, UserNodeType type, Object realObject, Image icon)
 	{
 		super(displayName, type, realObject, icon);
 	}
 
-	public UserNode(String displayName, UserNodeType type, String codeFragment, String toolTip, Object realObject, Object icon)
+	public UserNode(String displayName, UserNodeType type, String codeFragment, String toolTip, Object realObject, Image icon)
 	{
 		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, null, toolTip), realObject, icon);
 	}
 
-	public UserNode(String displayName, UserNodeType type, String codeFragment, String sampleCode, String toolTip, Object realObject, Object icon)
+	public UserNode(String displayName, UserNodeType type, String codeFragment, String sampleCode, String toolTip, Object realObject, Image icon)
 	{
 		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, sampleCode, toolTip), realObject, icon);
 	}
 
-	public UserNode(String displayName, UserNodeType type, IDeveloperFeedback developerFeedback, Object realObject, Object icon)
+	public UserNode(String displayName, UserNodeType type, IDeveloperFeedback developerFeedback, Object realObject, Image icon)
 	{
 		super(displayName, type, developerFeedback, realObject, icon);
 	}
 
 	public UserNode(String displayName, UserNodeType type, String codeFragment, String toolTip)
 	{
-		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, null, toolTip), (Object)null, (Object)null);
+		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, null, toolTip), (Object)null, (Image)null);
 	}
 
 	public UserNode(String displayName, UserNodeType type)

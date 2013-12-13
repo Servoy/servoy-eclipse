@@ -41,6 +41,8 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.ServerConfig;
 
 /**
  * Extension point that takes care of opening editors for {@link Element} objects.
@@ -143,7 +145,14 @@ public class OpenAdapter implements IOpenDelegate
 				ServoyLog.logError(e);
 			}
 		}
+		else if (resource instanceof ServerConfig)
+		{
+			EditorUtil.openServerEditor((ServerConfig)resource);
+		}
+		else if (resource instanceof ITable)
+		{
+			EditorUtil.openTableEditor((ITable)resource);
+		}
 		return null;
 	}
-
 }

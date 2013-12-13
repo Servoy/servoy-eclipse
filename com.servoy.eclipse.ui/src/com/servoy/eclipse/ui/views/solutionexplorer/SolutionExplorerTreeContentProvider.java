@@ -758,43 +758,38 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		for (String server_name : array)
 		{
 			IServerInternal serverObj = (IServerInternal)handler.getServer(server_name, false, false);
-			Pair<String, IServerInternal> serverInfo = new Pair<String, IServerInternal>(server_name, serverObj);
 
-			Object image = uiActivator.loadImageFromBundle("server.gif"); //$NON-NLS-1$
 			String tooltip = serverObj.toHTML();
-
-
-			if (serverObj.getConfig().isEnabled())
+			if (serverObj.getConfig().isEnabled() && serverObj.isValid() && !serverObj.getName().equals(server_name))
 			{
-				if (serverObj.isValid())
-				{
-					if (serverObj.getName().equals(serverInfo.getLeft()))
-					{
-						image = uiActivator.loadImageFromBundle("server.gif"); //$NON-NLS-1$
-					}
-					else
-					{
-						image = uiActivator.loadImageFromBundle("serverDuplicate.gif"); //$NON-NLS-1$
-						tooltip = "Duplicate of " + serverObj.getName(); //$NON-NLS-1$
-					}
-				}
-				else
-				{
-					image = uiActivator.loadImageFromBundle("serverError.gif"); //$NON-NLS-1$
-				}
+				tooltip = "Duplicate of " + serverObj.getName(); //$NON-NLS-1$
 			}
-			else
-			{
-				image = uiActivator.loadImageFromBundle("serverDisabled.gif"); //$NON-NLS-1$
-			}
-
-			PlatformSimpleUserNode node = new PlatformSimpleUserNode(server_name, UserNodeType.SERVER, "", tooltip, serverObj, image); //$NON-NLS-1$
+			PlatformSimpleUserNode node = new PlatformSimpleUserNode(server_name, UserNodeType.SERVER,
+				"", tooltip, serverObj, uiActivator.loadImageFromBundle(getServerImageName(server_name, serverObj))); //$NON-NLS-1$
 			serverNodes.add(node);
 			node.parent = serversNode;
 			handleServerViewsNode(serverObj, node);
 		}
 
 		serversNode.children = serverNodes.toArray(new PlatformSimpleUserNode[serverNodes.size()]);
+	}
+
+	public static String getServerImageName(String serverName, IServerInternal server)
+	{
+		if (!server.getConfig().isEnabled())
+		{
+			return "serverDisabled.gif";
+		}
+		if (!server.isValid())
+		{
+			return "serverError.gif";
+		}
+		if (!server.getName().equals(serverName))
+		{
+			return "serverDuplicate.gif";
+		}
+
+		return "server.gif";
 	}
 
 	private void handleServerViewsNode(IServerInternal serverObj, PlatformSimpleUserNode node)
@@ -918,7 +913,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						}
 						nodeName = cls.getName().substring(index + 1);
 					}
-					PlatformSimpleUserNode n = new PlatformSimpleUserNode(nodeName, UserNodeType.RETURNTYPE, cls, (Object)null, cls);
+					PlatformSimpleUserNode n = new PlatformSimpleUserNode(nodeName, UserNodeType.RETURNTYPE, cls, (Image)null, cls);
 					JavaMembers javaMembers = ScriptObjectRegistry.getJavaMembers(cls, null);
 					if (IConstantsObject.class.isAssignableFrom(cls) &&
 						!(javaMembers instanceof InstanceJavaMembers && javaMembers.getMethodIds(false).size() > 0))

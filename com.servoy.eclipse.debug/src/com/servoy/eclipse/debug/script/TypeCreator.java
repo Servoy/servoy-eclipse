@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -97,6 +98,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
+import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerTreeContentProvider;
 import com.servoy.j2db.BasicFormController.JSForm;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormManager.HistoryProvider;
@@ -110,6 +112,11 @@ import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.dataprocessing.RelatedFoundSet;
+import com.servoy.j2db.dataprocessing.datasource.DBDataSource;
+import com.servoy.j2db.dataprocessing.datasource.DBDataSourceServer;
+import com.servoy.j2db.dataprocessing.datasource.JSDataSource;
+import com.servoy.j2db.dataprocessing.datasource.JSDataSources;
+import com.servoy.j2db.dataprocessing.datasource.MemDataSource;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.DocumentationUtil;
 import com.servoy.j2db.documentation.IParameter;
@@ -131,6 +138,8 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.IServerManagerInternal;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.LiteralDataprovider;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Portal;
@@ -209,6 +218,7 @@ import com.servoy.j2db.ui.runtime.IRuntimeRtfArea;
 import com.servoy.j2db.ui.runtime.IRuntimeSpinner;
 import com.servoy.j2db.ui.runtime.IRuntimeTextArea;
 import com.servoy.j2db.ui.runtime.IRuntimeTextField;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.Pair;
@@ -362,15 +372,15 @@ public class TypeCreator extends TypeCache
 		addType(DataException.class.getSimpleName(), DataException.class);
 
 		addAnonymousClassType("Controller", JSForm.class);
-		addAnonymousClassType("JSApplication", JSApplication.class);
-		addAnonymousClassType("JSI18N", JSI18N.class);
-		addAnonymousClassType("HistoryProvider", HistoryProvider.class);
-		addAnonymousClassType("JSUtils", JSUtils.class);
+		addAnonymousClassType(JSApplication.class);
+		addAnonymousClassType(JSI18N.class);
+		addAnonymousClassType(HistoryProvider.class);
+		addAnonymousClassType(JSUtils.class);
 		addAnonymousClassType("JSUnit", JSUnitAssertFunctions.class);
-		addAnonymousClassType("JSSolutionModel", JSSolutionModel.class);
-		addAnonymousClassType("JSDatabaseManager", JSDatabaseManager.class);
-		addAnonymousClassType("JSDeveloperSolutionModel", JSDeveloperSolutionModel.class);
-		addAnonymousClassType("JSSecurity", JSSecurity.class);
+		addAnonymousClassType(JSSolutionModel.class);
+		addAnonymousClassType(JSDatabaseManager.class);
+		addAnonymousClassType(JSDeveloperSolutionModel.class);
+		addAnonymousClassType(JSSecurity.class);
 		ElementResolver.registerConstantType("JSSecurity", "JSSecurity");
 
 
@@ -408,8 +418,12 @@ public class TypeCreator extends TypeCache
 		addScopeType(QBParameters.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBColumns.class.getSimpleName(), new QueryBuilderColumnsCreator());
 		addScopeType(QBFunctions.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(MemDataSource.class.getSimpleName(), new MemDataSourceCreator());
+		addScopeType(DBDataSource.class.getSimpleName(), new DBDataSourceCreator());
+		addScopeType(DBDataSourceServer.class.getSimpleName(), new DBDataSourceServerCreator());
+		addScopeType(JSDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSDataSource.class, ClientSupport.wc_sc));
+		addScopeType(JSDataSources.class.getSimpleName(), new DynamicJavaClassCreator(JSDataSources.class, ClientSupport.wc_sc));
 	}
-
 
 	private final ConcurrentHashMap<String, Boolean> ignorePackages = new ConcurrentHashMap<String, Boolean>();
 
@@ -495,7 +509,6 @@ public class TypeCreator extends TypeCache
 			return addType(null, type);
 		}
 
-
 		String realTypeName = typeName;
 		if (realTypeName.equals("JSFoundset")) realTypeName = FoundSet.JS_FOUNDSET;
 		type = createClassType(context, realTypeName, realTypeName);
@@ -503,21 +516,19 @@ public class TypeCreator extends TypeCache
 		{
 			return addType(null, type);
 		}
+
+		FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
+		if (fs != null)
+		{
+			type = createDynamicType(context, realTypeName, realTypeName);
+			if (type != null && realTypeName.indexOf('<') != -1 && type.eResource() == null && !type.isProxy())
+			{
+				return addType(fs.getSolution().getName(), type);
+			}
+		}
 		else
 		{
-			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
-			if (fs != null)
-			{
-				type = createDynamicType(context, realTypeName, realTypeName);
-				if (type != null && realTypeName.indexOf('<') != -1 && type.eResource() == null && !type.isProxy())
-				{
-					return addType(fs.getSolution().getName(), type);
-				}
-			}
-			else
-			{
-				type = createDynamicType(context, realTypeName, realTypeName);
-			}
+			type = createDynamicType(context, realTypeName, realTypeName);
 		}
 		return type;
 	}
@@ -558,7 +569,7 @@ public class TypeCreator extends TypeCache
 			{
 				Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
 				parameter.setName("arg" + i);
-				JSType jsType = null;
+				JSType jsType;
 				if (i == (parameterTypes.length - 1) && method.isVarArgs() && parameterTypes[i].isArray())
 				{
 					jsType = getJSType(context, parameterTypes[i].getComponentType());
@@ -585,7 +596,10 @@ public class TypeCreator extends TypeCache
 	{
 		if (type != null && type != Void.class && type != void.class)
 		{
-			if (type == Object.class) return getTypeRef(context, "java.lang.Object");
+			if (type == Object.class)
+			{
+				return getTypeRef(context, "java.lang.Object");
+			}
 			if (type.isArray())
 			{
 				Class< ? > componentType = type.getComponentType();
@@ -596,27 +610,24 @@ public class TypeCreator extends TypeCache
 				}
 				return getTypeRef(context, ITypeNames.ARRAY);
 			}
-			else if (type == Boolean.class || type == boolean.class)
+			if (type == Boolean.class || type == boolean.class)
 			{
 				return getTypeRef(context, ITypeNames.BOOLEAN);
 			}
-			else if (type == Byte.class || type == byte.class)
+			if (type == Byte.class || type == byte.class)
 			{
 				return getTypeRef(context, "byte");
 			}
-			else if (Number.class.isAssignableFrom(type) || type.isPrimitive())
+			if (Number.class.isAssignableFrom(type) || type.isPrimitive())
 			{
 				return getTypeRef(context, ITypeNames.NUMBER);
 			}
-			else if (type == String.class || type == CharSequence.class)
+			if (type == String.class || type == CharSequence.class)
 			{
 				return getTypeRef(context, ITypeNames.STRING);
 			}
-			else
-			{
 
-				return getTypeRef(context, "Packages." + type.getName());
-			}
+			return getTypeRef(context, "Packages." + type.getName());
 		}
 		return null;
 	}
@@ -624,7 +635,6 @@ public class TypeCreator extends TypeCache
 
 	protected void initalize()
 	{
-
 		DesignApplication application = com.servoy.eclipse.core.Activator.getDefault().getDesignClient();
 		synchronized (this)
 		{
@@ -777,7 +787,6 @@ public class TypeCreator extends TypeCache
 		}
 		return names;
 	}
-
 
 	protected final void registerConstantsForScriptObject(IReturnedTypesProvider scriptObject, String prefix)
 	{
@@ -1054,7 +1063,6 @@ public class TypeCreator extends TypeCache
 			{
 				al.removeAll(objectMethods);
 			}
-
 
 			List<Member> newMembers = new ArrayList<Member>();
 			for (String name : al)
@@ -1370,6 +1378,11 @@ public class TypeCreator extends TypeCache
 	{
 		classTypes.put(name, cls);
 		typesClientSupport.put(name, AnnotationManagerReflection.getInstance().getClientSupport(cls, ClientSupport.Default));
+	}
+
+	protected void addAnonymousClassType(Class< ? > cls)
+	{
+		addAnonymousClassType(cls.getSimpleName(), cls);
 	}
 
 	protected void addAnonymousClassType(String name, Class< ? > cls)
@@ -2224,6 +2237,25 @@ public class TypeCreator extends TypeCache
 		}
 	}
 
+	private Member createOverrideMember(Member member, String context, String config)
+	{
+		JSType memberType = member.getType();
+		if (memberType != null)
+		{
+			if (memberType.getName().equals("Array<" + Record.JS_RECORD + '>'))
+			{
+				return TypeCreator.clone(member, TypeUtil.arrayOf(Record.JS_RECORD + '<' + config + '>'));
+			}
+			if (memberType.getName().equals(Record.JS_RECORD) || QUERY_BUILDER_CLASSES.containsKey(memberType.getName()) ||
+				memberType.getName().equals(FoundSet.JS_FOUNDSET) || memberType.getName().equals(DBDataSourceServer.class.getSimpleName()))
+			{
+				return TypeCreator.clone(member, getTypeRef(context, memberType.getName() + '<' + config + '>'));
+			}
+		}
+
+		return null;
+	}
+
 	private class FoundSetCreator implements IScopeTypeCreator
 	{
 		private Type cachedSuperTypeTemplateTypeForFoundSet = null;
@@ -2231,91 +2263,68 @@ public class TypeCreator extends TypeCache
 
 		public Type createType(String context, String fullTypeName)
 		{
-			Type type;
 			if (fullTypeName.equals(FoundSet.JS_FOUNDSET))
 			{
-				type = createBaseType(context, fullTypeName, FoundSet.class);
-
 				// quickly add this one to the static types.
-				return addType(null, type);
+				return addType(null, createBaseType(context, fullTypeName, FoundSet.class));
 			}
-			else
-			{
-				FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
-				String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
-				boolean isRelatedFoundSet = (fs != null && fs.getRelation(config) != null) ? true : false;
 
-				if (cachedSuperTypeTemplateTypeForFoundSet == null && !isRelatedFoundSet)
-				{
-					cachedSuperTypeTemplateTypeForFoundSet = createBaseType(context, FoundSet.JS_FOUNDSET, FoundSet.class);
-				}
-				else if (cachedSuperTypeTemplateTypeForRelatedFoundSet == null && isRelatedFoundSet)
+			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
+			String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
+			EList<Member> members;
+			if (fs != null && fs.getRelation(config) != null)
+			{
+				// related foundset
+				if (cachedSuperTypeTemplateTypeForRelatedFoundSet == null)
 				{
 					cachedSuperTypeTemplateTypeForRelatedFoundSet = createBaseType(context, FoundSet.JS_FOUNDSET, RelatedFoundSet.class);
 				}
-				EList<Member> members = null;
-				if (isRelatedFoundSet)
+				members = cachedSuperTypeTemplateTypeForRelatedFoundSet.getMembers();
+			}
+			else
+			{
+				if (cachedSuperTypeTemplateTypeForFoundSet == null)
 				{
-					members = cachedSuperTypeTemplateTypeForRelatedFoundSet.getMembers();
+					cachedSuperTypeTemplateTypeForFoundSet = createBaseType(context, FoundSet.JS_FOUNDSET, FoundSet.class);
+				}
+				members = cachedSuperTypeTemplateTypeForFoundSet.getMembers();
+			}
+
+			List<Member> overwrittenMembers = new ArrayList<Member>();
+			for (Member member : members)
+			{
+				Member overridden;
+				if (member.getVisibility() == Visibility.INTERNAL)
+				{
+					// the special internal once (like clear() of related) should be also added
+					// because they should override the normal super JSFoundSet clear
+					overridden = TypeCreator.clone(member, member.getType());
+					overridden.setAttribute(HIDDEN_IN_RELATED, Boolean.TRUE);
 				}
 				else
 				{
-					members = cachedSuperTypeTemplateTypeForFoundSet.getMembers();
-				}
-				List<Member> overwrittenMembers = new ArrayList<Member>();
-				for (Member member : members)
-				{
-					if (member.getVisibility() == Visibility.INTERNAL)
+					String memberConfig = config;
+					if (fs != null && member.getType() != null && member.getType().getName().equals(FoundSet.JS_FOUNDSET) &&
+						member.getName().equals("unrelate"))
 					{
-						// the special internal once (like clear() of related) should be also added
-						// because they should override the normal super JSFoundSet clear
-						Member cloned = TypeCreator.clone(member, member.getType());
-						cloned.setAttribute(HIDDEN_IN_RELATED, Boolean.TRUE);
-						overwrittenMembers.add(cloned);
-					}
-					else
-					{
-						JSType memberType = member.getType();
-						if (memberType != null)
+						// its really a relation, unrelate it.
+						Relation relation = fs.getRelation(config);
+						if (relation != null)
 						{
-							if (memberType.getName().equals("Array<" + Record.JS_RECORD + '>'))
-							{
-								overwrittenMembers.add(TypeCreator.clone(member, TypeUtil.arrayOf(Record.JS_RECORD + '<' + config + '>')));
-							}
-							else if (memberType.getName().equals(Record.JS_RECORD) || memberType.getName().equals(QBSelect.class.getSimpleName()))
-							{
-								overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(context, memberType.getName() + '<' + config + '>')));
-							}
-							else if (memberType.getName().equals(FoundSet.JS_FOUNDSET))
-							{
-								if (member.getName().equals("unrelate"))
-								{
-									// its really a relation, unrelate it.
-									if (fs != null)
-									{
-										Relation relation = fs.getRelation(config);
-										if (relation != null)
-										{
-											overwrittenMembers.add(TypeCreator.clone(member,
-												getTypeRef(context, FoundSet.JS_FOUNDSET + '<' + relation.getForeignDataSource() + '>')));
-										}
-										else
-										{
-											overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(context, FoundSet.JS_FOUNDSET + '<' + config + '>')));
-										}
-									}
-								}
-								else
-								{
-									overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(context, FoundSet.JS_FOUNDSET + '<' + config + '>')));
-								}
-							}
+							memberConfig = relation.getForeignDataSource();
 						}
 					}
+
+					overridden = createOverrideMember(member, context, memberConfig);
 				}
-				type = getCombinedType(fs, context, fullTypeName, config, overwrittenMembers, getType(context, FoundSet.JS_FOUNDSET), FOUNDSET_IMAGE, true);
+
+				if (overridden != null)
+				{
+					overwrittenMembers.add(overridden);
+				}
 			}
-			return type;
+			return getCombinedTypeWithRelationsAndDataproviders(fs, context, fullTypeName, config, overwrittenMembers, getType(context, FoundSet.JS_FOUNDSET),
+				FOUNDSET_IMAGE, true);
 		}
 
 		/**
@@ -2326,8 +2335,7 @@ public class TypeCreator extends TypeCache
 		 */
 		private Type createBaseType(String context, String fullTypeName, Class< ? > foundsetClass)
 		{
-			Type type;
-			type = TypeCreator.this.createType(context, fullTypeName, foundsetClass);
+			Type type = TypeCreator.this.createType(context, fullTypeName, foundsetClass);
 			//type.setAttribute(IMAGE_DESCRIPTOR, FOUNDSET_IMAGE);
 
 			Property maxRecordIndex = TypeInfoModelFactory.eINSTANCE.createProperty();
@@ -2348,7 +2356,6 @@ public class TypeCreator extends TypeCache
 
 	private class JSDataSetCreator implements IScopeTypeCreator
 	{
-
 		/*
 		 * (non-Javadoc)
 		 * 
@@ -2376,7 +2383,6 @@ public class TypeCreator extends TypeCache
 		}
 	}
 
-
 	private class RecordCreator extends FoundSetCreator
 	{
 		private Type cachedSuperTypeTemplateType;
@@ -2384,39 +2390,32 @@ public class TypeCreator extends TypeCache
 		@Override
 		public Type createType(String context, String fullTypeName)
 		{
-			Type type;
 			if (fullTypeName.equals(Record.JS_RECORD))
 			{
-				type = TypeCreator.this.createType(context, fullTypeName, Record.class);
+				Type type = TypeCreator.this.createType(context, fullTypeName, Record.class);
 				ImageDescriptor desc = IconProvider.instance().descriptor(Record.class);
 				type.setAttribute(IMAGE_DESCRIPTOR, desc);
 				// quickly add this one to the static types.
 				return addType(null, type);
 			}
-			else
+
+			String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
+			if (cachedSuperTypeTemplateType == null)
 			{
-				String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
-				if (cachedSuperTypeTemplateType == null)
-				{
-					cachedSuperTypeTemplateType = TypeCreator.this.createType(context, Record.JS_RECORD, Record.class);
-				}
-				EList<Member> members = cachedSuperTypeTemplateType.getMembers();
-				List<Member> overwrittenMembers = new ArrayList<Member>();
-				for (Member member : members)
-				{
-					JSType memberType = member.getType();
-					if (memberType != null)
-					{
-						if (memberType.getName().equals(FoundSet.JS_FOUNDSET))
-						{
-							overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(context, FoundSet.JS_FOUNDSET + '<' + config + '>')));
-						}
-					}
-				}
-				type = getCombinedType(ElementResolver.getFlattenedSolution(context), context, fullTypeName, config, overwrittenMembers,
-					getType(context, Record.JS_RECORD), IconProvider.instance().descriptor(Record.class), true);
+				cachedSuperTypeTemplateType = TypeCreator.this.createType(context, Record.JS_RECORD, Record.class);
 			}
-			return type;
+			EList<Member> members = cachedSuperTypeTemplateType.getMembers();
+			List<Member> overwrittenMembers = new ArrayList<Member>();
+			for (Member member : members)
+			{
+				Member overridden = createOverrideMember(member, context, config);
+				if (overridden != null)
+				{
+					overwrittenMembers.add(overridden);
+				}
+			}
+			return getCombinedTypeWithRelationsAndDataproviders(ElementResolver.getFlattenedSolution(context), context, fullTypeName, config,
+				overwrittenMembers, getType(context, Record.JS_RECORD), IconProvider.instance().descriptor(Record.class), true);
 		}
 	}
 
@@ -2523,10 +2522,9 @@ public class TypeCreator extends TypeCache
 	{
 		public Type createType(String context, String typeName)
 		{
-			Type type;
 			if (typeName.equals("Form") || typeName.equals("RuntimeForm"))
 			{
-				type = TypeCreator.this.createType(context, "RuntimeForm", com.servoy.j2db.documentation.scripting.docs.Form.class);
+				Type type = TypeCreator.this.createType(context, "RuntimeForm", com.servoy.j2db.documentation.scripting.docs.Form.class);
 				type.setKind(TypeKind.JAVA);
 				Member superMember = getMember("_super", type);
 				superMember.setVisible(false);
@@ -2535,70 +2533,69 @@ public class TypeCreator extends TypeCache
 				// quickly add this one to the static types.
 				return addType(null, type);
 			}
-			else
+
+			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
+			if (fs == null) return null;
+			String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
+			Form form = fs.getForm(config);
+			if (form == null) return null;
+			Form formToUse = fs.getFlattenedForm(form);
+			Type baseType = findType(context, "RuntimeForm");
+			Type superForm = baseType;
+			Form extendsForm = null;
+			if (form.getExtendsID() > 0)
 			{
-				FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
-				if (fs == null) return null;
-				String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
-				Form form = fs.getForm(config);
-				if (form == null) return null;
-				Form formToUse = fs.getFlattenedForm(form);
-				Type baseType = findType(context, "RuntimeForm");
-				Type superForm = baseType;
-				Form extendsForm = null;
-				if (form.getExtendsID() > 0)
-				{
-					extendsForm = fs.getForm(form.getExtendsID());
-					if (extendsForm != null) superForm = getType(context, "RuntimeForm<" + extendsForm.getName() + '>');
-				}
-
-				String ds = formToUse.getDataSource();
-				List<Member> overwrittenMembers = new ArrayList<Member>();
-
-				if (ds != null || PersistEncapsulation.hideFoundset(formToUse))
-				{
-					String foundsetType = FoundSet.JS_FOUNDSET;
-					if (ds != null) foundsetType += '<' + ds + '>';
-					Member clone = TypeCreator.clone(getMember("foundset", baseType), getTypeRef(context, foundsetType));
-					overwrittenMembers.add(clone);
-					clone.setVisible(!PersistEncapsulation.hideFoundset(formToUse));
-				}
-				if (PersistEncapsulation.hideController(formToUse))
-				{
-					Member clone = TypeCreator.clone(getMember("controller", baseType), null);
-					overwrittenMembers.add(clone);
-					clone.setVisible(false);
-				}
-				if (PersistEncapsulation.hideDataproviders(formToUse))
-				{
-					Member clone = TypeCreator.clone(getMember("alldataproviders", baseType), TypeUtil.arrayOf("String"));
-					overwrittenMembers.add(clone);
-					clone.setVisible(false);
-
-					clone = TypeCreator.clone(getMember("allrelations", baseType), TypeUtil.arrayOf("String"));
-					overwrittenMembers.add(clone);
-					clone.setVisible(false);
-				}
-
-				// currently _super is hardcoded in ElementResolver for when in the form's JS... hide it in other places
-				Member clone = TypeCreator.clone(getMember("_super", baseType), null);
-				clone.setType(null);
-				if (extendsForm != null)
-				{
-					clone.setAttribute(TypeCreator.LAZY_VALUECOLLECTION, extendsForm);
-					clone.setAttribute(ValueCollectionProvider.SUPER_SCOPE, Boolean.TRUE);
-				}
-				clone.setVisible(false);
-				overwrittenMembers.add(clone);
-
-				clone = TypeCreator.clone(getMember("elements", baseType), getTypeRef(context, "Elements<" + config + '>'));
-				overwrittenMembers.add(clone);
-				clone.setVisible(!PersistEncapsulation.hideElements(formToUse));
-
-				type = getCombinedType(fs, context, typeName, ds, overwrittenMembers, superForm,
-					getImageDescriptorForFormEncapsulation(form.getEncapsulation()), !PersistEncapsulation.hideDataproviders(formToUse));
-				if (type != null) type.setAttribute(LAZY_VALUECOLLECTION, form);
+				extendsForm = fs.getForm(form.getExtendsID());
+				if (extendsForm != null) superForm = getType(context, "RuntimeForm<" + extendsForm.getName() + '>');
 			}
+
+			String ds = formToUse.getDataSource();
+			List<Member> overwrittenMembers = new ArrayList<Member>();
+
+			if (ds != null || PersistEncapsulation.hideFoundset(formToUse))
+			{
+				String foundsetType = FoundSet.JS_FOUNDSET;
+				if (ds != null) foundsetType += '<' + ds + '>';
+				Member clone = TypeCreator.clone(getMember("foundset", baseType), getTypeRef(context, foundsetType));
+				overwrittenMembers.add(clone);
+				clone.setVisible(!PersistEncapsulation.hideFoundset(formToUse));
+			}
+			if (PersistEncapsulation.hideController(formToUse))
+			{
+				Member clone = TypeCreator.clone(getMember("controller", baseType), null);
+				overwrittenMembers.add(clone);
+				clone.setVisible(false);
+			}
+			if (PersistEncapsulation.hideDataproviders(formToUse))
+			{
+				Member clone = TypeCreator.clone(getMember("alldataproviders", baseType), TypeUtil.arrayOf("String"));
+				overwrittenMembers.add(clone);
+				clone.setVisible(false);
+
+				clone = TypeCreator.clone(getMember("allrelations", baseType), TypeUtil.arrayOf("String"));
+				overwrittenMembers.add(clone);
+				clone.setVisible(false);
+			}
+
+			// currently _super is hardcoded in ElementResolver for when in the form's JS... hide it in other places
+			Member clone = TypeCreator.clone(getMember("_super", baseType), null);
+			clone.setType(null);
+			if (extendsForm != null)
+			{
+				clone.setAttribute(TypeCreator.LAZY_VALUECOLLECTION, extendsForm);
+				clone.setAttribute(ValueCollectionProvider.SUPER_SCOPE, Boolean.TRUE);
+			}
+			clone.setVisible(false);
+			overwrittenMembers.add(clone);
+
+			clone = TypeCreator.clone(getMember("elements", baseType), getTypeRef(context, "Elements<" + config + '>'));
+			overwrittenMembers.add(clone);
+			clone.setVisible(!PersistEncapsulation.hideElements(formToUse));
+
+			Type type = getCombinedTypeWithRelationsAndDataproviders(fs, context, typeName, ds, overwrittenMembers, superForm,
+				getImageDescriptorForFormEncapsulation(form.getEncapsulation()), !PersistEncapsulation.hideDataproviders(formToUse));
+			if (type != null) type.setAttribute(LAZY_VALUECOLLECTION, form);
+
 			return type;
 		}
 
@@ -2608,50 +2605,47 @@ public class TypeCreator extends TypeCache
 		}
 	}
 
+	private final static Map<String, Class< ? >> QUERY_BUILDER_CLASSES = new ConcurrentHashMap<String, Class< ? >>();
+	static
+	{
+		addClass(QBAggregate.class);
+		addClass(QBColumn.class);
+		addClass(QBColumns.class);
+		addClass(QBCondition.class);
+		addClass(QBFactory.class);
+		addClass(QBFunction.class);
+		addClass(QBGroupBy.class);
+		addClass(QBJoin.class);
+		addClass(QBJoins.class);
+		addClass(QBLogicalCondition.class);
+		addClass(QBWhereCondition.class);
+		addClass(QBResult.class);
+		addClass(QBSelect.class);
+		addClass(QBSort.class);
+		addClass(QBSorts.class);
+		addClass(QBPart.class);
+		addClass(QBTableClause.class);
+		addClass(QBParameter.class);
+		addClass(QBParameters.class);
+		addClass(QBFunctions.class);
+	}
+
+	private static void addClass(Class< ? > clazz)
+	{
+		QUERY_BUILDER_CLASSES.put(clazz.getSimpleName(), clazz);
+	}
+
 	private class QueryBuilderCreator implements IScopeTypeCreator
 	{
 		private Type cachedSuperTypeTemplateType = null;
-
-		private final Map<String, Class< ? >> qbClasses = new ConcurrentHashMap<String, Class< ? >>();
-
-		QueryBuilderCreator()
-		{
-			addClass(QBAggregate.class);
-			addClass(QBColumn.class);
-			addClass(QBColumns.class);
-			addClass(QBCondition.class);
-			addClass(QBFactory.class);
-			addClass(QBFunction.class);
-			addClass(QBGroupBy.class);
-			addClass(QBJoin.class);
-			addClass(QBJoins.class);
-			addClass(QBLogicalCondition.class);
-			addClass(QBWhereCondition.class);
-			addClass(QBResult.class);
-			addClass(QBSelect.class);
-			addClass(QBSort.class);
-			addClass(QBSorts.class);
-			addClass(QBPart.class);
-			addClass(QBTableClause.class);
-			addClass(QBParameter.class);
-			addClass(QBParameters.class);
-			addClass(QBFunctions.class);
-		}
-
-		private void addClass(Class< ? > clazz)
-		{
-			qbClasses.put(clazz.getSimpleName(), clazz);
-		}
 
 		public Type createType(String context, String fullTypeName)
 		{
 			int indexOf = fullTypeName.indexOf('<');
 			if (indexOf == -1)
 			{
-				Type type = createBaseType(context, fullTypeName);
-
 				// quickly add this one to the static types.
-				return addType(null, type);
+				return addType(null, createBaseType(context, fullTypeName));
 			}
 
 			String config = fullTypeName.substring(indexOf + 1, fullTypeName.length() - 1);
@@ -2664,10 +2658,10 @@ public class TypeCreator extends TypeCache
 			List<Member> overwrittenMembers = new ArrayList<Member>();
 			for (Member member : members)
 			{
-				JSType memberType = member.getType();
-				if (memberType != null && qbClasses.containsKey(memberType.getName()))
+				Member overridden = createOverrideMember(member, context, config);
+				if (overridden != null)
 				{
-					overwrittenMembers.add(TypeCreator.clone(member, getTypeRef(context, memberType.getName() + '<' + config + '>')));
+					overwrittenMembers.add(overridden);
 				}
 			}
 
@@ -2687,15 +2681,14 @@ public class TypeCreator extends TypeCache
 		 */
 		private Type createBaseType(String context, String fullTypeName)
 		{
-			Class< ? > cls = qbClasses.get(fullTypeName);
+			Class< ? > cls = QUERY_BUILDER_CLASSES.get(fullTypeName);
 			Type type = TypeCreator.this.createType(context, fullTypeName, cls);
 			String superclass = cls.getSuperclass().getSimpleName();
-			if (qbClasses.containsKey(superclass))
+			if (QUERY_BUILDER_CLASSES.containsKey(superclass))
 			{
 				type.setSuperType(getType(context, superclass));
 			}
 			return type;
-
 		}
 
 		public ClientSupport getClientSupport()
@@ -2706,7 +2699,6 @@ public class TypeCreator extends TypeCache
 
 	private class QueryBuilderColumnsCreator implements IScopeTypeCreator
 	{
-
 		public Type createType(String context, String typeName)
 		{
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
@@ -2714,10 +2706,34 @@ public class TypeCreator extends TypeCache
 			type.setKind(TypeKind.JAVA);
 
 			TypeConfig fsAndTable = getFlattenedSolutonAndTable(typeName);
-			if (fsAndTable != null && fsAndTable.table != null)
+			Table table = null;
+			if (fsAndTable != null && (fsAndTable.table != null || typeName.indexOf('<') <= 0))
 			{
-				addDataProviders(context, fsAndTable.table.getColumns().iterator(), type.getMembers(), fsAndTable.table.getDataSource());
-				return type;
+				table = fsAndTable.table;
+			}
+			else if (typeName.indexOf('<') > 0)
+			{
+				// relation name
+				FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
+				if (fs != null)
+				{
+					Relation relation = fs.getRelation(typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1));
+					if (relation != null)
+					{
+						try
+						{
+							table = relation.getForeignTable();
+						}
+						catch (RepositoryException e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+				}
+			}
+			if (table != null)
+			{
+				addDataProviders(context, table.getColumns().iterator(), type.getMembers(), table.getDataSource());
 			}
 
 			return type;
@@ -2807,6 +2823,231 @@ public class TypeCreator extends TypeCache
 		}
 	}
 
+	private class DBDataSourceCreator implements IScopeTypeCreator
+	{
+		public Type createType(String context, String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setKind(TypeKind.JAVA);
+
+			IServerManagerInternal servermanager = ServoyModel.getServerManager();
+			for (String serverName : servermanager.getServerNames(false, false, true, true))
+			{
+				IServerInternal server = (IServerInternal)servermanager.getServer(serverName, false, false);
+				if (server != null)
+				{
+					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+					property.setName(serverName);
+					property.setAttribute(RESOURCE, server.getConfig());
+					property.setVisible(true);
+					property.setType(getTypeRef(context,
+						DBDataSourceServer.class.getSimpleName() + '<' + DataSourceUtils.createDBTableDataSource(serverName, null) + '>'));
+					property.setAttribute(
+						IMAGE_DESCRIPTOR,
+						com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle(SolutionExplorerTreeContentProvider.getServerImageName(serverName, server)));
+					property.setDescription("Server");
+					type.getMembers().add(property);
+				}
+			}
+			return addType(context, type);
+		}
+
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.wc_sc;
+		}
+	}
+
+	private class MemDataSourceCreator implements IScopeTypeCreator
+	{
+		public Type createType(String context, String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setKind(TypeKind.JAVA);
+
+			return type;
+		}
+
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.wc_sc;
+		}
+	}
+
+	private class DBDataSourceServerCreator implements IScopeTypeCreator
+	{
+		private Type cachedSuperTypeTemplateType = null;
+
+		public Type createType(String context, String fullTypeName)
+		{
+			if (fullTypeName.equals(DBDataSourceServer.class.getSimpleName()))
+			{
+				// quickly add this one to the static types.
+				return addType(null, TypeCreator.this.createType(context, fullTypeName, DBDataSourceServer.class));
+			}
+
+			if (cachedSuperTypeTemplateType == null)
+			{
+				cachedSuperTypeTemplateType = TypeCreator.this.createType(context, DBDataSourceServer.class.getSimpleName(), DBDataSourceServer.class);
+			}
+
+			String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
+
+			EList<Member> members = cachedSuperTypeTemplateType.getMembers();
+
+			List<Member> overwrittenMembers = new ArrayList<Member>();
+			for (Member member : members)
+			{
+				Member overridden = createOverrideMember(member, context, config);
+				if (overridden != null)
+				{
+					overwrittenMembers.add(overridden);
+				}
+			}
+
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.getMembers().addAll(overwrittenMembers);
+			type.setSuperType(getType(context, DBDataSourceServer.class.getSimpleName()));
+			type.setName(fullTypeName);
+			type.setKind(TypeKind.JAVA);
+
+			// add tables
+			int index = fullTypeName.indexOf('<');
+			if (index > 0)
+			{
+				String[] stn = DataSourceUtils.getDBServernameTablename(fullTypeName.substring(index + 1, fullTypeName.length() - 1));
+				if (stn != null)
+				{
+					IServer server = ServoyModel.getServerManager().getServer(stn[0]);
+					if (server != null)
+					{
+						try
+						{
+							for (String name : server.getTableAndViewNames(true))
+							{
+								ITable table = server.getTable(name);
+								if (table != null)
+								{
+									Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+									property.setName(name);
+									property.setAttribute(RESOURCE, table);
+									property.setVisible(true);
+									property.setType(getTypeRef(context, JSDataSource.class.getSimpleName() + '<' + table.getDataSource() + '>'));
+									property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("portal.gif"));
+									property.setDescription(Table.getTableTypeAsString(table.getTableType()));
+									type.getMembers().add(property);
+								}
+							}
+						}
+						catch (RepositoryException e)
+						{
+							ServoyLog.logError(e);
+						}
+						catch (RemoteException e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+				}
+			}
+
+			return type;
+		}
+
+		@Override
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.wc_sc;
+		}
+	}
+
+	private class TypeWithConfigCreator implements IScopeTypeCreator
+	{
+		protected final Class< ? > cls;
+		protected final ClientSupport csp;
+
+		private Type cachedSuperTypeTemplateType = null;
+
+		TypeWithConfigCreator(Class< ? > cls, ClientSupport csp)
+		{
+			this.cls = cls;
+			this.csp = csp;
+		}
+
+		public Type createType(String context, String fullTypeName)
+		{
+			if (fullTypeName.equals(cls.getSimpleName()))
+			{
+				// quickly add this one to the static types.
+				return addType(null, createBaseType(context, fullTypeName));
+			}
+
+			if (cachedSuperTypeTemplateType == null)
+			{
+				cachedSuperTypeTemplateType = createBaseType(context, cls.getSimpleName());
+			}
+
+			String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
+
+			EList<Member> members = cachedSuperTypeTemplateType.getMembers();
+
+			List<Member> overwrittenMembers = new ArrayList<Member>();
+			for (Member member : members)
+			{
+				Member overridden = createOverrideMember(member, context, config);
+				if (overridden != null)
+				{
+					overwrittenMembers.add(overridden);
+				}
+			}
+
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.getMembers().addAll(overwrittenMembers);
+			type.setSuperType(getType(context, cls.getSimpleName()));
+			type.setName(fullTypeName);
+			type.setKind(TypeKind.JAVA);
+
+			return type;
+		}
+
+		protected Type createBaseType(String context, String typeName)
+		{
+			return TypeCreator.this.createType(context, typeName, cls);
+		}
+
+		@Override
+		public ClientSupport getClientSupport()
+		{
+			return csp;
+		}
+	}
+
+	private class DynamicJavaClassCreator implements IScopeTypeCreator
+	{
+		private final Class< ? > cls;
+		private final ClientSupport csp;
+
+		DynamicJavaClassCreator(Class< ? > cls, ClientSupport csp)
+		{
+			this.cls = cls;
+			this.csp = csp;
+		}
+
+		public Type createType(String context, String fullTypeName)
+		{
+			// Make sure the type is dynamic, created in solution context
+			return addType(context, TypeCreator.this.createType(context, fullTypeName, cls));
+		}
+
+		@Override
+		public ClientSupport getClientSupport()
+		{
+			return csp;
+		}
+	}
+
 	private class InvisibleRelationsScopeCreator extends RelationsScopeCreator
 	{
 		/*
@@ -2866,7 +3107,6 @@ public class TypeCreator extends TypeCache
 		{
 			return false;
 		}
-
 	}
 
 	private class DataprovidersScopeCreator implements IScopeTypeCreator
@@ -3116,17 +3356,12 @@ public class TypeCreator extends TypeCache
 		return result;
 	}
 
-	/**
-	 * @param createProperty
-	 * @return
-	 */
 	private static <T extends Element> T makeDeprecated(T element)
 	{
 		element.setDeprecated(true);
 		element.setVisible(false);
 		return element;
 	}
-
 
 	public class ElementsScopeCreator implements IScopeTypeCreator
 	{
@@ -3188,45 +3423,42 @@ public class TypeCreator extends TypeCache
 
 		public Type createType(String context, String typeName)
 		{
-			Type type;
 			if (typeName.equals("Elements"))
 			{
-				type = TypeCreator.this.createType(context, "Elements", FormElements.class);
+				Type type = TypeCreator.this.createType(context, "Elements", FormElements.class);
 				type.setAttribute(IMAGE_DESCRIPTOR, ELEMENTS);
 
 				// quickly add this one to the static types.
 				return addType(null, type);
 			}
-			else
+
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setKind(TypeKind.JAVA);
+			type.setAttribute(IMAGE_DESCRIPTOR, ELEMENTS);
+			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
+			if (fs != null)
 			{
-				type = TypeInfoModelFactory.eINSTANCE.createType();
-				type.setName(typeName);
-				type.setKind(TypeKind.JAVA);
-				type.setAttribute(IMAGE_DESCRIPTOR, ELEMENTS);
-				FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
-				if (fs != null)
+				String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
+				Form form = fs.getForm(config);
+				if (form != null)
 				{
-					String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
-					Form form = fs.getForm(config);
-					if (form != null)
+					type.setSuperType(getType(context, "Elements"));
+					try
 					{
-						type.setSuperType(getType(context, "Elements"));
-						try
+						EList<Member> members = type.getMembers();
+						Form formToUse = form;
+						if (form.getExtendsID() > 0)
 						{
-							EList<Member> members = type.getMembers();
-							Form formToUse = form;
-							if (form.getExtendsID() > 0)
-							{
-								formToUse = fs.getFlattenedForm(form);
-							}
-							IApplication application = com.servoy.eclipse.core.Activator.getDefault().getDesignClient();
-							Iterator<IPersist> formObjects = formToUse.getAllObjects();
-							createFormElementProperties(context, application, members, formObjects);
+							formToUse = fs.getFlattenedForm(form);
 						}
-						catch (Exception e)
-						{
-							ServoyLog.logError(e);
-						}
+						IApplication application = com.servoy.eclipse.core.Activator.getDefault().getDesignClient();
+						Iterator<IPersist> formObjects = formToUse.getAllObjects();
+						createFormElementProperties(context, application, members, formObjects);
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
 					}
 				}
 			}
@@ -3424,7 +3656,7 @@ public class TypeCreator extends TypeCache
 	 */
 	public static Member clone(Member member, JSType type)
 	{
-		Member clone = null;
+		Member clone;
 		if (member instanceof Property)
 		{
 			Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
@@ -3489,8 +3721,8 @@ public class TypeCreator extends TypeCache
 		return clone;
 	}
 
-	private Type getCombinedType(FlattenedSolution fs, String context, String fullTypeName, String config, List<Member> members, Type superType,
-		ImageDescriptor imageDescriptor, boolean visible)
+	private Type getCombinedTypeWithRelationsAndDataproviders(FlattenedSolution fs, String context, String fullTypeName, String config, List<Member> members,
+		Type superType, ImageDescriptor imageDescriptor, boolean visible)
 	{
 		if (config == null)
 		{

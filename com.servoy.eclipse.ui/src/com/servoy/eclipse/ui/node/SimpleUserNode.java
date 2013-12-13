@@ -18,6 +18,7 @@ package com.servoy.eclipse.ui.node;
 
 import org.eclipse.core.internal.runtime.AdapterManager;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.swt.graphics.Image;
 
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.Form;
@@ -41,7 +42,7 @@ public class SimpleUserNode implements IAdaptable
 	private IDeveloperFeedback developerFeedback;
 	private boolean enabled = true;
 
-	private Object icon;
+	private Image icon;
 
 	private Object _realObject;
 	private IPersist containingPersist; // Form or Solution if they are needed to determine more specific characteristics of the node
@@ -63,7 +64,7 @@ public class SimpleUserNode implements IAdaptable
 		this.type = type;
 	}
 
-	public SimpleUserNode(String displayName, UserNodeType type, Object realObject, Object icon)
+	public SimpleUserNode(String displayName, UserNodeType type, Object realObject, Image icon)
 	{
 		this(displayName, type);
 		this._realObject = realObject;
@@ -71,7 +72,7 @@ public class SimpleUserNode implements IAdaptable
 		this.icon = icon;
 	}
 
-	public SimpleUserNode(String displayName, UserNodeType type, Object realObject, Object icon, Class< ? > realType)
+	public SimpleUserNode(String displayName, UserNodeType type, Object realObject, Image icon, Class< ? > realType)
 	{
 		this(displayName, type);
 		this._realObject = realObject;
@@ -80,7 +81,7 @@ public class SimpleUserNode implements IAdaptable
 		this.clientSupport = AnnotationManagerReflection.getInstance().getClientSupport(realType, ClientSupport.Default);
 	}
 
-	public SimpleUserNode(String displayName, UserNodeType type, Object realObject, IPersist containingPersist, Object icon)
+	public SimpleUserNode(String displayName, UserNodeType type, Object realObject, IPersist containingPersist, Image icon)
 	{
 		this(displayName, type);
 		this._realObject = realObject;
@@ -88,7 +89,7 @@ public class SimpleUserNode implements IAdaptable
 		this.containingPersist = containingPersist;
 	}
 
-	public SimpleUserNode(String displayName, UserNodeType type, IDeveloperFeedback developerFeedback, Object realObject, Object icon)
+	public SimpleUserNode(String displayName, UserNodeType type, IDeveloperFeedback developerFeedback, Object realObject, Image icon)
 	{
 		this(displayName, type);
 		this._realObject = realObject;
@@ -309,7 +310,7 @@ public class SimpleUserNode implements IAdaptable
 	 * 
 	 * @return Object
 	 */
-	public Object getIcon()
+	public Image getIcon()
 	{
 		return icon;
 	}
@@ -337,7 +338,7 @@ public class SimpleUserNode implements IAdaptable
 	 * 
 	 * @param icon The icon to set
 	 */
-	public void setIcon(Object icon)
+	public void setIcon(Image icon)
 	{
 		this.icon = icon;
 	}

@@ -149,9 +149,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	private final com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
 
-	private final Object propertiesIcon;
-	private final Object specialPropertiesIcon;
-	private final Object functionIcon;
+	private final Image propertiesIcon;
+	private final Image specialPropertiesIcon;
+	private final Image functionIcon;
 
 	private boolean includeModules = false;
 
@@ -223,7 +223,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	{
 	}
 
-	public Object loadImage(String name)
+	public Image loadImage(String name)
 	{
 		Image img = uiActivator.loadImageFromBundle(name);
 		if (img == null)
@@ -522,7 +522,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else if (type == UserNodeType.FOUNDSET_MANAGER)
 			{
-				lm = getJSMethods(JSDatabaseManager.class, "databaseManager", null, UserNodeType.FOUNDSET_MANAGER_ITEM, null, null);
+				lm = getJSMethods(JSDatabaseManager.class, IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER, null, UserNodeType.FOUNDSET_MANAGER_ITEM, null, null);
 			}
 			else if (type == UserNodeType.FORM_ELEMENTS)
 			{
@@ -1460,7 +1460,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			String name = (String)element;
 
-			Object pIcon = propertiesIcon;
+			Image pIcon = propertiesIcon;
 			if (adapter != null)
 			{
 				if (adapter.isDeprecated(name)) continue;

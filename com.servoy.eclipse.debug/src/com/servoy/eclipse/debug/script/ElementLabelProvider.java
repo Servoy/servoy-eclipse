@@ -33,6 +33,7 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import com.servoy.j2db.persistence.ScriptVariable;
+import com.servoy.j2db.scripting.IExecutingEnviroment;
 
 /**
  * Extension point implementation of {@link IElementLabelProvider} that returns the {@link TypeCreator#IMAGE_DESCRIPTOR} attribute
@@ -49,15 +50,16 @@ public class ElementLabelProvider implements IElementLabelProviderExtension
 	{
 		propertyNames.add("controller");
 		propertyNames.add("currentcontroller");
-		propertyNames.add("application");
-		propertyNames.add("i18n");
-		propertyNames.add("history");
-		propertyNames.add("utils");
-		propertyNames.add("jsunit");
-		propertyNames.add("solutionModel");
-		propertyNames.add("databaseManager");
+		propertyNames.add(IExecutingEnviroment.TOPLEVEL_APPLICATION);
+		propertyNames.add(IExecutingEnviroment.TOPLEVEL_I18N);
+		propertyNames.add(IExecutingEnviroment.TOPLEVEL_HISTORY);
+		propertyNames.add(IExecutingEnviroment.TOPLEVEL_UTILS);
+		propertyNames.add(IExecutingEnviroment.TOPLEVEL_JSUNIT);
+		propertyNames.add(IExecutingEnviroment.TOPLEVEL_SOLUTION_MODIFIER);
+		propertyNames.add(IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER);
+		propertyNames.add(IExecutingEnviroment.TOPLEVEL_DATASOURCES);
 		propertyNames.add("servoyDeveloper");
-		propertyNames.add("security");
+		propertyNames.add(IExecutingEnviroment.TOPLEVEL_SECURITY);
 		propertyNames.add("elements");
 		propertyNames.add(ScriptVariable.SCOPES);
 	}

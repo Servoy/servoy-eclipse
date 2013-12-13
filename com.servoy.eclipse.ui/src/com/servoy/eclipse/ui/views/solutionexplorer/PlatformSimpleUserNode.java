@@ -36,27 +36,27 @@ public class PlatformSimpleUserNode extends SimpleUserNode implements IAdaptable
 		super(displayName, type);
 	}
 
-	public PlatformSimpleUserNode(String displayName, UserNodeType type, Object realObject, Object icon, Class< ? > realType)
+	public PlatformSimpleUserNode(String displayName, UserNodeType type, Object realObject, Image icon, Class< ? > realType)
 	{
 		super(displayName, type, realObject, icon, realType);
 	}
 
-	public PlatformSimpleUserNode(String displayName, UserNodeType type, Object realObject, Object icon)
+	public PlatformSimpleUserNode(String displayName, UserNodeType type, Object realObject, Image icon)
 	{
 		super(displayName, type, realObject, icon);
 	}
 
-	public PlatformSimpleUserNode(String displayName, UserNodeType type, String codeFragment, String toolTip, Object realObject, Object icon)
+	public PlatformSimpleUserNode(String displayName, UserNodeType type, String codeFragment, String toolTip, Object realObject, Image icon)
 	{
 		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, null, toolTip), realObject, icon);
 	}
 
-	public PlatformSimpleUserNode(String displayName, UserNodeType type, Object realObject, IPersist containingPersist, Object icon)
+	public PlatformSimpleUserNode(String displayName, UserNodeType type, Object realObject, IPersist containingPersist, Image icon)
 	{
 		super(displayName, type, realObject, containingPersist, icon);
 	}
 
-	public PlatformSimpleUserNode(String displayName, UserNodeType type, String codeFragment, String sampleCode, String toolTip, Object realObject, Object icon)
+	public PlatformSimpleUserNode(String displayName, UserNodeType type, String codeFragment, String sampleCode, String toolTip, Object realObject, Image icon)
 	{
 		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, sampleCode, toolTip), realObject, icon);
 	}
@@ -65,16 +65,17 @@ public class PlatformSimpleUserNode extends SimpleUserNode implements IAdaptable
 	 * @see com.servoy.j2db.develop.node.SimpleUserNode#getIcon()
 	 */
 	@Override
-	public Object getIcon()
+	public Image getIcon()
 	{
-		Object icon = super.getIcon();
+		Image icon = super.getIcon();
 		if (hidden && icon instanceof Image)
 		{
-			icon = Activator.getDefault().createGrayImage(getName(), (Image)icon);
+			icon = Activator.getDefault().createGrayImage(getName(), icon);
 		}
 		return icon;
 	}
 
+	@Override
 	public Object getAdapter(Class adapter)
 	{
 		return AdapterManager.getDefault().getAdapter(this, adapter);

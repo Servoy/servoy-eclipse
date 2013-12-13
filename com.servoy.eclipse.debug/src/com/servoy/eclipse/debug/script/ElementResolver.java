@@ -58,6 +58,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.scripting.IExecutingEnviroment;
 
 /**
  * Class that resolves names in javascript like application or controller to a {@link Property} with a reference to the {@link Type} of that name.
@@ -83,23 +84,24 @@ public class ElementResolver implements IElementResolver
 
 	public ElementResolver()
 	{
-		typeNameCreators.put("application", new SimpleNameTypeNameCreator("JSApplication"));
-		typeNameCreators.put("security", new SimpleNameTypeNameCreator("JSSecurity"));
-		typeNameCreators.put("i18n", new SimpleNameTypeNameCreator("JSI18N"));
-		typeNameCreators.put("history", new SimpleNameTypeNameCreator("HistoryProvider"));
-		typeNameCreators.put("utils", new SimpleNameTypeNameCreator("JSUtils"));
-		typeNameCreators.put("jsunit", new SimpleNameTypeNameCreator("JSUnit"));
-		typeNameCreators.put("solutionModel", new SimpleNameTypeNameCreator("JSSolutionModel"));
-		typeNameCreators.put("databaseManager", new SimpleNameTypeNameCreator("JSDatabaseManager"));
+		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_APPLICATION, new SimpleNameTypeNameCreator("JSApplication"));
+		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_SECURITY, new SimpleNameTypeNameCreator("JSSecurity"));
+		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_I18N, new SimpleNameTypeNameCreator("JSI18N"));
+		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_HISTORY, new SimpleNameTypeNameCreator("HistoryProvider"));
+		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_UTILS, new SimpleNameTypeNameCreator("JSUtils"));
+		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_JSUNIT, new SimpleNameTypeNameCreator("JSUnit"));
+		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_SOLUTION_MODIFIER, new SimpleNameTypeNameCreator("JSSolutionModel"));
+		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER, new SimpleNameTypeNameCreator("JSDatabaseManager"));
 		typeNameCreators.put("controller", new SimpleNameTypeNameCreator("Controller"));
 		typeNameCreators.put("currentcontroller", new SimpleNameTypeNameCreator("Controller"));
 
 		typeNameCreators.put("foundset", new FoundsetTypeNameCreator());
-		typeNameCreators.put("plugins", new SimpleNameTypeNameCreator("Plugins"));
+		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_PLUGINS, new SimpleNameTypeNameCreator("Plugins"));
 		typeNameCreators.put("elements", new ElementsTypeNameCreator());
-		typeNameCreators.put("forms", new FormsNameCreator());
+		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_FORMS, new FormsNameCreator());
 		typeNameCreators.put(ScriptVariable.SCOPES, new ScopesTypeNameCreator());
 		typeNameCreators.put("alldataproviders", new SimpleNameTypeNameCreator("Array"));
+		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_DATASOURCES, new SimpleNameTypeNameCreator("JSDataSources"));
 
 		formOnlyNames.add("controller");
 		formOnlyNames.add("alldataproviders");
@@ -107,12 +109,12 @@ public class ElementResolver implements IElementResolver
 		formOnlyNames.add("elements");
 
 		noneFoundsetNames.add("currentcontroller");
-		noneFoundsetNames.add("history");
-		noneFoundsetNames.add("jsunit");
-		noneFoundsetNames.add("forms");
+		noneFoundsetNames.add(IExecutingEnviroment.TOPLEVEL_HISTORY);
+		noneFoundsetNames.add(IExecutingEnviroment.TOPLEVEL_JSUNIT);
+		noneFoundsetNames.add(IExecutingEnviroment.TOPLEVEL_FORMS);
 
 		noneCalcNames.addAll(noneFoundsetNames); // all filtered out for foundset methods is also filtered out for calcs
-		noneCalcNames.add("databaseManager");
+		noneCalcNames.add(IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER);
 
 		deprecated.add("alldataproviders");
 		deprecated.add("currentcontroller");

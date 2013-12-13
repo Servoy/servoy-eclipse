@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
+import org.eclipse.swt.graphics.Image;
+
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.XMLScriptObjectAdapterLoader;
@@ -59,7 +61,7 @@ public class TreeBuilder
 	 */
 	public static UserNode[] createLengthAndArray(IImageLookup imageLookup, String prefix)
 	{
-		Object propertiesIcon = imageLookup.loadImage("properties_icon.gif"); //$NON-NLS-1$
+		Image propertiesIcon = imageLookup.loadImage("properties_icon.gif"); //$NON-NLS-1$
 		List<UserNode> dlm = new ArrayList<UserNode>();
 		dlm.add(new UserNode(
 			"allnames", UserNodeType.ARRAY, prefix + ".allnames", prefix + ".allnames", "Get all names as an array", null, imageLookup.loadImage("special_properties_icon.gif"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
@@ -115,9 +117,9 @@ public class TreeBuilder
 
 	public static UserNode[] createTypedArray(IImageLookup imageLookup, Class< ? > clazz, UserNodeType type, List<UserNode> existingDlm)
 	{
-		Object constructorIcon = imageLookup.loadImage("constructor.gif"); //$NON-NLS-1$
-		Object functionIcon = imageLookup.loadImage("function.gif"); //$NON-NLS-1$
-		Object propertiesIcon = imageLookup.loadImage("properties_icon.gif"); //$NON-NLS-1$
+		Image constructorIcon = imageLookup.loadImage("constructor.gif"); //$NON-NLS-1$
+		Image functionIcon = imageLookup.loadImage("function.gif"); //$NON-NLS-1$
+		Image propertiesIcon = imageLookup.loadImage("properties_icon.gif"); //$NON-NLS-1$
 
 		List<UserNode> dlm = existingDlm != null ? new ArrayList<UserNode>(existingDlm) : new ArrayList<UserNode>();
 
@@ -156,7 +158,7 @@ public class TreeBuilder
 		return dlm.toArray(new UserNode[dlm.size()]);
 	}
 
-	private static UserNode fdoc2usernode(IFunctionDocumentation fdoc, UserNodeType type, Object functionIcon)
+	private static UserNode fdoc2usernode(IFunctionDocumentation fdoc, UserNodeType type, Image functionIcon)
 	{
 		ClientSupport clientType = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
 		String tooltip = "<html><body><b>" + fdoc.getFullSignature(true, true) + "</b><br>" + fdoc.getDescription(clientType) + "</body></html>"; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
@@ -179,7 +181,7 @@ public class TreeBuilder
 	}
 
 	public static List<SimpleUserNode> docToOneNode(Class< ? > clz, IImageLookup imageLookup, UserNodeType type, String codePrefix,
-		List<SimpleUserNode> existingDlm, String name, Object realObject, Object icon)
+		List<SimpleUserNode> existingDlm, String name, Object realObject, Image icon)
 	{
 		Map<String, Object> onlyThese = new HashMap<String, Object>();
 		onlyThese.put(name, realObject);
@@ -187,11 +189,11 @@ public class TreeBuilder
 	}
 
 	public static List<SimpleUserNode> docToNodesInternal(Class< ? > clz, IImageLookup imageLookup, UserNodeType type, String codePrefix,
-		List<SimpleUserNode> existingDlm, Map<String, Object> onlyThese, Object icon)
+		List<SimpleUserNode> existingDlm, Map<String, Object> onlyThese, Image icon)
 	{
-		Object functionIcon = imageLookup.loadImage("function.gif"); //$NON-NLS-1$
-		Object propertiesIcon = imageLookup.loadImage("properties_icon.gif"); //$NON-NLS-1$
-		Object specialPropertiesIcon = imageLookup.loadImage("special_properties_icon.gif"); //$NON-NLS-1$
+		Image functionIcon = imageLookup.loadImage("function.gif"); //$NON-NLS-1$
+		Image propertiesIcon = imageLookup.loadImage("properties_icon.gif"); //$NON-NLS-1$
+		Image specialPropertiesIcon = imageLookup.loadImage("special_properties_icon.gif"); //$NON-NLS-1$
 
 		List<SimpleUserNode> dlm = existingDlm != null ? existingDlm : new ArrayList<SimpleUserNode>();
 
@@ -209,7 +211,7 @@ public class TreeBuilder
 	}
 
 	private static void visitDocs(SortedSet<IFunctionDocumentation> fdocs, Integer typeFilter, List<SimpleUserNode> dlm, Map<String, Object> onlyThese,
-		UserNodeType type, String codePrefix, Object icon, Object specialIcon)
+		UserNodeType type, String codePrefix, Image icon, Image specialIcon)
 	{
 		for (IFunctionDocumentation fdoc : fdocs)
 		{
