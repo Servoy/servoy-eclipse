@@ -43,6 +43,7 @@ public class ModifiedComboBoxCellEditor extends ComboBoxCellEditor
 	protected Control createControl(Composite parent)
 	{
 		CCombo combo = (CCombo)super.createControl(parent);
+		combo.setVisibleItemCount(5); //default count - fixing bug introduced by eclipse 4.3
 		combo.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
