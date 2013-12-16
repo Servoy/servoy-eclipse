@@ -1167,7 +1167,7 @@ public class Activator extends Plugin
 							{
 								boolean upgrade = MessageDialog.openQuestion(
 									Display.getDefault().getActiveShell(),
-									"Servoy ApplicationServer version should be upgraded", "The ApplicationServers version (" + version + ") is lower than the Developers version (" + ClientVersion.getReleaseNumber() + ")\n Upgrade the ApplicationServer?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+									"Servoy ApplicationServer version should be upgraded", "The ApplicationServers version (" + version + ") is lower than Developer's version (" + ClientVersion.getReleaseNumber() + ")\n Upgrade the ApplicationServer?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
 								if (upgrade)
 								{
@@ -1212,7 +1212,7 @@ public class Activator extends Plugin
 														public void run()
 														{
 															MessageDialog.openError(new Shell(), "Servoy update problem", //$NON-NLS-1$
-																"Servoy ApplicationServer didn't update, please shutdown developer and to try run the updater on the command line"); //$NON-NLS-1$
+																"Servoy ApplicationServer update failed; please shutdown developer and try to run the command line updater."); //$NON-NLS-1$
 														}
 													});
 												}
