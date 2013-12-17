@@ -1346,10 +1346,11 @@ var BWidgetRegistry = {
         zones: [
             {
                 name: "default",
+                locator: '> fieldset',
                 allow: "RadioButton"
             }
         ],
-        template: '<div data-role="fieldcontain"><label for="%ID%">%LABEL%</label><div class="servoydataprovider">%SERVOYTITLEDATAPROVIDER%</div><div class="servoydataprovider">%SERVOYDATAPROVIDER%</div>'
+        template: '<div data-role="fieldcontain"><fieldset data-role="controlgroup"><legend>%LABEL%<div class="servoydataprovider">%SERVOYTITLEDATAPROVIDER%</div></legend></fieldset></div></div>'
     },
 
     /**
@@ -1385,34 +1386,7 @@ var BWidgetRegistry = {
             disabled: BCommonProperties.disabled
         },
         delegate: 'parent',
-        template: function (node) {
-            //var prop, code = $('<div data-role="header"><h1></h1></div>');
-            var prop, label, code;
-
-            code = $('<input type="radio"><label/>');
-
-            // always include id property on input
-            code.filter('input').attr("id", node.getProperty("id"));
-
-            // generate a "name" property for first child of ControlGroup
-            if (!node.getParent().getChildrenCount()) {
-                code.filter('input').attr("name", node.getProperty("id"));
-            } else {
-                code.filter('input').attr("name",
-                          node.getParent().getChildren()[0].getProperty("id"));
-            }
-
-            // apply props to associated label
-            label = code.next();
-
-            // always add "for" attribute to label
-            label.attr('for', node.getProperty("id"));
-
-            // always include label property as inner text
-            label.text(node.getProperty("label"));
-
-            return code;
-        }
+        template: '<input type="radio"><label for="%ID%">%LABEL%<div class="servoydataprovider">%SERVOYDATAPROVIDER%</div></label>'
     },
 
     /**
