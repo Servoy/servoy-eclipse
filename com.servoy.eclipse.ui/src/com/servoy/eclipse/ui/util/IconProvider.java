@@ -29,6 +29,7 @@ import com.servoy.j2db.BasicFormController.JSForm;
 import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
+import com.servoy.j2db.dataprocessing.datasource.JSDataSources;
 import com.servoy.j2db.scripting.JSApplication;
 import com.servoy.j2db.scripting.JSI18N;
 import com.servoy.j2db.scripting.JSSecurity;
@@ -76,6 +77,7 @@ public class IconProvider
 
 		c2i.put(JSApplication.class, "application.gif"); //$NON-NLS-1$
 		c2i.put(JSDatabaseManager.class, "server.gif"); //$NON-NLS-1$
+		c2i.put(JSDataSources.class, "datasources.png"); //$NON-NLS-1$
 		c2i.put(JSUtils.class, "toolbox.gif"); //$NON-NLS-1$
 		c2i.put(HistoryProvider.class, "history.gif"); //$NON-NLS-1$
 		c2i.put(JSSecurity.class, "lock.gif"); //$NON-NLS-1$

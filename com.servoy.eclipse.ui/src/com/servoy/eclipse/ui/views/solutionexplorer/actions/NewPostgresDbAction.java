@@ -60,7 +60,7 @@ public class NewPostgresDbAction extends Action
 
 		setText("Create PostgreSQL Database");
 		setToolTipText(getText());
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("Server.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("server.gif"));
 	}
 
 	public boolean setEnabledStatus()

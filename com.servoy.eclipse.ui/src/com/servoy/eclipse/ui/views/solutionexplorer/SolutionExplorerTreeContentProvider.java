@@ -70,6 +70,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
+import com.servoy.j2db.dataprocessing.datasource.JSDataSources;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.ServoyDocumented;
 import com.servoy.j2db.documentation.scripting.docs.JSLib;
@@ -136,6 +137,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	private PlatformSimpleUserNode allSolutionsNode;
 
 	private final PlatformSimpleUserNode databaseManager;
+
+	private final PlatformSimpleUserNode datasources;
 
 	private final PlatformSimpleUserNode solutionModel;
 
@@ -246,6 +249,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		databaseManager = createTypeNode(Messages.TreeStrings_DatabaseManager, UserNodeType.FOUNDSET_MANAGER, JSDatabaseManager.class, invisibleRootNode);
 		addReturnTypeNodes(databaseManager, ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class).getAllReturnedTypes());
 
+		datasources = createTypeNode(Messages.TreeStrings_Datasources, UserNodeType.DATASOURCES, JSDataSources.class, invisibleRootNode);
+		addReturnTypeNodes(datasources, ScriptObjectRegistry.getScriptObjectForClass(JSDataSources.class).getAllReturnedTypes());
+
 		PlatformSimpleUserNode utils = createTypeNode(Messages.TreeStrings_Utils, UserNodeType.UTILS, JSUtils.class, invisibleRootNode);
 
 		PlatformSimpleUserNode jsunit = createTypeNode(Messages.TreeStrings_JSUnit, UserNodeType.JSUNIT, JSUnitAssertFunctions.class, invisibleRootNode);
@@ -271,9 +277,12 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 		resources.children = new PlatformSimpleUserNode[] { servers, stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode };
 
-		invisibleRootNode.children = new PlatformSimpleUserNode[] { resources, allSolutionsNode, activeSolutionNode, jslib, application, solutionModel, databaseManager, utils, history, security, i18n, jsunit, plugins };
+		invisibleRootNode.children = new PlatformSimpleUserNode[] { resources, allSolutionsNode, activeSolutionNode, jslib, application, solutionModel, databaseManager, datasources, utils, history, security, i18n, jsunit, plugins };
 
-		scriptingNodes = new PlatformSimpleUserNode[] { jslib, application, solutionModel, databaseManager, utils, history, security, i18n, /* exceptions, */jsunit, plugins };
+		scriptingNodes = new PlatformSimpleUserNode[] { jslib, application, solutionModel, databaseManager, datasources, utils, history, security, i18n, /*
+																																						 * exceptions
+																																						 * ,
+																																						 */jsunit, plugins };
 		resourceNodes = new PlatformSimpleUserNode[] { stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode };
 
 		// we want to load the plugins node in a background low prio job so that it will expand fast
@@ -573,6 +582,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				// databaseManager not allowed in login solution
 				if (((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION) databaseManager.hide();
 				else databaseManager.unhide();
+				// datasources not allowed in login solution
+				if (((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION) datasources.hide();
+				else datasources.unhide();
 			}
 			activeSolutionNode.setDisplayName(name);
 

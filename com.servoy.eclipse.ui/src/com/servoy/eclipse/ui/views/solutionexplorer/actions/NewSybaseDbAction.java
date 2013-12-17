@@ -65,7 +65,7 @@ public class NewSybaseDbAction extends Action
 
 		setText("Create Sybase Database");
 		setToolTipText(getText());
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("Server.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("server.gif"));
 	}
 
 	public boolean setEnabledStatus()

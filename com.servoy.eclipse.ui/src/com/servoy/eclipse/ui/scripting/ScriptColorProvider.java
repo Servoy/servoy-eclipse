@@ -93,6 +93,7 @@ public class ScriptColorProvider
 		createKeyword("currentcontroller");
 		createKeyword(IExecutingEnviroment.TOPLEVEL_APPLICATION);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER);
+		createKeyword(IExecutingEnviroment.TOPLEVEL_DATASOURCES);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_SOLUTION_MODIFIER);
 		createKeyword(ScriptVariable.GLOBAL_SCOPE);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_SCOPES);

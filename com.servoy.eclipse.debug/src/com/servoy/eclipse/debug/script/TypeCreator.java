@@ -59,6 +59,7 @@ import org.eclipse.dltk.javascript.typeinfo.TypeMemberQuery;
 import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
 import org.eclipse.dltk.javascript.typeinfo.model.Element;
 import org.eclipse.dltk.javascript.typeinfo.model.JSType;
+import org.eclipse.dltk.javascript.typeinfo.model.MapType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
 import org.eclipse.dltk.javascript.typeinfo.model.Method;
 import org.eclipse.dltk.javascript.typeinfo.model.Parameter;
@@ -422,7 +423,7 @@ public class TypeCreator extends TypeCache
 		addScopeType(DBDataSource.class.getSimpleName(), new DBDataSourceCreator());
 		addScopeType(DBDataSourceServer.class.getSimpleName(), new DBDataSourceServerCreator());
 		addScopeType(JSDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSDataSource.class, ClientSupport.wc_sc));
-		addScopeType(JSDataSources.class.getSimpleName(), new DynamicJavaClassCreator(JSDataSources.class, ClientSupport.wc_sc));
+		addScopeType(JSDataSources.class.getSimpleName(), new JSDataSourcesCreator());
 	}
 
 	private final ConcurrentHashMap<String, Boolean> ignorePackages = new ConcurrentHashMap<String, Boolean>();
@@ -642,6 +643,7 @@ public class TypeCreator extends TypeCache
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class), null);
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDataSources.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(ServoyException.class), null);
 
 			List<IClientPlugin> lst = application.getPluginManager().getPlugins(IClientPlugin.class);
@@ -2858,7 +2860,6 @@ public class TypeCreator extends TypeCache
 			return ClientSupport.wc_sc;
 		}
 	}
-
 	private class MemDataSourceCreator implements IScopeTypeCreator
 	{
 		public Type createType(String context, String typeName)
@@ -3024,6 +3025,39 @@ public class TypeCreator extends TypeCache
 		}
 	}
 
+	private class JSDataSourcesCreator extends DynamicJavaClassCreator
+	{
+		JSDataSourcesCreator()
+		{
+			super(JSDataSources.class, ClientSupport.wc_sc);
+		}
+
+		@Override
+		public Type doCreateType(String context, String fullTypeName)
+		{
+			Type superType = super.doCreateType(context, fullTypeName);
+
+			List<Member> overwrittenMembers = new ArrayList<Member>();
+			for (Member member : superType.getMembers())
+			{
+				if ("mem".equals(member.getName()))
+				{
+					MapType mapType = TypeInfoModelFactory.eINSTANCE.createMapType();
+					mapType.setValueType(getTypeRef(context, JSDataSource.class.getSimpleName()));
+					overwrittenMembers.add(TypeCreator.clone(member, mapType));
+				}
+			}
+
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(fullTypeName);
+			type.setKind(TypeKind.JAVA);
+			type.setAttribute(IMAGE_DESCRIPTOR, superType.getAttribute(IMAGE_DESCRIPTOR));
+			type.setSuperType(superType);
+			type.getMembers().addAll(overwrittenMembers);
+			return type;
+		}
+	}
+
 	private class DynamicJavaClassCreator implements IScopeTypeCreator
 	{
 		private final Class< ? > cls;
@@ -3035,10 +3069,15 @@ public class TypeCreator extends TypeCache
 			this.csp = csp;
 		}
 
-		public Type createType(String context, String fullTypeName)
+		public final Type createType(String context, String fullTypeName)
 		{
 			// Make sure the type is dynamic, created in solution context
-			return addType(context, TypeCreator.this.createType(context, fullTypeName, cls));
+			return addType(context, doCreateType(context, fullTypeName));
+		}
+
+		protected Type doCreateType(String context, String fullTypeName)
+		{
+			return TypeCreator.this.createType(context, fullTypeName, cls);
 		}
 
 		@Override

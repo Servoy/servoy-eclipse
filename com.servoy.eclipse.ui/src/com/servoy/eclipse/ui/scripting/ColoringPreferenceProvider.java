@@ -50,6 +50,7 @@ public class ColoringPreferenceProvider implements IColoringPreferenceProvider
 		requestor.addPreference("currentcontroller", "currentcontroller", new RGB(50, 200, 0));
 		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_APPLICATION, IExecutingEnviroment.TOPLEVEL_APPLICATION, new RGB(0, 200, 0));
 		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER, IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER, new RGB(0, 200, 0));
+		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_DATASOURCES, IExecutingEnviroment.TOPLEVEL_DATASOURCES, new RGB(0, 200, 0));
 		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_SOLUTION_MODIFIER, IExecutingEnviroment.TOPLEVEL_SOLUTION_MODIFIER, new RGB(0, 200, 0));
 		requestor.addPreference(ScriptVariable.GLOBAL_SCOPE, ScriptVariable.GLOBAL_SCOPE, new RGB(0, 200, 50));
 		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_SCOPES, IExecutingEnviroment.TOPLEVEL_SCOPES, new RGB(0, 200, 50));

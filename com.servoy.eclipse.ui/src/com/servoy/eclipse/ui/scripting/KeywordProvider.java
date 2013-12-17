@@ -34,30 +34,29 @@ public class KeywordProvider implements IKeywordProvider
 
 	static
 	{
-		keywords = new String[18];
-		int n = 0;
+		Arrays.sort(keywords = new String[] { //
 
-		keywords[n++] = IExecutingEnviroment.TOPLEVEL_JSUNIT;
-		keywords[n++] = IExecutingEnviroment.TOPLEVEL_UTILS;
-		keywords[n++] = IExecutingEnviroment.TOPLEVEL_SECURITY;
-		keywords[n++] = "elements";
-		keywords[n++] = "controller";
-		keywords[n++] = "currentcontroller";
-		keywords[n++] = IExecutingEnviroment.TOPLEVEL_APPLICATION;
-		keywords[n++] = IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER;
-		keywords[n++] = IExecutingEnviroment.TOPLEVEL_SOLUTION_MODIFIER;
-		keywords[n++] = ScriptVariable.GLOBAL_SCOPE;
-		keywords[n++] = IExecutingEnviroment.TOPLEVEL_SCOPES;
-		keywords[n++] = IExecutingEnviroment.TOPLEVEL_FORMS;
-		keywords[n++] = IExecutingEnviroment.TOPLEVEL_HISTORY;
-		keywords[n++] = IExecutingEnviroment.TOPLEVEL_PLUGINS;
-		keywords[n++] = "_super";
+		IExecutingEnviroment.TOPLEVEL_JSUNIT, //
+		IExecutingEnviroment.TOPLEVEL_UTILS, //
+		IExecutingEnviroment.TOPLEVEL_SECURITY, //
+		"elements", //
+		"controller", //
+		"currentcontroller", //
+		IExecutingEnviroment.TOPLEVEL_APPLICATION, //
+		IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER, //
+		IExecutingEnviroment.TOPLEVEL_DATASOURCES, //
+		IExecutingEnviroment.TOPLEVEL_SOLUTION_MODIFIER, //
+		ScriptVariable.GLOBAL_SCOPE, //
+		IExecutingEnviroment.TOPLEVEL_SCOPES, //
+		IExecutingEnviroment.TOPLEVEL_FORMS, //
+		IExecutingEnviroment.TOPLEVEL_HISTORY, //
+		IExecutingEnviroment.TOPLEVEL_PLUGINS, //
+		"_super", //
 
-		keywords[n++] = "FIXME";
-		keywords[n++] = "CHECKME";
-		keywords[n++] = "TODO";
-
-		Arrays.sort(keywords);
+		"FIXME", //
+		"CHECKME", //
+		"TODO" // 
+		});
 	}
 
 	public KeywordProvider()
