@@ -21,6 +21,8 @@ import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.SwingUtilities;
+
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.test.SolutionJSUnitSuiteCodeBuilder;
 import com.servoy.j2db.IServiceProvider;
@@ -97,23 +99,11 @@ public class DebugJ2DBTestClient extends DebugJ2DBClient
 	}
 
 	@Override
-	public void invokeAndWait(Runnable r)
-	{
-		super.invokeAndWait(r);
-	}
-
-	@Override
-	public void invokeLater(Runnable r, boolean immediate)
-	{
-		invokeLater(r);
-	}
-
-	@Override
-	public void invokeLater(Runnable r)
+	protected void doInvokeLater(Runnable r)
 	{
 		events.add(r);
 		final IServiceProvider client = this;
-		super.invokeLater(new Runnable()
+		SwingUtilities.invokeLater(new Runnable()
 		{
 			public void run()
 			{
