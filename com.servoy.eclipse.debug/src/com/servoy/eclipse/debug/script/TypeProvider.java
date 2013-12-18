@@ -34,8 +34,8 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.IServerManagerInternal;
+import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
@@ -61,13 +61,8 @@ public class TypeProvider implements ITypeProvider
 	 */
 	public Type getType(ITypeInfoContext context, TypeMode mode, String typeName)
 	{
-		String contextString = null;
-		FlattenedSolution flattenedSolution = ElementResolver.getFlattenedSolution(context);
-		if (flattenedSolution != null)
-		{
-			contextString = flattenedSolution.getSolution().getName();
-		}
-		return TYPES.findType(contextString, typeName);
+		// use the projectname of the resource, also when the file does not belong to the active solution
+		return TYPES.findType(ElementResolver.getProjectName(context), typeName);
 	}
 
 	public Set<String> listTypes(ITypeInfoContext context, TypeMode mode, String prefix)

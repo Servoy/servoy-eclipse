@@ -735,11 +735,7 @@ public class ElementResolver implements IElementResolver
 		public String getTypeName(ITypeInfoContext context, String typeName);
 	}
 
-
-	/**
-	 * @param context
-	 */
-	public static FlattenedSolution getFlattenedSolution(ITypeInfoContext context)
+	public static String getProjectName(ITypeInfoContext context)
 	{
 		IResource resource = null;
 		ReferenceSource rs = context.getSource();
@@ -751,12 +747,16 @@ public class ElementResolver implements IElementResolver
 		{
 			resource = context.getModelElement().getResource();
 		}
-		String name = null;
-		if (resource != null)
+		if (resource == null)
 		{
-			name = resource.getProject().getName();
+			return null;
 		}
-		return getFlattenedSolution(name);
+		return resource.getProject().getName();
+	}
+
+	public static FlattenedSolution getFlattenedSolution(ITypeInfoContext context)
+	{
+		return getFlattenedSolution(getProjectName(context));
 	}
 
 
