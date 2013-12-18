@@ -556,7 +556,7 @@ $(function() {
                 placeholder: 'ui-sortable-placeholder',
                 appendTo: 'body',
                 helper: 'clone',
-                tolerance: "pointer",
+                tolerance: "intersect",
                 connectWith:
                     '.ui-page .adm-node.ui-sortable:not(.ui-masked),' +
                     '.ui-page .orig-adm-node.ui-sortable:not(.ui-masked)',
