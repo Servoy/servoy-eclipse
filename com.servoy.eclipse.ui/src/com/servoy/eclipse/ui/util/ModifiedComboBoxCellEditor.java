@@ -36,38 +36,17 @@ public class ModifiedComboBoxCellEditor extends ComboBoxCellEditor
 
 	private static final int VISIBLE_ITEM_COUNT = 5;
 
+	private CCombo combo;
+
 	public ModifiedComboBoxCellEditor(Composite parent, String[] items, int style)
 	{
 		super(parent, items, style);
-		CCombo combo = null;
-		Control control = getControl();
-		if (control instanceof CCombo)
-		{
-			combo = (CCombo)getControl();
-		}
-		else if (control instanceof Composite)
-		{
-			Control[] children = ((Composite)getControl()).getChildren();
-			for (Control c : children)
-			{
-				if (c instanceof CCombo) combo = (CCombo)c;
-				break;
-			}
-		}
-		if (combo != null)
-		{
-			int count = combo.getItems().length;
-			if (count <= VISIBLE_ITEM_COUNT)
-			{
-				combo.setVisibleItemCount(count == 0 ? count : count - 1);
-			}
-		}
 	}
 
 	@Override
 	protected Control createControl(Composite parent)
 	{
-		CCombo combo = (CCombo)super.createControl(parent);
+		combo = (CCombo)super.createControl(parent);
 
 		combo.setVisibleItemCount(VISIBLE_ITEM_COUNT); //default count - fixing bug introduced by eclipse 4.3
 		combo.addSelectionListener(new SelectionAdapter()
@@ -80,5 +59,16 @@ public class ModifiedComboBoxCellEditor extends ComboBoxCellEditor
 			}
 		});
 		return combo;
+	}
+
+	@Override
+	public void setItems(String[] items)
+	{
+		super.setItems(items);
+		int count = combo.getItems().length;
+		if (count <= VISIBLE_ITEM_COUNT)
+		{
+			combo.setVisibleItemCount(count == 0 ? count : count - 1);
+		}
 	}
 }

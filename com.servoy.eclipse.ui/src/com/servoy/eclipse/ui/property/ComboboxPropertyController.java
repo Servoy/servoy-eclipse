@@ -81,7 +81,7 @@ public class ComboboxPropertyController<T> extends PropertyController<T, Integer
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		ModifiedComboBoxCellEditor editor = new ModifiedComboBoxCellEditor(parent, getModel().getDisplayValues(), SWT.READ_ONLY)
+		ModifiedComboBoxCellEditor editor = new ModifiedComboBoxCellEditor(parent, EMPTY_STRING_ARRAY, SWT.READ_ONLY)
 		{
 			private Button editorButton;
 
@@ -90,6 +90,7 @@ public class ComboboxPropertyController<T> extends PropertyController<T, Integer
 			{
 				// set the items at activation, values may have changed
 				Object value = doGetValue();
+				setItems(model.getDisplayValues());
 				doSetValue(value);
 				if (valueEditor != null)
 				{
