@@ -42,11 +42,11 @@ public class ExportOptionsPage extends WizardPage
 	public static String SERVER_URL_KEY = "serverURL";
 	public static String SERVICE_SOLUTION_KEY_PREFIX = "serviceSolution_";
 	public static String TIMEOUT_KEY = "timeout";
+	public static String DEBUG_MODE_KEY = "debug_mode";
 
 	private Text serverURL;
 	private Text serviceSolutionName;
 	private Text timeout;
-	private String solution;
 	private final WizardPage nextPage;
 	private final MobileExporter mobileExporter;
 	private Button debugCheck;
@@ -80,7 +80,7 @@ public class ExportOptionsPage extends WizardPage
 		solutionLabel.setText("Solution");
 
 		Label solutionName = new Label(container, SWT.NONE);
-		solutionName.setText(solution);
+		solutionName.setText(mobileExporter.getSolutionName());
 
 		Label serviceSolutionLabel = new Label(container, SWT.NONE);
 		serviceSolutionLabel.setText("Service Solution Name");
@@ -142,10 +142,10 @@ public class ExportOptionsPage extends WizardPage
 		}
 		serverURL.setText(defaultServerURL);
 
-		String defaultServiceSolutionName = getDialogSettings().get(SERVICE_SOLUTION_KEY_PREFIX + solution);
+		String defaultServiceSolutionName = getDialogSettings().get(SERVICE_SOLUTION_KEY_PREFIX + mobileExporter.getSolutionName());
 		if (defaultServiceSolutionName == null)
 		{
-			defaultServiceSolutionName = getSolution() + "_service";
+			defaultServiceSolutionName = mobileExporter.getSolutionName() + "_service";
 		}
 		serviceSolutionName.setText(defaultServiceSolutionName);
 
@@ -176,6 +176,13 @@ public class ExportOptionsPage extends WizardPage
 				ExportOptionsPage.this.getContainer().updateButtons();
 			}
 		});
+
+		boolean debugMode = true;
+		if (getDialogSettings().get(DEBUG_MODE_KEY) != null)
+		{
+			debugMode = getDialogSettings().getBoolean(DEBUG_MODE_KEY);
+		}
+		debugCheck.setSelection(debugMode);
 	}
 
 	private String getServerURL()
@@ -199,23 +206,9 @@ public class ExportOptionsPage extends WizardPage
 		return timeout.getText();
 	}
 
-	public void setSolution(String solution)
-	{
-		this.solution = solution;
-	}
-
-	public String getSolution()
-	{
-		return solution;
-	}
-
 	@Override
 	public String getErrorMessage()
 	{
-		if (getSolution() == null || "".equals(getSolution()))
-		{
-			return "No solution specified";
-		}
 		if (getServiceSolutionName() == null || "".equals(getServiceSolutionName()))
 		{
 			return "No service solution specified";
@@ -230,14 +223,14 @@ public class ExportOptionsPage extends WizardPage
 	@Override
 	public IWizardPage getNextPage()
 	{
-		mobileExporter.setSolutionName(getSolution());
 		mobileExporter.setServerURL(getServerURL());
 		mobileExporter.setServiceSolutionName(getServiceSolutionName());
 		mobileExporter.setTimeout(Integer.parseInt(getTimeout()));
 		mobileExporter.setDebugMode(useDebugMode());
 		getDialogSettings().put(ExportOptionsPage.SERVER_URL_KEY, serverURL.getText());
-		getDialogSettings().put(ExportOptionsPage.SERVICE_SOLUTION_KEY_PREFIX + getSolution(), getServiceSolutionName());
+		getDialogSettings().put(ExportOptionsPage.SERVICE_SOLUTION_KEY_PREFIX + mobileExporter.getSolutionName(), getServiceSolutionName());
 		getDialogSettings().put(ExportOptionsPage.TIMEOUT_KEY, getTimeout());
+		getDialogSettings().put(ExportOptionsPage.DEBUG_MODE_KEY, useDebugMode());
 		return nextPage;
 	}
 

@@ -17,12 +17,18 @@
 
 package com.servoy.eclipse.exporter.mobile.ui.wizard;
 
+import java.io.File;
 import java.net.URL;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -70,8 +76,9 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 	public ExportMobileWizard()
 	{
 		finishPage = new CustomizedFinishPage("lastPage");
-		pgAppPage = new PhoneGapApplicationPage("PhoneGap Application", finishPage, mobileExporter);
+		pgAppPage = new PhoneGapApplicationPage("PhoneGap Application", mobileExporter);
 		warExportPage = new WarExportPage("outputPage", "Choose output", null, finishPage, pgAppPage, mobileExporter);
+		pgAppPage.setWarExportPage(warExportPage);
 		licensePage = new LicensePage("licensePage", warExportPage, mobileExporter);
 		mediaOrderPage = new MediaOrderPage("mediaOrderPage", licensePage, mobileExporter);
 		optionsPage = new ExportOptionsPage("optionsPage", mobileExporter.getMediaOrder().size() > 0 ? mediaOrderPage : licensePage, mobileExporter);
@@ -85,8 +92,6 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 		setDialogSettings(section);
 		finishPage.setTitle("Export finished");
 		setWindowTitle("Mobile Export");
-
-
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
@@ -103,7 +108,7 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 		}
 		else
 		{
-			optionsPage.setSolution(activeProject.getSolution().getName());
+			mobileExporter.setSolutionName(activeProject.getSolution().getName());
 		}
 	}
 
@@ -124,6 +129,73 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 	@Override
 	public boolean performFinish()
 	{
+		if (warExportPage.isWarExport())
+		{
+			return exportWar();
+		}
+		else
+		{
+			return exportToPhoneGap();
+		}
+	}
+
+	private boolean exportToPhoneGap()
+	{
+		try
+		{
+			final PhoneGapApplication app = pgAppPage.getPhoneGapApplication();
+			final File configFile = pgAppPage.getConfigFile();
+			final boolean openPhoneGapUrl = pgAppPage.openPhoneGapUrl();
+			Job uploadToPhoneGap = new Job("Uploading to PhoneGap build")
+			{
+				@Override
+				protected IStatus run(IProgressMonitor monitor)
+				{
+					String error = pgAppPage.getConnector().createOrUpdatePhoneGapApplication(app, mobileExporter, configFile);
+					if (error != null)
+					{
+						return new Status(IStatus.ERROR, com.servoy.eclipse.exporter.mobile.Activator.PLUGIN_ID, error);
+					}
+
+					if (openPhoneGapUrl)
+					{
+						try
+						{
+							IWorkbenchBrowserSupport support = PlatformUI.getWorkbench().getBrowserSupport();
+							IWebBrowser browser = support.getExternalBrowser();
+							browser.openURL(new URL("https://build.phonegap.com/people/sign_in"));
+						}
+						catch (Exception ex)
+						{
+							ServoyLog.logError(ex);
+						}
+					}
+					return Status.OK_STATUS;
+				}
+			};
+			uploadToPhoneGap.schedule();
+		}
+		catch (Exception ex)
+		{
+			((WizardPage)getContainer().getCurrentPage()).setErrorMessage(ex.getMessage());
+			return false;
+		}
+		return true;
+	}
+
+	private boolean exportWar()
+	{
+		//if current page is finish then export was already done
+		if (!getContainer().getCurrentPage().equals(finishPage))
+		{
+			String error = warExportPage.exportWar();
+			if (error != null)
+			{
+				((WizardPage)getContainer().getCurrentPage()).setErrorMessage(error);
+				return false;
+			}
+		}
+
 		IEclipsePreferences preferences = InstanceScope.INSTANCE.getNode(com.servoy.eclipse.exporter.mobile.Activator.PLUGIN_ID);
 		preferences.putBoolean(PROPERTY_IS_OPEN_URL, finishPage.isOpenUrl());
 		try
@@ -134,7 +206,6 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 		{
 			ServoyLog.logError(e);
 		}
-
 		if (finishPage.getOpenUrl() != null)
 		{
 			try
@@ -169,6 +240,22 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 		}
 	}
 
+
+	@Override
+	public boolean canFinish()
+	{
+		for (int i = 0; i < getPageCount(); i++)
+		{
+			IWizardPage page = getPages()[i];
+			if (page.getErrorMessage() != null || !page.isPageComplete())
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+
 	public class CustomizedFinishPage extends FinishPage
 	{
 		private String url = null;
@@ -179,12 +266,6 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 		public CustomizedFinishPage(String pageName)
 		{
 			super(pageName);
-		}
-
-		@Override
-		public boolean isPageComplete()
-		{
-			return super.isCurrentPage();
 		}
 
 		@Override

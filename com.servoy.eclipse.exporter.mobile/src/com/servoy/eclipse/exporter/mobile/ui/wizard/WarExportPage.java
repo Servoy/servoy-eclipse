@@ -32,6 +32,8 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -66,6 +68,7 @@ public class WarExportPage extends WizardPage
 	public static String PHONEGAP_EMAIL = "phonegapEmail";
 	public static final String SECURE_STORAGE_ACCOUNTS_NODE = "PhoneGap Account Storage";
 	public static final String NO_PHONEGAP_ACCOUNT = "-none-";
+	public static final String WAR_EXPORT_TYPE_KEY = "isWarExport";
 
 	private Text outputText;
 	private Button outputBrowseButton;
@@ -118,12 +121,32 @@ public class WarExportPage extends WizardPage
 
 		exportAsWar = new Button(container, SWT.RADIO);
 		exportAsWar.setText("Export as War"); //$NON-NLS-1$
-		exportAsWar.setSelection(true);
 
-		Button exportUsingPhoneGap = new Button(container, SWT.RADIO);
-
+		final Button exportUsingPhoneGap = new Button(container, SWT.RADIO);
 		Link phoneGapLink = new Link(container, SWT.NONE);
 		phoneGapLink.setText("Export using <A>PhoneGap build</A>");
+		phoneGapLink.addMouseListener(new MouseListener()
+		{
+
+			@Override
+			public void mouseUp(MouseEvent e)
+			{
+				exportUsingPhoneGap.setSelection(true);
+				exportAsWar.setSelection(false);
+				setExportType();
+				updateWizardState();
+			}
+
+			@Override
+			public void mouseDown(MouseEvent e)
+			{
+			}
+
+			@Override
+			public void mouseDoubleClick(MouseEvent e)
+			{
+			}
+		});
 		phoneGapLink.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -226,13 +249,17 @@ public class WarExportPage extends WizardPage
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
+				setExportType();
 				updateWizardState();
-				enableOption();
 			}
 		};
 		exportAsWar.addSelectionListener(selectionListener);
 		exportUsingPhoneGap.addSelectionListener(selectionListener);
-		enableOption(true);
+
+		boolean isWarExport = getDialogSettings().get(WAR_EXPORT_TYPE_KEY) != null ? getDialogSettings().getBoolean(WAR_EXPORT_TYPE_KEY) : true;
+		exportAsWar.setSelection(isWarExport);
+		exportUsingPhoneGap.setSelection(!isWarExport);
+		setExportType();
 	}
 
 	private void loadPhoneGapAccounts()
@@ -297,6 +324,8 @@ public class WarExportPage extends WizardPage
 		{
 			phoneGapUsername.setText(getDialogSettings().get(PHONEGAP_EMAIL)); // fill in the last used email address
 		}
+		//try to load the apps (for the case when the user clicks finish on first wizard page)
+		pgAppPage.getConnector().loadPhoneGapAcount(phoneGapUsername.getText(), phoneGapPassword.getText());
 	}
 
 	private void updateWizardState()
@@ -304,26 +333,27 @@ public class WarExportPage extends WizardPage
 		setErrorMessage(null);
 		WarExportPage.this.getContainer().updateMessage();
 		WarExportPage.this.getContainer().updateButtons();
+		getDialogSettings().put(WarExportPage.WAR_EXPORT_TYPE_KEY, isWarExport());
 	}
 
-	private void enableOption()
+	private void setExportType()
 	{
 		if (exportAsWar.getSelection())
 		{
-			enableOption(true);
+			setExportType(true);
 		}
 		else
 		{
-			enableOption(false);
+			setExportType(false);
 		}
 	}
 
-	private void enableOption(boolean enabled)
+	private void setExportType(boolean isDefault)
 	{
-		outputText.setEnabled(enabled);
-		outputBrowseButton.setEnabled(enabled);
-		phoneGapUsername.setEnabled(!enabled);
-		phoneGapPassword.setEnabled(!enabled);
+		outputText.setEnabled(isDefault);
+		outputBrowseButton.setEnabled(isDefault);
+		phoneGapUsername.setEnabled(!isDefault);
+		phoneGapPassword.setEnabled(!isDefault);
 	}
 
 	private String getOutputFolder()
@@ -331,15 +361,9 @@ public class WarExportPage extends WizardPage
 		return outputText.getText();
 	}
 
-	private boolean isWarExport()
+	public boolean isWarExport()
 	{
 		return exportAsWar.getSelection();
-	}
-
-	@Override
-	public boolean isPageComplete()
-	{
-		return !isCurrentPage();
 	}
 
 	@Override
@@ -356,25 +380,7 @@ public class WarExportPage extends WizardPage
 		{
 			if (isWarExport())
 			{
-				String serverDir = ApplicationServerSingleton.get().getServoyApplicationServerDirectory();
-				if (!serverDir.endsWith(File.separator)) serverDir = serverDir + File.separator;
-				serverDir = new StringBuilder(serverDir).append("server").append(File.separator).append("webapps").append(File.separator).toString(); //$NON-NLS-1$ //$NON-NLS-2$
-				String outputFolder = getOutputFolder();
-				if (!outputFolder.endsWith(File.pathSeparator)) outputFolder = outputFolder + File.separator;
-
-				EditorUtil.saveDirtyEditors(getShell(), true);
-				boolean isLocalDeploy = serverDir.equalsIgnoreCase(outputFolder);
-				String exportMessage = doExport(isLocalDeploy && finishPage.isOpenUrl() ? 3000 : 0);
-				if (isLocalDeploy)
-				{
-					finishPage.setApplicationURL(
-						new StringBuilder("http://localhost:").append(ApplicationServerSingleton.get().getWebServerPort()).append("/").append( //$NON-NLS-1$ //$NON-NLS-2$
-							mobileExporter.getSolutionName()).append("/index.html").toString(), "Open WAR application in browser at finish.", false); //$NON-NLS-1$ //$NON-NLS-2$
-					finishPage.createControl(WarExportPage.this.getControl().getParent());
-					finishPage.setTextMessage(exportMessage);
-					finishPage.getControl().getParent().layout(true);
-				}
-				else finishPage.setTextMessage(exportMessage);
+				exportWar();
 				return finishPage;
 			}
 			else
@@ -390,7 +396,7 @@ public class WarExportPage extends WizardPage
 						public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 						{
 							errorMessage[0] = pgAppPage.getConnector().loadPhoneGapAcount(username, password);
-							
+
 							// in case one uses his github account to login to phonegap
 //							errorMessage[0] = pgAppPage.getConnector().loadPhoneGapAcount("BTsF5NMzv2NdKxQ9noCq"); // your Phonegap Build token here (generated on the site)
 						}
@@ -430,6 +436,30 @@ public class WarExportPage extends WizardPage
 		return null;
 	}
 
+	public String exportWar()
+	{
+		String serverDir = ApplicationServerSingleton.get().getServoyApplicationServerDirectory();
+		if (!serverDir.endsWith(File.separator)) serverDir = serverDir + File.separator;
+		serverDir = new StringBuilder(serverDir).append("server").append(File.separator).append("webapps").append(File.separator).toString(); //$NON-NLS-1$ //$NON-NLS-2$
+		String outputFolder = getOutputFolder();
+		if (!outputFolder.endsWith(File.pathSeparator)) outputFolder = outputFolder + File.separator;
+
+		EditorUtil.saveDirtyEditors(getShell(), true);
+		boolean isLocalDeploy = serverDir.equalsIgnoreCase(outputFolder);
+		String error = doExport(isLocalDeploy && finishPage.isOpenUrl() ? 3000 : 0);
+		if (isLocalDeploy)
+		{
+			finishPage.setApplicationURL(new StringBuilder("http://localhost:").append(ApplicationServerSingleton.get().getWebServerPort()).append("/").append( //$NON-NLS-1$ //$NON-NLS-2$
+				mobileExporter.getSolutionName()).append("/index.html").toString(), "Open WAR application in browser at finish.", false); //$NON-NLS-1$ //$NON-NLS-2$
+			finishPage.createControl(WarExportPage.this.getControl().getParent());
+			finishPage.getControl().getParent().layout(true);
+		}
+		finishPage.setTextMessage(error == null ? "War file was successfully exported to: " +
+			new File(getDialogSettings().get(WarExportPage.OUTPUT_PATH_KEY), mobileExporter.getSolutionName() + ".war").getAbsolutePath()
+			: "Unexpected exception while exporting war file: " + error);
+		return error;
+	}
+
 	private String doExport(final long delayAfterExport)
 	{
 		File outputFile = new File(getOutputFolder());
@@ -463,9 +493,7 @@ public class WarExportPage extends WizardPage
 
 
 		getDialogSettings().put(WarExportPage.OUTPUT_PATH_KEY, getOutputFolder());
-		return errorMessage[0] == null ? "War file was successfully exported to: " +
-			new File(outputFile.getAbsolutePath(), mobileExporter.getSolutionName() + ".war").getAbsolutePath()
-			: "Unexpected exception while exporting war file: " + errorMessage[0];
+		return errorMessage[0];
 	}
 
 	@Override

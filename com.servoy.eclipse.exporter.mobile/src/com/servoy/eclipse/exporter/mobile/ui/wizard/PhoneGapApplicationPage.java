@@ -18,16 +18,18 @@
 package com.servoy.eclipse.exporter.mobile.ui.wizard;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.Arrays;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.operation.IRunnableWithProgress;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -47,11 +49,14 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
-import com.servoy.eclipse.exporter.mobile.ui.wizard.ExportMobileWizard.CustomizedFinishPage;
 import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author lvostinar
@@ -59,7 +64,7 @@ import com.servoy.eclipse.ui.util.EditorUtil;
  */
 public class PhoneGapApplicationPage extends WizardPage
 {
-	private final CustomizedFinishPage finishPage;
+	private WarExportPage warExportPage;
 	private final PhoneGapConnector connector;
 	private Combo applicationNameCombo;
 	private Text txtVersion;
@@ -67,15 +72,28 @@ public class PhoneGapApplicationPage extends WizardPage
 	private Button btnPublic;
 	private Text iconPath;
 	private Text configPath;
+	private Button configBrowseButton;
 	private Button iconBrowseButton;
 	private CheckboxTableViewer certificatesViewer;
 
 	private final MobileExporter exporter;
+	private Button btnUseConfigXml;
+	private Button btnUsePhonegap;
+	private Button btnOpenPhonegapLink;
 
-	public PhoneGapApplicationPage(String name, CustomizedFinishPage finishPage, MobileExporter mobileExporter)
+	public static final String HAS_CONFIG_FILE_KEY = "hasConfigFile_";
+	public static final String CONFIG_FILE_PATH_KEY = "configFilePath_";
+	public static final String APPLICATION_NAME_KEY = "applicationName_";
+	public static final String APPLICATION_DESCRIPTION_KEY = "applicationDescription_";
+	public static final String APPLICATION_VERSION_KEY = "applicationVersion_";
+	public static final String IS_APPLICATION_PUBLIC_KEY = "isApplicationPublic_";
+	public static final String APPLICATION_ICON_KEY = "applicationIcon_";
+	public static final String CERTIFICATES_KEY = "certificates_";
+	public static final String OPEN_PHONEGAP_BUILD_PAGE_KEY = "openPhoneGapBuild_";
+
+	public PhoneGapApplicationPage(String name, MobileExporter mobileExporter)
 	{
 		super(name);
-		this.finishPage = finishPage;
 		this.connector = new PhoneGapConnector();
 		this.exporter = mobileExporter;
 		setTitle("PhoneGap Application");
@@ -85,6 +103,25 @@ public class PhoneGapApplicationPage extends WizardPage
 	{
 		Composite container = new Composite(parent, SWT.NULL);
 		setControl(container);
+
+		Label lblConfigurationType = new Label(container, SWT.NONE);
+		lblConfigurationType.setText("Configuration type");
+
+		btnUseConfigXml = new Button(container, SWT.RADIO);
+		SelectionAdapter configSelection = new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				selectConfigType();
+			}
+		};
+		btnUseConfigXml.addSelectionListener(configSelection);
+		btnUseConfigXml.setText("Use config.xml");
+
+		btnUsePhonegap = new Button(container, SWT.RADIO);
+		btnUsePhonegap.addSelectionListener(configSelection);
+		btnUsePhonegap.setText("Load existing settings from PhoneGap");
 
 		Label lblApplicationName = new Label(container, SWT.NONE);
 		lblApplicationName.setText("Application Title");
@@ -152,7 +189,7 @@ public class PhoneGapApplicationPage extends WizardPage
 
 		configPath = new Text(container, SWT.BORDER);
 		configPath.setToolTipText("PhoneGap config file location. Settings from config file (if present) have higher priority than settings from this form.");
-		Button configBrowseButton = new Button(container, SWT.NONE);
+		configBrowseButton = new Button(container, SWT.NONE);
 		configBrowseButton.setText("Browse");
 
 		configBrowseButton.addSelectionListener(new SelectionAdapter()
@@ -160,45 +197,57 @@ public class PhoneGapApplicationPage extends WizardPage
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				FileDialog fileDialog = new FileDialog(outputBrowseShell, SWT.NONE);
-				fileDialog.setFilterExtensions(new String[] { "*.xml" });
-				if (fileDialog.open() != null)
-				{
-					configPath.setText(fileDialog.getFilterPath() + File.separator + fileDialog.getFileName());
-				}
+				selectConfigFile(outputBrowseShell);
+				getWizard().getContainer().updateButtons();
 			}
 		});
 
 		btnPublic = new Button(container, SWT.CHECK);
 		btnPublic.setText("Public Application");
 
+		btnOpenPhonegapLink = new Button(container, SWT.CHECK);
+		btnOpenPhonegapLink.setText("Open PhoneGap build page at finish.");
+
 		final GroupLayout groupLayout = new GroupLayout(container);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(lblApplicationName).add(lblVersion).add(lblDescription).add(iconLabel).add(
-					configLabel).add(certificatesLabel)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(applicationNameCombo, GroupLayout.DEFAULT_SIZE, 342, Short.MAX_VALUE).add(txtVersion,
-					GroupLayout.PREFERRED_SIZE, 276, Short.MAX_VALUE).add(txtDescription, GroupLayout.PREFERRED_SIZE, 276, Short.MAX_VALUE).add(
-					groupLayout.createSequentialGroup().add(iconPath, GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE).add(iconBrowseButton,
-						GroupLayout.PREFERRED_SIZE, 80, GroupLayout.PREFERRED_SIZE)).add(
-					groupLayout.createSequentialGroup().add(configPath, GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE).add(configBrowseButton,
-						GroupLayout.PREFERRED_SIZE, 80, GroupLayout.PREFERRED_SIZE)).add(certificatesViewer.getTable(), GroupLayout.DEFAULT_SIZE, 342,
-					Short.MAX_VALUE).add(btnPublic, GroupLayout.PREFERRED_SIZE, 276, Short.MAX_VALUE)).addContainerGap()));
-
+			groupLayout.createSequentialGroup().add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(
+					groupLayout.createSequentialGroup().add(161).add(configLabel).add(6).add(configPath, GroupLayout.PREFERRED_SIZE, 351,
+						GroupLayout.PREFERRED_SIZE).add(configBrowseButton, GroupLayout.PREFERRED_SIZE, 80, GroupLayout.PREFERRED_SIZE)).add(
+					groupLayout.createSequentialGroup().add(161).add(lblApplicationName).add(34).add(applicationNameCombo, GroupLayout.PREFERRED_SIZE, 431,
+						GroupLayout.PREFERRED_SIZE)).add(
+					groupLayout.createSequentialGroup().add(161).add(lblVersion).add(82).add(txtVersion, GroupLayout.PREFERRED_SIZE, 431,
+						GroupLayout.PREFERRED_SIZE)).add(
+					groupLayout.createSequentialGroup().add(161).add(lblDescription).add(61).add(txtDescription, GroupLayout.PREFERRED_SIZE, 431,
+						GroupLayout.PREFERRED_SIZE)).add(
+					groupLayout.createSequentialGroup().add(23).add(
+						groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(
+							groupLayout.createSequentialGroup().add(138).add(iconLabel).add(98).add(iconPath, GroupLayout.PREFERRED_SIZE, 351,
+								GroupLayout.PREFERRED_SIZE).add(iconBrowseButton, GroupLayout.PREFERRED_SIZE, 80, GroupLayout.PREFERRED_SIZE)).add(
+							certificatesLabel, GroupLayout.PREFERRED_SIZE, 103, GroupLayout.PREFERRED_SIZE).add(
+							groupLayout.createSequentialGroup().add(lblConfigurationType).add(11).add(
+								groupLayout.createParallelGroup(GroupLayout.LEADING).add(btnUsePhonegap, GroupLayout.PREFERRED_SIZE, 256,
+									GroupLayout.PREFERRED_SIZE).add(btnUseConfigXml, GroupLayout.PREFERRED_SIZE, 217, GroupLayout.PREFERRED_SIZE).add(
+									btnPublic, GroupLayout.PREFERRED_SIZE, 431, GroupLayout.PREFERRED_SIZE).add(certificatesViewer.getTable(),
+									GroupLayout.DEFAULT_SIZE, 576, Short.MAX_VALUE))).add(btnOpenPhonegapLink)))).add(17)));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(applicationNameCombo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(lblApplicationName)).add(7).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(txtVersion, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(lblVersion)).add(7).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(txtDescription, 80, 80, 80).add(lblDescription)).add(7).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(iconBrowseButton).add(iconPath, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(iconLabel)).add(7).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(configBrowseButton).add(configPath, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(configLabel)).add(7).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(certificatesViewer.getTable(), 80, 80, 80).add(certificatesLabel)).add(10).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(btnPublic))));
-
+			groupLayout.createSequentialGroup().add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().add(1).add(lblConfigurationType)).add(
+					btnUseConfigXml)).add(8).add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(configLabel).add(
+					groupLayout.createSequentialGroup().add(2).add(configPath, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(
+					configBrowseButton)).add(13).add(btnUsePhonegap).addPreferredGap(LayoutStyle.UNRELATED).add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().add(3).add(lblApplicationName)).add(
+					applicationNameCombo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(15).add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().add(3).add(lblVersion)).add(txtVersion,
+					GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(8).add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().add(3).add(lblDescription)).add(txtDescription,
+					GroupLayout.PREFERRED_SIZE, 80, GroupLayout.PREFERRED_SIZE)).add(8).add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().add(1).add(iconLabel)).add(
+					groupLayout.createSequentialGroup().add(1).add(iconPath, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(
+					iconBrowseButton)).addPreferredGap(LayoutStyle.RELATED).add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(certificatesLabel, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE).add(
+					certificatesViewer.getTable(), 80, 80, 80)).addPreferredGap(LayoutStyle.RELATED).add(btnPublic).add(25).add(btnOpenPhonegapLink)));
 		container.setLayout(groupLayout);
 
 		ModifyListener errorMessageDetecter = new ModifyListener()
@@ -225,67 +274,204 @@ public class PhoneGapApplicationPage extends WizardPage
 					iconPath.setText(app.getIconPath());
 					setSelectedCertificates(app.getCertificates());
 				}
+				getWizard().getContainer().updateButtons();
 			}
 		});
+		configPath.addModifyListener(errorMessageDetecter);
+		setDefaultPageData();
 	}
+
+
+	private void setDefaultPageData()
+	{
+		String solutionName = exporter.getSolutionName();
+		String hasConfig = getDialogSettings().get(HAS_CONFIG_FILE_KEY + solutionName);
+		boolean hasConfigXml = hasConfig != null ? Utils.getAsBoolean(hasConfig) : true;
+		if (hasConfigXml)
+		{
+			btnUseConfigXml.setSelection(true);
+			String config_path = getDialogSettings().get(CONFIG_FILE_PATH_KEY + solutionName);
+			if (config_path != null) configPath.setText(config_path);
+			enableConfigXmlFields();
+		}
+		else
+		{
+			btnUsePhonegap.setSelection(true);
+			applicationNameCombo.setText(getDialogSettings().get(APPLICATION_NAME_KEY + solutionName));
+			txtDescription.setText(getDialogSettings().get(APPLICATION_DESCRIPTION_KEY + solutionName));
+			txtVersion.setText(getDialogSettings().get(APPLICATION_VERSION_KEY + solutionName));
+			btnPublic.setSelection(getDialogSettings().getBoolean(IS_APPLICATION_PUBLIC_KEY + solutionName));
+			iconPath.setText(getDialogSettings().get(APPLICATION_ICON_KEY + solutionName));
+			enablePhoneGapApplicationFields();
+		}
+		String[] selectedCertificates = loadSelectedCertificates();
+		certificatesViewer.setInput(selectedCertificates);
+		setSelectedCertificates(selectedCertificates);
+		btnOpenPhonegapLink.setSelection(getDialogSettings().getBoolean(OPEN_PHONEGAP_BUILD_PAGE_KEY));
+	}
+
+	private String[] loadSelectedCertificates()
+	{
+		String certificates = getDialogSettings().get(CERTIFICATES_KEY + exporter.getSolutionName());
+		if (certificates != null)
+		{
+			return certificates.split(",");
+		}
+		return null;
+	}
+
+	private void enableConfigXmlFields()
+	{
+		configPath.setEnabled(true);
+		configBrowseButton.setEnabled(true);
+
+		applicationNameCombo.setEnabled(false);
+		txtVersion.setEnabled(false);
+		txtDescription.setEnabled(false);
+		iconPath.setEnabled(false);
+		iconBrowseButton.setEnabled(false);
+	}
+
+	private void enablePhoneGapApplicationFields()
+	{
+		configPath.setEnabled(false);
+		configBrowseButton.setEnabled(false);
+
+		applicationNameCombo.setEnabled(true);
+		txtVersion.setEnabled(true);
+		txtDescription.setEnabled(true);
+		iconPath.setEnabled(true);
+		iconBrowseButton.setEnabled(true);
+	}
+
 
 	@Override
 	public boolean canFlipToNextPage()
 	{
+		return false;
+	}
+
+
+	@Override
+	public boolean isPageComplete()
+	{
 		return getErrorMessage() == null;
 	}
 
-	@Override
-	public IWizardPage getNextPage()
+	public PhoneGapApplication getPhoneGapApplication() throws Exception
 	{
 		super.setErrorMessage(null);
-		if (canFlipToNextPage())
+		if (isPageComplete())
 		{
+			saveDefaultData();
 			EditorUtil.saveDirtyEditors(getShell(), true);
 			final String[] errorMessage = new String[1];
-			final String appName = applicationNameCombo.getText();
-			final String appVersion = txtVersion.getText();
-			final String appDescription = txtDescription.getText();
-			final boolean appPublic = btnPublic.getSelection();
-			final String path = iconPath.getText();
-			final File configFile = "".equals(configPath.getText()) ? null : new File(configPath.getText());
-			final String[] selectedCertificates = getSelectedCerticates();
-			try
+
+			final File configFile = getConfigFile();
+
+			String appName = null;
+			String appVersion = null;
+			String appDescription = null;
+			String path = null;
+			if (btnUsePhonegap.getSelection())
 			{
-				PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress()
+				appName = applicationNameCombo.getText();
+				appVersion = txtVersion.getText();
+				appDescription = txtDescription.getText();
+				path = iconPath.getText();
+			}
+			else
+			{
+				appName = getConfigApplicationName(errorMessage, configFile);
+				if (errorMessage[0] != null)
 				{
-					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
-					{
-						errorMessage[0] = getConnector().createOrUpdatePhoneGapApplication(
-							new PhoneGapApplication(appName, appVersion, appDescription, appPublic, path, selectedCertificates), exporter, configFile);
-					}
-				});
+					throw new Exception(errorMessage[0]);
+				}
 			}
-			catch (Exception ex)
-			{
-				ServoyLog.logError(ex);
-				errorMessage[0] = ex.getMessage();
-			}
-			if (errorMessage[0] != null)
-			{
-				setErrorMessage(errorMessage[0]);
-				return null;
-			}
-			finishPage.setApplicationURL("https://build.phonegap.com/people/sign_in", "Open PhoneGap build page at finish.", true);
-			finishPage.createControl(PhoneGapApplicationPage.this.getControl().getParent());
-			finishPage.setTextMessage("Solution exported to PhoneGap application.");
-			finishPage.getControl().getParent().layout(true);
-			return finishPage;
+
+			String[] selectedCertificates = getSelectedCerticates();
+			boolean appPublic = btnPublic.getSelection();
+
+			return new PhoneGapApplication(appName, appVersion, appDescription, appPublic, path, selectedCertificates);
 		}
 		return null;
+	}
+
+	private String getConfigApplicationName(final String[] errorMessage, final File configFile)
+	{
+		try
+		{
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			Document document = dbf.newDocumentBuilder().parse(configFile);
+			XPathFactory xpf = XPathFactory.newInstance();
+			XPath xpath = xpf.newXPath();
+			XPathExpression expression = xpath.compile("/widget/name");
+
+			Node node = (Node)expression.evaluate(document, XPathConstants.NODE);
+			if (node == null || node.getTextContent() == null || "".equals(node.getTextContent()))
+			{
+				errorMessage[0] = "The XML configuration file does not specify the application name.";
+			}
+			else
+			{
+				return node.getTextContent();
+			}
+		}
+		catch (SAXException e)
+		{
+			errorMessage[0] = "The XML configuration file cannot be parsed: " + e.getMessage();
+		}
+		catch (Exception e)
+		{
+			errorMessage[0] = e.getMessage();
+		}
+
+		return null;
+	}
+
+
+	private void saveDefaultData()
+	{
+		String solutionName = exporter.getSolutionName();
+		getDialogSettings().put(HAS_CONFIG_FILE_KEY + solutionName, btnUseConfigXml.getSelection());
+		getDialogSettings().put(CONFIG_FILE_PATH_KEY + solutionName, configPath.getText());
+		getDialogSettings().put(APPLICATION_NAME_KEY + solutionName, applicationNameCombo.getText());
+		getDialogSettings().put(APPLICATION_DESCRIPTION_KEY + solutionName, txtDescription.getText());
+		getDialogSettings().put(APPLICATION_VERSION_KEY + solutionName, txtVersion.getText());
+		getDialogSettings().put(IS_APPLICATION_PUBLIC_KEY + solutionName, btnPublic.getSelection());
+		getDialogSettings().put(APPLICATION_ICON_KEY + solutionName, iconPath.getText());
+		storeSelectedCertificates();
+		getDialogSettings().put(OPEN_PHONEGAP_BUILD_PAGE_KEY, btnOpenPhonegapLink.getSelection());
+	}
+
+	private void storeSelectedCertificates()
+	{
+		String[] selectedCertificates = getSelectedCerticates();
+		String certificates = "";
+		for (int i = 0; i < selectedCertificates.length; i++)
+		{
+			certificates += selectedCertificates[i];
+			if (i < selectedCertificates.length - 1) certificates += ",";
+		}
+		if (!certificates.equals(""))
+		{
+			getDialogSettings().put(CERTIFICATES_KEY + exporter.getSolutionName(), certificates);
+		}
 	}
 
 	@Override
 	public String getErrorMessage()
 	{
-		if (applicationNameCombo.getText() == null || "".equals(applicationNameCombo.getText()))
+		//in case the export type is war, we don't care about these errors (to enable the 'Finish' button)
+		if (warExportPage.isWarExport()) return null;
+
+		if (btnUsePhonegap.getSelection() && (applicationNameCombo.getText() == null || "".equals(applicationNameCombo.getText())))
 		{
 			return "No PhoneGap application name specified.";
+		}
+		if (btnUseConfigXml.getSelection() && (configPath.getText() == null || "".equals(configPath.getText())))
+		{
+			return "No config.xml file specified.";
 		}
 		return super.getErrorMessage();
 	}
@@ -309,5 +495,48 @@ public class PhoneGapApplicationPage extends WizardPage
 	private void setSelectedCertificates(String[] certificates)
 	{
 		certificatesViewer.setCheckedElements((certificates != null) ? certificates : new String[] { });
+	}
+
+	private void selectConfigType()
+	{
+		super.setErrorMessage(null);
+		if (btnUseConfigXml.getSelection())
+		{
+			enableConfigXmlFields();
+		}
+		else
+		{
+			enablePhoneGapApplicationFields();
+		}
+		getWizard().getContainer().updateButtons();
+	}
+
+	private void selectConfigFile(final Shell outputBrowseShell)
+	{
+		super.setErrorMessage(null);
+		FileDialog fileDialog = new FileDialog(outputBrowseShell, SWT.NONE);
+		fileDialog.setFilterExtensions(new String[] { "*.xml" });
+		if (fileDialog.open() != null)
+		{
+			configPath.setText(fileDialog.getFilterPath() + File.separator + fileDialog.getFileName());
+		}
+	}
+
+	public File getConfigFile()
+	{
+		return (btnUseConfigXml.getSelection() && "".equals(configPath.getText())) ? null : new File(configPath.getText());
+	}
+
+	/**
+	 * @return true if open phonegap page checkbox is checked
+	 */
+	public boolean openPhoneGapUrl()
+	{
+		return btnOpenPhonegapLink.getSelection();
+	}
+
+	public void setWarExportPage(WarExportPage warExportPage)
+	{
+		this.warExportPage = warExportPage;
 	}
 }

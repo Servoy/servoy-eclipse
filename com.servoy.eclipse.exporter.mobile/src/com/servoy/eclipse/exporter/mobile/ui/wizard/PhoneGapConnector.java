@@ -78,6 +78,14 @@ public class PhoneGapConnector
 
 	public String loadPhoneGapAcount(String username, String password)
 	{
+		if (username == null || "".equals(username))
+		{
+			return "Please provide your PhoneGap username";
+		}
+		if (password == null || "".equals(password))
+		{
+			return "Please provide your PhoneGap account password";
+		}
 		try
 		{
 			URL _url = new URL(URL_PHONEGAP_CLOUD);
@@ -100,6 +108,7 @@ public class PhoneGapConnector
 		{
 			HttpResponse response = client.execute(new HttpGet(getURL(URL_PHONEGAP_CLOUD)));
 			String content = EntityUtils.toString(response.getEntity());
+			EntityUtils.consume(response.getEntity());
 			jsonContent = new ServoyJSONObject(content, false);
 			if (jsonContent.has("error"))
 			{
@@ -108,6 +117,7 @@ public class PhoneGapConnector
 
 			response = client.execute(new HttpGet(getURL(URL_PHONEGAP_KEYS)));
 			JSONObject keys = new ServoyJSONObject(EntityUtils.toString(response.getEntity()), false);
+			EntityUtils.consume(response.getEntity());
 			if (keys.has("keys"))
 			{
 				keys = keys.getJSONObject("keys");
@@ -143,6 +153,7 @@ public class PhoneGapConnector
 							String url = URL_PHONEGAP_CLOUD + "/" + appID;
 							response = client.execute(new HttpGet(getURL(url)));
 							JSONObject jsonApp = new ServoyJSONObject(EntityUtils.toString(response.getEntity()), false);
+							EntityUtils.consume(response.getEntity());
 							if (jsonApp.has("keys"))
 							{
 								apps.getJSONObject(i).put("keys", jsonApp.getJSONObject("keys"));
