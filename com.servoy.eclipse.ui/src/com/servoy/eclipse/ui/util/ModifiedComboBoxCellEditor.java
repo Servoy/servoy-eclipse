@@ -54,10 +54,13 @@ public class ModifiedComboBoxCellEditor extends ComboBoxCellEditor
 				break;
 			}
 		}
-		int count = combo.getItems().length;
-		if (count <= VISIBLE_ITEM_COUNT)
+		if (combo != null)
 		{
-			combo.setVisibleItemCount(count == 0 ? count : count - 1);
+			int count = combo.getItems().length;
+			if (count <= VISIBLE_ITEM_COUNT)
+			{
+				combo.setVisibleItemCount(count == 0 ? count : count - 1);
+			}
 		}
 	}
 
