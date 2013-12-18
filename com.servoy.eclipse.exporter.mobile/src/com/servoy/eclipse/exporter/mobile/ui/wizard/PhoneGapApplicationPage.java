@@ -229,9 +229,9 @@ public class PhoneGapApplicationPage extends WizardPage
 								groupLayout.createParallelGroup(GroupLayout.LEADING).add(btnUsePhonegap, GroupLayout.PREFERRED_SIZE, 256,
 									GroupLayout.PREFERRED_SIZE).add(btnUseConfigXml, GroupLayout.PREFERRED_SIZE, 217, GroupLayout.PREFERRED_SIZE).add(
 									btnPublic, GroupLayout.PREFERRED_SIZE, 431, GroupLayout.PREFERRED_SIZE).add(certificatesViewer.getTable(),
-									GroupLayout.DEFAULT_SIZE, 576, Short.MAX_VALUE))).add(btnOpenPhonegapLink)))).add(17)));
+									GroupLayout.DEFAULT_SIZE, 576, Short.MAX_VALUE))).add(btnOpenPhonegapLink)))).addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().add(
+			groupLayout.createSequentialGroup().addContainerGap().add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().add(1).add(lblConfigurationType)).add(
 					btnUseConfigXml)).add(8).add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(configLabel).add(
@@ -247,7 +247,7 @@ public class PhoneGapApplicationPage extends WizardPage
 					groupLayout.createSequentialGroup().add(1).add(iconPath, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(
 					iconBrowseButton)).addPreferredGap(LayoutStyle.RELATED).add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(certificatesLabel, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE).add(
-					certificatesViewer.getTable(), 80, 80, 80)).addPreferredGap(LayoutStyle.RELATED).add(btnPublic).add(25).add(btnOpenPhonegapLink)));
+					certificatesViewer.getTable(), 80, 80, 80)).addPreferredGap(LayoutStyle.RELATED).add(btnPublic).add(25).add(btnOpenPhonegapLink).addContainerGap()));
 		container.setLayout(groupLayout);
 
 		ModifyListener errorMessageDetecter = new ModifyListener()
