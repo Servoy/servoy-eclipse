@@ -365,9 +365,8 @@ public class PhoneGapApplicationPage extends WizardPage
 		{
 			saveDefaultData();
 			EditorUtil.saveDirtyEditors(getShell(), true);
-			final String[] errorMessage = new String[1];
 
-			final File configFile = getConfigFile();
+			File configFile = getConfigFile();
 
 			String appName = null;
 			String appVersion = null;
@@ -382,11 +381,7 @@ public class PhoneGapApplicationPage extends WizardPage
 			}
 			else
 			{
-				appName = getConfigApplicationName(errorMessage, configFile);
-				if (errorMessage[0] != null)
-				{
-					throw new Exception(errorMessage[0]);
-				}
+				appName = getConfigApplicationName(configFile);
 			}
 
 			String[] selectedCertificates = getSelectedCerticates();
@@ -397,7 +392,7 @@ public class PhoneGapApplicationPage extends WizardPage
 		return null;
 	}
 
-	private String getConfigApplicationName(final String[] errorMessage, final File configFile)
+	private String getConfigApplicationName(File configFile) throws Exception
 	{
 		try
 		{
@@ -410,7 +405,7 @@ public class PhoneGapApplicationPage extends WizardPage
 			Node node = (Node)expression.evaluate(document, XPathConstants.NODE);
 			if (node == null || node.getTextContent() == null || "".equals(node.getTextContent()))
 			{
-				errorMessage[0] = "The XML configuration file does not specify the application name.";
+				throw new Exception("The XML configuration file does not specify the application name.");
 			}
 			else
 			{
@@ -419,14 +414,8 @@ public class PhoneGapApplicationPage extends WizardPage
 		}
 		catch (SAXException e)
 		{
-			errorMessage[0] = "The XML configuration file cannot be parsed: " + e.getMessage();
+			throw new Exception("The XML configuration file cannot be parsed: " + e.getMessage());
 		}
-		catch (Exception e)
-		{
-			errorMessage[0] = e.getMessage();
-		}
-
-		return null;
 	}
 
 

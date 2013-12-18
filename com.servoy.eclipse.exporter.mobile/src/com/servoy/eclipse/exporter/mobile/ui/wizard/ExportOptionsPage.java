@@ -177,12 +177,7 @@ public class ExportOptionsPage extends WizardPage
 			}
 		});
 
-		boolean debugMode = true;
-		if (getDialogSettings().get(DEBUG_MODE_KEY) != null)
-		{
-			debugMode = getDialogSettings().getBoolean(DEBUG_MODE_KEY);
-		}
-		debugCheck.setSelection(debugMode);
+		debugCheck.setSelection(getDialogSettings().getBoolean(DEBUG_MODE_KEY));
 	}
 
 	private String getServerURL()
