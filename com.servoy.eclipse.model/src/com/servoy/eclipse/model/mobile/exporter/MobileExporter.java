@@ -613,7 +613,7 @@ public class MobileExporter
 				if (exportAsZip && configFile != null && configFile.exists())
 				{
 					InputStream configStream = new FileInputStream(configFile);
-					addZipEntry(configFile.getName(), warStream, configStream);
+					addZipEntry("config.xml", warStream, configStream);
 					Utils.closeInputStream(configStream);
 				}
 				Utils.closeInputStream(zipStream);
