@@ -120,10 +120,18 @@ public class EventsComposite extends Composite
 
 	public void refreshViewer(Table t)
 	{
-		setViewerInput(t, false);
-		treeViewer.refresh();
-	}
+		List<EventNode> rows = getViewerInput(t);
 
+		if (!getViewerInput(t).equals(treeViewer.getInput()))
+		{
+			setViewerInput(t, false);
+		}
+		IBaseLabelProvider labelProvider = treeViewer.getLabelProvider();
+		if (labelProvider instanceof EventsLabelProvider)
+		{
+			((EventsLabelProvider)labelProvider).triggerUpdate();
+		}
+	}
 
 	@Override
 	protected void checkSubclass()
@@ -205,10 +213,7 @@ public class EventsComposite extends Composite
 		setViewerInput(t, true);
 	}
 
-	/**
-	 * @param t
-	 */
-	private void setViewerInput(Table t, boolean initialExpand)
+	private List<EventNode> getViewerInput(Table t)
 	{
 		List<EventNode> rows = new ArrayList<EventNode>();
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
@@ -233,6 +238,15 @@ public class EventsComposite extends Composite
 				}
 			}
 		}
+		return rows;
+	}
+
+	/**
+	 * @param t
+	 */
+	private void setViewerInput(Table t, boolean initialExpand)
+	{
+		List<EventNode> rows = getViewerInput(t);
 
 		Object[] expandedState = treeViewer.getExpandedElements();
 		treeViewer.setInput(rows);

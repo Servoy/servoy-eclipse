@@ -18,6 +18,7 @@ package com.servoy.eclipse.ui.editors.table;
 
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE.SharedImages;
@@ -61,5 +62,10 @@ public class EventsLabelProvider extends LabelProvider implements ITableLabelPro
 		}
 
 		return element.toString();
+	}
+
+	public void triggerUpdate()
+	{
+		fireLabelProviderChanged(new LabelProviderChangedEvent(this));
 	}
 }
