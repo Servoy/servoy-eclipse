@@ -33,4 +33,5 @@ Bundle-ClassPath: lib/jshybugger.jar,
  lib/json-20090211.jar,
  lib/netty-3.6.5.Final.jar,
  lib/webbit-0.4.15.jar,
+ lib/js.jar,
  .

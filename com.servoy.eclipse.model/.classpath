@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/js.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jshybugger.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/json-20090211.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/netty-3.6.5.Final.jar"/>
