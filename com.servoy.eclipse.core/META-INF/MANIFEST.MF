@@ -39,6 +39,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.dltk.ui,
  org.eclipse.dltk.javascript.ui,
  org.eclipse.ui.editors,
+ com.servoy.eclipse.model.exporter.mobile,
  net.sourceforge.sqlexplorer;resolution:=optional
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.core,

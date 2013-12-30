@@ -18,20 +18,10 @@ Require-Bundle: servoy_shared,
 Export-Package: com.servoy.eclipse.model,
  com.servoy.eclipse.model.builder,
  com.servoy.eclipse.model.extensions,
- com.servoy.eclipse.model.mobile.exporter,
  com.servoy.eclipse.model.nature,
  com.servoy.eclipse.model.preferences,
  com.servoy.eclipse.model.repository,
  com.servoy.eclipse.model.test,
- com.servoy.eclipse.model.util,
- org.jshybugger.instrumentation,
- org.jshybugger.proxy,
- org.webbitserver
+ com.servoy.eclipse.model.util
 Bundle-Activator: com.servoy.eclipse.model.Activator
 Bundle-ActivationPolicy: lazy
-Bundle-ClassPath: lib/jshybugger.jar,
- lib/json-20090211.jar,
- lib/netty-3.6.5.Final.jar,
- lib/webbit-0.4.15.jar,
- lib/js.jar,
- .
