@@ -299,13 +299,19 @@ public class SolutionJSUnitSuiteCodeBuilder
 				tmp.append(method.getName());
 
 				// if something bad happened even before tests got to execute, error out (for example if during solution open or first form load, an unhandled (so not handled by solution onError) global error was detected)
-				tmp.append("() { if (");
+				tmp.append("() { if (typeof ");
 				tmp.append(IExecutingEnviroment.TOPLEVEL_JSUNIT);
-				tmp.append(" && ");
+				tmp.append(" != 'undefined' && ");
+				tmp.append(IExecutingEnviroment.TOPLEVEL_JSUNIT);
+				tmp.append(" != null && typeof ");
 				tmp.append(IExecutingEnviroment.TOPLEVEL_JSUNIT);
 				tmp.append(".");
 				tmp.append(SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY);
-				tmp.append(") throw ");
+				tmp.append(" != 'undefined' && ");
+				tmp.append(IExecutingEnviroment.TOPLEVEL_JSUNIT);
+				tmp.append(".");
+				tmp.append(SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY);
+				tmp.append(" != null) throw ");
 				tmp.append(IExecutingEnviroment.TOPLEVEL_JSUNIT);
 				tmp.append(".");
 				tmp.append(SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY);
