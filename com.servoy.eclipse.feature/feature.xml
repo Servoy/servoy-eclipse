@@ -922,4 +922,11 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          install-size="0"
          version="0.0.0"/>
 
+   <plugin
+         id="com.servoy.eclipse.model.exporter.mobile"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>
