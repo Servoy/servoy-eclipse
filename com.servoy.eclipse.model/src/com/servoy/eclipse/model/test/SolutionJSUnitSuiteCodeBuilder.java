@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.mozilla.javascript.Context;
+import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
@@ -55,6 +56,8 @@ public class SolutionJSUnitSuiteCodeBuilder
 
 	// if this is set after a solution test method exits, it will fail that test (so at the end); it can be set by anyone that needs such behavior.
 	// when set it must be an error object; it will get thrown using JS "throw e;" it would be nice if it's a JSUnitError
+	// (+ if a jsunit.failAfterTest object is detected before any test started to run - so before a jsunit value is even set - it will be considered
+	// the same - an error that happened even before tests started to run - and will be reported as such, failing the first test)
 	public static final String FAIL_AFTER_CURRENT_TEST_KEY = "failAfterTest"; //$NON-NLS-1$
 
 	protected boolean initialized = false;
@@ -294,7 +297,21 @@ public class SolutionJSUnitSuiteCodeBuilder
 				tmp.append(testIdentifier.getTestClassName());
 				tmp.append("_");
 				tmp.append(method.getName());
-				tmp.append("() { ");
+
+				// if something bad happened even before tests got to execute, error out (for example if during solution open or first form load, an unhandled (so not handled by solution onError) global error was detected)
+				tmp.append("() { if (");
+				tmp.append(IExecutingEnviroment.TOPLEVEL_JSUNIT);
+				tmp.append(" && ");
+				tmp.append(IExecutingEnviroment.TOPLEVEL_JSUNIT);
+				tmp.append(".");
+				tmp.append(SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY);
+				tmp.append(") throw ");
+				tmp.append(IExecutingEnviroment.TOPLEVEL_JSUNIT);
+				tmp.append(".");
+				tmp.append(SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY);
+				tmp.append("; ");
+
+				// else continue; prepare for testing and execute test method
 				tmp.append(IExecutingEnviroment.TOPLEVEL_JSUNIT);
 				tmp.append(" = this; ");
 				tmp.append(callPrefix);
@@ -307,7 +324,7 @@ public class SolutionJSUnitSuiteCodeBuilder
 				tmp.append("(); ");
 				tmp.append(IExecutingEnviroment.TOPLEVEL_JSUNIT);
 
-				// if someone wants this test to fail after it finished running do so here
+				// if someone wants this test to fail after it finished running do so here (for example if during current test, an unhandled (so not handled by solution onError) global error was detected)
 				tmp.append(" = null; if (this.").append(SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY).append(") { var te = this.").append(
 					SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY).append("; this.").append(
 					SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY).append(" = null; throw te; } }\n");
@@ -424,8 +441,18 @@ public class SolutionJSUnitSuiteCodeBuilder
 		Context context = Context.enter();
 		try
 		{
-			Scriptable jsunitAssertObject = (Scriptable)solutionScope.get(IExecutingEnviroment.TOPLEVEL_JSUNIT, solutionScope); // this is the actual jsunit test object; so it must be a scriptable
-			Object failAfterTest = jsunitAssertObject.get(SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY, jsunitAssertObject); // can be null/undefined or an object like {message: "Errored out.", error: new Error()}
+			Object jsuAO = solutionScope.get(IExecutingEnviroment.TOPLEVEL_JSUNIT, solutionScope); // this is the actual jsunit test object; so it must be a scriptable
+			Scriptable jsunitAssertObject;
+			if (jsuAO == null || Scriptable.NOT_FOUND == jsuAO || Context.getUndefinedValue().equals(jsuAO))
+			{
+				jsunitAssertObject = new NativeObject();
+				ScriptableObject.putProperty(solutionScope, IExecutingEnviroment.TOPLEVEL_JSUNIT, jsunitAssertObject);
+			}
+			else
+			{
+				jsunitAssertObject = (Scriptable)jsuAO;
+			}
+			Object failAfterTest = jsunitAssertObject.get(SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY, jsunitAssertObject); // can be null/undefined or an error object
 
 			if (failAfterTest == null || Scriptable.NOT_FOUND == failAfterTest || Context.getUndefinedValue().equals(failAfterTest))
 			{

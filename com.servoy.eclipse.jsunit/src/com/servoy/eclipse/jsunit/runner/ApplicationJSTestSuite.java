@@ -24,6 +24,7 @@ import javax.swing.SwingUtilities;
 import junit.framework.Test;
 import junit.framework.TestResult;
 
+import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 
 import com.servoy.eclipse.model.test.SolutionJSUnitSuiteCodeBuilder;
@@ -133,7 +134,13 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 		// define the jsUnit property in scope so it can be used within solution methods with jsUnit.Assert...
 		if (scope != null)
 		{
-			scope.put(IExecutingEnviroment.TOPLEVEL_JSUNIT, scope, null);
+			// set it here (to null even) to be sure it will be referenced in the right scope
+			// in some cases it can already be set (unhandled errors when loading solution or first form) in which case we don't want to clear it
+			Object tmp = scope.get(IExecutingEnviroment.TOPLEVEL_JSUNIT, scope);
+			if (tmp == null || Scriptable.NOT_FOUND == tmp || Context.getUndefinedValue().equals(tmp))
+			{
+				scope.put(IExecutingEnviroment.TOPLEVEL_JSUNIT, scope, null);
+			}
 		}
 		return scope;
 	}
