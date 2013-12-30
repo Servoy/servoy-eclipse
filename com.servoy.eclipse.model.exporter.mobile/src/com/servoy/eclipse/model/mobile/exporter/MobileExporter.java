@@ -630,8 +630,8 @@ public class MobileExporter
 		}
 		else
 		{
-			ServoyLog.logError("servoy_mobile.war file was not found in com.servoy.eclipse.model project", null);
-			throw new RuntimeException("War file was not found inside com.servoy.eclipse.model project");
+			ServoyLog.logError("servoy_mobile.war file was not found in com.servoy.eclipse.model.exporter.mobile project", null);
+			throw new RuntimeException("War file was not found inside com.servoy.eclipse.model.exporter.mobile project");
 		}
 		return exportedFile;
 	}
