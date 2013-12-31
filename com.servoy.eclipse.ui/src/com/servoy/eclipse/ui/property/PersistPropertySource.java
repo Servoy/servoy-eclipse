@@ -175,6 +175,7 @@ import com.servoy.j2db.scripting.FunctionDefinition;
 import com.servoy.j2db.smart.dataui.InvisibleBean;
 import com.servoy.j2db.util.ComponentFactoryHelper;
 import com.servoy.j2db.util.IDelegate;
+import com.servoy.j2db.util.JavaVersion;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.SafeArrayList;
@@ -252,7 +253,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			{
 				Border border = null;
 				//TODO: find better way to handle this for MAC running with java 1.7
-				if (Utils.isAppleMacOS() && System.getProperty("java.version").startsWith("1.7")) //$NON-NLS-1$//$NON-NLS-2$
+				if (Utils.isAppleMacOS() && JavaVersion.CURRENT_JAVA_VERSION.major >= 7)
 				{
 					final Border[] fBorder = { null };
 					try

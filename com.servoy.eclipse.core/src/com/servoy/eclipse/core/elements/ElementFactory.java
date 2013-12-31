@@ -104,6 +104,7 @@ import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.IStyleRule;
 import com.servoy.j2db.util.IStyleSheet;
 import com.servoy.j2db.util.ImageLoader;
+import com.servoy.j2db.util.JavaVersion;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ScopesUtils;
@@ -374,7 +375,7 @@ public class ElementFactory
 		}
 		Border border = null;
 		//TODO: find better way to handle this for MAC running with java 1.7
-		if (Utils.isAppleMacOS() && System.getProperty("java.version").startsWith("1.7")) //$NON-NLS-1$//$NON-NLS-2$
+		if (Utils.isAppleMacOS() && JavaVersion.CURRENT_JAVA_VERSION.major >= 7)
 		{
 			final Border[] fBorder = { null };
 			try
@@ -755,7 +756,7 @@ public class ElementFactory
 		if (border != null)
 		{
 			//TODO: find better way to handle this for MAC running with java 1.7
-			if (Utils.isAppleMacOS() && System.getProperty("java.version").startsWith("1.7")) //$NON-NLS-1$//$NON-NLS-2$
+			if (Utils.isAppleMacOS() && JavaVersion.CURRENT_JAVA_VERSION.major >= 7)
 			{
 				final java.awt.Insets[] fInset = { null };
 				try

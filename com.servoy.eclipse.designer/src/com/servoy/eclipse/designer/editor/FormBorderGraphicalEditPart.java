@@ -46,6 +46,7 @@ import com.servoy.j2db.debug.DebugUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.util.ComponentFactoryHelper;
+import com.servoy.j2db.util.JavaVersion;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -160,7 +161,7 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 		{
 			java.awt.Insets borderInsets;
 			//TODO: find better way to handle this for MAC running with java 1.7
-			if (Utils.isAppleMacOS() && System.getProperty("java.version").startsWith("1.7")) //$NON-NLS-1$//$NON-NLS-2$
+			if (Utils.isAppleMacOS() && JavaVersion.CURRENT_JAVA_VERSION.major >= 7)
 			{
 				final java.awt.Insets[] fInset = { null };
 				try
