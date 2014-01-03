@@ -60,6 +60,12 @@ public class DebugJ2DBTestClient extends DebugJ2DBClient
 	}
 
 	@Override
+	protected void dispatchEventsToHideDialog()
+	{
+		// do nothing so that tests are run after client is loaded
+	}
+
+	@Override
 	protected boolean registerClient(IUserClient uc) throws Exception
 	{
 		boolean register = super.registerClient(uc);
