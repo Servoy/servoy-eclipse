@@ -781,13 +781,12 @@ public class RepositoryOperations
 		IUserManager eclipseUserManager = ApplicationServerSingleton.get().getUserManager();
 
 		// delete remote groups if locally were deleted
-		Integer groupID;
 		String groupName;
 		IDataSet remoteGroups = remoteUserManager.getGroups(rap.getClientID());
 		int remoteGroupsNr = remoteGroups.getRowCount();
 		for (int i = 0; i < remoteGroupsNr; i++)
 		{
-			groupID = (Integer)remoteGroups.getRow(i)[0];
+			Number groupID = (Number)remoteGroups.getRow(i)[0];
 			groupName = (String)remoteGroups.getRow(i)[1];
 			if (eclipseUserManager.getGroupId(ApplicationServerSingleton.get().getClientId(), groupName) == -1)
 			{
@@ -800,7 +799,6 @@ public class RepositoryOperations
 		int localGroupsNr = localGroups.getRowCount();
 		for (int i = 0; i < localGroupsNr; i++)
 		{
-			groupID = (Integer)localGroups.getRow(i)[0];
 			groupName = (String)localGroups.getRow(i)[1];
 
 			if ((remoteGroupID = remoteUserManager.getGroupId(rap.getClientID(), groupName)) == -1)
