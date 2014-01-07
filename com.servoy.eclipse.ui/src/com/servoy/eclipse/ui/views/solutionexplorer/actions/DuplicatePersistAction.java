@@ -18,11 +18,14 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
 import org.eclipse.jface.dialogs.IInputValidator;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.core.util.UIUtils.ExtendedInputDialog;
 import com.servoy.eclipse.core.util.UIUtils.InputAndListDialog;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -114,9 +117,31 @@ public class DuplicatePersistAction extends AbstractMovePersistAction
 	 *      com.servoy.j2db.persistence.IValidateName)
 	 */
 	@Override
-	protected void doWork(IPersist persist, Location location, IValidateName nameValidator) throws RepositoryException
+	protected void doWork(IPersist[] persists, IValidateName nameValidator)
 	{
-		IPersist duplicate = intelligentClonePersist(persist, location.getPersistName(), location.getServoyProject(), nameValidator, true);
-		EditorUtil.openPersistEditor(duplicate);
+		for (final IPersist persist : persists)
+		{
+			Location location = askForNewFormLocation(persist, nameValidator);
+			if (location != null)
+			{
+				try
+				{
+					IPersist duplicate = intelligentClonePersist(persist, location.getPersistName(), location.getServoyProject(), nameValidator, true);
+					EditorUtil.openPersistEditor(duplicate);
+				}
+				catch (final RepositoryException e)
+				{
+					Display.getDefault().syncExec(new Runnable()
+					{
+						public void run()
+						{
+							ServoyLog.logError(e);
+							MessageDialog.openError(shell, "Cannot duplicate form", persistString + " " + ((ISupportName)persist).getName() +
+								"cannot be duplicated. Reason:\n" + e.getMessage());
+						}
+					});
+				}
+			}
+		}
 	}
 }

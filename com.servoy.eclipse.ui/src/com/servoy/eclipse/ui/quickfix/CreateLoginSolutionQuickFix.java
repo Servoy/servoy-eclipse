@@ -37,7 +37,6 @@ import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 
@@ -134,9 +133,10 @@ public class CreateLoginSolutionQuickFix implements IMarkerResolution
 			super(null);
 		}
 
-		public void move(Form form, ServoyProject destProject) throws RepositoryException
+		public void move(Form form, ServoyProject destProject)
 		{
-			doWork(form, new Location(form.getName(), destProject), ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator());
+			location = new Location(form.getName(), destProject);
+			doWork(new IPersist[] { form }, ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator());
 		}
 	}
 }

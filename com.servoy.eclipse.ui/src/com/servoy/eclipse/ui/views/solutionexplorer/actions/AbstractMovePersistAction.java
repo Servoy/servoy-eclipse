@@ -17,8 +17,10 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -156,60 +158,36 @@ public abstract class AbstractMovePersistAction extends Action implements ISelec
 		if (selection != null)
 		{
 			isMoving = true;
-			try
+			List<IPersist> persistList = new ArrayList<IPersist>();
+			Iterator<SimpleUserNode> it = selection.iterator();
+			while (it.hasNext())
 			{
-				Iterator<SimpleUserNode> it = selection.iterator();
-				while (it.hasNext())
+				SimpleUserNode node = it.next();
+				SimpleUserNode projectNode = node.getAncestorOfType(ServoyProject.class);
+				if (projectNode != null)
 				{
-					SimpleUserNode node = it.next();
-					SimpleUserNode projectNode = node.getAncestorOfType(ServoyProject.class);
-					if (projectNode != null)
+					IPersist persist = (IPersist)node.getRealObject();
+					if (persist instanceof ISupportName)
 					{
-						IPersist persist = (IPersist)node.getRealObject();
-						if (persist instanceof ISupportName)
-						{
-							try
-							{
-								Location location = askForNewFormLocation(persist, nameValidator);
-								if (location != null) doWork(persist, location, nameValidator);
-							}
-							catch (RepositoryException e)
-							{
-								ServoyLog.logError(e);
-								MessageDialog.openError(shell, "Cannot duplicate/move form", persistString + " " + ((ISupportName)persist).getName() + //$NON-NLS-1$ //$NON-NLS-2$
-									"cannot be duplicated/moved. Reason:\n" + e.getMessage()); //$NON-NLS-1$
-							}
-						}
+						persistList.add(persist);
 					}
 				}
 			}
-			finally
-			{
-				isMoving = false;
-			}
+			
+			doWork(persistList.toArray(new IPersist[persistList.size()]), nameValidator);
+			isMoving = false;
 		}
 		if (selectedPersist instanceof ISupportName)
 		{
-			try
-			{
-				Location location = askForNewFormLocation(selectedPersist, nameValidator);
-				if (location != null) doWork(selectedPersist, location, nameValidator);
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError(e);
-				MessageDialog.openError(shell, "Cannot duplicate/move form", persistString + " " + ((ISupportName)selectedPersist).getName() + //$NON-NLS-1$ //$NON-NLS-2$
-					"cannot be duplicated/moved. Reason:\n" + e.getMessage()); //$NON-NLS-1$
-			}
+			doWork(new IPersist[] { selectedPersist }, nameValidator);
 		}
 	}
 
 	/**
-	 * @param editingForm
-	 * @param askForNewFormLocation
+	 * @param editingForms
 	 * @param nameValidator
 	 */
-	protected abstract void doWork(IPersist persist, Location location, IValidateName nameValidator) throws RepositoryException;
+	protected abstract void doWork(IPersist[] editingForms, IValidateName nameValidator);
 
 	protected Location askForNewFormLocation(final IPersist persist, final IValidateName nameValidator)
 	{
