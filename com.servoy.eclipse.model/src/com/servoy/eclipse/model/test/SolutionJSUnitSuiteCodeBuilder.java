@@ -462,7 +462,7 @@ public class SolutionJSUnitSuiteCodeBuilder
 
 			if (failAfterTest == null || Scriptable.NOT_FOUND == failAfterTest || Context.getUndefinedValue().equals(failAfterTest))
 			{
-				Exception scriptException;
+				Object scriptException;
 				if (error instanceof Exception && (scriptException = ClientState.getScriptException((Exception)error)) != null)
 				{
 					ScriptableObject.putProperty(jsunitAssertObject, SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY,
