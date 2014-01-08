@@ -50,6 +50,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.core.util.UIUtils.YesYesToAllNoNoToAllAsker;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
+import com.servoy.eclipse.dnd.IDragData;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -93,15 +94,25 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 		if (input instanceof SimpleUserNode &&
 			(((SimpleUserNode)input).getRealType() == UserNodeType.WORKING_SET || ((SimpleUserNode)input).getRealType() == UserNodeType.FORMS))
 		{
-			if (UserNodeListDragSourceListener.dragObjects != null && UserNodeListDragSourceListener.dragObjects.length == 1 &&
-				UserNodeListDragSourceListener.dragObjects[0] instanceof PersistDragData)
+			if (UserNodeListDragSourceListener.dragObjects != null && UserNodeListDragSourceListener.dragObjects[0] instanceof PersistDragData)
 			{
-				PersistDragData dragData = (PersistDragData)UserNodeListDragSourceListener.dragObjects[0];
-				if (dragData.type == IRepository.FORMS)
+				boolean onlyForms = false;
+				for (IDragData dragData : UserNodeListDragSourceListener.dragObjects)
 				{
-					// only possible to drag a form in a working set within the tree
-					return true;
+					onlyForms = false;
+					if (dragData instanceof PersistDragData)
+					{
+						if (((PersistDragData)dragData).type == IRepository.FORMS)
+						{
+							onlyForms = true;
+						}
+					}
+					if (!onlyForms)
+					{
+						break;
+					}
 				}
+				if (onlyForms) return true;
 			}
 		}
 
@@ -203,7 +214,7 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 					ServoyProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(persistDragData.solutionName);
 					final IPersist persist = project.getSolution().getChild(persistDragData.uuid);
 
-					if (persist instanceof Form && ((Object[])data).length == 1)
+					if (persist instanceof Form)
 					{
 						Form form = (Form)persist;
 						if (getCurrentTarget() instanceof SimpleUserNode &&
@@ -243,7 +254,6 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 								}
 							}
 						}
-						break;
 					}
 					else if (persist instanceof Media)
 					{

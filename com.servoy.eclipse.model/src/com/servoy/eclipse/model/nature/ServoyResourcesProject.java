@@ -18,8 +18,10 @@ package com.servoy.eclipse.model.nature;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -231,6 +233,19 @@ public class ServoyResourcesProject implements IProjectNature
 		List<String> pathsList = workingSetPersists.remove(workingSetName);
 		serializeServoyWorkingSets(fileAccess);
 		fireWorkingSetChanged(pathsList);
+	}
+
+	public void renameWorkingSet(IFileAccess fileAccess, String oldName, String newName)
+	{
+		List<String> pathsList = workingSetPersists.remove(oldName);
+		workingSetPersists.put(newName, pathsList);
+		serializeServoyWorkingSets(fileAccess);
+		fireWorkingSetChanged(pathsList);
+	}
+
+	public Set<String> getWorkingSetNames()
+	{
+		return new HashSet<String>(workingSetPersists.keySet());
 	}
 
 	private void fireWorkingSetChanged(List<String> pathsList)

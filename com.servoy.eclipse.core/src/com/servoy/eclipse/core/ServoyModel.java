@@ -3612,20 +3612,41 @@ public class ServoyModel extends AbstractServoyModel
 			}
 			else if (event.getNewValue() instanceof IWorkingSet && SERVOY_WORKING_SET_ID.equals(((IWorkingSet)event.getNewValue()).getId()))
 			{
-				IWorkingSet workingSet = (IWorkingSet)event.getNewValue();
-				List<String> paths = new ArrayList<String>();
-				IAdaptable[] resources = workingSet.getElements();
-				if (resources != null)
+				if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(event.getProperty()))
 				{
-					for (IAdaptable resource : resources)
+					Set<String> workingSetNames = activeResourcesProject.getWorkingSetNames();
+					String oldName = null;
+					for (String workingSetName : workingSetNames)
 					{
-						if (resource instanceof IResource && ((IResource)resource).exists())
+						IWorkingSet workingSet = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSetName);
+						if (workingSet == null)
 						{
-							paths.add(((IResource)resource).getFullPath().toString());
+							oldName = workingSetName;
+							break;
 						}
 					}
+					if (oldName != null)
+					{
+						activeResourcesProject.renameWorkingSet(wsa, oldName, ((IWorkingSet)event.getNewValue()).getName());
+					}
 				}
-				activeResourcesProject.addWorkingSet(wsa, workingSet.getName(), paths);
+				else
+				{
+					IWorkingSet workingSet = (IWorkingSet)event.getNewValue();
+					List<String> paths = new ArrayList<String>();
+					IAdaptable[] resources = workingSet.getElements();
+					if (resources != null)
+					{
+						for (IAdaptable resource : resources)
+						{
+							if (resource instanceof IResource && ((IResource)resource).exists())
+							{
+								paths.add(((IResource)resource).getFullPath().toString());
+							}
+						}
+					}
+					activeResourcesProject.addWorkingSet(wsa, workingSet.getName(), paths);
+				}
 			}
 		}
 	}

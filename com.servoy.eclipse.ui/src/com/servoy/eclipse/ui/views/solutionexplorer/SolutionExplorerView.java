@@ -278,6 +278,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenameMediaFolderAct
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenamePersistAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenameScopeAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenameSolutionAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenameWorkingSetAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ReplaceServerAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ReplaceTableAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.SelectAllAction;
@@ -2848,6 +2849,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		renameActionInTree.registerAction(UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE, renameSolutionAction);
 		renameActionInTree.registerAction(UserNodeType.FORM, new RenamePersistAction());
 		renameActionInTree.registerAction(UserNodeType.GLOBALS_ITEM, new RenameScopeAction(this));
+		renameActionInTree.registerAction(UserNodeType.WORKING_SET, new RenameWorkingSetAction());
 
 		addAsModuleAction = new AddAsModuleAction(getSite().getShell());
 		removeModuleAction = new RemoveModuleAction(getSite().getShell());
