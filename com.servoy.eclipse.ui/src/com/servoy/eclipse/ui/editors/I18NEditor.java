@@ -56,8 +56,8 @@ import com.servoy.eclipse.core.resource.I18NEditorInput;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.ui.dialogs.I18nComposite;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.i18n.I18NMessagesModel.I18NMessagesModelEntry;
 import com.servoy.j2db.persistence.I18NUtil.MessageEntry;
-import com.servoy.j2db.property.I18NMessagesModel.I18NMessagesModelEntry;
 import com.servoy.j2db.util.DataSourceUtils;
 
 public class I18NEditor extends EditorPart

@@ -56,11 +56,6 @@
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
 		</ant>
-		<ant antfile="build.xml" dir="../com.servoy.eclipse.xulrunner" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="win32"/>
-			<property name="os" value="win32"/>
-		</ant>
 		<ant antfile="build.xml" dir="../servoy_smart_client" target="${target}">
 			<property name="arch" value="x86_64"/>
 			<property name="ws" value="win32"/>
@@ -71,17 +66,22 @@
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
 		</ant>
-		<ant antfile="build.xml" dir="../servoy_debug" target="${target}">
-			<property name="arch" value="x86_64"/>
-			<property name="ws" value="win32"/>
-			<property name="os" value="win32"/>
-		</ant>
 		<ant antfile="build.xml" dir="../j2db_tunnel" target="${target}">
 			<property name="arch" value="x86_64"/>
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
 		</ant>
 		<ant antfile="build.xml" dir="../j2db_server" target="${target}">
+			<property name="arch" value="x86_64"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
+		</ant>
+		<ant antfile="build.xml" dir="../com.servoy.eclipse.xulrunner" target="${target}">
+			<property name="arch" value="x86_64"/>
+			<property name="ws" value="win32"/>
+			<property name="os" value="win32"/>
+		</ant>
+		<ant antfile="build.xml" dir="../servoy_debug" target="${target}">
 			<property name="arch" value="x86_64"/>
 			<property name="ws" value="win32"/>
 			<property name="os" value="win32"/>
