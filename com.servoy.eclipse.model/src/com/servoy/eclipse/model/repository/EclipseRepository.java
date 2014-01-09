@@ -295,19 +295,22 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 			ServoyLog.logError("Can not remove old set of resources before registering the new set", e);
 		}
 
-		// register new styles/templates	
-		try
+		// register new styles/templates
+		if (resourcesProjectName != null)
 		{
-			RootObjectMetaData[] rmds = StringResourceDeserializer.deserializeMetadatas(this, wsa.getProjectFile(resourcesProjectName), resourcesProjectName,
-				objectTypeId);
-			for (RootObjectMetaData meta : rmds)
+			try
 			{
-				addRootObjectMetaData(meta);
+				RootObjectMetaData[] rmds = StringResourceDeserializer.deserializeMetadatas(this, wsa.getProjectFile(resourcesProjectName),
+					resourcesProjectName, objectTypeId);
+				for (RootObjectMetaData meta : rmds)
+				{
+					addRootObjectMetaData(meta);
+				}
 			}
-		}
-		catch (Exception ex)
-		{
-			ServoyLog.logError("Can not register new resource", ex);
+			catch (Exception ex)
+			{
+				ServoyLog.logError("Can not register new resource", ex);
+			}
 		}
 	}
 

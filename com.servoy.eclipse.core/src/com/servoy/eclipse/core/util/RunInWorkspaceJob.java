@@ -41,6 +41,8 @@ import com.servoy.eclipse.model.util.ServoyLog;
  * 
  * @since 6.1
  */
+// I think this doesn't offer much of an improvement over a normal WorkspaceJob as IWorkspace.AVOID_UPDATE is more of a hint (see IWorkspace.run(...) docs).
+// if resource changes happen on another thread you can still get partial change notifications
 public class RunInWorkspaceJob extends Job
 {
 	private final IWorkspaceRunnable runnable;

@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import com.servoy.eclipse.model.extensions.AbstractServoyModel;
 import com.servoy.eclipse.model.extensions.IServoyModel;
+import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.EclipseSequenceProvider;
@@ -41,9 +42,28 @@ public class ExportServoyModel extends AbstractServoyModel implements IServoyMod
 	public void initialize(String solutionName)
 	{
 		activeProject = getServoyProject(solutionName);
+		setActiveResourcesProject(activeProject != null ? activeProject.getResourcesProject() : null);
+		updateFlattenedSolution();
+
 		if (activeProject != null)
 		{
-			activeResourcesProject = activeProject.getResourcesProject();
+			if (activeResourcesProject == null)
+			{
+				System.out.println("Cannot find solution project's resources project. (" + solutionName + ")"); //$NON-NLS-1$//$NON-NLS-2$
+			}
+		}
+		else
+		{
+			System.out.println("Cannot find solution project named '" + solutionName + "'. Are you sure you specified the correct workspace location?"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+
+	}
+
+	private void setActiveResourcesProject(ServoyResourcesProject servoyResourcesProject)
+	{
+		if (activeResourcesProject != servoyResourcesProject)
+		{
+			activeResourcesProject = servoyResourcesProject;
 			try
 			{
 				if (activeResourcesProject != null) activeResourcesProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
@@ -53,28 +73,20 @@ public class ExportServoyModel extends AbstractServoyModel implements IServoyMod
 				ServoyLog.logError(e);
 			}
 
-			if (activeResourcesProject != null)
-			{
-				IServerManagerInternal sm = ApplicationServerSingleton.get().getServerManager();
-				if (dataModelManager != null) sm.removeGlobalColumnInfoProvider(dataModelManager); // should never happen as long as this method is only called once
-				dataModelManager = new DataModelManager(getActiveResourcesProject().getProject(), sm);
-				sm.addGlobalColumnInfoProvider(dataModelManager);
-				sm.setGlobalSequenceProvider(new EclipseSequenceProvider(dataModelManager));
-				((WorkspaceUserManager)ApplicationServerSingleton.get().getUserManager()).setResourcesProject(activeResourcesProject.getProject());
-				((EclipseRepository)getActiveSolutionHandler().getRepository()).registerResourceMetaDatas(activeResourcesProject.getProject().getName(),
-					IRepository.STYLES);
-				((EclipseRepository)getActiveSolutionHandler().getRepository()).registerResourceMetaDatas(activeResourcesProject.getProject().getName(),
-					IRepository.TEMPLATES);
-			}
-			else
-			{
-				System.out.println("Cannot find solution project's resources project. (" + solutionName + ")"); //$NON-NLS-1$//$NON-NLS-2$
-			}
+			IServerManagerInternal sm = ApplicationServerSingleton.get().getServerManager();
+
+			if (dataModelManager != null) sm.removeGlobalColumnInfoProvider(dataModelManager);
+			dataModelManager = (activeResourcesProject != null ? new DataModelManager(activeResourcesProject.getProject(), sm) : null);
+			if (dataModelManager != null) sm.addGlobalColumnInfoProvider(dataModelManager);
+			sm.setGlobalSequenceProvider(dataModelManager != null ? new EclipseSequenceProvider(dataModelManager) : null);
+			((EclipseRepository)getActiveSolutionHandler().getRepository()).registerResourceMetaDatas(activeResourcesProject != null
+				? activeResourcesProject.getProject().getName() : null, IRepository.STYLES);
+			((EclipseRepository)getActiveSolutionHandler().getRepository()).registerResourceMetaDatas(activeResourcesProject != null
+				? activeResourcesProject.getProject().getName() : null, IRepository.TEMPLATES);
+
 		}
-		else
-		{
-			System.out.println("Cannot find solution project named '" + solutionName + "'. Are you sure you specified the correct workspace location?"); //$NON-NLS-1$ //$NON-NLS-2$
-		}
+		((WorkspaceUserManager)ApplicationServerSingleton.get().getUserManager()).setResourcesProject(activeResourcesProject != null
+			? activeResourcesProject.getProject() : null); // this needs to always be done to refresh in case the main solution changed
 	}
 
 }
