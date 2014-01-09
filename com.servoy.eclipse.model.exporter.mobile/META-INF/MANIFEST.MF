@@ -7,8 +7,7 @@ Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.core.runtime,
  servoy_base,
  servoy_shared,
- com.servoy.eclipse.model,
- servoy_smart_client
+ com.servoy.eclipse.model
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: lib/js.jar,
