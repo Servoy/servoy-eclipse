@@ -94,7 +94,8 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 		if (input instanceof SimpleUserNode &&
 			(((SimpleUserNode)input).getRealType() == UserNodeType.WORKING_SET || ((SimpleUserNode)input).getRealType() == UserNodeType.FORMS))
 		{
-			if (UserNodeListDragSourceListener.dragObjects != null && UserNodeListDragSourceListener.dragObjects[0] instanceof PersistDragData)
+			if (UserNodeListDragSourceListener.dragObjects != null && UserNodeListDragSourceListener.dragObjects.length > 0 &&
+				UserNodeListDragSourceListener.dragObjects[0] instanceof PersistDragData)
 			{
 				boolean onlyForms = false;
 				for (IDragData dragData : UserNodeListDragSourceListener.dragObjects)
