@@ -34,7 +34,7 @@ import org.eclipse.swt.widgets.Control;
 public class ModifiedComboBoxCellEditor extends ComboBoxCellEditor
 {
 
-	private static final int VISIBLE_ITEM_COUNT = 5;
+	private static final int VISIBLE_ITEM_COUNT = 5; //default count - fixing bug introduced by eclipse 4.3
 
 	private CCombo combo;
 
@@ -48,7 +48,6 @@ public class ModifiedComboBoxCellEditor extends ComboBoxCellEditor
 	{
 		combo = (CCombo)super.createControl(parent);
 
-		combo.setVisibleItemCount(VISIBLE_ITEM_COUNT); //default count - fixing bug introduced by eclipse 4.3
 		combo.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -70,5 +69,6 @@ public class ModifiedComboBoxCellEditor extends ComboBoxCellEditor
 		{
 			combo.setVisibleItemCount(count == 0 ? count : count - 1);
 		}
+		else combo.setVisibleItemCount(VISIBLE_ITEM_COUNT); //default count - fixing bug introduced by eclipse 4.3
 	}
 }
