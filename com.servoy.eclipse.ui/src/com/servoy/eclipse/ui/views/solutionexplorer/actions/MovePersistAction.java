@@ -85,25 +85,6 @@ public class MovePersistAction extends AbstractMovePersistAction
 	}
 
 	@Override
-	public void run()
-	{
-		WorkspaceJob saveJob = new WorkspaceJob("Moving files")
-		{
-
-			@Override
-			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
-			{
-				MovePersistAction.super.run();
-				return Status.OK_STATUS;
-			}
-
-		};
-		saveJob.setUser(false);
-		saveJob.setRule(ResourcesPlugin.getWorkspace().getRoot());
-		saveJob.schedule();
-	}
-
-	@Override
 	public void selectionChanged(SelectionChangedEvent event)
 	{
 		super.selectionChanged(event);
@@ -134,26 +115,20 @@ public class MovePersistAction extends AbstractMovePersistAction
 			if (modules.size() == 0) return null;
 
 			Collections.sort(modules);
-			final String[] moduleNames = modules.toArray(new String[] { });
-			Display.getDefault().syncExec(new Runnable()
+			String[] moduleNames = modules.toArray(new String[] { });
+			final OptionDialog optionDialog = new OptionDialog(shell, "Select destination module", null, "Select module where to move " + persistString + " " +
+				((ISupportName)persist).getName(), MessageDialog.INFORMATION, new String[] { "OK", "Cancel" }, 0, moduleNames, 0);
+			int retval = optionDialog.open();
+			String selectedProject = null;
+			if (retval == Window.OK)
 			{
-				public void run()
-				{
-					final OptionDialog optionDialog = new OptionDialog(shell, "Select destination module", null, "Select module where to move " +
-						persistString + " " + ((ISupportName)persist).getName(), MessageDialog.INFORMATION, new String[] { "OK", "Cancel" }, 0, moduleNames, 0);
-					int retval = optionDialog.open();
-					String selectedProject = null;
-					if (retval == Window.OK)
-					{
-						selectedProject = moduleNames[optionDialog.getSelectedOption()];
-					}
-					if (selectedProject != null)
-					{
-						ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(selectedProject);
-						location = new Location(null, servoyProject);
-					}
-				}
-			});
+				selectedProject = moduleNames[optionDialog.getSelectedOption()];
+			}
+			if (selectedProject != null)
+			{
+				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(selectedProject);
+				location = new Location(null, servoyProject);
+			}
 		}
 		if (location != null)
 		{
@@ -164,15 +139,8 @@ public class MovePersistAction extends AbstractMovePersistAction
 			}
 			catch (RepositoryException ex)
 			{
-				Display.getDefault().syncExec(new Runnable()
-				{
-					public void run()
-					{
-						MessageDialog.openError(shell, persistString + " already exists", persistString + " " + ((ISupportName)persist).getName() +
-							" already exists, it won't be moved to another module");
-					}
-				});
-				isMoving = false;
+				MessageDialog.openError(shell, persistString + " already exists", persistString + " " + ((ISupportName)persist).getName() +
+					" already exists, it won't be moved to another module");
 				return null;
 			}
 		}
@@ -191,7 +159,7 @@ public class MovePersistAction extends AbstractMovePersistAction
 	 *      com.servoy.j2db.persistence.IValidateName)
 	 */
 	@Override
-	protected void doWork(IPersist[] persistList, IValidateName nameValidator)
+	protected void doWork(final IPersist[] persistList, IValidateName nameValidator)
 	{
 		//ask location if not set (in CreateLoginSolutionQuickFix.MoveForm)
 		if (location == null && persistList.length > 0)
@@ -203,72 +171,84 @@ public class MovePersistAction extends AbstractMovePersistAction
 			return;
 		}
 
-		//reset all uuids and update references
-		Map<UUID, UUID> oldToNewID = new HashMap<UUID, UUID>();
-		Map<UUID, IPersist> duplicates = new HashMap<UUID, IPersist>();
-		for (final IPersist persist : persistList)
+		final Location destination = location;
+		WorkspaceJob moveJob = new WorkspaceJob("Moving files")
 		{
-			IRootObject rootObject = persist.getRootObject();
-			if (rootObject instanceof Solution)
+
+			@Override
+			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 			{
-				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(rootObject.getName());
-
-				IPersist editingNode = servoyProject.getEditingPersist(persist.getUUID());
-
-				try
+				//reset all uuids and update references
+				Map<UUID, UUID> oldToNewID = new HashMap<UUID, UUID>();
+				Map<UUID, IPersist> duplicates = new HashMap<UUID, IPersist>();
+				for (final IPersist persist : persistList)
 				{
-					// reset all uuids
-					IPersist duplicate = null;
-					final Map<Integer, Integer> idMap;
-					if (editingNode instanceof Media)
+					IRootObject rootObject = persist.getRootObject();
+					if (rootObject instanceof Solution)
 					{
-						duplicate = duplicatePersist(editingNode, ((Media)editingNode).getName(), location.getServoyProject(), DummyValidator.INSTANCE);
-						idMap = Collections.singletonMap(new Integer(editingNode.getID()), new Integer(duplicate.getID()));
-						oldToNewID.put(editingNode.getUUID(), duplicate.getUUID());
-						duplicates.put(editingNode.getUUID(), duplicate);
-						servoyProject.saveEditingSolutionNodes(new IPersist[] { duplicate }, true, false);
-					}
-					else
-					{
-						UUID oldID = editingNode.getUUID();
-						idMap = AbstractPersistFactory.resetUUIDSRecursively(editingNode, (EclipseRepository)rootObject.getRepository(), true);
-						servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true, false);
-						oldToNewID.put(oldID, editingNode.getUUID());
-					}
-					updateReferences(idMap);
-				}
-				catch (final RepositoryException e)
-				{
-					Display.getDefault().syncExec(new Runnable()
-					{
-						public void run()
+						ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(rootObject.getName());
+
+						IPersist editingNode = servoyProject.getEditingPersist(persist.getUUID());
+
+						try
 						{
-							ServoyLog.logError(e);
-							MessageDialog.openError(shell, "Cannot move form", persistString + " " + ((ISupportName)persist).getName() +
-								"cannot be moved. Reason:\n" + e.getMessage());
+							// reset all uuids
+							IPersist duplicate = null;
+							final Map<Integer, Integer> idMap;
+							if (editingNode instanceof Media)
+							{
+								duplicate = duplicatePersist(editingNode, ((Media)editingNode).getName(), destination.getServoyProject(),
+									DummyValidator.INSTANCE);
+								idMap = Collections.singletonMap(new Integer(editingNode.getID()), new Integer(duplicate.getID()));
+								oldToNewID.put(editingNode.getUUID(), duplicate.getUUID());
+								duplicates.put(editingNode.getUUID(), duplicate);
+								servoyProject.saveEditingSolutionNodes(new IPersist[] { duplicate }, true, false);
+							}
+							else
+							{
+								UUID oldID = editingNode.getUUID();
+								idMap = AbstractPersistFactory.resetUUIDSRecursively(editingNode, (EclipseRepository)rootObject.getRepository(), true);
+								servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true, false);
+								oldToNewID.put(oldID, editingNode.getUUID());
+							}
+							updateReferences(idMap);
 						}
-					});
+						catch (final RepositoryException e)
+						{
+							Display.getDefault().asyncExec(new Runnable()
+							{
+								public void run()
+								{
+									ServoyLog.logError(e);
+									MessageDialog.openError(shell, "Cannot move form", persistString + " " + ((ISupportName)persist).getName() +
+										"cannot be moved. Reason:\n" + e.getMessage());
+								}
+							});
+						}
+					}
 				}
-			}
-		}
 
-		//do the moves
-		for (IPersist persist : persistList)
-		{
-			IRootObject rootObject = persist.getRootObject();
-			if (rootObject instanceof Solution)
-			{
-				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(rootObject.getName());
-				IPersist editingNode = servoyProject.getEditingPersist(oldToNewID.get(persist.getUUID()));
-				moveFiles(rootObject, servoyProject, editingNode, duplicates.get(persist.getUUID()));
+				//do the moves
+				for (IPersist persist : persistList)
+				{
+					IRootObject rootObject = persist.getRootObject();
+					if (rootObject instanceof Solution)
+					{
+						ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(rootObject.getName());
+						IPersist editingNode = servoyProject.getEditingPersist(oldToNewID.get(persist.getUUID()));
+						moveFiles(rootObject, servoyProject, editingNode, duplicates.get(persist.getUUID()), destination);
+					}
+				}
+				return Status.OK_STATUS;
 			}
-		}
 
-		//clear location when move is done
-		location = null;
+		};
+		moveJob.setUser(false);
+		moveJob.setRule(ResourcesPlugin.getWorkspace().getRoot());
+		moveJob.schedule();
 	}
 
-	private void moveFiles(IRootObject rootObject, ServoyProject servoyProject, final IPersist editingNode, IPersist duplicate)
+	private void moveFiles(IRootObject rootObject, ServoyProject servoyProject, final IPersist editingNode, IPersist duplicate, Location destination)
 	{
 		try
 		{
@@ -276,7 +256,7 @@ public class MovePersistAction extends AbstractMovePersistAction
 			String[] scriptPathsFrom = SolutionSerializer.getScriptPaths(editingNode, true);
 
 			String relativePathFrom = editingNode.getRootObject().getName() + '/';
-			String relativePathTo = location.getServoyProject().getSolution().getName() + '/';
+			String relativePathTo = destination.getServoyProject().getSolution().getName() + '/';
 			if (filePairFrom.getLeft().startsWith(relativePathFrom))
 			{
 				WorkspaceFileAccess wsa = new WorkspaceFileAccess(ServoyModel.getWorkspace());
@@ -310,7 +290,7 @@ public class MovePersistAction extends AbstractMovePersistAction
 				}
 				catch (final RepositoryException e)
 				{
-					Display.getDefault().syncExec(new Runnable()
+					Display.getDefault().asyncExec(new Runnable()
 					{
 						public void run()
 						{

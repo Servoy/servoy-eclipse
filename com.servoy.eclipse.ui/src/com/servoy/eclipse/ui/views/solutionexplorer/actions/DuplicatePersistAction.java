@@ -20,7 +20,6 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.core.util.UIUtils.ExtendedInputDialog;
@@ -129,17 +128,11 @@ public class DuplicatePersistAction extends AbstractMovePersistAction
 					IPersist duplicate = intelligentClonePersist(persist, location.getPersistName(), location.getServoyProject(), nameValidator, true);
 					EditorUtil.openPersistEditor(duplicate);
 				}
-				catch (final RepositoryException e)
+				catch (RepositoryException e)
 				{
-					Display.getDefault().syncExec(new Runnable()
-					{
-						public void run()
-						{
-							ServoyLog.logError(e);
-							MessageDialog.openError(shell, "Cannot duplicate form", persistString + " " + ((ISupportName)persist).getName() +
-								"cannot be duplicated. Reason:\n" + e.getMessage());
-						}
-					});
+					ServoyLog.logError(e);
+					MessageDialog.openError(shell, "Cannot duplicate form", persistString + " " + ((ISupportName)persist).getName() +
+						"cannot be duplicated. Reason:\n" + e.getMessage());
 				}
 			}
 		}
