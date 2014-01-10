@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Servoy Developer" uid="servoy" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="5.2.16.1029" useFeatures="true" includeLaunchers="true">
+<product name="Servoy Developer" uid="servoy" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="5.2.17.1030" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="icons/installer_image.png"/>
