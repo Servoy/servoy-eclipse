@@ -163,7 +163,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 	{
 		try
 		{
-			browser = new Browser(parent, SWT.MOZILLA);
+			browser = new Browser(parent, SWT.NONE);
 		}
 		catch (SWTError e)
 		{
