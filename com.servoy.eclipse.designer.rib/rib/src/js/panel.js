@@ -30,7 +30,7 @@
                 'bottom': 'n'
             };
 
-            self.element.addClass('ui-panel vbox')
+            self.element.addClass('ui-panel')
                 .css({'position': 'relative',
                       'overflow': 'hidden',
                       'top': '0px',

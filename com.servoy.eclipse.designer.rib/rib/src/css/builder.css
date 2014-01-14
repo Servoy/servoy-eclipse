@@ -968,6 +968,7 @@ div.propertyItems .delete.button {
     overflow: auto;
     padding: 2px;
     cursor: pointer;
+    width: 98%;
 }
 .paletteView .columns {
     text-align: center;
