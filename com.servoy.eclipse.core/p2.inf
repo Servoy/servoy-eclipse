@@ -8,5 +8,5 @@ addRepository(type:0,name:QuickImage,location:http${#58}//psnet.nu/eclipse/updat
 addRepository(type:0,name:Servoy release candidate update site,location:https${#58}//www.servoy.com/developer/70x_updates/release_candidate);
 
 #Adding description for the Servoy updates
-update.id = servoy
-update.description = Servoy 7.4.0 a2, buildnumber 2022
+properties.0.name = org.eclipse.equinox.p2.description
+properties.0.value = Servoy 7.4.0 a2, buildnumber 2022
