@@ -16,12 +16,19 @@
  */
 package com.servoy.eclipse.ui.property;
 
+import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.views.properties.ComboBoxPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.util.ModifiedComboBoxCellEditor;
 import com.servoy.j2db.persistence.ISupportScrollbars;
 
 /**
@@ -48,8 +55,44 @@ public class ScrollbarSettingPropertySource extends ComplexPropertySource<Intege
 	@Override
 	public IPropertyDescriptor[] createPropertyDescriptors()
 	{
-		return new IPropertyDescriptor[] { new ComboBoxPropertyDescriptor(HORIZONTAL, HORIZONTAL, SCROLL_OPTIONS), new ComboBoxPropertyDescriptor(VERTICAL,
+		return new IPropertyDescriptor[] { createComboBoxPropertyDescriptor(HORIZONTAL, HORIZONTAL, SCROLL_OPTIONS), createComboBoxPropertyDescriptor(VERTICAL,
 			VERTICAL, SCROLL_OPTIONS) };
+	}
+
+	private ComboBoxPropertyDescriptor createComboBoxPropertyDescriptor(Object id, String displayName, final String[] labelsArray)
+	{
+		return new ComboBoxPropertyDescriptor(id, displayName, labelsArray)
+		{
+			@Override
+			public CellEditor createPropertyEditor(Composite parent)
+			{
+				ComboBoxCellEditor editor = new ComboBoxCellEditor(parent, labelsArray, SWT.READ_ONLY)
+				{
+					private CCombo combo;
+
+					@Override
+					protected Control createControl(Composite parent)
+					{
+						combo = (CCombo)super.createControl(parent);
+						return combo;
+					}
+
+					@Override
+					public void setItems(String[] items)
+					{
+						super.setItems(items);
+						int count = combo.getItems().length;
+						if (count <= ModifiedComboBoxCellEditor.VISIBLE_ITEM_COUNT)
+						{
+							combo.setVisibleItemCount(count == 0 ? count : count - 1);
+						}
+						else combo.setVisibleItemCount(ModifiedComboBoxCellEditor.VISIBLE_ITEM_COUNT); //default count - fixing bug introduced by eclipse 4.3
+					}
+				};
+				return editor;
+			}
+		};
+
 	}
 
 	@Override

@@ -34,7 +34,7 @@ import org.eclipse.swt.widgets.Control;
 public class ModifiedComboBoxCellEditor extends ComboBoxCellEditor
 {
 
-	private static final int VISIBLE_ITEM_COUNT = 5; //default count - fixing bug introduced by eclipse 4.3
+	public static final int VISIBLE_ITEM_COUNT = 5; //default count - fixing bug introduced by eclipse 4.3
 
 	private CCombo combo;
 
