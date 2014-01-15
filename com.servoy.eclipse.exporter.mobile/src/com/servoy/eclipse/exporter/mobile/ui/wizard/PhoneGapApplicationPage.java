@@ -250,6 +250,26 @@ public class PhoneGapApplicationPage extends WizardPage
 					certificatesViewer.getTable(), 80, 80, 80)).addPreferredGap(LayoutStyle.RELATED).add(btnPublic).add(25).add(btnOpenPhonegapLink).addContainerGap()));
 		container.setLayout(groupLayout);
 
+		applicationNameCombo.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				PhoneGapApplication app = connector.getApplication(applicationNameCombo.getText());
+				if (app != null)
+				{
+					txtDescription.setText(app.getDescription() != null ? app.getDescription() : "");
+					txtVersion.setText(app.getVersion() != null ? app.getVersion() : "");
+					btnPublic.setSelection(app.isPublicApplication());
+					iconPath.setText(app.getIconPath() != null ? app.getIconPath() : "");
+					setSelectedCertificates(app.getCertificates());
+				}
+				getWizard().getContainer().updateButtons();
+			}
+		});
+
+		setDefaultPageData();
+
 		ModifyListener errorMessageDetecter = new ModifyListener()
 		{
 			public void modifyText(ModifyEvent e)
@@ -260,27 +280,8 @@ public class PhoneGapApplicationPage extends WizardPage
 			}
 		};
 		applicationNameCombo.addModifyListener(errorMessageDetecter);
-		applicationNameCombo.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				PhoneGapApplication app = connector.getApplication(applicationNameCombo.getText());
-				if (app != null)
-				{
-					txtDescription.setText(app.getDescription());
-					txtVersion.setText(app.getVersion());
-					btnPublic.setSelection(app.isPublicApplication());
-					iconPath.setText(app.getIconPath());
-					setSelectedCertificates(app.getCertificates());
-				}
-				getWizard().getContainer().updateButtons();
-			}
-		});
 		configPath.addModifyListener(errorMessageDetecter);
-		setDefaultPageData();
 	}
-
 
 	private void setDefaultPageData()
 	{
@@ -297,11 +298,15 @@ public class PhoneGapApplicationPage extends WizardPage
 		else
 		{
 			btnUsePhonegap.setSelection(true);
-			applicationNameCombo.setText(getDialogSettings().get(APPLICATION_NAME_KEY + solutionName));
-			txtDescription.setText(getDialogSettings().get(APPLICATION_DESCRIPTION_KEY + solutionName));
-			txtVersion.setText(getDialogSettings().get(APPLICATION_VERSION_KEY + solutionName));
+			String applicationName = getDialogSettings().get(APPLICATION_NAME_KEY + solutionName);
+			String description = getDialogSettings().get(APPLICATION_DESCRIPTION_KEY + solutionName);
+			String version = getDialogSettings().get(APPLICATION_VERSION_KEY + solutionName);
+			String icon = getDialogSettings().get(APPLICATION_ICON_KEY + solutionName);
+			applicationNameCombo.setText(applicationName != null ? applicationName : "");
+			txtDescription.setText(description != null ? description : "");
+			txtVersion.setText(version != null ? version : "");
 			btnPublic.setSelection(getDialogSettings().getBoolean(IS_APPLICATION_PUBLIC_KEY + solutionName));
-			iconPath.setText(getDialogSettings().get(APPLICATION_ICON_KEY + solutionName));
+			iconPath.setText(icon != null ? icon : "");
 			enablePhoneGapApplicationFields();
 		}
 		String[] selectedCertificates = loadSelectedCertificates();
@@ -473,6 +478,12 @@ public class PhoneGapApplicationPage extends WizardPage
 	public void populateExistingApplications()
 	{
 		applicationNameCombo.setItems(connector.getExistingApps());
+		String defaultApplicationName = getDialogSettings().get(APPLICATION_NAME_KEY + exporter.getSolutionName());
+		if (defaultApplicationName != null)
+		{
+			applicationNameCombo.setText(defaultApplicationName);
+		}
+
 		certificatesViewer.setInput(getConnector().getCertificates());
 	}
 

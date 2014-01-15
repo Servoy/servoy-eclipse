@@ -25,13 +25,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.FileBody;
@@ -102,22 +105,52 @@ public class PhoneGapConnector
 		}
 	}
 
+	private ServoyJSONObject getJSONResponse(HttpUriRequest method) throws Exception
+	{
+		HttpResponse response = client.execute(method);
+		if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)
+		{
+			String content = EntityUtils.toString(response.getEntity());
+			EntityUtils.consumeQuietly(response.getEntity());
+			return new ServoyJSONObject(content, false);
+		}
+		else
+		{
+			String errorMsg = null;
+
+			Header contentType = response.getEntity().getContentType();
+			String content = EntityUtils.toString(response.getEntity());
+			EntityUtils.consumeQuietly(response.getEntity());
+			if (contentType != null && contentType.getValue().contains("json"))
+			{
+				try
+				{
+					ServoyJSONObject json = new ServoyJSONObject(content, false);
+					if (json.has("error") && json.get("error") instanceof String)
+					{
+						errorMsg = json.getString("error");
+					}
+				}
+				catch (JSONException ex)
+				{
+					ServoyLog.logError(ex);
+				}
+			}
+
+			if (errorMsg == null)
+			{
+				errorMsg = "Cannot connect to Phonegap. Please try again later";
+			}
+			throw new Exception(errorMsg);
+		}
+	}
+
 	protected String loadPhoneGapAccount()
 	{
 		try
 		{
-			HttpResponse response = client.execute(new HttpGet(getURL(URL_PHONEGAP_CLOUD)));
-			String content = EntityUtils.toString(response.getEntity());
-			EntityUtils.consume(response.getEntity());
-			jsonContent = new ServoyJSONObject(content, false);
-			if (jsonContent.has("error"))
-			{
-				return jsonContent.getString("error");
-			}
-
-			response = client.execute(new HttpGet(getURL(URL_PHONEGAP_KEYS)));
-			JSONObject keys = new ServoyJSONObject(EntityUtils.toString(response.getEntity()), false);
-			EntityUtils.consume(response.getEntity());
+			jsonContent = getJSONResponse(new HttpGet(getURL(URL_PHONEGAP_CLOUD)));
+			JSONObject keys = getJSONResponse(new HttpGet(getURL(URL_PHONEGAP_KEYS)));
 			if (keys.has("keys"))
 			{
 				keys = keys.getJSONObject("keys");
@@ -151,9 +184,7 @@ public class PhoneGapConnector
 						{
 							int appID = apps.getJSONObject(i).getInt("id");
 							String url = URL_PHONEGAP_CLOUD + "/" + appID;
-							response = client.execute(new HttpGet(getURL(url)));
-							JSONObject jsonApp = new ServoyJSONObject(EntityUtils.toString(response.getEntity()), false);
-							EntityUtils.consume(response.getEntity());
+							JSONObject jsonApp = getJSONResponse(new HttpGet(getURL(url)));
 							if (jsonApp.has("keys"))
 							{
 								apps.getJSONObject(i).put("keys", jsonApp.getJSONObject("keys"));
@@ -164,7 +195,6 @@ public class PhoneGapConnector
 					{
 						ServoyLog.logError(e);
 					}
-
 				}
 			}
 		}
@@ -178,7 +208,7 @@ public class PhoneGapConnector
 	public String[] getExistingApps()
 	{
 		List<String> pgApps = new ArrayList<String>();
-		if (jsonContent.has("apps"))
+		if (jsonContent != null && jsonContent.has("apps"))
 		{
 			try
 			{
@@ -199,7 +229,7 @@ public class PhoneGapConnector
 
 	public PhoneGapApplication getApplication(String title)
 	{
-		if (jsonContent.has("apps"))
+		if (jsonContent != null && jsonContent.has("apps"))
 		{
 			try
 			{
@@ -294,13 +324,7 @@ public class PhoneGapConnector
 
 			request.setEntity(entity);
 
-			HttpResponse response = client.execute(request);
-			String content = EntityUtils.toString(response.getEntity());
-			ServoyJSONObject jsonResponse = new ServoyJSONObject(content, false);
-			if (jsonResponse.has("error") && jsonResponse.get("error") instanceof String)
-			{
-				return jsonResponse.getString("error");
-			}
+			ServoyJSONObject jsonResponse = getJSONResponse(request);
 			appId = jsonResponse.getInt("id");
 
 			if (application.getIconPath() != null && !"".equals(application.getIconPath()))
@@ -313,12 +337,7 @@ public class PhoneGapConnector
 					entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
 					entity.addPart("icon", new FileBody(file));
 					request.setEntity(entity);
-					response = client.execute(request);
-					jsonResponse = new ServoyJSONObject(EntityUtils.toString(response.getEntity()), false);
-					if (jsonResponse.has("error") && jsonResponse.get("error") instanceof String)
-					{
-						return jsonResponse.getString("error");
-					}
+					jsonResponse = getJSONResponse(request);
 				}
 			}
 		}
