@@ -312,6 +312,7 @@ public class Exporter
 
 		// delete the servlet.jar that one isn't allowed.
 		new File(targetLibDir, "servlet-api.jar").delete();
+		new File(targetLibDir, "jsp-api.jar").delete();
 		// delete the tomcat boostrapper, also not needed in a war file
 		new File(targetLibDir, "server-bootstrap.jar").delete();
 		new File(targetLibDir, "tomcat-juli.jar").delete();
