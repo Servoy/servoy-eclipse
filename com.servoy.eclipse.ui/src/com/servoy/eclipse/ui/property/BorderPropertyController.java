@@ -38,7 +38,6 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.views.properties.ComboBoxPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
@@ -55,6 +54,7 @@ import com.servoy.eclipse.ui.labelproviders.TextCutoffLabelProvider;
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
 import com.servoy.eclipse.ui.util.ModifiedComboBoxCellEditor;
+import com.servoy.eclipse.ui.util.ModifiedComboBoxPropertyDescriptor;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.debug.DebugUtils;
 import com.servoy.j2db.persistence.Form;
@@ -530,10 +530,10 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		}
 
 		private static final IPropertyDescriptor[] PROPERTY_DESCRIPTORS = PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] {//
-		new ComboBoxPropertyDescriptor(TOP_STYLE, "top style", IStyleSheet.BORDER_STYLES), //
-		new ComboBoxPropertyDescriptor(LEFT_STYLE, "left style", IStyleSheet.BORDER_STYLES),//
-		new ComboBoxPropertyDescriptor(BOTTOM_STYLE, "bottom style", IStyleSheet.BORDER_STYLES),//
-		new ComboBoxPropertyDescriptor(RIGHT_STYLE, "right style", IStyleSheet.BORDER_STYLES),//
+		new ModifiedComboBoxPropertyDescriptor(TOP_STYLE, "top style", IStyleSheet.BORDER_STYLES), //
+		new ModifiedComboBoxPropertyDescriptor(LEFT_STYLE, "left style", IStyleSheet.BORDER_STYLES),//
+		new ModifiedComboBoxPropertyDescriptor(BOTTOM_STYLE, "bottom style", IStyleSheet.BORDER_STYLES),//
+		new ModifiedComboBoxPropertyDescriptor(RIGHT_STYLE, "right style", IStyleSheet.BORDER_STYLES),//
 		});
 
 		@Override
