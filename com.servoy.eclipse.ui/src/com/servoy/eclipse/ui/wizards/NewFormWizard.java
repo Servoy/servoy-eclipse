@@ -691,7 +691,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 					groupLayout.createParallelGroup(GroupLayout.LEADING).add(templateNameComboControl, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 						GroupLayout.PREFERRED_SIZE).add(templateLabel)).addPreferredGap(LayoutStyle.RELATED).add(
 					groupLayout.createParallelGroup(GroupLayout.LEADING).add(projectLabel).add(projectComboControl, GroupLayout.PREFERRED_SIZE,
-						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(
+						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
 					groupLayout.createParallelGroup(GroupLayout.LEADING).add(listFormLabel).add(listFormCheck, GroupLayout.PREFERRED_SIZE,
 						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addContainerGap(100, Short.MAX_VALUE)));
 			topLevel.setLayout(groupLayout);
