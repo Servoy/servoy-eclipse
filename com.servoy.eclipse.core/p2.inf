@@ -1,5 +1,6 @@
 instructions.configure=addRepository(type:0,name:Servoy update site,location:https${#58}//www.servoy.com/developer/70x_updates);addRepository(type:1,name:Servoy update site,location:https${#58}//www.servoy.com/developer/70x_updates);\
 addRepository(type:0,name:SQLExplorer Updates,location:http${#58}//eclipsesql.sourceforge.net/);addRepository(type:1,name:SQLExplorer Updates,location:http${#58}//eclipsesql.sourceforge.net/);\
+addRepository(type:0,name:Xulrunner Plugin,location:https${#58}//www.servoy.com/developer/xulrunner/);addRepository(type:1,name:Xulrunner Plugin,location:https${#58}//www.servoy.com/developer/xulrunner/);\
 addRepository(type:0,name:Indigo,location:http${#58}//download.eclipse.org/releases/indigo);addRepository(type:1,name:Indigo,location:http${#58}//download.eclipse.org/releases/indigo);\
 addRepository(type:0,name:The Eclipse Project Updates,location:http${#58}//download.eclipse.org/eclipse/updates/3.7);addRepository(type:1,name:The Eclipse Project Updates,location:http${#58}//download.eclipse.org/eclipse/updates/3.7);\
 addRepository(type:0,name:Subclipse 1.10.x Update Site,location:http${#58}//subclipse.tigris.org/update_1.10.x);addRepository(type:1,name:Subclipse 1.10.x Update Site,location:http${#58}//subclipse.tigris.org/update_1.10.x);
