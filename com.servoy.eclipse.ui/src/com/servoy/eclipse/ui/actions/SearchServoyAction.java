@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.actions;
 
 import org.eclipse.jface.action.IAction;
@@ -22,7 +22,9 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.dialogs.ServoySearchDialog;
+import com.servoy.eclipse.ui.dialogs.ServoySearchDialog.Scope;
 import com.servoy.eclipse.ui.dialogs.ServoySearchDialog.Table;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.IPersist;
@@ -44,9 +46,10 @@ public class SearchServoyAction implements IWorkbenchWindowActionDelegate
 	public void run(IAction action)
 	{
 		ServoySearchDialog ssd = new ServoySearchDialog(window.getShell());
-		
+
 		final int resultCode = ssd.open();
-		if (resultCode == IDialogConstants.OK_ID) {
+		if (resultCode == IDialogConstants.OK_ID)
+		{
 			final Object result = ssd.getFirstResult();
 			if (result instanceof IPersist)
 			{
@@ -56,6 +59,13 @@ public class SearchServoyAction implements IWorkbenchWindowActionDelegate
 			{
 				Table table = (Table)result;
 				EditorUtil.openTableEditor(table.getServerName(), table.getTableName());
+			}
+			else if (result instanceof Scope)
+			{
+				Scope scope = (Scope)result;
+				EditorUtil.openScriptEditor(
+					ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(scope.getSolutionName()).getSolution(), scope.getScopeName(),
+					true);
 			}
 		}
 	}

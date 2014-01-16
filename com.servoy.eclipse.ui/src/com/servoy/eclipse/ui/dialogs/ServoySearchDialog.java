@@ -17,6 +17,7 @@
 package com.servoy.eclipse.ui.dialogs;
 
 import java.rmi.RemoteException;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -50,6 +51,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ISupportName;
@@ -64,6 +66,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -86,6 +89,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		boolean showRelations = showRelationsAction.isChecked();
 		boolean showValuelists = showValuelistsAction.isChecked();
 		boolean showMedia = showMediaAction.isChecked();
+		boolean showScopes = showScopesAction.isChecked();
 
 		/**
 		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter#matchItem(java.lang.Object)
@@ -132,6 +136,10 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 				{
 					b = showMedia;
 				}
+				else if (item instanceof Scope)
+				{
+					b = showScopes;
+				}
 			}
 			return b;
 		}
@@ -165,7 +173,8 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 				ServoyItemsFilter siFilter = (ServoyItemsFilter)filter;
 				return siFilter.showCalculations == showCalculations && siFilter.showElements == showElements && siFilter.showForms == showForms &&
 					siFilter.showMethods == showMethods && siFilter.showRelations == showRelations && siFilter.showTables == showTables &&
-					siFilter.showValuelists == showValuelists && siFilter.showVariables == showVariables && siFilter.showMedia == showMedia;
+					siFilter.showValuelists == showValuelists && siFilter.showVariables == showVariables && siFilter.showMedia == showMedia &&
+					siFilter.showScopes == showScopes;
 
 			}
 			return false;
@@ -209,7 +218,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		{
 			boolean checked = !showFormsAction.isChecked() || !showMethodsAction.isChecked() || !showVariablesAction.isChecked() ||
 				!showTablesAction.isChecked() || !showCalculationsAction.isChecked() || !showElementsAction.isChecked() || !showRelationsAction.isChecked() ||
-				!showValuelistsAction.isChecked() || !showMediaAction.isChecked();
+				!showValuelistsAction.isChecked() || !showMediaAction.isChecked() || !showScopesAction.isChecked();
 
 			showFormsAction.setChecked(checked);
 			showMethodsAction.setChecked(checked);
@@ -220,6 +229,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 			showRelationsAction.setChecked(checked);
 			showValuelistsAction.setChecked(checked);
 			showMediaAction.setChecked(checked);
+			showScopesAction.setChecked(checked);
 
 			applyFilter();
 		}
@@ -236,6 +246,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 	private static final String SHOW_RELATIONS = "ShowRelations";
 	private static final String SHOW_VALUELIST = "ShowValuelist";
 	private static final String SHOW_MEDIA = "ShowValuelist";
+	private static final String SHOW_SCOPES = "ShowScopes";
 
 	private final ShowAction showFormsAction;
 	private final ShowAction showMethodsAction;
@@ -246,6 +257,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 	private final ShowAction showRelationsAction;
 	private final ShowAction showValuelistsAction;
 	private final ShowAction showMediaAction;
+	private final ShowAction showScopesAction;
 
 	private final ToggleAction toggleAllAction;
 
@@ -266,6 +278,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		showRelationsAction = new ShowAction("Show Relations");
 		showValuelistsAction = new ShowAction("Show Valuelists");
 		showMediaAction = new ShowAction("Show Media");
+		showScopesAction = new ShowAction("Show Scopes");
 		toggleAllAction = new ToggleAction();
 
 		setSelectionHistory(new SelectionHistory()
@@ -300,6 +313,30 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 							ServoyLog.logError(e);
 						}
 					}
+					else
+					{
+						String scopeName = memento.getString("scopename");
+						String solutionName = memento.getString("solutionname");
+						if (scopeName != null && solutionName != null)
+						{
+							Solution solution = servoyModel.getServoyProject(solutionName).getSolution();
+							if (solution != null && servoyModel.getActiveProject().getSolution().equals(solution) &&
+								solution.getScopeNames().contains(scopeName))
+							{
+								return new Scope(scopeName, solutionName);
+							}
+
+							Solution[] modules = servoyModel.getFlattenedSolution().getModules();
+							if (modules == null) return null;
+							for (Solution module : modules)
+							{
+								if (module.getName().equals(solutionName) && module.getScopeNames().contains(scopeName))
+								{
+									return new Scope(scopeName, solutionName);
+								}
+							}
+						}
+					}
 					return null;
 				}
 				UUID uuid = UUID.fromString(uuidString);
@@ -330,6 +367,12 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 					Table table = (Table)item;
 					memento.putString("servername", table.getServerName());
 					memento.putString("tablename", table.getTableName());
+				}
+				else if (item instanceof Scope)
+				{
+					Scope scope = (Scope)item;
+					memento.putString("scopename", scope.getScopeName());
+					memento.putString("solutionname", scope.getSolutionName());
 				}
 			}
 		});
@@ -380,6 +423,10 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 				{
 					image = "portal.gif";
 				}
+				else if (element instanceof Scope)
+				{
+					image = "scopes.gif";
+				}
 
 				if (image == null)
 				{
@@ -413,6 +460,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		menuManager.add(showRelationsAction);
 		menuManager.add(showValuelistsAction);
 		menuManager.add(showMediaAction);
+		menuManager.add(showScopesAction);
 		menuManager.add(toggleAllAction);
 		super.fillViewMenu(menuManager);
 	}
@@ -432,6 +480,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		settings.put(SHOW_RELATIONS, !showRelationsAction.isChecked());
 		settings.put(SHOW_VALUELIST, !showValuelistsAction.isChecked());
 		settings.put(SHOW_MEDIA, !showMediaAction.isChecked());
+		settings.put(SHOW_SCOPES, !showScopesAction.isChecked());
 		super.storeDialog(settings);
 	}
 
@@ -450,6 +499,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		showRelationsAction.setChecked(!settings.getBoolean(SHOW_RELATIONS));
 		showValuelistsAction.setChecked(!settings.getBoolean(SHOW_VALUELIST));
 		showMediaAction.setChecked(!settings.getBoolean(SHOW_MEDIA));
+		showScopesAction.setChecked(!settings.getBoolean(SHOW_SCOPES));
 		super.restoreDialog(settings);
 	}
 
@@ -540,6 +590,11 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 				Debug.error(e);
 			}
 		}
+		Collection<Pair<String, IRootObject>> scopes = flattenedSolution.getAllScopes();
+		for (Pair<String, IRootObject> scope : scopes)
+		{
+			contentProvider.add(new Scope(scope.getLeft(), scope.getRight().getName()), itemsFilter);
+		}
 	}
 
 	/**
@@ -621,5 +676,41 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 			return tableName;
 		}
 
+	}
+
+	public static class Scope implements ISupportName
+	{
+		private final String scopeName;
+		private final String solutionName;
+
+		public Scope(String scopeName, String solutionName)
+		{
+			this.scopeName = scopeName;
+			this.solutionName = solutionName;
+		}
+
+		/**
+		 * @see com.servoy.j2db.persistence.ISupportName#getName()
+		 */
+		public String getName()
+		{
+			return scopeName + " - " + solutionName;
+		}
+
+		/**
+		 * @return
+		 */
+		public String getSolutionName()
+		{
+			return solutionName;
+		}
+
+		/**
+		 * @return
+		 */
+		public String getScopeName()
+		{
+			return scopeName;
+		}
 	}
 }
