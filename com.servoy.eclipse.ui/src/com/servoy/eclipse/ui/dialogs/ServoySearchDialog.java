@@ -320,20 +320,9 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 						if (scopeName != null && solutionName != null)
 						{
 							Solution solution = servoyModel.getServoyProject(solutionName).getSolution();
-							if (solution != null && servoyModel.getActiveProject().getSolution().equals(solution) &&
-								solution.getScopeNames().contains(scopeName))
+							if (solution != null && servoyModel.isSolutionActive(solutionName) && solution.getScopeNames().contains(scopeName))
 							{
 								return new Scope(scopeName, solutionName);
-							}
-
-							Solution[] modules = servoyModel.getFlattenedSolution().getModules();
-							if (modules == null) return null;
-							for (Solution module : modules)
-							{
-								if (module.getName().equals(solutionName) && module.getScopeNames().contains(scopeName))
-								{
-									return new Scope(scopeName, solutionName);
-								}
 							}
 						}
 					}
