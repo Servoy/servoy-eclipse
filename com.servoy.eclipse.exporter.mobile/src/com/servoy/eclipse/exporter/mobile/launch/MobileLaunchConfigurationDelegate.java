@@ -12,6 +12,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.LaunchConfigurationDelegate;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.internal.browser.BrowserManager;
@@ -171,7 +173,21 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		IProgressMonitor monitor) throws CoreException
 	{
 		if (monitor != null) monitor.subTask("opening mobile client in browser");
-		EditorUtil.openURL(webBrowser, browserDescriptor, getApplicationURL(configuration));
+		try
+		{
+			EditorUtil.openURL(webBrowser, browserDescriptor, getApplicationURL(configuration));
+		}
+		catch (final Throwable e)
+		{
+			ServoyLog.logError("Cant open external browser", e); //$NON-NLS-1$
+			Display.getDefault().asyncExec(new Runnable()
+			{
+				public void run()
+				{
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Cant open external browser", e.getLocalizedMessage()); //$NON-NLS-1$
+				}
+			});
+		}
 	}
 
 	protected String getApplicationURL(ILaunchConfiguration configuration) throws CoreException
