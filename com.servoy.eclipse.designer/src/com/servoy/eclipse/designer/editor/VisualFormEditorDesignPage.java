@@ -31,7 +31,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalViewer;
@@ -43,8 +42,6 @@ import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.gef.ui.actions.DeleteAction;
 import org.eclipse.gef.ui.actions.GEFActionConstants;
 import org.eclipse.gef.ui.actions.SelectionAction;
-import org.eclipse.gef.ui.palette.FlyoutPaletteComposite;
-import org.eclipse.gef.ui.palette.FlyoutPaletteComposite.FlyoutPreferences;
 import org.eclipse.gef.ui.palette.PaletteCustomizer;
 import org.eclipse.gef.ui.parts.ScrollingGraphicalViewer;
 import org.eclipse.jface.action.Action;
@@ -74,7 +71,6 @@ import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.core.Activator;
-import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.designer.actions.SelectFeedbackmodeAction;
 import com.servoy.eclipse.designer.actions.SelectSnapmodeAction;
 import com.servoy.eclipse.designer.actions.ViewerTogglePropertyAction;
@@ -517,49 +513,6 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPag
 			return true;
 		}
 		return false;
-	}
-
-	/*
-	 * Set some defaults for palette preferences.
-	 */
-	@Override
-	protected FlyoutPreferences getPalettePreferences()
-	{
-		FlyoutPreferences palettePreferences = super.getPalettePreferences();
-		if ((getEditorInput() instanceof PersistEditorInput && ((PersistEditorInput)getEditorInput()).isNew()) || palettePreferences.getPaletteState() == 0)
-		{
-			// open palette first time it is shown or when it is a new form
-			palettePreferences.setPaletteState(FlyoutPaletteComposite.STATE_PINNED_OPEN);
-		}
-		if (palettePreferences.getDockLocation() == 0)
-		{
-			// default dock location to the left
-			palettePreferences.setDockLocation(PositionConstants.WEST);
-		}
-		return palettePreferences;
-	}
-
-	@Override
-	protected PaletteRoot getPaletteRoot()
-	{
-		if (paletteModel == null)
-		{
-			paletteModel = getPaletteFactory().createPalette();
-		}
-		return paletteModel;
-	}
-
-	/**
-	 * @return
-	 */
-	@Override
-	protected IPaletteFactory getPaletteFactory()
-	{
-		if (paletteFactory == null)
-		{
-			paletteFactory = createPaletteFactory();
-		}
-		return paletteFactory;
 	}
 
 	/**

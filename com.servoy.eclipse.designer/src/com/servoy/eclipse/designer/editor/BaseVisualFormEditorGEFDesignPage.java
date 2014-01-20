@@ -21,12 +21,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.RootEditPart;
 import org.eclipse.gef.dnd.TemplateTransferDragSourceListener;
 import org.eclipse.gef.internal.ui.palette.PaletteSelectionTool;
 import org.eclipse.gef.palette.PaletteRoot;
+import org.eclipse.gef.ui.palette.FlyoutPaletteComposite;
+import org.eclipse.gef.ui.palette.FlyoutPaletteComposite.FlyoutPreferences;
 import org.eclipse.gef.ui.palette.PaletteCustomizer;
 import org.eclipse.gef.ui.palette.PaletteViewer;
 import org.eclipse.gef.ui.palette.PaletteViewerProvider;
@@ -40,6 +43,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.designer.editor.palette.BaseVisualFormEditorPaletteCustomizer;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.persistence.Form;
@@ -62,6 +66,26 @@ public abstract class BaseVisualFormEditorGEFDesignPage extends BaseVisualFormEd
 	public BaseVisualFormEditorGEFDesignPage(BaseVisualFormEditor editorPart)
 	{
 		super(editorPart);
+	}
+
+	/*
+	 * Set some defaults for palette preferences.
+	 */
+	@Override
+	protected FlyoutPreferences getPalettePreferences()
+	{
+		FlyoutPreferences palettePreferences = super.getPalettePreferences();
+		if ((getEditorInput() instanceof PersistEditorInput && ((PersistEditorInput)getEditorInput()).isNew()) || palettePreferences.getPaletteState() == 0)
+		{
+			// open palette first time it is shown or when it is a new form
+			palettePreferences.setPaletteState(FlyoutPaletteComposite.STATE_PINNED_OPEN);
+		}
+		if (palettePreferences.getDockLocation() == 0)
+		{
+			// default dock location to the left
+			palettePreferences.setDockLocation(PositionConstants.WEST);
+		}
+		return palettePreferences;
 	}
 
 	@Override
