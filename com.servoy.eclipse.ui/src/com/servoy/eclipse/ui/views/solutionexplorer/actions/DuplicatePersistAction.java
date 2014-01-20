@@ -17,13 +17,18 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
+import java.util.Arrays;
+
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils.ExtendedInputDialog;
 import com.servoy.eclipse.core.util.UIUtils.InputAndListDialog;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
@@ -41,7 +46,7 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
  * 
  * @author acostescu
  */
-public class DuplicatePersistAction extends AbstractMovePersistAction
+public class DuplicatePersistAction extends AbstractPersistSelectionAction
 {
 
 	/**
@@ -63,8 +68,7 @@ public class DuplicatePersistAction extends AbstractMovePersistAction
 		setToolTipText("Duplicates the " + persistString + " to a different solution/module");
 	}
 
-	@Override
-	protected ExtendedInputDialog<String> createDialog(final IPersist persist, final IValidateName nameValidator, String[] solutionNames,
+	private ExtendedInputDialog<String> createDialog(final IPersist persist, final IValidateName nameValidator, String[] solutionNames,
 		String initialSolutionName)
 	{
 		String newName = null;
@@ -111,8 +115,37 @@ public class DuplicatePersistAction extends AbstractMovePersistAction
 		return dialog;
 	}
 
+	private Location askForNewLocation(final IPersist persist, final IValidateName nameValidator)
+	{
+		// populate combo with available solutions
+		final ServoyProject[] activeModules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
+		if (activeModules.length == 0)
+		{
+			ServoyLog.logError("No active modules on duplicate/move persist?!", null); //$NON-NLS-1$
+		}
+		String[] solutionNames = new String[activeModules.length];
+		String initialSolutionName = persist.getRootObject().getName();
+
+		for (int i = activeModules.length - 1; i >= 0; i--)
+		{
+			solutionNames[i] = activeModules[i].getProject().getName();
+
+		}
+		Arrays.sort(solutionNames);
+
+		ExtendedInputDialog<String> dialog = createDialog(persist, nameValidator, solutionNames, initialSolutionName);
+		dialog.open();
+		if (dialog.getExtendedValue() == null)
+		{
+			return null;
+		}
+		String projectName = dialog.getExtendedValue();
+		ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(projectName);
+		return (dialog.getReturnCode() == Window.CANCEL) ? null : new Location(dialog.getValue(), servoyProject);
+	}
+
 	/**
-	 * @see com.servoy.eclipse.ui.views.solutionexplorer.actions.AbstractMovePersistAction#doWork(com.servoy.j2db.persistence.Form, java.lang.Object[],
+	 * @see com.servoy.eclipse.ui.views.solutionexplorer.actions.AbstractPersistSelectionAction#doWork(com.servoy.j2db.persistence.Form, java.lang.Object[],
 	 *      com.servoy.j2db.persistence.IValidateName)
 	 */
 	@Override
@@ -120,12 +153,13 @@ public class DuplicatePersistAction extends AbstractMovePersistAction
 	{
 		for (final IPersist persist : persists)
 		{
-			Location location = askForNewFormLocation(persist, nameValidator);
+			Location location = askForNewLocation(persist, nameValidator);
 			if (location != null)
 			{
 				try
 				{
-					IPersist duplicate = intelligentClonePersist(persist, location.getPersistName(), location.getServoyProject(), nameValidator, true);
+					IPersist duplicate = PersistCloner.intelligentClonePersist(persist, location.getPersistName(), location.getServoyProject(), nameValidator,
+						true);
 					EditorUtil.openPersistEditor(duplicate);
 				}
 				catch (RepositoryException e)

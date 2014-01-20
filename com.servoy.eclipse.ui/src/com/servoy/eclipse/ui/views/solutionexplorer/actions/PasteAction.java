@@ -215,12 +215,11 @@ public class PasteAction extends Action implements ISelectionChangedListener
 							Form f = (Form)sourcePersist;
 							ServoyProject destinationProject = ((ServoyProject)pasteNode.getAncestorOfType(ServoyProject.class).getRealObject());
 							// we have the source form and the destination solution; perform the paste
-							DuplicatePersistAction dfa = new DuplicatePersistAction(display.getActiveShell());
 							IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 							String newName = getCopyName(f.getName(), nameValidator);
 							try
 							{
-								dfa.intelligentClonePersist(f, newName, destinationProject, nameValidator, true);
+								PersistCloner.intelligentClonePersist(f, newName, destinationProject, nameValidator, true);
 							}
 							catch (RepositoryException e)
 							{

@@ -51,7 +51,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.eclipse.ui.editors.table.actions.SearchForDataProvidersReferencesAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DuplicatePersistAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.MovePersistAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.MoveTableNodeChildAction;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Column;
@@ -129,7 +129,7 @@ public class AggregationsComposite extends Composite
 				TreeItem[] selection = treeViewer.getTree().getSelection();
 				if (selection != null && selection.length > 0 && selection[0].getData() instanceof AggregateVariable)
 				{
-					MovePersistAction action = new MovePersistAction(getShell());
+					MoveTableNodeChildAction action = new MoveTableNodeChildAction(getShell());
 					action.setPersist((AggregateVariable)selection[0].getData());
 					action.run();
 					treeViewer.refresh();
