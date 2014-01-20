@@ -114,9 +114,13 @@ $.servoy = {
       	  {
       	  	$.servoy._refreshForm()
       	  }
+      	  else if (func == 'refreshNode')
+      	  {
+      	  	$.servoy._refreshNode(split[1])
+      	  }
       	  else if (func == 'selectNode')
       	  {
-      	  	$.servoy._selectNode(split[1])
+      		  $.servoy._selectNode(split[1])
       	  }
       },
 		
@@ -133,20 +137,65 @@ $.servoy = {
 		console.log('reload design end')
 	},
 
-	  _selectNode : function(uuid ) // called from java
+	  _findNode : function(uuid) 
 	  {
-	  console.log('selectNode '+uuid)
-	  
 	 	var nodes = ADM.getDesignRoot().findNodesByProperty({type: 'string', name: 'id', value: uuid});
-	 	console.log('selectNode nodes='+nodes)	 	 
 	 	if (nodes.length == 1)
 	 	{
-			//node.suppressEvents(true)
-		 	ADM.setSelected(nodes[0].node)
-			//node.suppressEvents(false)
+	 		return nodes[0].node
 	 	}
 	 	
-	 	console.log('refreshPersist selectNode done')
+	 	return null;
+	},
+
+	_refreshNode : function(uuid ) // called from java
+	{
+		console.log('refreshNode '+uuid)
+		
+		var node = $.servoy._findNode(uuid)
+		if (!node)
+		{
+			console.log('refreshNode: node not found: '+uuid)
+			return false;
+		}
+		var childJson = getChildJson(uuid)
+		if (!childJson) 
+		{
+			console.log('refreshNode: json not found: '+uuid)
+			return false;
+		}
+		
+		var parsedObject
+		try {
+			parsedObject = $.parseJSON(childJson);
+		} catch(e) {
+			console.log('refreshNode: Invalid child design: '+childJson)
+			return false;
+		}
+		if (parsedObject) {
+			$.rib.updateSingleNode(node, parsedObject);
+		}
+		
+		console.log('refreshNode done')
+		return true
+	},
+	
+	_selectNode : function(uuid ) // called from java
+	{
+		console.log('selectNode '+uuid)
+		
+		var node = $.servoy._findNode(uuid)
+		if (node)
+		{
+			//node.suppressEvents(true)
+			ADM.setSelected(node)
+			//node.suppressEvents(false)
+		}
+		else {
+			console.log('selectNode: node not found: '+uuid)
+		}
+		
+		console.log('selectNode done')
 	},
 
    handleModelUpdated: function(event, widget)
