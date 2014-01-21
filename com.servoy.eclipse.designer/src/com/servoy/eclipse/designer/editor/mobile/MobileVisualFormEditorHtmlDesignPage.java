@@ -227,15 +227,15 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 			@Override
 			public Object function(Object[] arguments)
 			{
-				try
-				{
-					return lastFormDesign = getFormDesign();
-				}
-				catch (Exception e)
-				{
-					ServoyLog.logError(e);
-				}
-				return null;
+				return callGetFormDesign();
+			}
+		};
+		new BrowserFunction(browser, "getChildJson")
+		{
+			@Override
+			public Object function(Object[] arguments)
+			{
+				return callGetChildJson(asString(arguments[0]));
 			}
 		};
 		new BrowserFunction(browser, "callbackSelectionChanged")
@@ -820,11 +820,26 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 	{
 		try
 		{
-			if (lastFormDesign == null || !lastFormDesign.equals(getFormDesign()))
+			String newFormDesign = getFormDesign();
+			if (lastFormDesign == null || !lastFormDesign.equals(newFormDesign))
 			{
+				if (lastFormDesign != null && persists.size() == 1)
+				{
+					// single element changed, just refresh that one
+					// note that when an element is deleted 
+					ServoyJSONObject json = getChildJson(getPersistModel(persists.get(0)));
+					if (json != null) // null for forms etc
+					{
+						sendMessage("refreshNode:" + getModelId(persists.get(0)));
+						lastFormDesign = newFormDesign;
+						return;
+					}
+				}
+
 				// Form design json is regenerated and incrementally applied in js code
 				refreshAllParts();
 			}
+			// else nothing changed
 		}
 		catch (Exception e)
 		{
@@ -915,6 +930,20 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 		}
 
 		return null;
+	}
+
+	private String callGetFormDesign()
+	{
+		lastFormDesign = null;
+		try
+		{
+			lastFormDesign = getFormDesign();
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+		}
+		return lastFormDesign;
 	}
 
 	private String getFormDesign() throws JSONException, RepositoryException
@@ -1115,6 +1144,23 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 			{
 				return part;
 			}
+		}
+		return null;
+	}
+
+	private String callGetChildJson(String uuid)
+	{
+		try
+		{
+			ServoyJSONObject json = getChildJson(getPersistModel(ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(getUUID(uuid))));
+			if (json != null)
+			{
+				return json.toString();
+			}
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
 		}
 		return null;
 	}
@@ -1474,21 +1520,17 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 						{
 							// message tagged with id, a response is requested
 							String[] split = message.split(":");
-							String req = message.substring(split[0].length());
+							String req = message.substring(split[0].length() + 1);
 							String response = "error";
 							try
 							{
 								if (req.startsWith("getFormDesign:"))
 								{
-									lastFormDesign = null;
-									try
-									{
-										response = lastFormDesign = getFormDesign();
-									}
-									catch (Exception e)
-									{
-										ServoyLog.logError(e);
-									}
+									response = callGetFormDesign();
+								}
+								else if (req.startsWith("getChildJson:"))
+								{
+									response = callGetChildJson(split[2]);
 								}
 							}
 							finally
