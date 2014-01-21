@@ -33,7 +33,21 @@ html {
 .servoydataprovider {
 	z-index:1999;
 	font-size:small;
-	color:#858484;
+	color:#E6EC74; /* default */
+}
+.servoydataprovider_a {
+	color:#82A5EC;
+}
+.servoydataprovider_b { /* default */
+}
+.servoydataprovider_c {
+	color:#2E2B5B;
+}
+.servoydataprovider_d {
+	color:#2E2B5B;
+}
+.servoydataprovider_e {
+	color:#403C62;
 }
 
 .ui-popup-hidden {
