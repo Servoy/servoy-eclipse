@@ -1840,9 +1840,8 @@ for( var i = 1 ; i <= dataset.getMaxRowIndex() ; i++ )
           <return type="com.servoy.j2db.scripting.JSWindow" typecode="com.servoy.j2db.scripting.JSWindow"><![CDATA[the main application JSWindow.]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Get the main application window. This is the window that is created first for this client. 
-In a smart client this is always just the first started window where the solution is loaded in.
-In a webclient when users (so not the developer through a createWindow() call) create there own tabs after
 
+In a smart client this is always just the first started window where the solution is loaded in.
 In a webclient the user may open the same solution in a new tab in the same browser. In that case the main solution
 window will always be the first opened tab, even if that one was already closed.
 application.getActiveWindow() will aways return the currently active/focused window or dialog.
@@ -7126,6 +7125,7 @@ for( var i = 0 ; i < array.length ; i++ )
             <sample clientSupport="wc,sc"><![CDATA[// type the foundset returned from the call with JSDoc, fill in the right server/tablename
 /** @type {JSFoundset<db:/servername/tablename>} */
 var fs = databaseManager.getFoundSet(controller.getDataSource())
+// same as datasources.example_data.orders.getFoundSet() or datasources.mem['myds'].getFoundSet()
 var ridx = fs.newRecord()
 var record = fs.getRecord(ridx)
 record.emp_name = 'John'
@@ -7137,22 +7137,23 @@ databaseManager.saveData()]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc,wc,sc" deprecated="true" name="getFoundSet">
+        <function clientSupport="mc,wc,sc" name="getFoundSet">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.base.scripting.api.IJSFoundSet"><![CDATA[A new JSFoundset for that datasource.]]></return>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[Returns a foundset object for a specified datasource or server and tablename.]]></description>
+            <description clientSupport="mc,wc,sc"><![CDATA[Returns a foundset object for a specified datasource or server and tablename.
+Alternative method: datasources.db.server_name.table_name.getFoundSet() or datasources.mem['ds'].getFoundSet()]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="mc,wc,sc"><![CDATA[Returns a foundset object for a specified datasource or server and tablename.]]></summary>
           </summaries>
-          <deprecated><![CDATA[Use datasources.db.server_name.table_name.getFoundSet() or datasources.mem['ds'].getFoundSet()]]></deprecated>
           <samples>
             <sample clientSupport="mc,wc,sc"><![CDATA[// type the foundset returned from the call with JSDoc, fill in the right server/tablename
 /** @type {JSFoundset<db:/servername/tablename>} */
 var fs = databaseManager.getFoundSet(controller.getDataSource())
+// same as datasources.example_data.orders.getFoundSet() or datasources.mem['myds'].getFoundSet()
 var ridx = fs.newRecord()
 var record = fs.getRecord(ridx)
 record.emp_name = 'John'
@@ -7180,6 +7181,7 @@ databaseManager.saveData()]]></sample>
             <sample clientSupport="wc,sc"><![CDATA[// type the foundset returned from the call with JSDoc, fill in the right server/tablename
 /** @type {JSFoundset<db:/servername/tablename>} */
 var fs = databaseManager.getFoundSet(controller.getDataSource())
+// same as datasources.example_data.orders.getFoundSet() or datasources.mem['myds'].getFoundSet()
 var ridx = fs.newRecord()
 var record = fs.getRecord(ridx)
 record.emp_name = 'John'
@@ -32467,6 +32469,7 @@ var height = "Height: " + someWindow.getHeight() + "\n"
 var width = "Width: " + someWindow.getWidth() + "\n"
 var undecorated = "Undecorated: " + someWindow.isUndecorated() + "\n"
 var opacity = "Opacity: " + someWindow.opacity + "\n"
+var transparent = "Transparent: " + someWindow.transparent + "\n"
 var locationX = "Location-X-coordinate: " + someWindow.getX() + "\n"
 var locationY = "Location-Y-coordinate: " + someWindow.getY() + "\n"
 var info = name + parent + type + height + width + locationX + locationY + undecorated + "\n"
@@ -32526,6 +32529,38 @@ win1.title = "Window 1";
 controller.show(win1);]]></sample>
           </samples>
         </property>
+        <property clientSupport="wc,sc" name="transparent">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[transparency state of the window]]></return>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Gets/Sets the transparency property.
+NOTE: For smart clients, the window must be undecorated or the
+servoy.smartclient.allowLAFWindowDecoration property set to true]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Gets/Sets the transparency property.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[var someWindow = application.createWindow("someWindowName", JSWindow.WINDOW, null);
+someWindow.setInitialBounds(200, 200, 450, 350);
+controller.show(someWindow);
+
+var name = "Name: " + someWindow.getName() + "\n"
+var parent = "Parent: " + (someWindow.getParent() == null ? "none" : someWindow.getParent()) + "\n"
+var type = "TypeNumber: " + someWindow.getType() + "\n"
+var height = "Height: " + someWindow.getHeight() + "\n"
+var width = "Width: " + someWindow.getWidth() + "\n"
+var undecorated = "Undecorated: " + someWindow.isUndecorated() + "\n"
+var opacity = "Opacity: " + someWindow.opacity + "\n"
+var transparent = "Transparent: " + someWindow.transparent + "\n"
+var locationX = "Location-X-coordinate: " + someWindow.getX() + "\n"
+var locationY = "Location-Y-coordinate: " + someWindow.getY() + "\n"
+var info = name + parent + type + height + width + locationX + locationY + undecorated + "\n"
+var closeMsg = "Press 'Ok' to close this dialog."
+
+var infoDialog = plugins.dialogs.showInfoDialog("Window Info", info + closeMsg, "Ok");
+if (infoDialog == "Ok") someWindow.close()]]></sample>
+          </samples>
+        </property>
         <property clientSupport="wc,sc" name="undecorated">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[if this window will be undecorated]]></return>
           <descriptions>
@@ -32547,6 +32582,7 @@ var height = "Height: " + someWindow.getHeight() + "\n"
 var width = "Width: " + someWindow.getWidth() + "\n"
 var undecorated = "Undecorated: " + someWindow.isUndecorated() + "\n"
 var opacity = "Opacity: " + someWindow.opacity + "\n"
+var transparent = "Transparent: " + someWindow.transparent + "\n"
 var locationX = "Location-X-coordinate: " + someWindow.getX() + "\n"
 var locationY = "Location-Y-coordinate: " + someWindow.getY() + "\n"
 var info = name + parent + type + height + width + locationX + locationY + undecorated + "\n"
@@ -32622,6 +32658,7 @@ var height = "Height: " + someWindow.getHeight() + "\n"
 var width = "Width: " + someWindow.getWidth() + "\n"
 var undecorated = "Undecorated: " + someWindow.isUndecorated() + "\n"
 var opacity = "Opacity: " + someWindow.opacity + "\n"
+var transparent = "Transparent: " + someWindow.transparent + "\n"
 var locationX = "Location-X-coordinate: " + someWindow.getX() + "\n"
 var locationY = "Location-Y-coordinate: " + someWindow.getY() + "\n"
 var info = name + parent + type + height + width + locationX + locationY + undecorated + "\n"
@@ -32652,6 +32689,7 @@ var height = "Height: " + someWindow.getHeight() + "\n"
 var width = "Width: " + someWindow.getWidth() + "\n"
 var undecorated = "Undecorated: " + someWindow.isUndecorated() + "\n"
 var opacity = "Opacity: " + someWindow.opacity + "\n"
+var transparent = "Transparent: " + someWindow.transparent + "\n"
 var locationX = "Location-X-coordinate: " + someWindow.getX() + "\n"
 var locationY = "Location-Y-coordinate: " + someWindow.getY() + "\n"
 var info = name + parent + type + height + width + locationX + locationY + undecorated + "\n"
@@ -32682,6 +32720,7 @@ var height = "Height: " + someWindow.getHeight() + "\n"
 var width = "Width: " + someWindow.getWidth() + "\n"
 var undecorated = "Undecorated: " + someWindow.isUndecorated() + "\n"
 var opacity = "Opacity: " + someWindow.opacity + "\n"
+var transparent = "Transparent: " + someWindow.transparent + "\n"
 var locationX = "Location-X-coordinate: " + someWindow.getX() + "\n"
 var locationY = "Location-Y-coordinate: " + someWindow.getY() + "\n"
 var info = name + parent + type + height + width + locationX + locationY + undecorated + "\n"
@@ -32712,6 +32751,7 @@ var height = "Height: " + someWindow.getHeight() + "\n"
 var width = "Width: " + someWindow.getWidth() + "\n"
 var undecorated = "Undecorated: " + someWindow.isUndecorated() + "\n"
 var opacity = "Opacity: " + someWindow.opacity + "\n"
+var transparent = "Transparent: " + someWindow.transparent + "\n"
 var locationX = "Location-X-coordinate: " + someWindow.getX() + "\n"
 var locationY = "Location-Y-coordinate: " + someWindow.getY() + "\n"
 var info = name + parent + type + height + width + locationX + locationY + undecorated + "\n"
@@ -32742,6 +32782,7 @@ var height = "Height: " + someWindow.getHeight() + "\n"
 var width = "Width: " + someWindow.getWidth() + "\n"
 var undecorated = "Undecorated: " + someWindow.isUndecorated() + "\n"
 var opacity = "Opacity: " + someWindow.opacity + "\n"
+var transparent = "Transparent: " + someWindow.transparent + "\n"
 var locationX = "Location-X-coordinate: " + someWindow.getX() + "\n"
 var locationY = "Location-Y-coordinate: " + someWindow.getY() + "\n"
 var info = name + parent + type + height + width + locationX + locationY + undecorated + "\n"
@@ -32772,6 +32813,7 @@ var height = "Height: " + someWindow.getHeight() + "\n"
 var width = "Width: " + someWindow.getWidth() + "\n"
 var undecorated = "Undecorated: " + someWindow.isUndecorated() + "\n"
 var opacity = "Opacity: " + someWindow.opacity + "\n"
+var transparent = "Transparent: " + someWindow.transparent + "\n"
 var locationX = "Location-X-coordinate: " + someWindow.getX() + "\n"
 var locationY = "Location-Y-coordinate: " + someWindow.getY() + "\n"
 var info = name + parent + type + height + width + locationX + locationY + undecorated + "\n"
@@ -32802,6 +32844,7 @@ var height = "Height: " + someWindow.getHeight() + "\n"
 var width = "Width: " + someWindow.getWidth() + "\n"
 var undecorated = "Undecorated: " + someWindow.isUndecorated() + "\n"
 var opacity = "Opacity: " + someWindow.opacity + "\n"
+var transparent = "Transparent: " + someWindow.transparent + "\n"
 var locationX = "Location-X-coordinate: " + someWindow.getX() + "\n"
 var locationY = "Location-Y-coordinate: " + someWindow.getY() + "\n"
 var info = name + parent + type + height + width + locationX + locationY + undecorated + "\n"
@@ -60897,6 +60940,27 @@ forms.someForm.elements.typeAheadElement.putClientProperty(APP_UI_PROPERTY.DATE_
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[application.showFormInDialog('customers',APP_UI_PROPERTY.FULL_SCREEN,APP_UI_PROPERTY.FULL_SCREEN,
      APP_UI_PROPERTY.FULL_SCREEN,APP_UI_PROPERTY.FULL_SCREEN,'My Title',true,true,'customers_dialog',true)]]></sample>
+          </samples>
+        </constant>
+        <constant clientSupport="wc,sc" name="HTML_EDITOR_CONFIGURATION">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Property than can be set on editable html area using element.putClientProperty()
+
+The value must be a valid json string according to TinyMCE editor configuration (http://www.tinymce.com/wiki.php/configuration). 
+It will be used to override/set configuration properties in order to customize the editor.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Property than can be set on editable html area using element.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[// adding a new TinyMCE plugin (same for skin or theme)
+// this code assumes plugin.min.js was copied in web server at specified path
+// NOTE: we use external plugin, not plugin, in order for file to be accessible from web server 
+element.putClientProperty(APP_UI_PROPERTY.HTML_EDITOR_CONFIGURATION, '{external_plugins: { "link": "/servoy-webclient/tinymce/plugins/link/plugin.min.js"}}')
+
+// change the editor configuration (add menubar, status bar and change toolbar)
+element.putClientProperty(APP_UI_PROPERTY.HTML_EDITOR_CONFIGURATION, '{menubar: "tools table format view insert edit", statusbar : true, toolbar: "undo redo | styleselect | bold italic"}')]]></sample>
           </samples>
         </constant>
         <constant clientSupport="wc,sc" name="LEAVE_FIELDS_READONLY_IN_FIND_MODE">
