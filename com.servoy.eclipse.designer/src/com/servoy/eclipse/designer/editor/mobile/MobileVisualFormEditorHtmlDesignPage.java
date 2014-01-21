@@ -823,7 +823,9 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 			String newFormDesign = getFormDesign();
 			if (lastFormDesign == null || !lastFormDesign.equals(newFormDesign))
 			{
-				if (lastFormDesign != null && persists.size() == 1)
+				if (lastFormDesign != null && persists.size() == 1
+				// check if element existed before
+					&& lastFormDesign.indexOf("\"" + persists.get(0).getUUID() + "\"") >= 0)
 				{
 					// single element changed, just refresh that one
 					// note that when an element is deleted 
