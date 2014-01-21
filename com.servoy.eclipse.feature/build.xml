@@ -41,6 +41,16 @@
 			<property name="ws" value="gtk"/>
 			<property name="os" value="linux"/>
 		</ant>
+		<ant antfile="build.xml" dir="../j2db_tunnel" target="${target}">
+			<property name="arch" value="x86"/>
+			<property name="ws" value="gtk"/>
+			<property name="os" value="linux"/>
+		</ant>
+		<ant antfile="build.xml" dir="../j2db_server" target="${target}">
+			<property name="arch" value="x86"/>
+			<property name="ws" value="gtk"/>
+			<property name="os" value="linux"/>
+		</ant>
 		<ant antfile="build.xml" dir="../servoy_debug" target="${target}">
 			<property name="arch" value="x86"/>
 			<property name="ws" value="gtk"/>
@@ -52,16 +62,6 @@
 			<property name="os" value="linux"/>
 		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.model.exporter.mobile" target="${target}">
-			<property name="arch" value="x86"/>
-			<property name="ws" value="gtk"/>
-			<property name="os" value="linux"/>
-		</ant>
-		<ant antfile="build.xml" dir="../j2db_tunnel" target="${target}">
-			<property name="arch" value="x86"/>
-			<property name="ws" value="gtk"/>
-			<property name="os" value="linux"/>
-		</ant>
-		<ant antfile="build.xml" dir="../j2db_server" target="${target}">
 			<property name="arch" value="x86"/>
 			<property name="ws" value="gtk"/>
 			<property name="os" value="linux"/>
@@ -91,6 +91,21 @@
 			<property name="ws" value="gtk"/>
 			<property name="os" value="linux"/>
 		</ant>
+		<ant antfile="build.xml" dir="../com.servoy.eclipse.team" target="${target}">
+			<property name="arch" value="x86"/>
+			<property name="ws" value="gtk"/>
+			<property name="os" value="linux"/>
+		</ant>
+		<ant antfile="build.xml" dir="../com.servoy.eclipse.exporter.war" target="${target}">
+			<property name="arch" value="x86"/>
+			<property name="ws" value="gtk"/>
+			<property name="os" value="linux"/>
+		</ant>
+		<ant antfile="build.xml" dir="../j2db_runtime" target="${target}">
+			<property name="arch" value="x86"/>
+			<property name="ws" value="gtk"/>
+			<property name="os" value="linux"/>
+		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.debug" target="${target}">
 			<property name="arch" value="x86"/>
 			<property name="ws" value="gtk"/>
@@ -106,22 +121,7 @@
 			<property name="ws" value="gtk"/>
 			<property name="os" value="linux"/>
 		</ant>
-		<ant antfile="build.xml" dir="../com.servoy.eclipse.exporter.war" target="${target}">
-			<property name="arch" value="x86"/>
-			<property name="ws" value="gtk"/>
-			<property name="os" value="linux"/>
-		</ant>
-		<ant antfile="build.xml" dir="../j2db_runtime" target="${target}">
-			<property name="arch" value="x86"/>
-			<property name="ws" value="gtk"/>
-			<property name="os" value="linux"/>
-		</ant>
 		<ant antfile="build.xml" dir="../com.servoy.eclipse.exporter.mobile" target="${target}">
-			<property name="arch" value="x86"/>
-			<property name="ws" value="gtk"/>
-			<property name="os" value="linux"/>
-		</ant>
-		<ant antfile="build.xml" dir="../com.servoy.eclipse.team" target="${target}">
 			<property name="arch" value="x86"/>
 			<property name="ws" value="gtk"/>
 			<property name="os" value="linux"/>
@@ -276,7 +276,7 @@
 	</target>
 
 	<target name="refresh" depends="init" if="eclipse.running" description="Refresh this folder.">
-		<eclipse.convertPath fileSystemPath="/crypt/workspace/com.servoy.eclipse.feature/" property="resourcePath"/>
+		<eclipse.convertPath fileSystemPath="/crypt/workspace_v74/com.servoy.eclipse.feature/" property="resourcePath"/>
 		<eclipse.refreshLocal resource="${resourcePath}" depth="infinite"/>
 		<antcall target="all.children">
 			<param name="target" value="refresh"/>
