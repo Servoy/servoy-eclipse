@@ -65,7 +65,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		new ComboboxPropertyController<Integer>(IMobileProperties.HEADER_SIZE.propertyName, IMobileProperties.HEADER_SIZE.propertyName,
 			new ComboboxPropertyModel<Integer>(
 				new Integer[] { Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3), Integer.valueOf(4), Integer.valueOf(5), Integer.valueOf(6) },
-				new String[] { "h1", "h2", "h3", "h4", "h5", "h6" }), Messages.LabelDefault), IMobileProperties.HEADER_SIZE.propertyName)
+				new String[] { "h1", "h2", "h3", "h4", "h5", "h6" }).addDefaultValue(), Messages.LabelUnresolved), IMobileProperties.HEADER_SIZE.propertyName)
 	{
 		public void setProperty(MobilePersistPropertySource propertySource, Integer value)
 		{
