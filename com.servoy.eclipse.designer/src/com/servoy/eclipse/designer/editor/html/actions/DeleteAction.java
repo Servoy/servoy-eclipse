@@ -34,7 +34,6 @@ import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.GraphicalComponent;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Part;
@@ -93,7 +92,7 @@ public class DeleteAction extends org.eclipse.gef.ui.actions.DeleteAction
 				else if (modelObject instanceof GraphicalComponent &&
 					((GraphicalComponent)modelObject).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName) != null)
 				{
-					// deleting header
+					// deleting header, delete part
 					part = MobileVisualFormEditorHtmlDesignPage.getHeaderPart((GraphicalComponent)modelObject);
 				}
 
@@ -101,27 +100,26 @@ public class DeleteAction extends org.eclipse.gef.ui.actions.DeleteAction
 				{
 					if (PersistUtils.isHeaderPart(part.getPartType()))
 					{
-						List<IFormElement> headerModelChildren = MobileHeaderGraphicalEditPart.getHeaderModelChildren(Activator.getDefault().getDesignClient(),
-							(Form)(part).getAncestor(IRepository.FORMS));
-						if (headerModelChildren.size() <= 1 &&
-							(headerModelChildren.size() == 0 || ((GraphicalComponent)headerModelChildren.get(0)).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName) != null))
+						for (IPersist item : MobileHeaderGraphicalEditPart.getHeaderModelChildren(Activator.getDefault().getDesignClient(),
+							(Form)(part).getAncestor(IRepository.FORMS)))
 						{
-							// also delete headerTitle
-							deleteCommand.add(new FormElementDeleteCommand(part));
-							for (IPersist item : headerModelChildren)
+							if (item != modelObject)
 							{
 								deleteCommand.add(new FormElementDeleteCommand(item));
 							}
 						}
-						// else cannot delete non-empty header
-						continue;
+						if (part != modelObject)
+						{
+							deleteCommand.add(new FormElementDeleteCommand(part));
+						}
 					}
-					else if (PersistUtils.isFooterPart(part.getPartType()) &&
-						MobileFooterGraphicalEditPart.getFooterModelChildren(Activator.getDefault().getDesignClient(),
-							(Form)(part).getAncestor(IRepository.FORMS)).size() > 0)
+					else if (PersistUtils.isFooterPart(part.getPartType()))
 					{
-						// cannot delete non-empty footer
-						continue;
+						for (IPersist item : MobileFooterGraphicalEditPart.getFooterModelChildren(Activator.getDefault().getDesignClient(),
+							(Form)(part).getAncestor(IRepository.FORMS)))
+						{
+							deleteCommand.add(new FormElementDeleteCommand(item));
+						}
 					}
 				}
 
