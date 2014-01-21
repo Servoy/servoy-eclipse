@@ -314,7 +314,6 @@ public class Exporter
 		new File(targetLibDir, "servlet-api.jar").delete();
 		// delete the tomcat boostrapper, also not needed in a war file
 		new File(targetLibDir, "server-bootstrap.jar").delete();
-		new File(targetLibDir, "tomcat-juli.jar").delete();
 
 
 		monitor.worked(1);
