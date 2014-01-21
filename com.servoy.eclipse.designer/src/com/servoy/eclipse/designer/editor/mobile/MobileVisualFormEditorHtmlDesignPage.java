@@ -825,7 +825,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 			{
 				if (lastFormDesign != null && persists.size() == 1
 				// check if element existed before
-					&& lastFormDesign.indexOf("\"" + persists.get(0).getUUID() + "\"") >= 0)
+					&& lastFormDesign.indexOf("\"" + getModelId(persists.get(0)) + "\"") >= 0)
 				{
 					// single element changed, just refresh that one
 					// note that when an element is deleted 
@@ -1220,7 +1220,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 				if (PersistUtils.isHeaderPart(partType))
 				{
 					properties.put(ID_KEY, HEADER_PREFIX + headerText.getUUID().toString()); // use headerText element for selection
-					properties.put("text", headerText.getDataProviderID() == null ? headerText.getText() : EMPTY_VALUE);
+					properties.put("text", headerText.getDataProviderID() == null && headerText.getText() != null ? headerText.getText() : EMPTY_VALUE);
 					properties.put("servoydataprovider", headerText.getDataProviderID() == null ? EMPTY_VALUE : headerText.getDataProviderID());
 				}
 				else
@@ -1239,7 +1239,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 				if (ComponentFactory.isButton(gc))
 				{
 					elementType = "Button";
-					properties.put("text", gc.getDataProviderID() == null ? gc.getText() : EMPTY_VALUE);
+					properties.put("text", gc.getDataProviderID() == null && gc.getText() != null ? gc.getText() : EMPTY_VALUE);
 					properties.put("icon", gc.getCustomMobileProperty(IMobileProperties.DATA_ICON.propertyName));
 
 					if (gc.getCustomMobileProperty(IMobileProperties.HEADER_ITEM.propertyName) != null)
@@ -1277,7 +1277,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 					if (label.getDataProviderID() == null)
 					{
 						properties.put("servoytitledataprovider", EMPTY_VALUE);
-						properties.put("label", label.getText());
+						properties.put("label", label.getText() != null ? label.getText() : EMPTY_VALUE);
 					}
 					else
 					{
@@ -1398,17 +1398,17 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 				elementType = "InsetList";
 				persist = model.component; // Portal
 
-				properties.put("headertext", model.header.getDataProviderID() == null ? model.header.getText() : EMPTY_VALUE);
+				properties.put("headertext", model.header.getDataProviderID() == null && model.header.getText() != null ? model.header.getText() : EMPTY_VALUE);
 				properties.put("servoytitledataprovider", model.header.getDataProviderID() == null ? EMPTY_VALUE : model.header.getDataProviderID());
 				properties.put("headertheme", model.header.getStyleClass());
 				properties.put("buttontheme", model.button.getStyleClass());
 				properties.put("servoydataprovider", model.button.getDataProviderID() == null ? EMPTY_VALUE : model.button.getDataProviderID());
 			}
 
-			properties.put("text", model.button.getDataProviderID() == null ? model.button.getText() : EMPTY_VALUE);
+			properties.put("text", model.button.getDataProviderID() == null && model.button.getText() != null ? model.button.getText() : EMPTY_VALUE);
 			properties.put("icon", model.button.getCustomMobileProperty(IMobileProperties.DATA_ICON.propertyName));
 			properties.put("countbubble", model.countBubble.getDataProviderID() == null ? EMPTY_VALUE : "10");
-			properties.put("subtext", model.subtext.getDataProviderID() == null ? model.subtext.getText() : EMPTY_VALUE);
+			properties.put("subtext", model.subtext.getDataProviderID() == null && model.subtext.getText() != null ? model.subtext.getText() : EMPTY_VALUE);
 			properties.put("servoysubtextdataprovider", model.subtext.getDataProviderID() == null ? EMPTY_VALUE : model.subtext.getDataProviderID());
 		}
 
@@ -1436,7 +1436,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 
 	private static void setLabelProperties(GraphicalComponent labelComp, ServoyJSONObject properties) throws JSONException
 	{
-		properties.put("text", labelComp.getDataProviderID() == null ? labelComp.getText() : EMPTY_VALUE);
+		properties.put("text", labelComp.getDataProviderID() == null && labelComp.getText() != null ? labelComp.getText() : EMPTY_VALUE);
 		Object headerSizeProp = labelComp.getCustomMobileProperty(IMobileProperties.HEADER_SIZE.propertyName);
 		if (headerSizeProp != null)
 		{
