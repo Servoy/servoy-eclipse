@@ -69,6 +69,7 @@ public class WarExportPage extends WizardPage
 	public static final String SECURE_STORAGE_ACCOUNTS_NODE = "PhoneGap Account Storage";
 	public static final String NO_PHONEGAP_ACCOUNT = "-none-";
 	public static final String WAR_EXPORT_TYPE_KEY = "isWarExport";
+	public static final String IN_SECURE_STORE = "inSecureStore";
 
 	private Text outputText;
 	private Button outputBrowseButton;
@@ -179,9 +180,7 @@ public class WarExportPage extends WizardPage
 		phoneGapPassword = new Text(container, SWT.BORDER | SWT.PASSWORD);
 
 		savePasswordCheck = new Button(container, SWT.CHECK);
-
-		Label lblSavePassword = new Label(container, SWT.NONE);
-		lblSavePassword.setText("Store in Secure Store");
+		savePasswordCheck.setText("Store in Secure Storage");
 
 		final GroupLayout groupLayout = new GroupLayout(container);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
@@ -198,8 +197,7 @@ public class WarExportPage extends WizardPage
 						LayoutStyle.RELATED).add(
 						groupLayout.createParallelGroup(GroupLayout.LEADING).add(phoneGapUsername, GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE).add(
 							phoneGapPassword, GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE))).add(
-					groupLayout.createSequentialGroup().add(20).add(savePasswordCheck).addPreferredGap(LayoutStyle.RELATED).add(lblSavePassword,
-						GroupLayout.PREFERRED_SIZE, 80, Short.MAX_VALUE))).addContainerGap()));
+					groupLayout.createSequentialGroup().add(20).add(savePasswordCheck).addPreferredGap(LayoutStyle.RELATED))).addContainerGap()));
 
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
@@ -215,8 +213,8 @@ public class WarExportPage extends WizardPage
 								GroupLayout.PREFERRED_SIZE).add(lblPhoneGapUsername)).add(7).add(
 							groupLayout.createParallelGroup(GroupLayout.BASELINE).add(phoneGapPassword, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 								GroupLayout.PREFERRED_SIZE).add(lblPhoneGapPassword))).add(7).add(
-						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(lblSavePassword).add(savePasswordCheck, GroupLayout.PREFERRED_SIZE,
-							GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))).add(typeLabel))));
+						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(savePasswordCheck, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+							GroupLayout.PREFERRED_SIZE))).add(typeLabel))));
 
 		container.setLayout(groupLayout);
 
@@ -231,6 +229,7 @@ public class WarExportPage extends WizardPage
 			outputText.setText(webappsFolder.getAbsolutePath());
 		}
 
+		savePasswordCheck.setSelection(getDialogSettings().getBoolean(IN_SECURE_STORE));
 		//load existing PhoneGap accounts 
 		loadPhoneGapAccounts();
 
@@ -389,6 +388,7 @@ public class WarExportPage extends WizardPage
 				final String username = phoneGapUsername.getText();
 				final String password = phoneGapPassword.getText();
 				getDialogSettings().put(WarExportPage.PHONEGAP_EMAIL, username);
+				getDialogSettings().put(WarExportPage.IN_SECURE_STORE, savePasswordCheck.getSelection());
 				try
 				{
 					PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress()
@@ -419,7 +419,7 @@ public class WarExportPage extends WizardPage
 					ISecurePreferences node = securePreferences.node(SECURE_STORAGE_ACCOUNTS_NODE);
 					try
 					{
-						if (node.get(username, null) != password)
+						if (!password.equals(node.get(username, null)))
 						{
 							node.put(username, password, true);
 						}
@@ -427,6 +427,8 @@ public class WarExportPage extends WizardPage
 					catch (StorageException e)
 					{
 						Debug.error(e);
+						setErrorMessage("Cannot save the password to Secure Storage: " + e.getMessage() + " Please check your Secure Storage settings.");
+						return null;
 					}
 				}
 				pgAppPage.populateExistingApplications();
