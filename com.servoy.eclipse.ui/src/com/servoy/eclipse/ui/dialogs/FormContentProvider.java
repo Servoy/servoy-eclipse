@@ -31,6 +31,7 @@ import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.NameComparator;
+import com.servoy.j2db.persistence.PersistEncapsulation;
 
 /**
  * Content provider class for forms.
@@ -81,7 +82,8 @@ public class FormContentProvider implements ITreeContentProvider
 					while (forms.hasNext())
 					{
 						Form obj = forms.next();
-						if ((options.showInMenu == null || options.showInMenu.booleanValue() == obj.getShowInMenu()) && form != obj)
+						if ((options.showInMenu == null || options.showInMenu.booleanValue() == obj.getShowInMenu()) && form != obj &&
+							!PersistEncapsulation.isModuleScope(obj, flattenedSolution.getSolution()))
 						{
 							addFormInList(activeProject, obj, solutionNames, formIdsAndWorkingSets);
 						}
@@ -94,8 +96,9 @@ public class FormContentProvider implements ITreeContentProvider
 					while (forms.hasNext())
 					{
 						Form possibleParentForm = forms.next();
-						if (form.getDataSource() == null || possibleParentForm.getDataSource() == null ||
-							form.getDataSource().equals(possibleParentForm.getDataSource()))
+						if ((form.getDataSource() == null || possibleParentForm.getDataSource() == null || form.getDataSource().equals(
+							possibleParentForm.getDataSource())) &&
+							!PersistEncapsulation.isModuleScope(possibleParentForm, flattenedSolution.getSolution()))
 						{
 							// do not add the form if it is already a sub-form, to prevent cycles
 							if (!flattenedSolution.getFormHierarchy(possibleParentForm).contains(form))
