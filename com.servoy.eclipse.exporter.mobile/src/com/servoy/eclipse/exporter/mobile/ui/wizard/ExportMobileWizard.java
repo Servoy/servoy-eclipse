@@ -56,6 +56,8 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 {
 	private static final String PROPERTY_IS_OPEN_URL = "isOpenURL"; //$NON-NLS-1$
 
+	private static final String CAN_FINISH = "canFinish_";
+
 	private final MobileExporter mobileExporter = new MobileExporter();
 
 	private final CustomizedFinishPage finishPage;
@@ -129,14 +131,17 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 	@Override
 	public boolean performFinish()
 	{
+		boolean finished = false;
 		if (warExportPage.isWarExport())
 		{
-			return exportWar();
+			finished = exportWar();
 		}
 		else
 		{
-			return exportToPhoneGap();
+			finished = exportToPhoneGap();
 		}
+		getDialogSettings().put(CAN_FINISH + mobileExporter.getSolutionName(), finished);
+		return finished;
 	}
 
 	private boolean exportToPhoneGap()
@@ -244,15 +249,20 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 	@Override
 	public boolean canFinish()
 	{
-		for (int i = 0; i < getPageCount(); i++)
+		if (getDialogSettings().getBoolean(CAN_FINISH + mobileExporter.getSolutionName()) || pgAppPage.equals(getContainer().getCurrentPage()) ||
+			finishPage.equals(getContainer().getCurrentPage()))
 		{
-			IWizardPage page = getPages()[i];
-			if (page.getErrorMessage() != null || !page.isPageComplete())
+			for (int i = 0; i < getPageCount(); i++)
 			{
-				return false;
+				IWizardPage page = getPages()[i];
+				if (page.getErrorMessage() != null || !page.isPageComplete())
+				{
+					return false;
+				}
 			}
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 

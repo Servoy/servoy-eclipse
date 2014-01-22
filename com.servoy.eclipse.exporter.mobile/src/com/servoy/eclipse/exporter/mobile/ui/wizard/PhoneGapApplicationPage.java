@@ -264,7 +264,7 @@ public class PhoneGapApplicationPage extends WizardPage
 					iconPath.setText(app.getIconPath() != null ? app.getIconPath() : "");
 					setSelectedCertificates(app.getCertificates());
 				}
-				getWizard().getContainer().updateButtons();
+				if (getWizard().getContainer().getCurrentPage() != null) getWizard().getContainer().updateButtons();
 			}
 		});
 

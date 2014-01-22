@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.http.Header;
+import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthScope;
@@ -108,7 +109,8 @@ public class PhoneGapConnector
 	private ServoyJSONObject getJSONResponse(HttpUriRequest method) throws Exception
 	{
 		HttpResponse response = client.execute(method);
-		if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)
+		int status = response.getStatusLine().getStatusCode();
+		if (status == HttpStatus.SC_OK)
 		{
 			String content = EntityUtils.toString(response.getEntity());
 			EntityUtils.consumeQuietly(response.getEntity());
@@ -141,7 +143,7 @@ public class PhoneGapConnector
 			{
 				errorMsg = "Cannot connect to Phonegap. Please try again later";
 			}
-			throw new Exception(errorMsg);
+			throw new HttpException(errorMsg + " HTTP status code " + status);
 		}
 	}
 
@@ -198,9 +200,14 @@ public class PhoneGapConnector
 				}
 			}
 		}
-		catch (Exception ex)
+		catch (HttpException ex)
 		{
 			return ex.getMessage();
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
+			return "Cannot load Phonegap account. Please try again later.";
 		}
 		return null;
 	}
@@ -341,9 +348,14 @@ public class PhoneGapConnector
 				}
 			}
 		}
-		catch (Exception ex)
+		catch (HttpException ex)
 		{
 			return ex.getMessage();
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
+			return "Cannot connect to Phonegap. Please try again later";
 		}
 		finally
 		{
