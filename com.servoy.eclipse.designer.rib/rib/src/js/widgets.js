@@ -401,10 +401,13 @@ var BWidgetRegistry = {
         properties: {
             text: {
                 type: "string",
-                defaultValue: "Header"
+                defaultValue: "Title"
             },
             position: BCommonProperties.position,
-            theme: BCommonProperties.theme
+            theme: $.extend({}, BCommonProperties.theme, {
+            	defaultValue: "b",
+            	forceAttribute: true
+            })
         },
         zones: [
             {
@@ -485,8 +488,14 @@ var BWidgetRegistry = {
                 type: "string",
                 defaultValue: "Footer"
             },
-            position: BCommonProperties.position,
-            theme: BCommonProperties.theme
+            position: $.extend({}, BCommonProperties.position, {
+            	defaultValue: "fixed",
+            	forceAttribute: true
+            }),
+            theme: $.extend({}, BCommonProperties.theme, {
+            	defaultValue: "b",
+            	forceAttribute: true
+            })
         },
         zones: [
             {
@@ -715,7 +724,7 @@ var BWidgetRegistry = {
         properties: {
             text: {
                 type: "string",
-                defaultValue: "Button"
+                defaultValue: "button"
             },
             right: {
                 displayName: "align right",
@@ -765,7 +774,10 @@ var BWidgetRegistry = {
                 type: "boolean",
                 defaultValue: false
             },
-            theme: BCommonProperties.theme,
+            theme: $.extend({}, BCommonProperties.theme, {
+            	defaultValue: "b",
+            	forceAttribute: true
+            }),
             inline: $.extend({}, BCommonProperties.inline, {
                 invalidIn: "Navbar"
             }),
@@ -801,11 +813,11 @@ var BWidgetRegistry = {
         properties: {
             text: {
                 type: "string",
-                defaultValue: "Label"
+                defaultValue: "Text"
             },
             label: {
                 type: "string",
-                defaultValue: "Label"
+                defaultValue: "Title"
             },
             labelsize: {
                 type: "integer",
@@ -1033,7 +1045,7 @@ var BWidgetRegistry = {
             }),
             label: {
                 type: "string",
-                defaultValue: "Label"
+                defaultValue: "Title"
             },
             value: {
                 // FIXME: Probably value should be removed, setting initial
@@ -1090,7 +1102,7 @@ var BWidgetRegistry = {
             }),
             label: {
                 type: "string",
-                defaultValue: "Label"
+                defaultValue: "Title"
             },
             disabled: $.extend({}, BCommonProperties.disabled, {
                 htmlSelector: "input"
@@ -1139,7 +1151,7 @@ var BWidgetRegistry = {
     		}),
     		label: {
     			type: "string",
-    			defaultValue: "Label"
+    			defaultValue: "Title"
     		},
     		disabled: $.extend({}, BCommonProperties.disabled, {
     			htmlSelector: "input"
@@ -1174,7 +1186,7 @@ var BWidgetRegistry = {
             theme: BCommonProperties.theme,
             label: {
                 type: "string",
-                defaultValue: "Label"
+                defaultValue: "Title"
             },
             value: {
                 // FIXME: Probably value should be removed, setting initial
@@ -1341,7 +1353,7 @@ var BWidgetRegistry = {
             theme: BCommonProperties.theme,
             label: {
                 type: "string",
-                defaultValue: ""
+                defaultValue: "Title"
             }
         },
         zones: [
@@ -1351,6 +1363,22 @@ var BWidgetRegistry = {
                 allow: "RadioButton"
             }
         ],
+        init: function (node) {
+            // initial state is three buttons
+            var radioButton;
+            radioButton = new ADMNode("RadioButton")
+            radioButton.setProperty("label", "One")
+            radioButton.setProperty("checked", "checked")
+            node.addChild(radioButton);
+
+            radioButton = new ADMNode("RadioButton")
+            radioButton.setProperty("label", "Two")
+            node.addChild(radioButton);
+            
+            radioButton = new ADMNode("RadioButton")
+            radioButton.setProperty("label", "Three")
+            node.addChild(radioButton);
+        },
         template: '<div data-role="fieldcontain"><fieldset data-role="controlgroup"><legend>%LABEL%<div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></legend></fieldset></div></div>'
     },
 
@@ -1403,7 +1431,7 @@ var BWidgetRegistry = {
             mini: BCommonProperties.mini,
             label: {
                 type: "string",
-                defaultValue: ""
+                defaultValue: "Title"
             },
             theme: BCommonProperties.theme
         },
@@ -1414,6 +1442,22 @@ var BWidgetRegistry = {
                 locator: '> fieldset',
             }
         ],
+        init: function (node) {
+            // initial state is three buttons
+            var checkButton;
+            checkButton = new ADMNode("Checkbox")
+            checkButton.setProperty("label", "One")
+            checkButton.setProperty("checked", "checked")
+            node.addChild(checkButton);
+
+            checkButton = new ADMNode("Checkbox")
+            checkButton.setProperty("label", "Two")
+            node.addChild(checkButton);
+            
+            checkButton = new ADMNode("Checkbox")
+            checkButton.setProperty("label", "Three")
+            node.addChild(checkButton);
+        },
         template: '<div data-role="fieldcontain"><fieldset data-role="controlgroup"><legend>%LABEL%<div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></legend></fieldset></div>'
     },
 
@@ -1435,7 +1479,7 @@ var BWidgetRegistry = {
             },
             label: {
                 type: "string",
-                defaultValue: "Checkbox"
+                defaultValue: "Title"
             },
             value: {
                 type: "string",
@@ -1466,15 +1510,17 @@ var BWidgetRegistry = {
             },
             label: {
                 type: "string",
-                defaultValue: "Checkbox"
+                defaultValue: "Title"
             },
             value: {
                 type: "string",
                 defaultValue: "",
                 htmlAttribute: "value"
             },
-            checked:   $.extend({}, BCommonProperties.checked, {
-				htmlSelector: "input"
+            checked: $.extend({}, BCommonProperties.checked, {
+            	htmlSelector: "input",
+                defaultValue: "checked",
+                forceAttribute: true
             }),
             mini: BCommonProperties.mini,
             theme: BCommonProperties.theme,
