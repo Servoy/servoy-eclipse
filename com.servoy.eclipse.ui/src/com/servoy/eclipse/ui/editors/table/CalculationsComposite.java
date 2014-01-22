@@ -59,7 +59,7 @@ import com.servoy.eclipse.ui.labelproviders.TextCutoffLabelProvider;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DuplicatePersistAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.MovePersistAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.MoveTableNodeChildAction;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IColumn;
@@ -134,7 +134,7 @@ public class CalculationsComposite extends Composite
 				TreeItem[] selection = treeViewer.getTree().getSelection();
 				if (selection != null && selection.length > 0 && selection[0].getData() instanceof ScriptCalculation)
 				{
-					MovePersistAction action = new MovePersistAction(getShell());
+					MoveTableNodeChildAction action = new MoveTableNodeChildAction(getShell());
 					action.setPersist((ScriptCalculation)selection[0].getData());
 					action.run();
 					treeViewer.refresh();

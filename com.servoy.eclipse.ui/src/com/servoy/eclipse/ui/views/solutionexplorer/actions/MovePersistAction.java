@@ -1,5 +1,5 @@
 /*
- This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2010 Servoy BV
+ This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2014 Servoy BV
 
  This program is free software; you can redistribute it and/or modify it under
  the terms of the GNU Affero General Public License as published by the Free
@@ -14,14 +14,12 @@
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
+
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
-
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -31,22 +29,17 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.OptionDialog;
 import com.servoy.eclipse.core.util.UIUtils;
-import com.servoy.eclipse.core.util.UIUtils.ExtendedInputDialog;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
-import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractPersistFactory;
 import com.servoy.j2db.persistence.ContentSpec;
@@ -60,102 +53,22 @@ import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
 /**
- * Action for moving the selected persist(s).
- * 
- * 
+ * Move for relations, forms and media objects.
  */
 public class MovePersistAction extends AbstractMovePersistAction
 {
-	protected Location location;
-
-	/**
-	 * Creates a new "move persist" action.
-	 */
 	public MovePersistAction(Shell shell)
 	{
 		super(shell);
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("moveform.gif"));
-
-	}
-
-	@Override
-	public void selectionChanged(SelectionChangedEvent event)
-	{
-		super.selectionChanged(event);
-		setText("Move " + persistString);
-		setToolTipText("Moves the " + persistString + " to a different solution/module");
-
-		ServoyProject[] activeModules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
-		//excluding the active project, so we get the exact number of modules
-		if ((activeModules.length - 1) == 0) setEnabled(false);
-
-		if (!isMoving) location = null; // we need to keep the location until all the selected items are moved
-	}
-
-	@Override
-	protected Location askForNewFormLocation(final IPersist persist, IValidateName nameValidator)
-	{
-		if (location == null)
-		{
-			final ServoyProject[] activeModules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
-			List<String> modules = new ArrayList<String>();
-			for (ServoyProject project : activeModules)
-			{
-				if (!project.getProject().getName().equals(persist.getRootObject().getName()))
-				{
-					modules.add(project.getProject().getName());
-				}
-			}
-			if (modules.size() == 0) return null;
-
-			Collections.sort(modules);
-			String[] moduleNames = modules.toArray(new String[] { });
-			final OptionDialog optionDialog = new OptionDialog(shell, "Select destination module", null, "Select module where to move " + persistString + " " +
-				((ISupportName)persist).getName(), MessageDialog.INFORMATION, new String[] { "OK", "Cancel" }, 0, moduleNames, 0);
-			int retval = optionDialog.open();
-			String selectedProject = null;
-			if (retval == Window.OK)
-			{
-				selectedProject = moduleNames[optionDialog.getSelectedOption()];
-			}
-			if (selectedProject != null)
-			{
-				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(selectedProject);
-				location = new Location(null, servoyProject);
-			}
-		}
-		if (location != null)
-		{
-			try
-			{
-				ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(((ISupportName)persist).getName(), persist.getID(),
-					new ValidatorSearchContext(getPersistType()), false);
-			}
-			catch (RepositoryException ex)
-			{
-				MessageDialog.openError(shell, persistString + " already exists", persistString + " " + ((ISupportName)persist).getName() +
-					" already exists, it won't be moved to another module");
-				return null;
-			}
-		}
-		return location;
-	}
-
-	@Override
-	protected ExtendedInputDialog<String> createDialog(IPersist persist, IValidateName nameValidator, String[] solutionNames, String initialSolutionName)
-	{
-		// do not use, renaming is too hackish
-		return null;
 	}
 
 	/**
-	 * @see com.servoy.eclipse.ui.views.solutionexplorer.actions.AbstractMovePersistAction#doWork(com.servoy.j2db.persistence.Form, java.lang.Object[],
+	 * @see com.servoy.eclipse.ui.views.solutionexplorer.actions.AbstractPersistSelectionAction#doWork(com.servoy.j2db.persistence.Form, java.lang.Object[],
 	 *      com.servoy.j2db.persistence.IValidateName)
 	 */
 	@Override
@@ -164,7 +77,7 @@ public class MovePersistAction extends AbstractMovePersistAction
 		//ask location if not set (in CreateLoginSolutionQuickFix.MoveForm)
 		if (location == null && persistList.length > 0)
 		{
-			location = askForNewFormLocation(persistList[0], nameValidator);
+			location = askForNewLocation(persistList[0], nameValidator);
 		}
 		if (location == null)
 		{
@@ -187,9 +100,7 @@ public class MovePersistAction extends AbstractMovePersistAction
 					if (rootObject instanceof Solution)
 					{
 						ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(rootObject.getName());
-
 						IPersist editingNode = servoyProject.getEditingPersist(persist.getUUID());
-
 						try
 						{
 							// reset all uuids
@@ -197,7 +108,7 @@ public class MovePersistAction extends AbstractMovePersistAction
 							final Map<Integer, Integer> idMap;
 							if (editingNode instanceof Media)
 							{
-								duplicate = duplicatePersist(editingNode, ((Media)editingNode).getName(), destination.getServoyProject(),
+								duplicate = PersistCloner.duplicatePersist(editingNode, ((Media)editingNode).getName(), destination.getServoyProject(),
 									DummyValidator.INSTANCE);
 								idMap = Collections.singletonMap(new Integer(editingNode.getID()), new Integer(duplicate.getID()));
 								oldToNewID.put(editingNode.getUUID(), duplicate.getUUID());
@@ -246,6 +157,7 @@ public class MovePersistAction extends AbstractMovePersistAction
 		moveJob.setUser(false);
 		moveJob.setRule(ResourcesPlugin.getWorkspace().getRoot());
 		moveJob.schedule();
+		location = null;
 	}
 
 	private void moveFiles(IRootObject rootObject, ServoyProject servoyProject, final IPersist editingNode, IPersist duplicate, Location destination)
@@ -299,7 +211,6 @@ public class MovePersistAction extends AbstractMovePersistAction
 								"cannot be moved. Reason:\n" + e.getMessage());
 						}
 					});
-					isMoving = false;
 				}
 			}
 		}
