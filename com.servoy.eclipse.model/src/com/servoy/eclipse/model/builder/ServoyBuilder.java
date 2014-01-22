@@ -71,6 +71,7 @@ import com.servoy.base.persistence.PersistUtils;
 import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.model.Activator;
+import com.servoy.eclipse.model.DBITableLoader;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
 import com.servoy.eclipse.model.extensions.IMarkerAttributeContributor;
@@ -174,6 +175,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 {
 	public static int MAX_EXCEPTIONS = 25;
 	public static int MIN_FIELD_LENGTH = 1000;
+	public static String BUILD_USING_DBI = "BUILD_USING_DBI";
+
 	public static int exceptionCount = 0;
 
 	private static final int LIMIT_FOR_PORTAL_TABPANEL_COUNT_ON_FORM = 3;
@@ -549,6 +552,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	private SAXParserFactory parserFactory;
 	private final HashSet<String> referencedProjectsSet = new HashSet<String>();
 	private final HashSet<String> moduleProjectsSet = new HashSet<String>();
+	private FlattenedSolution currentBuildingFLSolution;
+	private boolean useDBItables;
+
 	private IServoyModel servoyModel;
 	private static IMarkerAttributeContributor[] markerContributors;
 
@@ -587,11 +593,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	}
 
 	@Override
-	protected IProject[] build(int kind, Map args, IProgressMonitor progressMonitor) throws CoreException
+	protected IProject[] build(int kind, Map<String, String> args, IProgressMonitor progressMonitor) throws CoreException
 	{
 		// make sure the IServoyModel is initialized
 		getServoyModel();
-
+		useDBItables = (args == null) ? false : Boolean.valueOf(args.get(BUILD_USING_DBI));
 		referencedProjectsSet.clear();
 		moduleProjectsSet.clear();
 
@@ -604,6 +610,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			if (sp != null)
 			{
 				Solution sol = sp.getSolution();
+				//sol = sol.clonePersist();  OVIDIU TODO
 				if (sol != null)
 				{
 					String moduleNames = sol.getModulesNames();
@@ -1648,7 +1655,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
-	private void addMissingServer(IPersist persist, Map<String, IPersist> missingServers, List<String> goodServers)
+	private void addMissingServer(IPersist persist, Map<String, IPersist> missingServers, List<String> goodServers, IProject project)
 	{
 		String serverName = null;
 		if (persist instanceof Form)
@@ -1676,9 +1683,38 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 		if (serverName != null && !missingServers.containsKey(serverName) && !goodServers.contains(serverName))
 		{
-			IServer server = ApplicationServerSingleton.get().getServerManager().getServer(serverName);
+			IServerManagerInternal sm = ApplicationServerSingleton.get().getServerManager();
+			IServer server = sm.getServer(serverName);
 			if (server != null) goodServers.add(serverName);
 			else missingServers.put(serverName, persist);
+
+			// if the build was done using dbi Table objects we must test if the connection exists to know if the database is down
+			if (sm.getTableLoader() instanceof DBITableLoader)
+			{
+				try
+				{
+					((IServerInternal)server).testConnection(1);
+				}
+				catch (Exception e)
+				{
+					try
+					{
+						ServoyMarker mk = MarkerMessages.ServerNotAccessibleFirstOccurence.fill(project.getName(), server.getName());
+						IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, SERVER_NOT_ACCESSIBLE_FIRST_OCCURENCE, IMarker.PRIORITY_HIGH, null,
+							persist);
+						if (marker != null)
+						{
+							marker.setAttribute("missingServer", server.getName()); //$NON-NLS-1$
+							marker.setAttribute("Uuid", persist.getUUID().toString()); //$NON-NLS-1$
+							marker.setAttribute("SolutionName", project.getName()); //$NON-NLS-1$
+						}
+					}
+					catch (Exception ex)
+					{
+						ServoyLog.logError(ex);
+					}
+				}
+			}
 		}
 	}
 
@@ -2297,9 +2333,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							throw new RuntimeException(e);
 						}
 						checkCancel();
-						addMissingServer(o, missingServers, goodServers);
+						addMissingServer(o, missingServers, goodServers, project);
 						checkCancel();
-						if (o instanceof ValueList && !missingServers.containsKey(((ValueList)o).getServerName()))
+						if (o instanceof ValueList && (!missingServers.containsKey(((ValueList)o).getServerName())))
 						{
 							ValueList vl = (ValueList)o;
 							addMarkers(

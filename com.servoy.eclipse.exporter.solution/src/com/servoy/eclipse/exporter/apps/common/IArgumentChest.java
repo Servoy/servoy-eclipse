@@ -43,8 +43,6 @@ public interface IArgumentChest
 
 	public boolean isVerbose();
 
-	public boolean exportIfDBDown();
-
 	public boolean getExportUsingDbiFileInfoOnly();
 
 	public String getExportFilePath();

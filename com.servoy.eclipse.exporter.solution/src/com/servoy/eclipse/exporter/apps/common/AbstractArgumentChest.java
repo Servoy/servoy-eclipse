@@ -34,7 +34,6 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 	private String settingsFile = null;
 	private String appServerDir = "../../application_server";
 	private boolean exportUsingDbiFileInfoOnly = false;
-	private boolean exportIfDBDown = false;
 
 	// this must not be done in constructor as it calls an abstract method that can end up setting fields in an extending class - fields that are not yet set to default values and will be after the constructor of this class finishes
 	public void initialize(String[] args)
@@ -102,13 +101,9 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 						markInvalid();
 					}
 				}
-				else if ("-dbi".equalsIgnoreCase(args[i]))
+				else if ("-dbi".equalsIgnoreCase(args[i]) || "-dbd".equalsIgnoreCase(args[i]))
 				{
 					exportUsingDbiFileInfoOnly = true;
-				}
-				else if ("-dbd".equalsIgnoreCase(args[i]))
-				{
-					exportIfDBDown = true;
 				}
 				i++;
 			}
@@ -149,17 +144,16 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 			+ "             Default: the 'servoy.properties' file  from 'application_server'  will be  used\n"
 			+ "        -as <app_server_dir> ... specifies where to find the 'application_server' directory.\n"
 			+ "             Default: '../../application_server'\n"
-			+ getHelpMessageDbiDbd();
+			+ getHelpMessageDbi();
 		// @formatter:on
 	}
 
 	// dbi and dbd are implemented by mobile exporter, but hardcoded, not configurable - so not part of the help message; allow extending classes to suppress these
-	protected String getHelpMessageDbiDbd()
+	protected String getHelpMessageDbi()
 	{
 		// @formatter:off
 		return
-			  "        -dbi ... export based on dbi files (even if database servers are available)\n"
-		    + "        -dbd ... try to export even if a needed database is offline, using the .dbi files\n";
+			  "        -dbi ... export based on dbi files (even if database servers are available)\n";
 		// @formatter:on
 	}
 
@@ -221,11 +215,6 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 	public boolean getExportUsingDbiFileInfoOnly()
 	{
 		return exportUsingDbiFileInfoOnly;
-	}
-
-	public boolean exportIfDBDown()
-	{
-		return exportIfDBDown;
 	}
 
 	public void info(String message, int priority)

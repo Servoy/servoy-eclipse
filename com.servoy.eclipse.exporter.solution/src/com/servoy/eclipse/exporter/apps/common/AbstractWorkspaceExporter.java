@@ -38,6 +38,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.servoy.eclipse.exporter.apps.Activator;
+import com.servoy.eclipse.model.DBITableLoader;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -51,6 +52,7 @@ import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.Messages;
 import com.servoy.j2db.dataprocessing.IDataServer;
 import com.servoy.j2db.debug.DebugClientHandler;
+import com.servoy.j2db.persistence.ITableLoader;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.server.shared.IUserManagerFactory;
@@ -77,7 +79,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 	private boolean finished;
 
 	private boolean initialAutoBuild = false;
-	private boolean dbDownMode = false;
+	private boolean dbDown = false;
 
 	public Object start(IApplicationContext context)
 	{
@@ -141,7 +143,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 				}
 
 				// initialize app server
-				initializeApplicationServer();
+				initializeApplicationServer(configuration);
 
 				if (ApplicationServerSingleton.get() != null)
 				{
@@ -162,7 +164,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 							{
 								ServoyLog.logError(e);
 								// continuing would only lead to potential deadlock, if auto-build cannot be turned off
-								outputError("Cannot export solution(s) '" + configuration.getSolutionNamesAsString() + "'; unable to turn off auto-build. Check workspace log."); //$NON-NLS-1$//$NON-NLS-2$
+								outputError("EXPORT FAILED. Cannot export solution(s) '" + configuration.getSolutionNamesAsString() + "'; unable to turn off auto-build. Check workspace log."); //$NON-NLS-1$//$NON-NLS-2$
 								exitCode = EXIT_EXPORT_FAILED;
 							}
 						}
@@ -208,7 +210,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 
 	protected boolean isDbDownForCurrentlyActiveSolution()
 	{
-		return dbDownMode;
+		return dbDown;
 	}
 
 	protected abstract T createArgumentChest(IApplicationContext context);
@@ -307,7 +309,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 			for (int i = 0; i < solutionNames.length && exitCode == EXIT_OK; i++)
 			{
 				String solutionName = solutionNames[i];
-				dbDownMode = false;
+				dbDown = false;
 
 				outputExtra("Refreshing and loading projects used by solution " + solutionName + "."); //$NON-NLS-1$ //$NON-NLS-2$
 				sm.initialize(solutionName); // the actual refresh of solution projects happens in the modified EclipseRepository load; this just loads all modules (because it reloads all form security info)
@@ -324,7 +326,6 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 							sm.buildActiveProjects(null, true);
 
 							// check project markers
-
 							// TODO we should really be able to tell Servoy Builder to use an abstractisation of table model (dbi info)
 							// instead of the actual tables - if we want nice -dbi or -dbd export; until then, -dbi and -dbd will both ignore
 							// all error markers and allow export to start (cause builder generates errors based on database only and it would be hard
@@ -340,57 +341,38 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 							// for resources project
 							splitMarkers(sm.getActiveResourcesProject().getProject(), errors, warnings);
 
-							if (dbDownMode)
+							if (dbDown && !configuration.getExportUsingDbiFileInfoOnly())
 							{
-								output("Found error markers that would suggest at least a DB used by this solution or it's exported modules is down."); //$NON-NLS-1$
-								// TODO see large comment some lines above; when error markers can be generated based on dbi files only we should do a rebuild here based on that to get real markers
-								if (configuration.exportIfDBDown()) // TODO see large comment some lines above; remove this when error markers can be generated based on dbi files only
-								{
-									output("Exporting with DB down is allowed. Proceeding..."); //$NON-NLS-1$
-								}
-								else if (!configuration.getExportUsingDbiFileInfoOnly())
-								{
-									outputError("Please use -dbd argument to allow exports when DB is down."); //$NON-NLS-1$
-									dbDownMode = false; // so that it fails because of error markers
-								}
-							}
-
-							if (errors.size() > 0 && !dbDownMode && configuration.getExportUsingDbiFileInfoOnly()) // TODO see large comment some lines above; remove this when error markers can be generated based on dbi files only
-							{
-								output("Found error markers but -dbi was specified. Ignoring the following errors and exporting based on .dbi files instead of database contents..."); //$NON-NLS-1$
-								if (verbose)
-								{
-									for (IMarker marker : errors)
-									{
-										outputExtra(marker.getAttribute(IMarker.MESSAGE, "Unknown marker message.")); //$NON-NLS-1$
-									}
-								}
-							}
-
-							// if db is down we still try to export (using dbi files)
-							if (errors.size() > 0 && !(dbDownMode || configuration.getExportUsingDbiFileInfoOnly())) // TODO see large comment some lines above; remove this when error markers can be generated based on dbi files only
-							{
+								outputError("EXPORT FAILED. Solution '" + solutionName +
+									"'cannot be exorted because at least one used database is unreachable. Consider using -dbi to export based on dbi files");
 								exitCode = EXIT_EXPORT_FAILED;
-								outputError("Found error markers in projects for solution '" + solutionName + "'."); //$NON-NLS-1$//$NON-NLS-2$
-								if (verbose)
-								{
-									for (IMarker marker : errors)
-									{
-										outputExtra(marker.getAttribute(IMarker.MESSAGE, "Unknown marker message.")); //$NON-NLS-1$
-									}
-								}
-								outputError("EXPORT FAILED."); //$NON-NLS-1$
+								return;
 							}
-							else if (!mustStop)
+
+							if (errors.size() > 0)
 							{
-								if (warnings.size() > 0 && !(dbDownMode || configuration.getExportUsingDbiFileInfoOnly())) // TODO see large comment some lines above; remove this when error markers can be generated based on dbi files only
+								output("Found error markers in solution. "); //$NON-NLS-1$
+
+								for (IMarker marker : errors)
+								{
+									outputExtra(" -" + marker.getAttribute(IMarker.MESSAGE, "Unknown marker message.")); //$NON-NLS-1$
+								}
+								outputError("EXPORT FAILED. Solution '" + solutionName + "' will NOT be exported. It has error markers"); //$NON-NLS-1$//$NON-NLS-2$
+								exitCode = EXIT_EXPORT_FAILED;
+								return;
+							}
+
+							if (!mustStop)
+							{
+
+								if (warnings.size() > 0)
 								{
 									output("Found warning markers in projects for solution " + solutionName); //$NON-NLS-1$
 									if (verbose)
 									{
 										for (IMarker marker : warnings)
 										{
-											outputExtra(marker.getAttribute(IMarker.MESSAGE, "Unknown marker message.")); //$NON-NLS-1$
+											outputExtra(" -" + marker.getAttribute(IMarker.MESSAGE, "Unknown marker message.")); //$NON-NLS-1$
 										}
 									}
 								}
@@ -402,7 +384,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 					}
 					else
 					{
-						outputError("Solution '" + solutionName + "' will NOT be exported. It cannot be activated."); //$NON-NLS-1$//$NON-NLS-2$
+						outputError("EXPORT FAILED. Solution '" + solutionName + "' will NOT be exported. It cannot be activated."); //$NON-NLS-1$//$NON-NLS-2$
 						exitCode = EXIT_EXPORT_FAILED;
 					}
 				}
@@ -450,9 +432,17 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 			errorCount = errors.size();
 			splitMarkers(module.getProject(), errors, warnings);
 
-			if (!dbDownMode && errorCount < errors.size())
+			if (!dbDown && errorCount < errors.size())
 			{
-				dbDownMode = ServoyExporterUtils.getInstance().hasDbDownErrorMarkers(new String[] { module.getProject().getName() });
+				dbDown = ServoyExporterUtils.getInstance().hasDbDownErrorMarkers(new String[] { module.getProject().getName() });
+			}
+		}
+		//remove Database down error marker , dbDown value has been set.
+		for (int i = 0; i < errors.size(); i++)
+		{
+			if (ServoyExporterUtils.getInstance().isDatabaseDownErrorMakrer(errors.get(i)))
+			{
+				errors.remove(errors.get(i));
 			}
 		}
 	}
@@ -468,6 +458,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 			{
 				if (marker.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO) == IMarker.SEVERITY_ERROR)
 				{
+
 					errors.add(marker);
 				}
 				else
@@ -504,7 +495,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 		}
 	}
 
-	private void initializeApplicationServer()
+	private void initializeApplicationServer(IArgumentChest configuration)
 	{
 		BundleContext bc = Activator.getDefault().getBundle().getBundleContext();
 		ServiceReference ref = bc.getServiceReference(IServerStarter.class);
@@ -513,6 +504,9 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 		{
 			try
 			{
+				ITableLoader tableLoader = null;
+				if (configuration.getExportUsingDbiFileInfoOnly()) tableLoader = new DBITableLoader();
+				ss.setTableLoader(tableLoader);
 				ss.init();
 				ss.setRepositoryFactory(new EclipseRepositoryFactory());
 				ss.setUserManagerFactory(new IUserManagerFactory()
@@ -528,7 +522,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 			catch (Exception e)
 			{
 				ServoyLog.logError(e);
-				outputError("Cannot initialize app. server. EXPORT FAILED. Check workspace log."); //$NON-NLS-1$
+				outputError("EXPORT FAILED. Cannot initialize app. server. Check workspace log."); //$NON-NLS-1$
 				exitCode = EXIT_EXPORT_FAILED;
 			}
 
@@ -537,7 +531,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 		}
 		else
 		{
-			outputError("Cannot initialize exporter due to missing app. server starter extension. EXPORT FAILED."); //$NON-NLS-1$
+			outputError("EXPORT FAILED. Cannot initialize exporter due to missing app. server starter extension."); //$NON-NLS-1$
 			exitCode = EXIT_EXPORT_FAILED;
 		}
 	}

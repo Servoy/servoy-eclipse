@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -33,6 +35,7 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.IPageChangedListener;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PageChangedEvent;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
@@ -67,6 +70,7 @@ import org.json.JSONException;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
+import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseExportI18NHelper;
 import com.servoy.eclipse.model.util.IFileAccess;
@@ -288,6 +292,12 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 	}
 
+	@Override
+	public boolean needsProgressMonitor()
+	{
+		return true;
+	}
+
 	private ExportConfirmationPage exportConfirmationPage;
 
 	@Override
@@ -334,7 +344,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		{
 			super("export confirmation page"); //$NON-NLS-1$
 			setTitle("Export solution confirmation"); //$NON-NLS-1$
-			setErrorMessage("The are errors related to the database in the solution"); //$NON-NLS-1$
+			setErrorMessage("One or more databases used in the solution are unreacheable"); //$NON-NLS-1$
 		}
 
 		public void createControl(Composite parent)
@@ -353,10 +363,47 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			gridData.horizontalSpan = 1;
 			message.setLayoutData(gridData);
 			message.setEditable(false);
-			message.setText("The errors will prevent the solution from functioning well; are you sure you want to proceed with the export?"); //$NON-NLS-1$
+			message.setText("Are you sure you want to proceed with the export?  \nYou can continue to export based on dbi(database information) files only."); //$NON-NLS-1$
 
 			setControl(container);
 			setPageComplete(true);
+		}
+
+		@Override
+		public IWizardPage getNextPage()
+		{
+			//
+			try
+			{
+				getContainer().run(true, true, new IRunnableWithProgress()
+				{
+					public void run(IProgressMonitor monitor) throws InterruptedException
+					{
+						monitor.beginTask("Building using DBI files", 0);
+						IProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject();
+						Map<String, String> buildUsingDBI = null;
+						if (modulesSelectionPage.hasDBDownErrors())
+						{
+							buildUsingDBI = new HashMap<String, String>();
+							buildUsingDBI.put(ServoyBuilder.BUILD_USING_DBI, "true");
+						}
+						try
+						{
+							project.build(IncrementalProjectBuilder.FULL_BUILD, ServoyBuilder.BUILDER_ID, buildUsingDBI, monitor);
+						}
+						catch (CoreException e)
+						{
+							monitor.done();
+							Debug.error(e);
+						}
+					}
+				});
+			}
+			catch (Exception e)
+			{
+				Debug.error(e);
+			}
+			return super.getNextPage();
 		}
 
 		@Override
@@ -630,6 +677,12 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			exportSampleDataButton.setText("Export solution sample data."); //$NON-NLS-1$ 
 			exportSampleDataButton.setSelection(exportModel.isExportSampleData());
 			exportSampleDataButton.addListener(SWT.Selection, this);
+			if (modulesSelectionPage.hasDBDownErrors())
+			{
+				exportSampleDataButton.setSelection(false);
+				exportSampleDataButton.setEnabled(false);
+				exportSampleDataButton.setText("Export solution sample data. (one or more used databases is unreacheable)");
+			}
 
 			Composite horizontalComposite = new Composite(composite, SWT.None);
 			GridLayout hcGridLayout = new GridLayout();
@@ -708,6 +761,12 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			exportUsingDbiFileInfoOnlyButton = new Button(composite, SWT.CHECK);
 			exportUsingDbiFileInfoOnlyButton.setText("Export based on DBI files only"); //$NON-NLS-1$
 			exportUsingDbiFileInfoOnlyButton.addListener(SWT.Selection, this);
+			if (modulesSelectionPage.hasDBDownErrors())
+			{
+				exportUsingDbiFileInfoOnlyButton.setEnabled(false);
+				exportUsingDbiFileInfoOnlyButton.setSelection(true);
+				exportUsingDbiFileInfoOnlyButton.setText("Export based on DBI files only  (one or more used databases is unreacheable)");
+			}
 
 			setControl(composite);
 		}

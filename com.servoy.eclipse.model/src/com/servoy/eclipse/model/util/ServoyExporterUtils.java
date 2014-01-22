@@ -294,6 +294,23 @@ public class ServoyExporterUtils
 		return neededServersTablesMap;
 	}
 
+	public boolean isDatabaseDownErrorMakrer(IMarker marker)
+	{
+		try
+		{
+			if (marker.getAttribute(IMarker.SEVERITY) != null && marker.getAttribute(IMarker.SEVERITY).equals(IMarker.SEVERITY_ERROR) &&
+				ServoyBuilder.MISSING_SERVER.equals(marker.getType()))
+			{
+				return true;
+			}
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
+		}
+		return false;
+	}
+
 	/** 
 	 * 
 	 * @return true if the database is down (servers or tables are inaccessible)
@@ -302,30 +319,32 @@ public class ServoyExporterUtils
 	{
 		if (projects != null && projects.length > 0)
 		{
-			try
+
+			for (String moduleName : projects)
 			{
-				for (String moduleName : projects)
+				ServoyProject module = ServoyModelFinder.getServoyModel().getServoyProject(moduleName);
+				if (module != null)
 				{
-					ServoyProject module = ServoyModelFinder.getServoyModel().getServoyProject(moduleName);
-					if (module != null)
+					try
 					{
 						IMarker[] markers = module.getProject().findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
 						for (IMarker marker : markers)
 						{
 							// db down errors = missing server (what other cases?)
-							if (marker.getAttribute(IMarker.SEVERITY) != null && marker.getAttribute(IMarker.SEVERITY).equals(IMarker.SEVERITY_ERROR) &&
-								ServoyBuilder.MISSING_SERVER.equals(marker.getType()))
+							if (isDatabaseDownErrorMakrer(marker))
 							{
 								return true;
 							}
 						}
 					}
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+					}
+
 				}
 			}
-			catch (Exception ex)
-			{
-				ServoyLog.logError(ex);
-			}
+
 		}
 		return false;
 	}

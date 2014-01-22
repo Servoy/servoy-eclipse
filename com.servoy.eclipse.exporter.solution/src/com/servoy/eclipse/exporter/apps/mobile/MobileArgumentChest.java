@@ -127,7 +127,7 @@ public class MobileArgumentChest extends AbstractArgumentChest
 	}
 
 	@Override
-	protected String getHelpMessageDbiDbd()
+	protected String getHelpMessageDbi()
 	{
 		return ""; //$NON-NLS-1$
 	}
@@ -157,12 +157,6 @@ public class MobileArgumentChest extends AbstractArgumentChest
 	public int getSyncTimeout()
 	{
 		return syncTimeout;
-	}
-
-	@Override
-	public boolean exportIfDBDown()
-	{
-		return true; // mobile exporter doesn't use table info
 	}
 
 	@Override
