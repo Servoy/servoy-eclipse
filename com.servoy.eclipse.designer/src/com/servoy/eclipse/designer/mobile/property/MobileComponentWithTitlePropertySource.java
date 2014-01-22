@@ -167,7 +167,15 @@ public class MobileComponentWithTitlePropertySource extends RetargetingPropertyS
 			{
 				oldTitleLoc = (Point)((ComplexProperty)titeValue).getValue();
 			}
-			Point newLoc = (Point)value;
+			Point newLoc;
+			if (value instanceof ComplexProperty)
+			{
+				newLoc = (Point)((ComplexProperty)value).getValue();
+			}
+			else
+			{
+				newLoc = (Point)value;
+			}
 			super.setPropertyValue("title.location", oldTitleLoc == null || oldLoc == null || newLoc == null ? value : new Point(oldTitleLoc.x + newLoc.x -
 				oldLoc.x, oldTitleLoc.y + newLoc.y - oldLoc.y));
 		}
