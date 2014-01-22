@@ -222,7 +222,7 @@ public class ElementFactory
 		return rectShape;
 	}
 
-	public static String createUniqueName(ISupportChilds parent, int type, String name) throws RepositoryException
+	public static String createUniqueName(ISupportChilds parent, int type, String name, INameGenerate nameGenerator) throws RepositoryException
 	{
 		String newName = name;
 		if (name != null)
@@ -242,7 +242,8 @@ public class ElementFactory
 					{
 						throw new RepositoryException("Cannot create new unique name for '" + name + "' in parent " + parent, e);
 					}
-					newName += 'c';
+
+					newName = nameGenerator.generateName(name, i);
 				}
 			}
 		}
@@ -252,7 +253,8 @@ public class ElementFactory
 	public static IPersist copyComponent(ISupportChilds parent, AbstractBase component, int x, int y, int type, Map<String, String> groupMap)
 		throws RepositoryException
 	{
-		String name = (component instanceof ISupportUpdateableName) ? createUniqueName(parent, type, ((ISupportUpdateableName)component).getName()) : null;
+		String name = (component instanceof ISupportUpdateableName) ? createUniqueName(parent, type, ((ISupportUpdateableName)component).getName(),
+			INameGenerate.GENERATE_NAME_PREPEND_CHAR) : null;
 		// place copied group
 		String groupId = (component instanceof IFormElement) ? ((IFormElement)component).getGroupID() : null;
 		String newGroupId = null;
@@ -271,7 +273,7 @@ public class ElementFactory
 				else
 				{
 					// create a new group name
-					newGroupId = createUniqueName(parent, type, groupId);
+					newGroupId = createUniqueName(parent, type, groupId, INameGenerate.GENERATE_NAME_PREPEND_CHAR);
 				}
 				groupMap.put(groupId, newGroupId);
 			}
@@ -827,9 +829,9 @@ public class ElementFactory
 			portalName.append('_');
 			portalName.append(relations[i].getName());
 		}
-		portalName.append('_').append(y);
 
-		Portal portal = form.createNewPortal(portalName.toString(), new java.awt.Point(x, y));
+		Portal portal = form.createNewPortal(
+			ElementFactory.createUniqueName(form, IRepository.ELEMENTS, portalName.toString(), INameGenerate.GENERATE_NAME_PREPEND_N), new java.awt.Point(x, y));
 		if (dataProviders != null && dataProviders.length > 0)
 		{
 			Dimension portaldim = new Dimension(dataProviders.length * 140, 50);
@@ -1324,6 +1326,36 @@ public class ElementFactory
 		}
 
 		return object;
+	}
+
+	public interface INameGenerate
+	{
+
+		public static INameGenerate GENERATE_NAME_PREPEND_CHAR = new INameGenerate()
+		{
+			@Override
+			public String generateName(String name, int n)
+			{
+				StringBuffer sb = new StringBuffer(name.length() + n);
+				sb.append(name);
+				for (int i = 0; i < n; i++)
+				{
+					sb.append('c');
+				}
+				return sb.toString();
+			}
+		};
+
+		public static INameGenerate GENERATE_NAME_PREPEND_N = new INameGenerate()
+		{
+			@Override
+			public String generateName(String name, int n)
+			{
+				return name + '_' + n;
+			}
+		};
+
+		public String generateName(String name, int i);
 	}
 
 	/**
