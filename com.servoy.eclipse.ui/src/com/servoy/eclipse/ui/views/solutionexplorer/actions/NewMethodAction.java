@@ -275,6 +275,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 									}
 									override = true;
 									superArguments = superMethod.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
+									break;
 								}
 							}
 						}
