@@ -110,19 +110,12 @@ public class PhoneGapConnector
 	{
 		HttpResponse response = client.execute(method);
 		int status = response.getStatusLine().getStatusCode();
-		if (status == HttpStatus.SC_OK)
-		{
-			String content = EntityUtils.toString(response.getEntity());
-			EntityUtils.consumeQuietly(response.getEntity());
-			return new ServoyJSONObject(content, false);
-		}
-		else
+		String content = EntityUtils.toString(response.getEntity());
+
+		if (status != HttpStatus.SC_OK)
 		{
 			String errorMsg = null;
-
 			Header contentType = response.getEntity().getContentType();
-			String content = EntityUtils.toString(response.getEntity());
-			EntityUtils.consumeQuietly(response.getEntity());
 			if (contentType != null && contentType.getValue().contains("json"))
 			{
 				try
@@ -139,12 +132,19 @@ public class PhoneGapConnector
 				}
 			}
 
-			if (errorMsg == null)
+			if (errorMsg == null && status >= 400)//error with no json error message (e.g. 504 Gateway Timeout)
 			{
 				errorMsg = "Cannot connect to Phonegap. Please try again later";
 			}
-			throw new HttpException(errorMsg + " HTTP status code " + status);
+			if (errorMsg != null)
+			{
+				EntityUtils.consumeQuietly(response.getEntity());
+				throw new HttpException(errorMsg + " " + response.getStatusLine().getReasonPhrase());
+			}
 		}
+
+		EntityUtils.consumeQuietly(response.getEntity());
+		return new ServoyJSONObject(content, false);
 	}
 
 	protected String loadPhoneGapAccount()
