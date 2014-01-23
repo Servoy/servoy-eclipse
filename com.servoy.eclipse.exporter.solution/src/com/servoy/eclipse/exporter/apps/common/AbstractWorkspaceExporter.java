@@ -46,7 +46,6 @@ import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.EclipseRepositoryFactory;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.eclipse.model.util.ServoyExporterUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.Messages;
@@ -79,7 +78,6 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 	private boolean finished;
 
 	private boolean initialAutoBuild = false;
-	private boolean dbDown = false;
 
 	public Object start(IApplicationContext context)
 	{
@@ -208,10 +206,6 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 		return exitCode;
 	}
 
-	protected boolean isDbDownForCurrentlyActiveSolution()
-	{
-		return dbDown;
-	}
 
 	protected abstract T createArgumentChest(IApplicationContext context);
 
@@ -309,7 +303,6 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 			for (int i = 0; i < solutionNames.length && exitCode == EXIT_OK; i++)
 			{
 				String solutionName = solutionNames[i];
-				dbDown = false;
 
 				outputExtra("Refreshing and loading projects used by solution " + solutionName + "."); //$NON-NLS-1$ //$NON-NLS-2$
 				sm.initialize(solutionName); // the actual refresh of solution projects happens in the modified EclipseRepository load; this just loads all modules (because it reloads all form security info)
@@ -340,14 +333,6 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 
 							// for resources project
 							splitMarkers(sm.getActiveResourcesProject().getProject(), errors, warnings);
-
-							if (dbDown && !configuration.getExportUsingDbiFileInfoOnly())
-							{
-								outputError("EXPORT FAILED. Solution '" + solutionName +
-									"'cannot be exorted because at least one used database is unreachable. Consider using -dbi to export based on dbi files");
-								exitCode = EXIT_EXPORT_FAILED;
-								return;
-							}
 
 							if (errors.size() > 0)
 							{
@@ -426,24 +411,9 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 	 */
 	protected void checkProjectMarkers(ServoyProject[] solutionProjects, List<IMarker> errors, List<IMarker> warnings, T config)
 	{
-		int errorCount;
 		for (ServoyProject module : solutionProjects)
 		{
-			errorCount = errors.size();
 			splitMarkers(module.getProject(), errors, warnings);
-
-			if (!dbDown && errorCount < errors.size())
-			{
-				dbDown = ServoyExporterUtils.getInstance().hasDbDownErrorMarkers(new String[] { module.getProject().getName() });
-			}
-		}
-		//remove Database down error marker , dbDown value has been set.
-		for (int i = 0; i < errors.size(); i++)
-		{
-			if (ServoyExporterUtils.getInstance().isDatabaseDownErrorMakrer(errors.get(i)))
-			{
-				errors.remove(errors.get(i));
-			}
 		}
 	}
 
@@ -458,7 +428,6 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 			{
 				if (marker.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO) == IMarker.SEVERITY_ERROR)
 				{
-
 					errors.add(marker);
 				}
 				else

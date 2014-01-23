@@ -71,7 +71,6 @@ import com.servoy.base.persistence.PersistUtils;
 import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.model.Activator;
-import com.servoy.eclipse.model.DBITableLoader;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
 import com.servoy.eclipse.model.extensions.IMarkerAttributeContributor;
@@ -1687,34 +1686,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			IServer server = sm.getServer(serverName);
 			if (server != null) goodServers.add(serverName);
 			else missingServers.put(serverName, persist);
-
-			// if the build was done using dbi Table objects we must test if the connection exists to know if the database is down
-			if (sm.getTableLoader() instanceof DBITableLoader)
-			{
-				try
-				{
-					((IServerInternal)server).testConnection(1);
-				}
-				catch (Exception e)
-				{
-					try
-					{
-						ServoyMarker mk = MarkerMessages.ServerNotAccessibleFirstOccurence.fill(project.getName(), server.getName());
-						IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, SERVER_NOT_ACCESSIBLE_FIRST_OCCURENCE, IMarker.PRIORITY_HIGH, null,
-							persist);
-						if (marker != null)
-						{
-							marker.setAttribute("missingServer", server.getName()); //$NON-NLS-1$
-							marker.setAttribute("Uuid", persist.getUUID().toString()); //$NON-NLS-1$
-							marker.setAttribute("SolutionName", project.getName()); //$NON-NLS-1$
-						}
-					}
-					catch (Exception ex)
-					{
-						ServoyLog.logError(ex);
-					}
-				}
-			}
 		}
 	}
 

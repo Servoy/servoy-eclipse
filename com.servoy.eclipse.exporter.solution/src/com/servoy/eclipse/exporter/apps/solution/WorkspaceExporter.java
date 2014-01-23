@@ -112,18 +112,10 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 
 			try
 			{
-				if (configuration.shouldExportSampleData() && isDbDownForCurrentlyActiveSolution())
-				{
-					outputError("EXPORT FAILED. Sample data (-sd) was specified as argument but one of the solution's databases cannot be reached. "); //$NON-NLS-1$
-					exitCode = EXIT_EXPORT_FAILED;
-				}
-				else
-				{
-					exporter.exportSolutionToFile(solution, new File(configuration.getExportFileName(solution.getName())), ClientVersion.getVersion(),
-						ClientVersion.getReleaseNumber(), configuration.shouldExportMetaData(), configuration.shouldExportSampleData(),
-						configuration.getNumberOfSampleDataExported(), configuration.shouldExportI18NData(), configuration.shouldExportUsers(),
-						configuration.shouldExportModules(), configuration.shouldProtectWithPassword(), tableDefManager, metadataDefManager);
-				}
+				exporter.exportSolutionToFile(solution, new File(configuration.getExportFileName(solution.getName())), ClientVersion.getVersion(),
+					ClientVersion.getReleaseNumber(), configuration.shouldExportMetaData(), configuration.shouldExportSampleData(),
+					configuration.getNumberOfSampleDataExported(), configuration.shouldExportI18NData(), configuration.shouldExportUsers(),
+					configuration.shouldExportModules(), configuration.shouldProtectWithPassword(), tableDefManager, metadataDefManager);
 			}
 			catch (final RepositoryException e)
 			{
@@ -138,6 +130,7 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 			exitCode = EXIT_EXPORT_FAILED;
 		}
 	}
+
 
 	@Override
 	protected void checkProjectMarkers(ServoyProject[] solutionAndAllModuleProjects, List<IMarker> errors, List<IMarker> warnings, ArgumentChest config)
