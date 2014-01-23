@@ -197,8 +197,9 @@ public class ElementUtil
 		{
 			ScriptVariable sv = (ScriptVariable)persist;
 			if (sv.isPrivate()) return "variable_private.gif"; //$NON-NLS-1$
-			if (sv.isPublic()) return "variable_public.gif"; //$NON-NLS-1$ 
-			else return "variable_default.gif"; //$NON-NLS-1$
+			if (sv.isPublic()) return "variable_public.gif"; //$NON-NLS-1$
+			if (sv.getScopeName() != null) return "global_variable.gif"; //$NON-NLS-1$ 
+			else return "form_variable.gif"; //$NON-NLS-1$
 		}
 		if (persist instanceof ScriptMethod)
 		{
