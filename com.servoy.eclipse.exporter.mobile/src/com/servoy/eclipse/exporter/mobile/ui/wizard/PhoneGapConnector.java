@@ -138,8 +138,10 @@ public class PhoneGapConnector
 			}
 			if (errorMsg != null)
 			{
+				String reason = "Status code " + status +
+					(response.getStatusLine().getReasonPhrase() != null ? " " + response.getStatusLine().getReasonPhrase() : "");
 				EntityUtils.consumeQuietly(response.getEntity());
-				throw new HttpException(errorMsg + " " + response.getStatusLine().getReasonPhrase());
+				throw new HttpException(errorMsg + " " + reason);
 			}
 		}
 
