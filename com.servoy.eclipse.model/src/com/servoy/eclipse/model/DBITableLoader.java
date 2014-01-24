@@ -45,8 +45,7 @@ import com.servoy.j2db.util.xmlxport.TableDef;
  */
 public class DBITableLoader implements ITableLoader
 {
-	//todo local cahce of table defs , TODO this should be automatically updated when a new server is added
-	private static Pair<ITableDefinitionsManager, IMetadataDefManager> defManagers = null;
+	private Pair<ITableDefinitionsManager, IMetadataDefManager> defManagers = null;
 
 	@Override
 	public boolean loadTables(LinkedHashMap<String, Table> loading_tables, IServerInternal server)

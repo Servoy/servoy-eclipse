@@ -550,8 +550,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	private SAXParserFactory parserFactory;
 	private final HashSet<String> referencedProjectsSet = new HashSet<String>();
 	private final HashSet<String> moduleProjectsSet = new HashSet<String>();
-	private FlattenedSolution currentBuildingFLSolution;
-	private boolean useDBItables;
 
 	private IServoyModel servoyModel;
 	private static IMarkerAttributeContributor[] markerContributors;
@@ -607,7 +605,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			if (sp != null)
 			{
 				Solution sol = sp.getSolution();
-				//sol = sol.clonePersist();  OVIDIU TODO
 				if (sol != null)
 				{
 					String moduleNames = sol.getModulesNames();
@@ -1652,7 +1649,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
-	private void addMissingServer(IPersist persist, Map<String, IPersist> missingServers, List<String> goodServers, IProject project)
+	private void addMissingServer(IPersist persist, Map<String, IPersist> missingServers, List<String> goodServers)
 	{
 		String serverName = null;
 		if (persist instanceof Form)
@@ -2302,7 +2299,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							throw new RuntimeException(e);
 						}
 						checkCancel();
-						addMissingServer(o, missingServers, goodServers, project);
+						addMissingServer(o, missingServers, goodServers);
 						checkCancel();
 						if (o instanceof ValueList && (!missingServers.containsKey(((ValueList)o).getServerName())))
 						{

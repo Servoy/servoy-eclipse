@@ -45,6 +45,8 @@ public interface IArgumentChest
 
 	public boolean getExportUsingDbiFileInfoOnly();
 
+	public boolean isIgnoreBuildErrors();
+
 	public String getExportFilePath();
 
 }

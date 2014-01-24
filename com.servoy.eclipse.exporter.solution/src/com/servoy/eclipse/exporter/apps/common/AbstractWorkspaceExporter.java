@@ -342,9 +342,12 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 								{
 									outputExtra(" -" + marker.getAttribute(IMarker.MESSAGE, "Unknown marker message.")); //$NON-NLS-1$
 								}
-								outputError("EXPORT FAILED. Solution '" + solutionName + "' will NOT be exported. It has error markers"); //$NON-NLS-1$//$NON-NLS-2$
-								exitCode = EXIT_EXPORT_FAILED;
-								return;
+								if (!configuration.isIgnoreBuildErrors())
+								{
+									outputError("EXPORT FAILED. Solution '" + solutionName + "' will NOT be exported. It has error markers"); //$NON-NLS-1$//$NON-NLS-2$
+									exitCode = EXIT_EXPORT_FAILED;
+									return;
+								}
 							}
 
 							if (!mustStop)
