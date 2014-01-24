@@ -22,7 +22,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyExporterUtils;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IColumnInfoManager;
@@ -31,7 +30,6 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITableLoader;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.Debug;
@@ -53,12 +51,9 @@ public class DBITableLoader implements ITableLoader
 	@Override
 	public boolean loadTables(LinkedHashMap<String, Table> loading_tables, IServerInternal server)
 	{
-		ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
-		Solution solution = activeProject.getSolution();
-
 		try
 		{
-			if (defManagers == null) defManagers = ServoyExporterUtils.getInstance().prepareDbiFilesBasedExportData(solution, true, true, true, true);
+			if (defManagers == null) defManagers = ServoyExporterUtils.getInstance().prepareDbiFilesBasedExportData(null, true, true, true, true);
 
 			for (Entry<String, List<TableDef>> entry : defManagers.getLeft().getServerTableDefs().entrySet())
 			{

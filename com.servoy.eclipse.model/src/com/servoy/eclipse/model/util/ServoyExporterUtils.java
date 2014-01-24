@@ -40,10 +40,14 @@ import org.json.JSONException;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
+import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.DataSourceUtils;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.IMetadataDefManager;
@@ -261,9 +265,38 @@ public class ServoyExporterUtils
 		srvTbl.put(serverName, tablesForServer);
 	}
 
+	/** 
+	 * @param mainActiveSolution if null all tables from all servers are specified
+	 * @param includeModules
+	 * @param includeI18NData
+	 * @return
+	 */
 	private Map<String, List<String>> getNeededServerTables(Solution mainActiveSolution, boolean includeModules, boolean includeI18NData)
 	{
 		DataSourceCollectorVisitor collector = new DataSourceCollectorVisitor();
+		//IF NO SOLUTION SPECIFFIED GET ALL TABLES FROM ALL SERVERS
+		if (mainActiveSolution == null)
+		{
+			IServerManagerInternal sm = ApplicationServerSingleton.get().getServerManager();
+			String[] serverNames = sm.getServerNames(true, true, false, false);
+			Map<String, List<String>> neededServersTablesMap = new HashMap<String, List<String>>();
+			try
+			{
+				for (String serverName : serverNames)
+				{
+					for (String tableName : getDBITableNames(serverName))
+					{
+						addServerTable(neededServersTablesMap, serverName, tableName);
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				Debug.error(e);
+			}
+			return neededServersTablesMap;
+		}
+		//NORMAL CASE WHENSOLUTION SPECIFIED AS PARAMETER
 		//get modules to export if needed, or just the active project
 		if (includeModules)
 		{
@@ -292,6 +325,36 @@ public class ServoyExporterUtils
 			mainActiveSolution.getI18nTableName());
 
 		return neededServersTablesMap;
+	}
+
+	List<String> getDBITableNames(String serverName)
+	{
+		List<String> list = new ArrayList<String>();
+
+		ServoyResourcesProject rp = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
+		IFolder serverFolder = rp.getProject().getFolder("datasources").getFolder(serverName);
+		IResource[] files;
+		try
+		{
+			if (serverFolder.exists() && serverFolder.isAccessible())
+			{
+				files = serverFolder.members();
+				for (IResource file : files)
+				{
+					String name = file.getName();
+					if (name.endsWith(".dbi"))
+					{
+						list.add(name.substring(0, name.indexOf(".dbi")).toLowerCase());
+					}
+				}
+			}
+		}
+		catch (CoreException e)
+		{
+			Debug.error(e);
+		}
+
+		return list;
 	}
 
 	public boolean isDatabaseDownErrorMakrer(IMarker marker)

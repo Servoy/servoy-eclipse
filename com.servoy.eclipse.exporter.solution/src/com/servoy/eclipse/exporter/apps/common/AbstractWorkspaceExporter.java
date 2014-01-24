@@ -336,7 +336,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 
 							if (errors.size() > 0)
 							{
-								output("Found error markers in solution. "); //$NON-NLS-1$
+								output("Found error markers in solution " + solutionName); //$NON-NLS-1$
 
 								for (IMarker marker : errors)
 								{
