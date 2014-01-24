@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import com.servoy.eclipse.exporter.mobile.ui.wizard.ExportMobileWizard.IMobileExportPropertiesPage;
 import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 
@@ -36,7 +37,7 @@ import com.servoy.j2db.server.shared.ApplicationServerSingleton;
  * @author lvostinar
  *
  */
-public class LicensePage extends WizardPage
+public class LicensePage extends WizardPage implements IMobileExportPropertiesPage
 {
 	public static String COMPANY_KEY = "company";
 	public static String LICENSE_KEY = "license";
@@ -134,8 +135,6 @@ public class LicensePage extends WizardPage
 	@Override
 	public IWizardPage getNextPage()
 	{
-		getDialogSettings().put(COMPANY_KEY, companyText.getText());
-		getDialogSettings().put(LICENSE_KEY, licenseText.getText());
 		if (ApplicationServerSingleton.get().checkMobileLicense(companyText.getText(), licenseText.getText()))
 		{
 			mobileExporter.setSkipConnect(true);
@@ -145,6 +144,13 @@ public class LicensePage extends WizardPage
 			mobileExporter.setSkipConnect(false);
 		}
 		return nextPage;
+	}
+
+	public boolean saveProperties()
+	{
+		getDialogSettings().put(COMPANY_KEY, companyText.getText());
+		getDialogSettings().put(LICENSE_KEY, licenseText.getText());
+		return true;
 	}
 
 }
