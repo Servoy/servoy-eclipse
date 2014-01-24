@@ -52,6 +52,7 @@ import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 import com.servoy.eclipse.exporter.mobile.ui.wizard.ExportMobileWizard.CustomizedFinishPage;
+import com.servoy.eclipse.exporter.mobile.ui.wizard.ExportMobileWizard.IMobileExportPropertiesPage;
 import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -62,7 +63,7 @@ import com.servoy.j2db.util.Debug;
  * @author lvostinar
  *
  */
-public class WarExportPage extends WizardPage
+public class WarExportPage extends WizardPage implements IMobileExportPropertiesPage
 {
 	public static String OUTPUT_PATH_KEY = "initialOutputPath";
 	public static String PHONEGAP_EMAIL = "phonegapEmail";
@@ -323,8 +324,6 @@ public class WarExportPage extends WizardPage
 		{
 			phoneGapUsername.setText(getDialogSettings().get(PHONEGAP_EMAIL)); // fill in the last used email address
 		}
-		//try to load the apps (for the case when the user clicks finish on first wizard page)
-		pgAppPage.getConnector().loadPhoneGapAcount(phoneGapUsername.getText(), phoneGapPassword.getText());
 	}
 
 	private void updateWizardState()
@@ -387,8 +386,6 @@ public class WarExportPage extends WizardPage
 				final String[] errorMessage = new String[1];
 				final String username = phoneGapUsername.getText();
 				final String password = phoneGapPassword.getText();
-				getDialogSettings().put(WarExportPage.PHONEGAP_EMAIL, username);
-				getDialogSettings().put(WarExportPage.IN_SECURE_STORE, savePasswordCheck.getSelection());
 				try
 				{
 					PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress()
@@ -411,25 +408,6 @@ public class WarExportPage extends WizardPage
 				{
 					setErrorMessage(errorMessage[0]);
 					return null;
-				}
-				else if (savePasswordCheck.getSelection())
-				{
-					// new PhoneGap account or updating existing account
-					ISecurePreferences securePreferences = SecurePreferencesFactory.getDefault();
-					ISecurePreferences node = securePreferences.node(SECURE_STORAGE_ACCOUNTS_NODE);
-					try
-					{
-						if (!password.equals(node.get(username, null)))
-						{
-							node.put(username, password, true);
-						}
-					}
-					catch (StorageException e)
-					{
-						Debug.error(e);
-						setErrorMessage("Cannot save the password to Secure Storage: " + e.getMessage() + " Please check your Secure Storage settings.");
-						return null;
-					}
 				}
 				pgAppPage.populateExistingApplications();
 				return pgAppPage;
@@ -492,9 +470,6 @@ public class WarExportPage extends WizardPage
 		{
 			ServoyLog.logError(e);
 		}
-
-
-		getDialogSettings().put(WarExportPage.OUTPUT_PATH_KEY, getOutputFolder());
 		return errorMessage[0];
 	}
 
@@ -535,4 +510,49 @@ public class WarExportPage extends WizardPage
 		return super.getErrorMessage();
 	}
 
+	String getPassword()
+	{
+		return phoneGapPassword.getText();
+	}
+
+	String getUsername()
+	{
+		return phoneGapUsername.getText();
+	}
+
+	@Override
+	public boolean saveProperties()
+	{
+		if (isWarExport())
+		{
+			getDialogSettings().put(WarExportPage.OUTPUT_PATH_KEY, getOutputFolder());
+		}
+		else
+		{
+			getDialogSettings().put(WarExportPage.PHONEGAP_EMAIL, phoneGapUsername.getText());
+			getDialogSettings().put(WarExportPage.IN_SECURE_STORE, savePasswordCheck.getSelection());
+			if (savePasswordCheck.getSelection())
+			{
+				// new PhoneGap account or updating existing account
+				ISecurePreferences securePreferences = SecurePreferencesFactory.getDefault();
+				ISecurePreferences node = securePreferences.node(SECURE_STORAGE_ACCOUNTS_NODE);
+				String password = phoneGapPassword.getText();
+				String username = phoneGapUsername.getText();
+				try
+				{
+					if (!password.equals(node.get(username, null)))
+					{
+						node.put(username, password, true);
+					}
+				}
+				catch (StorageException e)
+				{
+					Debug.error(e);
+					setErrorMessage("Cannot save the password to Secure Storage: " + e.getMessage() + " Please check your Secure Storage settings.");
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 }

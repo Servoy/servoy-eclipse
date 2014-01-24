@@ -131,6 +131,8 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 	@Override
 	public boolean performFinish()
 	{
+		if (!saveDialogProperties()) return false;
+
 		boolean finished = false;
 		if (warExportPage.isWarExport())
 		{
@@ -144,6 +146,23 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 		return finished;
 	}
 
+	/**
+	 * Save all dialog properties on finish.
+	 */
+	private boolean saveDialogProperties()
+	{
+		boolean saved = true;
+		for (int i = 0; i < getPageCount(); i++)
+		{
+			IWizardPage page = getPages()[i];
+			if (page instanceof IMobileExportPropertiesPage)
+			{
+				saved = saved && ((IMobileExportPropertiesPage)page).saveProperties();
+			}
+		}
+		return saved;
+	}
+
 	private boolean exportToPhoneGap()
 	{
 		try
@@ -151,12 +170,14 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 			final PhoneGapApplication app = pgAppPage.getPhoneGapApplication();
 			final File configFile = pgAppPage.getConfigFile();
 			final boolean openPhoneGapUrl = pgAppPage.openPhoneGapUrl();
+			final String username = warExportPage.getUsername();
+			final String password = warExportPage.getPassword();
 			Job uploadToPhoneGap = new Job("Uploading to PhoneGap build")
 			{
 				@Override
 				protected IStatus run(IProgressMonitor monitor)
 				{
-					String error = pgAppPage.getConnector().createOrUpdatePhoneGapApplication(app, mobileExporter, configFile);
+					String error = pgAppPage.getConnector().createOrUpdatePhoneGapApplication(username, password, app, mobileExporter, configFile);
 					if (error != null)
 					{
 						return new Status(IStatus.ERROR, com.servoy.eclipse.exporter.mobile.Activator.PLUGIN_ID, error);
@@ -344,5 +365,14 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 		{
 			return openURL != null && openURL.getSelection();
 		}
+	}
+
+	/**
+	 * Interface for wizard pages to save last used settings. 
+	 * @author emera
+	 */
+	interface IMobileExportPropertiesPage
+	{
+		public boolean saveProperties();
 	}
 }

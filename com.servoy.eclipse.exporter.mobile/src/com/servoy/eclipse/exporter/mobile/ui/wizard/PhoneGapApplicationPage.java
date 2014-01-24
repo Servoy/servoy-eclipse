@@ -53,6 +53,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
+import com.servoy.eclipse.exporter.mobile.ui.wizard.ExportMobileWizard.IMobileExportPropertiesPage;
 import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -62,7 +63,7 @@ import com.servoy.j2db.util.Utils;
  * @author lvostinar
  *
  */
-public class PhoneGapApplicationPage extends WizardPage
+public class PhoneGapApplicationPage extends WizardPage implements IMobileExportPropertiesPage
 {
 	private WarExportPage warExportPage;
 	private final PhoneGapConnector connector;
@@ -368,7 +369,6 @@ public class PhoneGapApplicationPage extends WizardPage
 		super.setErrorMessage(null);
 		if (isPageComplete())
 		{
-			saveDefaultData();
 			EditorUtil.saveDirtyEditors(getShell(), true);
 
 			File configFile = getConfigFile();
@@ -420,36 +420,6 @@ public class PhoneGapApplicationPage extends WizardPage
 		catch (SAXException e)
 		{
 			throw new Exception("The XML configuration file cannot be parsed: " + e.getMessage());
-		}
-	}
-
-
-	private void saveDefaultData()
-	{
-		String solutionName = exporter.getSolutionName();
-		getDialogSettings().put(HAS_CONFIG_FILE_KEY + solutionName, btnUseConfigXml.getSelection());
-		getDialogSettings().put(CONFIG_FILE_PATH_KEY + solutionName, configPath.getText());
-		getDialogSettings().put(APPLICATION_NAME_KEY + solutionName, applicationNameCombo.getText());
-		getDialogSettings().put(APPLICATION_DESCRIPTION_KEY + solutionName, txtDescription.getText());
-		getDialogSettings().put(APPLICATION_VERSION_KEY + solutionName, txtVersion.getText());
-		getDialogSettings().put(IS_APPLICATION_PUBLIC_KEY + solutionName, btnPublic.getSelection());
-		getDialogSettings().put(APPLICATION_ICON_KEY + solutionName, iconPath.getText());
-		storeSelectedCertificates();
-		getDialogSettings().put(OPEN_PHONEGAP_BUILD_PAGE_KEY, btnOpenPhonegapLink.getSelection());
-	}
-
-	private void storeSelectedCertificates()
-	{
-		String[] selectedCertificates = getSelectedCerticates();
-		String certificates = "";
-		for (int i = 0; i < selectedCertificates.length; i++)
-		{
-			certificates += selectedCertificates[i];
-			if (i < selectedCertificates.length - 1) certificates += ",";
-		}
-		if (!certificates.equals(""))
-		{
-			getDialogSettings().put(CERTIFICATES_KEY + exporter.getSolutionName(), certificates);
 		}
 	}
 
@@ -538,5 +508,36 @@ public class PhoneGapApplicationPage extends WizardPage
 	public void setWarExportPage(WarExportPage warExportPage)
 	{
 		this.warExportPage = warExportPage;
+	}
+
+	@Override
+	public boolean saveProperties()
+	{
+		String solutionName = exporter.getSolutionName();
+		getDialogSettings().put(HAS_CONFIG_FILE_KEY + solutionName, btnUseConfigXml.getSelection());
+		getDialogSettings().put(CONFIG_FILE_PATH_KEY + solutionName, configPath.getText());
+		getDialogSettings().put(APPLICATION_NAME_KEY + solutionName, applicationNameCombo.getText());
+		getDialogSettings().put(APPLICATION_DESCRIPTION_KEY + solutionName, txtDescription.getText());
+		getDialogSettings().put(APPLICATION_VERSION_KEY + solutionName, txtVersion.getText());
+		getDialogSettings().put(IS_APPLICATION_PUBLIC_KEY + solutionName, btnPublic.getSelection());
+		getDialogSettings().put(APPLICATION_ICON_KEY + solutionName, iconPath.getText());
+		storeSelectedCertificates();
+		getDialogSettings().put(OPEN_PHONEGAP_BUILD_PAGE_KEY, btnOpenPhonegapLink.getSelection());
+		return true;
+	}
+
+	private void storeSelectedCertificates()
+	{
+		String[] selectedCertificates = getSelectedCerticates();
+		String certificates = "";
+		for (int i = 0; i < selectedCertificates.length; i++)
+		{
+			certificates += selectedCertificates[i];
+			if (i < selectedCertificates.length - 1) certificates += ",";
+		}
+		if (!certificates.equals(""))
+		{
+			getDialogSettings().put(CERTIFICATES_KEY + exporter.getSolutionName(), certificates);
+		}
 	}
 }

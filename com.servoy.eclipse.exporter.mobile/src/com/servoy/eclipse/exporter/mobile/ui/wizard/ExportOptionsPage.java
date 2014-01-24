@@ -31,13 +31,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import com.servoy.eclipse.exporter.mobile.ui.wizard.ExportMobileWizard.IMobileExportPropertiesPage;
 import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 
 /**
  * @author lvostinar
  *
  */
-public class ExportOptionsPage extends WizardPage
+public class ExportOptionsPage extends WizardPage implements IMobileExportPropertiesPage
 {
 	public static String SERVER_URL_KEY = "serverURL";
 	public static String SERVICE_SOLUTION_KEY_PREFIX = "serviceSolution_";
@@ -222,10 +223,6 @@ public class ExportOptionsPage extends WizardPage
 		mobileExporter.setServiceSolutionName(getServiceSolutionName());
 		mobileExporter.setTimeout(Integer.parseInt(getTimeout()));
 		mobileExporter.setDebugMode(useDebugMode());
-		getDialogSettings().put(ExportOptionsPage.SERVER_URL_KEY, serverURL.getText());
-		getDialogSettings().put(ExportOptionsPage.SERVICE_SOLUTION_KEY_PREFIX + mobileExporter.getSolutionName(), getServiceSolutionName());
-		getDialogSettings().put(ExportOptionsPage.TIMEOUT_KEY, getTimeout());
-		getDialogSettings().put(ExportOptionsPage.DEBUG_MODE_KEY, useDebugMode());
 		return nextPage;
 	}
 
@@ -233,6 +230,16 @@ public class ExportOptionsPage extends WizardPage
 	public boolean canFlipToNextPage()
 	{
 		return getErrorMessage() == null;
+	}
+
+	@Override
+	public boolean saveProperties()
+	{
+		getDialogSettings().put(ExportOptionsPage.SERVER_URL_KEY, serverURL.getText());
+		getDialogSettings().put(ExportOptionsPage.SERVICE_SOLUTION_KEY_PREFIX + mobileExporter.getSolutionName(), getServiceSolutionName());
+		getDialogSettings().put(ExportOptionsPage.TIMEOUT_KEY, getTimeout());
+		getDialogSettings().put(ExportOptionsPage.DEBUG_MODE_KEY, useDebugMode());
+		return true;
 	}
 
 }

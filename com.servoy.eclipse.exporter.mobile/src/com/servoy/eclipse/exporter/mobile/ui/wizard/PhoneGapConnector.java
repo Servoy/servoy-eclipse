@@ -288,8 +288,16 @@ public class PhoneGapConnector
 		}
 	}
 
-	public String createOrUpdatePhoneGapApplication(PhoneGapApplication application, MobileExporter mobileExporter, File configFile)
+	public String createOrUpdatePhoneGapApplication(String username, String password, PhoneGapApplication application, MobileExporter mobileExporter,
+		File configFile)
 	{
+		//make sure we have loaded the account and have the latest data before export
+		String loadError = loadPhoneGapAcount(username, password);
+		if (loadError != null)
+		{
+			return loadError;
+		}
+
 		File exportedFile = null;
 		try
 		{
