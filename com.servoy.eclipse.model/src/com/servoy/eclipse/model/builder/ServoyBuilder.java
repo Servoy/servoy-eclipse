@@ -174,7 +174,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 {
 	public static int MAX_EXCEPTIONS = 25;
 	public static int MIN_FIELD_LENGTH = 1000;
-	public static String BUILD_USING_DBI = "BUILD_USING_DBI";
 
 	public static int exceptionCount = 0;
 
@@ -596,7 +595,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	{
 		// make sure the IServoyModel is initialized
 		getServoyModel();
-		useDBItables = (args == null) ? false : Boolean.valueOf(args.get(BUILD_USING_DBI));
 		referencedProjectsSet.clear();
 		moduleProjectsSet.clear();
 

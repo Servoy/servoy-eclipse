@@ -38,6 +38,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 	// this must not be done in constructor as it calls an abstract method that can end up setting fields in an extending class - fields that are not yet set to default values and will be after the constructor of this class finishes
 	public void initialize(String[] args)
 	{
+		printArguments(args);
 		if (args.length == 0) mustShowHelp = true;
 		else
 		{
@@ -126,6 +127,17 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 				}
 			}
 		}
+	}
+
+	void printArguments(String args[])
+	{
+		StringBuilder sb = new StringBuilder();
+		for (String str : args)
+		{
+			sb.append(str).append(" ");
+		}
+
+		info("Arguments: " + sb.toString(), ILogLevel.ERROR);
 	}
 
 	public abstract String getHelpMessage();

@@ -370,43 +370,6 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		}
 
 		@Override
-		public IWizardPage getNextPage()
-		{
-			//
-			try
-			{
-				getContainer().run(true, true, new IRunnableWithProgress()
-				{
-					public void run(IProgressMonitor monitor) throws InterruptedException
-					{
-						monitor.beginTask("Building using DBI files", 0);
-						IProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject();
-						Map<String, String> buildUsingDBI = null;
-						if (modulesSelectionPage.hasDBDownErrors())
-						{
-							buildUsingDBI = new HashMap<String, String>();
-							buildUsingDBI.put(ServoyBuilder.BUILD_USING_DBI, "true");
-						}
-						try
-						{
-							project.build(IncrementalProjectBuilder.FULL_BUILD, ServoyBuilder.BUILDER_ID, buildUsingDBI, monitor);
-						}
-						catch (CoreException e)
-						{
-							monitor.done();
-							Debug.error(e);
-						}
-					}
-				});
-			}
-			catch (Exception e)
-			{
-				Debug.error(e);
-			}
-			return super.getNextPage();
-		}
-
-		@Override
 		public IWizardPage getPreviousPage()
 		{
 			return null;
