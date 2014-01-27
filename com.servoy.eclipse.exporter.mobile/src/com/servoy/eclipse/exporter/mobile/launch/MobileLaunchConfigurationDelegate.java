@@ -135,7 +135,7 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		{
 			webBrowser = PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser();
 		}
-		openBrowser(webBrowser, getBrowserDescriptor(browserID), launch, configuration, monitor);
+		openBrowser(webBrowser, launch, configuration, monitor);
 	}
 
 	protected void beforeWaitForDeployment(IProgressMonitor monitor, ILaunchConfiguration configuration) throws CoreException
@@ -169,13 +169,12 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		return warExportDir;
 	}
 
-	protected void openBrowser(IWebBrowser webBrowser, IBrowserDescriptor browserDescriptor, ILaunch launch, ILaunchConfiguration configuration,
-		IProgressMonitor monitor) throws CoreException
+	protected void openBrowser(IWebBrowser webBrowser, ILaunch launch, ILaunchConfiguration configuration, IProgressMonitor monitor) throws CoreException
 	{
 		if (monitor != null) monitor.subTask("opening mobile client in browser");
 		try
 		{
-			EditorUtil.openURL(webBrowser, browserDescriptor, getApplicationURL(configuration));
+			EditorUtil.openURL(webBrowser, getApplicationURL(configuration));
 		}
 		catch (final Throwable e)
 		{
@@ -220,7 +219,7 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		exporter.setSkipConnect(validLicense);
 	}
 
-	public static IBrowserDescriptor getBrowserDescriptor(String browserId)
+	private static IBrowserDescriptor getBrowserDescriptor(String browserId)
 	{
 		Iterator iterator = BrowserManager.getInstance().getWebBrowsers().iterator();
 		try

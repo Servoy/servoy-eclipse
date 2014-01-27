@@ -884,18 +884,9 @@ public class EditorUtil
 		return null;
 	}
 
-	public static void openURL(IWebBrowser webBrowser, IBrowserDescriptor browserDescriptor, String url) throws Exception
+	public static void openURL(IWebBrowser webBrowser, String url) throws Exception
 	{
-		// temporary implementation until we upgrade to eclipse 4.3
-		// see https://bugs.eclipse.org/bugs/show_bug.cgi?format=multiple&id=405942
-		if (browserDescriptor != null && browserDescriptor.getLocation() != null && browserDescriptor.getLocation().contains(" "))
-		{
-			String[] command = new String[2];
-			command[0] = browserDescriptor.getLocation();
-			command[1] = url;
-			Runtime.getRuntime().exec(command);
-		}
-		else
+		if (webBrowser != null && url != null)
 		{
 			webBrowser.openURL(new URL(url));
 		}
