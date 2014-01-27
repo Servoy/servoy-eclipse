@@ -23357,7 +23357,20 @@ Deprecated method to handle pre-6.1 calls to varargs function foundset.loadRecor
             <description clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.
 If the foundset is related this function is not allowed.
 
-see foundset.loadRecords(QBSelect).]]></description>
+see foundset.loadRecords(QBSelect).
+
+When possible, the foundset will be loaded with the given query.
+This is not always possible because the foundset needs to manipulate the query when adding conditions and joins.
+In that case the query will be wrapped: select pk from tab where pk = (queryString)
+The result is the same, except for te ordering in the queryString which will be ignored.
+
+The query will be wrapped when one of the following is true:
+<ul>
+<li>you have no order-by clause</li>
+<li>you have no from keyword</li>
+<li>your query is not fully qualified on the main table</li>
+<li>you have a group-by, having, join or union keyword</li>
+</ul>]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
@@ -23382,7 +23395,20 @@ see foundset.loadRecords(QBSelect).]]></description>
             <description clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.
 If the foundset is related this function is not allowed.
 
-see foundset.loadRecords(QBSelect).]]></description>
+see foundset.loadRecords(QBSelect).
+
+When possible, the foundset will be loaded with the given query.
+This is not always possible because the foundset needs to manipulate the query when adding conditions and joins.
+In that case the query will be wrapped: select pk from tab where pk = (queryString)
+The result is the same, except for te ordering in the queryString which will be ignored.
+
+The query will be wrapped when one of the following is true:
+<ul>
+<li>you have no order-by clause</li>
+<li>you have no from keyword</li>
+<li>your query is not fully qualified on the main table</li>
+<li>you have a group-by, having, join or union keyword</li>
+</ul>]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
@@ -60956,8 +60982,8 @@ It will be used to override/set configuration properties in order to customize t
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[// adding a new TinyMCE plugin (same for skin or theme)
 // this code assumes plugin.min.js was copied in web server at specified path
-// NOTE: we use external plugin, not plugin, in order for file to be accessible from web server 
-element.putClientProperty(APP_UI_PROPERTY.HTML_EDITOR_CONFIGURATION, '{external_plugins: { "link": "/servoy-webclient/tinymce/plugins/link/plugin.min.js"}}')
+// NOTE: we use external plugin, not plugin, in order for file to be accessible from web server; for this example, pluging.min.js file must be copied under ServoyInstall/application_server/server/webapps/ROOT/tinymce/plugins/link
+element.putClientProperty(APP_UI_PROPERTY.HTML_EDITOR_CONFIGURATION, '{external_plugins: { "link": "../../../tinymce/plugins/link/plugin.min.js"}}')
 
 // change the editor configuration (add menubar, status bar and change toolbar)
 element.putClientProperty(APP_UI_PROPERTY.HTML_EDITOR_CONFIGURATION, '{menubar: "tools table format view insert edit", statusbar : true, toolbar: "undo redo | styleselect | bold italic"}')]]></sample>
@@ -62477,14 +62503,70 @@ if (count == 0)
         </function>
         <function clientSupport="wc,sc" name="find">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the foundset is now in find mode, false otherwise.]]></return>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Set the foundset in find mode. (Start a find request), use the "search" function to perform/exit the find.
+
+Before going into find mode, all unsaved records will be saved in the database.
+If this fails (due to validation failures or sql errors) or is not allowed (autosave off), the foundset will not go into find mode.
+Make sure the operator and the data (value) are part of the string passed to dataprovider (included inside a pair of quotation marks).
+Note: always make sure to check the result of the find() method.
+
+When in find mode, columns can be assigned string expressions (including operators) that are evaluated as:
+General:
+      c1||c2    (condition1 or condition2)
+      c|format  (apply format on condition like 'x|dd-MM-yyyy')
+      !c        (not condition)
+      #c        (modify condition, depends on column type)
+      ^         (is null)
+      ^=        (is null or empty)
+      &lt;x     (less than value x)
+      &gt;x     (greater than value x)
+      &lt;=x    (less than or equals value x)
+      &gt;=x    (greater than or equals value x)
+      x...y     (between values x and y, including values)
+      x         (equals value x)
+
+ Number fields:
+      =x       (equals value x)
+      ^=       (is null or zero)
+
+ Date fields:
+      #c       (equals value x, entire day)
+      now      (equals now, date and or time)
+      //       (equals today)
+      today    (equals today)
+
+ Text fields:
+      #c	        (case insensitive condition)
+      = x      (equals a space and 'x')
+      ^=       (is null or empty)
+      %x%      (contains 'x')
+      %x_y%    (contains 'x' followed by any char and 'y')
+      \%      (contains char '%')
+      \_      (contains char '_')
+
+Related columns can be assigned, they will result in related searches.
+For example, "employees_to_department.location_id = headoffice" finds all employees in the specified location).
+
+Searching on related aggregates is supported.
+For example, "orders_to_details.total_amount = '&gt;1000'" finds all orders with total order details amount more than 1000.
+
+Arrays can be used for searching a number of values, this will result in an 'IN' condition that will be used in the search.
+The values are not restricted to strings but can be any type that matches the column type.
+For example, "record.department_id = [1, 33, 99]"]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Set the foundset in find mode.]]></summary>
+          </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[if (%%prefix%%controller.find()) //find will fail if autosave is disabled and there are unsaved records
+            <sample clientSupport="wc,sc"><![CDATA[if (%%prefix%%foundset.find()) //find will fail if autosave is disabled and there are unsaved records
 {
 	columnTextDataProvider = 'a search value'
-	columnNumberDataProvider = '>10'
+	// for numbers you have to make sure to format it correctly so that the decimal point is in your locales notation (. or ,)
+	columnNumberDataProvider = '>' + utils.numberFormat(anumber, '####.00');
 	columnDateDataProvider = '31-12-2010|dd-MM-yyyy'
-	%%prefix%%controller.search()
+	%%prefix%%foundset.search()
 }]]></sample>
           </samples>
         </function>
@@ -63080,7 +63162,20 @@ Deprecated method to handle pre-6.1 calls to varargs function controller.loadRec
             <description clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.
 If the foundset is related this function is not allowed.
 
-see foundset.loadRecords(QBSelect).]]></description>
+see foundset.loadRecords(QBSelect).
+
+When possible, the foundset will be loaded with the given query.
+This is not always possible because the foundset needs to manipulate the query when adding conditions and joins.
+In that case the query will be wrapped: select pk from tab where pk = (queryString)
+The result is the same, except for te ordering in the queryString which will be ignored.
+
+The query will be wrapped when one of the following is true:
+<ul>
+<li>you have no order-by clause</li>
+<li>you have no from keyword</li>
+<li>your query is not fully qualified on the main table</li>
+<li>you have a group-by, having, join or union keyword</li>
+</ul>]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
@@ -63104,7 +63199,20 @@ see foundset.loadRecords(QBSelect).]]></description>
             <description clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.
 If the foundset is related this function is not allowed.
 
-see foundset.loadRecords(QBSelect).]]></description>
+see foundset.loadRecords(QBSelect).
+
+When possible, the foundset will be loaded with the given query.
+This is not always possible because the foundset needs to manipulate the query when adding conditions and joins.
+In that case the query will be wrapped: select pk from tab where pk = (queryString)
+The result is the same, except for te ordering in the queryString which will be ignored.
+
+The query will be wrapped when one of the following is true:
+<ul>
+<li>you have no order-by clause</li>
+<li>you have no from keyword</li>
+<li>your query is not fully qualified on the main table</li>
+<li>you have a group-by, having, join or union keyword</li>
+</ul>]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
@@ -63383,11 +63491,25 @@ Lookups are defined in the dataprovider (columns) auto-enter setting and are nor
         </function>
         <function clientSupport="wc,sc" name="search">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[the recordCount]]></return>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.
+Reduce results from previous searches.
+
+Note: Omitted records are automatically excluded when performing a search - meaning that the foundset result by default will not include omitted records.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.]]></summary>
+          </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[var recordCount = %%prefix%%controller.search();
-//var recordCount = %%prefix%%controller.search(false,false); //to extend foundset]]></sample>
+            <sample clientSupport="wc,sc"><![CDATA[var recordCount = %%prefix%%foundset.search();
+//var recordCount = %%prefix%%foundset.search(false,false); //to extend foundset]]></sample>
           </samples>
+          <parameters>
+            <parameter name="clearLastResults">
+              <description><![CDATA[boolean, clear previous search, default true]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function clientSupport="wc,sc" name="search">
           <argumentsTypes>
