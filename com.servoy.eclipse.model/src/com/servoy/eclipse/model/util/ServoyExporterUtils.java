@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,6 @@ import org.json.JSONException;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.IServerManagerInternal;
@@ -107,30 +107,7 @@ public class ServoyExporterUtils
 		{
 			final String serverName = neededServersTableEntry.getKey();
 			final List<String> tables = neededServersTableEntry.getValue();
-			IFolder serverInformationFolder = dmm.getDBIFileContainer(serverName);
-			final List<IFile> dbiz = new ArrayList<IFile>();
-			if (serverInformationFolder.exists())
-			{
-				serverInformationFolder.accept(new IResourceVisitor()
-				{
-					public boolean visit(IResource resource) throws CoreException
-					{
-						String extension = resource.getFileExtension();
-						if (extension != null && extension.equalsIgnoreCase(DataModelManager.COLUMN_INFO_FILE_EXTENSION))
-						{
-							//we found a dbi file
-							String tableName = resource.getName().substring(0,
-								resource.getName().length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
-							if (tables.contains(tableName) || exportAll)
-							{
-								dbiz.add((IFile)resource);
-							}
-						}
-						return true;
-					}
-
-				}, IResource.DEPTH_ONE, false);
-			}
+			final List<IFile> dbiz = getTablesDBIList(serverName, tables, exportAll);
 
 			// minimum requirement for dbi files based export: all needed dbi files must be found
 			if (!allNeededDbiFilesExist(tables, dbiz))
@@ -227,6 +204,57 @@ public class ServoyExporterUtils
 		return new Pair<ITableDefinitionsManager, IMetadataDefManager>(tableDefManager, metadataDefManager);
 	}
 
+	private List<IFile> getTablesDBIList(String serverName, List<String> tablesNeeded, boolean exportall)
+	{
+		IFolder serverInformationFolder = ServoyModelFinder.getServoyModel().getDataModelManager().getDBIFileContainer(serverName);
+		final List<IFile> dbiz = new ArrayList<IFile>();
+		final boolean exportAll_ = exportall;
+		List<String> tablesTemp = null;
+		if (tablesNeeded == null)
+		{
+			String[] tableNamesArr = ApplicationServerSingleton.get().getServerManager().getServerNames(true, true, false, false);
+
+			tablesTemp = Arrays.asList(tableNamesArr);
+		}
+		else
+		{
+			tablesTemp = tablesNeeded;
+		}
+		final List<String> tables = tablesTemp;
+
+		if (serverInformationFolder.exists())
+		{
+			try
+			{
+				serverInformationFolder.accept(new IResourceVisitor()
+				{
+					public boolean visit(IResource resource) throws CoreException
+					{
+						String extension = resource.getFileExtension();
+						if (extension != null && extension.equalsIgnoreCase(DataModelManager.COLUMN_INFO_FILE_EXTENSION))
+						{
+							//we found a dbi file
+							String tableName = resource.getName().substring(0,
+								resource.getName().length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
+							if (tables.contains(tableName) || exportAll_)
+							{
+								dbiz.add((IFile)resource);
+							}
+						}
+						return true;
+					}
+
+				}, IResource.DEPTH_ONE, false);
+			}
+			catch (CoreException e)
+			{
+				Debug.error(e);
+			}
+		}
+		return dbiz;
+
+	}
+
 	private boolean allNeededDbiFilesExist(List<String> neededTableNames, List<IFile> existingDbiFiles)
 	{
 		if (neededTableNames != null && existingDbiFiles != null && neededTableNames.size() > 0 && existingDbiFiles.size() == 0) return false;
@@ -284,8 +312,10 @@ public class ServoyExporterUtils
 			{
 				for (String serverName : serverNames)
 				{
-					for (String tableName : getDBITableNames(serverName))
+					for (IFile tableDbiFile : getTablesDBIList(serverName, null, true))
 					{
+						String name = tableDbiFile.getName();
+						String tableName = name.substring(0, name.indexOf(DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT)).toLowerCase();
 						addServerTable(neededServersTablesMap, serverName, tableName);
 					}
 				}
@@ -325,36 +355,6 @@ public class ServoyExporterUtils
 			mainActiveSolution.getI18nTableName());
 
 		return neededServersTablesMap;
-	}
-
-	List<String> getDBITableNames(String serverName)
-	{
-		List<String> list = new ArrayList<String>();
-
-		ServoyResourcesProject rp = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
-		IFolder serverFolder = rp.getProject().getFolder("datasources").getFolder(serverName);
-		IResource[] files;
-		try
-		{
-			if (serverFolder.exists() && serverFolder.isAccessible())
-			{
-				files = serverFolder.members();
-				for (IResource file : files)
-				{
-					String name = file.getName();
-					if (name.endsWith(".dbi"))
-					{
-						list.add(name.substring(0, name.indexOf(".dbi")).toLowerCase());
-					}
-				}
-			}
-		}
-		catch (CoreException e)
-		{
-			Debug.error(e);
-		}
-
-		return list;
 	}
 
 	public boolean isDatabaseDownErrorMakrer(IMarker marker)

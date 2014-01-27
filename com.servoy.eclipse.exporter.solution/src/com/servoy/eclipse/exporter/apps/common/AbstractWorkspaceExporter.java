@@ -319,13 +319,6 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 							sm.buildActiveProjects(null, true);
 
 							// check project markers
-							// TODO we should really be able to tell Servoy Builder to use an abstractisation of table model (dbi info)
-							// instead of the actual tables - if we want nice -dbi or -dbd export; until then, -dbi and -dbd will both ignore
-							// all error markers and allow export to start (cause builder generates errors based on database only and it would be hard
-							// to differentiate between them and also keep track of this in the future without that abstractisation);
-							// if -dbi is used then switch builder to that state here
-							// (developer exporter should be adjusted in this case as well, maybe with some subtle differences)
-
 							// for solution and/or (some) modules
 							List<IMarker> errors = new ArrayList<IMarker>();
 							List<IMarker> warnings = new ArrayList<IMarker>();

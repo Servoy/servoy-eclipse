@@ -625,6 +625,12 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			checkMetadataTablesButton.setText("Check metadata tables."); //$NON-NLS-1$ 
 			checkMetadataTablesButton.setSelection(exportModel.isCheckMetadataTables());
 			checkMetadataTablesButton.addListener(SWT.Selection, this);
+			if (modulesSelectionPage.hasDBDownErrors())
+			{
+				checkMetadataTablesButton.setSelection(false);
+				checkMetadataTablesButton.setEnabled(false);
+				checkMetadataTablesButton.setText("Check metadata tables.  (one or more used databases is unreacheable) "); //$NON-NLS-1$ 
+			}
 
 			exportSampleDataButton = new Button(composite, SWT.CHECK);
 			exportSampleDataButton.setText("Export solution sample data."); //$NON-NLS-1$ 
@@ -634,7 +640,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			{
 				exportSampleDataButton.setSelection(false);
 				exportSampleDataButton.setEnabled(false);
-				exportSampleDataButton.setText("Export solution sample data. (one or more used databases is unreacheable)");
+				exportSampleDataButton.setText("Export solution sample data.(one or more used databases is unreacheable)");
 			}
 
 			Composite horizontalComposite = new Composite(composite, SWT.None);
