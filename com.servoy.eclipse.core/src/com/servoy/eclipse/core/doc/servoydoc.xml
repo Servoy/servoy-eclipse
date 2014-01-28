@@ -23357,7 +23357,20 @@ Deprecated method to handle pre-6.1 calls to varargs function foundset.loadRecor
             <description clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.
 If the foundset is related this function is not allowed.
 
-see foundset.loadRecords(QBSelect).]]></description>
+see foundset.loadRecords(QBSelect).
+
+When possible, the foundset will be loaded with the given query.
+This is not always possible because the foundset needs to manipulate the query when adding conditions and joins.
+In that case the query will be wrapped: select pk from tab where pk = (queryString)
+The result is the same, except for te ordering in the queryString which will be ignored.
+
+The query will be wrapped when one of the following is true:
+<ul>
+<li>you have no order-by clause</li>
+<li>you have no from keyword</li>
+<li>your query is not fully qualified on the main table</li>
+<li>you have a group-by, having, join or union keyword</li>
+</ul>]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
@@ -23382,7 +23395,20 @@ see foundset.loadRecords(QBSelect).]]></description>
             <description clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.
 If the foundset is related this function is not allowed.
 
-see foundset.loadRecords(QBSelect).]]></description>
+see foundset.loadRecords(QBSelect).
+
+When possible, the foundset will be loaded with the given query.
+This is not always possible because the foundset needs to manipulate the query when adding conditions and joins.
+In that case the query will be wrapped: select pk from tab where pk = (queryString)
+The result is the same, except for te ordering in the queryString which will be ignored.
+
+The query will be wrapped when one of the following is true:
+<ul>
+<li>you have no order-by clause</li>
+<li>you have no from keyword</li>
+<li>your query is not fully qualified on the main table</li>
+<li>you have a group-by, having, join or union keyword</li>
+</ul>]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
@@ -61103,6 +61129,21 @@ DEFAULT: false]]></description>
             <sample clientSupport="wc,sc"><![CDATA[application.putClientProperty(APP_UI_PROPERTY.USE_SYSTEM_PRINT_DIALOG, true)]]></sample>
           </samples>
         </constant>
+        <constant clientSupport="wc,sc" name="VALUELIST_MAX_ROWS">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Property than can be set using application.putClientProperty()
+
+The value can be a positive integer representing the maximum number of rows that will be retrieved by query in database or related valuelist.
+DEFAULT: 500]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Property than can be set using application.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[application.putClientProperty(APP_UI_PROPERTY.VALUELIST_MAX_ROWS, 1000)]]></sample>
+          </samples>
+        </constant>
       </constants>
     </object>
     <object clientSupport="wc,sc" publicName="UNITS" qualifiedName="com.servoy.j2db.scripting.solutionmodel.UNITS">
@@ -63136,7 +63177,20 @@ Deprecated method to handle pre-6.1 calls to varargs function controller.loadRec
             <description clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.
 If the foundset is related this function is not allowed.
 
-see foundset.loadRecords(QBSelect).]]></description>
+see foundset.loadRecords(QBSelect).
+
+When possible, the foundset will be loaded with the given query.
+This is not always possible because the foundset needs to manipulate the query when adding conditions and joins.
+In that case the query will be wrapped: select pk from tab where pk = (queryString)
+The result is the same, except for te ordering in the queryString which will be ignored.
+
+The query will be wrapped when one of the following is true:
+<ul>
+<li>you have no order-by clause</li>
+<li>you have no from keyword</li>
+<li>your query is not fully qualified on the main table</li>
+<li>you have a group-by, having, join or union keyword</li>
+</ul>]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
@@ -63160,7 +63214,20 @@ see foundset.loadRecords(QBSelect).]]></description>
             <description clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query'). The query must be a valid sql select.
 If the foundset is related this function is not allowed.
 
-see foundset.loadRecords(QBSelect).]]></description>
+see foundset.loadRecords(QBSelect).
+
+When possible, the foundset will be loaded with the given query.
+This is not always possible because the foundset needs to manipulate the query when adding conditions and joins.
+In that case the query will be wrapped: select pk from tab where pk = (queryString)
+The result is the same, except for te ordering in the queryString which will be ignored.
+
+The query will be wrapped when one of the following is true:
+<ul>
+<li>you have no order-by clause</li>
+<li>you have no from keyword</li>
+<li>your query is not fully qualified on the main table</li>
+<li>you have a group-by, having, join or union keyword</li>
+</ul>]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Loads records into form foundset based on a query (also known as 'Form by query').]]></summary>
