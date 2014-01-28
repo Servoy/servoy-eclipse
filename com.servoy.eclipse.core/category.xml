@@ -30,7 +30,7 @@
    <feature url="features/com.servoy.eclipse.feature_7.4.0.2022.jar" id="com.servoy.eclipse.feature" version="7.4.0.2022">
       <category name="servoy.developer"/>
    </feature>
-   <feature url="features/com.servoy.css.core_1.0.0.201003231300.jar" id="com.servoy.css.core" version="1.0.0.201003231300">
+   <feature url="features/com.servoy.css.core_2.0.0.201308221100.jar" id="com.servoy.css.core" version="2.0.0.201308221100">
       <category name="servoy.css"/>
    </feature>
    <category-def name="servoy.developer" label="Servoy Developer"/>
