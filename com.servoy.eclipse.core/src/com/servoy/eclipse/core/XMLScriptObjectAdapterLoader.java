@@ -170,24 +170,13 @@ public class XMLScriptObjectAdapterLoader
 	public static void loadDocumentationForBeans(IBeanManagerInternal beanManager, IDocumentationManagerProvider documentationManagerProvider)
 	{
 		File beanDir = beanManager.getBeanDir();
-		Map<String, Object> beans = beanManager.getLoadedBeanDefs();
+		Map<String, List<Extension>> beans = beanManager.getLoadedBeanDefs();
 		List<File> allJars = new ArrayList<File>();
-		for (String beanName : beans.keySet())
+		for (List<Extension> exts : beans.values())
 		{
-			Object entry = beans.get(beanName);
-			if (entry instanceof String)
+			for (Extension ext : exts)
 			{
-				String jarName = (String)entry;
-				allJars.add(new File(beanDir, jarName));
-			}
-			else if (entry instanceof List)
-			{
-				@SuppressWarnings("unchecked")
-				List<String> jarNames = (List<String>)entry;
-				for (String jarName : jarNames)
-				{
-					allJars.add(new File(beanDir, jarName));
-				}
+				allJars.add(new File(beanDir, ext.jarFileName));
 			}
 		}
 		for (File jarPath : allJars)

@@ -30,7 +30,6 @@ import java.io.Writer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -58,6 +57,8 @@ import com.servoy.j2db.ILAFManagerInternal;
 import com.servoy.j2db.server.headlessclient.dataui.TemplateGenerator;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.JarManager;
+import com.servoy.j2db.util.JarManager.Extension;
 import com.servoy.j2db.util.SortedProperties;
 import com.servoy.j2db.util.Utils;
 
@@ -155,7 +156,7 @@ public class Exporter
 		File beanTargetDir = new File(tmpWarDir, "beans");
 		beanTargetDir.mkdirs();
 		IBeanManagerInternal beanManager = ApplicationServerSingleton.get().getBeanManager();
-		Map<String, Object> loadedBeanDefs = beanManager.getLoadedBeanDefs();
+		Map<String, List<Extension>> loadedBeanDefs = beanManager.getLoadedBeanDefs();
 		List<String> beans = exportModel.getBeans();
 		File beanProperties = new File(beanTargetDir, "beans.properties");
 		Writer fw = null;
@@ -165,14 +166,14 @@ public class Exporter
 			Set<File> writtenFiles = new HashSet<File>();
 			for (String beanName : beans)
 			{
-				String[] fileNames = getExtensions(loadedBeanDefs, beanName);
+				List<Extension> fileNames = JarManager.getExtensions(loadedBeanDefs, beanName);
 				if (fileNames != null)
 				{
-					for (String filename : fileNames)
+					for (Extension ext : fileNames)
 					{
-						File sourceFile = new File(beanSourceDir, filename);
-						copyFile(sourceFile, new File(beanTargetDir, filename));
-						writeFileEntry(fw, sourceFile, filename, writtenFiles);
+						File sourceFile = new File(beanSourceDir, ext.jarFileName);
+						copyFile(sourceFile, new File(beanTargetDir, ext.jarFileName));
+						writeFileEntry(fw, sourceFile, ext.jarFileName, writtenFiles);
 					}
 				}
 			}
@@ -260,7 +261,7 @@ public class Exporter
 		File lafTargetDir = new File(tmpWarDir, "lafs");
 		lafTargetDir.mkdirs();
 		ILAFManagerInternal lafManager = ApplicationServerSingleton.get().getLafManager();
-		Map<String, Object> loadedLafDefs = lafManager.getLoadedLAFDefs();
+		Map<String, List<Extension>> loadedLafDefs = lafManager.getLoadedLAFDefs();
 		List<String> lafs = exportModel.getLafs();
 		File lafProperties = new File(lafTargetDir, "lafs.properties");
 		fw = null;
@@ -270,14 +271,14 @@ public class Exporter
 			Set<File> writtenFiles = new HashSet<File>();
 			for (String lafName : lafs)
 			{
-				String[] fileNames = getExtensions(loadedLafDefs, lafName);
+				List<Extension> fileNames = JarManager.getExtensions(loadedLafDefs, lafName);
 				if (fileNames != null)
 				{
-					for (String filename : fileNames)
+					for (Extension ext : fileNames)
 					{
-						File sourceFile = new File(lafSourceDir, filename);
-						copyFile(sourceFile, new File(lafTargetDir, filename));
-						writeFileEntry(fw, sourceFile, filename, writtenFiles);
+						File sourceFile = new File(lafSourceDir, ext.jarFileName);
+						copyFile(sourceFile, new File(lafTargetDir, ext.jarFileName));
+						writeFileEntry(fw, sourceFile, ext.jarFileName, writtenFiles);
 					}
 				}
 			}
@@ -721,47 +722,6 @@ public class Exporter
 		catch (Exception e)
 		{
 			Debug.error("Error creating parsing the jnlp file: " + jnlpFile, e);
-		}
-		return null;
-	}
-
-	@SuppressWarnings("unchecked")
-	private static String[] getExtensions(Map<String, Object> definitions, String filename)
-	{
-		String jarFileName = filename;
-		int index = jarFileName.lastIndexOf('/');
-		if (index != -1)
-		{
-			jarFileName = jarFileName.substring(index + 1);
-		}
-		Iterator<Object> it = definitions.values().iterator();
-		while (it.hasNext())
-		{
-			Object value = it.next();
-			String[] names = null;
-			if (value instanceof String)
-			{
-				names = new String[] { (String)value };
-			}
-			else if (value instanceof List)
-			{
-				List<String> lst = (List<String>)value;
-				names = lst.toArray(new String[lst.size()]);
-			}
-			if (names != null)
-			{
-				for (String name : names)
-				{
-					index = name.lastIndexOf('/');
-					if (index == -1) index = 0;
-					else index++;
-					name = name.substring(index);
-					if (jarFileName.equals(name))
-					{
-						return names;
-					}
-				}
-			}
 		}
 		return null;
 	}
