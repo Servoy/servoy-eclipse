@@ -30,7 +30,7 @@ public class RunJSUnitHandler extends AbstractHandler
 		try
 		{
 			ILaunchConfiguration configuration = findSmartClientTestLaunchConfiguration(getTestTarget(HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().getSelection()));
-			//this call will end up in launch method of ServoyJsLaunchConfigurationDelegate
+			// this call will end up in launch method of JSUnitLaunchConfigurationDelegate
 			DebugUITools.launch(configuration, ILaunchManager.DEBUG_MODE);
 		}
 		catch (CoreException e)
