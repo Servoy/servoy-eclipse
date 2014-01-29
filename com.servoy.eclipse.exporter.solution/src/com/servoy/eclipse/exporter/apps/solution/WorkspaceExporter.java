@@ -80,7 +80,7 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 		{
 			ITableDefinitionsManager tableDefManager = null;
 			IMetadataDefManager metadataDefManager = null;
-			if (configuration.getExportUsingDbiFileInfoOnly())
+			if (configuration.shouldExportUsingDbiFileInfoOnly())
 			{
 				Pair<ITableDefinitionsManager, IMetadataDefManager> defManagers;
 				try

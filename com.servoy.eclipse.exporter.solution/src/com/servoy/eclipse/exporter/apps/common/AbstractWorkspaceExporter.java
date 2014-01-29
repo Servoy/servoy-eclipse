@@ -335,7 +335,11 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 								{
 									outputExtra(" -" + marker.getAttribute(IMarker.MESSAGE, "Unknown marker message.")); //$NON-NLS-1$
 								}
-								if (!configuration.isIgnoreBuildErrors())
+								if (configuration.shouldIgnoreBuildErrors())
+								{
+									output("Ignoring error markers. ('-ie' was used)"); //$NON-NLS-1$
+								}
+								else
 								{
 									outputError("EXPORT FAILED. Solution '" + solutionName + "' will NOT be exported. It has error markers"); //$NON-NLS-1$//$NON-NLS-2$
 									exitCode = EXIT_EXPORT_FAILED;
@@ -470,7 +474,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 			try
 			{
 				ITableLoader tableLoader = null;
-				if (configuration.getExportUsingDbiFileInfoOnly()) tableLoader = new DBITableLoader();
+				if (configuration.shouldExportUsingDbiFileInfoOnly()) tableLoader = new DBITableLoader();
 				ss.setTableLoader(tableLoader);
 				ss.init();
 				ss.setRepositoryFactory(new EclipseRepositoryFactory());

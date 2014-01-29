@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -204,23 +203,10 @@ public class ServoyExporterUtils
 		return new Pair<ITableDefinitionsManager, IMetadataDefManager>(tableDefManager, metadataDefManager);
 	}
 
-	private List<IFile> getTablesDBIList(String serverName, List<String> tablesNeeded, boolean exportall)
+	private List<IFile> getTablesDBIList(String serverName, final List<String> tablesNeeded, final boolean exportAll)
 	{
 		IFolder serverInformationFolder = ServoyModelFinder.getServoyModel().getDataModelManager().getDBIFileContainer(serverName);
 		final List<IFile> dbiz = new ArrayList<IFile>();
-		final boolean exportAll_ = exportall;
-		List<String> tablesTemp = null;
-		if (tablesNeeded == null)
-		{
-			String[] tableNamesArr = ApplicationServerSingleton.get().getServerManager().getServerNames(true, true, false, false);
-
-			tablesTemp = Arrays.asList(tableNamesArr);
-		}
-		else
-		{
-			tablesTemp = tablesNeeded;
-		}
-		final List<String> tables = tablesTemp;
 
 		if (serverInformationFolder.exists())
 		{
@@ -236,7 +222,7 @@ public class ServoyExporterUtils
 							//we found a dbi file
 							String tableName = resource.getName().substring(0,
 								resource.getName().length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
-							if (tables.contains(tableName) || exportAll_)
+							if ((tablesNeeded != null && tablesNeeded.contains(tableName)) || exportAll)
 							{
 								dbiz.add((IFile)resource);
 							}

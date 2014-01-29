@@ -160,7 +160,7 @@ public class MobileArgumentChest extends AbstractArgumentChest
 	}
 
 	@Override
-	public boolean getExportUsingDbiFileInfoOnly()
+	public boolean shouldExportUsingDbiFileInfoOnly()
 	{
 		return true; // mobile exporter doesn't use table info
 	}

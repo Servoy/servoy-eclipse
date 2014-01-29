@@ -161,7 +161,8 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 			+ "             Default: the 'servoy.properties' file  from 'application_server'  will be  used\n"
 			+ "        -as <app_server_dir> ... specifies where to find the 'application_server' directory.\n"
 			+ "             Default: '../../application_server'\n"
-			+ "        -ie ignore build warnings.CAUTION! usage of -ie is highly discouraged , export shuld not proceed if there are errors in solution\n"
+			+ "        -ie ignore build errors.  CAUTION! the use of this flag is discouraged; it can cause\n"
+			+ "             invalid solutions to be exported.\n"
 			+ getHelpMessageDbi();
 		// @formatter:on
 	}
@@ -230,7 +231,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 		return solutionNames;
 	}
 
-	public boolean getExportUsingDbiFileInfoOnly()
+	public boolean shouldExportUsingDbiFileInfoOnly()
 	{
 		return exportUsingDbiFileInfoOnly;
 	}
@@ -244,7 +245,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 	}
 
 	@Override
-	public boolean isIgnoreBuildErrors()
+	public boolean shouldIgnoreBuildErrors()
 	{
 		return ignoreBuildErrors;
 	}

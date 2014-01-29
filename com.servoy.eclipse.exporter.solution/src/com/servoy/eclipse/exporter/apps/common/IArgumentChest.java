@@ -43,9 +43,9 @@ public interface IArgumentChest
 
 	public boolean isVerbose();
 
-	public boolean getExportUsingDbiFileInfoOnly();
+	public boolean shouldExportUsingDbiFileInfoOnly();
 
-	public boolean isIgnoreBuildErrors();
+	public boolean shouldIgnoreBuildErrors();
 
 	public String getExportFilePath();
 

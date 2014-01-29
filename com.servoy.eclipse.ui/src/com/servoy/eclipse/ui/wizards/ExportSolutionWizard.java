@@ -617,30 +617,30 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			exportAllTablesFromReferencedServers.addListener(SWT.Selection, this);
 
 			exportMetadataTablesButton = new Button(composite, SWT.CHECK);
-			exportMetadataTablesButton.setText("Export metadata tables."); //$NON-NLS-1$ 
+			exportMetadataTablesButton.setText("Export metadata tables"); //$NON-NLS-1$ 
 			exportMetadataTablesButton.setSelection(exportModel.isExportMetaData());
 			exportMetadataTablesButton.addListener(SWT.Selection, this);
 
 			checkMetadataTablesButton = new Button(composite, SWT.CHECK);
-			checkMetadataTablesButton.setText("Check metadata tables."); //$NON-NLS-1$ 
+			checkMetadataTablesButton.setText("Check metadata tables"); //$NON-NLS-1$ 
 			checkMetadataTablesButton.setSelection(exportModel.isCheckMetadataTables());
 			checkMetadataTablesButton.addListener(SWT.Selection, this);
 			if (modulesSelectionPage.hasDBDownErrors())
 			{
 				checkMetadataTablesButton.setSelection(false);
 				checkMetadataTablesButton.setEnabled(false);
-				checkMetadataTablesButton.setText("Check metadata tables.  (one or more used databases is unreacheable) "); //$NON-NLS-1$ 
+				checkMetadataTablesButton.setText("Check metadata tables (one or more used databases is unreacheable)"); //$NON-NLS-1$ 
 			}
 
 			exportSampleDataButton = new Button(composite, SWT.CHECK);
-			exportSampleDataButton.setText("Export solution sample data."); //$NON-NLS-1$ 
+			exportSampleDataButton.setText("Export solution sample data"); //$NON-NLS-1$ 
 			exportSampleDataButton.setSelection(exportModel.isExportSampleData());
 			exportSampleDataButton.addListener(SWT.Selection, this);
 			if (modulesSelectionPage.hasDBDownErrors())
 			{
 				exportSampleDataButton.setSelection(false);
 				exportSampleDataButton.setEnabled(false);
-				exportSampleDataButton.setText("Export solution sample data.(one or more used databases is unreacheable)");
+				exportSampleDataButton.setText("Export solution sample data (one or more used databases is unreacheable)");
 			}
 
 			Composite horizontalComposite = new Composite(composite, SWT.None);
@@ -724,7 +724,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			{
 				exportUsingDbiFileInfoOnlyButton.setEnabled(false);
 				exportUsingDbiFileInfoOnlyButton.setSelection(true);
-				exportUsingDbiFileInfoOnlyButton.setText("Export based on DBI files only  (one or more used databases is unreacheable)");
+				exportUsingDbiFileInfoOnlyButton.setText("Export based on DBI files only (one or more used databases is unreacheable)");
 			}
 
 			setControl(composite);
