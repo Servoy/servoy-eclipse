@@ -467,15 +467,20 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 	private void initializeApplicationServer(IArgumentChest configuration)
 	{
 		BundleContext bc = Activator.getDefault().getBundle().getBundleContext();
+
+		//register a table loader so the server will use this if present
+		if (configuration.shouldExportUsingDbiFileInfoOnly())
+		{
+			ITableLoader tableLoader = new DBITableLoader();
+			bc.registerService(ITableLoader.class, tableLoader, null);
+		}
+
 		ServiceReference ref = bc.getServiceReference(IServerStarter.class);
 		IServerStarter ss = (IServerStarter)bc.getService(ref);
 		if (ss != null)
 		{
 			try
 			{
-				ITableLoader tableLoader = null;
-				if (configuration.shouldExportUsingDbiFileInfoOnly()) tableLoader = new DBITableLoader();
-				ss.setTableLoader(tableLoader);
 				ss.init();
 				ss.setRepositoryFactory(new EclipseRepositoryFactory());
 				ss.setUserManagerFactory(new IUserManagerFactory()
