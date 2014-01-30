@@ -146,14 +146,14 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel, servoyPropertiesConfigurationPage);
 		driverSelectionPage = new DirectorySelectionPage("driverpage", "Choose the jdbc drivers to export",
 			"Select the jdbc drivers that you want to use in the war (if the app server doesn't provide them)",
-			ApplicationServerSingleton.get().getServerManager().getDriverDir(), exportModel.getDrivers(), new String[] { "hsqldb.jar" },
+			ApplicationServerSingleton.get().getServerManager().getDriversDir(), exportModel.getDrivers(), new String[] { "hsqldb.jar" },
 			servoyPropertiesSelectionPage);
 		lafSelectionPage = new DirectorySelectionPage("lafpage", "Choose the lafs to export", "Select the lafs that you want to use in the war",
 			ApplicationServerSingleton.get().getLafManager().getLAFDir(), exportModel.getLafs(), null, driverSelectionPage);
 		beanSelectionPage = new DirectorySelectionPage("beanpage", "Choose the beans to export", "Select the beans that you want to use in the war",
-			ApplicationServerSingleton.get().getBeanManager().getBeanDir(), exportModel.getBeans(), null, lafSelectionPage);
+			ApplicationServerSingleton.get().getBeanManager().getBeansDir(), exportModel.getBeans(), null, lafSelectionPage);
 		pluginSelectionPage = new DirectorySelectionPage("pluginpage", "Choose the plugins to export", "Select the plugins that you want to use in the war",
-			ApplicationServerSingleton.get().getPluginManager().getPluginDir(), exportModel.getPlugins(), null, beanSelectionPage);
+			ApplicationServerSingleton.get().getPluginManager().getPluginsDir(), exportModel.getPlugins(), null, beanSelectionPage);
 		fileSelectionPage = new FileSelectionPage(exportModel, pluginSelectionPage);
 		addPage(fileSelectionPage);
 		addPage(pluginSelectionPage);

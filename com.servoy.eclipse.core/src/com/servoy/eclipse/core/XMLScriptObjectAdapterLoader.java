@@ -171,7 +171,7 @@ public class XMLScriptObjectAdapterLoader
 	 */
 	public static void loadDocumentationForBeans(IBeanManagerInternal beanManager, IDocumentationManagerProvider documentationManagerProvider)
 	{
-		File beanDir = beanManager.getBeanDir();
+		File beanDir = beanManager.getBeansDir();
 		Map<String, List<ExtensionResource>> beans = beanManager.getLoadedBeanDefs();
 		List<File> allJars = new ArrayList<File>();
 		for (List<ExtensionResource> exts : beans.values())
