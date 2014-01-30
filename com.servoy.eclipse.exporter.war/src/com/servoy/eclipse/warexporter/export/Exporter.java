@@ -58,7 +58,7 @@ import com.servoy.j2db.server.headlessclient.dataui.TemplateGenerator;
 import com.servoy.j2db.server.shared.ApplicationServerSingleton;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.JarManager;
-import com.servoy.j2db.util.JarManager.Extension;
+import com.servoy.j2db.util.JarManager.ExtensionResource;
 import com.servoy.j2db.util.SortedProperties;
 import com.servoy.j2db.util.Utils;
 
@@ -156,7 +156,7 @@ public class Exporter
 		File beanTargetDir = new File(tmpWarDir, "beans");
 		beanTargetDir.mkdirs();
 		IBeanManagerInternal beanManager = ApplicationServerSingleton.get().getBeanManager();
-		Map<String, List<Extension>> loadedBeanDefs = beanManager.getLoadedBeanDefs();
+		Map<String, List<ExtensionResource>> loadedBeanDefs = beanManager.getLoadedBeanDefs();
 		List<String> beans = exportModel.getBeans();
 		File beanProperties = new File(beanTargetDir, "beans.properties");
 		Writer fw = null;
@@ -166,10 +166,10 @@ public class Exporter
 			Set<File> writtenFiles = new HashSet<File>();
 			for (String beanName : beans)
 			{
-				List<Extension> fileNames = JarManager.getExtensions(loadedBeanDefs, beanName);
+				List<ExtensionResource> fileNames = JarManager.getExtensions(loadedBeanDefs, beanName);
 				if (fileNames != null)
 				{
-					for (Extension ext : fileNames)
+					for (ExtensionResource ext : fileNames)
 					{
 						File sourceFile = new File(beanSourceDir, ext.jarFileName);
 						copyFile(sourceFile, new File(beanTargetDir, ext.jarFileName));
@@ -261,7 +261,7 @@ public class Exporter
 		File lafTargetDir = new File(tmpWarDir, "lafs");
 		lafTargetDir.mkdirs();
 		ILAFManagerInternal lafManager = ApplicationServerSingleton.get().getLafManager();
-		Map<String, List<Extension>> loadedLafDefs = lafManager.getLoadedLAFDefs();
+		Map<String, List<ExtensionResource>> loadedLafDefs = lafManager.getLoadedLAFDefs();
 		List<String> lafs = exportModel.getLafs();
 		File lafProperties = new File(lafTargetDir, "lafs.properties");
 		fw = null;
@@ -271,10 +271,10 @@ public class Exporter
 			Set<File> writtenFiles = new HashSet<File>();
 			for (String lafName : lafs)
 			{
-				List<Extension> fileNames = JarManager.getExtensions(loadedLafDefs, lafName);
+				List<ExtensionResource> fileNames = JarManager.getExtensions(loadedLafDefs, lafName);
 				if (fileNames != null)
 				{
-					for (Extension ext : fileNames)
+					for (ExtensionResource ext : fileNames)
 					{
 						File sourceFile = new File(lafSourceDir, ext.jarFileName);
 						copyFile(sourceFile, new File(lafTargetDir, ext.jarFileName));

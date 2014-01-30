@@ -39,10 +39,12 @@ import com.servoy.j2db.documentation.DocumentationUtil;
 import com.servoy.j2db.documentation.IDocumentationManager;
 import com.servoy.j2db.documentation.IObjectDocumentation;
 import com.servoy.j2db.documentation.XMLScriptObjectAdapter;
+import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.util.JarManager;
+import com.servoy.j2db.util.JarManager.ExtensionResource;
 import com.servoy.j2db.util.JarManager.Extension;
 
 public class XMLScriptObjectAdapterLoader
@@ -141,9 +143,9 @@ public class XMLScriptObjectAdapterLoader
 	 */
 	public static void loadDocumentationForPlugins(PluginManager pluginManager, IDocumentationManagerProvider documentationManagerProvider)
 	{
-		for (Extension ext : pluginManager.loadClientPluginDefs())
+		for (Extension<IClientPlugin> ext : pluginManager.loadClientPluginDefs())
 		{
-			URL url = ext.jarUrl;
+			URL url = ext.jar.jarUrl;
 			try
 			{
 				File urlFile = new File(new URI(url.toExternalForm()));
@@ -170,11 +172,11 @@ public class XMLScriptObjectAdapterLoader
 	public static void loadDocumentationForBeans(IBeanManagerInternal beanManager, IDocumentationManagerProvider documentationManagerProvider)
 	{
 		File beanDir = beanManager.getBeanDir();
-		Map<String, List<Extension>> beans = beanManager.getLoadedBeanDefs();
+		Map<String, List<ExtensionResource>> beans = beanManager.getLoadedBeanDefs();
 		List<File> allJars = new ArrayList<File>();
-		for (List<Extension> exts : beans.values())
+		for (List<ExtensionResource> exts : beans.values())
 		{
-			for (Extension ext : exts)
+			for (ExtensionResource ext : exts)
 			{
 				allJars.add(new File(beanDir, ext.jarFileName));
 			}

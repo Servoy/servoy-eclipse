@@ -475,8 +475,8 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 			bc.registerService(ITableLoader.class, tableLoader, null);
 		}
 
-		ServiceReference ref = bc.getServiceReference(IServerStarter.class);
-		IServerStarter ss = (IServerStarter)bc.getService(ref);
+		ServiceReference<IServerStarter> ref = bc.getServiceReference(IServerStarter.class);
+		IServerStarter ss = bc.getService(ref);
 		if (ss != null)
 		{
 			try
