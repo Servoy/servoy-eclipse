@@ -61134,7 +61134,9 @@ DEFAULT: false]]></description>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Property than can be set using application.putClientProperty()
 
-The value can be a positive integer representing the maximum number of rows that will be retrieved by query in database or related valuelist.
+The value can be a positive integer representing the maximum number of rows that will be retrieved by query in database or related valuelist. 
+Can have a maximum value of 1000.
+
 DEFAULT: 500]]></description>
           </descriptions>
           <summaries>
@@ -63509,7 +63511,7 @@ Lookups are defined in the dataprovider (columns) auto-enter setting and are nor
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[the recordCount]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Start the database search and use the results, returns the number of records, make sure you did "find" function first.
-Reduce results from previous searches.
+Clear results from previous searches.
 
 Note: Omitted records are automatically excluded when performing a search - meaning that the foundset result by default will not include omitted records.]]></description>
           </descriptions>
@@ -63520,11 +63522,6 @@ Note: Omitted records are automatically excluded when performing a search - mean
             <sample clientSupport="wc,sc"><![CDATA[var recordCount = %%prefix%%foundset.search();
 //var recordCount = %%prefix%%foundset.search(false,false); //to extend foundset]]></sample>
           </samples>
-          <parameters>
-            <parameter name="clearLastResults">
-              <description><![CDATA[boolean, clear previous search, default true]]></description>
-            </parameter>
-          </parameters>
         </function>
         <function clientSupport="wc,sc" name="search">
           <argumentsTypes>
