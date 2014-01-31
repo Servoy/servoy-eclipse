@@ -99,6 +99,14 @@ public class FormatDialog extends Dialog
 		return true;
 	}
 
+	@Override
+	protected Control createContents(Composite parent)
+	{
+		Control content = super.createContents(parent);
+		getShell().pack();
+		return content;
+	}
+
 	/**
 	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
@@ -220,6 +228,7 @@ public class FormatDialog extends Dialog
 		boolean useConverters = useConvertersCheckbutton.getSelection();
 		uiConvertersComposite.setVisible(useConverters);
 		((GridData)uiConverterContainer.getLayoutData()).heightHint = useConverters ? -1 : 50;
+		getShell().pack();
 	}
 
 	protected void recreateFormatTextContainer()
