@@ -22716,6 +22716,28 @@ For example, "record.department_id = [1, 33, 99]"]]></description>
 }]]></sample>
           </samples>
         </function>
+        <function clientSupport="wc,sc" name="forEach">
+          <argumentsTypes>
+            <argumentType typecode="org.mozilla.javascript.Function"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Iterates over the loaded records of a foundset taking into account inserts and deletes that may happen at the same time.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Iterates over the loaded records of a foundset taking into account inserts and deletes that may happen at the same time.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[foundset.forEach(function(record) { 
+ 	//handle the record here  
+ });]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="callback" type="com.servoy.j2db.documentation.scripting.docs.Function" typecode="org.mozilla.javascript.Function">
+              <description><![CDATA[The callback function to be called for each loaded record in the foundset.]]></description>
+            </parameter>
+          </parameters>
+        </function>
         <function clientSupport="wc,sc" name="getCurrentSort">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String sort columns]]></return>
