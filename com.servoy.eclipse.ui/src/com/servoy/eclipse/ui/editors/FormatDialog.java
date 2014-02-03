@@ -279,6 +279,7 @@ public class FormatDialog extends Dialog
 		formatComposite.setParsedFormat(parsedFormat);
 
 		getShell().setText(title);
+		getShell().pack();
 	}
 
 	protected int calculateConvertedType()
