@@ -206,7 +206,7 @@ public class ServoyScriptValidator implements IValidatorExtension2
 		else if (visibility == Visibility.PROTECTED)
 		{
 			if (reference.getParent() != null && reference.getParent().getAttribute(ValueCollectionProvider.SUPER_SCOPE) == null &&
-				reference.getParent().getKind() != ReferenceKind.THIS)
+				reference.getParent().getKind() != ReferenceKind.THIS && !reference.getParent().getName().equals("prototype"))
 			{
 				return generateValidationStatus(name, method);
 			}
