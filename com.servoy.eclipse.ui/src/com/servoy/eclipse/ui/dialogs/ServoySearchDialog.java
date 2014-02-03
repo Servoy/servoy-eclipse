@@ -216,6 +216,34 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		@Override
 		public void run()
 		{
+			showFormsAction.setChecked(!showFormsAction.isChecked());
+			showMethodsAction.setChecked(!showMethodsAction.isChecked());
+			showVariablesAction.setChecked(!showVariablesAction.isChecked());
+			showTablesAction.setChecked(!showTablesAction.isChecked());
+			showCalculationsAction.setChecked(!showCalculationsAction.isChecked());
+			showElementsAction.setChecked(!showElementsAction.isChecked());
+			showRelationsAction.setChecked(!showRelationsAction.isChecked());
+			showValuelistsAction.setChecked(!showValuelistsAction.isChecked());
+			showMediaAction.setChecked(!showMediaAction.isChecked());
+			showScopesAction.setChecked(!showScopesAction.isChecked());
+
+			applyFilter();
+		}
+	}
+
+	private class CheckUncheckAction extends Action
+	{
+		public CheckUncheckAction()
+		{
+			super("Check/Uncheck All", IAction.AS_PUSH_BUTTON);
+		}
+
+		/**
+		 * @see org.eclipse.jface.action.Action#run()
+		 */
+		@Override
+		public void run()
+		{
 			boolean checked = !showFormsAction.isChecked() || !showMethodsAction.isChecked() || !showVariablesAction.isChecked() ||
 				!showTablesAction.isChecked() || !showCalculationsAction.isChecked() || !showElementsAction.isChecked() || !showRelationsAction.isChecked() ||
 				!showValuelistsAction.isChecked() || !showMediaAction.isChecked() || !showScopesAction.isChecked();
@@ -260,6 +288,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 	private final ShowAction showScopesAction;
 
 	private final ToggleAction toggleAllAction;
+	private final CheckUncheckAction checkUncheckAllAction;
 
 	/**
 	 * @param shell
@@ -280,6 +309,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		showMediaAction = new ShowAction("Show Media");
 		showScopesAction = new ShowAction("Show Scopes");
 		toggleAllAction = new ToggleAction();
+		checkUncheckAllAction = new CheckUncheckAction();
 
 		setSelectionHistory(new SelectionHistory()
 		{
@@ -451,6 +481,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		menuManager.add(showMediaAction);
 		menuManager.add(showScopesAction);
 		menuManager.add(toggleAllAction);
+		menuManager.add(checkUncheckAllAction);
 		super.fillViewMenu(menuManager);
 	}
 
