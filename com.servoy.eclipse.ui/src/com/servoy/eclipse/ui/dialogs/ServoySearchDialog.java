@@ -561,6 +561,25 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 	protected void fillContentProvider(AbstractContentProvider contentProvider, ItemsFilter itemsFilter, IProgressMonitor progressMonitor) throws CoreException
 	{
 		FlattenedSolution flattenedSolution = servoyModel.getFlattenedSolution();
+
+		//add elements
+		Iterator<Form> it = servoyModel.getFlattenedSolution().getForms(false);
+
+		while (it.hasNext())
+		{
+			Form form = it.next();
+			Iterator<IFormElement> i = form.getFormElementsSortedByFormIndex();
+			while (i.hasNext())
+			{
+				IFormElement el = i.next();
+				if (el.getName() != null)
+				{
+					contentProvider.add(el, itemsFilter);
+				}
+			}
+		}
+
+		//add persists
 		List<IPersist> allObjectsAsList = flattenedSolution.getAllObjectsAsList();
 		for (IPersist persist : allObjectsAsList)
 		{
@@ -594,6 +613,8 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 				}
 			}
 		}
+		
+		//add tables
 		String[] serverNames = ServoyModel.getServerManager().getServerNames(true, true, false, false);
 		for (String serverName : serverNames)
 		{
@@ -610,6 +631,8 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 				Debug.error(e);
 			}
 		}
+		
+		//add scopes
 		Collection<Pair<String, IRootObject>> scopes = flattenedSolution.getAllScopes();
 		for (Pair<String, IRootObject> scope : scopes)
 		{
