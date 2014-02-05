@@ -1284,6 +1284,20 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 						properties.put("servoytitledataprovider", label.getDataProviderID());
 						properties.put("label", EMPTY_VALUE);
 					}
+					if (compWithTitle.getLeft() instanceof GraphicalComponent)
+					{
+						if (!ComponentFactory.isButton((GraphicalComponent)compWithTitle.getLeft()))
+						{
+							if (!label.getVisible())
+							{
+								properties.put("titlevisible", "notVisibleElement");
+							}
+							else
+							{
+								properties.put("titlevisible", "visibleElement");
+							}
+						}
+					}
 				}
 
 				persist = compWithTitle.getLeft();
