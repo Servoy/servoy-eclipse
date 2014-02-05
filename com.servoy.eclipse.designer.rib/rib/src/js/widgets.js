@@ -815,6 +815,10 @@ var BWidgetRegistry = {
                 type: "string",
                 defaultValue: "Text"
             },
+            titlevisible: {
+                type: "string",
+                defaultValue: ""
+            },
             label: {
                 type: "string",
                 defaultValue: "Title"
@@ -825,7 +829,7 @@ var BWidgetRegistry = {
             }
         },
         template: function (node) {
-            var code = $('<div data-role="fieldcontain"><label for="%ID%" class="label-labelfor">%LABEL%</label><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div><div id="heading"/><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></div>');
+            var code = $('<div data-role="fieldcontain"><label for="%ID%" class="label-labelfor %TITLEVISIBLE%">%LABEL%</label><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div><div id="heading"/><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></div>');
 
 			// replace heading div with heading from labelsize
             var heading = 'h'+node.getProperty("labelsize")

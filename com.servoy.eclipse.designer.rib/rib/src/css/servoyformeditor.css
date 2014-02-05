@@ -58,3 +58,7 @@ textarea {
     resize: none;
 }
 
+.notVisibleElement
+{
+	color: #aaaaaa;
+}
