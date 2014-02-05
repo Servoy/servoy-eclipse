@@ -50,6 +50,7 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.views.properties.IPropertySource;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.osgi.framework.Bundle;
 
@@ -146,12 +147,37 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 		DISPLAY_TYPE_MAPPING.put("RadioGroup", Integer.valueOf(Field.RADIOS));
 	}
 
+	private static final String PALETTE_ITEMS_RECORDVIEW;
+	private static final String PALETTE_ITEMS_LISTFORM;
+	static
+	{
+		JSONArray items = new JSONArray(); // no newlines
+		items.put("Header");
+		items.put("Footer");
+		PALETTE_ITEMS_LISTFORM = items.toString();
+
+		items.put("Button");
+		items.put("TextInput");
+		items.put("PasswordField");
+		items.put("TextArea");
+		items.put("Calendar");
+		items.put("Bean");
+		items.put("SelectMenu");
+		items.put("RadioGroup");
+		items.put("SingleCheckbox");
+		items.put("CheckboxGroup");
+		items.put("InsetList");
+		items.put("Label");
+		PALETTE_ITEMS_RECORDVIEW = items.toString();
+	}
+
 	private final ISelectionProvider selectionProvider = new SelectionProviderAdapter();
 	private MobileVisualFormEditorContextMenuProvider contextMenuProvider;
 	private Browser browser;
 
 	private String lastFormDesign;
 	private EditorMessageHandler editorMessageHandler;
+	private String lastPaletteItems;
 
 	public MobileVisualFormEditorHtmlDesignPage(BaseVisualFormEditor editorPart)
 	{
@@ -305,6 +331,14 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 			ServoyLog.logError("couldn't load the editors html file: " + resourceUrl, e);
 		}
 
+		Display.getDefault().asyncExec(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				setPaletteItems();
+			}
+		});
 	}
 
 	@Override
@@ -815,9 +849,20 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 		}
 	}
 
+	public void setPaletteItems()
+	{
+		String paletteItems = editorPart.getForm().getView() == IFormConstants.VIEW_TYPE_TABLE_LOCKED ? PALETTE_ITEMS_LISTFORM : PALETTE_ITEMS_RECORDVIEW;
+		if (!paletteItems.equals(lastPaletteItems))
+		{
+			sendMessage("setPaletteItems:" + paletteItems);
+			lastPaletteItems = paletteItems;
+		}
+	}
+
 	@Override
 	public void refreshPersists(List<IPersist> persists)
 	{
+		setPaletteItems();
 		try
 		{
 			String newFormDesign = getFormDesign();

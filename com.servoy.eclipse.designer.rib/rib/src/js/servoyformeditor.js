@@ -122,6 +122,10 @@ $.servoy = {
       	  {
       		  $.servoy._selectNode(split[1])
       	  }
+      	  else if (func == 'setPaletteItems')
+      	  {
+      		  $.servoy._setPaletteItems(split[1])
+      	  }
       },
 		
 	  _refreshForm : function() // called from java to refresh on outside changes
@@ -198,6 +202,14 @@ $.servoy = {
 		console.log('selectNode done')
 	},
 
+	_setPaletteItems : function(itemsString) // called from java
+	{
+		var items = $.parseJSON(itemsString);
+		console.log('_setPaletteItems '+items)
+		 $(':rib-paletteView').paletteView('option', "model", [ { "Palette Items": items }]);
+		console.log('_setPaletteItems done')
+	},
+	
    handleModelUpdated: function(event, widget)
    {
      if ($.servoy._refreshing) return
