@@ -318,6 +318,7 @@ import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.ImageLoader;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
@@ -720,6 +721,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				result = Utils.stringReplaceCaseInsensitiveSearch(result, "<br>", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 				result = Utils.stringRemoveTags(result);
 			}
+			result = HtmlUtils.unescape(result, '<');
+			result = HtmlUtils.unescape(result, '>');
 			return result;
 		}
 
