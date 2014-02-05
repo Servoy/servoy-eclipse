@@ -96,7 +96,6 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 
 		displayFormat = new Combo(this, SWT.NONE);
 		GridData gridData_1 = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
-		gridData_1.widthHint = 351;
 		displayFormat.setLayoutData(gridData_1);
 		String[] formatItems = new String[] { "dd-MM-yyyy", "dd-MM-yyyy HH:mm", "MM/dd/yyyy", "MM/dd/yyyy hh:mm aa", "dd.MM.yyyy" };
 		displayFormat.setItems(formatItems);
@@ -125,7 +124,6 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 		editFormat = new Combo(this, SWT.NONE);
 		editFormat.setEnabled(!mobile);
 		GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-		gridData.widthHint = 411;
 		editFormat.setLayoutData(gridData);
 		editFormat.setItems(formatItems);
 		editFormat.addKeyListener(new KeyAdapter()
@@ -166,7 +164,7 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 
 		placeholder = new Text(this, SWT.BORDER);
 		placeholder.setEnabled(!mobile);
-		GridData gridData_2 = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+		GridData gridData_2 = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
 		gridData_2.widthHint = 29;
 		placeholder.setLayoutData(gridData_2);
 		placeholder.setTextLimit(1);
@@ -180,7 +178,9 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 
 		TableViewer tableViewer = new TableViewer(this, SWT.BORDER | SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL);
 		table = tableViewer.getTable();
-		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		GridData gridData_3 = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
+		gridData_3.heightHint = 200;
+		table.setLayoutData(gridData_3);
 		table.setHeaderVisible(true);
 
 		TableViewerColumn tableViewerColumn = new TableViewerColumn(tableViewer, SWT.NONE);
@@ -196,7 +196,7 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 
 		TableViewerColumn tableViewerColumn_2_1 = new TableViewerColumn(tableViewer, SWT.NONE);
 		TableColumn tblclmnMeaning = tableViewerColumn_2_1.getColumn();
-		tblclmnMeaning.setWidth(400);
+		tblclmnMeaning.setWidth(200);
 		tblclmnMeaning.setText("Description");
 
 		if (mobile)
