@@ -94,12 +94,6 @@ public class FormatDialog extends Dialog
 	}
 
 	@Override
-	protected boolean isResizable()
-	{
-		return true;
-	}
-
-	@Override
 	protected Control createContents(Composite parent)
 	{
 		Control content = super.createContents(parent);
