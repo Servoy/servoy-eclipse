@@ -172,6 +172,8 @@
                         //   remains after dragging has completed...
                         f.find('.ui-state-active')
                             .removeClass('ui-state-active');
+                        // make sure it is removed from view itself
+                        f.removeClass('ui-state-active');
                     }
                 })
                 .disableSelection();
