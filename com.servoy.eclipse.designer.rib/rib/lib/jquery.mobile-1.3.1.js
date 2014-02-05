@@ -3658,7 +3658,6 @@ var createHandler = function( sequential ) {
 				// By using scrollTo instead of silentScroll, we can keep things better in order
 				// Just to be precautios, disable scrollstart listening like silentScroll would
 				$.event.special.scrollstart.enabled = false;
-
 				window.scrollTo( 0, toScroll );
 
 				// reenable scrollstart listening like silentScroll would
@@ -3700,12 +3699,9 @@ var createHandler = function( sequential ) {
 
 				// Prevent flickering in phonegap container: see comments at #4024 regarding iOS
 				$to.css( "z-index", -10 );
-
 				$to.addClass( $.mobile.activePageClass + toPreClass );
-
 				// Send focus to page as it is now display: block
 				$.mobile.focusPage( $to );
-
 				// Set to page height
 				$to.height( screenHeight + toScroll );
 
@@ -3946,7 +3942,8 @@ $.mobile.getMaxScrollForTransition = $.mobile.getMaxScrollForTransition || defau
 		}
 
 		if ( pageTitle.length ) {
-			pageTitle.focus();
+			//temporary commit until we upgrade to latest firefox; this makes page scroll to the title (even if it has tabindex -1)
+			//pageTitle.focus();
 		} else{
 			page.focus();
 		}
