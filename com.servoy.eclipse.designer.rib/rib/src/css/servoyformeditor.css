@@ -53,3 +53,8 @@ html {
 .ui-popup-hidden {
 	display: none !important;
 }
+
+textarea {
+    resize: none;
+}
+
