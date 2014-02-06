@@ -1168,7 +1168,7 @@ var BWidgetRegistry = {
     			htmlSelector: "input"
     		})
     	},
-    	template: '<div data-role="fieldcontain"><label for="%ID%" class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label><input id="%ID%" type="date"><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></input></div>'
+    	template: '<div data-role="fieldcontain"><label for="%ID%" class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label><input id="%ID%" type="text" class="calendar"><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></input></div>'
     },
     
     /**
