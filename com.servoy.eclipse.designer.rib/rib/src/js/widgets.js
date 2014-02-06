@@ -1254,7 +1254,7 @@ var BWidgetRegistry = {
         parent: "Base",
         paletteImageName: "jqm_select.svg",
         // data-native-menu="false" ins select makes the selection go bad in xulrunner 10
-        template: '<div data-role="fieldcontain"><label for="%ID%" class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label><select id="%ID%"/><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></div>',
+        template: '<div data-role="fieldcontain"><label for="%ID%" class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label><select id="%ID%" data-native-menu="false"/><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></div>',
         displayLabel: "Select Menu",
         properties: {
             options: {
