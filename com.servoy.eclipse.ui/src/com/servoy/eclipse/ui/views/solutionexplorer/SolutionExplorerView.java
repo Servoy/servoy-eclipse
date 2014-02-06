@@ -723,8 +723,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			}
 			if (result != null)
 			{
-				result = HtmlUtils.unescape(result, '<');
-				result = HtmlUtils.unescape(result, '>');
+				result = HtmlUtils.unescape(result);
 			}
 			return result;
 		}
