@@ -62,3 +62,10 @@ textarea {
 {
 	color: #aaaaaa;
 }
+
+.calendar
+{
+	background-image: url('images/datebox.png')!important;
+	background-repeat: no-repeat!important;
+	background-position: 99% 8px!important;
+}
