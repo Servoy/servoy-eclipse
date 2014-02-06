@@ -721,8 +721,11 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				result = Utils.stringReplaceCaseInsensitiveSearch(result, "<br>", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 				result = Utils.stringRemoveTags(result);
 			}
-			result = HtmlUtils.unescape(result, '<');
-			result = HtmlUtils.unescape(result, '>');
+			if (result != null)
+			{
+				result = HtmlUtils.unescape(result, '<');
+				result = HtmlUtils.unescape(result, '>');
+			}
 			return result;
 		}
 
