@@ -18,7 +18,10 @@
 	<property name="compilerArg" value=""/>
 	<property name="compilation.prereq.log" value="${buildDirectory}/prereqErrors.log"/>
 	<condition property="dir_bootclasspath" value="${java.home}/../Classes">
-		<os family="mac"/>
+		<and>
+			<os family="mac"/>
+			<available file="${java.home}/../Classes" type="dir"/>
+		</and>
 	</condition>
 	<property name="dir_bootclasspath" value="${java.home}/lib"/>
 	<path id="path_bootclasspath">
@@ -426,8 +429,6 @@
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.wst.common.modulecore_1.2.300.v201305151500.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.ui_5.0.0.201402051205.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.core.manipulation_5.0.0.201402051205.jar"/>
-			<pathelement path="../com.servoy.eclipse.model.exporter.mobile/bin"/>
-			
 			<pathelement path="../com.servoy.eclipse.model.exporter.mobile/lib/js.jar"/>
 			
 			<pathelement path="../com.servoy.eclipse.model.exporter.mobile/lib/jshybugger.jar"/>
@@ -437,6 +438,8 @@
 			<pathelement path="../com.servoy.eclipse.model.exporter.mobile/lib/netty-3.6.5.Final.jar"/>
 			
 			<pathelement path="../com.servoy.eclipse.model.exporter.mobile/lib/webbit-0.4.15.jar"/>
+			
+			<pathelement path="../com.servoy.eclipse.model.exporter.mobile/bin"/>
 			
 			<pathelement path="../com.servoy.eclipse.model.exporter.mobile/bin/"/>
 			
@@ -536,31 +539,31 @@
 	<target name="checkCompilationResults" if="compilation.error.occured">
 		<echo file="${compilation.problem.marker}" message="com.servoy.eclipse.team_7.4.0.2023${line.separator}compilation.error.occured=${compilation.error.occured}"/>
 		<eclipse.logCompileError bundle="com.servoy.eclipse.team_7.4.0.2023" log="${compilation.prereq.log}">
-			<include name="C:/Users/Administrator/dev_v7xx_branch/com.servoy.eclipse.core/compilation.problem"/>
+			<include name="D:/Developer/dev/workspace74x/com.servoy.eclipse.core/compilation.problem"/>
 			<include name="${pluginTemp}/com.servoy.eclipse.core_7.4.0.2023/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_v7xx_branch/org.eclipse.dltk.javascript.rhino/compilation.problem"/>
-			<include name="${pluginTemp}/org.eclipse.dltk.javascript.rhino_7.4.0.2023/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_v7xx_branch/servoy_headless_client/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_headless_client_7.4.0.2023/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_v7xx_branch/servoy_debug/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_debug_7.4.0.2023/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_v7xx_branch/servoy_shared/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_shared_7.4.0.2023/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_v7xx_branch/com.servoy.eclipse.model.exporter.mobile/compilation.problem"/>
-			<include name="${pluginTemp}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2023/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_v7xx_branch/j2db_tunnel/compilation.problem"/>
-			<include name="${pluginTemp}/j2db_tunnel_7.4.0.2023/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_v7xx_branch/servoy_base/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_base_7.4.0.2023/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_v7xx_branch/j2db_server/compilation.problem"/>
-			<include name="${pluginTemp}/j2db_server_7.4.0.2023/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_v7xx_branch/servoy_smart_client/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_smart_client_7.4.0.2023/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_v7xx_branch/com.servoy.eclipse.ui/compilation.problem"/>
-			<include name="${pluginTemp}/com.servoy.eclipse.ui_7.4.0.2023/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_v7xx_branch/com.servoy.eclipse.model/compilation.problem"/>
+			<include name="D:/Developer/dev/workspace74x/com.servoy.eclipse.model/compilation.problem"/>
 			<include name="${pluginTemp}/com.servoy.eclipse.model_7.4.0.2023/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_v7xx_branch/eclipse_target/compile_target/optional/net.sourceforge.sqlexplorer_3.5.1.v20100211_SR3b/compilation.problem"/>
+			<include name="D:/Developer/dev/workspace74x/servoy_headless_client/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_headless_client_7.4.0.2023/compilation.problem"/>
+			<include name="D:/Developer/dev/workspace74x/servoy_debug/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_debug_7.4.0.2023/compilation.problem"/>
+			<include name="D:/Developer/dev/workspace74x/org.eclipse.dltk.javascript.rhino/compilation.problem"/>
+			<include name="${pluginTemp}/org.eclipse.dltk.javascript.rhino_7.4.0.2023/compilation.problem"/>
+			<include name="D:/Developer/dev/workspace74x/servoy_shared/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_shared_7.4.0.2023/compilation.problem"/>
+			<include name="D:/Developer/dev/workspace74x/com.servoy.eclipse.model.exporter.mobile/compilation.problem"/>
+			<include name="${pluginTemp}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2023/compilation.problem"/>
+			<include name="D:/Developer/dev/workspace74x/j2db_server/compilation.problem"/>
+			<include name="${pluginTemp}/j2db_server_7.4.0.2023/compilation.problem"/>
+			<include name="D:/Developer/dev/workspace74x/j2db_tunnel/compilation.problem"/>
+			<include name="${pluginTemp}/j2db_tunnel_7.4.0.2023/compilation.problem"/>
+			<include name="D:/Developer/dev/workspace74x/servoy_base/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_base_7.4.0.2023/compilation.problem"/>
+			<include name="D:/Developer/dev/workspace74x/servoy_smart_client/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_smart_client_7.4.0.2023/compilation.problem"/>
+			<include name="D:/Developer/dev/workspace74x/com.servoy.eclipse.ui/compilation.problem"/>
+			<include name="${pluginTemp}/com.servoy.eclipse.ui_7.4.0.2023/compilation.problem"/>
+			<include name="D:/Developer/dev/workspace74x/eclipse_target/compile_target/optional/net.sourceforge.sqlexplorer_3.5.1.v20100211_SR3b/compilation.problem"/>
 			<include name="${pluginTemp}/net.sourceforge.sqlexplorer_3.5.1.v20100211_SR3b/compilation.problem"/>
 		</eclipse.logCompileError>
 	</target>
@@ -659,7 +662,7 @@
 	</target>
 
 	<target name="refresh" depends="init" if="eclipse.running" description="Refresh this folder.">
-		<eclipse.convertPath fileSystemPath="C:/Users/Administrator/dev_v7xx_branch/com.servoy.eclipse.team" property="resourcePath"/>
+		<eclipse.convertPath fileSystemPath="D:/Developer/dev/workspace74x/com.servoy.eclipse.team" property="resourcePath"/>
 		<eclipse.refreshLocal resource="${resourcePath}" depth="infinite"/>
 	</target>
 
