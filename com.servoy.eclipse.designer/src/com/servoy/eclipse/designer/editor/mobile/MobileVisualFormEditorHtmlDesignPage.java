@@ -1440,6 +1440,17 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 					elementType = "Label";
 					setLabelProperties((GraphicalComponent)persist, properties);
 				}
+				if (persist instanceof BaseComponent)
+				{
+					if (!((BaseComponent)persist).getVisible())
+					{
+						properties.put("visibleelement", "notVisibleElement");
+					}
+					else
+					{
+						properties.put("visibleelement", "visibleElement");
+					}
+				}
 			}
 		}
 		else if (child instanceof MobileListModel)

@@ -223,6 +223,10 @@ var BWidgetRegistry = {
             servoytitledataprovider: {
                 type: "string",
                 defaultValue: ""
+            },
+            visibleelement: {
+                type: "string",
+                defaultValue: ""
             }
         }
     },
@@ -829,12 +833,12 @@ var BWidgetRegistry = {
             }
         },
         template: function (node) {
-            var code = $('<div data-role="fieldcontain"><label for="%ID%" class="label-labelfor %TITLEVISIBLE%">%LABEL%</label><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div><div id="heading"/><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></div>');
+            var code = $('<div data-role="fieldcontain"><label for="%ID%" class="label-labelfor %VISIBLEELEMENT% %TITLEVISIBLE%">%LABEL%</label><div class="%VISIBLEELEMENT% %TITLEVISIBLE% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div><div id="heading"/><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></div>');
 
 			// replace heading div with heading from labelsize
             var heading = 'h'+node.getProperty("labelsize")
             code.find('#heading').replaceWith('<'+heading+'/>')
-            code.find(heading).addClass("label-heading").text(node.getProperty("text"))
+            code.find(heading).addClass("label-heading %VISIBLEELEMENT%").text(node.getProperty("text"))
 
             return code;
         }
@@ -1066,7 +1070,7 @@ var BWidgetRegistry = {
                 htmlSelector: "input"
             })
         },
-        template: '<div data-role="fieldcontain"><label for="%ID%">%LABEL%<div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label><input id="%ID%" type="text"><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></input></div>'
+        template: '<div data-role="fieldcontain"><label for="%ID%" class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label><input id="%ID%" type="text"><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></input></div>'
     },
 
     /**
@@ -1115,7 +1119,7 @@ var BWidgetRegistry = {
                 htmlSelector: "input"
             })
         },
-        template: '<div data-role="fieldcontain"><label for="%ID%">%LABEL%<div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label><input id="%ID%" type="password"><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></input></div>'
+        template: '<div data-role="fieldcontain"><label for="%ID%" class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label><input id="%ID%" type="password"><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></input></div>'
     },
 
     /**
@@ -1164,7 +1168,7 @@ var BWidgetRegistry = {
     			htmlSelector: "input"
     		})
     	},
-    	template: '<div data-role="fieldcontain"><label for="%ID%">%LABEL%<div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label><input id="%ID%" type="date"><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></input></div>'
+    	template: '<div data-role="fieldcontain"><label for="%ID%" class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label><input id="%ID%" type="date"><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></input></div>'
     },
     
     /**
@@ -1201,7 +1205,7 @@ var BWidgetRegistry = {
             disabled: BCommonProperties.disabled,
             nativecontrol: BCommonProperties.nativecontrol
         },
-        template: '<div data-role="fieldcontain"><label for="%ID%">%LABEL%<div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label><textarea id="%ID%">%VALUE%</textarea><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></div>'
+        template: '<div data-role="fieldcontain"><label for="%ID%" class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label><textarea id="%ID%">%VALUE%</textarea><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></div>'
     },
 
     /**
@@ -1250,7 +1254,7 @@ var BWidgetRegistry = {
         parent: "Base",
         paletteImageName: "jqm_select.svg",
         // data-native-menu="false" ins select makes the selection go bad in xulrunner 10
-        template: '<div data-role="fieldcontain"><label for="%ID%">%LABEL%<div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label><select id="%ID%"/><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></div>',
+        template: '<div data-role="fieldcontain"><label for="%ID%" class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label><select id="%ID%"/><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></div>',
         displayLabel: "Select Menu",
         properties: {
             options: {
@@ -1383,7 +1387,7 @@ var BWidgetRegistry = {
             radioButton.setProperty("label", "Three")
             node.addChild(radioButton);
         },
-        template: '<div data-role="fieldcontain"><fieldset data-role="controlgroup"><legend>%LABEL%<div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></legend></fieldset></div></div>'
+        template: '<div data-role="fieldcontain"><fieldset data-role="controlgroup"><legend><label class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label></legend></fieldset></div></div>'
     },
 
     /**
@@ -1419,7 +1423,7 @@ var BWidgetRegistry = {
             disabled: BCommonProperties.disabled
         },
         delegate: 'parent',
-        template: '<input type="radio"><label for="%ID%">%LABEL%<div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></label>'
+        template: '<input type="radio"><label for="%ID%" class="%VISIBLEELEMENT%">%LABEL%<div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></label>'
     },
 
     /**
@@ -1462,7 +1466,7 @@ var BWidgetRegistry = {
             checkButton.setProperty("label", "Three")
             node.addChild(checkButton);
         },
-        template: '<div data-role="fieldcontain"><fieldset data-role="controlgroup"><legend>%LABEL%<div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></legend></fieldset></div>'
+        template: '<div data-role="fieldcontain"><fieldset data-role="controlgroup"><legend><label class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label></legend></fieldset></div>'
     },
 
     /**
@@ -1495,7 +1499,7 @@ var BWidgetRegistry = {
             theme: BCommonProperties.theme,
             disabled: BCommonProperties.disabled
         },
-        template: '<input type="checkbox"><label for="%ID%">%LABEL%<div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></label>',
+        template: '<input type="checkbox"><label for="%ID%" class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></label>',
         delegate: 'parent'
     },
 
@@ -1530,7 +1534,7 @@ var BWidgetRegistry = {
             theme: BCommonProperties.theme,
             disabled: BCommonProperties.disabled
         },
-        template: '<div data-role="fieldcontain"><fieldset data-role="controlgroup"><legend>%LABEL%<div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></legend><input type="checkbox" name="%ID%" id="%ID%"/><label for="%ID%"><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></label></fieldset></div>'
+        template: '<div data-role="fieldcontain"><fieldset data-role="controlgroup"><legend><label class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label></legend><input type="checkbox" name="%ID%" id="%ID%"/><label for="%ID%"><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></label></fieldset></div>'
     },
 
     /**
