@@ -278,7 +278,7 @@ public class RepositoryAccessPoint
 
 		if (serverAddress.equals(LOCALHOST))//try inproces 
 		{
-			IApplicationServer as = (IApplicationServer)LocalhostRMIRegistry.getService(IApplicationServer.NAME);
+			IApplicationServer as = (IApplicationServer)LocalhostRMIRegistry.getService(IApplicationServer.class.getName());
 			try
 			{
 				clientID = ApplicationServerSingleton.get().getClientId();//only works for inprocess!
@@ -297,7 +297,7 @@ public class RepositoryAccessPoint
 				rmiFactoryFactory = createRMIClientSocketFactoryFactory(url, null, getServoySettings(), null);
 
 				IApplicationServer as = (IApplicationServer)LocateRegistry.getRegistry(serverAddress, usedRMIPort,
-					rmiFactoryFactory.getRemoteClientSocketFactory()).lookup(IApplicationServer.NAME);
+					rmiFactoryFactory.getRemoteClientSocketFactory()).lookup(IApplicationServer.class.getName());
 
 				// TODO this getClientID expects a password not a hash!!!!
 				clientID = as.getClientID(user, password); // RemoteApplicationServer
