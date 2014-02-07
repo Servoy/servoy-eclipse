@@ -935,6 +935,12 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		getClient().setStatusText(text, tooltip);
 	}
 
+	@Override
+	public void showSolutionLoading(boolean loading)
+	{
+		getClient().showSolutionLoading(loading); // TODO I think this and many others should actually do nothing in design client
+	}
+
 	public void setTitle(String title)
 	{
 		getClient().setTitle(title);
