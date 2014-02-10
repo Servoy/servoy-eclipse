@@ -1375,16 +1375,16 @@ var BWidgetRegistry = {
             // initial state is three buttons
             var radioButton;
             radioButton = new ADMNode("RadioButton")
-            radioButton.setProperty("label", "One")
+            radioButton.setProperty("labelItem", "One")
             radioButton.setProperty("checked", "checked")
             node.addChild(radioButton);
 
             radioButton = new ADMNode("RadioButton")
-            radioButton.setProperty("label", "Two")
+            radioButton.setProperty("labelItem", "Two")
             node.addChild(radioButton);
             
             radioButton = new ADMNode("RadioButton")
-            radioButton.setProperty("label", "Three")
+            radioButton.setProperty("labelItem", "Three")
             node.addChild(radioButton);
         },
         template: '<div data-role="fieldcontain"><fieldset data-role="controlgroup"><legend><label class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label></legend></fieldset></div></div>'
@@ -1409,7 +1409,7 @@ var BWidgetRegistry = {
                 type: "string",
                 autoGenerate: "radio"
             },
-            label: {
+            labelItem: {
                 type: "string",
                 defaultValue: "Radio Button"
             },
@@ -1423,7 +1423,7 @@ var BWidgetRegistry = {
             disabled: BCommonProperties.disabled
         },
         delegate: 'parent',
-        template: '<input type="radio"><label for="%ID%" class="%VISIBLEELEMENT%">%LABEL%<div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></label>'
+        template: '<input type="radio"><label for="%ID%" class="%VISIBLEELEMENT%">%LABELITEM%<div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></label>'
     },
 
     /**
@@ -1454,16 +1454,16 @@ var BWidgetRegistry = {
             // initial state is three buttons
             var checkButton;
             checkButton = new ADMNode("Checkbox")
-            checkButton.setProperty("label", "One")
+            checkButton.setProperty("labelItem", "One")
             checkButton.setProperty("checked", "checked")
             node.addChild(checkButton);
 
             checkButton = new ADMNode("Checkbox")
-            checkButton.setProperty("label", "Two")
+            checkButton.setProperty("labelItem", "Two")
             node.addChild(checkButton);
             
             checkButton = new ADMNode("Checkbox")
-            checkButton.setProperty("label", "Three")
+            checkButton.setProperty("labelItem", "Three")
             node.addChild(checkButton);
         },
         template: '<div data-role="fieldcontain"><fieldset data-role="controlgroup"><legend><label class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label></legend></fieldset></div>'
@@ -1485,7 +1485,7 @@ var BWidgetRegistry = {
                 autoGenerate: "checkbox",
                 htmlAttribute: "id"
             },
-            label: {
+            labelItem: {
                 type: "string",
                 defaultValue: "Title"
             },
@@ -1499,7 +1499,7 @@ var BWidgetRegistry = {
             theme: BCommonProperties.theme,
             disabled: BCommonProperties.disabled
         },
-        template: '<input type="checkbox"><label for="%ID%" class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></label>',
+        template: '<input type="checkbox"><label for="%ID%" class="%VISIBLEELEMENT%">%LABELITEM%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></label>',
         delegate: 'parent'
     },
 

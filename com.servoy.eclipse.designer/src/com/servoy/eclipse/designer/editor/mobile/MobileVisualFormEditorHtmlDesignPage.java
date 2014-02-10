@@ -1374,7 +1374,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 									ServoyJSONObject checkProperties = new ServoyJSONObject(false, false);
 									check.put(PROPERTIES_KEY, checkProperties);
 									checkProperties.put(ID_KEY, "child" + i + '_' + field.getUUID().toString());
-									checkProperties.put("label", str[0]);
+									checkProperties.put("labelItem", str[0]);
 									if (i == 1)
 									{
 										checkProperties.put("checked", "checked");
