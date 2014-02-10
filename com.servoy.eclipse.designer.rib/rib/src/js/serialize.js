@@ -405,7 +405,6 @@ $(function () {
 	    		
 	    		root.suppressEvents(false);
 	         }
-
         	var properties = jsObject.properties;
             // Set properties for current ADM node
             for (var item in jsObject.properties) {
@@ -419,6 +418,39 @@ $(function () {
                     // Block elements based on the property change
                 	node.setProperty(item, val, null, true);
                 }
+            }
+            if (jsObject.children) {
+            	if (jsObject.children.length != node.getChildren().length)
+            	{
+            		//remove nodes
+            		var l = node.getChildren().length;
+        			for (var i= 1;i <= l;i++)
+        			{
+        				node.removeChild(node.getChildren()[0],false);
+        			}
+        			
+        			// add nodes
+        			for (var i= 0;i < jsObject.children.length;i++)
+        			{
+        				 var childNode = ADM.createNode(jsObject.children[i].type, false);
+        				 for (var item in jsObject.children[i].properties) {
+                             var val = jsObject.children[i].properties[item];
+                             childNode.setProperty(item, val, null, true);
+                    	 }
+        				 node.addChildToZone(childNode,(jsObject.children[i].properties.zone || "default"));
+        			}
+            	}
+            	else
+            	{
+	                for (var i = 0; i < jsObject.children.length; i++) {
+	                	 for (var item in jsObject.children[i].properties) {
+	                         var val = jsObject.children[i].properties[item];
+	                         if (item != 'id' && val){
+	                        	 node.getChildren()[i].setProperty(item, val, null, true);
+	                         }
+	                	 }
+	                }
+            	}
             }
         }
   
