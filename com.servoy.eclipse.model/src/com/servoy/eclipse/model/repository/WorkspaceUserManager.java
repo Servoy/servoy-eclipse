@@ -74,7 +74,7 @@ import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.server.shared.IUserManagerInternal;
 import com.servoy.j2db.util.Pair;
@@ -1288,7 +1288,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				if (element.access == IRepository.IMPLICIT_TABLE_ACCESS) mustWriteBackTableInfo = true;
 				else
 				{
-					IServer server = ApplicationServerSingleton.get().getServerManager().getServer(serverName);
+					IServer server = ApplicationServerRegistry.get().getServerManager().getServer(serverName);
 					ITable table = null;
 					if (server != null)
 					{
@@ -1557,7 +1557,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			{
 				try
 				{
-					solution = ApplicationServerSingleton.get().getDeveloperRepository().getRootObject(solution_id, releaseNumber);
+					solution = ApplicationServerRegistry.get().getDeveloperRepository().getRootObject(solution_id, releaseNumber);
 				}
 				catch (RepositoryException e)
 				{
@@ -2384,7 +2384,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				{
 					for (IProject project : projects)
 					{
-						Solution solution = (Solution)ApplicationServerSingleton.get().getDeveloperRepository().getActiveRootObject(project.getName(),
+						Solution solution = (Solution)ApplicationServerRegistry.get().getDeveloperRepository().getActiveRootObject(project.getName(),
 							IRepository.SOLUTIONS);
 						if (solution != null)
 						{
@@ -2490,7 +2490,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			boolean isView = false;
 			try
 			{
-				IServer s = ApplicationServerSingleton.get().getServerManager().getServer(serverName);
+				IServer s = ApplicationServerRegistry.get().getServerManager().getServer(serverName);
 				isView = s != null && s.getTableType(tableName) == ITable.VIEW;
 			}
 			catch (RepositoryException repEx)
@@ -2700,7 +2700,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	protected void writeAllTableInfo() throws RepositoryException
 	{
 		boolean invalidSecurityContent = false;
-		IServerManagerInternal sm = ApplicationServerSingleton.get().getServerManager();
+		IServerManagerInternal sm = ApplicationServerRegistry.get().getServerManager();
 		String[] servers = sm.getServerNames(true, true, false, false);
 		for (int i = servers.length - 1; i >= 0; i--)
 		{
@@ -2758,7 +2758,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		{
 			try
 			{
-				readUserAndGroupInfo(ApplicationServerSingleton.get().getClientId());
+				readUserAndGroupInfo(ApplicationServerRegistry.get().getClientId());
 				readAllTableInfo();
 				readAllFormInfo();
 			}
@@ -2775,7 +2775,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		try
 		{
 			boolean invalidSecurityContent = false;
-			IServerManagerInternal sm = ApplicationServerSingleton.get().getServerManager();
+			IServerManagerInternal sm = ApplicationServerRegistry.get().getServerManager();
 			String[] servers = sm.getServerNames(true, true, false, false);
 			for (int i = servers.length - 1; i >= 0; i--)
 			{

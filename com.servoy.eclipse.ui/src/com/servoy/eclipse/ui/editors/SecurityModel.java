@@ -30,7 +30,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.dataprocessing.IDataSet;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 public class SecurityModel
 {
@@ -142,7 +142,7 @@ public class SecurityModel
 		}
 		TreeItem keptSelection = null;
 		tree.removeAll();
-		IDataSet users = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getUsers(ApplicationServerSingleton.get().getClientId());
+		IDataSet users = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getUsers(ApplicationServerRegistry.get().getClientId());
 		int usersNr = users.getRowCount();
 		for (int i = 0; i < usersNr; i++)
 		{
@@ -181,9 +181,9 @@ public class SecurityModel
 					if (group != null)
 					{
 						String[] groups = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getUserGroups(
-							ApplicationServerSingleton.get().getClientId(),
+							ApplicationServerRegistry.get().getClientId(),
 							ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getUserUID(
-								ApplicationServerSingleton.get().getClientId(), userName));
+								ApplicationServerRegistry.get().getClientId(), userName));
 						if (groups != null)
 						{
 							for (String currentGroup : groups)
@@ -240,7 +240,7 @@ public class SecurityModel
 		if (column == SecurityEditor.CI_PASSWORD && text != null && text.length() > 0) return true;
 		if (column == SecurityEditor.CI_UID && text != null && text.length() > 0)
 		{
-			if (ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getUserIdByUID(ApplicationServerSingleton.get().getClientId(),
+			if (ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getUserIdByUID(ApplicationServerRegistry.get().getClientId(),
 				text) == -1)
 			{
 				// uid is unique
@@ -250,7 +250,7 @@ public class SecurityModel
 		if (column == SecurityEditor.CI_NAME && text != null && text.length() > 0)
 		{
 			int id = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getUserIdByUserName(
-				ApplicationServerSingleton.get().getClientId(), text);
+				ApplicationServerRegistry.get().getClientId(), text);
 			if (id == -1 && !newUsers.contains(text))
 			{
 				// username is unique
@@ -259,7 +259,7 @@ public class SecurityModel
 		}
 		if (column == SecurityEditor.CI_GROUP && text != null && text.length() > 0)
 		{
-			int id = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getGroupId(ApplicationServerSingleton.get().getClientId(),
+			int id = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getGroupId(ApplicationServerRegistry.get().getClientId(),
 				text);
 			if (id == -1 && !newGroups.contains(text))
 			{
@@ -275,7 +275,7 @@ public class SecurityModel
 		try
 		{
 			EclipseUserManager manager = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager();
-			String clientId = ApplicationServerSingleton.get().getClientId();
+			String clientId = ApplicationServerRegistry.get().getClientId();
 			for (String group : newGroups)
 			{
 				manager.createGroup(clientId, group);

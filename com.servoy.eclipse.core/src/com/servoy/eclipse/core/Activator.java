@@ -130,7 +130,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.plugins.IMethodTemplatesProvider;
 import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IDebugHeadlessClient;
 import com.servoy.j2db.server.shared.IUserManagerFactory;
@@ -383,7 +383,7 @@ public class Activator extends Plugin
 
 				try
 				{
-					if (!ApplicationServerSingleton.get().hasDeveloperLicense() ||
+					if (!ApplicationServerRegistry.get().hasDeveloperLicense() ||
 						Utils.getAsBoolean(Settings.getInstance().getProperty("servoy.developer.showStartPage", "true")))
 					{
 						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(StartPageBrowserEditor.INPUT,
@@ -554,14 +554,14 @@ public class Activator extends Plugin
 
 		// wait until webserver is stopped for case of
 		// restart (webserver cannot re-start when port is still in use, this may even cause a freeze after restart)
-		IApplicationServerSingleton appServer = ApplicationServerSingleton.get();
+		IApplicationServerSingleton appServer = ApplicationServerRegistry.get();
 		if (appServer != null)
 		{
 			appServer.shutDown();
 			appServer.doNativeShutdown();
 			J2DBGlobals.setSingletonServiceProvider(null); // avoid a null pointer exception that can happen when DLTK stops the debugger after appserver singleton gets cleared (due to a Context.enter() call)
 			J2DBGlobals.setServiceProvider(null);
-			ApplicationServerSingleton.clear();
+			ApplicationServerRegistry.clear();
 		}
 		super.stop(context);
 
@@ -583,7 +583,7 @@ public class Activator extends Plugin
 	 */
 	public IDebugClientHandler getDebugClientHandler()
 	{
-		IDebugClientHandler dch = ApplicationServerSingleton.get().getDebugClientHandler();
+		IDebugClientHandler dch = ApplicationServerRegistry.get().getDebugClientHandler();
 		if (designerCallback == null)
 		{
 			designerCallback = new IDesignerCallback()
@@ -1101,7 +1101,7 @@ public class Activator extends Plugin
 	public synchronized void startAppServer(IRepositoryFactory repositoryFactory, IDebugClientHandler debugClientHandler,
 		IWebClientSessionFactory webClientSessionFactory, IUserManagerFactory userManagerFactory) throws Exception
 	{
-		if (ApplicationServerSingleton.get() != null)
+		if (ApplicationServerRegistry.get() != null)
 		{
 			// already started
 			return;
@@ -1116,7 +1116,7 @@ public class Activator extends Plugin
 		ss.start();
 		ss.startWebServer();
 
-		checkApplicationServerVersion(ApplicationServerSingleton.get());
+		checkApplicationServerVersion(ApplicationServerRegistry.get());
 	}
 
 	private void checkApplicationServerVersion(IApplicationServerSingleton applicationServer)
@@ -1182,7 +1182,7 @@ public class Activator extends Plugin
 												try
 												{
 													monitor.beginTask("Updating...", IProgressMonitor.UNKNOWN);
-													updatedToVersion[0] = ApplicationServerSingleton.get().updateAppServerFromSerclipse(
+													updatedToVersion[0] = ApplicationServerRegistry.get().updateAppServerFromSerclipse(
 														new File(appServerDir).getParentFile(), version, ClientVersion.getReleaseNumber(), new ActionListener()
 														{
 															public void actionPerformed(ActionEvent e)

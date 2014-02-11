@@ -43,7 +43,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Table;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 public class TableSettingsComposite extends Group
 {
@@ -358,7 +358,7 @@ public class TableSettingsComposite extends Group
 					userManager.setWriteMode(WorkspaceUserManager.WRITE_MODE_MANUAL);
 					for (String columnName : t.getColumnNames())
 					{
-						userManager.setTableSecurityAccess(ApplicationServerSingleton.get().getClientId(), group, access, t.getServerName(), t.getName(),
+						userManager.setTableSecurityAccess(ApplicationServerRegistry.get().getClientId(), group, access, t.getServerName(), t.getName(),
 							columnName);
 					}
 					userManager.writeSecurityInfo(t.getServerName(), t.getName(), false);

@@ -60,7 +60,7 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.query.QuerySelect;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 
@@ -309,7 +309,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 			try
 			{ // check for existing data
 				QuerySelect query = MetaDataUtils.createTableMetadataQuery(table, null);
-				IDataSet ds = ApplicationServerSingleton.get().getDataServer().performQuery(ApplicationServerSingleton.get().getClientId(),
+				IDataSet ds = ApplicationServerRegistry.get().getDataServer().performQuery(ApplicationServerRegistry.get().getClientId(),
 					table.getServerName(), null, query, null, false, 0, 1, IDataServer.META_DATA_QUERY, null);
 				if (ds.getRowCount() > 0)
 				{

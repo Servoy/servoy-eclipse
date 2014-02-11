@@ -31,7 +31,7 @@ import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITableLoader;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
@@ -99,7 +99,7 @@ public class DBITableLoader implements ITableLoader
 	@Override
 	public void loadAllColumnInfo(Collection<Table> tables, IServerInternal server) throws RepositoryException
 	{
-		IServerManagerInternal sm = ApplicationServerSingleton.get().getServerManager();
+		IServerManagerInternal sm = ApplicationServerRegistry.get().getServerManager();
 		for (Table table : tables)
 		{
 			IColumnInfoManager[] colInfoManagers = sm.getColumnInfoManagers(table.getName());

@@ -56,7 +56,7 @@ import com.servoy.eclipse.exporter.mobile.ui.wizard.ExportMobileWizard.IMobileEx
 import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 
 /**
@@ -226,7 +226,7 @@ public class WarExportPage extends WizardPage implements IMobileExportProperties
 		}
 		else
 		{
-			File webappsFolder = new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory(), "server/webapps");
+			File webappsFolder = new File(ApplicationServerRegistry.get().getServoyApplicationServerDirectory(), "server/webapps");
 			outputText.setText(webappsFolder.getAbsolutePath());
 		}
 
@@ -418,7 +418,7 @@ public class WarExportPage extends WizardPage implements IMobileExportProperties
 
 	public String exportWar()
 	{
-		String serverDir = ApplicationServerSingleton.get().getServoyApplicationServerDirectory();
+		String serverDir = ApplicationServerRegistry.get().getServoyApplicationServerDirectory();
 		if (!serverDir.endsWith(File.separator)) serverDir = serverDir + File.separator;
 		serverDir = new StringBuilder(serverDir).append("server").append(File.separator).append("webapps").append(File.separator).toString(); //$NON-NLS-1$ //$NON-NLS-2$
 		String outputFolder = getOutputFolder();
@@ -429,7 +429,7 @@ public class WarExportPage extends WizardPage implements IMobileExportProperties
 		String error = doExport(isLocalDeploy && finishPage.isOpenUrl() ? 3000 : 0);
 		if (isLocalDeploy)
 		{
-			finishPage.setApplicationURL(new StringBuilder("http://localhost:").append(ApplicationServerSingleton.get().getWebServerPort()).append("/").append( //$NON-NLS-1$ //$NON-NLS-2$
+			finishPage.setApplicationURL(new StringBuilder("http://localhost:").append(ApplicationServerRegistry.get().getWebServerPort()).append("/").append( //$NON-NLS-1$ //$NON-NLS-2$
 				mobileExporter.getSolutionName()).append("/index.html").toString(), "Open WAR application in browser at finish.", false); //$NON-NLS-1$ //$NON-NLS-2$
 			finishPage.createControl(WarExportPage.this.getControl().getParent());
 			finishPage.getControl().getParent().layout(true);

@@ -66,7 +66,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.ServoyException;
 
 public class SecurityEditor extends EditorPart implements IActiveProjectListener
@@ -415,7 +415,7 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 	private void addDataToGroupList()
 	{
 		groupTable.removeAll();
-		IDataSet groups = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getGroups(ApplicationServerSingleton.get().getClientId());
+		IDataSet groups = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getGroups(ApplicationServerRegistry.get().getClientId());
 		int groupsNr = groups.getRowCount();
 		String[] groupNames = new String[groupsNr];
 		boolean mustCreateAdmin = true;
@@ -436,7 +436,7 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 		{
 			try
 			{
-				ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().createGroup(ApplicationServerSingleton.get().getClientId(),
+				ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().createGroup(ApplicationServerRegistry.get().getClientId(),
 					IRepository.ADMIN_GROUP);
 				TableItem item = new TableItem(groupTable, SWT.NONE, 0);
 				item.setText(IRepository.ADMIN_GROUP);

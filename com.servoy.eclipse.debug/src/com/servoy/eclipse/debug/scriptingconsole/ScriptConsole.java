@@ -69,7 +69,7 @@ import com.servoy.j2db.IDebugClient;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.scripting.GlobalScope;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -379,9 +379,9 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 			testClientsJob.schedule(20 * 1000);
 
 			Object[] clients = new Object[0];
-			if (ApplicationServerSingleton.get() != null && ApplicationServerSingleton.get().getDebugClientHandler() != null)
+			if (ApplicationServerRegistry.get() != null && ApplicationServerRegistry.get().getDebugClientHandler() != null)
 			{
-				clients = ApplicationServerSingleton.get().getDebugClientHandler().getActiveDebugClients().toArray();
+				clients = ApplicationServerRegistry.get().getDebugClientHandler().getActiveDebugClients().toArray();
 			}
 			clientsList.setInput(clients);
 			if (clients.length > 0)
@@ -418,7 +418,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 			@Override
 			protected IStatus run(IProgressMonitor monitor)
 			{
-				List<IDebugClient> activeDebugClients = ApplicationServerSingleton.get().getDebugClientHandler().getActiveDebugClients();
+				List<IDebugClient> activeDebugClients = ApplicationServerRegistry.get().getDebugClientHandler().getActiveDebugClients();
 				if (!activeDebugClients.equals(this.activeClients))
 				{
 					this.activeClients = activeDebugClients;

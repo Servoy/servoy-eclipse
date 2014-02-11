@@ -151,7 +151,7 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.FormatParser;
@@ -1670,14 +1670,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			String foreignServer = ((Relation)persist).getForeignServerName();
 			if (foreignServer != null && !missingServers.containsKey(foreignServer) && !goodServers.contains(foreignServer))
 			{
-				IServer server = ApplicationServerSingleton.get().getServerManager().getServer(foreignServer);
+				IServer server = ApplicationServerRegistry.get().getServerManager().getServer(foreignServer);
 				if (server != null) goodServers.add(foreignServer);
 				else missingServers.put(foreignServer, persist);
 			}
 		}
 		if (serverName != null && !missingServers.containsKey(serverName) && !goodServers.contains(serverName))
 		{
-			IServerManagerInternal sm = ApplicationServerSingleton.get().getServerManager();
+			IServerManagerInternal sm = ApplicationServerRegistry.get().getServerManager();
 			IServer server = sm.getServer(serverName);
 			if (server != null) goodServers.add(serverName);
 			else missingServers.put(serverName, persist);
@@ -1888,8 +1888,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						Map<IPersist, Boolean> methodsReferences = new HashMap<IPersist, Boolean>();
 						try
 						{
-							final Map<String, Method> methods = ((EclipseRepository)ApplicationServerSingleton.get().getDeveloperRepository()).getGettersViaIntrospection(o);
-							for (ContentSpec.Element element : Utils.iterate(((EclipseRepository)ApplicationServerSingleton.get().getDeveloperRepository()).getContentSpec().getPropertiesForObjectType(
+							final Map<String, Method> methods = ((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository()).getGettersViaIntrospection(o);
+							for (ContentSpec.Element element : Utils.iterate(((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository()).getContentSpec().getPropertiesForObjectType(
 								o.getTypeID())))
 							{
 								// Don't set meta data properties.
@@ -2307,7 +2307,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							addMarkers(
 								project,
 								checkValuelist(vl, ServoyBuilder.getPersistFlattenedSolution(vl, flattenedSolution),
-									ApplicationServerSingleton.get().getServerManager(), false), vl);
+									ApplicationServerRegistry.get().getServerManager(), false), vl);
 						}
 						checkCancel();
 						if (o instanceof Media)
@@ -4116,12 +4116,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ServoyProject activeProject = getServoyModel().getActiveProject();
 		if (activeProject != null && activeProject.getProject().getName().equals(project.getName()))
 		{
-			String[] array = ApplicationServerSingleton.get().getServerManager().getServerNames(true, false, false, true);
+			String[] array = ApplicationServerRegistry.get().getServerManager().getServerNames(true, false, false, true);
 			for (String server_name : array)
 			{
-				IServerInternal server = (IServerInternal)ApplicationServerSingleton.get().getServerManager().getServer(server_name, true, false);
+				IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(server_name, true, false);
 				boolean existing = false;
-				for (String name : ApplicationServerSingleton.get().getServerManager().getKnownDriverClassNames())
+				for (String name : ApplicationServerRegistry.get().getServerManager().getKnownDriverClassNames())
 				{
 					if (server != null && name.equals(server.getConfig().getDriver()))
 					{
@@ -4146,7 +4146,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					}
 				}
 
-				if (ApplicationServerSingleton.get().getServerManager().isServerDataModelCloneCycling(server))
+				if (ApplicationServerRegistry.get().getServerManager().isServerDataModelCloneCycling(server))
 				{
 					ServoyMarker mk = MarkerMessages.ServerCloneCycle.fill(server_name);
 					addMarker(project, mk.getType(), mk.getText(), -1, SERVER_CLONE_CYCLE, IMarker.PRIORITY_NORMAL, null, null);
@@ -4356,7 +4356,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		{
 			// is this table actually hidden in developer? If yes, show a warning. (developer would work even if table is not there based on resources files, but if it was
 			// hidden on purpose, it is probably meant as deprecated and we should issue a warning)
-			IServerInternal s = (IServerInternal)ApplicationServerSingleton.get().getServerManager().getServer(solution.getI18nServerName());
+			IServerInternal s = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(solution.getI18nServerName());
 			if (s != null && s.isValid() && s.getConfig().isEnabled())
 			{
 				if (s.isTableMarkedAsHiddenInDeveloper(solution.getI18nTableName()))
@@ -4416,7 +4416,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			ServoyLog.logError(ex);
 		}
 		hasDeletedMarkers = false;
-		String[] array = ApplicationServerSingleton.get().getServerManager().getServerNames(true, true, false, true);
+		String[] array = ApplicationServerRegistry.get().getServerManager().getServerNames(true, true, false, true);
 		for (String server_name : array)
 		{
 			try
@@ -4425,7 +4425,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				Set<String> dataSources = getDataSourceCollectorVisitor().getDataSources();
 				SortedSet<String> serverNames = DataSourceUtils.getServerNames(dataSources);
 
-				IServerInternal server = (IServerInternal)ApplicationServerSingleton.get().getServerManager().getServer(server_name, true, true);
+				IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(server_name, true, true);
 				if (server != null) // server may have become invalid in the mean time
 				{
 					List<String> tableNames = server.getTableAndViewNames(true);
@@ -4731,7 +4731,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						Style style = null;
 						try
 						{
-							style = (Style)ApplicationServerSingleton.get().getDeveloperRepository().getActiveRootObject(styleName, IRepository.STYLES);
+							style = (Style)ApplicationServerRegistry.get().getDeveloperRepository().getActiveRootObject(styleName, IRepository.STYLES);
 						}
 						catch (Exception ex)
 						{
@@ -5003,7 +5003,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		{
 			ServoyMarker mk = null;
 
-			IServerManagerInternal sm = ApplicationServerSingleton.get().getServerManager();
+			IServerManagerInternal sm = ApplicationServerRegistry.get().getServerManager();
 			Iterator<Relation> it = servoyProject.getSolution().getRelations(false);
 			while (it.hasNext())
 			{

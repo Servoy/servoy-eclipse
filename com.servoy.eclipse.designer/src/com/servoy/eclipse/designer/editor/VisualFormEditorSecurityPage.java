@@ -50,7 +50,7 @@ import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * Tab in form editor for managing form security.
@@ -243,7 +243,7 @@ public class VisualFormEditorSecurityPage extends Composite
 
 	public void doRefresh()
 	{
-		IDataSet groups = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getGroups(ApplicationServerSingleton.get().getClientId());
+		IDataSet groups = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getGroups(ApplicationServerRegistry.get().getClientId());
 		groupViewer.setInput(groups);
 		if (groups.getRowCount() == 0)
 		{

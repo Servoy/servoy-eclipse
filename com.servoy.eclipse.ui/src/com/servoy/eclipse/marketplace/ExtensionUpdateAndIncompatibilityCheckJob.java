@@ -25,7 +25,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.util.UIUtils;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 
 /**
@@ -52,7 +52,7 @@ public class ExtensionUpdateAndIncompatibilityCheckJob extends Job
 	@Override
 	protected IStatus run(IProgressMonitor monitor)
 	{
-		IApplicationServerSingleton applicationServer = ApplicationServerSingleton.get();
+		IApplicationServerSingleton applicationServer = ApplicationServerRegistry.get();
 		final InstalledExtensionsDialog dialog = InstalledExtensionsDialog.getOrCreateInstance(null);
 
 		if (applicationServer.hadIncompatibleExtensionsWhenStarted())

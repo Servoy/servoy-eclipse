@@ -47,7 +47,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.IApplication;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 
 /**
@@ -146,7 +146,7 @@ public class Activator extends AbstractUIPlugin
 	{
 		// see if installed extensions are not out of sync with Servoy version
 		ServoyModel.startAppServer(); // this will probably do nothing as core Activator initialise probably did it
-		IApplicationServerSingleton applicationServer = ApplicationServerSingleton.get();
+		IApplicationServerSingleton applicationServer = ApplicationServerRegistry.get();
 
 		// if incompatible extensions were found or we need to automatically check for extension updates at startup (if this is the preference of the user)
 		if (needsExtensionUpdateCheckBecauseOfNewRelease() || applicationServer.hadIncompatibleExtensionsWhenStarted() ||
@@ -326,7 +326,7 @@ public class Activator extends AbstractUIPlugin
 			{
 				IProvisioningAgentProvider agentProvider = (IProvisioningAgentProvider)context.getService(sr);
 
-				URI p2URI = new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory(), "../developer/p2/").toURI(); //$NON-NLS-1$
+				URI p2URI = new File(ApplicationServerRegistry.get().getServoyApplicationServerDirectory(), "../developer/p2/").toURI(); //$NON-NLS-1$
 				try
 				{
 					provisioningAgent = agentProvider.createAgent(p2URI);

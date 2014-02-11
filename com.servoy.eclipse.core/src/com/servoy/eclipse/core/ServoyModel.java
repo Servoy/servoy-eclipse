@@ -183,7 +183,7 @@ import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.scripting.ScriptEngine;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.server.shared.IUserManagerFactory;
 import com.servoy.j2db.server.shared.IWebClientSessionFactory;
@@ -883,9 +883,9 @@ public class ServoyModel extends AbstractServoyModel
 	{
 		PreInitializeTaskHandler.runTasksIfNeeded();
 
-		if (ApplicationServerSingleton.get() != null)
+		if (ApplicationServerRegistry.get() != null)
 		{
-			if (!ApplicationServerSingleton.waitForApplicationServerStarted())
+			if (!ApplicationServerRegistry.waitForApplicationServerStarted())
 			{
 				ServoyLog.logError("App server didnt fully get started", new RuntimeException());
 			}
@@ -924,25 +924,25 @@ public class ServoyModel extends AbstractServoyModel
 	public EclipseUserManager getUserManager()
 	{
 		startAppServer();
-		return ((SwitchableEclipseUserManager)ApplicationServerSingleton.get().getUserManager()).getEclipseUserManager();
+		return ((SwitchableEclipseUserManager)ApplicationServerRegistry.get().getUserManager()).getEclipseUserManager();
 	}
 
 	public static IServerManagerInternal getServerManager()
 	{
 		startAppServer();
-		return ApplicationServerSingleton.get().getServerManager();
+		return ApplicationServerRegistry.get().getServerManager();
 	}
 
 	public static IDeveloperRepository getDeveloperRepository()
 	{
 		startAppServer();
-		return ApplicationServerSingleton.get().getDeveloperRepository();
+		return ApplicationServerRegistry.get().getDeveloperRepository();
 	}
 
 	public static IDataServer getDataServer()
 	{
 		startAppServer();
-		return ApplicationServerSingleton.get().getDataServer();
+		return ApplicationServerRegistry.get().getDataServer();
 	}
 
 	public static Settings getSettings()

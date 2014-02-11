@@ -37,7 +37,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerManagerInternal;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * 
@@ -78,7 +78,7 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 		checkboxTableViewer = CheckboxTableViewer.newCheckList(container, SWT.BORDER | SWT.FULL_SELECTION);
 
 		checkboxTableViewer.setContentProvider(new ServersContentProvider());
-		checkboxTableViewer.setInput(ApplicationServerSingleton.get().getServerManager());
+		checkboxTableViewer.setInput(ApplicationServerRegistry.get().getServerManager());
 		if (requiredServers != null && requiredServers.length > 0) checkboxTableViewer.addCheckStateListener(this);
 		if (selectedServers.size() == 0)
 		{

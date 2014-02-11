@@ -72,7 +72,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TableNode;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
 
@@ -724,7 +724,7 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 			persistVisitor.visit(node);
 		}
 
-		IDeveloperRepository repository = ApplicationServerSingleton.get().getDeveloperRepository(); // why not use "this" instead?
+		IDeveloperRepository repository = ApplicationServerRegistry.get().getDeveloperRepository(); // why not use "this" instead?
 		if (node instanceof IScriptElement && !nodeDeleted && node.isChanged())
 		{
 			// if the node itself is a method or variable, and has changed content, then we must regenerate

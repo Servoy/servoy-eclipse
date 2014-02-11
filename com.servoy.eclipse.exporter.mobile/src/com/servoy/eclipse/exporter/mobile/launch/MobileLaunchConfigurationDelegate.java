@@ -27,7 +27,7 @@ import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 
 public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelegate
@@ -160,7 +160,7 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 //		String warLocation = configuration.getAttribute(IMobileLaunchConstants.WAR_LOCATION, ""); // this is currently never set; if we want to add it to the launcher organize dialog in the future, it might be set; see StartMobileClientActionDelegate
 //		if (warLocation.length() == 0)
 //		{
-		warExportDir = new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory(), "server/webapps");
+		warExportDir = new File(ApplicationServerRegistry.get().getServoyApplicationServerDirectory(), "server/webapps");
 //		}
 //		else
 //		{
@@ -209,7 +209,7 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		int timeout = Integer.valueOf(configuration.getAttribute(IMobileLaunchConstants.TIMEOUT, IMobileLaunchConstants.DEFAULT_TIMEOUT)).intValue();
 		String company = configuration.getAttribute(IMobileLaunchConstants.COMPANY_NAME, "");
 		String license = configuration.getAttribute(IMobileLaunchConstants.LICENSE_CODE, "");
-		boolean validLicense = ApplicationServerSingleton.get().checkMobileLicense(company, license);
+		boolean validLicense = ApplicationServerRegistry.get().checkMobileLicense(company, license);
 
 		exporter.setSolutionName(solutionName);
 		exporter.setOutputFolder(exportFolder);

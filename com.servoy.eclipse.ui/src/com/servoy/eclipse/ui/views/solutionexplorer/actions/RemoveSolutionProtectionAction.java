@@ -31,7 +31,7 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 public class RemoveSolutionProtectionAction extends Action implements ISelectionChangedListener
 {
@@ -92,11 +92,11 @@ public class RemoveSolutionProtectionAction extends Action implements ISelection
 				"Please enter protection password for solution : '" + solution.getName() + "'", "", null);
 			if (inputPassword != null)
 			{
-				inputPassword = ApplicationServerSingleton.get().calculateProtectionPassword(solution.getSolutionMetaData(), inputPassword);
+				inputPassword = ApplicationServerRegistry.get().calculateProtectionPassword(solution.getSolutionMetaData(), inputPassword);
 				if (inputPassword.equals(solution.getProtectionPassword()))
 				{
 					solution.getSolutionMetaData().setProtectionPassword(
-						ApplicationServerSingleton.get().calculateProtectionPassword(solution.getSolutionMetaData(), null));
+						ApplicationServerRegistry.get().calculateProtectionPassword(solution.getSolutionMetaData(), null));
 					try
 					{
 						selectedSolutionProject.saveEditingSolutionNodes(new IPersist[] { solution }, false);

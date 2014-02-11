@@ -81,7 +81,7 @@ import com.servoy.j2db.dataprocessing.IDataServerInternal;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.util.Debug;
@@ -140,7 +140,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 				AbstractRepository rep = (AbstractRepository)ServoyModel.getDeveloperRepository();
 
-				final IApplicationServerSingleton as = ApplicationServerSingleton.get();
+				final IApplicationServerSingleton as = ApplicationServerRegistry.get();
 				IUserManager sm = as.getUserManager();
 				EclipseExportUserChannel eeuc = new EclipseExportUserChannel(exportModel, monitor);
 				EclipseExportI18NHelper eeI18NHelper = new EclipseExportI18NHelper(workspace);

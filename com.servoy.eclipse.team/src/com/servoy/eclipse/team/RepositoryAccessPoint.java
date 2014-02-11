@@ -35,7 +35,7 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.IDataServer;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.ITeamRepository;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServer;
 import com.servoy.j2db.server.shared.IApplicationServerAccess;
 import com.servoy.j2db.server.shared.IUserManager;
@@ -281,7 +281,7 @@ public class RepositoryAccessPoint
 			IApplicationServer as = (IApplicationServer)LocalhostRMIRegistry.getService(IApplicationServer.class.getName());
 			try
 			{
-				clientID = ApplicationServerSingleton.get().getClientId();//only works for inprocess!
+				clientID = ApplicationServerRegistry.get().getClientId();//only works for inprocess!
 				asa = as.getApplicationServerAccess(clientID); // LocalApplicationServer
 			}
 			catch (RemoteException e)

@@ -44,7 +44,7 @@ import com.servoy.j2db.dataprocessing.IDataServer;
 import com.servoy.j2db.persistence.I18NUtil;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 
 public class I18NWriteToDBAction extends Action
@@ -87,8 +87,8 @@ public class I18NWriteToDBAction extends Action
 			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 			{
 				IRepository repository = ServoyModel.getDeveloperRepository();
-				IDataServer dataServer = ApplicationServerSingleton.get().getDataServer();
-				String clientID = ApplicationServerSingleton.get().getClientId();
+				IDataServer dataServer = ApplicationServerRegistry.get().getDataServer();
+				String clientID = ApplicationServerRegistry.get().getClientId();
 				IFileAccess workspace = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
 
 				Solution[] modules = servoyProject.getModules();

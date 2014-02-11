@@ -59,7 +59,7 @@ import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -95,7 +95,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 	 */
 	public boolean isSolutionLoaded()
 	{
-		IDeveloperRepository repository = ApplicationServerSingleton.get().getDeveloperRepository();
+		IDeveloperRepository repository = ApplicationServerRegistry.get().getDeveloperRepository();
 		if (repository != null)
 		{
 			try
@@ -120,7 +120,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 	public Solution getSolution()
 	{
 		Solution solution = null;
-		IDeveloperRepository repository = ApplicationServerSingleton.get().getDeveloperRepository();
+		IDeveloperRepository repository = ApplicationServerRegistry.get().getDeveloperRepository();
 		if (repository != null)
 		{
 			try
@@ -405,7 +405,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 			}
 		}
 
-		EclipseRepository repository = (EclipseRepository)ApplicationServerSingleton.get().getDeveloperRepository();
+		EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 		if (runAsJob)
 		{
 			repository.updateNodesInWorkspace(nodes, recursive);
@@ -504,7 +504,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 				@Override
 				public IRepository getRepository()
 				{
-					return ApplicationServerSingleton.get().getDeveloperRepository();
+					return ApplicationServerRegistry.get().getDeveloperRepository();
 				}
 
 				@Override
@@ -551,7 +551,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 						@Override
 						public IRepository getRepository()
 						{
-							return ApplicationServerSingleton.get().getDeveloperRepository();
+							return ApplicationServerRegistry.get().getDeveloperRepository();
 						}
 
 						@Override
@@ -659,7 +659,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 	 */
 	public SolutionMetaData getSolutionMetaData()
 	{
-		IDeveloperRepository repository = ApplicationServerSingleton.get().getDeveloperRepository();
+		IDeveloperRepository repository = ApplicationServerRegistry.get().getDeveloperRepository();
 		try
 		{
 			return (SolutionMetaData)repository.getRootObjectMetaData(project.getName(), IRepository.SOLUTIONS);

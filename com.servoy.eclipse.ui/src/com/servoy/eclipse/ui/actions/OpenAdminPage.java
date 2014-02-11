@@ -26,7 +26,7 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 public class OpenAdminPage implements IWorkbenchWindowActionDelegate
 {
@@ -36,7 +36,7 @@ public class OpenAdminPage implements IWorkbenchWindowActionDelegate
 		try
 		{
 			PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(
-				new URL("http://localhost:" + ApplicationServerSingleton.get().getWebServerPort() + "/servoy-admin"));
+				new URL("http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/servoy-admin"));
 		}
 		catch (Exception e)
 		{

@@ -32,7 +32,7 @@ import com.servoy.extension.ExtensionDependencyDeclaration;
 import com.servoy.extension.ExtensionUtils;
 import com.servoy.extension.Message;
 import com.servoy.extension.VersionStringUtils;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 
 /**
@@ -78,7 +78,7 @@ public class UninstallExtensionWizard extends Wizard implements IImportWizard
 		// first page is uninstall confirmation
 		if (state.installDir == null)
 		{
-			String appServerDir = ApplicationServerSingleton.get().getServoyApplicationServerDirectory();
+			String appServerDir = ApplicationServerRegistry.get().getServoyApplicationServerDirectory();
 			if (appServerDir != null)
 			{
 				state.installDir = new File(appServerDir).getParentFile();

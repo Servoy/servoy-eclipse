@@ -55,7 +55,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IBeanManagerInternal;
 import com.servoy.j2db.ILAFManagerInternal;
 import com.servoy.j2db.server.headlessclient.dataui.TemplateGenerator;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.JarManager;
 import com.servoy.j2db.util.JarManager.ExtensionResource;
@@ -125,7 +125,7 @@ public class Exporter
 		}
 
 		monitor.worked(1);
-		String appServerDir = ApplicationServerSingleton.get().getServoyApplicationServerDirectory();
+		String appServerDir = ApplicationServerRegistry.get().getServoyApplicationServerDirectory();
 
 		File webAppDir = new File(appServerDir, "server/webapps/ROOT");
 
@@ -155,7 +155,7 @@ public class Exporter
 		File beanSourceDir = new File(appServerDir, "beans");
 		File beanTargetDir = new File(tmpWarDir, "beans");
 		beanTargetDir.mkdirs();
-		IBeanManagerInternal beanManager = ApplicationServerSingleton.get().getBeanManager();
+		IBeanManagerInternal beanManager = ApplicationServerRegistry.get().getBeanManager();
 		Map<String, List<ExtensionResource>> loadedBeanDefs = beanManager.getLoadedBeanDefs();
 		List<String> beans = exportModel.getBeans();
 		File beanProperties = new File(beanTargetDir, "beans.properties");
@@ -260,7 +260,7 @@ public class Exporter
 		File lafSourceDir = new File(appServerDir, "lafs");
 		File lafTargetDir = new File(tmpWarDir, "lafs");
 		lafTargetDir.mkdirs();
-		ILAFManagerInternal lafManager = ApplicationServerSingleton.get().getLafManager();
+		ILAFManagerInternal lafManager = ApplicationServerRegistry.get().getLafManager();
 		Map<String, List<ExtensionResource>> loadedLafDefs = lafManager.getLoadedLAFDefs();
 		List<String> lafs = exportModel.getLafs();
 		File lafProperties = new File(lafTargetDir, "lafs.properties");
@@ -537,7 +537,7 @@ public class Exporter
 			{
 				FlattenedSolution solution = ServoyModelFinder.getServoyModel().getActiveProject().getFlattenedSolution();
 				SolutionSerializer.writeRuntimeSolution(null, new File(tmpWarDir, "WEB-INF/solution.runtime"), solution.getSolution(),
-					ApplicationServerSingleton.get().getDeveloperRepository(), solution.getModules());
+					ApplicationServerRegistry.get().getDeveloperRepository(), solution.getModules());
 			}
 			catch (Exception ex)
 			{

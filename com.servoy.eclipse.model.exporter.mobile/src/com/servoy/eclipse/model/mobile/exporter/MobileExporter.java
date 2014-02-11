@@ -87,7 +87,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.scripting.ScriptEngine;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.ServoyJSONArray;
@@ -160,7 +160,7 @@ public class MobileExporter
 
 	public static String getDefaultServerURL()
 	{
-		return "http://localhost:" + ApplicationServerSingleton.get().getWebServerPort();
+		return "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort();
 	}
 
 	private String doMediaExport(ZipOutputStream zos, File outputFolder) throws IOException
@@ -219,7 +219,7 @@ public class MobileExporter
 				try
 				{
 					ServoyJSONObject formJSon = SolutionSerializer.generateJSONObject(form, true, true,
-						ApplicationServerSingleton.get().getDeveloperRepository(), true, new IValueFilter()
+						ApplicationServerRegistry.get().getDeveloperRepository(), true, new IValueFilter()
 						{
 
 							public String getFilteredValue(IPersist persist, Map<String, Object> property_values, String key, String value)
@@ -230,7 +230,7 @@ public class MobileExporter
 								{
 									try
 									{
-										Object methodID = ApplicationServerSingleton.get().getDeveloperRepository().convertArgumentStringToObject(
+										Object methodID = ApplicationServerRegistry.get().getDeveloperRepository().convertArgumentStringToObject(
 											contentSpec.getTypeID(), value);
 										if (methodID instanceof Integer)
 										{
@@ -291,7 +291,7 @@ public class MobileExporter
 					try
 					{
 						ServoyJSONObject relationJSON = SolutionSerializer.generateJSONObject(relation, true, true,
-							ApplicationServerSingleton.get().getDeveloperRepository(), true, null);
+							ApplicationServerRegistry.get().getDeveloperRepository(), true, null);
 						relationJSons.add(relationJSON);
 					}
 					catch (Exception e)

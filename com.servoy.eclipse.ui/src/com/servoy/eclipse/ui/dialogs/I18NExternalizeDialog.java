@@ -133,7 +133,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
@@ -336,7 +336,7 @@ public class I18NExternalizeDialog extends Dialog
 		{
 			Solution editingSolution = project.getEditingSolution();
 			I18NMessagesModel i18nMessagesModel = new I18NMessagesModel(editingSolution != null ? editingSolution.getI18nDataSource() : null,
-				ApplicationServerSingleton.get().getClientId(), ServoyModel.getSettings(), ServoyModel.getDataServer(), ServoyModel.getDeveloperRepository());
+				ApplicationServerRegistry.get().getClientId(), ServoyModel.getSettings(), ServoyModel.getDataServer(), ServoyModel.getDeveloperRepository());
 			i18nMessagesModel.setLanguage(Locale.getDefault());
 
 			defaultMessages = new HashMap<String, String>();

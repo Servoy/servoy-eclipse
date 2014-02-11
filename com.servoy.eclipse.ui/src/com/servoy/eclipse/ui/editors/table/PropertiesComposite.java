@@ -43,7 +43,7 @@ import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * @author jcompagner
@@ -215,7 +215,7 @@ public class PropertiesComposite extends Composite
 
 		}
 		table.setMarkedAsMetaData(btnMetadataTable.getSelection());
-		IServerInternal server = (IServerInternal)ApplicationServerSingleton.get().getServerManager().getServer(table.getServerName());
+		IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(table.getServerName());
 		if (server != null)
 		{
 			server.setTableMarkedAsHiddenInDeveloper(table.getName(), btnHiddenInDeveloper.getSelection());

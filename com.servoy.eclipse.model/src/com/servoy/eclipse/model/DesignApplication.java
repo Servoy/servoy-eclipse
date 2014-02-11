@@ -80,7 +80,7 @@ import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.query.QuerySelect;
 import com.servoy.j2db.querybuilder.IQueryBuilder;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServer;
 import com.servoy.j2db.server.shared.IApplicationServerAccess;
 import com.servoy.j2db.server.shared.IUserManager;
@@ -118,7 +118,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	{
 		if (client == null)
 		{
-			client = ApplicationServerSingleton.get().getDebugClientHandler().getDebugSmartClient();
+			client = ApplicationServerRegistry.get().getDebugClientHandler().getDebugSmartClient();
 		}
 		return client;
 	}
@@ -188,7 +188,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		if (beanManager == null)
 		{
 			// don't create bean manager again, this is needed for jfxpanel bean, its native libraries cannot be loaded twice
-			beanManager = ApplicationServerSingleton.get().getBeanManager();
+			beanManager = ApplicationServerRegistry.get().getBeanManager();
 		}
 		return beanManager;
 	}
@@ -613,7 +613,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 
 	public ILAFManager getLAFManager()
 	{
-		return ApplicationServerSingleton.get().getLafManager();
+		return ApplicationServerRegistry.get().getLafManager();
 	}
 
 	public Locale getLocale()

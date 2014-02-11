@@ -30,7 +30,7 @@ import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IServerManagerInternal;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * IServoyModel used when exporting solutions with stand-alone product.
@@ -73,7 +73,7 @@ public class ExportServoyModel extends AbstractServoyModel implements IServoyMod
 				ServoyLog.logError(e);
 			}
 
-			IServerManagerInternal sm = ApplicationServerSingleton.get().getServerManager();
+			IServerManagerInternal sm = ApplicationServerRegistry.get().getServerManager();
 
 			if (dataModelManager != null) sm.removeGlobalColumnInfoProvider(dataModelManager);
 			dataModelManager = (activeResourcesProject != null ? new DataModelManager(activeResourcesProject.getProject(), sm) : null);
@@ -85,7 +85,7 @@ public class ExportServoyModel extends AbstractServoyModel implements IServoyMod
 				? activeResourcesProject.getProject().getName() : null, IRepository.TEMPLATES);
 
 		}
-		((WorkspaceUserManager)ApplicationServerSingleton.get().getUserManager()).setResourcesProject(activeResourcesProject != null
+		((WorkspaceUserManager)ApplicationServerRegistry.get().getUserManager()).setResourcesProject(activeResourcesProject != null
 			? activeResourcesProject.getProject() : null); // this needs to always be done to refresh in case the main solution changed
 	}
 

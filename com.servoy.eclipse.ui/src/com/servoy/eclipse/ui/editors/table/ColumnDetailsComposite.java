@@ -71,7 +71,7 @@ import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 
 public class ColumnDetailsComposite extends Composite
@@ -355,7 +355,7 @@ public class ColumnDetailsComposite extends Composite
 			if (converterName != null)
 			{
 				// check type defined by column converter
-				IColumnConverter converter = ApplicationServerSingleton.get().getPluginManager().getColumnConverterManager().getConverter(converterName);
+				IColumnConverter converter = ApplicationServerRegistry.get().getPluginManager().getColumnConverterManager().getConverter(converterName);
 				if (converter instanceof ITypedColumnConverter)
 				{
 					return (ITypedColumnConverter)converter;

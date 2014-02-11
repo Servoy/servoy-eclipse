@@ -45,7 +45,7 @@ import com.servoy.j2db.dataprocessing.IColumnValidator;
 import com.servoy.j2db.dataprocessing.IPropertyDescriptorProvider;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 
@@ -130,7 +130,7 @@ public class ColumnValidationComposite extends Composite
 		ColumnInfo ci = c.getColumnInfo();
 		int selectedIndex = 0;
 
-		Map<String, IColumnValidator> validators = ApplicationServerSingleton.get().getPluginManager().getColumnValidatorManager().getValidators();
+		Map<String, IColumnValidator> validators = ApplicationServerRegistry.get().getPluginManager().getColumnValidatorManager().getValidators();
 		List<String> options = new ArrayList<String>();
 		options.add("none"); //$NON-NLS-1$
 		Iterator<IColumnValidator> it = validators.values().iterator();
@@ -171,7 +171,7 @@ public class ColumnValidationComposite extends Composite
 
 	private IColumnValidator getSelectedValidator()
 	{
-		Map<String, IColumnValidator> Validators = ApplicationServerSingleton.get().getPluginManager().getColumnValidatorManager().getValidators();
+		Map<String, IColumnValidator> Validators = ApplicationServerRegistry.get().getPluginManager().getColumnValidatorManager().getValidators();
 		Iterator<IColumnValidator> it = Validators.values().iterator();
 		String selectedConvertor = combo.getText();
 		while (it.hasNext())

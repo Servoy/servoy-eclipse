@@ -52,7 +52,7 @@ import com.servoy.j2db.Messages;
 import com.servoy.j2db.dataprocessing.IDataServer;
 import com.servoy.j2db.debug.DebugClientHandler;
 import com.servoy.j2db.persistence.ITableLoader;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.server.shared.IUserManagerFactory;
 import com.servoy.j2db.server.starter.IServerStarter;
@@ -143,7 +143,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 				// initialize app server
 				initializeApplicationServer(configuration);
 
-				if (ApplicationServerSingleton.get() != null)
+				if (ApplicationServerRegistry.get() != null)
 				{
 					initialAutoBuild = ResourcesPlugin.getWorkspace().isAutoBuilding();
 
@@ -181,7 +181,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 					}
 					finally
 					{
-						ApplicationServerSingleton.get().doNativeShutdown();
+						ApplicationServerRegistry.get().doNativeShutdown();
 						try
 						{
 							ResourcesPlugin.getWorkspace().save(true, null);

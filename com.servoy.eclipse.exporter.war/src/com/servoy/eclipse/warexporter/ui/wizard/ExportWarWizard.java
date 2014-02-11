@@ -38,7 +38,7 @@ import com.servoy.eclipse.warexporter.export.ExportException;
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
 import com.servoy.eclipse.warexporter.export.Exporter;
 import com.servoy.j2db.persistence.IServer;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 
 
@@ -146,14 +146,14 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel, servoyPropertiesConfigurationPage);
 		driverSelectionPage = new DirectorySelectionPage("driverpage", "Choose the jdbc drivers to export",
 			"Select the jdbc drivers that you want to use in the war (if the app server doesn't provide them)",
-			ApplicationServerSingleton.get().getServerManager().getDriversDir(), exportModel.getDrivers(), new String[] { "hsqldb.jar" },
+			ApplicationServerRegistry.get().getServerManager().getDriversDir(), exportModel.getDrivers(), new String[] { "hsqldb.jar" },
 			servoyPropertiesSelectionPage);
 		lafSelectionPage = new DirectorySelectionPage("lafpage", "Choose the lafs to export", "Select the lafs that you want to use in the war",
-			ApplicationServerSingleton.get().getLafManager().getLAFDir(), exportModel.getLafs(), null, driverSelectionPage);
+			ApplicationServerRegistry.get().getLafManager().getLAFDir(), exportModel.getLafs(), null, driverSelectionPage);
 		beanSelectionPage = new DirectorySelectionPage("beanpage", "Choose the beans to export", "Select the beans that you want to use in the war",
-			ApplicationServerSingleton.get().getBeanManager().getBeansDir(), exportModel.getBeans(), null, lafSelectionPage);
+			ApplicationServerRegistry.get().getBeanManager().getBeansDir(), exportModel.getBeans(), null, lafSelectionPage);
 		pluginSelectionPage = new DirectorySelectionPage("pluginpage", "Choose the plugins to export", "Select the plugins that you want to use in the war",
-			ApplicationServerSingleton.get().getPluginManager().getPluginsDir(), exportModel.getPlugins(), null, beanSelectionPage);
+			ApplicationServerRegistry.get().getPluginManager().getPluginsDir(), exportModel.getPlugins(), null, beanSelectionPage);
 		fileSelectionPage = new FileSelectionPage(exportModel, pluginSelectionPage);
 		addPage(fileSelectionPage);
 		addPage(pluginSelectionPage);
@@ -164,7 +164,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		addPage(servoyPropertiesConfigurationPage);
 		addPage(serversSelectionPage);
 
-		String[] serverNames = ApplicationServerSingleton.get().getServerManager().getServerNames(true, true, true, false);
+		String[] serverNames = ApplicationServerRegistry.get().getServerManager().getServerNames(true, true, true, false);
 		ArrayList<String> srvNames = new ArrayList<String>(Arrays.asList(serverNames));
 		boolean repositoryServerPresent = true;
 		if (!srvNames.contains(IServer.REPOSITORY_SERVER))

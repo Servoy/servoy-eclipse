@@ -40,7 +40,7 @@ import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.util.Debug;
@@ -67,7 +67,7 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 	@Override
 	protected void exportActiveSolution(ArgumentChest configuration)
 	{
-		IApplicationServerSingleton as = ApplicationServerSingleton.get();
+		IApplicationServerSingleton as = ApplicationServerRegistry.get();
 		AbstractRepository rep = (AbstractRepository)as.getDeveloperRepository();
 		IUserManager sm = as.getUserManager();
 

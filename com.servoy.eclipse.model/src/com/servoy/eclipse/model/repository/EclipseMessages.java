@@ -56,7 +56,7 @@ import com.servoy.j2db.Messages;
 import com.servoy.j2db.persistence.I18NUtil;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 
@@ -312,8 +312,8 @@ public class EclipseMessages implements ICustomMessageLoader
 							{
 								String[] serverTableNames = DataSourceUtils.getDBServernameTablename(i18nDataSource);
 								TreeMap<String, I18NUtil.MessageEntry> messages = I18NUtil.loadSortedMessagesFromRepository(
-									ApplicationServerSingleton.get().getDeveloperRepository(), ApplicationServerSingleton.get().getDataServer(),
-									ApplicationServerSingleton.get().getClientId(), serverTableNames[0], serverTableNames[1], null, null, null);
+									ApplicationServerRegistry.get().getDeveloperRepository(), ApplicationServerRegistry.get().getDataServer(),
+									ApplicationServerRegistry.get().getClientId(), serverTableNames[0], serverTableNames[1], null, null, null);
 								writeMessages(serverTableNames[0], serverTableNames[1], messages, new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()),
 									resourceProject.getProject(), false, overwriteExisting, deleteNonExistingKeys);
 							}

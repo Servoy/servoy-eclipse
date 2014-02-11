@@ -32,7 +32,7 @@ import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -153,7 +153,7 @@ public class ElementSettingsModel
 						if (elementIsInList(formElements, uuid))
 						{
 							ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().setFormSecurityAccess(
-								ApplicationServerSingleton.get().getClientId(), group, currentGroupSecurityInfo.get(uuid), uuid, solutionName);
+								ApplicationServerRegistry.get().getClientId(), group, currentGroupSecurityInfo.get(uuid), uuid, solutionName);
 						}
 
 					}

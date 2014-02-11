@@ -73,7 +73,7 @@ import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.query.ColumnType;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONArray;
@@ -262,7 +262,7 @@ public class DataModelManager implements IColumnInfoManager
 		else
 		{
 			boolean clonedServerWithoutTableDbiInDeveloper = false;
-			if (ApplicationServerSingleton.get().isDeveloperStartup())
+			if (ApplicationServerRegistry.get().isDeveloperStartup())
 			{
 				IServerInternal s = (IServerInternal)sm.getServer(t.getServerName());
 				// checking if the server is a clone
@@ -333,7 +333,7 @@ public class DataModelManager implements IColumnInfoManager
 
 	public void createNewColumnInfo(Column c, boolean createMissingServoySequence) throws RepositoryException
 	{
-		int element_id = ApplicationServerSingleton.get().getDeveloperRepository().getNewElementID(null);
+		int element_id = ApplicationServerRegistry.get().getDeveloperRepository().getNewElementID(null);
 		ColumnInfo ci = new ColumnInfo(element_id, false);
 		if (createMissingServoySequence &&
 			c.getRowIdentType() != Column.NORMAL_COLUMN &&
@@ -712,7 +712,7 @@ public class DataModelManager implements IColumnInfoManager
 				if (c != null)
 				{
 					existingColumnInfo++;
-					int element_id = ApplicationServerSingleton.get().getDeveloperRepository().getNewElementID(null);
+					int element_id = ApplicationServerRegistry.get().getDeveloperRepository().getNewElementID(null);
 					ColumnInfo ci = new ColumnInfo(element_id, true);
 					ci.setAutoEnterType(cid.autoEnterType);
 					ci.setAutoEnterSubType(cid.autoEnterSubType);
@@ -1843,7 +1843,7 @@ public class DataModelManager implements IColumnInfoManager
 		{
 			try
 			{
-				IServer server = ApplicationServerSingleton.get().getServerManager().getServer(serverName);
+				IServer server = ApplicationServerRegistry.get().getServerManager().getServer(serverName);
 				if (server != null)
 				{
 					List<String> tableNames = serversTables.get(serverName);

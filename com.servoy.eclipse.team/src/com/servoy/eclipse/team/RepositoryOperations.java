@@ -95,7 +95,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Table;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.UUID;
@@ -207,7 +207,7 @@ public class RepositoryOperations
 
 		if (repositoryAP.isInprocessApplicationServer())
 		{
-			IServerManagerInternal eclipseServerManager = ApplicationServerSingleton.get().getServerManager();
+			IServerManagerInternal eclipseServerManager = ApplicationServerRegistry.get().getServerManager();
 			eclipseServerManager.reloadServersTables();
 		}
 
@@ -672,7 +672,7 @@ public class RepositoryOperations
 		{
 			row = groups.getRow(i);
 			groupsNames[i] = row[1].toString();
-			eclipseUserManager.createGroup(ApplicationServerSingleton.get().getClientId(), groupsNames[i]);
+			eclipseUserManager.createGroup(ApplicationServerRegistry.get().getClientId(), groupsNames[i]);
 		}
 
 		for (String groupName : groupsNames)
@@ -687,7 +687,7 @@ public class RepositoryOperations
 				securityEntry = securityAccessIte.next();
 				if (securityEntry.getKey() instanceof UUID) // form security entry
 				{
-					eclipseUserManager.setFormSecurityAccess(ApplicationServerSingleton.get().getClientId(), groupName, securityEntry.getValue(),
+					eclipseUserManager.setFormSecurityAccess(ApplicationServerRegistry.get().getClientId(), groupName, securityEntry.getValue(),
 						(UUID)securityEntry.getKey(), solution.getName());
 				}
 			}
@@ -713,7 +713,7 @@ public class RepositoryOperations
 		{
 			row = groups.getRow(i);
 			groupsNames[i] = row[1].toString();
-			eclipseUserManager.createGroup(ApplicationServerSingleton.get().getClientId(), groupsNames[i]);
+			eclipseUserManager.createGroup(ApplicationServerRegistry.get().getClientId(), groupsNames[i]);
 		}
 
 		IDataSet users = userManager.getUsers(rap.getClientID());
@@ -730,14 +730,14 @@ public class RepositoryOperations
 			userName = row[1].toString();
 			userPassHash = userManager.getUserPasswordHash(rap.getClientID(), userUID);
 
-			userID = eclipseUserManager.createUser(ApplicationServerSingleton.get().getClientId(), userName, userPassHash, userUID, true);
+			userID = eclipseUserManager.createUser(ApplicationServerRegistry.get().getClientId(), userName, userPassHash, userUID, true);
 			String[] userUIDGroups = userManager.getUserGroups(rap.getClientID(), userUID);
 			if (userUIDGroups != null)
 			{
 				for (String userUIDGroup : userUIDGroups)
 				{
-					eclipseUserManager.addUserToGroup(ApplicationServerSingleton.get().getClientId(), userID,
-						eclipseUserManager.getGroupId(ApplicationServerSingleton.get().getClientId(), userUIDGroup));
+					eclipseUserManager.addUserToGroup(ApplicationServerRegistry.get().getClientId(), userID,
+						eclipseUserManager.getGroupId(ApplicationServerRegistry.get().getClientId(), userUIDGroup));
 				}
 			}
 		}
@@ -758,7 +758,7 @@ public class RepositoryOperations
 					String connectionName = tableSecKeyTokenizer.nextToken();
 					String tableName = tableSecKeyTokenizer.nextToken();
 					String columnName = tableSecKeyTokenizer.nextToken();
-					eclipseUserManager.setTableSecurityAccess(ApplicationServerSingleton.get().getClientId(), groupName, securityEntry.getValue(),
+					eclipseUserManager.setTableSecurityAccess(ApplicationServerRegistry.get().getClientId(), groupName, securityEntry.getValue(),
 						connectionName, tableName, columnName);
 				}
 			}
@@ -778,7 +778,7 @@ public class RepositoryOperations
 		// get remote user manager
 		IUserManager remoteUserManager = rap.getUserManager();
 		// get local user manager
-		IUserManager eclipseUserManager = ApplicationServerSingleton.get().getUserManager();
+		IUserManager eclipseUserManager = ApplicationServerRegistry.get().getUserManager();
 
 		// delete remote groups if locally were deleted
 		String groupName;
@@ -788,14 +788,14 @@ public class RepositoryOperations
 		{
 			Number groupID = (Number)remoteGroups.getRow(i)[0];
 			groupName = (String)remoteGroups.getRow(i)[1];
-			if (eclipseUserManager.getGroupId(ApplicationServerSingleton.get().getClientId(), groupName) == -1)
+			if (eclipseUserManager.getGroupId(ApplicationServerRegistry.get().getClientId(), groupName) == -1)
 			{
 				remoteUserManager.deleteGroup(rap.getClientID(), groupID.intValue());
 			}
 		}
 
 		int remoteGroupID;
-		IDataSet localGroups = eclipseUserManager.getGroups(ApplicationServerSingleton.get().getClientId());
+		IDataSet localGroups = eclipseUserManager.getGroups(ApplicationServerRegistry.get().getClientId());
 		int localGroupsNr = localGroups.getRowCount();
 		for (int i = 0; i < localGroupsNr; i++)
 		{
@@ -819,7 +819,7 @@ public class RepositoryOperations
 		// get remote user manager
 		IUserManager remoteUserManager = rap.getUserManager();
 		// get local user manager
-		IUserManager eclipseUserManager = ApplicationServerSingleton.get().getUserManager();
+		IUserManager eclipseUserManager = ApplicationServerRegistry.get().getUserManager();
 
 
 		// delete remote users if locally were deleted
@@ -832,22 +832,22 @@ public class RepositoryOperations
 		{
 			userUUID = (String)remoteUsers.getRow(i)[0];
 
-			if (eclipseUserManager.getUserIdByUID(ApplicationServerSingleton.get().getClientId(), userUUID) == -1)
+			if (eclipseUserManager.getUserIdByUID(ApplicationServerRegistry.get().getClientId(), userUUID) == -1)
 			{
 				remoteUserManager.deleteUser(rap.getClientID(), userUUID);
 			}
 		}
 
 
-		IDataSet localUsers = eclipseUserManager.getUsers(ApplicationServerSingleton.get().getClientId());
+		IDataSet localUsers = eclipseUserManager.getUsers(ApplicationServerRegistry.get().getClientId());
 		int localUsersNr = localUsers.getRowCount();
 		for (int i = 0; i < localUsersNr; i++)
 		{
 			userUUID = (String)localUsers.getRow(i)[0];
 			userName = (String)localUsers.getRow(i)[1];
-			userPass = eclipseUserManager.getUserPasswordHash(ApplicationServerSingleton.get().getClientId(), userUUID);
+			userPass = eclipseUserManager.getUserPasswordHash(ApplicationServerRegistry.get().getClientId(), userUUID);
 
-			String[] localUserGroups = eclipseUserManager.getUserGroups(ApplicationServerSingleton.get().getClientId(), userUUID);
+			String[] localUserGroups = eclipseUserManager.getUserGroups(ApplicationServerRegistry.get().getClientId(), userUUID);
 			if (remoteUserManager.getUserIdByUID(rap.getClientID(), userUUID) == -1)
 			{
 				// insert new user
@@ -919,8 +919,8 @@ public class RepositoryOperations
 		// get remote user manager
 		IUserManager remoteUserManager = repositoryAP.getUserManager();
 		// get local user manager
-		IUserManager eclipseUserManager = ApplicationServerSingleton.get().getUserManager();
-		IDataSet groups = eclipseUserManager.getGroups(ApplicationServerSingleton.get().getClientId());
+		IUserManager eclipseUserManager = ApplicationServerRegistry.get().getUserManager();
+		IDataSet groups = eclipseUserManager.getGroups(ApplicationServerRegistry.get().getClientId());
 		int groupsNr = groups.getRowCount();
 		String groupsNames[] = new String[groupsNr];
 
@@ -933,7 +933,7 @@ public class RepositoryOperations
 
 		for (String groupName : groupsNames)
 		{
-			Map<Object, Integer> securityAccess = eclipseUserManager.getSecurityAccess(ApplicationServerSingleton.get().getClientId(), new int[0], new int[0],
+			Map<Object, Integer> securityAccess = eclipseUserManager.getSecurityAccess(ApplicationServerRegistry.get().getClientId(), new int[0], new int[0],
 				new String[] { groupName });
 			Map<Object, Integer> remoteSecurityAccess = remoteUserManager.getSecurityAccess(repositoryAP.getClientID(), new int[0], new int[0],
 				new String[] { groupName });
@@ -993,8 +993,8 @@ public class RepositoryOperations
 		// get remote user manager
 		IUserManager remoteUserManager = rap.getUserManager();
 		// get local user manager
-		IUserManager eclipseUserManager = ApplicationServerSingleton.get().getUserManager();
-		IDataSet groups = eclipseUserManager.getGroups(ApplicationServerSingleton.get().getClientId());
+		IUserManager eclipseUserManager = ApplicationServerRegistry.get().getUserManager();
+		IDataSet groups = eclipseUserManager.getGroups(ApplicationServerRegistry.get().getClientId());
 		int groupsNr = groups.getRowCount();
 		String groupsNames[] = new String[groupsNr];
 
@@ -1010,7 +1010,7 @@ public class RepositoryOperations
 
 		for (String groupName : groupsNames)
 		{
-			Map<Object, Integer> securityAccess = eclipseUserManager.getSecurityAccess(ApplicationServerSingleton.get().getClientId(),
+			Map<Object, Integer> securityAccess = eclipseUserManager.getSecurityAccess(ApplicationServerRegistry.get().getClientId(),
 				new int[] { localSolution.getID() }, new int[] { localSolution.getReleaseNumber() }, new String[] { groupName });
 			Map<Object, Integer> remoteSecurityAccess = null;
 			if (remoteSolution != null) remoteSecurityAccess = remoteUserManager.getSecurityAccess(rap.getClientID(), new int[] { remoteSolution.getID() },

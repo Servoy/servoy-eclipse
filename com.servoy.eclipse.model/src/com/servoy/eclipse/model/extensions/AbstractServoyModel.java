@@ -49,7 +49,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -340,7 +340,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 			@Override
 			public IRepository getRepository()
 			{
-				return ApplicationServerSingleton.get().getDeveloperRepository();
+				return ApplicationServerRegistry.get().getDeveloperRepository();
 			}
 
 			@Override

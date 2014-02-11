@@ -24,7 +24,7 @@ import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.j2db.dataprocessing.IDataServerInternal;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IClientInternal;
 import com.servoy.j2db.server.shared.IClientManagerInternal;
 import com.servoy.j2db.util.Debug;
@@ -61,14 +61,14 @@ public final class JSUnitUserManager extends WorkspaceUserManager
 	@Override
 	protected void checkForAdminUser(String clientId, String ownerUserId) throws RepositoryException
 	{
-		if (ApplicationServerSingleton.get().getClientId().equals(clientId))
+		if (ApplicationServerRegistry.get().getClientId().equals(clientId))
 		{
 			// internal: ok
 			return;
 		}
 
 		// check if user is in admin group
-		IClientManagerInternal clientManager = ((IDataServerInternal)ApplicationServerSingleton.get().getDataServer()).getClientManager();
+		IClientManagerInternal clientManager = ((IDataServerInternal)ApplicationServerRegistry.get().getDataServer()).getClientManager();
 		IClientInternal client = clientManager.getClient(clientId);
 		if (client == null || client.getClientInfo().getUserGroups() == null ||
 			!Arrays.asList(client.getClientInfo().getUserGroups()).contains(IRepository.ADMIN_GROUP))

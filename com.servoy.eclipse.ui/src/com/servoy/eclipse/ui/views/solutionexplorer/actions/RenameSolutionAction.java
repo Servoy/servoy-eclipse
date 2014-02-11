@@ -40,7 +40,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
@@ -124,7 +124,7 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 						description.setLocation(null);
 						servoyProject.getProject().move(description, false, null);
 						EclipseRepository repository = (EclipseRepository)ServoyModel.getDeveloperRepository();
-						String protectionPassword = ApplicationServerSingleton.get().calculateProtectionPassword(editingSolution.getSolutionMetaData(), null);
+						String protectionPassword = ApplicationServerRegistry.get().calculateProtectionPassword(editingSolution.getSolutionMetaData(), null);
 						editingSolution.getSolutionMetaData().setProtectionPassword(protectionPassword);
 						repository.updateNodesInWorkspace(new IPersist[] { editingSolution }, true);
 						servoyProject.getSolution().getSolutionMetaData().setProtectionPassword(protectionPassword);

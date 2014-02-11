@@ -108,7 +108,7 @@ import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.ValueList;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.IMessageHandler;
 import com.servoy.j2db.util.Pair;
@@ -315,7 +315,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 		};
 
 		String editorid = UUID.randomUUID().toString();
-		ApplicationServerSingleton.get().getMessageDispatcher().register(editorid, editorMessageHandler = new EditorMessageHandler(editorid));
+		ApplicationServerRegistry.get().getMessageDispatcher().register(editorid, editorMessageHandler = new EditorMessageHandler(editorid));
 
 		Bundle bundle = Platform.getBundle("com.servoy.eclipse.designer.rib");
 		URL resourceUrl = bundle.getResource("/rib/index.html");
@@ -346,7 +346,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 	{
 		if (editorMessageHandler != null)
 		{
-			ApplicationServerSingleton.get().getMessageDispatcher().deregister(editorMessageHandler.getId(), editorMessageHandler);
+			ApplicationServerRegistry.get().getMessageDispatcher().deregister(editorMessageHandler.getId(), editorMessageHandler);
 			editorMessageHandler = null;
 		}
 		super.dispose();
@@ -845,7 +845,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 		}
 		if (editorMessageHandler != null)
 		{
-			ApplicationServerSingleton.get().getMessageDispatcher().sendMessage(editorMessageHandler.getId(), message, editorMessageHandler);
+			ApplicationServerRegistry.get().getMessageDispatcher().sendMessage(editorMessageHandler.getId(), message, editorMessageHandler);
 		}
 	}
 

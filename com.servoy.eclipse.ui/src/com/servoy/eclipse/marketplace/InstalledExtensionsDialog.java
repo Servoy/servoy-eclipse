@@ -82,7 +82,7 @@ import com.servoy.extension.VersionStringUtils;
 import com.servoy.extension.parser.EXPParser;
 import com.servoy.extension.parser.EXPParserPool;
 import com.servoy.extension.parser.ExtensionConfiguration;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.StringComparator;
 
@@ -220,7 +220,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 			{
 				installedDmds[i] = extensions[i].getLeft();
 			}
-			File installDir = new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory()).getParentFile();
+			File installDir = new File(ApplicationServerRegistry.get().getServoyApplicationServerDirectory()).getParentFile();
 			marketPlaceProvider = new MarketPlaceExtensionProvider(installDir); // always create it in order not to use cached data in subsequent calls
 		}
 		monitor.worked(1);
@@ -454,7 +454,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 		{
 			if (installedProvider == null)
 			{
-				File extDir = new File(new File(ApplicationServerSingleton.get().getServoyApplicationServerDirectory()).getParentFile(),
+				File extDir = new File(new File(ApplicationServerRegistry.get().getServoyApplicationServerDirectory()).getParentFile(),
 					ExtensionUtils.EXPFILES_FOLDER);
 				if (!extDir.exists()) extDir.mkdirs();
 				installedProvider = new InstalledWithPendingExtensionProvider(extDir, parserPool);

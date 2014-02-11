@@ -28,7 +28,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import com.servoy.eclipse.warexporter.ui.wizard.ServerConfiguration;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -296,7 +296,7 @@ public class ExportWarModel
 		ServerConfiguration serverConfiguration = servers.get(serverName);
 		if (serverConfiguration == null)
 		{
-			IServerInternal server = (IServerInternal)ApplicationServerSingleton.get().getServerManager().getServer(serverName);
+			IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName);
 			if (server != null)
 			{
 				serverConfiguration = new ServerConfiguration(serverName, server.getConfig());

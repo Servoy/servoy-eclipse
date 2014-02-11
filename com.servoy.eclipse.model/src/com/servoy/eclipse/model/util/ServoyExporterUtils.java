@@ -44,7 +44,7 @@ import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
@@ -291,7 +291,7 @@ public class ServoyExporterUtils
 		//IF NO SOLUTION SPECIFFIED GET ALL TABLES FROM ALL SERVERS
 		if (mainActiveSolution == null)
 		{
-			IServerManagerInternal sm = ApplicationServerSingleton.get().getServerManager();
+			IServerManagerInternal sm = ApplicationServerRegistry.get().getServerManager();
 			String[] serverNames = sm.getServerNames(true, true, false, false);
 			Map<String, List<String>> neededServersTablesMap = new HashMap<String, List<String>>();
 			try

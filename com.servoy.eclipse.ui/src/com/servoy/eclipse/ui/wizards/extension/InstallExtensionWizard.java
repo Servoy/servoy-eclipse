@@ -31,7 +31,7 @@ import com.servoy.eclipse.ui.Activator;
 import com.servoy.extension.ExtensionUtils;
 import com.servoy.extension.MarketPlaceExtensionProvider;
 import com.servoy.extension.Message;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Pair;
 
 
@@ -113,7 +113,7 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 
 			if (state.installDir == null)
 			{
-				String appServerDir = ApplicationServerSingleton.get().getServoyApplicationServerDirectory();
+				String appServerDir = ApplicationServerRegistry.get().getServoyApplicationServerDirectory();
 				if (appServerDir != null)
 				{
 					state.installDir = new File(appServerDir).getParentFile();

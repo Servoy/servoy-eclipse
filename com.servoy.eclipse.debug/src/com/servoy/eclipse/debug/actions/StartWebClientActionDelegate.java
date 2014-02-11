@@ -62,7 +62,7 @@ import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.IDebugWebClient;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * @author jcompagner
@@ -145,7 +145,7 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 							}
 							try
 							{
-								String url = "http://localhost:" + ApplicationServerSingleton.get().getWebServerPort() + "/servoy-webclient/solutions/solution/" + solution.getName(); //$NON-NLS-1$ //$NON-NLS-2$
+								String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/servoy-webclient/solutions/solution/" + solution.getName(); //$NON-NLS-1$ //$NON-NLS-2$
 								IWorkbenchBrowserSupport support = PlatformUI.getWorkbench().getBrowserSupport();
 								if (webBrowser == null) webBrowser = support.getExternalBrowser();
 								EditorUtil.openURL(webBrowser, url);

@@ -94,7 +94,7 @@ import com.servoy.j2db.persistence.ITeamRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
@@ -515,7 +515,7 @@ public class ServoyTeamProvider extends RepositoryProvider
 				protectionDlg.setBlockOnOpen(true);
 				if (protectionDlg.open() == Window.OK)
 				{
-					String passHashed = ApplicationServerSingleton.get().calculateProtectionPassword(solutionMetaData, protectionDlg.getValue());
+					String passHashed = ApplicationServerRegistry.get().calculateProtectionPassword(solutionMetaData, protectionDlg.getValue());
 					if (passHashed.equals(solutionMetaData.getProtectionPassword()))
 					{
 						bCheckProtection = true;
@@ -670,7 +670,7 @@ public class ServoyTeamProvider extends RepositoryProvider
 		{
 			try
 			{
-				IServerInternal repository_server = (IServerInternal)ApplicationServerSingleton.get().getServerManager().getServer(IServer.REPOSITORY_SERVER);
+				IServerInternal repository_server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(IServer.REPOSITORY_SERVER);
 				if (repository_server != null && repository_server.getConfig().isEnabled())
 				{
 					int retries = Utils.getAsInteger(settings.getProperty("developer.maxRepositoryConnectRetries", "5")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -698,7 +698,7 @@ public class ServoyTeamProvider extends RepositoryProvider
 								"' connection, do you want to upgrade the repository?\nYou might want to backup your database first before continuing.");
 							if (ok)
 							{
-								IServerInternal repository_server = (IServerInternal)ApplicationServerSingleton.get().getServerManager().getServer(
+								IServerInternal repository_server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(
 									IServer.REPOSITORY_SERVER);
 								try
 								{

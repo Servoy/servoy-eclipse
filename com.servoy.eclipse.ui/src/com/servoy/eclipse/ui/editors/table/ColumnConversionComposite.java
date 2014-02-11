@@ -34,7 +34,7 @@ import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.IColumnConverter;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 
@@ -77,7 +77,7 @@ public class ColumnConversionComposite extends ConvertersComposite<IColumnConver
 		this.column = c;
 
 		setConverters(c.getConfiguredColumnType().getSqlType(), c.getColumnInfo().getConverterName(),
-			ApplicationServerSingleton.get().getPluginManager().getColumnConverterManager().getConverters().values());
+			ApplicationServerRegistry.get().getPluginManager().getColumnConverterManager().getConverters().values());
 		loadTable();
 	}
 

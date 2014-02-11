@@ -38,7 +38,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * @author acostescu
@@ -185,7 +185,7 @@ public class RunSmartClientTests extends RunJSUnitTests
 								cancelCleanupShutDown = false; // because of the rule, last run session should have already finished by now, so no more danger in old cleanup shutting down newly open client
 								StartJsUnitClientActionDelegate startJsUnitClientAction = new StartJsUnitClientActionDelegate();
 								startJsUnitClientAction.init(window);
-								((SwitchableEclipseUserManager)ApplicationServerSingleton.get().getUserManager()).switchTo(testUserManager); // use testUserManager in app. server code as well
+								((SwitchableEclipseUserManager)ApplicationServerRegistry.get().getUserManager()).switchTo(testUserManager); // use testUserManager in app. server code as well
 								startJsUnitClientAction.run((IAction)null);
 
 								if (startJsUnitClientAction.clientStartSucceeded())
@@ -227,7 +227,7 @@ public class RunSmartClientTests extends RunJSUnitTests
 	@Override
 	protected void cleanUpAfterPrepare()
 	{
-		((SwitchableEclipseUserManager)ApplicationServerSingleton.get().getUserManager()).switchTo(null); // restore use of EclipseUserManager in app. server code
+		((SwitchableEclipseUserManager)ApplicationServerRegistry.get().getUserManager()).switchTo(null); // restore use of EclipseUserManager in app. server code
 		if (!cancelCleanupShutDown)
 		{
 			Activator plugin = Activator.getDefault();

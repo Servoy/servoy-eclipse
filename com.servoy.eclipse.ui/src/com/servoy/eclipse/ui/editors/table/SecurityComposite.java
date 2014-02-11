@@ -42,7 +42,7 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.persistence.NameComparator;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 public class SecurityComposite extends Composite implements EclipseUserManager.IUserGroupChangeListener
 {
@@ -159,7 +159,7 @@ public class SecurityComposite extends Composite implements EclipseUserManager.I
 			}
 		});
 		EclipseUserManager eum = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager();
-		tableViewer.setInput(eum.getGroups(ApplicationServerSingleton.get().getClientId()));
+		tableViewer.setInput(eum.getGroups(ApplicationServerRegistry.get().getClientId()));
 		tableViewer.setSorter(new ColumnsSorter(tableViewer, new TableColumn[] { nameColumn }, new Comparator[] { NameComparator.INSTANCE }));
 		eum.addUserGroupChangeListener(this);
 	}
@@ -182,7 +182,7 @@ public class SecurityComposite extends Composite implements EclipseUserManager.I
 			public void run()
 			{
 				tableViewer.setInput(ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getGroups(
-					ApplicationServerSingleton.get().getClientId()));
+					ApplicationServerRegistry.get().getClientId()));
 
 			}
 		}, true);

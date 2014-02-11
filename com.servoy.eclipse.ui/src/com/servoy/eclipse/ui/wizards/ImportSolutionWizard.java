@@ -57,7 +57,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.util.CryptUtils;
 import com.servoy.j2db.util.ServoyException;
@@ -119,7 +119,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 
 	private static String getInitialImportPath()
 	{
-		String as_dir = ApplicationServerSingleton.get().getServoyApplicationServerDirectory().replace("\\", "/").replace("//", "/"); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		String as_dir = ApplicationServerRegistry.get().getServoyApplicationServerDirectory().replace("\\", "/").replace("//", "/"); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		if (!as_dir.endsWith("/")) as_dir += "/"; //$NON-NLS-1$//$NON-NLS-2$
 		return as_dir + "solutions/examples"; //$NON-NLS-1$
 	}
@@ -324,7 +324,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 				public void run(IProgressMonitor monitor)
 				{
 					final EclipseImportUserChannel userChannel = new EclipseImportUserChannel(allowDataModelChanges, doDisplayDataModelChanges, getShell());
-					IApplicationServerSingleton as = ApplicationServerSingleton.get();
+					IApplicationServerSingleton as = ApplicationServerRegistry.get();
 					try
 					{
 						IXMLImportEngine importEngine = as.createXMLImportEngine(fileDecryption(file), (EclipseRepository)ServoyModel.getDeveloperRepository(),

@@ -77,7 +77,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
@@ -744,7 +744,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 					{
 						if (column.getColumnInfo().getValidatorName() != null && column.getColumnInfo().getValidatorProperties() == null)
 						{
-							IColumnValidator validator = ApplicationServerSingleton.get().getPluginManager().getColumnValidatorManager().getValidator(
+							IColumnValidator validator = ApplicationServerRegistry.get().getPluginManager().getColumnValidatorManager().getValidator(
 								column.getColumnInfo().getValidatorName());
 							if (validator != null && validator.getDefaultProperties() != null && validator.getDefaultProperties().size() > 0)
 							{
@@ -754,7 +754,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 						}
 						if (column.getColumnInfo().getConverterName() != null && column.getColumnInfo().getConverterProperties() == null)
 						{
-							IColumnConverter converter = ApplicationServerSingleton.get().getPluginManager().getColumnConverterManager().getConverter(
+							IColumnConverter converter = ApplicationServerRegistry.get().getPluginManager().getColumnConverterManager().getConverter(
 								column.getColumnInfo().getConverterName());
 							if (converter != null && converter.getDefaultProperties() != null)
 							{

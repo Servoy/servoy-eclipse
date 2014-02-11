@@ -55,7 +55,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -380,7 +380,7 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 		String appUrl = MobileLaunchUtils.getDefaultApplicationURL(
 			MobileLaunchUtils.getWarFileName(project.getSolution().getName(),
 				launchConfigurationID.equals(IMobileTestLaunchConstants.LAUNCH_TEST_CONFIGURATION_TYPE_ID)),
-			ApplicationServerSingleton.get().getWebServerPort());
+			ApplicationServerRegistry.get().getWebServerPort());
 
 		workingCopy.setAttribute(IMobileLaunchConstants.SERVER_URL, MobileExporter.getDefaultServerURL());
 		workingCopy.setAttribute(IMobileLaunchConstants.SERVICE_SOLUTION, project.getSolutionMetaData().getName() + "_service");
@@ -400,7 +400,7 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 	{
 		String solutionName = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution().getName();
 		return MobileLaunchUtils.getDefaultApplicationURL(MobileLaunchUtils.getWarFileName(solutionName, testURL),
-			ApplicationServerSingleton.get().getWebServerPort());
+			ApplicationServerRegistry.get().getWebServerPort());
 	}
 
 	public void init(IWorkbenchWindow window)

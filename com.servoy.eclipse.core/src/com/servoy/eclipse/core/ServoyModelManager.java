@@ -21,7 +21,7 @@ import java.util.concurrent.Semaphore;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * Is similar to JavaModelManager, single entry point for anything about servoy in eclipse
@@ -112,9 +112,9 @@ public class ServoyModelManager
 			// notify the client debug handler that servoy model has been initialized.
 			// on the mac the debug smart client must wait until the swt main thread is not busy,
 			// otherwise the smart client frame will not paint.
-			if (ApplicationServerSingleton.get().getDebugClientHandler() != null)
+			if (ApplicationServerRegistry.get().getDebugClientHandler() != null)
 			{
-				ApplicationServerSingleton.get().getDebugClientHandler().flagModelInitialised();
+				ApplicationServerRegistry.get().getDebugClientHandler().flagModelInitialised();
 			}
 		}
 		// this access to servoyModel is not exactly thread safe, but as servoyModel can only be set to something as opposed to being null - it's a turn for the better

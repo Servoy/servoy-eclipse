@@ -52,7 +52,7 @@ import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IClientInternal;
 import com.servoy.j2db.server.shared.IClientManagerInternal;
 import com.servoy.j2db.util.Debug;
@@ -81,7 +81,7 @@ public class EclipseUserManager extends WorkspaceUserManager
 	@Override
 	protected void checkForAdminUser(String clientId, String ownerUserId) throws RepositoryException
 	{
-		if (ApplicationServerSingleton.get().getClientId().equals(clientId))
+		if (ApplicationServerRegistry.get().getClientId().equals(clientId))
 		{
 			// internal: ok
 			return;
@@ -90,7 +90,7 @@ public class EclipseUserManager extends WorkspaceUserManager
 		if (!ServoyModel.isClientRepositoryAccessAllowed())
 		{
 			// check if user is in admin group
-			IClientManagerInternal clientManager = ((IDataServerInternal)ApplicationServerSingleton.get().getDataServer()).getClientManager();
+			IClientManagerInternal clientManager = ((IDataServerInternal)ApplicationServerRegistry.get().getDataServer()).getClientManager();
 			IClientInternal client = clientManager.getClient(clientId);
 			if (client == null || client.getClientInfo().getUserGroups() == null ||
 				!Arrays.asList(client.getClientInfo().getUserGroups()).contains(IRepository.ADMIN_GROUP))
@@ -405,7 +405,7 @@ public class EclipseUserManager extends WorkspaceUserManager
 	@Override
 	public void dispose()
 	{
-		if (ApplicationServerSingleton.get() == null)
+		if (ApplicationServerRegistry.get() == null)
 		{
 			// don't start app server again
 			serverListener = null;

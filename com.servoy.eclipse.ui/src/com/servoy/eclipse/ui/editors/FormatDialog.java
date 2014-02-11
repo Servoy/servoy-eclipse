@@ -40,7 +40,7 @@ import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.dataprocessing.IUIConverter;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IColumnTypes;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.FormatParser;
 import com.servoy.j2db.util.FormatParser.ParsedFormat;
 
@@ -149,7 +149,7 @@ public class FormatDialog extends Dialog
 		// set data
 		useConvertersCheckbutton.setSelection(parsedFormat.getUIConverterName() != null);
 		uiConvertersComposite.setConverters(dataproviderType, parsedFormat.getUIConverterName(),
-			ApplicationServerSingleton.get().getPluginManager().getUIConverterManager().getConverters().values());
+			ApplicationServerRegistry.get().getPluginManager().getUIConverterManager().getConverters().values());
 
 		setPropertiesForSelectedConverter();
 		recreateFormatTextContainer();

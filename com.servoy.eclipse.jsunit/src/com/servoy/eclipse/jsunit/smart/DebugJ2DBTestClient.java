@@ -31,7 +31,7 @@ import com.servoy.j2db.dataprocessing.IUserClient;
 import com.servoy.j2db.debug.DebugClientHandler;
 import com.servoy.j2db.debug.DebugJ2DBClient;
 import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.util.Debug;
 
@@ -70,7 +70,7 @@ public class DebugJ2DBTestClient extends DebugJ2DBClient
 	{
 		boolean register = super.registerClient(uc);
 		// access the server directly to mark the client as local
-		ApplicationServerSingleton.get().setServerProcess(getClientID());
+		ApplicationServerRegistry.get().setServerProcess(getClientID());
 		return register;
 	}
 
@@ -80,7 +80,7 @@ public class DebugJ2DBTestClient extends DebugJ2DBClient
 	{
 		try
 		{
-			userManager.createGroup(ApplicationServerSingleton.get().getClientId(), IRepository.ADMIN_GROUP);
+			userManager.createGroup(ApplicationServerRegistry.get().getClientId(), IRepository.ADMIN_GROUP);
 		}
 		catch (Exception e)
 		{

@@ -31,7 +31,7 @@ import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.exporter.mobile.ui.wizard.ExportMobileWizard.IMobileExportPropertiesPage;
 import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * @author lvostinar
@@ -119,7 +119,7 @@ public class LicensePage extends WizardPage implements IMobileExportPropertiesPa
 
 	private void checkLicense(Composite container, Label validationLabel)
 	{
-		if (ApplicationServerSingleton.get().checkMobileLicense(companyText.getText(), licenseText.getText()))
+		if (ApplicationServerRegistry.get().checkMobileLicense(companyText.getText(), licenseText.getText()))
 		{
 			validationLabel.setForeground(container.getDisplay().getSystemColor(SWT.COLOR_BLACK));
 			validationLabel.setText("License OK");
@@ -135,7 +135,7 @@ public class LicensePage extends WizardPage implements IMobileExportPropertiesPa
 	@Override
 	public IWizardPage getNextPage()
 	{
-		if (ApplicationServerSingleton.get().checkMobileLicense(companyText.getText(), licenseText.getText()))
+		if (ApplicationServerRegistry.get().checkMobileLicense(companyText.getText(), licenseText.getText()))
 		{
 			mobileExporter.setSkipConnect(true);
 		}

@@ -75,7 +75,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.query.QuerySelect;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.ILogLevel;
 import com.servoy.j2db.util.ServoyException;
@@ -591,7 +591,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		while (iterator.hasNext())
 		{
 			GroupInfo groupInfo = iterator.next();
-			int groupId = userManager.getGroupId(ApplicationServerSingleton.get().getClientId(), groupInfo.name);
+			int groupId = userManager.getGroupId(ApplicationServerRegistry.get().getClientId(), groupInfo.name);
 			boolean update = false;
 			if (groupId > 0)
 			{
@@ -623,7 +623,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 				// If the group does not yet exist, create it.
 				if (groupId < 0)
 				{
-					userManager.createGroup(ApplicationServerSingleton.get().getClientId(), groupInfo.name);
+					userManager.createGroup(ApplicationServerRegistry.get().getClientId(), groupInfo.name);
 				}
 
 				// Iterate over the elements in the security element info and
@@ -662,7 +662,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 							String columnName = target.substring(i + 1);
 							if (elementInfo.columnInfoAccess >= 0)
 							{
-								userManager.setTableSecurityAccess(ApplicationServerSingleton.get().getClientId(), groupInfo.name,
+								userManager.setTableSecurityAccess(ApplicationServerRegistry.get().getClientId(), groupInfo.name,
 									elementInfo.columnInfoAccess, serverName, tableName, columnName);
 							}
 						}
@@ -857,7 +857,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					try
 					{
 						QuerySelect query = MetaDataUtils.createTableMetadataQuery((Table)table, null);
-						IDataSet ds = ApplicationServerSingleton.get().getDataServer().performQuery(ApplicationServerSingleton.get().getClientId(),
+						IDataSet ds = ApplicationServerRegistry.get().getDataServer().performQuery(ApplicationServerRegistry.get().getClientId(),
 							table.getServerName(), null, query, null, false, 0, 1, IDataServer.META_DATA_QUERY, null);
 						if (ds.getRowCount() == 0)
 						{
@@ -930,19 +930,19 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 				UserInfo userInfo = iterator.next();
 
 				// Look up the user with the given name.
-				int userId = userManager.getUserIdByUserName(ApplicationServerSingleton.get().getClientId(), userInfo.name);
+				int userId = userManager.getUserIdByUserName(ApplicationServerRegistry.get().getClientId(), userInfo.name);
 
 				// If override users is set, delete the user first.
 				if (userId != -1 && mode == IXMLImportUserChannel.IMPORT_USER_POLICY_OVERWRITE_COMPLETELY)
 				{
-					userManager.deleteUser(ApplicationServerSingleton.get().getClientId(), userId);
+					userManager.deleteUser(ApplicationServerRegistry.get().getClientId(), userId);
 					userId = -1;
 				}
 
 				// If the user does not exist, create.
 				if (userId == -1)
 				{
-					userId = userManager.createUser(ApplicationServerSingleton.get().getClientId(), userInfo.name, userInfo.password, userInfo.uid, true);
+					userId = userManager.createUser(ApplicationServerRegistry.get().getClientId(), userInfo.name, userInfo.password, userInfo.uid, true);
 					if (userId == -1)
 					{
 						x11handler.getUserChannel().info("Could not create user with name `" + userInfo.name + "'.", ILogLevel.ERROR);
@@ -958,13 +958,13 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					Integer groupId = groupIdCache.get(groupName);
 					if (groupId == null)
 					{
-						groupId = new Integer(userManager.getGroupId(ApplicationServerSingleton.get().getClientId(), groupName));
+						groupId = new Integer(userManager.getGroupId(ApplicationServerRegistry.get().getClientId(), groupName));
 						if (groupId.intValue() == -1)
 						{
 							if (IRepository.ADMIN_GROUP.equals(groupName))
 							{
 								// admin group is considered to always exist; but in case of a newly created resources project it isn't there yet
-								groupId = new Integer(userManager.createGroup(ApplicationServerSingleton.get().getClientId(), IRepository.ADMIN_GROUP));
+								groupId = new Integer(userManager.createGroup(ApplicationServerRegistry.get().getClientId(), IRepository.ADMIN_GROUP));
 							}
 							else
 							{
@@ -980,7 +980,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 						x11handler.getUserChannel().info("User '" + userInfo.name + "' not added to '" + IRepository.ADMIN_GROUP + "'.", ILogLevel.INFO);
 						continue;
 					}
-					userManager.addUserToGroup(ApplicationServerSingleton.get().getClientId(), userId, groupId.intValue());
+					userManager.addUserToGroup(ApplicationServerRegistry.get().getClientId(), userId, groupId.intValue());
 				}
 				x11handler.getUserChannel().notifyWorkDone(-1);
 			}

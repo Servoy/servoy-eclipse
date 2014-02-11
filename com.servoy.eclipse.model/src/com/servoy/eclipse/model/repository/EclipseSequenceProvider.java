@@ -44,7 +44,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.query.QueryAggregate;
 import com.servoy.j2db.query.QueryCustomSelect;
 import com.servoy.j2db.query.QuerySelect;
-import com.servoy.j2db.server.shared.ApplicationServerSingleton;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Utils;
 
@@ -82,7 +82,7 @@ public class EclipseSequenceProvider implements ISequenceProvider
 		long nextSequence = 1;
 		ColumnInfoSequence s = null;
 
-		IDataServer dataServer = ApplicationServerSingleton.get().getDataServer();
+		IDataServer dataServer = ApplicationServerRegistry.get().getDataServer();
 		IDataSet rs = null;
 		try
 		{
@@ -99,7 +99,7 @@ public class EclipseSequenceProvider implements ISequenceProvider
 					throw new RepositoryException("Cannot get sequence for column without sequence settings"); //$NON-NLS-1$
 				}
 
-				IServerInternal tableServer = (IServerInternal)ApplicationServerSingleton.get().getServerManager().getServer(column.getTable().getServerName(),
+				IServerInternal tableServer = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(column.getTable().getServerName(),
 					false, true);
 				QuerySelect select = SQLGenerator.createAggregateSelect(QueryAggregate.MAX, column.getTable(), column);
 
@@ -109,7 +109,7 @@ public class EclipseSequenceProvider implements ISequenceProvider
 				// in case one of the debug clients has a transaction started on this server, exectute the query inside that transaction
 				// (otherwise the query will block)
 
-				String clientId = ApplicationServerSingleton.get().getClientId();
+				String clientId = ApplicationServerRegistry.get().getClientId();
 				String tid = null;
 				IServiceProvider client = J2DBGlobals.getServiceProvider();
 
@@ -227,7 +227,7 @@ public class EclipseSequenceProvider implements ISequenceProvider
 	{
 		if (column == null) throw new RepositoryException("Can't sync on null column"); //$NON-NLS-1$
 
-		IServerInternal tableServer = (IServerInternal)ApplicationServerSingleton.get().getServerManager().getServer(column.getTable().getServerName(), false,
+		IServerInternal tableServer = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(column.getTable().getServerName(), false,
 			true);
 		Connection connection = null;
 		PreparedStatement ps = null;
