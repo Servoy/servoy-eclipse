@@ -37,56 +37,11 @@
                 };
                 resolveRefs(groups, groups);
                 widget._setOption("model", groups);
-                widget.findDomNode(groups[0]['Functional Groups'])
+                widget.findDomNode(groups[0]['Palette'])
                     .find('> a').trigger('click');
             }/* )*/;
 	    /*{ */
-	    readGroups(
-[{
-    "_hidden_node": {
-        "jqm_toolbars":["Header" /*, "CustomHeader"*/, "Footer"/* , "Navbar"*/],
-        "jqm_input_boolean":[/* "ToggleSwitch", */"RadioGroup", "SingleCheckbox", "CheckboxGroup"],
-        "jqm_other_inputs":[ {
-                    /* "Form": ["Form"],*/
-                    "Text": ["TextInput", "PasswordField", "TextArea", "Calendar", "Bean"],
-                    "Select": ["SelectMenu"]/*,
-                    "Number": ["Slider"]*/
-            }
-         ]
-    },
-    "Functional Groups": [
-        {
-            "Toolbars": ["#0._hidden_node.jqm_toolbars"],
-            "Buttons": ["Button"/* , "ButtonGroup"*/],
-            "Content Formatting": [/* "Grid", "Collapsible", "Accordion", "Div"*/],
-            "Form Elements": [
-                "#0._hidden_node.jqm_other_inputs.0", /* "Text",*/
-                {
-                    "Boolean": ["#0._hidden_node.jqm_input_boolean"]
-                }
-            ],
-            "List Views": [
-                 "InsetList"/* List , "OrderedList", "ListItem", "ListDivider", "ListButton"
-          */ ],
-          "Image": [/*"Image"*/],
-          "Label": ["Label"]
-    }
-    ],
-
-    "Widget Sets": [
-        {
-            "Simple HTML": [ "Text", "Image", "Div" ],
-            "jQuery Mobile": [ 
-                "#0._hidden_node.jqm_toolbars",
-                "#0.Functional Groups.0.Buttons",
-                "#0.Functional Groups.0.Content Formatting",
-                "#0._hidden_node.jqm_other_inputs",
-                "#0._hidden_node.jqm_input_boolean",
-                "#0.Functional Groups.0.List Views"
-            ]
-        }
-    ]
-}]
+	    readGroups( [{ "Palette": [ {  "Palette Items": [ ] } ] }] // will be set later
 			    )
 	    /*} */
             this.enableKeyNavigation();

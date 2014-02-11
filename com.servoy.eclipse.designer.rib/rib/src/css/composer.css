@@ -117,6 +117,11 @@ Add some padding some that outline can be seen when selected.
     position: static;
 }
 
+
+.ui-listview .ui-li { 
+ margin: 2px;
+ }
+
 .adm-node.ui-selected,
 .nrc-sortable-container.ui-selected:not([data-role=footer]):not([data-role=header]),
 .nrc-sortable-container.ui-selected:not([data-role=footer]):not([data-role=header]).nrc-empty {

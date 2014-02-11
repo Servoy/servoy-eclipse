@@ -28,6 +28,7 @@ import com.servoy.base.persistence.PersistUtils;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
 import com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditorHtmlDesignPage;
+import com.servoy.eclipse.designer.editor.mobile.commands.ConvertToRecordFormCommand;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileFooterGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileHeaderGraphicalEditPart;
 import com.servoy.eclipse.ui.property.MobileListModel;
@@ -125,10 +126,19 @@ public class DeleteAction extends org.eclipse.gef.ui.actions.DeleteAction
 
 				deleteCommand.add(new FormElementDeleteCommand((IPersist)modelObject));
 			}
-			else if (modelObject instanceof MobileListModel && ((MobileListModel)modelObject).component != null)
+			else if (modelObject instanceof MobileListModel)
 			{
-				// inset list
-				deleteCommand.add(new FormElementDeleteCommand(((MobileListModel)modelObject).component));
+				MobileListModel listModel = (MobileListModel)modelObject;
+				if (listModel.component == null)
+				{
+					// list form, delete means change to record form
+					deleteCommand.add(new ConvertToRecordFormCommand(listModel.form));
+				}
+				else
+				{
+					// inset list
+					deleteCommand.add(new FormElementDeleteCommand(((MobileListModel)modelObject).component));
+				}
 			}
 		}
 
