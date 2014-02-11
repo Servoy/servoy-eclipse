@@ -2403,7 +2403,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			manager.add(suggestForeignTypes);
 		}
 
-		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.I18N_FILES)
+		if (!ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile() && selectedTreeNode != null &&
+			selectedTreeNode.getType() == UserNodeType.I18N_FILES)
 		{
 			manager.add(new Separator());
 			manager.add(i18nCreateFromDBAction);

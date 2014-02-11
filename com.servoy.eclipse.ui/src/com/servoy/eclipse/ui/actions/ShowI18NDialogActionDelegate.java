@@ -77,6 +77,9 @@ public class ShowI18NDialogActionDelegate implements IWorkbenchWindowActionDeleg
 	private static final String DEFAULT_MESSAGES_TABLE = "defaultMessagesTable"; //$NON-NLS-1$
 	private static final String DEFAULT_MESSAGES_SERVER = "defaultMessagesServer"; //$NON-NLS-1$
 
+	private static final String MOBILE_MESSAGES_SERVER_NAME = "mobile"; //$NON-NLS-1$
+	private static final String MOBILE_MESSAGES_TABLE_NAME = "messages"; //$NON-NLS-1$
+
 	private IWorkbenchWindow workbenchWindow;
 
 	public void dispose()
@@ -106,80 +109,98 @@ public class ShowI18NDialogActionDelegate implements IWorkbenchWindowActionDeleg
 				"The dialog does not work when there is no active solution set.", MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL }, 0).open();
 			return;
 		}
-		String i18nDetails[] = hasI18NTable();
-		if (i18nDetails == null)
+
+		String i18nDetails[] = null;
+
+		if (servoyModel.isActiveSolutionMobile())
 		{
-			if (MessageDialog.openQuestion(shell, ACTION_EXTERNALIZE.equals(actionId) ? "Externalize Strings" : "Edit I18N messages",
-				"There is no i18n table defined for the active solution. Do you want to define one now ?"))
+			i18nDetails = hasI18NTable(false);
+			if (i18nDetails == null)
 			{
-				TableContentProvider tableContentProvider = new TableContentProvider();
-				final TreeSelectDialog dialog = new TreeSelectDialog(UIUtils.getActiveShell(), true, false, TreePatternFilter.FILTER_LEAFS,
-					tableContentProvider, DatasourceLabelProvider.INSTANCE_IMAGE_NAMEONLY, null, new LeafnodesSelectionFilter(tableContentProvider), SWT.NONE,
-					"Select I18N table", new TableContentProvider.TableListOptions(TableListOptions.TableListType.I18N, true), null, false,
-					"serverTableDialog", null);
-				dialog.setOptionsAreaFactory(new IControlFactory()
+				try
 				{
-					public Control createControl(Composite composite)
+					setActiveProjectI18N(activeProject, MOBILE_MESSAGES_SERVER_NAME, MOBILE_MESSAGES_TABLE_NAME, false);
+					i18nDetails = new String[] { MOBILE_MESSAGES_SERVER_NAME, MOBILE_MESSAGES_TABLE_NAME };
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+		}
+		else
+		{
+			i18nDetails = hasI18NTable(true);
+			if (i18nDetails == null)
+			{
+				if (MessageDialog.openQuestion(shell, ACTION_EXTERNALIZE.equals(actionId) ? "Externalize Strings" : "Edit I18N messages",
+					"There is no i18n table defined for the active solution. Do you want to define one now ?"))
+				{
+					TableContentProvider tableContentProvider = new TableContentProvider();
+					final TreeSelectDialog dialog = new TreeSelectDialog(UIUtils.getActiveShell(), true, false, TreePatternFilter.FILTER_LEAFS,
+						tableContentProvider, DatasourceLabelProvider.INSTANCE_IMAGE_NAMEONLY, null, new LeafnodesSelectionFilter(tableContentProvider),
+						SWT.NONE, "Select I18N table", new TableContentProvider.TableListOptions(TableListOptions.TableListType.I18N, true), null, false,
+						"serverTableDialog", null);
+					dialog.setOptionsAreaFactory(new IControlFactory()
 					{
-						Button createButton = new Button(composite, SWT.PUSH);
-						createButton.setText("Create new I18N table"); //$NON-NLS-1$
-						createButton.addListener(SWT.Selection, new Listener()
+						public Control createControl(Composite composite)
 						{
-							public void handleEvent(Event event)
+							Button createButton = new Button(composite, SWT.PUSH);
+							createButton.setText("Create new I18N table"); //$NON-NLS-1$
+							createButton.addListener(SWT.Selection, new Listener()
 							{
-								String serverName = null;
-								TreeSelection ts = (TreeSelection)dialog.getTreeViewer().getViewer().getSelection();
-								if (!ts.isEmpty())
+								public void handleEvent(Event event)
 								{
-									Object selection = ts.getFirstElement();
-									if (selection instanceof TableWrapper)
+									String serverName = null;
+									TreeSelection ts = (TreeSelection)dialog.getTreeViewer().getViewer().getSelection();
+									if (!ts.isEmpty())
 									{
-										serverName = ((TableWrapper)selection).getServerName();
+										Object selection = ts.getFirstElement();
+										if (selection instanceof TableWrapper)
+										{
+											serverName = ((TableWrapper)selection).getServerName();
+										}
+									}
+									I18NServerTableDialog dlg = new I18NServerTableDialog(shell, serverName, "");
+									dlg.open();
+
+									if (dlg.getReturnCode() == Window.OK)
+									{
+										serverName = dlg.getSelectedServerName();
+										String selectedTableName = dlg.getSelectedTableName();
+										Table newTable = I18NServerTableDialog.createDefaultMessagesTable(serverName, selectedTableName, shell);
+
+										dialog.refreshTree();
+										dialog.getTreeViewer().setSelection(
+											new StructuredSelection(new TableWrapper(newTable.getServerName(), newTable.getName())));
 									}
 								}
-								I18NServerTableDialog dlg = new I18NServerTableDialog(shell, serverName, "");
-								dlg.open();
-
-								if (dlg.getReturnCode() == Window.OK)
-								{
-									serverName = dlg.getSelectedServerName();
-									String selectedTableName = dlg.getSelectedTableName();
-									Table newTable = I18NServerTableDialog.createDefaultMessagesTable(serverName, selectedTableName, shell);
-
-									dialog.refreshTree();
-									dialog.getTreeViewer().setSelection(new StructuredSelection(new TableWrapper(newTable.getServerName(), newTable.getName())));
-								}
-							}
-						});
-						return createButton;
-					}
-
-				});
-				dialog.open();
-
-				if (dialog.getReturnCode() == Window.OK)
-				{
-					TableWrapper tableWrapper = (TableWrapper)((StructuredSelection)dialog.getSelection()).getFirstElement();
-					if (tableWrapper.getServerName() != null && tableWrapper.getTableName() != null)
-					{
-						activeProject.getEditingSolution().setI18nDataSource(
-							DataSourceUtils.createDBTableDataSource(tableWrapper.getServerName(), tableWrapper.getTableName()));
-						I18NMessagesUtil.showDatasourceWarning();
-						try
-						{
-							activeProject.saveEditingSolutionNodes(new IPersist[] { activeProject.getEditingSolution() }, false);
-							EclipseMessages.writeProjectI18NFiles(activeProject, false, false);
-							i18nDetails = new String[] { tableWrapper.getServerName(), tableWrapper.getTableName() };
+							});
+							return createButton;
 						}
-						catch (Exception e)
+
+					});
+					dialog.open();
+
+					if (dialog.getReturnCode() == Window.OK)
+					{
+						TableWrapper tableWrapper = (TableWrapper)((StructuredSelection)dialog.getSelection()).getFirstElement();
+						if (tableWrapper.getServerName() != null && tableWrapper.getTableName() != null)
 						{
-							ServoyLog.logError(e);
+							try
+							{
+								setActiveProjectI18N(activeProject, tableWrapper.getServerName(), tableWrapper.getTableName(), true);
+								i18nDetails = new String[] { tableWrapper.getServerName(), tableWrapper.getTableName() };
+							}
+							catch (Exception e)
+							{
+								ServoyLog.logError(e);
+							}
 						}
 					}
 				}
 			}
 		}
-
 
 		if (i18nDetails != null)
 		{
@@ -218,6 +239,14 @@ public class ShowI18NDialogActionDelegate implements IWorkbenchWindowActionDeleg
 
 	}
 
+	private void setActiveProjectI18N(ServoyProject activeProject, String serverName, String tableName, boolean showDatasourceWarning) throws Exception
+	{
+		activeProject.getEditingSolution().setI18nDataSource(DataSourceUtils.createDBTableDataSource(serverName, tableName));
+		if (showDatasourceWarning) I18NMessagesUtil.showDatasourceWarning();
+		activeProject.saveEditingSolutionNodes(new IPersist[] { activeProject.getEditingSolution() }, false);
+		EclipseMessages.writeProjectI18NFiles(activeProject, false, false);
+	}
+
 	public void selectionChanged(IAction action, ISelection selection)
 	{
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
@@ -225,7 +254,7 @@ public class ShowI18NDialogActionDelegate implements IWorkbenchWindowActionDeleg
 		action.setEnabled(activeProject != null && activeProject.getSolution() != null);
 	}
 
-	public static String[] hasI18NTable()
+	private static String[] hasI18NTable(boolean checkForDefaults)
 	{
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject activeProject = servoyModel.getActiveProject();
@@ -236,7 +265,7 @@ public class ShowI18NDialogActionDelegate implements IWorkbenchWindowActionDeleg
 		String tableName = activeSolution.getI18nTableName();
 		// If the solution does not define I18N server/table, then pick defaults from
 		// global preferences.
-		if (serverName == null || serverName.trim().length() == 0 || tableName == null || tableName.trim().length() == 0)
+		if (checkForDefaults && (serverName == null || serverName.trim().length() == 0 || tableName == null || tableName.trim().length() == 0))
 		{
 			Settings settings = Settings.getInstance();
 			serverName = settings.getProperty(DEFAULT_MESSAGES_SERVER);
@@ -246,7 +275,7 @@ public class ShowI18NDialogActionDelegate implements IWorkbenchWindowActionDeleg
 		else return new String[] { serverName, tableName };
 	}
 
-	public static ITable getI18nTable(String serverName, String tableName)
+	private static ITable getI18nTable(String serverName, String tableName)
 	{
 		IServer server = ServoyModel.getServerManager().getServer(serverName);
 		if (server == null)
