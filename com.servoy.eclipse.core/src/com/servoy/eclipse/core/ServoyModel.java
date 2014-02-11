@@ -885,7 +885,7 @@ public class ServoyModel extends AbstractServoyModel
 
 		if (ApplicationServerSingleton.get() != null)
 		{
-			if (!ApplicationServerSingleton.waitForInstanceStarted())
+			if (!ApplicationServerSingleton.waitForApplicationServerStarted())
 			{
 				ServoyLog.logError("App server didnt fully get started", new RuntimeException());
 			}
