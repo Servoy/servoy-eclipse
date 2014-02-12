@@ -24,7 +24,7 @@
          </property>
          <property
                name="windowImages"
-               value="icons/windowicon16.png,icons/windowicon.png,icons/windowicon48.png,icons/windowicon64.png,icons/windowicon128.png">
+               value="icons/windowicon16.png,icons/windowIcon.png,icons/windowIcon48.png,icons/windowIcon64.png,icons/windowIcon128.png">
          </property>
          <property
                name="appName"
