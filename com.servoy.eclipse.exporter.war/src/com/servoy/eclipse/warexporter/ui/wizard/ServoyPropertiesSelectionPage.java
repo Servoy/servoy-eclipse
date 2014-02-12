@@ -138,14 +138,12 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 			File f = new File(exportModel.getServoyPropertiesFileName());
 			if (!f.exists())
 			{
-				setMessage("Specified servoy properties file doesn't exists.", IMessageProvider.WARNING);
-				result = false;
+				setMessage("Specified servoy properties file doesn't exist.", IMessageProvider.WARNING);
 				messageSet = true;
 			}
 			else if (f.isDirectory())
 			{
 				setMessage("Specified servoy properties file is a folder.", IMessageProvider.WARNING);
-				result = false;
 				messageSet = true;
 			}
 			else
@@ -171,7 +169,6 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 							setMessage("Servoy properties file: " + exportModel.getServoyPropertiesFileName() +
 								" is not valid because it doesn't contain repository_server database which is required.", IMessageProvider.WARNING);
 							messageSet = true;
-							result = false;
 						}
 
 					}
@@ -180,7 +177,6 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 						setMessage("Servoy properties file: " + exportModel.getServoyPropertiesFileName() +
 							" doesn't look like a valid servoy properties file, no servers configured", IMessageProvider.WARNING);
 						messageSet = true;
-						result = false;
 					}
 				}
 				catch (IOException e)
@@ -188,7 +184,6 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 					setMessage("Couldn't load the servoy properties file: " + exportModel.getServoyPropertiesFileName() + ", error: " + e.getMessage(),
 						IMessageProvider.WARNING);
 					messageSet = true;
-					result = false;
 				}
 				finally
 				{

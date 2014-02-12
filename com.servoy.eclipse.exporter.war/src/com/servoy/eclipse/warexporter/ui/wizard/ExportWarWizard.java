@@ -24,6 +24,7 @@ import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -198,7 +199,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 	public boolean canFinish()
 	{
 		IWizardPage currentPage = getContainer().getCurrentPage();
-		if (currentPage instanceof ServoyPropertiesSelectionPage && !((ServoyPropertiesSelectionPage)currentPage).canFlipToNextPage())
+		if (currentPage instanceof ServoyPropertiesSelectionPage && ((ServoyPropertiesSelectionPage)currentPage).getMessageType() == IMessageProvider.WARNING)
 		{
 			return false; //if any warning about the selected properties file, disable finish
 		}
