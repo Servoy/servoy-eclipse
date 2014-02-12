@@ -7125,7 +7125,7 @@ for( var i = 0 ; i < array.length ; i++ )
             <sample clientSupport="wc,sc"><![CDATA[// type the foundset returned from the call with JSDoc, fill in the right server/tablename
 /** @type {JSFoundset<db:/servername/tablename>} */
 var fs = databaseManager.getFoundSet(controller.getDataSource())
-// same as datasources.example_data.orders.getFoundSet() or datasources.mem['myds'].getFoundSet()
+// same as datasources.db.example_data.orders.getFoundSet() or datasources.mem['myds'].getFoundSet()
 var ridx = fs.newRecord()
 var record = fs.getRecord(ridx)
 record.emp_name = 'John'
@@ -7153,7 +7153,7 @@ Alternative method: datasources.db.server_name.table_name.getFoundSet() or datas
             <sample clientSupport="mc,wc,sc"><![CDATA[// type the foundset returned from the call with JSDoc, fill in the right server/tablename
 /** @type {JSFoundset<db:/servername/tablename>} */
 var fs = databaseManager.getFoundSet(controller.getDataSource())
-// same as datasources.example_data.orders.getFoundSet() or datasources.mem['myds'].getFoundSet()
+// same as datasources.db.example_data.orders.getFoundSet() or datasources.mem['myds'].getFoundSet()
 var ridx = fs.newRecord()
 var record = fs.getRecord(ridx)
 record.emp_name = 'John'
@@ -7181,7 +7181,7 @@ databaseManager.saveData()]]></sample>
             <sample clientSupport="wc,sc"><![CDATA[// type the foundset returned from the call with JSDoc, fill in the right server/tablename
 /** @type {JSFoundset<db:/servername/tablename>} */
 var fs = databaseManager.getFoundSet(controller.getDataSource())
-// same as datasources.example_data.orders.getFoundSet() or datasources.mem['myds'].getFoundSet()
+// same as datasources.db.example_data.orders.getFoundSet() or datasources.mem['myds'].getFoundSet()
 var ridx = fs.newRecord()
 var record = fs.getRecord(ridx)
 record.emp_name = 'John'
@@ -15159,6 +15159,23 @@ function mySortFunction(r1, r2)
     </object>
     <object clientSupport="wc,sc" publicName="JSDataSource" qualifiedName="com.servoy.j2db.dataprocessing.datasource.JSDataSource">
       <functions>
+        <function clientSupport="wc,sc" name="createSelect">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"><![CDATA[query builder]]></return>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Create a query builder for a data source.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Create a query builder for a data source.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/book_nodes>} */
+ var q = datasources.db.example_data.book_nodes.createSelect()
+ q.result.addPk()
+ q.where.add(q.columns.label_text.not.isin(null))
+ datasources.db.example_data.book_nodes.getFoundSet().loadRecords(q)]]></sample>
+          </samples>
+        </function>
         <function clientSupport="wc,sc" name="getDatasource">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String datasource]]></return>
@@ -22730,7 +22747,7 @@ If no value is returned all records of the foundset will be traversed. In the ca
             <summary clientSupport="wc,sc"><![CDATA[Iterates over the records of a foundset taking into account inserts and deletes that may happen at the same time.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[foundset.forEach(function(record) { 
+            <sample clientSupport="wc,sc"><![CDATA[foundset.forEach(function(record,recordIndex,foundset) { 
  	//handle the record here  
  });]]></sample>
           </samples>
