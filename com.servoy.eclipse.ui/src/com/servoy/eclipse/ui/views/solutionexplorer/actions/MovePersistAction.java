@@ -22,18 +22,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.RunInWorkspaceJob;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
@@ -85,11 +83,11 @@ public class MovePersistAction extends AbstractMovePersistAction
 		}
 
 		final Location destination = location;
-		WorkspaceJob moveJob = new WorkspaceJob("Moving files")
+		IWorkspaceRunnable moveJob = new IWorkspaceRunnable()
 		{
 
 			@Override
-			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+			public void run(IProgressMonitor monitor) throws CoreException
 			{
 				//reset all uuids and update references
 				Map<UUID, UUID> oldToNewID = new HashMap<UUID, UUID>();
@@ -119,10 +117,9 @@ public class MovePersistAction extends AbstractMovePersistAction
 							{
 								UUID oldID = editingNode.getUUID();
 								idMap = AbstractPersistFactory.resetUUIDSRecursively(editingNode, (EclipseRepository)rootObject.getRepository(), true);
-								servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true, false);
 								oldToNewID.put(oldID, editingNode.getUUID());
 							}
-							updateReferences(idMap);
+							updateReferences(editingNode, idMap);
 						}
 						catch (final RepositoryException e)
 						{
@@ -150,13 +147,15 @@ public class MovePersistAction extends AbstractMovePersistAction
 						moveFiles(rootObject, servoyProject, editingNode, duplicates.get(persist.getUUID()), destination);
 					}
 				}
-				return Status.OK_STATUS;
 			}
 
 		};
-		moveJob.setUser(false);
-		moveJob.setRule(ResourcesPlugin.getWorkspace().getRoot());
-		moveJob.schedule();
+
+		RunInWorkspaceJob job = new RunInWorkspaceJob(moveJob);
+		job.setName("Moving files");
+		job.setRule(ServoyModel.getWorkspace().getRoot());
+		job.setUser(false);
+		job.schedule();
 		location = null;
 	}
 
@@ -191,27 +190,30 @@ public class MovePersistAction extends AbstractMovePersistAction
 				}
 			}
 
-			if (duplicate != null)
+			try
 			{
-
-				try
+				if (duplicate != null)
 				{
 					// delete duplicate Media
 					((EclipseRepository)rootObject.getRepository()).deleteObject(editingNode);
 					servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
 				}
-				catch (final RepositoryException e)
+				else
 				{
-					Display.getDefault().asyncExec(new Runnable()
-					{
-						public void run()
-						{
-							ServoyLog.logError(e);
-							MessageDialog.openError(shell, "Cannot move form", persistString + " " + ((ISupportName)editingNode).getName() +
-								"cannot be moved. Reason:\n" + e.getMessage());
-						}
-					});
+					editingNode.getParent().removeChild(editingNode);
 				}
+			}
+			catch (final RepositoryException e)
+			{
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						ServoyLog.logError(e);
+						MessageDialog.openError(shell, "Cannot move form", persistString + " " + ((ISupportName)editingNode).getName() +
+							"cannot be moved. Reason:\n" + e.getMessage());
+					}
+				});
 			}
 		}
 		catch (IOException e)
@@ -221,8 +223,10 @@ public class MovePersistAction extends AbstractMovePersistAction
 		}
 	}
 
-	private void updateReferences(final Map<Integer, Integer> idMap) throws RepositoryException
+	private void updateReferences(IPersist editingNode, final Map<Integer, Integer> idMap) throws RepositoryException
 	{
+		boolean saveEditingNode = true;
+		ServoyProject editingProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(editingNode.getRootObject().getName());
 		for (ServoyProject project : ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject())
 		{
 			final boolean[] changed = { false };
@@ -264,8 +268,17 @@ public class MovePersistAction extends AbstractMovePersistAction
 
 			if (changed[0])
 			{
+				if (Utils.equalObjects(project.getProject().getName(), editingProject.getProject().getName()))
+				{
+					saveEditingNode = false;
+				}
 				project.saveEditingSolutionNodes(new IPersist[] { project.getEditingSolution() }, true, false);
 			}
 		}
+		if (saveEditingNode)
+		{
+			editingProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true, false);
+		}
+
 	}
 }
