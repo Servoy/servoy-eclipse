@@ -39148,7 +39148,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -39593,7 +39593,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -40528,7 +40528,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -41138,7 +41138,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -41666,7 +41666,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -42237,7 +42237,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -42928,7 +42928,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -43439,7 +43439,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -43976,7 +43976,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -44600,7 +44600,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -45249,7 +45249,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -45823,7 +45823,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -46480,7 +46480,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -47188,7 +47188,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -47741,7 +47741,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -48432,7 +48432,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -48979,7 +48979,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -49644,7 +49644,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -50215,7 +50215,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -50816,7 +50816,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -51390,7 +51390,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -52092,7 +52092,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -52723,7 +52723,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -53488,7 +53488,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -54345,7 +54345,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
@@ -55077,7 +55077,7 @@ forms.company.elements.faxBtn.setLocation(x+10,y+10);]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The y location of the element in pixels.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. 
+            <description clientSupport="wc,sc"><![CDATA[Returns the y location of the current element. The method can only be used in Record view.
 
 NOTE: getLocationY() can be used with getLocationX() to set the location of an element using the setLocation function. For Example:
 
