@@ -154,9 +154,9 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 		JSONArray items = new JSONArray(); // no newlines
 		items.put("Header");
 		items.put("Footer");
+		items.put("Button");
 		PALETTE_ITEMS_LISTFORM = items.toString();
 
-		items.put("Button");
 		items.put("TextInput");
 		items.put("PasswordField");
 		items.put("TextArea");
