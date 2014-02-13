@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.designer.preferences;
 
+import java.net.URL;
+
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -33,10 +35,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.browser.IWebBrowser;
+import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.eclipse.ui.views.ColorSelectViewer;
@@ -101,7 +108,28 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		optionsPanel.setLayout(new GridLayout(1, false));
 
 		classicMobileFormeditorCheck = new Button(optionsPanel, SWT.CHECK);
-		classicMobileFormeditorCheck.setText("Use classic form editor for mobile forms"); //$NON-NLS-1$
+		classicMobileFormeditorCheck.setText("Use classic form editor for mobile forms."); //$NON-NLS-1$
+
+		Link xulRunnerInfo = new Link(optionsPanel, SWT.NONE);
+		xulRunnerInfo.setText("Consider installing <A>XulRunner</A> when this option is disabled, for increased compatibility.");
+		xulRunnerInfo.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				try
+				{
+					IWorkbenchBrowserSupport support = PlatformUI.getWorkbench().getBrowserSupport();
+					IWebBrowser browser = support.getExternalBrowser();
+					browser.openURL(new URL(
+						"https://wiki.servoy.com/display/public/DOCS/Post-Installation+Modifications#Post-InstallationModifications-InstallMozillaXulRunnerasinternalbrowser"));
+				}
+				catch (Exception ex)
+				{
+					ServoyLog.logError(ex);
+				}
+			}
+		});
 
 		Composite copyPastePanel = new Composite(optionsPanel, SWT.NONE);
 		copyPastePanel.setLayout(new GridLayout(2, false));
