@@ -185,7 +185,7 @@ public class ColorPropertyController extends PropertyDescriptor implements IProp
 		{
 			if (element instanceof String)
 			{
-				return ColorResource.INSTANCE.getColorImage(25, 12, 1, ColorResource.ColorAwt2Rgb(PROPERTY_COLOR_CONVERTER.convertValue(null, (String)element)));
+				return ColorResource.INSTANCE.getColorImage(12, 12, 1, ColorResource.ColorAwt2Rgb(PROPERTY_COLOR_CONVERTER.convertValue(null, (String)element)));
 			}
 
 			return super.getImage(element);
