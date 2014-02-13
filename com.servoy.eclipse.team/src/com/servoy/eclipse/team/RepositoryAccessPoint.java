@@ -40,7 +40,6 @@ import com.servoy.j2db.server.shared.IApplicationServer;
 import com.servoy.j2db.server.shared.IApplicationServerAccess;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.LocalhostRMIRegistry;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.rmi.IRMIClientFactoryProvider;
 import com.servoy.j2db.util.rmi.IRMIClientSocketFactoryFactory;
@@ -278,7 +277,7 @@ public class RepositoryAccessPoint
 
 		if (serverAddress.equals(LOCALHOST))//try inproces 
 		{
-			IApplicationServer as = (IApplicationServer)LocalhostRMIRegistry.getService(IApplicationServer.class.getName());
+			IApplicationServer as = ApplicationServerRegistry.getService(IApplicationServer.class);
 			try
 			{
 				clientID = ApplicationServerRegistry.get().getClientId();//only works for inprocess!

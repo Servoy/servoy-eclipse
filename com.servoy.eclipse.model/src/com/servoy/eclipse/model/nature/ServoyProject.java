@@ -60,6 +60,7 @@ import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.server.shared.IApplicationServer;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -499,7 +500,8 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 		FlattenedSolution fs = new FlattenedSolution();
 		try
 		{
-			fs.setSolution(getSolutionMetaData(), true, true, new AbstractActiveSolutionHandler()
+			IApplicationServer as = ApplicationServerRegistry.getService(IApplicationServer.class);
+			fs.setSolution(getSolutionMetaData(), true, true, new AbstractActiveSolutionHandler(as)
 			{
 				@Override
 				public IRepository getRepository()
@@ -544,9 +546,10 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 			}
 			if (editingFlattenedSolution.getSolution() == null)
 			{
+				IApplicationServer as = ApplicationServerRegistry.getService(IApplicationServer.class);
 				// new or flattened solution was reset
 				editingFlattenedSolution.setSolution(getEditingSolution().getSolutionMetaData(), loadLoginSolution, loadMainSolution,
-					new AbstractActiveSolutionHandler()
+					new AbstractActiveSolutionHandler(as)
 					{
 						@Override
 						public IRepository getRepository()

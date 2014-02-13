@@ -50,6 +50,7 @@ import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.server.shared.IApplicationServer;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -335,7 +336,8 @@ public abstract class AbstractServoyModel implements IServoyModel
 
 	protected IActiveSolutionHandler createActiveSolutionHandler()
 	{
-		return new AbstractActiveSolutionHandler()
+		IApplicationServer as = ApplicationServerRegistry.getService(IApplicationServer.class);
+		return new AbstractActiveSolutionHandler(as)
 		{
 			@Override
 			public IRepository getRepository()
