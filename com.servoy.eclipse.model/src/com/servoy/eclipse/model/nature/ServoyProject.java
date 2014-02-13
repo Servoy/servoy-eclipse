@@ -515,7 +515,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 					ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solutionDef.getName());
 					if (servoyProject != null)
 					{
-						return servoyProject.getEditingSolution();
+						return servoyProject.getSolution();
 					}
 					return null;
 				}
