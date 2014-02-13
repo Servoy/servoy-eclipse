@@ -33017,16 +33017,17 @@ forms.myForm.show(win);]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Set the window location.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Set the window location.
+If the coordinates are not valid they might be corrected. (for example out of screen locations)]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Set the window location.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var window = application.createWindow('test',JSWindow.DIALOG);
-window.show(forms.child1);
 window.setLocation(0,0);
-window.setSize(400,600);]]></sample>
+window.setSize(400,600);
+window.show(forms.child1);]]></sample>
           </samples>
           <parameters>
             <parameter name="x" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
@@ -33051,9 +33052,9 @@ window.setSize(400,600);]]></sample>
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var window = application.createWindow('test',JSWindow.DIALOG);
-window.show(forms.child1);
 window.setLocation(0,0);
-window.setSize(400,600);]]></sample>
+window.setSize(400,600);
+window.show(forms.child1);]]></sample>
           </samples>
           <parameters>
             <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
