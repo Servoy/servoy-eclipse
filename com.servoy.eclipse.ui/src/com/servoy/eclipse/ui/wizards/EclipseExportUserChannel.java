@@ -31,6 +31,7 @@ import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.dataprocessing.MetaDataUtils;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.util.ILogLevel;
 import com.servoy.j2db.util.xmlxport.IXMLExportUserChannel;
 
 public class EclipseExportUserChannel implements IXMLExportUserChannel
@@ -58,9 +59,9 @@ public class EclipseExportUserChannel implements IXMLExportUserChannel
 
 	public void info(String message, int priority)
 	{
-		// Seems that for each referenced module we get one message with priority 1. 
+		// Seems that for each referenced module we get one message with priority INFO. 
 		// We send these to the progress monitor.
-		if (priority == 1)
+		if (priority == ILogLevel.INFO)
 		{
 			monitor.setTaskName(message);
 			monitor.worked(1);
