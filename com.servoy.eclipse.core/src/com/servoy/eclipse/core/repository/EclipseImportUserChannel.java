@@ -42,6 +42,8 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.ILogLevel;
+import com.servoy.j2db.util.LogUtils;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 import com.servoy.j2db.util.xmlxport.IXMLImportUserChannel;
@@ -455,10 +457,9 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 
 	public void info(String message, int priority)
 	{
-		if (priority > 0)
+		if (priority > ILogLevel.DEBUG)
 		{
-			allImportantMSGes.append(message);
-			allImportantMSGes.append("\n"); //$NON-NLS-1$
+			allImportantMSGes.append(LogUtils.getLogLevelString(priority)).append(": ").append(message).append('\n');
 		}
 		Debug.trace(message);
 	}
