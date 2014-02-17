@@ -153,7 +153,11 @@ public class ServoyScriptValidator implements IValidatorExtension2
 		if (member == null)
 		{
 			Object element = reference.getAttribute(IReferenceAttributes.ELEMENT);
-			if (element instanceof Member)
+			if (element instanceof IRMember)
+			{
+				member = (IRMember)element;
+			}
+			else if (element instanceof Member)
 			{
 				visibility = ((Member)element).getVisibility();
 				name = ((Member)element).getName();
@@ -179,7 +183,7 @@ public class ServoyScriptValidator implements IValidatorExtension2
 				method = false;
 			}
 		}
-		else
+		if (member != null)
 		{
 			visibility = member.getVisibility();
 			name = member.getName();
