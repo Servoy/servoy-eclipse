@@ -119,11 +119,11 @@ public class BackgroundTableLoader implements IActiveProjectListener
 					{
 						try
 						{
+							((IServerInternal)s).testConnection(0);
 							synchronized (this)
 							{
 								while (paused)
 									wait();
-								((IServerInternal)s).testConnection(0);
 								try
 								{
 									s.getTableAndViewNames(false); //load all table names
