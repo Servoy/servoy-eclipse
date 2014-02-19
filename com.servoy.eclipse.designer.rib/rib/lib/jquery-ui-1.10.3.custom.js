@@ -488,7 +488,7 @@ $.widget.bridge = function( name, object ) {
 						"attempted to call method '" + options + "'" );
 				}
 				if ( !$.isFunction( instance[options] ) || options.charAt( 0 ) === "_" ) {
-					return $.error( "no such method '" + options + "' for " + name + " widget instance" );
+					return $.error( "no such method '" + options + "' for " + fullName + " widget instance" );
 				}
 				methodValue = instance[ options ].apply( instance, args );
 				if ( methodValue !== instance && methodValue !== undefined ) {
