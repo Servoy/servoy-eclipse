@@ -117,7 +117,11 @@
 
             if (event &&  (name === 'modelUpdated' || name === 'designReset'))
             {
-            	this.options.iframe.css('min-height',this.options.iframe[0].contentDocument.body.childNodes[0].offsetHeight);
+            	if (this.options.iframe[0].contentDocument.body)
+            	{
+            		this.options.iframe.css('min-height',this.options.iframe[0].contentDocument.body.childNodes[0].offsetHeight);
+            	}
+            	
             }
             if ((!event) || (name === 'load' ||
                              name === 'designReset' ||
@@ -235,7 +239,11 @@
                     .addClass('ui-selected').first().each(function () {
                         // Scroll selected node into view
                         setTimeout($.proxy(function () {
-                            this.scrollIntoViewIfNeeded()
+                        	// ie doesn't have this function, will see if we have to implement it
+                        	if ( this.scrollIntoViewIfNeeded)
+                        	{
+                        		 this.scrollIntoViewIfNeeded()
+                        	}
                         }, this), 100);
                     });
             }
@@ -293,7 +301,10 @@
             widget.options.contentDocument.scrollTop(oldScrollTop);
             // Make sure Make sure selected node is visible
             widget.options.contentDocument.find('.ui-selected').first().each(function () {
-                this.scrollIntoViewIfNeeded()
+            	if ( this.scrollIntoViewIfNeeded)
+            	{
+            		 this.scrollIntoViewIfNeeded()
+            	}
             });
         },
 

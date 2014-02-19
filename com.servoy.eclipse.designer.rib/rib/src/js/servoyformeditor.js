@@ -205,9 +205,14 @@ $.servoy = {
 	_setPaletteItems : function(itemsString) // called from java
 	{
 		var items = $.parseJSON(itemsString);
-		console.log('_setPaletteItems '+items)
-		 $(':rib-paletteView').paletteView('option', "model", [ { "Palette Items": items }]);
-		console.log('_setPaletteItems done')
+		// in ie there seems to be a loading issue/difference; 
+		// we have to make sure everything is loaded
+		// maybe we can improve this in the future
+		setTimeout(function(){
+			console.log('_setPaletteItems '+items)
+			 $(':rib-paletteView').paletteView('option', "model", [ { "Palette Items": items }]);
+			console.log('_setPaletteItems done')}
+		,1000);
 	},
 	
    handleModelUpdated: function(event, widget)
@@ -273,18 +278,19 @@ var QueryParameters = (function()
     return result;
 }());
 
-if (QueryParameters.editorid && typeof(WebSocket) != 'undefined')
-{
-	console.log('connecting to form editor websocket')
-	// TODO: take ws url from request parameters
-	 var websocket = new WebSocket("ws://localhost:8080/messageproxy/wsproxy"); // export war from com.servoy.server.messageproxy to webapps/messageproxy.war
-	 websocket.onopen = function () {
-			console.log('Info: WebSocket connection opened.');
-			$.servoy.connectedToWebsocket(QueryParameters.editorid, websocket)
-	 }
-}
-else 
-{
+//if (QueryParameters.editorid && typeof(WebSocket) != 'undefined')
+//{
+//	console.log('connecting to form editor websocket')
+//	// TODO: take ws url from request parameters
+//	 var websocket = new WebSocket("ws://localhost:8080/messageproxy/wsproxy"); // export war from com.servoy.server.messageproxy to webapps/messageproxy.war
+//	 websocket.onopen = function () {
+//			console.log('Info: WebSocket connection opened.');
+//			$.servoy.connectedToWebsocket(QueryParameters.editorid, websocket)
+//	 }
+//}
+//else 
+//{
 	// load using builtin functions
 	$.servoy.connectedToWebsocket(null, null)
-}
+
+//}

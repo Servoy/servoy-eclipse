@@ -928,8 +928,7 @@ $(function() {
         var foo = $('.adm-text-content', item)[0] || window.top;
         var bar = $(':focus')[0] || document.activeElement;
         $(foo).focus();
-        $(bar).blur();
-
+        $(bar).not('body').blur();
         if (item) {
             adm.setSelected($(item).attr('data-uid'));
         } else {

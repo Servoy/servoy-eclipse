@@ -233,8 +233,15 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 				}
 			}
 		};
-		browser.addListener(SWT.MouseUp, mouseListener);
-		//browser.addListener(SWT.MouseDown, mouseListener); TODO: check why this does not work
+		// for firefox use mouseup, for ie use mouse down
+		if ("mozilla".equals(browser.getBrowserType()))
+		{
+			browser.addListener(SWT.MouseUp, mouseListener);
+		}
+		else
+		{
+			browser.addListener(SWT.MouseDown, mouseListener); //TODO: check why this does not work
+		}
 
 		new BrowserFunction(browser, "consoleLog")
 		{
