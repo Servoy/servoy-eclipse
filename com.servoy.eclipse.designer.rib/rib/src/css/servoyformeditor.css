@@ -69,3 +69,9 @@ textarea {
 	background-repeat: no-repeat!important;
 	background-position: 99% 8px!important;
 }
+
+.ui-footer
+{
+	/* we don't have a title so make sure footer is tall enough*/
+	min-height: 30px;
+}

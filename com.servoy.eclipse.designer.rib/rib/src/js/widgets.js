@@ -473,12 +473,6 @@ var BWidgetRegistry = {
         template: function (node) {
             var prop, code = $('<div data-role="footer"></div>');
             code = BWidgetRegistry.Base.applyProperties(node, code);
-
-            // write the empty title if there are no children,otherwise footer is 1 px high
-            if (node.getChildrenCount() == 0) {
-        	    code.append('<h1/>');
-            }
-            
             return code;
         },
 
@@ -797,7 +791,8 @@ var BWidgetRegistry = {
             }
         },
         template: function (node) {
-            var right, active, code = $('<a data-role="button">%TEXT%<div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></a>');
+        	var text =  node.getProperty("text");
+            var right, active, code = $('<a data-role="button">'+(text == ' '? '&nbsp;' : text)+'<div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></a>');
 
             code.toggleClass("ui-btn-active", node.getProperty("active"));
             if(BWidget.propertyValidIn("Button", "right",
