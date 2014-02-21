@@ -59,7 +59,6 @@ import org.eclipse.dltk.javascript.typeinfo.TypeMemberQuery;
 import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
 import org.eclipse.dltk.javascript.typeinfo.model.Element;
 import org.eclipse.dltk.javascript.typeinfo.model.JSType;
-import org.eclipse.dltk.javascript.typeinfo.model.MapType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
 import org.eclipse.dltk.javascript.typeinfo.model.Method;
 import org.eclipse.dltk.javascript.typeinfo.model.Parameter;
@@ -2832,6 +2831,7 @@ public class TypeCreator extends TypeCache
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(typeName);
 			type.setKind(TypeKind.JAVA);
+			type.setSuperType(createArrayLookupType(context, DBDataSourceServer.class));
 
 			IServerManagerInternal servermanager = ServoyModel.getServerManager();
 			for (String serverName : servermanager.getServerNames(false, false, true, true))
@@ -2867,6 +2867,7 @@ public class TypeCreator extends TypeCache
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(typeName);
 			type.setKind(TypeKind.JAVA);
+			type.setSuperType(createArrayLookupType(context, JSDataSource.class));
 
 			return type;
 		}
@@ -2885,8 +2886,10 @@ public class TypeCreator extends TypeCache
 		{
 			if (fullTypeName.equals(DBDataSourceServer.class.getSimpleName()))
 			{
+				Type type = TypeCreator.this.createType(context, fullTypeName, DBDataSourceServer.class);
+				type.setSuperType(createArrayLookupType(context, JSDataSource.class));
 				// quickly add this one to the static types.
-				return addType(null, TypeCreator.this.createType(context, fullTypeName, DBDataSourceServer.class));
+				return addType(null, type);
 			}
 
 			if (cachedSuperTypeTemplateType == null)
@@ -3030,31 +3033,6 @@ public class TypeCreator extends TypeCache
 		JSDataSourcesCreator()
 		{
 			super(JSDataSources.class, ClientSupport.wc_sc);
-		}
-
-		@Override
-		public Type doCreateType(String context, String fullTypeName)
-		{
-			Type superType = super.doCreateType(context, fullTypeName);
-
-			List<Member> overwrittenMembers = new ArrayList<Member>();
-			for (Member member : superType.getMembers())
-			{
-				if ("mem".equals(member.getName()))
-				{
-					MapType mapType = TypeInfoModelFactory.eINSTANCE.createMapType();
-					mapType.setValueType(getTypeRef(context, JSDataSource.class.getSimpleName()));
-					overwrittenMembers.add(TypeCreator.clone(member, mapType));
-				}
-			}
-
-			Type type = TypeInfoModelFactory.eINSTANCE.createType();
-			type.setName(fullTypeName);
-			type.setKind(TypeKind.JAVA);
-			type.setAttribute(IMAGE_DESCRIPTOR, superType.getAttribute(IMAGE_DESCRIPTOR));
-			type.setSuperType(superType);
-			type.getMembers().addAll(overwrittenMembers);
-			return type;
 		}
 	}
 
@@ -3874,6 +3852,19 @@ public class TypeCreator extends TypeCache
 
 		return type;
 	}
+
+	public Type createArrayLookupType(String context, Class< ? > arrayClassType)
+	{
+		Type superType = TypeInfoModelFactory.eINSTANCE.createType();
+		Property arrayType = TypeInfoModelFactory.eINSTANCE.createProperty();
+		arrayType.setName("[]");
+		arrayType.setVisible(false);
+		arrayType.setReadOnly(true);
+		arrayType.setType(getTypeRef(context, arrayClassType.getSimpleName()));
+		superType.getMembers().add(arrayType);
+		return superType;
+	}
+
 
 	public static class TypeConfig
 	{
