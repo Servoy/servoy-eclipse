@@ -79,7 +79,7 @@ public class FormElementDeleteCommand extends Command
 	public void execute()
 	{
 		String label = "delete element";
-		if (children.length > 0) label += 's';
+		if (children.length > 1) label += 's';
 		for (IPersist child : children)
 		{
 			if (child instanceof ISupportName && ((ISupportName)child).getName() != null)
@@ -115,7 +115,7 @@ public class FormElementDeleteCommand extends Command
 	@Override
 	public void undo()
 	{
-		for (int i = children.length - 1; i > 0; i--)
+		for (int i = children.length - 1; i >= 0; i--)
 		{
 			try
 			{
