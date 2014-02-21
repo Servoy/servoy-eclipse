@@ -118,6 +118,10 @@ $.servoy = {
       	  {
       	  	$.servoy._refreshNode(split[1])
       	  }
+      	  else if (func == 'deleteNode')
+      	  {
+      		  $.servoy._deleteNode(split[1])
+      	  }
       	  else if (func == 'selectNode')
       	  {
       		  $.servoy._selectNode(split[1])
@@ -181,6 +185,23 @@ $.servoy = {
 		}
 		
 		console.log('refreshNode done')
+		return true
+	},
+
+	_deleteNode : function(uuid ) // called from java
+	{
+		console.log('deleteNode '+uuid)
+		
+		var node = $.servoy._findNode(uuid)
+		if (!node)
+		{
+			console.log('deleteNode: node not found: '+uuid)
+			return false;
+		}
+		
+		$.rib.deleteSingleNode(node);
+		
+		console.log('deleteNode done')
 		return true
 	},
 	

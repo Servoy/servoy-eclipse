@@ -17,10 +17,10 @@
 
 package com.servoy.eclipse.designer.editor.html.actions;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.gef.commands.Command;
-import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.base.persistence.IMobileProperties;
@@ -71,17 +71,14 @@ public class DeleteAction extends org.eclipse.gef.ui.actions.DeleteAction
 	{
 		if (objects.isEmpty()) return null;
 
-		final CompoundCommand deleteCommand = new CompoundCommand();
+		final List<IPersist> toDelete = new ArrayList<IPersist>();
 		for (Object modelObject : objects)
 		{
 			if (modelObject instanceof Form) continue; // do not delete entire form here
 
 			if (modelObject instanceof FormElementGroup)
 			{
-				for (IPersist el : Utils.iterate(((FormElementGroup)modelObject).getElements()))
-				{
-					deleteCommand.add(new FormElementDeleteCommand(el));
-				}
+				toDelete.addAll(Utils.asList(((FormElementGroup)modelObject).getElements()));
 			}
 			else if (modelObject instanceof IPersist)
 			{
@@ -106,12 +103,12 @@ public class DeleteAction extends org.eclipse.gef.ui.actions.DeleteAction
 						{
 							if (item != modelObject)
 							{
-								deleteCommand.add(new FormElementDeleteCommand(item));
+								toDelete.add(item);
 							}
 						}
 						if (part != modelObject)
 						{
-							deleteCommand.add(new FormElementDeleteCommand(part));
+							toDelete.add(part);
 						}
 					}
 					else if (PersistUtils.isFooterPart(part.getPartType()))
@@ -119,12 +116,12 @@ public class DeleteAction extends org.eclipse.gef.ui.actions.DeleteAction
 						for (IPersist item : MobileFooterGraphicalEditPart.getFooterModelChildren(Activator.getDefault().getDesignClient(),
 							(Form)(part).getAncestor(IRepository.FORMS)))
 						{
-							deleteCommand.add(new FormElementDeleteCommand(item));
+							toDelete.add(item);
 						}
 					}
 				}
 
-				deleteCommand.add(new FormElementDeleteCommand((IPersist)modelObject));
+				toDelete.add((IPersist)modelObject);
 			}
 			else if (modelObject instanceof MobileListModel)
 			{
@@ -132,16 +129,19 @@ public class DeleteAction extends org.eclipse.gef.ui.actions.DeleteAction
 				if (listModel.component == null)
 				{
 					// list form, delete means change to record form
-					deleteCommand.add(new ConvertToRecordFormCommand(listModel.form));
+					return new ConvertToRecordFormCommand(listModel.form);
 				}
-				else
-				{
-					// inset list
-					deleteCommand.add(new FormElementDeleteCommand(((MobileListModel)modelObject).component));
-				}
+
+				// inset list
+				toDelete.add(((MobileListModel)modelObject).component);
 			}
 		}
 
-		return deleteCommand;
+		if (toDelete.size() == 0)
+		{
+			// nothing to delete
+			return null;
+		}
+		return new FormElementDeleteCommand(toDelete.toArray(new IPersist[toDelete.size()]));
 	}
 }

@@ -453,8 +453,16 @@ $(function () {
             	}
             }
         }
-  
     }
+    
+    function deleteSingleNode(admNode) {
+    	
+//    	var root = admNode.getDesign();
+//		root.suppressEvents(true);
+    	admNode.getParent().removeChild(admNode, false);
+//    	root.suppressEvents(false);
+    }
+    
     /**
      * Loads a design from a JSON object and updates the design root.
      * 
@@ -1225,6 +1233,7 @@ $(function () {
     $.rib.JSONToProj = JSONToProj;
     $.rib.updateDesignToJSON = updateDesignToJSON;
     $.rib.updateSingleNode = updateSingleNode;
+    $.rib.deleteSingleNode = deleteSingleNode;
     $.rib.getDesignHeaders = getDesignHeaders;
     $.rib.exportPackage = exportPackage;
     $.rib.isSandboxHeader = isSandboxHeader;

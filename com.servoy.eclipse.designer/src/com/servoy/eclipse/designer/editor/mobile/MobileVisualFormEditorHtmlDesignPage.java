@@ -872,28 +872,45 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 		setPaletteItems();
 		try
 		{
-			String newFormDesign = getFormDesign();
-			if (lastFormDesign == null || !lastFormDesign.equals(newFormDesign))
+			if (lastFormDesign == null)
 			{
-				if (lastFormDesign != null && persists.size() == 1
-				// check if element existed before
-					&& lastFormDesign.indexOf("\"" + getModelId(persists.get(0)) + "\"") >= 0)
-				{
-					// single element changed, just refresh that one
-					// note that when an element is deleted 
-					ServoyJSONObject json = getChildJson(getPersistModel(persists.get(0)));
-					if (json != null) // null for forms etc
-					{
-						sendMessage("refreshNode:" + getModelId(persists.get(0)));
-						lastFormDesign = newFormDesign;
-						return;
-					}
-				}
-
-				// Form design json is regenerated and incrementally applied in js code
 				refreshAllParts();
 			}
-			// else nothing changed
+			else
+			{
+				String newFormDesign = getFormDesign();
+				if (!lastFormDesign.equals(newFormDesign))
+				{
+					// check if elements existed before
+					for (IPersist persist : persists)
+					{
+						String searchString = '"' + getModelId(getPersistModel(persist)) + '"';
+						boolean existedBefore = lastFormDesign.indexOf(searchString) >= 0;
+						boolean existsNow = newFormDesign.indexOf(searchString) >= 0;
+						if (existsNow)
+						{
+							if (existedBefore)
+							{
+								// was modified
+								sendMessage("refreshNode:" + getModelId(persist));
+							}
+							else
+							{
+								// was added
+								// TODO	sendMessage("addNode:" + getModelId(persist));
+							}
+						}
+						else if (existedBefore)
+						{
+							// was deleted
+							sendMessage("deleteNode:" + getModelId(persist));
+						}
+						// else: ignore
+					}
+					lastFormDesign = newFormDesign;
+
+				} // else nothing changed
+			}
 		}
 		catch (Exception e)
 		{
@@ -1116,6 +1133,11 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 			{
 				uuid = compWithTitle.getLeft().getUUID();
 			}
+			//else if (((FormElementGroup)model).getGroupID().split("-").length == 5)
+			//	{
+			//		// group was deleted, use group id
+			//		uuid = UUID.fromString(((FormElementGroup)model).getGroupID());
+			//	}
 		}
 		else if (model instanceof Part && PersistUtils.isHeaderPart(((Part)model).getPartType()))
 		{
@@ -1182,7 +1204,11 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 			String groupid = ((IFormElement)persist).getGroupID();
 			if (groupid != null)
 			{
-				return new FormElementGroup(groupid, ModelUtils.getEditingFlattenedSolution(editorPart.getForm()), editorPart.getForm());
+				FormElementGroup group = new FormElementGroup(groupid, ModelUtils.getEditingFlattenedSolution(editorPart.getForm()), editorPart.getForm());
+				if (group.getElements().hasNext())
+				{
+					return new FormElementGroup(groupid, ModelUtils.getEditingFlattenedSolution(editorPart.getForm()), editorPart.getForm());
+				} // else group was deleted
 			}
 		}
 		return persist;
