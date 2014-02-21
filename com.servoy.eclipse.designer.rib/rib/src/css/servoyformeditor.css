@@ -32,7 +32,7 @@ html {
 
 .servoydataprovider {
 	z-index:1999;
-	font-size:small;
+	font-size:small!important;
 	color:#E6EC74; /* default */
 }
 .servoydataprovider_a {
@@ -49,7 +49,21 @@ html {
 .servoydataprovider_e {
 	color:#403C62;
 }
-
+.ui-select span {
+	text-align: left!important;
+}
+.ui-select .ui-btn-inner {
+	text-align: left!important;
+	padding: 17px 0 0 8px!important;
+}
+.ui-field-contain input{
+	padding: 17px 0 0 3px!important;
+	font-size:small!important;
+}
+.ui-field-contain textarea{
+	padding: 27px 0 0 8px!important;
+	font-size: small!important;
+}
 .ui-popup-hidden {
 	display: none !important;
 }

@@ -1065,7 +1065,7 @@ var BWidgetRegistry = {
                 htmlSelector: "input"
             })
         },
-        template: '<div data-role="fieldcontain"><label for="%ID%" class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label><input id="%ID%" type="text"><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></input></div>'
+        template: '<div data-role="fieldcontain"><label for="%ID%" class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label><input id="%ID%" type="text" value="%SERVOYDATAPROVIDER%" class="servoydataprovider servoydataprovider_%THEME%"></input></div>'
     },
 
     /**
@@ -1114,7 +1114,7 @@ var BWidgetRegistry = {
                 htmlSelector: "input"
             })
         },
-        template: '<div data-role="fieldcontain"><label for="%ID%" class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label><input id="%ID%" type="password"><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></input></div>'
+        template: '<div data-role="fieldcontain"><label for="%ID%" class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label><input id="%ID%" type="text" value="%SERVOYDATAPROVIDER%" class="servoydataprovider servoydataprovider_%THEME%"></input></div>'
     },
 
     /**
@@ -1163,7 +1163,7 @@ var BWidgetRegistry = {
     			htmlSelector: "input"
     		})
     	},
-    	template: '<div data-role="fieldcontain"><label for="%ID%" class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label><input id="%ID%" type="text" class="calendar"><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></input></div>'
+    	template: '<div data-role="fieldcontain"><label for="%ID%" class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label><input id="%ID%" type="text" class="calendar" value="%SERVOYDATAPROVIDER%" class="servoydataprovider servoydataprovider_%THEME%"></input></div>'
     },
     
     /**
@@ -1200,7 +1200,7 @@ var BWidgetRegistry = {
             disabled: BCommonProperties.disabled,
             nativecontrol: BCommonProperties.nativecontrol
         },
-        template: '<div data-role="fieldcontain"><label for="%ID%" class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label><textarea id="%ID%">%VALUE%</textarea><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></div>'
+        template: '<div data-role="fieldcontain"><label for="%ID%" class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label><textarea id="%ID%" class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</textarea></div>'
     },
 
     /**
@@ -1249,7 +1249,7 @@ var BWidgetRegistry = {
         parent: "Base",
         paletteImageName: "jqm_select.svg",
         // data-native-menu="false" ins select makes the selection go bad in xulrunner 10
-        template: '<div data-role="fieldcontain"><label for="%ID%" class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label><select id="%ID%" data-native-menu="false"/><div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></div>',
+        template: '<div data-role="fieldcontain"><label for="%ID%" class="%VISIBLEELEMENT%">%LABEL%<div class="%VISIBLEELEMENT% servoydataprovider servoydataprovider_%THEME%">%SERVOYTITLEDATAPROVIDER%</div></label><select id="%ID%" data-native-menu="false" class="servoydataprovider servoydataprovider_%THEME%"><option >%SERVOYDATAPROVIDER%</option></select></div>',
         displayLabel: "Select Menu",
         properties: {
             options: {
