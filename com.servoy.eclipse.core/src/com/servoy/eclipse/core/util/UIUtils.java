@@ -773,7 +773,15 @@ public class UIUtils
 	public static String showEditableOptionDialog(Shell shell, String title, String message, final String[] options, int defaultOption)
 	{
 		OptionDialog dialog = new OptionDialog(shell, title, null, message, MessageDialog.NONE, new String[] { "OK", "Cancel" }, 0, options, defaultOption,
-			SWT.DROP_DOWN);
+			SWT.DROP_DOWN)
+		{
+			@Override
+			protected boolean customShouldTakeFocus()
+			{
+				//focus set on first element in custom area
+				return true;
+			}
+		};
 		dialog.setBlockOnOpen(true);
 		if (dialog.open() != Window.OK)
 		{
