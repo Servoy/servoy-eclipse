@@ -1900,6 +1900,53 @@ public class ServoyModel extends AbstractServoyModel
 		}
 	}
 
+	private final int[] isCollectingPersistChanges = new int[] { 0, 0 };
+	@SuppressWarnings("unchecked")
+	private final List<IPersist>[] collectedPersistChanges = new List[] { new ArrayList<IPersist>(), new ArrayList<IPersist>() };
+
+	public void startCollectingPersistChanges(boolean realSolution)
+	{
+		synchronized (isCollectingPersistChanges)
+		{
+			isCollectingPersistChanges[realSolution ? 0 : 1]++;
+		}
+	}
+
+	public boolean isCollectingPersistChanges(boolean realSolution, Collection<IPersist> changes)
+	{
+		synchronized (isCollectingPersistChanges)
+		{
+			if (isCollectingPersistChanges[realSolution ? 0 : 1] == 0)
+			{
+				return false;
+			}
+			List<IPersist> collected = collectedPersistChanges[realSolution ? 0 : 1];
+			for (IPersist persist : changes)
+			{
+				if (!collected.contains(persist))
+				{
+					collected.add(persist);
+				}
+			}
+			return true;
+		}
+	}
+
+	public void stopCollectingPersistChanges(boolean realSolution)
+	{
+		Collection<IPersist> collected;
+		synchronized (isCollectingPersistChanges)
+		{
+			if (--isCollectingPersistChanges[realSolution ? 0 : 1] > 0 || collectedPersistChanges[realSolution ? 0 : 1].size() == 0)
+			{
+				return;
+			}
+			collected = collectedPersistChanges[realSolution ? 0 : 1];
+			collectedPersistChanges[realSolution ? 0 : 1] = new ArrayList<IPersist>();
+		}
+		firePersistsChanged(realSolution, collected);
+	}
+
 	/**
 	 * Notify listeners of changes to persists. Changes can be notified for the real solutions or the editing solutions.
 	 * 
@@ -1908,7 +1955,7 @@ public class ServoyModel extends AbstractServoyModel
 	 */
 	public void firePersistsChanged(boolean realSolution, Collection<IPersist> changes)
 	{
-		if (changes.size() == 0) return;
+		if (changes.size() == 0 || isCollectingPersistChanges(realSolution, changes)) return;
 
 		flushFlattenedFormCache(realSolution);
 		if (realSolution)

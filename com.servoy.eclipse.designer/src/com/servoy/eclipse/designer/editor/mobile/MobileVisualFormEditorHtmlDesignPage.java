@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -127,7 +128,12 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 {
 	private static final String ID_KEY = "id";
 	private static final String TYPE_KEY = "type";
+	private static final String TEXT_KEY = "text";
 	private static final String PROPERTIES_KEY = "properties";
+	private static final String CHILDREN_KEY = "children";
+	private static final String THEME_KEY = "theme";
+	private static final String ZONE_KEY = "zone";
+	private static final String LABEL_KEY = "label";
 
 	private static final String EMPTY_VALUE = " "; // to display empty, with "" the default of a widget would be used
 
@@ -443,8 +449,6 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 				return null;
 			}
 
-			lastFormDesign = null; // enforce refresh
-
 			if ("Button".equals(nodeType))
 			{
 				MobileSnapType snapType = MobileSnapType.ContentItem;
@@ -629,8 +633,8 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 					if (value instanceof String && ((String)value).trim().length() > 0)
 					{
 						String prop = null;
-						/* */if ("text".equals(key)) prop = key;
-						else if ("label".equals(key)) prop = "title.text";
+						/* */if (TEXT_KEY.equals(key)) prop = key;
+						else if (LABEL_KEY.equals(key)) prop = "title.text";
 
 						if (prop != null)
 						{
@@ -881,29 +885,56 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 				String newFormDesign = getFormDesign();
 				if (!lastFormDesign.equals(newFormDesign))
 				{
-					// check if elements existed before
-					for (IPersist persist : persists)
+					List<IPersist> sortedPersists = new ArrayList<IPersist>(persists);
+					// sort so that forms are before parts are before elements
+					Collections.sort(sortedPersists, new Comparator<IPersist>()
 					{
-						String searchString = '"' + getModelId(getPersistModel(persist)) + '"';
+						private int getValue(IPersist persist)
+						{
+							if (persist instanceof Form) return 1;
+							if (persist instanceof Part) return 2;
+							return 3;
+						}
+
+						@Override
+						public int compare(IPersist o1, IPersist o2)
+						{
+							return getValue(o1) - getValue(o2);
+						}
+					});
+
+					// check if elements existed before
+					for (IPersist persist : sortedPersists)
+					{
+						Object modelId = getModelId(getPersistModel(persist));
+						String searchString = '"' + String.valueOf(modelId) + '"';
 						boolean existedBefore = lastFormDesign.indexOf(searchString) >= 0;
 						boolean existsNow = newFormDesign.indexOf(searchString) >= 0;
 						if (existsNow)
 						{
+							ElementLocation childLocation = getChildLocation(persist);
+							if (childLocation == null)
+							{
+								// cannot find where to add/update the child
+								refreshAllParts();
+								return;
+							}
+
 							if (existedBefore)
 							{
 								// was modified
-								sendMessage("refreshNode:" + getModelId(persist));
+								sendMessage("refreshNode:" + modelId + ':' + childLocation.parentId + ':' + childLocation.zone + ':' + childLocation.zoneIndex);
 							}
 							else
 							{
 								// was added
-								// TODO	sendMessage("addNode:" + getModelId(persist));
+								sendMessage("addNode:" + modelId + ':' + childLocation.parentId + ':' + childLocation.zone + ':' + childLocation.zoneIndex);
 							}
 						}
 						else if (existedBefore)
 						{
 							// was deleted
-							sendMessage("deleteNode:" + getModelId(persist));
+							sendMessage("deleteNode:" + modelId);
 						}
 						// else: ignore
 					}
@@ -916,6 +947,95 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 		{
 			ServoyLog.logError(e);
 		}
+	}
+
+	/**
+	 * @param persist
+	 * @return
+	 */
+	private ElementLocation getChildLocation(IPersist persist)
+	{
+		String modelId = getModelId(persist);
+		if (modelId == null)
+		{
+			return null;
+		}
+
+		int contextIndex = 0;
+		for (Object child : MobileFormGraphicalEditPart.getFormModelChildren(editorPart.getForm()))
+		{
+			if (child instanceof Part)
+			{
+				if (modelId.equals(getModelId(child)))
+				{
+					// direct child of page
+					String pageId = editorPart.getForm().getUUID().toString();
+					if (PersistUtils.isHeaderPart(((Part)child).getPartType()))
+					{
+						return new ElementLocation(pageId, "top", 0);
+					}
+					if (PersistUtils.isFooterPart(((Part)child).getPartType()))
+					{
+						return new ElementLocation(pageId, "bottom", 0);
+					}
+					return null;
+				}
+
+				if (PersistUtils.isHeaderPart(((Part)child).getPartType()))
+				{
+					for (IFormElement headerChild : MobileHeaderGraphicalEditPart.getHeaderModelChildren(Activator.getDefault().getDesignClient(),
+						editorPart.getForm()))
+					{
+						if (modelId.equals(getModelId(headerChild)))
+						{
+							// header element
+							boolean right = headerChild instanceof AbstractBase &&
+								((AbstractBase)headerChild).getCustomMobileProperty(IMobileProperties.HEADER_RIGHT_BUTTON.propertyName) != null;
+
+							// use headertext for uuid
+							UUID uuid;
+							GraphicalComponent headerText = getHeaderText((Part)child);
+							if (headerText != null)
+							{
+								uuid = headerText.getUUID();
+							}
+							else
+							{
+								uuid = ((Part)child).getUUID();
+							}
+
+							return new ElementLocation(HEADER_PREFIX + uuid.toString(), right ? "right" : "left", 0);
+						}
+					}
+				}
+				else if (PersistUtils.isFooterPart(((Part)child).getPartType()))
+				{
+					int footerIndex = 0;
+					for (IFormElement footerChild : MobileFooterGraphicalEditPart.getFooterModelChildren(Activator.getDefault().getDesignClient(),
+						editorPart.getForm()))
+					{
+						if (modelId.equals(getModelId(footerChild)))
+						{
+							// footer element
+							return new ElementLocation(FOOTER_PREFIX + ((Part)child).getUUID().toString(), "default", footerIndex);
+						}
+						footerIndex++;
+					}
+				}
+			}
+			else
+			{
+				if (modelId.equals(getModelId(child)))
+				{
+					// content element
+					return new ElementLocation(CONTENT_PREFIX + editorPart.getForm().getUUID().toString(), "default", contextIndex);
+				}
+				contextIndex++;
+			}
+		}
+
+		// not found
+		return null;
 	}
 
 	@Override
@@ -1028,13 +1148,13 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 
 		ServoyJSONObject design = new ServoyJSONObject(false, false);
 		design.put(TYPE_KEY, "Design");
-		design.put("children", pages = new ServoyJSONArray());
+		design.put(CHILDREN_KEY, pages = new ServoyJSONArray());
 		pages.put(page = new ServoyJSONObject(false, false));
 		page.put(TYPE_KEY, "Page");
 		page.put(PROPERTIES_KEY, properties = new ServoyJSONObject(false, false));
 		properties.put(ID_KEY, editorPart.getForm().getUUID().toString());
-		properties.put("theme", "d"); // white background
-		page.put("children", elements = new ServoyJSONArray());
+		properties.put(THEME_KEY, "d"); // white background
+		page.put(CHILDREN_KEY, elements = new ServoyJSONArray());
 
 		for (Object child : MobileFormGraphicalEditPart.getFormModelChildren(editorPart.getForm()))
 		{
@@ -1066,11 +1186,10 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 					if (partModelChildren != null && partModelChildren.size() > 0)
 					{
 						ServoyJSONArray partChildren = new ServoyJSONArray();
-						element.put("children", partChildren);
+						element.put(CHILDREN_KEY, partChildren);
 						for (IFormElement partItem : partModelChildren)
 						{
-							ServoyJSONObject childJson = getChildJson(partItem);
-							partChildren.put(childJson);
+							partChildren.put(getChildJson(partItem));
 						}
 					}
 				}
@@ -1095,8 +1214,8 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 			ServoyJSONObject contentElement = new ServoyJSONObject(false, false);
 			elements.put(contentElement);
 			contentElement.put(TYPE_KEY, editorPart.getForm().getView() == IFormConstants.VIEW_TYPE_TABLE_LOCKED ? "ListFormContent" : "Content");
-			contentElement.put("zone", "content");
-			contentElement.put("children", content = new ServoyJSONArray());
+			contentElement.put(ZONE_KEY, "content");
+			contentElement.put(CHILDREN_KEY, content = new ServoyJSONArray());
 			ServoyJSONObject properties = new ServoyJSONObject(false, false);
 			contentElement.put(PROPERTIES_KEY, properties);
 			properties.put(ID_KEY, CONTENT_PREFIX + editorPart.getForm().getUUID().toString());
@@ -1133,11 +1252,6 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 			{
 				uuid = compWithTitle.getLeft().getUUID();
 			}
-			//else if (((FormElementGroup)model).getGroupID().split("-").length == 5)
-			//	{
-			//		// group was deleted, use group id
-			//		uuid = UUID.fromString(((FormElementGroup)model).getGroupID());
-			//	}
 		}
 		else if (model instanceof Part && PersistUtils.isHeaderPart(((Part)model).getPartType()))
 		{
@@ -1169,7 +1283,6 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 
 		return uuid == null ? null : (prefix + uuid.toString());
 	}
-
 
 	private Object getPersistModel(IPersist persist)
 	{
@@ -1272,7 +1385,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 				if (PersistUtils.isHeaderPart(partType))
 				{
 					elementType = "Header";
-					element.put("zone", "top");
+					element.put(ZONE_KEY, "top");
 					if (headerText == null)
 					{
 						headerText = getHeaderText((Part)persist);
@@ -1286,7 +1399,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 				else if (PersistUtils.isFooterPart(partType))
 				{
 					elementType = "Footer";
-					element.put("zone", "bottom");
+					element.put(ZONE_KEY, "bottom");
 				}
 				else
 				{
@@ -1294,17 +1407,17 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 				}
 
 				properties.put("position", partType == Part.TITLE_HEADER || partType == Part.TITLE_FOOTER ? "fixed" : "default"); // sticky
-				properties.put("theme", ((Part)persist).getStyleClass());
+				properties.put(THEME_KEY, ((Part)persist).getStyleClass());
 				if (PersistUtils.isHeaderPart(partType))
 				{
 					properties.put(ID_KEY, HEADER_PREFIX + headerText.getUUID().toString()); // use headerText element for selection
-					properties.put("text", headerText.getDataProviderID() == null && headerText.getText() != null ? headerText.getText() : EMPTY_VALUE);
+					properties.put(TEXT_KEY, headerText.getDataProviderID() == null && headerText.getText() != null ? headerText.getText() : EMPTY_VALUE);
 					properties.put("servoydataprovider", headerText.getDataProviderID() == null ? EMPTY_VALUE : headerText.getDataProviderID());
 				}
 				else
 				{
 					// Footer
-					properties.put("text", EMPTY_VALUE);
+					properties.put(TEXT_KEY, EMPTY_VALUE);
 					properties.put(ID_KEY, FOOTER_PREFIX + persist.getUUID().toString());
 				}
 			}
@@ -1317,14 +1430,14 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 				if (ComponentFactory.isButton(gc))
 				{
 					elementType = "Button";
-					properties.put("text", gc.getDataProviderID() == null && gc.getText() != null ? gc.getText() : EMPTY_VALUE);
+					properties.put(TEXT_KEY, gc.getDataProviderID() == null && gc.getText() != null ? gc.getText() : EMPTY_VALUE);
 					properties.put("icon", gc.getCustomMobileProperty(IMobileProperties.DATA_ICON.propertyName));
 
 					if (gc.getCustomMobileProperty(IMobileProperties.HEADER_ITEM.propertyName) != null)
 					{
 						// header button
 						boolean right = gc.getCustomMobileProperty(IMobileProperties.HEADER_RIGHT_BUTTON.propertyName) != null;
-						element.put("zone", right ? "right" : "left");
+						element.put(ZONE_KEY, right ? "right" : "left");
 						properties.put("right", Boolean.valueOf(right));
 					}
 				}
@@ -1355,26 +1468,16 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 					if (label.getDataProviderID() == null)
 					{
 						properties.put("servoytitledataprovider", EMPTY_VALUE);
-						properties.put("label", label.getText() != null ? label.getText() : EMPTY_VALUE);
+						properties.put(LABEL_KEY, label.getText() != null ? label.getText() : EMPTY_VALUE);
 					}
 					else
 					{
 						properties.put("servoytitledataprovider", label.getDataProviderID());
-						properties.put("label", EMPTY_VALUE);
+						properties.put(LABEL_KEY, EMPTY_VALUE);
 					}
-					if (compWithTitle.getLeft() instanceof GraphicalComponent)
+					if (compWithTitle.getLeft() instanceof GraphicalComponent && !ComponentFactory.isButton((GraphicalComponent)compWithTitle.getLeft()))
 					{
-						if (!ComponentFactory.isButton((GraphicalComponent)compWithTitle.getLeft()))
-						{
-							if (!label.getVisible())
-							{
-								properties.put("titlevisible", "notVisibleElement");
-							}
-							else
-							{
-								properties.put("titlevisible", "visibleElement");
-							}
-						}
+						properties.put("titlevisible", label.getVisible() ? "visibleElement" : "notVisibleElement");
 					}
 				}
 
@@ -1403,7 +1506,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 						case Field.COMBOBOX :
 						{
 							ServoyJSONObject comboOptions = new ServoyJSONObject(false, false);
-							comboOptions.put("children", new ServoyJSONArray());
+							comboOptions.put(CHILDREN_KEY, new ServoyJSONArray());
 							properties.put("options", comboOptions);
 							break;
 						}
@@ -1438,7 +1541,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 								}
 
 								ServoyJSONArray children = new ServoyJSONArray();
-								element.put("children", children);
+								element.put(CHILDREN_KEY, children);
 
 								StringTokenizer tk = new StringTokenizer(customValues, "\r\n"); //$NON-NLS-1$
 								for (int i = 1; tk.hasMoreTokens(); i++)
@@ -1460,7 +1563,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 											: ((ISupportDataProviderID)persist).getDataProviderID());
 									}
 
-									checkProperties.put("theme", field.getStyleClass());
+									checkProperties.put(THEME_KEY, field.getStyleClass());
 								}
 							}
 
@@ -1475,14 +1578,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 				}
 				if (persist instanceof BaseComponent)
 				{
-					if (!((BaseComponent)persist).getVisible())
-					{
-						properties.put("visibleelement", "notVisibleElement");
-					}
-					else
-					{
-						properties.put("visibleelement", "visibleElement");
-					}
+					properties.put("visibleelement", ((BaseComponent)persist).getVisible() ? "visibleElement" : "notVisibleElement");
 				}
 			}
 		}
@@ -1508,7 +1604,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 				properties.put("servoydataprovider", model.button.getDataProviderID() == null ? EMPTY_VALUE : model.button.getDataProviderID());
 			}
 
-			properties.put("text", model.button.getDataProviderID() == null && model.button.getText() != null ? model.button.getText() : EMPTY_VALUE);
+			properties.put(TEXT_KEY, model.button.getDataProviderID() == null && model.button.getText() != null ? model.button.getText() : EMPTY_VALUE);
 			properties.put("icon", model.button.getCustomMobileProperty(IMobileProperties.DATA_ICON.propertyName));
 			properties.put("countbubble", model.countBubble.getDataProviderID() == null ? EMPTY_VALUE : "10");
 			properties.put("subtext", model.subtext.getDataProviderID() == null && model.subtext.getText() != null ? model.subtext.getText() : EMPTY_VALUE);
@@ -1526,7 +1622,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 
 		if (persist instanceof IBaseComponent)
 		{
-			properties.put("theme", ((IBaseComponent)persist).getStyleClass());
+			properties.put(THEME_KEY, ((IBaseComponent)persist).getStyleClass());
 		}
 		if (persist instanceof ISupportDataProviderID)
 		{
@@ -1539,7 +1635,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 
 	private static void setLabelProperties(GraphicalComponent labelComp, ServoyJSONObject properties) throws JSONException
 	{
-		properties.put("text", labelComp.getDataProviderID() == null && labelComp.getText() != null ? labelComp.getText() : EMPTY_VALUE);
+		properties.put(TEXT_KEY, labelComp.getDataProviderID() == null && labelComp.getText() != null ? labelComp.getText() : EMPTY_VALUE);
 		Object headerSizeProp = labelComp.getCustomMobileProperty(IMobileProperties.HEADER_SIZE.propertyName);
 		if (headerSizeProp != null)
 		{
@@ -1577,6 +1673,21 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 				return editorPart.isDesignerContextActive() && super.isEnabled();
 			}
 		};
+	}
+
+	private static class ElementLocation
+	{
+
+		public final String parentId;
+		public final String zone;
+		public final int zoneIndex;
+
+		public ElementLocation(String parentId, String zone, int zoneIndex)
+		{
+			this.parentId = parentId;
+			this.zone = zone;
+			this.zoneIndex = zoneIndex;
+		}
 	}
 
 	public class EditorMessageHandler implements IMessageHandler
