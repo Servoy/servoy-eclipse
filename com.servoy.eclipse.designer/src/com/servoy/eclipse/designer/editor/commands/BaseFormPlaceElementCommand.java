@@ -523,9 +523,15 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 				}
 			}
 
-			if ((command instanceof FormElementDeleteCommand && uuid.equals(((FormElementDeleteCommand)command).getPersist().getUUID())))
+			if (command instanceof FormElementDeleteCommand)
 			{
-				return ((FormElementDeleteCommand)command).getPersist();
+				for (IPersist persist : ((FormElementDeleteCommand)command).getPersists())
+				{
+					if (uuid.equals(persist.getUUID()))
+					{
+						return persist;
+					}
+				}
 			}
 		}
 

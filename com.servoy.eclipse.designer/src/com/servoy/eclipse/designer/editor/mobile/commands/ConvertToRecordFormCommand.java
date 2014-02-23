@@ -17,6 +17,9 @@
 
 package com.servoy.eclipse.designer.editor.mobile.commands;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.gef.commands.CompoundCommand;
 
 import com.servoy.base.persistence.constants.IFormConstants;
@@ -49,18 +52,15 @@ public class ConvertToRecordFormCommand extends CompoundCommand
 
 			// delete all form list elements
 			MobileListModel model = MobileListModel.create(form, form);
-			addDeleteCommand(this, model.button);
-			addDeleteCommand(this, model.countBubble);
-			addDeleteCommand(this, model.image);
-			addDeleteCommand(this, model.subtext);
-		}
-	}
-
-	private static void addDeleteCommand(CompoundCommand command, IPersist persist)
-	{
-		if (persist != null)
-		{
-			command.add(new FormElementDeleteCommand(persist));
+			List<IPersist> toDelete = new ArrayList<IPersist>();
+			if (model.button != null) toDelete.add(model.button);
+			if (model.countBubble != null) toDelete.add(model.countBubble);
+			if (model.image != null) toDelete.add(model.image);
+			if (model.subtext != null) toDelete.add(model.subtext);
+			if (toDelete.size() > 0)
+			{
+				add(new FormElementDeleteCommand(toDelete.toArray(new IPersist[toDelete.size()])));
+			}
 		}
 	}
 }

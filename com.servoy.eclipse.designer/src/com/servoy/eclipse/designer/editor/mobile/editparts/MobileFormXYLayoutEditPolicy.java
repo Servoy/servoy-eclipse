@@ -42,7 +42,6 @@ import com.servoy.eclipse.designer.editor.mobile.editparts.MobileSnapData.Mobile
 import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.j2db.debug.layout.MobileFormLayout;
 import com.servoy.j2db.persistence.FormElementGroup;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.Part;
@@ -101,17 +100,14 @@ public class MobileFormXYLayoutEditPolicy extends XYLayoutEditPolicy
 				compoundCmd.add(new FormElementDeleteCommand((IPersist)model));
 				return compoundCmd;
 			}
-			else if (model instanceof FormElementGroup)
+
+			if (model instanceof FormElementGroup)
 			{
 				// group
-				CompoundCommand compoundCmd = new CompoundCommand();
-				for (IFormElement elem : Utils.iterate(((FormElementGroup)model).getElements()))
-				{
-					compoundCmd.add(new FormElementDeleteCommand(elem));
-				}
-				return compoundCmd;
+				return new FormElementDeleteCommand(Utils.asArray(((FormElementGroup)model).getElements(), IPersist.class));
 			}
-			else if (model instanceof MobileListModel)
+
+			if (model instanceof MobileListModel)
 			{
 				// list
 				return new DeleteListCommand((MobileListModel)model);

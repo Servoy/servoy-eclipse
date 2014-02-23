@@ -13,8 +13,10 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.designer.editor.commands;
+
+import java.util.Arrays;
 
 import org.eclipse.gef.commands.Command;
 
@@ -28,15 +30,15 @@ import com.servoy.j2db.persistence.RepositoryException;
 
 
 /**
- * A command to remove an element from a form. The command can be undone or redone.
+ * A command to remove elements from a form. The command can be undone or redone.
  */
 public class FormElementDeleteCommand extends Command
 {
-	/** Object to remove. */
-	private final IPersist child;
+	/** Objects to remove. */
+	private final IPersist[] children;
 
 	/** Object to remove from. */
-	private ISupportChilds parent;
+	private ISupportChilds[] parents;
 
 	/**
 	 * Create a command that will remove the element from its parent.
@@ -47,72 +49,88 @@ public class FormElementDeleteCommand extends Command
 	 */
 	public FormElementDeleteCommand(IPersist child)
 	{
-		if (child == null || child.getParent() == null)
+		this(new IPersist[] { child });
+	}
+
+	/**
+	 * Create a command that will remove the element from its parent.
+	 * 
+	 * @param form the Form containing the child
+	 * @param children the elements to remove
+	 * @throws IllegalArgumentException if any parameter is null
+	 */
+	public FormElementDeleteCommand(IPersist[] children)
+	{
+		if (children == null)
 		{
 			throw new IllegalArgumentException();
 		}
-		this.child = child;
+		for (IPersist child : children)
+		{
+			if (child == null || child.getParent() == null)
+			{
+				throw new IllegalArgumentException();
+			}
+		}
+		this.children = children;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.commands.Command#execute()
-	 */
 	@Override
 	public void execute()
 	{
 		String label = "delete element";
-		if (child instanceof ISupportName && ((ISupportName)child).getName() != null)
+		if (children.length > 1) label += 's';
+		for (IPersist child : children)
 		{
-			label += " " + ((ISupportName)child).getName();
+			if (child instanceof ISupportName && ((ISupportName)child).getName() != null)
+			{
+				label += ' ' + ((ISupportName)child).getName();
+			}
 		}
 		setLabel(label);
 		redo();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.commands.Command#redo()
-	 */
 	@Override
 	public void redo()
 	{
-		// parent may be the form or a tab panel
-		parent = child.getParent();
-		try
+		parents = new ISupportChilds[children.length];
+		for (int i = 0; i < children.length; i++)
 		{
-			((IDeveloperRepository)child.getRootObject().getRepository()).deleteObject(child);
+			// parent may be the form or a tab panel
+			parents[i] = children[i].getParent();
+			try
+			{
+				((IDeveloperRepository)children[i].getRootObject().getRepository()).deleteObject(children[i]);
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError("Could not delete element", e);
+			}
 		}
-		catch (RepositoryException e)
-		{
-			ServoyLog.logError("Could not delete element", e);
-		}
-		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, child, false);
+
+		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, Arrays.asList(children));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.commands.Command#undo()
-	 */
 	@Override
 	public void undo()
 	{
-		try
+		for (int i = children.length - 1; i >= 0; i--)
 		{
-			((IDeveloperRepository)parent.getRootObject().getRepository()).undeleteObject(parent, child);
+			try
+			{
+				((IDeveloperRepository)parents[i].getRootObject().getRepository()).undeleteObject(parents[i], children[i]);
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError("Could not restore element", e);
+			}
 		}
-		catch (RepositoryException e)
-		{
-			ServoyLog.logError("Could not restore element", e);
-		}
-		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, child, false);
+		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, Arrays.asList(children));
 	}
 
-	public IPersist getPersist()
+	public IPersist[] getPersists()
 	{
-		return child;
+		return children;
 	}
 }

@@ -814,6 +814,15 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 
 		public void stackChanged(CommandStackEvent event)
 		{
+			// make sure all changes are coming in as 1 set
+			if (event.isPreChangeEvent())
+			{
+				ServoyModelManager.getServoyModelManager().getServoyModel().startCollectingPersistChanges(false);
+			}
+			else if (event.isPostChangeEvent())
+			{
+				ServoyModelManager.getServoyModelManager().getServoyModel().stopCollectingPersistChanges(false);
+			}
 			lastState = event.getDetail();
 		}
 

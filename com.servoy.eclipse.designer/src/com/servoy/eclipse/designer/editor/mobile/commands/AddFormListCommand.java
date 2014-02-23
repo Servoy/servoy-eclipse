@@ -17,6 +17,9 @@
 
 package com.servoy.eclipse.designer.editor.mobile.commands;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.swt.graphics.Point;
 
@@ -58,20 +61,22 @@ public class AddFormListCommand extends CompoundCommand
 					Integer.valueOf(IFormConstants.VIEW_TYPE_TABLE_LOCKED))));
 
 			// delete all form elements except header/footer
+			List<IPersist> toDelete = new ArrayList<IPersist>();
 			FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
 			for (ISupportBounds elem : MobileFormLayout.getBodyElementsForRecordView(editingFlattenedSolution, editingFlattenedSolution.getFlattenedForm(form)))
 			{
 				if (elem instanceof IPersist)
 				{
-					add(new FormElementDeleteCommand((IPersist)elem));
+					toDelete.add((IPersist)elem);
 				}
 				else if (elem instanceof FormElementGroup)
 				{
-					for (IPersist persist : Utils.iterate(((FormElementGroup)elem).getElements()))
-					{
-						add(new FormElementDeleteCommand(persist));
-					}
+					toDelete.addAll(Utils.asList(((FormElementGroup)elem).getElements()));
 				}
+			}
+			if (toDelete.size() > 0)
+			{
+				add(new FormElementDeleteCommand(toDelete.toArray(new IPersist[toDelete.size()])));
 			}
 
 			// add list items

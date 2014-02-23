@@ -379,32 +379,33 @@ $(function () {
         }
     }
 
-    function updateSingleNode(admNode, jsObject) {
+    function updateSingleNode(admNode, jsObject, parent, zone, zoneIndex) {
     	
         if (jsObject.properties && jsObject.properties.id) {
 
 	       	 var node = admNode
-	    	 if (admNode.getType() != jsObject.type)
+	       	 var currenZoneIndex = admNode.getZoneIndex()
+	       	 var currentParent = admNode.getParent()
+	       	 var currentZone = currentParent.zone || "default";
+	    	 if (admNode.getType() != jsObject.type || parent != currentParent || zoneIndex != currenZoneIndex || zone != currentZone)
 	         {
 	    		 var root = admNode.getDesign();
 	    		 root.suppressEvents(true);
 	    		 
-	         	// node changed type, remove it and create a new one
-	    		var zoneIndex = admNode.getZoneIndex()
-	    		var parent = admNode.getParent()
-	         	parent.removeChild(admNode, false);
-	    		var zone = parent.zone || "default";
+	         	// node changed type or was moved, remove it and create a new one
+	         	currentParent.removeChild(admNode, false);
 	    		 
 	    		node = ADM.createNode(jsObject.type, true);
 	    		node.setProperty('id', jsObject.properties.id)
 	    		
-	         	// Add child node to current node
-	         	if (!parent.addChildToZone(node, parent.zone || "default", zoneIndex)) {
+	         	// Add child node to parent node
+	         	if (!parent.addChildToZone(node, zone || "default", zoneIndex)) {
 	         		dumplog("add child type "+ child.type + " failed");
 	         	}
 	    		
 	    		root.suppressEvents(false);
-	         }
+	        }
+	       	 
         	var properties = jsObject.properties;
             // Set properties for current ADM node
             for (var item in jsObject.properties) {
@@ -453,8 +454,74 @@ $(function () {
             	}
             }
         }
-  
     }
+    
+    function addSingleNode(parent, zone, zoneIndex, jsObject) {
+    	
+		var root = parent.getDesign();
+		//root.suppressEvents(true);
+		
+		var node = ADM.createNode(jsObject.type, true);
+		node.setProperty('id', jsObject.properties.id)
+		
+		// Add child node to current node
+		if (!parent.addChildToZone(node, zone || "default", zoneIndex)) {
+			dumplog("add child type "+ child.type + " failed");
+		}
+		
+		//root.suppressEvents(false);
+		
+		var properties = jsObject.properties;
+		// Set properties for current ADM node
+		for (var item in jsObject.properties) {
+			// Parse properties and set the value to the node
+			var val = properties[item];
+			// If we can't get value, we set item's value as default
+			if (item != 'id' && val){
+				// NOTE: It's important that we pass "true" for the fourth
+				// parameter here (raw) to disable "property hook"
+				// functions like the grid one that adds or removes child
+				// Block elements based on the property change
+				node.setProperty(item, val, null, true);
+			}
+		}
+		
+		if (jsObject.children) {
+			if (jsObject.children.length != node.getChildren().length)
+			{
+				// add nodes
+				for (var i= 0;i < jsObject.children.length;i++)
+				{
+					var childNode = ADM.createNode(jsObject.children[i].type, false);
+					for (var item in jsObject.children[i].properties) {
+						var val = jsObject.children[i].properties[item];
+						childNode.setProperty(item, val, null, true);
+					}
+					node.addChildToZone(childNode,(jsObject.children[i].properties.zone || "default"));
+				}
+			}
+			else
+			{
+				for (var i = 0; i < jsObject.children.length; i++) {
+					for (var item in jsObject.children[i].properties) {
+						var val = jsObject.children[i].properties[item];
+						if (item != 'id' && val){
+							node.getChildren()[i].setProperty(item, val, null, true);
+						}
+					}
+				}
+    		}
+    	}
+    }
+    
+    function deleteSingleNode(admNode) {
+    	
+//    	var root = admNode.getDesign();
+//		root.suppressEvents(true);
+    	admNode.getParent().removeChild(admNode, false);
+//    	root.suppressEvents(false);
+    }
+    
     /**
      * Loads a design from a JSON object and updates the design root.
      * 
@@ -1225,6 +1292,8 @@ $(function () {
     $.rib.JSONToProj = JSONToProj;
     $.rib.updateDesignToJSON = updateDesignToJSON;
     $.rib.updateSingleNode = updateSingleNode;
+    $.rib.deleteSingleNode = deleteSingleNode;
+    $.rib.addSingleNode = addSingleNode;
     $.rib.getDesignHeaders = getDesignHeaders;
     $.rib.exportPackage = exportPackage;
     $.rib.isSandboxHeader = isSandboxHeader;

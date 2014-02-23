@@ -116,7 +116,15 @@ $.servoy = {
       	  }
       	  else if (func == 'refreshNode')
       	  {
-      	  	$.servoy._refreshNode(split[1])
+      	  	$.servoy._refreshNode(split[1], split[2], split[3], split[4])
+      	  }
+      	  else if (func == 'deleteNode')
+      	  {
+      		  $.servoy._deleteNode(split[1])
+      	  }
+      	  else if (func == 'addNode')
+      	  {
+      		  $.servoy._addNode(split[1], split[2], split[3], split[4])
       	  }
       	  else if (func == 'selectNode')
       	  {
@@ -152,14 +160,20 @@ $.servoy = {
 	 	return null;
 	},
 
-	_refreshNode : function(uuid ) // called from java
+	_refreshNode : function(uuid, parentUuid, zone, zoneIndex) // called from java
 	{
-		console.log('refreshNode '+uuid)
+		console.log('refreshNode '+uuid+' parent ' + parentUuid + ' zone ' + zone + ' zoneIndex ' + zoneIndex)
 		
 		var node = $.servoy._findNode(uuid)
 		if (!node)
 		{
 			console.log('refreshNode: node not found: '+uuid)
+			return false;
+		}
+		var parent = $.servoy._findNode(parentUuid)
+		if (!parent)
+		{
+			console.log('refreshNode: parent not found: '+parentUuid)
 			return false;
 		}
 		var childJson = getChildJson(uuid)
@@ -177,14 +191,70 @@ $.servoy = {
 			return false;
 		}
 		if (parsedObject) {
-			$.rib.updateSingleNode(node, parsedObject);
+			$.rib.updateSingleNode(node, parsedObject, parent, zone, zoneIndex);
 		}
 		
 		console.log('refreshNode done')
 		return true
 	},
+
+	_deleteNode : function(uuid) // called from java
+	{
+		console.log('deleteNode '+uuid)
+		
+		var node = $.servoy._findNode(uuid)
+		if (!node)
+		{
+			console.log('deleteNode: node not found: '+uuid)
+			return false;
+		}
+		
+		$.rib.deleteSingleNode(node);
+		
+		console.log('deleteNode done')
+		return true
+	},
 	
-	_selectNode : function(uuid ) // called from java
+	_addNode : function(uuid, parentUuid, zone, zoneIndex) // called from java
+	{
+		console.log('addNode '+uuid+' parent ' + parentUuid + ' zone ' + zone + ' zoneIndex ' + zoneIndex)
+		
+		if ($.servoy._findNode(uuid))
+		{
+			console.log('addNode: node already exists: '+uuid)
+			return false
+		}
+		
+		var parent = $.servoy._findNode(parentUuid)
+		if (!parent)
+		{
+			console.log('addNode: parent node not found: '+parentUuid)
+			return false;
+		}
+		var childJson = getChildJson(uuid)
+		if (!childJson) 
+		{
+			console.log('addNode: json not found: '+uuid)
+			return false;
+		}
+		
+		var parsedObject
+		try {
+			parsedObject = $.parseJSON(childJson);
+		} catch(e) {
+			console.log('addNode: Invalid child design: '+childJson)
+			return false;
+		}
+		if (parsedObject)
+		{
+			$.rib.addSingleNode(parent, zone, zoneIndex, parsedObject);
+		}
+		
+		console.log('addNode done')
+		return true
+	},
+
+	_selectNode : function(uuid) // called from java
 	{
 		console.log('selectNode '+uuid)
 		

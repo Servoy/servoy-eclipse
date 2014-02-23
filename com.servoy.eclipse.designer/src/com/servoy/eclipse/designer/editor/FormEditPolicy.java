@@ -161,11 +161,7 @@ public class FormEditPolicy extends ComponentEditPolicy
 				}
 				else if (BaseVisualFormEditor.REQ_CUT.equals(request.getType()))
 				{
-					final CompoundCommand deleteCommand = new CompoundCommand();
-					for (IPersist persist : models)
-					{
-						deleteCommand.add(new FormElementDeleteCommand(persist));
-					}
+					final FormElementDeleteCommand deleteCommand = new FormElementDeleteCommand(models.toArray(new IPersist[models.size()]));
 					CompoundCommand cutCommand = new CompoundCommand()
 					{
 						// copy command is not applicable in undo
