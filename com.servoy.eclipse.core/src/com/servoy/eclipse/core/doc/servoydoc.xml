@@ -3737,34 +3737,6 @@ form.navigator = SM_DEFAULTS.NONE; // Hide the navigator on the form.]]></sample
         </constant>
       </constants>
     </object>
-    <object clientSupport="wc,sc" publicName="Data Sources" qualifiedName="com.servoy.j2db.dataprocessing.datasource.JSDataSources" scriptingName="datasources">
-      <properties>
-        <property clientSupport="wc,sc" name="db">
-          <return type="com.servoy.j2db.dataprocessing.datasource.DBDataSource" typecode="com.servoy.j2db.dataprocessing.datasource.DBDataSource"/>
-          <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Scope property for server/table based data sources.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Scope property for server/table based data sources.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="wc,sc"><![CDATA[datasources.db.example_data.orders]]></sample>
-          </samples>
-        </property>
-        <property clientSupport="wc,sc" name="mem">
-          <return type="com.servoy.j2db.dataprocessing.datasource.MemDataSource" typecode="com.servoy.j2db.dataprocessing.datasource.MemDataSource"/>
-          <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Scope property for in-memory data sources.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Scope property for in-memory data sources.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="wc,sc"><![CDATA[datasources.mem['myds']]]></sample>
-          </samples>
-        </property>
-      </properties>
-    </object>
     <object clientSupport="wc,sc" publicName="DataException" qualifiedName="com.servoy.j2db.dataprocessing.DataException">
       <constants>
         <constant clientSupport="wc,sc" name="ABSTRACT_FORM">
@@ -8683,6 +8655,34 @@ var success = databaseManager.switchServer('crm', 'crm1')]]></sample>
           </parameters>
         </function>
       </functions>
+    </object>
+    <object clientSupport="wc,sc" publicName="Datasources" qualifiedName="com.servoy.j2db.dataprocessing.datasource.JSDataSources" scriptingName="datasources">
+      <properties>
+        <property clientSupport="wc,sc" name="db">
+          <return type="com.servoy.j2db.dataprocessing.datasource.DBDataSource" typecode="com.servoy.j2db.dataprocessing.datasource.DBDataSource"/>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Scope property for server/table based data sources.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Scope property for server/table based data sources.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[datasources.db.example_data.orders]]></sample>
+          </samples>
+        </property>
+        <property clientSupport="wc,sc" name="mem">
+          <return type="com.servoy.j2db.dataprocessing.datasource.MemDataSource" typecode="com.servoy.j2db.dataprocessing.datasource.MemDataSource"/>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Scope property for in-memory data sources.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Scope property for in-memory data sources.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[datasources.mem['myds']]]></sample>
+          </samples>
+        </property>
+      </properties>
     </object>
     <object clientSupport="wc,sc" publicName="ELEMENT_TYPES" qualifiedName="com.servoy.j2db.scripting.info.ELEMENT_TYPES">
       <constants>
