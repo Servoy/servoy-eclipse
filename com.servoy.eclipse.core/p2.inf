@@ -6,7 +6,7 @@ addRepository(type:0,name:The Eclipse Project Updates,location:http${#58}//downl
 addRepository(type:0,name:Subclipse 1.10.x Update Site,location:http${#58}//subclipse.tigris.org/update_1.10.x);addRepository(type:1,name:Subclipse 1.10.x Update Site,location:http${#58}//subclipse.tigris.org/update_1.10.x);\
 addRepository(type:0,name:ServoyEclipse JSDoc Plugin,location:http${#58}//www.servoy-stuff.net/downloads/developer/updates);addRepository(type:1,name:ServoyEclipse JSDoc Plugin,location:http${#58}//www.servoy-stuff.net/downloads/developer/updates);\
 addRepository(type:0,name:QuickImage,location:http${#58}//psnet.nu/eclipse/updates);addRepository(type:1,name:QuickImage,location:http${#58}//psnet.nu/eclipse/updates);\
-addRepository(type:0,name:Servoy Release Candidate Update Site,location:https${#58}//www.servoy.com/developer/70x_updates/release_candidate,enabled:false);addRepository(type:1,name:Servoy Release Candidate Update Site,location:https${#58}//www.servoy.com/developer/70x_updates/release_candidate,enabled:false);
+addRepository(type:0,name:Servoy Release Candidate Update Site,location:https${#58}//www.servoy.com/developer/70x_updates/releasecandidate,enabled:false);addRepository(type:1,name:Servoy Release Candidate Update Site,location:https${#58}//www.servoy.com/developer/70x_updates/releasecandidate,enabled:false);
 
 #Adding description for the Servoy updates
 properties.0.name = org.eclipse.equinox.p2.description
