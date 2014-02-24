@@ -548,13 +548,19 @@ $(function() {
 
         debug && console.log("Found ["+targets.length+"] sortable targets: ");
 
-        targets
-            .sortable({
+        targets.each(function(){
+        	var sortableAxis = $(this).attr('sortableAxis');
+        	if (!sortableAxis)
+        	{
+        		sortableAxis = false;
+        	}
+        	$(this).sortable({
                 distance: 5,
                 forceHelperSize: true,
                 forcePlaceholderSize: true,
                 placeholder: 'ui-sortable-placeholder',
                 appendTo: 'body',
+                axis: sortableAxis,
                 helper: 'clone',
                 tolerance: "intersect",
                 connectWith:
@@ -777,7 +783,7 @@ $(function() {
                                     }
                                 }
                                 if (newZone) {
-                                    adm.moveNode(node, newParent, newZone, 0);
+                                	adm.moveNode(node, newParent, newZone, 0);
                                     debug && console.log('Move node worked');
                                     if (node) adm.setSelected(node.getUid());
                                 } else {
@@ -809,6 +815,7 @@ $(function() {
                 return true;
             })
             .disableSelection();
+        });
 
         // Fixup "Collapsible" to make the content div be marked as empty,
         // not it's toplevel element

@@ -401,7 +401,7 @@ var BWidgetRegistry = {
             selector: "h1",
             propertyName: "text"
         },
-        template: '<div data-role="header"><h1>%TEXT%<div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></h1></div>',
+        template: '<div data-role="header" sortableAxis="x"><h1>%TEXT%<div class="servoydataprovider servoydataprovider_%THEME%">%SERVOYDATAPROVIDER%</div></h1></div>',
         properties: {
             text: {
                 type: "string",
@@ -444,7 +444,7 @@ var BWidgetRegistry = {
         paletteImageName: "jqm_customheader.svg",
         displayLabel: "Custom Header",
         moveable: false,
-        template: '<div data-role="header"><div></div></div>',
+        template: '<div data-role="header" sortableAxis="x"><div></div></div>',
         properties: {
             position: BCommonProperties.position,
             theme: BCommonProperties.theme
