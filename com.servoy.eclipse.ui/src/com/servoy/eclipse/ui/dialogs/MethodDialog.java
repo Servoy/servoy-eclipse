@@ -259,17 +259,20 @@ public class MethodDialog extends TreeSelectDialog
 
 			else if (parentElement instanceof Solution)
 			{
-				Collection<Pair<String, IRootObject>> scopes = ModelUtils.getEditingFlattenedSolution((Solution)parentElement).getScopes();
+				Solution solution = (Solution)parentElement;
+				Collection<Pair<String, IRootObject>> scopes = ModelUtils.getEditingFlattenedSolution(solution).getScopes();
 				Iterator<Pair<String, IRootObject>> it = scopes.iterator();
-				Object[] scopesArray = new Object[scopes.size()];
-				int i = 0;
+				ArrayList<Object> scopesArray = new ArrayList<Object>();
 				while (it.hasNext())
 				{
 					Pair<String, IRootObject> sc = it.next();
-					scopesArray[i++] = new ScopeWithContext(sc.getLeft(), sc.getRight());
+					if (solution.getName().equals(sc.getRight().getName()))
+					{
+						scopesArray.add(new ScopeWithContext(sc.getLeft(), sc.getRight()));
+					}
 				}
 
-				return scopesArray;
+				return scopesArray.toArray();
 			}
 			else
 			{
