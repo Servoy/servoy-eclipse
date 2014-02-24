@@ -96,7 +96,7 @@ public class OptionDialog extends MessageDialog
 		GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
 		combo.setLayoutData(gridData);
 
-		return super.createCustomArea(parent);
+		return combo;
 	}
 
 	@Override
