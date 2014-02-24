@@ -53,7 +53,7 @@ public class ValuelistLabelProvider extends LabelProvider implements IFontProvid
 
 		int vlmId = ((Integer)value).intValue();
 
-		if (vlmId == VALUELIST_NONE)
+		if (vlmId == VALUELIST_NONE || vlmId == -1)
 		{
 			return Messages.LabelNone;
 		}
