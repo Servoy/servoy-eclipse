@@ -3737,34 +3737,6 @@ form.navigator = SM_DEFAULTS.NONE; // Hide the navigator on the form.]]></sample
         </constant>
       </constants>
     </object>
-    <object clientSupport="wc,sc" publicName="Data Sources" qualifiedName="com.servoy.j2db.dataprocessing.datasource.JSDataSources" scriptingName="datasources">
-      <properties>
-        <property clientSupport="wc,sc" name="db">
-          <return type="com.servoy.j2db.dataprocessing.datasource.DBDataSource" typecode="com.servoy.j2db.dataprocessing.datasource.DBDataSource"/>
-          <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Scope property for server/table based data sources.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Scope property for server/table based data sources.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="wc,sc"><![CDATA[datasources.db.example_data.orders]]></sample>
-          </samples>
-        </property>
-        <property clientSupport="wc,sc" name="mem">
-          <return type="com.servoy.j2db.dataprocessing.datasource.MemDataSource" typecode="com.servoy.j2db.dataprocessing.datasource.MemDataSource"/>
-          <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Scope property for in-memory data sources.]]></description>
-          </descriptions>
-          <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Scope property for in-memory data sources.]]></summary>
-          </summaries>
-          <samples>
-            <sample clientSupport="wc,sc"><![CDATA[datasources.mem['myds']]]></sample>
-          </samples>
-        </property>
-      </properties>
-    </object>
     <object clientSupport="wc,sc" publicName="DataException" qualifiedName="com.servoy.j2db.dataprocessing.DataException">
       <constants>
         <constant clientSupport="wc,sc" name="ABSTRACT_FORM">
@@ -8683,6 +8655,34 @@ var success = databaseManager.switchServer('crm', 'crm1')]]></sample>
           </parameters>
         </function>
       </functions>
+    </object>
+    <object clientSupport="wc,sc" publicName="Datasources" qualifiedName="com.servoy.j2db.dataprocessing.datasource.JSDataSources" scriptingName="datasources">
+      <properties>
+        <property clientSupport="wc,sc" name="db">
+          <return type="com.servoy.j2db.dataprocessing.datasource.DBDataSource" typecode="com.servoy.j2db.dataprocessing.datasource.DBDataSource"/>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Scope property for server/table based data sources.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Scope property for server/table based data sources.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[datasources.db.example_data.orders]]></sample>
+          </samples>
+        </property>
+        <property clientSupport="wc,sc" name="mem">
+          <return type="com.servoy.j2db.dataprocessing.datasource.MemDataSource" typecode="com.servoy.j2db.dataprocessing.datasource.MemDataSource"/>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Scope property for in-memory data sources.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Scope property for in-memory data sources.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[datasources.mem['myds']]]></sample>
+          </samples>
+        </property>
+      </properties>
     </object>
     <object clientSupport="wc,sc" publicName="ELEMENT_TYPES" qualifiedName="com.servoy.j2db.scripting.info.ELEMENT_TYPES">
       <constants>
@@ -24000,7 +24000,8 @@ If the current foundset is not related, no copy will made.]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if proceeded to next record, false otherwise]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Go to next record in this updater, returns true if successful.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Go to next record in this updater, returns true if successful.
+NOTE: this method doesn't take into account deletes and inserts that may happen at same time. For more reliable iterator see foundset.forEach]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Go to next record in this updater, returns true if successful.]]></summary>
