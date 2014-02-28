@@ -385,8 +385,8 @@ $(function () {
 
 	       	 var node = admNode
 	       	 var currenZoneIndex = admNode.getZoneIndex()
+	       	 var currentZone = admNode.getZone() || "default";
 	       	 var currentParent = admNode.getParent()
-	       	 var currentZone = currentParent.zone || "default";
 	    	 if (admNode.getType() != jsObject.type || parent != currentParent || zoneIndex != currenZoneIndex || zone != currentZone)
 	         {
 	    		 var root = admNode.getDesign();
