@@ -14732,7 +14732,7 @@ scopes.globals.html_field = '<html>'+dataset.getAsHTML()+'</html>';
         </function>
         <function clientSupport="wc,sc" deprecated="true" name="getAsTableModel">
           <argumentsTypes/>
-          <return type="javax.swing.table.TableModel" typecode="javax.swing.table.TableModel"/>
+          <return type="javax.swing.table.TableModel" typecode="javax.swing.table.TableModel"><![CDATA[TableModel]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Returns the dataset as a Swing tablemodel.]]></description>
           </descriptions>
@@ -24000,7 +24000,8 @@ If the current foundset is not related, no copy will made.]]></description>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if proceeded to next record, false otherwise]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Go to next record in this updater, returns true if successful.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Go to next record in this updater, returns true if successful.
+NOTE: this method doesn't take into account deletes and inserts that may happen at same time. For more reliable iterator see foundset.forEach]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Go to next record in this updater, returns true if successful.]]></summary>
