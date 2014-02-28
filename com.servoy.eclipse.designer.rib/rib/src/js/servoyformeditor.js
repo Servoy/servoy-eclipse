@@ -116,7 +116,7 @@ $.servoy = {
       	  }
       	  else if (func == 'refreshNode')
       	  {
-      	  	$.servoy._refreshNode(split[1], split[2], split[3], split[4])
+      	  	$.servoy._refreshNode(split[1], split[2], split[3], parseInt(split[4]))
       	  }
       	  else if (func == 'deleteNode')
       	  {
@@ -124,7 +124,7 @@ $.servoy = {
       	  }
       	  else if (func == 'addNode')
       	  {
-      		  $.servoy._addNode(split[1], split[2], split[3], split[4])
+      		  $.servoy._addNode(split[1], split[2], split[3], parseInt(split[4]))
       	  }
       	  else if (func == 'selectNode')
       	  {
