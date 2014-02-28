@@ -222,7 +222,7 @@ $.servoy = {
 		if ($.servoy._findNode(uuid))
 		{
 			console.log('addNode: node already exists: '+uuid)
-			return false
+			return $.servoy._refreshNode(uuid, parentUuid, zone, zoneIndex)
 		}
 		
 		var parent = $.servoy._findNode(parentUuid)
@@ -293,6 +293,8 @@ $.servoy = {
       if (event.type == 'nodeAdded' && newid)
       {
       	event.node.setProperty('id', newid)
+      	// refresh the new node
+      	$.servoy._refreshNode(newid, event.node.getParent().getProperty('id'), event.node.getZone(), event.node.getZoneIndex())
       }
    }
 }
