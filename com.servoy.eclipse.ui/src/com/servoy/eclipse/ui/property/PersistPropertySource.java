@@ -115,7 +115,7 @@ import com.servoy.eclipse.ui.views.properties.IMergeablePropertyDescriptor;
 import com.servoy.eclipse.ui.views.properties.IMergedPropertyDescriptor;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController;
-import com.servoy.j2db.FormManager;
+import com.servoy.j2db.IBasicFormManager;
 import com.servoy.j2db.IForm;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.component.ComponentFormat;
@@ -2433,7 +2433,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			retval.append(')');
 		}
 
-		String name = getActualComponentName(persistContext.getPersist());
+		String name = getActualComponentName();
 		if (name != null)
 		{
 			retval.append(" - ").append(name);
@@ -2540,6 +2540,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			}
 		}
 		return retval.toString();
+	}
+
+	protected String getActualComponentName()
+	{
+		return getActualComponentName(persistContext.getPersist());
 	}
 
 	public static String getActualComponentName(IPersist persist)
@@ -3473,7 +3478,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				{
 					if ("titleText".equals(id) && value != null && value.length() > 0 && value.trim().length() == 0)
 					{
-						return FormManager.NO_TITLE_TEXT;
+						return IBasicFormManager.NO_TITLE_TEXT;
 					}
 					return value;
 				}
