@@ -181,7 +181,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 	private MobileVisualFormEditorContextMenuProvider contextMenuProvider;
 	private Browser browser;
 
-	private String lastFormDesign;
+	private volatile String lastFormDesign;
 	private EditorMessageHandler editorMessageHandler;
 	private String lastPaletteItems;
 
@@ -719,10 +719,8 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 			{
 				return getModelId(createdModels.get(0));
 			}
-			else
-			{
-				selectionProvider.setSelection(element == null ? StructuredSelection.EMPTY : new StructuredSelection(element));
-			}
+
+			selectionProvider.setSelection(element == null ? StructuredSelection.EMPTY : new StructuredSelection(element));
 		}
 
 		return null;

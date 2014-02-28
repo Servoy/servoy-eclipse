@@ -412,7 +412,7 @@ $(function () {
                 // Parse properties and set the value to the node
                 var val = properties[item];
                 // If we can't get value, we set item's value as default
-                if (item != 'id' && val){
+                if (item != 'id' ){ // also set value if false
                     // NOTE: It's important that we pass "true" for the fourth
                     // parameter here (raw) to disable "property hook"
                     // functions like the grid one that adds or removes child
