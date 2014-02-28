@@ -1357,7 +1357,10 @@ var BWidgetRegistry = {
             label: {
                 type: "string",
                 defaultValue: "Title"
-            }
+            },
+            orientation: $.extend({}, BCommonProperties.orientation, {
+            	  htmlSelector: "fieldset"
+            })
         },
         zones: [
             {
