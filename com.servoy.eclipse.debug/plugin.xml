@@ -41,6 +41,22 @@
                     </pluginState>
                 </enablement>
          </action>
+         <action
+               class="com.servoy.eclipse.debug.actions.StartNGClientActionDelegate"
+               definitionId="com.servoy.eclipse.ui.StartNGClient"
+               icon="icons/launch_web.gif"
+               id="com.servoy.eclipse.ui.startNGClient"
+               label="Start Debug NGClient"
+               menubarPath="org.eclipse.ui.run/start"
+               style="pulldown"
+               toolbarPath="Normal/additions"
+               tooltip="Start Debug NGClient">
+               <enablement>
+                    <pluginState
+                          id="com.servoy.eclipse.debug" value="activated">
+                    </pluginState>
+                </enablement>
+         </action>
       </actionSet>
    </extension>
    <extension
@@ -129,6 +145,11 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M3+M2+B">
       </key>
+      <key
+            commandId="com.servoy.eclipse.ui.StartNGClient"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M3+M2+G">
+      </key>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -143,6 +164,12 @@
             description="Start WebClient"
             id="com.servoy.eclipse.ui.StartWebClient"
             name="Start WebClient">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.ui"
+            description="Start NGClient"
+            id="com.servoy.eclipse.ui.StartNGClient"
+            name="Start NGClient">
       </command>
    </extension>
    <extension

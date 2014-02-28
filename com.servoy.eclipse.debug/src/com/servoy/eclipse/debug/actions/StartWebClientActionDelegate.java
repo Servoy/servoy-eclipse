@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
@@ -79,7 +80,7 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 		DLTKDebugUIPlugin.getDefault();
 		DebugPlugin.getDefault();
 
-		Job job = new Job("Web client start") //$NON-NLS-1$
+		Job job = new Job(getStartTitle())
 		{
 			@Override
 			protected IStatus run(IProgressMonitor monitor)
@@ -103,9 +104,14 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 		job.schedule();
 	}
 
+	protected String getStartTitle()
+	{
+		return "Web client start";
+	}
+
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 	{
-		monitor.beginTask("Web client start", 5); //$NON-NLS-1$
+		monitor.beginTask(getStartTitle(), 5);
 		monitor.worked(1);
 		try
 		{
@@ -146,9 +152,7 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 							try
 							{
 								String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/servoy-webclient/solutions/solution/" + solution.getName(); //$NON-NLS-1$ //$NON-NLS-2$
-								IWorkbenchBrowserSupport support = PlatformUI.getWorkbench().getBrowserSupport();
-								if (webBrowser == null) webBrowser = support.getExternalBrowser();
-								EditorUtil.openURL(webBrowser, url);
+								EditorUtil.openURL(getWebBrowser(), url);
 							}
 							catch (final Throwable e)//catch all for apple mac
 							{
@@ -196,6 +200,16 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 	private IWebBrowser webBrowser;
 	private IBrowserDescriptor browserDescriptor;
 	private HashMap<String, Image> browsersImagesList;
+
+
+	/**
+	 * @return the webBrowser
+	 * @throws PartInitException 
+	 */
+	protected IWebBrowser getWebBrowser() throws PartInitException
+	{
+		return webBrowser == null ? PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser() : webBrowser;
+	}
 
 	/*
 	 * (non-Javadoc)
