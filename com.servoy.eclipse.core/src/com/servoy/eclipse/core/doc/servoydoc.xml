@@ -14732,7 +14732,7 @@ scopes.globals.html_field = '<html>'+dataset.getAsHTML()+'</html>';
         </function>
         <function clientSupport="wc,sc" deprecated="true" name="getAsTableModel">
           <argumentsTypes/>
-          <return type="javax.swing.table.TableModel" typecode="javax.swing.table.TableModel"/>
+          <return type="javax.swing.table.TableModel" typecode="javax.swing.table.TableModel"><![CDATA[TableModel]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Returns the dataset as a Swing tablemodel.]]></description>
           </descriptions>
