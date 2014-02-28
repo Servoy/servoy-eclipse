@@ -1396,10 +1396,10 @@ var BWidgetRegistry = {
         displayLabel: "Radio Button",
         paletteImageName: "jqm_radio_button.svg",
         allowIn: "RadioGroup",
-        editable: {
-            selector: "span > .ui-btn-text",
-            propertyName: "label"
-        },
+//        editable: {
+//            selector: "span > .ui-btn-text",
+//            propertyName: "label"
+//        },
         properties: {
             // FIXME: All the radio buttons in a group need to have a common
             //        "name" field in order to work correctly
