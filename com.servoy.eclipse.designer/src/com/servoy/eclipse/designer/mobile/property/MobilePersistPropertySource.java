@@ -45,7 +45,6 @@ import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RepositoryHelper;
@@ -182,19 +181,12 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			{
 				return (Part)propertySource.getPersist();
 			}
-			if (propertySource.getPersist() instanceof GraphicalComponent &&
-				((GraphicalComponent)propertySource.getPersist()).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName) != null)
+
+			// if header text, find header part
+			PersistContext headerPart = getHeaderPartForHeaderText(PersistContext.create(propertySource.getPersist(), propertySource.getContext()));
+			if (headerPart != null)
 			{
-				// header text, find header part
-				Form form = (Form)propertySource.getContext().getAncestor(IRepository.FORMS);
-				// TODO: check flattened form?
-				for (Part part : Utils.iterate(form.getParts()))
-				{
-					if (PersistUtils.isHeaderPart(part.getPartType()))
-					{
-						return part;
-					}
-				}
+				return (Part)headerPart.getPersist();
 			}
 			return null;
 		}
@@ -434,24 +426,54 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		return super.createPropertyDescriptor(propertyDescriptor, flattenedEditingSolution, form, category, id);
 	}
 
+	private static PersistContext getHeaderPartForHeaderText(PersistContext persistContext)
+	{
+		if (persistContext.getPersist() instanceof GraphicalComponent &&
+			Boolean.TRUE.equals(((GraphicalComponent)persistContext.getPersist()).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName)) &&
+			persistContext.getContext() instanceof Form)
+		{
+			// header text, find header part
+			Form form = (Form)persistContext.getContext();
+			for (Part part : Utils.iterate(form.getParts()))
+			{
+				if (PersistUtils.isHeaderPart(part.getPartType()))
+				{
+					return PersistContext.create(part, form);
+				}
+			}
+		}
+
+		return null;
+	}
+
 	@Override
 	public void setPersistPropertyValue(Object id, Object value)
 	{
 		super.setPersistPropertyValue(id, value);
 
 		// set style on header text, copy to header part for FormList (not for InsetList)
-		if (StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName().equals(id) && getPersist() instanceof GraphicalComponent &&
-			Boolean.TRUE.equals(((GraphicalComponent)getPersist()).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName)) &&
-			getContext() instanceof Form)
+		if (StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName().equals(id))
 		{
-			Form form = (Form)getContext();
-			for (Part part : Utils.iterate(form.getParts()))
+			PersistContext headerPart = getHeaderPartForHeaderText(persistContext);
+			if (headerPart != null)
 			{
-				if (PersistUtils.isHeaderPart(part.getPartType()))
-				{
-					new PersistPropertySource(PersistContext.create(part, form), false).setPersistPropertyValue(id, value);
-				}
+				new PersistPropertySource(headerPart, false).setPersistPropertyValue(id, value);
 			}
 		}
+	}
+
+	@Override
+	protected String getActualComponentName()
+	{
+		IPersist persist = persistContext.getPersist();
+
+		// if header text, find header part
+		PersistContext headerPart = getHeaderPartForHeaderText(persistContext);
+		if (headerPart != null)
+		{
+			persist = headerPart.getPersist();
+		}
+
+		return getActualComponentName(persist);
 	}
 }

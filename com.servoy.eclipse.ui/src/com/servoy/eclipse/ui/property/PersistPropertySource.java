@@ -2433,7 +2433,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			retval.append(')');
 		}
 
-		String name = getActualComponentName(persistContext.getPersist());
+		String name = getActualComponentName();
 		if (name != null)
 		{
 			retval.append(" - ").append(name);
@@ -2540,6 +2540,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			}
 		}
 		return retval.toString();
+	}
+
+	protected String getActualComponentName()
+	{
+		return getActualComponentName(persistContext.getPersist());
 	}
 
 	public static String getActualComponentName(IPersist persist)
