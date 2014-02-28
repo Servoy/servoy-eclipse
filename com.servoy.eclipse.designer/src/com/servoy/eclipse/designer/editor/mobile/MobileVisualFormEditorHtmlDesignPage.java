@@ -885,6 +885,13 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 				String newFormDesign = getFormDesign();
 				if (!lastFormDesign.equals(newFormDesign))
 				{
+					if (persists.size() == 1 && persists.get(0) instanceof Form)
+					{
+						// just the form is changed, refresh it completely
+						refreshAllParts();
+						return;
+					}
+
 					List<IPersist> sortedPersists = new ArrayList<IPersist>(persists);
 					// sort so that forms are before parts are before elements
 					Collections.sort(sortedPersists, new Comparator<IPersist>()
@@ -906,6 +913,12 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 					// check if elements existed before
 					for (IPersist persist : sortedPersists)
 					{
+						if (persist instanceof Form)
+						{
+							// Skip form here, form properties are not used in rendering
+							continue;
+						}
+
 						Object modelId = getModelId(getPersistModel(persist));
 						String searchString = '"' + String.valueOf(modelId) + '"';
 						boolean existedBefore = lastFormDesign.indexOf(searchString) >= 0;
