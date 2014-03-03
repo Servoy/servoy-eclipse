@@ -42,6 +42,7 @@ import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
+import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -58,46 +59,20 @@ import com.servoy.j2db.util.xmlxport.TableDef;
  * @author acostache
  *
  */
-public class ServoyExporterUtils
+public class TableDefinitionUtils
 {
-	private static ServoyExporterUtils svyExportUtlsInstance = null;
-
-	private ServoyExporterUtils()
+	public static Pair<ITableDefinitionsManager, IMetadataDefManager> getTableDefinitionsFromDBI(IServerInternal server) throws CoreException, JSONException,
+		IOException
 	{
-
+		final Map<String, List<String>> neededServersTables = new HashMap<String, List<String>>();
+		neededServersTables.put(server.getName(), new ArrayList<String>());
+		// just retrieve all tables from this server
+		return getTableDefinitionsFromDBI(neededServersTables, true, true);
 	}
 
-	public static ServoyExporterUtils getInstance()
+	private static Pair<ITableDefinitionsManager, IMetadataDefManager> getTableDefinitionsFromDBI(Map<String, List<String>> neededServersTables,
+		final boolean exportAllTablesFromReferencedServers, boolean exportMetaData) throws CoreException, JSONException, IOException
 	{
-		if (svyExportUtlsInstance == null)
-		{
-			svyExportUtlsInstance = new ServoyExporterUtils();
-		}
-		return svyExportUtlsInstance;
-	}
-
-	/**
-	 * This method takes care of minimal db info to be used in export in the case in which the db is down.
-	 * It will create and initialize the table def manager and the metadata manager, which will contain server and table and metadata info
-	 * to be used at solution export.
-	 * 
-	 * If the database is not down, it will export all needed (non-minimal) db info, based on dbi files (only). That is, if needed,
-	 * it will export all tables from referenced servers, based on dbi files.
-	 * 
-	 * NOTE: if there are no dbi files created, export info will be empty
-	 * 
-	 * @param true if the database is down, false otherwise 
-	 * 
-	 * @throws CoreException
-	 * @throws JSONException 
-	 * @throws IOException 
-	 */
-	public Pair<ITableDefinitionsManager, IMetadataDefManager> prepareDbiFilesBasedExportData(Solution activeSolution, boolean exportReferencedModules,
-		boolean exportI18NData, boolean exportAllTablesFromReferencedServers, boolean exportMetaData) throws CoreException, JSONException, IOException
-	{
-		// A. get only the needed servers (and tables) 
-		final Map<String, List<String>> neededServersTables = getNeededServerTables(activeSolution, exportReferencedModules, exportI18NData);
-		final boolean exportAll = exportAllTablesFromReferencedServers;
 		DataModelManager dmm = ServoyModelFinder.getServoyModel().getDataModelManager();
 
 		// B. for needed tables, get dbi files (db is down)
@@ -106,7 +81,7 @@ public class ServoyExporterUtils
 		{
 			final String serverName = neededServersTableEntry.getKey();
 			final List<String> tables = neededServersTableEntry.getValue();
-			final List<IFile> dbiz = getTablesDBIList(serverName, tables, exportAll);
+			final List<IFile> dbiz = getTablesDBIList(serverName, tables, exportAllTablesFromReferencedServers);
 
 			// minimum requirement for dbi files based export: all needed dbi files must be found
 			if (!allNeededDbiFilesExist(tables, dbiz))
@@ -203,7 +178,15 @@ public class ServoyExporterUtils
 		return new Pair<ITableDefinitionsManager, IMetadataDefManager>(tableDefManager, metadataDefManager);
 	}
 
-	private List<IFile> getTablesDBIList(String serverName, final List<String> tablesNeeded, final boolean exportAll)
+	public static Pair<ITableDefinitionsManager, IMetadataDefManager> getTableDefinitionsFromDBI(Solution activeSolution, boolean exportReferencedModules,
+		boolean exportI18NData, boolean exportAllTablesFromReferencedServers, boolean exportMetaData) throws CoreException, JSONException, IOException
+	{
+		// A. get only the needed servers (and tables) 
+		final Map<String, List<String>> neededServersTables = getNeededServerTables(activeSolution, exportReferencedModules, exportI18NData);
+		return getTableDefinitionsFromDBI(neededServersTables, exportAllTablesFromReferencedServers, exportMetaData);
+	}
+
+	private static List<IFile> getTablesDBIList(String serverName, final List<String> tablesNeeded, final boolean exportAll)
 	{
 		IFolder serverInformationFolder = ServoyModelFinder.getServoyModel().getDataModelManager().getDBIFileContainer(serverName);
 		final List<IFile> dbiz = new ArrayList<IFile>();
@@ -241,7 +224,7 @@ public class ServoyExporterUtils
 
 	}
 
-	private boolean allNeededDbiFilesExist(List<String> neededTableNames, List<IFile> existingDbiFiles)
+	private static boolean allNeededDbiFilesExist(List<String> neededTableNames, List<IFile> existingDbiFiles)
 	{
 		if (neededTableNames != null && existingDbiFiles != null && neededTableNames.size() > 0 && existingDbiFiles.size() == 0) return false;
 
@@ -268,7 +251,7 @@ public class ServoyExporterUtils
 		return allFound;
 	}
 
-	private void addServerTable(Map<String, List<String>> srvTbl, String serverName, String tableName)
+	private static void addServerTable(Map<String, List<String>> srvTbl, String serverName, String tableName)
 	{
 		List<String> tablesForServer = srvTbl.get(serverName);
 		if (tablesForServer == null)
@@ -285,7 +268,7 @@ public class ServoyExporterUtils
 	 * @param includeI18NData
 	 * @return
 	 */
-	private Map<String, List<String>> getNeededServerTables(Solution mainActiveSolution, boolean includeModules, boolean includeI18NData)
+	private static Map<String, List<String>> getNeededServerTables(Solution mainActiveSolution, boolean includeModules, boolean includeI18NData)
 	{
 		DataSourceCollectorVisitor collector = new DataSourceCollectorVisitor();
 		//IF NO SOLUTION SPECIFFIED GET ALL TABLES FROM ALL SERVERS
@@ -343,7 +326,7 @@ public class ServoyExporterUtils
 		return neededServersTablesMap;
 	}
 
-	public boolean isDatabaseDownErrorMakrer(IMarker marker)
+	public static boolean isDatabaseDownErrorMakrer(IMarker marker)
 	{
 		try
 		{
@@ -364,7 +347,7 @@ public class ServoyExporterUtils
 	 * 
 	 * @return true if the database is down (servers or tables are inaccessible)
 	 */
-	public boolean hasDbDownErrorMarkers(String[] projects)
+	public static boolean hasDbDownErrorMarkers(String[] projects)
 	{
 		if (projects != null && projects.length > 0)
 		{

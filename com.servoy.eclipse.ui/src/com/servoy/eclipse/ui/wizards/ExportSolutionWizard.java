@@ -70,8 +70,8 @@ import com.servoy.eclipse.core.util.BuilderUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseExportI18NHelper;
 import com.servoy.eclipse.model.util.IFileAccess;
-import com.servoy.eclipse.model.util.ServoyExporterUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.TableDefinitionUtils;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -152,9 +152,9 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 					IMetadataDefManager metadataDefManager = null;
 					if (modulesSelectionPage.hasDBDownErrors() || exportModel.isExportUsingDbiFileInfoOnly())
 					{
-						Pair<ITableDefinitionsManager, IMetadataDefManager> defManagers = ServoyExporterUtils.getInstance().prepareDbiFilesBasedExportData(
-							activeSolution, exportModel.isExportReferencedModules(), exportModel.isExportI18NData(),
-							exportModel.isExportAllTablesFromReferencedServers(), exportModel.isExportMetaData());
+						Pair<ITableDefinitionsManager, IMetadataDefManager> defManagers = TableDefinitionUtils.getTableDefinitionsFromDBI(activeSolution,
+							exportModel.isExportReferencedModules(), exportModel.isExportI18NData(), exportModel.isExportAllTablesFromReferencedServers(),
+							exportModel.isExportMetaData());
 						if (defManagers != null)
 						{
 							tableDefManager = defManagers.getLeft();
@@ -253,8 +253,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		int hasErrs = BuilderUtils.getMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
 		if (hasErrs == BuilderUtils.HAS_ERROR_MARKERS)
 		{
-			activeSolutionDbDownErrors = ServoyExporterUtils.getInstance().hasDbDownErrorMarkers(
-				new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
+			activeSolutionDbDownErrors = TableDefinitionUtils.hasDbDownErrorMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
 		}
 		else
 		{
@@ -868,7 +867,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			projectProblemsType = BuilderUtils.getMarkers(exportModel.getModulesToExport());
 			if (projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS)
 			{
-				moduleDbDownErrors = ServoyExporterUtils.getInstance().hasDbDownErrorMarkers(exportModel.getModulesToExport());
+				moduleDbDownErrors = TableDefinitionUtils.hasDbDownErrorMarkers(exportModel.getModulesToExport());
 			}
 			else
 			{

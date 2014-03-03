@@ -33,8 +33,8 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseExportI18NHelper;
-import com.servoy.eclipse.model.util.ServoyExporterUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.TableDefinitionUtils;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.persistence.AbstractRepository;
@@ -85,7 +85,7 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 				Pair<ITableDefinitionsManager, IMetadataDefManager> defManagers;
 				try
 				{
-					defManagers = ServoyExporterUtils.getInstance().prepareDbiFilesBasedExportData(solution, configuration.shouldExportModules(),
+					defManagers = TableDefinitionUtils.getTableDefinitionsFromDBI(solution, configuration.shouldExportModules(),
 						configuration.shouldExportI18NData(), configuration.getExportAllTablesFromReferencedServers(), configuration.shouldExportMetaData());
 				}
 				catch (CoreException e)

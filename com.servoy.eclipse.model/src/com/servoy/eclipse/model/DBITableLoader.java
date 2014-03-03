@@ -22,7 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import com.servoy.eclipse.model.util.ServoyExporterUtils;
+import com.servoy.eclipse.model.util.TableDefinitionUtils;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IColumnInfoManager;
 import com.servoy.j2db.persistence.IServer;
@@ -45,16 +45,15 @@ import com.servoy.j2db.util.xmlxport.TableDef;
  */
 public class DBITableLoader implements ITableLoader
 {
-	private Pair<ITableDefinitionsManager, IMetadataDefManager> defManagers = null;
 
 	@Override
 	public boolean loadTables(LinkedHashMap<String, Table> loading_tables, IServerInternal server)
 	{
 		try
 		{
-			if (defManagers == null) defManagers = ServoyExporterUtils.getInstance().prepareDbiFilesBasedExportData(null, true, true, true, true);
+			Pair<ITableDefinitionsManager, IMetadataDefManager> tablesDefinitionManager = TableDefinitionUtils.getTableDefinitionsFromDBI(server);
 
-			for (Entry<String, List<TableDef>> entry : defManagers.getLeft().getServerTableDefs().entrySet())
+			for (Entry<String, List<TableDef>> entry : tablesDefinitionManager.getLeft().getServerTableDefs().entrySet())
 			{
 				if (server.getConfig().getServerName().equals(entry.getKey()))
 				{
