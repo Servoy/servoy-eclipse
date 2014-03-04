@@ -161,11 +161,31 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 							metadataDefManager = defManagers.getRight();
 						}
 					}
-
+					final String[] warningMessage = new String[] { "" };
+					if (exportModel.isExportSampleData() && modulesSelectionPage.hasDBDownErrors())
+					{
+						warningMessage[0] = "Skipping sample data export, solution or module has non accesible database.";
+					}
+					if (exportModel.isExportMetaData() && modulesSelectionPage.hasDBDownErrors())
+					{
+						warningMessage[0] = warningMessage[0] + "\nSkipping metadata export, solution or module has non accesible database.";
+					}
+					if (!"".equals(warningMessage[0]))
+					{
+						Display.getDefault().syncExec(new Runnable()
+						{
+							public void run()
+							{
+								MessageDialog.openWarning(Display.getDefault().getActiveShell(),
+									"Export solution from database files (database server not accesible)", warningMessage[0]);
+							}
+						});
+					}
 					exporter.exportSolutionToFile(activeSolution, new File(exportModel.getFileName()), ClientVersion.getVersion(),
-						ClientVersion.getReleaseNumber(), exportModel.isExportMetaData(), exportModel.isExportSampleData(),
-						exportModel.getNumberOfSampleDataExported(), exportModel.isExportI18NData(), exportModel.isExportUsers(),
-						exportModel.isExportReferencedModules(), exportModel.isProtectWithPassword(), tableDefManager, metadataDefManager);
+						ClientVersion.getReleaseNumber(), exportModel.isExportMetaData() && !modulesSelectionPage.hasDBDownErrors(),
+						exportModel.isExportSampleData() && !modulesSelectionPage.hasDBDownErrors(), exportModel.getNumberOfSampleDataExported(),
+						exportModel.isExportI18NData(), exportModel.isExportUsers(), exportModel.isExportReferencedModules(),
+						exportModel.isProtectWithPassword(), tableDefManager, metadataDefManager);
 
 					monitor.done();
 
@@ -621,26 +641,12 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			exportMetadataTablesButton.addListener(SWT.Selection, this);
 
 			checkMetadataTablesButton = new Button(composite, SWT.CHECK);
-			checkMetadataTablesButton.setText("Check metadata tables"); //$NON-NLS-1$ 
 			checkMetadataTablesButton.setSelection(exportModel.isCheckMetadataTables());
 			checkMetadataTablesButton.addListener(SWT.Selection, this);
-			if (modulesSelectionPage.hasDBDownErrors())
-			{
-				checkMetadataTablesButton.setSelection(false);
-				checkMetadataTablesButton.setEnabled(false);
-				checkMetadataTablesButton.setText("Check metadata tables (one or more used databases is unreacheable)"); //$NON-NLS-1$ 
-			}
 
 			exportSampleDataButton = new Button(composite, SWT.CHECK);
-			exportSampleDataButton.setText("Export solution sample data"); //$NON-NLS-1$ 
 			exportSampleDataButton.setSelection(exportModel.isExportSampleData());
 			exportSampleDataButton.addListener(SWT.Selection, this);
-			if (modulesSelectionPage.hasDBDownErrors())
-			{
-				exportSampleDataButton.setSelection(false);
-				exportSampleDataButton.setEnabled(false);
-				exportSampleDataButton.setText("Export solution sample data (one or more used databases is unreacheable)");
-			}
 
 			Composite horizontalComposite = new Composite(composite, SWT.None);
 			GridLayout hcGridLayout = new GridLayout();
@@ -719,20 +725,54 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			exportUsingDbiFileInfoOnlyButton = new Button(composite, SWT.CHECK);
 			exportUsingDbiFileInfoOnlyButton.setText("Export based on DBI files only"); //$NON-NLS-1$
 			exportUsingDbiFileInfoOnlyButton.addListener(SWT.Selection, this);
-			if (modulesSelectionPage.hasDBDownErrors())
+
+			refreshDBIDownFlag(exportModel.isExportReferencedModules() && modulesSelectionPage.hasDBDownErrors());
+			setControl(composite);
+		}
+
+		private void refreshDBIDownFlag(boolean dbiDown)
+		{
+			exportUsingDbiFileInfoOnlyButton.setEnabled(!dbiDown);
+			exportUsingDbiFileInfoOnlyButton.setSelection(dbiDown ? true : exportModel.isExportUsingDbiFileInfoOnly());
+			if (dbiDown)
 			{
-				exportUsingDbiFileInfoOnlyButton.setEnabled(false);
-				exportUsingDbiFileInfoOnlyButton.setSelection(true);
 				exportUsingDbiFileInfoOnlyButton.setText("Export based on DBI files only (one or more used databases is unreacheable)");
 			}
+			else
+			{
+				exportUsingDbiFileInfoOnlyButton.setText("Export based on DBI files only"); //$NON-NLS-1$
+			}
 
-			setControl(composite);
+			exportSampleDataButton.setEnabled(!dbiDown);
+			exportSampleDataButton.setSelection(dbiDown ? false : exportModel.isExportSampleData());
+			if (dbiDown)
+			{
+				exportSampleDataButton.setText("Export solution sample data (one or more used databases is unreacheable)");
+			}
+			else
+			{
+				exportSampleDataButton.setText("Export solution sample data");
+			}
+			checkMetadataTablesButton.setEnabled(!dbiDown);
+			checkMetadataTablesButton.setSelection(dbiDown ? false : exportModel.isExportMetaData());
+			if (dbiDown)
+			{
+				checkMetadataTablesButton.setText("Check metadata tables (one or more used databases is unreacheable)"); //$NON-NLS-1$ 
+			}
+			else
+			{
+				checkMetadataTablesButton.setText("Check metadata tables"); //$NON-NLS-1$ 
+			}
 		}
 
 		public void handleEvent(Event event)
 		{
 			if (event.widget == protectWithPasswordButton) exportModel.setProtectWithPassword(protectWithPasswordButton.getSelection());
-			else if (event.widget == exportReferencedModulesButton) exportModel.setExportReferencedModules(exportReferencedModulesButton.getSelection());
+			else if (event.widget == exportReferencedModulesButton)
+			{
+				exportModel.setExportReferencedModules(exportReferencedModulesButton.getSelection());
+				refreshDBIDownFlag(exportModel.isExportReferencedModules() && modulesSelectionPage.hasDBDownErrors());
+			}
 			else if (event.widget == checkMetadataTablesButton) exportModel.setCheckMetadataTables(checkMetadataTablesButton.getSelection());
 			else if (event.widget == exportMetadataTablesButton)
 			{
@@ -892,6 +932,8 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			}
 
 			if (isCurrentPage()) getWizard().getContainer().updateButtons();
+
+			exportOptionsPage.refreshDBIDownFlag(hasDBDownErrors());
 		}
 
 		/**
