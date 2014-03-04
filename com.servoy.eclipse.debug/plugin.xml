@@ -44,7 +44,7 @@
          <action
                class="com.servoy.eclipse.debug.actions.StartNGClientActionDelegate"
                definitionId="com.servoy.eclipse.ui.StartNGClient"
-               icon="icons/launch_web.gif"
+               icon="icons/launch_ng.gif"
                id="com.servoy.eclipse.ui.startNGClient"
                label="Start Debug NGClient"
                menubarPath="org.eclipse.ui.run/start"
