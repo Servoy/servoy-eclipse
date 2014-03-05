@@ -268,7 +268,7 @@ public class EventsComposite extends Composite
 			{
 				public void run()
 				{
-					treeViewer.setExpandedElements(expandedRows.toArray());
+					if (!treeViewer.getControl().isDisposed()) treeViewer.setExpandedElements(expandedRows.toArray());
 				}
 			});
 		}
