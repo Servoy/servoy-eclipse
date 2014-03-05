@@ -31,6 +31,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 	private String solutionNames = null;
 	private String exportFilePath = null;
 	private boolean verbose = false;
+	private boolean workspaceIsSplit = false;
 	private String settingsFile = null;
 	private String appServerDir = "../../application_server";
 	private boolean exportUsingDbiFileInfoOnly = false;
@@ -102,6 +103,10 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 						markInvalid();
 					}
 				}
+				else if ("-sw".equalsIgnoreCase(args[i]))
+				{
+					workspaceIsSplit = true;
+				}
 				else if ("-dbi".equalsIgnoreCase(args[i]))
 				{
 					exportUsingDbiFileInfoOnly = true;
@@ -146,9 +151,13 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 			+ "        Optional arguments:\n\n"
 			+ "        -verbose ... prints more info to console\n"
 			+ "        -p <properties_file> ... path and name of properties file.\n"
-			+ "             Default: the 'servoy.properties' file  from 'application_server'  will be  used\n"
+			+ "             Default: the 'servoy.properties' file  from 'application_server'  will be used.\n"
 			+ "        -as <app_server_dir> ... specifies where to find the 'application_server' directory.\n"
-			+ "             Default: '../../application_server'\n"
+			+ "             Default: '../../application_server'.\n"
+			+ "        -sw assume split workspace. Solution and resources projects will be  searched for in\n"
+			+ "             direct subfolders of the  given 'workspace_location'. Example: if the workspace\n"
+			+ "             needs to contain projects from different git repositories, those can be checked\n"
+			+ "             out in '<workspace_location>/repo1', '<workspace_location>/repo2' and so on.\n"
 			+ getHelpMessageDbiDbd();
 		// @formatter:on
 	}
@@ -206,6 +215,11 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 	public boolean isVerbose()
 	{
 		return verbose;
+	}
+
+	public boolean isWorkspaceSplit()
+	{
+		return workspaceIsSplit;
 	}
 
 	public String[] getSolutionNames()
