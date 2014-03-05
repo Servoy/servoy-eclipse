@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -242,42 +243,19 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 		List<IProject> existingClosedProjects = new ArrayList<IProject>();
 		try
 		{
-			outputExtra("Importing new projects into workspace and opening closed ones if needed."); //$NON-NLS-1$
+			outputExtra("Importing existing projects into workspace and opening closed ones if needed. " + (configuration.isWorkspaceSplit() ? "(checking child folders for projects as well)" : "")); //$NON-NLS-1$
 			IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
 			File wr = workspaceRoot.getLocation().toFile();
-			for (File f : wr.listFiles())
-			{
-				IProject p = workspaceRoot.getProject(f.getName());
-				if (f.isDirectory() && (!p.exists() || !p.isOpen()))
-				{
-					if (new File(f, ".project").exists()) //$NON-NLS-1$
-					{
-						try
-						{
-							boolean existed = p.exists();
-							if (!existed)
-							{
-								p.create(null);
-								importedProjects.add(p);
-							}
-							if (!p.isOpen())
-							{
-								p.open(null);
+			importExistingAndOpenClosedProjects(wr, workspaceRoot, importedProjects, existingClosedProjects);
 
-								// if a previous export operation managed to create the project but failed to open it, subsequent exports
-								// should try to temporarily open it again (useful for automatic build systems where it would be hard to know why the projects are not used anymore otherwise)
-								if (existed) existingClosedProjects.add(p);
-							}
-						}
-						catch (CoreException e)
-						{
-							ServoyLog.logError(e);
-							outputError("Cannot import and open project '" + f.getName() + "' into workspace. Check workspace log."); //$NON-NLS-1$//$NON-NLS-2$
-						}
-					}
+			if (configuration.isWorkspaceSplit())
+			{
+				// also import existing projects in subfolders
+				for (File f : wr.listFiles())
+				{
+					if (f.isDirectory()) importExistingAndOpenClosedProjects(f, workspaceRoot, importedProjects, existingClosedProjects);
 				}
 			}
-
 
 			outputExtra("Refreshing projects."); //$NON-NLS-1$
 			IProject[] prjs = workspaceRoot.getProjects();
@@ -377,7 +355,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 		}
 		finally
 		{
-			outputExtra("Restoring closed projects."); //$NON-NLS-1$ 
+			outputExtra("Restoring closed projects if needed."); //$NON-NLS-1$ 
 			for (IProject p : existingClosedProjects)
 			{
 				try
@@ -387,10 +365,10 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 				catch (CoreException e)
 				{
 					ServoyLog.logError(e);
-					outputError("Cannot restore project " + p.getName() + " to it's closed state after export. Check workspace log."); //$NON-NLS-1$ //$NON-NLS-2$
+					outputError("Cannot restore project '" + p.getName() + "' to it's closed state after export. Check workspace log."); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
-			outputExtra("Removing imported projects from workspace (without removing content)."); //$NON-NLS-1$ 
+			outputExtra("Removing imported projects from workspace (without removing content) if needed."); //$NON-NLS-1$ 
 			for (IProject p : importedProjects)
 			{
 				try
@@ -400,7 +378,76 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 				catch (CoreException e)
 				{
 					ServoyLog.logError(e);
-					outputError("Cannot restore project " + p.getName() + " to it's closed state after export. Check workspace log."); //$NON-NLS-1$ //$NON-NLS-2$
+					outputError("Cannot remove project (not content) '" + p.getName() + "' from workspace after export. Check workspace log."); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+			}
+		}
+	}
+
+
+	protected void importExistingAndOpenClosedProjects(File sourceFolder, IWorkspaceRoot workspaceRoot, List<IProject> importedProjects,
+		List<IProject> existingClosedProjects)
+	{
+		boolean useLinks = !workspaceRoot.getLocation().toFile().equals(sourceFolder);
+
+		for (File f : sourceFolder.listFiles())
+		{
+			// this assumes that the name defined in ".project" matches the name of the parent folder;
+			// if needed in the future, Workspace.loadProjectDescription(<.project>) can be used before we create the Project instance
+			IProject p = workspaceRoot.getProject(f.getName());
+			if (f.isDirectory() && new File(f, ".project").exists())
+			{
+				if (!p.exists() || !p.isOpen())
+				{
+					try
+					{
+						boolean existed = p.exists();
+						if (!existed)
+						{
+							if (useLinks)
+							{
+								// create a new project in this workspace linking to the real project location
+								IProjectDescription projectDescription = workspaceRoot.getWorkspace().newProjectDescription(p.getName());
+								projectDescription.setLocationURI(f.toURI());
+								p.create(projectDescription, null);
+							}
+							else
+							{
+								// real project location is default - directly inside workspace folder
+								p.create(null);
+							}
+							importedProjects.add(p);
+						}
+						if (!p.isOpen())
+						{
+							p.open(null);
+
+							if (existed)
+							{
+								if (!p.getLocation().toFile().equals(f))
+								{
+									outputError("Cannot use project in alternate location '" + f.getAbsolutePath() +
+										"'. Another project with that name is already present in workspace from location '" +
+										p.getLocation().toFile().getAbsolutePath() + "'.");
+								}
+
+								// if a previous export operation managed to create the project but failed to open it, subsequent exports
+								// should try to temporarily open it again (useful for automatic build systems where it would be hard to know why the projects are not used anymore otherwise)
+								existingClosedProjects.add(p);
+							}
+
+						}
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError(e);
+						outputError("Cannot import and open project '" + f.getName() + "' into workspace. Check workspace log."); //$NON-NLS-1$//$NON-NLS-2$
+					}
+				}
+				else if (useLinks && !p.getLocation().toFile().equals(f))
+				{
+					outputError("Cannot use project in alternate location '" + f.getAbsolutePath() +
+						"'. Another project with that name is already present in workspace from location '" + p.getLocation().toFile().getAbsolutePath() + "'.");
 				}
 			}
 		}

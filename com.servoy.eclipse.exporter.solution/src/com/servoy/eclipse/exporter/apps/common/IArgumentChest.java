@@ -43,6 +43,8 @@ public interface IArgumentChest
 
 	public boolean isVerbose();
 
+	public boolean isWorkspaceSplit();
+
 	public boolean shouldExportUsingDbiFileInfoOnly();
 
 	public boolean shouldIgnoreBuildErrors();
