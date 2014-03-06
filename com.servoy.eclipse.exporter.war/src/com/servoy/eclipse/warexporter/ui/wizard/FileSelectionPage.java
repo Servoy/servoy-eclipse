@@ -81,7 +81,7 @@ public class FileSelectionPage extends WizardPage implements Listener
 		browseButton.addListener(SWT.Selection, this);
 
 		exportActiveSolution = new Button(composite, SWT.CHECK);
-		exportActiveSolution.setText("Export Only Active Solution And Its Modules");
+		exportActiveSolution.setText("Include active solution and modules");
 		exportActiveSolution.setSelection(exportModel.isExportActiveSolutionOnly());
 		exportActiveSolution.addSelectionListener(new SelectionAdapter()
 		{
