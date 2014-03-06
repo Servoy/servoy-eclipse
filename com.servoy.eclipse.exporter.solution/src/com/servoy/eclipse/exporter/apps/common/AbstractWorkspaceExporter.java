@@ -247,12 +247,12 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 		List<IProject> existingClosedProjects = new ArrayList<IProject>();
 		try
 		{
-			outputExtra("Importing existing projects into workspace and opening closed ones if needed. " + (configuration.isWorkspaceSplit() ? "(checking child folders for projects as well)" : "")); //$NON-NLS-1$
+			outputExtra("Importing existing projects into workspace and opening closed ones if needed. " + (configuration.shouldAggregateWorkspace() ? "(checking child folders for projects as well)" : "")); //$NON-NLS-1$
 			IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
 			File wr = workspaceRoot.getLocation().toFile();
 			importExistingAndOpenClosedProjects(wr, workspaceRoot, importedProjects, existingClosedProjects);
 
-			if (configuration.isWorkspaceSplit())
+			if (configuration.shouldAggregateWorkspace())
 			{
 				// also import existing projects in subfolders
 				for (File f : wr.listFiles())
