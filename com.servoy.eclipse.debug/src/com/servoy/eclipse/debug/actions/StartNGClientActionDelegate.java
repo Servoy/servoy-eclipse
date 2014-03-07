@@ -25,12 +25,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 
+import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.debug.FlattenedSolutionDebugListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
-import com.servoy.j2db.IDebugWebClient;
+import com.servoy.j2db.IDebugClient;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -85,19 +87,18 @@ public class StartNGClientActionDelegate extends StartWebClientActionDelegate
 				if (testAndStartDebugger())
 				{
 					monitor.worked(3);
-					final IDebugWebClient debugWebClient = null;
-//					Activator.getDefault().getDebugWebClient();
-//					if (debugWebClient != null && debugWebClient.getFlattenedSolution().getDebugListener() == null)
-//					{
-//						debugWebClient.getFlattenedSolution().registerDebugListener(new FlattenedSolutionDebugListener());
-//					}
+					final IDebugClient debugNGClient = Activator.getDefault().getDebugNGClient();
+					if (debugNGClient != null && debugNGClient.getFlattenedSolution().getDebugListener() == null)
+					{
+						debugNGClient.getFlattenedSolution().registerDebugListener(new FlattenedSolutionDebugListener());
+					}
 					SwingUtilities.invokeLater(new Runnable()
 					{
 						public void run()
 						{
-							if (debugWebClient != null)
+							if (debugNGClient != null)
 							{
-								debugWebClient.shutDown(true);
+								debugNGClient.shutDown(true);
 							}
 							try
 							{

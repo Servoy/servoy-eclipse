@@ -719,6 +719,11 @@ public class Activator extends Plugin
 		return getDebugClientHandler().getDebugWebClient();
 	}
 
+	public IDebugClient getDebugNGClient()
+	{
+		return getDebugClientHandler().getDebugNGClient();
+	}
+
 	public IDebugHeadlessClient getDebugHeadlessClient()
 	{
 		return getDebugClientHandler().getDebugHeadlessClient();
