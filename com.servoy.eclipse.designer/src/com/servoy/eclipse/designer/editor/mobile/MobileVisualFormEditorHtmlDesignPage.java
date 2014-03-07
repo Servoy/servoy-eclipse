@@ -34,8 +34,12 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.ui.actions.DeleteAction;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
@@ -73,6 +77,7 @@ import com.servoy.eclipse.designer.editor.mobile.commands.AddBeanCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.AddFieldCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.AddInsetListCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.AddLabelCommand;
+import com.servoy.eclipse.designer.editor.mobile.commands.ApplyMobileFormElementOrderCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.MobileAddButtonCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.MobileAddHeaderTitleCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.PutCustomMobilePropertyCommand;
@@ -178,6 +183,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 	}
 
 	private final ISelectionProvider selectionProvider = new SelectionProviderAdapter();
+
 	private MobileVisualFormEditorContextMenuProvider contextMenuProvider;
 	private Browser browser;
 
@@ -350,6 +356,19 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 			public void run()
 			{
 				setPaletteItems();
+			}
+		});
+
+		selectionProvider.addSelectionChangedListener(new ISelectionChangedListener()
+		{
+			@Override
+			public void selectionChanged(SelectionChangedEvent event)
+			{
+				ISelection selection = event.getSelection();
+				if (!selection.isEmpty() && selection instanceof IStructuredSelection)
+				{
+					selectNode(((IStructuredSelection)selection).getFirstElement());
+				}
 			}
 		});
 	}
@@ -613,7 +632,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 				// moved within zone, reorder elements
 				elements.remove(element);
 				elements.add(zoneIndex < 0 ? 0 : zoneIndex > elements.size() ? elements.size() : zoneIndex, element);
-				addIfNonNull(commands, applyElementOrder(elements));
+				addIfNonNull(commands, ApplyMobileFormElementOrderCommand.applyElementOrder(elements));
 			}
 
 			if (commands.size() > 0)
@@ -657,41 +676,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 			{
 				if (cmd instanceof AbstractModelsCommand)
 				{
-					((CompoundCommand)command).add(new RefreshingCommand<AbstractModelsCommand>((AbstractModelsCommand)cmd)
-					{
-						private List<Object> elements;
-
-						@Override
-						public void refresh(boolean haveExecuted)
-						{
-							elements = null;
-							Command reorderCommand = null;
-							if (haveExecuted)
-							{
-								Object[] models = command.getModels();
-								if (models != null && models.length > 0)
-								{
-									createdModels.add(models[0]);
-									Object model = getModelObject(models[0]);
-									elements = new ArrayList<Object>(getElementsForParent(form, parent));
-									elements.remove(model); // new elements is already added
-									elements.add(zoneIndex < 0 ? 0 : zoneIndex > elements.size() ? elements.size() : zoneIndex, model);
-									reorderCommand = applyElementOrder(elements);
-								}
-							}
-							else if (elements != null)
-							{
-								// undo
-								elements.remove(zoneIndex < 0 ? 0 : zoneIndex > elements.size() - 1 ? elements.size() - 1 : zoneIndex);
-								reorderCommand = applyElementOrder(elements);
-								elements = null;
-							}
-							if (reorderCommand != null && reorderCommand.canExecute())
-							{
-								reorderCommand.execute();
-							}
-						}
-					});
+					((CompoundCommand)command).add(new ApplyMobileFormElementOrderCommand((AbstractModelsCommand)cmd, zoneIndex, parent, form, createdModels));
 				}
 				else
 				{
@@ -731,39 +716,12 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 		String servoyuuid = json.optString(ID_KEY);
 		if (servoyuuid.length() > 0)
 		{
-			return getPersistModel(ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(getUUID(servoyuuid)));
+			return getPersistModel(editorPart.getForm(), ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(getUUID(servoyuuid)));
 		}
 		return null;
 	}
 
-	/**
-	 * @param elements
-	 */
-	private Command applyElementOrder(List< ? > elements)
-	{
-		CompoundCommand command = null;
-		if (elements.size() > 1)
-		{
-			int d = 0;
-			for (Object elem : elements)
-			{
-				Command setValueCommand = createSetValueCommand(elem, StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), new java.awt.Point(d, d));
-				if (setValueCommand != null)
-				{
-					if (command == null)
-					{
-						command = new CompoundCommand();
-					}
-					command.add(setValueCommand);
-				}
-				d += 100;
-			}
-		}
-
-		return command;
-	}
-
-	private static List< ? > getElementsForParent(Form form, IPersist parent)
+	public static List< ? > getElementsForParent(Form form, IPersist parent)
 	{
 		if (parent == form)
 		{
@@ -785,7 +743,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 		return Collections.emptyList();
 	}
 
-	static Command createSetValueCommand(Object element, String id, Object value)
+	public static Command createSetValueCommand(Object element, String id, Object value)
 	{
 		IPropertySource propertySource = (IPropertySource)Platform.getAdapterManager().getAdapter(element, IPropertySource.class);
 		if (propertySource == null)
@@ -917,7 +875,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 							continue;
 						}
 
-						Object modelId = getModelId(getPersistModel(persist));
+						Object modelId = getModelId(getPersistModel(editorPart.getForm(), persist));
 						String searchString = '"' + String.valueOf(modelId) + '"';
 						boolean existedBefore = lastFormDesign.indexOf(searchString) >= 0;
 						boolean existsNow = newFormDesign.indexOf(searchString) >= 0;
@@ -1234,11 +1192,11 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 		return content;
 	}
 
-	private Object getModelObject(Object object)
+	public static Object getModelObject(Form form, Object object)
 	{
 		if (object instanceof IPersist)
 		{
-			return getPersistModel((IPersist)object);
+			return getPersistModel(form, (IPersist)object);
 		}
 
 		return object;
@@ -1249,7 +1207,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 		String prefix = "";
 		UUID uuid = null;
 
-		Object model = getModelObject(object);
+		Object model = getModelObject(editorPart.getForm(), object);
 
 		if (model instanceof IPersist)
 		{
@@ -1295,7 +1253,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 		return uuid == null ? null : (prefix + uuid.toString());
 	}
 
-	private Object getPersistModel(IPersist persist)
+	private static Object getPersistModel(Form form, IPersist persist)
 	{
 		if (persist == null)
 		{
@@ -1305,13 +1263,13 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 		if (persist instanceof Portal && ((Portal)persist).isMobileInsetList())
 		{
 			// inset list
-			return MobileListModel.create(editorPart.getForm(), (ISupportChilds)persist);
+			return MobileListModel.create(form, (ISupportChilds)persist);
 		}
 
 		if (persist.getParent() instanceof Portal && ((Portal)persist.getParent()).isMobileInsetList())
 		{
 			// inset list
-			return MobileListModel.create(editorPart.getForm(), persist.getParent());
+			return MobileListModel.create(form, persist.getParent());
 		}
 
 		if (persist instanceof AbstractBase &&
@@ -1320,7 +1278,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 				((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.LIST_ITEM_SUBTEXT.propertyName) != null || ((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.LIST_ITEM_COUNT.propertyName) != null))
 		{
 			// list form
-			return MobileListModel.create(editorPart.getForm(), editorPart.getForm());
+			return MobileListModel.create(form, form);
 		}
 
 		if (persist instanceof IFormElement)
@@ -1328,23 +1286,37 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 			String groupid = ((IFormElement)persist).getGroupID();
 			if (groupid != null)
 			{
-				FormElementGroup group = new FormElementGroup(groupid, ModelUtils.getEditingFlattenedSolution(editorPart.getForm()), editorPart.getForm());
+				FormElementGroup group = new FormElementGroup(groupid, ModelUtils.getEditingFlattenedSolution(form), form);
 				if (group.getElements().hasNext())
 				{
-					return new FormElementGroup(groupid, ModelUtils.getEditingFlattenedSolution(editorPart.getForm()), editorPart.getForm());
+					return new FormElementGroup(groupid, ModelUtils.getEditingFlattenedSolution(form), form);
 				} // else group was deleted
 			}
 		}
 		return persist;
 	}
 
-	public static Part getHeaderPart(GraphicalComponent headerText)
+	public static Part getHeaderPart(AbstractBase element)
 	{
 		// header title, use header part
-		Form form = (Form)headerText.getAncestor(IRepository.FORMS);
+		Form form = (Form)element.getAncestor(IRepository.FORMS);
 		for (Part part : Utils.iterate(form.getParts()))
 		{
 			if (PersistUtils.isHeaderPart(part.getPartType()))
+			{
+				return part;
+			}
+		}
+		return null;
+	}
+
+	public static Part getFooterPart(AbstractBase element)
+	{
+		// header title, use header part
+		Form form = (Form)element.getAncestor(IRepository.FORMS);
+		for (Part part : Utils.iterate(form.getParts()))
+		{
+			if (PersistUtils.isFooterPart(part.getPartType()))
 			{
 				return part;
 			}
@@ -1356,7 +1328,8 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 	{
 		try
 		{
-			ServoyJSONObject json = getChildJson(getPersistModel(ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(getUUID(uuid))));
+			ServoyJSONObject json = getChildJson(getPersistModel(editorPart.getForm(),
+				ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(getUUID(uuid))));
 			if (json != null)
 			{
 				return json.toString();
@@ -1686,9 +1659,26 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 		};
 	}
 
+	@Override
+	protected IAction createCopyAction()
+	{
+		return new com.servoy.eclipse.designer.editor.html.actions.CopyAction(editorPart);
+	}
+
+	@Override
+	protected IAction createCutAction()
+	{
+		return new com.servoy.eclipse.designer.editor.html.actions.CutAction(editorPart);
+	}
+
+	@Override
+	protected IAction createPasteAction()
+	{
+		return new com.servoy.eclipse.designer.editor.html.actions.PasteAction(Activator.getDefault().getDesignClient(), selectionProvider, editorPart);
+	}
+
 	private static class ElementLocation
 	{
-
 		public final String parentId;
 		public final String zone;
 		public final int zoneIndex;

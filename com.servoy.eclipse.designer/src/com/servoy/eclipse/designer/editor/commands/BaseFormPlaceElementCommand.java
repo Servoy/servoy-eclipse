@@ -57,7 +57,6 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.ColumnWrapper;
-import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IColumn;
@@ -321,7 +320,7 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 				ServoyLog.logWarning("paste/drop unsupported class:  " + o.getClass(), null);
 			}
 		}
-		if (origLocations.size() > 1)
+		if (location != null && origLocations.size() > 1)
 		{
 			// update the locations of the pasted persists to place them relative to each other same as in original position
 			Set<Entry<ISupportBounds, java.awt.Point>> entrySet = origLocations.entrySet();
@@ -472,9 +471,9 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 					}
 				}
 			}
-			else if (draggedPersist instanceof Field && !(parent instanceof Portal) && alternativeParent instanceof Portal)
+			else if (!(parent instanceof Portal) && alternativeParent instanceof Portal)
 			{
-				persist = ElementFactory.copyComponent((ISupportChilds)alternativeParent, (Field)draggedPersist, x, y, IRepository.ELEMENTS, groupMap);
+				persist = ElementFactory.copyComponent((ISupportChilds)alternativeParent, (AbstractBase)draggedPersist, x, y, IRepository.ELEMENTS, groupMap);
 			}
 			else
 			{
@@ -530,6 +529,14 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 					if (uuid.equals(persist.getUUID()))
 					{
 						return persist;
+					}
+					if (persist instanceof ISupportChilds)
+					{
+						IPersist found = AbstractRepository.searchPersist((ISupportChilds)persist, uuid);
+						if (found != null)
+						{
+							return found;
+						}
 					}
 				}
 			}

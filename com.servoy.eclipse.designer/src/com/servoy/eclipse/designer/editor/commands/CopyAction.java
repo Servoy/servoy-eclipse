@@ -38,7 +38,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
 
 /**
- * An action to delete selected objects.
+ * An action to copy selected objects.
  */
 public class CopyAction extends MultipleSelectionAction
 {

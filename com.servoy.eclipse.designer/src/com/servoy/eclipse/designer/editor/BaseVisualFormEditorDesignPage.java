@@ -53,11 +53,8 @@ import com.servoy.eclipse.designer.editor.commands.AddMediaAction;
 import com.servoy.eclipse.designer.editor.commands.AddPortalAction;
 import com.servoy.eclipse.designer.editor.commands.AddSplitpaneAction;
 import com.servoy.eclipse.designer.editor.commands.AddTabpanelAction;
-import com.servoy.eclipse.designer.editor.commands.CopyAction;
-import com.servoy.eclipse.designer.editor.commands.CutAction;
 import com.servoy.eclipse.designer.editor.commands.FixedSelectAllAction;
 import com.servoy.eclipse.designer.editor.commands.GroupAction;
-import com.servoy.eclipse.designer.editor.commands.PasteAction;
 import com.servoy.eclipse.designer.editor.commands.SameHeightAction;
 import com.servoy.eclipse.designer.editor.commands.SameWidthAction;
 import com.servoy.eclipse.designer.editor.commands.SaveAsTemplateAction;
@@ -154,6 +151,11 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 		site.getPage().showView("org.eclipse.ui.views.PropertySheet", null, IWorkbenchPage.VIEW_VISIBLE); //$NON-NLS-1$	
 	}
 
+	protected abstract IAction createCopyAction();
+
+	protected abstract IAction createCutAction();
+
+	protected abstract IAction createPasteAction();
 
 	@Override
 	protected void createActions()
@@ -182,17 +184,26 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 
 		registry.registerAction(new PrintAction(editorPart));
 
-		action = new CopyAction(editorPart);
-		registry.registerAction(action);
-		getSelectionActions().add(action.getId());
+		action = createCopyAction();
+		if (action != null)
+		{
+			registry.registerAction(action);
+			getSelectionActions().add(action.getId());
+		}
 
-		action = new CutAction(editorPart);
-		registry.registerAction(action);
-		getSelectionActions().add(action.getId());
+		action = createCutAction();
+		if (action != null)
+		{
+			registry.registerAction(action);
+			getSelectionActions().add(action.getId());
+		}
 
-		action = new PasteAction(editorPart);
-		registry.registerAction(action);
-		getSelectionActions().add(action.getId());
+		action = createPasteAction();
+		if (action != null)
+		{
+			registry.registerAction(action);
+			getSelectionActions().add(action.getId());
+		}
 
 		action = new DirectEditAction(editorPart);
 		registry.registerAction(action);

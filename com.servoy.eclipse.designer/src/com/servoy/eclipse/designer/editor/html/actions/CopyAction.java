@@ -1,5 +1,5 @@
 /*
- This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2013 Servoy BV
+ This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2014 Servoy BV
 
  This program is free software; you can redistribute it and/or modify it under
  the terms of the GNU Affero General Public License as published by the Free
@@ -21,14 +21,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.gef.commands.Command;
+import org.eclipse.gef.internal.GEFMessages;
+import org.eclipse.gef.ui.actions.SelectionAction;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.ActionFactory;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.PersistUtils;
 import com.servoy.eclipse.core.Activator;
-import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
+import com.servoy.eclipse.designer.editor.commands.FormElementCopyCommand;
 import com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditorHtmlDesignPage;
-import com.servoy.eclipse.designer.editor.mobile.commands.ConvertToRecordFormCommand;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileFooterGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileHeaderGraphicalEditPart;
 import com.servoy.eclipse.ui.property.MobileListModel;
@@ -40,51 +44,51 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.util.Utils;
 
-/** Command to delete selected editor models.
+/** Command to copy selected editor models.
  * 
  * @author rgansevles
  *
  */
-public class DeleteAction extends org.eclipse.gef.ui.actions.DeleteAction
+public class CopyAction extends SelectionAction
 {
 	/**
-	 * Constructs a <code>DeleteAction</code> using the specified part.
+	 * Constructs a <code>CopyAction</code> using the specified part.
 	 * 
 	 * @param part
 	 *            The part for this action
 	 */
-	public DeleteAction(IWorkbenchPart part)
+	public CopyAction(IWorkbenchPart part)
 	{
 		super(part);
-		setEnabled(true);
 	}
 
 	@Override
-	public boolean calculateEnabled()
+	protected void init()
 	{
-		return super.calculateEnabled();
+		super.init();
+		setText(GEFMessages.CopyAction_Label);
+		setToolTipText(GEFMessages.CopyAction_Tooltip);
+		setId(ActionFactory.COPY.getId());
+		ISharedImages sharedImages = PlatformUI.getWorkbench().getSharedImages();
+		setImageDescriptor(sharedImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
+		setDisabledImageDescriptor(sharedImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY_DISABLED));
 	}
 
 	/**
-	 * Create a command to remove the selected objects.
-	 * 
-	 * @param objects
-	 *            The objects to be deleted.
-	 * @return The command to remove the selected objects.
+	 * Create a command to copy the selected objects.
 	 */
-	@Override
-	public Command createDeleteCommand(List objects)
+	public Command createCopyCommand(List< ? > objects)
 	{
 		if (objects.isEmpty()) return null;
 
-		final List<IPersist> toDelete = new ArrayList<IPersist>();
+		final List<IPersist> toCopy = new ArrayList<IPersist>();
 		for (Object modelObject : objects)
 		{
-			if (modelObject instanceof Form) continue; // do not delete entire form here
+			if (modelObject instanceof Form) continue; // do not copy entire form here
 
 			if (modelObject instanceof FormElementGroup)
 			{
-				toDelete.addAll(Utils.asList(((FormElementGroup)modelObject).getElements()));
+				toCopy.addAll(Utils.asList(((FormElementGroup)modelObject).getElements()));
 			}
 			else if (modelObject instanceof IPersist)
 			{
@@ -96,7 +100,7 @@ public class DeleteAction extends org.eclipse.gef.ui.actions.DeleteAction
 				else if (modelObject instanceof GraphicalComponent &&
 					((GraphicalComponent)modelObject).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName) != null)
 				{
-					// deleting header, delete part
+					// copying header, copying part
 					part = MobileVisualFormEditorHtmlDesignPage.getHeaderPart((GraphicalComponent)modelObject);
 				}
 
@@ -109,12 +113,12 @@ public class DeleteAction extends org.eclipse.gef.ui.actions.DeleteAction
 						{
 							if (item != modelObject)
 							{
-								toDelete.add(item);
+								toCopy.add(item);
 							}
 						}
 						if (part != modelObject)
 						{
-							toDelete.add(part);
+							toCopy.add(part);
 						}
 					}
 					else if (PersistUtils.isFooterPart(part.getPartType()))
@@ -122,32 +126,52 @@ public class DeleteAction extends org.eclipse.gef.ui.actions.DeleteAction
 						for (IPersist item : MobileFooterGraphicalEditPart.getFooterModelChildren(Activator.getDefault().getDesignClient(),
 							(Form)(part).getAncestor(IRepository.FORMS)))
 						{
-							toDelete.add(item);
+							toCopy.add(item);
 						}
 					}
 				}
 
-				toDelete.add((IPersist)modelObject);
+				toCopy.add((IPersist)modelObject);
 			}
 			else if (modelObject instanceof MobileListModel)
 			{
 				MobileListModel listModel = (MobileListModel)modelObject;
-				if (listModel.component == null)
+				if (listModel.component != null)
 				{
-					// list form, delete means change to record form
-					return new ConvertToRecordFormCommand(listModel.form);
+					// inset list
+					if (listModel.header != null) toCopy.add(listModel.header);
+					if (listModel.button != null) toCopy.add(listModel.button);
+					if (listModel.subtext != null) toCopy.add(listModel.subtext);
+					if (listModel.countBubble != null) toCopy.add(listModel.countBubble);
+					if (listModel.image != null) toCopy.add(listModel.image);
+					toCopy.add(listModel.component);
 				}
-
-				// inset list
-				toDelete.add(((MobileListModel)modelObject).component);
+				// else: list form
 			}
 		}
 
-		if (toDelete.size() == 0)
+		if (toCopy.size() == 0)
 		{
-			// nothing to delete
+			// nothing to copy
 			return null;
 		}
-		return new FormElementDeleteCommand(toDelete.toArray(new IPersist[toDelete.size()]));
+		return new FormElementCopyCommand(toCopy.toArray(new IPersist[toCopy.size()]));
+	}
+
+	@Override
+	protected boolean calculateEnabled()
+	{
+		return createCopyCommand(getSelectedObjects()) != null;
+	}
+
+	@Override
+	public void run()
+	{
+		// Run copy command immediately, not via command stack, editor should not get dirty from it
+		Command command = createCopyCommand(getSelectedObjects());
+		if (command != null && command.canExecute())
+		{
+			command.execute();
+		}
 	}
 }

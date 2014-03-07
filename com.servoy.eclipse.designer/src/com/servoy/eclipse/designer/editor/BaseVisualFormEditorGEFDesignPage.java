@@ -35,6 +35,7 @@ import org.eclipse.gef.ui.palette.PaletteViewer;
 import org.eclipse.gef.ui.palette.PaletteViewerProvider;
 import org.eclipse.gef.ui.palette.customize.PaletteCustomizerDialog;
 import org.eclipse.gef.ui.parts.GraphicalViewerKeyHandler;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -44,6 +45,9 @@ import org.eclipse.swt.widgets.Composite;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
+import com.servoy.eclipse.designer.editor.commands.CopyAction;
+import com.servoy.eclipse.designer.editor.commands.CutAction;
+import com.servoy.eclipse.designer.editor.commands.PasteAction;
 import com.servoy.eclipse.designer.editor.palette.BaseVisualFormEditorPaletteCustomizer;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.persistence.Form;
@@ -332,5 +336,21 @@ public abstract class BaseVisualFormEditorGEFDesignPage extends BaseVisualFormEd
 		}
 	}
 
+	@Override
+	protected IAction createCopyAction()
+	{
+		return new CopyAction(editorPart);
+	}
 
+	@Override
+	protected IAction createCutAction()
+	{
+		return new CutAction(editorPart);
+	}
+
+	@Override
+	protected IAction createPasteAction()
+	{
+		return new PasteAction(editorPart);
+	}
 }
