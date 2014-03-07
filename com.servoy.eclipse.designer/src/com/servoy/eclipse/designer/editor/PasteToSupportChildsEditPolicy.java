@@ -22,7 +22,6 @@ import java.util.List;
 
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.RequestConstants;
@@ -30,17 +29,12 @@ import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.editpolicies.AbstractEditPolicy;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.requests.GroupRequest;
-import org.eclipse.swt.dnd.Clipboard;
-import org.eclipse.swt.dnd.TextTransfer;
-import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.elements.IFieldPositioner;
+import com.servoy.eclipse.designer.actions.PasteCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
-import com.servoy.eclipse.designer.editor.commands.ICommandWrapper;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
-import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.ui.util.DefaultFieldPositioner;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
@@ -50,7 +44,6 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.TabPanel;
 
 /**
  * This edit policy enables pasting to a form or tab panel.
@@ -83,7 +76,7 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 		}
 		if (BaseVisualFormEditor.REQ_PASTE.equals(request.getType()) && persist instanceof ISupportChilds)
 		{
-			return new PasteCommand(application, (ISupportChilds)persist, request, getHost().getViewer(), (IPersist)(formEditPart == null ? null
+			return new PasteCommand(application, (ISupportChilds)persist, request.getExtendedData(), (IPersist)(formEditPart == null ? null
 				: formEditPart.getModel()), fieldPositioner);
 		}
 		if (RequestConstants.REQ_CLONE.equals(request.getType()) && request instanceof ChangeBoundsRequest)
@@ -138,108 +131,5 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 	public boolean understandsRequest(Request request)
 	{
 		return BaseVisualFormEditor.REQ_PASTE.equals(request.getType()) || RequestConstants.REQ_CLONE.equals(request.getType());
-	}
-
-	public static Object getClipboardContents()
-	{
-		Object clip = null;
-		Clipboard cb = new Clipboard(Display.getDefault());
-		try
-		{
-			TransferData[] transferTypes = cb.getAvailableTypes();
-			for (TransferData transferData : transferTypes)
-			{
-				if (FormElementTransfer.getInstance().isSupportedType(transferData))
-				{
-					clip = cb.getContents(FormElementTransfer.getInstance());
-					break;
-				}
-				if (clip == null && TextTransfer.getInstance().isSupportedType(transferData))
-				{
-					clip = cb.getContents(TextTransfer.getInstance());
-					continue; // prefer FormElementTransfer
-				}
-			}
-		}
-		finally
-		{
-			cb.dispose();
-		}
-		return clip;
-	}
-
-	public static class PasteCommand extends Command implements ICommandWrapper
-	{
-		private final IPersist parent;
-		private final IPersist context;
-		private final Request request;
-		private Command subCommand;
-		private final EditPartViewer editPartViewer;
-		private final IFieldPositioner fieldPositioner;
-		private final IApplication application;
-
-		public PasteCommand(IApplication application, ISupportChilds parent, Request request, EditPartViewer editPartViewer, IPersist context,
-			IFieldPositioner fieldPositioner)
-		{
-			this.application = application;
-			this.parent = parent;
-			this.request = request;
-			this.editPartViewer = editPartViewer;
-			this.fieldPositioner = fieldPositioner;
-			this.context = context;
-		}
-
-		@Override
-		public void execute()
-		{
-			if (subCommand == null)
-			{
-				subCommand = createSubCommand();
-			}
-			if (subCommand != null && subCommand.canExecute())
-			{
-				subCommand.execute();
-			}
-		}
-
-		@Override
-		public boolean canUndo()
-		{
-			return subCommand != null && subCommand.canUndo();
-		}
-
-		@Override
-		public void undo()
-		{
-			if (canUndo()) subCommand.undo();
-		}
-
-		protected Command createSubCommand()
-		{
-			Object clipboardContents = getClipboardContents();
-			// tabs can only be pasted to tab panels
-			IPersist pasteParent = parent;
-			if (clipboardContents instanceof Object[])
-			{
-				for (int i = 0; i < ((Object[])clipboardContents).length; i++)
-				{
-					Object o = ((Object[])clipboardContents)[i];
-					if (parent instanceof TabPanel && (!(o instanceof PersistDragData) || ((PersistDragData)o).type != IRepository.TABS))
-					{
-						// paste something else then a tab into a tabpanel? in stead paste to form 
-						pasteParent = parent.getAncestor(IRepository.FORMS);
-						break;
-					}
-				}
-			}
-
-			return new FormPlaceElementCommand(application, (ISupportChilds)pasteParent, clipboardContents, request.getType(), request.getExtendedData(),
-				fieldPositioner, null, null, context);
-		}
-
-		public Command getCommand()
-		{
-			return subCommand;
-		}
 	}
 }
