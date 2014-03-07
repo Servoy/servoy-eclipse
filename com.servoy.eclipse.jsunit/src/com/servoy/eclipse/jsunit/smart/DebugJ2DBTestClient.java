@@ -30,6 +30,7 @@ import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.dataprocessing.IUserClient;
 import com.servoy.j2db.debug.DebugClientHandler;
 import com.servoy.j2db.debug.DebugJ2DBClient;
+import com.servoy.j2db.debug.DebugUtils;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IUserManager;
@@ -130,7 +131,7 @@ public class DebugJ2DBTestClient extends DebugJ2DBClient
 	@Override
 	public void reportError(Component parentComponent, String message, Object detail)
 	{
-		errorToDebugger(message, detail);
+		DebugUtils.errorToDebugger(getScriptEngine(), message, detail);
 		logError(message, detail);
 
 		// tests should fail when this happens;
@@ -141,7 +142,7 @@ public class DebugJ2DBTestClient extends DebugJ2DBClient
 	@Override
 	public void reportInfo(Component parentComponent, String message, String title)
 	{
-		infoToDebugger(message);
+		DebugUtils.infoToDebugger(getScriptEngine(), message);
 		Debug.trace(message);
 	}
 
