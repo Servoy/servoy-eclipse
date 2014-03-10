@@ -87,7 +87,7 @@ public class ExportOptionsPage extends WizardPage implements IMobileExportProper
 		serviceSolutionLabel.setText("Service Solution Name");
 
 		serviceSolutionName = new Text(container, SWT.BORDER);
-		serviceSolutionName.setToolTipText("This is the name of the service solution mobile clients connects to (must be available at serverURL url).");
+		serviceSolutionName.setToolTipText("This is the name of the service solution mobile clients connects to (must be available at server URL).");
 
 		Label debugLabel = new Label(container, SWT.NONE);
 		debugLabel.setText("Export in debug mode"); //, .
