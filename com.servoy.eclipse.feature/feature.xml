@@ -906,14 +906,14 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          unpack="false"/>
 
    <plugin
-         id="javax.websocket-api"
+         id="servoy_ngclient"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="servoy_ngclient"
+         id="javax.websocket"
          download-size="0"
          install-size="0"
          version="0.0.0"
