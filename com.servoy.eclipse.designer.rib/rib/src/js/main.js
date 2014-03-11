@@ -264,10 +264,10 @@
 		.addClass('servoyhide');
 
             // Add the view plugins
-            this.ui.projectView = $('<div/>').appendTo(container)
+           /* this.ui.projectView = $('<div/>').appendTo(container)
                 .attr('id', 'projectView')
                 .addClass('servoyhide view project flex1 hbox');
-            this.ui.projectView.append('<div class="stage flex1 vbox">');
+            this.ui.projectView.append('<div class="stage flex1 vbox">');*/
 
             this.ui.layoutView = $('<div/>').appendTo(container)
                 .attr('id', 'layoutView')
@@ -432,7 +432,7 @@
             this._syncViewNames();
 
             this.ui.navbar = $('.navbar').eq(0);
-            this.ui.projectView = $('.view.project').eq(0);
+           /* this.ui.projectView = $('.view.project').eq(0);*/
             this.ui.layoutView = $('.view.layout').eq(0);
             this.ui.codeView = $('.view.code').eq(0);
             this.ui.liveView = $('.view.live').eq(0);
