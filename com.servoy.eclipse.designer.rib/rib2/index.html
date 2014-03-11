@@ -3,7 +3,7 @@
 <head>
 	<title>Rapid Interface Builder</title>
 	<link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.1/css/bootstrap.min.css" rel="stylesheet">
-	<link href="css/layoutit.css" rel="stylesheet">
+	<link href="css/layout.css" rel="stylesheet">
 
 	<script type="text/javascript" src="js/jquery.min.js"></script>
 	<script type="text/javascript" src="js/jquery-ui.min.js"></script>
@@ -13,32 +13,17 @@
 </head>
 
 <body class="edit" style="min-height: 502px; cursor: auto;">
-	<div class="navbar navbar-inverse navbar-fixed-top navbar-layoutit">
+	<div class="navbar navbar-inverse navbar-fixed-top navbar-layout">
     <div class="navbar-header">
       <button data-target="navbar-collapse" data-toggle="collapse" class="navbar-toggle" type="button">
         <span class="glyphicon-bar"></span>
         <span class="glyphicon-bar"></span>
         <span class="glyphicon-bar"></span>
       </button>
-      <a class="navbar-brand" href="http://www.layoutit.com/"> RIB<span class="label label-default">BETA</span></a>
+      <a class="navbar-brand" href="http://www.servoy.com/"> RIB<span class="label label-default">BETA</span></a>
     </div>
     <div class="collapse navbar-collapse">
-      <ul class="nav pull-right">
-        <li>
-
-          <div class="btn-group">
-            <a class="btn btn-xs btn-info" href="http://www.layoutit.com/en/register">Register</a> 
-            <a class="btn btn-xs btn-info" href="http://www.layoutit.com/en/login">Login</a>
-          </div>
-
-          <div class="btn-group" data-toggle="buttons-radio">				    
-            <button href="/feedbacks/indexV3" role="button" data-toggle="modal" data-target="#feedbackModal" id="feedback" class="btn btn-xs btn-primary">
-              <i class="glyphicon-comment glyphicon"></i> Feedback            
-			</button>
-          </div>
-        </li>
-      </ul>
-      <ul class="nav" id="menu-layoutit">
+      <ul class="nav" id="menu-layout">
         <li>
           <div class="btn-group" data-toggle="buttons-radio">
             <button type="button" id="edit" class="btn btn-xs btn-primary active"><i class="glyphicon glyphicon-edit "></i> Edit</button>
@@ -67,7 +52,7 @@
 
 
 <div class="lyrow ui-draggable">
-	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon-remove glyphicon"></i> remove</a>
+	<a href="#close" class="remove label label-danger"><i class="glyphicon-remove glyphicon"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<div class="preview"><input type="text" value="12" class="form-control"></div>
 	<div class="view">
@@ -80,7 +65,7 @@
 
 
 <div class="lyrow ui-draggable">
-	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon-remove glyphicon"></i> remove</a>
+	<a href="#close" class="remove label label-danger"><i class="glyphicon-remove glyphicon"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<div class="preview"><input type="text" value="6 6" class="form-control"></div>
 	<div class="view">
@@ -94,7 +79,7 @@
 
 
 <div class="lyrow ui-draggable">
-	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon-remove glyphicon"></i> remove</a>
+	<a href="#close" class="remove label label-danger"><i class="glyphicon-remove glyphicon"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<div class="preview"><input type="text" value="8 4" class="form-control"></div>
 	<div class="view">
@@ -108,7 +93,7 @@
 
 
 <div class="lyrow ui-draggable">
-	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon-remove glyphicon"></i> remove</a>
+	<a href="#close" class="remove label label-danger"><i class="glyphicon-remove glyphicon"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<div class="preview"><input type="text" value="4 4 4" class="form-control"></div>
 	<div class="view">
@@ -123,7 +108,7 @@
 
 
 <div class="lyrow ui-draggable">
-	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon-remove glyphicon"></i> remove</a>
+	<a href="#close" class="remove label label-danger"><i class="glyphicon-remove glyphicon"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<div class="preview"><input type="text" value="2 6 4" class="form-control"></div>
 	<div class="view">
@@ -144,7 +129,7 @@
 <li class="nav-header">Base CSS</li>
 <li class="boxes" id="elmBase" style="display: none;">
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">
 		<span class="btn-group btn-group-xs">
@@ -175,7 +160,7 @@
 </div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">
 		<span class="btn-group btn-group-xs">
@@ -208,7 +193,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<div class="preview">Address</div>
 	<div class="view">
@@ -221,7 +206,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">		  
 		<a class="btn btn-xs btn-default" href="#" rel="pull-right">Pull right</a>
@@ -235,7 +220,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">		  
 		<a class="btn btn-xs btn-default" href="#" rel="list-unstyled">Unstyled</a>
@@ -256,7 +241,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">		  
 		<a class="btn btn-xs btn-default" href="#" rel="list-unstyled">Unstyled</a>
@@ -277,7 +262,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-		<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+		<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">		  
 		<a class="btn btn-xs btn-default" href="#" rel="dl-horizontal">Horizontal</a>
@@ -298,7 +283,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-		<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+		<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">
 		<span class="btn-group btn-group-xs">
@@ -359,7 +344,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">
 		<a class="btn btn-xs btn-default" href="#" rel="form-inline">Inline</a>
@@ -390,7 +375,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">
 	</span>
@@ -427,7 +412,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">
 		<span class="btn-group btn-group-xs">
@@ -462,7 +447,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">
 		<span class="btn-group btn-group-xs">
@@ -497,7 +482,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">
 		<span class="btn-group btn-group-xs">
@@ -522,7 +507,7 @@
 <li class="nav-header">Components</li>
 <li class="boxes" id="elmComponents" style="display: none;">
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
   <span class="configuration">
 		<span class="btn-group btn-group-xs">
@@ -548,7 +533,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">
 		<a class="btn btn-xs btn-default" href="#" rel="dropup">Dropup</a>
@@ -568,7 +553,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">
 		<span class="btn-group btn-group-xs">
@@ -600,7 +585,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<div class="preview">Breadcrumb</div>
 	<div class="view">
@@ -614,7 +599,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">
 		<span class="btn-group btn-group-xs">
@@ -641,7 +626,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">
 		<span class="btn-group btn-group-xs">
@@ -662,7 +647,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">
 	</span>
@@ -685,7 +670,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">
 		<a class="btn btn-xs btn-default" href="#" rel="well">Well</a>
@@ -700,7 +685,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<div class="preview">Page Header</div>
 	<div class="view">
@@ -710,7 +695,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<div class="preview">Text</div>
 	<div class="view">
@@ -720,14 +705,14 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<div class="preview">Thumbnails</div>
 	<div class="view">
 						<div class="row">
               <div class="col-md-4">
                 <div class="thumbnail">
-                  <img alt="300x200" src="./LayoutIt! - Interface Builder for Bootstrap_files/people">
+                  <img alt="300x200" src="./layout! - Interface Builder for Bootstrap_files/people">
                   <div class="caption" contenteditable="true">
                     <h3>Thumbnail label</h3>
                     <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
@@ -737,7 +722,7 @@
               </div>
               <div class="col-md-4">
                 <div class="thumbnail">
-                  <img alt="300x200" src="./LayoutIt! - Interface Builder for Bootstrap_files/city">
+                  <img alt="300x200" src="./layout! - Interface Builder for Bootstrap_files/city">
                   <div class="caption" contenteditable="true">
                     <h3>Thumbnail label</h3>
                     <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
@@ -747,7 +732,7 @@
               </div>
               <div class="col-md-4">
                 <div class="thumbnail">
-                  <img alt="300x200" src="./LayoutIt! - Interface Builder for Bootstrap_files/sports">
+                  <img alt="300x200" src="./layout! - Interface Builder for Bootstrap_files/sports">
                   <div class="caption" contenteditable="true">
                     <h3>Thumbnail label</h3>
                     <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
@@ -759,7 +744,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">
 		
@@ -775,7 +760,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">
 		<a class="btn btn-xs btn-default" href="#" rel="well">well</a>
@@ -784,14 +769,14 @@
 	<div class="view">
 		<div class="media">
       <a href="#" class="pull-left">
-        <img src="./LayoutIt! - Interface Builder for Bootstrap_files/saved_resource(1)" class="media-object">
+        <img src="./layout! - Interface Builder for Bootstrap_files/saved_resource(1)" class="media-object">
       </a>
       <div class="media-body" contenteditable="true">
         <h4 class="media-heading">Nested media heading</h4>
         Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin commodo. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis.
         <div class="media">
           <a href="#" class="pull-left">
-            <img src="./LayoutIt! - Interface Builder for Bootstrap_files/saved_resource(1)" class="media-object">
+            <img src="./layout! - Interface Builder for Bootstrap_files/saved_resource(1)" class="media-object">
           </a>
           <div class="media-body" contenteditable="true">
             <h4 class="media-heading">Nested media heading</h4>
@@ -803,7 +788,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">
 	</span>
@@ -822,7 +807,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">
 		<span class="btn-group btn-group-xs">
@@ -861,12 +846,12 @@
 <li class="nav-header">JavaScript</li>
 <li class="boxes mute" id="elmJS" style="display: list-item;">
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<div class="preview">Modal</div>
 	<div class="view">
 		<!-- Button to trigger modal -->
-				<a id="myModalLink" href="http://www.layoutit.com/build#myModalContainer" role="button" class="btn" data-toggle="modal">Launch demo modal</a>
+				<a id="myModalLink" href="#myModalContainer" role="button" class="btn" data-toggle="modal">Launch demo modal</a>
 		 
 <!-- Modal -->
 <div class="modal fade" id="myModalContainer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -890,7 +875,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">
   <span class="btn-group btn-group-xs">
@@ -965,7 +950,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">
 	</span>
@@ -973,8 +958,8 @@
 	<div class="view">
 		<div class="tabbable" id="myTabs"> <!-- Only required for left/right tabs -->
 			<ul class="nav nav-tabs">
-				<li class="active"><a href="http://www.layoutit.com/build#tab1" data-toggle="tab" contenteditable="true">Section 1</a></li>
-				<li><a href="http://www.layoutit.com/build#tab2" data-toggle="tab" contenteditable="true">Section 2</a></li>
+				<li class="active"><a href="#tab1" data-toggle="tab" contenteditable="true">Section 1</a></li>
+				<li><a href="#tab2" data-toggle="tab" contenteditable="true">Section 2</a></li>
 			</ul>
 			<div class="tab-content">
 				<div class="tab-pane active" id="tab1">
@@ -988,7 +973,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<span class="configuration">
 		<span class="btn-group btn-group-xs">
@@ -1012,14 +997,14 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<div class="preview">Collapse</div>
 	<div class="view">
 		<div class="panel-group" id="myAccordion">
 			<div class="panel panel-default">
 				<div class="panel-heading">
-				  <a class="panel-title" data-toggle="collapse" data-parent="#myAccordion" href="http://www.layoutit.com/build#collapseOne" contenteditable="true">
+				  <a class="panel-title" data-toggle="collapse" data-parent="#myAccordion" href="#collapseOne" contenteditable="true">
 				    Collapsible Group Item #1
 				  </a>
 				</div>
@@ -1031,7 +1016,7 @@
 			</div>
 			<div class="panel panel-default">
 				<div class="panel-heading">
-				  <a class="panel-title" data-toggle="collapse" data-parent="#myAccordion" href="http://www.layoutit.com/build#collapseTwo" contenteditable="true">
+				  <a class="panel-title" data-toggle="collapse" data-parent="#myAccordion" href="#collapseTwo" contenteditable="true">
 				    Collapsible Group Item #2
 				  </a>
 				</div>
@@ -1046,7 +1031,7 @@
 	</div>
 </div>
 	<div class="box box-element ui-draggable">
-  	<a href="http://www.layoutit.com/build#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i> remove</a>
 	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
 	<div class="preview">Carousel</div>
 	<div class="view">
@@ -1060,21 +1045,21 @@
   </ol>
   <div class="carousel-inner">
     <div class="item active">
-      <img alt="" src="./LayoutIt! - Interface Builder for Bootstrap_files/1">
+      <img alt="" src="./layout! - Interface Builder for Bootstrap_files/1">
       <div class="carousel-caption">
         <h4>First Thumbnail label</h4>
         <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
       </div>
     </div>
     <div class="item">
-      <img alt="" src="./LayoutIt! - Interface Builder for Bootstrap_files/2">
+      <img alt="" src="./layout! - Interface Builder for Bootstrap_files/2">
       <div class="carousel-caption">
         <h4>Second Thumbnail label</h4>
         <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
       </div>
     </div>
     <div class="item">
-      <img alt="" src="./LayoutIt! - Interface Builder for Bootstrap_files/3">
+      <img alt="" src="./layout! - Interface Builder for Bootstrap_files/3">
       <div class="carousel-caption">
         <h4>Third Thumbnail label</h4>
         <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
@@ -1082,10 +1067,10 @@
     </div>
   </div>
 
-  <a class="left carousel-control" href="http://www.layoutit.com/build#myCarousel" data-slide="prev">
+  <a class="left carousel-control" href="#myCarousel" data-slide="prev">
     <span class="glyphicon glyphicon-chevron-left"></span>
   </a>
-  <a class="right carousel-control" href="http://www.layoutit.com/build#myCarousel" data-slide="next">
+  <a class="right carousel-control" href="#myCarousel" data-slide="next">
     <span class="glyphicon glyphicon-chevron-right"></span>
   </a>
 </div>		
