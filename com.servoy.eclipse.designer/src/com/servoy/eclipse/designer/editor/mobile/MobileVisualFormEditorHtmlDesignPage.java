@@ -333,6 +333,22 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 				return null;
 			}
 		};
+		new BrowserFunction(browser, "getPaletteItems")
+		{
+			@Override
+			public Object function(Object[] arguments)
+			{
+				try
+				{
+					return getPaletteItems();
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
+				return null;
+			}
+		};
 
 		String editorid = UUID.randomUUID().toString();
 		ApplicationServerRegistry.get().getMessageDispatcher().register(editorid, editorMessageHandler = new EditorMessageHandler(editorid));
@@ -350,15 +366,6 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 		{
 			ServoyLog.logError("couldn't load the editors html file: " + resourceUrl, e);
 		}
-
-		Display.getDefault().asyncExec(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				setPaletteItems();
-			}
-		});
 
 		selectionProvider.addSelectionChangedListener(new ISelectionChangedListener()
 		{
@@ -817,9 +824,14 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 		}
 	}
 
+	private String getPaletteItems()
+	{
+		return editorPart.getForm().getView() == IFormConstants.VIEW_TYPE_TABLE_LOCKED ? PALETTE_ITEMS_LISTFORM : PALETTE_ITEMS_RECORDVIEW;
+	}
+
 	public void setPaletteItems()
 	{
-		String paletteItems = editorPart.getForm().getView() == IFormConstants.VIEW_TYPE_TABLE_LOCKED ? PALETTE_ITEMS_LISTFORM : PALETTE_ITEMS_RECORDVIEW;
+		String paletteItems = getPaletteItems();
 		if (!paletteItems.equals(lastPaletteItems))
 		{
 			sendMessage("setPaletteItems:" + paletteItems);

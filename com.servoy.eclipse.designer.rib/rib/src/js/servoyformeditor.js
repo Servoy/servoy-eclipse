@@ -57,6 +57,11 @@ $.servoy = {
 			    console.log('form design end')  	
 	        })
 		})
+		
+		$.servoy.getReturnvalue(getPaletteItems(), function(val) {
+				$.servoy._setPaletteItems(val)
+	    })
+		
       },
       
       sendWebsocketMessage : function(message, defer)
