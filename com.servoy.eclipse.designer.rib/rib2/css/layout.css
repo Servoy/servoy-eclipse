@@ -102,7 +102,7 @@ body {
 .boxes {}
 .sidebar-nav li { line-height:28px; margin-bottom:3px; }
 .sidebar-nav li .lyrow { margin-bottom:5px;}
-.sidebar-nav .box { line-height:26px; width:160px; height:26px; }
+.sidebar-nav .box { line-height:26px; width:160px; }
 .sidebar-nav .preview { display: block; color:#666; font-size:12px; line-height:26px;}
 .sidebar-nav .preview input { width:105px; padding:0 10px; background:#bbb; font-size:10px; color:#999; line-height:20px; height:20px; position:relative; top:-1px; }
 .sidebar-nav .view { display: none; }
