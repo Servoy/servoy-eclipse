@@ -369,6 +369,10 @@
                 .remove();
             $.rib.serializeADMSubtreeToDOM(this.designRoot, null, true, this._renderer);
         },
+        
+        resize: function(){
+        	// this function is to prevent 'Error: no such method 'resize' for rib-layoutView widget instance' 
+        },
 
         _renderer: function (admNode, domNode) {
             if (!domNode) {
