@@ -80,32 +80,54 @@ function randomFromInterval(e,t)
 	return Math.floor(Math.random()*(t-e+1)+e)
 }
 
+function updateGridColumns(elemNode)
+{
+	var e=0;
+	var t="";
+	var n=false;
+	var r=$(this).val().split(",",12);
+	$.each(r,function(r,i)
+	{
+		if (!n)
+		{
+			if(parseInt(i)<=0)n=true;
+			e=e+parseInt(i);
+			t+='<div class="col-md-'+i+' column"></div>'
+		}
+	});
+	
+	if (e==12&&!n)
+	{
+		elemNode.parent().next().children().html(t);
+		elemNode.parent().prev().show()
+	}
+	else
+	{
+		elemNode.parent().prev().hide()
+	}
+}
+
 function gridSystemGenerator()
 {
+	//add grid rows from template
+	var gridArray = ["12","6,6","8,4","4,4,4","2,6,4"];
+	for ( var gval in gridArray) 
+	{
+		var ghtml = $("#gridGenerator").html();
+		ghtml = ghtml.replace("xxx",gval);
+		$("#estRows").append(ghtml);
+	}
+	
+	//expand them
+	$(".lyrow .preview input").each(function()
+	{
+		updateGridColumns($(this));
+	});
+	
+	//bind them
 	$(".lyrow .preview input").bind("keyup",function()
 	{
-		var e=0;
-		var t="";
-		var n=false;
-		var r=$(this).val().split(" ",12);
-		$.each(r,function(r,i)
-		{
-			if(!n)
-			{
-				if(parseInt(i)<=0)n=true;
-				e=e+parseInt(i);
-				t+='<div class="col-md-'+i+' column"></div>'
-			}
-		});
-		if(e==12&&!n)
-		{
-			$(this).parent().next().children().html(t);
-			$(this).parent().prev().show()
-		}
-		else
-		{
-			$(this).parent().prev().hide()
-		}
+		updateGridColumns($(this));
 	});
 }
 
@@ -245,7 +267,25 @@ $(document).ready(function()
 	$("body").css("min-height",$(window).height()-90);
 	$(".demo").css("min-height",$(window).height()-160);
 
-	//dynamically add something to palette 
+	//dynamically add one category in palette 
+	$.get("palette/base.template", function(data){
+		$("#elmBase").append(data);
+		addDragable($(".sidebar-nav .box"));
+	});
+
+	//dynamically add one category in palette 
+	$.get("palette/components.template", function(data){
+		$("#elmComponents").append(data);
+		addDragable($(".sidebar-nav .box"));
+	});
+
+	//dynamically add one category in palette 
+	$.get("palette/advanced.template", function(data){
+		$("#elmJS").append(data);
+		addDragable($(".sidebar-nav .box"));
+	});
+	
+	//dynamically add one item to palette category
 	$.get("palette/progressbar.template", function(data){
 		$("#elmComponents").append(data);
 		addDragable($(".sidebar-nav .box"));
@@ -314,6 +354,7 @@ $(document).ready(function()
 	});
 	
 	removeElm();
+	
 	configurationElm();
 	
 	gridSystemGenerator();

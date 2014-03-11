@@ -1,0 +1,384 @@
+<div class="box box-element ui-draggable">
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i></a>
+	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
+	<span class="configuration">
+		<span class="btn-group btn-group-xs">
+	<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">Align <span class="caret"></span></a>
+	<ul class="dropdown-menu">
+				<li class="active"><a href="#" rel="">Default</a></li>
+				<li class=""><a href="#" rel="text-left">Left</a></li>
+				<li class=""><a href="#" rel="text-center">Center</a></li>
+				<li class=""><a href="#" rel="text-right">Right</a></li>
+			</ul>
+</span>
+		<span class="btn-group btn-group-xs">
+	<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">Emphasis <span class="caret"></span></a>
+	<ul class="dropdown-menu">
+				<li class="active"><a href="#" rel="">Default</a></li>
+				<li class=""><a href="#" rel="text-muted">Muted</a></li>
+				<li class=""><a href="#" rel="text-primary">Primary</a></li>
+				<li class=""><a href="#" rel="text-success">Success</a></li>
+				<li class=""><a href="#" rel="text-info">Info</a></li>
+				<li class=""><a href="#" rel="text-warning">Warning</a></li>
+				<li class=""><a href="#" rel="text-danger">Danger</a></li>
+			</ul>
+</span>
+	</span>
+	<div class="preview">Title</div>
+<div class="view">
+	<h3 contenteditable="true">h3. Lorem ipsum dolor sit amet.</h3>
+</div>
+</div>
+	
+<div class="box box-element ui-draggable">
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i></a>
+	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
+	<span class="configuration">
+		<span class="btn-group btn-group-xs">
+	<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">Align <span class="caret"></span></a>
+	<ul class="dropdown-menu">
+				<li class="active"><a href="#" rel="">Default</a></li>
+				<li class=""><a href="#" rel="text-left">Left</a></li>
+				<li class=""><a href="#" rel="text-center">Center</a></li>
+				<li class=""><a href="#" rel="text-right">Right</a></li>
+			</ul>
+</span>
+		<span class="btn-group btn-group-xs">
+	<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">Emphasis <span class="caret"></span></a>
+	<ul class="dropdown-menu">
+				<li class="active"><a href="#" rel="">Default</a></li>
+				<li class=""><a href="#" rel="text-muted">Muted</a></li>
+				<li class=""><a href="#" rel="text-primary">Primary</a></li>
+				<li class=""><a href="#" rel="text-success">Success</a></li>
+				<li class=""><a href="#" rel="text-info">Info</a></li>
+				<li class=""><a href="#" rel="text-warning">Warning</a></li>
+				<li class=""><a href="#" rel="text-danger">Danger</a></li>
+			</ul>
+</span>
+						  
+		<a class="btn btn-xs btn-default" href="#" rel="lead">Lead</a>
+	</span>
+	<div class="preview">Paragraph</div>
+	<div class="view">
+		<p contenteditable="true">Lorem ipsum dolor sit amet, <strong>consectetur adipiscing elit</strong>. Aliquam eget sapien sapien. Curabitur in metus urna. In hac habitasse platea dictumst. Phasellus eu sem sapien, sed vestibulum velit. Nam purus nibh, lacinia non faucibus et, pharetra in dolor. Sed iaculis posuere diam ut cursus. <em>Morbi commodo sodales nisi id sodales. Proin consectetur, nisi id commodo imperdiet, metus nunc consequat lectus, id bibendum diam velit et dui.</em> Proin massa magna, vulputate nec bibendum nec, posuere nec lacus. <small>Aliquam mi erat, aliquam vel luctus eu, pharetra quis elit. Nulla euismod ultrices massa, et feugiat ipsum consequat eu. </small></p>
+	</div>
+</div>
+	
+<div class="box box-element ui-draggable">
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i></a>
+	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
+	<div class="preview">Address</div>
+	<div class="view">
+		<address contenteditable="true">
+			<strong>Twitter, Inc.</strong><br>
+			795 Folsom Ave, Suite 600<br>
+			San Francisco, CA 94107<br>
+			<abbr title="Phone">P:</abbr> (123) 456-7890
+		</address>
+	</div>
+</div>
+	
+<div class="box box-element ui-draggable">
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i></a>
+	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
+	<span class="configuration">		  
+		<a class="btn btn-xs btn-default" href="#" rel="pull-right">Pull right</a>
+	</span>
+	<div class="preview">Blockquote</div>
+	<div class="view clearfix">
+    <blockquote contenteditable="true">
+	  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>
+	  <small>Someone famous <cite title="Source Title">Source Title</cite></small>
+    </blockquote>
+	</div>
+</div>
+	
+<div class="box box-element ui-draggable">
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i></a>
+	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
+	<span class="configuration">		  
+		<a class="btn btn-xs btn-default" href="#" rel="list-unstyled">Unstyled</a>
+		<a class="btn btn-xs btn-default" href="#" rel="list-inline">Inline</a>
+	</span>
+	<div class="preview">Unordered List</div>
+	<div class="view">
+			<ul contenteditable="true">
+              <li>Lorem ipsum dolor sit amet</li>
+              <li>Consectetur adipiscing elit</li>
+              <li>Integer molestie lorem at massa</li>
+              <li>Facilisis in pretium nisl aliquet</li>
+              <li>Nulla volutpat aliquam velit</li>
+              <li>Faucibus porta lacus fringilla vel</li>
+              <li>Aenean sit amet erat nunc</li>
+              <li>Eget porttitor lorem</li>
+            </ul>
+	</div>
+</div>
+	
+<div class="box box-element ui-draggable">
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i></a>
+	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
+	<span class="configuration">		  
+		<a class="btn btn-xs btn-default" href="#" rel="list-unstyled">Unstyled</a>
+		<a class="btn btn-xs btn-default" href="#" rel="list-inline">Inline</a>
+	</span>
+	<div class="preview">Ordered List</div>
+	<div class="view">
+			<ol contenteditable="true">
+              <li>Lorem ipsum dolor sit amet</li>
+              <li>Consectetur adipiscing elit</li>
+              <li>Integer molestie lorem at massa</li>
+              <li>Facilisis in pretium nisl aliquet</li>
+              <li>Nulla volutpat aliquam velit</li>
+              <li>Faucibus porta lacus fringilla vel</li>
+              <li>Aenean sit amet erat nunc</li>
+              <li>Eget porttitor lorem</li>
+            </ol>
+	</div>
+</div>
+	
+<div class="box box-element ui-draggable">
+		<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i></a>
+	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
+	<span class="configuration">		  
+		<a class="btn btn-xs btn-default" href="#" rel="dl-horizontal">Horizontal</a>
+	</span>
+	<div class="preview">Description</div>
+	<div class="view">
+		<dl contenteditable="true">
+			<dt>Description lists</dt>
+			<dd>A description list is perfect for defining terms.</dd>
+			<dt>Euismod</dt>
+			<dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>
+			<dd>Donec id elit non mi porta gravida at eget metus.</dd>
+			<dt>Malesuada porta</dt>
+			<dd>Etiam porta sem malesuada magna mollis euismod.</dd>
+			<dt>Felis euismod semper eget lacinia</dt>
+			<dd>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</dd>
+		</dl>
+	</div>
+</div>
+	
+<div class="box box-element ui-draggable">
+		<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i></a>
+	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
+	<span class="configuration">
+		<span class="btn-group btn-group-xs">
+	<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">Style <span class="caret"></span></a>
+	<ul class="dropdown-menu">
+				<li class="active"><a href="#" rel="">Default</a></li>
+				<li class=""><a href="#" rel="table-striped">Striped</a></li>
+				<li class=""><a href="#" rel="table-bordered">Bordered</a></li>
+			</ul>
+</span>
+		<a class="btn btn-xs btn-default" href="#" rel="table-hover">Hover</a>
+		<a class="btn btn-xs btn-default" href="#" rel="table-condensed">Condensed</a>
+	</span>
+	<div class="preview">Table</div>
+	<div class="view">
+		<table class="table" contenteditable="true">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Product</th>
+          <th>Payment Taken</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+      	<tr>
+          <td>1</td>
+          <td>TB - Monthly</td>
+          <td>01/04/2012</td>
+          <td>Default</td>
+        </tr>
+        <tr class="active">
+          <td>1</td>
+          <td>TB - Monthly</td>
+          <td>01/04/2012</td>
+          <td>Approved</td>
+        </tr>
+        <tr class="success">
+          <td>2</td>
+          <td>TB - Monthly</td>
+          <td>02/04/2012</td>
+          <td>Declined</td>
+        </tr>
+        <tr class="warning">
+          <td>3</td>
+          <td>TB - Monthly</td>
+          <td>03/04/2012</td>
+          <td>Pending</td>
+        </tr>
+        <tr class="danger">
+          <td>4</td>
+          <td>TB - Monthly</td>
+          <td>04/04/2012</td>
+          <td>Call in to confirm</td>
+        </tr>
+      </tbody>
+    </table>
+	</div>
+</div>
+	
+<div class="box box-element ui-draggable">
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i></a>
+	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
+	<span class="configuration">
+		<a class="btn btn-xs btn-default" href="#" rel="form-inline">Inline</a>
+	</span>
+	<div class="preview">Form</div>
+	<div class="view">
+		<form role="form">
+		  <div class="form-group">
+		    <label for="exampleInputEmail1">Email address</label>
+		    <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
+		  </div>
+		  <div class="form-group">
+		    <label for="exampleInputPassword1">Password</label>
+		    <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+		  </div>
+		  <div class="form-group">
+		    <label for="exampleInputFile">File input</label>
+		    <input type="file" id="exampleInputFile">
+		    <p class="help-block">Example block-level help text here.</p>
+		  </div>
+		  <div class="checkbox">
+		    <label>
+		      <input type="checkbox"> Check me out
+		    </label>
+		  </div>
+		  <button type="submit" class="btn btn-default">Submit</button>
+		</form>
+	</div>
+</div>
+	
+<div class="box box-element ui-draggable">
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i></a>
+	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
+	<span class="configuration">
+	</span>
+	<div class="preview">Horizontal Form</div>
+	<div class="view">
+<form class="form-horizontal" role="form">
+  <div class="form-group">
+    <label for="inputEmail3" class="col-sm-2 control-label">Email</label>
+    <div class="col-sm-10">
+      <input type="email" class="form-control" id="inputEmail3" placeholder="Email">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="inputPassword3" class="col-sm-2 control-label">Password</label>
+    <div class="col-sm-10">
+      <input type="password" class="form-control" id="inputPassword3" placeholder="Password">
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+      <div class="checkbox">
+        <label>
+          <input type="checkbox"> Remember me
+        </label>
+      </div>
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+      <button type="submit" class="btn btn-default">Sign in</button>
+    </div>
+  </div>
+</form>
+	</div>
+</div>
+	
+<div class="box box-element ui-draggable">
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i></a>
+	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
+	<span class="configuration">
+		<span class="btn-group btn-group-xs">
+	<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">Styles <span class="caret"></span></a>
+	<ul class="dropdown-menu">
+				<li class=""><a href="#" rel="btn-default">Default</a></li>
+				<li class=""><a href="#" rel="btn-primary">Primary</a></li>
+				<li class=""><a href="#" rel="btn-success">Success</a></li>
+				<li class=""><a href="#" rel="btn-info">Info</a></li>
+				<li class=""><a href="#" rel="btn-warning">Warning</a></li>
+				<li class=""><a href="#" rel="btn-danger">Danger</a></li>
+				<li class=""><a href="#" rel="btn-link">Link</a></li>
+			</ul>
+</span>
+		<span class="btn-group btn-group-xs">
+	<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">Size <span class="caret"></span></a>
+	<ul class="dropdown-menu">
+				<li class=""><a href="#" rel="btn-lg">Large</a></li>
+				<li class=""><a href="#" rel="btn-default">Default</a></li>
+				<li class=""><a href="#" rel="btn-sm">Small</a></li>
+				<li class=""><a href="#" rel="btn-xs">Mini</a></li>
+			</ul>
+</span>
+						  
+		<a class="btn btn-xs btn-default" href="#" rel="btn-block">Block</a>
+		<a class="btn btn-xs btn-default" href="#" rel="active">Active</a>
+		<a class="btn btn-xs btn-default" href="#" rel="disabled">Disabled</a>
+	</span>
+	<div class="preview">Button</div>
+	<div class="view">
+		<button type="button" class="btn btn-default" contenteditable="true">Default</button>		
+	</div>
+</div>
+	
+<div class="box box-element ui-draggable">
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i></a>
+	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
+	<span class="configuration">
+		<span class="btn-group btn-group-xs">
+	<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">Styles <span class="caret"></span></a>
+	<ul class="dropdown-menu">
+				<li class=""><a href="#" rel="btn-default">Default</a></li>
+				<li class=""><a href="#" rel="btn-primary">Primary</a></li>
+				<li class=""><a href="#" rel="btn-success">Success</a></li>
+				<li class=""><a href="#" rel="btn-info">Info</a></li>
+				<li class=""><a href="#" rel="btn-warning">Warning</a></li>
+				<li class=""><a href="#" rel="btn-danger">Danger</a></li>
+				<li class=""><a href="#" rel="btn-link">Link</a></li>
+			</ul>
+</span>
+		<span class="btn-group btn-group-xs">
+	<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">Size <span class="caret"></span></a>
+	<ul class="dropdown-menu">
+				<li class=""><a href="#" rel="btn-lg">Large</a></li>
+				<li class=""><a href="#" rel="btn-default">Default</a></li>
+				<li class=""><a href="#" rel="btn-sm">Small</a></li>
+				<li class=""><a href="#" rel="btn-xs">Mini</a></li>
+			</ul>
+</span>
+						  
+		<a class="btn btn-xs btn-default" href="#" rel="btn-block">Block</a>
+		<a class="btn btn-xs btn-default" href="#" rel="active">Active</a>
+		<a class="btn btn-xs btn-default" href="#" rel="disabled">Disabled</a>
+	</span>
+	<div class="preview">Anchor Button</div>
+	<div class="view">
+		<a href="#" class="btn" type="button" contenteditable="true">Button</a>
+	</div>
+</div>
+	
+<div class="box box-element ui-draggable">
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i></a>
+	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
+	<span class="configuration">
+		<span class="btn-group btn-group-xs">
+	<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">Styles <span class="caret"></span></a>
+	<ul class="dropdown-menu">
+				<li class="active"><a href="#" rel="">Default</a></li>
+				<li class=""><a href="#" rel="img-rounded">Rounded</a></li>
+				<li class=""><a href="#" rel="img-circle">Circle</a></li>
+				<li class=""><a href="#" rel="img-thumbnail">Thumbnail</a></li>
+			</ul>
+</span>
+	</span>
+	<div class="preview">Image</div>
+	<div class="view">
+		<img alt="140x140" src="x.png">
+	</div>
+</div>

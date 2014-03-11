@@ -1,0 +1,236 @@
+<div class="box box-element ui-draggable">
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i></a>
+	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
+	<div class="preview">Modal</div>
+	<div class="view">
+		<!-- Button to trigger modal -->
+				<a id="myModalLink" href="#myModalContainer" role="button" class="btn" data-toggle="modal">Launch demo modal</a>
+		 
+<!-- Modal -->
+<div class="modal fade" id="myModalContainer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="modal-title" id="myModalLabel" contenteditable="true">Modal title</h4>
+      </div>
+      <div class="modal-body" contenteditable="true">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" contenteditable="true">Close</button>
+        <button type="button" class="btn btn-primary" contenteditable="true">Save changes</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+	</div>
+</div>
+	
+<div class="box box-element ui-draggable">
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i></a>
+	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
+	<span class="configuration">
+  <span class="btn-group btn-group-xs">
+	<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">Position <span class="caret"></span></a>
+	<ul class="dropdown-menu">
+				<li class="active"><a href="#" rel="">Default</a></li>
+				<li class=""><a href="#" rel="navbar-static-top">Static top</a></li>
+				<li class=""><a href="#" rel="navbar-fixed-top">Navbar fixed top</a></li>
+				<li class=""><a href="#" rel="navbar-fixed-bottom">Navbar fixed bottom</a></li>
+			</ul>
+</span>
+		<a class="btn btn-xs btn-default" href="#" rel="navbar-inverse">Inverse</a>
+		<!--a class="btn btn-xs btn-default" href="#" rel="navbar-static-top">Static top</a>
+		<a class="btn btn-mini" href="#" rel="navbar-fixed-top">Navbar fixed top</a>
+		<a class="btn btn-mini" href="#" rel="navbar-fixed-bottom">Navbar fixed bottom</a-->
+	</span>
+	<div class="preview">Navbar</div>
+	<div class="view">
+
+<nav class="navbar navbar-default" role="navigation">
+  <!-- Brand and toggle get grouped for better mobile display -->
+  <div class="navbar-header">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="#">Brand</a>
+  </div>
+
+  <!-- Collect the nav links, forms, and other content for toggling -->
+  <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+    <ul class="nav navbar-nav">
+      <li class="active"><a href="#">Link</a></li>
+      <li><a href="#">Link</a></li>
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+        <ul class="dropdown-menu">
+          <li><a href="#">Action</a></li>
+          <li><a href="#">Another action</a></li>
+          <li><a href="#">Something else here</a></li>
+          <li class="divider"></li>
+          <li><a href="#">Separated link</a></li>
+          <li class="divider"></li>
+          <li><a href="#">One more separated link</a></li>
+        </ul>
+      </li>
+    </ul>
+    <form class="navbar-form navbar-left" role="search">
+      <div class="form-group">
+        <input type="text" class="form-control" placeholder="Search">
+      </div>
+      <button type="submit" class="btn btn-default">Submit</button>
+    </form>
+    <ul class="nav navbar-nav navbar-right">
+      <li><a href="#">Link</a></li>
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+        <ul class="dropdown-menu">
+          <li><a href="#">Action</a></li>
+          <li><a href="#">Another action</a></li>
+          <li><a href="#">Something else here</a></li>
+          <li class="divider"></li>
+          <li><a href="#">Separated link</a></li>
+        </ul>
+      </li>
+    </ul>
+  </div><!-- /.navbar-collapse -->
+</nav>
+
+	</div>
+</div>
+	
+<div class="box box-element ui-draggable">
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i></a>
+	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
+	<span class="configuration">
+	</span>
+	<div class="preview">Tabs</div>
+	<div class="view">
+		<div class="tabbable" id="myTabs"> <!-- Only required for left/right tabs -->
+			<ul class="nav nav-tabs">
+				<li class="active"><a href="#tab1" data-toggle="tab" contenteditable="true">Section 1</a></li>
+				<li><a href="#tab2" data-toggle="tab" contenteditable="true">Section 2</a></li>
+			</ul>
+			<div class="tab-content">
+				<div class="tab-pane active" id="tab1">
+					<p contenteditable="true">I'm in Section 1.</p>
+				</div>
+				<div class="tab-pane" id="tab2">
+					<p contenteditable="true">Howdy, I'm in Section 2.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+	
+<div class="box box-element ui-draggable">
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i></a>
+	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
+	<span class="configuration">
+		<span class="btn-group btn-group-xs">
+	<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">Styles <span class="caret"></span></a>
+	<ul class="dropdown-menu">
+				<li class=""><a href="#" rel="alert-success">Success</a></li>
+				<li class=""><a href="#" rel="alert-info">Info</a></li>
+				<li class=""><a href="#" rel="alert-warning">Warning</a></li>
+				<li class=""><a href="#" rel="alert-danger">Danger</a></li>
+			</ul>
+</span>
+              
+	</span>
+	<div class="preview">Alerts</div>
+	<div class="view">
+		<div class="alert alert-success alert-dismissable" contenteditable="true">
+      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+			<h4>Alert!</h4>
+			<strong>Warning!</strong> Best check yo self, you're not looking too good. <a href="#" class="alert-link">alert link</a>
+		</div>
+	</div>
+</div>
+	
+<div class="box box-element ui-draggable">
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i></a>
+	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
+	<div class="preview">Collapse</div>
+	<div class="view">
+		<div class="panel-group" id="myAccordion">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+				  <a class="panel-title" data-toggle="collapse" data-parent="#myAccordion" href="#collapseOne" contenteditable="true">
+				    Collapsible Group Item #1
+				  </a>
+				</div>
+				<div id="collapseOne" class="panel-collapse collapse in">
+				  <div class="panel-body" contenteditable="true">
+				    Anim pariatur cliche...
+				  </div>
+				</div>
+			</div>
+			<div class="panel panel-default">
+				<div class="panel-heading">
+				  <a class="panel-title" data-toggle="collapse" data-parent="#myAccordion" href="#collapseTwo" contenteditable="true">
+				    Collapsible Group Item #2
+				  </a>
+				</div>
+				<div id="collapseTwo" class="panel-collapse collapse">
+				  <div class="panel-body" contenteditable="true">
+				    Anim pariatur cliche...
+				  </div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
+	
+<div class="box box-element ui-draggable">
+  	<a href="#close" class="remove label label-danger"><i class="glyphicon glyphicon-remove"></i></a>
+	<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
+	<div class="preview">Carousel</div>
+	<div class="view">
+		
+		
+<div class="carousel slide" id="myCarousel">
+  <ol class="carousel-indicators">
+    <li class="active" data-slide-to="0" data-target="#myCarousel"></li>
+    <li data-slide-to="1" data-target="#myCarousel" class=""></li>
+    <li data-slide-to="2" data-target="#myCarousel" class=""></li>
+  </ol>
+  <div class="carousel-inner">
+    <div class="item active">
+      <img alt="" src="./layout! - Interface Builder for Bootstrap_files/1">
+      <div class="carousel-caption">
+        <h4>First Thumbnail label</h4>
+        <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
+      </div>
+    </div>
+    <div class="item">
+      <img alt="" src="./layout! - Interface Builder for Bootstrap_files/2">
+      <div class="carousel-caption">
+        <h4>Second Thumbnail label</h4>
+        <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
+      </div>
+    </div>
+    <div class="item">
+      <img alt="" src="./layout! - Interface Builder for Bootstrap_files/3">
+      <div class="carousel-caption">
+        <h4>Third Thumbnail label</h4>
+        <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
+      </div>
+    </div>
+  </div>
+
+  <a class="left carousel-control" href="#myCarousel" data-slide="prev">
+    <span class="glyphicon glyphicon-chevron-left"></span>
+  </a>
+  <a class="right carousel-control" href="#myCarousel" data-slide="next">
+    <span class="glyphicon glyphicon-chevron-right"></span>
+  </a>
+</div>		
+	</div>
+</div>
