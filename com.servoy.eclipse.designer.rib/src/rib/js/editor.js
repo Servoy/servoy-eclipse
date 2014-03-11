@@ -107,7 +107,7 @@ function updateGridColumns(elemNode)
 	}
 }
 
-function gridSystemGenerator()
+function fillGridSystemGeneratorPalette()
 {
 	//add grid rows from template
 	var gridArray = ["12","6,6","8,4","4,4,4","2,6,4"];
@@ -280,6 +280,8 @@ function addDragable(elems)
 
 function fillPalette()
 {
+	fillGridSystemGeneratorPalette();
+
 	//dynamically add one category in palette 
 	$.get("palette/base.template", function(data){
 		$("#elmBase").append(data);
@@ -361,8 +363,6 @@ $(document).ready(function()
 	removeElm();
 	
 	configurationElm();
-
-	gridSystemGenerator();
 
 //	setInterval(function()
 //	{
