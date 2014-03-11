@@ -2,11 +2,11 @@ body {
 	padding-top:50px;
 	padding-bottom: 40px;
 	margin-left:200px;
-	-webkit-transition: margin 500ms ease;
-	-moz-transition: margin 500ms ease;
-	-ms-transition: margin 500ms ease;
-	-o-transition: margin 500ms ease;
-	transition: margin 500ms ease;
+	-webkit-transition: margin 150ms ease;
+	-moz-transition: margin 150ms ease;
+	-ms-transition: margin 150ms ease;
+	-o-transition: margin 150ms ease;
+	transition: margin 150ms ease;
 }
 .navbar-layoutit .btn-donate {padding: 0 0 0 10px;}
 .navbar-layoutit .btn-donate form { margin:0;}
@@ -78,11 +78,11 @@ body {
 	top:32px;
 	background:#ccc; 
 	z-index:10;
-	-webkit-transition: all 50ms ease;
-	-moz-transition: all 50ms ease;
-	-ms-transition: all 50ms ease;
-	-o-transition: all 50ms ease;
-	transition: all 50ms ease;
+	-webkit-transition: all 150ms ease;
+	-moz-transition: all 150ms ease;
+	-ms-transition: all 150ms ease;
+	-o-transition: all 150ms ease;
+	transition: all 150ms ease;
 }
 .sidebar-nav .nav-header { cursor:pointer; font-size:14px; color:#fff; text-shadow:0 1px 0 rgba(0, 0, 0, 0.3); text-transform:uppercase; font-weight:bold;}
 .sidebar-nav .nav-header span.label { font-size:10px; /*padding-bottom:0;*/ position:relative; top:-1px; }
@@ -136,19 +136,19 @@ body {
 .demo .configuration {
 	filter: alpha(opacity=0);
 	opacity: 0;
-	-webkit-transition: all 500ms ease;
-	-moz-transition: all 500ms ease;
-	-ms-transition: all 500ms ease;
-	-o-transition: all 500ms ease;
-	transition: all 500ms ease;
+	-webkit-transition: all 150ms ease;
+	-moz-transition: all 150ms ease;
+	-ms-transition: all 150ms ease;
+	-o-transition: all 150ms ease;
+	transition: all 150ms ease;
 }
 .demo .drag, .demo .remove {
 	filter: alpha(opacity=20); opacity: 0.2;
-	-webkit-transition: all 500ms ease;
-	-moz-transition: all 500ms ease;
-	-ms-transition: all 500ms ease;
-	-o-transition: all 500ms ease;
-	transition: all 500ms ease;
+	-webkit-transition: all 150ms ease;
+	-moz-transition: all 150ms ease;
+	-ms-transition: all 150ms ease;
+	-o-transition: all 150ms ease;
+	transition: all 150ms ease;
 }
 .demo .lyrow:hover > .drag, 
 .demo .lyrow:hover > .configuration, 
