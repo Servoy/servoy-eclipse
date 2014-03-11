@@ -85,7 +85,7 @@ function updateGridColumns(elemNode)
 	var e=0;
 	var t="";
 	var n=false;
-	var r=$(this).val().split(",",12);
+	var r=elemNode.val().split(",",12);
 	$.each(r,function(r,i)
 	{
 		if (!n)
@@ -111,10 +111,10 @@ function gridSystemGenerator()
 {
 	//add grid rows from template
 	var gridArray = ["12","6,6","8,4","4,4,4","2,6,4"];
-	for ( var gval in gridArray) 
+	for (var i in gridArray) 
 	{
 		var ghtml = $("#gridGenerator").html();
-		ghtml = ghtml.replace("xxx",gval);
+		ghtml = ghtml.replace("xxx",gridArray[i]);
 		$("#estRows").append(ghtml);
 	}
 	
@@ -124,10 +124,26 @@ function gridSystemGenerator()
 		updateGridColumns($(this));
 	});
 	
-	//bind them
+	//bind them for changes
 	$(".lyrow .preview input").bind("keyup",function()
 	{
 		updateGridColumns($(this));
+	});
+
+	//make them draggable
+	$(".sidebar-nav .lyrow").draggable(
+	{
+		connectToSortable:".demo",helper:"clone",handle:".drag",drag:function(e,t)
+		{
+			t.helper.width(400)
+		}
+		,stop:function(e,t)
+		{
+			$(".demo .column").sortable(
+			{
+				opacity:.35,connectWith:".column"
+			})
+		}
 	});
 }
 
@@ -262,11 +278,8 @@ function addDragable(elems)
 	});
 }
 
-$(document).ready(function()
+function fillPalette()
 {
-	$("body").css("min-height",$(window).height()-90);
-	$(".demo").css("min-height",$(window).height()-160);
-
 	//dynamically add one category in palette 
 	$.get("palette/base.template", function(data){
 		$("#elmBase").append(data);
@@ -290,29 +303,21 @@ $(document).ready(function()
 		$("#elmComponents").append(data);
 		addDragable($(".sidebar-nav .box"));
 	});
+}
 
+$(document).ready(function()
+{
+	//some corrections
+	$("body").css("min-height",$(window).height()-90);
+	$(".demo").css("min-height",$(window).height()-160);
+
+	fillPalette();
+	
 	$(".demo, .demo .column").sortable(
 	{
 		connectWith:".column",opacity:.35,handle:".drag"
 	});
 
-	$(".sidebar-nav .lyrow").draggable(
-	{
-		connectToSortable:".demo",helper:"clone",handle:".drag",drag:function(e,t)
-		{
-			t.helper.width(400)
-		}
-		,stop:function(e,t)
-		{
-			$(".demo .column").sortable(
-			{
-				opacity:.35,connectWith:".column"
-			})
-		}
-	});
-	
-	addDragable($(".sidebar-nav .box"));
-	
 	$("[data-target=#downloadModal]").click(function(e)
 	{
 		e.preventDefault();downloadLayoutSrc()
@@ -356,9 +361,9 @@ $(document).ready(function()
 	removeElm();
 	
 	configurationElm();
-	
+
 	gridSystemGenerator();
-	
+
 //	setInterval(function()
 //	{
 //		handleSaveLayout()

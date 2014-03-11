@@ -7,12 +7,14 @@ import java.net.URLConnection;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.servoy.j2db.util.Utils;
 
+@WebServlet("/rib/*")
 public class ResourcesServlet extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
@@ -21,6 +23,8 @@ public class ResourcesServlet extends HttpServlet
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
 	{
 		String path = req.getPathInfo();
+		if ("/".equals(path)) path = "/index.html";
+		path = req.getServletPath() + path;
 		URL res = getClass().getResource(path);
 		if (res != null)
 		{
