@@ -77,7 +77,7 @@ public class FormGraphicalEditPart extends BaseFormGraphicalEditPart implements 
 		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(getPersist()).getFlattenedForm(getPersist());
 		List<Object> list = new ArrayList<Object>();
 
-		list.add(new BorderModel(flattenedForm)); // A separate editpart to show the form border and resize handles
+		list.add(new BorderModel(getPersist())); // A separate editpart to show the form border and resize handles
 		for (Part part : Utils.iterate(flattenedForm.getParts()))
 		{
 			// separate editparts for painting part backgrounds
@@ -327,7 +327,7 @@ public class FormGraphicalEditPart extends BaseFormGraphicalEditPart implements 
 
 		for (EditPart ep : (List<EditPart>)getChildren())
 		{
-			if (ep.getModel() instanceof BorderModel && getModel().equals(((BorderModel)ep.getModel()).flattenedForm))
+			if (ep.getModel() instanceof BorderModel && getModel().equals(((BorderModel)ep.getModel()).form))
 			{
 				toRefresh.add(ep);
 			}

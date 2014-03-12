@@ -25,6 +25,7 @@ import javax.swing.text.html.CSS;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.Form;
@@ -43,18 +44,20 @@ import com.servoy.j2db.util.PersistHelper;
 
 public class FormImageNotifier extends AbstractImageNotifier
 {
-	private final Form flattenedForm;
+	private final Form form;
 	private static final Insets DEFAULT_INSETS = new Insets(0, 0, 0, 0);
 
-	public FormImageNotifier(IApplication application, Form flattenedForm)
+	public FormImageNotifier(IApplication application, Form form)
 	{
 		super(application);
-		this.flattenedForm = flattenedForm;
+		this.form = form;
 	}
 
 	@Override
 	protected Component createComponent()
 	{
+		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form);
+
 		Border border = ElementFactory.getFormBorder(application, flattenedForm);
 		Pair<IStyleSheet, IStyleRule> formStyle = ComponentFactory.getCSSPairStyleForForm(application, flattenedForm);
 
