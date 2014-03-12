@@ -40,6 +40,7 @@ import com.servoy.eclipse.designer.internal.core.FormImageNotifier;
 import com.servoy.eclipse.designer.internal.core.IImageNotifier;
 import com.servoy.eclipse.designer.internal.core.ImageFigureController;
 import com.servoy.eclipse.designer.util.BoundsImageFigure;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.debug.DebugUtils;
@@ -95,7 +96,7 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 				handles = new ArrayList<Handle>();
 				handles.add(new FormResizeHandle(this, PositionConstants.EAST)); // resize form via right side of form
 
-				Iterator<Part> parts = getModel().flattenedForm.getParts();
+				Iterator<Part> parts = getModel().getFlattenedForm().getParts();
 				while (parts.hasNext())
 				{
 					Part next = parts.next();
@@ -153,10 +154,10 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 
 	protected IFigure updateFigure(BoundsImageFigure fig)
 	{
-		java.awt.Dimension size = getModel().flattenedForm.getSize();
+		java.awt.Dimension size = getModel().getFlattenedForm().getSize();
 		// add border size
 		Insets insets = IFigure.NO_INSETS;
-		final javax.swing.border.Border border = ElementFactory.getFormBorder(application, getModel().flattenedForm);
+		final javax.swing.border.Border border = ElementFactory.getFormBorder(application, getModel().getFlattenedForm());
 		if (border != null)
 		{
 			java.awt.Insets borderInsets;
@@ -244,7 +245,7 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 	{
 		if (borderImageNotifier == null)
 		{
-			borderImageNotifier = new FormImageNotifier(application, getModel().flattenedForm);
+			borderImageNotifier = new FormImageNotifier(application, getModel().form);
 		}
 		return borderImageNotifier;
 	}
@@ -258,14 +259,20 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 	 */
 	public static class BorderModel
 	{
-		public final Form flattenedForm;
+		public final Form form;
 
 		/**
 		 * @param flattenedForm
 		 */
-		public BorderModel(Form flattenedForm)
+		public BorderModel(Form form)
 		{
-			this.flattenedForm = flattenedForm;
+			this.form = form;
+		}
+
+		public Form getFlattenedForm()
+		{
+			// flattened form is already cached, do not cache it twice since is destroyed often and goes out of sync
+			return ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form);
 		}
 	}
 }

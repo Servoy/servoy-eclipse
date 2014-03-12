@@ -51,7 +51,7 @@ public class FormResizableEditPolicy extends ResizableEditPolicy
 		feedback.setVerticalLine(rect.width + request.getSizeDelta().width, rect.height);
 
 		// feedback on status line
-		EditorUtil.setStatuslineMessage("Form width " + (((BorderModel)getHost().getModel()).flattenedForm.getWidth() + request.getSizeDelta().width));
+		EditorUtil.setStatuslineMessage("Form width " + (((BorderModel)getHost().getModel()).getFlattenedForm().getWidth() + request.getSizeDelta().width));
 	}
 
 	@Override
