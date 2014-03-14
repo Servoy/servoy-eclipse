@@ -22,6 +22,7 @@ import javax.websocket.OnError;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
+import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
 import com.servoy.j2db.util.Debug;
@@ -42,11 +43,12 @@ public class FormEditorEndpoint
 	private MessageHandler handler;
 
 	@OnOpen
-	public void onOpen(Session newSession)
+	public void onOpen(Session newSession, @PathParam("editorid")
+	String editorid)
 	{
 		this.session = newSession;
-		Debug.log("FormEditorEndpoint new session");
-		register(newSession.getPathParameters().get("editorid"));
+		Debug.log("FormEditorEndpoint new session: editorid=" + editorid);
+		register(editorid);
 	}
 
 	@OnError
