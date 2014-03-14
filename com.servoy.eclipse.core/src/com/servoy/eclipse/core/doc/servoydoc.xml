@@ -60572,7 +60572,8 @@ for (var i = 0; i < mediaList.length; i++) {
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the removal was successful, false otherwise]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Removes the relation specified by name.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Removes the relation specified by name. You cannot remove the the relation if it is touched within the application.
+So even if you remove all the ui elements using it, like tabs, it still can't be removed, because of underlying created and cached data.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Removes the relation specified by name.]]></summary>
