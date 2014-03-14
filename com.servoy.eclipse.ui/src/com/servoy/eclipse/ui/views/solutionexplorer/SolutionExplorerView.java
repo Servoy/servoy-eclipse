@@ -320,6 +320,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.ImageLoader;
+import com.servoy.j2db.util.MimeTypes;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -3293,7 +3294,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					else
 					{
 
-						String mimetype = ImageLoader.getContentType(mediaNode.getMedia().getMediaData());
+						String mimetype = MimeTypes.getContentType(mediaNode.getMedia().getMediaData());
 						String type = (mimetype == null ? "other" : mimetype.split("/")[0]);
 
 						if (scaledImage == null && type.equals("image"))

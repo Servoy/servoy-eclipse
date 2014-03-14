@@ -50,7 +50,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.util.ImageLoader;
+import com.servoy.j2db.util.MimeTypes;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
@@ -257,7 +257,7 @@ public class ImportMediaAction extends Action implements ISelectionChangedListen
 			Utils.closeInputStream(fis);
 			Utils.closeOutputStream(baos);
 
-			String mime = ImageLoader.getContentType(media_data, file.getName());
+			String mime = MimeTypes.getContentType(media_data, file.getName());
 			if (mime == null)
 			{
 				mime = repository.getContentType(file.getName());
