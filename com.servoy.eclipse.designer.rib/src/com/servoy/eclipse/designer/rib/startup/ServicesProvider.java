@@ -7,6 +7,8 @@ import javax.servlet.annotation.WebServlet;
 
 import org.apache.tomcat.starter.IServicesProvider;
 
+import com.servoy.eclipse.designer.rib.editor.FormEditorEndpoint;
+
 @WebServlet("/rib/*")
 public class ServicesProvider implements IServicesProvider
 {
@@ -21,6 +23,7 @@ public class ServicesProvider implements IServicesProvider
 		{
 			HashSet<Class< ? >> set = new HashSet<Class< ? >>();
 			set.add(ResourcesServlet.class);
+			set.add(FormEditorEndpoint.class);
 			return set;
 		}
 		return null;

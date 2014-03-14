@@ -87,6 +87,7 @@ import com.servoy.eclipse.designer.editor.mobile.editparts.MobileHeaderGraphical
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileSnapData.MobileSnapType;
 import com.servoy.eclipse.designer.mobile.property.MobilePersistPropertySource;
 import com.servoy.eclipse.designer.property.SetValueCommand;
+import com.servoy.eclipse.designer.rib.editor.MessageDispatcher;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.ComplexProperty;
@@ -114,7 +115,6 @@ import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.ValueList;
-import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.IMessageHandler;
 import com.servoy.j2db.util.Pair;
@@ -260,7 +260,6 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 			@Override
 			public Object function(Object[] arguments)
 			{
-				System.err.println("RAGTEST " + Arrays.toString(arguments));
 				if (Debug.tracing())
 				{
 					Debug.trace("consoleLog: " + Arrays.toString(arguments));
@@ -351,7 +350,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 		};
 
 		String editorid = UUID.randomUUID().toString();
-		ApplicationServerRegistry.get().getMessageDispatcher().register(editorid, editorMessageHandler = new EditorMessageHandler(editorid));
+		MessageDispatcher.INSTANCE.register(editorid, editorMessageHandler = new EditorMessageHandler(editorid));
 
 		Bundle bundle = Platform.getBundle("com.servoy.eclipse.designer.rib");
 		URL resourceUrl = bundle.getResource("/rib/index.html");
@@ -386,7 +385,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 	{
 		if (editorMessageHandler != null)
 		{
-			ApplicationServerRegistry.get().getMessageDispatcher().deregister(editorMessageHandler.getId(), editorMessageHandler);
+			MessageDispatcher.INSTANCE.deregister(editorMessageHandler.getId(), editorMessageHandler);
 			editorMessageHandler = null;
 		}
 		super.dispose();
@@ -820,7 +819,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 		}
 		if (editorMessageHandler != null)
 		{
-			ApplicationServerRegistry.get().getMessageDispatcher().sendMessage(editorMessageHandler.getId(), message, editorMessageHandler);
+			MessageDispatcher.INSTANCE.sendMessage(editorMessageHandler.getId(), message, editorMessageHandler);
 		}
 	}
 
