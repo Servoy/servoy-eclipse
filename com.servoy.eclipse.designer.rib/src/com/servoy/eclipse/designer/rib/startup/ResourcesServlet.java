@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.servoy.j2db.util.MimeTypes;
 import com.servoy.j2db.util.Utils;
 
 @WebServlet("/rib/*")
@@ -30,7 +31,7 @@ public class ResourcesServlet extends HttpServlet
 		{
 			URLConnection uc = res.openConnection();
 			resp.setContentLength(uc.getContentLength());
-			resp.setContentType(uc.getContentType());
+			resp.setContentType(MimeTypes.guessContentTypeFromName(path));
 			InputStream in = uc.getInputStream();
 			ServletOutputStream outputStream = resp.getOutputStream();
 			Utils.streamCopy(in,outputStream);
