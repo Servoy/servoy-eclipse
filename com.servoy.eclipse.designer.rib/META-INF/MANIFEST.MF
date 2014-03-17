@@ -9,3 +9,4 @@ Require-Bundle: org.apache.tomcat;bundle-version="7.0.52",
  servoy_shared,
  javax.websocket
 Export-Package: com.servoy.eclipse.designer.rib.editor
+Bundle-ClassPath: .
