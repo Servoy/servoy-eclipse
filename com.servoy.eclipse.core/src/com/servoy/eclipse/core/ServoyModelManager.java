@@ -19,6 +19,7 @@ package com.servoy.eclipse.core;
 import java.util.concurrent.Semaphore;
 
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -58,9 +59,46 @@ public class ServoyModelManager
 	{
 		if (servoyModel == null)
 		{
+			while (true)
+			{
+				boolean wait = false;
+				try
+				{
+					// first just check if the workbench is running
+					if (!PlatformUI.isWorkbenchRunning())
+					{
+						wait = true;
+					}
+					else
+					{
+						// even if it is running it could be that that parts
+						// are not initialised yet (the WorkbenchPlugin.e4Context)
+						// this will bomb out with a null point exception if not fully initialised
+						PlatformUI.getWorkbench().getWorkingSetManager();
+					}
+				}
+				catch (Exception e)
+				{
+					wait = true;
+				}
+				if (wait)
+				{
+					try
+					{
+						// just wait until it is ready 
+						Thread.sleep(500);
+					}
+					catch (InterruptedException e)
+					{
+					}
+				}
+				else
+				{
+					break;
+				}
+			}
 			// create servoy model in the display thread.
 			final boolean async[] = { false };
-
 			Runnable run = new Runnable()
 			{
 				public void run()
