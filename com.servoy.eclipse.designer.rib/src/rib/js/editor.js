@@ -1,12 +1,3 @@
-function handleSaveLayout()
-{
-	var e=$("#canvas").html();
-	if(e!=window.demoHtml)
-	{
-		saveLayout();window.demoHtml=e
-	}
-}
-
 function handleJsIds()
 {
 	handleModalIds();
