@@ -12,20 +12,20 @@
 	<script type="text/javascript" src="js/editor.js"></script>
 	<script type="text/javascript" src="js/websocket.js"></script>
 	<script id="gridGenerator" type="text/template">
-	<div class="lyrow ui-draggable">
-		<a href="#close" class="remove label label-danger"><i class="glyphicon-remove glyphicon"></i></a>
-		<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
-		<div class="preview"><input type="text" value="xxx" class="form-control"></div>
-		<div class="view">
-			<div class="row clearfix">
-				<div class="col-md-12 column"></div>
+		<div class="lyrow ui-draggable">
+			<a href="#close" class="remove label label-danger"><i class="glyphicon-remove glyphicon"></i></a>
+			<span class="drag label label-default"><i class="glyphicon glyphicon-move"></i> drag</span>
+			<div class="preview"><input type="text" value="xxx" class="form-control"></div>
+			<div class="view">
+				<div class="row clearfix">
+					<div class="col-md-12 column"></div>
+				</div>
 			</div>
 		</div>
-	</div>
 	</script>
 </head>
 
-<body class="edit" style="min-height: 502px; cursor: auto;">
+<body class="editor" style="min-height: 502px; cursor: auto;">
 	<div class="navbar navbar-inverse navbar-fixed-top navbar-layout">
     <div class="navbar-header">
       <button data-target="navbar-collapse" data-toggle="collapse" class="navbar-toggle" type="button">
@@ -33,60 +33,65 @@
         <span class="glyphicon-bar"></span>
         <span class="glyphicon-bar"></span>
       </button>
-      <a class="navbar-brand" href="http://www.servoy.com/"> RIB<span class="label label-default">BETA</span></a>
+	  <a class="navbar-brand" href="http://www.servoy.com/"> RIB<span class="label label-default">Prototype</span></a>
     </div>
     <div class="collapse navbar-collapse">
       <ul class="nav" id="menu-layout">
         <li>
           <div class="btn-group" data-toggle="buttons-radio">
-            <button type="button" id="edit" class="btn btn-xs btn-primary active"><i class="glyphicon glyphicon-edit "></i> Edit</button>
+            <button type="button" class="btn btn-xs btn-primary active" id="edit"><i class="glyphicon glyphicon-edit "></i> Edit</button>
             <button type="button" class="btn btn-xs btn-primary" id="devpreview"><i class="glyphicon-eye-close glyphicon"></i> Developer</button>
             <button type="button" class="btn btn-xs btn-primary" id="sourcepreview"><i class="glyphicon-eye-open glyphicon"></i> Preview</button>
           </div>
           <div class="btn-group">							
-            <button type="button" class="btn btn-xs btn-primary" id="button-download-modal" data-target="#downloadModal" href="#" role="button" data-toggle="modal"><i class="glyphicon-refresh glyphicon"></i> Refresh</button>
-            <button class="btn btn-xs btn-primary" id="button-share-modal" href="/share/indexV3" role="button" data-toggle="modal" data-target="#shareModal"><i class="glyphicon-share glyphicon"></i> Save</button>
-            <button class="btn btn-xs btn-primary" href="#clear" id="clear"><i class="glyphicon-trash glyphicon"></i> Clear</button>
+            <button type="button" class="btn btn-xs btn-primary" id="refresh"><i class="glyphicon-refresh glyphicon"></i> Refresh</button>
+            <button type="button" class="btn btn-xs btn-primary" id="save"><i class="glyphicon-share glyphicon"></i> Save</button>
+            <button type="button" class="btn btn-xs btn-primary" id="clear"><i class="glyphicon-trash glyphicon"></i> Clear</button>
           </div>
+        </li>
+      </ul>
+      <ul class="nav pull-right">
+        <li>
+          <div class="btn-group">
+			  <button type="button" class="btn btn-xs btn-primary dropdown-toggle" data-toggle="dropdown">
+			    Size <span class="caret"></span>
+			  </button>
+			  <ul class="dropdown-menu pull-right" role="menu">
+	            <li><a href="#" id="size-desktop">desktop</a></li>
+	            <li><a href="#" id="size-tablet">tablet</a></li>
+	            <li><a href="#" id="size-phone">phone</a></li>
+			  </ul>
+			 </div>
         </li>
       </ul>
     </div><!--/.navbar-collapse -->
 	</div><!--/.navbar-fixed-top -->
 	
-	<div class="container">
-	<div class="row">
-	
-	<div class="">
-		<div class="sidebar-nav">
-			<ul class="nav nav-list accordion-group">
-			<li class="nav-header">Grid system</li>
-			<li class="rows" id="estRows" style="display: none;"></li>
-			</ul>
-			
-						
-			<ul class="nav nav-list accordion-group">
-			<li class="nav-header">Base</li>
-			<li class="boxes" id="elmBase" style="display: none;"></li>
-			</ul>
-			
-			<ul class="nav nav-list accordion-group">
-			<li class="nav-header">Components</li>
-			<li class="boxes" id="elmComponents" style="display: none;"></li>
-			</ul>
-			
-			<ul class="nav nav-list accordion-group">
-			<li class="nav-header">Advanced</li>
-			<li class="boxes mute" id="elmJS" style="display: list-item;"></li>
-			</ul>
-		</div>
+	<div class="sidebar-nav">
+		<ul class="nav nav-list accordion-group">
+		<li class="nav-header">Grid system</li>
+		<li class="rows" id="estRows" style="display: list-item;"></li>
+		</ul>
+		
+					
+		<ul class="nav nav-list accordion-group">
+		<li class="nav-header">Base</li>
+		<li class="boxes" id="elmBase" style="display: none;"></li>
+		</ul>
+		
+		<ul class="nav nav-list accordion-group">
+		<li class="nav-header">Components</li>
+		<li class="boxes" id="elmComponents" style="display: none;"></li>
+		</ul>
+		
+		<ul class="nav nav-list accordion-group">
+		<li class="nav-header">Advanced</li>
+		<li class="boxes mute" id="elmJS" style="display: none;"></li>
+		</ul>
 	</div>
 
-	<div class="demo ui-sortable" style="min-height: 432px"></div>
-	
-	</div><!--/row-->
-	</div><!--/.fluid-container-->
+	<div id="canvas">
+		<div class="container" style="min-height: 432px"></div>
+	</div>
 
-	<div class="modal fade" id="downloadModal" tabindex="-1" role="dialog" aria-labelledby="downloadModalLabel" aria-hidden="true"></div>
-	<div class="modal fade" id="shareModal" tabindex="-1" role="dialog" aria-labelledby="shareModalLabel" aria-hidden="true"></div>
-	<div class="modal fade" id="feedbackModal" tabindex="-1" role="dialog" aria-labelledby="feedbackModalLabel" aria-hidden="true"></div>
 </body></html>

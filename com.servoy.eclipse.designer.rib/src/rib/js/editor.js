@@ -1,6 +1,6 @@
 function handleSaveLayout()
 {
-	var e=$(".demo").html();
+	var e=$("#canvas").html();
 	if(e!=window.demoHtml)
 	{
 		saveLayout();window.demoHtml=e
@@ -17,7 +17,7 @@ function handleJsIds()
 
 function handleAccordionIds()
 {
-	var e=$(".demo #myAccordion");
+	var e=$("#canvas #myAccordion");
 	var t=randomNumber();
 	var n="panel-"+t;
 	var r;e.attr("id",n);e.find(".panel").each(function(e,t)
@@ -37,7 +37,7 @@ function handleAccordionIds()
 
 function handleCarouselIds()
 {
-	var e=$(".demo #myCarousel");
+	var e=$("#canvas #myCarousel");
 	var t=randomNumber();
 	var n="carousel-"+t;e.attr("id",n);
 	e.find(".carousel-indicators li").each(function(e,t)
@@ -50,7 +50,7 @@ function handleCarouselIds()
 
 function handleModalIds()
 {
-	var e=$(".demo #myModalLink");
+	var e=$("#canvas #myModalLink");
 	var t=randomNumber();
 	var n="modal-container-"+t;
 	var r="modal-"+t;
@@ -61,7 +61,7 @@ function handleModalIds()
 
 function handleTabsIds()
 {
-	var e=$(".demo #myTabs");
+	var e=$("#canvas #myTabs");
 	var t=randomNumber();
 	var n="tabs-"+t;e.attr("id",n);
 	e.find(".tab-pane").each(function(e,t)
@@ -133,15 +133,19 @@ function fillGridSystemGeneratorPalette()
 	//make them draggable
 	$(".sidebar-nav .lyrow").draggable(
 	{
-		connectToSortable:".demo",helper:"clone",handle:".drag",drag:function(e,t)
+		connectToSortable:"#canvas, #canvas .container",helper:"clone",handle:".drag",drag:function(e,t)
 		{
 			t.helper.width(400)
 		}
 		,stop:function(e,t)
 		{
-			$(".demo .column").sortable(
+			$("#canvas .column").sortable(
 			{
 				opacity:.35,connectWith:".column"
+			})
+			$("#canvas .row").sortable(
+			{
+				opacity:.35,connectWith:"#canvas"
 			})
 		}
 	});
@@ -149,13 +153,13 @@ function fillGridSystemGeneratorPalette()
 
 function configurationElm(e,t)
 {
-	$(".demo").delegate(".configuration > a","click",function(e)
+	$("#canvas").delegate(".configuration > a","click",function(e)
 	{
 		e.preventDefault();var t=$(this).parent().next().next().children();
 		$(this).toggleClass("active");t.toggleClass($(this).attr("rel"))
 	});
 	
-	$(".demo").delegate(".configuration .dropdown-menu a","click",function(e)
+	$("#canvas").delegate(".configuration .dropdown-menu a","click",function(e)
 	{
 		e.preventDefault();
 		var t=$(this).parent().parent();
@@ -174,11 +178,11 @@ function configurationElm(e,t)
 
 function removeElm()
 {
-	$(".demo").delegate(".remove","click",function(e)
+	$("#canvas").delegate(".remove","click",function(e)
 	{
 		e.preventDefault();
 		$(this).parent().remove();
-		if(!$(".demo .lyrow").length>0)
+		if(!$("#canvas .lyrow").length>0)
 		{
 			clearDemo()
 		}
@@ -187,7 +191,7 @@ function removeElm()
 
 function clearDemo()
 {
-	$(".demo").empty()
+	$("#canvas").empty()
 }
 
 function removeMenuClasses()
@@ -208,7 +212,7 @@ function cleanHtml(e)
 function downloadLayoutSrc()
 {
 	var e="";
-	$("#download-layout").children().html($(".demo").html());
+	$("#download-layout").children().html($("#canvas").html());
 	var t=$("#download-layout").children();
 	t.find(".preview, .configuration, .drag, .remove").remove();
 	t.find(".lyrow").addClass("removeClean");t.find(".box-element").addClass("removeClean");
@@ -258,12 +262,12 @@ function downloadLayoutSrc()
 	$("#download-layout").html(formatSrc);$("#downloadModal textarea").empty();$("#downloadModal textarea").val(formatSrc)
 }
 
-var currentDocument=null;var timerSave=2e3;var demoHtml=$(".demo").html();$(window).resize(function()
+var currentDocument=null;var timerSave=2e3;var demoHtml=$("#canvas").html();$(window).resize(function()
 {
-	$("body").css("min-height",$(window).height()-90);$(".demo").css("min-height",$(window).height()-160)
+	$("body").css("min-height",$(window).height()-90);$("#canvas").css("min-height",$(window).height()-160)
 });
 
-function addDragable(elems)
+function connectDnD(elems)
 {
 	elems.draggable(
 	{
@@ -285,25 +289,32 @@ function fillPalette()
 	//dynamically add one category in palette 
 	$.get("palette/base.template", function(data){
 		$("#elmBase").append(data);
-		addDragable($(".sidebar-nav .box"));
+		connectDnD($(".sidebar-nav .box"));
 	});
 
 	//dynamically add one category in palette 
 	$.get("palette/components.template", function(data){
 		$("#elmComponents").append(data);
-		addDragable($(".sidebar-nav .box"));
+		connectDnD($(".sidebar-nav .box"));
 	});
 
 	//dynamically add one category in palette 
 	$.get("palette/advanced.template", function(data){
 		$("#elmJS").append(data);
-		addDragable($(".sidebar-nav .box"));
+		connectDnD($(".sidebar-nav .box"));
 	});
 	
 	//dynamically add one item to palette category
 	$.get("palette/progressbar.template", function(data){
 		$("#elmComponents").append(data);
-		addDragable($(".sidebar-nav .box"));
+		connectDnD($(".sidebar-nav .box"));
+	});
+	
+	//add palette slide
+	$(".nav-header").click(function()
+	{
+		$(".sidebar-nav .boxes, .sidebar-nav .rows").hide();
+		$(this).next().slideDown()
 	});
 }
 
@@ -311,62 +322,74 @@ $(document).ready(function()
 {
 	//some corrections
 	$("body").css("min-height",$(window).height()-90);
-	$(".demo").css("min-height",$(window).height()-160);
+	$("#canvas").css("min-height",$(window).height()-160);
 
 	fillPalette();
 	
-	$(".demo, .demo .column").sortable(
+	//initial drop positions
+	$("#canvas, .container, #canvas .column").sortable(
 	{
 		connectWith:".column",opacity:.35,handle:".drag"
 	});
 
-	$("[data-target=#downloadModal]").click(function(e)
-	{
-		e.preventDefault();downloadLayoutSrc()
-	});
-	
-	$("#download").click(function()
-	{
-		downloadLayout();return false
-	});
-	
-	$("#downloadhtml").click(function()
-	{
-		downloadHtmlLayout();return false
-	});
-	
+	//view click handlers
 	$("#edit").click(function()
 	{
-		$("body").removeClass("devpreview sourcepreview");$("body").addClass("edit");removeMenuClasses();$(this).addClass("active");return false
+		$("body").removeClass("editor devpreview sourcepreview");
+		$("body").addClass("editor");
+		removeMenuClasses();
+		$(this).addClass("active");
+		return false
 	});
-	
-	$("#clear").click(function(e)
-	{
-		e.preventDefault();clearDemo()
-	});
-	
 	$("#devpreview").click(function()
 	{
-		$("body").removeClass("edit sourcepreview");$("body").addClass("devpreview");removeMenuClasses();$(this).addClass("active");return false
+		$("body").removeClass("editor devpreview sourcepreview");
+		$("body").addClass("devpreview");
+		removeMenuClasses();
+		$(this).addClass("active");
+		return false
 	});
-	
 	$("#sourcepreview").click(function()
 	{
-		$("body").removeClass("edit");$("body").addClass("devpreview sourcepreview");removeMenuClasses();$(this).addClass("active");return false
+		$("body").removeClass("editor devpreview sourcepreview");
+		$("body").addClass("sourcepreview");
+		removeMenuClasses();
+		$(this).addClass("active");
+		return false
 	});
 	
-	$(".nav-header").click(function()
+	//action click handlers
+	$("#save").click(function(e)
 	{
-		$(".sidebar-nav .boxes, .sidebar-nav .rows").hide();$(this).next().slideDown()
+		e.preventDefault();
+		downloadLayoutSrc();
 	});
+	$("#refresh").click(function()
+	{
+		return false
+	});
+	$("#clear").click(function(e)
+	{
+		e.preventDefault();
+		clearDemo()
+	});
+			
+	//attach canvas size handlers
+	var defaultsize = function()
+	{
+		$("#canvas").removeClass("size-desktop size-tablet size-phone").addClass("size-desktop");
+	}
+	$("#size-desktop").click(defaultsize);
+	$("#size-tablet").click(function()
+	{
+		$("#canvas").removeClass("size-desktop size-tablet size-phone").addClass("size-tablet");
+	});
+	$("#size-phone").click(function()
+	{
+		$("#canvas").removeClass("size-desktop size-tablet size-phone").addClass("size-phone");
+	});
+	defaultsize();
 	
 	removeElm();
-	
 	configurationElm();
-
-//	setInterval(function()
-//	{
-//		handleSaveLayout()
-//	}
-//	,timerSave)
 });
