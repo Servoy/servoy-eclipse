@@ -201,7 +201,7 @@ function removeMenuClasses()
 
 function changeStructure(e,t)
 {
-	$("#download-layout ."+e).removeClass(e).addClass(t)
+	$("#src ."+e).removeClass(e).addClass(t)
 }
 
 function cleanHtml(e)
@@ -212,31 +212,26 @@ function cleanHtml(e)
 function downloadLayoutSrc()
 {
 	var e="";
-	$("#download-layout").children().html($("#canvas").html());
-	var t=$("#download-layout").children();
+	$("#src").html($("#canvas").html());
+	var t=$("#src").children();
 	t.find(".preview, .configuration, .drag, .remove").remove();
 	t.find(".lyrow").addClass("removeClean");t.find(".box-element").addClass("removeClean");
 	t.find(".lyrow .lyrow .lyrow .lyrow .lyrow .removeClean").each(function()
 	{
 		cleanHtml(this)
 	});
-	
 	t.find(".lyrow .lyrow .lyrow .lyrow .removeClean").each(function()
 	{
 		cleanHtml(this)
 	});
-	
 	t.find(".lyrow .lyrow .lyrow .removeClean").each(function()
 	{
 		cleanHtml(this)
-	}
-	);
-	
+	});
 	t.find(".lyrow .lyrow .removeClean").each(function()
 	{
 		cleanHtml(this)
 	});
-	
 	t.find(".lyrow .removeClean").each(function()
 	{
 		cleanHtml(this)
@@ -245,21 +240,19 @@ function downloadLayoutSrc()
 	{
 		cleanHtml(this)
 	});
-	
 	t.find(".removeClean").remove();
-	$("#download-layout .column").removeClass("ui-sortable");
-	$("#download-layout .row-fluid").removeClass("clearfix").children().removeClass("column");
-	if($("#download-layout .container").length>0)
+	$("#src .column").removeClass("ui-sortable");
+	$("#src .row-fluid").removeClass("clearfix").children().removeClass("column");
+	if($("#src .container").length>0)
 	{
 		changeStructure("row-fluid","row")
 	}
-	
-	formatSrc=$.htmlClean($("#download-layout").html(),
+	var formatSrc=$.htmlClean($("#src").html(),
 	{
 		format:true,allowedAttributes:[["id"],["class"],["data-toggle"],["data-target"],["data-parent"],["role"],["data-dismiss"],["aria-labelledby"],["aria-hidden"],["data-slide-to"],["data-slide"]]
 	});
-	
-	$("#download-layout").html(formatSrc);$("#downloadModal textarea").empty();$("#downloadModal textarea").val(formatSrc)
+	$("#src").html('');
+	return formatSrc;
 }
 
 var currentDocument=null;var timerSave=2e3;var demoHtml=$("#canvas").html();$(window).resize(function()
@@ -362,7 +355,7 @@ $(document).ready(function()
 	$("#save").click(function(e)
 	{
 		e.preventDefault();
-		downloadLayoutSrc();
+		window.prompt("Copy to clipboard: Ctrl+C, Enter", downloadLayoutSrc());
 	});
 	$("#refresh").click(function()
 	{
