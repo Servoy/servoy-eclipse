@@ -36,6 +36,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Widget;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.dataprocessing.IUIConverter;
 import com.servoy.j2db.persistence.Column;
@@ -305,8 +307,16 @@ public class FormatDialog extends Dialog
 	@Override
 	protected void okPressed()
 	{
-		parsedFormat = formatComposite.getParsedFormat().getCopy(parsedFormat.getUIConverterName(), parsedFormat.getUIConverterProperties());
-		super.okPressed();
+		try
+		{
+			parsedFormat = formatComposite.getParsedFormat().getCopy(parsedFormat.getUIConverterName(), parsedFormat.getUIConverterProperties());
+			super.okPressed();
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
+			UIUtils.reportError("Unexpected error while parsing format", ex.getMessage());
+		}
 	}
 
 	@Override
