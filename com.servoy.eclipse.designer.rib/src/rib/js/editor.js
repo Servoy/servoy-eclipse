@@ -143,7 +143,7 @@ function fillGridSystemGeneratorPalette()
 	});
 }
 
-function configurationElm(e,t)
+function installConfigurationDelegateAction(e,t)
 {
 	$("#canvas").delegate(".configuration > a","click",function(e)
 	{
@@ -168,7 +168,7 @@ function configurationElm(e,t)
 	});
 }
 
-function removeElm()
+function installRemoveDelegateAction()
 {
 	$("#canvas").delegate(".remove","click",function(e)
 	{
@@ -247,27 +247,31 @@ function downloadLayoutSrc()
 	return formatSrc;
 }
 
-var currentDocument=null;var timerSave=2e3;var demoHtml=$("#canvas").html();$(window).resize(function()
+$(window).resize(function()
 {
 	$("body").css("min-height",$(window).height()-90);$("#canvas").css("min-height",$(window).height()-160)
 });
 
-function connectDnD(elems)
+function connectPaletteDnD(elems)
 {
 	if (window.absolute_layout)
 	{
 		elems.draggable(
 		{
 			helper:"clone",handle:".drag",
-			drag:function(e,t)
+			drag:function(e,ui)
 			{
-				t.helper.width(400);
+				ui.helper.width(400);
 			},
-			stop:function()
+			stop:function(e,ui)
 			{
-				$("#canvas .box").selectable({
-					filter: ".box"
-				});
+				//move a clone of helper to canvas
+				var clone = $(ui.helper).clone(true).removeClass('ui-draggable ui-draggable-dragging');
+//				clone.position( { of: $(this), my: 'left top', at: 'left top' } );
+				$("#canvas").append(clone);
+				
+				//make clone draggable/selectable
+				connectElementDnD(clone);
 			}
 		});
 	}
@@ -276,9 +280,9 @@ function connectDnD(elems)
 		elems.draggable(
 		{
 			connectToSortable:".column",helper:"clone",handle:".drag",
-			drag:function(e,t)
+			drag:function(e,ui)
 			{
-				t.helper.width(400);
+				ui.helper.width(400);
 			},
 			stop:function()
 			{
@@ -298,25 +302,25 @@ function fillPalette()
 	//dynamically add one category in palette 
 	$.get("palette/base.template", function(data){
 		$("#elmBase").append(data);
-		connectDnD($(".sidebar-nav .box"));
+		connectPaletteDnD($(".sidebar-nav .box"));
 	});
 
 	//dynamically add one category in palette 
 	$.get("palette/components.template", function(data){
 		$("#elmComponents").append(data);
-		connectDnD($(".sidebar-nav .box"));
+		connectPaletteDnD($(".sidebar-nav .box"));
 	});
 
 	//dynamically add one category in palette 
 	$.get("palette/advanced.template", function(data){
 		$("#elmJS").append(data);
-		connectDnD($(".sidebar-nav .box"));
+		connectPaletteDnD($(".sidebar-nav .box"));
 	});
 	
 	//dynamically add one item to palette category
 	$.get("palette/progressbar.template", function(data){
 		$("#elmComponents").append(data);
-		connectDnD($(".sidebar-nav .box"));
+		connectPaletteDnD($(".sidebar-nav .box"));
 	});
 	
 	//add palette slide
@@ -344,66 +348,54 @@ function getURLParameter(sParam)
 //this creates the selected variable
 //we are going to store the selected objects in here
 var selected = $([]), offset = {top:0, left:0}; 
-
-function enableAbsoluteLayout()
+function connectElementDnD(elem)
 {
-	//set global var
-	window.absolute_layout = true;
-	
-	//set helper class
-	$("body").addClass("abs");
-
-	var elementselect = "#canvas .box";
-	$( elementselect ).draggable({
-	 start: function(ev, ui) {
-	     if ($(this).hasClass("ui-selected")){
-	         selected = $(".ui-selected").each(function() {
-	            var el = $(this);
-	            el.data("offset", el.offset());
-	         });
-	     }
-	     else {
-	         selected = $([]);
-	         $(elementselect).removeClass("ui-selected");
-	     }
-	     offset = $(this).offset();
-	 },
-	 drag: function(ev, ui) {
-	     var dt = ui.position.top - offset.top, dl = ui.position.left - offset.left;
-	     // take all the elements that are selected except $("this"), which is the element being dragged and loop through each.
-	     selected.not(this).each(function() {
-	          // create the variable for we don't need to keep calling $("this")
-	          // el = current element we are on
-	          // off = what position was this element at when it was selected, before drag
-	          var el = $(this), off = el.data("offset");
-	         el.css({top: off.top + dt, left: off.left + dl});
-	     });
-	 }
-	});
-	
-	$("#canvas").selectable({
-		filter: ".box" 
+	elem.draggable({
+		handle:".drag",
+		start: function(ev, ui) {
+		    if ($(this).hasClass("ui-selected")){
+		        selected = $(".ui-selected").each(function() {
+		           var el = $(this);
+		           el.data("offset", el.offset());
+		        });
+		    }
+		    else {
+		        selected = $([]);
+		        elem.removeClass("ui-selected");
+		    }
+		    offset = $(this).offset();
+		},
+		drag: function(ev, ui) {
+		    var dt = ui.position.top - offset.top, dl = ui.position.left - offset.left;
+		    // take all the elements that are selected except $("this"), which is the element being dragged and loop through each.
+		    selected.not(this).each(function() {
+		         // create the variable for we don't need to keep calling $("this")
+		         // el = current element we are on
+		         // off = what position was this element at when it was selected, before drag
+		         var el = $(this), off = el.data("offset");
+		         el.css({top: off.top + dt, left: off.left + dl});
+		    });
+		}
 	});
 	
 	//manually trigger the "select" of clicked elements
-	$( elementselect ).click( function(e){
-	 if (e.ctrlKey == false) {
-	     // if command key is pressed don't deselect existing elements
-	     $( elementselect ).removeClass("ui-selected");
-	     $(this).addClass("ui-selecting");
-	 }
-	 else {
-	     if ($(this).hasClass("ui-selected")) {
-	         // remove selected class from element if already selected
-	         $(this).removeClass("ui-selected");
-	     }
-	     else {
-	         // add selecting class if not
-	         $(this).addClass("ui-selecting");
-	     }
-	 }
-	 
-	 $( "#canvas" ).data("selectable")._mouseStop(null);
+	elem.click( function(e){
+		if (e.ctrlKey == false) {
+		    // if command key is pressed don't deselect existing elements
+		    elem.removeClass("ui-selected");
+		    $(this).addClass("ui-selecting");
+		}
+		else {
+		    if ($(this).hasClass("ui-selected")) {
+		        // remove selected class from element if already selected
+		        $(this).removeClass("ui-selected");
+		    }
+		    else {
+		        // add selecting class if not
+		        $(this).addClass("ui-selecting");
+		    }
+		}
+		$( "#canvas" ).data("selectable")._mouseStop(null);
 	});
 }
 
@@ -413,10 +405,18 @@ $(document).ready(function()
 	$("body").css("min-height",$(window).height()-90);
 	$("#canvas").css("min-height",$(window).height()-160);
 
-	//enable absolute layout
+	//enable absolute layout if parameter is present
 	if (getURLParameter("absolute_layout") == "true")
 	{
-		enableAbsoluteLayout();
+		//set global var
+		window.absolute_layout = true;
+		
+		//set helper class
+		$("body").addClass("abs");
+
+		$("#canvas").selectable({
+			filter:".box",cancel:"a,span",delay:150 
+		});
 	}
 
 	fillPalette();
@@ -424,15 +424,7 @@ $(document).ready(function()
 	//initial drop positions
 	if (window.absolute_layout)
 	{
-		$("#canvas").droppable(
-		{
-			drop:function(e,ui)
-			{
-				var clone = $(ui.helper).clone(true).removeClass('ui-draggable ui-draggable-dragging');
-//				clone.position( { of: $(this), my: 'left top', at: 'left top' } );
-				$("#canvas").append(clone);
-			}
-		});
+		$("#canvas").droppable();
 	}
 	else
 	{
@@ -500,6 +492,6 @@ $(document).ready(function()
 	});
 	defaultsize();
 	
-	removeElm();
-	configurationElm();
+	installRemoveDelegateAction();
+	installConfigurationDelegateAction();
 });
