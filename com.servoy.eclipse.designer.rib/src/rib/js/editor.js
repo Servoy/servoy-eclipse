@@ -174,10 +174,6 @@ function installRemoveDelegateAction()
 	{
 		e.preventDefault();
 		$(this).parent().remove();
-		if(!$("#canvas .lyrow").length>0)
-		{
-			clearDemo()
-		}
 	});
 }
 
@@ -246,11 +242,6 @@ function downloadLayoutSrc()
 	$("#src").html('');
 	return formatSrc;
 }
-
-$(window).resize(function()
-{
-	$("body").css("min-height",$(window).height()-90);$("#canvas").css("min-height",$(window).height()-160)
-});
 
 function connectPaletteDnD(elems)
 {
@@ -399,31 +390,35 @@ function connectElementDnD(elem)
 	});
 }
 
-$(document).ready(function()
+function windowResizer()
 {
-	//some corrections
 	$("body").css("min-height",$(window).height()-90);
 	$("#canvas").css("min-height",$(window).height()-160);
+}
+
+$(document).ready(function()
+{
+	//apply corrections
+	$(window).resize(windowResizer);
+	windowResizer();
 
 	//enable absolute layout if parameter is present
 	if (getURLParameter("absolute_layout") == "true")
 	{
 		//set global var
 		window.absolute_layout = true;
-		
+	}
+	
+	//initial drop positions
+	if (window.absolute_layout)
+	{
 		//set helper class
 		$("body").addClass("abs");
 
 		$("#canvas").selectable({
 			filter:".box",cancel:"a,span",delay:150 
 		});
-	}
 
-	fillPalette();
-	
-	//initial drop positions
-	if (window.absolute_layout)
-	{
 		$("#canvas").droppable();
 	}
 	else
@@ -433,6 +428,8 @@ $(document).ready(function()
 			connectWith:".column",opacity:.35,handle:".drag"
 		});
 	}
+
+	fillPalette();
 	
 	//view click handlers
 	$("#edit").click(function()
