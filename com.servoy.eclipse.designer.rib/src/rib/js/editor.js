@@ -124,11 +124,12 @@ function fillGridSystemGeneratorPalette()
 	//make them draggable
 	$(".sidebar-nav .lyrow").draggable(
 	{
-		connectToSortable:"#canvas, #canvas .container",helper:"clone",handle:".drag",drag:function(e,t)
+		connectToSortable:"#canvas, #canvas .container",helper:"clone",handle:".drag",
+		drag:function(e,t)
 		{
 			t.helper.width(400)
-		}
-		,stop:function(e,t)
+		},
+		stop:function(e,t)
 		{
 			$("#canvas .column").sortable(
 			{
@@ -253,23 +254,47 @@ var currentDocument=null;var timerSave=2e3;var demoHtml=$("#canvas").html();$(wi
 
 function connectDnD(elems)
 {
-	elems.draggable(
+	if (window.absolute_layout)
 	{
-		connectToSortable:".column",helper:"clone",handle:".drag",drag:function(e,t)
+		elems.draggable(
 		{
-			t.helper.width(400)
-		}
-		,stop:function()
+			helper:"clone",handle:".drag",
+			drag:function(e,t)
+			{
+				t.helper.width(400);
+			},
+			stop:function()
+			{
+				$("#canvas .box").selectable({
+					filter: ".box"
+				});
+			}
+		});
+	}
+	else
+	{
+		elems.draggable(
 		{
-			handleJsIds()
-		}
-	});
+			connectToSortable:".column",helper:"clone",handle:".drag",
+			drag:function(e,t)
+			{
+				t.helper.width(400);
+			},
+			stop:function()
+			{
+				handleJsIds();
+			}
+		});
+	}
 }
 
 function fillPalette()
 {
-	fillGridSystemGeneratorPalette();
-
+	if (!window.absolute_layout)
+	{
+		fillGridSystemGeneratorPalette();
+	}
+	
 	//dynamically add one category in palette 
 	$.get("palette/base.template", function(data){
 		$("#elmBase").append(data);
@@ -302,20 +327,121 @@ function fillPalette()
 	});
 }
 
+function getURLParameter(sParam)
+{
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split('&');
+    for (var i = 0; i < sURLVariables.length; i++) 
+    {
+        var sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] == sParam) 
+        {
+            return sParameterName[1];
+        }
+    }
+}
+
+//this creates the selected variable
+//we are going to store the selected objects in here
+var selected = $([]), offset = {top:0, left:0}; 
+
+function enableAbsoluteLayout()
+{
+	//set global var
+	window.absolute_layout = true;
+	
+	//set helper class
+	$("body").addClass("abs");
+
+	var elementselect = "#canvas .box";
+	$( elementselect ).draggable({
+	 start: function(ev, ui) {
+	     if ($(this).hasClass("ui-selected")){
+	         selected = $(".ui-selected").each(function() {
+	            var el = $(this);
+	            el.data("offset", el.offset());
+	         });
+	     }
+	     else {
+	         selected = $([]);
+	         $(elementselect).removeClass("ui-selected");
+	     }
+	     offset = $(this).offset();
+	 },
+	 drag: function(ev, ui) {
+	     var dt = ui.position.top - offset.top, dl = ui.position.left - offset.left;
+	     // take all the elements that are selected except $("this"), which is the element being dragged and loop through each.
+	     selected.not(this).each(function() {
+	          // create the variable for we don't need to keep calling $("this")
+	          // el = current element we are on
+	          // off = what position was this element at when it was selected, before drag
+	          var el = $(this), off = el.data("offset");
+	         el.css({top: off.top + dt, left: off.left + dl});
+	     });
+	 }
+	});
+	
+	$("#canvas").selectable({
+		filter: ".box" 
+	});
+	
+	//manually trigger the "select" of clicked elements
+	$( elementselect ).click( function(e){
+	 if (e.ctrlKey == false) {
+	     // if command key is pressed don't deselect existing elements
+	     $( elementselect ).removeClass("ui-selected");
+	     $(this).addClass("ui-selecting");
+	 }
+	 else {
+	     if ($(this).hasClass("ui-selected")) {
+	         // remove selected class from element if already selected
+	         $(this).removeClass("ui-selected");
+	     }
+	     else {
+	         // add selecting class if not
+	         $(this).addClass("ui-selecting");
+	     }
+	 }
+	 
+	 $( "#canvas" ).data("selectable")._mouseStop(null);
+	});
+}
+
 $(document).ready(function()
 {
 	//some corrections
 	$("body").css("min-height",$(window).height()-90);
 	$("#canvas").css("min-height",$(window).height()-160);
 
+	//enable absolute layout
+	if (getURLParameter("absolute_layout") == "true")
+	{
+		enableAbsoluteLayout();
+	}
+
 	fillPalette();
 	
 	//initial drop positions
-	$("#canvas, .container, #canvas .column").sortable(
+	if (window.absolute_layout)
 	{
-		connectWith:".column",opacity:.35,handle:".drag"
-	});
-
+		$("#canvas").droppable(
+		{
+			drop:function(e,ui)
+			{
+				var clone = $(ui.helper).clone(true).removeClass('ui-draggable ui-draggable-dragging');
+//				clone.position( { of: $(this), my: 'left top', at: 'left top' } );
+				$("#canvas").append(clone);
+			}
+		});
+	}
+	else
+	{
+		$("#canvas, .container, #canvas .column").sortable(
+		{
+			connectWith:".column",opacity:.35,handle:".drag"
+		});
+	}
+	
 	//view click handlers
 	$("#edit").click(function()
 	{

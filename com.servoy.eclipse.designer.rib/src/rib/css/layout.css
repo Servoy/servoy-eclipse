@@ -123,6 +123,13 @@ body {
 	top: -1px;
 }
 
+.abs #gridOptions { display: none; }
+.abs #canvas,
+.abs #canvas .box  {
+	position: absolute;
+}
+.ui-selected {border: 1px dashed #ddd}
+
 .editor #canvas {
 	margin-right:10px; 
 	background: white;
@@ -137,16 +144,16 @@ body {
 
 .box,.lyrow { position:relative;}
 
-.editor #canvas .lyrow .drag { top:5px; right:30px; z-index:10; }
-.editor #canvas .column .box .drag { top:5px; }
-.editor #canvas .column .box .configuration {position: absolute; top: 3px; right: 140px;white-space:nowrap; }
-.editor #canvas .column .box .configuration:hover { z-index:1001;}
+.editor #canvas .remove { position: absolute; top: 5px; right: 5px; z-index:10; }
+.editor #canvas .drag { top:5px; right:30px; z-index:10; }
+
+.editor #canvas .configuration {position: absolute; top: 3px; right: 140px;white-space:nowrap; }
+.editor #canvas .configuration:hover { z-index:1001;}
 
 .editor #canvas .column .navbar-fixed-top {top: 33px; left: 180px;}
 #canvas .column .navbar-fixed-top {top: 33px;}
 .editor #canvas .column .navbar-fixed-bottom { left: 180px;}
 
-.editor #canvas .remove { position: absolute; top: 5px; right: 5px; z-index:10; }
 #canvas .configuration {
 	filter: alpha(opacity=0);
 	opacity: 0;
