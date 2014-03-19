@@ -7,7 +7,7 @@
 	<property name="basearch" value="${arch}"/>
 	<property name="basenl" value="${nl}"/>
 	<property name="bundleId" value="com.servoy.eclipse.model.exporter.mobile"/>
-	<property name="bundleVersion" value="7.4.0.2025"/>
+	<property name="bundleVersion" value="7.4.0.2026"/>
 	<property name="p2.publishonerror" value="false"/>
 
 	<!-- Compiler settings. -->
@@ -20,10 +20,7 @@
 	<property name="javacSource" value="1.3"/>
 	<property name="javacTarget" value="1.2"/>
 	<condition property="dir_bootclasspath" value="${java.home}/../Classes">
-		<and>
-			<os family="mac"/>
-			<available file="${java.home}/../Classes" type="dir"/>
-		</and>
+		<os family="mac"/>
 	</condition>
 	<property name="dir_bootclasspath" value="${java.home}/lib"/>
 	<path id="path_bootclasspath">
@@ -50,7 +47,7 @@
 			<isset property="buildTempFolder"/>
 		</condition>
 		<property name="pluginTemp" value="${basedir}"/>
-		<condition property="build.result.folder" value="${pluginTemp}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2025"		>
+		<condition property="build.result.folder" value="${pluginTemp}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2026"		>
 			<isset property="buildTempFolder"/>
 		</condition>
 		<property name="build.result.folder" value="${basedir}"/>
@@ -80,7 +77,7 @@
 		<antcall target="gather.bin.parts">
 			<param name="destination.temp.folder" value="${temp.folder}/"/>
 		</antcall>
-		<jar destfile="${plugin.destination}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2025.jar" basedir="${temp.folder}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2025" filesetmanifest="merge"/>
+		<jar destfile="${plugin.destination}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2026.jar" basedir="${temp.folder}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2026" filesetmanifest="merge"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
@@ -331,22 +328,22 @@
 	</target>
 
 	<target name="checkCompilationResults" if="compilation.error.occured">
-		<echo file="${compilation.problem.marker}" message="com.servoy.eclipse.model.exporter.mobile_7.4.0.2025${line.separator}compilation.error.occured=${compilation.error.occured}"/>
-		<eclipse.logCompileError bundle="com.servoy.eclipse.model.exporter.mobile_7.4.0.2025" log="${compilation.prereq.log}">
-			<include name="E:/Workspaces/7_4/servoy_smart_client/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_smart_client_7.4.0.2025/compilation.problem"/>
-			<include name="E:/Workspaces/7_4/com.servoy.eclipse.model/compilation.problem"/>
-			<include name="${pluginTemp}/com.servoy.eclipse.model_7.4.0.2025/compilation.problem"/>
-			<include name="E:/Workspaces/7_4/servoy_headless_client/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_headless_client_7.4.0.2025/compilation.problem"/>
-			<include name="E:/Workspaces/7_4/servoy_debug/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_debug_7.4.0.2025/compilation.problem"/>
-			<include name="E:/Workspaces/7_4/org.eclipse.dltk.javascript.rhino/compilation.problem"/>
-			<include name="${pluginTemp}/org.eclipse.dltk.javascript.rhino_7.4.0.2025/compilation.problem"/>
-			<include name="E:/Workspaces/7_4/servoy_shared/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_shared_7.4.0.2025/compilation.problem"/>
-			<include name="E:/Workspaces/7_4/servoy_base/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_base_7.4.0.2025/compilation.problem"/>
+		<echo file="${compilation.problem.marker}" message="com.servoy.eclipse.model.exporter.mobile_7.4.0.2026${line.separator}compilation.error.occured=${compilation.error.occured}"/>
+		<eclipse.logCompileError bundle="com.servoy.eclipse.model.exporter.mobile_7.4.0.2026" log="${compilation.prereq.log}">
+			<include name="C:/Users/Administrator/dev_v7xx_branch/org.eclipse.dltk.javascript.rhino/compilation.problem"/>
+			<include name="${pluginTemp}/org.eclipse.dltk.javascript.rhino_7.4.0.2026/compilation.problem"/>
+			<include name="C:/Users/Administrator/dev_v7xx_branch/servoy_headless_client/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_headless_client_7.4.0.2026/compilation.problem"/>
+			<include name="C:/Users/Administrator/dev_v7xx_branch/servoy_debug/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_debug_7.4.0.2026/compilation.problem"/>
+			<include name="C:/Users/Administrator/dev_v7xx_branch/servoy_shared/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_shared_7.4.0.2026/compilation.problem"/>
+			<include name="C:/Users/Administrator/dev_v7xx_branch/servoy_base/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_base_7.4.0.2026/compilation.problem"/>
+			<include name="C:/Users/Administrator/dev_v7xx_branch/servoy_smart_client/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_smart_client_7.4.0.2026/compilation.problem"/>
+			<include name="C:/Users/Administrator/dev_v7xx_branch/com.servoy.eclipse.model/compilation.problem"/>
+			<include name="${pluginTemp}/com.servoy.eclipse.model_7.4.0.2026/compilation.problem"/>
 		</eclipse.logCompileError>
 	</target>
 
@@ -356,7 +353,7 @@
 	</target>
 
 	<target name="publish.bin.parts" depends="init" if="p2.publish.parts" unless="compilation.problem.marker.exists">
-		<mkdir dir="${build.result.folder}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2025"/>
+		<mkdir dir="${build.result.folder}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2026"/>
 		<copy todir="${build.result.folder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}">
 				<include name="META-INF/MANIFEST.MF"/>
@@ -367,7 +364,7 @@
 		<antcall target="apitools.generation">
 			<param name="target.folder" value="${build.result.folder}"/>
 			<param name="projectLocation" value="${basedir}"/>
-			<param name="binary.folders" value="${build.result.folder}/@dot;E:\Workspaces\7_4\com.servoy.eclipse.model.exporter.mobile/lib/webbit-0.4.15.jar;E:\Workspaces\7_4\com.servoy.eclipse.model.exporter.mobile/lib/json-20090211.jar;E:\Workspaces\7_4\com.servoy.eclipse.model.exporter.mobile/lib/js.jar;E:\Workspaces\7_4\com.servoy.eclipse.model.exporter.mobile/lib/jshybugger.jar;E:\Workspaces\7_4\com.servoy.eclipse.model.exporter.mobile/lib/netty-3.6.5.Final.jar"/>
+			<param name="binary.folders" value="${build.result.folder}/@dot;C:\Users\Administrator\dev_v7xx_branch\com.servoy.eclipse.model.exporter.mobile/lib/webbit-0.4.15.jar;C:\Users\Administrator\dev_v7xx_branch\com.servoy.eclipse.model.exporter.mobile/lib/json-20090211.jar;C:\Users\Administrator\dev_v7xx_branch\com.servoy.eclipse.model.exporter.mobile/lib/js.jar;C:\Users\Administrator\dev_v7xx_branch\com.servoy.eclipse.model.exporter.mobile/lib/jshybugger.jar;C:\Users\Administrator\dev_v7xx_branch\com.servoy.eclipse.model.exporter.mobile/lib/netty-3.6.5.Final.jar"/>
 			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
 		</antcall>
 		<eclipse.gatherBundle 
@@ -380,13 +377,13 @@
 	</target>
 
 	<target name="gather.bin.parts" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2025"/>
-		<copy todir="${destination.temp.folder}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2025" failonerror="true" overwrite="false">
+		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2026"/>
+		<copy todir="${destination.temp.folder}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2026" failonerror="true" overwrite="false">
 			<fileset dir="${build.result.folder}/@dot">
 				<include name="**"/>
 			</fileset>
 		</copy>
-		<copy todir="${destination.temp.folder}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2025" failonerror="true" overwrite="true">
+		<copy todir="${destination.temp.folder}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2026" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}">
 				<include name="META-INF/"/>
 				<include name="lib/js.jar"/>
@@ -397,9 +394,9 @@
 			</fileset>
 		</copy>
 		<antcall target="apitools.generation">
-			<param name="target.folder" value="${destination.temp.folder}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2025"/>
+			<param name="target.folder" value="${destination.temp.folder}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2026"/>
 			<param name="projectLocation" value="${basedir}"/>
-			<param name="binary.folders" value="${build.result.folder}/@dot;E:\Workspaces\7_4\com.servoy.eclipse.model.exporter.mobile/lib/webbit-0.4.15.jar;E:\Workspaces\7_4\com.servoy.eclipse.model.exporter.mobile/lib/json-20090211.jar;E:\Workspaces\7_4\com.servoy.eclipse.model.exporter.mobile/lib/js.jar;E:\Workspaces\7_4\com.servoy.eclipse.model.exporter.mobile/lib/jshybugger.jar;E:\Workspaces\7_4\com.servoy.eclipse.model.exporter.mobile/lib/netty-3.6.5.Final.jar"/>
+			<param name="binary.folders" value="${build.result.folder}/@dot;C:\Users\Administrator\dev_v7xx_branch\com.servoy.eclipse.model.exporter.mobile/lib/webbit-0.4.15.jar;C:\Users\Administrator\dev_v7xx_branch\com.servoy.eclipse.model.exporter.mobile/lib/json-20090211.jar;C:\Users\Administrator\dev_v7xx_branch\com.servoy.eclipse.model.exporter.mobile/lib/js.jar;C:\Users\Administrator\dev_v7xx_branch\com.servoy.eclipse.model.exporter.mobile/lib/jshybugger.jar;C:\Users\Administrator\dev_v7xx_branch\com.servoy.eclipse.model.exporter.mobile/lib/netty-3.6.5.Final.jar"/>
 			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
 		</antcall>
 	</target>
@@ -408,10 +405,10 @@
 	</target>
 
 	<target name="gather.sources" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2025"/>
-		<copy file="${build.result.folder}/src.zip" todir="${destination.temp.folder}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2025" failonerror="false" overwrite="false"/>
+		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2026"/>
+		<copy file="${build.result.folder}/src.zip" todir="${destination.temp.folder}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2026" failonerror="false" overwrite="false"/>
 		<antcall target="copy.src.includes">
-			<param name="source.destination.folder" value="${destination.temp.folder}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2025"/>
+			<param name="source.destination.folder" value="${destination.temp.folder}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2026"/>
 		</antcall>
 	</target>
 
@@ -428,8 +425,8 @@
 	</target>
 
 	<target name="gather.logs" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2025"/>
-		<copy todir="${destination.temp.folder}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2025" failonerror="false" overwrite="false">
+		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2026"/>
+		<copy todir="${destination.temp.folder}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2026" failonerror="false" overwrite="false">
 			<fileset dir="${build.result.folder}">
 				<include name="@dot${logExtension}"/>
 			</fileset>
@@ -439,14 +436,14 @@
 	<target name="clean" depends="init" description="Clean the plug-in: com.servoy.eclipse.model.exporter.mobile of all the zips, jars and logs created.">
 		<delete dir="${build.result.folder}/@dot"/>
 		<delete file="${build.result.folder}/src.zip"/>
-		<delete file="${plugin.destination}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2025.jar"/>
-		<delete file="${plugin.destination}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2025.zip"/>
+		<delete file="${plugin.destination}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2026.jar"/>
+		<delete file="${plugin.destination}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2026.zip"/>
 		<delete dir="${temp.folder}"/>
 		<delete file="${compilation.problem.marker}" quiet="true"/>
 	</target>
 
 	<target name="refresh" depends="init" if="eclipse.running" description="Refresh this folder.">
-		<eclipse.convertPath fileSystemPath="E:/Workspaces/7_4/com.servoy.eclipse.model.exporter.mobile" property="resourcePath"/>
+		<eclipse.convertPath fileSystemPath="C:/Users/Administrator/dev_v7xx_branch/com.servoy.eclipse.model.exporter.mobile" property="resourcePath"/>
 		<eclipse.refreshLocal resource="${resourcePath}" depth="infinite"/>
 	</target>
 
@@ -466,7 +463,7 @@
 				<include name="**/*.bin${logExtension}"/>
 			</fileset>
 		</delete>
-		<zip destfile="${plugin.destination}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2025.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
+		<zip destfile="${plugin.destination}/com.servoy.eclipse.model.exporter.mobile_7.4.0.2026.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
