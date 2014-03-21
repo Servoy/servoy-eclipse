@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Servoy Designer Rfb Plug-in
+Bundle-SymbolicName: com.servoy.eclipse.designer.rfb;singleton:=true
+Bundle-Version: 8.0.0.3000
+Bundle-Vendor: Servoy
+Require-Bundle: org.apache.tomcat;bundle-version="7.0.52",
+ javax.servlet;bundle-version="3.0.0",
+ servoy_shared,
+ javax.websocket
+Export-Package: com.servoy.eclipse.designer.rfb.editor
+Bundle-ClassPath: .

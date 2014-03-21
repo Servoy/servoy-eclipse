@@ -1,4 +1,4 @@
-package com.servoy.eclipse.designer.rib.startup;
+package com.servoy.eclipse.designer.rfb.startup;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.servoy.j2db.util.MimeTypes;
 import com.servoy.j2db.util.Utils;
 
-@WebServlet("/rib/*")
+@WebServlet("/rfb/*")
 public class ResourcesServlet extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;

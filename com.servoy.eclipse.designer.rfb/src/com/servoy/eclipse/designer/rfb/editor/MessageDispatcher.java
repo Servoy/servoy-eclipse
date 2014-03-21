@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.designer.rib.editor;
+package com.servoy.eclipse.designer.rfb.editor;
 
 import java.util.ArrayList;
 import java.util.HashMap;

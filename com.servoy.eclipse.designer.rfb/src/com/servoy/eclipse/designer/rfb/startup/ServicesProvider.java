@@ -1,4 +1,4 @@
-package com.servoy.eclipse.designer.rib.startup;
+package com.servoy.eclipse.designer.rfb.startup;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -7,9 +7,9 @@ import javax.servlet.annotation.WebServlet;
 
 import org.apache.tomcat.starter.IServicesProvider;
 
-import com.servoy.eclipse.designer.rib.editor.FormEditorEndpoint;
+import com.servoy.eclipse.designer.rfb.editor.FormEditorEndpoint;
 
-@WebServlet("/rib/*")
+@WebServlet("/rfb/*")
 public class ServicesProvider implements IServicesProvider
 {
 	public void registerServices()
@@ -18,7 +18,7 @@ public class ServicesProvider implements IServicesProvider
 
 	public Set<Class< ? >> getAnnotatedClasses(String context)
 	{
-		// rib stuff are only reported for the root context in developer.
+		// rfb stuff are only reported for the root context in developer.
 		if ("".equals(context))
 		{
 			HashSet<Class< ? >> set = new HashSet<Class< ? >>();
