@@ -126,7 +126,7 @@ public class CustomViewportAutoexposeHelper extends CustomViewportHelper impleme
 		port.getClientArea(rect);
 		port.translateToParent(rect);
 		port.translateToAbsolute(rect);
-		return rect.contains(where) && !rect.crop(threshold).contains(where);
+		return rect.contains(where) && !rect.shrink(threshold).contains(where);
 	}
 
 	/**
@@ -146,7 +146,8 @@ public class CustomViewportAutoexposeHelper extends CustomViewportHelper impleme
 		port.translateToParent(rect);
 		port.translateToAbsolute(rect);
 
-		if (!(continueIfOutside || rect.contains(where)) || rect.crop(threshold).contains(where)) return false;
+		// note, rect.shrink modified rect
+		if (!(continueIfOutside || rect.contains(where)) || rect.shrink(threshold).contains(where)) return false;
 
 		//if (!rect.contains(where) || rect.crop(threshold).contains(where)) return false;
 
@@ -166,8 +167,6 @@ public class CustomViewportAutoexposeHelper extends CustomViewportHelper impleme
 
 		if (scrollOffset == 0) return true;
 
-		rect.shrink(threshold);
-
 		int region = rect.getPosition(where);
 		Point loc = port.getViewLocation();
 
@@ -177,8 +176,6 @@ public class CustomViewportAutoexposeHelper extends CustomViewportHelper impleme
 		if ((region & PositionConstants.EAST) != 0) loc.x += scrollOffset;
 		else if ((region & PositionConstants.WEST) != 0) loc.x -= scrollOffset;
 
-		if (loc.x < 0) loc.x = 0;
-		if (loc.y < 0) loc.y = 0;
 		port.setViewLocation(loc);
 		return true;
 	}
