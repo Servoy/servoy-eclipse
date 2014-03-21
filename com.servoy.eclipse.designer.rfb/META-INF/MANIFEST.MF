@@ -10,3 +10,4 @@ Require-Bundle: org.apache.tomcat;bundle-version="7.0.52",
  javax.websocket
 Export-Package: com.servoy.eclipse.designer.rfb.editor
 Bundle-ClassPath: .
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
