@@ -60,8 +60,10 @@ import com.servoy.eclipse.designer.editor.commands.SameWidthAction;
 import com.servoy.eclipse.designer.editor.commands.SaveAsTemplateAction;
 import com.servoy.eclipse.designer.editor.commands.SetTabSequenceAction;
 import com.servoy.eclipse.designer.editor.commands.UngroupAction;
+import com.servoy.eclipse.designer.editor.rfb.RfbEditorMessageHandler;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.property.UndoablePropertySheetEntry;
+import com.servoy.eclipse.designer.rib.editor.MessageDispatcher;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
 import com.servoy.j2db.persistence.IPersist;
@@ -78,12 +80,18 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 	private ISelectionListener selectionChangedHandler;
 	private ISelection currentSelection;
 
+	private final RfbEditorMessageHandler editorMessageHandler;
+
 	public BaseVisualFormEditorDesignPage(BaseVisualFormEditor editorPart)
 	{
 		this.editorPart = editorPart;
 		DefaultEditDomain editDomain = new DefaultEditDomain(editorPart);
 		editDomain.getCommandStack().addCommandStackListener(editorPart);
 		setEditDomain(editDomain);
+
+		// Serve requests for rfb editor, TODO: somehow tell the editor which editorid to use
+		editorMessageHandler = new RfbEditorMessageHandler(this.editorPart.getForm(), "rfbtest" /* UUID.randomUUID(). toString() */);
+		MessageDispatcher.INSTANCE.register(editorMessageHandler.getId(), editorMessageHandler);
 	}
 
 	@Override
@@ -394,5 +402,12 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 	protected PaletteRoot getPaletteRoot()
 	{
 		return null;
+	}
+
+	@Override
+	public void dispose()
+	{
+		super.dispose();
+		MessageDispatcher.INSTANCE.deregister(editorMessageHandler.getId(), editorMessageHandler);
 	}
 }

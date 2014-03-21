@@ -197,6 +197,11 @@ function cleanHtml(e)
 	$(e).parent().append($(e).children().html())
 }
 
+function setLayoutSrc(src)
+{
+	$("#canvas").html(src);
+}
+
 function downloadLayoutSrc()
 {
 	var e="";
