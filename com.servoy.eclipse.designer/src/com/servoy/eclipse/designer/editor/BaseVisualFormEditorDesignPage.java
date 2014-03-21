@@ -63,7 +63,7 @@ import com.servoy.eclipse.designer.editor.commands.UngroupAction;
 import com.servoy.eclipse.designer.editor.rfb.RfbEditorMessageHandler;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.property.UndoablePropertySheetEntry;
-import com.servoy.eclipse.designer.rib.editor.MessageDispatcher;
+import com.servoy.eclipse.designer.rfb.editor.MessageDispatcher;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
 import com.servoy.j2db.persistence.IPersist;

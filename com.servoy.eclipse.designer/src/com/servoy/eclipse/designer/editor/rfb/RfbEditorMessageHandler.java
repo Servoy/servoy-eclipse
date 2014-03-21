@@ -19,7 +19,7 @@ package com.servoy.eclipse.designer.editor.rfb;
 
 import org.eclipse.swt.widgets.Display;
 
-import com.servoy.eclipse.designer.rib.editor.MessageDispatcher;
+import com.servoy.eclipse.designer.rfb.editor.MessageDispatcher;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.util.IMessageHandler;
 

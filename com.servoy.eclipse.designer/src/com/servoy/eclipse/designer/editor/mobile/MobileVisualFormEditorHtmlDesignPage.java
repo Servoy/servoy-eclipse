@@ -87,7 +87,7 @@ import com.servoy.eclipse.designer.editor.mobile.editparts.MobileHeaderGraphical
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileSnapData.MobileSnapType;
 import com.servoy.eclipse.designer.mobile.property.MobilePersistPropertySource;
 import com.servoy.eclipse.designer.property.SetValueCommand;
-import com.servoy.eclipse.designer.rib.editor.MessageDispatcher;
+import com.servoy.eclipse.designer.rfb.editor.MessageDispatcher;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.ComplexProperty;
