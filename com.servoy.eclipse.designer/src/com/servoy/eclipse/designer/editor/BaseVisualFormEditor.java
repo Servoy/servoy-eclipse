@@ -39,6 +39,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IShowEditorInput;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.contexts.IContextActivation;
 import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.ide.IGotoMarker;
@@ -148,7 +149,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 			public void run()
 			{
 				// part needs to be activated first
-				activateEditorContext();
+				if (!PlatformUI.getWorkbench().isClosing()) activateEditorContext();
 			}
 		});
 	}

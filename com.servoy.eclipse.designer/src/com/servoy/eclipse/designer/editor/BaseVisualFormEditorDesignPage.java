@@ -39,6 +39,7 @@ import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.ui.views.properties.PropertySheetPage;
@@ -128,7 +129,7 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 						// So that we can get the editor up and displaying as soon as possible we will
 						// push this off to
 						// the next async cycle.
-						openViewers(getEditorSite());
+						if (!PlatformUI.getWorkbench().isClosing()) openViewers(getEditorSite()); // maybe workbench was closed meanwhile
 					}
 					catch (PartInitException e)
 					{
@@ -144,7 +145,6 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 	 */
 	protected void openViewers(IEditorSite site) throws PartInitException
 	{
-
 		// // Open the properties and Java beans viewer if we are in the Java or Java Browsing
 		// perspective
 		IWorkbenchPage page = site.getWorkbenchWindow().getActivePage();
