@@ -1687,25 +1687,23 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	 * @param styleLookupname
 	 * @return
 	 */
-	public static ComboboxPropertyController<String> createStyleClassPropertyController(IPersist persist, String id, String displayName,
-		final String styleLookupname, Form form)
+	public static PropertyController createStyleClassPropertyController(IPersist persist, String id, String displayName, final String styleLookupname, Form form)
 	{
-		StyleClassesComboboxModel model = new StyleClassesComboboxModel(form, styleLookupname);
-		return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved,
-			((Solution)persist.getRootObject()).getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE ? new ComboboxDelegateValueEditor<String>(
-				new StyleClassValueEditor(form, persist), model) : null)
+		final StyleClassesComboboxModel model = new StyleClassesComboboxModel(form, styleLookupname);
+		if (((Solution)persist.getRootObject()).getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE)
 		{
-			@Override
-			protected String getWarningMessage()
+			return new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, null, new ICellEditorFactory()
 			{
-				if (getModel().getRealValues().length == 1)
+				public CellEditor createPropertyEditor(Composite parent)
 				{
-					// only 1 value (DEFAULT)
-					return "No style classes available for lookup '" + styleLookupname + "'";
+					return new StyleClassCellEditor(parent, model);
 				}
-				return null;
-			}
-		};
+			});
+		}
+		else
+		{
+			return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved, null);
+		}
 	}
 
 	public static ComboboxPropertyController<String> createNamedFoundsetPropertyController(String id, String displayName, Form form)
