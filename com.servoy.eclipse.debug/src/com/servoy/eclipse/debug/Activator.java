@@ -17,23 +17,47 @@
 package com.servoy.eclipse.debug;
 
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.Action;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import com.servoy.eclipse.core.IActiveProjectListener;
+import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.server.ngclient.component.WebComponentPackage;
+import com.servoy.j2db.server.ngclient.component.WebComponentPackage.IPackageReader;
+import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -41,7 +65,7 @@ import com.servoy.j2db.util.Utils;
  */
 public class Activator extends AbstractUIPlugin implements IStartup
 {
-
+	private static final String COMPONENTS_DIR_NAME = "components";
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "com.servoy.eclipse.debug"; //$NON-NLS-1$
@@ -50,6 +74,10 @@ public class Activator extends AbstractUIPlugin implements IStartup
 	private static Activator plugin;
 
 	private final List<Image> imageList = Collections.synchronizedList(new ArrayList<Image>());
+
+	private final Map<String, IPackageReader> readers = new HashMap<String, IPackageReader>();
+
+	private IResourceChangeListener resourceChangeListener;
 
 	/**
 	 * The constructor
@@ -77,6 +105,140 @@ public class Activator extends AbstractUIPlugin implements IStartup
 			// GTK LaF causes crashes or hangs on linux in developer
 			System.setProperty("swing.defaultlaf", "javax.swing.plaf.metal.MetalLookAndFeel"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
+
+		registerResources();
+		((ServoyModel)ServoyModelFinder.getServoyModel()).addActiveProjectListener(new IActiveProjectListener()
+		{
+			public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
+			{
+				return true;
+			}
+
+			public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
+			{
+				// todo maybe fush on certain things?
+			}
+
+			public void activeProjectChanged(ServoyProject activeProject)
+			{
+				registerResources();
+			}
+		});
+
+		resourceChangeListener = new IResourceChangeListener()
+		{
+			@Override
+			public void resourceChanged(IResourceChangeEvent event)
+			{
+				IProject resourceProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject().getProject();
+				IResourceDelta delta = event.getDelta();
+				IResourceDelta[] affectedChildren = delta.getAffectedChildren();
+				if (shouldRefresh(resourceProject, affectedChildren))
+				{
+					registerResources();
+				}
+			}
+
+			/**
+			 * @param resourceProject
+			 * @param affectedChildren
+			 */
+			private boolean shouldRefresh(IProject resourceProject, IResourceDelta[] affectedChildren)
+			{
+				for (IResourceDelta rd : affectedChildren)
+				{
+					IResource resource = rd.getResource();
+					if (resourceProject.equals(resource.getProject()))
+					{
+						IPath path = resource.getProjectRelativePath();
+						if (path.segmentCount() > 1)
+						{
+							if (path.segment(0).equals(COMPONENTS_DIR_NAME))
+							{
+								if (path.segmentCount() == 2 && resource instanceof IFile)
+								{
+									// a zip is changed refresh
+									return true;
+								}
+								else if (path.lastSegment().equalsIgnoreCase("MANIFEST.MF") || path.lastSegment().toLowerCase().endsWith(".spec"))
+								{
+									return true;
+								}
+							}
+						}
+						if (path.segmentCount() == 0 || (path.segmentCount() > 0 && path.segment(0).equals(COMPONENTS_DIR_NAME)))
+						{
+							if (shouldRefresh(resourceProject, rd.getAffectedChildren()))
+							{
+								return true;
+							}
+						}
+					}
+				}
+				return false;
+			}
+		};
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
+	}
+
+	/**
+	 * @param activeResourcesProject
+	 */
+	private void registerResources()
+	{
+		Job job = new Job("registering resources")
+		{
+			@Override
+			public IStatus run(IProgressMonitor monitor)
+			{
+				ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
+				if (activeResourcesProject != null)
+				{
+					if (readers.size() > 0)
+					{
+						ResourceProvider.removeResources(readers.values());
+						readers.clear();
+					}
+					IFolder folder = activeResourcesProject.getProject().getFolder(COMPONENTS_DIR_NAME);
+					if (folder.exists())
+					{
+						try
+						{
+							folder.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+							IResource[] members = folder.members();
+							for (IResource resource : members)
+							{
+								String name = resource.getName();
+								int index = name.lastIndexOf('.');
+								if (index != -1)
+								{
+									name = name.substring(0, index);
+								}
+								if (resource instanceof IFolder)
+								{
+									if (((IFolder)resource).getFile("META-INF/MANIFEST.MF").exists())
+									{
+										readers.put(name, new WebComponentPackage.DirPackageReader(new File(resource.getRawLocationURI())));
+									}
+								}
+								else if (resource instanceof IFile)
+								{
+									readers.put(name, new WebComponentPackage.JarPackageReader(new File(resource.getRawLocationURI())));
+								}
+							}
+						}
+						catch (CoreException e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+					ResourceProvider.addResources(readers.values());
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
+		job.schedule();
 	}
 
 	/*
@@ -87,6 +249,8 @@ public class Activator extends AbstractUIPlugin implements IStartup
 	@Override
 	public void stop(BundleContext context) throws Exception
 	{
+		ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
+		ResourceProvider.removeResources(readers.values());
 		plugin = null;
 		super.stop(context);
 		for (Image image : imageList)
