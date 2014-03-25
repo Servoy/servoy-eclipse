@@ -51,7 +51,6 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.preferences.JSDocScriptTemplates;
-import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.eclipse.ui.editors.table.actions.SearchForDataProvidersReferencesAction;
@@ -72,6 +71,7 @@ import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.persistence.ValidatorSearchContext;
 
 public class CalculationsComposite extends Composite
 {
@@ -313,14 +313,21 @@ public class CalculationsComposite extends Composite
 				}
 				if (solution != null)
 				{
-					ScriptCalculation calc = ModelUtils.getEditingFlattenedSolution(solution).getScriptCalculation(calcName, te.getTable());
 					int i = 1;
-					while (calc != null)
+					boolean isValidName = false;
+					ValidatorSearchContext searchContext = new ValidatorSearchContext(te.getTable(), IRepository.SCRIPTCALCULATIONS);
+					while (!isValidName)
 					{
-						calcName = orgName + i;
-						i++;
-						calc = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(solution).getScriptCalculation(calcName,
-							te.getTable());
+						try
+						{
+							nameValidator.checkName(calcName, 0, searchContext, false);
+							isValidName = true;
+						}
+						catch (RepositoryException e)
+						{
+							calcName = orgName + i;
+							i++;
+						}
 					}
 					ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(solution.getName());
 					String userTemplate = JSDocScriptTemplates.getTemplates(project.getProject(), true).getMethodTemplate();

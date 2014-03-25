@@ -17,7 +17,6 @@
 package com.servoy.eclipse.ui.editors.table;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -46,7 +45,6 @@ import org.eclipse.swt.widgets.TreeItem;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.eclipse.ui.editors.table.actions.SearchForDataProvidersReferencesAction;
@@ -62,9 +60,9 @@ import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.query.QueryAggregate;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.Utils;
 
 public class AggregationsComposite extends Composite
 {
@@ -287,20 +285,21 @@ public class AggregationsComposite extends Composite
 						}
 						if (solution != null)
 						{
-							HashMap<String, AggregateVariable> agrVariables = new HashMap<String, AggregateVariable>();
-							AggregateVariable agr = null;
-							for (AggregateVariable aggr : Utils.iterate(ModelUtils.getEditingFlattenedSolution(solution).getAggregateVariables(te.getTable(),
-								false)))
-							{
-								agrVariables.put(aggr.getName(), aggr);
-							}
-							agr = agrVariables.get(newName);
 							int i = 1;
-							while (agr != null)
+							boolean isValidName = false;
+							ValidatorSearchContext searchContext = new ValidatorSearchContext(te.getTable(), IRepository.AGGREGATEVARIABLES);
+							while (!isValidName)
 							{
-								newName = orgName + i;
-								i++;
-								agr = agrVariables.get(newName);
+								try
+								{
+									nameValidator.checkName(newName, 0, searchContext, true);
+									isValidName = true;
+								}
+								catch (RepositoryException e)
+								{
+									newName = orgName + i;
+									i++;
+								}
 							}
 
 							AggregateVariable aggregationVariable = solution.createNewAggregateVariable(nameValidator, te.getTable().getDataSource(), newName,
