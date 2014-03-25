@@ -562,12 +562,12 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 			}
 			else
 			{
-				// check field type
-				boolean setValueListId = true;
 				Integer fieldType;
+				Map<String, Object> customProperties = null;
 				if ("SingleCheckbox".equals(nodeType))
 				{
-					setValueListId = false;
+					customProperties = new HashMap<String, Object>();
+					customProperties.put(IMobileProperties.COMPONENT_SINGLE_CHECKBOX.propertyName, Boolean.TRUE);
 					fieldType = Integer.valueOf(Field.CHECKS);
 				}
 				else
@@ -581,12 +581,8 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 						SetValueCommand.REQUEST_PROPERTY_PREFIX + StaticContentSpecLoader.PROPERTY_DISPLAYTYPE.getPropertyName(),
 						MobilePersistPropertySource.MOBILE_DISPLAY_TYPE_CONTROLLER.getConverter().convertProperty(
 							StaticContentSpecLoader.PROPERTY_DISPLAYTYPE.getPropertyName(), fieldType));
-					// special case: checkboxgroup, set valuelist to -1
-					if (fieldType.intValue() == Field.CHECKS && setValueListId)
-					{
-						props.put(SetValueCommand.REQUEST_PROPERTY_PREFIX + StaticContentSpecLoader.PROPERTY_VALUELISTID.getPropertyName(), Integer.valueOf(-1));
-					}
-					commands.add(new AddFieldCommand(Activator.getDefault().getDesignClient(), form, VisualFormEditor.REQ_PLACE_FIELD, props, null));
+					commands.add(new AddFieldCommand(Activator.getDefault().getDesignClient(), form, VisualFormEditor.REQ_PLACE_FIELD, props, null,
+						customProperties));
 				}
 			}
 		}
@@ -1516,7 +1512,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 
 						case Field.CHECKS :
 						{
-							if (field.getValuelistID() == 0 && !radios)
+							if (field.getCustomMobileProperty(IMobileProperties.COMPONENT_SINGLE_CHECKBOX.propertyName) == Boolean.TRUE && !radios)
 							{
 								elementType = "SingleCheckbox"; // special case
 								properties.put("checked", "checked");
