@@ -46,14 +46,18 @@ import com.servoy.j2db.util.Pair;
  */
 public class AddFieldCommand extends BaseFormPlaceElementCommand
 {
+	private final Map<String, Object> mobileProperties;
+
 	public AddFieldCommand(IApplication application, Form form, CreateRequest request)
 	{
-		this(application, form, request.getType(), request.getExtendedData(), request.getLocation().getSWTPoint());
+		this(application, form, request.getType(), request.getExtendedData(), request.getLocation().getSWTPoint(), null);
 	}
 
-	public AddFieldCommand(IApplication application, Form form, Object requestType, Map<Object, Object> objectProperties, Point defaultLocation)
+	public AddFieldCommand(IApplication application, Form form, Object requestType, Map<Object, Object> objectProperties, Point defaultLocation,
+		Map<String, Object> mobileProperties)
 	{
 		super(application, form, null, requestType, objectProperties, null, defaultLocation, null, form);
+		this.mobileProperties = mobileProperties;
 	}
 
 	@Override
@@ -62,6 +66,13 @@ public class AddFieldCommand extends BaseFormPlaceElementCommand
 		if (parent instanceof Form)
 		{
 			Pair<Field, GraphicalComponent> pair = ElementFactory.createMobileFieldWithTitle((Form)parent, location);
+			if (mobileProperties != null)
+			{
+				for (String key : mobileProperties.keySet())
+				{
+					pair.getLeft().putCustomMobileProperty(key, mobileProperties.get(key));
+				}
+			}
 			if (objectProperties != null && objectProperties.size() > 0) setProperiesOnModel(pair.getLeft(), objectProperties);
 			return new Object[] { new FormElementGroup(pair.getLeft().getGroupID(), ModelUtils.getEditingFlattenedSolution(parent), (Form)parent) };
 		}
