@@ -96,9 +96,18 @@ public class StyleClassCellEditor extends TextCellEditor
 			{
 				IControlContentAdapter contentAdapter = contentProposalAdapter.getControlContentAdapter();
 				Control control = contentProposalAdapter.getControl();
-				StringBuilder sb = new StringBuilder(contentAdapter.getControlContents(control));
-				sb.insert(contentAdapter.getCursorPosition(control), proposal.getContent().substring(endPosition - startPosition));
-				contentAdapter.setControlContents(control, sb.toString(), startPosition + proposal.getCursorPosition());
+				if (proposal.getContent().equals("DEFAULT"))
+				{
+					contentAdapter.setControlContents(control, proposal.getContent(), proposal.getCursorPosition());
+				}
+				else
+				{
+					StringBuilder sb = new StringBuilder(contentAdapter.getControlContents(control));
+					String style_prefix = sb.substring(startPosition, endPosition);
+					if (style_prefix.contains(" ")) startPosition = startPosition + style_prefix.lastIndexOf(" ") + 1;
+					sb.insert(contentAdapter.getCursorPosition(control), proposal.getContent().substring(endPosition - startPosition));
+					contentAdapter.setControlContents(control, sb.toString(), startPosition + proposal.getCursorPosition());
+				}
 			}
 		});
 	}

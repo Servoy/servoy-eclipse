@@ -438,6 +438,19 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		}
 	};
 
+	public static IPropertyConverter<String, String> DEFAULT_STRING_CONVERTER = new IPropertyConverter<String, String>()
+	{
+		public String convertProperty(Object id, String value)
+		{
+			return (value == null) ? "DEFAULT" : value;
+		}
+
+		public String convertValue(Object id, String value)
+		{
+			return "DEFAULT".equals(value) ? null : value;
+		}
+	};
+
 	// remember the font that was used last time the element was painted, use this as default for font cell editors.
 	public static final RuntimeProperty<java.awt.Font> LastPaintedFontProperty = new RuntimeProperty<java.awt.Font>()
 	{
@@ -1692,7 +1705,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		final StyleClassesComboboxModel model = new StyleClassesComboboxModel(form, styleLookupname);
 		if (((Solution)persist.getRootObject()).getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE)
 		{
-			return new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, null, new ICellEditorFactory()
+			return new PropertyController<String, String>(id, displayName, DEFAULT_STRING_CONVERTER, null, new ICellEditorFactory()
 			{
 				public CellEditor createPropertyEditor(Composite parent)
 				{
