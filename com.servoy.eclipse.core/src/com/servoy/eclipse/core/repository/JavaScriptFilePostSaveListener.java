@@ -110,6 +110,11 @@ public class JavaScriptFilePostSaveListener implements IPostSaveListener
 			final IProject project = compilationUnit.getScriptProject().getProject();
 			final ServoyModel servoyModel = (ServoyModel)ServoyModelFinder.getServoyModel();
 			final Solution solution = (Solution)ServoyModel.getDeveloperRepository().getActiveRootObject(project.getName(), IRepository.SOLUTIONS);
+			if (solution == null)
+			{
+				// a project that is not a servoy solution project
+				return;
+			}
 			final ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solution.getName());
 			final SolutionDeserializer sd = new SolutionDeserializer(ServoyModel.getDeveloperRepository(), servoyProject, file, compilationUnit.getSource());
 			final IContainer workspace = project.getParent();
