@@ -383,152 +383,18 @@ public class Exporter
 
 		if (exportModel.getServoyPropertiesFileName() == null)
 		{
-			// create the (sorted) properties file.
-			Properties properties = new SortedProperties();
-			properties.setProperty("SocketFactory.rmiServerFactory", "com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory");
-			properties.setProperty("SocketFactory.tunnelConnectionMode", "http&socket");
-			properties.setProperty("SocketFactory.compress", "true");
-			properties.setProperty("java.rmi.server.hostname", "127.0.0.1");
-
-			// TODO ask for a keystore?
-			properties.setProperty("SocketFactory.useSSL", "true");
-			properties.setProperty("SocketFactory.tunnelUseSSLForHttp", "false");
-			//{ "SocketFactory.SSLKeystorePath", "", "The SSL keystore path on the server", "text" }, // 
-			//{ "SocketFactory.SSLKeystorePassphrase", "", "The SSL passphrase to access the keystore", "password" }, //
-
-			properties.setProperty("servoy.use.client.timezone", "true");
-
-			// TODO ask for all kinds of other stuff like branding?
-			properties.setProperty("servoy.server.start.rmi", Boolean.toString(exportModel.getStartRMI()));
-			properties.setProperty("servoy.rmiStartPort", exportModel.getStartRMIPort());
-
-			// store the servers
-			SortedSet<String> selectedServerNames = exportModel.getSelectedServerNames();
-			properties.setProperty("ServerManager.numberOfServers", Integer.toString(selectedServerNames.size()));
-			int i = 0;
-			for (String serverName : selectedServerNames)
-			{
-				ServerConfiguration sc = exportModel.getServerConfiguration(serverName);
-
-				properties.put("server." + i + ".serverName", sc.getName()); //$NON-NLS-1$ //$NON-NLS-2$
-				properties.put("server." + i + ".userName", sc.getUserName()); //$NON-NLS-1$ //$NON-NLS-2$
-				properties.put("server." + i + ".password", sc.getPassword()); //$NON-NLS-1$ //$NON-NLS-2$
-				properties.put("server." + i + ".URL", sc.getServerUrl()); //$NON-NLS-1$ //$NON-NLS-2$
-//			Map<String, String> connectionProperties = sc.getConnectionProperties();
-//			if (connectionProperties == null)
-//			{
-//				Settings.removePrefixedProperties(properties, "server." + i + ".property."); //$NON-NLS-1$ //$NON-NLS-2$
-//			}
-//			else
-//			{
-//				for (Entry<String, String> entry : connectionProperties.entrySet())
-//				{
-//					properties.put("server." + i + ".property." + entry.getKey(), entry.getValue()); //$NON-NLS-1$ //$NON-NLS-2$
-//				}
-//			}
-				properties.put("server." + i + ".driver", sc.getDriver()); //$NON-NLS-1$ //$NON-NLS-2$
-				properties.put("server." + i + ".skipSysTables", "" + sc.isSkipSysTables()); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-				String catalog = sc.getCatalog();
-				if (catalog == null)
-				{
-					catalog = "<none>"; //$NON-NLS-1$
-				}
-				else if (catalog.trim().length() == 0)
-				{
-					catalog = "<empty>"; //$NON-NLS-1$
-				}
-				properties.put("server." + i + ".catalog", catalog); //$NON-NLS-1$ //$NON-NLS-2$
-				String schema = sc.getSchema();
-				if (schema == null)
-				{
-					schema = "<none>"; //$NON-NLS-1$
-				}
-				else if (schema.trim().length() == 0)
-				{
-					schema = "<empty>"; //$NON-NLS-1$
-				}
-				properties.put("server." + i + ".schema", schema); //$NON-NLS-1$ //$NON-NLS-2$
-				properties.put("server." + i + ".maxConnectionsActive", String.valueOf(sc.getMaxActive())); //$NON-NLS-1$ //$NON-NLS-2$
-				properties.put("server." + i + ".maxConnectionsIdle", String.valueOf(sc.getMaxIdle())); //$NON-NLS-1$ //$NON-NLS-2$
-				properties.put("server." + i + ".maxPreparedStatementsIdle", String.valueOf(sc.getMaxPreparedStatementsIdle())); //$NON-NLS-1$ //$NON-NLS-2$
-				properties.put("server." + i + ".connectionValidationType", String.valueOf(sc.getConnectionValidationType())); //$NON-NLS-1$ //$NON-NLS-2$
-				if (sc.getValidationQuery() != null)
-				{
-					properties.put("server." + i + ".validationQuery", sc.getValidationQuery()); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-				if (sc.getDataModelCloneFrom() != null && !"".equals(sc.getDataModelCloneFrom())) //$NON-NLS-1$
-				{
-					properties.put("server." + i + ".dataModelCloneFrom", sc.getDataModelCloneFrom()); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-				properties.put("server." + i + ".enabled", Boolean.toString(true)); //$NON-NLS-1$ //$NON-NLS-2$ 
-//			if (sc.getDialectClass() != null)
-//			{
-//				properties.put("server." + i + ".dialect", sc.getDialectClass()); //$NON-NLS-1$ //$NON-NLS-2$
-//			}
-//			else
-//			{
-//				properties.remove("server." + i + ".dialect"); //$NON-NLS-1$//$NON-NLS-2$
-//			}
-				i++;
-			}
-
-			FileOutputStream fos = null;
-			try
-			{
-				fos = new FileOutputStream(new File(tmpWarDir, "WEB-INF/servoy.properties"));
-				properties.store(fos, "");
-			}
-			catch (Exception e)
-			{
-				throw new ExportException("Couldn't generate the properties file", e);
-			}
-			finally
-			{
-				if (fos != null) try
-				{
-					fos.close();
-				}
-				catch (IOException e)
-				{
-				}
-			}
-
+			generatePropertiesFile(tmpWarDir);
 		}
 		else
 		{
 			File sourceFile = new File(exportModel.getServoyPropertiesFileName());
-			File destFile = new File(tmpWarDir, "WEB-INF/servoy.properties");
-			try
+			if (exportModel.allowOverwriteSocketFactoryProperties())
 			{
-				if (destFile.createNewFile())
-				{
-					FileInputStream fis = null;
-					FileOutputStream fos = null;
-					FileChannel sourceChannel = null;
-					FileChannel destinationChannel = null;
-
-
-					try
-					{
-						fis = new FileInputStream(sourceFile);
-						fos = new FileOutputStream(destFile);
-						sourceChannel = fis.getChannel();
-						destinationChannel = fos.getChannel();
-						// Copy source file to destination file
-						destinationChannel.transferFrom(sourceChannel, 0, sourceChannel.size());
-					}
-					finally
-					{
-						if (sourceChannel != null) sourceChannel.close();
-						if (destinationChannel != null) destinationChannel.close();
-						if (fis != null) fis.close();
-						if (fos != null) fos.close();
-					}
-				}
+				changeAndWritePropertiesFile(tmpWarDir, sourceFile);
 			}
-			catch (IOException e)
+			else
 			{
-				throw new ExportException("Couldn't copy the servoy properties file", e);
+				copyPropertiesFileToWar(tmpWarDir, sourceFile);
 			}
 		}
 		if (exportModel.isExportActiveSolutionOnly())
@@ -554,6 +420,204 @@ public class Exporter
 		monitor.worked(2);
 		monitor.done();
 		return;
+	}
+
+	/**
+	 * @param tmpWarDir
+	 * @param sourceFile
+	 * @throws ExportException
+	 */
+	private void changeAndWritePropertiesFile(File tmpWarDir, File sourceFile) throws ExportException
+	{
+		FileInputStream fis = null;
+		FileOutputStream fos = null;
+		try
+		{
+			fis = new FileInputStream(sourceFile);
+			Properties properties = new Properties();
+			properties.load(fis);
+
+			properties.setProperty("SocketFactory.tunnelConnectionMode", "http&socket");
+			if (properties.containsKey("SocketFactory.useTwoWaySocket")) properties.remove("SocketFactory.useTwoWaySocket");
+
+			fos = new FileOutputStream(new File(tmpWarDir, "WEB-INF/servoy.properties"));
+			properties.store(fos, "");
+		}
+		catch (IOException e)
+		{
+			throw new ExportException("Failed to overwrite properties file", e);
+		}
+		finally
+		{
+			try
+			{
+				if (fis != null) fis.close();
+				if (fos != null) fos.close();
+			}
+			catch (IOException e)
+			{
+				// ignore
+			}
+		}
+	}
+
+	/**
+	 * @param tmpWarDir
+	 * @param sourceFile
+	 * @throws ExportException
+	 */
+	private void copyPropertiesFileToWar(File tmpWarDir, File sourceFile) throws ExportException
+	{
+		File destFile = new File(tmpWarDir, "WEB-INF/servoy.properties");
+		try
+		{
+			if (destFile.createNewFile())
+			{
+				FileInputStream fis = null;
+				FileOutputStream fos = null;
+				FileChannel sourceChannel = null;
+				FileChannel destinationChannel = null;
+
+
+				try
+				{
+					fis = new FileInputStream(sourceFile);
+					fos = new FileOutputStream(destFile);
+					sourceChannel = fis.getChannel();
+					destinationChannel = fos.getChannel();
+					// Copy source file to destination file
+					destinationChannel.transferFrom(sourceChannel, 0, sourceChannel.size());
+				}
+				finally
+				{
+					if (sourceChannel != null) sourceChannel.close();
+					if (destinationChannel != null) destinationChannel.close();
+					if (fis != null) fis.close();
+					if (fos != null) fos.close();
+				}
+			}
+		}
+		catch (IOException e)
+		{
+			throw new ExportException("Couldn't copy the servoy properties file", e);
+		}
+	}
+
+	/**
+	 * @param tmpWarDir
+	 * @throws ExportException
+	 */
+	private void generatePropertiesFile(File tmpWarDir) throws ExportException
+	{
+		// create the (sorted) properties file.
+		Properties properties = new SortedProperties();
+		properties.setProperty("SocketFactory.rmiServerFactory", "com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory");
+		properties.setProperty("SocketFactory.tunnelConnectionMode", "http&socket");
+		properties.setProperty("SocketFactory.compress", "true");
+		properties.setProperty("java.rmi.server.hostname", "127.0.0.1");
+
+		// TODO ask for a keystore?
+		properties.setProperty("SocketFactory.useSSL", "true");
+		properties.setProperty("SocketFactory.tunnelUseSSLForHttp", "false");
+		//{ "SocketFactory.SSLKeystorePath", "", "The SSL keystore path on the server", "text" }, // 
+		//{ "SocketFactory.SSLKeystorePassphrase", "", "The SSL passphrase to access the keystore", "password" }, //
+
+		properties.setProperty("servoy.use.client.timezone", "true");
+
+		// TODO ask for all kinds of other stuff like branding?
+		properties.setProperty("servoy.server.start.rmi", Boolean.toString(exportModel.getStartRMI()));
+		properties.setProperty("servoy.rmiStartPort", exportModel.getStartRMIPort());
+
+		// store the servers
+		SortedSet<String> selectedServerNames = exportModel.getSelectedServerNames();
+		properties.setProperty("ServerManager.numberOfServers", Integer.toString(selectedServerNames.size()));
+		int i = 0;
+		for (String serverName : selectedServerNames)
+		{
+			ServerConfiguration sc = exportModel.getServerConfiguration(serverName);
+
+			properties.put("server." + i + ".serverName", sc.getName()); //$NON-NLS-1$ //$NON-NLS-2$
+			properties.put("server." + i + ".userName", sc.getUserName()); //$NON-NLS-1$ //$NON-NLS-2$
+			properties.put("server." + i + ".password", sc.getPassword()); //$NON-NLS-1$ //$NON-NLS-2$
+			properties.put("server." + i + ".URL", sc.getServerUrl()); //$NON-NLS-1$ //$NON-NLS-2$
+//			Map<String, String> connectionProperties = sc.getConnectionProperties();
+//			if (connectionProperties == null)
+//			{
+//				Settings.removePrefixedProperties(properties, "server." + i + ".property."); //$NON-NLS-1$ //$NON-NLS-2$
+//			}
+//			else
+//			{
+//				for (Entry<String, String> entry : connectionProperties.entrySet())
+//				{
+//					properties.put("server." + i + ".property." + entry.getKey(), entry.getValue()); //$NON-NLS-1$ //$NON-NLS-2$
+//				}
+//			}
+			properties.put("server." + i + ".driver", sc.getDriver()); //$NON-NLS-1$ //$NON-NLS-2$
+			properties.put("server." + i + ".skipSysTables", "" + sc.isSkipSysTables()); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+			String catalog = sc.getCatalog();
+			if (catalog == null)
+			{
+				catalog = "<none>"; //$NON-NLS-1$
+			}
+			else if (catalog.trim().length() == 0)
+			{
+				catalog = "<empty>"; //$NON-NLS-1$
+			}
+			properties.put("server." + i + ".catalog", catalog); //$NON-NLS-1$ //$NON-NLS-2$
+			String schema = sc.getSchema();
+			if (schema == null)
+			{
+				schema = "<none>"; //$NON-NLS-1$
+			}
+			else if (schema.trim().length() == 0)
+			{
+				schema = "<empty>"; //$NON-NLS-1$
+			}
+			properties.put("server." + i + ".schema", schema); //$NON-NLS-1$ //$NON-NLS-2$
+			properties.put("server." + i + ".maxConnectionsActive", String.valueOf(sc.getMaxActive())); //$NON-NLS-1$ //$NON-NLS-2$
+			properties.put("server." + i + ".maxConnectionsIdle", String.valueOf(sc.getMaxIdle())); //$NON-NLS-1$ //$NON-NLS-2$
+			properties.put("server." + i + ".maxPreparedStatementsIdle", String.valueOf(sc.getMaxPreparedStatementsIdle())); //$NON-NLS-1$ //$NON-NLS-2$
+			properties.put("server." + i + ".connectionValidationType", String.valueOf(sc.getConnectionValidationType())); //$NON-NLS-1$ //$NON-NLS-2$
+			if (sc.getValidationQuery() != null)
+			{
+				properties.put("server." + i + ".validationQuery", sc.getValidationQuery()); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			if (sc.getDataModelCloneFrom() != null && !"".equals(sc.getDataModelCloneFrom())) //$NON-NLS-1$
+			{
+				properties.put("server." + i + ".dataModelCloneFrom", sc.getDataModelCloneFrom()); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			properties.put("server." + i + ".enabled", Boolean.toString(true)); //$NON-NLS-1$ //$NON-NLS-2$ 
+//			if (sc.getDialectClass() != null)
+//			{
+//				properties.put("server." + i + ".dialect", sc.getDialectClass()); //$NON-NLS-1$ //$NON-NLS-2$
+//			}
+//			else
+//			{
+//				properties.remove("server." + i + ".dialect"); //$NON-NLS-1$//$NON-NLS-2$
+//			}
+			i++;
+		}
+
+		FileOutputStream fos = null;
+		try
+		{
+			fos = new FileOutputStream(new File(tmpWarDir, "WEB-INF/servoy.properties"));
+			properties.store(fos, "");
+		}
+		catch (Exception e)
+		{
+			throw new ExportException("Couldn't generate the properties file", e);
+		}
+		finally
+		{
+			if (fos != null) try
+			{
+				fos.close();
+			}
+			catch (IOException e)
+			{
+			}
+		}
 	}
 
 	/**

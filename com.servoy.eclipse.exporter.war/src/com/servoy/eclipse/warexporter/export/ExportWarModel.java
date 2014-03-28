@@ -51,6 +51,7 @@ public class ExportWarModel
 	private String startRMIPort;
 	private boolean startRMI;
 	private boolean exportActiveSolutionOnly;
+	private boolean overwriteSocketFactoryProperties;
 
 	/**
 	 * @param dialogSettings
@@ -123,6 +124,7 @@ public class ExportWarModel
 				}
 			}
 		}
+		overwriteSocketFactoryProperties = false;
 	}
 
 	public void saveSettings(IDialogSettings settings)
@@ -329,5 +331,15 @@ public class ExportWarModel
 	public void setStartRMI(boolean startRMI)
 	{
 		this.startRMI = startRMI;
+	}
+
+	public void setOverwriteSocketFactoryProperties(boolean overwriteProperties)
+	{
+		this.overwriteSocketFactoryProperties = overwriteProperties;
+	}
+
+	public boolean allowOverwriteSocketFactoryProperties()
+	{
+		return overwriteSocketFactoryProperties;
 	}
 }
