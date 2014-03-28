@@ -19,8 +19,6 @@ package com.servoy.eclipse.debug.actions;
 
 import java.lang.reflect.InvocationTargetException;
 
-import javax.swing.SwingUtilities;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
@@ -92,32 +90,26 @@ public class StartNGClientActionDelegate extends StartWebClientActionDelegate
 					{
 						debugNGClient.getFlattenedSolution().registerDebugListener(new FlattenedSolutionDebugListener());
 					}
-					SwingUtilities.invokeLater(new Runnable()
+					if (debugNGClient != null)
 					{
-						public void run()
+						debugNGClient.shutDown(true);
+					}
+					try
+					{
+						String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solutions/" + solution.getName() + "/index.html"; //$NON-NLS-1$ //$NON-NLS-2$
+						EditorUtil.openURL(getWebBrowser(), url);
+					}
+					catch (final Throwable e)//catch all for apple mac
+					{
+						ServoyLog.logError("Cant open external browser", e); //$NON-NLS-1$
+						Display.getDefault().asyncExec(new Runnable()
 						{
-							if (debugNGClient != null)
+							public void run()
 							{
-								debugNGClient.shutDown(true);
+								MessageDialog.openError(Display.getDefault().getActiveShell(), "Cant open external browser", e.getLocalizedMessage()); //$NON-NLS-1$
 							}
-							try
-							{
-								String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solutions/" + solution.getName() + "/index.html"; //$NON-NLS-1$ //$NON-NLS-2$
-								EditorUtil.openURL(getWebBrowser(), url);
-							}
-							catch (final Throwable e)//catch all for apple mac
-							{
-								ServoyLog.logError("Cant open external browser", e); //$NON-NLS-1$
-								Display.getDefault().asyncExec(new Runnable()
-								{
-									public void run()
-									{
-										MessageDialog.openError(Display.getDefault().getActiveShell(), "Cant open external browser", e.getLocalizedMessage()); //$NON-NLS-1$
-									}
-								});
-							}
-						}
-					});
+						});
+					}
 					monitor.worked(4);
 				}
 			}
