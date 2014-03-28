@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -30,6 +31,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
@@ -90,6 +92,7 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 		{
 			String potentialFileName = fileNameText.getText();
 			exportModel.setServoyPropertiesFileName(potentialFileName);
+			exportModel.setOverwriteSocketFactoryProperties(false);
 		}
 		else if (event.widget == browseButton)
 		{
@@ -154,6 +157,7 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 				{
 					fis = new FileInputStream(f);
 					prop.load(fis);
+
 					String numberOfServers = prop.getProperty("ServerManager.numberOfServers");
 					if (numberOfServers != null)
 					{
@@ -177,6 +181,37 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 						setMessage("Servoy properties file: " + exportModel.getServoyPropertiesFileName() +
 							" doesn't look like a valid servoy properties file, no servers configured", IMessageProvider.WARNING);
 						messageSet = true;
+					}
+
+					String tunnelConnectionMode = prop.getProperty("SocketFactory.tunnelConnectionMode");
+					if (!exportModel.allowOverwriteSocketFactoryProperties() && (tunnelConnectionMode == null || !tunnelConnectionMode.equals("http&socket")))
+					{
+						final Shell shell = getShell();
+						final boolean[] ok = new boolean[1];
+						Display.getDefault().syncExec(new Runnable()
+						{
+							public void run()
+							{
+								ok[0] = MessageDialog.openConfirm(
+									shell,
+									"Overwrite SocketFactory properties",
+									"In the selected properties file SocketFactory.tunnelConnectionMode is not set to http&socket. Please allow exporter to overwrite properties or cancel the export.");
+							}
+						});
+						if (ok[0])
+						{
+							exportModel.setOverwriteSocketFactoryProperties(true);
+						}
+						else
+						{
+							Display.getDefault().asyncExec(new Runnable()
+							{
+								public void run()
+								{
+									getWizard().getContainer().getShell().close();
+								}
+							});
+						}
 					}
 				}
 				catch (IOException e)
