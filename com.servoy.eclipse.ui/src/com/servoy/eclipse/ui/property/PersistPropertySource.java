@@ -134,6 +134,7 @@ import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IColumnTypes;
+import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IDataProviderLookup;
 import com.servoy.j2db.persistence.IDeveloperRepository;
@@ -1700,7 +1701,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	 * @param styleLookupname
 	 * @return
 	 */
-	public static PropertyController createStyleClassPropertyController(IPersist persist, String id, String displayName, final String styleLookupname, Form form)
+	protected static PropertyController<String, ? > createStyleClassPropertyController(IPersist persist, String id, String displayName,
+		final String styleLookupname, Form form)
 	{
 		final StyleClassesComboboxModel model = new StyleClassesComboboxModel(form, styleLookupname);
 		if (((Solution)persist.getRootObject()).getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE)
@@ -1717,6 +1719,21 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		{
 			return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved, null);
 		}
+	}
+
+	protected static PropertyController<String, String> createStyleSheetPropertyController(IPersist persist, String id, String displayName)
+	{
+		if (persist.getTypeID() == IRepository.SOLUTIONS)
+		{
+			return new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, null, new ICellEditorFactory()
+			{
+				public CellEditor createPropertyEditor(Composite parent)
+				{
+					return new TextCellEditor(parent);
+				}
+			});
+		}
+		return null;
 	}
 
 	public static ComboboxPropertyController<String> createNamedFoundsetPropertyController(String id, String displayName, Form form)
@@ -3294,6 +3311,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					};
 				}
 			};
+		}
+
+		if (name.equals(IContentSpecConstants.PROPERTY_STYLESHEET))
+		{
+			return createStyleSheetPropertyController(persistContext.getPersist(), id, displayName);
 		}
 
 		if (name.equals("styleClass"))
