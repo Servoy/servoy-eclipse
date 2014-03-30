@@ -167,6 +167,7 @@ public class Messages extends NLS
 	public static String LabelContainersPalette;
 	public static String LabelServoyBeansPalette;
 	public static String LabelJavaBeansPalette;
+	public static String LabelComponentsPalette;
 
 	public static String LabelButtonsPalette;
 	public static String LabelPartsPalette;

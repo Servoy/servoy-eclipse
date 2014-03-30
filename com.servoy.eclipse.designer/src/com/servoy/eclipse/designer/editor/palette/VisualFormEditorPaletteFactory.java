@@ -68,6 +68,8 @@ import com.servoy.j2db.persistence.RectShape;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
+import com.servoy.j2db.server.ngclient.component.WebComponentSpec;
+import com.servoy.j2db.server.ngclient.component.WebComponentSpecProvider;
 import com.servoy.j2db.server.ngclient.property.PropertyType;
 import com.servoy.j2db.util.Utils;
 
@@ -139,6 +141,8 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 	private static final String JAVA_BEANS_ID = BEANS_ID_PREFIX + "java";
 	private static final Map<String, BeanInfo> beanInfos = new HashMap<String, BeanInfo>();
 
+	private static final String COMPONENTS_ID = "components";
+
 	private static final String TEMPLATES_ID = "templates";
 	protected static final String TEMPLATE_ID_PREFIX = "template:";
 
@@ -182,6 +186,9 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 
 		// add other beans
 		addBeans(false, drawers, drawerEntries, entryProperties);
+
+		// add components
+		addComponents(drawers, drawerEntries, entryProperties);
 
 		// add shapes
 		addFixedEntries(SHAPES_ID, Messages.LabelShapesPalette, SHAPES_IDS, drawers, drawerEntries, entryProperties);
@@ -256,6 +263,34 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		}
 	}
 
+	private static void addComponents(List<String> drawers, Map<String, List<String>> drawerEntries, Map<String, Object> entryProperties)
+	{
+		String id = COMPONENTS_ID;
+
+		List<String> componentIds = new ArrayList<String>();
+		for (WebComponentSpec spec : WebComponentSpecProvider.getInstance().getWebComponentDescriptions())
+		{
+			String componentId = spec.getFullName();
+			componentIds.add(componentId);
+
+			String name = spec.getDisplayName();
+			if (name == null || name.length() == 0)
+			{
+				name = "<UNKNOWN>";
+			}
+			entryProperties.put(id + '.' + componentId + '.' + PaletteCustomization.PROPERTY_LABEL, name);
+			entryProperties.put(id + '.' + componentId + '.' + PaletteCustomization.PROPERTY_DESCRIPTION, "Place component " + name);
+		}
+
+		if (componentIds.size() > 0)
+		{
+			drawers.add(id);
+			entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_LABEL, Messages.LabelComponentsPalette);
+			entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_HIDDEN, Boolean.FALSE); // TRUE if you want to hide components by default
+			drawerEntries.put(id, componentIds);
+		}
+	}
+
 	private PaletteEntry createPaletteEntry(String drawerId, String id)
 	{
 		if (ELEMENTS_ID.equals(drawerId))
@@ -276,6 +311,11 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		if (TEMPLATES_ID.equals(drawerId))
 		{
 			return createTemplatesEntry(id);
+		}
+
+		if (COMPONENTS_ID.equals(drawerId))
+		{
+			return createComponentsEntry(id);
 		}
 
 		if (drawerId.startsWith(BEANS_ID_PREFIX))
@@ -424,7 +464,9 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		{
 			if (displayType != -1)
 			{
-				setProperty(extendedData, StaticContentSpecLoader.PROPERTY_DISPLAYTYPE,
+				setProperty(
+					extendedData,
+					StaticContentSpecLoader.PROPERTY_DISPLAYTYPE,
 					Integer.valueOf(((PropertyType.ValuesConfig)PersistPropertyHandler.DISPLAY_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(displayType))));
 			}
 			RequestTypeCreationFactory factory = new RequestTypeCreationFactory(requestType, size);
@@ -507,7 +549,9 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		{
 			if (shapeType != -1)
 			{
-				setProperty(extendedData, StaticContentSpecLoader.PROPERTY_SHAPETYPE,
+				setProperty(
+					extendedData,
+					StaticContentSpecLoader.PROPERTY_SHAPETYPE,
 					Integer.valueOf(((PropertyType.ValuesConfig)PersistPropertyHandler.SHAPE_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(shapeType))));
 			}
 			RequestTypeCreationFactory factory = new RequestTypeCreationFactory(requestType, size);
@@ -554,7 +598,9 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		{
 			// one of the tab panels above
 			factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_TAB, new Dimension(300, 300));
-			setProperty(factory.getExtendedData(), StaticContentSpecLoader.PROPERTY_TABORIENTATION,
+			setProperty(
+				factory.getExtendedData(),
+				StaticContentSpecLoader.PROPERTY_TABORIENTATION,
 				Integer.valueOf(((PropertyType.ValuesConfig)PersistPropertyHandler.TAB_ORIENTATION_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(tabOrienation))));
 			if (nameHint != null)
 			{
@@ -650,6 +696,14 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 			icon = Activator.loadImageDescriptorFromBundle("template.gif");
 		}
 		return new ElementCreationToolEntry("", "", factory, icon, icon);
+	}
+
+	private static PaletteEntry createComponentsEntry(String beanClassName)
+	{
+		RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_BEAN, new Dimension(100, 100));
+		factory.setData(beanClassName);
+		ImageDescriptor beanIcon = Activator.loadImageDescriptorFromBundle("bean.gif");
+		return new ElementCreationToolEntry("", "", factory, beanIcon, beanIcon);
 	}
 
 	private PaletteEntry createTemplateToolEntry(String templateName, int element)
