@@ -19,8 +19,9 @@ package com.servoy.eclipse.designer.actions;
 import javax.swing.BorderFactory;
 
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
-import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.eclipse.ui.property.PersistPropertyHandler;
 import com.servoy.j2db.persistence.RectShape;
+import com.servoy.j2db.server.ngclient.property.PropertyType;
 
 /**
  * Add a shape.
@@ -36,7 +37,7 @@ public class AddBorderPanelActionDelegate extends AbstractEditpartActionDelegate
 	{
 		super(VisualFormEditor.REQ_PLACE_RECT_SHAPE);
 		addSetPropertyValue("shapeType",
-			PersistPropertySource.SHAPE_TYPE_CONTOLLER.getConverter().convertProperty("shapeType", Integer.valueOf(RectShape.BORDER_PANEL)));
+			Integer.valueOf(((PropertyType.ValuesConfig)PersistPropertyHandler.SHAPE_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(RectShape.BORDER_PANEL))));
 		addSetPropertyValue("borderType", BorderFactory.createTitledBorder("xy"));
 	}
 }

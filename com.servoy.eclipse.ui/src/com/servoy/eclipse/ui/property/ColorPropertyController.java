@@ -122,7 +122,7 @@ public class ColorPropertyController extends PropertyDescriptor implements IProp
 		/**
 		 * Convert AWT color to SWT color
 		 */
-		public String convertProperty(Object id, java.awt.Color awtcolor)
+		public static String getColorString(java.awt.Color awtcolor)
 		{
 			if (awtcolor == null) return null;
 			String hexString = Integer.toHexString(awtcolor.getRGB() & 0x00ffffff);
@@ -130,7 +130,13 @@ public class ColorPropertyController extends PropertyDescriptor implements IProp
 			{
 				hexString = "000000".substring(hexString.length()) + hexString; //$NON-NLS-1$
 			}
-			String colorString = '#' + hexString;
+			return '#' + hexString;
+		}
+
+		public String convertProperty(Object id, java.awt.Color awtcolor)
+		{
+			if (awtcolor == null) return null;
+			String colorString = getColorString(awtcolor);
 			String named = colorsMap.getKey(colorString);
 			if (named != null)
 			{
@@ -138,7 +144,6 @@ public class ColorPropertyController extends PropertyDescriptor implements IProp
 			}
 			return colorString;
 		}
-
 
 		/**
 		 * Convert SWT color to AWT color

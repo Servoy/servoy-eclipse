@@ -42,6 +42,9 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.server.ngclient.component.WebComponentSpec;
+import com.servoy.j2db.server.ngclient.component.WebComponentSpecProvider;
+import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.smart.dataui.ComponentAccordionPanel;
 import com.servoy.j2db.smart.dataui.ComponentJTabbedPane;
 import com.servoy.j2db.smart.dataui.InvisibleBean;
@@ -101,19 +104,38 @@ public class DesignComponentFactory extends ComponentFactory
 		Component c = null;
 		if (meta.getTypeID() == IRepository.BEANS)
 		{
-			// can cast, design should always be a swing
-			IComponent comp = createBean(application, form, (Bean)meta, flattenedSolution);
-			if (comp instanceof InvisibleBean)
+			if (FormTemplateGenerator.isWebcomponentBean(meta))
 			{
-				c = (InvisibleBean)comp;
+				WebComponentSpec spec = WebComponentSpecProvider.getInstance().getWebComponentDescription(
+					FormTemplateGenerator.getComponentTypeName((Bean)meta));
+				String label;
+				if (spec == null)
+				{
+					label = "Web component not found " + ((Bean)meta).getBeanClassName();
+				}
+				else
+				{
+					label = "Web component (" + spec.getDisplayName() + ')';
+				}
+				c = (Component)application.getItemFactory().createLabel(((Bean)meta).getName(), label);
 			}
-			else if (comp instanceof VisibleBean)
+			else
 			{
-				c = ((VisibleBean)comp).getDelegate();
-			}
-			else if (comp instanceof Component)
-			{
-				c = (Component)comp;
+
+				// can cast, design should always be a swing
+				IComponent comp = createBean(application, form, (Bean)meta, flattenedSolution);
+				if (comp instanceof InvisibleBean)
+				{
+					c = (InvisibleBean)comp;
+				}
+				else if (comp instanceof VisibleBean)
+				{
+					c = ((VisibleBean)comp).getDelegate();
+				}
+				else if (comp instanceof Component)
+				{
+					c = (Component)comp;
+				}
 			}
 		}
 		else

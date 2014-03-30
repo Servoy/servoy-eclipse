@@ -56,7 +56,7 @@ import com.servoy.eclipse.ui.preferences.DesignerPreferences.PaletteCustomizatio
 import com.servoy.eclipse.ui.property.BorderPropertyController;
 import com.servoy.eclipse.ui.property.BorderPropertyController.BorderType;
 import com.servoy.eclipse.ui.property.ComplexProperty;
-import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.eclipse.ui.property.PersistPropertyHandler;
 import com.servoy.j2db.IServoyBeanFactory;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataui.IServoyAwareBean;
@@ -68,6 +68,7 @@ import com.servoy.j2db.persistence.RectShape;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
+import com.servoy.j2db.server.ngclient.property.PropertyType;
 import com.servoy.j2db.util.Utils;
 
 
@@ -423,11 +424,8 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		{
 			if (displayType != -1)
 			{
-				setProperty(
-					extendedData,
-					StaticContentSpecLoader.PROPERTY_DISPLAYTYPE,
-					PersistPropertySource.DISPLAY_TYPE_CONTOLLER.getConverter().convertProperty(StaticContentSpecLoader.PROPERTY_DISPLAYTYPE.getPropertyName(),
-						Integer.valueOf(displayType)));
+				setProperty(extendedData, StaticContentSpecLoader.PROPERTY_DISPLAYTYPE,
+					Integer.valueOf(((PropertyType.ValuesConfig)PersistPropertyHandler.DISPLAY_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(displayType))));
 			}
 			RequestTypeCreationFactory factory = new RequestTypeCreationFactory(requestType, size);
 			factory.setExtendedData(extendedData);
@@ -501,8 +499,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 			setProperty(
 				extendedData,
 				StaticContentSpecLoader.PROPERTY_HORIZONTALALIGNMENT,
-				PersistPropertySource.HORIZONTAL_ALIGNMENT_CONTROLLER.getConverter().convertProperty(
-					StaticContentSpecLoader.PROPERTY_HORIZONTALALIGNMENT.getPropertyName(), Integer.valueOf(SwingConstants.RIGHT)));
+				Integer.valueOf(((PropertyType.ValuesConfig)PersistPropertyHandler.HORIZONTAL_ALIGNMENT_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(SwingConstants.RIGHT))));
 			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_TRANSPARENT, Boolean.TRUE);
 		}
 
@@ -510,11 +507,8 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		{
 			if (shapeType != -1)
 			{
-				setProperty(
-					extendedData,
-					StaticContentSpecLoader.PROPERTY_SHAPETYPE,
-					PersistPropertySource.SHAPE_TYPE_CONTOLLER.getConverter().convertProperty(StaticContentSpecLoader.PROPERTY_SHAPETYPE.getPropertyName(),
-						Integer.valueOf(shapeType)));
+				setProperty(extendedData, StaticContentSpecLoader.PROPERTY_SHAPETYPE,
+					Integer.valueOf(((PropertyType.ValuesConfig)PersistPropertyHandler.SHAPE_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(shapeType))));
 			}
 			RequestTypeCreationFactory factory = new RequestTypeCreationFactory(requestType, size);
 			factory.setExtendedData(extendedData);
@@ -560,11 +554,8 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		{
 			// one of the tab panels above
 			factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_TAB, new Dimension(300, 300));
-			setProperty(
-				factory.getExtendedData(),
-				StaticContentSpecLoader.PROPERTY_TABORIENTATION,
-				PersistPropertySource.TAB_ORIENTATION_CONTROLLER.getConverter().convertProperty(
-					StaticContentSpecLoader.PROPERTY_TABORIENTATION.getPropertyName(), Integer.valueOf(tabOrienation)));
+			setProperty(factory.getExtendedData(), StaticContentSpecLoader.PROPERTY_TABORIENTATION,
+				Integer.valueOf(((PropertyType.ValuesConfig)PersistPropertyHandler.TAB_ORIENTATION_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(tabOrienation))));
 			if (nameHint != null)
 			{
 				factory.getExtendedData().put(ElementFactory.NAME_HINT_PROPERTY, nameHint);

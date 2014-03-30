@@ -28,11 +28,13 @@ import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.eclipse.ui.property.PersistPropertyHandler;
 import com.servoy.j2db.IForm;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.server.ngclient.property.PropertyType;
 
 /**
  * Command to delete inset list (tabpanel) and containing form.
@@ -51,8 +53,7 @@ public class DeleteListCommand extends CompoundCommand
 				"",
 				PersistPropertySource.createPersistPropertySource(model.form, false),
 				StaticContentSpecLoader.PROPERTY_VIEW.getPropertyName(),
-				PersistPropertySource.VIEW_TYPE_CONTOLLER.getConverter().convertProperty(StaticContentSpecLoader.PROPERTY_VIEW.getPropertyName(),
-					Integer.valueOf(IForm.LOCKED_RECORD_VIEW))));
+				Integer.valueOf(((PropertyType.ValuesConfig)PersistPropertyHandler.VIEW_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(IForm.LOCKED_RECORD_VIEW)))));
 		}
 		add(new DeleteListItemsCommand(model));
 	}

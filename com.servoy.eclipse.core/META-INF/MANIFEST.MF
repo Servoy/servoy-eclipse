@@ -8,6 +8,7 @@ Bundle-Vendor: Servoy
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui,
+ servoy_ngclient,
  servoy_shared,
  org.eclipse.dltk.javascript.rhino,
  servoy_smart_client,

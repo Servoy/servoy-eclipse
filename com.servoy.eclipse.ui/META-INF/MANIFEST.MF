@@ -57,7 +57,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.team.ui,
  org.eclipse.core.filesystem,
  org.eclipse.ltk.core.refactoring,
- org.eclipse.ltk.ui.refactoring
+ org.eclipse.ltk.ui.refactoring,
+ servoy_ngclient
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.ui,
  com.servoy.eclipse.ui.actions,

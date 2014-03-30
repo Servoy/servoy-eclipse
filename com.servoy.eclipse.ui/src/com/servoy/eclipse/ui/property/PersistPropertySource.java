@@ -17,14 +17,10 @@
 package com.servoy.eclipse.ui.property;
 
 import java.awt.Component;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Insets;
-import java.awt.Point;
-import java.awt.print.PageFormat;
 import java.beans.IntrospectionException;
 import java.beans.PropertyEditor;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,7 +31,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 
 import org.eclipse.core.runtime.IAdaptable;
@@ -50,7 +45,6 @@ import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -60,7 +54,6 @@ import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.DesignComponentFactory;
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.repository.I18NMessagesUtil;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -84,10 +77,6 @@ import com.servoy.eclipse.ui.editors.DataProviderCellEditor.DataProviderValueEdi
 import com.servoy.eclipse.ui.editors.FontCellEditor;
 import com.servoy.eclipse.ui.editors.FormatCellEditor;
 import com.servoy.eclipse.ui.editors.ListSelectCellEditor;
-import com.servoy.eclipse.ui.editors.PageFormatEditor;
-import com.servoy.eclipse.ui.editors.SortCellEditor;
-import com.servoy.eclipse.ui.editors.TabSeqDialogCellEditor;
-import com.servoy.eclipse.ui.editors.TabSeqDialogCellEditor.TabSeqDialogValueEditor;
 import com.servoy.eclipse.ui.editors.TagsAndI18NTextCellEditor;
 import com.servoy.eclipse.ui.labelproviders.ArrayLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
@@ -96,7 +85,6 @@ import com.servoy.eclipse.ui.labelproviders.FontLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.MediaLabelProvider;
-import com.servoy.eclipse.ui.labelproviders.PageFormatLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.PersistInheritenceDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.TextCutoffLabelProvider;
@@ -114,10 +102,7 @@ import com.servoy.eclipse.ui.util.VerifyingTextCellEditor;
 import com.servoy.eclipse.ui.views.properties.IMergeablePropertyDescriptor;
 import com.servoy.eclipse.ui.views.properties.IMergedPropertyDescriptor;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.FormController;
 import com.servoy.j2db.IBasicFormManager;
-import com.servoy.j2db.IForm;
-import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.dataui.PropertyEditorClass;
 import com.servoy.j2db.dataui.PropertyEditorHint;
@@ -130,11 +115,9 @@ import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.ContentSpec.Element;
-import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IColumnTypes;
-import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IDataProviderLookup;
 import com.servoy.j2db.persistence.IDeveloperRepository;
@@ -147,17 +130,14 @@ import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
-import com.servoy.j2db.persistence.ITableDisplay;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.Part;
-import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RectShape;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RepositoryHelper;
-import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.RuntimeProperty;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
@@ -165,14 +145,15 @@ import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
-import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.ValueList;
-import com.servoy.j2db.query.ISQLJoin;
 import com.servoy.j2db.scripting.FunctionDefinition;
+import com.servoy.j2db.server.ngclient.property.PropertyDescription;
+import com.servoy.j2db.server.ngclient.property.PropertyType;
+import com.servoy.j2db.server.ngclient.property.PropertyType.ValuesConfig;
 import com.servoy.j2db.smart.dataui.InvisibleBean;
 import com.servoy.j2db.util.ComponentFactoryHelper;
 import com.servoy.j2db.util.IDelegate;
@@ -192,241 +173,91 @@ import com.servoy.j2db.util.Utils;
 
 public class PersistPropertySource implements IPropertySource, IAdaptable, IModelSavePropertySource
 {
-	public static final IPropertyController<Integer, Integer> HORIZONTAL_ALIGNMENT_CONTROLLER;
-	public static final IPropertyController<Integer, Integer> SELECTION_MODE_CONTROLLER;
-	public static final IPropertyController<Integer, Integer> VERTICAL_ALIGNMENT_CONTROLLER;
-	public static final IPropertyController<Integer, Integer> ROLLOVER_CURSOR_CONTROLLER;
-	public static final IPropertyController<Integer, Integer> ROTATION_CONTROLLER;
-	public static final IPropertyController<Integer, Integer> SHAPE_TYPE_CONTOLLER;
-	public static final IPropertyController<Integer, Integer> VIEW_TYPE_CONTOLLER;
-	public static final IPropertyController<Integer, Integer> DISPLAY_TYPE_CONTOLLER;
-	public static final IPropertyController<Integer, Integer> TAB_ORIENTATION_CONTROLLER;
-	public static final IPropertyController<String, String> MNEMONIC_CONTROLLER;
-	public static final IPropertyController<Integer, Integer> TEXT_ORIENTATION_CONTROLLER;
-	public static final IPropertyController<Integer, Integer> SOLUTION_TYPE_CONTROLLER;
-	public static final IPropertyController<Integer, Integer> JOIN_TYPE_CONTROLLER;
-	public static final IPropertyController<Integer, Object> SLIDING_OPTIONS_CONTROLLER;
-	public static final IPropertyController<Integer, Object> ENCAPSULATION_CONTROLLER;
-	public static final IPropertyController<Integer, Object> ANCHOR_CONTROLLER;
-	public static final IPropertyController<String, PageFormat> PAGE_FORMAT_CONTROLLER;
-	public static final IPropertyController<String, String> LOGIN_SOLUTION_CONTROLLER;
-	public static final IPropertyController<Map<String, Object>, Map<String, Object>> DESIGN_PROPERTIES_CONTROLLER;
-	public static final IPropertyController<String, Object[]> COMMA_SEPARATED_CONTROLLER;
-
-	public static final IPropertyConverter<String, Border> BORDER_STRING_CONVERTER;
-
-	public static final Comparator<java.beans.PropertyDescriptor> BEANS_PROPERTY_COMPARATOR;
-
-	static
+	public static final Comparator<IPropertyHandler> BEANS_PROPERTY_COMPARATOR = new Comparator<IPropertyHandler>()
 	{
-		HORIZONTAL_ALIGNMENT_CONTROLLER = new ComboboxPropertyController<Integer>("horizontalAlignment", RepositoryHelper.getDisplayName("horizontalAlignment",
-			Field.class), new ComboboxPropertyModel<Integer>(
-			new Integer[] { Integer.valueOf(SwingConstants.LEFT), Integer.valueOf(SwingConstants.CENTER), Integer.valueOf(SwingConstants.RIGHT) },
-			new String[] { Messages.AlignLeft, Messages.AlignCenter, Messages.AlignRight }).addDefaultValue(Integer.valueOf(-1)), Messages.LabelUnresolved);
-		SELECTION_MODE_CONTROLLER = new ComboboxPropertyController<Integer>("selectionMode", RepositoryHelper.getDisplayName("selectionMode", Form.class),
-			new ComboboxPropertyModel<Integer>(new Integer[] { Integer.valueOf(IForm.SELECTION_MODE_SINGLE), Integer.valueOf(IForm.SELECTION_MODE_MULTI) },
-				new String[] { Messages.SelectionModeSingle, Messages.SelectionModeMulti }).addDefaultValue(Integer.valueOf(IForm.SELECTION_MODE_DEFAULT)),
-			Messages.LabelUnresolved);
-		SHAPE_TYPE_CONTOLLER = new ComboboxPropertyController<Integer>(
-			"shapeType",
-			RepositoryHelper.getDisplayName("shapeType", RectShape.class),
-			new ComboboxPropertyModel<Integer>(
-				new Integer[] { Integer.valueOf(RectShape.BORDER_PANEL), Integer.valueOf(RectShape.RECTANGLE), Integer.valueOf(RectShape.ROUNDED_RECTANGLE), Integer.valueOf(RectShape.OVAL) },
-				new String[] { "BORDER_PANEL", "RECTANGLE", "ROUNDED_RECTANGLE", "OVAL" }), Messages.LabelUnresolved);
-		TAB_ORIENTATION_CONTROLLER = new ComboboxPropertyController<Integer>(
-			"tabOrientation",
-			RepositoryHelper.getDisplayName("tabOrientation", TabPanel.class),
-			new ComboboxPropertyModel<Integer>(
-				new Integer[] { Integer.valueOf(SwingConstants.TOP), Integer.valueOf(SwingConstants.RIGHT), Integer.valueOf(SwingConstants.BOTTOM), Integer.valueOf(SwingConstants.LEFT), Integer.valueOf(TabPanel.HIDE), Integer.valueOf(TabPanel.SPLIT_HORIZONTAL), Integer.valueOf(TabPanel.SPLIT_VERTICAL), Integer.valueOf(TabPanel.ACCORDION_PANEL) },
-				new String[] { Messages.AlignTop, Messages.AlignRight, Messages.AlignBottom, Messages.AlignLeft, "HIDE", "SPLIT HORIZONTAL", "SPLIT VERTICAL", "ACCORDION PANE" }).addDefaultValue(Integer.valueOf(TabPanel.DEFAULT_ORIENTATION)),
-			Messages.LabelUnresolved);
-		DISPLAY_TYPE_CONTOLLER = new ComboboxPropertyController<Integer>(
-			"displayType",
-			RepositoryHelper.getDisplayName("displayType", Field.class),
-			new ComboboxPropertyModel<Integer>(
-				new Integer[] { Integer.valueOf(Field.TEXT_FIELD), Integer.valueOf(Field.TEXT_AREA), Integer.valueOf(Field.RTF_AREA), Integer.valueOf(Field.HTML_AREA), Integer.valueOf(Field.TYPE_AHEAD), Integer.valueOf(Field.COMBOBOX), Integer.valueOf(Field.RADIOS), Integer.valueOf(Field.CHECKS), Integer.valueOf(Field.CALENDAR), Integer.valueOf(Field.IMAGE_MEDIA), Integer.valueOf(Field.PASSWORD), Integer.valueOf(Field.LIST_BOX), Integer.valueOf(Field.MULTISELECT_LISTBOX), Integer.valueOf(Field.SPINNER) },
-				new String[] { "TEXT_FIELD", "TEXT_AREA", "RTF_AREA", "HTML_AREA", "TYPE_AHEAD", "COMBOBOX", "RADIOS", "CHECK", "CALENDAR", "IMAGE_MEDIA", "PASSWORD", "LISTBOX", "MULTISELECT_LISTBOX", "SPINNER" }),
-			Messages.LabelUnresolved);
-
-		BORDER_STRING_CONVERTER = new IPropertyConverter<String, Border>()
+		public int compare(IPropertyHandler p1, IPropertyHandler p2)
 		{
-			public Border convertProperty(Object property, final String value)
+			Object hint1 = null;
+			if (p1 instanceof BeanPropertyHandler)
 			{
-				Border border = null;
-				//TODO: find better way to handle this for MAC running with java 1.7
-				if (Utils.isAppleMacOS() && JavaVersion.CURRENT_JAVA_VERSION.major >= 7)
-				{
-					final Border[] fBorder = { null };
-					try
-					{
-						DebugUtils.invokeAndWaitWhileDispatchingOnSWT(new Runnable()
-						{
-							public void run()
-							{
-								fBorder[0] = ComponentFactoryHelper.createBorder(value, true);
-							}
-						});
-					}
-					catch (Exception e)
-					{
-						ServoyLog.logError("Error creating border from " + value, e);
-					}
-					border = fBorder[0];
-				}
-				else
-				{
-					border = ComponentFactoryHelper.createBorder(value, true);
-				}
-
-				return border;
+				hint1 = ((BeanPropertyHandler)p1).getAttributeValue(PropertyEditorHint.PROPERTY_EDITOR_HINT);
+			}
+			Object hint2 = null;
+			if (p2 instanceof BeanPropertyHandler)
+			{
+				hint2 = ((BeanPropertyHandler)p2).getAttributeValue(PropertyEditorHint.PROPERTY_EDITOR_HINT);
 			}
 
-			public String convertValue(Object property, Border value)
+			Object comp1 = null;
+			Object comp2 = null;
+			if (hint1 instanceof PropertyEditorHint)
 			{
-				return ComponentFactoryHelper.createBorderString(value);
+				comp1 = ((PropertyEditorHint)hint1).getOption(PropertyEditorOption.propertyOrder);
+				if (comp1 instanceof Comparable< ? >)
+				{
+					if (hint2 instanceof PropertyEditorHint)
+					{
+						comp2 = ((PropertyEditorHint)hint2).getOption(PropertyEditorOption.propertyOrder);
+					}
+					if (!(comp2 instanceof Comparable< ? >))
+					{
+						// not both comparable, compare on displayName
+						comp1 = comp2 = null;
+					}
+				}
 			}
-		};
-		JOIN_TYPE_CONTROLLER = new ComboboxPropertyController<Integer>("joinType", RepositoryHelper.getDisplayName("joinType", Relation.class),
-			new ComboboxPropertyModel<Integer>(
-
-			new Integer[] { Integer.valueOf(ISQLJoin.INNER_JOIN), Integer.valueOf(ISQLJoin.LEFT_OUTER_JOIN) },
-				new String[] { ISQLJoin.JOIN_TYPES_NAMES[ISQLJoin.INNER_JOIN], ISQLJoin.JOIN_TYPES_NAMES[ISQLJoin.LEFT_OUTER_JOIN] }), Messages.LabelUnresolved);
-
-		Integer[] ia = new Integer[SolutionMetaData.solutionTypes.length];
-		for (int i = 0; i < ia.length; i++)
-		{
-			ia[i] = Integer.valueOf(SolutionMetaData.solutionTypes[i]);
+			if (!(comp1 instanceof Comparable< ? >))
+			{
+				comp1 = p1.getDisplayName();
+				comp2 = p2.getDisplayName();
+			}
+			return comp1 == null ? (comp2 == null ? 0 : -1) : (comp2 == null ? 1 : ((Comparable)comp1).compareTo(comp2));
 		}
-		SOLUTION_TYPE_CONTROLLER = new ComboboxPropertyController<Integer>("solutionType", RepositoryHelper.getDisplayName("solutionType", Solution.class),
-			new ComboboxPropertyModel<Integer>(ia, SolutionMetaData.solutionTypeNames), Messages.LabelUnresolved);
+	};
 
-		MNEMONIC_CONTROLLER = new EditableComboboxPropertyController("mnemonic", RepositoryHelper.getDisplayName("mnemonic", GraphicalComponent.class),
-			new String[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" });
 
-		VIEW_TYPE_CONTOLLER = new ComboboxPropertyController<Integer>(
-			"view",
-			RepositoryHelper.getDisplayName("view", Form.class),
-			new ComboboxPropertyModel<Integer>(
-				new Integer[] { Integer.valueOf(IForm.RECORD_VIEW), Integer.valueOf(IForm.LIST_VIEW), Integer.valueOf(IForm.LOCKED_RECORD_VIEW), Integer.valueOf(FormController.LOCKED_LIST_VIEW), Integer.valueOf(FormController.LOCKED_TABLE_VIEW) },
-				new String[] { "Record view", "List view", "Record view (locked)", "List view (locked)", "Table view (locked)" }), Messages.LabelUnresolved);
-
-		ROTATION_CONTROLLER = new ComboboxPropertyController<Integer>("rotation", RepositoryHelper.getDisplayName("rotation", GraphicalComponent.class),
-			new ComboboxPropertyModel<Integer>(new Integer[] { Integer.valueOf(0), Integer.valueOf(90), Integer.valueOf(180), Integer.valueOf(270) }),
-			Messages.LabelUnresolved);
-
-		ROLLOVER_CURSOR_CONTROLLER = new ComboboxPropertyController<Integer>("rolloverCursor", RepositoryHelper.getDisplayName("rolloverCursor",
-			GraphicalComponent.class), new ComboboxPropertyModel<Integer>(new Integer[] { Integer.valueOf(Cursor.HAND_CURSOR) },
-			new String[] { Messages.CursorHand }).addDefaultValue(Integer.valueOf(Cursor.DEFAULT_CURSOR)), Messages.LabelUnresolved);
-
-		VERTICAL_ALIGNMENT_CONTROLLER = new ComboboxPropertyController<Integer>("verticalAlignment", RepositoryHelper.getDisplayName("verticalAlignment",
-			Field.class), new ComboboxPropertyModel<Integer>(
-			new Integer[] { Integer.valueOf(SwingConstants.TOP), Integer.valueOf(SwingConstants.CENTER), Integer.valueOf(SwingConstants.BOTTOM) },
-			new String[] { Messages.AlignTop, Messages.AlignCenter, Messages.AlignBottom }).addDefaultValue(Integer.valueOf(-1)), Messages.LabelUnresolved);
-
-		TEXT_ORIENTATION_CONTROLLER = new ComboboxPropertyController<Integer>(
-			"textOrientation",
-			RepositoryHelper.getDisplayName("textOrientation", Solution.class),
-			new ComboboxPropertyModel<Integer>(
-				new Integer[] { Integer.valueOf(Solution.TEXT_ORIENTATION_LEFT_TO_RIGHT), Integer.valueOf(Solution.TEXT_ORIENTATION_RIGHT_TO_LEFT), Integer.valueOf(Solution.TEXT_ORIENTATION_LOCALE_SPECIFIC) },
-				new String[] { Messages.OrientationLeftToRight, Messages.OrientationRightToLeft, Messages.OrientationLocaleSpecific }).addDefaultValue(Integer.valueOf(Solution.TEXT_ORIENTATION_DEFAULT)),
-			Messages.LabelUnresolved);
-
-		SLIDING_OPTIONS_CONTROLLER = new SlidingoptionsPropertyController("printSliding", RepositoryHelper.getDisplayName("printSliding",
-			GraphicalComponent.class));
-
-		ENCAPSULATION_CONTROLLER = new EncapsulationPropertyController("encapsulation", RepositoryHelper.getDisplayName("encapsulation", Form.class));
-		ANCHOR_CONTROLLER = new AnchorPropertyController("anchors", RepositoryHelper.getDisplayName("anchors", GraphicalComponent.class));
-
-		PAGE_FORMAT_CONTROLLER = new PropertyController<String, PageFormat>("defaultPageFormat", RepositoryHelper.getDisplayName("defaultPageFormat",
-			Form.class), new IPropertyConverter<String, PageFormat>()
+	public static final IPropertyConverter<String, Border> BORDER_STRING_CONVERTER = new IPropertyConverter<String, Border>()
+	{
+		public Border convertProperty(Object property, final String value)
 		{
-			public PageFormat convertProperty(Object id, String value)
+			Border border = null;
+			//TODO: find better way to handle this for MAC running with java 1.7
+			if (Utils.isAppleMacOS() && JavaVersion.CURRENT_JAVA_VERSION.major >= 7)
 			{
-				return PersistHelper.createPageFormat(value);
-			}
-
-			public String convertValue(Object id, PageFormat value)
-			{
-				return PersistHelper.createPageFormatString(value);
-			}
-
-		}, PageFormatLabelProvider.INSTANCE, new ICellEditorFactory()
-		{
-			public CellEditor createPropertyEditor(Composite parent)
-			{
-				return new PageFormatEditor(parent, "Page Setup", PageFormatLabelProvider.INSTANCE);
-			}
-		});
-
-		LOGIN_SOLUTION_CONTROLLER = new LoginSolutionPropertyController("loginSolutionName", RepositoryHelper.getDisplayName("loginSolutionName",
-			Solution.class));
-
-		DESIGN_PROPERTIES_CONTROLLER = new PropertySetterDelegatePropertyController<Map<String, Object>, PersistPropertySource>(
-			new MapEntriesPropertyController("designTimeProperties", RepositoryHelper.getDisplayName("designTimeProperties", Form.class)),
-			"designTimeProperties")
-		{
-			@Override
-			public Map<String, Object> getProperty(PersistPropertySource propSource)
-			{
-				IPersist persist = propSource.getPersist();
-				if (persist instanceof AbstractBase)
+				final Border[] fBorder = { null };
+				try
 				{
-					return ((AbstractBase)persist).getMergedCustomDesignTimeProperties(); // returns non-null map with copied/merged values, may be written to
-				}
-				return null;
-			}
-
-			public void setProperty(PersistPropertySource propSource, Map<String, Object> value)
-			{
-				IPersist persist = propSource.getPersist();
-				if (persist instanceof AbstractBase)
-				{
-					((AbstractBase)persist).setUnmergedCustomDesignTimeProperties(value);
-				}
-			}
-		};
-
-		COMMA_SEPARATED_CONTROLLER = new PropertyController<String, Object[]>("groupbyDataProviderIDs", RepositoryHelper.getDisplayName(
-			"groupbyDataProviderIDs", Part.class), new StringTokenizerConverter(",", true), null, null);
-
-		BEANS_PROPERTY_COMPARATOR = new Comparator<java.beans.PropertyDescriptor>()
-		{
-			public int compare(java.beans.PropertyDescriptor p1, java.beans.PropertyDescriptor p2)
-			{
-				Object hint1 = p1.getValue(PropertyEditorHint.PROPERTY_EDITOR_HINT);
-				Object hint2 = p2.getValue(PropertyEditorHint.PROPERTY_EDITOR_HINT);
-
-				Object comp1 = null;
-				Object comp2 = null;
-				if (hint1 instanceof PropertyEditorHint)
-				{
-					comp1 = ((PropertyEditorHint)hint1).getOption(PropertyEditorOption.propertyOrder);
-					if (comp1 instanceof Comparable< ? >)
+					DebugUtils.invokeAndWaitWhileDispatchingOnSWT(new Runnable()
 					{
-						if (hint2 instanceof PropertyEditorHint)
+						public void run()
 						{
-							comp2 = ((PropertyEditorHint)hint2).getOption(PropertyEditorOption.propertyOrder);
+							fBorder[0] = ComponentFactoryHelper.createBorder(value, true);
 						}
-						if (!(comp2 instanceof Comparable< ? >))
-						{
-							// not both comparable, compare on displayName
-							comp1 = comp2 = null;
-						}
-					}
+					});
 				}
-				if (!(comp1 instanceof Comparable< ? >))
+				catch (Exception e)
 				{
-					comp1 = p1.getDisplayName();
-					comp2 = p2.getDisplayName();
+					ServoyLog.logError("Error creating border from " + value, e);
 				}
-				return comp1 == null ? (comp2 == null ? 0 : -1) : (comp2 == null ? 1 : ((Comparable)comp1).compareTo(comp2));
+				border = fBorder[0];
 			}
-		};
-	}
+			else
+			{
+				border = ComponentFactoryHelper.createBorder(value, true);
+			}
 
-	private static final String BEAN_PROPERTY_PREFIX_DOT = "bean.";
+			return border;
+		}
 
-	public static IPropertyConverter<String, String> NULL_STRING_CONVERTER = new IPropertyConverter<String, String>()
+		public String convertValue(Object property, Border value)
+		{
+			return ComponentFactoryHelper.createBorderString(value);
+		}
+	};
+
+	protected static final String BEAN_PROPERTY_PREFIX_DOT = "bean.";
+
+	public static final IPropertyConverter<String, String> NULL_STRING_CONVERTER = new IPropertyConverter<String, String>()
 	{
 		public String convertProperty(Object id, String value)
 		{
@@ -439,33 +270,18 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		}
 	};
 
-	public static IPropertyConverter<String, String> DEFAULT_STRING_CONVERTER = new IPropertyConverter<String, String>()
-	{
-		public String convertProperty(Object id, String value)
-		{
-			return (value == null) ? "DEFAULT" : value;
-		}
-
-		public String convertValue(Object id, String value)
-		{
-			return "DEFAULT".equals(value) ? null : value;
-		}
-	};
-
 	// remember the font that was used last time the element was painted, use this as default for font cell editors.
 	public static final RuntimeProperty<java.awt.Font> LastPaintedFontProperty = new RuntimeProperty<java.awt.Font>()
 	{
-		private static final long serialVersionUID = 1L;
 	};
 
 	// remember the background set for the object when painted
 	public static final RuntimeProperty<java.awt.Color> LastPaintedBackgroundProperty = new RuntimeProperty<java.awt.Color>()
 	{
-		private static final long serialVersionUID = 1L;
 	};
 
 	protected PersistContext persistContext;
-	private boolean readOnly;
+	protected boolean readOnly;
 
 	// Property Descriptors
 	private Map<Object, IPropertyDescriptor> propertyDescriptors;
@@ -544,47 +360,13 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			Form form = (Form)(ModelUtils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext()) ? persistContext.getContext()
 				: persistContext.getPersist()).getAncestor(IRepository.FORMS);
 
-			java.beans.BeanInfo info = null;
-			Object valueObject = null;
-			try
-			{
-				if (persistContext.getPersist() instanceof Bean) //step into the bean instance
-				{
-					valueObject = DesignComponentFactory.getBeanDesignInstance(Activator.getDefault().getDesignClient(), flattenedEditingSolution,
-						(Bean)persistContext.getPersist(), form);
-					if (valueObject instanceof InvisibleBean) //step into the invisible bean instance
-					{
-						valueObject = ((InvisibleBean)valueObject).getDelegate();
-					}
-				}
-				else
-				{
-					valueObject = persistContext.getPersist();
-				}
-				if (valueObject != null)
-				{
-					info = java.beans.Introspector.getBeanInfo(valueObject.getClass());
-				}
-			}
-			catch (java.beans.IntrospectionException e)
-			{
-				ServoyLog.logError(e);
-			}
-			java.beans.PropertyDescriptor[] properties;
-			if (info != null)
-			{
-				properties = sortBeansPropertyDescriptors(info.getPropertyDescriptors());
-			}
-			else
-			{
-				properties = new java.beans.PropertyDescriptor[0];
-			}
 
 			propertyDescriptors = new LinkedHashMap<Object, IPropertyDescriptor>();// defines order
 			hiddenPropertyDescriptors = new HashMap<Object, IPropertyDescriptor>();
 			beansProperties = new HashMap<Object, PropertyDescriptorWrapper>();
 
-			for (java.beans.PropertyDescriptor element : properties)
+			Object valueObject = getValueObject(flattenedEditingSolution, form);
+			for (IPropertyHandler element : sortBeansPropertyDescriptors(createPropertyHandlers(valueObject)))
 			{
 				try
 				{
@@ -595,23 +377,17 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					ServoyLog.logError("Could not register property " + element.getName(), e);
 				}
 			}
-			if (valueObject == persistContext.getPersist())
+			if (!(persistContext.getPersist() instanceof Bean))
 			{
 				// check for pseudo properties
-				String[] pseudoPropertyNames = getPseudoPropertyNames(persistContext.getPersist().getClass());
-				if (pseudoPropertyNames != null)
+				IPropertyHandler[] pseudoProperties = getPseudoProperties(persistContext.getPersist().getClass());
+				if (pseudoProperties != null)
 				{
-					for (String propName : pseudoPropertyNames)
+					for (IPropertyHandler prop : pseudoProperties)
 					{
-						IPropertyDescriptor desc;
 						try
 						{
-							desc = getPropertiesPropertyDescriptor(this, propName, getDisplayName(propName), propName, flattenedEditingSolution, form);
-							if (desc != null)
-							{
-								setCategory(desc, PropertyCategory.createPropertyCategory(propName));
-								propertyDescriptors.put(propName, desc);
-							}
+							registerProperty(new PropertyDescriptorWrapper(prop, valueObject), flattenedEditingSolution, form);
 						}
 						catch (RepositoryException e)
 						{
@@ -629,12 +405,15 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					{
 						try
 						{
-							registerProperty(new PropertyDescriptorWrapper(element, persistContext.getPersist()), flattenedEditingSolution, form);
+							registerProperty(new PropertyDescriptorWrapper(new BeanPropertyHandler(element), persistContext.getPersist()),
+								flattenedEditingSolution, form);
 						}
 						catch (RepositoryException e)
 						{
 							ServoyLog.logError("Could not register property " + element.getName(), e);
 						}
+
+
 						if (propertyDescriptors.containsKey(element.getName()))
 						{
 							// if same property is defined in bean and persist, override with persist version
@@ -650,15 +429,69 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		}
 	}
 
-	protected String[] getPseudoPropertyNames(Class< ? > clazz)
+	/**
+	 * @param form 
+	 * @param flattenedEditingSolution 
+	 * @return
+	 */
+	protected Object getValueObject(FlattenedSolution flattenedEditingSolution, Form form)
+	{
+		Object valueObject = null;
+		if (persistContext.getPersist() instanceof Bean) //step into the bean instance
+		{
+			valueObject = DesignComponentFactory.getBeanDesignInstance(Activator.getDefault().getDesignClient(), flattenedEditingSolution,
+				(Bean)persistContext.getPersist(), form);
+			if (valueObject instanceof InvisibleBean) //step into the invisible bean instance
+			{
+				valueObject = ((InvisibleBean)valueObject).getDelegate();
+			}
+		}
+		else
+		{
+			valueObject = persistContext.getPersist();
+		}
+
+		return valueObject;
+	}
+
+	protected IPropertyHandler[] createPropertyHandlers(Object valueObject)
+	{
+		java.beans.BeanInfo info = null;
+		try
+		{
+			if (valueObject != null)
+			{
+				info = java.beans.Introspector.getBeanInfo(valueObject.getClass());
+			}
+		}
+		catch (java.beans.IntrospectionException e)
+		{
+			ServoyLog.logError(e);
+		}
+
+		java.beans.PropertyDescriptor[] descs = info.getPropertyDescriptors();
+		if (descs == null)
+		{
+			return new IPropertyHandler[0];
+		}
+
+		IPropertyHandler[] handlers = new IPropertyHandler[descs.length];
+		for (int i = 0; i < descs.length; i++)
+		{
+			handlers[i] = valueObject == persistContext.getPersist() ? new PersistPropertyHandler(descs[i]) : new BeanPropertyHandler(descs[i]);
+		}
+		return handlers;
+	}
+
+	protected IPropertyHandler[] getPseudoProperties(Class< ? > clazz)
 	{
 		if (Solution.class == clazz)
 		{
-			return new String[] { "loginSolutionName" };
+			return new IPropertyHandler[] { new PseudoPropertyHandler("loginSolutionName") };
 		}
 		if (Form.class == clazz || IFormElement.class.isAssignableFrom(clazz))
 		{
-			return new String[] { "designTimeProperties" };
+			return new IPropertyHandler[] { new PseudoPropertyHandler("designTimeProperties") };
 		}
 		return null;
 	}
@@ -686,7 +519,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			id = BEAN_PROPERTY_PREFIX_DOT + propertyDescriptor.propertyDescriptor.getName();
 		}
 
-		IPropertyDescriptor pd = createPropertyDescriptor(propertyDescriptor, flattenedEditingSolution, form, category, id);
+		IPropertyDescriptor pd = createPropertyDescriptor(propertyDescriptor, flattenedEditingSolution, form, id);
 		setCategory(pd, category);
 		IPropertyDescriptor combinedPropertyDesciptor = null;
 		if (propertyDescriptor.valueObject == persistContext.getPersist())
@@ -735,11 +568,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	 * @return
 	 * @throws RepositoryException
 	 */
-	protected IPropertyDescriptor createPropertyDescriptor(PropertyDescriptorWrapper propertyDescriptor, FlattenedSolution flattenedEditingSolution, Form form,
-		PropertyCategory category, String id) throws RepositoryException
+	protected IPropertyDescriptor createPropertyDescriptor(PropertyDescriptorWrapper propertyDescriptorWrapper, FlattenedSolution flattenedEditingSolution,
+		Form form, String id) throws RepositoryException
 	{
-		return createPropertyDescriptor(this, id, persistContext, readOnly, propertyDescriptor,
-			RepositoryHelper.getDisplayName(propertyDescriptor.propertyDescriptor.getName(), persistContext.getPersist().getClass()), category,
+		return createPropertyDescriptor(this, id, persistContext, readOnly, propertyDescriptorWrapper,
+			RepositoryHelper.getDisplayName(propertyDescriptorWrapper.propertyDescriptor.getName(), persistContext.getPersist().getClass()),
 			flattenedEditingSolution, form);
 	}
 
@@ -804,18 +637,15 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	}
 
 	public static IPropertyDescriptor createPropertyDescriptor(IPropertySource propertySource, final String id, final PersistContext persistContext,
-		boolean readOnly, PropertyDescriptorWrapper propertyDescriptor, String displayName, PropertyCategory category,
-		FlattenedSolution flattenedEditingSolution, Form form) throws RepositoryException
+		boolean readOnly, PropertyDescriptorWrapper propertyDescriptor, String displayName, FlattenedSolution flattenedEditingSolution, Form form)
+		throws RepositoryException
 	{
-
-		if ((propertyDescriptor.propertyDescriptor.getReadMethod() == null) || propertyDescriptor.propertyDescriptor.getWriteMethod() == null ||
-			propertyDescriptor.propertyDescriptor.isExpert() || propertyDescriptor.propertyDescriptor.getPropertyType().equals(Object.class) ||
-			propertyDescriptor.propertyDescriptor.isHidden())
+		if (!propertyDescriptor.propertyDescriptor.isProperty())
 		{
 			return null;
 		}
 
-		IPropertyDescriptor desc = createPropertyDescriptor(propertySource, persistContext, readOnly, propertyDescriptor, id, displayName, category,
+		IPropertyDescriptor desc = createPropertyDescriptor(propertySource, persistContext, readOnly, propertyDescriptor, id, displayName,
 			flattenedEditingSolution, form);
 		if (desc != null //
 			&&
@@ -884,17 +714,27 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	}
 
 	private static IPropertyDescriptor createPropertyDescriptor(IPropertySource propertySource, final PersistContext persistContext, final boolean readOnly,
-		final PropertyDescriptorWrapper propertyDescriptor, final String id, String displayName, PropertyCategory category,
-		final FlattenedSolution flattenedEditingSolution, final Form form) throws RepositoryException
+		final PropertyDescriptorWrapper propertyDescriptor, final String id, String displayName, final FlattenedSolution flattenedEditingSolution,
+		final Form form) throws RepositoryException
 	{
+		PropertyDescription propertyDescription = propertyDescriptor.propertyDescriptor.getPropertyDescription(propertyDescriptor.valueObject, propertySource,
+			persistContext);
+		if (propertyDescription != null && propertyDescription.getType() == null && propertyDescription.getConfig() instanceof IPropertyDescriptor)
+		{
+			// internal properties, config is propertycontroller
+			return (IPropertyDescriptor)propertyDescription.getConfig();
+		}
+
+		PropertyType propertyType = propertyDescription == null ? null : propertyDescription.getType();
+
 		/*
 		 * Category based property controllers.
 		 */
-		if (category == PropertyCategory.Events || category == PropertyCategory.Commands)
+		if (propertyType == PropertyType.function)
 		{
 			final Table table = form == null ? null : form.getTable();
-			return new MethodPropertyController<Integer>(id, displayName, persistContext, new MethodListOptions(true, category == PropertyCategory.Commands,
-				form != null, true, allowFoundsetMethods(persistContext, id) && table != null, table))
+			return new MethodPropertyController<Integer>(id, displayName, persistContext, new MethodListOptions(true,
+				Boolean.TRUE.equals(propertyDescription.getConfig()), form != null, true, allowFoundsetMethods(persistContext, id) && table != null, table))
 			{
 				@Override
 				protected IPropertyConverter<Integer, Object> createConverter()
@@ -988,9 +828,10 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		 * Property editors defined by beans
 		 */
 
-		if (category == PropertyCategory.Beans)
+		if (propertyDescriptor.propertyDescriptor instanceof BeanPropertyHandler)
 		{
-			Class< ? > propertyEditorClass = propertyDescriptor.propertyDescriptor.getPropertyEditorClass();
+			final BeanPropertyHandler beanHandler = (BeanPropertyHandler)propertyDescriptor.propertyDescriptor;
+			Class< ? > propertyEditorClass = beanHandler.getPropertyEditorClass();
 			try
 			{
 				if (propertyEditorClass != null && PropertyEditor.class.isAssignableFrom(propertyEditorClass))
@@ -1037,8 +878,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 							@Override
 							public CellEditor createPropertyEditor(Composite parent)
 							{
-								return new BeanCustomCellEditor(parent, propertyDescriptor.getPropertyEditor(), labelProvider,
-									propertyDescriptor.propertyDescriptor.getName(), "Bean custom property editor", readOnly);
+								return new BeanCustomCellEditor(parent, propertyDescriptor.getPropertyEditor(), labelProvider, beanHandler.getName(),
+									"Bean custom property editor", readOnly);
 							}
 						};
 						beanPropertyDescriptor.setLabelProvider(labelProvider);
@@ -1077,13 +918,13 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			}
 
 			// property editors for beans, use property editor hints if given
-			Object hintValue = propertyDescriptor.propertyDescriptor.getValue(PropertyEditorHint.PROPERTY_EDITOR_HINT);
+			Object hintValue = beanHandler.getAttributeValue(PropertyEditorHint.PROPERTY_EDITOR_HINT);
 			final PropertyEditorHint propertyEditorHint;
 			if (hintValue instanceof PropertyEditorHint)
 			{
 				propertyEditorHint = (PropertyEditorHint)hintValue;
 			}
-			else if (propertyDescriptor.propertyDescriptor.getPropertyType() == FunctionDefinition.class)
+			else if (beanHandler.getPropertyType() == FunctionDefinition.class)
 			{
 				// use defaults for FunctionDefinition property without specified hint
 				propertyEditorHint = new PropertyEditorHint(PropertyEditorClass.method);
@@ -1099,7 +940,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				{
 					// accept String or FunctionDefinition properties
 
-					Class< ? > propertyType = propertyDescriptor.propertyDescriptor.getPropertyType();
+					Class< ? > propertyClass = beanHandler.getPropertyType();
 					// convert a FunctionDefinition to MethodWithArguments
 					IPropertyConverter<FunctionDefinition, MethodWithArguments> methodsWithArgumentConverter = new IPropertyConverter<FunctionDefinition, MethodWithArguments>()
 					{
@@ -1159,7 +1000,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					final IPropertyConverter<FunctionDefinition, Object> functionDefinitionPropertyConverter = new ChainedPropertyConverter<FunctionDefinition, MethodWithArguments, Object>(
 						methodsWithArgumentConverter, PropertyCastingConverter.<MethodWithArguments, Object> propertyCastingConverter());
 
-					if (propertyType == FunctionDefinition.class)
+					if (propertyClass == FunctionDefinition.class)
 					{
 						return new MethodPropertyController<FunctionDefinition>(id, displayName, persistContext, new MethodListOptions(
 							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeNone)), false,
@@ -1175,7 +1016,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 						};
 					}
 
-					if (propertyType == String.class)
+					if (propertyClass == String.class)
 					{
 						// chain with String to FunctionDefinition converter
 						return new MethodPropertyController<String>(id, displayName, persistContext, new MethodListOptions(
@@ -1211,8 +1052,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					return null;
 				}
 
-				if (propertyEditorHint.getPropertyEditorClass() == PropertyEditorClass.dataprovider &&
-					propertyDescriptor.propertyDescriptor.getPropertyType() == String.class)
+				if (propertyEditorHint.getPropertyEditorClass() == PropertyEditorClass.dataprovider && beanHandler.getPropertyType() == String.class)
 				{
 					// String property, select a data provider
 					Table table = null;
@@ -1286,8 +1126,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					return propertyController;
 				}
 
-				if (propertyEditorHint.getPropertyEditorClass() == PropertyEditorClass.relation &&
-					propertyDescriptor.propertyDescriptor.getPropertyType() == String.class)
+				if (propertyEditorHint.getPropertyEditorClass() == PropertyEditorClass.relation && beanHandler.getPropertyType() == String.class)
 				{
 					// String property, select a relation
 					Table primaryTable = null;
@@ -1308,8 +1147,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 						Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeNestedRelations)));
 				}
 
-				if (propertyEditorHint.getPropertyEditorClass() == PropertyEditorClass.form &&
-					propertyDescriptor.propertyDescriptor.getPropertyType() == String.class)
+				if (propertyEditorHint.getPropertyEditorClass() == PropertyEditorClass.form && beanHandler.getPropertyType() == String.class)
 				{
 					// String property, select a form
 					final ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedEditingSolution, false),
@@ -1352,8 +1190,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					return pd;
 				}
 
-				if (propertyEditorHint.getPropertyEditorClass() == PropertyEditorClass.valuelist &&
-					propertyDescriptor.propertyDescriptor.getPropertyType() == String.class)
+				if (propertyEditorHint.getPropertyEditorClass() == PropertyEditorClass.valuelist && beanHandler.getPropertyType() == String.class)
 				{
 					// String property, select a value list
 					return new ValuelistPropertyController<String>(id, displayName, persistContext,
@@ -1383,8 +1220,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					};
 				}
 
-				if (propertyEditorHint.getPropertyEditorClass() == PropertyEditorClass.media &&
-					propertyDescriptor.propertyDescriptor.getPropertyType() == String.class)
+				if (propertyEditorHint.getPropertyEditorClass() == PropertyEditorClass.media && beanHandler.getPropertyType() == String.class)
 				{
 					// String property, select an image
 					return new MediaPropertyController<String>(id, displayName, persistContext,
@@ -1419,8 +1255,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					};
 				}
 
-				if (propertyEditorHint.getPropertyEditorClass() == PropertyEditorClass.styleclass &&
-					propertyDescriptor.propertyDescriptor.getPropertyType() == String.class)
+				if (propertyEditorHint.getPropertyEditorClass() == PropertyEditorClass.styleclass && beanHandler.getPropertyType() == String.class)
 				{
 					// String property, select a style class
 					Object option = propertyEditorHint.getOption(PropertyEditorOption.styleLookupName);
@@ -1436,10 +1271,9 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		 * Type based property controllers.
 		 */
 
-		if (propertyDescriptor.propertyDescriptor.getPropertyType() == java.awt.Dimension.class)
+		if (propertyType == PropertyType.dimension)
 		{
-			final java.awt.Dimension defaultDimension = propertyDescriptor.propertyDescriptor.getName().equals("intercellSpacing") ? new Dimension(1, 1)
-				: new Dimension(0, 0);
+			final java.awt.Dimension defaultDimension = id.equals("intercellSpacing") ? new Dimension(1, 1) : new Dimension(0, 0);
 			return new PropertyController<java.awt.Dimension, Object>(id, displayName, new ComplexPropertyConverter<java.awt.Dimension>()
 			{
 				@Override
@@ -1466,7 +1300,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			});
 		}
 
-		if (propertyDescriptor.propertyDescriptor.getPropertyType() == java.awt.Point.class)
+		if (propertyType == PropertyType.point)
 		{
 			return new PropertyController<java.awt.Point, Object>(id, displayName, new ComplexPropertyConverter<java.awt.Point>()
 			{
@@ -1493,7 +1327,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			});
 		}
 
-		if (propertyDescriptor.propertyDescriptor.getPropertyType() == java.awt.Insets.class)
+		if (propertyType == PropertyType.insets)
 		{
 			return new PropertyController<java.awt.Insets, Object>(id, displayName, new ComplexPropertyConverter<java.awt.Insets>()
 			{
@@ -1520,150 +1354,142 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			});
 		}
 
-		if (propertyDescriptor.propertyDescriptor.getPropertyType() == java.awt.Color.class)
+		if (propertyType == PropertyType.color)
 		{
 			return new ColorPropertyController(id, displayName);
 		}
 
-		if (propertyDescriptor.propertyDescriptor.getPropertyType() == java.awt.Font.class)
+		if (propertyType == PropertyType.border)
 		{
-			final IDefaultValue<String> getLastPaintedFont;
-			if (persistContext != null && persistContext.getPersist() instanceof AbstractBase)
+			BorderPropertyController borderPropertyController = new BorderPropertyController(id, displayName, propertySource, persistContext);
+			borderPropertyController.setReadonly(readOnly);
+
+			if (Boolean.TRUE.equals(propertyDescription.getConfig()))
 			{
-				getLastPaintedFont = new IDefaultValue<String>()
-				{
-					public String getValue()
-					{
-						return PropertyFontConverter.INSTANCE.convertProperty(id,
-							((AbstractBase)persistContext.getPersist()).getRuntimeProperty(LastPaintedFontProperty));
-					}
-				};
+				// BorderPropertyController handles Border objects, the property is a String.
+				return new PropertyController<String, Object>(id, displayName, new ChainedPropertyConverter<String, Border, Object>(BORDER_STRING_CONVERTER,
+					borderPropertyController.getConverter()), borderPropertyController.getLabelProvider(), borderPropertyController);
 			}
-			else
-			{
-				getLastPaintedFont = null;
-			}
-			return new PropertyController<java.awt.Font, String>(id, displayName, PropertyFontConverter.INSTANCE, new LabelProvider(), new ICellEditorFactory()
-			{
-				public CellEditor createPropertyEditor(Composite parent)
-				{
-					return new FontCellEditor(parent, getLastPaintedFont);
-				}
-			});
+
+			return borderPropertyController;
 		}
 
-		if (propertyDescriptor.propertyDescriptor.getPropertyType() == Border.class)
-		{
-			return new BorderPropertyController(id, displayName, propertySource, persistContext);
-		}
-
-		if (propertyDescriptor.propertyDescriptor.getPropertyType() == boolean.class ||
-			propertyDescriptor.propertyDescriptor.getPropertyType() == Boolean.class)
+		if (propertyType == PropertyType.bool)
 		{
 			return new CheckboxPropertyDescriptor(id, displayName);
 		}
 
-
-		/*
-		 * Name based property controllers.
-		 */
-
-		String name = propertyDescriptor.propertyDescriptor.getName();
-		IPropertyDescriptor retval = getGeneralPropertyDescriptor(persistContext, readOnly, id, displayName, name, flattenedEditingSolution);
+		IPropertyDescriptor retval = getGeneralPropertyDescriptor(persistContext, readOnly, id, displayName, flattenedEditingSolution);
 		if (retval != null)
 		{
 			return retval;
 		}
-		if (category != PropertyCategory.Beans) // name based props for IPersists only (not beans)
+
+		if (propertyType == PropertyType.scrollbars)
 		{
-			retval = getPropertiesPropertyDescriptor(propertySource, persistContext, readOnly, id, displayName, name, flattenedEditingSolution, form);
-			if (retval != null)
+			return new PropertyController<Integer, Object>(id, displayName, new ComplexProperty.ComplexPropertyConverter<Integer>()
 			{
-				return retval;
-			}
+				@Override
+				public Object convertProperty(Object property, Integer value)
+				{
+					return new ComplexProperty<Integer>(value)
+					{
+						@Override
+						public IPropertySource getPropertySource()
+						{
+							ScrollbarSettingPropertySource scrollbarSettingPropertySource = new ScrollbarSettingPropertySource(this);
+							scrollbarSettingPropertySource.setReadonly(readOnly);
+							return scrollbarSettingPropertySource;
+						}
+					};
+				}
+			}, ScrollbarSettingLabelProvider.INSTANCE, new DummyCellEditorFactory(ScrollbarSettingLabelProvider.INSTANCE));
 		}
 
-		//  defaults, determine editor based on type
-		final Class< ? > clazz = propertyDescriptor.propertyDescriptor.getPropertyType();
-		if (clazz != null)
+
+		retval = getPropertiesPropertyDescriptor(propertyDescriptor, persistContext, readOnly, id, displayName, propertyDescription, flattenedEditingSolution,
+			form);
+		if (retval != null)
 		{
-			if (clazz == String.class)
-			{
-				return new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, null, new ICellEditorFactory()
-				{
-					public CellEditor createPropertyEditor(Composite parent)
-					{
-						return new TextCellEditor(parent);
-					}
-				});
-			}
+			return retval;
+		}
 
-			final int type;
-			if (clazz == byte.class || clazz == Byte.class)
+		if (propertyType == PropertyType.string)
+		{
+			return new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, null, new ICellEditorFactory()
 			{
-				type = NumberCellEditor.BYTE;
-			}
-			else if (clazz == double.class || clazz == Double.class)
-			{
-				type = NumberCellEditor.DOUBLE;
-			}
-			else if (clazz == float.class || clazz == Float.class)
-			{
-				type = NumberCellEditor.FLOAT;
-			}
-			else if (clazz == int.class || clazz == Integer.class)
-			{
-				type = NumberCellEditor.INTEGER;
-			}
-			else if (clazz == long.class || clazz == Long.class)
-			{
-				type = NumberCellEditor.LONG;
-			}
-			else if (clazz == short.class || clazz == Short.class)
-			{
-				type = NumberCellEditor.SHORT;
-			}
-			else
-			{
-				type = -1;
-			}
-			if (type != -1)
-			{
-				return new PropertyDescriptor(id, displayName)
+				public CellEditor createPropertyEditor(Composite parent)
 				{
-					@Override
-					public CellEditor createPropertyEditor(Composite parent)
-					{
-						NumberCellEditor editor = new NumberCellEditor(parent);
-						editor.setType(type);
-						return editor;
-					}
-				};
-			}
+					return new TextCellEditor(parent);
+				}
+			});
+		}
 
-			// other bean properties
-			if (category == PropertyCategory.Beans)
+		final int type;
+		if (propertyType == PropertyType.bytenumber)
+		{
+			type = NumberCellEditor.BYTE;
+		}
+		else if (propertyType == PropertyType.doublenumber)
+		{
+			type = NumberCellEditor.DOUBLE;
+		}
+		else if (propertyType == PropertyType.floatnumber)
+		{
+			type = NumberCellEditor.FLOAT;
+		}
+		else if (propertyType == PropertyType.intnumber)
+		{
+			type = NumberCellEditor.INTEGER;
+		}
+		else if (propertyType == PropertyType.longnumber)
+		{
+			type = NumberCellEditor.LONG;
+		}
+		else if (propertyType == PropertyType.shortnumber)
+		{
+			type = NumberCellEditor.SHORT;
+		}
+		else
+		{
+			type = -1;
+		}
+		if (type != -1)
+		{
+			return new PropertyDescriptor(id, displayName)
 			{
-				return new PropertyController<Object, Object>(id, displayName, new ComplexPropertyConverter<Object>()
+				@Override
+				public CellEditor createPropertyEditor(Composite parent)
 				{
-					@Override
-					public Object convertProperty(Object id, Object value)
+					NumberCellEditor editor = new NumberCellEditor(parent);
+					editor.setType(type);
+					return editor;
+				}
+			};
+		}
+
+		// other bean properties
+		if (propertyDescriptor.propertyDescriptor instanceof BeanPropertyHandler)
+		{
+			return new PropertyController<Object, Object>(id, displayName, new ComplexPropertyConverter<Object>()
+			{
+				@Override
+				public Object convertProperty(Object id, Object value)
+				{
+					return new ComplexProperty<Object>(value)
 					{
-						return new ComplexProperty<Object>(value)
+						@Override
+						public IPropertySource getPropertySource()
 						{
-							@Override
-							public IPropertySource getPropertySource()
-							{
-								BeanSubpropertyPropertySource ps = new BeanSubpropertyPropertySource(this, propertyDescriptor.valueObject,
-									propertyDescriptor.propertyDescriptor, flattenedEditingSolution, form);
-								ps.setReadonly(readOnly);
-								return ps;
-							}
-						};
-					}
+							BeanSubpropertyPropertySource ps = new BeanSubpropertyPropertySource(this, propertyDescriptor.valueObject,
+								(BeanPropertyHandler)propertyDescriptor.propertyDescriptor, flattenedEditingSolution, form);
+							ps.setReadonly(readOnly);
+							return ps;
+						}
+					};
+				}
 
-				}, null, new DummyCellEditorFactory(NullDefaultLabelProvider.LABEL_DEFAULT));
-			}
+			}, null, new DummyCellEditorFactory(NullDefaultLabelProvider.LABEL_DEFAULT));
 		}
 
 		return null;
@@ -1701,46 +1527,25 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	 * @param styleLookupname
 	 * @return
 	 */
-	protected static PropertyController<String, ? > createStyleClassPropertyController(IPersist persist, String id, String displayName,
+	public static ComboboxPropertyController<String> createStyleClassPropertyController(IPersist persist, String id, String displayName,
 		final String styleLookupname, Form form)
 	{
-		final StyleClassesComboboxModel model = new StyleClassesComboboxModel(form, styleLookupname);
-		if (((Solution)persist.getRootObject()).getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE)
+		StyleClassesComboboxModel model = new StyleClassesComboboxModel(form, styleLookupname);
+		return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved,
+			((Solution)persist.getRootObject()).getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE ? new ComboboxDelegateValueEditor<String>(
+				new StyleClassValueEditor(form, persist), model) : null)
 		{
-			return new PropertyController<String, String>(id, displayName, DEFAULT_STRING_CONVERTER, null, new ICellEditorFactory()
+			@Override
+			protected String getWarningMessage()
 			{
-				public CellEditor createPropertyEditor(Composite parent)
+				if (getModel().getRealValues().length == 1)
 				{
-					return new StyleClassCellEditor(parent, model);
+					// only 1 value (DEFAULT)
+					return "No style classes available for lookup '" + styleLookupname + "'";
 				}
-			});
-		}
-		else
-		{
-			return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved, null);
-		}
-	}
-
-	protected static PropertyController<String, String> createStyleSheetPropertyController(IPersist persist, String id, String displayName)
-	{
-		if (persist.getTypeID() == IRepository.SOLUTIONS)
-		{
-			return new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, null, new ICellEditorFactory()
-			{
-				public CellEditor createPropertyEditor(Composite parent)
-				{
-					return new TextCellEditor(parent);
-				}
-			});
-		}
-		return null;
-	}
-
-	public static ComboboxPropertyController<String> createNamedFoundsetPropertyController(String id, String displayName, Form form)
-	{
-		NamedFoundsetComboboxModel model = new NamedFoundsetComboboxModel(form);
-		return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved, new ComboboxDelegateValueEditor<String>(
-			new NamedFoundsetRelationValueEditor(form), model));
+				return null;
+			}
+		};
 	}
 
 	/**
@@ -1767,123 +1572,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		return null;
 	}
 
-	/**
-	 * Get all solution names other than yourself.
-	 * 
-	 * @return
-	 */
-	private static List<String> getSolutionNames(IPersist persist)
-	{
-		List<String> lst = new ArrayList<String>();
-
-		if (persist instanceof Solution)
-		{
-			String name = ((Solution)persist).getName();
-			RootObjectMetaData[] solutionMetaDatas;
-			try
-			{
-				solutionMetaDatas = ServoyModel.getDeveloperRepository().getRootObjectMetaDatasForType(IRepository.SOLUTIONS);
-				for (RootObjectMetaData element : solutionMetaDatas)
-				{
-					if (!element.getName().equals(name))
-					{
-						lst.add(element.getName());
-					}
-				}
-			}
-			catch (RemoteException e)
-			{
-				ServoyLog.logError(e);
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError(e);
-			}
-		}
-		return lst;
-	}
-
-	/**
-	 * Get the style names usable for the current form.
-	 * 
-	 * @param persist
-	 * @return
-	 * @throws RepositoryException
-	 */
-	protected static String[] getStyleNames() throws RepositoryException
-	{
-		List<String> styleNames = new ArrayList<String>();
-		Iterator<Style> it = ServoyModel.getDeveloperRepository().getActiveRootObjects(IRepository.STYLES).iterator();
-		while (it.hasNext())
-		{
-			Style style = it.next();
-			styleNames.add(style.getName());
-		}
-
-		Collections.sort(styleNames);
-		styleNames.add(0, null);
-		return styleNames.toArray(new String[styleNames.size()]);
-	}
 
 	//remove some properties based on the 'known' name
-	protected boolean shouldShow(PropertyDescriptorWrapper propertyDescriptor) throws RepositoryException
+	protected boolean shouldShow(PropertyDescriptorWrapper propertyDescriptor)
 	{
-		String name = propertyDescriptor.propertyDescriptor.getName();
-
-		// check for content spec element.
-		EclipseRepository repository = (EclipseRepository)persistContext.getPersist().getRootObject().getRepository();
-		Element element = repository.getContentSpec().getPropertyForObjectTypeByName(persistContext.getPersist().getTypeID(), name);
-
-		int dispType = -1;
-		if (persistContext.getPersist() instanceof Field)
-		{
-			Field field = (Field)persistContext.getPersist();
-			dispType = field.getDisplayType();
-		}
-
-		if (!RepositoryHelper.shouldShow(name, element, persistContext.getPersist().getClass(), dispType))
-		{
-			return false;
-		}
-
-		if (name.equals("labelFor") && persistContext.getPersist() instanceof GraphicalComponent)
-		{
-			GraphicalComponent gc = (GraphicalComponent)persistContext.getPersist();
-			if (ComponentFactory.isButton(gc))
-			{
-				//if it's a button, then we only show the property if it has a value (probably to be cleared via quickfix)
-				return gc.getLabelFor() != null && !gc.getLabelFor().equals("");
-			}
-			else return true;
-		}
-		if (name.endsWith("printSliding") && !(persistContext.getPersist().getParent() instanceof Form))
-		{
-			return false;//if not directly on form it can not slide
-		}
-		if ((name.equals("onTabChangeMethodID") || name.equals("scrollTabs")) &&
-			persistContext.getPersist() instanceof TabPanel &&
-			(((TabPanel)persistContext.getPersist()).getTabOrientation() == TabPanel.SPLIT_HORIZONTAL || ((TabPanel)persistContext.getPersist()).getTabOrientation() == TabPanel.SPLIT_VERTICAL))
-		{
-			return false; // not applicable for splitpanes
-		}
-
-		if (name.equals("loginFormID") && persistContext.getPersist() instanceof Solution && ((Solution)persistContext.getPersist()).getLoginFormID() <= 0)
-		{
-			try
-			{
-				if (((Solution)persistContext.getPersist()).getLoginSolutionName() != null)
-				{
-					// there is a login solution, do not show the deprecated login form setting
-					return false;
-				}
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError(e);
-			}
-		}
-
-		return true;
+		return propertyDescriptor.propertyDescriptor.shouldShow(persistContext.getPersist());
 	}
 
 	protected boolean hideForProperties(PropertyDescriptorWrapper propertyDescriptor)
@@ -1900,7 +1593,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		{
 			try
 			{
-				return beanPropertyDescriptor.propertyDescriptor.getReadMethod().invoke(beanPropertyDescriptor.valueObject, new Object[0]);
+				return beanPropertyDescriptor.propertyDescriptor.getValue(beanPropertyDescriptor.valueObject, persistContext);
 			}
 			catch (Exception e)
 			{
@@ -2003,17 +1696,15 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				if (element == null)
 				{
 					// no content spec (example: form.width), try based on property descriptor
-					PropertyDescriptorWrapper propertyDescriptor = beansProperties.get(id);
-					if (propertyDescriptor != null)
+					PropertyDescription desc = beanPropertyDescriptor.propertyDescriptor.getPropertyDescription(beanPropertyDescriptor.valueObject, this,
+						persistContext);
+					if (desc != null && desc.getType() == PropertyType.intnumber)
 					{
-						if (propertyDescriptor.propertyDescriptor.getPropertyType() == int.class)
-						{
-							return repository.convertArgumentStringToObject(IRepository.INTEGER, null);
-						}
-						else if (propertyDescriptor.propertyDescriptor.getPropertyType() == boolean.class)
-						{
-							return repository.convertArgumentStringToObject(IRepository.BOOLEAN, null);
-						}
+						return repository.convertArgumentStringToObject(IRepository.INTEGER, null);
+					}
+					if (desc != null && desc.getType() == PropertyType.bool)
+					{
+						return repository.convertArgumentStringToObject(IRepository.BOOLEAN, null);
 					}
 				}
 				else
@@ -2216,11 +1907,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		}
 	}
 
-	private static boolean isQuoted(String text)
-	{
-		return ((text.startsWith("'") && text.endsWith("'")) || (text.startsWith("\"") && text.endsWith("\"")));
-	}
-
 	public void setPersistPropertyValue(Object id, Object value)
 	{
 		init();
@@ -2235,15 +1921,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					beanPropertyDescriptor = getBeansProperties().get(id);
 					changed = true;
 				}
-				boolean isInheritedValue = (value == null && persistContext.getPersist() instanceof ISupportExtendsID &&
-					beanPropertyDescriptor.valueObject == persistContext.getPersist() &&
-					PersistHelper.getSuperPersist((ISupportExtendsID)persistContext.getPersist()) != null && ((AbstractBase)PersistHelper.getSuperPersist((ISupportExtendsID)persistContext.getPersist())).getProperty((String)id) != null);
-				if (beanPropertyDescriptor.valueObject instanceof AbstractBase && value == null && !isInheritedValue)
-				{
-					changed |= (((AbstractBase)beanPropertyDescriptor.valueObject).getProperty((String)id) != null);
-					((AbstractBase)beanPropertyDescriptor.valueObject).clearProperty((String)id);
-				}
-				else if ("name".equals(id) && beanPropertyDescriptor.valueObject instanceof ISupportUpdateableName)
+
+				if ("name".equals(id) && beanPropertyDescriptor.valueObject instanceof ISupportUpdateableName)
 				{
 					if (value instanceof String || value == null)
 					{
@@ -2261,9 +1940,9 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				else
 				{
 					changed |= !Utils.equalObjects(value,
-						beanPropertyDescriptor.propertyDescriptor.getReadMethod().invoke(beanPropertyDescriptor.valueObject, (Object[])null));
+						beanPropertyDescriptor.propertyDescriptor.getValue(beanPropertyDescriptor.valueObject, persistContext));
 
-					beanPropertyDescriptor.propertyDescriptor.getWriteMethod().invoke(beanPropertyDescriptor.valueObject, new Object[] { value });
+					beanPropertyDescriptor.propertyDescriptor.setValue(beanPropertyDescriptor.valueObject, value, persistContext);
 					if ("i18nDataSource".equals(id))
 					{
 						I18NMessagesUtil.showDatasourceWarning();
@@ -2271,40 +1950,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 						EclipseMessages.writeProjectI18NFiles(servoyProject, false, false);
 					}
 				}
-				if (persistContext.getPersist() instanceof Bean)
-				{
-					changed = true;
-					if (beanPropertyDescriptor.valueObject == persistContext.getPersist())
-					{
-						// size, location and name are set on persist, not on bean instance
-						if ("size".equals(id) && (value == null || value instanceof Dimension))
-						{
-							Object beanDesignInstance = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist()).getBeanDesignInstance(
-								(Bean)persistContext.getPersist());
-							if (beanDesignInstance instanceof Component)
-							{
-								((Component)beanDesignInstance).setSize((Dimension)value);
-							}
-						}
-					}
-					else
-					{
-						ComponentFactory.updateBeanWithItsXML((Bean)persistContext.getPersist(), beanPropertyDescriptor.valueObject);
-					}
-				}
-
-				if (changed && id.equals("textOrientation"))
-				{
-					Display.getDefault().asyncExec(new Runnable()
-					{
-						public void run()
-						{
-							MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Orientation change",
-								"Running clients need to be restarted to make text orientation changes effective");
-						}
-					});
-				}
-
 			}
 			catch (Exception e)
 			{
@@ -2622,11 +2267,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	 */
 	public static class PropertyDescriptorWrapper
 	{
-		public final java.beans.PropertyDescriptor propertyDescriptor;
+		public final IPropertyHandler propertyDescriptor;
 		public Object valueObject;
 		private PropertyEditor propertyEditor;
 
-		PropertyDescriptorWrapper(java.beans.PropertyDescriptor propertyDescriptor, Object valueObject)
+		PropertyDescriptorWrapper(IPropertyHandler propertyDescriptor, Object valueObject)
 		{
 			this.propertyDescriptor = propertyDescriptor;
 			this.valueObject = valueObject;
@@ -2644,11 +2289,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	}
 
 	private static IPropertyDescriptor getGeneralPropertyDescriptor(PersistContext persistContext, final boolean readOnly, String id, String displayName,
-		String name, FlattenedSolution flattenedEditingSolution)
+		FlattenedSolution flattenedEditingSolution)
 	{
-		// Some properties apply to both persists and beans
+		// Some property types are hard-coded
 
-		if (name.equals("dataSource"))
+		if (id.equals("dataSource"))
 		{
 			// cannot change table when we have a super-form that already has a data source
 			boolean propertyReadOnly = false;
@@ -2676,109 +2321,105 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				TableListOptions.TableListType.ALL, true), DatasourceLabelProvider.INSTANCE_NO_IMAGE_FULLY_QUALIFIED);
 		}
 
-		if (name.equals("i18nDataSource"))
+		if (id.equals("i18nDataSource"))
 		{
 			return new DatasourceController(id, displayName, "Select I18N table", readOnly, new TableContentProvider.TableListOptions(
 				TableListOptions.TableListType.I18N, true), DatasourceLabelProvider.INSTANCE_NO_IMAGE_FULLY_QUALIFIED);
 		}
 
-		if (name.equals("primaryDataSource"))
+		if (id.equals("primaryDataSource"))
 		{
 			return new DatasourceController(id, displayName, "Select Primary table", readOnly, new TableContentProvider.TableListOptions(
 				TableListOptions.TableListType.ALL, false), DatasourceLabelProvider.INSTANCE_NO_IMAGE_FULLY_QUALIFIED);
 		}
 
-		if (name.equals("foreignDataSource"))
+		if (id.equals("foreignDataSource"))
 		{
 			return new DatasourceController(id, displayName, "Select Foreign table", readOnly, new TableContentProvider.TableListOptions(
 				TableListOptions.TableListType.ALL, false), DatasourceLabelProvider.INSTANCE_NO_IMAGE_FULLY_QUALIFIED);
 		}
 
-		if (name.equals("scrollbars"))
-		{
-			return new PropertyController<Integer, Object>(id, displayName, new ComplexProperty.ComplexPropertyConverter<Integer>()
-			{
-				@Override
-				public Object convertProperty(Object property, Integer value)
-				{
-					return new ComplexProperty<Integer>(value)
-					{
-						@Override
-						public IPropertySource getPropertySource()
-						{
-							ScrollbarSettingPropertySource scrollbarSettingPropertySource = new ScrollbarSettingPropertySource(this);
-							scrollbarSettingPropertySource.setReadonly(readOnly);
-							return scrollbarSettingPropertySource;
-						}
-					};
-				}
-			}, ScrollbarSettingLabelProvider.INSTANCE, new DummyCellEditorFactory(ScrollbarSettingLabelProvider.INSTANCE));
-		}
-
-		if ("horizontalAlignment".equals(name))
-		{
-			return HORIZONTAL_ALIGNMENT_CONTROLLER;
-		}
 
 		return null;
 	}
 
-	protected IPropertyDescriptor getPropertiesPropertyDescriptor(IPropertySource propertySource, String id, String displayName, String name,
-		FlattenedSolution flattenedEditingSolution, Form form) throws RepositoryException
+	protected IPropertyDescriptor getPropertiesPropertyDescriptor(PropertyDescriptorWrapper propertyDescriptor, String id, String displayName,
+		PropertyDescription propertyDescription, FlattenedSolution flattenedEditingSolution, Form form) throws RepositoryException
 	{
-		return getPropertiesPropertyDescriptor(propertySource, persistContext, readOnly, id, displayName, name, flattenedEditingSolution, form);
+		return getPropertiesPropertyDescriptor(propertyDescriptor, persistContext, readOnly, id, displayName, propertyDescription, flattenedEditingSolution,
+			form);
 	}
 
-	private static IPropertyDescriptor getPropertiesPropertyDescriptor(IPropertySource propertySource, final PersistContext persistContext,
-		final boolean readOnly, final String id, String displayName, final String name, final FlattenedSolution flattenedEditingSolution, final Form form)
-		throws RepositoryException
+	private static IPropertyDescriptor getPropertiesPropertyDescriptor(PropertyDescriptorWrapper propertyDescriptor, final PersistContext persistContext,
+		final boolean readOnly, final String id, final String displayName, final PropertyDescription propertyDescription,
+		final FlattenedSolution flattenedEditingSolution, final Form form) throws RepositoryException
 	{
-		if (persistContext.getPersist() instanceof Media && ("mimeType".equals(name) || "name".equals(name)))
-		{
-			return new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, null, null);
-		}
+		if (propertyDescription == null) return null;
 
-		if ("tabSeq".equals(name))
+		PropertyType propertyType = propertyDescription.getType();
+		if (propertyType == PropertyType.values)
 		{
-			return new PropertyController<String, String>(id, displayName, null, null, new ICellEditorFactory()
+			final PropertyType.ValuesConfig config = (ValuesConfig)propertyDescription.getConfig();
+			if (config.isEditable())
 			{
-				public CellEditor createPropertyEditor(Composite parent)
+				// only display values
+				return new EditableComboboxPropertyController(id, displayName, config.getDisplay());
+			}
+
+			if (config.isMultiple())
+			{
+				// list the available values as well as unknown values that are currently set.
+				List<String> availableValues = Arrays.asList(config.getDisplay());
+				final List<String> allValues = new ArrayList<String>(availableValues);
+				StringTokenizerConverter converter = new StringTokenizerConverter(",", true);
+
+				Object value = propertyDescriptor.propertyDescriptor.getValue(propertyDescriptor.valueObject, persistContext);
+				if (value instanceof String)
 				{
-					if (persistContext.getContext() instanceof Form) return new TabSeqDialogCellEditor(parent, null, new TabSeqDialogValueEditor(
-						(Form)persistContext.getContext()), true, SWT.NONE);
-					else return new TabSeqDialogCellEditor(parent, null, new TabSeqDialogValueEditor(null), true, SWT.NONE);
+					for (String val : converter.convertProperty(id, (String)value))
+					{
+						if (!allValues.contains(val))
+						{
+							allValues.add(val);
+						}
+					}
 				}
-			});
-		}
-		if ("verticalAlignment".equals(name))
-		{
-			return VERTICAL_ALIGNMENT_CONTROLLER;
+				final ILabelProvider labelProvider;
+				if (allValues.size() == availableValues.size())
+				{
+					// no 'unknown' values
+					labelProvider = new ArrayLabelProvider(converter);
+				}
+				else
+				{
+					// found 'unknown' value in current value, mark them with italic font
+					labelProvider = new ValidvalueDelegatelabelProvider(new ArrayLabelProvider(converter), availableValues, null, FontResource.getDefaultFont(
+						SWT.ITALIC, 0));
+					Collections.sort(allValues);
+				}
+				return new PropertyController<String, Object[]>(id, displayName, converter, labelProvider, new ICellEditorFactory()
+				{
+					public CellEditor createPropertyEditor(Composite parent)
+					{
+						return new ListSelectCellEditor(parent, "Select " + displayName, labelProvider, null, readOnly, allValues.toArray(), SWT.MULTI |
+							SWT.CHECK, null, id + "SelectDialog");
+					}
+				});
+			}
+
+			// a dropdown with read and display values
+			ComboboxPropertyModel<Object> model = new ComboboxPropertyModel<Object>(config.getReal(), config.getDisplay());
+			if (config.hasDefault())
+			{
+				model.addDefaultValue(config.getRealDefault(), config.getDisplayDefault() == null ? Messages.LabelDefault : config.getDisplayDefault());
+			}
+			return new ComboboxPropertyController<Object>(id, displayName, model, Messages.LabelUnresolved);
 		}
 
-		if (name.equals("borderType"))
-		{
-			BorderPropertyController borderPropertyController = new BorderPropertyController(id, displayName, propertySource, persistContext);
-			borderPropertyController.setReadonly(readOnly);
-
-			// BorderPropertyController handles Border objects, the property is a String.
-			return new PropertyController<String, Object>(id, displayName, new ChainedPropertyConverter<String, Border, Object>(BORDER_STRING_CONVERTER,
-				borderPropertyController.getConverter()), borderPropertyController.getLabelProvider(), borderPropertyController);
-		}
-
-		if (name.equals("mediaOptions"))
-		{
-			return new MediaoptionsPropertyController(id, displayName, propertySource);
-		}
-
-		if (name.endsWith("printSliding"))
-		{
-			return SLIDING_OPTIONS_CONTROLLER;
-		}
-
-		if (name.equals("fontType"))
+		if (propertyType == PropertyType.font)
 		{
 			final IDefaultValue<String> getLastPaintedFont;
-			if (persistContext.getPersist() instanceof AbstractBase)
+			if (persistContext != null && persistContext.getPersist() instanceof AbstractBase)
 			{
 				getLastPaintedFont = new IDefaultValue<String>()
 				{
@@ -2793,20 +2434,34 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			{
 				getLastPaintedFont = null;
 			}
-			// Both property (P) and edit (E) types are font strings, parse the string as awt font and convert back so that guessed fonts are mapped to 
-			// the correct string for that font
-			return new PropertyController<String, String>(id, displayName, new ChainedPropertyConverter<String, java.awt.Font, String>(
-				new InversedPropertyConverter<String, java.awt.Font>(PropertyFontConverter.INSTANCE), PropertyFontConverter.INSTANCE),
-				FontLabelProvider.INSTANCE, new ICellEditorFactory()
-				{
-					public CellEditor createPropertyEditor(Composite parent)
+			if (Boolean.TRUE.equals(propertyDescription.getConfig()))
+			{
+				// Both property (P) and edit (E) types are font strings, parse the string as awt font and convert back so that guessed fonts are mapped to 
+				// the correct string for that font
+				return new PropertyController<String, String>(id, displayName, new ChainedPropertyConverter<String, java.awt.Font, String>(
+					new InversedPropertyConverter<String, java.awt.Font>(PropertyFontConverter.INSTANCE), PropertyFontConverter.INSTANCE),
+					FontLabelProvider.INSTANCE, new ICellEditorFactory()
 					{
-						return new FontCellEditor(parent, getLastPaintedFont);
-					}
-				});
+						public CellEditor createPropertyEditor(Composite parent)
+						{
+							return new FontCellEditor(parent, getLastPaintedFont);
+						}
+					});
+			}
+			else
+			{
+				return new PropertyController<java.awt.Font, String>(id, displayName, PropertyFontConverter.INSTANCE, new LabelProvider(),
+					new ICellEditorFactory()
+					{
+						public CellEditor createPropertyEditor(Composite parent)
+						{
+							return new FontCellEditor(parent, getLastPaintedFont);
+						}
+					});
+			}
 		}
 
-		if (name.endsWith("dataProviderID"))
+		if (propertyType == PropertyType.dataprovider)
 		{
 			Table table = null;
 			boolean listItemHeader = persistContext != null && persistContext.getPersist() instanceof AbstractBase &&
@@ -2870,7 +2525,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			return propertyController;
 		}
 
-		if (name.equals("relationName"))
+		if (propertyType == PropertyType.relation)
 		{
 			Table primaryTable = null;
 			if (form != null)
@@ -2886,7 +2541,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			}
 			Table foreignTable = null;
 			boolean incudeNone = false;
-			if (persistContext.getPersist() instanceof Tab)
+			if (persistContext != null && persistContext.getPersist() instanceof Tab)
 			{
 				Form tabForm = flattenedEditingSolution.getForm(((Tab)persistContext.getPersist()).getContainsFormID());
 				if (tabForm != null)
@@ -2914,241 +2569,19 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			return new RelationPropertyController(id, displayName, persistContext, primaryTable, foreignTable, incudeNone, true);
 		}
 
-		if (name.endsWith("rowBGColorCalculation"))
-		{
-			if (form == null) return null;
-			Table table = null;
-			if (persistContext.getPersist() instanceof Portal)
-			{
-				Relation[] relations = flattenedEditingSolution.getRelationSequence(((Portal)persistContext.getPersist()).getRelationName());
-				if (relations != null)
-				{
-					table = relations[relations.length - 1].getForeignTable();
-				}
-			}
-			else
-			{
-				try
-				{
-					table = flattenedEditingSolution.getFlattenedForm(form).getTable();
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logInfo("Table form not accessible: " + e.getMessage());
-				}
-			}
-			return new ScriptProviderPropertyController(id, displayName, table, persistContext);
-		}
-
-		if ("variableType".equals(name) && persistContext.getPersist() instanceof ScriptVariable && propertySource instanceof PersistPropertySource)
-		{
-			int[] iTypes = Column.allDefinedTypes;
-			Integer[] integerTypes = new Integer[iTypes.length];
-			String[] stringTypes = new String[iTypes.length];
-			for (int i = 0; i < iTypes.length; i++)
-			{
-				integerTypes[i] = Integer.valueOf(iTypes[i]);
-				stringTypes[i] = Column.getDisplayTypeString(iTypes[i]);
-			}
-			return new PropertySetterDelegatePropertyController<Integer, PersistPropertySource>(new ComboboxPropertyController<Integer>(id, displayName,
-				new ComboboxPropertyModel<Integer>(integerTypes, stringTypes), Messages.LabelUnresolved), id)
-			{
-				// handle setting of this property via a IPropertySetter so that we can do additional stuff when the property is set.
-				public void setProperty(PersistPropertySource propertySource, Integer value)
-				{
-					propertySource.setPersistPropertyValue(id, value);
-
-					// the variable type is being set; the default value should change if incompatible
-					ScriptVariable variable = (ScriptVariable)propertySource.getPersist();
-					String defaultValue = variable.getDefaultValue();
-					if (defaultValue != null)
-					{
-						String newDefault = null;
-						int type = value.intValue();
-						if (type == IColumnTypes.TEXT)
-						{
-							if (!isQuoted(defaultValue))
-							{
-								newDefault = Utils.makeJSExpression(defaultValue);
-							}
-						}
-						else if (type == IColumnTypes.INTEGER)
-						{
-							if (isQuoted(defaultValue))
-							{
-								newDefault = defaultValue.substring(1, defaultValue.length() - 1);
-							}
-							else
-							{
-								newDefault = defaultValue;
-							}
-							try
-							{
-								Integer.parseInt(newDefault);
-								newDefault = (defaultValue == newDefault) ? null : newDefault;
-							}
-							catch (NumberFormatException e)
-							{
-								newDefault = "";
-							}
-						}
-						else if (type == IColumnTypes.NUMBER)
-						{
-							if (isQuoted(defaultValue))
-							{
-								newDefault = defaultValue.substring(1, defaultValue.length() - 1);
-							}
-							else
-							{
-								newDefault = defaultValue;
-							}
-							try
-							{
-								Double.parseDouble(newDefault);
-								newDefault = (defaultValue == newDefault) ? null : newDefault;
-							}
-							catch (NumberFormatException e)
-							{
-								newDefault = "";
-							}
-						}
-
-						if (newDefault != null)
-						{
-							variable.setDefaultValue(newDefault);
-						}
-					}
-				}
-			};
-		}
-
-		if ("rolloverCursor".equals(name))
-		{
-			return ROLLOVER_CURSOR_CONTROLLER;
-		}
-
-		if (name.endsWith("shapeType"))
-		{
-			return SHAPE_TYPE_CONTOLLER;
-		}
-
-		if (name.equals("view"))
-		{
-			return VIEW_TYPE_CONTOLLER;
-		}
-
-		if ("selectionMode".equals(name))
-		{
-			return SELECTION_MODE_CONTROLLER;
-		}
-
-		if (name.equals("textOrientation"))
-		{
-			return TEXT_ORIENTATION_CONTROLLER;
-		}
-
-		if (name.equals("solutionType"))
-		{
-			return SOLUTION_TYPE_CONTROLLER;
-		}
-
-		if (name.equals("joinType"))
-		{
-			return JOIN_TYPE_CONTROLLER;
-		}
-
-		if (name.equals("displayType"))
-		{
-			return DISPLAY_TYPE_CONTOLLER;
-		}
-
-		if (name.equals("tabOrientation"))
-		{
-			return TAB_ORIENTATION_CONTROLLER;
-		}
-
-		if (name.equals("format"))
+		if (propertyType == PropertyType.format)
 		{
 			return new PropertyDescriptor(id, displayName)
 			{
 				@Override
 				public CellEditor createPropertyEditor(Composite parent)
 				{
-					return new FormatCellEditor(parent, persistContext.getPersist());
+					return new FormatCellEditor(parent, persistContext.getPersist(), (String)propertyDescription.getConfig());
 				}
 			};
 		}
-		if (name.equals("labelFor"))
-		{
-			if (form != null)
-			{
-				Form flattenedForm = flattenedEditingSolution.getFlattenedForm(form);
-				int bodyStart = -1, bodyEnd = -1;
-				if (flattenedForm.getView() == FormController.TABLE_VIEW || flattenedForm.getView() == FormController.LOCKED_TABLE_VIEW)
-				{
-					bodyStart = 0;
-					Iterator<Part> parts = flattenedForm.getParts();
-					while (parts.hasNext())
-					{
-						Part part = parts.next();
-						if (part.getPartType() == Part.BODY)
-						{
-							bodyEnd = part.getHeight();
-							break;
-						}
-						bodyStart = part.getHeight();
-					}
-				}
 
-				List<String> names = new ArrayList<String>();
-				for (IPersist object : flattenedForm.getAllObjectsAsList())
-				{
-					if (object instanceof IFormElement && ((IFormElement)object).getName() != null && ((IFormElement)object).getName().length() > 0)
-					{
-						boolean add = ((IFormElement)object).getTypeID() == IRepository.FIELDS;
-						if (!add && bodyStart >= 0 && (!(object instanceof GraphicalComponent) || ((GraphicalComponent)object).getLabelFor() == null))
-						{
-							// TableView, add elements in the body
-							Point location = ((IFormElement)object).getLocation();
-							add = (location != null && location.y >= bodyStart && location.y < bodyEnd);
-						}
-						if (add)
-						{
-							names.add(((IFormElement)object).getName());
-						}
-					}
-				}
-				String[] array = names.toArray(new String[names.size()]);
-				Arrays.sort(array, String.CASE_INSENSITIVE_ORDER);
-				return new EditableComboboxPropertyController(id, displayName, array);
-			}
-		}
-		if (name.equals("mnemonic"))
-		{
-			return MNEMONIC_CONTROLLER;
-		}
-		if (name.endsWith("navigatorID") && persistContext != null && persistContext.getPersist() instanceof Form)
-		{
-			final ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedEditingSolution, false),
-				persistContext.getContext());
-			PropertyDescriptor pd = new PropertyDescriptor(id, displayName)
-			{
-				@Override
-				public CellEditor createPropertyEditor(Composite parent)
-				{
-					Form f = (Form)persistContext.getPersist();
-					boolean isMobile = f != null && f.getSolution().getSolutionMetaData().getSolutionType() == SolutionMetaData.MOBILE;
-
-					return new ListSelectCellEditor(parent, "Select navigator form", new FormContentProvider(flattenedEditingSolution, f), formLabelProvider,
-						new FormValueEditor(flattenedEditingSolution), readOnly, new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS,
-							Boolean.valueOf(isMobile), true, !isMobile, true), SWT.NONE, null, "navigatorFormDialog");
-				}
-			};
-			pd.setLabelProvider(formLabelProvider);
-			return pd;
-		}
-
-		if (name.equals("firstFormID") || name.equals("loginFormID"))
+		if (propertyType == PropertyType.form)
 		{
 			final ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedEditingSolution, false),
 				persistContext.getContext());
@@ -3165,118 +2598,12 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			pd.setLabelProvider(formLabelProvider);
 			return pd;
 		}
-
-		if (name.equals("extendsID") && persistContext != null && persistContext.getPersist() instanceof Form)
-		{
-			if (form == null) return null;
-			final ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedEditingSolution, true),
-				persistContext.getContext());
-			PropertyDescriptor pd = new PropertyDescriptor(id, displayName)
-			{
-				@Override
-				public CellEditor createPropertyEditor(Composite parent)
-				{
-					return new ListSelectCellEditor(parent, "Select parent form", new FormContentProvider(flattenedEditingSolution, form), formLabelProvider,
-						new FormValueEditor(flattenedEditingSolution), readOnly, new FormContentProvider.FormListOptions(
-							FormListOptions.FormListType.HIERARCHY, null, true, false, false), SWT.NONE, null, "parentFormDialog")
-					{
-						@Override
-						protected Object openDialogBox(Control cellEditorWindow)
-						{
-							Object returnValue = super.openDialogBox(cellEditorWindow);
-							if (returnValue != null)
-							{
-								Form f = (Form)persistContext.getPersist();
-								if (!Utils.equalObjects(Integer.valueOf(f.getExtendsID()), returnValue))
-								{
-									List<IPersist> overridePersists = new ArrayList<IPersist>();
-									for (IPersist child : f.getAllObjectsAsList())
-									{
-										if (child instanceof ISupportExtendsID && PersistHelper.isOverrideElement((ISupportExtendsID)child)) overridePersists.add(child);
-									}
-									if (overridePersists.size() > 0)
-									{
-										if (MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Delete override elements",
-											"You are about to change the parent form, this will also delete all override elements (this action cannot be undone). Are you sure you want to proceed?"))
-										{
-											for (IPersist child : overridePersists)
-											{
-												f.removeChild(child);
-											}
-										}
-										else
-										{
-											returnValue = null;
-										}
-									}
-									if (returnValue != null)
-									{
-										// here we decide what happens to the parts that are declared in this form; if new extended form
-										// has those parts, mark them as overriden; if we wouldn't do this you could end up with 2 body parts in the same form: one overriden and one not�
-										// an alternative would be to simply delete these parts
-										ArrayList<Part> inheritedParts = new ArrayList<Part>();
-										int newExtendsId = ((Integer)returnValue).intValue();
-										if (newExtendsId != Form.NAVIGATOR_NONE && newExtendsId != Form.NAVIGATOR_DEFAULT) // NAVIGATOR_NONE (0 default value as in contentspec) should be used but in the past either one or the other was used
-										{
-											Form newSuperForm = flattenedEditingSolution.getForm(((Integer)returnValue).intValue());
-											if (newSuperForm != null)
-											{
-												Iterator<Part> it = newSuperForm.getParts();
-												while (it.hasNext())
-													inheritedParts.add(it.next());
-												List<Form> ancestorForms = flattenedEditingSolution.getFormHierarchy(newSuperForm);
-												for (Form frm : ancestorForms)
-												{
-													it = frm.getParts();
-													while (it.hasNext())
-														inheritedParts.add(it.next());
-												}
-											}
-										}
-
-										Iterator<Part> it = f.getParts();
-										while (it.hasNext())
-										{
-											Part p = it.next();
-											Part ancestorP = null;
-											// find first ancestor of the same part type for parts that cannot be duplicate in a form
-											for (Part aP : inheritedParts)
-											{
-												if (aP.getPartType() == p.getPartType() && !Part.canBeMoved(p.getPartType()))
-												{
-													ancestorP = aP;
-													break;
-												}
-											}
-											if (ancestorP != null)
-											{
-												// remove part type as it is inherited
-												Map<String, Object> pMap = p.getPropertiesMap();
-												pMap.remove(StaticContentSpecLoader.PROPERTY_PARTTYPE.getPropertyName());
-												p.copyPropertiesMap(pMap, true);
-
-												p.setExtendsID(ancestorP.getID());
-											}
-										}
-									}
-								}
-							}
-							return returnValue;
-						}
-					};
-				}
-			};
-
-			pd.setLabelProvider(formLabelProvider);
-			return pd;
-		}
-
-		if (name.endsWith("valuelistID"))
+		if (propertyType == PropertyType.valuelist)
 		{
 			return new ValuelistPropertyController<Integer>(id, displayName, persistContext, true);
 		}
 
-		if (name.equals("rolloverImageMediaID") || name.equals("imageMediaID"))
+		if (propertyType == PropertyType.media)
 		{
 			return new MediaPropertyController<Integer>(id, displayName, persistContext, true)
 			{
@@ -3313,179 +2640,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			};
 		}
 
-		if (name.equals(IContentSpecConstants.PROPERTY_STYLESHEET))
-		{
-			return createStyleSheetPropertyController(persistContext.getPersist(), id, displayName);
-		}
 
-		if (name.equals("styleClass"))
-		{
-			return createStyleClassPropertyController(persistContext.getPersist(), id, displayName, ModelUtils.getStyleLookupname(persistContext.getPersist()),
-				form);
-		}
-
-		if (name.equals("namedFoundSet"))
-		{
-			return createNamedFoundsetPropertyController(id, displayName, form);
-		}
-
-		if (name.equals("styleName"))
-		{
-			ComboboxPropertyModel<String> model = new ComboboxPropertyModel<String>(getStyleNames(), NullDefaultLabelProvider.LABEL_DEFAULT);
-			return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved, new ComboboxDelegateValueEditor<String>(
-				StyleValueEditor.INSTANCE, model));
-		}
-
-		if (name.equals("anchors"))
-		{
-			return ANCHOR_CONTROLLER;
-		}
-		if (name.equals("encapsulation"))
-		{
-			if (persistContext.getPersist() instanceof Form)
-			{
-				return ENCAPSULATION_CONTROLLER;
-			}
-			else
-			{
-				Integer[] values = null;
-				String[] labels = null;
-				if (persistContext.getPersist() instanceof Relation)
-				{
-					values = new Integer[] { Integer.valueOf(PersistEncapsulation.DEFAULT), Integer.valueOf(PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE), Integer.valueOf(PersistEncapsulation.MODULE_SCOPE) };
-					labels = new String[] { Messages.Public, Messages.HideInScriptingModuleScope, Messages.ModuleScope };
-				}
-				else
-				{
-					values = new Integer[] { Integer.valueOf(PersistEncapsulation.DEFAULT), Integer.valueOf(PersistEncapsulation.MODULE_SCOPE) };
-					labels = new String[] { Messages.Public, Messages.ModuleScope };
-				}
-				return new ComboboxPropertyController<Integer>(id, displayName, new ComboboxPropertyModel<Integer>(values, labels), Messages.LabelUnresolved);
-			}
-		}
-
-		if (name.equals("rotation"))
-		{
-			return ROTATION_CONTROLLER;
-		}
-
-		if (name.equals("groupbyDataProviderIDs"))
-		{
-			return COMMA_SEPARATED_CONTROLLER;
-		}
-
-		if (name.equals("modulesNames"))
-		{
-			// list the available modules as well as unknown modules that are currently set.
-			List<String> availableSolutions = getSolutionNames(persistContext.getPersist());
-			StringTokenizerConverter converter = new StringTokenizerConverter(",", true);
-
-			String[] modulesNames = null;
-			if (persistContext.getPersist() instanceof Solution)
-			{
-				modulesNames = converter.convertProperty(id, ((Solution)persistContext.getPersist()).getModulesNames());
-			}
-
-			final List<String> allSolutions = new ArrayList<String>(availableSolutions);
-			if (modulesNames != null)
-			{
-				for (String module : modulesNames)
-				{
-					if (!allSolutions.contains(module))
-					{
-						allSolutions.add(module);
-					}
-				}
-			}
-
-			final ILabelProvider labelProvider;
-			if (allSolutions.size() == availableSolutions.size())
-			{
-				// no 'unknown' modules
-				labelProvider = new ArrayLabelProvider(converter);
-			}
-			else
-			{
-				// found 'unknown' modules in current value, mark them with italic font
-				labelProvider = new ValidvalueDelegatelabelProvider(new ArrayLabelProvider(converter), availableSolutions, null, FontResource.getDefaultFont(
-					SWT.ITALIC, 0));
-				Collections.sort(allSolutions);
-			}
-
-			return new PropertyController<String, Object[]>(id, displayName, converter, labelProvider, new ICellEditorFactory()
-			{
-				public CellEditor createPropertyEditor(Composite parent)
-				{
-					return new ListSelectCellEditor(parent, "Select modules", labelProvider, null, readOnly, allSolutions.toArray(), SWT.MULTI | SWT.CHECK,
-						null, "selectModules");
-				}
-			});
-		}
-
-		if (name.endsWith("initialSort"))
-		{
-			final ITableDisplay tableDisplay;
-			if (persistContext != null && persistContext.getPersist() instanceof Portal)
-			{
-				tableDisplay = new ITableDisplay()
-				{
-					public String getInitialSort()
-					{
-						return ((Portal)persistContext.getPersist()).getInitialSort();
-					}
-
-					public Table getTable() throws RepositoryException
-					{
-						Table table = null;
-						Relation[] relations = flattenedEditingSolution.getRelationSequence(((Portal)persistContext.getPersist()).getRelationName());
-						if (relations != null)
-						{
-							table = relations[relations.length - 1].getForeignTable();
-						}
-						return table;
-					}
-				};
-			}
-			else if (form != null)
-			{
-				tableDisplay = flattenedEditingSolution.getFlattenedForm(form);
-			}
-			else if (persistContext.getPersist() instanceof Relation)
-			{
-				tableDisplay = new ITableDisplay()
-				{
-					public String getInitialSort()
-					{
-						return ((Relation)persistContext.getPersist()).getInitialSort();
-					}
-
-					public Table getTable() throws RepositoryException
-					{
-						return ((Relation)persistContext.getPersist()).getForeignTable();
-					}
-				};
-			}
-			else
-			{
-				tableDisplay = null;
-			}
-			if (tableDisplay == null)
-			{
-				return null;
-			}
-
-			return new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, NullDefaultLabelProvider.LABEL_DEFAULT,
-				new ICellEditorFactory()
-				{
-					public CellEditor createPropertyEditor(Composite parent)
-					{
-						return new SortCellEditor(parent, flattenedEditingSolution, tableDisplay, "Select sorting fields",
-							NullDefaultLabelProvider.LABEL_DEFAULT);
-					}
-				});
-		}
-
-		if (name.equals("text") || name.equals("toolTipText") || name.equals("titleText") || name.equals("innerHTML"))
+		if (propertyType == PropertyType.tagstring)
 		{
 			Table table = null;
 			if (form != null)
@@ -3521,12 +2677,12 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				public CellEditor createPropertyEditor(Composite parent)
 				{
 					return new TagsAndI18NTextCellEditor(parent, persistContext, flattenedEditingSolution, TextCutoffLabelProvider.DEFAULT, finalTable,
-						"Edit text property", Activator.getDefault().getDesignClient(), name.equals("innerHTML"));
+						"Edit text property", Activator.getDefault().getDesignClient(), Boolean.TRUE.equals(propertyDescription.getConfig()));
 				}
 			});
 		}
 
-		if (name.equals("name"))
+		if (id.equals("name"))
 		{
 			return new DelegatePropertyController<String, String>(new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, null,
 				new ICellEditorFactory()
@@ -3590,47 +2746,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			};
 		}
 
-		if (name.equals("defaultPageFormat"))
-		{
-			return PAGE_FORMAT_CONTROLLER;
-		}
-
-		if (name.equals("loginSolutionName"))
-		{
-			return LOGIN_SOLUTION_CONTROLLER;
-		}
-
-		if (name.equals("designTimeProperties"))
-		{
-			return DESIGN_PROPERTIES_CONTROLLER;
-		}
-
-		if ("location".equals(name))
-		{
-			return new PropertyController<java.awt.Point, Object>(id, displayName, new ComplexPropertyConverter<java.awt.Point>()
-			{
-				@Override
-				public Object convertProperty(Object id, java.awt.Point value)
-				{
-					return new ComplexProperty<java.awt.Point>(value)
-					{
-						@Override
-						public IPropertySource getPropertySource()
-						{
-							PointPropertySource pointPropertySource = new PointPropertySource(this);
-							pointPropertySource.setReadonly(readOnly);
-							return pointPropertySource;
-						}
-					};
-				}
-			}, PointPropertySource.getLabelProvider(), new ICellEditorFactory()
-			{
-				public CellEditor createPropertyEditor(Composite parent)
-				{
-					return PointPropertySource.createPropertyEditor(parent);
-				}
-			});
-		}
 
 		return null;
 	}
@@ -3667,7 +2782,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	 * @param propertyDescriptors2
 	 * @return
 	 */
-	public static java.beans.PropertyDescriptor[] sortBeansPropertyDescriptors(java.beans.PropertyDescriptor[] descs)
+	public static <T extends IPropertyHandler> T[] sortBeansPropertyDescriptors(T[] descs)
 	{
 		if (descs != null && descs.length > 1)
 		{
@@ -3675,4 +2790,5 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		}
 		return descs;
 	}
+
 }

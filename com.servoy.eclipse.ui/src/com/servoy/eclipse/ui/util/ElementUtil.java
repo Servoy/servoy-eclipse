@@ -354,52 +354,53 @@ public class ElementUtil
 
 		if (model instanceof Bean)
 		{
-			if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile()) return IScriptMobileBean.class;
-			else
+			if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile())
 			{
-				final Bean bean = (Bean)model;
-				String beanClassName = bean.getBeanClassName();
-				WeakReference<Class< ? >> beanClassRef = beanClassCache.get(beanClassName);
-				Class< ? > beanClass = null;
-				if (beanClassRef != null)
+				return IScriptMobileBean.class;
+			}
+
+			final Bean bean = (Bean)model;
+			String beanClassName = bean.getBeanClassName();
+			WeakReference<Class< ? >> beanClassRef = beanClassCache.get(beanClassName);
+			Class< ? > beanClass = null;
+			if (beanClassRef != null)
+			{
+				beanClass = beanClassRef.get();
+			}
+			if (beanClass == null)
+			{
+				ClassLoader bcl = application.getBeanManager().getClassLoader();
+				try
 				{
-					beanClass = beanClassRef.get();
-				}
-				if (beanClass == null)
-				{
-					ClassLoader bcl = application.getBeanManager().getClassLoader();
-					try
+					beanClass = bcl.loadClass(beanClassName);
+					if (IServoyBeanFactory.class.isAssignableFrom(beanClass))
 					{
-						beanClass = bcl.loadClass(beanClassName);
-						if (IServoyBeanFactory.class.isAssignableFrom(beanClass))
+						try
 						{
-							try
+							Form form = (Form)bean.getParent();
+							IServoyBeanFactory beanFactory = (IServoyBeanFactory)beanClass.newInstance();
+							Object beanInstance = beanFactory.getBeanInstance(application.getApplicationType(),
+								(IClientPluginAccess)application.getPluginAccess(),
+								new Object[] { ComponentFactory.getWebID(null, bean), form.getName(), form.getStyleName() });
+							beanClass = beanInstance.getClass();
+							if (beanInstance instanceof IScriptObject)
 							{
-								Form form = (Form)bean.getParent();
-								IServoyBeanFactory beanFactory = (IServoyBeanFactory)beanClass.newInstance();
-								Object beanInstance = beanFactory.getBeanInstance(application.getApplicationType(),
-									(IClientPluginAccess)application.getPluginAccess(),
-									new Object[] { ComponentFactory.getWebID(null, bean), form.getName(), form.getStyleName() });
-								beanClass = beanInstance.getClass();
-								if (beanInstance instanceof IScriptObject)
-								{
-									ScriptObjectRegistry.registerScriptObjectForClass(beanClass, (IScriptObject)beanInstance);
-								}
-							}
-							catch (Throwable t)
-							{
-								Debug.error("Error loading bean: " + bean.getName() + " clz: " + beanClass, t); //$NON-NLS-1$ //$NON-NLS-2$
+								ScriptObjectRegistry.registerScriptObjectForClass(beanClass, (IScriptObject)beanInstance);
 							}
 						}
-						beanClassCache.put(beanClassName, new WeakReference<Class< ? >>(beanClass));
+						catch (Throwable t)
+						{
+							Debug.error("Error loading bean: " + bean.getName() + " clz: " + beanClass, t); //$NON-NLS-1$ //$NON-NLS-2$
+						}
 					}
-					catch (Throwable e)
-					{
-						Debug.error("Error loading bean: " + bean.getName() + " clz: " + beanClassName, e); //$NON-NLS-1$ //$NON-NLS-2$
-					}
+					beanClassCache.put(beanClassName, new WeakReference<Class< ? >>(beanClass));
 				}
-				return beanClass;
+				catch (Throwable e)
+				{
+					Debug.error("Error loading bean: " + bean.getName() + " clz: " + beanClassName, e); //$NON-NLS-1$ //$NON-NLS-2$
+				}
 			}
+			return beanClass;
 		}
 
 		if (model instanceof TabPanel)

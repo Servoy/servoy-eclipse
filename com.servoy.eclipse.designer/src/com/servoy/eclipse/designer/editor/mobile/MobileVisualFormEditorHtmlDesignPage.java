@@ -558,7 +558,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 			}
 			else if ("Bean".equals(nodeType))
 			{
-				commands.add(new AddBeanCommand(Activator.getDefault().getDesignClient(), form, VisualFormEditor.REQ_PLACE_BEAN, null));
+				commands.add(new AddBeanCommand(Activator.getDefault().getDesignClient(), form, VisualFormEditor.REQ_PLACE_BEAN, null, null));
 			}
 			else
 			{

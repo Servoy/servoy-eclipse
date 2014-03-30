@@ -27,9 +27,11 @@ import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.eclipse.ui.property.PersistPropertyHandler;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.server.ngclient.property.PropertyType;
 
 /**
  * Command to modify the current form as a list form.
@@ -47,8 +49,7 @@ public class ConvertToRecordFormCommand extends CompoundCommand
 				"",
 				PersistPropertySource.createPersistPropertySource(form, false),
 				StaticContentSpecLoader.PROPERTY_VIEW.getPropertyName(),
-				PersistPropertySource.VIEW_TYPE_CONTOLLER.getConverter().convertProperty(StaticContentSpecLoader.PROPERTY_VIEW.getPropertyName(),
-					Integer.valueOf(IFormConstants.VIEW_TYPE_RECORD))));
+				Integer.valueOf(((PropertyType.ValuesConfig)PersistPropertyHandler.VIEW_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(IFormConstants.VIEW_TYPE_RECORD)))));
 
 			// delete all form list elements
 			MobileListModel model = MobileListModel.create(form, form);

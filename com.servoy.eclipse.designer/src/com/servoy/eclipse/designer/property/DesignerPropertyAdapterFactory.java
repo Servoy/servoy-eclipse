@@ -48,6 +48,7 @@ import com.servoy.eclipse.ui.property.PointPropertySource;
 import com.servoy.eclipse.ui.property.RetargetToEditorPersistProperties;
 import com.servoy.eclipse.ui.property.SavingPersistPropertySource;
 import com.servoy.j2db.persistence.AbstractRepository;
+import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
@@ -58,6 +59,9 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Style;
+import com.servoy.j2db.server.ngclient.component.WebComponentSpec;
+import com.servoy.j2db.server.ngclient.component.WebComponentSpecProvider;
+import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -90,7 +94,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 
 		if (obj instanceof FormElementGroup && key == IPropertySource.class)
 		{
-			return createFormElementGroupPropertySource((FormElementGroup)obj, null);
+			return createFormElementGroupPropertySource((FormElementGroup)obj, ((FormElementGroup)obj).getParent());
 		}
 
 		IPersist persist = null;
@@ -138,7 +142,9 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 				}
 				if (realObject instanceof FormElementGroup && key == IPropertySource.class)
 				{
-					return new RetargetToEditorPersistProperties(createFormElementGroupPropertySource((FormElementGroup)realObject, null));
+					SimpleUserNode formNode = userNode.getAncestorOfType(Form.class);
+					return new RetargetToEditorPersistProperties(createFormElementGroupPropertySource((FormElementGroup)realObject, formNode == null
+						? ((FormElementGroup)obj).getParent() : (Form)formNode.getRealObject()));
 				}
 
 				if (realObject instanceof IPersist && !(realObject instanceof Solution) && !(realObject instanceof Style) &&
@@ -264,23 +270,37 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 			{
 				// for properties view
 				PersistContext persistContext = PersistContext.create(persist, context);
-				PersistPropertySource persistProperties;
-				Form form = (Form)persistContext.getContext().getAncestor(IRepository.FORMS);
-				boolean mobile = form != null && form.getCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName) != null;
-				if (!mobile)
+				PersistPropertySource persistProperties = null;
+
+				if (FormTemplateGenerator.isWebcomponentBean(persist))
 				{
-					Solution solution = (Solution)persistContext.getContext().getAncestor(IRepository.SOLUTIONS);
-					mobile = solution != null && solution.getSolutionType() == SolutionMetaData.MOBILE;
+					WebComponentSpec spec = WebComponentSpecProvider.getInstance().getWebComponentDescription(
+						FormTemplateGenerator.getComponentTypeName((Bean)persist));
+					if (spec != null)
+					{
+						persistProperties = new WebComponentPropertySource(persistContext, false, spec);
+					}
 				}
-				if (mobile)
+
+				if (persistProperties == null)
 				{
-					// mobile form or mobile solution
-					persistProperties = new MobilePersistPropertySource(persistContext, false);
-				}
-				else
-				{
-					// regular
-					persistProperties = new PersistPropertySource(persistContext, false);
+					Form form = (Form)persistContext.getContext().getAncestor(IRepository.FORMS);
+					boolean mobile = form != null && form.getCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName) != null;
+					if (!mobile)
+					{
+						Solution solution = (Solution)persistContext.getContext().getAncestor(IRepository.SOLUTIONS);
+						mobile = solution != null && solution.getSolutionType() == SolutionMetaData.MOBILE;
+					}
+					if (mobile)
+					{
+						// mobile form or mobile solution
+						persistProperties = new MobilePersistPropertySource(persistContext, false);
+					}
+					else
+					{
+						// regular
+						persistProperties = new PersistPropertySource(persistContext, false);
+					}
 				}
 
 				if (autoSave)
@@ -288,6 +308,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 					// all changes are saved immediately, on the persist node only (not recursive)
 					return new SavingPersistPropertySource(persistProperties, servoyProject);
 				}
+
 				if (retargetToEditor)
 				{
 					// save actions are retargeted to the editor that handles the persist type

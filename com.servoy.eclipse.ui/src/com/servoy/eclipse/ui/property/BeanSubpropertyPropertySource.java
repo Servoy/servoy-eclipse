@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.ui.property;
 
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
@@ -44,14 +43,14 @@ import com.servoy.j2db.persistence.RepositoryException;
 public class BeanSubpropertyPropertySource extends ComplexPropertySource<Object>
 {
 	private final Object valueObject;
-	private final PropertyDescriptor propertyDescriptor;
+	private final BeanPropertyHandler propertyDescriptor;
 	private final FlattenedSolution flattenedEditingSolution;
 	private final Form form;
 
 	private Map<String, IPropertyDescriptor> propertyDescriptors;
-	private Map<Object, PropertyDescriptor> beansProperties;
+	private Map<Object, BeanPropertyHandler> beansProperties;
 
-	public BeanSubpropertyPropertySource(ComplexProperty<Object> complexProperty, Object valueObject, PropertyDescriptor propertyDescriptor,
+	public BeanSubpropertyPropertySource(ComplexProperty<Object> complexProperty, Object valueObject, BeanPropertyHandler propertyDescriptor,
 		FlattenedSolution flattenedEditingSolution, Form form)
 	{
 		super(complexProperty);
@@ -76,14 +75,13 @@ public class BeanSubpropertyPropertySource extends ComplexPropertySource<Object>
 			}
 
 			propertyDescriptors = new LinkedHashMap<String, IPropertyDescriptor>();
-			beansProperties = new HashMap<Object, java.beans.PropertyDescriptor>();
+			beansProperties = new HashMap<Object, BeanPropertyHandler>();
 
 			if (info != null)
 			{
-				for (java.beans.PropertyDescriptor element : PersistPropertySource.sortBeansPropertyDescriptors(info.getPropertyDescriptors()))
+				for (BeanPropertyHandler element : PersistPropertySource.sortBeansPropertyDescriptors(createPropertyHandlers(info.getPropertyDescriptors())))
 				{
-					if ((element.getReadMethod() == null) || element.getWriteMethod() == null || element.isExpert() ||
-						element.getPropertyType().equals(Object.class) || element.isHidden())
+					if (!element.isProperty())
 					{
 						continue;
 					}
@@ -96,8 +94,7 @@ public class BeanSubpropertyPropertySource extends ComplexPropertySource<Object>
 							editableValue = createNewValue();
 						}
 						IPropertyDescriptor pd = PersistPropertySource.createPropertyDescriptor(this, element.getName(), null /* persistContext */, readOnly,
-							new PropertyDescriptorWrapper(element, editableValue), element.getDisplayName(), PropertyCategory.Beans, flattenedEditingSolution,
-							form);
+							new PropertyDescriptorWrapper(element, editableValue), element.getDisplayName(), flattenedEditingSolution, form);
 						if (pd != null)
 						{
 							beansProperties.put(element.getName(), element);
@@ -113,6 +110,20 @@ public class BeanSubpropertyPropertySource extends ComplexPropertySource<Object>
 		}
 	}
 
+	private static BeanPropertyHandler[] createPropertyHandlers(java.beans.PropertyDescriptor[] descs)
+	{
+		if (descs == null)
+		{
+			return new BeanPropertyHandler[0];
+		}
+		BeanPropertyHandler[] handlers = new BeanPropertyHandler[descs.length];
+		for (int i = 0; i < descs.length; i++)
+		{
+			handlers[i] = new BeanPropertyHandler(descs[i]);
+		}
+		return handlers;
+	}
+
 	@Override
 	public IPropertyDescriptor[] createPropertyDescriptors()
 	{
@@ -125,7 +136,7 @@ public class BeanSubpropertyPropertySource extends ComplexPropertySource<Object>
 	{
 		init();
 
-		java.beans.PropertyDescriptor beanPropertyDescriptor = beansProperties.get(id);
+		BeanPropertyHandler beanPropertyDescriptor = beansProperties.get(id);
 		if (beanPropertyDescriptor != null)
 		{
 			Object editableValue = getEditableValue();
@@ -139,7 +150,7 @@ public class BeanSubpropertyPropertySource extends ComplexPropertySource<Object>
 				try
 				{
 					return PersistPropertySource.convertGetPropertyValue(id, propertyDescriptors.get(id),
-						beanPropertyDescriptor.getReadMethod().invoke(editableValue, new Object[0]));
+						beanPropertyDescriptor.getValue(editableValue, null /* persistContext */));
 				}
 				catch (Exception e)
 				{
@@ -155,7 +166,7 @@ public class BeanSubpropertyPropertySource extends ComplexPropertySource<Object>
 	 */
 	private Object createNewValue()
 	{
-		Object hint = propertyDescriptor.getValue(PropertyEditorHint.PROPERTY_EDITOR_HINT);
+		Object hint = propertyDescriptor.getAttributeValue(PropertyEditorHint.PROPERTY_EDITOR_HINT);
 		if (hint instanceof PropertyEditorHint)
 		{
 			Object factoryMethodName = ((PropertyEditorHint)hint).getOption(PropertyEditorOption.subPropertyFactoryMethod);
@@ -199,7 +210,7 @@ public class BeanSubpropertyPropertySource extends ComplexPropertySource<Object>
 	protected Object setComplexPropertyValue(Object id, Object v)
 	{
 		init();
-		java.beans.PropertyDescriptor beanPropertyDescriptor = beansProperties.get(id);
+		BeanPropertyHandler beanPropertyDescriptor = beansProperties.get(id);
 
 		Object editableValue = getEditableValue();
 		if (beanPropertyDescriptor != null)
@@ -211,8 +222,7 @@ public class BeanSubpropertyPropertySource extends ComplexPropertySource<Object>
 
 			try
 			{
-				beanPropertyDescriptor.getWriteMethod().invoke(editableValue,
-					new Object[] { PersistPropertySource.convertSetPropertyValue(id, propertyDescriptors.get(id), v) });
+				beanPropertyDescriptor.setValue(editableValue, PersistPropertySource.convertSetPropertyValue(id, propertyDescriptors.get(id), v), null /* persistContext */);
 			}
 			catch (Exception e)
 			{

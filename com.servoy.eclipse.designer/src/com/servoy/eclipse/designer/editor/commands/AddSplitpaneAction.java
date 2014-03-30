@@ -22,9 +22,10 @@ import org.eclipse.gef.Request;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.designer.property.SetValueCommand;
-import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.eclipse.ui.property.PersistPropertyHandler;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.server.ngclient.property.PropertyType;
 
 /**
  * Action to add a split pane in form designer, show form selection dialog
@@ -48,8 +49,7 @@ public class AddSplitpaneAction extends AddTabpanelAction
 		return addSetPropertyValue(
 			super.createRequest(editPart),
 			StaticContentSpecLoader.PROPERTY_TABORIENTATION.getPropertyName(),
-			PersistPropertySource.TAB_ORIENTATION_CONTROLLER.getConverter().convertProperty(StaticContentSpecLoader.PROPERTY_TABORIENTATION.getPropertyName(),
-				Integer.valueOf(TabPanel.SPLIT_HORIZONTAL)));
+			Integer.valueOf(((PropertyType.ValuesConfig)PersistPropertyHandler.TAB_ORIENTATION_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(TabPanel.SPLIT_HORIZONTAL))));
 	}
 
 	/**

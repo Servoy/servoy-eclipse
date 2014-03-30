@@ -30,15 +30,13 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
-import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IDataProviderLookup;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IServerInternal;
-import com.servoy.j2db.persistence.ISupportChilds;
-import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -281,48 +279,37 @@ public final class DatabaseUtils
 	/**
 	 * @return
 	 */
-	public static int getDataproviderType(IPersist persist)
+	public static int getDataproviderType(IPersist persist, String format, String dataProviderID)
 	{
 		int type = IColumnTypes.TEXT;
-		if (persist instanceof ISupportDataProviderID)
+
+		Form form = (Form)persist.getAncestor(IRepository.FORMS);
+		if (form != null)
 		{
-			String dataProviderID = ((ISupportDataProviderID)persist).getDataProviderID();
-
-			ISupportChilds supportChilds = persist.getParent();
-			while (supportChilds != null && !(supportChilds instanceof Form))
+			IDataProviderLookup dataproviderLookup = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getDataproviderLookup(
+				null, form);
+			ComponentFormat componentFormat = null;
+			if (format != null)
 			{
-				supportChilds = supportChilds.getParent();
+				componentFormat = ComponentFormat.getComponentFormat(format, dataProviderID, dataproviderLookup, Activator.getDefault().getDesignClient());
 			}
-			if (supportChilds instanceof Form)
+			if (componentFormat != null)
 			{
-				Form form = (Form)supportChilds;
-				IDataProviderLookup dataproviderLookup = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getDataproviderLookup(
-					null, form);
-				ComponentFormat componentFormat = null;
-				if (persist instanceof Field)
+				type = componentFormat.dpType;
+			}
+			else
+			{
+				try
 				{
-					componentFormat = ComponentFormat.getComponentFormat(((Field)persist).getFormat(), dataProviderID, dataproviderLookup,
-						Activator.getDefault().getDesignClient());
-
-				}
-				if (componentFormat != null)
-				{
-					type = componentFormat.dpType;
-				}
-				else
-				{
-					try
+					IDataProvider dataProvider = dataproviderLookup.getDataProvider(dataProviderID);
+					if (dataProvider != null)
 					{
-						IDataProvider dataProvider = dataproviderLookup.getDataProvider(dataProviderID);
-						if (dataProvider != null)
-						{
-							type = dataProvider.getDataProviderType();
-						}
+						type = dataProvider.getDataProviderType();
 					}
-					catch (RepositoryException re)
-					{
-						ServoyLog.logError(re);
-					}
+				}
+				catch (RepositoryException re)
+				{
+					ServoyLog.logError(re);
 				}
 			}
 		}

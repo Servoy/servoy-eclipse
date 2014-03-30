@@ -29,6 +29,7 @@ import com.servoy.eclipse.designer.editor.commands.BaseFormPlaceElementCommand;
 import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.ui.property.PersistPropertyHandler;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
@@ -39,6 +40,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.server.ngclient.property.PropertyType;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -57,8 +59,8 @@ public class AddFormListCommand extends CompoundCommand
 				"",
 				PersistPropertySource.createPersistPropertySource(form, false),
 				StaticContentSpecLoader.PROPERTY_VIEW.getPropertyName(),
-				PersistPropertySource.VIEW_TYPE_CONTOLLER.getConverter().convertProperty(StaticContentSpecLoader.PROPERTY_VIEW.getPropertyName(),
-					Integer.valueOf(IFormConstants.VIEW_TYPE_TABLE_LOCKED))));
+				Integer.valueOf(((PropertyType.ValuesConfig)PersistPropertyHandler.VIEW_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(IFormConstants.VIEW_TYPE_TABLE_LOCKED)))));
+
 
 			// delete all form elements except header/footer
 			List<IPersist> toDelete = new ArrayList<IPersist>();

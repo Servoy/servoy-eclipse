@@ -16,10 +16,12 @@
  */
 package com.servoy.eclipse.ui.editors;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.eclipse.core.util.DatabaseUtils;
 import com.servoy.j2db.persistence.IPersist;
@@ -31,16 +33,18 @@ import com.servoy.j2db.persistence.IPersist;
 public class FormatCellEditor extends TextDialogCellEditor
 {
 
-	final IPersist persist;
+	private final IPersist persist;
+	private final String formatForPropertyname;
 
 	/**
 	 * @param parent
 	 * @param persist 
 	 */
-	public FormatCellEditor(Composite parent, IPersist persist)
+	public FormatCellEditor(Composite parent, IPersist persist, String formatForPropertyname)
 	{
 		super(parent, SWT.NONE, null);
 		this.persist = persist;
+		this.formatForPropertyname = formatForPropertyname;
 	}
 
 	/**
@@ -49,8 +53,13 @@ public class FormatCellEditor extends TextDialogCellEditor
 	@Override
 	public Object openDialogBox(Control cellEditorWindow)
 	{
-		int type = DatabaseUtils.getDataproviderType(persist);
-		FormatDialog dialog = new FormatDialog(cellEditorWindow.getShell(), (String)getValue(), type);
+
+		IPropertySource propertySource = (IPropertySource)Platform.getAdapterManager().getAdapter(persist, IPropertySource.class);
+		String dataProviderID = (String)propertySource.getPropertyValue(formatForPropertyname);
+
+		String formatString = (String)getValue();
+		int type = DatabaseUtils.getDataproviderType(persist, formatString, dataProviderID);
+		FormatDialog dialog = new FormatDialog(cellEditorWindow.getShell(), formatString, type);
 		dialog.open();
 		if (dialog.getReturnCode() == Window.CANCEL)
 		{

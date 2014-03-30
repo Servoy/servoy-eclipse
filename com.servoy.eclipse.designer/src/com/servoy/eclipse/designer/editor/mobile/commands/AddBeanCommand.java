@@ -34,14 +34,17 @@ import com.servoy.j2db.persistence.RepositoryException;
  */
 public class AddBeanCommand extends BaseFormPlaceElementCommand
 {
+	private final String beanClassname;
+
 	public AddBeanCommand(IApplication application, Form form, CreateRequest request)
 	{
-		this(application, form, request.getType(), request.getLocation().getSWTPoint());
+		this(application, form, request.getType(), request.getLocation().getSWTPoint(), null);
 	}
 
-	public AddBeanCommand(IApplication application, Form form, Object requestType, Point location)
+	public AddBeanCommand(IApplication application, Form form, Object requestType, Point location, String beanClassname)
 	{
 		super(application, form, null, requestType, null, null, location, null, form);
+		this.beanClassname = beanClassname;
 	}
 
 	@Override
@@ -50,7 +53,7 @@ public class AddBeanCommand extends BaseFormPlaceElementCommand
 		if (parent instanceof Form)
 		{
 			setLabel("place bean");
-			return toArrAy(ElementFactory.createBean((Form)parent, "java.lang.Object", location));
+			return toArrAy(ElementFactory.createBean((Form)parent, beanClassname == null ? "java.lang.Object" : beanClassname, location));
 		}
 		return null;
 	}

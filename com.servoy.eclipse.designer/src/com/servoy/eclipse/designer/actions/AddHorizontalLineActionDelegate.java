@@ -21,7 +21,8 @@ import java.awt.Dimension;
 
 import javax.swing.SwingConstants;
 
-import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.eclipse.ui.property.PersistPropertyHandler;
+import com.servoy.j2db.server.ngclient.property.PropertyType;
 import com.servoy.j2db.util.gui.SpecialMatteBorder;
 
 /**
@@ -38,8 +39,9 @@ public class AddHorizontalLineActionDelegate extends AddLabelActionDelegate
 	{
 		addSetPropertyValue("text", "");
 		addSetPropertyValue("borderType", new SpecialMatteBorder(1, 0, 0, 0, Color.black, Color.black, Color.black, Color.black));
-		addSetPropertyValue("horizontalAlignment",
-			PersistPropertySource.HORIZONTAL_ALIGNMENT_CONTROLLER.getConverter().convertProperty("horizontalAlignment", Integer.valueOf(SwingConstants.RIGHT)));
+		addSetPropertyValue(
+			"horizontalAlignment",
+			Integer.valueOf(((PropertyType.ValuesConfig)PersistPropertyHandler.HORIZONTAL_ALIGNMENT_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(SwingConstants.RIGHT))));
 		addSetPropertyValue("transparent", Boolean.TRUE);
 		addSetPropertyValue("size", new Dimension(40, 1));
 	}
