@@ -90,6 +90,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.debug.Activator;
+import com.servoy.eclipse.debug.IWebResourceChangedListener;
 import com.servoy.eclipse.model.DesignApplication;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IServoyModel;
@@ -193,6 +194,12 @@ import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 import com.servoy.j2db.scripting.annotations.JSReadonlyProperty;
 import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
+import com.servoy.j2db.server.ngclient.component.WebComponentApiDefinition;
+import com.servoy.j2db.server.ngclient.component.WebComponentSpec;
+import com.servoy.j2db.server.ngclient.component.WebComponentSpecProvider;
+import com.servoy.j2db.server.ngclient.property.PropertyDescription;
+import com.servoy.j2db.server.ngclient.property.PropertyType;
+import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.ui.IScriptAccordionPanelMethods;
 import com.servoy.j2db.ui.IScriptDataLabelMethods;
 import com.servoy.j2db.ui.IScriptInsetListComponentMethods;
@@ -335,6 +342,8 @@ public class TypeCreator extends TypeCache
 	 */
 	private final ConcurrentMap<String, Class< ? >> classTypes = new ConcurrentHashMap<String, Class< ? >>();
 	private final ConcurrentMap<String, Class< ? >> anonymousClassTypes = new ConcurrentHashMap<String, Class< ? >>();
+	private final ConcurrentMap<String, String> wcTypeNames = new ConcurrentHashMap<String, String>();
+
 
 	private final ConcurrentMap<String, IScopeTypeCreator> scopeTypes = new ConcurrentHashMap<String, IScopeTypeCreator>();
 	protected final ConcurrentMap<Class< ? >, Class< ? >[]> linkedTypes = new ConcurrentHashMap<Class< ? >, Class< ? >[]>();
@@ -514,6 +523,7 @@ public class TypeCreator extends TypeCache
 		type = createClassType(context, realTypeName, realTypeName);
 		if (type != null)
 		{
+			if (type.eResource() != null) return type;
 			return addType(null, type);
 		}
 
@@ -757,6 +767,26 @@ public class TypeCreator extends TypeCache
 						}
 					});
 				}
+
+				Activator.getDefault().addWebComponentChangedListener(new IWebResourceChangedListener()
+				{
+					@Override
+					public void changed()
+					{
+						Job job = new Job("clearing cache")
+						{
+
+							@Override
+							public IStatus run(IProgressMonitor monitor)
+							{
+								flushCache();
+								return Status.OK_STATUS;
+							}
+						};
+						job.setRule(ResourcesPlugin.getWorkspace().getRoot());
+						job.schedule();
+					}
+				});
 			}
 		}
 	}
@@ -924,6 +954,78 @@ public class TypeCreator extends TypeCache
 		if (cls != null)
 		{
 			return createType(context, fullTypeName, cls);
+		}
+		if (wcTypeNames.get(typeNameClassName) != null)
+		{
+			WebComponentSpec spec = WebComponentSpecProvider.getInstance().getWebComponentDescription(typeNameClassName);
+			if (spec != null)
+			{
+				Type type = TypeInfoModelFactory.eINSTANCE.createType();
+				type.setName(fullTypeName);
+				type.setKind(TypeKind.JAVA);
+				EList<Member> members = type.getMembers();
+				Map<String, PropertyDescription> properties = spec.getProperties();
+				for (PropertyDescription pd : properties.values())
+				{
+					String name = pd.getName();
+					// skip the default once added by servoy, see WebComponentPackage.getWebComponentDescriptions()
+					// and skip the dataprovider properties (those are not accesable through scripting)
+					if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && pd.getType() != PropertyType.dataprovider)
+					{
+						members.add(createProperty(name, false, getType(context, pd), "", null));
+					}
+				}
+				Map<String, WebComponentApiDefinition> apis = spec.getApis();
+				for (WebComponentApiDefinition api : apis.values())
+				{
+					Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
+					method.setName(api.getName());
+					method.setType(getType(context, api.getReturnType()));
+					EList<Parameter> parameters = method.getParameters();
+					for (PropertyDescription paramDesc : api.getParameters())
+					{
+						Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
+						param.setName(paramDesc.getName());
+						if (paramDesc.isOptional()) param.setKind(ParameterKind.OPTIONAL);
+						param.setType(getType(context, paramDesc));
+						parameters.add(param);
+
+					}
+
+					members.add(method);
+				}
+				return addType("WEB:COMPONENTS", type);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * @param type
+	 * @return
+	 */
+	private JSType getType(String context, PropertyDescription pd)
+	{
+		if (pd == null) return null;
+		PropertyType type = pd.getType();
+		switch (type)
+		{
+			case bool :
+				return getTypeRef(context, ITypeNames.BOOLEAN);
+			case bytenumber :
+			case doublenumber :
+			case floatnumber :
+			case intnumber :
+			case longnumber :
+			case shortnumber :
+				return getTypeRef(context, ITypeNames.NUMBER);
+			case string :
+			case tagstring :
+				return getTypeRef(context, ITypeNames.STRING);
+			case date :
+				return getTypeRef(context, ITypeNames.DATE);
+			default :
+				break;
 		}
 		return null;
 	}
@@ -3498,18 +3600,29 @@ public class TypeCreator extends TypeCache
 					IFormElement formElement = (IFormElement)persist;
 					if (!Utils.stringIsEmpty(formElement.getName()))
 					{
-						Class< ? > persistClass = ElementUtil.getPersistScriptClass(application, persist);
-						if (persistClass != null && formElement instanceof Bean)
+						SimpleType elementType = null;
+						if (FormTemplateGenerator.isWebcomponentBean(formElement))
 						{
-							String beanClassName = ((Bean)formElement).getBeanClassName();
-							if (persistClass != IScriptMobileBean.class && beanClassName != null)
-							{
-								// map the persist class that is registered in the initialize() method under the beanclassname under that same name.
-								// So SwingDBTreeView class/name points to "DBTreeView" which points to that class again of the class types 
-								typeNames.put(persistClass.getSimpleName(), beanClassName.substring(beanClassName.lastIndexOf('.') + 1));
-							}
+							String typeName = FormTemplateGenerator.getComponentTypeName(formElement);
+							wcTypeNames.put(typeName, typeName);
+							elementType = getTypeRef(context, typeName);
 						}
-						members.add(createProperty(formElement.getName(), true, getElementType(context, persistClass), null, PROPERTY));
+						else
+						{
+							Class< ? > persistClass = ElementUtil.getPersistScriptClass(application, persist);
+							if (persistClass != null && formElement instanceof Bean)
+							{
+								String beanClassName = ((Bean)formElement).getBeanClassName();
+								if (persistClass != IScriptMobileBean.class && beanClassName != null)
+								{
+									// map the persist class that is registered in the initialize() method under the beanclassname under that same name.
+									// So SwingDBTreeView class/name points to "DBTreeView" which points to that class again of the class types 
+									typeNames.put(persistClass.getSimpleName(), beanClassName.substring(beanClassName.lastIndexOf('.') + 1));
+								}
+							}
+							elementType = getElementType(context, persistClass);
+						}
+						members.add(createProperty(formElement.getName(), true, elementType, null, PROPERTY));
 					}
 					if (formElement.getGroupID() != null)
 					{

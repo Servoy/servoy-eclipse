@@ -79,6 +79,8 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 	private IResourceChangeListener resourceChangeListener;
 
+	private final List<IWebResourceChangedListener> webResourceChangedListeners = Collections.synchronizedList(new ArrayList<IWebResourceChangedListener>());
+
 	/**
 	 * The constructor
 	 */
@@ -233,12 +235,27 @@ public class Activator extends AbstractUIPlugin implements IStartup
 						}
 					}
 					ResourceProvider.addResources(readers.values());
+
+					for (IWebResourceChangedListener listener : webResourceChangedListeners)
+					{
+						listener.changed();
+					}
 				}
 				return Status.OK_STATUS;
 			}
 		};
 		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
 		job.schedule();
+	}
+
+	public void addWebComponentChangedListener(IWebResourceChangedListener listener)
+	{
+		webResourceChangedListeners.add(listener);
+	}
+
+	public void removeWebComponentChangedListener(IWebResourceChangedListener listener)
+	{
+		webResourceChangedListeners.remove(listener);
 	}
 
 	/*
