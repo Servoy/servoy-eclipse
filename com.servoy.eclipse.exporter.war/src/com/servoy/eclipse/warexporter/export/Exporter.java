@@ -437,6 +437,7 @@ public class Exporter
 			Properties properties = new Properties();
 			properties.load(fis);
 
+			properties.setProperty("SocketFactory.rmiServerFactory", "com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory");
 			properties.setProperty("SocketFactory.tunnelConnectionMode", "http&socket");
 			if (properties.containsKey("SocketFactory.useTwoWaySocket")) properties.remove("SocketFactory.useTwoWaySocket");
 
