@@ -34,7 +34,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -82,7 +81,6 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 		browseButton.setText("Browse..."); //$NON-NLS-1$
 		browseButton.addListener(SWT.Selection, this);
 
-		new Label(composite, SWT.NONE).setText("If an existing servoy.properties file is specified, please make sure that 'SocketFactory.tunnelConnectionMode' is set to 'http&socket'\nCheck the admin page after installing the war"); //$NON-NLS-1$
 		setControl(composite);
 	}
 
@@ -183,8 +181,9 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 						messageSet = true;
 					}
 
-					String tunnelConnectionMode = prop.getProperty("SocketFactory.tunnelConnectionMode");
-					if (!exportModel.allowOverwriteSocketFactoryProperties() && (tunnelConnectionMode == null || !tunnelConnectionMode.equals("http&socket")))
+					String rmiServerFactory = prop.getProperty("SocketFactory.rmiServerFactory");
+					if (exportModel.getStartRMI() && !exportModel.allowOverwriteSocketFactoryProperties() &&
+						(rmiServerFactory == null || !rmiServerFactory.equals("com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory")))
 					{
 						final Shell shell = getShell();
 						final boolean[] ok = new boolean[1];
@@ -195,7 +194,7 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 								ok[0] = MessageDialog.openConfirm(
 									shell,
 									"Overwrite SocketFactory properties",
-									"In the selected properties file SocketFactory.tunnelConnectionMode is not set to http&socket. Please allow exporter to overwrite properties or cancel the export.");
+									"In the selected properties file SocketFactory.rmiServerFactory is not set to 'com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory'. Please allow exporter to overwrite properties or cancel the export.");
 							}
 						});
 						if (ok[0])
