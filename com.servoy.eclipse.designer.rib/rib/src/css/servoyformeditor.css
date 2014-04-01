@@ -64,6 +64,9 @@ html {
 	padding: 27px 0 0 8px!important;
 	font-size: small!important;
 }
+.ui-field-contain fieldset{
+	min-width:100%;
+}
 .ui-popup-hidden {
 	display: none !important;
 }
