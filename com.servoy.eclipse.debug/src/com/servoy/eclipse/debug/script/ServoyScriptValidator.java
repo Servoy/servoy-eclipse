@@ -25,6 +25,7 @@ import org.eclipse.dltk.javascript.core.JavaScriptProblems;
 import org.eclipse.dltk.javascript.typeinference.IValueCollection;
 import org.eclipse.dltk.javascript.typeinference.IValueReference;
 import org.eclipse.dltk.javascript.typeinference.ReferenceKind;
+import org.eclipse.dltk.javascript.typeinfo.IModelBuilder.IVariable;
 import org.eclipse.dltk.javascript.typeinfo.IRMember;
 import org.eclipse.dltk.javascript.typeinfo.IRMethod;
 import org.eclipse.dltk.javascript.typeinfo.IRProperty;
@@ -102,24 +103,37 @@ public class ServoyScriptValidator implements IValidatorExtension2
 		Form form = getForm();
 		if (form != null)
 		{
+			Visibility visibility = null;
+			String name = null;
 			IRVariable variable = (IRVariable)reference.getAttribute(IReferenceAttributes.R_VARIABLE);
 			if (variable != null)
 			{
-				if (variable.getVisibility() == Visibility.PRIVATE)
+				visibility = variable.getVisibility();
+				name = variable.getName();
+			}
+			else
+			{
+				IVariable var = (IVariable)reference.getAttribute(IReferenceAttributes.VARIABLE);
+				if (var != null)
 				{
-					ScriptVariable scriptVariable = form.getScriptVariable(variable.getName());
-					if (scriptVariable != null)
+					visibility = var.getVisibility();
+					name = var.getName();
+				}
+			}
+			if (visibility != null && visibility == Visibility.PRIVATE)
+			{
+				ScriptVariable scriptVariable = form.getScriptVariable(name);
+				if (scriptVariable != null)
+				{
+					ScriptVariableSearch search = new ScriptVariableSearch(scriptVariable, false);
+					search.run(null);
+					if (search.getMatchCount() > 0)
 					{
-						ScriptVariableSearch search = new ScriptVariableSearch(scriptVariable, false);
-						search.run(null);
-						if (search.getMatchCount() > 0)
-						{
-							return UnusedVariableValidation.FALSE;
-						}
+						return UnusedVariableValidation.FALSE;
 					}
 				}
-				else return UnusedVariableValidation.FALSE;
 			}
+			else return UnusedVariableValidation.FALSE;
 
 		}
 		return null;
@@ -269,6 +283,11 @@ public class ServoyScriptValidator implements IValidatorExtension2
 	private Form getForm()
 	{
 		String formName = SolutionSerializer.getFormNameFromFile((IResource)context.getAdapter(IResource.class));
+		if (formName == null)
+		{
+			ReferenceSource rs = (ReferenceSource)context.getAdapter(ReferenceSource.class);
+			if (rs != null && rs.getSourceModule() != null) formName = SolutionSerializer.getFormNameFromFile(rs.getSourceModule().getResource());
+		}
 		if (formName != null)
 		{
 			FlattenedSolution fs = getFlattenedSolution(context);
@@ -289,7 +308,7 @@ public class ServoyScriptValidator implements IValidatorExtension2
 		IResource resource = rs.getSourceModule().getResource();
 		if (resource != null)
 		{
-			ElementResolver.getFlattenedSolution(resource.getProject().getName());
+			return ElementResolver.getFlattenedSolution(resource.getProject().getName());
 		}
 		return null;
 	}
