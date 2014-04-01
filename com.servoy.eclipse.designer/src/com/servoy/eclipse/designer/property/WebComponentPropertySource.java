@@ -104,7 +104,7 @@ public class WebComponentPropertySource extends PersistPropertySource
 				props.add(new WebComponentPropertyHandler(desc));
 			}
 		}
-		for (PropertyDescription desc : webComponentSpec.getEvents().values())
+		for (PropertyDescription desc : webComponentSpec.getHandlers().values())
 		{
 			props.add(new WebComponentPropertyHandler(desc));
 		}
