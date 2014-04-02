@@ -66,6 +66,7 @@ html {
 }
 .ui-field-contain fieldset{
 	min-width:100%;
+	display: table-column;   /*last comment workaround from -> https://bugzilla.mozilla.org/show_bug.cgi?id=504622*/
 }
 .ui-popup-hidden {
 	display: none !important;
