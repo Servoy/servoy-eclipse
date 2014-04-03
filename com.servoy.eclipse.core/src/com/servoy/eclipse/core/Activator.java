@@ -1124,6 +1124,16 @@ public class Activator extends Plugin
 		checkApplicationServerVersion(ApplicationServerRegistry.get());
 	}
 
+	private int updateAppServerFromSerclipse(java.io.File parentFile, int version, int releaseNumber, ActionListener listener) throws Exception
+	{
+		URLClassLoader loader = URLClassLoader.newInstance(new URL[] { new File(ApplicationServerRegistry.get().getServoyApplicationServerDirectory() +
+			"/../servoy_updater.jar").toURI().toURL() });
+		Class< ? > versionCheckClass = loader.loadClass("com.servoy.updater.VersionCheck");
+		Method updateAppServerFromSerclipse = versionCheckClass.getMethod("updateAppServerFromSerclipse",
+			new Class[] { java.io.File.class, int.class, int.class, ActionListener.class });
+		return Utils.getAsInteger(updateAppServerFromSerclipse.invoke(null, new Object[] { parentFile, version, releaseNumber, listener }));
+	}
+
 	private void checkApplicationServerVersion(IApplicationServerSingleton applicationServer)
 	{
 		// check the app server dir
@@ -1187,8 +1197,8 @@ public class Activator extends Plugin
 												try
 												{
 													monitor.beginTask("Updating...", IProgressMonitor.UNKNOWN);
-													updatedToVersion[0] = ApplicationServerRegistry.get().updateAppServerFromSerclipse(
-														new File(appServerDir).getParentFile(), version, ClientVersion.getReleaseNumber(), new ActionListener()
+													updatedToVersion[0] = updateAppServerFromSerclipse(new File(appServerDir).getParentFile(), version,
+														ClientVersion.getReleaseNumber(), new ActionListener()
 														{
 															public void actionPerformed(ActionEvent e)
 															{
