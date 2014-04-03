@@ -84,20 +84,19 @@ import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FontLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormLabelProvider;
-import com.servoy.eclipse.ui.labelproviders.MediaLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.PersistInheritenceDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.TextCutoffLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.ValidvalueDelegatelabelProvider;
 import com.servoy.eclipse.ui.labelproviders.ValuelistLabelProvider;
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
+import com.servoy.eclipse.ui.property.MediaPropertyController.MediaPropertyControllerConfig;
 import com.servoy.eclipse.ui.property.MethodWithArguments.UnresolvedMethodWithArguments;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IDefaultValue;
-import com.servoy.eclipse.ui.util.MediaNode;
 import com.servoy.eclipse.ui.util.VerifyingTextCellEditor;
 import com.servoy.eclipse.ui.views.properties.IMergeablePropertyDescriptor;
 import com.servoy.eclipse.ui.views.properties.IMergedPropertyDescriptor;
@@ -1235,36 +1234,10 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				if (propertyEditorHint.getPropertyEditorClass() == PropertyEditorClass.media && beanHandler.getPropertyType() == String.class)
 				{
 					// String property, select an image
-					return new MediaPropertyController<String>(id, displayName, persistContext,
-						Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeNone)))
-					{
-						@Override
-						protected IPropertyConverter<String, MediaNode> createConverter()
-						{
-							// convert between media node and image name
-							return new IPropertyConverter<String, MediaNode>()
-							{
-								public MediaNode convertProperty(Object id, String value)
-								{
-									Media media = flattenedEditingSolution.getMedia(value);
-									if (media != null)
-									{
-										String mediaName = media.getName();
-										return new MediaNode(mediaName, mediaName, MediaNode.TYPE.IMAGE, flattenedEditingSolution.getSolution(), null, media);
-									}
-									else
-									{
-										return MediaLabelProvider.MEDIA_NODE_NONE;
-									}
-								}
-
-								public String convertValue(Object id, MediaNode value)
-								{
-									return value == null ? null : value.getName();
-								}
-							};
-						}
-					};
+					MediaPropertyControllerConfig config = null;
+					if (propertyDescription != null && propertyDescription.getConfig() instanceof MediaPropertyControllerConfig) config = (MediaPropertyControllerConfig)propertyDescription.getConfig();
+					return new MediaNamePropertyController(id, displayName, persistContext, flattenedEditingSolution,
+						Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeNone)), config);
 				}
 
 				if (propertyEditorHint.getPropertyEditorClass() == PropertyEditorClass.styleclass && beanHandler.getPropertyType() == String.class)
@@ -2616,39 +2589,9 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 		if (propertyType == PropertyType.media)
 		{
-			return new MediaPropertyController<Integer>(id, displayName, persistContext, true)
-			{
-				@Override
-				protected IPropertyConverter<Integer, MediaNode> createConverter()
-				{
-					// convert between media node and image name
-					return new IPropertyConverter<Integer, MediaNode>()
-					{
-						public MediaNode convertProperty(@SuppressWarnings("hiding")
-						Object id, Integer value)
-						{
-							if (value != null && value.intValue() > 0)
-							{
-								Media media = flattenedEditingSolution.getMedia(value.intValue());
-								if (media != null)
-								{
-									String mediaName = media.getName();
-									return new MediaNode(mediaName, mediaName, MediaNode.TYPE.IMAGE, flattenedEditingSolution.getSolution(), null, media);
-								}
-								return MediaLabelProvider.MEDIA_NODE_UNRESOLVED;
-							}
-							return MediaLabelProvider.MEDIA_NODE_NONE;
-						}
-
-						public Integer convertValue(@SuppressWarnings("hiding")
-						Object id, MediaNode value)
-						{
-							return value == null || value == MediaLabelProvider.MEDIA_NODE_NONE ? Integer.valueOf(0)
-								: Integer.valueOf(value.getMedia().getID());
-						}
-					};
-				}
-			};
+			MediaPropertyControllerConfig config = null;
+			if (propertyDescription != null && propertyDescription.getConfig() instanceof MediaPropertyControllerConfig) config = (MediaPropertyControllerConfig)propertyDescription.getConfig();
+			return new MediaIDPropertyController(id, displayName, persistContext, flattenedEditingSolution, true, config);
 		}
 
 

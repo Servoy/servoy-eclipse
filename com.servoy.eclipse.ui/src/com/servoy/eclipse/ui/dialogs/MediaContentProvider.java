@@ -16,8 +16,11 @@
  */
 package com.servoy.eclipse.ui.dialogs;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 
+import org.eclipse.jface.viewers.IFilter;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
@@ -32,34 +35,25 @@ import com.servoy.j2db.persistence.IPersist;
  * @author rgansevles
  * 
  */
-
 public class MediaContentProvider implements ITreeContentProvider
 {
 	private final FlattenedSolution flattenedSolution;
 	private final IPersist context;
+	private final IFilter filter;
 
-	public MediaContentProvider(FlattenedSolution flattenedSolution, IPersist context)
+	public MediaContentProvider(FlattenedSolution flattenedSolution, IPersist context, IFilter filter)
 	{
 		this.flattenedSolution = flattenedSolution;
 		this.context = context;
+		this.filter = filter;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
-	 */
 	public void dispose()
 	{
 		// TODO Auto-generated method stub
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
-	 */
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
 	{
 		// TODO Auto-generated method stub
@@ -72,6 +66,8 @@ public class MediaContentProvider implements ITreeContentProvider
 		{
 			MediaNode rootMediaNode = new MediaNode(null, null, MediaNode.TYPE.FOLDER, flattenedSolution, context);
 			MediaNode[] children = rootMediaNode.getChildren(EnumSet.of(MediaNode.TYPE.IMAGE, MediaNode.TYPE.FOLDER));
+
+			children = filterIfNeeded(children);
 
 			MediaListOptions options = (MediaListOptions)inputElement;
 			if (options.includeNone)
@@ -88,31 +84,30 @@ public class MediaContentProvider implements ITreeContentProvider
 		return new Object[0];
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getChildren(java.lang.Object)
-	 */
-	public Object[] getChildren(Object parentElement)
+	protected MediaNode[] filterIfNeeded(MediaNode[] children)
 	{
-		return ((MediaNode)parentElement).getChildren(EnumSet.of(MediaNode.TYPE.IMAGE, MediaNode.TYPE.FOLDER));
+		if (filter != null && children != null)
+		{
+			List<MediaNode> filtered = new ArrayList<MediaNode>(children.length);
+			for (MediaNode node : children)
+			{
+				if (filter.select(node)) filtered.add(node);
+			}
+			return filtered.toArray(new MediaNode[filtered.size()]);
+		}
+		else return children;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getParent(java.lang.Object)
-	 */
+	public Object[] getChildren(Object parentElement)
+	{
+		return filterIfNeeded(((MediaNode)parentElement).getChildren(EnumSet.of(MediaNode.TYPE.IMAGE, MediaNode.TYPE.FOLDER)));
+	}
+
 	public Object getParent(Object element)
 	{
 		return ((MediaNode)element).getParent();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(java.lang.Object)
-	 */
 	public boolean hasChildren(Object element)
 	{
 		return ((MediaNode)element).hasChildren(EnumSet.of(MediaNode.TYPE.IMAGE, MediaNode.TYPE.FOLDER));

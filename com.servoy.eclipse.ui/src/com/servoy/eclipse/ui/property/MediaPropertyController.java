@@ -17,6 +17,7 @@
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.IFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -43,14 +44,30 @@ import com.servoy.j2db.FlattenedSolution;
 public class MediaPropertyController<P> extends PropertyController<P, MediaNode>
 {
 
+	public static class MediaPropertyControllerConfig
+	{
+		public final String title;
+		public final IFilter leafFilter;
+		public final boolean showPreviewArea;
+
+		public MediaPropertyControllerConfig(String title, IFilter leafFilter, boolean showPreviewArea)
+		{
+			this.title = title;
+			this.leafFilter = leafFilter;
+			this.showPreviewArea = showPreviewArea;
+		}
+	}
+
 	private final PersistContext persistContext;
 	private final boolean includeNone;
+	private final MediaPropertyControllerConfig config;
 
-	public MediaPropertyController(Object id, String displayName, PersistContext persistContext, boolean includeNone)
+	public MediaPropertyController(Object id, String displayName, PersistContext persistContext, boolean includeNone, MediaPropertyControllerConfig config)
 	{
 		super(id, displayName);
 		this.persistContext = persistContext;
 		this.includeNone = includeNone;
+		this.config = config;
 		setLabelProvider(new SolutionContextDelegateLabelProvider(new MediaLabelProvider(), persistContext.getContext()));
 		setSupportsReadonly(true);
 	}
@@ -58,20 +75,22 @@ public class MediaPropertyController<P> extends PropertyController<P, MediaNode>
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
+		String dialogTitle = (config != null && config.title != null) ? config.title : "Please select media / resource";
 		final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext());
-		return new ListSelectCellEditor(parent, "Select image", new MediaContentProvider(flattenedEditingSolution, persistContext.getContext()),
-			getLabelProvider(), new IValueEditor<MediaNode>()
+		ListSelectCellEditor listSelectCellEditor = new ListSelectCellEditor(parent, dialogTitle, new MediaContentProvider(flattenedEditingSolution,
+			persistContext.getContext(), config != null ? config.leafFilter : null), getLabelProvider(), new IValueEditor<MediaNode>()
+		{
+			public void openEditor(MediaNode value)
 			{
-				public void openEditor(MediaNode value)
-				{
-					EditorUtil.openMediaViewer(value.getMedia());
-				}
+				EditorUtil.openMediaViewer(value.getMedia());
+			}
 
-				public boolean canEdit(MediaNode value)
-				{
-					return value != null && value.getMedia() != null;
-				}
-			}, isReadOnly(), new MediaContentProvider.MediaListOptions(includeNone), SWT.NONE, new ListSelectCellEditor.ListSelectControlFactory()
+			public boolean canEdit(MediaNode value)
+			{
+				return value != null && value.getMedia() != null;
+			}
+		}, isReadOnly(), new MediaContentProvider.MediaListOptions(includeNone), SWT.NONE, (config == null || config.showPreviewArea)
+			? new ListSelectCellEditor.ListSelectControlFactory()
 			{
 				private TreeSelectDialog dialog;
 
@@ -80,10 +99,12 @@ public class MediaPropertyController<P> extends PropertyController<P, MediaNode>
 					this.dialog = dialog;
 				}
 
+				@Override
 				public Control createControl(Composite composite)
 				{
-					return new MediaPreview(composite, SWT.NONE, flattenedEditingSolution, dialog.getTreeViewer());
+					return new MediaPreview(composite, SWT.NONE, dialog.getTreeViewer());
 				}
-			}, "selectImageDialog");
+			} : null, "selectImageDialog");
+		return listSelectCellEditor;
 	}
 }

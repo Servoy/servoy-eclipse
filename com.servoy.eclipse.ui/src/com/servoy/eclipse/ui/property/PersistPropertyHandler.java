@@ -32,6 +32,7 @@ import javax.swing.SwingConstants;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.IFilter;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -54,7 +55,9 @@ import com.servoy.eclipse.ui.editors.TabSeqDialogCellEditor.TabSeqDialogValueEdi
 import com.servoy.eclipse.ui.labelproviders.FormLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.PageFormatLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
+import com.servoy.eclipse.ui.property.MediaPropertyController.MediaPropertyControllerConfig;
 import com.servoy.eclipse.ui.property.PersistPropertySource.NullDefaultLabelProvider;
+import com.servoy.eclipse.ui.util.MediaNode;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController;
 import com.servoy.j2db.IForm;
@@ -303,7 +306,19 @@ public class PersistPropertyHandler extends BasePropertyHandler
 		{
 			if (persistContext.getPersist() instanceof Solution)
 			{
-				return new PropertyDescription(name, PropertyType.string);
+				return new PropertyDescription(name, PropertyType.media, new MediaPropertyControllerConfig("Solution CSS picker", new IFilter()
+				{
+					@Override
+					public boolean select(Object toTest)
+					{
+						if (toTest instanceof MediaNode)
+						{
+							MediaNode node = ((MediaNode)toTest);
+							return node.getType() == MediaNode.TYPE.FOLDER || node.getName().endsWith(".css");
+						}
+						return false;
+					}
+				}, false));
 			}
 		}
 
