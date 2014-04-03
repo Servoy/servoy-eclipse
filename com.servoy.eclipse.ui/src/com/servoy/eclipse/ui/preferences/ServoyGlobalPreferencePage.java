@@ -30,7 +30,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
@@ -38,9 +37,7 @@ import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.internal.util.PrefUtil;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.ui.Activator;
-import com.servoy.j2db.debug.DeveloperPreferences;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.util.ObjectWrapper;
 
@@ -52,13 +49,11 @@ import com.servoy.j2db.util.ObjectWrapper;
  */
 public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkbenchPreferencePage
 {
-	private Button securityChangeButton;
 	private Button toolbarsInFormWindowButton;
 	private Button closeEditorOnExitButton;
 	private Button openFirstFormDesignerButton;
 	private Button showColumnsInDbOrderButton;
 	private Button showColumnsInAlphabeticOrderButton;
-	private Label enhancedSecurityLabel;
 	private ComboViewer primaryKeySequenceTypeCombo;
 	private Button showNavigatorDefaultButton;
 	private ComboViewer encapsulationTypeCombo;
@@ -84,33 +79,6 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 
 		rootContainer.setLayout(new GridLayout(1, false));
 		rootContainer.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
-
-		if (!new DeveloperPreferences(ServoyModel.getSettings()).getEnhancedSecurity())
-		{
-			Group securityInfoContainer = new Group(rootContainer, SWT.NONE);
-			securityInfoContainer.setText("Security Information");
-			securityInfoContainer.setLayout(new GridLayout(2, false));
-			securityInfoContainer.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
-
-			enhancedSecurityLabel = new Label(securityInfoContainer, SWT.NONE);
-			enhancedSecurityLabel.setText("Servoy Application Server NOT is running with Enhanced Security, this is strongly discouraged");
-			enhancedSecurityLabel.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
-
-			securityChangeButton = new Button(securityInfoContainer, SWT.NONE);
-			securityChangeButton.setText("Change");
-			securityChangeButton.addSelectionListener(new SelectionAdapter()
-			{
-				@Override
-				public void widgetSelected(SelectionEvent e)
-				{
-					new DeveloperPreferences(ServoyModel.getSettings()).setEnhancedSecurity(true);
-
-					enhancedSecurityLabel.setText("Servoy Application Server is running with Enhanced Security");
-					enhancedSecurityLabel.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-					securityChangeButton.setVisible(false);
-				}
-			});
-		}
 
 		// Servoy Design Perspective
 		Group formEditorOptionsContainer = new Group(rootContainer, SWT.NONE);
