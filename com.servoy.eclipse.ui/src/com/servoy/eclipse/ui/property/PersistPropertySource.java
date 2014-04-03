@@ -269,6 +269,18 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			return "".equals(value) ? null : value;
 		}
 	};
+	public static IPropertyConverter<String, String> DEFAULT_STRING_CONVERTER = new IPropertyConverter<String, String>()
+	{
+		public String convertProperty(Object id, String value)
+		{
+			return (value == null) ? "DEFAULT" : value;
+		}
+
+		public String convertValue(Object id, String value)
+		{
+			return "DEFAULT".equals(value) ? null : value;
+		}
+	};
 
 	// remember the font that was used last time the element was painted, use this as default for font cell editors.
 	public static final RuntimeProperty<java.awt.Font> LastPaintedFontProperty = new RuntimeProperty<java.awt.Font>()
@@ -1527,25 +1539,24 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	 * @param styleLookupname
 	 * @return
 	 */
-	public static ComboboxPropertyController<String> createStyleClassPropertyController(IPersist persist, String id, String displayName,
+	public static PropertyController<String, ? > createStyleClassPropertyController(IPersist persist, String id, String displayName,
 		final String styleLookupname, Form form)
 	{
-		StyleClassesComboboxModel model = new StyleClassesComboboxModel(form, styleLookupname);
-		return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved,
-			((Solution)persist.getRootObject()).getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE ? new ComboboxDelegateValueEditor<String>(
-				new StyleClassValueEditor(form, persist), model) : null)
+		final StyleClassesComboboxModel model = new StyleClassesComboboxModel(form, styleLookupname);
+		if (((Solution)persist.getRootObject()).getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE)
 		{
-			@Override
-			protected String getWarningMessage()
+			return new PropertyController<String, String>(id, displayName, DEFAULT_STRING_CONVERTER, null, new ICellEditorFactory()
 			{
-				if (getModel().getRealValues().length == 1)
+				public CellEditor createPropertyEditor(Composite parent)
 				{
-					// only 1 value (DEFAULT)
-					return "No style classes available for lookup '" + styleLookupname + "'";
+					return new StyleClassCellEditor(parent, model);
 				}
-				return null;
-			}
-		};
+			});
+		}
+		else
+		{
+			return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved, null);
+		}
 	}
 
 	/**
