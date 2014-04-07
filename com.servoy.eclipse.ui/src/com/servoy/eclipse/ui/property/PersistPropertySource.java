@@ -1427,6 +1427,10 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		{
 			type = NumberCellEditor.INTEGER;
 		}
+		else if (propertyType == PropertyType.tabseq)
+		{
+			type = NumberCellEditor.INTEGER;
+		}
 		else if (propertyType == PropertyType.longnumber)
 		{
 			type = NumberCellEditor.LONG;
