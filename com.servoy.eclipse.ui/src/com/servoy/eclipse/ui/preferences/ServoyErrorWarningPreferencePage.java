@@ -544,6 +544,9 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 				Messages.ErrorWarningPreferencePage_methodNumberOfArgsMismatch, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.ROLLOVER_NOT_WORKING,
 				Messages.ErrorWarningPreferencePage_rolloverImageAndCursorNotWorking, true));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.TAB_SEQUENCE_NOT_SET,
+				Messages.ErrorWarningPreferencePage_formTabPanelTabSequenceNotSet, false));
+
 		}
 		else if (ERROR_WARNING_STYLES_PROBLEMS.equals(problemSection))
 		{
