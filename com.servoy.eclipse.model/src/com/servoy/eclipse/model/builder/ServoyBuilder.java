@@ -476,6 +476,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		"nonAccessibleFormInModuleUsedInParentSolution", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> METHOD_NUMBER_OF_ARGUMENTS_MISMATCH = new Pair<String, ProblemSeverity>(
 		"methodNumberOfArgsMismatch", ProblemSeverity.WARNING); //$NON-NLS-1$
+	public final static Pair<String, ProblemSeverity> TAB_SEQUENCE_NOT_SET = new Pair<String, ProblemSeverity>(
+		"tabpanelTabSequenceNotSet", ProblemSeverity.WARNING); //$NON-NLS-1$
 
 	// relations related
 	public final static Pair<String, ProblemSeverity> RELATION_PRIMARY_SERVER_WITH_PROBLEMS = new Pair<String, ProblemSeverity>(
@@ -2934,6 +2936,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									{
 										tabSequences.put(Integer.valueOf(tabSeq), null);
 									}
+								}
+								else if (persist instanceof TabPanel && ((TabPanel)persist).getTabSeq() < 0)
+								{
+									ServoyMarker mk = MarkerMessages.FormTabPanelTabSequenceNotSet.fill(form.getName(), ((TabPanel)persist).getName());
+									addMarker(project, mk.getType(), mk.getText(), -1, TAB_SEQUENCE_NOT_SET, IMarker.PRIORITY_NORMAL, null, persist);
 								}
 							}
 							if (portalAndTabPanelCount > LIMIT_FOR_PORTAL_TABPANEL_COUNT_ON_FORM)
