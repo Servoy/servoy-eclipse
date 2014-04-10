@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.debug.actions;
+package com.servoy.eclipse.debug.handlers;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -47,7 +47,7 @@ public class StartNGClientActionDelegate extends StartWebClientActionDelegate
 	 * @see com.servoy.eclipse.debug.actions.StartWebClientActionDelegate#getStartTitle()
 	 */
 	@Override
-	protected String getStartTitle()
+	public String getStartTitle()
 	{
 		return "NGClient start";
 	}

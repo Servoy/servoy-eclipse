@@ -14,9 +14,11 @@
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
-package com.servoy.eclipse.debug.actions;
+package com.servoy.eclipse.debug.handlers;
 
 
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -25,18 +27,16 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.IInternalDebugUIConstants;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.IWorkbenchWindowActionDelegate;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.debug.DebugStarter;
+import com.servoy.eclipse.debug.actions.IDebuggerStartListener;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.Activator;
@@ -47,9 +47,8 @@ import com.servoy.eclipse.ui.util.EditorUtil;
  * @author jcompagner
  * 
  */
-public abstract class StartDebugAction implements IWorkbenchWindowActionDelegate
+public abstract class StartDebugAction extends AbstractHandler implements IHandler
 {
-	private Shell shell;
 	public static boolean LAUNCH;
 
 	/**
@@ -160,7 +159,8 @@ public abstract class StartDebugAction implements IWorkbenchWindowActionDelegate
 		final String save = store.getString(IInternalDebugUIConstants.PREF_SAVE_DIRTY_EDITORS_BEFORE_LAUNCH);
 		if (!save.equals(MessageDialogWithToggle.NEVER))
 		{
-			if (EditorUtil.saveDirtyEditors(shell, save.equals(MessageDialogWithToggle.PROMPT)))
+			IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
+			if ((workbenchWindows.length > 0) && EditorUtil.saveDirtyEditors(workbenchWindows[0].getShell(), save.equals(MessageDialogWithToggle.PROMPT)))
 			{
 				// there where dirty editors and the user canceled it.
 				return false;
@@ -185,28 +185,4 @@ public abstract class StartDebugAction implements IWorkbenchWindowActionDelegate
 			}
 		});
 	}
-
-	/**
-	 * @see org.eclipse.ui.IWorkbenchWindowActionDelegate#dispose()
-	 */
-	public void dispose()
-	{
-	}
-
-	/**
-	 * @see org.eclipse.ui.IWorkbenchWindowActionDelegate#init(org.eclipse.ui.IWorkbenchWindow)
-	 */
-	public void init(IWorkbenchWindow window)
-	{
-		this.shell = window.getShell();
-	}
-
-	/**
-	 * @see org.eclipse.ui.IActionDelegate#selectionChanged(org.eclipse.jface.action.IAction, org.eclipse.jface.viewers.ISelection)
-	 */
-	public void selectionChanged(IAction action, ISelection selection)
-	{
-	}
-
-
 }
