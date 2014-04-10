@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.views;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlAdapter;
@@ -43,6 +44,8 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.ISaveablePart;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.properties.IPropertySheetEntry;
 import org.eclipse.ui.views.properties.IPropertySheetEntryListener;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -283,6 +286,15 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 			fd_tree.top = new FormAttachment(propertiesLabel, 0, SWT.DEFAULT);
 			fd_tree.left = new FormAttachment(0, 0);
 			tree.setLayoutData(fd_tree);
+		}
+		IWorkbenchPart activeEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().getActivePart();
+		if (activeEditor != null)
+		{
+			ISelectionProvider selectionProvider = activeEditor.getSite().getSelectionProvider();
+			if (selectionProvider != null)
+			{
+				selectionChanged(activeEditor, selectionProvider.getSelection());
+			}
 		}
 	}
 
