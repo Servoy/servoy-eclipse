@@ -4,46 +4,6 @@
 	<extension-point id="shortcuts" name="Shortcuts for debug smart client" schema="schema/shortcuts.exsd"/>
 	
    <extension
-         point="org.eclipse.ui.actionSets">
-      <actionSet
-            id="com.servoy.eclipse.ui.start_actions"
-            label="Start Servoy Clients"
-            visible="true">
-         <action
-               class="com.servoy.eclipse.debug.actions.StartWebClientActionDelegate"
-               definitionId="com.servoy.eclipse.ui.StartWebClient"
-               icon="icons/launch_web.gif"
-               id="com.servoy.eclipse.ui.startWebClient"
-               label="Start Debug Web Client"
-               menubarPath="org.eclipse.ui.run/start"
-               style="pulldown"
-               toolbarPath="Normal/additions"
-               tooltip="Start Debug Web Client">
-               <enablement>
-                    <pluginState
-                          id="com.servoy.eclipse.debug" value="activated">
-                    </pluginState>
-                </enablement>
-         </action>
-         <action
-               class="com.servoy.eclipse.debug.actions.StartSmartClientActionDelegate"
-               definitionId="com.servoy.eclipse.ui.StartSmartClient"
-               icon="icons/launch.gif"
-               id="com.servoy.eclipse.ui.startSmartClient"
-               label="Start Debug Smart Client"
-               menubarPath="org.eclipse.ui.run/start"
-               style="push"
-               toolbarPath="Normal/additions"
-               tooltip="Start Debug Smart Client">
-               <enablement>
-                    <pluginState
-                          id="com.servoy.eclipse.debug" value="activated">
-                    </pluginState>
-                </enablement>
-         </action>
-      </actionSet>
-   </extension>
-   <extension
          point="org.eclipse.dltk.launching.debuggingEngine">
       <engineContribution
             natureId="org.eclipse.dltk.javascript.core.nature">
@@ -143,6 +103,11 @@
             description="Start WebClient"
             id="com.servoy.eclipse.ui.StartWebClient"
             name="Start WebClient">
+         <commandParameter
+               id="com.servoy.eclipse.debug.browser"
+               name="com.servoy.eclipse.debug.browser"
+               optional="true">
+         </commandParameter>
       </command>
    </extension>
    <extension
@@ -313,5 +278,86 @@
               name="rhino">
         </interpreterInstall>
      </extension>
-   
+     <extension
+           point="org.eclipse.ui.menus">
+        <menuContribution
+              allPopups="false"
+              locationURI="toolbar:org.eclipse.ui.main.toolbar?endof=additions">
+           <toolbar
+                 id="com.servoy.eclipse.debug.toolbar">
+              <command
+                    commandId="com.servoy.eclipse.ui.StartWebClient"
+                    icon="icons/launch_web.gif"
+                    id="com.servoy.eclipse.ui.StartWebClient.dynamic"
+                    label="Start Debug Web Client"
+                    style="pulldown">
+              </command>
+              <command
+                    commandId="com.servoy.eclipse.ui.StartSmartClient"
+                    icon="icons/launch.gif"
+                    label="Start Debug Smart Client"
+                    style="push">
+              </command>
+           </toolbar>
+        </menuContribution>
+        <menuContribution
+              allPopups="false"
+              locationURI="menu:com.servoy.eclipse.ui.StartWebClient.dynamic">
+           <dynamic
+                 class="com.servoy.eclipse.debug.handlers.CreateBrowserContributions"
+                 id="com.servoy.eclipse.ui.StartWebClient.dynamic.contributions">
+           </dynamic>
+        </menuContribution>
+        <menuContribution
+              allPopups="false"
+              locationURI="menu:org.eclipse.ui.run?after=breakpointGroup">
+           <separator
+                 name="com.servoy.eclipse.debug.separator"
+                 visible="true">
+           </separator>
+           <command
+                 commandId="com.servoy.eclipse.ui.StartWebClient"
+                 icon="icons/launch_web.gif"
+                 label="Start Debug Web Client"
+                 style="push">
+           </command>
+           <command
+                 commandId="com.servoy.eclipse.ui.StartSmartClient"
+                 icon="icons/launch.gif"
+                 label="Start Debug Smart Client"
+                 style="push">
+           </command>
+        </menuContribution>
+        <group
+              id="com.servoy.eclipse.debug.group2"
+              separatorsVisible="true">
+        </group>
+     </extension>
+     <extension
+           point="org.eclipse.ui.handlers">
+        <handler
+              class="com.servoy.eclipse.debug.handlers.StartWebClientActionDelegate"
+              commandId="com.servoy.eclipse.ui.StartWebClient">
+           <enabledWhen>
+              <with
+                    variable="com.servoy.eclipse.core.webClientState">
+                 <equals
+                       value="ENABLED">
+                 </equals>
+              </with>
+           </enabledWhen>
+        </handler>
+        <handler
+              class="com.servoy.eclipse.debug.handlers.StartSmartClientActionDelegate"
+              commandId="com.servoy.eclipse.ui.StartSmartClient">
+           <enabledWhen>
+              <with
+                    variable="com.servoy.eclipse.core.smartClientState">
+                 <equals
+                       value="ENABLED">
+                 </equals>
+              </with>
+           </enabledWhen>
+        </handler>
+     </extension>
 </plugin>

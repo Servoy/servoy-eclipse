@@ -19,12 +19,13 @@ package com.servoy.eclipse.jsunit.smart;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.IWorkbenchWindow;
 
-import com.servoy.eclipse.debug.actions.StartDebugAction;
+import com.servoy.eclipse.debug.handlers.StartDebugAction;
 import com.servoy.eclipse.jsunit.Activator;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IDebugJ2DBClient;
@@ -35,20 +36,21 @@ import com.servoy.j2db.IDebugJ2DBClient;
  */
 public class StartJsUnitClientActionDelegate extends StartDebugAction implements IRunnableWithProgress
 {
-	private IWorkbenchWindow window;
 	private boolean started = false;
+	private IWorkbenchWindow window;
 
-	@Override
 	public void init(IWorkbenchWindow w)
 	{
-		super.init(w);
 		this.window = w;
 	}
 
-	/**
-	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.core.commands.IHandler#execute(org.eclipse.core.commands.ExecutionEvent)
 	 */
-	public void run(IAction action)
+	@Override
+	public Object execute(ExecutionEvent event) throws ExecutionException
 	{
 		started = false;
 
@@ -69,6 +71,7 @@ public class StartJsUnitClientActionDelegate extends StartDebugAction implements
 		{
 			ServoyLog.logError(e);
 		}
+		return null;
 	}
 
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
@@ -90,5 +93,6 @@ public class StartJsUnitClientActionDelegate extends StartDebugAction implements
 	{
 		return started;
 	}
+
 
 }
