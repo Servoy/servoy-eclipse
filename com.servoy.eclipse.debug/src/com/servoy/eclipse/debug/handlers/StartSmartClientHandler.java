@@ -54,7 +54,7 @@ import com.servoy.j2db.util.Utils;
  * @author jcompagner,jblok
  * 
  */
-public class StartSmartClientActionDelegate extends StartDebugAction implements IRunnableWithProgress, IDebuggerStartListener
+public class StartSmartClientHandler extends StartDebugHandler implements IRunnableWithProgress, IDebuggerStartListener
 {
 	public static ITagResolver noReplacementResolver = new ITagResolver()
 	{
@@ -93,7 +93,7 @@ public class StartSmartClientActionDelegate extends StartDebugAction implements 
 			{
 				try
 				{
-					StartSmartClientActionDelegate.this.run(monitor);
+					StartSmartClientHandler.this.run(monitor);
 				}
 				catch (InvocationTargetException e)
 				{

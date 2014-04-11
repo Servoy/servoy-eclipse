@@ -302,17 +302,17 @@
            <toolbar
                  id="com.servoy.eclipse.debug.toolbar">
               <command
+                    commandId="com.servoy.eclipse.ui.StartSmartClient"
+                    icon="icons/launch.gif"
+                    label="Start Debug Smart Client"
+                    style="push">
+              </command>
+              <command
                     commandId="com.servoy.eclipse.ui.StartWebClient"
                     icon="icons/launch_web.gif"
                     id="com.servoy.eclipse.ui.StartWebClient.dynamic"
                     label="Start Debug Web Client"
                     style="pulldown">
-              </command>
-              <command
-                    commandId="com.servoy.eclipse.ui.StartSmartClient"
-                    icon="icons/launch.gif"
-                    label="Start Debug Smart Client"
-                    style="push">
               </command>
               <command
                     commandId="com.servoy.eclipse.ui.StartNGClient"
@@ -373,7 +373,7 @@
      <extension
            point="org.eclipse.ui.handlers">
         <handler
-              class="com.servoy.eclipse.debug.handlers.StartWebClientActionDelegate"
+              class="com.servoy.eclipse.debug.handlers.StartWebClientHandler"
               commandId="com.servoy.eclipse.ui.StartWebClient">
            <enabledWhen>
               <with
@@ -385,7 +385,7 @@
            </enabledWhen>
         </handler>
         <handler
-              class="com.servoy.eclipse.debug.handlers.StartSmartClientActionDelegate"
+              class="com.servoy.eclipse.debug.handlers.StartSmartClientHandler"
               commandId="com.servoy.eclipse.ui.StartSmartClient">
            <enabledWhen>
               <with
@@ -397,7 +397,7 @@
            </enabledWhen>
         </handler>
         <handler
-              class="com.servoy.eclipse.debug.handlers.StartNGClientActionDelegate"
+              class="com.servoy.eclipse.debug.handlers.StartNGClientHandler"
               commandId="com.servoy.eclipse.ui.StartNGClient">
            <enabledWhen>
               <with

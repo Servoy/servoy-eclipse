@@ -39,7 +39,7 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
  * @author jcompagner
  *
  */
-public class StartNGClientActionDelegate extends StartWebClientActionDelegate
+public class StartNGClientHandler extends StartWebClientHandler
 {
 	/*
 	 * (non-Javadoc)

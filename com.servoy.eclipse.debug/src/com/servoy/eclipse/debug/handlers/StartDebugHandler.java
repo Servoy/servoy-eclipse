@@ -47,14 +47,14 @@ import com.servoy.eclipse.ui.util.EditorUtil;
  * @author jcompagner
  * 
  */
-public abstract class StartDebugAction extends AbstractHandler implements IHandler
+public abstract class StartDebugHandler extends AbstractHandler implements IHandler
 {
 	public static boolean LAUNCH;
 
 	/**
 	 * 
 	 */
-	public StartDebugAction()
+	public StartDebugHandler()
 	{
 		super();
 	}

@@ -58,7 +58,7 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
  * @author jcompagner
  * 
  */
-public class StartWebClientActionDelegate extends StartDebugAction implements IRunnableWithProgress, IHandler
+public class StartWebClientHandler extends StartDebugHandler implements IRunnableWithProgress, IHandler
 {
 
 
@@ -89,7 +89,7 @@ public class StartWebClientActionDelegate extends StartDebugAction implements IR
 			{
 				try
 				{
-					StartWebClientActionDelegate.this.run(monitor);
+					StartWebClientHandler.this.run(monitor);
 				}
 				catch (InvocationTargetException itex)
 				{

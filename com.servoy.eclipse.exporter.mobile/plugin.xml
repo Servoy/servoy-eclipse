@@ -35,7 +35,7 @@
                 label="Start Mobile Client"
                 menubarPath="org.eclipse.ui.run/start"
                 style="pulldown"
-                toolbarPath="Normal/additions"
+                toolbarPath="com.servoy.eclipse.debug.toolbar/start"
                 tooltip="Start Mobile Client in Browser">  
                 <enablement>
                     <pluginState

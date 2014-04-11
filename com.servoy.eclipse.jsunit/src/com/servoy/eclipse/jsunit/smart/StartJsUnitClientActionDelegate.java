@@ -25,7 +25,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.IWorkbenchWindow;
 
-import com.servoy.eclipse.debug.handlers.StartDebugAction;
+import com.servoy.eclipse.debug.handlers.StartDebugHandler;
 import com.servoy.eclipse.jsunit.Activator;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IDebugJ2DBClient;
@@ -34,7 +34,7 @@ import com.servoy.j2db.IDebugJ2DBClient;
  * @author jcompagner
  * 
  */
-public class StartJsUnitClientActionDelegate extends StartDebugAction implements IRunnableWithProgress
+public class StartJsUnitClientActionDelegate extends StartDebugHandler implements IRunnableWithProgress
 {
 	private boolean started = false;
 	private IWorkbenchWindow window;
