@@ -152,7 +152,7 @@
           <with
                 variable="com.servoy.eclipse.core.mobileState">
              <equals
-                   value="false">
+                   value="DISABLED">
              </equals>
           </with>
        </activeWhen>
@@ -181,7 +181,7 @@
           <with
                 variable="com.servoy.eclipse.core.mobileState">
              <equals
-                   value="false">
+                   value="DISABLED">
              </equals>
           </with>
           <reference
