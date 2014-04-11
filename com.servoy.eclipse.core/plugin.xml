@@ -369,10 +369,6 @@
                name="com.servoy.eclipse.core.mobileState"
                priorityLevel="workbench">
          </variable>
-         <variable
-               name="com.servoy.eclipse.core.webState"
-               priorityLevel="workbench">
-         </variable>
       </sourceProvider>
    </extension>
 </plugin>

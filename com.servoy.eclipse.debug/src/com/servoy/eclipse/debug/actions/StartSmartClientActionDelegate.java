@@ -14,7 +14,7 @@
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
-package com.servoy.eclipse.debug.handlers;
+package com.servoy.eclipse.debug.actions;
 
 
 import java.lang.reflect.InvocationTargetException;
@@ -26,14 +26,14 @@ import javax.swing.JComponent;
 import javax.swing.JRootPane;
 import javax.swing.KeyStroke;
 
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.base.util.ITagResolver;
@@ -41,7 +41,6 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.debug.Activator;
 import com.servoy.eclipse.debug.Activator.ShortcutDefinition;
-import com.servoy.eclipse.debug.actions.IDebuggerStartListener;
 import com.servoy.eclipse.debug.FlattenedSolutionDebugListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -76,13 +75,10 @@ public class StartSmartClientActionDelegate extends StartDebugAction implements 
 
 	private List<ShortcutDefinition> shortCuts;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.core.commands.IHandler#execute(org.eclipse.core.commands.ExecutionEvent)
+	/**
+	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
 	 */
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException
+	public void run(IAction action)
 	{
 		makeSureNeededPluginsAreStarted();
 
@@ -108,7 +104,6 @@ public class StartSmartClientActionDelegate extends StartDebugAction implements 
 		};
 		job.setUser(true);
 		job.schedule();
-		return null;
 	}
 
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
@@ -202,6 +197,26 @@ public class StartSmartClientActionDelegate extends StartDebugAction implements 
 				ServoyLog.logError(e);
 			}
 		}
+	}
+
+
+	@Override
+	public void selectionChanged(IAction action, ISelection selection)
+	{
+		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		final ServoyProject activeProject = servoyModel.getActiveProject();
+		boolean enabled = true;
+		if (activeProject != null && activeProject.getSolution() != null)
+		{
+			final Solution solution = activeProject.getSolution();
+			if (solution.getSolutionType() == SolutionMetaData.WEB_CLIENT_ONLY || solution.getSolutionType() == SolutionMetaData.MOBILE ||
+				solution.getSolutionType() == SolutionMetaData.MOBILE_MODULE) enabled = false;
+		}
+		else
+		{
+			enabled = false;
+		}
+		action.setEnabled(enabled);
 	}
 
 }

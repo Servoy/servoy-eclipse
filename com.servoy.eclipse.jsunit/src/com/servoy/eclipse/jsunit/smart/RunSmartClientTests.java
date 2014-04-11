@@ -21,13 +21,12 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.SwingUtilities;
 
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.ui.progress.WorkbenchJob;
 
 import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
@@ -187,14 +186,7 @@ public class RunSmartClientTests extends RunJSUnitTests
 								StartJsUnitClientActionDelegate startJsUnitClientAction = new StartJsUnitClientActionDelegate();
 								startJsUnitClientAction.init(window);
 								((SwitchableEclipseUserManager)ApplicationServerSingleton.get().getUserManager()).switchTo(testUserManager); // use testUserManager in app. server code as well
-								try
-								{
-									startJsUnitClientAction.execute((ExecutionEvent)null);
-								}
-								catch (ExecutionException e)
-								{
-									ServoyLog.logError(e);
-								}
+								startJsUnitClientAction.run((IAction)null);
 
 								if (startJsUnitClientAction.clientStartSucceeded())
 								{

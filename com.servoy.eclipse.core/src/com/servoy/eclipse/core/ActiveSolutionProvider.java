@@ -12,9 +12,6 @@ public class ActiveSolutionProvider extends AbstractSourceProvider
 {
 
 	public static final String MOBILE_STATE = "com.servoy.eclipse.core.mobileState"; //$NON-NLS-1$
-	public static final String WEB_STATE = "com.servoy.eclipse.core.webClientState"; //$NON-NLS-1$
-	public static final String SMART_STATE = "com.servoy.eclipse.core.smartClientState"; //$NON-NLS-1$
-
 	private ServoyModel sm;
 	private IActiveProjectListener listener;
 
@@ -34,8 +31,6 @@ public class ActiveSolutionProvider extends AbstractSourceProvider
 			public void activeProjectChanged(ServoyProject activeProject)
 			{
 				fireSourceChanged(ISources.WORKBENCH, MOBILE_STATE, getMobileVariableState());
-				fireSourceChanged(ISources.WORKBENCH, WEB_STATE, getWebVariableState());
-				fireSourceChanged(ISources.WORKBENCH, SMART_STATE, getSmartClientVariableState());
 			}
 
 			@Override
@@ -56,41 +51,20 @@ public class ActiveSolutionProvider extends AbstractSourceProvider
 	@Override
 	public Map<String, Object> getCurrentState()
 	{
-		Map<String, Object> map = new HashMap<String, Object>(2);
+		Map<String, Object> map = new HashMap<String, Object>(1);
 		map.put(MOBILE_STATE, getMobileVariableState());
-		map.put(WEB_STATE, getWebVariableState());
-		map.put(SMART_STATE, getWebVariableState());
 		return map;
 	}
 
-	private String translateEnablement(boolean source)
+	private Boolean getMobileVariableState()
 	{
-		if (source) return "ENABLED";
-		else return "DISABLED";
+		return Boolean.valueOf(sm.isActiveSolutionMobile());
 	}
-
-	private String getMobileVariableState()
-	{
-		return translateEnablement(sm.isActiveSolutionMobile());
-	}
-
-
-	private String getSmartClientVariableState()
-	{
-		return translateEnablement(sm.isActiveSolutionSmartClient());
-	}
-
-
-	private String getWebVariableState()
-	{
-		return translateEnablement(sm.isActiveSolutionWeb());
-	}
-
 
 	@Override
 	public String[] getProvidedSourceNames()
 	{
-		return new String[] { MOBILE_STATE, WEB_STATE, SMART_STATE };
+		return new String[] { MOBILE_STATE };
 	}
 
 }

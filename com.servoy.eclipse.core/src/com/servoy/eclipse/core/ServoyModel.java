@@ -3581,28 +3581,10 @@ public class ServoyModel extends AbstractServoyModel
 		return ClientSupport.Default;
 	}
 
-	public boolean isActiveSolutionWeb()
-	{
-		if (getActiveSolutionClientType() != null) return getActiveSolutionClientType().supports(ClientSupport.wc);
-		else return false;
-	}
-
-
 	public boolean isActiveSolutionMobile()
 	{
-		if (getActiveSolutionClientType() != null) return getActiveSolutionClientType().supports(ClientSupport.mc);
-		else return false;
+		return getActiveSolutionClientType() == ClientSupport.mc;
 	}
-
-	/**
-	 * @return
-	 */
-	public boolean isActiveSolutionSmartClient()
-	{
-		if (getActiveSolutionClientType() != null) return getActiveSolutionClientType().supports(ClientSupport.sc);
-		else return false;
-	}
-
 
 	private void readWorkingSetsFromResourcesProject()
 	{
@@ -3736,6 +3718,4 @@ public class ServoyModel extends AbstractServoyModel
 			activeResourcesProject.removeListener(workingSetChangedListener);
 		}
 	}
-
-
 }
