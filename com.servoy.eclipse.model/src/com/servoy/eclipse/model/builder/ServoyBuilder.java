@@ -677,6 +677,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		{
 			try
 			{
+				boolean needFullBuild = false;
 				for (IProject p : monitoredProjects)
 				{
 					if (p.exists() && p.isOpen())
@@ -684,14 +685,22 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						IResourceDelta delta = getDelta(p);
 						if (delta != null)
 						{
+							needFullBuild = needFullBuild || delta.getAffectedChildren().length > 0;
 							incrementalBuild(delta, progressMonitor);
 						}
 					} // should we generate a problem marker otherwise?
 				}
-				IResourceDelta delta = getDelta(getProject());
-				if (delta != null)
+				if (needFullBuild)
 				{
-					incrementalBuild(delta, progressMonitor);
+					fullBuild(progressMonitor);
+				}
+				else
+				{
+					IResourceDelta delta = getDelta(getProject());
+					if (delta != null)
+					{
+						incrementalBuild(delta, progressMonitor);
+					}
 				}
 			}
 			catch (Exception e)
@@ -2557,6 +2566,17 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														mk = MarkerMessages.FormDataproviderOnElementNotFound.fill(elementName, inForm, id);
 													}
 													addMarker(project, mk.getType(), mk.getText(), -1, FORM_INVALID_DATAPROVIDER, IMarker.PRIORITY_LOW, null, o);
+												}
+											}
+											if (dataProvider instanceof ColumnWrapper)
+											{
+												Relation[] relations = ((ColumnWrapper)dataProvider).getRelations();
+												if (relations != null)
+												{
+													for (Relation r : relations)
+													{
+														addEncapsulationMarker(project, o, r, (Form)context);
+													}
 												}
 											}
 										}
