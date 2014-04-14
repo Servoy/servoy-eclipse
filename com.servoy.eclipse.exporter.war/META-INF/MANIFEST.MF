@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.servoy.eclipse.exporter.war;singleton:=true
 Bundle-Version: 8.0.0.3000
 Bundle-Activator: com.servoy.eclipse.warexporter.Activator
 Bundle-Vendor: Servoy
-Require-Bundle: org.eclipse.ui,
+Require-Bundle: org.eclipse.core.resources, 
+ org.eclipse.ui,
  org.eclipse.core.runtime,
  servoy_shared,
  org.eclipse.core.databinding,

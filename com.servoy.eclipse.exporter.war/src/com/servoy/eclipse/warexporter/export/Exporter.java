@@ -29,18 +29,25 @@ import java.io.StringReader;
 import java.io.Writer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -49,7 +56,9 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.warexporter.ui.wizard.ServerConfiguration;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IBeanManagerInternal;
@@ -72,6 +81,7 @@ import com.servoy.j2db.util.Utils;
 public class Exporter
 {
 
+	private static final String COMPONENTS_DIR_NAME = "components";
 	private final ExportWarModel exportModel;
 
 	/**
@@ -87,6 +97,178 @@ public class Exporter
 	 * @return
 	 */
 	public void doExport(IProgressMonitor monitor) throws ExportException
+	{
+		File warFile = createNewWarFile(monitor);
+		File tmpWarDir = createTempDir(monitor);
+
+		String appServerDir = ApplicationServerRegistry.get().getServoyApplicationServerDirectory();
+		copyRootWebappFiles(monitor, tmpWarDir, appServerDir);
+		copyBeans(monitor, tmpWarDir, appServerDir);
+		copyPlugins(monitor, tmpWarDir, appServerDir);
+		copyLafs(monitor, tmpWarDir, appServerDir);
+
+		final File targetLibDir = copyStandardLibs(monitor, tmpWarDir, appServerDir);
+		copyDrivers(monitor, appServerDir, targetLibDir);
+		copyLibImages(tmpWarDir, appServerDir);
+		moveSlf4j(tmpWarDir, targetLibDir);
+
+		copyWebXml(tmpWarDir);
+		addServoyProperties(tmpWarDir);
+		copyActiveSolution(tmpWarDir, monitor);
+
+		StringBuilder locations = new StringBuilder("/servoydefault;/servoycomponents");
+		locations.append(copyNGComponents(tmpWarDir, monitor));
+		createComponentsPropertiesFile(tmpWarDir, locations.toString());
+
+		zipDirectory(tmpWarDir, warFile, monitor);
+		deleteDirectory(tmpWarDir);
+
+		monitor.worked(2);
+		monitor.done();
+		return;
+	}
+
+	/**
+	 * @param tmpWarDir 
+	 * @param locations
+	 * @throws ExportException 
+	 */
+	private void createComponentsPropertiesFile(File tmpWarDir, String locations) throws ExportException
+	{
+		Properties properties = new Properties();
+		properties.put("locations", locations);
+		FileOutputStream fos = null;
+		try
+		{
+			fos = new FileOutputStream(new File(tmpWarDir, "components.properties"));
+			properties.store(fos, "");
+		}
+		catch (Exception e)
+		{
+			throw new ExportException("Couldn't generate the components.properties file", e);
+		}
+		finally
+		{
+			if (fos != null) try
+			{
+				fos.close();
+			}
+			catch (IOException e)
+			{
+			}
+		}
+	}
+
+	/**
+	 * @param tmpWarDir
+	 * @param monitor 
+	 * @param locations 
+	 * @throws ExportException 
+	 */
+	private String copyNGComponents(File tmpWarDir, IProgressMonitor monitor) throws ExportException
+	{
+		monitor.subTask("Copy NG components");
+		StringBuilder locations = new StringBuilder();
+		ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
+		try
+		{
+			activeResourcesProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, monitor);
+		}
+		catch (CoreException e1)
+		{
+			Debug.error(e1);
+		}
+		if (activeResourcesProject != null)
+		{
+			IFolder folder = activeResourcesProject.getProject().getFolder(COMPONENTS_DIR_NAME);
+			if (folder.exists())
+			{
+				try
+				{
+					folder.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+					IResource[] members = folder.members();
+					for (IResource resource : members)
+					{
+						String name = resource.getName();
+						int index = name.lastIndexOf('.');
+						if (index != -1)
+						{
+							name = name.substring(0, index);
+						}
+						if (resource instanceof IFolder)
+						{
+							IFolder resourceFolder = (IFolder)resource;
+							if ((resourceFolder).getFile("META-INF/MANIFEST.MF").exists())
+							{
+								locations.append(";/" + resourceFolder.getName().split("\\.")[0]);
+								copyDir(new File(resource.getRawLocationURI()), tmpWarDir, true);
+							}
+						}
+						else if (resource instanceof IFile)
+						{
+							locations.append(";/" + resource.getName().split("\\.")[0]);
+							extractJar(new File(resource.getRawLocationURI()), tmpWarDir);
+						}
+					}
+				}
+				catch (CoreException e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+		}
+		monitor.worked(1);
+		return locations.toString();
+	}
+
+	/**
+	 * @param file
+	 * @param tmpWarDir
+	 * @throws ExportException 
+	 */
+	private void extractJar(File file, File tmpWarDir) throws ExportException
+	{
+		try
+		{
+			JarFile jarfile = new JarFile(file);
+			Enumeration<JarEntry> enu = jarfile.entries();
+			while (enu.hasMoreElements())
+			{
+				String destdir = tmpWarDir + "/" + file.getName().split("\\.")[0];
+				JarEntry je = enu.nextElement();
+				File fl = new File(destdir, je.getName());
+				if (!fl.exists())
+				{
+					fl.getParentFile().mkdirs();
+					fl = new File(destdir, je.getName());
+				}
+				if (je.isDirectory())
+				{
+					continue;
+				}
+				InputStream is = jarfile.getInputStream(je);
+				FileOutputStream fo = new FileOutputStream(fl);
+				while (is.available() > 0)
+				{
+					fo.write(is.read());
+				}
+				fo.close();
+				is.close();
+			}
+		}
+		catch (IOException e)
+		{
+			Debug.error(e);
+			throw new ExportException(e.getMessage());
+		}
+	}
+
+	/**
+	 * @param monitor
+	 * @return
+	 * @throws ExportException
+	 */
+	private File createNewWarFile(IProgressMonitor monitor) throws ExportException
 	{
 		monitor.beginTask("Creating War File", 11);
 		File warFile = new File(exportModel.getFileName());
@@ -108,7 +290,16 @@ public class Exporter
 		}
 
 		monitor.worked(1);
+		return warFile;
+	}
 
+	/**
+	 * @param monitor
+	 * @return
+	 * @throws ExportException
+	 */
+	private File createTempDir(IProgressMonitor monitor) throws ExportException
+	{
 		File tmpDir = new File(System.getProperty("java.io.tmpdir"));
 
 		File tmpWarDir = new File(tmpDir, "warexport/");
@@ -125,54 +316,211 @@ public class Exporter
 		}
 
 		monitor.worked(1);
-		String appServerDir = ApplicationServerRegistry.get().getServoyApplicationServerDirectory();
+		return tmpWarDir;
+	}
 
-		File webAppDir = new File(appServerDir, "server/webapps/ROOT");
-
-		monitor.subTask("Copy root webapp files");
-		// copy first the standard webapp dir of the app server
-		copyDir(webAppDir, tmpWarDir, true);
-
-		File defaultCss = new File(tmpWarDir, "/servoy-webclient/templates/default/servoy_web_client_default.css");
-		if (!defaultCss.exists())
+	/**
+	 * @param tmpWarDir
+	 * @param monitor 
+	 * @throws ExportException
+	 */
+	private void copyActiveSolution(File tmpWarDir, IProgressMonitor monitor) throws ExportException
+	{
+		if (exportModel.isExportActiveSolutionOnly())
 		{
 			try
 			{
-				String styleCSS = TemplateGenerator.getStyleCSS("servoy_web_client_default.css");
-				OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(defaultCss), "utf8");
-				fw.write(styleCSS);
-				fw.close();
+				FlattenedSolution solution = ServoyModelFinder.getServoyModel().getActiveProject().getFlattenedSolution();
+				SolutionSerializer.writeRuntimeSolution(null, new File(tmpWarDir, "WEB-INF/solution.runtime"), solution.getSolution(),
+					ApplicationServerRegistry.get().getDeveloperRepository(), solution.getModules());
 			}
-			catch (Exception e)
+			catch (Exception ex)
 			{
-				throw new ExportException("Error default servoy css file (servoy_web_client_default.css)", e);
+				throw new ExportException("Cannot write the active solution in war file", ex);
 			}
 		}
-
 		monitor.worked(1);
-		monitor.subTask("Copy beans");
-		// copy the beans
-		File beanSourceDir = new File(appServerDir, "beans");
-		File beanTargetDir = new File(tmpWarDir, "beans");
-		beanTargetDir.mkdirs();
-		IBeanManagerInternal beanManager = ApplicationServerRegistry.get().getBeanManager();
-		Map<String, List<ExtensionResource>> loadedBeanDefs = beanManager.getLoadedBeanDefs();
-		List<String> beans = exportModel.getBeans();
-		File beanProperties = new File(beanTargetDir, "beans.properties");
-		Writer fw = null;
+	}
+
+	/**
+	 * @param tmpWarDir
+	 * @throws ExportException
+	 */
+	private void addServoyProperties(File tmpWarDir) throws ExportException
+	{
+		if (exportModel.getServoyPropertiesFileName() == null)
+		{
+			generatePropertiesFile(tmpWarDir);
+		}
+		else
+		{
+			File sourceFile = new File(exportModel.getServoyPropertiesFileName());
+			if (exportModel.allowOverwriteSocketFactoryProperties())
+			{
+				changeAndWritePropertiesFile(tmpWarDir, sourceFile);
+			}
+			else
+			{
+				copyPropertiesFileToWar(tmpWarDir, sourceFile);
+			}
+		}
+	}
+
+	/**
+	 * @param tmpWarDir
+	 * @throws ExportException
+	 */
+	private void copyWebXml(File tmpWarDir) throws ExportException
+	{
+		// copy war web.xml
+		File webXMLFile = new File(tmpWarDir, "WEB-INF/web.xml");
+		BufferedOutputStream bos = null;
+		InputStream webXmlIS = null;
 		try
 		{
-			fw = new FileWriter(beanProperties);
-			Set<File> writtenFiles = new HashSet<File>();
-			for (String beanName : beans)
+			webXmlIS = getClass().getResourceAsStream("resources/web.xml");
+			bos = new BufferedOutputStream(new FileOutputStream(webXMLFile));
+
+			byte[] buffer = new byte[8096];
+			int read = webXmlIS.read(buffer);
+			while (read != -1)
 			{
-				List<ExtensionResource> fileNames = JarManager.getExtensions(loadedBeanDefs, beanName);
+				bos.write(buffer, 0, read);
+				read = webXmlIS.read(buffer);
+			}
+		}
+		catch (Exception e)
+		{
+			throw new ExportException("Can't create the web.xml file: " + webXMLFile, e);
+		}
+		finally
+		{
+			if (bos != null) try
+			{
+				bos.close();
+			}
+			catch (IOException e)
+			{
+			}
+			if (webXmlIS != null) try
+			{
+				webXmlIS.close();
+			}
+			catch (IOException e)
+			{
+			}
+		}
+	}
+
+	/**
+	 * @param tmpWarDir
+	 * @param targetLibDir
+	 * @throws ExportException
+	 */
+	private void moveSlf4j(File tmpWarDir, final File targetLibDir) throws ExportException
+	{
+		// move the slf4j outside of the WEB-INF/lib to /lib/, its only used in the client
+		File slf4j = new File(targetLibDir, "slf4j-jdk14.jar");
+		copyFile(slf4j, new File(tmpWarDir, "lib/slf4j-jdk14.jar"));
+		slf4j.delete();
+	}
+
+	/**
+	 * @param tmpWarDir
+	 * @param appServerDir
+	 * @throws ExportException
+	 */
+	private void copyLibImages(File tmpWarDir, String appServerDir) throws ExportException
+	{
+		// copy lib/images dir 
+		File libImagesDir = new File(appServerDir, "lib/images");
+		File targetLibImagesDir = new File(tmpWarDir, "lib/images");
+		targetLibImagesDir.mkdirs();
+		copyDir(libImagesDir, targetLibImagesDir, false);
+	}
+
+	/**
+	 * @param monitor
+	 * @param appServerDir
+	 * @param targetLibDir
+	 * @throws ExportException
+	 */
+	private void copyDrivers(IProgressMonitor monitor, String appServerDir, final File targetLibDir) throws ExportException
+	{
+		monitor.subTask("Copy Drivers");
+
+		List<String> drivers = exportModel.getDrivers();
+		File srcDriverDir = new File(appServerDir, "drivers");
+		for (String driverFileName : drivers)
+		{
+			copyFile(new File(srcDriverDir, driverFileName), new File(targetLibDir, driverFileName));
+		}
+		monitor.worked(1);
+	}
+
+	/**
+	 * @param monitor
+	 * @param tmpWarDir
+	 * @param appServerDir
+	 * @return
+	 * @throws ExportException
+	 */
+	private File copyStandardLibs(IProgressMonitor monitor, File tmpWarDir, String appServerDir) throws ExportException
+	{
+		monitor.subTask("Copy all standard libraries");
+		// copy lib dir (excluding images)
+		final File libDir = new File(appServerDir, "lib");
+		final File targetLibDir = new File(tmpWarDir, "WEB-INF/lib");
+		targetLibDir.mkdirs();
+		copyDir(libDir, targetLibDir, false);
+
+//		// copy the template handler
+//		copyFile(new File(appServerDir, "server/lib/template-handler.jar"), new File(targetLibDir, "template-handler.jar"));
+
+		// delete the servlet.jar that one isn't allowed.
+		new File(targetLibDir, "servlet-api.jar").delete();
+		new File(targetLibDir, "jsp-api.jar").delete();
+		// delete the tomcat boostrapper, also not needed in a war file
+		new File(targetLibDir, "server-bootstrap.jar").delete();
+		new File(targetLibDir, "tomcat-juli.jar").delete();
+
+
+		monitor.worked(1);
+		return targetLibDir;
+	}
+
+	/**
+	 * @param monitor
+	 * @param tmpWarDir
+	 * @param appServerDir
+	 * @throws ExportException
+	 */
+	private void copyLafs(IProgressMonitor monitor, File tmpWarDir, String appServerDir) throws ExportException
+	{
+		Writer fw;
+		monitor.subTask("Copy lafs");
+		// copy the lafs
+		File lafSourceDir = new File(appServerDir, "lafs");
+		File lafTargetDir = new File(tmpWarDir, "lafs");
+		lafTargetDir.mkdirs();
+		ILAFManagerInternal lafManager = ApplicationServerRegistry.get().getLafManager();
+		Map<String, List<ExtensionResource>> loadedLafDefs = lafManager.getLoadedLAFDefs();
+		List<String> lafs = exportModel.getLafs();
+		File lafProperties = new File(lafTargetDir, "lafs.properties");
+		fw = null;
+		try
+		{
+			fw = new FileWriter(lafProperties);
+			Set<File> writtenFiles = new HashSet<File>();
+			for (String lafName : lafs)
+			{
+				List<ExtensionResource> fileNames = JarManager.getExtensions(loadedLafDefs, lafName);
 				if (fileNames != null)
 				{
 					for (ExtensionResource ext : fileNames)
 					{
-						File sourceFile = new File(beanSourceDir, ext.jarFileName);
-						copyFile(sourceFile, new File(beanTargetDir, ext.jarFileName));
+						File sourceFile = new File(lafSourceDir, ext.jarFileName);
+						copyFile(sourceFile, new File(lafTargetDir, ext.jarFileName));
 						writeFileEntry(fw, sourceFile, ext.jarFileName, writtenFiles);
 					}
 				}
@@ -180,7 +528,7 @@ public class Exporter
 		}
 		catch (IOException e2)
 		{
-			throw new ExportException("Error creating beans dir", e2);
+			throw new ExportException("Error creating laf dir", e2);
 		}
 		finally
 		{
@@ -194,13 +542,26 @@ public class Exporter
 			}
 		}
 
+
 		monitor.worked(1);
+	}
+
+	/**
+	 * @param monitor
+	 * @param tmpWarDir
+	 * @param appServerDir
+	 * @param fw
+	 * @throws ExportException
+	 */
+	private void copyPlugins(IProgressMonitor monitor, File tmpWarDir, String appServerDir) throws ExportException
+	{
 		monitor.subTask("Copy plugins");
 		// copy the plugins
 		File pluginsDir = new File(tmpWarDir, "plugins");
 		pluginsDir.mkdirs();
 		List<String> plugins = exportModel.getPlugins();
 		File pluginProperties = new File(pluginsDir, "plugins.properties");
+		Writer fw = null;
 		try
 		{
 			fw = new FileWriter(pluginProperties);
@@ -255,29 +616,40 @@ public class Exporter
 		}
 
 		monitor.worked(1);
-		monitor.subTask("Copy lafs");
-		// copy the lafs
-		File lafSourceDir = new File(appServerDir, "lafs");
-		File lafTargetDir = new File(tmpWarDir, "lafs");
-		lafTargetDir.mkdirs();
-		ILAFManagerInternal lafManager = ApplicationServerRegistry.get().getLafManager();
-		Map<String, List<ExtensionResource>> loadedLafDefs = lafManager.getLoadedLAFDefs();
-		List<String> lafs = exportModel.getLafs();
-		File lafProperties = new File(lafTargetDir, "lafs.properties");
-		fw = null;
+	}
+
+	/**
+	 * @param monitor
+	 * @param tmpWarDir
+	 * @param appServerDir
+	 * @return
+	 * @throws ExportException
+	 */
+	private void copyBeans(IProgressMonitor monitor, File tmpWarDir, String appServerDir) throws ExportException
+	{
+		monitor.subTask("Copy beans");
+		// copy the beans
+		File beanSourceDir = new File(appServerDir, "beans");
+		File beanTargetDir = new File(tmpWarDir, "beans");
+		beanTargetDir.mkdirs();
+		IBeanManagerInternal beanManager = ApplicationServerRegistry.get().getBeanManager();
+		Map<String, List<ExtensionResource>> loadedBeanDefs = beanManager.getLoadedBeanDefs();
+		List<String> beans = exportModel.getBeans();
+		File beanProperties = new File(beanTargetDir, "beans.properties");
+		Writer fw = null;
 		try
 		{
-			fw = new FileWriter(lafProperties);
+			fw = new FileWriter(beanProperties);
 			Set<File> writtenFiles = new HashSet<File>();
-			for (String lafName : lafs)
+			for (String beanName : beans)
 			{
-				List<ExtensionResource> fileNames = JarManager.getExtensions(loadedLafDefs, lafName);
+				List<ExtensionResource> fileNames = JarManager.getExtensions(loadedBeanDefs, beanName);
 				if (fileNames != null)
 				{
 					for (ExtensionResource ext : fileNames)
 					{
-						File sourceFile = new File(lafSourceDir, ext.jarFileName);
-						copyFile(sourceFile, new File(lafTargetDir, ext.jarFileName));
+						File sourceFile = new File(beanSourceDir, ext.jarFileName);
+						copyFile(sourceFile, new File(beanTargetDir, ext.jarFileName));
 						writeFileEntry(fw, sourceFile, ext.jarFileName, writtenFiles);
 					}
 				}
@@ -285,7 +657,7 @@ public class Exporter
 		}
 		catch (IOException e2)
 		{
-			throw new ExportException("Error creating laf dir", e2);
+			throw new ExportException("Error creating beans dir", e2);
 		}
 		finally
 		{
@@ -299,127 +671,39 @@ public class Exporter
 			}
 		}
 
-
 		monitor.worked(1);
-		monitor.subTask("Copy all standard libraries");
-		// copy lib dir (excluding images)
-		final File libDir = new File(appServerDir, "lib");
-		final File targetLibDir = new File(tmpWarDir, "WEB-INF/lib");
-		targetLibDir.mkdirs();
-		copyDir(libDir, targetLibDir, false);
+	}
 
-//		// copy the template handler
-//		copyFile(new File(appServerDir, "server/lib/template-handler.jar"), new File(targetLibDir, "template-handler.jar"));
+	/**
+	 * @param monitor
+	 * @param tmpWarDir
+	 * @throws ExportException
+	 */
+	private void copyRootWebappFiles(IProgressMonitor monitor, File tmpWarDir, String appServerDir) throws ExportException
+	{
+		File webAppDir = new File(appServerDir, "server/webapps/ROOT");
 
-		// delete the servlet.jar that one isn't allowed.
-		new File(targetLibDir, "servlet-api.jar").delete();
-		new File(targetLibDir, "jsp-api.jar").delete();
-		// delete the tomcat boostrapper, also not needed in a war file
-		new File(targetLibDir, "server-bootstrap.jar").delete();
-		new File(targetLibDir, "tomcat-juli.jar").delete();
+		monitor.subTask("Copy root webapp files");
+		// copy first the standard webapp dir of the app server
+		copyDir(webAppDir, tmpWarDir, true);
 
-
-		monitor.worked(1);
-		monitor.subTask("Copy Drivers");
-
-		List<String> drivers = exportModel.getDrivers();
-		File srcDriverDir = new File(appServerDir, "drivers");
-		for (String driverFileName : drivers)
-		{
-			copyFile(new File(srcDriverDir, driverFileName), new File(targetLibDir, driverFileName));
-		}
-		monitor.worked(1);
-
-
-		// copy lib/images dir 
-		File libImagesDir = new File(appServerDir, "lib/images");
-		File targetLibImagesDir = new File(tmpWarDir, "lib/images");
-		targetLibImagesDir.mkdirs();
-		copyDir(libImagesDir, targetLibImagesDir, false);
-
-		// move the slf4j outside of the WEB-INF/lib to /lib/, its only used in the client
-		File slf4j = new File(targetLibDir, "slf4j-jdk14.jar");
-		copyFile(slf4j, new File(tmpWarDir, "lib/slf4j-jdk14.jar"));
-		slf4j.delete();
-
-		// copy war web.xml
-		File webXMLFile = new File(tmpWarDir, "WEB-INF/web.xml");
-		BufferedOutputStream bos = null;
-		InputStream webXmlIS = null;
-		try
-		{
-			webXmlIS = getClass().getResourceAsStream("resources/web.xml");
-			bos = new BufferedOutputStream(new FileOutputStream(webXMLFile));
-
-			byte[] buffer = new byte[8096];
-			int read = webXmlIS.read(buffer);
-			while (read != -1)
-			{
-				bos.write(buffer, 0, read);
-				read = webXmlIS.read(buffer);
-			}
-		}
-		catch (Exception e)
-		{
-			throw new ExportException("Can't create the web.xml file: " + webXMLFile, e);
-		}
-		finally
-		{
-			if (bos != null) try
-			{
-				bos.close();
-			}
-			catch (IOException e)
-			{
-			}
-			if (webXmlIS != null) try
-			{
-				webXmlIS.close();
-			}
-			catch (IOException e)
-			{
-			}
-		}
-
-		if (exportModel.getServoyPropertiesFileName() == null)
-		{
-			generatePropertiesFile(tmpWarDir);
-		}
-		else
-		{
-			File sourceFile = new File(exportModel.getServoyPropertiesFileName());
-			if (exportModel.allowOverwriteSocketFactoryProperties())
-			{
-				changeAndWritePropertiesFile(tmpWarDir, sourceFile);
-			}
-			else
-			{
-				copyPropertiesFileToWar(tmpWarDir, sourceFile);
-			}
-		}
-		if (exportModel.isExportActiveSolutionOnly())
+		File defaultCss = new File(tmpWarDir, "/servoy-webclient/templates/default/servoy_web_client_default.css");
+		if (!defaultCss.exists())
 		{
 			try
 			{
-				FlattenedSolution solution = ServoyModelFinder.getServoyModel().getActiveProject().getFlattenedSolution();
-				SolutionSerializer.writeRuntimeSolution(null, new File(tmpWarDir, "WEB-INF/solution.runtime"), solution.getSolution(),
-					ApplicationServerRegistry.get().getDeveloperRepository(), solution.getModules());
+				String styleCSS = TemplateGenerator.getStyleCSS("servoy_web_client_default.css");
+				OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(defaultCss), "utf8");
+				fw.write(styleCSS);
+				fw.close();
 			}
-			catch (Exception ex)
+			catch (Exception e)
 			{
-				throw new ExportException("Cannot write the active solution in war file", ex);
+				throw new ExportException("Error default servoy css file (servoy_web_client_default.css)", e);
 			}
 		}
+
 		monitor.worked(1);
-		monitor.subTask("Zipping the war file");
-		// zip it
-		zipDirectory(tmpWarDir, warFile);
-
-		deleteDirectory(tmpWarDir);
-
-		monitor.worked(2);
-		monitor.done();
-		return;
 	}
 
 	/**
@@ -641,8 +925,9 @@ public class Exporter
 		}
 	}
 
-	private void zipDirectory(File directory, File zip) throws ExportException
+	private void zipDirectory(File directory, File zip, IProgressMonitor monitor) throws ExportException
 	{
+		monitor.subTask("Zipping the war file");
 		ZipOutputStream zos = null;
 		try
 		{

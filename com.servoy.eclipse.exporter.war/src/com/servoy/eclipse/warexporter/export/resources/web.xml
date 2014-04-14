@@ -5,8 +5,22 @@
     "http://java.sun.com/dtd/web-app_2_3.dtd">
 
 <web-app>
+
   <!-- Servoy related servlets -->
   
+  <listener>
+		<listener-class>com.servoy.j2db.server.servlets.WarClientServletContextListener</listener-class>
+  </listener>  
+   
+   <filter>
+      <filter-name>TemplateGeneratorFilter</filter-name>
+      <filter-class>com.servoy.j2db.server.ngclient.TemplateGeneratorFilter</filter-class>
+   </filter>
+   <filter-mapping>
+      <filter-name>TemplateGeneratorFilter</filter-name>
+      <url-pattern>/solutions/*</url-pattern>
+   </filter-mapping>  
+     
 	<servlet>
 		<servlet-name>http-tunnel-servlet</servlet-name>
 		<servlet-class>
@@ -47,7 +61,7 @@
   </servlet>
   <servlet>
     <servlet-name>servoy_webclient</servlet-name>
-    <servlet-class>com.servoy.j2db.server.servlets.WarClientServlet</servlet-class>
+    <servlet-class>com.servoy.j2db.server.servlets.WebClientServlet</servlet-class>
     <init-param>
       <param-name>applicationClassName</param-name>
       <param-value>com.servoy.j2db.server.headlessclient.WebClientsApplication</param-value>
@@ -63,7 +77,7 @@
 		<servlet-name>http-tunnel-servlet</servlet-name>
 		<url-pattern>/tunnel</url-pattern>
 	</servlet-mapping>
-
+	
 	<servlet-mapping>
 		<servlet-name>lib_servlet</servlet-name>
 		<url-pattern>*.jar</url-pattern>
