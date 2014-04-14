@@ -64,6 +64,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IBeanManagerInternal;
 import com.servoy.j2db.ILAFManagerInternal;
 import com.servoy.j2db.server.headlessclient.dataui.TemplateGenerator;
+import com.servoy.j2db.server.ngclient.startup.resourceprovider.ComponentResourcesExporter;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.JarManager;
@@ -116,9 +117,7 @@ public class Exporter
 		addServoyProperties(tmpWarDir);
 		copyActiveSolution(tmpWarDir, monitor);
 
-		StringBuilder locations = new StringBuilder("/servoydefault;/servoycomponents");
-		locations.append(copyNGComponents(tmpWarDir, monitor));
-		createComponentsPropertiesFile(tmpWarDir, locations.toString());
+		copyComponents(monitor, tmpWarDir, targetLibDir);
 
 		zipDirectory(tmpWarDir, warFile, monitor);
 		deleteDirectory(tmpWarDir);
@@ -126,6 +125,37 @@ public class Exporter
 		monitor.worked(2);
 		monitor.done();
 		return;
+	}
+
+	/**
+	 * @param monitor
+	 * @param tmpWarDir
+	 * @param targetLibDir
+	 * @throws ExportException
+	 */
+	private void copyComponents(IProgressMonitor monitor, File tmpWarDir, final File targetLibDir) throws ExportException
+	{
+		StringBuilder locations = new StringBuilder();
+		try
+		{
+			locations.append(ComponentResourcesExporter.copyComponents(tmpWarDir));
+		}
+		catch (IOException e)
+		{
+			throw new ExportException("Could not copy default components", e);
+		}
+		locations.append(copyNGComponents(tmpWarDir, monitor));
+		createComponentsPropertiesFile(tmpWarDir, locations.toString());
+
+		try
+		{
+			ComponentResourcesExporter.copyLibs(targetLibDir);
+		}
+		catch (IOException e)
+		{
+			Debug.error(e);
+			throw new ExportException("Could not copy default components", e);
+		}
 	}
 
 	/**
@@ -140,7 +170,7 @@ public class Exporter
 		FileOutputStream fos = null;
 		try
 		{
-			fos = new FileOutputStream(new File(tmpWarDir, "components.properties"));
+			fos = new FileOutputStream(new File(tmpWarDir, "WEB-INF/components.properties"));
 			properties.store(fos, "");
 		}
 		catch (Exception e)
@@ -185,7 +215,6 @@ public class Exporter
 			{
 				try
 				{
-					folder.refreshLocal(IResource.DEPTH_INFINITE, monitor);
 					IResource[] members = folder.members();
 					for (IResource resource : members)
 					{
