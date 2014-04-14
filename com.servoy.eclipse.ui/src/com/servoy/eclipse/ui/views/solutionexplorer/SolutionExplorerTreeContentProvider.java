@@ -150,6 +150,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private final PlatformSimpleUserNode stylesNode;
 
+	private final PlatformSimpleUserNode componentsNode;
+
 	private final PlatformSimpleUserNode templatesNode;
 
 	private final PlatformSimpleUserNode i18nFilesNode;
@@ -222,6 +224,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		stylesNode.setClientSupport(ClientSupport.wc_sc);
 		stylesNode.parent = resources;
 
+		componentsNode = new PlatformSimpleUserNode(Messages.TreeStrings_Components, UserNodeType.COMPONENTS, null, uiActivator.loadImageFromBundle("bean.gif")); //$NON-NLS-1$
+		componentsNode.setClientSupport(ClientSupport.wc_sc);
+		componentsNode.parent = resources;
+
 		userGroupSecurityNode = new PlatformSimpleUserNode(Messages.TreeStrings_UserGroupSecurity, UserNodeType.USER_GROUP_SECURITY, null,
 			uiActivator.loadImageFromBundle("lock.gif")); //$NON-NLS-1$
 		userGroupSecurityNode.setClientSupport(ClientSupport.wc_sc);
@@ -275,7 +281,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			uiActivator.loadImageFromBundle("plugin.gif")); //$NON-NLS-1$
 		plugins.parent = invisibleRootNode;
 
-		resources.children = new PlatformSimpleUserNode[] { servers, stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode };
+		resources.children = new PlatformSimpleUserNode[] { servers, stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode, componentsNode };
 
 		invisibleRootNode.children = new PlatformSimpleUserNode[] { resources, allSolutionsNode, activeSolutionNode, jslib, application, solutionModel, databaseManager, datasources, utils, history, security, i18n, jsunit, plugins };
 
@@ -283,7 +289,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 																																						 * exceptions
 																																						 * ,
 																																						 */jsunit, plugins };
-		resourceNodes = new PlatformSimpleUserNode[] { stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode };
+		resourceNodes = new PlatformSimpleUserNode[] { stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode, componentsNode };
 
 		// we want to load the plugins node in a background low prio job so that it will expand fast
 		// when used...

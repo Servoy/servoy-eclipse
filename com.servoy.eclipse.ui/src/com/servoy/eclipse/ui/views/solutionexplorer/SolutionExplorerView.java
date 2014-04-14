@@ -219,6 +219,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.CopyTableAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.CreateMediaFolderAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.CutAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DebugMethodAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteComponentResourceAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteI18NAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteMediaAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeletePersistAction;
@@ -239,6 +240,8 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.HideUnhideTablesActi
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NExternalizeAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NReadFromDBAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NWriteToDBAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.ImportComponentAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.ImportComponentFolderAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ImportMediaAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ImportMediaFolderAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.LinkWithEditorAction;
@@ -2706,6 +2709,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		IAction newScope = new NewScopeAction(this);
 
+
 		IAction newRelation = new NewRelationAction(this);
 		IAction importMedia = new ImportMediaAction(this);
 		importMediaFolder = new ImportMediaFolderAction(this);
@@ -2714,6 +2718,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		renameMediaFolderAction = new RenameMediaFolderAction(this);
 		movePersistAction = new MovePersistAction(this.getSite().getShell());
 		duplicatePersistAction = new DuplicatePersistAction(this.getSite().getShell());
+		IAction importComponent = new ImportComponentAction(this);
+		IAction importComponentFolder = new ImportComponentFolderAction(this);
 
 		newActionInTreePrimary.registerAction(UserNodeType.FORM, newMethod);
 		newActionInTreePrimary.registerAction(UserNodeType.SCOPES_ITEM, newScope);
@@ -2733,9 +2739,11 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInTreePrimary.registerAction(UserNodeType.MODULES, newModule);
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_SOLUTIONS, newSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.STYLES, newStyle);
+		newActionInTreePrimary.registerAction(UserNodeType.COMPONENTS, importComponent);
 
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA, importMediaFolder);
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA_FOLDER, importMediaFolder);
+		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS, importComponentFolder);
 		importMediaFolder = new ImportMediaFolderAction(this);
 		importMediaFolder.setEnabled(false);
 
@@ -2810,6 +2818,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction deleteGlobalScript = new DeleteScriptAction(UserNodeType.GLOBAL_METHOD_ITEM, "Delete method", this); //$NON-NLS-1$
 		IAction deleteFormVariable = new DeleteScriptAction(UserNodeType.FORM_VARIABLE_ITEM, "Delete variable", this); //$NON-NLS-1$
 		IAction deleteGlobalVariable = new DeleteScriptAction(UserNodeType.GLOBAL_VARIABLE_ITEM, "Delete variable", this); //$NON-NLS-1$
+		IAction deleteComponentResource = new DeleteComponentResourceAction(getSite().getShell());
 		IAction deleteI18N = new DeleteI18NAction(getSite().getShell());
 		IAction deleteScope = new DeleteScopeAction("Delete scope", this);
 
@@ -2825,6 +2834,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		deleteActionInList.registerAction(UserNodeType.TEMPLATE_ITEM, deleteTemplate);
 		deleteActionInList.registerAction(UserNodeType.RELATION, deleteRelation);
 		deleteActionInList.registerAction(UserNodeType.I18N_FILE_ITEM, deleteI18N);
+		deleteActionInList.registerAction(UserNodeType.COMPONENT_ITEM, deleteComponentResource);
 
 		copyTable = new CopyTableAction(getSite().getShell());
 		editVariableAction = new EditVariableAction(this);

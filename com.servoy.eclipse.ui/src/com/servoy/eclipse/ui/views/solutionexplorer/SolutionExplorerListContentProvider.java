@@ -32,6 +32,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -50,6 +55,7 @@ import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
@@ -368,6 +374,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				lm = createI18NFiles();
 			}
+			else if (type == UserNodeType.COMPONENTS)
+			{
+				lm = createComponentsFiles();
+			}
 			else if (type == UserNodeType.TEMPLATES)
 			{
 				un.setRealObject(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject());
@@ -659,6 +669,45 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			lm = EMPTY_LIST;
 		}
 		return lm;
+	}
+
+	/**
+	 * @return
+	 */
+	private Object[] createComponentsFiles()
+	{
+		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
+		ServoyProject initialActiveProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+		ServoyResourcesProject resourcesProject = initialActiveProject.getResourcesProject();
+		IProject project = resourcesProject.getProject();
+
+		IFolder folder = project.getFolder("components");
+		if (folder.exists())
+		{
+			IResource[] members;
+			try
+			{
+				members = folder.members();
+
+				for (IResource iResource : members)
+				{
+					String name = iResource.getName();
+					if (iResource.getType() == IResource.FILE)
+					{
+						IFile fileResource = (IFile)iResource;
+						name = name.substring(0, name.length() - (fileResource.getFileExtension().length() + 1));
+					}
+
+					UserNode node = new UserNode(name, UserNodeType.COMPONENT_ITEM, iResource, null);
+					dlm.add(node);
+				}
+			}
+			catch (CoreException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		return dlm.toArray();
 	}
 
 	private List<IPersist> getPersists(Solution solution, UserNodeType type, String scopeName)
