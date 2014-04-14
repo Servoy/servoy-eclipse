@@ -2756,6 +2756,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newStyle = new OpenWizardAction(NewStyleWizard.class, Activator.loadImageDescriptorFromBundle("styles.gif"), "Create new style"); //$NON-NLS-1$ //$NON-NLS-2$
 		importMedia = new ImportMediaAction(this);
 		newRelation = new NewRelationAction(this);
+		newForm = new OpenNewFormWizardAction();
+		newScope = new NewScopeAction(this);
+		newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadImageDescriptorFromBundle("solution_module_m.gif"), "Create new module"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		newActionInListPrimary.registerAction(UserNodeType.FORM, newMethod);
 		newActionInListPrimary.registerAction(UserNodeType.GLOBALS_ITEM, newMethod);
@@ -2770,6 +2773,10 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInListPrimary.registerAction(UserNodeType.ALL_RELATIONS, newRelation);
 		newActionInListPrimary.registerAction(UserNodeType.GLOBALRELATIONS, newRelation);
 		newActionInListPrimary.registerAction(UserNodeType.RELATIONS, newRelation);
+		newActionInListPrimary.registerAction(UserNodeType.FORMS, newForm);
+		newActionInListPrimary.registerAction(UserNodeType.SCOPES_ITEM, newScope);
+		newActionInListPrimary.registerAction(UserNodeType.SCOPES_ITEM_CALCULATION_MODE, newScope);
+		newActionInListPrimary.registerAction(UserNodeType.MODULES, newModule);
 
 		newActionInListSecondary.registerAction(UserNodeType.TABLE, newForm);
 		newActionInListSecondary.registerAction(UserNodeType.VIEW, newForm);
