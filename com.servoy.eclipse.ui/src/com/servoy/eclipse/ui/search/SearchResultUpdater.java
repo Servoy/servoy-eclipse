@@ -18,6 +18,8 @@
 package com.servoy.eclipse.ui.search;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.core.resources.IFile;
@@ -25,7 +27,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
-import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.search.ui.IQueryListener;
@@ -34,6 +35,7 @@ import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.Match;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
@@ -71,101 +73,90 @@ public class SearchResultUpdater implements IResourceChangeListener, IQueryListe
 
 	private void handleDelta(IResourceDelta d)
 	{
-		try
+		List<IResourceDelta> changedFiles = new ArrayList<IResourceDelta>();
+		ServoyModel.findChangedFiles(d, changedFiles);
+		for (IResourceDelta delta : changedFiles)
 		{
-			d.accept(new IResourceDeltaVisitor()
+			try
 			{
-				@SuppressWarnings("restriction")
-				public boolean visit(IResourceDelta delta) throws CoreException
+				switch (delta.getKind())
 				{
-					switch (delta.getKind())
-					{
-						case IResourceDelta.ADDED :
-							return false;
-						case IResourceDelta.REMOVED :
-							IResource res = delta.getResource();
-							if (res instanceof IFile)
+					case IResourceDelta.ADDED :
+						break;
+					case IResourceDelta.REMOVED :
+						IResource res = delta.getResource();
+						if (res instanceof IFile)
+						{
+							Match[] matches = fResult.getMatches(res);
+							fResult.removeMatches(matches);
+						}
+						break;
+					case IResourceDelta.CHANGED :
+						if (searchText != null)
+						{
+							Match[] matches = fResult.getMatches(delta.getResource());
+							String fileText = null;
+							try
 							{
-								Match[] matches = fResult.getMatches(res);
-								fResult.removeMatches(matches);
-							}
-							break;
-						case IResourceDelta.CHANGED :
-							IResourceDelta[] ird = delta.getAffectedChildren();
-							if (ird.length == 0)
-							{
-								Match[] matches = fResult.getMatches(delta.getResource());
-								String fileText = null;
-								try
+								if (delta.getResource() instanceof IFile)
 								{
-									if (delta.getResource() instanceof IFile)
+									fileText = IOUtils.toString(((IFile)delta.getResource()).getContents(), "UTF-8");
+								}
+							}
+							catch (IOException e)
+							{
+								ServoyLog.logError(e);
+								break;
+							}
+
+							if (fileText == null) break;
+
+							if (matches.length > 0)
+							{
+								for (Match m : matches)
+								{
+									int startOfLine = -1; //start of line in the file
+									int lengthToSearch = -1; //length of the old line match
+									String lineElementContents = "";
+
+									if (m instanceof com.servoy.eclipse.ui.search.FileMatch)
 									{
-										fileText = IOUtils.toString(((IFile)delta.getResource()).getContents(), "UTF-8");
+										com.servoy.eclipse.ui.search.LineElement svyle = ((com.servoy.eclipse.ui.search.FileMatch)m).getLineElement();
+										startOfLine = svyle.getOffset();
+										lengthToSearch = svyle.getLength();
+										lineElementContents = svyle.getContents();
 									}
-								}
-								catch (IOException e)
-								{
-									ServoyLog.logError(e);
-									break;
-								}
-
-								if (searchText == null || fileText == null) break;
-
-								if (matches.length > 0)
-								{
-									for (Match m : matches)
+									else
 									{
-										int startOfLine = -1; //start of line in the file
-										int lengthToSearch = -1; //length of the old line match
-										String lineElementContents = "";
-
-										if (m instanceof com.servoy.eclipse.ui.search.FileMatch)
-										{
-											com.servoy.eclipse.ui.search.LineElement svyle = ((com.servoy.eclipse.ui.search.FileMatch)m).getLineElement();
-											startOfLine = svyle.getOffset();
-											lengthToSearch = svyle.getLength();
-											lineElementContents = svyle.getContents();
-										}
-										else
-										{
-											org.eclipse.search.internal.ui.text.LineElement le = ((org.eclipse.search.internal.ui.text.FileMatch)m).getLineElement();
-											startOfLine = le.getOffset();
-											lengthToSearch = le.getLength();
-											lineElementContents = le.getContents();
-										}
-
-										//get start of line element
-										int ind1 = lineElementContents.indexOf(searchText) - 1;
-										int ind2 = lineElementContents.indexOf(searchText) + searchText.length() + 1;
-										if (startOfLine < 0 || ind1 < 0) continue;
-
-										//safety: make sure we don't take out unnecessary stuff when doubleclicking on a match
-										String newLineOfText = fileText.substring(startOfLine, startOfLine + lengthToSearch);
-										if (newLineOfText.trim().equals(lineElementContents.trim())) continue;
-
-										String theMatch = lineElementContents.substring(ind1, ind2);
-
-										//search if new line in the file (where old match was) still contains the match (=search text + 1char before and 1after it)
-										//a match is changed if it differs one char before and one after the searchtext in the line string
-										if (!newLineOfText.contains(theMatch)) fResult.removeMatch(m);
+										org.eclipse.search.internal.ui.text.LineElement le = ((org.eclipse.search.internal.ui.text.FileMatch)m).getLineElement();
+										startOfLine = le.getOffset();
+										lengthToSearch = le.getLength();
+										lineElementContents = le.getContents();
 									}
+
+									//get start of line element
+									int ind1 = lineElementContents.indexOf(searchText) - 1;
+									int ind2 = lineElementContents.indexOf(searchText) + searchText.length() + 1;
+									if (startOfLine < 0 || ind1 < 0) continue;
+
+									//safety: make sure we don't take out unnecessary stuff when doubleclicking on a match
+									String newLineOfText = fileText.substring(startOfLine, startOfLine + lengthToSearch);
+									if (newLineOfText.trim().equals(lineElementContents.trim())) continue;
+
+									String theMatch = lineElementContents.substring(ind1, ind2);
+
+									//search if new line in the file (where old match was) still contains the match (=search text + 1char before and 1after it)
+									//a match is changed if it differs one char before and one after the searchtext in the line string
+									if (!newLineOfText.contains(theMatch)) fResult.removeMatch(m);
 								}
 							}
-							else for (IResourceDelta id : ird)
-							{
-								if (id.getKind() != IResourceDelta.CHANGED) continue;
-								handleDelta(id);
-							}
-
-							break;
-					}
-					return true;
+						}
 				}
-			});
-		}
-		catch (CoreException e)
-		{
-			ServoyLog.logError(e);
+			}
+			catch (CoreException e)
+			{
+				ServoyLog.logError(e);
+			}
 		}
 	}
 
