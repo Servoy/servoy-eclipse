@@ -135,25 +135,17 @@ public class Exporter
 	 */
 	private void copyComponents(IProgressMonitor monitor, File tmpWarDir, final File targetLibDir) throws ExportException
 	{
-		StringBuilder locations = new StringBuilder();
 		try
 		{
-			locations.append(ComponentResourcesExporter.copyComponents(tmpWarDir));
-		}
-		catch (IOException e)
-		{
-			throw new ExportException("Could not copy default components", e);
-		}
-		locations.append(copyNGComponents(tmpWarDir, monitor));
-		createComponentsPropertiesFile(tmpWarDir, locations.toString());
-
-		try
-		{
+			StringBuilder locations = new StringBuilder();
+			ComponentResourcesExporter.copyComponents(tmpWarDir);
+			locations.append(ComponentResourcesExporter.getComponentDirectoryNames());
+			locations.append(copyNGComponents(tmpWarDir, monitor));
+			createComponentsPropertiesFile(tmpWarDir, locations.toString());
 			ComponentResourcesExporter.copyLibs(targetLibDir);
 		}
 		catch (IOException e)
 		{
-			Debug.error(e);
 			throw new ExportException("Could not copy default components", e);
 		}
 	}
