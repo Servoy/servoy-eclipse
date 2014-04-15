@@ -133,6 +133,11 @@ import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
+import com.servoy.j2db.server.ngclient.component.WebComponentApiDefinition;
+import com.servoy.j2db.server.ngclient.component.WebComponentSpec;
+import com.servoy.j2db.server.ngclient.component.WebComponentSpecProvider;
+import com.servoy.j2db.server.ngclient.property.PropertyDescription;
+import com.servoy.j2db.server.ngclient.property.PropertyType;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.Pair;
@@ -560,7 +565,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					prefix += ((ISupportName)model).getName();
 				}
 
-				if (specificClass == null)
+				if (SolutionExplorerTreeContentProvider.isWebcomponentBean((IPersist)model))
+				{
+					lm = getWebComponentMethods(prefix, (Bean)model);
+				}
+				else if (specificClass == null)
 				{
 					try
 					{
@@ -1627,6 +1636,58 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 		SimpleUserNode[] nodes = new SimpleUserNode[dlm.size()];
 		return dlm.toArray(nodes);
+	}
+
+	private String getWebComponentClassName(Bean webcomponent)
+	{
+		return webcomponent.getBeanClassName().substring((webcomponent).getBeanClassName().indexOf(':') + 1);
+	}
+
+	private SimpleUserNode[] getWebComponentMethods(String prefix, Bean webcomponent)
+	{
+
+		String prefixForWebComponentMembers = prefix + ".";
+		if (webcomponent == null)
+		{
+			return null;
+		}
+		List<SimpleUserNode> nodes = new ArrayList<SimpleUserNode>();
+
+		String webComponentClassName = getWebComponentClassName(webcomponent);
+
+		WebComponentSpec spec = WebComponentSpecProvider.getInstance().getWebComponentDescription(webComponentClassName);
+		if (spec != null)
+		{
+			Map<String, PropertyDescription> properties = spec.getProperties();
+			for (PropertyDescription pd : properties.values())
+			{
+				String name = pd.getName();
+				// skip the default once added by servoy, see WebComponentPackage.getWebComponentDescriptions()
+				// and skip the dataprovider properties (those are not accesable through scripting)
+				if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && pd.getType() != PropertyType.dataprovider)
+				{
+					nodes.add(new UserNode(name, UserNodeType.FORM_ELEMENTS, prefixForWebComponentMembers + name, name, webcomponent, propertiesIcon));
+				}
+			}
+			Map<String, WebComponentApiDefinition> apis = spec.getApis();
+			for (WebComponentApiDefinition api : apis.values())
+			{
+				String name = api.getName();
+				String displayParams = "(";
+				List<PropertyDescription> parameters = api.getParameters();
+
+				for (int i = 0; i < parameters.size(); i++)
+				{
+					displayParams += parameters.get(i).getName();
+					if (i < parameters.size() - 1) displayParams += ", ";
+				}
+				displayParams += ")";
+				String codeFragment = prefixForWebComponentMembers + name + displayParams;
+				nodes.add(new UserNode(name + displayParams, UserNodeType.FORM_ELEMENTS, codeFragment, codeFragment, webcomponent, functionIcon));
+			}
+		}
+
+		return nodes.toArray(new SimpleUserNode[nodes.size()]);
 	}
 
 	private SimpleUserNode[] getScriptableMethods(Scriptable scriptable, String elementName, String prefix)

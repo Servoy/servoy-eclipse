@@ -1457,6 +1457,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		{
 			IApplication application = Activator.getDefault().getDesignClient();
 
+			if (isWebcomponentBean(bean)) return createNodeForWebComponentBean(bean);
+
 			Class< ? > beanClass = ElementUtil.getPersistScriptClass(Activator.getDefault().getDesignClient(), bean);
 			if (beanClass == null)
 			{
@@ -1531,6 +1533,23 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			node.setDeveloperFeedback(new SimpleDeveloperFeedback(bean.getName() + ".", null, null)); //$NON-NLS-1$
 		}
 		return node;
+	}
+
+
+	/**
+	 * @return
+	 */
+	private PlatformSimpleUserNode createNodeForWebComponentBean(Bean bean)
+	{
+		PlatformSimpleUserNode node = new PlatformSimpleUserNode(bean.getName(), UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { bean, null },
+			bean.getParent(), uiActivator.loadImageFromBundle("element.gif")); //$NON-NLS-1$
+		node.setDeveloperFeedback(new SimpleDeveloperFeedback(bean.getName() + ".", null, null)); //$NON-NLS-1$
+		return node;
+	}
+
+	public static boolean isWebcomponentBean(IPersist persist)
+	{
+		return persist instanceof Bean && ((Bean)persist).getBeanClassName() != null && ((Bean)persist).getBeanClassName().indexOf(':') > 0;
 	}
 
 	private void addGlobalRelationsNodeChildren(PlatformSimpleUserNode globalRelations)
