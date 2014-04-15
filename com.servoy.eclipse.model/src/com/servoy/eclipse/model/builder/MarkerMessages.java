@@ -412,7 +412,7 @@ public class MarkerMessages
 		"Related tab error: relation UUID was not resolved to relation name \"{0}\".", ServoyBuilder.UNRESOLVED_RELATION_UUID); //$NON-NLS-1$
 
 	public static ServoyMarker FormTabPanelTabSequenceNotSet = new ServoyMarker(
-		"Form \"{0}\" has tab panel \"{1}\" with tab sequence not set.Components inside tabs will have their tabsequences ignored.",
+		"Form \"{0}\" has tab panel \"{1}\" with tab sequence not set. Components inside \"{1}\" will have their tabsequences ignored.",
 		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 	public static ServoyMarker FormPropertyMethodNotAccessible = new ServoyMarker(
 		"Property \"{0}\" in form \"{1}\" is linked to a non accessible method (method belongs to form \"{2}\").", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
