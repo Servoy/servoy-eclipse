@@ -3227,7 +3227,7 @@ public class ServoyModel extends AbstractServoyModel
 	 * @param affectedChildren
 	 * @param al
 	 */
-	private List<IResourceDelta> findChangedFiles(IResourceDelta parent, List<IResourceDelta> al)
+	public static List<IResourceDelta> findChangedFiles(IResourceDelta parent, List<IResourceDelta> al)
 	{
 		IResourceDelta[] affectedChildren = parent.getAffectedChildren();
 		for (IResourceDelta child : affectedChildren)
