@@ -138,6 +138,7 @@ import com.servoy.j2db.server.ngclient.component.WebComponentSpec;
 import com.servoy.j2db.server.ngclient.component.WebComponentSpecProvider;
 import com.servoy.j2db.server.ngclient.property.PropertyDescription;
 import com.servoy.j2db.server.ngclient.property.PropertyType;
+import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.Pair;
@@ -565,9 +566,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					prefix += ((ISupportName)model).getName();
 				}
 
-				if (SolutionExplorerTreeContentProvider.isWebcomponentBean((IPersist)model))
+				if (FormTemplateGenerator.isWebcomponentBean((IPersist)model))
 				{
-					lm = getWebComponentMethods(prefix, (Bean)model);
+					lm = getWebComponentMembers(prefix, (Bean)model);
 				}
 				else if (specificClass == null)
 				{
@@ -1061,7 +1062,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			else if ("*".equals(returnType)) returnType = "Any"; //$NON-NLS-1$ //$NON-NLS-2$
 			if (showReturnTypeAtEnd)
 			{
-				methodSignatureBuilder.append(" - ").append(returnType); //$NON-NLS-1$		
+				methodSignatureBuilder.append(" - ").append(returnType); //$NON-NLS-1$
 			}
 			else
 			{
@@ -1143,7 +1144,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			ScriptVariable var = (ScriptVariable)persist;
 			SimpleUserNode node = new UserNode(getDisplayName(var, pair.getLeft()), UserNodeType.GLOBAL_VARIABLE_ITEM, var.getDataProviderID(),
-				Column.getDisplayTypeString(var.getDataProviderType()) + " " + var.getDataProviderID(), var, getImageForVariableEncapsulation(var)); //$NON-NLS-1$ 
+				Column.getDisplayTypeString(var.getDataProviderType()) + " " + var.getDataProviderID(), var, getImageForVariableEncapsulation(var)); //$NON-NLS-1$
 			dlm.add(node);
 		}
 		return dlm.toArray();
@@ -1241,7 +1242,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			ValueList var = (ValueList)persist;
 			SimpleUserNode node = new UserNode(getDisplayName(var, s), UserNodeType.VALUELIST_ITEM, null, var.getName(), var,
-				uiActivator.loadImageFromBundle(PersistEncapsulation.isModuleScope(var, null) ? "valuelist_protected.gif" : "valuelists.gif")); //$NON-NLS-1$ //$NON-NLS-2$ 
+				uiActivator.loadImageFromBundle(PersistEncapsulation.isModuleScope(var, null) ? "valuelist_protected.gif" : "valuelists.gif")); //$NON-NLS-1$ //$NON-NLS-2$
 			dlm.add(node);
 		}
 		return dlm.toArray();
@@ -1638,14 +1639,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return dlm.toArray(nodes);
 	}
 
-	private String getWebComponentClassName(Bean webcomponent)
+	private SimpleUserNode[] getWebComponentMembers(String prefix, Bean webcomponent)
 	{
-		return webcomponent.getBeanClassName().substring((webcomponent).getBeanClassName().indexOf(':') + 1);
-	}
-
-	private SimpleUserNode[] getWebComponentMethods(String prefix, Bean webcomponent)
-	{
-
 		String prefixForWebComponentMembers = prefix + ".";
 		if (webcomponent == null)
 		{
@@ -1653,7 +1648,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 		List<SimpleUserNode> nodes = new ArrayList<SimpleUserNode>();
 
-		String webComponentClassName = getWebComponentClassName(webcomponent);
+		String webComponentClassName = FormTemplateGenerator.getComponentTypeName(webcomponent);
 
 		WebComponentSpec spec = WebComponentSpecProvider.getInstance().getWebComponentDescription(webComponentClassName);
 		if (spec != null)
@@ -2182,7 +2177,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				bp = ijm.getField(name, true);
 				if (bp instanceof Field)
 				{
-					tmp = "<html><body><b>" + prefix + name + "</b>"; //$NON-NLS-1$ //$NON-NLS-2$ 
+					tmp = "<html><body><b>" + prefix + name + "</b>"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 			if ("".equals(toolTip)) //$NON-NLS-1$
