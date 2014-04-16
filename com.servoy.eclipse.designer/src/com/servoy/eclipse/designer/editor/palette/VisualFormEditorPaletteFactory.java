@@ -267,9 +267,24 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 	{
 		String id = COMPONENTS_ID;
 
-		List<String> componentIds = new ArrayList<String>();
+		Map<String, List<String>> allComponents = new HashMap<String, List<String>>();
+		Map<String, String> drawerNames = new HashMap<String, String>();
+
 		for (WebComponentSpec spec : WebComponentSpecProvider.getInstance().getWebComponentDescriptions())
 		{
+			String packageName = spec.getPackageName();
+			id = COMPONENTS_ID;
+			id += "." + packageName;
+
+			drawerNames.put(id, packageName);
+
+			List<String> componentIds = new ArrayList<String>();
+			if (allComponents.get(id) != null) componentIds = allComponents.get(id);
+			else
+			{
+				allComponents.put(id, componentIds);
+			}
+
 			String componentId = spec.getFullName();
 			componentIds.add(componentId);
 
@@ -282,13 +297,20 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 			entryProperties.put(id + '.' + componentId + '.' + PaletteCustomization.PROPERTY_DESCRIPTION, "Place component " + name);
 		}
 
-		if (componentIds.size() > 0)
+		for (String containerPackageID : allComponents.keySet())
 		{
-			drawers.add(id);
-			entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_LABEL, Messages.LabelComponentsPalette);
-			entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_HIDDEN, Boolean.FALSE); // TRUE if you want to hide components by default
-			drawerEntries.put(id, componentIds);
+			List<String> componentIds = allComponents.get(containerPackageID);
+			if (componentIds.size() > 0)
+			{
+				drawers.add(containerPackageID);
+				entryProperties.put(containerPackageID + '.' + PaletteCustomization.PROPERTY_LABEL,
+					Messages.LabelComponentsPalette + " " + drawerNames.get(containerPackageID));
+				entryProperties.put(containerPackageID + '.' + PaletteCustomization.PROPERTY_HIDDEN, Boolean.FALSE); // TRUE if you want to hide components by default
+				drawerEntries.put(containerPackageID, allComponents.get(containerPackageID));
+			}
 		}
+
+
 	}
 
 	private PaletteEntry createPaletteEntry(String drawerId, String id)
@@ -313,7 +335,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 			return createTemplatesEntry(id);
 		}
 
-		if (COMPONENTS_ID.equals(drawerId))
+		if (drawerId.startsWith(COMPONENTS_ID))
 		{
 			return createComponentsEntry(id);
 		}
