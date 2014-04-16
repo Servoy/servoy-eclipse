@@ -99,30 +99,54 @@ public class Exporter
 	 */
 	public void doExport(IProgressMonitor monitor) throws ExportException
 	{
-		File warFile = createNewWarFile(monitor);
-		File tmpWarDir = createTempDir(monitor);
-
+		monitor.beginTask("Creating War File", 17);
+		File warFile = createNewWarFile();
+		monitor.worked(1);
+		File tmpWarDir = createTempDir();
+		monitor.worked(1);
 		String appServerDir = ApplicationServerRegistry.get().getServoyApplicationServerDirectory();
-		copyRootWebappFiles(monitor, tmpWarDir, appServerDir);
-		copyBeans(monitor, tmpWarDir, appServerDir);
-		copyPlugins(monitor, tmpWarDir, appServerDir);
-		copyLafs(monitor, tmpWarDir, appServerDir);
-
-		final File targetLibDir = copyStandardLibs(monitor, tmpWarDir, appServerDir);
-		copyDrivers(monitor, appServerDir, targetLibDir);
+		monitor.subTask("Copy root webapp files");
+		copyRootWebappFiles(tmpWarDir, appServerDir);
+		monitor.worked(1);
+		monitor.subTask("Copy beans");
+		copyBeans(tmpWarDir, appServerDir);
+		monitor.worked(1);
+		monitor.subTask("Copy plugins");
+		copyPlugins(tmpWarDir, appServerDir);
+		monitor.worked(1);
+		monitor.subTask("Copy lafs");
+		copyLafs(tmpWarDir, appServerDir);
+		monitor.worked(1);
+		monitor.subTask("Copy all standard libraries");
+		final File targetLibDir = copyStandardLibs(tmpWarDir, appServerDir);
+		monitor.worked(1);
+		monitor.subTask("Copy Drivers");
+		copyDrivers(appServerDir, targetLibDir);
+		monitor.worked(1);
+		monitor.subTask("Copy images");
 		copyLibImages(tmpWarDir, appServerDir);
+		monitor.worked(1);
 		moveSlf4j(tmpWarDir, targetLibDir);
-
+		monitor.worked(1);
+		monitor.subTask("Creating web.xml");
 		copyWebXml(tmpWarDir);
+		monitor.worked(1);
 		addServoyProperties(tmpWarDir);
-		copyActiveSolution(tmpWarDir, monitor);
-
+		monitor.worked(1);
+		if (exportModel.isExportActiveSolutionOnly())
+		{
+			monitor.subTask("Copy the active solution");
+			copyActiveSolution(tmpWarDir);
+		}
+		monitor.worked(1);
+		monitor.subTask("Copy NGClient components");
 		copyComponents(monitor, tmpWarDir, targetLibDir);
-
-		zipDirectory(tmpWarDir, warFile, monitor);
+		monitor.worked(1);
+		monitor.subTask("Creating/zipping the WAR file");
+		zipDirectory(tmpWarDir, warFile);
+		monitor.worked(1);
 		deleteDirectory(tmpWarDir);
-
-		monitor.worked(2);
+		monitor.worked(1);
 		monitor.done();
 		return;
 	}
@@ -222,7 +246,7 @@ public class Exporter
 							if ((resourceFolder).getFile("META-INF/MANIFEST.MF").exists())
 							{
 								locations.append(";/" + resourceFolder.getName().split("\\.")[0]);
-								copyDir(new File(resource.getRawLocationURI()), tmpWarDir, true);
+								copyDir(new File(resource.getRawLocationURI()), new File(tmpWarDir, resourceFolder.getName()), true);
 							}
 						}
 						else if (resource instanceof IFile)
@@ -238,7 +262,6 @@ public class Exporter
 				}
 			}
 		}
-		monitor.worked(1);
 		return locations.toString();
 	}
 
@@ -289,9 +312,8 @@ public class Exporter
 	 * @return
 	 * @throws ExportException
 	 */
-	private File createNewWarFile(IProgressMonitor monitor) throws ExportException
+	private File createNewWarFile() throws ExportException
 	{
-		monitor.beginTask("Creating War File", 11);
 		File warFile = new File(exportModel.getFileName());
 		if (warFile.exists() && !warFile.delete())
 		{
@@ -309,8 +331,6 @@ public class Exporter
 		{
 			throw new ExportException("Can't create the file " + exportModel.getFileName(), e);
 		}
-
-		monitor.worked(1);
 		return warFile;
 	}
 
@@ -319,7 +339,7 @@ public class Exporter
 	 * @return
 	 * @throws ExportException
 	 */
-	private File createTempDir(IProgressMonitor monitor) throws ExportException
+	private File createTempDir() throws ExportException
 	{
 		File tmpDir = new File(System.getProperty("java.io.tmpdir"));
 
@@ -335,8 +355,6 @@ public class Exporter
 		{
 			throw new ExportException("Can't create the temp dir  " + tmpWarDir);
 		}
-
-		monitor.worked(1);
 		return tmpWarDir;
 	}
 
@@ -345,22 +363,18 @@ public class Exporter
 	 * @param monitor 
 	 * @throws ExportException
 	 */
-	private void copyActiveSolution(File tmpWarDir, IProgressMonitor monitor) throws ExportException
+	private void copyActiveSolution(File tmpWarDir) throws ExportException
 	{
-		if (exportModel.isExportActiveSolutionOnly())
+		try
 		{
-			try
-			{
-				FlattenedSolution solution = ServoyModelFinder.getServoyModel().getActiveProject().getFlattenedSolution();
-				SolutionSerializer.writeRuntimeSolution(null, new File(tmpWarDir, "WEB-INF/solution.runtime"), solution.getSolution(),
-					ApplicationServerRegistry.get().getDeveloperRepository(), solution.getModules());
-			}
-			catch (Exception ex)
-			{
-				throw new ExportException("Cannot write the active solution in war file", ex);
-			}
+			FlattenedSolution solution = ServoyModelFinder.getServoyModel().getActiveProject().getFlattenedSolution();
+			SolutionSerializer.writeRuntimeSolution(null, new File(tmpWarDir, "WEB-INF/solution.runtime"), solution.getSolution(),
+				ApplicationServerRegistry.get().getDeveloperRepository(), solution.getModules());
 		}
-		monitor.worked(1);
+		catch (Exception ex)
+		{
+			throw new ExportException("Cannot write the active solution in war file", ex);
+		}
 	}
 
 	/**
@@ -466,17 +480,14 @@ public class Exporter
 	 * @param targetLibDir
 	 * @throws ExportException
 	 */
-	private void copyDrivers(IProgressMonitor monitor, String appServerDir, final File targetLibDir) throws ExportException
+	private void copyDrivers(String appServerDir, final File targetLibDir) throws ExportException
 	{
-		monitor.subTask("Copy Drivers");
-
 		List<String> drivers = exportModel.getDrivers();
 		File srcDriverDir = new File(appServerDir, "drivers");
 		for (String driverFileName : drivers)
 		{
 			copyFile(new File(srcDriverDir, driverFileName), new File(targetLibDir, driverFileName));
 		}
-		monitor.worked(1);
 	}
 
 	/**
@@ -486,9 +497,8 @@ public class Exporter
 	 * @return
 	 * @throws ExportException
 	 */
-	private File copyStandardLibs(IProgressMonitor monitor, File tmpWarDir, String appServerDir) throws ExportException
+	private File copyStandardLibs(File tmpWarDir, String appServerDir) throws ExportException
 	{
-		monitor.subTask("Copy all standard libraries");
 		// copy lib dir (excluding images)
 		final File libDir = new File(appServerDir, "lib");
 		final File targetLibDir = new File(tmpWarDir, "WEB-INF/lib");
@@ -504,9 +514,6 @@ public class Exporter
 		// delete the tomcat boostrapper, also not needed in a war file
 		new File(targetLibDir, "server-bootstrap.jar").delete();
 		new File(targetLibDir, "tomcat-juli.jar").delete();
-
-
-		monitor.worked(1);
 		return targetLibDir;
 	}
 
@@ -516,10 +523,9 @@ public class Exporter
 	 * @param appServerDir
 	 * @throws ExportException
 	 */
-	private void copyLafs(IProgressMonitor monitor, File tmpWarDir, String appServerDir) throws ExportException
+	private void copyLafs(File tmpWarDir, String appServerDir) throws ExportException
 	{
 		Writer fw;
-		monitor.subTask("Copy lafs");
 		// copy the lafs
 		File lafSourceDir = new File(appServerDir, "lafs");
 		File lafTargetDir = new File(tmpWarDir, "lafs");
@@ -562,9 +568,6 @@ public class Exporter
 			{
 			}
 		}
-
-
-		monitor.worked(1);
 	}
 
 	/**
@@ -574,9 +577,8 @@ public class Exporter
 	 * @param fw
 	 * @throws ExportException
 	 */
-	private void copyPlugins(IProgressMonitor monitor, File tmpWarDir, String appServerDir) throws ExportException
+	private void copyPlugins(File tmpWarDir, String appServerDir) throws ExportException
 	{
-		monitor.subTask("Copy plugins");
 		// copy the plugins
 		File pluginsDir = new File(tmpWarDir, "plugins");
 		pluginsDir.mkdirs();
@@ -635,8 +637,6 @@ public class Exporter
 			{
 			}
 		}
-
-		monitor.worked(1);
 	}
 
 	/**
@@ -646,9 +646,8 @@ public class Exporter
 	 * @return
 	 * @throws ExportException
 	 */
-	private void copyBeans(IProgressMonitor monitor, File tmpWarDir, String appServerDir) throws ExportException
+	private void copyBeans(File tmpWarDir, String appServerDir) throws ExportException
 	{
-		monitor.subTask("Copy beans");
 		// copy the beans
 		File beanSourceDir = new File(appServerDir, "beans");
 		File beanTargetDir = new File(tmpWarDir, "beans");
@@ -691,8 +690,6 @@ public class Exporter
 			{
 			}
 		}
-
-		monitor.worked(1);
 	}
 
 	/**
@@ -700,11 +697,9 @@ public class Exporter
 	 * @param tmpWarDir
 	 * @throws ExportException
 	 */
-	private void copyRootWebappFiles(IProgressMonitor monitor, File tmpWarDir, String appServerDir) throws ExportException
+	private void copyRootWebappFiles(File tmpWarDir, String appServerDir) throws ExportException
 	{
 		File webAppDir = new File(appServerDir, "server/webapps/ROOT");
-
-		monitor.subTask("Copy root webapp files");
 		// copy first the standard webapp dir of the app server
 		copyDir(webAppDir, tmpWarDir, true);
 
@@ -723,8 +718,6 @@ public class Exporter
 				throw new ExportException("Error default servoy css file (servoy_web_client_default.css)", e);
 			}
 		}
-
-		monitor.worked(1);
 	}
 
 	/**
@@ -946,9 +939,8 @@ public class Exporter
 		}
 	}
 
-	private void zipDirectory(File directory, File zip, IProgressMonitor monitor) throws ExportException
+	private void zipDirectory(File directory, File zip) throws ExportException
 	{
-		monitor.subTask("Zipping the war file");
 		ZipOutputStream zos = null;
 		try
 		{
