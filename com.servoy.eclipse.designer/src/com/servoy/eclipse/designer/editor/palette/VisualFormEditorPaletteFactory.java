@@ -265,16 +265,13 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 
 	private static void addComponents(List<String> drawers, Map<String, List<String>> drawerEntries, Map<String, Object> entryProperties)
 	{
-		String id = COMPONENTS_ID;
-
 		Map<String, List<String>> allComponents = new HashMap<String, List<String>>();
 		Map<String, String> drawerNames = new HashMap<String, String>();
 
 		for (WebComponentSpec spec : WebComponentSpecProvider.getInstance().getWebComponentDescriptions())
 		{
 			String packageName = spec.getPackageName();
-			id = COMPONENTS_ID;
-			id += "." + packageName;
+			String id = COMPONENTS_ID + "." + packageName;
 
 			drawerNames.put(id, packageName);
 
