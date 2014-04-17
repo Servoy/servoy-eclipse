@@ -174,31 +174,28 @@ public class MobileExporter
 			boolean headerJSEmpty = true, headerCSSEmpty = true;
 			for (String mediaName : getMediaOrder())
 			{
-				boolean isTXTContent = false;
 				Media media = flattenedSolution.getMedia(mediaName);
 				byte[] content = media.getMediaData();
+		
 				if (MIME_JS.equals(media.getMimeType()))
 				{
 					if (headerJSEmpty) headerJSEmpty = false;
 					else headerJS.append(',');
 					headerJS.append('"').append(media.getName()).append('"');
-					isTXTContent = true;
 				}
 				else if (MIME_CSS.equals(media.getMimeType()))
 				{
 					if (headerCSSEmpty) headerCSSEmpty = false;
 					else headerCSS.append(',');
 					headerCSS.append('"').append(media.getName()).append('"');
-					isTXTContent = true;
 				}
 
-				addZipEntry("media/" + media.getName(), zos, isTXTContent ? Utils.getUTF8EncodedStream(new String(content)) : new ByteArrayInputStream(content)); //$NON-NLS-1$
+				addZipEntry("media/" + media.getName(), zos,  new ByteArrayInputStream(content)); //$NON-NLS-1$
 				if (outputFolder != null)
 				{
 					File outputFolderJS = new File(outputFolder, "media"); //$NON-NLS-1$
 					outputFolderJS.mkdirs();
-					if (isTXTContent) Utils.writeTXTFile(new File(outputFolderJS, media.getName()), new String(content));
-					else Utils.writeFile(new File(outputFolderJS, media.getName()), content);
+					Utils.writeFile(new File(outputFolderJS, media.getName()), content);
 				}
 			}
 		}
