@@ -1391,6 +1391,10 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			}, ScrollbarSettingLabelProvider.INSTANCE, new DummyCellEditorFactory(ScrollbarSettingLabelProvider.INSTANCE));
 		}
 
+		if (propertyType == PropertyType.styleclass)
+		{
+			return createStyleClassPropertyController(persistContext.getPersist(), id, displayName, null, form);
+		}
 
 		retval = getPropertiesPropertyDescriptor(propertyDescriptor, persistContext, readOnly, id, displayName, propertyDescription, flattenedEditingSolution,
 			form);
@@ -1519,21 +1523,17 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	public static PropertyController<String, ? > createStyleClassPropertyController(IPersist persist, String id, String displayName,
 		final String styleLookupname, Form form)
 	{
-		final StyleClassesComboboxModel model = new StyleClassesComboboxModel(form, styleLookupname);
-		if (((Solution)persist.getRootObject()).getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE)
+		final StyleClassesComboboxModel model = new StyleClassesComboboxModel(form, persist instanceof IFormElement ? (IFormElement)persist : null, id,
+			styleLookupname);
+		final boolean newBehavior = ((Solution)persist.getRootObject()).getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE &&
+			((Solution)persist.getRootObject()).getStyleSheetID() > 0;
+		return new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, NullDefaultLabelProvider.LABEL_DEFAULT, new ICellEditorFactory()
 		{
-			return new PropertyController<String, String>(id, displayName, DEFAULT_STRING_CONVERTER, null, new ICellEditorFactory()
+			public CellEditor createPropertyEditor(Composite parent)
 			{
-				public CellEditor createPropertyEditor(Composite parent)
-				{
-					return new StyleClassCellEditor(parent, model);
-				}
-			});
-		}
-		else
-		{
-			return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved, null);
-		}
+				return new StyleClassCellEditor(parent, model, newBehavior);
+			}
+		});
 	}
 
 	/**

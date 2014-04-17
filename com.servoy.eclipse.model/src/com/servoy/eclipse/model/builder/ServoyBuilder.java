@@ -4731,7 +4731,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	{
 		deleteMarkers(project, MISSING_STYLE);
 		ServoyProject servoyProject = getServoyModel().getServoyProject(project.getName());
-		FlattenedSolution flattenedSolution = getServoyModel().getFlattenedSolution();
+		final FlattenedSolution flattenedSolution = getServoyModel().getFlattenedSolution();
 		if (servoyProject != null)
 		{
 			Iterator<Form> it = servoyProject.getSolution().getForms(null, false);
@@ -4764,7 +4764,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						{
 							ServoyLog.logError(ex);
 						}
-						final Style finalStyle = style;
 						if (style == null)
 						{
 							ServoyMarker mk = MarkerMessages.StyleNotFound.fill(styleName, form.getName());
@@ -4782,87 +4781,95 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 							continue;
 						}
+						if (servoyProject.getSolution().getStyleSheetID() <= 0)
+						{
+							form.acceptVisitor(new IPersistVisitor()
+							{
+								public Object visit(IPersist o)
+								{
+									if (o instanceof BaseComponent || o instanceof Form || o instanceof Part)
+									{
+										String styleClass = null;
+										if (o instanceof BaseComponent) styleClass = ((BaseComponent)o).getStyleClass();
+										else if (o instanceof Form) styleClass = ((Form)o).getStyleClass();
+										else if (o instanceof Part) styleClass = ((Part)o).getStyleClass();
+										if (styleClass != null)
+										{
+											String[] classes = ModelUtils.getStyleClasses(flattenedSolution, form, (o instanceof IFormElement)
+												? (IFormElement)o : null, StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName(),
+												ModelUtils.getStyleLookupname(o));
+											List<String> styleClasses = Arrays.asList(classes);
+											if (!styleClasses.contains(styleClass))
+											{
+												ServoyMarker mk = MarkerMessages.StyleFormClassNotFound.fill(styleClass, form.getName());
+												IMarker marker = null;
+												if (o instanceof Part)
+												{
+													mk = MarkerMessages.StyleElementClassNotFound.fill(styleClass,
+														Part.getDisplayName(((Part)o).getPartType()), form.getName());
+													marker = addMarker(project, mk.getType(), mk.getText(), -1, STYLE_CLASS_NOT_FOUND, IMarker.PRIORITY_NORMAL,
+														null, o);
+												}
+												else if (o instanceof ISupportName && !(o instanceof Form) && (((ISupportName)o).getName() != null))
+												{
+													mk = MarkerMessages.StyleElementClassNotFound.fill(styleClass, ((ISupportName)o).getName(), form.getName());
+													marker = addMarker(project, mk.getType(), mk.getText(), -1, STYLE_CLASS_NOT_FOUND, IMarker.PRIORITY_NORMAL,
+														null, o);
+												}
+												else marker = addMarker(project, mk.getType(), mk.getText(), -1, STYLE_CLASS_NOT_FOUND,
+													IMarker.PRIORITY_NORMAL, null, o);
+												for (String currentClass : styleClasses)
+												{
+													if (currentClass.equalsIgnoreCase(styleClass))
+													{
+														try
+														{
+															marker.setAttribute("styleClass", currentClass);
+														}
+														catch (CoreException e)
+														{
+															ServoyLog.logError(e);
+														}
+														break;
+													}
+												}
+											}
+										}
+									}
+									return IPersistVisitor.CONTINUE_TRAVERSAL;
+								}
+							});
+						}
+					}
+				}
+				else
+				{
+					if (servoyProject.getSolution().getStyleSheetID() <= 0)
+					{
 						form.acceptVisitor(new IPersistVisitor()
 						{
 							public Object visit(IPersist o)
 							{
-								if (o instanceof BaseComponent || o instanceof Form || o instanceof Part)
+								if (o instanceof BaseComponent || o instanceof Form)
 								{
 									String styleClass = null;
 									if (o instanceof BaseComponent) styleClass = ((BaseComponent)o).getStyleClass();
 									else if (o instanceof Form) styleClass = ((Form)o).getStyleClass();
-									else if (o instanceof Part) styleClass = ((Part)o).getStyleClass();
 									if (styleClass != null)
 									{
-										String[] classes = ModelUtils.getStyleClasses(finalStyle, ModelUtils.getStyleLookupname(o), form.getStyleClass());
-										List<String> styleClasses = Arrays.asList(classes);
-										if (!styleClasses.contains(styleClass))
+										ServoyMarker mk = MarkerMessages.StyleFormClassNoStyle.fill(styleClass, form.getName());
+										if (o instanceof ISupportName && !(o instanceof Form) && (((ISupportName)o).getName() != null))
 										{
-											ServoyMarker mk = MarkerMessages.StyleFormClassNotFound.fill(styleClass, form.getName());
-											IMarker marker = null;
-											if (o instanceof Part)
-											{
-												mk = MarkerMessages.StyleElementClassNotFound.fill(styleClass, Part.getDisplayName(((Part)o).getPartType()),
-													form.getName());
-												marker = addMarker(project, mk.getType(), mk.getText(), -1, STYLE_CLASS_NOT_FOUND, IMarker.PRIORITY_NORMAL,
-													null, o);
-											}
-											else if (o instanceof ISupportName && !(o instanceof Form) && (((ISupportName)o).getName() != null))
-											{
-												mk = MarkerMessages.StyleElementClassNotFound.fill(styleClass, ((ISupportName)o).getName(), form.getName());
-												marker = addMarker(project, mk.getType(), mk.getText(), -1, STYLE_CLASS_NOT_FOUND, IMarker.PRIORITY_NORMAL,
-													null, o);
-											}
-											else marker = addMarker(project, mk.getType(), mk.getText(), -1, STYLE_CLASS_NOT_FOUND, IMarker.PRIORITY_NORMAL,
-												null, o);
-											for (String currentClass : styleClasses)
-											{
-												if (currentClass.equalsIgnoreCase(styleClass))
-												{
-													try
-													{
-														marker.setAttribute("styleClass", currentClass);
-													}
-													catch (CoreException e)
-													{
-														ServoyLog.logError(e);
-													}
-													break;
-												}
-											}
+											mk = MarkerMessages.StyleElementClassNoStyle.fill(styleClass, ((ISupportName)o).getName(), form.getName());
+											addMarker(project, mk.getType(), mk.getText(), -1, STYLE_CLASS_NO_STYLE, IMarker.PRIORITY_NORMAL, null, o);
 										}
+										else addMarker(project, mk.getType(), mk.getText(), -1, STYLE_CLASS_NO_STYLE, IMarker.PRIORITY_NORMAL, null, o);
 									}
 								}
 								return IPersistVisitor.CONTINUE_TRAVERSAL;
 							}
 						});
 					}
-				}
-				else
-				{
-					form.acceptVisitor(new IPersistVisitor()
-					{
-						public Object visit(IPersist o)
-						{
-							if (o instanceof BaseComponent || o instanceof Form)
-							{
-								String styleClass = null;
-								if (o instanceof BaseComponent) styleClass = ((BaseComponent)o).getStyleClass();
-								else if (o instanceof Form) styleClass = ((Form)o).getStyleClass();
-								if (styleClass != null)
-								{
-									ServoyMarker mk = MarkerMessages.StyleFormClassNoStyle.fill(styleClass, form.getName());
-									if (o instanceof ISupportName && !(o instanceof Form) && (((ISupportName)o).getName() != null))
-									{
-										mk = MarkerMessages.StyleElementClassNoStyle.fill(styleClass, ((ISupportName)o).getName(), form.getName());
-										addMarker(project, mk.getType(), mk.getText(), -1, STYLE_CLASS_NO_STYLE, IMarker.PRIORITY_NORMAL, null, o);
-									}
-									else addMarker(project, mk.getType(), mk.getText(), -1, STYLE_CLASS_NO_STYLE, IMarker.PRIORITY_NORMAL, null, o);
-								}
-							}
-							return IPersistVisitor.CONTINUE_TRAVERSAL;
-						}
-					});
 				}
 			}
 		}

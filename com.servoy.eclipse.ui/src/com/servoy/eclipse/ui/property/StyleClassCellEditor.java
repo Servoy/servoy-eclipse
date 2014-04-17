@@ -39,12 +39,12 @@ public class StyleClassCellEditor extends TextCellEditor
 {
 	private ContentProposalAdapter contentProposalAdapter;
 	private boolean popupOpen = false; // true, iff popup is currently open
-	private int startPosition;
-	private int endPosition;
+	private final boolean multiSelect;
 
-	public StyleClassCellEditor(Composite parent, StyleClassesComboboxModel model)
+	public StyleClassCellEditor(Composite parent, StyleClassesComboboxModel model, boolean multiSelect)
 	{
 		super(parent);
+		this.multiSelect = multiSelect;
 		enableContentProposal(model);
 	}
 
@@ -57,7 +57,7 @@ public class StyleClassCellEditor extends TextCellEditor
 			{
 				//find proposals for last inserted style class prefix
 				int lastIndexOfSpace = contents.substring(0, position).lastIndexOf(" ");
-				if (contents.length() > 0 && lastIndexOfSpace > 0 && lastIndexOfSpace < contents.length() - 1)
+				if (contents.length() > 0 && lastIndexOfSpace < contents.length() - 1)
 				{
 					setFiltering(true);
 					IContentProposal[] proposals = super.getProposals(contents.substring(lastIndexOfSpace + 1), position);
@@ -68,60 +68,46 @@ public class StyleClassCellEditor extends TextCellEditor
 			}
 		};
 		contentProposalAdapter = new ContentProposalAdapter(text, new TextContentAdapter(), provider, null, null);
-		contentProposalAdapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_IGNORE);
 		contentProposalAdapter.addContentProposalListener(new IContentProposalListener2()
 		{
 			@Override
 			public void proposalPopupClosed(ContentProposalAdapter adapter)
 			{
 				popupOpen = false;
-				endPosition = adapter.getControlContentAdapter().getCursorPosition(adapter.getControl());
 			}
 
 			@Override
 			public void proposalPopupOpened(ContentProposalAdapter adapter)
 			{
 				popupOpen = true;
-
-				//find start position of last inserted style prefix
-				int start = adapter.getControlContentAdapter().getCursorPosition(adapter.getControl());
-				int lastIndexOfSpace = text.getText().substring(0, start).lastIndexOf(" ");
-				startPosition = lastIndexOfSpace > 0 ? lastIndexOfSpace + 1 : 0;
 			}
 		});
-		contentProposalAdapter.addContentProposalListener(new IContentProposalListener()
+		if (multiSelect)
 		{
-			@Override
-			public void proposalAccepted(IContentProposal proposal)
+			contentProposalAdapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_IGNORE);
+			contentProposalAdapter.addContentProposalListener(new IContentProposalListener()
 			{
-				IControlContentAdapter contentAdapter = contentProposalAdapter.getControlContentAdapter();
-				Control control = contentProposalAdapter.getControl();
-				if (proposal.getContent().equals("DEFAULT"))
+				@Override
+				public void proposalAccepted(IContentProposal proposal)
 				{
-					contentAdapter.setControlContents(control, proposal.getContent(), proposal.getCursorPosition());
+					IControlContentAdapter contentAdapter = contentProposalAdapter.getControlContentAdapter();
+					Control control = contentProposalAdapter.getControl();
+					String contents = contentAdapter.getControlContents(control);
+					int cursorPosition = contentAdapter.getCursorPosition(control);
+					int startPosition = contents.lastIndexOf(" ", cursorPosition) + 1;
+					contents = contents.substring(0, startPosition) + proposal.getContent();
+					// set/reset auto activation chars to prevent popup from opening again
+					contentProposalAdapter.setAutoActivationCharacters(new char[0]);
+					contentAdapter.setControlContents(control, contents, startPosition + proposal.getContent().length());
+					contentProposalAdapter.setAutoActivationCharacters(null);
 				}
-				else
-				{
-					StringBuilder sb = new StringBuilder(contentAdapter.getControlContents(control));
-					String style_prefix = sb.substring(startPosition, endPosition);
-					if (style_prefix.contains(" ")) startPosition = startPosition + style_prefix.lastIndexOf(" ") + 1;
-					sb.insert(contentAdapter.getCursorPosition(control), proposal.getContent().substring(endPosition - startPosition));
-					contentAdapter.setControlContents(control, sb.toString(), startPosition + proposal.getCursorPosition());
-				}
-			}
-		});
+			});
+		}
+		else
+		{
+			contentProposalAdapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
+		}
 	}
-
-	/**
-	 * Return the {@link ContentProposalAdapter} of this cell editor.
-	 *
-	 * @return the {@link ContentProposalAdapter}
-	 */
-	public ContentProposalAdapter getContentProposalAdapter()
-	{
-		return contentProposalAdapter;
-	}
-
 
 	@Override
 	protected void focusLost()
@@ -138,10 +124,6 @@ public class StyleClassCellEditor extends TextCellEditor
 	@Override
 	protected boolean dependsOnExternalFocusListener()
 	{
-		// Always return false;
-		// Otherwise, the ColumnViewerEditor will install an additional focus listener
-		// that cancels cell editing on focus lost, even if focus gets lost due to
-		// activation of the completion proposal popup. See also bug 58777.
 		return false;
 	}
 }

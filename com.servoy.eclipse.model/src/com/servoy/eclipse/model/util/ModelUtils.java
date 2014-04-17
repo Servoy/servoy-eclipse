@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.model.util;
 
+import java.io.UnsupportedEncodingException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,6 +53,7 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
@@ -59,11 +61,17 @@ import com.servoy.j2db.persistence.ServerProxy;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.server.ngclient.component.WebComponentSpec;
+import com.servoy.j2db.server.ngclient.component.WebComponentSpecProvider;
+import com.servoy.j2db.server.ngclient.property.PropertyDescription;
+import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.ui.ISupportRowStyling;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.IStyleSheet;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
+import com.servoy.j2db.util.ServoyStyleSheet;
+import com.servoy.j2db.util.StringComparator;
 
 public class ModelUtils
 {
@@ -110,6 +118,89 @@ public class ModelUtils
 	 * Weak cache for style classes per lookupname.
 	 */
 	private final static WeakHashMap<IStyleSheet, Map<Pair<String, String>, String[]>> styleClassesCache = new WeakHashMap<IStyleSheet, Map<Pair<String, String>, String[]>>();
+
+	public static String[] getStyleClasses(FlattenedSolution flattenedSolution, Form form, IFormElement persist, String styleClassProperty, String lookupName)
+	{
+		if (flattenedSolution == null || form == null)
+		{
+			return new String[0];
+		}
+		form = flattenedSolution.getFlattenedForm(form);
+		Solution solution = (Solution)form.getRootObject();
+		// if we have solution level css, return spec file and classes from css, ignore form style
+		if (solution.getStyleSheetID() > 0)
+		{
+			Media media = flattenedSolution.getMedia(solution.getStyleSheetID());
+			if (media != null)
+			{
+				try
+				{
+					List<Object> cssClasses = new ArrayList<Object>();
+					if (persist != null)
+					{
+						WebComponentSpec spec = WebComponentSpecProvider.getInstance().getWebComponentDescription(
+							FormTemplateGenerator.getComponentTypeName(persist));
+						if (spec != null)
+						{
+							PropertyDescription pd = spec.getProperty(styleClassProperty);
+							if (pd != null)
+							{
+								List<Object> values = pd.getValues();
+								if (values != null)
+								{
+									Collections.sort(values, StringComparator.INSTANCE);
+									cssClasses.addAll(values);
+								}
+							}
+						}
+
+					}
+
+					String cssContent = new String(media.getMediaData(), "UTF-8");
+					IStyleSheet ss = new ServoyStyleSheet(cssContent, media.getName());
+					List<Object> cssSelectors = new ArrayList<Object>();
+					Iterator<String> it = ss.getStyleNames().iterator();
+					while (it.hasNext())
+					{
+						String cssSelector = it.next();
+						if (cssSelector.contains("."))
+						{
+							String[] selectors = cssSelector.split("\\.");
+							for (int i = 0; i < selectors.length; i++)
+							{
+								if (i == 0 && selectors.length > 1) continue;
+								String selector = selectors[i];
+								int cutIndex = selector.indexOf(" ");
+								int pseudoClassIndex = selector.indexOf(":");
+								cutIndex = Math.min(Math.max(cutIndex, 0), Math.max(pseudoClassIndex, 0));
+								if (cutIndex > 0)
+								{
+									selector = selector.substring(0, cutIndex);
+								}
+								if (!cssSelectors.contains(selector))
+								{
+									cssSelectors.add(selector);
+								}
+							}
+						}
+					}
+					Collections.sort(cssSelectors, StringComparator.INSTANCE);
+					cssClasses.addAll(cssSelectors);
+					return cssClasses.toArray(new String[0]);
+
+				}
+				catch (UnsupportedEncodingException ex)
+				{
+					ServoyLog.logError(ex);
+				}
+			}
+			return new String[0];
+		}
+
+		Style style = flattenedSolution.getStyleForForm(form, null);
+
+		return getStyleClasses(style, lookupName, form.getStyleClass());
+	}
 
 	public static String[] getStyleClasses(Style style, String lookupName, String formStyleClass)
 	{
