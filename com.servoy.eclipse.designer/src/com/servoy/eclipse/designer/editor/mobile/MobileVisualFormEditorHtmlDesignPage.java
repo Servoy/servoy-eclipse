@@ -47,7 +47,6 @@ import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IEditorInput;
@@ -87,7 +86,6 @@ import com.servoy.eclipse.designer.editor.mobile.editparts.MobileHeaderGraphical
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileSnapData.MobileSnapType;
 import com.servoy.eclipse.designer.mobile.property.MobilePersistPropertySource;
 import com.servoy.eclipse.designer.property.SetValueCommand;
-import com.servoy.eclipse.designer.rfb.editor.MessageDispatcher;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.ComplexProperty;
@@ -116,7 +114,6 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.IMessageHandler;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -188,7 +185,6 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 	private Browser browser;
 
 	private volatile String lastFormDesign;
-	private EditorMessageHandler editorMessageHandler;
 	private String lastPaletteItems;
 
 	public MobileVisualFormEditorHtmlDesignPage(BaseVisualFormEditor editorPart)
@@ -349,17 +345,11 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 			}
 		};
 
-		String editorid = UUID.randomUUID().toString();
-		MessageDispatcher.INSTANCE.register(editorid, editorMessageHandler = new EditorMessageHandler(editorid));
-
 		Bundle bundle = Platform.getBundle("com.servoy.eclipse.designer.rib");
 		URL resourceUrl = bundle.getResource("/rib/index.html");
 		try
 		{
-			URL fileUrl = FileLocator.toFileURL(resourceUrl);
-			String editorUrl = fileUrl.toURI().toString() + "?editorid=" + editorid;
-			//System.err.println("Open editor: " + editorUrl);
-			browser.setUrl(editorUrl);
+			browser.setUrl(FileLocator.toFileURL(resourceUrl).toURI().toString());
 		}
 		catch (Exception e)
 		{
@@ -378,17 +368,6 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 				}
 			}
 		});
-	}
-
-	@Override
-	public void dispose()
-	{
-		if (editorMessageHandler != null)
-		{
-			MessageDispatcher.INSTANCE.deregister(editorMessageHandler.getId(), editorMessageHandler);
-			editorMessageHandler = null;
-		}
-		super.dispose();
 	}
 
 	private static String asString(Object s)
@@ -812,10 +791,6 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 		if (!browser.isDisposed())
 		{
 			browser.execute("$.servoy.handleMessage('" + message + "')");
-		}
-		if (editorMessageHandler != null)
-		{
-			MessageDispatcher.INSTANCE.sendMessage(editorMessageHandler.getId(), message, editorMessageHandler);
 		}
 	}
 
@@ -1698,75 +1673,4 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 			this.zoneIndex = zoneIndex;
 		}
 	}
-
-	public class EditorMessageHandler implements IMessageHandler
-	{
-		private final String id;
-
-		public EditorMessageHandler(String id)
-		{
-			this.id = id;
-		}
-
-		/**
-		 * @return the id
-		 */
-		public String getId()
-		{
-			return id;
-		}
-
-		@Override
-		public void messageReceived(final String message)
-		{
-			if (message != null)
-			{
-				Display.getDefault().asyncExec(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						if (message.startsWith("callbackSelectionChanged:"))
-						{
-							try
-							{
-								callbackSelectionChanged(message.substring("callbackSelectionChanged:".length()));
-							}
-							catch (JSONException e)
-							{
-								ServoyLog.logError(e);
-							}
-						}
-						else if (message.startsWith("callbackEditingStateChanged:"))
-						{
-							callbackEditingStateChanged(Boolean.parseBoolean(message.substring("callbackEditingStateChanged:".length())));
-						}
-						else if (message.startsWith("#"))
-						{
-							// message tagged with id, a response is requested
-							String[] split = message.split(":");
-							String req = message.substring(split[0].length() + 1);
-							String response = "error";
-							try
-							{
-								if (req.startsWith("getFormDesign:"))
-								{
-									response = callGetFormDesign();
-								}
-								else if (req.startsWith("getChildJson:"))
-								{
-									response = callGetChildJson(split[2]);
-								}
-							}
-							finally
-							{
-								sendMessage(split[0] + ':' + response);
-							}
-						}
-					}
-				});
-			}
-		}
-	}
-
 }

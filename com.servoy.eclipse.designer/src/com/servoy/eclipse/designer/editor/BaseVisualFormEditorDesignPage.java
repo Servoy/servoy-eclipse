@@ -61,13 +61,15 @@ import com.servoy.eclipse.designer.editor.commands.SameWidthAction;
 import com.servoy.eclipse.designer.editor.commands.SaveAsTemplateAction;
 import com.servoy.eclipse.designer.editor.commands.SetTabSequenceAction;
 import com.servoy.eclipse.designer.editor.commands.UngroupAction;
-import com.servoy.eclipse.designer.editor.rfb.RfbEditorMessageHandler;
+import com.servoy.eclipse.designer.editor.rfb.EditorServiceHandler;
+import com.servoy.eclipse.designer.editor.rfb.EditorWebsocketSession;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.property.UndoablePropertySheetEntry;
-import com.servoy.eclipse.designer.rfb.editor.MessageDispatcher;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.server.websocket.IWebsocketSession;
+import com.servoy.j2db.server.websocket.WebsocketEndpoint;
 
 /**
  * Tab in form editor for designing the form visually.
@@ -81,7 +83,7 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 	private ISelectionListener selectionChangedHandler;
 	private ISelection currentSelection;
 
-	private final RfbEditorMessageHandler editorMessageHandler;
+	private final IWebsocketSession editorWebsocketSession;
 
 	public BaseVisualFormEditorDesignPage(BaseVisualFormEditor editorPart)
 	{
@@ -91,8 +93,9 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 		setEditDomain(editDomain);
 
 		// Serve requests for rfb editor, TODO: somehow tell the editor which editorid to use
-		editorMessageHandler = new RfbEditorMessageHandler(this.editorPart.getForm(), "rfbtest" /* UUID.randomUUID(). toString() */);
-		MessageDispatcher.INSTANCE.register(editorMessageHandler.getId(), editorMessageHandler);
+		WebsocketEndpoint.addWebSocketSession(EditorWebsocketSession.EDITOR_ENDPOINT, "rfbtest" /* UUID.randomUUID(). toString() */,
+			editorWebsocketSession = new EditorWebsocketSession());
+		editorWebsocketSession.registerService("formeditor", new EditorServiceHandler(editorPart));
 	}
 
 	@Override
@@ -408,6 +411,6 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 	public void dispose()
 	{
 		super.dispose();
-		MessageDispatcher.INSTANCE.deregister(editorMessageHandler.getId(), editorMessageHandler);
+		WebsocketEndpoint.removeWebSocketSession(EditorWebsocketSession.EDITOR_ENDPOINT, editorWebsocketSession.getUuid());
 	}
 }
