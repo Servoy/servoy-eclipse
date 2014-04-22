@@ -18,11 +18,8 @@
 package com.servoy.eclipse.ui.util;
 
 import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.views.properties.ComboBoxPropertyDescriptor;
 
 /**
@@ -42,29 +39,7 @@ public class ModifiedComboBoxPropertyDescriptor extends ComboBoxPropertyDescript
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		ComboBoxCellEditor editor = new ComboBoxCellEditor(parent, labelsArray, SWT.READ_ONLY)
-		{
-			private CCombo combo;
+		return new FixedComboBoxCellEditor(parent, labelsArray, SWT.READ_ONLY);
 
-			@Override
-			protected Control createControl(Composite parent)
-			{
-				combo = (CCombo)super.createControl(parent);
-				return combo;
-			}
-
-			@Override
-			public void setItems(String[] items)
-			{
-				super.setItems(items);
-				int count = combo.getItems().length;
-				if (count <= ModifiedComboBoxCellEditor.VISIBLE_ITEM_COUNT)
-				{
-					combo.setVisibleItemCount(count == 0 ? count : count - 1);
-				}
-				else combo.setVisibleItemCount(ModifiedComboBoxCellEditor.VISIBLE_ITEM_COUNT); //default count - fixing bug introduced by eclipse 4.3
-			}
-		};
-		return editor;
 	}
 }
