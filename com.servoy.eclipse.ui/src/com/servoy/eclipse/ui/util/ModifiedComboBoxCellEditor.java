@@ -13,10 +13,9 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.util;
 
-import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -31,11 +30,8 @@ import org.eclipse.swt.widgets.Control;
  * @author rgansevles
  * 
  */
-public class ModifiedComboBoxCellEditor extends ComboBoxCellEditor
+public class ModifiedComboBoxCellEditor extends FixedComboBoxCellEditor
 {
-
-	public static final int VISIBLE_ITEM_COUNT = 5; //default count - fixing bug introduced by eclipse 4.3
-
 	private CCombo combo;
 
 	public ModifiedComboBoxCellEditor(Composite parent, String[] items, int style)
@@ -58,17 +54,5 @@ public class ModifiedComboBoxCellEditor extends ComboBoxCellEditor
 			}
 		});
 		return combo;
-	}
-
-	@Override
-	public void setItems(String[] items)
-	{
-		super.setItems(items);
-		int count = combo.getItems().length;
-		if (count <= VISIBLE_ITEM_COUNT)
-		{
-			combo.setVisibleItemCount(count == 0 ? count : count - 1);
-		}
-		else combo.setVisibleItemCount(VISIBLE_ITEM_COUNT); //default count - fixing bug introduced by eclipse 4.3
 	}
 }
