@@ -521,7 +521,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		String id;
 		if (propertyDescriptor.valueObject == persistContext.getPersist())
 		{
-			category = PropertyCategory.createPropertyCategory(propertyDescriptor.propertyDescriptor.getName());
+			category = createPropertyCategory(propertyDescriptor);
 			id = propertyDescriptor.propertyDescriptor.getName();
 		}
 		else
@@ -568,6 +568,15 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				propertyDescriptors.put(combinedPropertyDesciptor.getId(), combinedPropertyDesciptor);
 			}
 		}
+	}
+
+	/**
+	 * @param propertyDescriptor
+	 * @return
+	 */
+	protected PropertyCategory createPropertyCategory(PropertyDescriptorWrapper propertyDescriptor)
+	{
+		return PropertyCategory.createPropertyCategory(propertyDescriptor.propertyDescriptor.getName());
 	}
 
 	/**

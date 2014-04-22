@@ -30,6 +30,7 @@ import com.servoy.eclipse.ui.property.BeanPropertyHandler;
 import com.servoy.eclipse.ui.property.IPropertyHandler;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.eclipse.ui.property.PropertyCategory;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
@@ -110,6 +111,25 @@ public class WebComponentPropertySource extends PersistPropertySource
 		}
 
 		return props.toArray(new IPropertyHandler[props.size()]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.servoy.eclipse.ui.property.PersistPropertySource#createPropertyCategory(com.servoy.eclipse.ui.property.PersistPropertySource.PropertyDescriptorWrapper
+	 * )
+	 * 
+	 * Properties from spec should be dispayed under "Beans" category except for handlers and BEAN_PROPERTIES. Properties found with reflection are handled by
+	 * the super class (they go under "Properties").
+	 */
+	@Override
+	protected PropertyCategory createPropertyCategory(PropertyDescriptorWrapper propertyDescriptor)
+	{
+		if (webComponentSpec.getHandlers().containsKey(propertyDescriptor.propertyDescriptor.getName()) ||
+			BEAN_PROPERTIES.containsKey(propertyDescriptor.propertyDescriptor.getName())) return super.createPropertyCategory(propertyDescriptor);
+		if (webComponentSpec.getProperties().containsKey(propertyDescriptor.propertyDescriptor.getName())) return PropertyCategory.Beans;
+		return super.createPropertyCategory(propertyDescriptor);
 	}
 
 	@Override
