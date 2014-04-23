@@ -733,6 +733,11 @@ public class PersistPropertyHandler extends BasePropertyHandler
 			return new PropertyDescription(name, PropertyType.border, Boolean.TRUE);
 		}
 
+		if (name.equals("scrollbars"))
+		{
+			return new PropertyDescription(name, PropertyType.scrollbars);
+		}
+
 		if (name.endsWith("dataProviderID"))
 		{
 			return new PropertyDescription(name, PropertyType.dataprovider);
