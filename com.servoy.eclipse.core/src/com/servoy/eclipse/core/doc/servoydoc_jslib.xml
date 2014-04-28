@@ -904,7 +904,7 @@ var nwords1 = words.splice(3, 2, "done", "On");]]></sample>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
             <argumentType typecode="com.servoy.j2db.documentation.scripting.docs.Object"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Array" typecode="com.servoy.j2db.documentation.scripting.docs.Array"/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="com.servoy.j2db.documentation.scripting.docs.Number"/>
           <descriptions>
             <description clientSupport="mc,wc,sc"><![CDATA[Places element data at the start of an array.]]></description>
           </descriptions>
