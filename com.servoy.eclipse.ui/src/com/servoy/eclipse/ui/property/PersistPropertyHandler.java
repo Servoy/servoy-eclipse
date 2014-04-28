@@ -111,6 +111,11 @@ public class PersistPropertyHandler extends BasePropertyHandler
 			new Integer[] { Integer.valueOf(SwingConstants.LEFT), Integer.valueOf(SwingConstants.CENTER), Integer.valueOf(SwingConstants.RIGHT) },
 			new String[] { Messages.AlignLeft, Messages.AlignCenter, Messages.AlignRight }).addDefault(Integer.valueOf(-1), null));
 
+	public static final PropertyDescription VERTICAL_ALIGNMENT_VALUES = new PropertyDescription("verticalAlignment", PropertyType.values,
+		new PropertyType.ValuesConfig().setValues(
+			new Integer[] { Integer.valueOf(SwingConstants.TOP), Integer.valueOf(SwingConstants.CENTER), Integer.valueOf(SwingConstants.BOTTOM) },
+			new String[] { Messages.AlignTop, Messages.AlignCenter, Messages.AlignBottom }).addDefault(Integer.valueOf(-1), null));
+
 	public static final PropertyDescription SOLUTION_TYPE_VALUES;
 	static
 	{
@@ -464,6 +469,12 @@ public class PersistPropertyHandler extends BasePropertyHandler
 		{
 			return HORIZONTAL_ALIGNMENT_VALUES;
 		}
+
+		if (name.equals("verticalAlignment"))
+		{
+			return VERTICAL_ALIGNMENT_VALUES;
+		}
+
 
 		if (name.equals("solutionType"))
 		{
