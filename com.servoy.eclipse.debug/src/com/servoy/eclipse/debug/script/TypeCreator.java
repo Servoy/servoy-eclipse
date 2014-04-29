@@ -438,7 +438,7 @@ public class TypeCreator extends TypeCache
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.dltk.javascript.typeinfo.TypeCache#getAccessibleBuckets(java.lang.String)
 	 */
 	@Override
@@ -756,6 +756,10 @@ public class TypeCreator extends TypeCache
 								@Override
 								public IStatus run(IProgressMonitor monitor)
 								{
+									for (IScopeTypeCreator creator : scopeTypes.values())
+									{
+										creator.flush();
+									}
 									servoyStaticTypeSystem.reset();
 									clear(null);
 									flushCache();
@@ -1128,7 +1132,7 @@ public class TypeCreator extends TypeCache
 	}
 
 	/**
-	 * @param typeName 
+	 * @param typeName
 	 * @param members
 	 * @param class1
 	 */
@@ -1548,6 +1552,8 @@ public class TypeCreator extends TypeCache
 		Type createType(String context, String fullTypeName);
 
 		ClientSupport getClientSupport();
+
+		void flush();
 	}
 
 	@SuppressWarnings("deprecation")
@@ -1657,7 +1663,7 @@ public class TypeCreator extends TypeCache
 	private final ConcurrentMap<String, String> buckets = new ConcurrentHashMap<String, String>();
 
 	/**
-	 * 
+	 *
 	 */
 	protected void flushCache()
 	{
@@ -1676,7 +1682,7 @@ public class TypeCreator extends TypeCache
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.dltk.javascript.typeinfo.TypeCache#addType(java.lang.String, org.eclipse.dltk.javascript.typeinfo.model.Type)
 	 */
 	@Override
@@ -2103,7 +2109,7 @@ public class TypeCreator extends TypeCache
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Object#hashCode()
 		 */
 		@Override
@@ -2119,7 +2125,7 @@ public class TypeCreator extends TypeCache
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Object#equals(java.lang.Object)
 		 */
 		@Override
@@ -2200,7 +2206,7 @@ public class TypeCreator extends TypeCache
 				Property arrayProp = createProperty(context, "[]", true, "Scope", PROPERTY);
 				arrayProp.setVisible(false);
 				type.getMembers().add(arrayProp);
-				// quickly add this one to the static types. context.markInvariant(type); 
+				// quickly add this one to the static types. context.markInvariant(type);
 				return addType(null, type);
 			}
 			else
@@ -2225,6 +2231,11 @@ public class TypeCreator extends TypeCache
 		public ClientSupport getClientSupport()
 		{
 			return ClientSupport.All;
+		}
+
+		@Override
+		public void flush()
+		{
 		}
 	}
 
@@ -2271,6 +2282,13 @@ public class TypeCreator extends TypeCache
 		{
 			return ClientSupport.All;
 		}
+
+		@Override
+		public void flush()
+		{
+			docGlobalsType = null;
+		}
+
 	}
 
 	private class FormsScopeCreator implements IScopeTypeCreator
@@ -2338,6 +2356,12 @@ public class TypeCreator extends TypeCache
 		{
 			return ClientSupport.All;
 		}
+
+		@Override
+		public void flush()
+		{
+		}
+
 	}
 
 	private Member createOverrideMember(Member member, String context, String config)
@@ -2396,13 +2420,16 @@ public class TypeCreator extends TypeCache
 			List<Member> overwrittenMembers = new ArrayList<Member>();
 			for (Member member : members)
 			{
-				Member overridden;
+				Member overridden = null;
 				if (member.getVisibility() == Visibility.INTERNAL)
 				{
-					// the special internal once (like clear() of related) should be also added
-					// because they should override the normal super JSFoundSet clear
-					overridden = TypeCreator.clone(member, member.getType());
-					overridden.setAttribute(HIDDEN_IN_RELATED, Boolean.TRUE);
+					if (fs != null && fs.getRelation(config) != null)
+					{
+						// the special internal once (like clear() of related) should be also added
+						// because they should override the normal super JSFoundSet clear
+						overridden = TypeCreator.clone(member, member.getType());
+						overridden.setAttribute(HIDDEN_IN_RELATED, Boolean.TRUE);
+					}
 				}
 				else
 				{
@@ -2455,16 +2482,17 @@ public class TypeCreator extends TypeCache
 		{
 			return ClientSupport.All;
 		}
+
+		@Override
+		public void flush()
+		{
+			cachedSuperTypeTemplateTypeForFoundSet = null;
+			cachedSuperTypeTemplateTypeForRelatedFoundSet = null;
+		}
 	}
 
 	private class JSDataSetCreator implements IScopeTypeCreator
 	{
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see com.servoy.eclipse.debug.script.TypeCreator.IScopeTypeCreator#createType(org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext,
-		 * java.lang.String)
-		 */
 		public Type createType(String context, String fullTypeName)
 		{
 			Type type = getType(context, "JSDataSet");
@@ -2483,6 +2511,11 @@ public class TypeCreator extends TypeCache
 		public ClientSupport getClientSupport()
 		{
 			return ClientSupport.wc_sc;
+		}
+
+		@Override
+		public void flush()
+		{
 		}
 	}
 
@@ -2520,6 +2553,14 @@ public class TypeCreator extends TypeCache
 			return getCombinedTypeWithRelationsAndDataproviders(ElementResolver.getFlattenedSolution(context), context, fullTypeName, config,
 				overwrittenMembers, getType(context, Record.JS_RECORD), IconProvider.instance().descriptor(Record.class), true);
 		}
+
+		@Override
+		public void flush()
+		{
+			super.flush();
+			cachedSuperTypeTemplateType = null;
+		}
+
 	}
 
 	private class PluginsScopeCreator implements IScopeTypeCreator
@@ -2619,6 +2660,11 @@ public class TypeCreator extends TypeCache
 		{
 			return ClientSupport.All;
 		}
+
+		@Override
+		public void flush()
+		{
+		}
 	}
 
 	private class FormScopeCreator implements IScopeTypeCreator
@@ -2705,6 +2751,11 @@ public class TypeCreator extends TypeCache
 		public ClientSupport getClientSupport()
 		{
 			return ClientSupport.All;
+		}
+
+		@Override
+		public void flush()
+		{
 		}
 	}
 
@@ -2798,6 +2849,13 @@ public class TypeCreator extends TypeCache
 		{
 			return ClientSupport.wc_sc;
 		}
+
+		@Override
+		public void flush()
+		{
+			cachedSuperTypeTemplateType = null;
+		}
+
 	}
 
 	private class QueryBuilderColumnsCreator implements IScopeTypeCreator
@@ -2873,6 +2931,11 @@ public class TypeCreator extends TypeCache
 		public ClientSupport getClientSupport()
 		{
 			return ClientSupport.wc_sc;
+		}
+
+		@Override
+		public void flush()
+		{
 		}
 	}
 
@@ -2961,6 +3024,11 @@ public class TypeCreator extends TypeCache
 		{
 			return ClientSupport.wc_sc;
 		}
+
+		@Override
+		public void flush()
+		{
+		}
 	}
 	private class MemDataSourceCreator implements IScopeTypeCreator
 	{
@@ -2977,6 +3045,11 @@ public class TypeCreator extends TypeCache
 		public ClientSupport getClientSupport()
 		{
 			return ClientSupport.wc_sc;
+		}
+
+		@Override
+		public void flush()
+		{
 		}
 	}
 
@@ -3067,6 +3140,13 @@ public class TypeCreator extends TypeCache
 		{
 			return ClientSupport.wc_sc;
 		}
+
+		@Override
+		public void flush()
+		{
+			cachedSuperTypeTemplateType = null;
+		}
+
 	}
 
 	private class TypeWithConfigCreator implements IScopeTypeCreator
@@ -3128,6 +3208,12 @@ public class TypeCreator extends TypeCache
 		{
 			return csp;
 		}
+
+		@Override
+		public void flush()
+		{
+			cachedSuperTypeTemplateType = null;
+		}
 	}
 
 	private class JSDataSourcesCreator extends DynamicJavaClassCreator
@@ -3165,15 +3251,15 @@ public class TypeCreator extends TypeCache
 		{
 			return csp;
 		}
+
+		@Override
+		public void flush()
+		{
+		}
 	}
 
 	private class InvisibleRelationsScopeCreator extends RelationsScopeCreator
 	{
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see com.servoy.eclipse.debug.script.TypeProvider.RelationsScopeCreator#isVisible()
-		 */
 		@Override
 		protected boolean isVisible()
 		{
@@ -3192,7 +3278,7 @@ public class TypeCreator extends TypeCache
 			TypeConfig fsAndTable = getFlattenedSolutonAndTable(typeName);
 			if (fsAndTable != null && fsAndTable.flattenedSolution != null)
 			{
-				// do not set Relations<solutionName> as supertype when table is not null, if you do then in a table 
+				// do not set Relations<solutionName> as supertype when table is not null, if you do then in a table
 				// context (like forms.x.foundset) global relations show up.
 				try
 				{
@@ -3216,6 +3302,11 @@ public class TypeCreator extends TypeCache
 		public ClientSupport getClientSupport()
 		{
 			return ClientSupport.All;
+		}
+
+		@Override
+		public void flush()
+		{
 		}
 	}
 
@@ -3361,17 +3452,22 @@ public class TypeCreator extends TypeCache
 		{
 			return ClientSupport.All;
 		}
+
+		@Override
+		public void flush()
+		{
+		}
 	}
 
 	/**
-	 * Parse the config for a type. Possible combinations: 
+	 * Parse the config for a type. Possible combinations:
 	 *
 	 * <br>* Typename&lt;solutionName;dataSource&gt;
-	 * 
+	 *
 	 * <br>* Typename&lt;dataSource&gt;
-	 * 
+	 *
 	 * <br>* Typename&lt;solutionName&gt;
-	 * 
+	 *
 	 * <br>* Typename&lt;solutionName/scopeName&gt;
 	 */
 	private static TypeConfig getFlattenedSolutonAndTable(String typeName)
@@ -3616,7 +3712,7 @@ public class TypeCreator extends TypeCache
 								if (persistClass != IScriptMobileBean.class && beanClassName != null)
 								{
 									// map the persist class that is registered in the initialize() method under the beanclassname under that same name.
-									// So SwingDBTreeView class/name points to "DBTreeView" which points to that class again of the class types 
+									// So SwingDBTreeView class/name points to "DBTreeView" which points to that class again of the class types
 									typeNames.put(persistClass.getSimpleName(), beanClassName.substring(beanClassName.lastIndexOf('.') + 1));
 								}
 							}
@@ -3657,6 +3753,11 @@ public class TypeCreator extends TypeCache
 		{
 			return ClientSupport.All;
 		}
+
+		@Override
+		public void flush()
+		{
+		}
 	}
 
 	/**
@@ -3664,7 +3765,7 @@ public class TypeCreator extends TypeCache
 	 * @param fs
 	 * @param members
 	 * @param relations
-	 * @param visible 
+	 * @param visible
 	 * @throws RepositoryException
 	 */
 	private void addRelations(String context, FlattenedSolution fs, String scopeName, EList<Member> members, Iterator<Relation> relations, boolean visible)
