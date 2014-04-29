@@ -484,7 +484,7 @@ public class TypeCreator extends TypeCache
 				}
 				type = getClassType(context, clz, name);
 			}
-			catch (ClassNotFoundException e)
+			catch (Throwable e)
 			{
 				ignorePackages.put(name, Boolean.FALSE);
 			}
