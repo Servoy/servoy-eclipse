@@ -25,7 +25,8 @@ import java.util.TreeSet;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
-import com.servoy.eclipse.warexporter.ui.wizard.ServerConfiguration;
+import com.servoy.eclipse.model.war.exporter.IWarExportModel;
+import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -37,7 +38,7 @@ import com.servoy.j2db.util.Utils;
  * @author jcompagner
  * @since 6.1
  */
-public class ExportWarModel
+public class ExportWarModel implements IWarExportModel
 {
 
 	private String fileName;
@@ -341,5 +342,16 @@ public class ExportWarModel
 	public boolean allowOverwriteSocketFactoryProperties()
 	{
 		return overwriteSocketFactoryProperties;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getServoyApplicationServerDir()
+	 */
+	@Override
+	public String getServoyApplicationServerDir()
+	{
+		return ApplicationServerRegistry.get().getServoyApplicationServerDirectory();
 	}
 }
