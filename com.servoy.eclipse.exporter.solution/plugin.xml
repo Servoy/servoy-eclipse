@@ -26,6 +26,18 @@
       </application>
    </extension>
    <extension
+         id="com.servoy.eclipse.exporter.war.application"
+         point="org.eclipse.core.runtime.applications">
+      <application
+            cardinality="singleton-global"
+            thread="main"
+            visible="true">
+         <run
+               class="com.servoy.eclipse.exporter.apps.war.WarWorkspaceExporter">
+         </run>
+      </application>
+   </extension>   
+   <extension
          point="com.servoy.eclipse.model.modelProvider">
       <provider
             class="com.servoy.eclipse.exporter.apps.common.ServoyModelProvider"

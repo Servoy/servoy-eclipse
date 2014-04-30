@@ -34,10 +34,11 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
 
+import com.servoy.eclipse.model.war.exporter.ExportException;
+import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
+import com.servoy.eclipse.model.war.exporter.WarExporter;
 import com.servoy.eclipse.warexporter.Activator;
-import com.servoy.eclipse.warexporter.export.ExportException;
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
-import com.servoy.eclipse.warexporter.export.Exporter;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
@@ -104,7 +105,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		{
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 			{
-				Exporter exporter = new Exporter(exportModel);
+				WarExporter exporter = new WarExporter(exportModel);
 				try
 				{
 					exporter.doExport(monitor);

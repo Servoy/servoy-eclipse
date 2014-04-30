@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.warexporter.export;
+package com.servoy.eclipse.model.war.exporter;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -59,7 +59,6 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.warexporter.ui.wizard.ServerConfiguration;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IBeanManagerInternal;
 import com.servoy.j2db.ILAFManagerInternal;
@@ -76,19 +75,19 @@ import com.servoy.j2db.util.Utils;
 /**
  * Class that creates the WAR file.
  * 
- * @author jcompagner
- * @since 6.1
+ * @author gboros
+ * @since 8.0
  */
-public class Exporter
+public class WarExporter
 {
 
 	private static final String COMPONENTS_DIR_NAME = "components";
-	private final ExportWarModel exportModel;
+	private final IWarExportModel exportModel;
 
 	/**
 	 * @param exportModel
 	 */
-	public Exporter(ExportWarModel exportModel)
+	public WarExporter(IWarExportModel exportModel)
 	{
 		this.exportModel = exportModel;
 	}
@@ -104,7 +103,7 @@ public class Exporter
 		monitor.worked(1);
 		File tmpWarDir = createTempDir();
 		monitor.worked(1);
-		String appServerDir = ApplicationServerRegistry.get().getServoyApplicationServerDirectory();
+		String appServerDir = exportModel.getServoyApplicationServerDir();
 		monitor.subTask("Copy root webapp files");
 		copyRootWebappFiles(tmpWarDir, appServerDir);
 		monitor.worked(1);

@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.warexporter.export;
+package com.servoy.eclipse.model.war.exporter;
 
 /**
  * Exception that will be thrown by the exporter if some thing fails in the export.

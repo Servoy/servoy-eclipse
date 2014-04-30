@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.warexporter.ui.wizard;
+package com.servoy.eclipse.model.war.exporter;
 
 import com.servoy.j2db.persistence.ServerConfig;
 
