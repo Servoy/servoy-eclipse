@@ -100,6 +100,15 @@ public class WarExportPage extends WizardPage implements IMobileExportProperties
 		outputLabel.setText("Output directory");
 
 		outputText = new Text(container, SWT.BORDER);
+		outputText.addModifyListener(new ModifyListener()
+		{
+			@Override
+			public void modifyText(ModifyEvent e)
+			{
+				File outputFile = new File(getOutputFolder());
+				mobileExporter.setOutputFolder(outputFile);
+			}
+		});
 		outputBrowseButton = new Button(container, SWT.NONE);
 		outputBrowseButton.setText("Browse");
 
@@ -442,8 +451,6 @@ public class WarExportPage extends WizardPage implements IMobileExportProperties
 
 	private String doExport(final long delayAfterExport)
 	{
-		File outputFile = new File(getOutputFolder());
-		mobileExporter.setOutputFolder(outputFile);
 		final String[] errorMessage = new String[1];
 
 		IRunnableWithProgress job = new IRunnableWithProgress()

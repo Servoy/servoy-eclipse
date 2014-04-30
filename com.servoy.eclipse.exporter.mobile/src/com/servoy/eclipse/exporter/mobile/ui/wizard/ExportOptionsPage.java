@@ -17,7 +17,6 @@
 
 package com.servoy.eclipse.exporter.mobile.ui.wizard;
 
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -97,18 +96,22 @@ public class ExportOptionsPage extends WizardPage implements IMobileExportProper
 		label.setVisible(false);
 
 		debugCheck = new Button(container, SWT.CHECK);
+		debugCheck.setSelection(getDialogSettings().getBoolean(DEBUG_MODE_KEY));
+		mobileExporter.setDebugMode(debugCheck.getSelection());
 		debugCheck.addSelectionListener(new SelectionListener()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
 				label.setVisible(debugCheck.getSelection());
+				mobileExporter.setDebugMode(debugCheck.getSelection());
 			}
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e)
 			{
 				label.setVisible(debugCheck.getSelection());
+				mobileExporter.setDebugMode(debugCheck.getSelection());
 			}
 		});
 
@@ -142,6 +145,14 @@ public class ExportOptionsPage extends WizardPage implements IMobileExportProper
 			defaultServerURL = MobileExporter.getDefaultServerURL();
 		}
 		serverURL.setText(defaultServerURL);
+		mobileExporter.setServerURL(getServerURL());
+		serverURL.addModifyListener(new ModifyListener()
+		{
+			public void modifyText(ModifyEvent e)
+			{
+				mobileExporter.setServerURL(getServerURL());
+			}
+		});
 
 		String defaultServiceSolutionName = getDialogSettings().get(SERVICE_SOLUTION_KEY_PREFIX + mobileExporter.getSolutionName());
 		if (defaultServiceSolutionName == null)
@@ -149,7 +160,7 @@ public class ExportOptionsPage extends WizardPage implements IMobileExportProper
 			defaultServiceSolutionName = mobileExporter.getSolutionName() + "_service";
 		}
 		serviceSolutionName.setText(defaultServiceSolutionName);
-
+		mobileExporter.setServiceSolutionName(getServiceSolutionName());
 		serviceSolutionName.addModifyListener(new ModifyListener()
 		{
 			public void modifyText(ModifyEvent e)
@@ -157,6 +168,7 @@ public class ExportOptionsPage extends WizardPage implements IMobileExportProper
 				setErrorMessage(null);
 				ExportOptionsPage.this.getContainer().updateMessage();
 				ExportOptionsPage.this.getContainer().updateButtons();
+				mobileExporter.setServiceSolutionName(getServiceSolutionName());
 			}
 		});
 
@@ -167,7 +179,7 @@ public class ExportOptionsPage extends WizardPage implements IMobileExportProper
 		}
 
 		timeout.setText(defaultTimeout);
-
+		mobileExporter.setTimeout(Integer.parseInt(getTimeout()));
 		timeout.addModifyListener(new ModifyListener()
 		{
 			public void modifyText(ModifyEvent e)
@@ -175,10 +187,9 @@ public class ExportOptionsPage extends WizardPage implements IMobileExportProper
 				setErrorMessage(null);
 				ExportOptionsPage.this.getContainer().updateMessage();
 				ExportOptionsPage.this.getContainer().updateButtons();
+				mobileExporter.setTimeout(Integer.parseInt(getTimeout()));
 			}
 		});
-
-		debugCheck.setSelection(getDialogSettings().getBoolean(DEBUG_MODE_KEY));
 	}
 
 	private String getServerURL()
@@ -214,16 +225,6 @@ public class ExportOptionsPage extends WizardPage implements IMobileExportProper
 			return "No valid timeout specified";
 		}
 		return super.getErrorMessage();
-	}
-
-	@Override
-	public IWizardPage getNextPage()
-	{
-		mobileExporter.setServerURL(getServerURL());
-		mobileExporter.setServiceSolutionName(getServiceSolutionName());
-		mobileExporter.setTimeout(Integer.parseInt(getTimeout()));
-		mobileExporter.setDebugMode(useDebugMode());
-		return nextPage;
 	}
 
 	@Override

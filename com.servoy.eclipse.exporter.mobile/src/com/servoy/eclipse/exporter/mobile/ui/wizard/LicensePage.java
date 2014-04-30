@@ -17,7 +17,6 @@
 
 package com.servoy.eclipse.exporter.mobile.ui.wizard;
 
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -123,27 +122,15 @@ public class LicensePage extends WizardPage implements IMobileExportPropertiesPa
 		{
 			validationLabel.setForeground(container.getDisplay().getSystemColor(SWT.COLOR_BLACK));
 			validationLabel.setText("License OK");
+			mobileExporter.setSkipConnect(true);
 		}
 		else
 		{
 			validationLabel.setForeground(container.getDisplay().getSystemColor(SWT.COLOR_RED));
 			validationLabel.setText("License invalid");
-		}
-		container.layout();
-	}
-
-	@Override
-	public IWizardPage getNextPage()
-	{
-		if (ApplicationServerRegistry.get().checkMobileLicense(companyText.getText(), licenseText.getText()))
-		{
-			mobileExporter.setSkipConnect(true);
-		}
-		else
-		{
 			mobileExporter.setSkipConnect(false);
 		}
-		return nextPage;
+		container.layout();
 	}
 
 	public boolean saveProperties()

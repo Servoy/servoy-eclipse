@@ -21,7 +21,6 @@ import java.util.Arrays;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ListViewer;
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -103,6 +102,7 @@ public class MediaOrderPage extends WizardPage
 							input.add(index, obj);
 						}
 						listViewer.refresh();
+						mobileExporter.setMediaOrder(input);
 					}
 				}
 			}
@@ -129,21 +129,10 @@ public class MediaOrderPage extends WizardPage
 						}
 						listViewer.refresh();
 					}
+					mobileExporter.setMediaOrder(input);
 				}
 			}
 		});
 		btnDown.setText("Down");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.wizard.WizardPage#getNextPage()
-	 */
-	@Override
-	public IWizardPage getNextPage()
-	{
-		mobileExporter.setMediaOrder((java.util.List<String>)listViewer.getInput());
-		return nextPage;
 	}
 }
