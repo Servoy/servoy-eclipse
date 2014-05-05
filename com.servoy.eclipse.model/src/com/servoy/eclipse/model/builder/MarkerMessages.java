@@ -327,10 +327,10 @@ public class MarkerMessages
 		"Editable combobox \"{0}\" has attached a valuelist that contains real values. This is not supported.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker FormNamedFieldRelatedValuelist = new ServoyMarker(
-		"Field \"{0}\" has attached a related valuelist \"{1}\" that doesn''t have the same datasource as form \"{2}\" .", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Field \"{0}\" has attached a related valuelist \"{1}\" that doesn''t have the same datasource as {2} .", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	public static ServoyMarker FormNamedFieldFallbackRelatedValuelist = new ServoyMarker(
-		"Field \"{0}\" has attached a valuelist \"{1}\" whose fallback valuelist \"{2}\" is related but doesn''t have the same datasource as form \"{3}\".", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
+		"Field \"{0}\" has attached a valuelist \"{1}\" whose fallback valuelist \"{2}\" is related but doesn''t have the same datasource as {3}.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	/**
 	 * The labelfor element used by a label cannot be found.
 	 */
