@@ -3240,34 +3240,52 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												null, field);
 										}
 									}
-									if (vl.getValueListType() == IValueListConstants.DATABASE_VALUES && vl.getRelationName() != null)
+									String parentDataSource = null;
+									String parentString = null;
+									if (field.getParent() instanceof Portal)
+									{
+										Relation[] relations = fieldFlattenedSolution.getRelationSequence(((Portal)field.getParent()).getRelationName());
+										if (relations != null && relations.length > 0)
+										{
+											parentDataSource = relations[relations.length - 1].getForeignDataSource();
+										}
+										parentString = "portal \"" + ((Portal)field.getParent()).getName() + "\"";
+									}
+									else
 									{
 										Form form = (Form)o.getAncestor(IRepository.FORMS);
-										String[] parts = vl.getRelationName().split("\\."); //$NON-NLS-1$
-										Relation relation = fieldFlattenedSolution.getRelation(parts[0]);
-										if (relation != null && !relation.isGlobal() && !relation.getPrimaryDataSource().equals(form.getDataSource()))
-										{
-											ServoyMarker mk = MarkerMessages.FormNamedFieldRelatedValuelist.fill(fieldName, vl.getName(), form.getName());
-											addMarker(project, mk.getType(), mk.getText(), -1, FORM_FIELD_RELATED_VALUELIST, IMarker.PRIORITY_NORMAL, null,
-												field);
-										}
+										parentDataSource = form.getDataSource();
+										parentString = "form \"" + form.getName() + "\"";
 									}
-									if (vl.getFallbackValueListID() > 0)
+									if (parentDataSource != null)
 									{
-										ValueList fallback = fieldFlattenedSolution.getValueList(vl.getFallbackValueListID());
-										if (fallback != null && fallback.getValueListType() == IValueListConstants.DATABASE_VALUES &&
-											fallback.getRelationName() != null)
+										if (vl.getValueListType() == IValueListConstants.DATABASE_VALUES && vl.getRelationName() != null)
 										{
-											Form form = (Form)o.getAncestor(IRepository.FORMS);
-											String[] parts = fallback.getRelationName().split("\\."); //$NON-NLS-1$
+											String[] parts = vl.getRelationName().split("\\."); //$NON-NLS-1$
 											Relation relation = fieldFlattenedSolution.getRelation(parts[0]);
-											if (relation != null && !relation.isGlobal() && !relation.isLiteral() &&
-												!relation.getPrimaryDataSource().equals(form.getDataSource()))
+											if (relation != null && !relation.isGlobal() && !relation.getPrimaryDataSource().equals(parentDataSource))
 											{
-												ServoyMarker mk = MarkerMessages.FormNamedFieldFallbackRelatedValuelist.fill(fieldName, vl.getName(),
-													fallback.getName(), form.getName());
+												ServoyMarker mk = MarkerMessages.FormNamedFieldRelatedValuelist.fill(fieldName, vl.getName(), parentString);
 												addMarker(project, mk.getType(), mk.getText(), -1, FORM_FIELD_RELATED_VALUELIST, IMarker.PRIORITY_NORMAL, null,
 													field);
+											}
+										}
+										if (vl.getFallbackValueListID() > 0)
+										{
+											ValueList fallback = fieldFlattenedSolution.getValueList(vl.getFallbackValueListID());
+											if (fallback != null && fallback.getValueListType() == IValueListConstants.DATABASE_VALUES &&
+												fallback.getRelationName() != null)
+											{
+												String[] parts = fallback.getRelationName().split("\\."); //$NON-NLS-1$
+												Relation relation = fieldFlattenedSolution.getRelation(parts[0]);
+												if (relation != null && !relation.isGlobal() && !relation.isLiteral() &&
+													!relation.getPrimaryDataSource().equals(parentDataSource))
+												{
+													ServoyMarker mk = MarkerMessages.FormNamedFieldFallbackRelatedValuelist.fill(fieldName, vl.getName(),
+														fallback.getName(), parentString);
+													addMarker(project, mk.getType(), mk.getText(), -1, FORM_FIELD_RELATED_VALUELIST, IMarker.PRIORITY_NORMAL,
+														null, field);
+												}
 											}
 										}
 									}
