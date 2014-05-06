@@ -87,6 +87,7 @@ import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.smart.J2DBClient;
 import com.servoy.j2db.smart.dataui.SwingItemFactory;
 import com.servoy.j2db.ui.ItemFactory;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.RendererParentWrapper;
 import com.servoy.j2db.util.ServoyException;
@@ -569,8 +570,8 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 				Messages.loadMessagesFromDatabaseInternal(null, null, getSettings(), null, null, properties, locale, getFoundSetManager());
 				if (getSolution() != null) //must be sure that solution is loaded, app might retrieve system messages, before solution loaded!
 				{
-					Messages.loadMessagesFromDatabaseInternal(getSolution().getI18nDataSource(), null, getSettings(), null, null, properties, locale,
-						getFoundSetManager());
+					Messages.loadMessagesFromDatabaseInternal(DataSourceUtils.getI18NDataSource(getSolution(), getSettings()), null, getSettings(), null, null,
+						properties, locale, getFoundSetManager());
 					messages.put(locale, properties);
 				}
 			}
