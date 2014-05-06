@@ -65,6 +65,7 @@ import com.servoy.j2db.i18n.I18NMessagesModel.I18NMessagesModelEntry;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Settings;
 
 public class I18nComposite extends Composite
@@ -285,7 +286,7 @@ public class I18nComposite extends Composite
 		IApplicationServerSingleton appServer = ApplicationServerRegistry.get();
 		ServoyProject ap = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 		Solution appSolution = ap != null ? ap.getEditingSolution() : null;
-		messagesModel = new I18NMessagesModel(i18nDatasource != null ? i18nDatasource : appSolution != null ? appSolution.getI18nDataSource() : null,
+		messagesModel = new I18NMessagesModel(i18nDatasource != null ? i18nDatasource : DataSourceUtils.getI18NDataSource(appSolution, Settings.getInstance()),
 			appServer.getClientId(), Settings.getInstance(), appServer.getDataServer(), appServer.getLocalRepository());
 		messagesModel.setLanguage(selectedLanguage);
 
