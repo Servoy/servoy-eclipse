@@ -300,8 +300,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 			if (componentIds.size() > 0)
 			{
 				drawers.add(containerPackageID);
-				entryProperties.put(containerPackageID + '.' + PaletteCustomization.PROPERTY_LABEL,
-					Messages.LabelComponentsPalette + " " + drawerNames.get(containerPackageID));
+				entryProperties.put(containerPackageID + '.' + PaletteCustomization.PROPERTY_LABEL, drawerNames.get(containerPackageID));
 				entryProperties.put(containerPackageID + '.' + PaletteCustomization.PROPERTY_HIDDEN, Boolean.FALSE); // TRUE if you want to hide components by default
 				drawerEntries.put(containerPackageID, allComponents.get(containerPackageID));
 			}
