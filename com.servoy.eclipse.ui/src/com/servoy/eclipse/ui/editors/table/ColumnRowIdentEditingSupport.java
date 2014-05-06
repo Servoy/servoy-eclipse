@@ -91,6 +91,7 @@ public class ColumnRowIdentEditingSupport extends EditingSupport
 				dialog.open();
 			}
 			pi.setRowIdentType(type);
+			if (type != 0 && !pi.getAllowNull()) pi.setAllowNull(true); // force setting Allow Null to true even if Row Ident is set on column
 			getViewer().update(element, null);
 			pi.flagColumnInfoChanged();
 		}
