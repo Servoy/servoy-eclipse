@@ -34,13 +34,14 @@ public class ServoyTypeInferenceFactory implements ITypeInferenceHandlerFactory,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.dltk.javascript.typeinfo.ITypeInferenceHandlerFactory#create(org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext,
 	 * org.eclipse.dltk.javascript.typeinfo.ITypeInferencerVisitor)
 	 */
 	public ITypeInferenceHandler create(ITypeInfoContext context, ITypeInferencerVisitor visitor)
 	{
-		if (SolutionSerializer.getDataSourceForCalculationJSFile(context.getModelElement().getResource()) != null)
+		if (context != null && context.getModelElement() != null &&
+			SolutionSerializer.getDataSourceForCalculationJSFile(context.getModelElement().getResource()) != null)
 		{
 			return new CalculationsTypeInferenceHandler(visitor);
 		}
@@ -49,7 +50,7 @@ public class ServoyTypeInferenceFactory implements ITypeInferenceHandlerFactory,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.dltk.javascript.typeinfo.ITypeInferenceExtensionFactory#createExtension(org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext,
 	 * org.eclipse.dltk.javascript.typeinfo.ITypeInferencerVisitor, java.lang.Class)
 	 */
@@ -64,7 +65,7 @@ public class ServoyTypeInferenceFactory implements ITypeInferenceHandlerFactory,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.dltk.javascript.typeinfo.ITypeInferenceExtensionFactory#createExtension(org.eclipse.core.runtime.IAdaptable, java.lang.Class,
 	 * java.lang.Object)
 	 */
