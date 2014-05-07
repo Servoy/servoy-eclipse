@@ -205,7 +205,7 @@ public class MobileExporter
 
 	public String doPersistExport()
 	{
-		FlattenedSolution flattenedSolution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
+		FlattenedSolution flattenedSolution = getFlattenedSolution();
 		if (flattenedSolution != null)
 		{
 			Iterator<Form> formIterator = flattenedSolution.getForms(true);
