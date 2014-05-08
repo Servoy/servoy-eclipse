@@ -24,6 +24,8 @@ import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
 import org.mozilla.javascript.Scriptable;
+import org.sablo.specification.WebComponentSpec;
+import org.sablo.specification.WebComponentSpecProvider;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
@@ -42,8 +44,6 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.TabPanel;
-import com.servoy.j2db.server.ngclient.component.WebComponentSpec;
-import com.servoy.j2db.server.ngclient.component.WebComponentSpecProvider;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.smart.dataui.ComponentAccordionPanel;
 import com.servoy.j2db.smart.dataui.ComponentJTabbedPane;

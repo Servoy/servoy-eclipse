@@ -18,6 +18,8 @@
 package com.servoy.eclipse.designer.mobile.property;
 
 import org.eclipse.ui.views.properties.IPropertySource;
+import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.PropertyType;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.PersistUtils;
@@ -31,8 +33,6 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Part;
-import com.servoy.j2db.server.ngclient.property.PropertyDescription;
-import com.servoy.j2db.server.ngclient.property.PropertyType;
 import com.servoy.j2db.util.Utils;
 
 /**

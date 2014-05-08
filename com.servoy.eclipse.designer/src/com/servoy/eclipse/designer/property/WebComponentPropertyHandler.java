@@ -21,6 +21,7 @@ import java.awt.Color;
 
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.json.JSONException;
+import org.sablo.specification.PropertyDescription;
 
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -36,7 +37,6 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.server.ngclient.property.PropertyDescription;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
 

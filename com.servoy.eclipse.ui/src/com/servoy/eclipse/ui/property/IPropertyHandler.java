@@ -18,9 +18,9 @@
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.ui.views.properties.IPropertySource;
+import org.sablo.specification.PropertyDescription;
 
 import com.servoy.j2db.documentation.ClientSupport;
-import com.servoy.j2db.server.ngclient.property.PropertyDescription;
 
 
 /**

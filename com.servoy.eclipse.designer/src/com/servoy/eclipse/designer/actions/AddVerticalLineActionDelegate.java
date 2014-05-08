@@ -21,8 +21,9 @@ import java.awt.Dimension;
 
 import javax.swing.SwingConstants;
 
+import org.sablo.specification.PropertyType;
+
 import com.servoy.eclipse.ui.property.PersistPropertyHandler;
-import com.servoy.j2db.server.ngclient.property.PropertyType;
 import com.servoy.j2db.util.gui.SpecialMatteBorder;
 
 /**

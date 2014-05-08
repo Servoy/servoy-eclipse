@@ -20,12 +20,12 @@ package com.servoy.eclipse.designer.editor.commands;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.Request;
 import org.eclipse.ui.IWorkbenchPart;
+import org.sablo.specification.PropertyType;
 
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.ui.property.PersistPropertyHandler;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TabPanel;
-import com.servoy.j2db.server.ngclient.property.PropertyType;
 
 /**
  * @author lvostinar

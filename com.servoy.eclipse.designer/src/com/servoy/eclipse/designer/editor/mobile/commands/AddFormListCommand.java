@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.swt.graphics.Point;
+import org.sablo.specification.PropertyType;
 
 import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.core.elements.ElementFactory;
@@ -40,7 +41,6 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
-import com.servoy.j2db.server.ngclient.property.PropertyType;
 import com.servoy.j2db.util.Utils;
 
 /**

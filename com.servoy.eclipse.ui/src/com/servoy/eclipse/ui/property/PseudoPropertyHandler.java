@@ -20,6 +20,7 @@ package com.servoy.eclipse.ui.property;
 import java.util.Map;
 
 import org.eclipse.ui.views.properties.IPropertySource;
+import org.sablo.specification.PropertyDescription;
 
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -27,7 +28,6 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.server.ngclient.property.PropertyDescription;
 
 /**
  * Handler for some known pseudo proeties/

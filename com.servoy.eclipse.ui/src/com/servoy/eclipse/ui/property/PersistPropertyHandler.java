@@ -40,6 +40,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
+import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.PropertyType;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -89,8 +91,6 @@ import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.query.ISQLJoin;
-import com.servoy.j2db.server.ngclient.property.PropertyDescription;
-import com.servoy.j2db.server.ngclient.property.PropertyType;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
 

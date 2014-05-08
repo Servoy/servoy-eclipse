@@ -22,6 +22,8 @@ import java.beans.PropertyDescriptor;
 import javax.swing.border.Border;
 
 import org.eclipse.ui.views.properties.IPropertySource;
+import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.PropertyType;
 
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -37,8 +39,6 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
-import com.servoy.j2db.server.ngclient.property.PropertyDescription;
-import com.servoy.j2db.server.ngclient.property.PropertyType;
 
 /**
  * Base class for property handlers base on java beans/introspection.

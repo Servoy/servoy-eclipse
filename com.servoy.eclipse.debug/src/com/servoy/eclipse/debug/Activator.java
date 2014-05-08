@@ -47,6 +47,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.sablo.specification.WebComponentPackage;
+import org.sablo.specification.WebComponentPackage.IPackageReader;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModel;
@@ -55,8 +57,6 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.server.ngclient.component.WebComponentPackage;
-import com.servoy.j2db.server.ngclient.component.WebComponentPackage.IPackageReader;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.util.Utils;
 

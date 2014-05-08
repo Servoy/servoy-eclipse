@@ -25,6 +25,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebComponentSpec;
+
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.BeanPropertyHandler;
 import com.servoy.eclipse.ui.property.IPropertyHandler;
@@ -35,8 +38,6 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
-import com.servoy.j2db.server.ngclient.component.WebComponentSpec;
-import com.servoy.j2db.server.ngclient.property.PropertyDescription;
 
 /**
  * Properties for ngclient components.

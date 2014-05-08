@@ -16,10 +16,11 @@
  */
 package com.servoy.eclipse.designer.actions;
 
+import org.sablo.specification.PropertyType;
+
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.ui.property.PersistPropertyHandler;
 import com.servoy.j2db.persistence.RectShape;
-import com.servoy.j2db.server.ngclient.property.PropertyType;
 
 /**
  * Add a shape.
