@@ -69,7 +69,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.server.websocket.IWebsocketSession;
-import com.servoy.j2db.server.websocket.WebsocketEndpoint;
+import com.servoy.j2db.server.websocket.WebsocketSessionManager;
 
 /**
  * Tab in form editor for designing the form visually.
@@ -93,7 +93,7 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 		setEditDomain(editDomain);
 
 		// Serve requests for rfb editor, TODO: somehow tell the editor which editorid to use
-		WebsocketEndpoint.addWebSocketSession(EditorWebsocketSession.EDITOR_ENDPOINT, "rfbtest" /* UUID.randomUUID(). toString() */,
+		WebsocketSessionManager.addWebSocketSession(EditorWebsocketSession.EDITOR_ENDPOINT, "rfbtest" /* UUID.randomUUID(). toString() */,
 			editorWebsocketSession = new EditorWebsocketSession());
 		editorWebsocketSession.registerService("formeditor", new EditorServiceHandler(editorPart));
 	}
@@ -411,6 +411,6 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 	public void dispose()
 	{
 		super.dispose();
-		WebsocketEndpoint.removeWebSocketSession(EditorWebsocketSession.EDITOR_ENDPOINT, editorWebsocketSession.getUuid());
+		WebsocketSessionManager.removeWebSocketSession(EditorWebsocketSession.EDITOR_ENDPOINT, editorWebsocketSession.getUuid());
 	}
 }
