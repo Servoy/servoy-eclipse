@@ -43,6 +43,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.ui.views.properties.PropertySheetPage;
+import org.sablo.websocket.IWebsocketSession;
+import org.sablo.websocket.WebsocketSessionManager;
 
 import com.servoy.eclipse.designer.actions.AlignmentSortPartsAction;
 import com.servoy.eclipse.designer.actions.DistributeAction;
@@ -68,8 +70,6 @@ import com.servoy.eclipse.designer.property.UndoablePropertySheetEntry;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.server.websocket.IWebsocketSession;
-import com.servoy.j2db.server.websocket.WebsocketSessionManager;
 
 /**
  * Tab in form editor for designing the form visually.

@@ -18,9 +18,9 @@
 package com.servoy.eclipse.designer.editor.rfb;
 
 import org.json.JSONObject;
+import org.sablo.websocket.IService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.j2db.server.websocket.IService;
 
 /** 
  * Handle requests from the rfb html editor.

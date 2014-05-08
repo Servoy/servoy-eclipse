@@ -18,8 +18,7 @@
 package com.servoy.eclipse.designer.editor.rfb;
 
 import org.json.JSONObject;
-
-import com.servoy.j2db.server.websocket.BaseWebsocketSession;
+import org.sablo.websocket.BaseWebsocketSession;
 
 /**
  * Handle communication with a remote rfb form editor.
