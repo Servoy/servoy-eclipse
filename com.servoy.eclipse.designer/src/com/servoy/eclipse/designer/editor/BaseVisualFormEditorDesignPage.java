@@ -93,7 +93,7 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 		setEditDomain(editDomain);
 
 		// Serve requests for rfb editor, TODO: somehow tell the editor which editorid to use
-		WebsocketSessionManager.addWebSocketSession(EditorWebsocketSession.EDITOR_ENDPOINT, "rfbtest" /* UUID.randomUUID(). toString() */,
+		WebsocketSessionManager.addSession(EditorWebsocketSession.EDITOR_ENDPOINT, "rfbtest" /* UUID.randomUUID(). toString() */,
 			editorWebsocketSession = new EditorWebsocketSession());
 		editorWebsocketSession.registerService("formeditor", new EditorServiceHandler(editorPart));
 	}
@@ -411,6 +411,6 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 	public void dispose()
 	{
 		super.dispose();
-		WebsocketSessionManager.removeWebSocketSession(EditorWebsocketSession.EDITOR_ENDPOINT, editorWebsocketSession.getUuid());
+		WebsocketSessionManager.removeSession(EditorWebsocketSession.EDITOR_ENDPOINT, editorWebsocketSession.getUuid());
 	}
 }
