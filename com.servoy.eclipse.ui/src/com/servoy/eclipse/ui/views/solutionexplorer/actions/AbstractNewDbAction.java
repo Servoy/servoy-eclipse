@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -74,6 +75,12 @@ public abstract class AbstractNewDbAction extends Action
 		if (dbSelection == null) return;
 
 		final IServerInternal serverPrototype = (IServerInternal)ServoyModel.getServerManager().getServer(serverMap.get(dbSelection).getServerName());
+		if (serverPrototype == null)
+		{
+			UIUtils.reportError("Create new database", "Could not find server '" + serverMap.get(dbSelection).getServerName() +
+				"', the server should be enabled and valid");
+			return;
+		}
 		final String name = getDatabaseName();
 		if (name != null)
 		{
