@@ -887,6 +887,13 @@ public class MobileExporter
 	{
 		this.solutionName = solutionName;
 	}
+	
+	/**
+	 * @return the outputFolder
+	 */
+	public File getOutputFolder() {
+		return outputFolder;
+	}
 
 	/**
 	 * @param timeout the request timeout interval

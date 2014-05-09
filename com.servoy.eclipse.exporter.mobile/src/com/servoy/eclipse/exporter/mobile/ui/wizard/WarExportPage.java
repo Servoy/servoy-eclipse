@@ -444,7 +444,7 @@ public class WarExportPage extends WizardPage implements IMobileExportProperties
 			finishPage.getControl().getParent().layout(true);
 		}
 		finishPage.setTextMessage(error == null ? "War file was successfully exported to: " +
-			new File(getDialogSettings().get(WarExportPage.OUTPUT_PATH_KEY), mobileExporter.getSolutionName() + ".war").getAbsolutePath()
+			new File(mobileExporter.getOutputFolder().getAbsolutePath(), mobileExporter.getSolutionName() + ".war").getAbsolutePath()
 			: "Unexpected exception while exporting war file: " + error);
 		return error;
 	}
