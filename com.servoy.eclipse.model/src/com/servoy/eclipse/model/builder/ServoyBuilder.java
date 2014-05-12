@@ -4125,12 +4125,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	private void addDeserializeProblemMarkersIfNeeded(ServoyProject servoyProject)
 	{
-		HashMap<File, Exception> deserializeExceptionMessages = servoyProject.getDeserializeExceptions();
-		for (Map.Entry<File, Exception> entry : deserializeExceptionMessages.entrySet())
+		HashMap<File, String> deserializeExceptionMessages = servoyProject.getDeserializeExceptions();
+		for (Map.Entry<File, String> entry : deserializeExceptionMessages.entrySet())
 		{
 			IResource file = getEclipseResourceFromJavaIO(entry.getKey(), servoyProject.getProject());
 			if (file == null) file = servoyProject.getProject();
-			addDeserializeProblemMarker(file, entry.getValue().getMessage(), servoyProject.getProject().getName());
+			addDeserializeProblemMarker(file, entry.getValue(), servoyProject.getProject().getName());
 		}
 	}
 

@@ -137,12 +137,12 @@ public class SolutionDeserializer
 
 	};
 	private final IDeveloperRepository repository;
-	private final ErrorKeeper<File, Exception> errorKeeper;
+	private final ErrorKeeper<File, String> errorKeeper;
 	private static final Map<UUID, HashSet<UUID>> alreadyUsedUUID = new HashMap<UUID, HashSet<UUID>>(16, 0.9f);
 	private final File jsFile;
 	private final String jsContent;
 
-	public SolutionDeserializer(IDeveloperRepository repository, ErrorKeeper<File, Exception> errorKeeper)
+	public SolutionDeserializer(IDeveloperRepository repository, ErrorKeeper<File, String> errorKeeper)
 	{
 		this.repository = repository;
 		this.errorKeeper = errorKeeper;
@@ -150,7 +150,7 @@ public class SolutionDeserializer
 		this.jsContent = null;
 	}
 
-	public SolutionDeserializer(IDeveloperRepository repository, ErrorKeeper<File, Exception> errorKeeper, File jsFile, String jsContent)
+	public SolutionDeserializer(IDeveloperRepository repository, ErrorKeeper<File, String> errorKeeper, File jsFile, String jsContent)
 	{
 		this.repository = repository;
 		this.errorKeeper = errorKeeper;
@@ -283,7 +283,7 @@ public class SolutionDeserializer
 			if (errorKeeper != null)
 			{
 				// get the innermost exception - the most relevant one for the user
-				errorKeeper.addError(solutionDir, new Exception("Please check the .log file for more info.")); //$NON-NLS-1$
+				errorKeeper.addError(solutionDir, "Please check the .log file for more info."); //$NON-NLS-1$
 			}
 			if (e instanceof RepositoryException)
 			{
@@ -403,7 +403,7 @@ public class SolutionDeserializer
 				catch (JSONException e)
 				{
 					// skip this file
-					if (f != null && errorKeeper != null) errorKeeper.addError(f, e);
+					if (f != null && errorKeeper != null) errorKeeper.addError(f, e.getMessage());
 					ServoyLog.logError("Invalid JSON syntax in file " + f, e); //$NON-NLS-1$
 				}
 			}
@@ -452,7 +452,7 @@ public class SolutionDeserializer
 					jsonFile = tmp.getLeft();
 					if (jsonFile == null)
 					{
-						errorKeeper.addError(jsFile, new Exception("Unrecognized javascript file name '" + jsFile.getName() + "'."));
+						errorKeeper.addError(jsFile, "Unrecognized javascript file name '" + jsFile.getName() + "'.");
 						continue;
 					}
 					ISupportChilds scriptParent = tmp.getRight();
@@ -500,8 +500,7 @@ public class SolutionDeserializer
 					}
 					else
 					{
-						errorKeeper.addError(jsFile, new Exception("Invalid javascript file name '" + jsFile.getName() +
-							"', doesn't have a corresponding object."));
+						errorKeeper.addError(jsFile, "Invalid javascript file name '" + jsFile.getName() + "', doesn't have a corresponding object.");
 					}
 				}
 			}
@@ -914,7 +913,7 @@ public class SolutionDeserializer
 				}
 				catch (JSONException jsonex)
 				{
-					if (fmediasobjects != null && errorKeeper != null) errorKeeper.addError(fmediasobjects, jsonex);
+					if (fmediasobjects != null && errorKeeper != null) errorKeeper.addError(fmediasobjects, jsonex.getMessage());
 					ServoyLog.logError("Could not read medias.obj file " + fmediasobjects, jsonex); //$NON-NLS-1$
 					return;
 				}
@@ -936,7 +935,7 @@ public class SolutionDeserializer
 		}
 	}
 
-	private List<JSONObject> parseJSFile(File file, boolean markAsChanged) throws JSONException
+	private List<JSONObject> parseJSFile(final File file, boolean markAsChanged) throws JSONException
 	{
 		String fileContent = jsContent;
 		if (jsFile != file)
@@ -976,6 +975,7 @@ public class SolutionDeserializer
 					if (problem.isError())
 					{
 						problems.add(problem);
+						errorKeeper.addError(file, problem.getMessage());
 					}
 				}
 			};

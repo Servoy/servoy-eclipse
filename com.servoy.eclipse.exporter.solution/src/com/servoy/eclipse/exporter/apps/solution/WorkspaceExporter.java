@@ -145,6 +145,11 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 			if (p != activeProject) moduleNames.add(p.getProject().getName());
 		}
 		moduleNames = config.getModuleIncludeList(moduleNames);
+		if (moduleNames == null)
+		{
+			exitCode = EXIT_STOPPED;
+			return;
+		}
 
 		ServoyProject[] toCheck = new ServoyProject[moduleNames.size() + 1];
 		toCheck[0] = activeProject;
