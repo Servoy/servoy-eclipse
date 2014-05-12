@@ -747,7 +747,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 				try
 				{
 					Integer width = ((JSONObject)defaultValue).getInt("width");
-					Integer height = ((JSONObject)defaultValue).getInt("heigth");
+					Integer height = ((JSONObject)defaultValue).getInt("height");
 					dimension = new Dimension(width, height);
 				}
 				catch (JSONException e)
