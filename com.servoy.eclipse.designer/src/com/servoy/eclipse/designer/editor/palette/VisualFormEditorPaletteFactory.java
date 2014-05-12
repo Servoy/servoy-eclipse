@@ -718,10 +718,35 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 
 	private static PaletteEntry createComponentsEntry(String beanClassName)
 	{
-		RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_BEAN, new Dimension(100, 100));
-		factory.setData(beanClassName);
+		String webComponentClassName = beanClassName.substring(beanClassName.indexOf(':') + 1);
+		WebComponentSpec webComponentDescription = WebComponentSpecProvider.getInstance().getWebComponentDescription(webComponentClassName);
+		Dimension dimension = getDimensionFromSpec(webComponentDescription);
 		ImageDescriptor beanIcon = Activator.loadImageDescriptorFromBundle("bean.gif");
+		RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_BEAN, dimension);
+		factory.setData(beanClassName);
+
 		return new ElementCreationToolEntry("", "", factory, beanIcon, beanIcon);
+	}
+
+	/**
+	 * @param webComponentDescription
+	 * @param dimension
+	 * @return
+	 */
+	private static Dimension getDimensionFromSpec(WebComponentSpec webComponentDescription)
+	{
+		Dimension dimension = new Dimension(100, 100);
+		if (webComponentDescription.getProperty("size") != null)
+		{
+			Object defaultValue = webComponentDescription.getProperty("size").getDefaultValue();
+			if (defaultValue instanceof java.awt.Dimension)
+			{
+				Double width = ((java.awt.Dimension)defaultValue).getWidth();
+				Double height = ((java.awt.Dimension)defaultValue).getHeight();
+				dimension = new Dimension(width.intValue(), height.intValue());
+			}
+		}
+		return dimension;
 	}
 
 	private PaletteEntry createTemplateToolEntry(String templateName, int element)
