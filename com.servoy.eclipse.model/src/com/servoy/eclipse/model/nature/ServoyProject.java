@@ -69,7 +69,7 @@ import com.servoy.j2db.util.Utils;
  * 
  * @author jblok
  */
-public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exception>
+public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 {
 	/**
 	 * ID of this project nature
@@ -80,7 +80,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 	private Solution editingSolution;// working copy for editing
 	private FlattenedSolution editingFlattenedSolution;
 
-	private final HashMap<File, Exception> deserializeExceptions = new HashMap<File, Exception>();
+	private final HashMap<File, String> deserializeExceptions = new HashMap<File, String>();
 
 	public ServoyProject()
 	{
@@ -637,7 +637,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 		return project != null ? project.getName() : super.toString();
 	}
 
-	public void addError(File badObject, Exception error)
+	public void addError(File badObject, String error)
 	{
 		deserializeExceptions.put(badObject, error);
 	}
@@ -652,7 +652,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, Exceptio
 	 * 
 	 * @return a map of exceptions encountered during deserialization.
 	 */
-	public HashMap<File, Exception> getDeserializeExceptions()
+	public HashMap<File, String> getDeserializeExceptions()
 	{
 		return deserializeExceptions;
 	}

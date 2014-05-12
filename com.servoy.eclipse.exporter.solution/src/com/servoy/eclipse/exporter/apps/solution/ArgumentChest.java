@@ -258,6 +258,7 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 			if (allModules.size() != moduleList.size())
 			{
 				info("Some of the modules specified for export were not actually modules of exported solution.", ILogLevel.ERROR); //$NON-NLS-1$
+				return null;
 			}
 		}
 		return allModules;
