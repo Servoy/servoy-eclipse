@@ -36,6 +36,7 @@ import org.eclipse.gef.palette.PaletteDrawer;
 import org.eclipse.gef.palette.PaletteEntry;
 import org.eclipse.gef.palette.PaletteRoot;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyType;
 import org.sablo.specification.WebComponentSpec;
@@ -71,6 +72,8 @@ import com.servoy.j2db.persistence.RectShape;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
+import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
 
@@ -718,7 +721,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 
 	private static PaletteEntry createComponentsEntry(String beanClassName)
 	{
-		String webComponentClassName = beanClassName.substring(beanClassName.indexOf(':') + 1);
+		String webComponentClassName = FormTemplateGenerator.getComponentTypeName(beanClassName);
 		WebComponentSpec webComponentDescription = WebComponentSpecProvider.getInstance().getWebComponentDescription(webComponentClassName);
 		Dimension dimension = getDimensionFromSpec(webComponentDescription);
 		ImageDescriptor beanIcon = Activator.loadImageDescriptorFromBundle("bean.gif");
@@ -739,11 +742,18 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		if (webComponentDescription.getProperty("size") != null)
 		{
 			Object defaultValue = webComponentDescription.getProperty("size").getDefaultValue();
-			if (defaultValue instanceof java.awt.Dimension)
+			if (defaultValue instanceof JSONObject)
 			{
-				Double width = ((java.awt.Dimension)defaultValue).getWidth();
-				Double height = ((java.awt.Dimension)defaultValue).getHeight();
-				dimension = new Dimension(width.intValue(), height.intValue());
+				try
+				{
+					Integer width = ((JSONObject)defaultValue).getInt("width");
+					Integer height = ((JSONObject)defaultValue).getInt("heigth");
+					dimension = new Dimension(width, height);
+				}
+				catch (JSONException e)
+				{
+					Debug.log(e);
+				}
 			}
 		}
 		return dimension;
