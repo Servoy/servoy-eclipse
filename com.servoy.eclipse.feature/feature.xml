@@ -672,8 +672,8 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
    </license>
 
    <url>
-      <update label="Servoy Update Site" url="http://www.servoy.com/developer/70x_updates"/>
-      <discovery label="Servoy Update Site" url="http://www.servoy.com/developer/70x_updates"/>
+      <update label="Servoy Update Site" url="http://www.servoy.com/developer/8xx_updates"/>
+      <discovery label="Servoy Update Site" url="http://www.servoy.com/developer/8xx_updates"/>
    </url>
 
    <includes
