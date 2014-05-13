@@ -90,8 +90,9 @@ public class ColumnRowIdentEditingSupport extends EditingSupport
 				dialog.setMessage("Row identifiers should always be not null. \nIf you really need this column to be a row identifier you should make sure the contents of this column is always not null ");
 				dialog.open();
 			}
+			boolean initialAllowNull = pi.getAllowNull();
 			pi.setRowIdentType(type);
-			if (type != 0 && !pi.getAllowNull()) pi.setAllowNull(true); // force setting Allow Null to true even if Row Ident is set on column
+			if (type != 0 && !pi.getAllowNull() && initialAllowNull) pi.setAllowNull(true); // when a new column is added, force setting Allow Null to true even if Row Ident is set on column	  
 			getViewer().update(element, null);
 			pi.flagColumnInfoChanged();
 		}
