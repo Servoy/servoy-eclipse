@@ -166,6 +166,10 @@ public class WarExporter
 			locations.append(copyNGComponents(tmpWarDir, monitor));
 			createComponentsPropertiesFile(tmpWarDir, locations.toString());
 			ComponentResourcesExporter.copyLibs(targetLibDir);
+			File tempBin = new File(tmpWarDir, "bin");
+			ComponentResourcesExporter.copyClassFiles(tempBin);
+			zipDirectory(tempBin, new File(targetLibDir, "servoy_ngclient.jar"));
+			deleteDirectory(tempBin);
 		}
 		catch (IOException e)
 		{
