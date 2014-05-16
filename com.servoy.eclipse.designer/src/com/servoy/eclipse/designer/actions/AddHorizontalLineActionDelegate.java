@@ -21,7 +21,7 @@ import java.awt.Dimension;
 
 import javax.swing.SwingConstants;
 
-import org.sablo.specification.PropertyType;
+import org.sablo.specification.ValuesConfig;
 
 import com.servoy.eclipse.ui.property.PersistPropertyHandler;
 import com.servoy.j2db.util.gui.SpecialMatteBorder;
@@ -42,7 +42,7 @@ public class AddHorizontalLineActionDelegate extends AddLabelActionDelegate
 		addSetPropertyValue("borderType", new SpecialMatteBorder(1, 0, 0, 0, Color.black, Color.black, Color.black, Color.black));
 		addSetPropertyValue(
 			"horizontalAlignment",
-			Integer.valueOf(((PropertyType.ValuesConfig)PersistPropertyHandler.HORIZONTAL_ALIGNMENT_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(SwingConstants.RIGHT))));
+			Integer.valueOf(((ValuesConfig)PersistPropertyHandler.HORIZONTAL_ALIGNMENT_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(SwingConstants.RIGHT))));
 		addSetPropertyValue("transparent", Boolean.TRUE);
 		addSetPropertyValue("size", new Dimension(40, 1));
 	}

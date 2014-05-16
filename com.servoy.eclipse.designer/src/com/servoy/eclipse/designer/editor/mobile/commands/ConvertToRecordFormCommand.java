@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.gef.commands.CompoundCommand;
-import org.sablo.specification.PropertyType;
+import org.sablo.specification.ValuesConfig;
 
 import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
@@ -49,7 +49,7 @@ public class ConvertToRecordFormCommand extends CompoundCommand
 				"",
 				PersistPropertySource.createPersistPropertySource(form, false),
 				StaticContentSpecLoader.PROPERTY_VIEW.getPropertyName(),
-				Integer.valueOf(((PropertyType.ValuesConfig)PersistPropertyHandler.VIEW_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(IFormConstants.VIEW_TYPE_RECORD)))));
+				Integer.valueOf(((ValuesConfig)PersistPropertyHandler.VIEW_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(IFormConstants.VIEW_TYPE_RECORD)))));
 
 			// delete all form list elements
 			MobileListModel model = MobileListModel.create(form, form);

@@ -48,10 +48,10 @@ import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.PropertyType;
 import org.sablo.specification.WebComponentApiDefinition;
 import org.sablo.specification.WebComponentSpec;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.property.IPropertyType;
 
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.base.util.ITagResolver;
@@ -1659,7 +1659,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				String name = pd.getName();
 				// skip the default once added by servoy, see WebComponentPackage.getWebComponentDescriptions()
 				// and skip the dataprovider properties (those are not accesable through scripting)
-				if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && pd.getType() != PropertyType.dataprovider)
+				if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && pd.getType() != IPropertyType.Default.dataprovider.getType())
 				{
 					nodes.add(new UserNode(name, UserNodeType.FORM_ELEMENTS, prefixForWebComponentMembers + name, name, webcomponent, propertiesIcon));
 				}

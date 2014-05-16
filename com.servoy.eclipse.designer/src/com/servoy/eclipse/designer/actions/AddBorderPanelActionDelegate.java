@@ -18,7 +18,7 @@ package com.servoy.eclipse.designer.actions;
 
 import javax.swing.BorderFactory;
 
-import org.sablo.specification.PropertyType;
+import org.sablo.specification.ValuesConfig;
 
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.ui.property.PersistPropertyHandler;
@@ -38,7 +38,7 @@ public class AddBorderPanelActionDelegate extends AbstractEditpartActionDelegate
 	{
 		super(VisualFormEditor.REQ_PLACE_RECT_SHAPE);
 		addSetPropertyValue("shapeType",
-			Integer.valueOf(((PropertyType.ValuesConfig)PersistPropertyHandler.SHAPE_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(RectShape.BORDER_PANEL))));
+			Integer.valueOf(((ValuesConfig)PersistPropertyHandler.SHAPE_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(RectShape.BORDER_PANEL))));
 		addSetPropertyValue("borderType", BorderFactory.createTitledBorder("xy"));
 	}
 }

@@ -20,7 +20,7 @@ package com.servoy.eclipse.designer.editor.commands;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.Request;
 import org.eclipse.ui.IWorkbenchPart;
-import org.sablo.specification.PropertyType;
+import org.sablo.specification.ValuesConfig;
 
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.ui.property.PersistPropertyHandler;
@@ -49,7 +49,7 @@ public class AddSplitpaneAction extends AddTabpanelAction
 		return addSetPropertyValue(
 			super.createRequest(editPart),
 			StaticContentSpecLoader.PROPERTY_TABORIENTATION.getPropertyName(),
-			Integer.valueOf(((PropertyType.ValuesConfig)PersistPropertyHandler.TAB_ORIENTATION_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(TabPanel.SPLIT_HORIZONTAL))));
+			Integer.valueOf(((ValuesConfig)PersistPropertyHandler.TAB_ORIENTATION_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(TabPanel.SPLIT_HORIZONTAL))));
 	}
 
 	/**

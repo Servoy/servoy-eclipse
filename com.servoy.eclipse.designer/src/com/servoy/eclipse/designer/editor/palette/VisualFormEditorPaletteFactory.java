@@ -38,7 +38,7 @@ import org.eclipse.gef.palette.PaletteRoot;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.sablo.specification.PropertyType;
+import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.WebComponentSpec;
 import org.sablo.specification.WebComponentSpecProvider;
 
@@ -488,7 +488,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 				setProperty(
 					extendedData,
 					StaticContentSpecLoader.PROPERTY_DISPLAYTYPE,
-					Integer.valueOf(((PropertyType.ValuesConfig)PersistPropertyHandler.DISPLAY_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(displayType))));
+					Integer.valueOf(((ValuesConfig)PersistPropertyHandler.DISPLAY_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(displayType))));
 			}
 			RequestTypeCreationFactory factory = new RequestTypeCreationFactory(requestType, size);
 			factory.setExtendedData(extendedData);
@@ -562,7 +562,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 			setProperty(
 				extendedData,
 				StaticContentSpecLoader.PROPERTY_HORIZONTALALIGNMENT,
-				Integer.valueOf(((PropertyType.ValuesConfig)PersistPropertyHandler.HORIZONTAL_ALIGNMENT_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(SwingConstants.RIGHT))));
+				Integer.valueOf(((ValuesConfig)PersistPropertyHandler.HORIZONTAL_ALIGNMENT_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(SwingConstants.RIGHT))));
 			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_TRANSPARENT, Boolean.TRUE);
 		}
 
@@ -573,7 +573,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 				setProperty(
 					extendedData,
 					StaticContentSpecLoader.PROPERTY_SHAPETYPE,
-					Integer.valueOf(((PropertyType.ValuesConfig)PersistPropertyHandler.SHAPE_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(shapeType))));
+					Integer.valueOf(((ValuesConfig)PersistPropertyHandler.SHAPE_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(shapeType))));
 			}
 			RequestTypeCreationFactory factory = new RequestTypeCreationFactory(requestType, size);
 			factory.setExtendedData(extendedData);
@@ -622,7 +622,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 			setProperty(
 				factory.getExtendedData(),
 				StaticContentSpecLoader.PROPERTY_TABORIENTATION,
-				Integer.valueOf(((PropertyType.ValuesConfig)PersistPropertyHandler.TAB_ORIENTATION_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(tabOrienation))));
+				Integer.valueOf(((ValuesConfig)PersistPropertyHandler.TAB_ORIENTATION_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(tabOrienation))));
 			if (nameHint != null)
 			{
 				factory.getExtendedData().put(ElementFactory.NAME_HINT_PROPERTY, nameHint);

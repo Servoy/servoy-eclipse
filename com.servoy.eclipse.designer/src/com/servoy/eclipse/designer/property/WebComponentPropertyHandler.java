@@ -107,7 +107,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			ServoyLog.logError(e);
 		}
 
-		switch (propertyDescription.getType())
+		switch (propertyDescription.getType().getDefaultEnumValue())
 		{
 			case color :
 				return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(null, (String)value);
@@ -135,7 +135,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		Bean bean = (Bean)obj;
 
 		Object convertedValue = value;
-		switch (propertyDescription.getType())
+		switch (propertyDescription.getType().getDefaultEnumValue())
 		{
 			case color :
 				convertedValue = PropertyColorConverter.getColorString((Color)value);

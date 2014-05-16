@@ -16,7 +16,7 @@
  */
 package com.servoy.eclipse.designer.actions;
 
-import org.sablo.specification.PropertyType;
+import org.sablo.specification.ValuesConfig;
 
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.ui.property.PersistPropertyHandler;
@@ -37,7 +37,7 @@ public class AddRoundedRectangleActionDelegate extends AbstractEditpartActionDel
 		super(VisualFormEditor.REQ_PLACE_RECT_SHAPE);
 		addSetPropertyValue(
 			"shapeType",
-			Integer.valueOf(((PropertyType.ValuesConfig)PersistPropertyHandler.SHAPE_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(RectShape.ROUNDED_RECTANGLE))));
+			Integer.valueOf(((ValuesConfig)PersistPropertyHandler.SHAPE_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(RectShape.ROUNDED_RECTANGLE))));
 		addSetPropertyValue("roundedRadius", Integer.valueOf(35));
 	}
 }

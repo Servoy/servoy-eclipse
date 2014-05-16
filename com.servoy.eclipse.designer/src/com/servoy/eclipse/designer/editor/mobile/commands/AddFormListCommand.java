@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.swt.graphics.Point;
-import org.sablo.specification.PropertyType;
+import org.sablo.specification.ValuesConfig;
 
 import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.core.elements.ElementFactory;
@@ -59,7 +59,7 @@ public class AddFormListCommand extends CompoundCommand
 				"",
 				PersistPropertySource.createPersistPropertySource(form, false),
 				StaticContentSpecLoader.PROPERTY_VIEW.getPropertyName(),
-				Integer.valueOf(((PropertyType.ValuesConfig)PersistPropertyHandler.VIEW_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(IFormConstants.VIEW_TYPE_TABLE_LOCKED)))));
+				Integer.valueOf(((ValuesConfig)PersistPropertyHandler.VIEW_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(IFormConstants.VIEW_TYPE_TABLE_LOCKED)))));
 
 
 			// delete all form elements except header/footer

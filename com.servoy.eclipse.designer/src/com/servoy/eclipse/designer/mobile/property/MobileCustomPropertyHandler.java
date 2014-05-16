@@ -19,7 +19,8 @@ package com.servoy.eclipse.designer.mobile.property;
 
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.PropertyType;
+import org.sablo.specification.ValuesConfig;
+import org.sablo.specification.property.IPropertyType;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.PersistUtils;
@@ -68,26 +69,26 @@ public class MobileCustomPropertyHandler implements IPropertyHandler
 	"star"
 	};
 
-	public static final PropertyDescription DATA_ICONS_VALUES = new PropertyDescription(IMobileProperties.DATA_ICON.propertyName, PropertyType.values,
-		new PropertyType.ValuesConfig().setValues(DATA_ICONS).addDefault(null, null));
+	public static final PropertyDescription DATA_ICONS_VALUES = new PropertyDescription(IMobileProperties.DATA_ICON.propertyName,
+		IPropertyType.Default.values.getType(), new ValuesConfig().setValues(DATA_ICONS).addDefault(null, null));
 
 
-	public static final PropertyDescription HEADERSIZE_VALUES = new PropertyDescription(IMobileProperties.HEADER_SIZE.propertyName, PropertyType.values,
-		new PropertyType.ValuesConfig().setValues(
+	public static final PropertyDescription HEADERSIZE_VALUES = new PropertyDescription(IMobileProperties.HEADER_SIZE.propertyName,
+		IPropertyType.Default.values.getType(), new ValuesConfig().setValues(
 			new Integer[] { Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3), Integer.valueOf(4), Integer.valueOf(5), Integer.valueOf(6) },
 			new String[] { "h1", "h2", "h3", "h4", "h5", "h6" }).addDefault(null, null));
 
 
 	public static final String ALIGN_RIGHT_NAME = "alignRight";
-	public static final PropertyDescription ALIGN_RIGHT_DESCRIPTION = new PropertyDescription(ALIGN_RIGHT_NAME, PropertyType.bool);
+	public static final PropertyDescription ALIGN_RIGHT_DESCRIPTION = new PropertyDescription(ALIGN_RIGHT_NAME, IPropertyType.Default.bool.getType());
 
 
 	public static final String RADIO_STYLE_NAME = "horizontal";
-	public static final PropertyDescription RADIO_STYLE_DESCRIPTION = new PropertyDescription(RADIO_STYLE_NAME, PropertyType.bool);
+	public static final PropertyDescription RADIO_STYLE_DESCRIPTION = new PropertyDescription(RADIO_STYLE_NAME, IPropertyType.Default.bool.getType());
 
 
 	public static final String STICKY_PART_NAME = "sticky";
-	public static final PropertyDescription STICKY_PART_DESCRIPTION = new PropertyDescription(STICKY_PART_NAME, PropertyType.bool);
+	public static final PropertyDescription STICKY_PART_DESCRIPTION = new PropertyDescription(STICKY_PART_NAME, IPropertyType.Default.bool.getType());
 
 
 	private final String name;

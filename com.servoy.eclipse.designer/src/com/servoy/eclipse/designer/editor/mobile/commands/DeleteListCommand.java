@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
-import org.sablo.specification.PropertyType;
+import org.sablo.specification.ValuesConfig;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.property.SetValueCommand;
@@ -53,7 +53,7 @@ public class DeleteListCommand extends CompoundCommand
 				"",
 				PersistPropertySource.createPersistPropertySource(model.form, false),
 				StaticContentSpecLoader.PROPERTY_VIEW.getPropertyName(),
-				Integer.valueOf(((PropertyType.ValuesConfig)PersistPropertyHandler.VIEW_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(IForm.LOCKED_RECORD_VIEW)))));
+				Integer.valueOf(((ValuesConfig)PersistPropertyHandler.VIEW_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(IForm.LOCKED_RECORD_VIEW)))));
 		}
 		add(new DeleteListItemsCommand(model));
 	}

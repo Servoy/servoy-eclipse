@@ -82,10 +82,10 @@ import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.Scriptable;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.PropertyType;
 import org.sablo.specification.WebComponentApiDefinition;
 import org.sablo.specification.WebComponentSpec;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.property.IPropertyType;
 
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.core.IActiveProjectListener;
@@ -436,11 +436,6 @@ public class TypeCreator extends TypeCache
 
 	private final ConcurrentHashMap<String, Boolean> ignorePackages = new ConcurrentHashMap<String, Boolean>();
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.dltk.javascript.typeinfo.TypeCache#getAccessibleBuckets(java.lang.String)
-	 */
 	@Override
 	protected String[] getAccessibleBuckets(String context)
 	{
@@ -974,7 +969,8 @@ public class TypeCreator extends TypeCache
 					String name = pd.getName();
 					// skip the default once added by servoy, see WebComponentPackage.getWebComponentDescriptions()
 					// and skip the dataprovider properties (those are not accesable through scripting)
-					if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && pd.getType() != PropertyType.dataprovider)
+					if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") &&
+						pd.getType() != IPropertyType.Default.dataprovider.getType())
 					{
 						members.add(createProperty(name, false, getType(context, pd), "", null));
 					}
@@ -1011,8 +1007,8 @@ public class TypeCreator extends TypeCache
 	private JSType getType(String context, PropertyDescription pd)
 	{
 		if (pd == null) return null;
-		PropertyType type = pd.getType();
-		switch (type)
+		IPropertyType type = pd.getType();
+		switch (type.getDefaultEnumValue())
 		{
 			case bool :
 				return getTypeRef(context, ITypeNames.BOOLEAN);
@@ -1680,11 +1676,6 @@ public class TypeCreator extends TypeCache
 //	final Set<String> javaTypes = Collections.synchronizedSet(new TreeSet<String>());
 //	final ConcurrentHashMap<String, Set<String>> dynamicTypes = new ConcurrentHashMap<String, Set<String>>();
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.dltk.javascript.typeinfo.TypeCache#addType(java.lang.String, org.eclipse.dltk.javascript.typeinfo.model.Type)
-	 */
 	@Override
 	protected Type addType(String bucket, Type type)
 	{
@@ -2107,11 +2098,6 @@ public class TypeCreator extends TypeCache
 			this.parameterTypes = parameterTypes;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see java.lang.Object#hashCode()
-		 */
 		@Override
 		public int hashCode()
 		{
@@ -2123,11 +2109,6 @@ public class TypeCreator extends TypeCache
 			return result;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see java.lang.Object#equals(java.lang.Object)
-		 */
 		@Override
 		public boolean equals(Object obj)
 		{

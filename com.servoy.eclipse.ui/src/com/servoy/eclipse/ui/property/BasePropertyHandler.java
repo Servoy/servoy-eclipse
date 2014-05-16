@@ -23,12 +23,13 @@ import javax.swing.border.Border;
 
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.PropertyType;
+import org.sablo.specification.property.IPropertyType;
 
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.documentation.ClientSupport;
+import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
@@ -37,7 +38,6 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TabPanel;
-import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 
 /**
@@ -90,72 +90,72 @@ public class BasePropertyHandler implements IPropertyHandler
 
 		if (clazz == java.awt.Dimension.class)
 		{
-			return new PropertyDescription(name, PropertyType.dimension);
+			return new PropertyDescription(name, IPropertyType.Default.dimension.getType());
 		}
 
 		if (clazz == java.awt.Point.class)
 		{
-			return new PropertyDescription(name, PropertyType.point);
+			return new PropertyDescription(name, IPropertyType.Default.point.getType());
 		}
 
 		if (clazz == java.awt.Insets.class)
 		{
-			return new PropertyDescription(name, PropertyType.insets);
+			return new PropertyDescription(name, IPropertyType.Default.insets.getType());
 		}
 
 		if (clazz == java.awt.Color.class)
 		{
-			return new PropertyDescription(name, PropertyType.color);
+			return new PropertyDescription(name, IPropertyType.Default.color.getType());
 		}
 
 		if (clazz == java.awt.Font.class)
 		{
-			return new PropertyDescription(name, PropertyType.font, Boolean.FALSE);
+			return new PropertyDescription(name, IPropertyType.Default.font.getType(), Boolean.FALSE);
 		}
 
 		if (clazz == Border.class)
 		{
-			return new PropertyDescription(name, PropertyType.border, Boolean.FALSE);
+			return new PropertyDescription(name, IPropertyType.Default.border.getType(), Boolean.FALSE);
 		}
 
 		if (clazz == boolean.class || clazz == Boolean.class)
 		{
-			return new PropertyDescription(name, PropertyType.bool);
+			return new PropertyDescription(name, IPropertyType.Default.bool.getType());
 		}
 
 		if (clazz == String.class)
 		{
-			return new PropertyDescription(name, PropertyType.string);
+			return new PropertyDescription(name, IPropertyType.Default.string.getType());
 		}
 
 		if (clazz == byte.class || clazz == Byte.class)
 		{
-			return new PropertyDescription(name, PropertyType.bytenumber);
+			return new PropertyDescription(name, IPropertyType.Default.bytenumber.getType());
 		}
 
 		if (clazz == double.class || clazz == Double.class)
 		{
-			return new PropertyDescription(name, PropertyType.doublenumber);
+			return new PropertyDescription(name, IPropertyType.Default.doublenumber.getType());
 		}
 
 		if (clazz == float.class || clazz == Float.class)
 		{
-			return new PropertyDescription(name, PropertyType.floatnumber);
+			return new PropertyDescription(name, IPropertyType.Default.floatnumber.getType());
 		}
 
 		if (clazz == int.class || clazz == Integer.class)
 		{
-			return new PropertyDescription(name, PropertyType.intnumber);
+			return new PropertyDescription(name, IPropertyType.Default.intnumber.getType());
 		}
 
 		if (clazz == long.class || clazz == Long.class)
 		{
-			return new PropertyDescription(name, PropertyType.longnumber);
+			return new PropertyDescription(name, IPropertyType.Default.longnumber.getType());
 		}
 
 		if (clazz == short.class || clazz == Short.class)
 		{
-			return new PropertyDescription(name, PropertyType.shortnumber);
+			return new PropertyDescription(name, IPropertyType.Default.shortnumber.getType());
 		}
 
 		return null;
