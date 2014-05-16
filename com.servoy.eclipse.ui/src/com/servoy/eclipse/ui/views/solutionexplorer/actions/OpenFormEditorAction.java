@@ -40,8 +40,8 @@ public class OpenFormEditorAction extends Action implements IActionDelegate
 
 	public OpenFormEditorAction()
 	{
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("designer.gif")); //$NON-NLS-1$
-		setText("Open in Form Editor"); //$NON-NLS-1$
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("designer.gif"));
+		setText("Open in Form Editor");
 		setToolTipText(getText());
 	}
 

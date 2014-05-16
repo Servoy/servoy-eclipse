@@ -86,7 +86,7 @@ public abstract class ActualExecuteOperationPage extends WizardPage
 		scroll.setBackground(state.display.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		operationLog.setForeground(state.display.getSystemColor(SWT.COLOR_LIST_FOREGROUND));
 		scroll.setContent(operationLog);
-		operationLog.setText(""); //$NON-NLS-1$
+		operationLog.setText("");
 
 		startOperationIfNecessary();
 	}
@@ -138,7 +138,7 @@ public abstract class ActualExecuteOperationPage extends WizardPage
 						{
 							state.disallowCancel = false;
 							ShowMessagesPage errorPage = new ShowMessagesPage(
-								"IntErr", operationTypeString + " failed", "Internal error. Logs contain more details.", false, null); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+								"IntErr", operationTypeString + " failed", "Internal error. Logs contain more details.", false, null);
 							errorPage.setWizard(getWizard());
 							showPageInUIThread(errorPage);
 						}
@@ -176,7 +176,7 @@ public abstract class ActualExecuteOperationPage extends WizardPage
 		if (error.o != null)
 		{
 			state.disallowCancel = false;
-			ShowMessagesPage errorPage = new ShowMessagesPage("ActErr", operationTypeString + " failed", error.o, null, messages, false, null); //$NON-NLS-1$//$NON-NLS-2$
+			ShowMessagesPage errorPage = new ShowMessagesPage("ActErr", operationTypeString + " failed", error.o, null, messages, false, null);
 			errorPage.setWizard(getWizard());
 			showPageInUIThread(errorPage);
 		}
@@ -190,11 +190,11 @@ public abstract class ActualExecuteOperationPage extends WizardPage
 		}
 		else
 		{
-			appendTextToLog("Done."); //$NON-NLS-1$
+			appendTextToLog("Done.");
 			if (messages != null)
 			{
 				nextPage = new ShowMessagesPage(
-					"ActErr", operationTypeString + " finished", "However, some items may need your attention.", null, messages, false, null); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+					"ActErr", operationTypeString + " finished", "However, some items may need your attention.", null, messages, false, null);
 				nextPage.setWizard(getWizard());
 				// state.canFinish is not set to true here; see getNextPage()
 			}
@@ -213,7 +213,7 @@ public abstract class ActualExecuteOperationPage extends WizardPage
 			{
 				if (!operationLog.isDisposed()) // can be already disposed when on restart there are not messages to show and the wizard closes itself
 				{
-					operationLog.setText(operationLog.getText() + toAppend + System.getProperty("line.separator")); //$NON-NLS-1$
+					operationLog.setText(operationLog.getText() + toAppend + System.getProperty("line.separator"));
 					operationLog.setSize(operationLog.computeSize(operationLog.getParent().getSize().x, SWT.DEFAULT));
 				}
 			}

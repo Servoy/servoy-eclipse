@@ -54,7 +54,7 @@ public class FileEditorInputFactory extends org.eclipse.ui.part.FileEditorInputF
 	/**
 	 * Tag for the IFile.fullPath of the file resource.
 	 */
-	private static final String TAG_PATH = "path"; //$NON-NLS-1$
+	private static final String TAG_PATH = "path";
 
 	/*
 	 * (non-Javadoc) Method declared on IElementFactory.

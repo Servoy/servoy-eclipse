@@ -120,10 +120,10 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 	{
 		viewer = sev;
 
-		newFormMethodImage = Activator.loadImageDescriptorFromBundle("new_form_method.gif"); //$NON-NLS-1$
-		newGlobalMethodImage = Activator.loadImageDescriptorFromBundle("new_global_method.gif"); //$NON-NLS-1$
-		setText("Create method"); //$NON-NLS-1$
-		setToolTipText("Create method"); //$NON-NLS-1$
+		newFormMethodImage = Activator.loadImageDescriptorFromBundle("new_form_method.gif");
+		newGlobalMethodImage = Activator.loadImageDescriptorFromBundle("new_global_method.gif");
+		setText("Create method");
+		setToolTipText("Create method");
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)
@@ -264,8 +264,8 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 								{
 									if (forcedMethodName == null)
 									{
-										MessageDialog dialog = new MessageDialog(shell, "Method already exists in the super form " + f.getName(), null, //$NON-NLS-1$
-											"Are you sure you want to override that forms method?", MessageDialog.QUESTION, //$NON-NLS-1$
+										MessageDialog dialog = new MessageDialog(shell, "Method already exists in the super form " + f.getName(), null,
+											"Are you sure you want to override that forms method?", MessageDialog.QUESTION,
 											new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0);
 										int returnCode = dialog.open();
 										if (returnCode > 0)
@@ -340,7 +340,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 						ISourceViewer sv = scriptEditor.getScriptSourceViewer();
 						StyledText st = sv.getTextWidget();
 
-						st.append("\n"); // for some reason this must be separately //$NON-NLS-1$
+						st.append("\n"); // for some reason this must be separately
 						// added
 						st.append(code);
 						st.setCaretOffset(st.getText().lastIndexOf('}') - 1);
@@ -367,8 +367,8 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 									public void run()
 									{
 										if (MessageDialog.openQuestion(shell,
-											"Javascript editor not saved", //$NON-NLS-1$
-											"The javascript editor for this form is open and dirty.\nThe new method has been appended to it, but\nyou have to save it in order to be able to select/see the new method in Solution Explorer and other places.\n\nDo you want to save the editor?")) //$NON-NLS-1$
+											"Javascript editor not saved",
+											"The javascript editor for this form is open and dirty.\nThe new method has been appended to it, but\nyou have to save it in order to be able to select/see the new method in Solution Explorer and other places.\n\nDo you want to save the editor?"))
 										{
 											openEditor.doSave(null);
 										}
@@ -401,8 +401,8 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 							contents = new BufferedInputStream(file.getContents(true));
 							baos = new ByteArrayOutputStream();
 							Utils.streamCopy(contents, baos);
-							baos.write("\n".getBytes("UTF8")); //$NON-NLS-1$ //$NON-NLS-2$
-							baos.write(code.getBytes("UTF8")); //$NON-NLS-1$
+							baos.write("\n".getBytes("UTF8"));
+							baos.write(code.getBytes("UTF8"));
 							baos.close();
 							bais = new ByteArrayInputStream(baos.toByteArray());
 							file.setContents(bais, true, true, null);
@@ -434,18 +434,18 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 			}
 			catch (RepositoryException e)
 			{
-				MessageDialog.openWarning(shell, "Cannot create the new " + methodType + " method", "Reason: " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				ServoyLog.logWarning("Cannot create method", e); //$NON-NLS-1$
+				MessageDialog.openWarning(shell, "Cannot create the new " + methodType + " method", "Reason: " + e.getMessage());
+				ServoyLog.logWarning("Cannot create method", e);
 			}
 			catch (CoreException e)
 			{
-				MessageDialog.openWarning(shell, "Cannot create the JS file for new " + methodType + " method", "Reason: " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				ServoyLog.logWarning("Cannot create method", e); //$NON-NLS-1$ 
+				MessageDialog.openWarning(shell, "Cannot create the JS file for new " + methodType + " method", "Reason: " + e.getMessage());
+				ServoyLog.logWarning("Cannot create method", e);
 			}
 			catch (IOException e)
 			{
-				MessageDialog.openWarning(shell, "Cannot modify JS file contents for new " + methodType + " method", "Reason: " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				ServoyLog.logWarning("Cannot create method", e); //$NON-NLS-1$ 
+				MessageDialog.openWarning(shell, "Cannot modify JS file contents for new " + methodType + " method", "Reason: " + e.getMessage());
+				ServoyLog.logWarning("Cannot create method", e);
 			}
 		}
 		return null;
@@ -513,7 +513,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 
 		if (!IdentDocumentValidator.isJavaIdentifier(newText))
 		{
-			return "Invalid method name"; //$NON-NLS-1$
+			return "Invalid method name";
 		}
 		// valid
 		return null;
@@ -522,7 +522,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 	private static Pair<Pair<String, String>, Integer> askForMethodName(String methodType, final IPersist parent, String methodKey, Shell shell, int tagFilter,
 		String[] listOptions, String listValue, String listDescriptionText, IPersist persist, String scopeName)
 	{
-		String defaultName = ""; //$NON-NLS-1$
+		String defaultName = "";
 		if (methodKey != null)
 		{
 			MethodTemplate template = MethodTemplate.getTemplate(ScriptMethod.class, methodKey);
@@ -531,7 +531,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 			if (signature == null || signature.getName() == null)
 			{
 				// not a servoy method key, probably a bean property
-				String[] split = methodKey.split("\\."); //$NON-NLS-1$
+				String[] split = methodKey.split("\\.");
 				name = split[split.length - 1];
 			}
 			else
@@ -567,7 +567,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		if (elementName == null) return simpleMethodName;
 		String modifiedElemName = elementName.substring(0, 1).toUpperCase() + elementName.substring(1);
 		//include in method name ("on/after ... Action ")
-		if (simpleMethodName.startsWith("after")) return new StringBuffer(simpleMethodName).insert(5, modifiedElemName).toString(); //$NON-NLS-1$
+		if (simpleMethodName.startsWith("after")) return new StringBuffer(simpleMethodName).insert(5, modifiedElemName).toString();
 		else return new StringBuffer(simpleMethodName).insert(2, modifiedElemName).toString();
 	}
 
@@ -617,7 +617,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 			{
 				public String isValid(String newText)
 				{
-					if (newText.length() == 0) return ""; //$NON-NLS-1$
+					if (newText.length() == 0) return "";
 					return validateMethodName(parent, scopeName, newText);
 				}
 			}, listOptions, listValue, listDescriptionText);

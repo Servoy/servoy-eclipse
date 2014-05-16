@@ -250,14 +250,14 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 			}
 			else if (type.equals(ServoyBuilder.LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE))
 			{
-				String uuid = (String)marker.getAttribute("elementUuid"); //$NON-NLS-1$
-				String solName = (String)marker.getAttribute("SolutionName"); //$NON-NLS-1$
+				String uuid = (String)marker.getAttribute("elementUuid");
+				String solName = (String)marker.getAttribute("SolutionName");
 				fixes = new IMarkerResolution[] { new ClearLabelForElementProperty(uuid, solName) };
 			}
 			else if (type.equals(ServoyBuilder.MISPLACED_MODULES_MARKER_TYPE))
 			{
-				String solName = (String)marker.getAttribute("SolutionName"); //$NON-NLS-1$
-				Object solType = marker.getAttribute("SolutionType"); //$NON-NLS-1$
+				String solName = (String)marker.getAttribute("SolutionName");
+				Object solType = marker.getAttribute("SolutionType");
 				if (solName != null)
 				{
 					if (solType != null && (Integer)solType == SolutionMetaData.MOBILE)

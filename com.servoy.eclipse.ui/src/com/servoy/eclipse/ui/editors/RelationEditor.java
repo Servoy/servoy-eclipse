@@ -100,8 +100,8 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 {
 	public static int NUMBER_VISIBLE_ITEMS = 10;
 
-	public final static String EMPTY = "";//Leave the spaces!! //$NON-NLS-1$
-	private final static String SEPARATOR = "-"; //$NON-NLS-1$
+	public final static String EMPTY = "";//Leave the spaces!!
+	private final static String SEPARATOR = "-";
 
 	private TableViewer tableViewer;
 	private Text nameField;
@@ -192,7 +192,7 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 			{
 				Point pt = new Point(event.x, event.y);
 				TableItem item = table.getItem(pt);
-				if (item != null && item.getBounds(CI_DELETE).contains(pt) && (!"".equals(item.getText(CI_FROM)) || !"".equals(item.getText(CI_TO)))) //$NON-NLS-1$ //$NON-NLS-2$
+				if (item != null && item.getBounds(CI_DELETE).contains(pt) && (!"".equals(item.getText(CI_FROM)) || !"".equals(item.getText(CI_TO))))
 				{
 					List<TableItem> items = Arrays.asList(table.getItems());
 					int index = items.indexOf(item);
@@ -779,7 +779,7 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 
 	private boolean isEmptySelection(Object object)
 	{
-		if (object == null || "".equals(object)) return true; //$NON-NLS-1$
+		if (object == null || "".equals(object)) return true;
 		if (object instanceof Integer && ((Integer)object).intValue() == 0) return true;
 		return false;
 	}

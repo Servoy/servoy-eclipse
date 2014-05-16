@@ -27,7 +27,7 @@ import com.servoy.j2db.documentation.IDocumentationManager;
  */
 public interface IDocumentationManagerProvider
 {
-	static final String EXTENSION_ID = "com.servoy.eclipse.core.docmanager"; //$NON-NLS-1$
+	static final String EXTENSION_ID = "com.servoy.eclipse.core.docmanager";
 
 	public IDocumentationManager fromXML(String path, ClassLoader loader);
 

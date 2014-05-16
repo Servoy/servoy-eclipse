@@ -98,10 +98,10 @@ public class MapEntryValueEditor extends TableViewer
 	private void createTableColumns(Composite parent, IRelayEditorProvider cellEditorProvider)
 	{
 		TableColumn nameColumn = new TableColumn(getTable(), SWT.LEFT, CI_NAME);
-		nameColumn.setText("Name"); //$NON-NLS-1$
+		nameColumn.setText("Name");
 
 		TableColumn valueColumn = new TableColumn(getTable(), SWT.LEFT, CI_VALUE);
-		valueColumn.setText("Value"); //$NON-NLS-1$
+		valueColumn.setText("Value");
 		TableViewerColumn lengthViewerColumn = new TableViewerColumn(this, valueColumn);
 		lengthViewerColumn.setEditingSupport(new ValueEditingSupport(this, cellEditorProvider));
 
@@ -123,7 +123,7 @@ public class MapEntryValueEditor extends TableViewer
 				}
 				else
 				{
-					throw new IllegalArgumentException("Can only work with Set<Map.Entry>, normally retieved from .entrySet() on Map's"); //$NON-NLS-1$
+					throw new IllegalArgumentException("Can only work with Set<Map.Entry>, normally retieved from .entrySet() on Map's");
 				}
 			}
 
@@ -215,9 +215,9 @@ public class MapEntryValueEditor extends TableViewer
 							return pi.getKey().toString();
 						}
 					case CI_VALUE :
-						return (pi.getValue() != null ? pi.getValue().toString() : ""); //$NON-NLS-1$
+						return (pi.getValue() != null ? pi.getValue().toString() : "");
 					default :
-						return "?"; //$NON-NLS-1$
+						return "?";
 				}
 			}
 			return null;
@@ -251,7 +251,7 @@ public class MapEntryValueEditor extends TableViewer
 				{
 					realValue = relayEditorProvider.convertSetValue(pi.getKey(), value);
 				}
-				pi.setValue((realValue != null ? realValue.toString() : "")); //$NON-NLS-1$
+				pi.setValue((realValue != null ? realValue.toString() : ""));
 				changeSupport.fireEvent(new ChangeEvent(observable));
 				getViewer().update(element, null);
 			}

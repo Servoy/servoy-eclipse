@@ -68,40 +68,40 @@ public class AutomaticNamingStrategies extends PreferencePage implements IWorkbe
 		rootPanel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 
 		Group grpFormEventHandlerNaming = new Group(rootPanel, SWT.NONE);
-		grpFormEventHandlerNaming.setText("Form event handler naming"); //$NON-NLS-1$
+		grpFormEventHandlerNaming.setText("Form event handler naming");
 		grpFormEventHandlerNaming.setLayout(new GridLayout(1, false));
 		grpFormEventHandlerNaming.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
 		defaultFormEventHandlerNaming = new Button(grpFormEventHandlerNaming, SWT.RADIO);
-		defaultFormEventHandlerNaming.setText("Default naming"); //$NON-NLS-1$
+		defaultFormEventHandlerNaming.setText("Default naming");
 
 		includeFormElementNameRadio = new Button(grpFormEventHandlerNaming, SWT.RADIO);
-		includeFormElementNameRadio.setText("Include element name"); //$NON-NLS-1$
+		includeFormElementNameRadio.setText("Include element name");
 
 		includeFormElementDataProviderRadio = new Button(grpFormEventHandlerNaming, SWT.RADIO);
-		includeFormElementDataProviderRadio.setText("Include dataprovider name"); //$NON-NLS-1$
+		includeFormElementDataProviderRadio.setText("Include dataprovider name");
 
 		includeFormElementDataProviderWithFallbackRadio = new Button(grpFormEventHandlerNaming, SWT.RADIO);
-		includeFormElementDataProviderWithFallbackRadio.setText("Include dataprovider name (fallback to element name)"); //$NON-NLS-1$
+		includeFormElementDataProviderWithFallbackRadio.setText("Include dataprovider name (fallback to element name)");
 
 		Group grpTableEventHandlerNaming = new Group(rootPanel, SWT.NONE);
-		grpTableEventHandlerNaming.setText("Table event handler naming"); //$NON-NLS-1$
+		grpTableEventHandlerNaming.setText("Table event handler naming");
 		grpTableEventHandlerNaming.setLayout(new GridLayout(1, false));
 		grpTableEventHandlerNaming.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
 		defaultTableEventHandlerNaming = new Button(grpTableEventHandlerNaming, SWT.RADIO);
-		defaultTableEventHandlerNaming.setText("Default naming"); //$NON-NLS-1$
+		defaultTableEventHandlerNaming.setText("Default naming");
 
 		includeTableNameInEventHandlerRadio = new Button(grpTableEventHandlerNaming, SWT.RADIO);
-		includeTableNameInEventHandlerRadio.setText("Include table name"); //$NON-NLS-1$
+		includeTableNameInEventHandlerRadio.setText("Include table name");
 
 		Group grpLoadedRelationsNaming = new Group(rootPanel, SWT.NONE);
-		grpLoadedRelationsNaming.setText("Relations naming"); //$NON-NLS-1$
+		grpLoadedRelationsNaming.setText("Relations naming");
 		grpLoadedRelationsNaming.setLayout(new GridLayout(1, false));
 		grpLoadedRelationsNaming.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
 		defaultLoadedRelationsNaming = new Button(grpLoadedRelationsNaming, SWT.RADIO);
-		defaultLoadedRelationsNaming.setText("Default naming"); //$NON-NLS-1$
+		defaultLoadedRelationsNaming.setText("Default naming");
 		defaultLoadedRelationsNaming.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -115,7 +115,7 @@ public class AutomaticNamingStrategies extends PreferencePage implements IWorkbe
 		});
 
 		customLoadedRelationsNamingPattern = new Button(grpLoadedRelationsNaming, SWT.RADIO);
-		customLoadedRelationsNamingPattern.setText("Use custom pattern for single-item relations"); //$NON-NLS-1$
+		customLoadedRelationsNamingPattern.setText("Use custom pattern for single-item relations");
 		customLoadedRelationsNamingPattern.addSelectionListener(new SelectionAdapter()
 		{
 			@Override

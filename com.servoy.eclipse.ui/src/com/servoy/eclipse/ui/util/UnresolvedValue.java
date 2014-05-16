@@ -55,7 +55,7 @@ public class UnresolvedValue
 	@Override
 	public String toString()
 	{
-		return "UnresolvedValue [unresolved=" + unresolved + ']'; //$NON-NLS-1$
+		return "UnresolvedValue [unresolved=" + unresolved + ']';
 	}
 
 }

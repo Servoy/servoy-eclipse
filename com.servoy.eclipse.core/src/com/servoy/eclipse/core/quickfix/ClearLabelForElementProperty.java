@@ -68,14 +68,14 @@ public class ClearLabelForElementProperty implements IMarkerResolution
 
 	public String getLabel()
 	{
-		String message = "Clear 'labelFor' property of element "; //$NON-NLS-1$
+		String message = "Clear 'labelFor' property of element ";
 		IPersist persist = getElementAsPersist();
 		if (persist instanceof ISupportName)
 		{
 			String elemName = ((ISupportName)persist).getName();
-			if (elemName != null && !elemName.equals("")) return message + "'" + elemName + "'"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			if (elemName != null && !elemName.equals("")) return message + "'" + elemName + "'";
 		}
-		return message + "with UUID: '" + persist.getUUID() + "'"; //$NON-NLS-1$ //$NON-NLS-2$ 
+		return message + "with UUID: '" + persist.getUUID() + "'";
 	}
 
 	public void run(IMarker marker)

@@ -52,8 +52,8 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 	public static final RequestType REQ_PLACE_LABEL = new RequestType(RequestType.TYPE_LABEL);
 	public static final RequestType REQ_PLACE_RECT_SHAPE = new RequestType(RequestType.TYPE_SHAPE);
 	public static final RequestType REQ_PLACE_TEMPLATE = new RequestType(RequestType.TYPE_TEMPLATE);
-	public static final String REQ_DISTRIBUTE = "VFE_DISTRIBUTE"; //$NON-NLS-1$
-	public static final String VFE_PAGE_ID = "PageID"; //$NON-NLS-1$
+	public static final String REQ_DISTRIBUTE = "VFE_DISTRIBUTE";
+	public static final String VFE_PAGE_ID = "PageID";
 
 	// constants for the mobile editor
 	public static final RequestType REQ_PLACE_HEADER_TITLE = new RequestType(RequestType.TYPE_LABEL);

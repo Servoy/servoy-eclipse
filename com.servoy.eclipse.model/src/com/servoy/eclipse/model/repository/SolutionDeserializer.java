@@ -125,12 +125,12 @@ import com.servoy.j2db.util.Utils;
  */
 public class SolutionDeserializer
 {
-	private static final String VARIABLE_TYPE_JSON_ATTRIBUTE = "variableType"; //$NON-NLS-1$
-	private static final String JS_TYPE_JSON_ATTRIBUTE = "jsType"; //$NON-NLS-1$
-	private static final String ARGUMENTS_JSON_ATTRIBUTE = "arguments"; //$NON-NLS-1$
-	static final String LINE_NUMBER_OFFSET_JSON_ATTRIBUTE = "lineNumberOffset"; //$NON-NLS-1$
-	static final String COMMENT_JSON_ATTRIBUTE = "comment"; //$NON-NLS-1$
-	private static final String CHANGED_JSON_ATTRIBUTE = "changed"; //$NON-NLS-1$
+	private static final String VARIABLE_TYPE_JSON_ATTRIBUTE = "variableType";
+	private static final String JS_TYPE_JSON_ATTRIBUTE = "jsType";
+	private static final String ARGUMENTS_JSON_ATTRIBUTE = "arguments";
+	static final String LINE_NUMBER_OFFSET_JSON_ATTRIBUTE = "lineNumberOffset";
+	static final String COMMENT_JSON_ATTRIBUTE = "comment";
+	private static final String CHANGED_JSON_ATTRIBUTE = "changed";
 
 	public static final RuntimeProperty<Boolean> POSSIBLE_DUPLICATE_UUID = new RuntimeProperty<Boolean>()
 	{
@@ -166,7 +166,7 @@ public class SolutionDeserializer
 		}
 		catch (JSONException e)
 		{
-			ServoyLog.logError("Error created json object of: " + content, e); //$NON-NLS-1$
+			ServoyLog.logError("Error created json object of: " + content, e);
 		}
 		return null;
 	}
@@ -179,7 +179,7 @@ public class SolutionDeserializer
 		}
 		catch (JSONException e)
 		{
-			ServoyLog.logError("Error created json object of: " + content, e); //$NON-NLS-1$
+			ServoyLog.logError("Error created json object of: " + content, e);
 		}
 		return null;
 	}
@@ -283,7 +283,7 @@ public class SolutionDeserializer
 			if (errorKeeper != null)
 			{
 				// get the innermost exception - the most relevant one for the user
-				errorKeeper.addError(solutionDir, "Please check the .log file for more info."); //$NON-NLS-1$
+				errorKeeper.addError(solutionDir, "Please check the .log file for more info.");
 			}
 			if (e instanceof RepositoryException)
 			{
@@ -340,7 +340,7 @@ public class SolutionDeserializer
 							boolean recognized = false;
 							if (SolutionSerializer.isJSONFile(file))
 							{
-								JSONObject json_obj = new ServoyJSONObject(Utils.getTXTFileContent(f, Charset.forName("UTF8")), true); //$NON-NLS-1$
+								JSONObject json_obj = new ServoyJSONObject(Utils.getTXTFileContent(f, Charset.forName("UTF8")), true);
 								if (json_obj.length() == 0)
 								{
 									// empty file just skip this one.
@@ -404,7 +404,7 @@ public class SolutionDeserializer
 				{
 					// skip this file
 					if (f != null && errorKeeper != null) errorKeeper.addError(f, e.getMessage());
-					ServoyLog.logError("Invalid JSON syntax in file " + f, e); //$NON-NLS-1$
+					ServoyLog.logError("Invalid JSON syntax in file " + f, e);
 				}
 			}
 
@@ -421,11 +421,11 @@ public class SolutionDeserializer
 				}
 				catch (JSONException e)
 				{
-					ServoyLog.logError("Could not read json object from file " + file + " -- skipping", e); //$NON-NLS-1$ //$NON-NLS-2$
+					ServoyLog.logError("Could not read json object from file " + file + " -- skipping", e);
 				}
 				catch (RepositoryException e)
 				{
-					ServoyLog.logError("Could not read json object from file " + file + " -- skipping", e); //$NON-NLS-1$//$NON-NLS-2$
+					ServoyLog.logError("Could not read json object from file " + file + " -- skipping", e);
 				}
 				if (persist != null)
 				{
@@ -481,11 +481,11 @@ public class SolutionDeserializer
 								}
 								catch (JSONException e)
 								{
-									ServoyLog.logError("Could not read json object from file " + jsFile + " -- skipping", e); //$NON-NLS-1$ //$NON-NLS-2$
+									ServoyLog.logError("Could not read json object from file " + jsFile + " -- skipping", e);
 								}
 								catch (RepositoryException e)
 								{
-									ServoyLog.logError("Could not read json object from file " + jsFile + " -- skipping", e); //$NON-NLS-1$//$NON-NLS-2$
+									ServoyLog.logError("Could not read json object from file " + jsFile + " -- skipping", e);
 								}
 								if (persist != null)
 								{
@@ -802,7 +802,7 @@ public class SolutionDeserializer
 		int typeId;
 		if (parent instanceof Form || parent instanceof Solution)
 		{
-			if (object.has("declaration")) //$NON-NLS-1$
+			if (object.has("declaration"))
 			{
 				typeId = IRepository.METHODS;
 			}
@@ -914,7 +914,7 @@ public class SolutionDeserializer
 				catch (JSONException jsonex)
 				{
 					if (fmediasobjects != null && errorKeeper != null) errorKeeper.addError(fmediasobjects, jsonex.getMessage());
-					ServoyLog.logError("Could not read medias.obj file " + fmediasobjects, jsonex); //$NON-NLS-1$
+					ServoyLog.logError("Could not read medias.obj file " + fmediasobjects, jsonex);
 					return;
 				}
 			}
@@ -940,7 +940,7 @@ public class SolutionDeserializer
 		String fileContent = jsContent;
 		if (jsFile != file)
 		{
-			fileContent = Utils.getTXTFileContent(file, Charset.forName("UTF8")); //$NON-NLS-1$
+			fileContent = Utils.getTXTFileContent(file, Charset.forName("UTF8"));
 		}
 		if (fileContent == null) return Collections.<JSONObject> emptyList();
 
@@ -1001,7 +1001,7 @@ public class SolutionDeserializer
 			}
 			if (script == null)
 			{
-				Debug.error("No script returned when parsing " + file.getAbsolutePath()); //$NON-NLS-1$
+				Debug.error("No script returned when parsing " + file.getAbsolutePath());
 				ServoyLog.logError("No script returned when parsing " + file.getAbsolutePath(), null);
 				return null;
 			}
@@ -1114,7 +1114,7 @@ public class SolutionDeserializer
 						}
 						else
 						{
-							ServoyLog.logError("Invalid properties comment, ignoring:\n" + comment.getText(), null); //$NON-NLS-1$
+							ServoyLog.logError("Invalid properties comment, ignoring:\n" + comment.getText(), null);
 						}
 					}
 				}
@@ -1161,7 +1161,7 @@ public class SolutionDeserializer
 				if (code != null)
 				{
 					String value_part = fileContent.substring(code.sourceStart(), code.sourceEnd());
-					if (value_part.endsWith(";")) value_part = value_part.substring(0, value_part.length() - 1); //$NON-NLS-1$
+					if (value_part.endsWith(";")) value_part = value_part.substring(0, value_part.length() - 1);
 					if (code instanceof UnaryOperation)
 					{
 						code = ((UnaryOperation)code).getExpression();
@@ -1235,15 +1235,15 @@ public class SolutionDeserializer
 								objectclass = ((Identifier)((CallExpression)objectClassExpression).getExpression()).getName();
 							}
 						}
-						if ("String".equals(objectclass)) //$NON-NLS-1$
+						if ("String".equals(objectclass))
 						{
 							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.TEXT);
 						}
-						else if ("Date".equals(objectclass)) //$NON-NLS-1$
+						else if ("Date".equals(objectclass))
 						{
 							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.DATETIME);
 						}
-						else if ("Array".equals(objectclass)) //$NON-NLS-1$
+						else if ("Array".equals(objectclass))
 						{
 							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
 							String current = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
@@ -1301,7 +1301,7 @@ public class SolutionDeserializer
 						// only fall back to media if the jstype is not set, else keep the jstype that is specified in the doc
 						if (json.opt(JS_TYPE_JSON_ATTRIBUTE) == null)
 						{
-							Debug.log("Unknow expression falling back to media: " + code.getClass()); //$NON-NLS-1$
+							Debug.log("Unknow expression falling back to media: " + code.getClass());
 							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
 						}
 						else
@@ -1315,7 +1315,7 @@ public class SolutionDeserializer
 							}
 						}
 					}
-					json.put("defaultValue", value_part); //$NON-NLS-1$
+					json.put("defaultValue", value_part);
 				}
 				else
 				{
@@ -1346,9 +1346,9 @@ public class SolutionDeserializer
 				JSONObject json = null;
 				if (comment != null)
 				{
-					if (!comment.startsWith("/**") && comment.startsWith("/*")) //$NON-NLS-1$ //$NON-NLS-2$
+					if (!comment.startsWith("/**") && comment.startsWith("/*"))
 					{
-						comment = "/*" + comment.substring(1); //$NON-NLS-1$
+						comment = "/*" + comment.substring(1);
 					}
 					int prop_idx = comment.indexOf(SolutionSerializer.PROPERTIESKEY);
 					if (prop_idx != -1)
@@ -1365,13 +1365,13 @@ public class SolutionDeserializer
 						}
 						else
 						{
-							ServoyLog.logError("Invalid properties comment, ignoring:\n" + comment, null); //$NON-NLS-1$
+							ServoyLog.logError("Invalid properties comment, ignoring:\n" + comment, null);
 						}
 					}
 				}
 				else
 				{
-					comment = ""; //$NON-NLS-1$
+					comment = "";
 				}
 				if (json == null)
 				{
@@ -1381,16 +1381,16 @@ public class SolutionDeserializer
 				json.put(SolutionSerializer.PROP_NAME, function.getName().getName());
 
 				String source = fileContent.substring(function.sourceStart(), function.sourceEnd());
-				if ("".equals(comment)) //$NON-NLS-1$
+				if ("".equals(comment))
 				{
 					if (source.indexOf(".search") != -1 || source.indexOf("controller.loadAllRecords") != -1)
 					{
 						comment = "/**\n * @AllowToRunInFind\n */\n";
-						json.put("declaration", comment + source + '\n'); //$NON-NLS-1$
+						json.put("declaration", comment + source + '\n');
 					}
 					else
 					{
-						json.put("declaration", source + '\n'); //$NON-NLS-1$
+						json.put("declaration", source + '\n');
 					}
 				}
 				else
@@ -1402,9 +1402,9 @@ public class SolutionDeserializer
 						comment = comment.substring(0, lastNewLine + 1) + comment.substring(lastNewLine + 1, endComment) + "* @AllowToRunInFind\n" +
 							comment.substring(lastNewLine + 1);
 					}
-					json.put("declaration", comment.trim() + '\n' + source + '\n'); //$NON-NLS-1$
+					json.put("declaration", comment.trim() + '\n' + source + '\n');
 				}
-//				json.put("filename", file.getAbsolutePath()); //$NON-NLS-1$
+//				json.put("filename", file.getAbsolutePath());
 
 
 				int linenr = 1;
@@ -1430,7 +1430,7 @@ public class SolutionDeserializer
 		{
 			// if there is a runtime exception throw then something in the parsing did go wrong.
 			// then this js file will be skipped.
-			ServoyLog.logWarning("Javascript file '" + file + "' had a parsing error ", e); //$NON-NLS-1$ //$NON-NLS-2$
+			ServoyLog.logWarning("Javascript file '" + file + "' had a parsing error ", e);
 		}
 		return null;
 	}
@@ -1483,7 +1483,7 @@ public class SolutionDeserializer
 	{
 		if (!obj.has(SolutionSerializer.PROP_TYPEID))
 		{
-			ServoyLog.logError("The json object couldnt be deserialized into a persist: " + obj + " on parent: " + parent, null); //$NON-NLS-1$ //$NON-NLS-2$
+			ServoyLog.logError("The json object couldnt be deserialized into a persist: " + obj + " on parent: " + parent, null);
 			return null;
 		}
 
@@ -1525,7 +1525,7 @@ public class SolutionDeserializer
 						if (fileName.equals(getFileName(o)))
 						{
 							String relativePath = SolutionSerializer.getRelativePath(o, false);
-							if (relativePath.replace(parentRelativePath, "").startsWith(parentDirName)) //$NON-NLS-1$
+							if (relativePath.replace(parentRelativePath, "").startsWith(parentDirName))
 							{
 								// must make sure also the same parent dir
 								// updated persist in same file
@@ -1743,13 +1743,13 @@ public class SolutionDeserializer
 							if ((JSDocTag.PARAM.equals(jsDocTagName) || JSDocTag.RETURNS.equals(jsDocTagName) || JSDocTag.RETURN.equals(jsDocTagName)))
 							{
 								String tagValueType = null;
-								if (jsDocTagValue.startsWith("{{") && //$NON-NLS-1$
+								if (jsDocTagValue.startsWith("{{") &&
 									(endBracketIdx = jsDocTagValue.indexOf("}}", 1)) != -1)
 								{
 									endBracketIdx++;
 									tagValueType = jsDocTagValue.substring(1, endBracketIdx);
 								}
-								else if (jsDocTagValue.startsWith("{") && //$NON-NLS-1$
+								else if (jsDocTagValue.startsWith("{") &&
 									(endBracketIdx = jsDocTagValue.indexOf('}', 1)) != -1)
 								{
 									tagValueType = jsDocTagValue.substring(1, endBracketIdx);
@@ -1809,7 +1809,7 @@ public class SolutionDeserializer
 									paramType = paramIdToTypeMap.get(opName);
 								}
 							}
-							if (paramType == null || "*".equals(paramType)) paramType = "Any"; // if still null then it is the Any type. //$NON-NLS-1$
+							if (paramType == null || "*".equals(paramType)) paramType = "Any"; // if still null then it is the Any type.
 							ArgumentType argumentType = ArgumentType.valueOf(paramType);
 							methodArguments[i] = new MethodArgument(name, argumentType, null, isOptional); // TODO: parse description
 						}
@@ -1941,7 +1941,7 @@ public class SolutionDeserializer
 		}
 		catch (JSONException e)
 		{
-			ServoyLog.logWarning("Cannot get uuid from file " + file, e); //$NON-NLS-1$
+			ServoyLog.logWarning("Cannot get uuid from file " + file, e);
 		}
 		return uuid;
 	}
@@ -2019,7 +2019,7 @@ public class SolutionDeserializer
 					}
 					catch (RepositoryException e)
 					{
-						ServoyLog.logWarning("Error paring js to json", e); //$NON-NLS-1$
+						ServoyLog.logWarning("Error paring js to json", e);
 					}
 				}
 
@@ -2098,21 +2098,21 @@ public class SolutionDeserializer
 			JSONObject obj = new ServoyJSONObject(solutionmetadata, true);
 			if (!obj.has(SolutionSerializer.PROP_FILE_VERSION))
 			{
-				throw new RepositoryException("Cannot handle files with unknown version"); //$NON-NLS-1$
+				throw new RepositoryException("Cannot handle files with unknown version");
 			}
 			else
 			{
 				fileVersion = obj.getInt(SolutionSerializer.PROP_FILE_VERSION);
 				if (fileVersion <= 0)
 				{
-					throw new RepositoryException("Cannot handle files with invalid version (<= 0)"); //$NON-NLS-1$
+					throw new RepositoryException("Cannot handle files with invalid version (<= 0)");
 				}
 			}
 			UUID rootObjectUuid = UUID.fromString(obj.getString(SolutionSerializer.PROP_UUID));
 			int objectTypeId = obj.getInt(SolutionSerializer.PROP_TYPEID);
 //			String name = obj.getString(SolutionSerializer.PROP_NAME);
-			int solutionType = obj.getInt("solutionType"); //$NON-NLS-1$
-			boolean mustAuthenticate = obj.getBoolean("mustAuthenticate"); //$NON-NLS-1$
+			int solutionType = obj.getInt("solutionType");
+			boolean mustAuthenticate = obj.getBoolean("mustAuthenticate");
 			//int id = repository.getNewElementID(rootObjectUuid);
 			int id = repository.getElementIdForUUID(rootObjectUuid);
 			SolutionMetaData metadata = (SolutionMetaData)repository.createRootObjectMetaData(id, rootObjectUuid, name, objectTypeId, 1, 1);
@@ -2126,7 +2126,7 @@ public class SolutionDeserializer
 		}
 		catch (JSONException e)
 		{
-			throw new RepositoryException("Cannot get root meta data from file " + projectFile, e); //$NON-NLS-1$
+			throw new RepositoryException("Cannot get root meta data from file " + projectFile, e);
 		}
 	}
 

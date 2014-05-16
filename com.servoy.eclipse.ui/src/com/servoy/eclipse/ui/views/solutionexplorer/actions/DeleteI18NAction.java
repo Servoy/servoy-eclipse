@@ -41,20 +41,20 @@ public class DeleteI18NAction extends Action implements ISelectionChangedListene
 	public DeleteI18NAction(Shell shell)
 	{
 		this.shell = shell;
-		setText("Delete I18N"); //$NON-NLS-1$
-		setToolTipText("Delete I18N"); //$NON-NLS-1$
+		setText("Delete I18N");
+		setToolTipText("Delete I18N");
 	}
 
 	@Override
 	public void run()
 	{
-		if (selection != null && MessageDialog.openConfirm(shell, getText(), "Are you sure you want to delete?")) //$NON-NLS-1$
+		if (selection != null && MessageDialog.openConfirm(shell, getText(), "Are you sure you want to delete?"))
 		{
 			Iterator<SimpleUserNode> it = selection.iterator();
 			String[] i18nName;
 			while (it.hasNext())
 			{
-				i18nName = Utils.getTokenElements(it.next().getName(), ".", true); //$NON-NLS-1$
+				i18nName = Utils.getTokenElements(it.next().getName(), ".", true);
 				EclipseMessages.deleteMessageFileNames(i18nName[0], i18nName[1]);
 			}
 		}

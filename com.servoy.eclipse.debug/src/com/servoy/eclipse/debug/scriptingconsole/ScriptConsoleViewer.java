@@ -56,8 +56,8 @@ import org.eclipse.ui.console.TextConsoleViewer;
 
 public class ScriptConsoleViewer extends TextConsoleViewer implements IScriptConsoleViewer
 {
-	private static final String TEXT_SETTING = "TEXT"; //$NON-NLS-1$
-	private static final String HISTORY_SETTING = "HISTORY"; //$NON-NLS-1$
+	private static final String TEXT_SETTING = "TEXT";
+	private static final String HISTORY_SETTING = "HISTORY";
 
 	private class ConsoleDocumentListener implements IDocumentListener
 	{
@@ -101,7 +101,7 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements IScriptCon
 			try
 			{
 				disconnectListener();
-				doc.set(""); //$NON-NLS-1$
+				doc.set("");
 				ScriptConsoleViewer viewer;
 				for (Object element : viewerList)
 				{
@@ -164,7 +164,7 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements IScriptCon
 				return;
 			}
 
-			Thread handlerThread = new Thread("Command Line Handler") //$NON-NLS-1$
+			Thread handlerThread = new Thread("Command Line Handler")
 			{
 
 				@Override
@@ -279,7 +279,7 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements IScriptCon
 		{
 			// ssanders: Content has to be tokenized in order for style and
 			// hyperlinks to display correctly
-			StringTokenizer tokenizer = new StringTokenizer(content, " \t\n\r\f@#=|,()[]{}<>'\"", true); //$NON-NLS-1$
+			StringTokenizer tokenizer = new StringTokenizer(content, " \t\n\r\f@#=|,()[]{}<>'\"", true);
 			String token;
 			int tokenStart = start;
 			ScriptConsoleViewer viewer;
@@ -320,8 +320,8 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements IScriptCon
 			{
 				final String delim = TextUtilities.getDefaultLineDelimiter(doc);
 				String text = doc.get(offset, doc.getLength() - offset);
-				doc.replace(offset, text.length(), ""); //$NON-NLS-1$
-				text = text.replaceAll("\r\n|\n|\r", delim); //$NON-NLS-1$
+				doc.replace(offset, text.length(), "");
+				text = text.replaceAll("\r\n|\n|\r", delim);
 				int start = 0;
 				int index;
 				boolean commandHandled = false;
@@ -598,7 +598,7 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements IScriptCon
 							clipboard.dispose();
 							if (text != null && text.length() > 0)
 							{
-								if (text.indexOf("\n") == -1) //$NON-NLS-1$
+								if (text.indexOf("\n") == -1)
 								{
 									Point selectedRange = getSelectedRange();
 									getTextWidget().insert(text);
@@ -607,11 +607,11 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements IScriptCon
 								}
 								else
 								{
-									StringTokenizer tokenizer = new StringTokenizer(text, "\n\r"); //$NON-NLS-1$
+									StringTokenizer tokenizer = new StringTokenizer(text, "\n\r");
 									while (tokenizer.hasMoreTokens() == true)
 									{
 										final String finText = tokenizer.nextToken();
-										insertText(finText + "\n"); //$NON-NLS-1$
+										insertText(finText + "\n");
 									}
 								}
 							}
@@ -700,7 +700,7 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements IScriptCon
 	{
 		if (documentListener == null)
 		{
-			documentListener = new ConsoleDocumentListener(new ScriptConsolePrompt("=>", "->")); //$NON-NLS-1$//$NON-NLS-2$
+			documentListener = new ConsoleDocumentListener(new ScriptConsolePrompt("=>", "->"));
 		}
 		return documentListener;
 	}

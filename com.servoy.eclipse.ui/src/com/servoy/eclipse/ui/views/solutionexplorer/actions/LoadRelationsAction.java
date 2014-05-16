@@ -98,7 +98,7 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 	{
 		final IServerInternal server = (IServerInternal)((SimpleUserNode)viewer.getTreeSelection().getFirstElement()).getRealObject();
 		final RelationDataLoader dataLoader = new RelationDataLoader();
-		WorkspaceJob loadDataAndShowWizardJob = new WorkspaceJob("Loading relations from server '" + server.getName() + "'") //$NON-NLS-1$ 
+		WorkspaceJob loadDataAndShowWizardJob = new WorkspaceJob("Loading relations from server '" + server.getName() + "'")
 		{
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
@@ -125,7 +125,7 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 							else
 							{
 								MessageDialog.openInformation(Display.getDefault().getActiveShell(),
-									"Load relations", "No relation was found in server '" + server.getName() + "'."); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+									"Load relations", "No relation was found in server '" + server.getName() + "'.");
 							}
 						}
 					});
@@ -169,7 +169,7 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 			{
 				List<String> tableNames = server.getTableAndViewNames(true, true);
 				// plus 1 for sorting at the end
-				monitor.beginTask("Loading relations", tableNames.size() + 1); //$NON-NLS-1$
+				monitor.beginTask("Loading relations", tableNames.size() + 1);
 				for (String tableName : tableNames)
 				{
 					if (isCanceled())
@@ -188,13 +188,13 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 						resultSet = dbmd.getExportedKeys(server.getConfig().getCatalog(), server.getConfig().getSchema(), table.getSQLName());
 						while (resultSet.next())
 						{
-							String pcolumnName = resultSet.getString("PKCOLUMN_NAME"); //$NON-NLS-1$
-							String ftableName = resultSet.getString("FKTABLE_NAME"); //$NON-NLS-1$
-							String fcolumnName = resultSet.getString("FKCOLUMN_NAME"); //$NON-NLS-1$
-							String fkname = resultSet.getString("FK_NAME"); //$NON-NLS-1$
+							String pcolumnName = resultSet.getString("PKCOLUMN_NAME");
+							String ftableName = resultSet.getString("FKTABLE_NAME");
+							String fcolumnName = resultSet.getString("FKCOLUMN_NAME");
+							String fkname = resultSet.getString("FK_NAME");
 
 							String relname = fkname;
-							if (relname == null) relname = table.getSQLName() + "_to_" + ftableName; //$NON-NLS-1$
+							if (relname == null) relname = table.getSQLName() + "_to_" + ftableName;
 
 							int keySeq = resultSet.getInt("KEY_SEQ");
 							Debug.trace("Found (export) rel: name: " + relname + "  keyseq = " + keySeq + ' ' + table.getSQLName() + ' ' + pcolumnName +
@@ -217,11 +217,11 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 						List<List<String[]>> fk_rel_items_list = new ArrayList<List<String[]>>();
 						while (resultSet.next())
 						{
-							String pcolumnName = resultSet.getString("PKCOLUMN_NAME"); //$NON-NLS-1$
-							String ptableName = resultSet.getString("PKTABLE_NAME"); //$NON-NLS-1$
-							String fcolumnName = resultSet.getString("FKCOLUMN_NAME"); //$NON-NLS-1$
+							String pcolumnName = resultSet.getString("PKCOLUMN_NAME");
+							String ptableName = resultSet.getString("PKTABLE_NAME");
+							String fcolumnName = resultSet.getString("FKCOLUMN_NAME");
 
-							int keySeq = resultSet.getInt("KEY_SEQ"); //$NON-NLS-1$
+							int keySeq = resultSet.getInt("KEY_SEQ");
 							Debug.trace("Found (import) rel: name: " + table.getSQLName() + "_to_" + ptableName + " keyseq = " + keySeq + ' ' +
 								table.getSQLName() + ' ' + pcolumnName + " -> " + ptableName + ' ' + fcolumnName);
 

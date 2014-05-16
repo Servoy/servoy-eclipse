@@ -107,7 +107,7 @@ public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigura
 				try
 				{
 					MobileTestLaunchConfigurationDelegate.super.openBrowser(webBrowser, launch, configuration, getLaunchMonitor()); // non-blocking
-					if (getLaunchMonitor() != null) getLaunchMonitor().subTask("connecting to mobile test client"); //$NON-NLS-1$
+					if (getLaunchMonitor() != null) getLaunchMonitor().subTask("connecting to mobile test client");
 				}
 				catch (CoreException e)
 				{
@@ -131,7 +131,7 @@ public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigura
 			if (Boolean.parseBoolean(configuration.getAttribute(IMobileTestLaunchConstants.CLOSE_BROWSER_WHEN_DONE,
 				IMobileTestLaunchConstants.DEFAULT_CLOSE_BROWSER_WHEN_DONE)))
 			{
-				if (monitor != null) monitor.subTask("test session finished - closing browser"); //$NON-NLS-1$
+				if (monitor != null) monitor.subTask("test session finished - closing browser");
 				webBrowser.close(); // when tests are done, close the browser
 			}
 			this.webBrowser = null;

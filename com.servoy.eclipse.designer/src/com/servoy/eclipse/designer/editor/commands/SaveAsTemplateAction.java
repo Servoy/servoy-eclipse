@@ -149,8 +149,8 @@ public class SaveAsTemplateAction extends SelectionAction
 		// check existing template
 		StringResource existingTemplate = (Template)ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObject(templateName,
 			IRepository.TEMPLATES);
-		if (existingTemplate != null && !MessageDialog.openConfirm(getWorkbenchPart().getSite().getShell(), "Template exists", //$NON-NLS-1$
-			"A template with name '" + templateName + "' already exists, do you want to overwrite?")) //$NON-NLS-1$
+		if (existingTemplate != null && !MessageDialog.openConfirm(getWorkbenchPart().getSite().getShell(), "Template exists",
+			"A template with name '" + templateName + "' already exists, do you want to overwrite?"))
 		{
 			return;
 		}

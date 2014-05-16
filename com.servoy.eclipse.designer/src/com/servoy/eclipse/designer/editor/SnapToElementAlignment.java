@@ -55,12 +55,12 @@ public class SnapToElementAlignment extends SnapToHelper
 	 * A viewer property indicating whether the snap function is enabled. The
 	 * value must  be a Boolean.
 	 */
-	public static final String PROPERTY_ALIGNMENT_ENABLED = "SnapToAlignment.isEnabled"; //$NON-NLS-1$
+	public static final String PROPERTY_ALIGNMENT_ENABLED = "SnapToAlignment.isEnabled";
 
 	/**
 	 * Property set in the request extended data by the snap class, type will be  {@link ElementAlignmentItem[]}.
 	 */
-	public static final String ELEMENT_ALIGNMENT_REQUEST_DATA = "ElementAlignment.requestData"; //$NON-NLS-1$
+	public static final String ELEMENT_ALIGNMENT_REQUEST_DATA = "ElementAlignment.requestData";
 
 
 	private final GraphicalEditPart container;

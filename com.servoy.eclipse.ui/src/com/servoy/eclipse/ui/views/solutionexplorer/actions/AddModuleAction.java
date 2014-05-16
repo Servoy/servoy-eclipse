@@ -69,9 +69,9 @@ public class AddModuleAction extends Action implements ISelectionChangedListener
 	public AddModuleAction(Shell shell)
 	{
 		this.shell = shell;
-		setText("Add Module"); //$NON-NLS-1$
-		setToolTipText("Add a module to the solution"); //$NON-NLS-1$
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("add_as_module.gif")); //FIXME: NOK - other icon //$NON-NLS-1$
+		setText("Add Module");
+		setToolTipText("Add a module to the solution");
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("add_as_module.gif")); //FIXME: NOK - other icon
 	}
 
 	@Override

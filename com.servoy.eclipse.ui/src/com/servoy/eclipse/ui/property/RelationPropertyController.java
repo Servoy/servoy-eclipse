@@ -76,7 +76,7 @@ public class RelationPropertyController extends PropertyController<String, Objec
 			incudeNone, includeNested);
 		ListSelectCellEditor editor = new ListSelectCellEditor(parent, "Select relation", new RelationContentProvider(flattenedEditingSolution,
 			persistContext.getContext()), new SolutionContextDelegateLabelProvider(RelationLabelProvider.INSTANCE_LAST_NAME_ONLY, persistContext.getContext()), RelationValueEditor.INSTANCE, isReadOnly(), relationListOptions, SWT.NONE, null,
-			"selectRelationDialog"); //$NON-NLS-1$
+			"selectRelationDialog");
 		editor.setShowFilterMenu(true);
 
 		editor.setSelectionFilter(new IFilter()

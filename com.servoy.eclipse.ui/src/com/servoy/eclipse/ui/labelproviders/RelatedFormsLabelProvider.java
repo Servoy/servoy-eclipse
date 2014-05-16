@@ -83,7 +83,7 @@ public class RelatedFormsLabelProvider extends LabelProvider implements IPersist
 
 		if (element instanceof Table)
 		{
-			return ((Table)element).getName() + "[" + ((Table)element).getServerName() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+			return ((Table)element).getName() + "[" + ((Table)element).getServerName() + "]";
 		}
 
 		String superText = super.getText(element);
@@ -92,7 +92,7 @@ public class RelatedFormsLabelProvider extends LabelProvider implements IPersist
 			if (persist instanceof ISupportExtendsID && PersistHelper.isOverrideElement((ISupportExtendsID)persist) &&
 				((AbstractBase)persist).hasProperty("containsFormID"))
 			{
-				superText = (superText != null ? superText : "") + " (" + Messages.LabelOverride + ')'; //$NON-NLS-1$ //$NON-NLS-2$
+				superText = (superText != null ? superText : "") + " (" + Messages.LabelOverride + ')';
 			}
 		}
 		return superText;
@@ -115,7 +115,7 @@ public class RelatedFormsLabelProvider extends LabelProvider implements IPersist
 			Image image = null;
 			if (element instanceof Table)
 			{
-				image = Activator.getDefault().loadImageFromBundle("portal.gif"); //$NON-NLS-1$
+				image = Activator.getDefault().loadImageFromBundle("portal.gif");
 				try
 				{
 					IServer server = ServoyModel.getServerManager().getServer(((Table)element).getServerName());
@@ -124,7 +124,7 @@ public class RelatedFormsLabelProvider extends LabelProvider implements IPersist
 						int tableType = server.getTableType(((Table)element).getName());
 						if (tableType == ITable.VIEW)
 						{
-							image = Activator.getDefault().loadImageFromBundle("view.png"); //$NON-NLS-1$
+							image = Activator.getDefault().loadImageFromBundle("view.png");
 						}
 					}
 				}

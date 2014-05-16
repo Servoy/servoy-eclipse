@@ -43,7 +43,7 @@ import com.servoy.j2db.util.Utils;
 public class ApplicationJSTestSuite extends JSUnitSuite
 {
 
-	private static final String SERVOY_DISABLE_SCRIPT_COMPILE_PROPERTY = "servoy.disableScriptCompile"; //$NON-NLS-1$
+	private static final String SERVOY_DISABLE_SCRIPT_COMPILE_PROPERTY = "servoy.disableScriptCompile";
 
 	public static final String SOLUTION_TEST_JS_NAME = "solutionTestSuite.js";
 
@@ -74,7 +74,7 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 		// make sure that the solution scripts are compiled in interpreted mode by default
 		if (System.getProperty(SERVOY_DISABLE_SCRIPT_COMPILE_PROPERTY) == null)
 		{
-			System.setProperty(SERVOY_DISABLE_SCRIPT_COMPILE_PROPERTY, "true"); //$NON-NLS-1$
+			System.setProperty(SERVOY_DISABLE_SCRIPT_COMPILE_PROPERTY, "true");
 		}
 
 		setStackElementFilters(new String[] { "\\A" + SOLUTION_TEST_JS_NAME + "\\z" });
@@ -107,7 +107,7 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 			catch (NoClassDefFoundError e)
 			{
 				// show nice message when SolutionJSUnitSuiteCodeBuilder is not found - cause classpath needs to be updated since 7.3
-				String msg = "Please include latest 'com.servoy.eclipse.model*.jar' in classpath (required since 7.3)."; //$NON-NLS-1$
+				String msg = "Please include latest 'com.servoy.eclipse.model*.jar' in classpath (required since 7.3).";
 				Debug.log(msg, e);
 				System.err.println(msg);
 				throw e;

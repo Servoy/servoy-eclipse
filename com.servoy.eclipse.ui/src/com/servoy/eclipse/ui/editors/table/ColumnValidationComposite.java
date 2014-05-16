@@ -132,7 +132,7 @@ public class ColumnValidationComposite extends Composite
 
 		Map<String, IColumnValidator> validators = ApplicationServerRegistry.get().getPluginManager().getColumnValidatorManager().getValidators();
 		List<String> options = new ArrayList<String>();
-		options.add("none"); //$NON-NLS-1$
+		options.add("none");
 		Iterator<IColumnValidator> it = validators.values().iterator();
 		while (it.hasNext())
 		{

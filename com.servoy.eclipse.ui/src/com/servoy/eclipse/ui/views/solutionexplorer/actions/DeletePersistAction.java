@@ -172,7 +172,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 								}
 								else
 								{
-									ServoyLog.logError("Trying to delete a selection that is only partially made of resources (they must all be resources)", //$NON-NLS-1$
+									ServoyLog.logError("Trying to delete a selection that is only partially made of resources (they must all be resources)",
 										null);
 								}
 							}
@@ -183,7 +183,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 						}
 						else
 						{
-							ServoyLog.logError("Cannot delete resources when no resources project is active", null); //$NON-NLS-1$
+							ServoyLog.logError("Cannot delete resources when no resources project is active", null);
 						}
 					}
 					if (closeEditor) EditorUtil.closeEditor(persist);
@@ -222,7 +222,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 		}
 		catch (RepositoryException e)
 		{
-			ServoyLog.logError("Could not delete persist from solution", e); //$NON-NLS-1$
+			ServoyLog.logError("Could not delete persist from solution", e);
 		}
 	}
 
@@ -288,7 +288,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 	 */
 	private String buildMessageFromRelationsTable(Map<Integer, List<String>> map)
 	{
-		String message = ""; //$NON-NLS-1$
+		String message = "";
 		Iterator<Integer> keyEnumeration = map.keySet().iterator();
 
 		//retrieve the servoy model
@@ -301,22 +301,22 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 
 			String baseFormName = servoyModel.getFlattenedSolution().getForm(currentKey.intValue()).getName();
 
-			message += "Form: [" + baseFormName + "] has the following children: "; //$NON-NLS-1$ //$NON-NLS-2$
+			message += "Form: [" + baseFormName + "] has the following children: ";
 			for (Object object : childFormNames)
 			{
 				String childName = (String)object;
 
 				if (childFormNames.indexOf(object) == childFormNames.size() - 1)
 				{
-					message += childName + ";"; //$NON-NLS-1$
+					message += childName + ";";
 				}
 				else
 				{
-					message += childName + ","; //$NON-NLS-1$
+					message += childName + ",";
 				}
 			}
 
-			message += "\n"; //$NON-NLS-1$
+			message += "\n";
 		}
 		return message;
 	}
@@ -374,7 +374,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 		List<IPersist> deleteItems = selectedPersists;
 
 		Map<Integer, List<String>> map = new HashMap<Integer, List<String>>();
-		String message = ""; //$NON-NLS-1$
+		String message = "";
 
 		if (deleteItems.size() > 0 && (deleteItems.get(0).getRootObject() instanceof Solution))
 		{
@@ -390,7 +390,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 						performDeletion(selectedPersists);
 					}
 					else if (MessageDialog.openConfirm(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getText(),
-						"Are you sure you want to delete?")) //$NON-NLS-1$
+						"Are you sure you want to delete?"))
 					{
 						performDeletion(selectedPersists);
 					}
@@ -399,7 +399,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 				{
 					message = buildMessageFromRelationsTable(map);
 					MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getText(), message +
-						"You are not allowed to delete!"); //$NON-NLS-1$
+						"You are not allowed to delete!");
 				}
 			}
 			else
@@ -409,7 +409,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 					performDeletion(selectedPersists);
 				}
 				else if (MessageDialog.openConfirm(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getText(),
-					"Are you sure you want to delete?")) //$NON-NLS-1$
+					"Are you sure you want to delete?"))
 				{
 					performDeletion(selectedPersists);
 				}
@@ -417,7 +417,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 		}
 		else if (deleteItems.size() > 0 && (deleteItems.get(0).getRootObject() instanceof StringResource))
 		{
-			if (MessageDialog.openConfirm(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getText(), "Are you sure you want to delete?")) //$NON-NLS-1$
+			if (MessageDialog.openConfirm(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getText(), "Are you sure you want to delete?"))
 			{
 				performDeletion(selectedPersists);
 			}

@@ -28,7 +28,7 @@ import com.servoy.j2db.IServiceProvider;
 public interface IServoyEnvironmentProvider
 {
 
-	static final String EXTENSION_ID = Activator.PLUGIN_ID + ".modelProvider"; //$NON-NLS-1$
+	static final String EXTENSION_ID = Activator.PLUGIN_ID + ".modelProvider";
 
 	IServoyModel getServoyModel();
 

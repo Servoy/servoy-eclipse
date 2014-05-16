@@ -62,8 +62,8 @@ import com.servoy.j2db.util.Debug;
 
 public class EclipseMessages implements ICustomMessageLoader
 {
-	public static final String MESSAGES_EXTENSION = ".properties"; //$NON-NLS-1$
-	public static final String MESSAGES_DIR = "messages"; //$NON-NLS-1$
+	public static final String MESSAGES_EXTENSION = ".properties";
+	public static final String MESSAGES_DIR = "messages";
 
 	private final IFileAccess workspaceDir;
 	private final HashMap<String, TreeMap<String, I18NUtil.MessageEntry>> i18nDatasourceMessages = new HashMap<String, TreeMap<String, I18NUtil.MessageEntry>>();
@@ -205,7 +205,7 @@ public class EclipseMessages implements ICustomMessageLoader
 				String lang = entry.getValue().getLanguage();
 				String messageKey = entry.getValue().getKey();
 				String value = entry.getValue().getValue();
-				if (lang.equals("")) //$NON-NLS-1$
+				if (lang.equals(""))
 				{
 					allDefaults.put(messageKey, value);
 				}
@@ -272,7 +272,7 @@ public class EclipseMessages implements ICustomMessageLoader
 						String lang = entry.getValue().getLanguage();
 						String messageKey = entry.getValue().getKey();
 
-						if ((loadingType == Messages.DEFAULT_LOCALE && (lang.equals(""))) || //$NON-NLS-1$
+						if ((loadingType == Messages.DEFAULT_LOCALE && (lang.equals(""))) ||
 							(loadingType == Messages.SPECIFIED_LANGUAGE && (lang.equals(language.getLanguage()))) ||
 							(loadingType == Messages.SPECIFIED_LOCALE && (lang.equals(Messages.localeToString(language)))))
 						{
@@ -381,7 +381,7 @@ public class EclipseMessages implements ICustomMessageLoader
 				languagesOutput.put(lang, output);
 			}
 			String v = entry.getValue().getValue();
-			if ("".equals(lang) || v != null && v.length() > 0) output.put(key, v); //$NON-NLS-1$
+			if ("".equals(lang) || v != null && v.length() > 0) output.put(key, v);
 		}
 
 		try
@@ -394,8 +394,8 @@ public class EclipseMessages implements ICustomMessageLoader
 			{
 				languageOutputEntry = languagesOutputIte.next();
 				langExt = languageOutputEntry.getKey();
-				if (!langExt.equals("")) langExt = "." + langExt; //$NON-NLS-1$ //$NON-NLS-2$
-				messageFilePath = resourceProject.getFullPath().append(MESSAGES_DIR).append(i18nServer + "." + i18nTable + langExt + MESSAGES_EXTENSION); //$NON-NLS-1$
+				if (!langExt.equals("")) langExt = "." + langExt;
+				messageFilePath = resourceProject.getFullPath().append(MESSAGES_DIR).append(i18nServer + "." + i18nTable + langExt + MESSAGES_EXTENSION);
 
 				String relativeFilePath = messageFilePath.toOSString();
 				if (!workspaceDir.exists(relativeFilePath))
@@ -435,7 +435,7 @@ public class EclipseMessages implements ICustomMessageLoader
 			if (bDeleteUnnecessaryI18NFiles)
 			{
 				IResource messagesResource = resourceProject.findMember(MESSAGES_DIR);
-				final String messageFileName = i18nServer + "." + i18nTable; //$NON-NLS-1$
+				final String messageFileName = i18nServer + "." + i18nTable;
 				if (messagesResource != null)
 				{
 					messagesResource.accept(new IResourceVisitor()
@@ -450,7 +450,7 @@ public class EclipseMessages implements ICustomMessageLoader
 									String language = null;
 									resourceName = resourceName.substring(0, resourceName.lastIndexOf(MESSAGES_EXTENSION));
 									language = resourceName.substring(messageFileName.length());
-									if (language.length() > 0 && language.startsWith(".")) //$NON-NLS-1$
+									if (language.length() > 0 && language.startsWith("."))
 									{
 										language = language.substring(1);
 									}
@@ -487,7 +487,7 @@ public class EclipseMessages implements ICustomMessageLoader
 			ServoyResourcesProject resourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
 			if (resourcesProject != null)
 			{
-				final String messageFileName = i18nServer + "." + i18nTable; //$NON-NLS-1$
+				final String messageFileName = i18nServer + "." + i18nTable;
 
 				IResource messagesResource = resourcesProject.getProject().findMember(MESSAGES_DIR);
 				if (messagesResource != null)
@@ -504,7 +504,7 @@ public class EclipseMessages implements ICustomMessageLoader
 									String language = null;
 									resourceName = resourceName.substring(0, resourceName.lastIndexOf(MESSAGES_EXTENSION));
 									language = resourceName.substring(messageFileName.length());
-									if (language.length() > 0 && language.startsWith(".")) //$NON-NLS-1$
+									if (language.length() > 0 && language.startsWith("."))
 									{
 										language = language.substring(1);
 									}
@@ -593,7 +593,7 @@ public class EclipseMessages implements ICustomMessageLoader
 			ServoyResourcesProject resourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
 			if (resourcesProject != null)
 			{
-				final String messageFileName = (i18nServer != null && i18nTable != null) ? i18nServer + "." + i18nTable : null; //$NON-NLS-1$
+				final String messageFileName = (i18nServer != null && i18nTable != null) ? i18nServer + "." + i18nTable : null;
 				IResource messagesResource = resourcesProject.getProject().findMember(MESSAGES_DIR);
 				if (messagesResource != null)
 				{

@@ -76,7 +76,7 @@ public class StartNGClientHandler extends StartWebClientHandler
 						public void run()
 						{
 							MessageDialog.openError(Display.getDefault().getActiveShell(),
-								"Solution type problem", "Cant open this solution type in this client"); //$NON-NLS-1$
+								"Solution type problem", "Cant open this solution type in this client");
 						}
 					});
 					return;
@@ -96,17 +96,17 @@ public class StartNGClientHandler extends StartWebClientHandler
 					}
 					try
 					{
-						String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solutions/" + solution.getName() + "/index.html"; //$NON-NLS-1$ //$NON-NLS-2$
+						String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solutions/" + solution.getName() + "/index.html";
 						EditorUtil.openURL(getWebBrowser(), url);
 					}
 					catch (final Throwable e)//catch all for apple mac
 					{
-						ServoyLog.logError("Cant open external browser", e); //$NON-NLS-1$
+						ServoyLog.logError("Cant open external browser", e);
 						Display.getDefault().asyncExec(new Runnable()
 						{
 							public void run()
 							{
-								MessageDialog.openError(Display.getDefault().getActiveShell(), "Cant open external browser", e.getLocalizedMessage()); //$NON-NLS-1$
+								MessageDialog.openError(Display.getDefault().getActiveShell(), "Cant open external browser", e.getLocalizedMessage());
 							}
 						});
 					}

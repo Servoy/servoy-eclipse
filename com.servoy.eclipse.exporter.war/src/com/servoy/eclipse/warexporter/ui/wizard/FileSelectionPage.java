@@ -57,11 +57,11 @@ public class FileSelectionPage extends WizardPage implements Listener
 
 	public FileSelectionPage(ExportWarModel exportModel, IWizardPage nextPage)
 	{
-		super("warfileselection"); //$NON-NLS-1$
+		super("warfileselection");
 		this.exportModel = exportModel;
 		this.nextPage = nextPage;
-		setTitle("Choose the destination file"); //$NON-NLS-1$
-		setDescription("Select the file where you want your solution exported to"); //$NON-NLS-1$
+		setTitle("Choose the destination file");
+		setDescription("Select the file where you want your solution exported to");
 	}
 
 	public void createControl(Composite parent)
@@ -77,7 +77,7 @@ public class FileSelectionPage extends WizardPage implements Listener
 		if (exportModel.getFileName() != null) fileNameText.setText(exportModel.getFileName());
 
 		browseButton = new Button(composite, SWT.PUSH);
-		browseButton.setText("Browse..."); //$NON-NLS-1$
+		browseButton.setText("Browse...");
 		browseButton.addListener(SWT.Selection, this);
 
 		exportActiveSolution = new Button(composite, SWT.CHECK);
@@ -125,7 +125,7 @@ public class FileSelectionPage extends WizardPage implements Listener
 					dlg.setFileName(f.getName());
 				}
 			}
-			String[] extensions = { "*.war" }; //$NON-NLS-1$
+			String[] extensions = { "*.war" };
 			dlg.setFilterExtensions(extensions);
 			String chosenFileName = dlg.open();
 			if (chosenFileName != null)
@@ -146,7 +146,7 @@ public class FileSelectionPage extends WizardPage implements Listener
 		if (exportModel.getFileName() == null) return false;
 		if (exportActiveSolution.getSelection() && ServoyModelFinder.getServoyModel().getActiveProject() == null)
 		{
-			setMessage("There is no active solution.", IMessageProvider.WARNING); //$NON-NLS-1$
+			setMessage("There is no active solution.", IMessageProvider.WARNING);
 			result = false;
 			messageSet = true;
 		}
@@ -161,13 +161,13 @@ public class FileSelectionPage extends WizardPage implements Listener
 			{
 				if (f.isDirectory())
 				{
-					setMessage("Specified path points to an existing folder.", IMessageProvider.WARNING); //$NON-NLS-1$
+					setMessage("Specified path points to an existing folder.", IMessageProvider.WARNING);
 					result = false;
 					messageSet = true;
 				}
 				else
 				{
-					setMessage("Specified path points to an existing file.", IMessageProvider.INFORMATION); //$NON-NLS-1$
+					setMessage("Specified path points to an existing file.", IMessageProvider.INFORMATION);
 					messageSet = true;
 				}
 			}
@@ -188,8 +188,8 @@ public class FileSelectionPage extends WizardPage implements Listener
 		if (f.exists())
 		{
 			MessageBox msg = new MessageBox(this.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO | SWT.CANCEL);
-			msg.setText("File already exists"); //$NON-NLS-1$
-			msg.setMessage("The file you selected already exists on disk. Do you want to overwrite it?"); //$NON-NLS-1$
+			msg.setText("File already exists");
+			msg.setMessage("The file you selected already exists on disk. Do you want to overwrite it?");
 			if (msg.open() == SWT.YES)
 			{
 				return nextPage;

@@ -48,7 +48,7 @@ public class OpenValueListAction extends Action implements ISelectionChangedList
 	{
 		viewer = sev;
 
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("openvaluelist.gif")); //$NON-NLS-1$
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("openvaluelist.gif"));
 		setText("Edit valuelist");
 		setToolTipText("Edit valuelist");
 	}

@@ -102,18 +102,18 @@ public class UserNodeListDragSourceListener implements DragSourceListener
 			}
 
 			StringBuilder mediaData = new StringBuilder();
-			boolean isCSSEditorTarget = "org.eclipse.wst.css.ui".equals(targetEditorPluginID); //$NON-NLS-1$
+			boolean isCSSEditorTarget = "org.eclipse.wst.css.ui".equals(targetEditorPluginID);
 			int mediaNamesCount = mediaNamesDragged.size();
 			for (int i = 0; i < mediaNamesCount; i++)
 			{
-				if (i > 0) mediaData.append(", "); //$NON-NLS-1$
+				if (i > 0) mediaData.append(", ");
 				if (isCSSEditorTarget)
 				{
-					mediaData.append("url(media:///").append(mediaNamesDragged.get(i)).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
+					mediaData.append("url(media:///").append(mediaNamesDragged.get(i)).append(")");
 				}
 				else
 				{
-					mediaData.append("\"media:///").append(mediaNamesDragged.get(i)).append("\""); //$NON-NLS-1$ //$NON-NLS-2$
+					mediaData.append("\"media:///").append(mediaNamesDragged.get(i)).append("\"");
 				}
 			}
 

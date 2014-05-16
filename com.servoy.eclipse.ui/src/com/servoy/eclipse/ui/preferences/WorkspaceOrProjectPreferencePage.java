@@ -45,7 +45,7 @@ abstract class WorkspaceOrProjectPreferencePage extends PreferencePage
 	private Link fChangeWorkspaceSettings;
 	private boolean projectSpecificSetting = false;
 	private IProject fProject; // project or null
-	public static final String DATA_NO_LINK = "PropertyAndPreferencePage.nolink"; //$NON-NLS-1$
+	public static final String DATA_NO_LINK = "PropertyAndPreferencePage.nolink";
 	private final Map fData; // page data
 
 	protected abstract String getPreferencePageId();
@@ -133,7 +133,7 @@ abstract class WorkspaceOrProjectPreferencePage extends PreferencePage
 	{
 		Link link = new Link(composite, SWT.NONE);
 		link.setFont(composite.getFont());
-		link.setText("<A>" + text + "</A>"); //$NON-NLS-1$//$NON-NLS-2$
+		link.setText("<A>" + text + "</A>");
 		link.addSelectionListener(new SelectionListener()
 		{
 			public void widgetSelected(SelectionEvent e)

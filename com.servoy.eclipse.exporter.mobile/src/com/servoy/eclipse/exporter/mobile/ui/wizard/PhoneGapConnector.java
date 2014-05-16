@@ -58,9 +58,9 @@ import com.servoy.j2db.util.ServoyJSONObject;
 public class PhoneGapConnector
 {
 
-	private static final String AUTH_TOKEN_PARAM = "?auth_token="; //$NON-NLS-1$
-	private static final String URL_PHONEGAP_KEYS = "https://build.phonegap.com/api/v1/keys"; //$NON-NLS-1$
-	private static final String URL_PHONEGAP_CLOUD = "https://build.phonegap.com/api/v1/apps"; //$NON-NLS-1$
+	private static final String AUTH_TOKEN_PARAM = "?auth_token=";
+	private static final String URL_PHONEGAP_KEYS = "https://build.phonegap.com/api/v1/keys";
+	private static final String URL_PHONEGAP_CLOUD = "https://build.phonegap.com/api/v1/apps";
 
 	private ServoyJSONObject jsonContent;
 	private final DefaultHttpClient client = new DefaultHttpClient();

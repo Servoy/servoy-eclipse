@@ -130,7 +130,7 @@ public class FilteredTree extends Composite
 	/**
 	 * The text to initially show in the filter text control.
 	 */
-	protected String initialText = ""; //$NON-NLS-1$
+	protected String initialText = "";
 
 	/**
 	 * The job used to refresh the tree.
@@ -169,12 +169,12 @@ public class FilteredTree extends Composite
 	/**
 	 * Image descriptor for enabled clear button.
 	 */
-	private static final String CLEAR_ICON = "org.eclipse.ui.internal.dialogs.CLEAR_ICON"; //$NON-NLS-1$
+	private static final String CLEAR_ICON = "org.eclipse.ui.internal.dialogs.CLEAR_ICON";
 
 	/**
 	 * Image descriptor for disabled clear button.
 	 */
-	private static final String DISABLED_CLEAR_ICON = "org.eclipse.ui.internal.dialogs.DCLEAR_ICON"; //$NON-NLS-1$
+	private static final String DISABLED_CLEAR_ICON = "org.eclipse.ui.internal.dialogs.DCLEAR_ICON";
 
 	/**
 	 * Maximum time spent expanding the tree after the filter text has been
@@ -188,12 +188,12 @@ public class FilteredTree extends Composite
 	 */
 	static
 	{
-		ImageDescriptor descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PlatformUI.PLUGIN_ID, "$nl$/icons/full/etool16/clear_co.gif"); //$NON-NLS-1$
+		ImageDescriptor descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PlatformUI.PLUGIN_ID, "$nl$/icons/full/etool16/clear_co.gif");
 		if (descriptor != null)
 		{
 			JFaceResources.getImageRegistry().put(CLEAR_ICON, descriptor);
 		}
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PlatformUI.PLUGIN_ID, "$nl$/icons/full/dtool16/clear_co.gif"); //$NON-NLS-1$
+		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PlatformUI.PLUGIN_ID, "$nl$/icons/full/dtool16/clear_co.gif");
 		if (descriptor != null)
 		{
 			JFaceResources.getImageRegistry().put(DISABLED_CLEAR_ICON, descriptor);
@@ -502,7 +502,7 @@ public class FilteredTree extends Composite
 	 */
 	protected WorkbenchJob doCreateRefreshJob()
 	{
-		return new WorkbenchJob("Refresh Filter") {//$NON-NLS-1$
+		return new WorkbenchJob("Refresh Filter") {
 			@Override
 			public IStatus runInUIThread(IProgressMonitor monitor)
 			{
@@ -767,7 +767,7 @@ public class FilteredTree extends Composite
 				}
 				if (filterText.getText().equals(initialText))
 				{
-					setFilterText(""); //$NON-NLS-1$
+					setFilterText("");
 					textChanged();
 				}
 			}
@@ -788,7 +788,7 @@ public class FilteredTree extends Composite
 					if (filterText.getText().equals(initialText))
 					{
 						// XXX: We cannot call clearText() due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=260664
-						setFilterText(""); //$NON-NLS-1$
+						setFilterText("");
 						textChanged();
 					}
 				}
@@ -971,7 +971,7 @@ public class FilteredTree extends Composite
 			filterToolBar = new ToolBarManager(SWT.FLAT | SWT.HORIZONTAL);
 			filterToolBar.createControl(parent);
 
-			IAction clearTextAction = new Action("", IAction.AS_PUSH_BUTTON) {//$NON-NLS-1$
+			IAction clearTextAction = new Action("", IAction.AS_PUSH_BUTTON) {
 				/*
 				 * (non-Javadoc)
 				 * 
@@ -1110,7 +1110,7 @@ public class FilteredTree extends Composite
 	 */
 	protected void clearText()
 	{
-		setFilterText(""); //$NON-NLS-1$
+		setFilterText("");
 		textChanged();
 	}
 
@@ -1258,7 +1258,7 @@ public class FilteredTree extends Composite
 
 		// Do nothing if it's empty string
 		String initialText = tree.getInitialText();
-		if (!filterText.equals("") && !filterText.equals(initialText)) {//$NON-NLS-1$
+		if (!filterText.equals("") && !filterText.equals(initialText)) {
 			if (tree.getPatternFilter() != filter)
 			{
 				boolean initial = initialText != null && initialText.equals(filterText);

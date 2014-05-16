@@ -74,11 +74,11 @@ public class ShowI18NDialogActionDelegate implements IWorkbenchWindowActionDeleg
 	public static final String ACTION_EDIT = "com.servoy.eclipse.ui.actions.ShowI1n8DialogActionDelegate";
 	public static final String ACTION_EXTERNALIZE = "com.servoy.eclipse.ui.actions.I18nExternalizeDialog";
 
-	private static final String DEFAULT_MESSAGES_TABLE = "defaultMessagesTable"; //$NON-NLS-1$
-	private static final String DEFAULT_MESSAGES_SERVER = "defaultMessagesServer"; //$NON-NLS-1$
+	private static final String DEFAULT_MESSAGES_TABLE = "defaultMessagesTable";
+	private static final String DEFAULT_MESSAGES_SERVER = "defaultMessagesServer";
 
-	private static final String MOBILE_MESSAGES_SERVER_NAME = "mobile"; //$NON-NLS-1$
-	private static final String MOBILE_MESSAGES_TABLE_NAME = "messages"; //$NON-NLS-1$
+	private static final String MOBILE_MESSAGES_SERVER_NAME = "mobile";
+	private static final String MOBILE_MESSAGES_TABLE_NAME = "messages";
 
 	private IWorkbenchWindow workbenchWindow;
 
@@ -146,7 +146,7 @@ public class ShowI18NDialogActionDelegate implements IWorkbenchWindowActionDeleg
 						public Control createControl(Composite composite)
 						{
 							Button createButton = new Button(composite, SWT.PUSH);
-							createButton.setText("Create new I18N table"); //$NON-NLS-1$
+							createButton.setText("Create new I18N table");
 							createButton.addListener(SWT.Selection, new Listener()
 							{
 								public void handleEvent(Event event)

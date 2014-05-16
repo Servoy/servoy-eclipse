@@ -41,9 +41,9 @@ public class OpenI18NAction extends Action implements ISelectionChangedListener
 	{
 		viewer = sev;
 
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("open.gif")); //$NON-NLS-1$
-		setText("Open I18N"); //$NON-NLS-1$
-		setToolTipText("Open I18N"); //$NON-NLS-1$
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("open.gif"));
+		setText("Open I18N");
+		setToolTipText("Open I18N");
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)

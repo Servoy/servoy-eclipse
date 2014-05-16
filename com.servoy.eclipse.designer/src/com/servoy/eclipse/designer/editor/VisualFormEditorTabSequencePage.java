@@ -512,7 +512,7 @@ public class VisualFormEditorTabSequencePage extends Composite
 		for (int index : selection.getSelectedIndices())
 			tabSeqs[index] = ++max;
 
-		executeCommand(new RefreshingCommand(getSaveCommand(tabSeqs, "add to tab sequence")) //$NON-NLS-1$
+		executeCommand(new RefreshingCommand(getSaveCommand(tabSeqs, "add to tab sequence"))
 		{
 			@Override
 			public void refresh(boolean haveExecuted)
@@ -547,7 +547,7 @@ public class VisualFormEditorTabSequencePage extends Composite
 		for (int i = 0; i < tabSeqs.length; i++)
 			if (tabSeqs[i] >= 0) tabSeqs[i] = count++;
 
-		executeCommand(new RefreshingCommand(getSaveCommand(tabSeqs, "remove from tab sequence")) //$NON-NLS-1$
+		executeCommand(new RefreshingCommand(getSaveCommand(tabSeqs, "remove from tab sequence"))
 		{
 			@Override
 			public void refresh(boolean haveExecuted)

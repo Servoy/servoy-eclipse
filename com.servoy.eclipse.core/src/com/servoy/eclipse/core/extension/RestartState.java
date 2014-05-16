@@ -43,7 +43,7 @@ import com.servoy.j2db.util.Utils;
  */
 public class RestartState implements IEXPParserPool
 {
-	protected final static String PERSISTED_STATE_FILENAME = "pending.pgo"; //$NON-NLS-1$
+	protected final static String PERSISTED_STATE_FILENAME = "pending.pgo";
 
 	public File installDir = null; // this one does not need to be persisted; can be recreated
 	public IExtensionProvider extensionProvider; // after restart (if needed) it's recreated based on ".pending/.#" folder where # is an int, not persisted
@@ -78,7 +78,7 @@ public class RestartState implements IEXPParserPool
 		}
 		catch (IOException e)
 		{
-			err = "Error persisting pending install: " + e.getMessage(); //$NON-NLS-1$
+			err = "Error persisting pending install: " + e.getMessage();
 			Debug.error(e);
 		}
 		finally
@@ -112,12 +112,12 @@ public class RestartState implements IEXPParserPool
 		}
 		catch (IOException e)
 		{
-			err = "Error preparing pending install: " + e.getMessage(); //$NON-NLS-1$
+			err = "Error preparing pending install: " + e.getMessage();
 			Debug.error(e);
 		}
 		catch (ClassNotFoundException e)
 		{
-			err = "Error preparing pending install: " + e.getMessage(); //$NON-NLS-1$
+			err = "Error preparing pending install: " + e.getMessage();
 			Debug.error(e);
 		}
 		finally

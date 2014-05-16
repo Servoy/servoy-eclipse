@@ -84,15 +84,15 @@ public class CalculationTracker implements ActiveEditorListener
 			}
 			catch (ModelException e)
 			{
-				ServoyLog.logError("Editor exception while trying to determine if JS editor is showing a calculation", e); //$NON-NLS-1$
+				ServoyLog.logError("Editor exception while trying to determine if JS editor is showing a calculation", e);
 			}
 			catch (RepositoryException e)
 			{
-				ServoyLog.logError("Repository exception while trying to get server from calculation editor", e); //$NON-NLS-1$
+				ServoyLog.logError("Repository exception while trying to get server from calculation editor", e);
 			}
 			catch (RemoteException e)
 			{
-				ServoyLog.logError("Repository exception while trying to get table from calculation editor", e); //$NON-NLS-1$
+				ServoyLog.logError("Repository exception while trying to get table from calculation editor", e);
 			}
 		}
 		if (!calculationIdentified)

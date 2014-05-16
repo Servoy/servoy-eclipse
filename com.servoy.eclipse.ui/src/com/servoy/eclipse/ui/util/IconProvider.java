@@ -62,31 +62,31 @@ public class IconProvider
 		c2i = new HashMap<Class< ? >, String>();
 		oldLocation = new HashSet<Class< ? >>();
 
-		c2i.put(com.servoy.j2db.documentation.scripting.docs.JSLib.class, "jslibfolder.gif"); //$NON-NLS-1$
-		c2i.put(com.servoy.j2db.documentation.scripting.docs.Array.class, "jslibarray.gif"); //$NON-NLS-1$
-		c2i.put(com.servoy.j2db.documentation.scripting.docs.Date.class, "day_obj.gif"); //$NON-NLS-1$
-		c2i.put(com.servoy.j2db.documentation.scripting.docs.String.class, "jslibstring.gif"); //$NON-NLS-1$
-		c2i.put(com.servoy.j2db.documentation.scripting.docs.Math.class, "sum.gif"); //$NON-NLS-1$
-		c2i.put(com.servoy.j2db.documentation.scripting.docs.JSON.class, "json.gif"); //$NON-NLS-1$
-		c2i.put(com.servoy.j2db.documentation.scripting.docs.Statements.class, "statements.gif"); //$NON-NLS-1$
-		c2i.put(com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, "special_operators.gif"); //$NON-NLS-1$
-		c2i.put(com.servoy.j2db.documentation.scripting.docs.XML.class, "xml_image.gif"); //$NON-NLS-1$
-		c2i.put(com.servoy.j2db.documentation.scripting.docs.XMLList.class, "xmlList_image.gif"); //$NON-NLS-1$
-		c2i.put(com.servoy.j2db.documentation.scripting.docs.RegExp.class, "regExp_image.gif"); //$NON-NLS-1$
-		c2i.put(com.servoy.j2db.documentation.scripting.docs.Number.class, "number.gif"); //$NON-NLS-1$
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.JSLib.class, "jslibfolder.gif");
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.Array.class, "jslibarray.gif");
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.Date.class, "day_obj.gif");
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.String.class, "jslibstring.gif");
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.Math.class, "sum.gif");
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.JSON.class, "json.gif");
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.Statements.class, "statements.gif");
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, "special_operators.gif");
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.XML.class, "xml_image.gif");
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.XMLList.class, "xmlList_image.gif");
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.RegExp.class, "regExp_image.gif");
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.Number.class, "number.gif");
 
-		c2i.put(JSApplication.class, "application.gif"); //$NON-NLS-1$
-		c2i.put(JSDatabaseManager.class, "server.gif"); //$NON-NLS-1$
-		c2i.put(JSDataSources.class, "datasources.png"); //$NON-NLS-1$
-		c2i.put(JSUtils.class, "toolbox.gif"); //$NON-NLS-1$
-		c2i.put(HistoryProvider.class, "history.gif"); //$NON-NLS-1$
-		c2i.put(JSSecurity.class, "lock.gif"); //$NON-NLS-1$
-		c2i.put(JSI18N.class, "i18n.gif"); //$NON-NLS-1$
-		c2i.put(JSSolutionModel.class, "blueprint.gif"); //$NON-NLS-1$
-		c2i.put(JSUnitAssertFunctions.class, "jsunit.png"); //$NON-NLS-1$
-		c2i.put(ServoyException.class, "exception.gif"); //$NON-NLS-1$
-		c2i.put(JSForm.class, "formula.gif"); //$NON-NLS-1$
-		c2i.put(FoundSet.class, "foundset.gif"); //$NON-NLS-1$
+		c2i.put(JSApplication.class, "application.gif");
+		c2i.put(JSDatabaseManager.class, "server.gif");
+		c2i.put(JSDataSources.class, "datasources.png");
+		c2i.put(JSUtils.class, "toolbox.gif");
+		c2i.put(HistoryProvider.class, "history.gif");
+		c2i.put(JSSecurity.class, "lock.gif");
+		c2i.put(JSI18N.class, "i18n.gif");
+		c2i.put(JSSolutionModel.class, "blueprint.gif");
+		c2i.put(JSUnitAssertFunctions.class, "jsunit.png");
+		c2i.put(ServoyException.class, "exception.gif");
+		c2i.put(JSForm.class, "formula.gif");
+		c2i.put(FoundSet.class, "foundset.gif");
 
 		oldLocation.add(JSUtils.class);
 	}

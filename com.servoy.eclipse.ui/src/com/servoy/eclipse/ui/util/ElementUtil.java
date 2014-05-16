@@ -196,17 +196,17 @@ public class ElementUtil
 		if (persist instanceof ScriptVariable)
 		{
 			ScriptVariable sv = (ScriptVariable)persist;
-			if (sv.isPrivate()) return "variable_private.gif"; //$NON-NLS-1$
-			if (sv.isPublic()) return "variable_public.gif"; //$NON-NLS-1$
-			if (sv.getScopeName() != null) return "global_variable.gif"; //$NON-NLS-1$ 
-			else return "form_variable.gif"; //$NON-NLS-1$
+			if (sv.isPrivate()) return "variable_private.gif";
+			if (sv.isPublic()) return "variable_public.gif";
+			if (sv.getScopeName() != null) return "global_variable.gif";
+			else return "form_variable.gif";
 		}
 		if (persist instanceof ScriptMethod)
 		{
 			ScriptMethod sm = (ScriptMethod)persist;
-			if (sm.isPrivate()) return "private_method.gif"; //$NON-NLS-1$
-			else if (sm.isProtected()) return "protected_method.gif"; //$NON-NLS-1$
-			else return "public_method.gif"; //$NON-NLS-1$
+			if (sm.isPrivate()) return "private_method.gif";
+			else if (sm.isProtected()) return "protected_method.gif";
+			else return "public_method.gif";
 		}
 
 		return null;
@@ -390,14 +390,14 @@ public class ElementUtil
 						}
 						catch (Throwable t)
 						{
-							Debug.error("Error loading bean: " + bean.getName() + " clz: " + beanClass, t); //$NON-NLS-1$ //$NON-NLS-2$
+							Debug.error("Error loading bean: " + bean.getName() + " clz: " + beanClass, t);
 						}
 					}
 					beanClassCache.put(beanClassName, new WeakReference<Class< ? >>(beanClass));
 				}
 				catch (Throwable e)
 				{
-					Debug.error("Error loading bean: " + bean.getName() + " clz: " + beanClassName, e); //$NON-NLS-1$ //$NON-NLS-2$
+					Debug.error("Error loading bean: " + bean.getName() + " clz: " + beanClassName, e);
 				}
 			}
 			return beanClass;
@@ -630,10 +630,10 @@ public class ElementUtil
 		{
 			//designer.gif
 			int encapsulation = f.getEncapsulation();
-			if ((encapsulation & PersistEncapsulation.MODULE_SCOPE) == PersistEncapsulation.MODULE_SCOPE) relPath = "icons/designer_protected.gif"; //$NON-NLS-1$
-			else if ((encapsulation & PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) == PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) relPath = "icons/designer_private.gif"; //$NON-NLS-1$
-			else if ((encapsulation & DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) == DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) relPath = "icons/designer_public.gif"; //$NON-NLS-1$
-			else relPath = "icons/designer.gif"; //$NON-NLS-1$
+			if ((encapsulation & PersistEncapsulation.MODULE_SCOPE) == PersistEncapsulation.MODULE_SCOPE) relPath = "icons/designer_protected.gif";
+			else if ((encapsulation & PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) == PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) relPath = "icons/designer_private.gif";
+			else if ((encapsulation & DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) == DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) relPath = "icons/designer_public.gif";
+			else relPath = "icons/designer.gif";
 		}
 		return relPath;
 	}
@@ -651,12 +651,12 @@ public class ElementUtil
 		{
 			int encapsulation = (form).getEncapsulation();
 			if ((encapsulation & PersistEncapsulation.MODULE_SCOPE) == PersistEncapsulation.MODULE_SCOPE) image = Activator.getDefault().loadImageFromBundle(
-				"designer_protected.gif"); //$NON-NLS-1$
+				"designer_protected.gif");
 			else if ((encapsulation & PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) == PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) image = Activator.getDefault().loadImageFromBundle(
-				"designer_private.gif"); //$NON-NLS-1$
+				"designer_private.gif");
 			else if ((encapsulation & DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) == DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) image = Activator.getDefault().loadImageFromBundle(
-				"designer_public.gif"); //$NON-NLS-1$
-			else image = Activator.getDefault().loadImageFromBundle("designer.gif"); //$NON-NLS-1$
+				"designer_public.gif");
+			else image = Activator.getDefault().loadImageFromBundle("designer.gif");
 		}
 		return image;
 	}

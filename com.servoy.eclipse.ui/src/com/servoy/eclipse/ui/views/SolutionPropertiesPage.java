@@ -96,7 +96,7 @@ public class SolutionPropertiesPage extends PropertyPage
 		IViewReference[] iv = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getViewReferences();
 		for (IViewReference ref : iv)
 		{
-			if (ref.getId().equals("org.eclipse.ui.views.PropertySheet")) //$NON-NLS-1$
+			if (ref.getId().equals("org.eclipse.ui.views.PropertySheet"))
 			{
 				PropertySheetPage psp = (PropertySheetPage)ref.getView(false).getAdapter(PropertySheetPage.class);
 				if (psp != null) psp.refresh();

@@ -325,9 +325,9 @@ public class ProfilerView extends ViewPart
 		 */
 		public void toXML(StringBuilder sb)
 		{
-			String childPrefix = "\t"; //$NON-NLS-1$
+			String childPrefix = "\t";
 
-			int endLine = sb.lastIndexOf("\n"); //$NON-NLS-1$
+			int endLine = sb.lastIndexOf("\n");
 			if (endLine != -1)
 			{
 				childPrefix = sb.substring(endLine + 1) + '\t';

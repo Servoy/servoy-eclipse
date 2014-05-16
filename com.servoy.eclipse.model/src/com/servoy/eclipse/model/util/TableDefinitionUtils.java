@@ -87,7 +87,7 @@ public class TableDefinitionUtils
 			if (!allNeededDbiFilesExist(tables, dbiz))
 			{
 				throw new FileNotFoundException(
-					"Could not locate all needed dbi files for server '" + serverName + "'.\nPlease make sure the necessary files exist."); //$NON-NLS-1$ //$NON-NLS-2$
+					"Could not locate all needed dbi files for server '" + serverName + "'.\nPlease make sure the necessary files exist.");
 			}
 
 			server_tableDbiFiles.put(serverName, dbiz);
@@ -234,7 +234,7 @@ public class TableDefinitionUtils
 		{
 			if (f != null)
 			{
-				int i = f.getName().lastIndexOf(".dbi"); //$NON-NLS-1$
+				int i = f.getName().lastIndexOf(".dbi");
 				dbiFileNames.add(f.getName().substring(0, i));
 			}
 		}

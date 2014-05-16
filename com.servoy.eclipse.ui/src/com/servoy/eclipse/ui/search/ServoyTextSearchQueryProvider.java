@@ -86,6 +86,6 @@ public class ServoyTextSearchQueryProvider extends TextSearchQueryProvider
 
 	private String[] getPreviousFileNamePatterns()
 	{
-		return new String[] { "*" }; //$NON-NLS-1$
+		return new String[] { "*" };
 	}
 }

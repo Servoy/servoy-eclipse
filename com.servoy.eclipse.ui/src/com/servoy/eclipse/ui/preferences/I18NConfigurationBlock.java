@@ -58,14 +58,14 @@ import com.servoy.j2db.util.Settings;
 
 public class I18NConfigurationBlock extends AbstractConfigurationBlock
 {
-	private static final String DEFAULT_MESSAGES_TABLE = "defaultMessagesTable"; //$NON-NLS-1$
-	private static final String DEFAULT_MESSAGES_SERVER = "defaultMessagesServer"; //$NON-NLS-1$
-	private static final String TIMEZONE_DEFAULT = "timezone.default"; //$NON-NLS-1$
-	private static final String LOCALE_DEFAULT = "locale.default"; //$NON-NLS-1$
-	private static final String LOCALE_INTEGERFORMAT = "locale.integerformat"; //$NON-NLS-1$
-	private static final String LOCALE_NUMBERFORMAT = "locale.numberformat"; //$NON-NLS-1$
-	private static final String LOCALE_DATEFORMAT = "locale.dateformat"; //$NON-NLS-1$
-	private static final String SELECTION_NONE = "<none>"; //$NON-NLS-1$
+	private static final String DEFAULT_MESSAGES_TABLE = "defaultMessagesTable";
+	private static final String DEFAULT_MESSAGES_SERVER = "defaultMessagesServer";
+	private static final String TIMEZONE_DEFAULT = "timezone.default";
+	private static final String LOCALE_DEFAULT = "locale.default";
+	private static final String LOCALE_INTEGERFORMAT = "locale.integerformat";
+	private static final String LOCALE_NUMBERFORMAT = "locale.numberformat";
+	private static final String LOCALE_DATEFORMAT = "locale.dateformat";
+	private static final String SELECTION_NONE = "<none>";
 
 	private Text dateFormat;
 	private Text numberFormat;
@@ -98,7 +98,7 @@ public class I18NConfigurationBlock extends AbstractConfigurationBlock
 		composite.setLayout(new GridLayout(3, false));
 
 		Label labelDateFormat = new Label(composite, SWT.NONE);
-		labelDateFormat.setText("Date Format"); //$NON-NLS-1$
+		labelDateFormat.setText("Date Format");
 
 		dateFormat = new Text(composite, SWT.BORDER);
 		GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
@@ -108,40 +108,40 @@ public class I18NConfigurationBlock extends AbstractConfigurationBlock
 		dateFormat.setLayoutData(gridData);
 
 		Label labelNumberFormat = new Label(composite, SWT.NONE);
-		labelNumberFormat.setText("Number Format"); //$NON-NLS-1$
+		labelNumberFormat.setText("Number Format");
 
 		numberFormat = new Text(composite, SWT.BORDER);
 		numberFormat.setLayoutData(gridData);
 
 		Label labelIntegerFormat = new Label(composite, SWT.NONE);
-		labelIntegerFormat.setText("Integer Format"); //$NON-NLS-1$
+		labelIntegerFormat.setText("Integer Format");
 
 		integerFormat = new Text(composite, SWT.BORDER);
 		integerFormat.setLayoutData(gridData);
 
 		Label labelDefaultLocale = new Label(composite, SWT.NONE);
-		labelDefaultLocale.setText("Default Locale"); //$NON-NLS-1$
+		labelDefaultLocale.setText("Default Locale");
 
 		defaultLocale = new Combo(composite, SWT.NULL | SWT.READ_ONLY);
 		UIUtils.setDefaultVisibleItemCount(defaultLocale);
 		defaultLocale.setLayoutData(gridData);
 
 		Label labelDefaultTimezone = new Label(composite, SWT.NONE);
-		labelDefaultTimezone.setText("Default Timezone"); //$NON-NLS-1$
+		labelDefaultTimezone.setText("Default Timezone");
 
 		defaultTimezone = new Combo(composite, SWT.NULL | SWT.READ_ONLY);
 		UIUtils.setDefaultVisibleItemCount(defaultTimezone);
 		defaultTimezone.setLayoutData(gridData);
 
 		Label labelDefaultI18NServer = new Label(composite, SWT.NONE);
-		labelDefaultI18NServer.setText("Default I18N server:"); //$NON-NLS-1$
+		labelDefaultI18NServer.setText("Default I18N server:");
 
 		defaultI18NServer = new Combo(composite, SWT.NULL | SWT.READ_ONLY);
 		UIUtils.setDefaultVisibleItemCount(defaultI18NServer);
 		defaultI18NServer.setLayoutData(gridData);
 
 		Label labelDefaultI18NTable = new Label(composite, SWT.NONE);
-		labelDefaultI18NTable.setText("Default I18N table:"); //$NON-NLS-1$
+		labelDefaultI18NTable.setText("Default I18N table:");
 
 		defaultI18NTable = new Combo(composite, SWT.NULL);
 		UIUtils.setDefaultVisibleItemCount(defaultI18NTable);
@@ -154,7 +154,7 @@ public class I18NConfigurationBlock extends AbstractConfigurationBlock
 		GridData btnCreateData = new GridData(GridData.HORIZONTAL_ALIGN_END);
 		btnCreateData.verticalIndent = 5;
 		btnCreateI18NTable.setLayoutData(btnCreateData);
-		btnCreateI18NTable.setText("Create"); //$NON-NLS-1$
+		btnCreateI18NTable.setText("Create");
 		btnCreateI18NTable.addListener(SWT.Selection, new Listener()
 		{
 			public void handleEvent(Event event)
@@ -190,7 +190,7 @@ public class I18NConfigurationBlock extends AbstractConfigurationBlock
 		GridData btnRecreateFormsData = new GridData(GridData.HORIZONTAL_ALIGN_END);
 		btnRecreateFormsData.verticalIndent = 5;
 		btnRecreateFormsOnI18NChange.setLayoutData(btnRecreateFormsData);
-		btnRecreateFormsOnI18NChange.setText("Recreate forms in debug clients on i18n change"); //$NON-NLS-1$
+		btnRecreateFormsOnI18NChange.setText("Recreate forms in debug clients on i18n change");
 		btnRecreateFormsOnI18NChange.addListener(SWT.Selection, new Listener()
 		{
 			public void handleEvent(Event event)
@@ -214,7 +214,7 @@ public class I18NConfigurationBlock extends AbstractConfigurationBlock
 		locales = Locale.getAvailableLocales();
 		for (int i = 0; i < locales.length; i++)
 		{
-			if (locales[i].getCountry() != null && !locales[i].getCountry().equals("")) //$NON-NLS-1$
+			if (locales[i].getCountry() != null && !locales[i].getCountry().equals(""))
 			al.add(locales[i]);
 		}
 		locales = new Locale[al.size()];
@@ -233,17 +233,17 @@ public class I18NConfigurationBlock extends AbstractConfigurationBlock
 		// Initialize date format.
 		String currentDateFormat = settings.getProperty(LOCALE_DATEFORMAT);
 		if (currentDateFormat != null) dateFormat.setText(currentDateFormat);
-		else dateFormat.setText(""); //$NON-NLS-1$
+		else dateFormat.setText("");
 
 		// Initialize number format.
 		String currentNumberFormat = settings.getProperty(LOCALE_NUMBERFORMAT);
 		if (currentNumberFormat != null) numberFormat.setText(currentNumberFormat);
-		else numberFormat.setText(""); //$NON-NLS-1$
+		else numberFormat.setText("");
 
 		// Initialize integer format
 		String currentIntegerFormat = settings.getProperty(LOCALE_INTEGERFORMAT);
 		if (currentIntegerFormat != null) integerFormat.setText(currentIntegerFormat);
-		else integerFormat.setText(""); //$NON-NLS-1$
+		else integerFormat.setText("");
 
 		// Initialize locales combobox.
 		String defaultLocaleAsString = (String)settings.get(LOCALE_DEFAULT);
@@ -329,7 +329,7 @@ public class I18NConfigurationBlock extends AbstractConfigurationBlock
 					String tName = tableNames.get(i);
 					ITable table = server.getTable(tName);
 					List<String> allcols = Arrays.asList(table.getColumnNames());
-					if (!allcols.contains("message_key") || !allcols.contains("message_value") || !allcols.contains("message_language")) continue; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+					if (!allcols.contains("message_key") || !allcols.contains("message_value") || !allcols.contains("message_language")) continue;
 
 					defaultI18NTable.add(tName);
 					if (tName.equals(tableName)) selectedTableIndex = index;
@@ -338,7 +338,7 @@ public class I18NConfigurationBlock extends AbstractConfigurationBlock
 			}
 			catch (Exception ex)
 			{
-				ServoyLog.logError("Failed to retrieve table names for server '" + serverName + "'.", ex); //$NON-NLS-1$//$NON-NLS-2$
+				ServoyLog.logError("Failed to retrieve table names for server '" + serverName + "'.", ex);
 			}
 		}
 
@@ -387,9 +387,9 @@ public class I18NConfigurationBlock extends AbstractConfigurationBlock
 		settings.put(TIMEZONE_DEFAULT, newTimeZone);
 
 		// Store the default I18N server and table name.
-		if (defaultI18NServer.getText().equals(SELECTION_NONE)) settings.put(DEFAULT_MESSAGES_SERVER, ""); //$NON-NLS-1$
+		if (defaultI18NServer.getText().equals(SELECTION_NONE)) settings.put(DEFAULT_MESSAGES_SERVER, "");
 		else settings.put(DEFAULT_MESSAGES_SERVER, defaultI18NServer.getText());
-		if (defaultI18NTable.getText().equals(SELECTION_NONE)) settings.put(DEFAULT_MESSAGES_TABLE, ""); //$NON-NLS-1$
+		if (defaultI18NTable.getText().equals(SELECTION_NONE)) settings.put(DEFAULT_MESSAGES_TABLE, "");
 		else settings.put(DEFAULT_MESSAGES_TABLE, defaultI18NTable.getText());
 
 		// refresh the i18n messages from the design client so that the visual designer will use new messages if changed 

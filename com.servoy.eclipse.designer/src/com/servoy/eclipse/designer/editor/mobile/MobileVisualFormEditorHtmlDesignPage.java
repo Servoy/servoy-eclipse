@@ -1510,7 +1510,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 								ServoyJSONArray children = new ServoyJSONArray();
 								element.put(CHILDREN_KEY, children);
 
-								StringTokenizer tk = new StringTokenizer(customValues, "\r\n"); //$NON-NLS-1$
+								StringTokenizer tk = new StringTokenizer(customValues, "\r\n");
 								for (int i = 1; tk.hasMoreTokens(); i++)
 								{
 									String line = tk.nextToken();

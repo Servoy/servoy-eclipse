@@ -41,7 +41,7 @@ public class OpenServerAction extends Action implements ISelectionChangedListene
 	{
 		viewer = sev;
 
-//		setImageDescriptor(SolutionExplorerView.loadImageDescriptor("open.gif")); //$NON-NLS-1$
+//		setImageDescriptor(SolutionExplorerView.loadImageDescriptor("open.gif"));
 		setText("Open server");
 		setToolTipText("Open server");
 	}

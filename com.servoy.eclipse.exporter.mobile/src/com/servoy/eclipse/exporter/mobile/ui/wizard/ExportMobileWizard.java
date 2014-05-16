@@ -54,7 +54,7 @@ import com.servoy.eclipse.ui.wizards.FinishPage;
 
 public class ExportMobileWizard extends Wizard implements IExportWizard
 {
-	private static final String PROPERTY_IS_OPEN_URL = "isOpenURL"; //$NON-NLS-1$
+	private static final String PROPERTY_IS_OPEN_URL = "isOpenURL";
 
 	private static final String CAN_FINISH = "canFinish_";
 
@@ -86,10 +86,10 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 		optionsPage = new ExportOptionsPage("optionsPage", mobileExporter.getMediaOrder().size() > 0 ? mediaOrderPage : licensePage, mobileExporter);
 
 		IDialogSettings workbenchSettings = Activator.getDefault().getDialogSettings();
-		IDialogSettings section = workbenchSettings.getSection("MobileExportWizard");//$NON-NLS-1$
+		IDialogSettings section = workbenchSettings.getSection("MobileExportWizard");
 		if (section == null)
 		{
-			section = workbenchSettings.addNewSection("MobileExportWizard");//$NON-NLS-1$
+			section = workbenchSettings.addNewSection("MobileExportWizard");
 		}
 		setDialogSettings(section);
 		finishPage.setTitle("Export finished");

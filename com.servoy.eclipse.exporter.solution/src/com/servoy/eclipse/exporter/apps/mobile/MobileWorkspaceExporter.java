@@ -66,19 +66,19 @@ public class MobileWorkspaceExporter extends AbstractWorkspaceExporter<MobileArg
 				}
 				catch (Exception ex)
 				{
-					outputError("Error while exporting solution - '" + activeProject.getProject().getName() + "': " + ex.getMessage()); //$NON-NLS-1$//$NON-NLS-2$
+					outputError("Error while exporting solution - '" + activeProject.getProject().getName() + "': " + ex.getMessage());
 					exitCode = EXIT_EXPORT_FAILED;
 				}
 			}
 			else
 			{
-				outputError("Solution '" + activeProject.getProject().getName() + "' is not a mobile solution. EXPORT FAILED for this solution."); //$NON-NLS-1$//$NON-NLS-2$
+				outputError("Solution '" + activeProject.getProject().getName() + "' is not a mobile solution. EXPORT FAILED for this solution.");
 				exitCode = EXIT_EXPORT_FAILED;
 			}
 		}
 		else
 		{
-			outputError("Solution in project '" + activeProject.getProject().getName() + "' is not valid. EXPORT FAILED for this solution."); //$NON-NLS-1$//$NON-NLS-2$
+			outputError("Solution in project '" + activeProject.getProject().getName() + "' is not valid. EXPORT FAILED for this solution.");
 			exitCode = EXIT_EXPORT_FAILED;
 		}
 	}

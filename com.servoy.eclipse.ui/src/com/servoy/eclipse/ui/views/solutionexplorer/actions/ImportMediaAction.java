@@ -217,7 +217,7 @@ public class ImportMediaAction extends Action implements ISelectionChangedListen
 			//if duplicate media is not from current editing solution fail fast
 			if (!((Solution)media.getRootObject()).getName().equals(editingSolution.getName()))
 			{
-				throw new RepositoryException("The name '" + media.getName() + "' already exists as media in " + media.getRootObject().getName()); //$NON-NLS-1$ //$NON-NLS-2$
+				throw new RepositoryException("The name '" + media.getName() + "' already exists as media in " + media.getRootObject().getName());
 			}
 			else
 			{

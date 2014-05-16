@@ -100,7 +100,7 @@ public class RelationSearch extends AbstractPersistSearch
 	 */
 	public String getLabel()
 	{
-		return "Searching references to relation '" + relation.getName() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+		return "Searching references to relation '" + relation.getName() + "'";
 	}
 
 	private static class RelationSearchResultCollector extends TextSearchResultCollector
@@ -136,7 +136,7 @@ public class RelationSearch extends AbstractPersistSearch
 					if (object instanceof Element)
 					{
 						// TODO refactor this is the constant of TypeProvider.RESOURCE
-						if (RelationSearchResultCollector.this.relation.equals(((Element)object).getAttribute("servoy.RESOURCE"))) //$NON-NLS-1$
+						if (RelationSearchResultCollector.this.relation.equals(((Element)object).getAttribute("servoy.RESOURCE")))
 						{
 							found = true;
 						}

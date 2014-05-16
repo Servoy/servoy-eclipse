@@ -122,7 +122,7 @@ class SearchMatchAccess extends TextSearchMatchAccess
 			catch (Exception e)
 			{
 				ServoyLog.logError(e);
-				contents = ""; //$NON-NLS-1$
+				contents = "";
 			}
 		}
 	}

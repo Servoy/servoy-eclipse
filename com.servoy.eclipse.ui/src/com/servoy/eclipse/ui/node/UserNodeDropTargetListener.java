@@ -165,13 +165,13 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 
 			final String targetParentPath = targetMediaNode != null ? targetMediaNode.getPath() : null;
 			final Solution editingSolution = project.getEditingSolution();
-			Job job = new WorkspaceJob("Import Media") //$NON-NLS-1$
+			Job job = new WorkspaceJob("Import Media")
 			{
 
 				@Override
 				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 				{
-					monitor.beginTask("Importing Media", IProgressMonitor.UNKNOWN); //$NON-NLS-1$
+					monitor.beginTask("Importing Media", IProgressMonitor.UNKNOWN);
 					try
 					{
 						ImportMediaAction.addMediaFiles(editingSolution, null, (String[])data, targetParentPath);
@@ -182,14 +182,14 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 						{
 							public void run()
 							{
-								MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Could not import media files: " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
-								ServoyLog.logError("Could not import media files", e); //$NON-NLS-1$
+								MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Could not import media files: " + e.getMessage());
+								ServoyLog.logError("Could not import media files", e);
 							}
 						});
 					}
 					catch (Exception e)
 					{
-						ServoyLog.logError("Could not import media files", e); //$NON-NLS-1$
+						ServoyLog.logError("Could not import media files", e);
 					}
 					finally
 					{
@@ -278,7 +278,7 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 					}
 					else if (nodeObject instanceof Solution)
 					{
-						targetFolder = ""; //$NON-NLS-1$
+						targetFolder = "";
 						targetSolutionName = ((Solution)nodeObject).getName();
 					}
 					if (targetFolder != null && targetSolutionName != null)
@@ -287,7 +287,7 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 						final int currentOp = getCurrentOperation();
 						final String fTargetFolder = targetFolder;
 						final String fTargetSolutionName = targetSolutionName;
-						Job job = new WorkspaceJob("Copy/Move Media") //$NON-NLS-1$
+						Job job = new WorkspaceJob("Copy/Move Media")
 						{
 							@Override
 							public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
@@ -298,7 +298,7 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 									String mediaParentName;
 									int idxPathSeparator = mediaName.lastIndexOf('/');
 									if (idxPathSeparator > 0) mediaParentName = mediaName.substring(0, idxPathSeparator);
-									else mediaParentName = ""; //$NON-NLS-1$
+									else mediaParentName = "";
 
 									Solution persistSolution = (Solution)m.getAncestor(IRepository.SOLUTIONS);
 									if (!fTargetFolder.equals(mediaParentName) ||

@@ -73,13 +73,13 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 
 		if (moveSampleText)
 		{
-			setImageDescriptor(Activator.loadImageDescriptorFromBundle("copycont_r_co.gif")); //$NON-NLS-1$
+			setImageDescriptor(Activator.loadImageDescriptorFromBundle("copycont_r_co.gif"));
 			setText(Messages.MoveTextAction_moveSample);
 			setToolTipText(Messages.MoveTextAction_moveSample);
 		}
 		else
 		{
-			setImageDescriptor(Activator.loadImageDescriptorFromBundle("goto_obj.gif")); //$NON-NLS-1$
+			setImageDescriptor(Activator.loadImageDescriptorFromBundle("goto_obj.gif"));
 			setText(Messages.MoveTextAction_moveCode);
 			setToolTipText(Messages.MoveTextAction_moveCode);
 		}
@@ -104,7 +104,7 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 
 			if (cssEditorAvailable)
 			{
-				textToMove = "url(" + textToMove + ")"; //$NON-NLS-1$//$NON-NLS-2$
+				textToMove = "url(" + textToMove + ")";
 			}
 
 			SimpleUserNode formNode = un.parent;
@@ -157,7 +157,7 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 		{
 			String scope = getScopeForEditor(ed);
 			String scopeTxt = txt.substring(txt.indexOf("scopes."));
-			if (scope.equals(scopeTxt.split("\\.")[1])) //$NON-NLS-1$
+			if (scope.equals(scopeTxt.split("\\.")[1]))
 			{
 				// moving code belonging to a scope to the scope's own js file does not need the scope prefix
 				txt = txt.replaceAll("scopes\\." + scope + "\\.", "");
@@ -171,7 +171,7 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 			textSelection.x = caretOffset;
 			textSelection.y = 0;
 		}
-		if (caretOffset > 0 && txt.startsWith(".") && st.getText(caretOffset - 1, caretOffset - 1).equals(".")) //$NON-NLS-1$ //$NON-NLS-2$
+		if (caretOffset > 0 && txt.startsWith(".") && st.getText(caretOffset - 1, caretOffset - 1).equals("."))
 		{
 			txt = txt.substring(1);
 		}
@@ -375,25 +375,25 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 			{
 				if (appliedForm.getName().equals(code))
 				{
-					code = "forms." + appliedForm.getName(); //$NON-NLS-1$
+					code = "forms." + appliedForm.getName();
 				}
 				else
 				{
 					if (replacePrefix)
 					{
-						SampleTagResolver resolver = new SampleTagResolver("forms." + appliedForm.getName() + "."); //$NON-NLS-1$ //$NON-NLS-2$
+						SampleTagResolver resolver = new SampleTagResolver("forms." + appliedForm.getName() + ".");
 						code = Text.processTags(code, resolver);
 					}
 					else
 					{
-						code = "forms." + appliedForm.getName() + "." + code; //$NON-NLS-1$ //$NON-NLS-2$
+						code = "forms." + appliedForm.getName() + "." + code;
 					}
 				}
 
 			}
 			else if (replacePrefix)
 			{
-				SampleTagResolver resolver = new SampleTagResolver(""); //$NON-NLS-1$
+				SampleTagResolver resolver = new SampleTagResolver("");
 				code = Text.processTags(code, resolver);
 			}
 		}
@@ -401,24 +401,24 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 		{
 			if (appliedForm.getName().equals(code))
 			{
-				code = "forms." + appliedForm.getName(); //$NON-NLS-1$
+				code = "forms." + appliedForm.getName();
 			}
 			else
 			{
 				if (replacePrefix)
 				{
-					SampleTagResolver resolver = new SampleTagResolver("forms." + appliedForm.getName() + "."); //$NON-NLS-1$ //$NON-NLS-2$
+					SampleTagResolver resolver = new SampleTagResolver("forms." + appliedForm.getName() + ".");
 					code = Text.processTags(code, resolver);
 				}
 				else
 				{
-					code = "forms." + appliedForm.getName() + "." + code; //$NON-NLS-1$ //$NON-NLS-2$
+					code = "forms." + appliedForm.getName() + "." + code;
 				}
 			}
 		}
 		else if (replacePrefix)
 		{
-			SampleTagResolver resolver = new SampleTagResolver(""); //$NON-NLS-1$
+			SampleTagResolver resolver = new SampleTagResolver("");
 			code = Text.processTags(code, resolver);
 		}
 		return code;
@@ -438,7 +438,7 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 		 */
 		public String getStringValue(String tagname)
 		{
-			if (tagname.equals("prefix")) //$NON-NLS-1$
+			if (tagname.equals("prefix"))
 			{
 				return prefix;
 			}

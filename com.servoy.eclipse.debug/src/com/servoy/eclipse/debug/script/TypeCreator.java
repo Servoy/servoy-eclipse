@@ -679,7 +679,7 @@ public class TypeCreator extends TypeCache
 				}
 				catch (Throwable e)
 				{
-					Debug.error("error registering constants for client plugin ", e); //$NON-NLS-1$
+					Debug.error("error registering constants for client plugin ", e);
 				}
 			}
 		}
@@ -2010,8 +2010,8 @@ public class TypeCreator extends TypeCache
 						docBuilder.append("<br/>");
 						docBuilder.append(returnText);
 					}
-					doc = Utils.stringReplace(docBuilder.toString(), "%%prefix%%", ""); //$NON-NLS-1$ //$NON-NLS-2$
-					doc = Utils.stringReplace(doc, "%%elementName%%", "elements.elem"); //$NON-NLS-1$
+					doc = Utils.stringReplace(docBuilder.toString(), "%%prefix%%", "");
+					doc = Utils.stringReplace(doc, "%%elementName%%", "elements.elem");
 				}
 			}
 			docCache.putIfAbsent(cacheKey, doc);
@@ -3828,50 +3828,50 @@ public class TypeCreator extends TypeCache
 		StringBuilder sb = new StringBuilder(150);
 		if (relation.isGlobal())
 		{
-			sb.append("Global relation defined in solution: "); //$NON-NLS-1$
+			sb.append("Global relation defined in solution: ");
 		}
 		else if (primaryDataProviders.length == 0)
 		{
-			sb.append("Self referencing relation defined in solution:"); //$NON-NLS-1$
+			sb.append("Self referencing relation defined in solution:");
 		}
 		else
 		{
-			sb.append("Relation defined in solution: "); //$NON-NLS-1$
+			sb.append("Relation defined in solution: ");
 		}
 		sb.append(relation.getRootObject().getName());
 		if (relation.isGlobal() || primaryDataProviders.length == 0)
 		{
-			sb.append("<br/>On table: "); //$NON-NLS-1$
-			sb.append(relation.getForeignServerName() + "->" + relation.getForeignTableName()); //$NON-NLS-1$
+			sb.append("<br/>On table: ");
+			sb.append(relation.getForeignServerName() + "->" + relation.getForeignTableName());
 		}
 		else
 		{
-			sb.append("<br/>From: "); //$NON-NLS-1$
+			sb.append("<br/>From: ");
 //			sb.append(relation.getPrimaryDataSource());
-			sb.append(relation.getPrimaryServerName() + " -> " + relation.getPrimaryTableName()); //$NON-NLS-1$
-			sb.append("<br/>To: "); //$NON-NLS-1$
-			sb.append(relation.getForeignServerName() + " -> " + relation.getForeignTableName()); //$NON-NLS-1$
+			sb.append(relation.getPrimaryServerName() + " -> " + relation.getPrimaryTableName());
+			sb.append("<br/>To: ");
+			sb.append(relation.getForeignServerName() + " -> " + relation.getForeignTableName());
 		}
-		sb.append("<br/>"); //$NON-NLS-1$
+		sb.append("<br/>");
 		if (primaryDataProviders.length != 0)
 		{
 			for (int i = 0; i < foreignColumns.length; i++)
 			{
-				sb.append("&nbsp;&nbsp;"); //$NON-NLS-1$
+				sb.append("&nbsp;&nbsp;");
 				if (primaryDataProviders[i] instanceof LiteralDataprovider)
 				{
 					sb.append(((LiteralDataprovider)primaryDataProviders[i]).getValue());
-					sb.append("&nbsp;"); //$NON-NLS-1$
+					sb.append("&nbsp;");
 					sb.append(RelationItem.getOperatorAsString(relation.getOperators()[i]));
-					sb.append("&nbsp;"); //$NON-NLS-1$
+					sb.append("&nbsp;");
 				}
 				else
 				{
 					sb.append((primaryDataProviders[i] != null) ? primaryDataProviders[i].getDataProviderID() : "unresolved");
-					sb.append(" -> "); //$NON-NLS-1$
+					sb.append(" -> ");
 				}
 				sb.append((foreignColumns[i] != null) ? foreignColumns[i].getDataProviderID() : "unresolved");
-				sb.append("<br/>"); //$NON-NLS-1$
+				sb.append("<br/>");
 			}
 		}
 		str = sb.toString();

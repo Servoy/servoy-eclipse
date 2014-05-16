@@ -93,13 +93,13 @@ import com.servoy.j2db.util.StringComparator;
 public class InstalledExtensionsDialog extends TrayDialog
 {
 
-	protected static final String INSTALLED_EXTENSIONS_SECTION = "InstalledExtensionsDialog"; //$NON-NLS-1$
+	protected static final String INSTALLED_EXTENSIONS_SECTION = "InstalledExtensionsDialog";
 	protected static final int UPDATE_CHECK_BUTTON_ID = 1017;
 	protected static final int CI_UPDATE = 3;
 	protected static final int CI_UNINSTALL = 4;
-	protected static final String SPLIT_AT = "splitAt"; //$NON-NLS-1$
-	protected static final String WIDTH = "shellWidth"; //$NON-NLS-1$
-	protected static final String HEIGHT = "shellHeight"; //$NON-NLS-1$
+	protected static final String SPLIT_AT = "splitAt";
+	protected static final String WIDTH = "shellWidth";
+	protected static final String HEIGHT = "shellHeight";
 
 	public static final int SERIAL_RULE_ID = 1017;
 
@@ -178,11 +178,11 @@ public class InstalledExtensionsDialog extends TrayDialog
 			}
 		}
 
-		getShell().setText("Installed Servoy Extensions"); //$NON-NLS-1$
-		Image i1 = Activator.getDefault().loadImageFromBundle("extension16.png"); //$NON-NLS-1$
-		Image i2 = Activator.getDefault().loadImageFromBundle("extension32.png"); //$NON-NLS-1$
-		Image i3 = Activator.getDefault().loadImageFromBundle("extension64.png"); //$NON-NLS-1$
-		Image i4 = Activator.getDefault().loadImageFromBundle("extension128.png"); //$NON-NLS-1$
+		getShell().setText("Installed Servoy Extensions");
+		Image i1 = Activator.getDefault().loadImageFromBundle("extension16.png");
+		Image i2 = Activator.getDefault().loadImageFromBundle("extension32.png");
+		Image i3 = Activator.getDefault().loadImageFromBundle("extension64.png");
+		Image i4 = Activator.getDefault().loadImageFromBundle("extension128.png");
 
 		getShell().setImages(new Image[] { i1, i2, i3, i4 });
 
@@ -213,7 +213,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 		MarketPlaceExtensionProvider marketPlaceProvider;
 		synchronized (dataLock)
 		{
-			monitor.beginTask("Checking for available Servoy Extension updates...", extensions.length * 10 + 2); //$NON-NLS-1$
+			monitor.beginTask("Checking for available Servoy Extension updates...", extensions.length * 10 + 2);
 			installedDmds = new DependencyMetadata[extensions.length];
 			availableUpdates = new DependencyMetadata[extensions.length];
 			for (int i = extensions.length - 1; i >= 0; i--)
@@ -269,7 +269,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 			Message[] msgs = marketPlaceProvider.getMessages();
 			if (msgs.length > 0)
 			{
-				ServoyLog.logInfo("While checking for updates, problems were found: " + Arrays.asList(msgs).toString()); //$NON-NLS-1$
+				ServoyLog.logInfo("While checking for updates, problems were found: " + Arrays.asList(msgs).toString());
 				warnings = msgs;
 			}
 			marketPlaceProvider.dispose();
@@ -325,11 +325,11 @@ public class InstalledExtensionsDialog extends TrayDialog
 		TableColumn col = new TableColumn(table, SWT.CENTER); // icon
 		col.setResizable(false);
 		col = new TableColumn(table, SWT.NONE);
-		col.setText("Extension name"); //$NON-NLS-1$
+		col.setText("Extension name");
 		col.setResizable(false);
 		col = new TableColumn(table, SWT.CENTER);
 		col.setResizable(false);
-		col.setText("Version"); //$NON-NLS-1$
+		col.setText("Version");
 		col = new TableColumn(table, SWT.CENTER, CI_UPDATE); // update button
 		col.setResizable(false);
 		col = new TableColumn(table, SWT.CENTER, CI_UNINSTALL); // remove button
@@ -386,12 +386,12 @@ public class InstalledExtensionsDialog extends TrayDialog
 
 					Message[] msgs = parser.getMessages();
 					if (msgs.length > ml) ServoyLog.logWarning(
-						"When preparing to show description in installed extensions dialog, problems were encountered: " + Arrays.asList(msgs).toString(), null); //$NON-NLS-1$
+						"When preparing to show description in installed extensions dialog, problems were encountered: " + Arrays.asList(msgs).toString(), null);
 
-					String descriptionText = "Extension ID: " + dmd.id + System.getProperty("line.separator"); //$NON-NLS-1$//$NON-NLS-2$
+					String descriptionText = "Extension ID: " + dmd.id + System.getProperty("line.separator");
 					if (whole.getInfo() != null)
 					{
-						if (whole.getInfo().description != null) descriptionText += whole.getInfo().description.replace("\r\n", "\n").replace("\n", System.getProperty("line.separator")); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$
+						if (whole.getInfo().description != null) descriptionText += whole.getInfo().description.replace("\r\n", "\n").replace("\n", System.getProperty("line.separator"));
 					}
 
 					description.setText(descriptionText);
@@ -496,7 +496,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 
 			Message[] msgs = installedProvider.getMessages();
 			if (msgs.length > ml) ServoyLog.logWarning(
-				"When getting all items for installed extensions dialog, problems were encountered: " + Arrays.asList(msgs).toString(), null); //$NON-NLS-1$
+				"When getting all items for installed extensions dialog, problems were encountered: " + Arrays.asList(msgs).toString(), null);
 
 			Pair<DependencyMetadata, DependencyMetadata>[] oldExtensions = extensions;
 			extensions = new Pair[allInstalled.length];
@@ -532,7 +532,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 			{
 				if (table == null || getShell().isDisposed()) return;
 
-				Image updateIcon = Activator.getDefault().loadImageFromBundle("upgrade.gif"); //$NON-NLS-1$
+				Image updateIcon = Activator.getDefault().loadImageFromBundle("upgrade.gif");
 				Image uninstallIcon = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 
 				table.setVisible(false);
@@ -614,7 +614,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 		int nm = parser.getMessages().length;
 		ExtensionConfiguration xml = parser.parseWholeXML();
 		Message[] msgs = parser.getMessages();
-		if (msgs.length > nm) ServoyLog.logInfo("While getting icon in installed dialog, problems were found: " + Arrays.asList(msgs).toString()); //$NON-NLS-1$
+		if (msgs.length > nm) ServoyLog.logInfo("While getting icon in installed dialog, problems were found: " + Arrays.asList(msgs).toString());
 
 		if (xml != null && xml.getInfo() != null)
 		{
@@ -640,7 +640,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 				catch (IOException e)
 				{
 					// we can't get the image for some reason
-					ServoyLog.logWarning("Cannot get extension icon for installed extension", e); //$NON-NLS-1$
+					ServoyLog.logWarning("Cannot get extension icon for installed extension", e);
 				}
 			}
 		}
@@ -693,7 +693,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 	@Override
 	protected void createButtonsForButtonBar(Composite parent)
 	{
-		createButton(parent, UPDATE_CHECK_BUTTON_ID, "Check for updates", true); //$NON-NLS-1$
+		createButton(parent, UPDATE_CHECK_BUTTON_ID, "Check for updates", true);
 	}
 
 	public void simulateUpdateCheckButtonClick()
@@ -709,7 +709,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 		if (buttonId == UPDATE_CHECK_BUTTON_ID)
 		{
 			getButton(UPDATE_CHECK_BUTTON_ID).setEnabled(false);
-			Job job = new Job("Checking for Servoy Extension updates") //$NON-NLS-1$
+			Job job = new Job("Checking for Servoy Extension updates")
 			{
 				private volatile Thread checkingForUpdates;
 
@@ -744,17 +744,17 @@ public class InstalledExtensionsDialog extends TrayDialog
 										getButton(UPDATE_CHECK_BUTTON_ID).setEnabled(true);
 										if (updatesFound == null)
 										{
-											MessageDialog.openError(getShell(), "Update check", //$NON-NLS-1$
-												"Errors encountered while checking for updates.\nCheck logs for more information."); //$NON-NLS-1$
+											MessageDialog.openError(getShell(), "Update check",
+												"Errors encountered while checking for updates.\nCheck logs for more information.");
 										}
 										else if (updatesFound.getLeft().booleanValue()) updateTableUI();
-										else if (updatesFound.getRight() == null) MessageDialog.openInformation(getShell(), "Update check", //$NON-NLS-1$
-											"No new (and compatible) versions were found for installed extensions in the marketplace."); //$NON-NLS-1$
+										else if (updatesFound.getRight() == null) MessageDialog.openInformation(getShell(), "Update check",
+											"No new (and compatible) versions were found for installed extensions in the marketplace.");
 										else
 										{
 											MultiStatus details = ExtensionUIUtils.translateMessagesToStatus(
-												"Could not find any updates for installed extensions.", updatesFound.getRight()); //$NON-NLS-1$
-											ErrorDialog.openError(getShell(), "Update check", null, details); //$NON-NLS-1$
+												"Could not find any updates for installed extensions.", updatesFound.getRight());
+											ErrorDialog.openError(getShell(), "Update check", null, details);
 										}
 									}
 								}

@@ -34,7 +34,7 @@ public class PartFigure extends Figure
 	private static final int MARGINX = 10;
 	private static final int MARGINY = 2;
 
-	private String text = "";//$NON-NLS-1$
+	private String text = "";
 
 	private Dimension textSize = null;
 
@@ -120,7 +120,7 @@ public class PartFigure extends Figure
 		//"text" will never be null.
 		if (s == null)
 		{
-			s = "";//$NON-NLS-1$
+			s = "";
 		}
 		if (text.equals(s))
 		{

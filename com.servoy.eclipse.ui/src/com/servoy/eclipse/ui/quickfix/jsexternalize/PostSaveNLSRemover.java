@@ -48,8 +48,8 @@ import com.servoy.eclipse.model.util.ServoyLog;
  */
 public class PostSaveNLSRemover implements IPostSaveListener
 {
-	public static final String ID = "NLSRemover"; //$NON-NLS-1$
-	public static final String EDITOR_SAVE_PARTICIPANT_PREFIX = "editor_save_participant_"; //$NON-NLS-1$
+	public static final String ID = "NLSRemover";
+	public static final String EDITOR_SAVE_PARTICIPANT_PREFIX = "editor_save_participant_";
 
 	/*
 	 * @see org.eclipse.dltk.ui.editor.saveparticipant.IPostSaveListener#getName()
@@ -103,7 +103,7 @@ public class PostSaveNLSRemover implements IPostSaveListener
 			while (allCommentsIte.hasNext())
 			{
 				c = allCommentsIte.next();
-				if (!c.isMultiLine() && c.getText().startsWith("//$NON-NLS-")) //$NON-NLS-1$
+				if (!c.isMultiLine() && c.getText().startsWith("//$NON-NLS-"))
 				{
 					allNLSComments.add(c);
 				}
@@ -132,7 +132,7 @@ public class PostSaveNLSRemover implements IPostSaveListener
 									nlsUsedIdxMap.put(nlsComment, new ArrayList<Integer>());
 								}
 
-								if (nlsComment.getText().indexOf("//$NON-NLS-" + stringLiteralIdx + "$") != -1) //$NON-NLS-1$ //$NON-NLS-2$
+								if (nlsComment.getText().indexOf("//$NON-NLS-" + stringLiteralIdx + "$") != -1)
 								{
 									nlsUsedIdxMap.get(nlsComment).add(Integer.valueOf(stringLiteralIdx));
 								}
@@ -179,7 +179,7 @@ public class PostSaveNLSRemover implements IPostSaveListener
 			if (usedIdx != null)
 			{
 				for (Integer i : usedIdx)
-					sb.append("//$NON-NLS-").append(i.intValue()).append("$ "); //$NON-NLS-1$ //$NON-NLS-2$
+					sb.append("//$NON-NLS-").append(i.intValue()).append("$ ");
 			}
 			String replaceNLS = sb.toString();
 			if (!nlsComment.getText().equals(replaceNLS))

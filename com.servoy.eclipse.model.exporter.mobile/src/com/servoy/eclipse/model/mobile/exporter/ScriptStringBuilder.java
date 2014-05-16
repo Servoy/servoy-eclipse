@@ -44,7 +44,7 @@ public class ScriptStringBuilder
 
 	public long getCurrentLineNumber()
 	{
-		if (!trackLines) throw new RuntimeException("Line numbers are not being tracked!"); //$NON-NLS-1$
+		if (!trackLines) throw new RuntimeException("Line numbers are not being tracked!");
 		return currentLineNumber;
 	}
 

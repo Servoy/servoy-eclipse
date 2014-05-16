@@ -47,7 +47,7 @@ public class ShowSolutionExplorerAction extends Action
 			}
 			catch (PartInitException e)
 			{
-				Debug.log("Failed to show Solution Explorer.", e); //$NON-NLS-1$
+				Debug.log("Failed to show Solution Explorer.", e);
 			}
 		}
 		if (solex != null) page.setPartState(solex, IWorkbenchPage.STATE_RESTORED);

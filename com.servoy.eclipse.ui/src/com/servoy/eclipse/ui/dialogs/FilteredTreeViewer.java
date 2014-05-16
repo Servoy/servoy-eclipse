@@ -268,7 +268,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 	 */
 	private void createFixedRefreshJob()
 	{
-		refreshJob = new WorkbenchJob("Refresh Filter") {//$NON-NLS-1$
+		refreshJob = new WorkbenchJob("Refresh Filter") {
 			/*
 			 * (non-Javadoc)
 			 * 

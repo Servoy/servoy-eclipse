@@ -108,7 +108,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		optionsPanel.setLayout(new GridLayout(1, false));
 
 		classicMobileFormeditorCheck = new Button(optionsPanel, SWT.CHECK);
-		classicMobileFormeditorCheck.setText("Use classic form editor for mobile forms."); //$NON-NLS-1$
+		classicMobileFormeditorCheck.setText("Use classic form editor for mobile forms.");
 
 		Link xulRunnerInfo = new Link(optionsPanel, SWT.NONE);
 		xulRunnerInfo.setText("Consider installing <A>XulRunner</A> when this option is disabled, for increased compatibility.");
@@ -134,54 +134,54 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		Composite copyPastePanel = new Composite(optionsPanel, SWT.NONE);
 		copyPastePanel.setLayout(new GridLayout(2, false));
 
-		new Label(copyPastePanel, SWT.NONE).setText("Copy/Paste offset"); //$NON-NLS-1$
+		new Label(copyPastePanel, SWT.NONE).setText("Copy/Paste offset");
 
 		copyPasteOffsetSpinner = new Spinner(copyPastePanel, SWT.BORDER);
 		copyPasteOffsetSpinner.setValues(0, 0, 100, 0, 1, 5);
 
 		marqueeSelectOuterCheck = new Button(optionsPanel, SWT.CHECK);
-		marqueeSelectOuterCheck.setText("Marquee selects only elements fully in lasso"); //$NON-NLS-1$
+		marqueeSelectOuterCheck.setText("Marquee selects only elements fully in lasso");
 
 		showRulersCheck = new Button(optionsPanel, SWT.CHECK);
-		showRulersCheck.setText("Show rulers"); //$NON-NLS-1$
+		showRulersCheck.setText("Show rulers");
 		GridData metricsPanelGridData = new GridData(SWT.LEFT, SWT.CENTER, true, true);
 
 		Composite metricsComboPanel = new Composite(optionsPanel, SWT.NONE);
 		metricsComboPanel.setLayout(new GridLayout(2, false));
 		metricsComboPanel.setLayoutData(metricsPanelGridData);
 
-		new Label(metricsComboPanel, SWT.NONE).setText("Ruler Metrics"); //$NON-NLS-1$
+		new Label(metricsComboPanel, SWT.NONE).setText("Ruler Metrics");
 
 		metricsCombo = new ComboViewer(metricsComboPanel);
 		metricsCombo.setContentProvider(new ArrayContentProvider());
 		metricsCombo.setLabelProvider(new LabelProvider());
-		metricsCombo.setInput(new ObjectWrapper[] { new ObjectWrapper("pixels", Integer.valueOf(DesignerPreferences.PX)), new ObjectWrapper("centimeters", //$NON-NLS-1$//$NON-NLS-2$
-			Integer.valueOf(DesignerPreferences.CM)), new ObjectWrapper("inches", Integer.valueOf(DesignerPreferences.IN)) }); //$NON-NLS-1$
+		metricsCombo.setInput(new ObjectWrapper[] { new ObjectWrapper("pixels", Integer.valueOf(DesignerPreferences.PX)), new ObjectWrapper("centimeters",
+			Integer.valueOf(DesignerPreferences.CM)), new ObjectWrapper("inches", Integer.valueOf(DesignerPreferences.IN)) });
 
 		Composite settingsPanel = new Composite(rootPanel, SWT.NONE);
 		settingsPanel.setLayout(new GridLayout(2, false));
 
 		Group grpFeedbackSettings = new Group(settingsPanel, SWT.NONE);
-		grpFeedbackSettings.setText("Feedback Settings"); //$NON-NLS-1$
+		grpFeedbackSettings.setText("Feedback Settings");
 		grpFeedbackSettings.setLayout(new GridLayout(1, false));
 		grpFeedbackSettings.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
 		gridFeedbackCheck = new Button(grpFeedbackSettings, SWT.CHECK);
-		gridFeedbackCheck.setText("Grid Guides"); //$NON-NLS-1$
+		gridFeedbackCheck.setText("Grid Guides");
 
 		Composite gridColorPanel = new Composite(grpFeedbackSettings, SWT.NONE);
 		gridColorPanel.setLayout(new GridLayout(2, false));
 
 		gridColorViewer = new ColorSelectViewer(gridColorPanel, SWT.NONE);
 
-		new Label(gridColorPanel, SWT.NONE).setText("Grid color"); //$NON-NLS-1$
+		new Label(gridColorPanel, SWT.NONE).setText("Grid color");
 
 		Composite gridPointSizePanel = new Composite(grpFeedbackSettings, SWT.NONE);
 		gridPointSizePanel.setLayout(new GridLayout(2, false));
 
 		gridPointSizeSpinner = new Spinner(gridPointSizePanel, SWT.BORDER);
 
-		new Label(gridPointSizePanel, SWT.NONE).setText("Grid point size"); //$NON-NLS-1$
+		new Label(gridPointSizePanel, SWT.NONE).setText("Grid point size");
 
 		Composite gridPointDistancePanel = new Composite(grpFeedbackSettings, SWT.NONE);
 		gridPointDistancePanel.setLayout(new GridLayout(2, false));
@@ -189,23 +189,23 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		gridSizeSpinner = new Spinner(gridPointDistancePanel, SWT.BORDER);
 		gridSizeSpinner.setValues(0, 3, 100, 0, 5, 20);
 
-		new Label(gridPointDistancePanel, SWT.NONE).setText("Point distance"); //$NON-NLS-1$
+		new Label(gridPointDistancePanel, SWT.NONE).setText("Point distance");
 
 		alignmentFeedbackCheck = new Button(grpFeedbackSettings, SWT.CHECK);
-		alignmentFeedbackCheck.setText("Alignment Guides"); //$NON-NLS-1$
+		alignmentFeedbackCheck.setText("Alignment Guides");
 
 		Composite alignementGuideColorPanel = new Composite(grpFeedbackSettings, SWT.NONE);
 		alignementGuideColorPanel.setLayout(new GridLayout(2, false));
 
 		alignmentGuidecolorSelectViewer = new ColorSelectViewer(alignementGuideColorPanel, 0);
 
-		new Label(alignementGuideColorPanel, SWT.NONE).setText("Guide color"); //$NON-NLS-1$
+		new Label(alignementGuideColorPanel, SWT.NONE).setText("Guide color");
 
 		anchorFeedbackCheck = new Button(grpFeedbackSettings, SWT.CHECK);
-		anchorFeedbackCheck.setText("Show anchoring feedback"); //$NON-NLS-1$
+		anchorFeedbackCheck.setText("Show anchoring feedback");
 
 		sameSizeFeedbackCheck = new Button(grpFeedbackSettings, SWT.CHECK);
-		sameSizeFeedbackCheck.setText("Show same-size feedback"); //$NON-NLS-1$
+		sameSizeFeedbackCheck.setText("Show same-size feedback");
 		sameSizeFeedbackCheck.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -220,16 +220,16 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		sameHeightWidthIndicatorColor = new ColorSelectViewer(sameHeightWidthIndicatorPanel, SWT.NONE);
 
-		new Label(sameHeightWidthIndicatorPanel, SWT.NONE).setText("Same height/width indicator"); //$NON-NLS-1$
+		new Label(sameHeightWidthIndicatorPanel, SWT.NONE).setText("Same height/width indicator");
 
 		paintPagebreaksCheck = new Button(grpFeedbackSettings, SWT.CHECK);
-		paintPagebreaksCheck.setText("Paint page breaks"); //$NON-NLS-1$
+		paintPagebreaksCheck.setText("Paint page breaks");
 
 		Composite guideKeyPanel = new Composite(settingsPanel, SWT.NONE);
 		guideKeyPanel.setLayout(new GridLayout(1, true));
 
 		Group grpAlignmentSettings = new Group(guideKeyPanel, SWT.NONE);
-		grpAlignmentSettings.setText("Guide Settings"); //$NON-NLS-1$
+		grpAlignmentSettings.setText("Guide Settings");
 		grpAlignmentSettings.setLayout(new GridLayout(1, false));
 		grpAlignmentSettings.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
@@ -242,10 +242,10 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 				setEnabledState();
 			}
 		});
-		snapToNoneRadio.setText("None"); //$NON-NLS-1$
+		snapToNoneRadio.setText("None");
 
 		snapToGridRadio = new Button(grpAlignmentSettings, SWT.RADIO);
-		snapToGridRadio.setText("Grid Guides"); //$NON-NLS-1$
+		snapToGridRadio.setText("Grid Guides");
 		snapToGridRadio.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -261,7 +261,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		guideSizeSpinner = new Spinner(guideSizePanel, SWT.BORDER);
 		guideSizeSpinner.setValues(0, 3, 100, 0, 5, 20);
 
-		new Label(guideSizePanel, SWT.NONE).setText("Guide size"); //$NON-NLS-1$
+		new Label(guideSizePanel, SWT.NONE).setText("Guide size");
 
 		snapToAlignmentRadio = new Button(grpAlignmentSettings, SWT.RADIO);
 		snapToAlignmentRadio.addSelectionListener(new SelectionAdapter()
@@ -272,7 +272,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 				setEnabledState();
 			}
 		});
-		snapToAlignmentRadio.setText("Alignment Guides"); //$NON-NLS-1$
+		snapToAlignmentRadio.setText("Alignment Guides");
 
 		Composite alignementGuidesPanel = new Composite(grpAlignmentSettings, SWT.NONE);
 		alignementGuidesPanel.setLayout(new GridLayout(2, false));
@@ -282,7 +282,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		alignmentSmallOffsetSpinner = new Spinner(smallOffsetPanel, SWT.BORDER);
 
-		new Label(smallOffsetPanel, SWT.NONE).setText("Small offset"); //$NON-NLS-1$
+		new Label(smallOffsetPanel, SWT.NONE).setText("Small offset");
 
 		Composite indentOffsetPanel = new Composite(alignementGuidesPanel, SWT.NONE);
 		indentOffsetPanel.setLayout(new GridLayout(2, false));
@@ -292,7 +292,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		Label indentLabel = new Label(indentOffsetPanel, SWT.NONE);
 		indentLabel.setBounds(252, 158, 128, 14);
-		indentLabel.setText("Indent offset"); //$NON-NLS-1$
+		indentLabel.setText("Indent offset");
 
 		Composite mediumOffsetPanel = new Composite(alignementGuidesPanel, SWT.NONE);
 		mediumOffsetPanel.setLayout(new GridLayout(2, false));
@@ -300,14 +300,14 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		alignmentMediumDistanceSpinner = new Spinner(mediumOffsetPanel, SWT.BORDER);
 
 		Label lblMediumOffset = new Label(mediumOffsetPanel, SWT.NONE);
-		lblMediumOffset.setText("Medium offset"); //$NON-NLS-1$
+		lblMediumOffset.setText("Medium offset");
 
 		Composite snapToGuidePanel = new Composite(alignementGuidesPanel, SWT.NONE);
 		snapToGuidePanel.setLayout(new GridLayout(2, false));
 
 		alignmentThresholdSpinner = new Spinner(snapToGuidePanel, SWT.BORDER);
 
-		new Label(snapToGuidePanel, SWT.NONE).setText("Snap to Guide Threshold"); //$NON-NLS-1$
+		new Label(snapToGuidePanel, SWT.NONE).setText("Snap to Guide Threshold");
 
 		Composite largeOffsetPanel = new Composite(alignementGuidesPanel, SWT.NONE);
 		largeOffsetPanel.setLayout(new GridLayout(2, false));
@@ -316,15 +316,15 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		alignmentLargeDistanceSpinner.setBounds(20, 204, 60, 26);
 
 		Label lblLargeOffset = new Label(largeOffsetPanel, SWT.NONE);
-		lblLargeOffset.setText("Large offset"); //$NON-NLS-1$
+		lblLargeOffset.setText("Large offset");
 		lblLargeOffset.setBounds(86, 211, 108, 20);
 
 		anchorCheck = new Button(grpAlignmentSettings, SWT.CHECK);
 		anchorCheck.setBounds(19, 230, 175, 26);
-		anchorCheck.setText("Enable Smart Anchoring"); //$NON-NLS-1$
+		anchorCheck.setText("Enable Smart Anchoring");
 
 		Group grpResizing = new Group(guideKeyPanel, SWT.NONE);
-		grpResizing.setText("Keyboard resize/move step sizes"); //$NON-NLS-1$
+		grpResizing.setText("Keyboard resize/move step sizes");
 		grpResizing.setLayout(new GridLayout(2, false));
 		grpResizing.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
@@ -332,8 +332,8 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		smallStepPanel.setLayout(new GridLayout(2, false));
 
 		Label stepSizeLabel = new Label(smallStepPanel, SWT.NONE);
-		stepSizeLabel.setText("Small step"); //$NON-NLS-1$
-		stepSizeLabel.setToolTipText("Move: Ctrl-Arrows\r\nResize : Ctrl-Shift-Arrows"); //$NON-NLS-1$
+		stepSizeLabel.setText("Small step");
+		stepSizeLabel.setToolTipText("Move: Ctrl-Arrows\r\nResize : Ctrl-Shift-Arrows");
 
 		stepSizeSpinner = new Spinner(smallStepPanel, SWT.BORDER);
 		stepSizeSpinner.setValues(0, 1, 100, 0, 1, 5);
@@ -342,8 +342,8 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		largeStepPanel.setLayout(new GridLayout(2, false));
 
 		Label labelLargeStep = new Label(largeStepPanel, SWT.NONE);
-		labelLargeStep.setToolTipText("Move: Ctrl-Alt-Arrows\r\nResize: Alt-Shift-Arrows"); //$NON-NLS-1$
-		labelLargeStep.setText("Large step"); //$NON-NLS-1$
+		labelLargeStep.setToolTipText("Move: Ctrl-Alt-Arrows\r\nResize: Alt-Shift-Arrows");
+		labelLargeStep.setText("Large step");
 
 		largeStepSizeSpinner = new Spinner(largeStepPanel, SWT.BORDER);
 		largeStepSizeSpinner.setValues(0, 1, 100, 0, 1, 5);

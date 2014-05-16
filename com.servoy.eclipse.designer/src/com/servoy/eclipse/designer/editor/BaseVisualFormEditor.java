@@ -88,15 +88,15 @@ import com.servoy.j2db.util.Utils;
 public abstract class BaseVisualFormEditor extends MultiPageEditorPart implements CommandStackListener, IActiveProjectListener, IPersistChangeListener,
 	IShowEditorInput
 {
-	private static final String COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT = "com.servoy.eclipse.designer.context"; //$NON-NLS-1$
+	private static final String COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT = "com.servoy.eclipse.designer.context";
 
 	// edit request types
-	public static final String REQ_SET_PROPERTY = "VFE_SET_PROPERTY"; //$NON-NLS-1$
-	public static final String REQ_COPY = "VFE_COPY"; //$NON-NLS-1$
-	public static final String REQ_CUT = "VFE_CUT"; //$NON-NLS-1$
-	public static final String REQ_PASTE = "VFE_PASTE"; //$NON-NLS-1$
+	public static final String REQ_SET_PROPERTY = "VFE_SET_PROPERTY";
+	public static final String REQ_COPY = "VFE_COPY";
+	public static final String REQ_CUT = "VFE_CUT";
+	public static final String REQ_PASTE = "VFE_PASTE";
 	public static final RequestType REQ_DROP_COPY = new RequestType();
-	public static final String REQ_DROP_LINK = "VFE_DROP_LINK"; //$NON-NLS-1$
+	public static final String REQ_DROP_LINK = "VFE_DROP_LINK";
 	private Form form; // The working model.
 	private ServoyProject servoyProject; // the solution wrapper
 
@@ -374,7 +374,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 	@Override
 	public void doSaveAs()
 	{
-		throw new RuntimeException("'Save as' is not allowed"); //$NON-NLS-1$
+		throw new RuntimeException("'Save as' is not allowed");
 	}
 
 	@Override

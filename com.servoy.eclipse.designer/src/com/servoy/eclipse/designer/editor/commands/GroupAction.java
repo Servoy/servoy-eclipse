@@ -272,7 +272,7 @@ public class GroupAction extends DesignerSelectionAction
 				requests.put(
 					editPartMap.get(bc),
 					new SetPropertyRequest(BaseVisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(),
-						Integer.valueOf(index++), "")); //$NON-NLS-1$
+						Integer.valueOf(index++), ""));
 			}
 		}
 
@@ -286,7 +286,7 @@ public class GroupAction extends DesignerSelectionAction
 			requests.put(
 				editPartMap.get(bc),
 				new SetPropertyRequest(BaseVisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(),
-					Integer.valueOf(index++), "")); //$NON-NLS-1$
+					Integer.valueOf(index++), ""));
 		}
 
 		if (higherModels != null)
@@ -305,7 +305,7 @@ public class GroupAction extends DesignerSelectionAction
 				requests.put(
 					editPartMap.get(bc),
 					new SetPropertyRequest(BaseVisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(),
-						Integer.valueOf(index++), "")); //$NON-NLS-1$
+						Integer.valueOf(index++), ""));
 			}
 		}
 

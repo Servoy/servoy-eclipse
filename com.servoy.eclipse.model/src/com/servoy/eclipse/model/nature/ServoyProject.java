@@ -74,7 +74,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 	/**
 	 * ID of this project nature
 	 */
-	public static final String NATURE_ID = "com.servoy.eclipse.core.ServoyProject"; //$NON-NLS-1$
+	public static final String NATURE_ID = "com.servoy.eclipse.core.ServoyProject";
 
 	private IProject project;
 	private Solution editingSolution;// working copy for editing
@@ -130,13 +130,13 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 			}
 			catch (Exception e)
 			{
-				ServoyLog.logError("Cannot get solution object for project " + project.getName(), e); //$NON-NLS-1$
+				ServoyLog.logError("Cannot get solution object for project " + project.getName(), e);
 			}
 		}
 		else
 		{
 			ModelUtils.getUnexpectedSituationHandler().cannotFindRepository();
-			ServoyLog.logError("Repository error. Cannot find Servoy Eclipse repository.", null); //$NON-NLS-1$
+			ServoyLog.logError("Repository error. Cannot find Servoy Eclipse repository.", null);
 		}
 		return solution;
 	}
@@ -256,7 +256,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 			}
 			catch (Exception e)
 			{
-				ServoyLog.logError("Could not create a working copy of solution " + getSolution().getName(), e); //$NON-NLS-1$
+				ServoyLog.logError("Could not create a working copy of solution " + getSolution().getName(), e);
 			}
 			finally
 			{
@@ -280,7 +280,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 			// the node to save was a new node, add the parent first
 			if (srcNode.getParent() == null)
 			{
-				throw new RepositoryException("Object to save not found in solution"); //$NON-NLS-1$
+				throw new RepositoryException("Object to save not found in solution");
 			}
 			// copy the parent over if needed
 			if (AbstractRepository.searchPersist(editingSolution, srcNode.getParent()) == null)
@@ -395,14 +395,14 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 
 		if (getSolution() == null)
 		{
-			throw new RepositoryException("Cannot load solution"); //$NON-NLS-1$
+			throw new RepositoryException("Cannot load solution");
 		}
 		for (IPersist node : nodes)
 		{
 			IPersist searchNode = AbstractRepository.searchPersist(getEditingSolution(), node);
 			if (searchNode != null /* object was not deleted */&& searchNode != node)
 			{
-				throw new RepositoryException("Object to save is out of sync"); //$NON-NLS-1$
+				throw new RepositoryException("Object to save is out of sync");
 			}
 		}
 
@@ -447,7 +447,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 			}
 			catch (CoreException e)
 			{
-				ServoyLog.logError("Exception while reading referenced projects for " + project.getName(), e); //$NON-NLS-1$
+				ServoyLog.logError("Exception while reading referenced projects for " + project.getName(), e);
 			}
 		}
 		return null;

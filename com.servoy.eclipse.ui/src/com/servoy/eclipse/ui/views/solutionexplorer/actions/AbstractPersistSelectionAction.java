@@ -105,10 +105,10 @@ public abstract class AbstractPersistSelectionAction extends Action implements I
 			}
 			selection = sel;
 		}
-		if (nodeType == UserNodeType.RELATION) persistString = "relation"; //$NON-NLS-1$
-		if (nodeType == UserNodeType.VALUELIST_ITEM) persistString = "valuelist";//$NON-NLS-1$
-		if (nodeType == UserNodeType.MEDIA_IMAGE) persistString = "media";//$NON-NLS-1$
-		if (nodeType == UserNodeType.FORM) persistString = "form";//$NON-NLS-1$
+		if (nodeType == UserNodeType.RELATION) persistString = "relation";
+		if (nodeType == UserNodeType.VALUELIST_ITEM) persistString = "valuelist";
+		if (nodeType == UserNodeType.MEDIA_IMAGE) persistString = "media";
+		if (nodeType == UserNodeType.FORM) persistString = "form";
 
 		setEnabled(state);
 	}
@@ -127,8 +127,8 @@ public abstract class AbstractPersistSelectionAction extends Action implements I
 	public void setPersist(IPersist persist)
 	{
 		this.selectedPersist = persist;
-		if (persist instanceof ScriptCalculation) persistString = "calculation";//$NON-NLS-1$
-		if (persist instanceof AggregateVariable) persistString = "aggregation";//$NON-NLS-1$
+		if (persist instanceof ScriptCalculation) persistString = "calculation";
+		if (persist instanceof AggregateVariable) persistString = "aggregation";
 	}
 
 

@@ -87,18 +87,18 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 
 
 	private final String ERROR_WARNING_POTENTIAL_DRAWBACKS = Messages.ErrorWarningPreferencePage_potentialDrawBacks;
-	private final String ERROR_WARNING_DEVELOPER_PROBLEMS = "Developer problems"; //$NON-NLS-1$
-	private final String ERROR_WARNING_RELATIONS_PROBLEMS = "Relation problems"; //$NON-NLS-1$
-	private final String ERROR_WARNING_VALUELIST_PROBLEMS = "Valuelist problems"; //$NON-NLS-1$
-	private final String ERROR_WARNING_RESOURCE_PROJECT_PROBLEMS = "Resource project problems"; //$NON-NLS-1$
-	private final String ERROR_WARNING_STYLES_PROBLEMS = "Styles problems"; //$NON-NLS-1$
-	private final String ERROR_WARNING_LOGIN_PROBLEMS = "Login problems"; //$NON-NLS-1$
-	private final String ERROR_WARNING_DEPRECATED_PROPERTIES_USAGE_PROBLEMS = "Deprecated elements usage problems"; //$NON-NLS-1$
-	private final String ERROR_WARNING_MODULES_PROBLEMS = "Module problems"; //$NON-NLS-1$
-	private final String ERROR_WARNING_FORM_PROBLEMS = "Form problems"; //$NON-NLS-1$
-	private final String ERROR_WARNING_COLUMNS_PROBLEMS = "Column problems"; //$NON-NLS-1$
-	private final String ERROR_WARNING_SORT_PROBLEMS = "Sort problems"; //$NON-NLS-1$
-	private final String ERROR_WARNING_SOLUTION_PROBLEMS = "Servoy solution problems"; //$NON-NLS-1$
+	private final String ERROR_WARNING_DEVELOPER_PROBLEMS = "Developer problems";
+	private final String ERROR_WARNING_RELATIONS_PROBLEMS = "Relation problems";
+	private final String ERROR_WARNING_VALUELIST_PROBLEMS = "Valuelist problems";
+	private final String ERROR_WARNING_RESOURCE_PROJECT_PROBLEMS = "Resource project problems";
+	private final String ERROR_WARNING_STYLES_PROBLEMS = "Styles problems";
+	private final String ERROR_WARNING_LOGIN_PROBLEMS = "Login problems";
+	private final String ERROR_WARNING_DEPRECATED_PROPERTIES_USAGE_PROBLEMS = "Deprecated elements usage problems";
+	private final String ERROR_WARNING_MODULES_PROBLEMS = "Module problems";
+	private final String ERROR_WARNING_FORM_PROBLEMS = "Form problems";
+	private final String ERROR_WARNING_COLUMNS_PROBLEMS = "Column problems";
+	private final String ERROR_WARNING_SORT_PROBLEMS = "Sort problems";
+	private final String ERROR_WARNING_SOLUTION_PROBLEMS = "Servoy solution problems";
 
 
 	public ServoyErrorWarningPreferencePage()
@@ -198,14 +198,14 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 		composite.setLayout(layout);
 		composite.setFont(parent.getFont());
 
-		String[] names1 = new String[] { "Warning", "Error", "Info", "Ignore" }; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$
+		String[] names1 = new String[] { "Warning", "Error", "Info", "Ignore" };
 		List<String> ids1 = new ArrayList<String>(4);
 		ids1.add(ProblemSeverity.WARNING.name());
 		ids1.add(ProblemSeverity.ERROR.name());
 		ids1.add(ProblemSeverity.INFO.name());
 		ids1.add(ProblemSeverity.IGNORE.name());
 
-		String[] names2 = new String[] { "Warning", "Error" }; //$NON-NLS-1$//$NON-NLS-2$
+		String[] names2 = new String[] { "Warning", "Error" };
 		List<String> ids2 = new ArrayList<String>(4);
 		ids2.add(ProblemSeverity.WARNING.name());
 		ids2.add(ProblemSeverity.ERROR.name());

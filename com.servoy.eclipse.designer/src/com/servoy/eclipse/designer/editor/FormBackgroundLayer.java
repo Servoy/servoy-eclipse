@@ -51,7 +51,7 @@ public class FormBackgroundLayer extends FreeformLayer
 	/**
 	 * A viewer property indicating whether page breaks should be painted in the form editor. The value must  be a Boolean.
 	 */
-	public static final String PROPERTY_PAINT_PAGEBREAKS = "FormBackground.paintPageBreaks"; //$NON-NLS-1$
+	public static final String PROPERTY_PAINT_PAGEBREAKS = "FormBackground.paintPageBreaks";
 
 
 	public static final int TRANSPARENT_PATTERN_SIZE = 14;

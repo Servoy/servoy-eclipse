@@ -62,7 +62,7 @@ public class MarqueeSelectionTool extends AbstractTool
 	/**
 	 * The property to be used in {@link AbstractTool#setProperties(java.util.Map)} for {@link #setMarqueeBehavior(int)}.
 	 */
-	public static final Object PROPERTY_MARQUEE_BEHAVIOR = "marqueeBehavior"; //$NON-NLS-1$
+	public static final Object PROPERTY_MARQUEE_BEHAVIOR = "marqueeBehavior";
 
 	/**
 	 * This behaviour selects nodes completely encompassed by the marquee rectangle. This is the default behaviour for this tool.
@@ -302,7 +302,7 @@ public class MarqueeSelectionTool extends AbstractTool
 	@Override
 	protected String getDebugName()
 	{
-		return "Marquee Tool: " + marqueeBehavior;//$NON-NLS-1$
+		return "Marquee Tool: " + marqueeBehavior;
 	}
 
 	protected IFigure getMarqueeFeedbackFigure()
@@ -518,7 +518,7 @@ public class MarqueeSelectionTool extends AbstractTool
 	public void setMarqueeBehavior(int type)
 	{
 		if (type != BEHAVIOR_CONNECTIONS_TOUCHED && type != BEHAVIOR_NODES_CONTAINED && type != BEHAVIOR_NODES_AND_CONNECTIONS) throw new IllegalArgumentException(
-			"Invalid marquee behaviour specified."); //$NON-NLS-1$
+			"Invalid marquee behaviour specified.");
 		marqueeBehavior = type;
 	}
 

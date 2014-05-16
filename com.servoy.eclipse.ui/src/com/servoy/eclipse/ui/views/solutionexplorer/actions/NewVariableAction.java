@@ -107,8 +107,8 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 	{
 		viewer = sev;
 
-		newFormVariableImage = Activator.loadImageDescriptorFromBundle("new_form_variable.gif"); //$NON-NLS-1$
-		newGlobalVariableImage = Activator.loadImageDescriptorFromBundle("new_global_variable.gif"); //$NON-NLS-1$
+		newFormVariableImage = Activator.loadImageDescriptorFromBundle("new_form_variable.gif");
+		newGlobalVariableImage = Activator.loadImageDescriptorFromBundle("new_global_variable.gif");
 		setText("Create variable");
 		setToolTipText("Create variable");
 	}
@@ -286,8 +286,8 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 						contents = new BufferedInputStream(file.getContents(true));
 					}
 					baos = new ByteArrayOutputStream();
-					baos.write(code.getBytes("UTF8")); //$NON-NLS-1$
-					baos.write("\n".getBytes("UTF8")); //$NON-NLS-1$//$NON-NLS-2$
+					baos.write(code.getBytes("UTF8"));
+					baos.write("\n".getBytes("UTF8"));
 					Utils.streamCopy(contents, baos);
 					new WorkspaceFileAccess(ServoyModel.getWorkspace()).setContents(scriptPath, baos.toByteArray()); // will also create file and parent folders if needed
 				}

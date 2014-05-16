@@ -42,8 +42,8 @@ public class RefreshAction extends Action
 	{
 		fPart = part;
 		setText(Messages.RefreshAction_refresh);
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("refresh.gif"));//$NON-NLS-1$
-		setActionDefinitionId("org.eclipse.ui.file.refresh"); //$NON-NLS-1$
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("refresh.gif"));
+		setActionDefinitionId("org.eclipse.ui.file.refresh");
 //        PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_REFRESH_ACTION);
 	}
 

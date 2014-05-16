@@ -92,7 +92,7 @@ public class DependencyResolvingPage extends ReviewOperationPage
 	 */
 	public DependencyResolvingPage(String pageName, InstallExtensionState state, InstallExtensionWizardOptions dialogOptions, boolean fromFile)
 	{
-		super(pageName, "Please review extension information", state); //$NON-NLS-1$
+		super(pageName, "Please review extension information", state);
 		this.fromFile = fromFile;
 		this.dialogOptions = dialogOptions;
 	}
@@ -153,9 +153,9 @@ public class DependencyResolvingPage extends ReviewOperationPage
 		final Button restoreDefaults = new Button(advancedResolvingComposite, SWT.FLAT);
 		final Button allowDowngrades = new Button(advancedResolvingComposite, SWT.CHECK);
 
-		restoreDefaults.setText("Restore defaults"); //$NON-NLS-1$
-		allowUpgrades.setText("allow dependency upgrades"); //$NON-NLS-1$
-		allowDowngrades.setText("allow dependency downgrades"); //$NON-NLS-1$
+		restoreDefaults.setText("Restore defaults");
+		allowUpgrades.setText("allow dependency upgrades");
+		allowDowngrades.setText("allow dependency downgrades");
 
 		allowUpgrades.setSelection(dialogOptions.allowUpgrades);
 		allowDowngrades.setSelection(dialogOptions.allowUpgrades && dialogOptions.allowDowngrades);
@@ -180,7 +180,7 @@ public class DependencyResolvingPage extends ReviewOperationPage
 		});
 
 		final Button onlyFinal = new Button(advancedResolvingComposite, SWT.CHECK);
-		onlyFinal.setText("only use final (numeric) dependency versions"); //$NON-NLS-1$
+		onlyFinal.setText("only use final (numeric) dependency versions");
 		onlyFinal.setSelection(dialogOptions.allowOnlyFinalVersions);
 		onlyFinal.addSelectionListener(new SelectionAdapter()
 		{
@@ -192,7 +192,7 @@ public class DependencyResolvingPage extends ReviewOperationPage
 		});
 
 		final Button allowLibConflicts = new Button(advancedResolvingComposite, SWT.CHECK);
-		allowLibConflicts.setText("allow library conflicts"); //$NON-NLS-1$
+		allowLibConflicts.setText("allow library conflicts");
 		allowLibConflicts.setSelection(dialogOptions.allowLibConflicts);
 		allowLibConflicts.addSelectionListener(new SelectionAdapter()
 		{
@@ -243,9 +243,9 @@ public class DependencyResolvingPage extends ReviewOperationPage
 
 		ExpandItem collapsableItem = new ExpandItem(advancedResolvingCollapser, SWT.NONE, 0);
 		collapsableItem.setControl(advancedResolvingComposite);
-		collapsableItem.setText("Advanced dependency resolve options"); //$NON-NLS-1$
+		collapsableItem.setText("Advanced dependency resolve options");
 		collapsableItem.setHeight(advancedResolvingComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
-		collapsableItem.setImage(Activator.getDefault().loadImageFromBundle("dependency.gif")); //$NON-NLS-1$
+		collapsableItem.setImage(Activator.getDefault().loadImageFromBundle("dependency.gif"));
 
 		separator1.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
 		advancedResolvingCollapser.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
@@ -275,9 +275,9 @@ public class DependencyResolvingPage extends ReviewOperationPage
 				}
 				try
 				{
-					monitor.beginTask("Getting extension", 11); //$NON-NLS-1$
+					monitor.beginTask("Getting extension", 11);
 
-					monitor.subTask("acquiring extension name..."); //$NON-NLS-1$
+					monitor.subTask("acquiring extension name...");
 					DependencyMetadata[] dmds = state.extensionProvider.getDependencyMetadata(new ExtensionDependencyDeclaration(state.extensionID,
 						state.version, state.version));
 					if (dmds != null && dmds.length == 1)
@@ -310,13 +310,13 @@ public class DependencyResolvingPage extends ReviewOperationPage
 						}
 					}
 
-					monitor.subTask("acquiring package..."); //$NON-NLS-1$
+					monitor.subTask("acquiring package...");
 					final SubProgressMonitor m = new SubProgressMonitor(monitor, 8);
 					IProgress progress = new IProgress()
 					{
 						public void start(int totalWork)
 						{
-							m.beginTask("", totalWork); //$NON-NLS-1$
+							m.beginTask("", totalWork);
 						}
 
 						public void worked(int worked)
@@ -326,7 +326,7 @@ public class DependencyResolvingPage extends ReviewOperationPage
 
 						public void setStatusMessage(String message)
 						{
-							m.subTask("acquiring package - " + message); //$NON-NLS-1$
+							m.subTask("acquiring package - " + message);
 						}
 
 						public boolean shouldCancelOperation()
@@ -349,7 +349,7 @@ public class DependencyResolvingPage extends ReviewOperationPage
 					}
 
 					// no use checking for cancel in the future cause we are only dealing with HDD access from now on
-					monitor.subTask("parsing information..."); //$NON-NLS-1$
+					monitor.subTask("parsing information...");
 					EXPParser parser = state.getOrCreateParser(f);
 					final ExtensionConfiguration xml;
 					if (parser != null)
@@ -362,7 +362,7 @@ public class DependencyResolvingPage extends ReviewOperationPage
 					}
 					monitor.worked(1);
 
-					monitor.subTask("getting extension icon and description..."); //$NON-NLS-1$
+					monitor.subTask("getting extension icon and description...");
 					if (xml != null && xml.getInfo() != null)
 					{
 						if (xml.getInfo().description != null || xml.getInfo().url != null)
@@ -377,7 +377,7 @@ public class DependencyResolvingPage extends ReviewOperationPage
 									}
 									if (xml.getInfo().url != null)
 									{
-										setExtensionProductUrl("<a href=\"" + xml.getInfo().url + "\">" + xml.getInfo().url + "</a>", true); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+										setExtensionProductUrl("<a href=\"" + xml.getInfo().url + "\">" + xml.getInfo().url + "</a>", true);
 									}
 								}
 							});
@@ -508,8 +508,8 @@ public class DependencyResolvingPage extends ReviewOperationPage
 					{
 						try
 						{
-							monitor.beginTask("Preparing to install", 10); //$NON-NLS-1$
-							monitor.subTask("Checking installed extensions..."); //$NON-NLS-1$
+							monitor.beginTask("Preparing to install", 10);
+							monitor.subTask("Checking installed extensions...");
 
 							if (state.installedExtensionsProvider != null)
 							{
@@ -518,7 +518,7 @@ public class DependencyResolvingPage extends ReviewOperationPage
 								resolver.setIgnoreLibConflicts(dialogOptions.allowLibConflicts);
 								monitor.worked(4);
 
-								monitor.subTask("Resolving dependencies..."); //$NON-NLS-1$
+								monitor.subTask("Resolving dependencies...");
 								resolver.resolveDependencies(state.extensionID, state.version);
 								Message[] resolveWarnings = resolver.getMessages();
 								if (resolveWarnings.length > 0) Debug.trace(Arrays.asList(resolveWarnings).toString());
@@ -527,7 +527,7 @@ public class DependencyResolvingPage extends ReviewOperationPage
 								List<DependencyPath> installPaths = resolver.getResults();
 								if (installPaths != null && installPaths.size() > 0)
 								{
-									monitor.subTask("Filtering configurations..."); //$NON-NLS-1$
+									monitor.subTask("Filtering configurations...");
 									int prevSize = installPaths.size();
 									String s1 = null, s2 = null;
 									IDependencyPathFilter filter;
@@ -548,7 +548,7 @@ public class DependencyResolvingPage extends ReviewOperationPage
 									if (installPaths.size() > 0)
 									{
 										// dependency resolving successful
-										monitor.subTask("Choosing best configuration..."); //$NON-NLS-1$
+										monitor.subTask("Choosing best configuration...");
 										MultipleCriteriaChooser chooser = new MultipleCriteriaChooser();
 										state.chosenPath = chooser.pickResolvePath(installPaths); // we have a winner
 										monitor.worked(1);
@@ -556,7 +556,7 @@ public class DependencyResolvingPage extends ReviewOperationPage
 									else
 									{
 										// a path was found, but dependency options denied it
-										failMessage[0] = "Cannot resolve dependencies.\nTry changing dependency resolve options."; //$NON-NLS-1$
+										failMessage[0] = "Cannot resolve dependencies.\nTry changing dependency resolve options.";
 										int tmp = (s1 != null ? 1 : 0) + (s2 != null ? 1 : 0);
 										warnings[0] = new Message[tmp];
 										tmp = 0;
@@ -574,7 +574,7 @@ public class DependencyResolvingPage extends ReviewOperationPage
 									else
 									{
 										// no dependency path found; either because of dependency options (disallow lib conflicts) or because the dependency cannot be resolved
-										failMessage[0] = "Cannot resolve dependencies. Potential reasons:\n(NOTE: the reasons below may not (all) be actual problems)"; //$NON-NLS-1$
+										failMessage[0] = "Cannot resolve dependencies. Potential reasons:\n(NOTE: the reasons below may not (all) be actual problems)";
 									}
 									warnings[0] = resolveWarnings;
 								}
@@ -582,7 +582,7 @@ public class DependencyResolvingPage extends ReviewOperationPage
 							else
 							{
 								// should never happen
-								failMessage[0] = "Cannot access installed extensions."; //$NON-NLS-1$
+								failMessage[0] = "Cannot access installed extensions.";
 							}
 							monitor.done();
 						}
@@ -626,7 +626,7 @@ public class DependencyResolvingPage extends ReviewOperationPage
 		else
 		{
 			// should never happen
-			failMessage[0] = "Problem accessing install directory."; //$NON-NLS-1$
+			failMessage[0] = "Problem accessing install directory.";
 		}
 
 		IWizardPage nextPage;
@@ -638,8 +638,8 @@ public class DependencyResolvingPage extends ReviewOperationPage
 			if (failMessage[0] == null)
 			{
 				// new unhandled branch in above code? maybe it's because of installedExtensionsProvider warnings...
-				Debug.warn("Chosen path should never be null without a fail message."); //$NON-NLS-1$
-				failMessage[0] = "Dependency resolve failed."; //$NON-NLS-1$
+				Debug.warn("Chosen path should never be null without a fail message.");
+				failMessage[0] = "Dependency resolve failed.";
 			}
 			// show problems page with failMessage as description and warnings as list (which could be null)
 			List<Message> allWarnings = new ArrayList<Message>((warnings[0] != null ? warnings[0].length : 0) + exp1W.length + exp2W.length);
@@ -656,7 +656,7 @@ public class DependencyResolvingPage extends ReviewOperationPage
 			{
 				messages = null;
 			}
-			nextPage = new ShowMessagesPage("DepWarnings", "Cannot install extension", failMessage[0], null, messages, true, null); //$NON-NLS-1$//$NON-NLS-2$
+			nextPage = new ShowMessagesPage("DepWarnings", "Cannot install extension", failMessage[0], null, messages, true, null);
 			nextPage.setWizard(getWizard());
 		}
 		else
@@ -664,7 +664,7 @@ public class DependencyResolvingPage extends ReviewOperationPage
 			// dependency resolving succeeded
 
 			// prepare install page; afterwards, we might postpone it for after some dummy info/warning page
-			nextPage = new ActualInstallPage("DoInstall", state); //$NON-NLS-1$
+			nextPage = new ActualInstallPage("DoInstall", state);
 			nextPage.setWizard(getWizard());
 
 			if (state.chosenPath.extensionPath.length > 1 ||
@@ -673,17 +673,17 @@ public class DependencyResolvingPage extends ReviewOperationPage
 				// more extensions are to be installed/replaced (or one is down-graded); tell the user
 				UIMessage[] messages;
 				Image addIcon = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_ADD);
-				Image upgradeIcon = Activator.getDefault().loadImageFromBundle("upgrade.gif"); //$NON-NLS-1$
-				Image downgradeIcon = Activator.getDefault().loadImageFromBundle("downgrade.gif"); //$NON-NLS-1$
+				Image upgradeIcon = Activator.getDefault().loadImageFromBundle("upgrade.gif");
+				Image downgradeIcon = Activator.getDefault().loadImageFromBundle("downgrade.gif");
 
-				String[] header = new String[] { "", "From", "To", "Name", "Id" }; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+				String[] header = new String[] { "", "From", "To", "Name", "Id" };
 				messages = new UIMessage[state.chosenPath.extensionPath.length];
 				for (int i = state.chosenPath.extensionPath.length - 1; i >= 0; i--)
 				{
 					ExtensionNode ext = state.chosenPath.extensionPath[i];
 					DependencyMetadata[] newOne = state.extensionProvider.getDependencyMetadata(new ExtensionDependencyDeclaration(ext.id, ext.version,
 						ext.version));
-					String name = ""; //$NON-NLS-1$
+					String name = "";
 					if (newOne != null && newOne.length == 1)
 					{
 						name = newOne[0].extensionName;
@@ -702,10 +702,10 @@ public class DependencyResolvingPage extends ReviewOperationPage
 						default :
 							icon = addIcon;
 					}
-					messages[i] = new UIMessage(icon, new String[] { ext.installedVersion != null ? ext.installedVersion : "-", ext.version, name, ext.id }); //$NON-NLS-1$
+					messages[i] = new UIMessage(icon, new String[] { ext.installedVersion != null ? ext.installedVersion : "-", ext.version, name, ext.id });
 				}
 
-				nextPage = new ShowMessagesPage("DepReview", "Changes", "Review installation changes.", header, messages, true, nextPage); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+				nextPage = new ShowMessagesPage("DepReview", "Changes", "Review installation changes.", header, messages, true, nextPage);
 				nextPage.setWizard(getWizard());
 			} // else just use nextPage to install
 
@@ -714,7 +714,7 @@ public class DependencyResolvingPage extends ReviewOperationPage
 			{
 				// user should know about these; or should we just consider this step failed directly?
 				nextPage = new ShowMessagesPage(
-					"DepWarnings", "Some items require your attention", "However, you can continue with the install process.", null, exp1W, true, nextPage); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+					"DepWarnings", "Some items require your attention", "However, you can continue with the install process.", null, exp1W, true, nextPage);
 				nextPage.setWizard(getWizard());
 			}
 		}

@@ -65,9 +65,9 @@ public class OpenSqlEditorAction extends Action implements ISelectionChangedList
 	 */
 	public OpenSqlEditorAction()
 	{
-		setImageDescriptor(Activator.getImageDescriptor("icons/sqleditor.gif")); //$NON-NLS-1$
-		setText("Open SQL Editor"); //$NON-NLS-1$
-		setToolTipText("Open the SQL Editor for this server"); //$NON-NLS-1$
+		setImageDescriptor(Activator.getImageDescriptor("icons/sqleditor.gif"));
+		setText("Open SQL Editor");
+		setToolTipText("Open the SQL Editor for this server");
 		sqlExplorerLoaded = com.servoy.eclipse.core.Activator.getDefault().isSqlExplorerLoaded();
 		if (!sqlExplorerLoaded) setEnabled(false);
 	}
@@ -142,7 +142,7 @@ public class OpenSqlEditorAction extends Action implements ISelectionChangedList
 					});
 				}
 			}
-			SQLEditorInput input = new SQLEditorInput("SQL Editor " + serverName + ".sql"); //$NON-NLS-1$ //$NON-NLS-2$
+			SQLEditorInput input = new SQLEditorInput("SQL Editor " + serverName + ".sql");
 			Alias alias = SQLExplorerPlugin.getDefault().getAliasManager().getAlias(serverName);
 			input.setUser(alias.getDefaultUser());
 			try
@@ -156,9 +156,9 @@ public class OpenSqlEditorAction extends Action implements ISelectionChangedList
 
 						String sql = textEditor.getSQLToBeExecuted();
 
-						if (sql == null || sql.trim().equals("")) //$NON-NLS-1$
+						if (sql == null || sql.trim().equals(""))
 						{
-							textEditor.setText("select * from " + tableName); //$NON-NLS-1$
+							textEditor.setText("select * from " + tableName);
 						}
 					}
 				}

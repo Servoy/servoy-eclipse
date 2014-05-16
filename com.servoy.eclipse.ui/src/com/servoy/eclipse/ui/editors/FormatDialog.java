@@ -92,7 +92,7 @@ public class FormatDialog extends Dialog
 	protected void configureShell(Shell shell)
 	{
 		super.configureShell(shell);
-		shell.setText("Edit format property"); //$NON-NLS-1$
+		shell.setText("Edit format property");
 	}
 
 	@Override
@@ -322,7 +322,7 @@ public class FormatDialog extends Dialog
 	@Override
 	protected IDialogSettings getDialogBoundsSettings()
 	{
-		return EditorUtil.getDialogSettings("formatDialog"); //$NON-NLS-1$
+		return EditorUtil.getDialogSettings("formatDialog");
 	}
 
 	public static interface IFormatTextContainer

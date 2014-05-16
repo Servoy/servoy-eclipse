@@ -673,7 +673,7 @@ public class ServoyTeamProvider extends RepositoryProvider
 				IServerInternal repository_server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(IServer.REPOSITORY_SERVER);
 				if (repository_server != null && repository_server.getConfig().isEnabled())
 				{
-					int retries = Utils.getAsInteger(settings.getProperty("developer.maxRepositoryConnectRetries", "5")); //$NON-NLS-1$ //$NON-NLS-2$
+					int retries = Utils.getAsInteger(settings.getProperty("developer.maxRepositoryConnectRetries", "5"));
 					repository_server.testConnection(retries);//wait for db to come online
 					repository_server.getRepository();
 				}

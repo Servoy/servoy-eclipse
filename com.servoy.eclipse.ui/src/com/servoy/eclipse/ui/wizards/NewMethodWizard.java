@@ -59,7 +59,7 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 public class NewMethodWizard extends Wizard implements INewWizard
 {
 
-	public static final String ID = "com.servoy.eclipse.ui.NewMethodWizard"; //$NON-NLS-1$
+	public static final String ID = "com.servoy.eclipse.ui.NewMethodWizard";
 
 	private MethodFormsSolutionPage methodPage;
 	private WizardPage errorPage;
@@ -81,7 +81,7 @@ public class NewMethodWizard extends Wizard implements INewWizard
 
 		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() == null)
 		{
-			errorPage = new WizardPage("No active Servoy solution project found") //$NON-NLS-1$
+			errorPage = new WizardPage("No active Servoy solution project found")
 			{
 				public void createControl(Composite parent)
 				{
@@ -147,7 +147,7 @@ public class NewMethodWizard extends Wizard implements INewWizard
 
 	public class MethodFormsSolutionPage extends WizardPage implements Listener
 	{
-		private static final String NO_FORM_PRESENT = "-- No form present --"; //$NON-NLS-1$
+		private static final String NO_FORM_PRESENT = "-- No form present --";
 
 		private Combo solutionsCombo;
 		private String[] currentSolutionNames;
@@ -160,7 +160,7 @@ public class NewMethodWizard extends Wizard implements INewWizard
 		protected MethodFormsSolutionPage(String pageName)
 		{
 			super(pageName);
-			setTitle("Choose the method's location and name."); //$NON-NLS-1$
+			setTitle("Choose the method's location and name.");
 			setDialogSettings(Activator.getDefault().getDialogSettings());
 
 			retrieveCurrentSolutionNames();

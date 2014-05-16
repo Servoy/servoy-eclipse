@@ -40,8 +40,8 @@ import com.servoy.j2db.util.IDelegate;
  */
 public class TreePatternFilter extends PatternFilter
 {
-	public static final String TREE_PATTERN_FILTER_MODE = "treePatternFilterMode"; //$NON-NLS-1$
-	public static final String TREE_PATTERN_SEARCH_DEPTH = "treePatternSearchDepth"; //$NON-NLS-1$
+	public static final String TREE_PATTERN_FILTER_MODE = "treePatternFilterMode";
+	public static final String TREE_PATTERN_SEARCH_DEPTH = "treePatternSearchDepth";
 
 	public static final int FILTER_LEAFS = 1;
 	public static final int FILTER_PARENTS = 2;

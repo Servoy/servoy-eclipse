@@ -21,7 +21,7 @@ public class UnexpectedSituationHandler implements IUnexpectedSituationHandler
 	@Override
 	public boolean allowUnexpectedDBIWrite(ITable t)
 	{
-		ServoyLog.logWarning("Allowed undexpected DBI write for table " + (t != null ? t.getDataSource() : null), null); //$NON-NLS-1$
+		ServoyLog.logWarning("Allowed undexpected DBI write for table " + (t != null ? t.getDataSource() : null), null);
 		return true;
 	}
 

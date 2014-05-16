@@ -87,7 +87,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		formEditorOptionsContainer.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 
 		toolbarsInFormWindowButton = new Button(formEditorOptionsContainer, SWT.CHECK);
-		toolbarsInFormWindowButton.setText("Show Form Editing Toolbars inside Form Editor"); //$NON-NLS-1$
+		toolbarsInFormWindowButton.setText("Show Form Editing Toolbars inside Form Editor");
 
 		Button resetToolbarsButton = new Button(formEditorOptionsContainer, SWT.NONE);
 		resetToolbarsButton.addSelectionListener(new SelectionAdapter()
@@ -98,7 +98,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 				new DesignerPreferences().saveCoolbarLayout(null);
 			}
 		});
-		resetToolbarsButton.setText("Show all"); //$NON-NLS-1$
+		resetToolbarsButton.setText("Show all");
 
 		closeEditorOnExitButton = new Button(formEditorOptionsContainer, SWT.CHECK);
 		closeEditorOnExitButton.setText("Close Editors at shutdown");
@@ -126,39 +126,39 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 
 		//Table Creation Options
 		Group tableCreationSettings = new Group(rootContainer, SWT.NONE);
-		tableCreationSettings.setText("Table Creation Settings"); //$NON-NLS-1$
+		tableCreationSettings.setText("Table Creation Settings");
 		tableCreationSettings.setLayout(new GridLayout(1, false));
 		tableCreationSettings.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 
 		Group defaultPrimaryKeySequenceType = new Group(tableCreationSettings, SWT.NONE);
-		defaultPrimaryKeySequenceType.setText("Default Primary Key Sequence Type"); //$NON-NLS-1$
+		defaultPrimaryKeySequenceType.setText("Default Primary Key Sequence Type");
 		defaultPrimaryKeySequenceType.setLayout(new GridLayout(1, true));
 
 		primaryKeySequenceTypeCombo = new ComboViewer(defaultPrimaryKeySequenceType);
 		primaryKeySequenceTypeCombo.setContentProvider(new ArrayContentProvider());
 		primaryKeySequenceTypeCombo.setLabelProvider(new LabelProvider());
-		primaryKeySequenceTypeCombo.setInput(new ObjectWrapper[] { new ObjectWrapper("Servoy Sequence", new Integer(ColumnInfo.SERVOY_SEQUENCE)), new ObjectWrapper( //$NON-NLS-1$
-			"Database Sequence", new Integer(ColumnInfo.DATABASE_SEQUENCE)), new ObjectWrapper("Database Identity", new Integer(ColumnInfo.DATABASE_IDENTITY)), new ObjectWrapper( //$NON-NLS-1$ //$NON-NLS-2$
-			"UUID Generator", new Integer(ColumnInfo.UUID_GENERATOR)) }); //$NON-NLS-1$
+		primaryKeySequenceTypeCombo.setInput(new ObjectWrapper[] { new ObjectWrapper("Servoy Sequence", new Integer(ColumnInfo.SERVOY_SEQUENCE)), new ObjectWrapper(
+			"Database Sequence", new Integer(ColumnInfo.DATABASE_SEQUENCE)), new ObjectWrapper("Database Identity", new Integer(ColumnInfo.DATABASE_IDENTITY)), new ObjectWrapper(
+			"UUID Generator", new Integer(ColumnInfo.UUID_GENERATOR)) });
 
 		//Form Properties
 		Group formProperties = new Group(rootContainer, SWT.NONE);
-		formProperties.setText("Form Properties"); //$NON-NLS-1$
+		formProperties.setText("Form Properties");
 		formProperties.setLayout(new GridLayout(1, true));
 		formProperties.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 
 		showNavigatorDefaultButton = new Button(formProperties, SWT.CHECK);
-		showNavigatorDefaultButton.setText("Set default navigator on new forms"); //$NON-NLS-1$
+		showNavigatorDefaultButton.setText("Set default navigator on new forms");
 
 		Group encapsulationProperties = new Group(formProperties, SWT.NONE);
-		encapsulationProperties.setText("Encapsulation Properties"); //$NON-NLS-1$
+		encapsulationProperties.setText("Encapsulation Properties");
 		encapsulationProperties.setLayout(new GridLayout(1, true));
 
 		encapsulationTypeCombo = new ComboViewer(encapsulationProperties);
 		encapsulationTypeCombo.setContentProvider(new ArrayContentProvider());
 		encapsulationTypeCombo.setLabelProvider(new LabelProvider());
 		encapsulationTypeCombo.setInput(new ObjectWrapper[] { new ObjectWrapper(
-			"Public, Hide All", new Integer(DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL)), new ObjectWrapper("Public", new Integer(DesignerPreferences.ENCAPSULATION_PUBLIC)) }); //$NON-NLS-1$ //$NON-NLS-2$
+			"Public, Hide All", new Integer(DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL)), new ObjectWrapper("Public", new Integer(DesignerPreferences.ENCAPSULATION_PUBLIC)) });
 
 		initializeFields();
 

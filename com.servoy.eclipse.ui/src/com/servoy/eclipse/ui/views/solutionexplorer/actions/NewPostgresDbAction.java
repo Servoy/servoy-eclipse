@@ -98,7 +98,7 @@ public class NewPostgresDbAction extends AbstractNewDbAction
 			int endIndex = serverUrl.indexOf("?", startIndex);
 			if (endIndex == -1) endIndex = serverUrl.length();
 			dbname = serverUrl.substring(startIndex + 1, endIndex);
-			if (dbname != null) serverUrl = serverUrl.replaceFirst("/" + dbname, "/" + name); //$NON-NLS-1$ //$NON-NLS-2$
+			if (dbname != null) serverUrl = serverUrl.replaceFirst("/" + dbname, "/" + name);
 			if (serverUrl.equals(origConfig.getServerUrl()))
 			{
 				// hmm, no replace, fall back to default

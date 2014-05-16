@@ -125,22 +125,22 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 
 	private Image getImageForName(String name)
 	{
-		String browserImgFileName = ""; //$NON-NLS-1$
-		String browserName = (name != null ? name.toLowerCase() : ""); //$NON-NLS-1$
-		if (browserName.contains("ie")) browserImgFileName = "explorer.png"; //$NON-NLS-1$ //$NON-NLS-2$ 
-		else if (browserName.contains("firefox")) browserImgFileName = "firefox.png"; //$NON-NLS-1$ //$NON-NLS-2$ 
-		else if (browserName.contains("chrome")) browserImgFileName = "chrome.png"; //$NON-NLS-1$ //$NON-NLS-2$ 
-		else if (browserName.contains("safari")) browserImgFileName = "safari.png"; //$NON-NLS-1$ //$NON-NLS-2$ 
-		else if (browserName.contains("opera")) browserImgFileName = "opera.png"; //$NON-NLS-1$ //$NON-NLS-2$  
+		String browserImgFileName = "";
+		String browserName = (name != null ? name.toLowerCase() : "");
+		if (browserName.contains("ie")) browserImgFileName = "explorer.png";
+		else if (browserName.contains("firefox")) browserImgFileName = "firefox.png";
+		else if (browserName.contains("chrome")) browserImgFileName = "chrome.png";
+		else if (browserName.contains("safari")) browserImgFileName = "safari.png";
+		else if (browserName.contains("opera")) browserImgFileName = "opera.png";
 		return getImageForBrowser(browserImgFileName);
 	}
 
 	private Image getImageForBrowser(String name)
 	{
 		if (browsersImagesList == null) browsersImagesList = new HashMap<String, Image>();
-		if (!name.equals("") && !browsersImagesList.containsKey(name)) //$NON-NLS-1$
+		if (!name.equals("") && !browsersImagesList.containsKey(name))
 		{
-			ImageDescriptor id = AbstractUIPlugin.imageDescriptorFromPlugin(com.servoy.eclipse.ui.Activator.PLUGIN_ID, "icons/" + name); //$NON-NLS-1$
+			ImageDescriptor id = AbstractUIPlugin.imageDescriptorFromPlugin(com.servoy.eclipse.ui.Activator.PLUGIN_ID, "icons/" + name);
 			browsersImagesList.put(name, id.createImage());
 		}
 		return browsersImagesList.get(name);

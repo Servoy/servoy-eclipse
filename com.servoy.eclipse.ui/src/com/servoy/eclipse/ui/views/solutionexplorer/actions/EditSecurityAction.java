@@ -37,7 +37,7 @@ public class EditSecurityAction extends Action
 	 */
 	public EditSecurityAction()
 	{
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("lock.gif")); //$NON-NLS-1$
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("lock.gif"));
 		setText("Edit users/groups");
 		setToolTipText("Edit users/groups");
 	}

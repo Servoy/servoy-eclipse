@@ -386,7 +386,7 @@ public class ReplaceTableWizard extends Wizard implements INewWizard
 			});
 
 			replaceCalculationsButton = new Button(topLevel, SWT.CHECK);
-			replaceCalculationsButton.setText("Replace table in calculations/aggregations"); //$NON-NLS-1$
+			replaceCalculationsButton.setText("Replace table in calculations/aggregations");
 			replaceCalculationsButton.addSelectionListener(new SelectionAdapter()
 			{
 				@Override
@@ -474,10 +474,10 @@ public class ReplaceTableWizard extends Wizard implements INewWizard
 		public void setVisible(boolean visible)
 		{
 			super.setVisible(visible);
-			IDialogSettings settings = getDialogSettings().getSection("replacetablesection"); //$NON-NLS-1$
+			IDialogSettings settings = getDialogSettings().getSection("replacetablesection");
 			if (settings == null)
 			{
-				settings = getDialogSettings().addNewSection("replacetablesection"); //$NON-NLS-1$
+				settings = getDialogSettings().addNewSection("replacetablesection");
 			}
 			if (visible)
 			{

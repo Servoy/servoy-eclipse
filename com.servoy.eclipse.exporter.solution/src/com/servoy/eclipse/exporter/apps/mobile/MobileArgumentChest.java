@@ -129,7 +129,7 @@ public class MobileArgumentChest extends AbstractArgumentChest
 	@Override
 	protected String getHelpMessageDbi()
 	{
-		return ""; //$NON-NLS-1$
+		return "";
 	}
 
 	public boolean shouldExportForTesting()

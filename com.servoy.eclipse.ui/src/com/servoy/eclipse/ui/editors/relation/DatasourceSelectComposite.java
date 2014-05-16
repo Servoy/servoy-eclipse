@@ -154,7 +154,7 @@ public class DatasourceSelectComposite extends Composite
 			String relationName = EditorUtil.getRelationName(primaryTable, foreignTable, null, null);
 			if (relationName == null)
 			{
-				relationName = oldSourceTable + "_to_" + oldDestinationTable; //$NON-NLS-1$
+				relationName = oldSourceTable + "_to_" + oldDestinationTable;
 			}
 			return relationName;
 		}

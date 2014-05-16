@@ -85,7 +85,7 @@ public class DebugMethod implements IViewActionDelegate
 		}
 		else if (Activator.getDefault().getDebugClientHandler().getDebugReadyClient() == null)
 		{
-			MessageDialog.openError(Display.getDefault().getActiveShell(), "Debug Method Problem", "Cannot debug method; please start a debug client first."); //$NON-NLS-1$ //$NON-NLS-2$
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Debug Method Problem", "Cannot debug method; please start a debug client first.");
 		}
 	}
 

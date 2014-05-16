@@ -258,7 +258,7 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 	protected Button createButton(Composite parent)
 	{
 		Button result = new Button(parent, SWT.DOWN);
-		result.setText("..."); //$NON-NLS-1$
+		result.setText("...");
 		return result;
 	}
 
@@ -362,7 +362,7 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 			}
 		}
 
-		String stringValue = "";//$NON-NLS-1$
+		String stringValue = "";
 		if (val != null)
 		{
 			stringValue = val.toString();

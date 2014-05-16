@@ -43,7 +43,7 @@ public class FormElementTransfer extends ByteArrayTransfer
 
 	// Create a unique ID to make sure that different Eclipse
 	// applications use different "types" of <code>FormElementTransfer</code>
-	private static final String TYPE_NAME = "formelement-transfer-format:" + System.currentTimeMillis() + ":" + fInstance.hashCode(); //$NON-NLS-2$//$NON-NLS-1$
+	private static final String TYPE_NAME = "formelement-transfer-format:" + System.currentTimeMillis() + ":" + fInstance.hashCode();
 
 	private static final int TYPEID = registerType(TYPE_NAME);
 

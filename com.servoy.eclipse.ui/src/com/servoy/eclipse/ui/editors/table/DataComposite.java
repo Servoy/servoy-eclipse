@@ -62,13 +62,13 @@ public class DataComposite extends Composite
 				@Override
 				public String getLabelText()
 				{
-					return "select from " + table.getName(); //$NON-NLS-1$
+					return "select from " + table.getName();
 				}
 
 				@Override
 				public String getStatusMessage()
 				{
-					return "select from " + table.getName(); //$NON-NLS-1$
+					return "select from " + table.getName();
 				}
 
 				@Override
@@ -79,7 +79,7 @@ public class DataComposite extends Composite
 					Session session = alias.getDefaultUser().createSession();
 					try
 					{
-						return new DataSet(null, "select * from " + table.getSQLName(), null, session, 1000); //$NON-NLS-1$
+						return new DataSet(null, "select * from " + table.getSQLName(), null, session, 1000);
 					}
 					finally
 					{

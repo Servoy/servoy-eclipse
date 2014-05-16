@@ -45,27 +45,27 @@ import com.servoy.j2db.util.Utils;
 public class MobileCustomPropertyHandler implements IPropertyHandler
 {
 	public static String[] DATA_ICONS = new String[] { //
-	"alert", //$NON-NLS-1$
-	"arrow-d", //$NON-NLS-1$
-	"arrow-l", //$NON-NLS-1$
-	"arrow-r", //$NON-NLS-1$
-	"arrow-u", //$NON-NLS-1$
-	"back", //$NON-NLS-1$
-	"bars", //$NON-NLS-1$
-	"check", //$NON-NLS-1$
-//			"custom", //$NON-NLS-1$
-	"delete", //$NON-NLS-1$
-	"edit", //$NON-NLS-1$
-	"forward", //$NON-NLS-1$
-	"gear", //$NON-NLS-1$
-	"grid", //$NON-NLS-1$
-	"home", //$NON-NLS-1$
-	"info", //$NON-NLS-1$
-	"minus", //$NON-NLS-1$
-	"plus", //$NON-NLS-1$
-	"refresh", //$NON-NLS-1$
-	"search", //$NON-NLS-1$
-	"star" //$NON-NLS-1$
+	"alert",
+	"arrow-d",
+	"arrow-l",
+	"arrow-r",
+	"arrow-u",
+	"back",
+	"bars",
+	"check",
+//			"custom",
+	"delete",
+	"edit",
+	"forward",
+	"gear",
+	"grid",
+	"home",
+	"info",
+	"minus",
+	"plus",
+	"refresh",
+	"search",
+	"star"
 	};
 
 	public static final PropertyDescription DATA_ICONS_VALUES = new PropertyDescription(IMobileProperties.DATA_ICON.propertyName, PropertyType.values,
@@ -78,15 +78,15 @@ public class MobileCustomPropertyHandler implements IPropertyHandler
 			new String[] { "h1", "h2", "h3", "h4", "h5", "h6" }).addDefault(null, null));
 
 
-	public static final String ALIGN_RIGHT_NAME = "alignRight"; //$NON-NLS-1$
+	public static final String ALIGN_RIGHT_NAME = "alignRight";
 	public static final PropertyDescription ALIGN_RIGHT_DESCRIPTION = new PropertyDescription(ALIGN_RIGHT_NAME, PropertyType.bool);
 
 
-	public static final String RADIO_STYLE_NAME = "horizontal"; //$NON-NLS-1$
+	public static final String RADIO_STYLE_NAME = "horizontal";
 	public static final PropertyDescription RADIO_STYLE_DESCRIPTION = new PropertyDescription(RADIO_STYLE_NAME, PropertyType.bool);
 
 
-	public static final String STICKY_PART_NAME = "sticky"; //$NON-NLS-1$
+	public static final String STICKY_PART_NAME = "sticky";
 	public static final PropertyDescription STICKY_PART_DESCRIPTION = new PropertyDescription(STICKY_PART_NAME, PropertyType.bool);
 
 

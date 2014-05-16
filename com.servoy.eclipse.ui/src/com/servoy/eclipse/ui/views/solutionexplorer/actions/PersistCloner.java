@@ -76,7 +76,7 @@ public class PersistCloner
 			}
 			else
 			{
-				ServoyLog.logError("Cannot find solution project for duplicated persist", null); //$NON-NLS-1$
+				ServoyLog.logError("Cannot find solution project for duplicated persist", null);
 			}
 		}
 		return duplicate;
@@ -172,7 +172,7 @@ public class PersistCloner
 			{
 				if (persist instanceof Media)
 				{
-					newPersistName = Utils.stringReplace(newPersistName, " ", "_");//$NON-NLS-1$//$NON-NLS-2$
+					newPersistName = Utils.stringReplace(newPersistName, " ", "_");
 				}
 				AbstractBase clone = null;
 				if (persist instanceof ScriptCalculation)
@@ -201,12 +201,12 @@ public class PersistCloner
 					((Media)clone).setName(newPersistName);
 					((Media)clone).setPermMediaData(((Media)persist).getMediaData());
 				}
-				clone.setRuntimeProperty(AbstractBase.NameChangeProperty, "");//$NON-NLS-1$
+				clone.setRuntimeProperty(AbstractBase.NameChangeProperty, "");
 				return clone;
 			}
 			else
 			{
-				ServoyLog.logError("Cannot get solution for destination solution project", null);//$NON-NLS-1$
+				ServoyLog.logError("Cannot get solution for destination solution project", null);
 			}
 		}
 		return null;

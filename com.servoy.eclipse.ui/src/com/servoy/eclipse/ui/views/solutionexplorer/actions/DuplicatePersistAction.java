@@ -121,7 +121,7 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 		final ServoyProject[] activeModules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
 		if (activeModules.length == 0)
 		{
-			ServoyLog.logError("No active modules on duplicate/move persist?!", null); //$NON-NLS-1$
+			ServoyLog.logError("No active modules on duplicate/move persist?!", null);
 		}
 		String[] solutionNames = new String[activeModules.length];
 		String initialSolutionName = persist.getRootObject().getName();

@@ -98,17 +98,17 @@ public class NumberCellEditor extends ObjectCellEditor implements IExecutableExt
 		if (initData instanceof String)
 		{
 			String type = ((String)initData).trim();
-			if ("byte".equalsIgnoreCase(type)) //$NON-NLS-1$
+			if ("byte".equalsIgnoreCase(type))
 			setType(BYTE);
-			else if ("double".equalsIgnoreCase(type)) //$NON-NLS-1$
+			else if ("double".equalsIgnoreCase(type))
 			setType(DOUBLE);
-			else if ("float".equalsIgnoreCase(type)) //$NON-NLS-1$
+			else if ("float".equalsIgnoreCase(type))
 			setType(FLOAT);
-			else if ("integer".equalsIgnoreCase(type)) //$NON-NLS-1$
+			else if ("integer".equalsIgnoreCase(type))
 			setType(INTEGER);
-			else if ("long".equalsIgnoreCase(type)) //$NON-NLS-1$
+			else if ("long".equalsIgnoreCase(type))
 			setType(LONG);
-			else if ("short".equalsIgnoreCase(type)) //$NON-NLS-1$
+			else if ("short".equalsIgnoreCase(type))
 			setType(SHORT);
 		}
 	}

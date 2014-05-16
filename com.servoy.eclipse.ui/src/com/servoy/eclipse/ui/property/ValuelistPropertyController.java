@@ -80,7 +80,7 @@ public class ValuelistPropertyController<P> extends PropertyController<P, Intege
 						? persistContext.getContext() : persistContext.getPersist());
 					return buttons;
 				}
-			}, "valuelistDialog"); //$NON-NLS-1$
+			}, "valuelistDialog");
 	}
 
 	public static class ValueListValueEditor implements IValueEditor<Integer>

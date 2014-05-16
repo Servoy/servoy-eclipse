@@ -52,11 +52,11 @@ public class UnexpectedSituationHandler implements IUnexpectedSituationHandler
 			{
 				returnValue = new Boolean(
 					MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
-						"Unexpected database information file write", //$NON-NLS-1$
-						"The database information file (.dbi) contents for table '" + //$NON-NLS-1$
-							t.getName() + "' of server '" + //$NON-NLS-1$
+						"Unexpected database information file write",
+						"The database information file (.dbi) contents for table '" +
+							t.getName() + "' of server '" +
 							t.getServerName() +
-							"' are about to be written. This table currently has associated error markers for problems that might have prevented the loading of .dbi information in the first place. This means that you could be overwriting the current .dbi file contents with defaults.\nIf you are not sure why this happened, you should choose 'No', check the 'Problems' view for these error markers and try to solve them (see if context menu - Quick Fix is enabled).\n\nDo you wish to continue with the write?")); //$NON-NLS-1$
+							"' are about to be written. This table currently has associated error markers for problems that might have prevented the loading of .dbi information in the first place. This means that you could be overwriting the current .dbi file contents with defaults.\nIf you are not sure why this happened, you should choose 'No', check the 'Problems' view for these error markers and try to solve them (see if context menu - Quick Fix is enabled).\n\nDo you wish to continue with the write?"));
 			}
 		};
 		if (Display.getCurrent() != null)
@@ -72,7 +72,7 @@ public class UnexpectedSituationHandler implements IUnexpectedSituationHandler
 
 	public void cannotFindRepository()
 	{
-		MessageDialog.openError(Display.getCurrent().getActiveShell(), "Repository error", "Cannot find Servoy Eclipse repository."); //$NON-NLS-1$ //$NON-NLS-2$
+		MessageDialog.openError(Display.getCurrent().getActiveShell(), "Repository error", "Cannot find Servoy Eclipse repository.");
 	}
 
 	public void cannotWriteI18NFiles(final Exception ex)
@@ -81,7 +81,7 @@ public class UnexpectedSituationHandler implements IUnexpectedSituationHandler
 		{
 			public void run()
 			{
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Cannot write project I18N files.\n" + ex.getMessage()); //$NON-NLS-1$//$NON-NLS-2$
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Cannot write project I18N files.\n" + ex.getMessage());
 			}
 		});
 	}
@@ -110,8 +110,8 @@ public class UnexpectedSituationHandler implements IUnexpectedSituationHandler
 									IEditorPart editor = reference.getEditor(false);
 									if (editor != null && editor.isDirty())
 									{
-										if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "Saving script changes with dirty editor", //$NON-NLS-1$
-											"Overwrite editor changes? (if not then (property) changes could be ignored)")) //$NON-NLS-1$
+										if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "Saving script changes with dirty editor",
+											"Overwrite editor changes? (if not then (property) changes could be ignored)"))
 										{
 											return;
 										}

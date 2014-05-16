@@ -68,7 +68,7 @@ public class JSFileExternalize implements IBuildParticipantFactory
 	class StringExternalizeParser implements IBuildParticipant
 	{
 		private static final String WARNING_MESSAGE = "Non-externalized string literal; it should be followed by ";
-		private static final String SUPPRESS_WARNING_NLS = "@SuppressWarnings(nls)"; //$NON-NLS-1$
+		private static final String SUPPRESS_WARNING_NLS = "@SuppressWarnings(nls)";
 
 		/*
 		 * @see org.eclipse.dltk.core.builder.IBuildParticipant#build(org.eclipse.dltk.core.builder.IBuildContext)
@@ -110,7 +110,7 @@ public class JSFileExternalize implements IBuildParticipantFactory
 			if (reporter != null)
 			{
 				reporter.reportProblem(JSFileExternalizeProblem.NON_EXTERNALIZED_STRING,
-					WARNING_MESSAGE + "//$NON-NLS-" + stringLiteralIdx + "$", sourceStart, sourceStop); //$NON-NLS-1$ //$NON-NLS-2$
+					WARNING_MESSAGE + "//$NON-NLS-" + stringLiteralIdx + "$", sourceStart, sourceStop);
 			}
 		}
 
@@ -164,7 +164,7 @@ public class JSFileExternalize implements IBuildParticipantFactory
 
 					private boolean isMarkedForSkip(String nodeLine, int nodeLineIdx)
 					{
-						return nodeLine.indexOf(new StringBuilder("//$NON-NLS-").append(nodeLineIdx).append("$").toString()) != -1; //$NON-NLS-1$ //$NON-NLS-2$
+						return nodeLine.indexOf(new StringBuilder("//$NON-NLS-").append(nodeLineIdx).append("$").toString()) != -1;
 					}
 				});
 			}

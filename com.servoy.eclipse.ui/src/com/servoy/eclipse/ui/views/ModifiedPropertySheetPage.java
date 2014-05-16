@@ -137,7 +137,7 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 			// on the mac, when selecting an item the cell editor gets created and activated immediately, but the next click within
 			// approx 1 sec goes to the Tree in stead of the CellEditor.
 			// The following is a workaround attempt to send the event to the cell editor.
-			if (Boolean.parseBoolean(ServoyModel.getSettings().getProperty("servoy.developer.slowproperties.workaround", String.valueOf(Utils.isAppleMacOS())))) //$NON-NLS-1$
+			if (Boolean.parseBoolean(ServoyModel.getSettings().getProperty("servoy.developer.slowproperties.workaround", String.valueOf(Utils.isAppleMacOS()))))
 			{
 				tree.addMouseListener(new MouseAdapter()
 				{

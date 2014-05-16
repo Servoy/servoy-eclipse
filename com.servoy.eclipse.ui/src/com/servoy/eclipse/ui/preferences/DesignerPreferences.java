@@ -274,7 +274,7 @@ public class DesignerPreferences
 			return ALIGNMENT_DISTANCES_DEFAULT;
 		}
 		int[] distances = new int[3];
-		String[] nrs = property.split(":"); //$NON-NLS-1$
+		String[] nrs = property.split(":");
 		if (nrs.length != 3)
 		{
 			return ALIGNMENT_DISTANCES_DEFAULT;

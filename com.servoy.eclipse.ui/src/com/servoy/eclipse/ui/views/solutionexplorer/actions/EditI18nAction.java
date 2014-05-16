@@ -30,9 +30,9 @@ public class EditI18nAction extends Action
 	 */
 	public EditI18nAction()
 	{
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("i18n.gif")); //$NON-NLS-1$
-		setText("Edit I18N Messages"); //$NON-NLS-1$
-		setToolTipText("Edit I18N Messages"); //$NON-NLS-1$
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("i18n.gif"));
+		setText("Edit I18N Messages");
+		setToolTipText("Edit I18N Messages");
 	}
 
 	@Override

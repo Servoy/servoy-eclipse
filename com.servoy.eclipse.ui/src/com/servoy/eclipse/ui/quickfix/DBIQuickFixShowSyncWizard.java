@@ -65,7 +65,7 @@ public class DBIQuickFixShowSyncWizard extends WorkbenchMarkerResolution
 
 	public String getLabel()
 	{
-		return "Open 'Synchronize DB tables with DB information' wizard"; //$NON-NLS-1$
+		return "Open 'Synchronize DB tables with DB information' wizard";
 	}
 
 	public Image getImage()
@@ -127,7 +127,7 @@ public class DBIQuickFixShowSyncWizard extends WorkbenchMarkerResolution
 	@Override
 	public void run(IMarker[] markers, IProgressMonitor monitor)
 	{
-		monitor.beginTask("Running 'Synchronize DB tables with DB information' wizard", IProgressMonitor.UNKNOWN); //$NON-NLS-1$
+		monitor.beginTask("Running 'Synchronize DB tables with DB information' wizard", IProgressMonitor.UNKNOWN);
 		try
 		{
 			runInternal();

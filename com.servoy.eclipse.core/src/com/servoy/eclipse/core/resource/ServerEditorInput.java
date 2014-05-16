@@ -31,7 +31,7 @@ import com.servoy.j2db.persistence.ServerConfig;
 public class ServerEditorInput implements IEditorInput
 {
 	public static final String SERVER_RESOURCE_ID = "com.servoy.eclipse.core.resource.server";
-	public static final String EDITOR_ID = "com.servoy.eclipse.ui.editors.ServerEditor"; //$NON-NLS-1$
+	public static final String EDITOR_ID = "com.servoy.eclipse.ui.editors.ServerEditor";
 
 	private final ServerConfig serverConfig;
 	private boolean isNew = false;
@@ -129,7 +129,7 @@ public class ServerEditorInput implements IEditorInput
 	@Override
 	public String toString()
 	{
-		return getClass().getName() + "(" + getToolTipText() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+		return getClass().getName() + "(" + getToolTipText() + ")";
 	}
 
 	@Override

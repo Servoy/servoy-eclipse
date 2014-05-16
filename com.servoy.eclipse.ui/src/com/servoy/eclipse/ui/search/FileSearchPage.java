@@ -114,14 +114,14 @@ public class FileSearchPage extends AbstractTextSearchViewPage implements IAdapt
 
 			String name1 = fLabelProvider.getText(e1);
 			String name2 = fLabelProvider.getText(e2);
-			if (name1 == null) name1 = "";//$NON-NLS-1$
-			if (name2 == null) name2 = "";//$NON-NLS-1$
+			if (name1 == null) name1 = "";
+			if (name2 == null) name2 = "";
 			return getComparator().compare(name1, name2);
 		}
 	}
 
-	private static final String KEY_SORTING = "org.eclipse.search.resultpage.sorting"; //$NON-NLS-1$
-	private static final String KEY_LIMIT = "org.eclipse.search.resultpage.limit"; //$NON-NLS-1$
+	private static final String KEY_SORTING = "org.eclipse.search.resultpage.sorting";
+	private static final String KEY_LIMIT = "org.eclipse.search.resultpage.limit";
 
 	private static final int DEFAULT_ELEMENT_LIMIT = 1000;
 

@@ -88,13 +88,13 @@ public class ImportMediaFolderAction extends ImportMediaAction implements ISelec
 
 		if (folderName != null && folderName.equals("") == false)
 		{
-			Job job = new WorkspaceJob("Import Media Folder") //$NON-NLS-1$
+			Job job = new WorkspaceJob("Import Media Folder")
 			{
 
 				@Override
 				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 				{
-					monitor.beginTask("Importing Media Folder", IProgressMonitor.UNKNOWN); //$NON-NLS-1$
+					monitor.beginTask("Importing Media Folder", IProgressMonitor.UNKNOWN);
 					try
 					{
 						addMediaFiles(solution, null, new String[] { folderName }, viewer.getCurrentMediaFolder() != null
@@ -103,11 +103,11 @@ public class ImportMediaFolderAction extends ImportMediaAction implements ISelec
 					catch (RepositoryException e)
 					{
 						UIUtils.reportError("Error", "Could not import media files: " + e.getMessage());
-						ServoyLog.logError("Could not import media files", e); //$NON-NLS-1$
+						ServoyLog.logError("Could not import media files", e);
 					}
 					catch (Exception e)
 					{
-						ServoyLog.logError("Could not import media files", e); //$NON-NLS-1$
+						ServoyLog.logError("Could not import media files", e);
 					}
 					finally
 					{

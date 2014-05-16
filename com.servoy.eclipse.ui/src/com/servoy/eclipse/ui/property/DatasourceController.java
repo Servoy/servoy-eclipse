@@ -97,7 +97,7 @@ public class DatasourceController extends PropertyController<String, TableWrappe
 				public Control createControl(Composite composite)
 				{
 					Button createButton = new Button(composite, SWT.PUSH);
-					createButton.setText("Create new I18N table"); //$NON-NLS-1$
+					createButton.setText("Create new I18N table");
 					createButton.addListener(SWT.Selection, new Listener()
 					{
 						public void handleEvent(Event event)

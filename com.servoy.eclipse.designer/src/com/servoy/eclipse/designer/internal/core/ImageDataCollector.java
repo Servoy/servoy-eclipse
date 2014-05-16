@@ -248,11 +248,11 @@ public class ImageDataCollector implements ImageConsumer
 		{
 			if (fProducer != null)
 			{
-				throw new IllegalAccessException("Image collection already in progress."); //$NON-NLS-1$
+				throw new IllegalAccessException("Image collection already in progress.");
 			}
 			if (producer == null)
 			{
-				throw new IllegalArgumentException("ImageProducer is null"); //$NON-NLS-1$
+				throw new IllegalArgumentException("ImageProducer is null");
 			}
 
 			fStartingIndexModel = null;

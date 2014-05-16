@@ -153,7 +153,7 @@ public class UpdateServoySequencesAction extends Action implements ISelectionCha
 						catch (Exception e)
 						{
 							ServoyLog.logError(e);
-							detail.append("Error getting tables: " + e.getMessage() + "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+							detail.append("Error getting tables: " + e.getMessage() + "\n");
 						}
 						if (tables != null)
 						{

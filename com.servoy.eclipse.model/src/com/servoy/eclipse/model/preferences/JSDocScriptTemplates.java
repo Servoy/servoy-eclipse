@@ -42,7 +42,7 @@ public class JSDocScriptTemplates
 {
 	private final IEclipsePreferences settingsNode;
 
-	public final static String JSDOC_SCRIPT_TEMPLATES_NODE = Activator.PLUGIN_ID + "/jsdoctemplates"; //$NON-NLS-1$
+	public final static String JSDOC_SCRIPT_TEMPLATES_NODE = Activator.PLUGIN_ID + "/jsdoctemplates";
 	public static final String METHOD_TEMPLATE_SETTING = "methodTemplate";
 	public static final String VARIABLE_TEMPLATE_SETTING = "variableTemplate";
 

@@ -96,7 +96,7 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 
 	protected static class MapPropertySource extends ComplexPropertySource<Map<String, Object>>
 	{
-		private static final String REMOVE_VALUE = "<removed>&*^&^%&$#@^%$&%%^#$*$($"; //$NON-NLS-1$
+		private static final String REMOVE_VALUE = "<removed>&*^&^%&$#@^%$&%%^#$*$($";
 
 		public MapPropertySource(ComplexProperty<Map<String, Object>> complexProperty)
 		{
@@ -127,7 +127,7 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 							protected Button createButton(Composite parent)
 							{
 								Button button = super.createButton(parent);
-								button.setText("x"); //$NON-NLS-1$
+								button.setText("x");
 								return button;
 							}
 

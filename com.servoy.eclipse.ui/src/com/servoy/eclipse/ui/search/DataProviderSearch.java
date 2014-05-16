@@ -98,8 +98,8 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 
 		//search js files
 		((DataProviderSearchCollector)collector).setEngine(DLTKLanguageManager.getSelectionEngine(JavaScriptNature.NATURE_ID));
-		FileTextSearchScope scriptScope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.js" }, true); //$NON-NLS-1$ 
-		TextSearchEngine.create().search(scriptScope, collector, Pattern.compile("\\b" + dataprovider.getName() + "\\b"), monitor); //$NON-NLS-1$ //$NON-NLS-2$
+		FileTextSearchScope scriptScope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.js" }, true);
+		TextSearchEngine.create().search(scriptScope, collector, Pattern.compile("\\b" + dataprovider.getName() + "\\b"), monitor);
 
 		return Status.OK_STATUS;
 	}
@@ -117,7 +117,7 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 	 */
 	public String getLabel()
 	{
-		return "Searching references to dataprovider '" + dataprovider.getName() + "'" + " (" + datasource + ")"; //$NON-NLS-1$//$NON-NLS-2$
+		return "Searching references to dataprovider '" + dataprovider.getName() + "'" + " (" + datasource + ")";
 	}
 
 	private class DataProviderSearchCollector extends TextSearchResultCollector
@@ -174,7 +174,7 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 					if (object instanceof Element)
 					{
 						// TODO refactor this is the constant of TypeProvider.RESOURCE
-						if (DataProviderSearchCollector.this.dataprovider.equals(((Element)object).getAttribute("servoy.RESOURCE"))) //$NON-NLS-1$
+						if (DataProviderSearchCollector.this.dataprovider.equals(((Element)object).getAttribute("servoy.RESOURCE")))
 						{
 							found = true;
 						}

@@ -84,7 +84,7 @@ public abstract class AbstractNewDbAction extends Action
 		final String name = getDatabaseName();
 		if (name != null)
 		{
-			WorkspaceJob createDbJob = new WorkspaceJob("Creating " + dbType + " database") //$NON-NLS-1$
+			WorkspaceJob createDbJob = new WorkspaceJob("Creating " + dbType + " database")
 			{
 				@Override
 				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException

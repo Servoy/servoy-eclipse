@@ -60,7 +60,7 @@ public class StartSmartClientHandler extends StartDebugHandler implements IRunna
 	{
 		public String getStringValue(String name)
 		{
-			return "%%" + name + "%%"; //$NON-NLS-1$ //$NON-NLS-2$
+			return "%%" + name + "%%";
 		}
 	};
 
@@ -68,9 +68,9 @@ public class StartSmartClientHandler extends StartDebugHandler implements IRunna
 	{
 		public String getStringValue(String name)
 		{
-			if ("prefix".equals(name)) return "forms.customer."; //$NON-NLS-1$//$NON-NLS-2$
-			else if ("elementName".equals(name)) return ".elements.customer_id"; //$NON-NLS-1$ //$NON-NLS-2$
-			else return "%%" + name + "%%"; //$NON-NLS-1$ //$NON-NLS-2$
+			if ("prefix".equals(name)) return "forms.customer.";
+			else if ("elementName".equals(name)) return ".elements.customer_id";
+			else return "%%" + name + "%%";
 		}
 	};
 
@@ -86,7 +86,7 @@ public class StartSmartClientHandler extends StartDebugHandler implements IRunna
 	{
 		makeSureNeededPluginsAreStarted();
 
-		Job job = new Job("Smart client start") //$NON-NLS-1$
+		Job job = new Job("Smart client start")
 		{
 			@Override
 			protected IStatus run(IProgressMonitor monitor)
@@ -113,7 +113,7 @@ public class StartSmartClientHandler extends StartDebugHandler implements IRunna
 
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 	{
-		monitor.beginTask("Smart client start", 5); //$NON-NLS-1$
+		monitor.beginTask("Smart client start", 5);
 		monitor.worked(1);
 		try
 		{
@@ -129,7 +129,7 @@ public class StartSmartClientHandler extends StartDebugHandler implements IRunna
 						public void run()
 						{
 							MessageDialog.openError(Display.getDefault().getActiveShell(),
-								"Solution type problem", "Cant open this solution type in this client"); //$NON-NLS-1$
+								"Solution type problem", "Cant open this solution type in this client");
 						}
 					});
 					return;
@@ -151,7 +151,7 @@ public class StartSmartClientHandler extends StartDebugHandler implements IRunna
 							KeyStroke keyStroke = KeyStroke.getKeyStroke(def.keystroke);
 							if (keyStroke == null)
 							{
-								ServoyLog.logWarning("Could not parse keystroke '" + def.keystroke + '\'', null); //$NON-NLS-1$
+								ServoyLog.logWarning("Could not parse keystroke '" + def.keystroke + '\'', null);
 							}
 							else
 							{
@@ -190,7 +190,7 @@ public class StartSmartClientHandler extends StartDebugHandler implements IRunna
 	{
 		// add some delay, this seems to fix grey screens in developer on the mac.
 		// If action returns and at the same time the frame is shown, awt/swt events get mixed up?
-		long delay = Utils.getAsLong(ServoyModel.getSettings().getProperty("servoy.developer.startsc.delay", Utils.isAppleMacOS() ? "1000" : "0")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		long delay = Utils.getAsLong(ServoyModel.getSettings().getProperty("servoy.developer.startsc.delay", Utils.isAppleMacOS() ? "1000" : "0"));
 		if (delay > 0)
 		{
 			try

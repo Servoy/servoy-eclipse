@@ -72,7 +72,7 @@ public class I18nComposite extends Composite
 {
 	private static final int FILTER_TEXT_HEIGHT = 29;
 	private static final int LANG_COMBO_WIDTH = 128;
-	private static final String DIALOGSTORE_FILTER = "I18NComposite.filter"; //$NON-NLS-1$
+	private static final String DIALOGSTORE_FILTER = "I18NComposite.filter";
 	private static final String COLUMN_WIDTHS = "I18NComposite.table.widths";
 	private static final String KEY_COLUMN = "key.column";
 	private static final String DEFAULT_COLUMN = "default.column";

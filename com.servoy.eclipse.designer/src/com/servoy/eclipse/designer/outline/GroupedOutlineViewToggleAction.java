@@ -42,7 +42,7 @@ public class GroupedOutlineViewToggleAction extends Action implements IPropertyC
 
 	protected GroupedOutlineViewToggleAction()
 	{
-		super("Group Elements", AS_CHECK_BOX); //$NON-NLS-1$
+		super("Group Elements", AS_CHECK_BOX);
 		setChecked(FormOutlineContentProvider.getDisplayType());
 
 		addListenerObject(this);
@@ -64,8 +64,8 @@ public class GroupedOutlineViewToggleAction extends Action implements IPropertyC
 		for (TreeViewer treeViewer : treeViewerList)
 			treeViewer.refresh();
 
-		IEclipsePreferences preferences = new InstanceScope().getNode("com.servoy.eclipse.designer"); //$NON-NLS-1$
-		preferences.putBoolean("OutlineViewMode", ((Boolean)event.getNewValue()).booleanValue()); //$NON-NLS-1$
+		IEclipsePreferences preferences = new InstanceScope().getNode("com.servoy.eclipse.designer");
+		preferences.putBoolean("OutlineViewMode", ((Boolean)event.getNewValue()).booleanValue());
 		try
 		{
 			preferences.flush();

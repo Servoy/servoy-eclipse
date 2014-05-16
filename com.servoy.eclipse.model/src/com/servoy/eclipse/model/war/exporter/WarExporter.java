@@ -834,64 +834,64 @@ public class WarExporter
 		{
 			ServerConfiguration sc = exportModel.getServerConfiguration(serverName);
 
-			properties.put("server." + i + ".serverName", sc.getName()); //$NON-NLS-1$ //$NON-NLS-2$
-			properties.put("server." + i + ".userName", sc.getUserName()); //$NON-NLS-1$ //$NON-NLS-2$
-			properties.put("server." + i + ".password", sc.getPassword()); //$NON-NLS-1$ //$NON-NLS-2$
-			properties.put("server." + i + ".URL", sc.getServerUrl()); //$NON-NLS-1$ //$NON-NLS-2$
+			properties.put("server." + i + ".serverName", sc.getName());
+			properties.put("server." + i + ".userName", sc.getUserName());
+			properties.put("server." + i + ".password", sc.getPassword());
+			properties.put("server." + i + ".URL", sc.getServerUrl());
 //			Map<String, String> connectionProperties = sc.getConnectionProperties();
 //			if (connectionProperties == null)
 //			{
-//				Settings.removePrefixedProperties(properties, "server." + i + ".property."); //$NON-NLS-1$ //$NON-NLS-2$
+//				Settings.removePrefixedProperties(properties, "server." + i + ".property.");
 //			}
 //			else
 //			{
 //				for (Entry<String, String> entry : connectionProperties.entrySet())
 //				{
-//					properties.put("server." + i + ".property." + entry.getKey(), entry.getValue()); //$NON-NLS-1$ //$NON-NLS-2$
+//					properties.put("server." + i + ".property." + entry.getKey(), entry.getValue());
 //				}
 //			}
-			properties.put("server." + i + ".driver", sc.getDriver()); //$NON-NLS-1$ //$NON-NLS-2$
-			properties.put("server." + i + ".skipSysTables", "" + sc.isSkipSysTables()); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+			properties.put("server." + i + ".driver", sc.getDriver());
+			properties.put("server." + i + ".skipSysTables", "" + sc.isSkipSysTables());
 			String catalog = sc.getCatalog();
 			if (catalog == null)
 			{
-				catalog = "<none>"; //$NON-NLS-1$
+				catalog = "<none>";
 			}
 			else if (catalog.trim().length() == 0)
 			{
-				catalog = "<empty>"; //$NON-NLS-1$
+				catalog = "<empty>";
 			}
-			properties.put("server." + i + ".catalog", catalog); //$NON-NLS-1$ //$NON-NLS-2$
+			properties.put("server." + i + ".catalog", catalog);
 			String schema = sc.getSchema();
 			if (schema == null)
 			{
-				schema = "<none>"; //$NON-NLS-1$
+				schema = "<none>";
 			}
 			else if (schema.trim().length() == 0)
 			{
-				schema = "<empty>"; //$NON-NLS-1$
+				schema = "<empty>";
 			}
-			properties.put("server." + i + ".schema", schema); //$NON-NLS-1$ //$NON-NLS-2$
-			properties.put("server." + i + ".maxConnectionsActive", String.valueOf(sc.getMaxActive())); //$NON-NLS-1$ //$NON-NLS-2$
-			properties.put("server." + i + ".maxConnectionsIdle", String.valueOf(sc.getMaxIdle())); //$NON-NLS-1$ //$NON-NLS-2$
-			properties.put("server." + i + ".maxPreparedStatementsIdle", String.valueOf(sc.getMaxPreparedStatementsIdle())); //$NON-NLS-1$ //$NON-NLS-2$
-			properties.put("server." + i + ".connectionValidationType", String.valueOf(sc.getConnectionValidationType())); //$NON-NLS-1$ //$NON-NLS-2$
+			properties.put("server." + i + ".schema", schema);
+			properties.put("server." + i + ".maxConnectionsActive", String.valueOf(sc.getMaxActive()));
+			properties.put("server." + i + ".maxConnectionsIdle", String.valueOf(sc.getMaxIdle()));
+			properties.put("server." + i + ".maxPreparedStatementsIdle", String.valueOf(sc.getMaxPreparedStatementsIdle()));
+			properties.put("server." + i + ".connectionValidationType", String.valueOf(sc.getConnectionValidationType()));
 			if (sc.getValidationQuery() != null)
 			{
-				properties.put("server." + i + ".validationQuery", sc.getValidationQuery()); //$NON-NLS-1$ //$NON-NLS-2$
+				properties.put("server." + i + ".validationQuery", sc.getValidationQuery());
 			}
-			if (sc.getDataModelCloneFrom() != null && !"".equals(sc.getDataModelCloneFrom())) //$NON-NLS-1$
+			if (sc.getDataModelCloneFrom() != null && !"".equals(sc.getDataModelCloneFrom()))
 			{
-				properties.put("server." + i + ".dataModelCloneFrom", sc.getDataModelCloneFrom()); //$NON-NLS-1$ //$NON-NLS-2$
+				properties.put("server." + i + ".dataModelCloneFrom", sc.getDataModelCloneFrom());
 			}
-			properties.put("server." + i + ".enabled", Boolean.toString(true)); //$NON-NLS-1$ //$NON-NLS-2$ 
+			properties.put("server." + i + ".enabled", Boolean.toString(true));
 //			if (sc.getDialectClass() != null)
 //			{
-//				properties.put("server." + i + ".dialect", sc.getDialectClass()); //$NON-NLS-1$ //$NON-NLS-2$
+//				properties.put("server." + i + ".dialect", sc.getDialectClass());
 //			}
 //			else
 //			{
-//				properties.remove("server." + i + ".dialect"); //$NON-NLS-1$//$NON-NLS-2$
+//				properties.remove("server." + i + ".dialect");
 //			}
 			i++;
 		}
@@ -1117,7 +1117,7 @@ public class WarExporter
 
 	private static void copyDir(File sourceDir, File destDir, boolean recusive, Set<File> writtenFiles) throws ExportException
 	{
-		if (!destDir.exists() && !destDir.mkdirs()) throw new ExportException("Can't create destination dir: " + destDir); //$NON-NLS-1$
+		if (!destDir.exists() && !destDir.mkdirs()) throw new ExportException("Can't create destination dir: " + destDir);
 		File[] listFiles = sourceDir.listFiles();
 		for (File file : listFiles)
 		{

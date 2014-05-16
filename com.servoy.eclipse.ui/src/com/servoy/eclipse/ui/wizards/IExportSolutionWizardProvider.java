@@ -27,7 +27,7 @@ import com.servoy.eclipse.ui.Activator;
  */
 public interface IExportSolutionWizardProvider
 {
-	static final String EXTENSION_ID = Activator.PLUGIN_ID + ".exportSolutionProvider"; //$NON-NLS-1$
+	static final String EXTENSION_ID = Activator.PLUGIN_ID + ".exportSolutionProvider";
 
 	IAction getExportAction();
 }

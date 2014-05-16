@@ -63,8 +63,8 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 	public FormOutlineContentProvider(Form form)
 	{
 		this.form = form;
-		IEclipsePreferences preferences = new InstanceScope().getNode("com.servoy.eclipse.designer"); //$NON-NLS-1$
-		displayType = preferences.getBoolean("OutlineViewMode", false); //$NON-NLS-1$
+		IEclipsePreferences preferences = new InstanceScope().getNode("com.servoy.eclipse.designer");
+		displayType = preferences.getBoolean("OutlineViewMode", false);
 	}
 
 	public Object[] getChildren(Object parentElement)
@@ -167,7 +167,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			}
 			catch (RepositoryException e)
 			{
-				ServoyLog.logError("Could not create flattened form for form " + form, e); //$NON-NLS-1$
+				ServoyLog.logError("Could not create flattened form for form " + form, e);
 			}
 		}
 		else if (parentElement instanceof Pair)
@@ -195,7 +195,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			}
 			catch (RepositoryException e)
 			{
-				ServoyLog.logError("Could not create flattened form for form " + form, e); //$NON-NLS-1$
+				ServoyLog.logError("Could not create flattened form for form " + form, e);
 			}
 		}
 		else if (parentElement instanceof PersistContext && ((PersistContext)parentElement).getPersist() instanceof AbstractBase)
@@ -292,7 +292,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
 			if (editingFlattenedSolution == null)
 			{
-				ServoyLog.logError("Could not get project for form " + persist, null); //$NON-NLS-1$
+				ServoyLog.logError("Could not get project for form " + persist, null);
 				return null;
 			}
 			return editingFlattenedSolution.getFlattenedForm(persist);

@@ -83,7 +83,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 		this.shell = shell;
 
 		// it appears right next to another action with the same icon - it's a bit confusing
-//		setImageDescriptor(Activator.loadImageDescriptorFromBundle("sync_tables.png")); //$NON-NLS-1$
+//		setImageDescriptor(Activator.loadImageDescriptorFromBundle("sync_tables.png"));
 
 		setToolTipText("update meta data for table marked as meta data table between database and workspace");
 		setText("Update Meta Data ...");
@@ -121,7 +121,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 				}
 				catch (RepositoryException e)
 				{
-					ServoyLog.logWarning("Cannot get table list for server: " + server.getName(), e); //$NON-NLS-1$
+					ServoyLog.logWarning("Cannot get table list for server: " + server.getName(), e);
 				}
 				if (state) selectedServer = server;
 				break;
@@ -139,7 +139,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 		try
 		{
 			List<String> tableNames = server.getTableNames(true);
-			monitor.beginTask("Checking for metadata tables", tableNames.size()); //$NON-NLS-1$
+			monitor.beginTask("Checking for metadata tables", tableNames.size());
 			for (String tableName : tableNames)
 			{
 				Table table = server.getTable(tableName);
@@ -183,13 +183,13 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 
 			if (dataSources.size() == 0)
 			{
-				UIUtils.showInformation(shell, "Metadata update", "The server you selected does not have any metadata tables."); //$NON-NLS-1$ //$NON-NLS-2$
+				UIUtils.showInformation(shell, "Metadata update", "The server you selected does not have any metadata tables.");
 				return;
 			}
 		}
 		MultiStatus warnings = new MultiStatus(Activator.PLUGIN_ID, 0, "For more information please click 'Details'.", null);
 		List<Table> tables = new ArrayList<Table>();
-		monitor.beginTask("Checking for metadata tables", dataSources.size()); //$NON-NLS-1$
+		monitor.beginTask("Checking for metadata tables", dataSources.size());
 		for (String dataSource : dataSources)
 		{
 			String[] stn = DataSourceUtilsBase.getDBServernameTablename(dataSource);
@@ -371,7 +371,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 		StringBuilder sb = new StringBuilder();
 		MultiStatus warnings = new MultiStatus(Activator.PLUGIN_ID, 0, "For more information please click 'Details'.", null);
 
-		monitor.beginTask("Creating metadata files for the tables", tables.size()); //$NON-NLS-1$
+		monitor.beginTask("Creating metadata files for the tables", tables.size());
 		for (Table table : tables)
 		{
 			try

@@ -53,32 +53,32 @@ public class ProcessPendingInstall implements Runnable
 		// we are not using ApplicationServerSingleton.get().getServoyApplicationServerDirectory() cause that would init the app. server and load all plugins, beans...
 		// which negates the purpose of this restart-install
 		File f = null;
-		String location = System.getProperty("servoy.application_server.dir"); //$NON-NLS-1$
+		String location = System.getProperty("servoy.application_server.dir");
 		if (location == null)
 		{
-			location = System.getProperty("eclipse.home.location"); //$NON-NLS-1$
-			if (location != null && location.startsWith("file:")) //$NON-NLS-1$
+			location = System.getProperty("eclipse.home.location");
+			if (location != null && location.startsWith("file:"))
 			{
-				location = location.substring(5) + "../"; //$NON-NLS-1$
+				location = location.substring(5) + "../";
 				if (location != null && Utils.getPlatform() == Utils.PLATFORM_WINDOWS)
 				{
-					if (location.startsWith("/")) location = location.substring(1); //$NON-NLS-1$
-					location = location.replaceAll("/", "\\\\"); //$NON-NLS-1$//$NON-NLS-2$
+					if (location.startsWith("/")) location = location.substring(1);
+					location = location.replaceAll("/", "\\\\");
 				}
 				f = new File(location);
 			}
 		}
 		else
 		{
-			f = new File(location + "../"); //$NON-NLS-1$
+			f = new File(location + "../");
 		}
 
 		if (f != null && f.exists()) return f;
 
 		// should never happen
-		RuntimeException ex = new RuntimeException("eclipseLocation='" + location + '\''); //$NON-NLS-1$
-		ServoyLog.logError("Could not determine servoy base location", ex); //$NON-NLS-1$ 
-		MessageDialog.openError(null, "Install", "A pending installation has failed: base location unknown."); //$NON-NLS-1$//$NON-NLS-2$
+		RuntimeException ex = new RuntimeException("eclipseLocation='" + location + '\'');
+		ServoyLog.logError("Could not determine servoy base location", ex);
+		MessageDialog.openError(null, "Install", "A pending installation has failed: base location unknown.");
 		throw ex;
 	}
 
@@ -113,7 +113,7 @@ public class ProcessPendingInstall implements Runnable
 			}
 			catch (RuntimeException e)
 			{
-				error = "Failed to check for/install pending extension operations. Pending operations will be discarded. Check logs for more info. Reason: " + e.getMessage(); //$NON-NLS-1$
+				error = "Failed to check for/install pending extension operations. Pending operations will be discarded. Check logs for more info. Reason: " + e.getMessage();
 				throw e;
 			}
 			finally
@@ -124,7 +124,7 @@ public class ProcessPendingInstall implements Runnable
 		else
 		{
 			// should never happen
-			error = "Cannot access installed extensions."; //$NON-NLS-1$
+			error = "Cannot access installed extensions.";
 		}
 
 		if (error != null || allMessages.size() > 0)
@@ -172,8 +172,8 @@ public class ProcessPendingInstall implements Runnable
 			else
 			{
 				// should never happen; if it does it's an implementation error
-				allMessages.add(new Message("Internal error [uist]...", Message.ERROR)); //$NON-NLS-1$
-				ServoyLog.logError("Unknown install step type...", null); //$NON-NLS-1$
+				allMessages.add(new Message("Internal error [uist]...", Message.ERROR));
+				ServoyLog.logError("Unknown install step type...", null);
 			}
 		}
 

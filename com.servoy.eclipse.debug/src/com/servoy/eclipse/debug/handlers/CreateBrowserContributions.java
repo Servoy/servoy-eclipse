@@ -46,23 +46,23 @@ public class CreateBrowserContributions extends CompoundContributionItem impleme
 
 	private ImageDescriptor getImageForName(String name, String location)
 	{
-		String browserImgFileName = ""; //$NON-NLS-1$
-		String browserName = (name != null ? name.toLowerCase() : ""); //$NON-NLS-1$
-		String browserLocation = (location != null ? location.toLowerCase() : ""); //$NON-NLS-1$
-		if (browserLocation.contains("iexplore") || browserName.contains("explorer")) browserImgFileName = "explorer.png"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		else if (browserLocation.contains("firefox") || browserName.contains("firefox")) browserImgFileName = "firefox.png"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		else if (browserLocation.contains("chrome") || browserName.contains("chrome")) browserImgFileName = "chrome.png"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		else if (browserLocation.contains("safari") || browserName.contains("safari")) browserImgFileName = "safari.png"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		else if (browserLocation.contains("opera") || browserName.contains("opera")) browserImgFileName = "opera.png"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		String browserImgFileName = "";
+		String browserName = (name != null ? name.toLowerCase() : "");
+		String browserLocation = (location != null ? location.toLowerCase() : "");
+		if (browserLocation.contains("iexplore") || browserName.contains("explorer")) browserImgFileName = "explorer.png";
+		else if (browserLocation.contains("firefox") || browserName.contains("firefox")) browserImgFileName = "firefox.png";
+		else if (browserLocation.contains("chrome") || browserName.contains("chrome")) browserImgFileName = "chrome.png";
+		else if (browserLocation.contains("safari") || browserName.contains("safari")) browserImgFileName = "safari.png";
+		else if (browserLocation.contains("opera") || browserName.contains("opera")) browserImgFileName = "opera.png";
 		return getImageForBrowser(browserImgFileName);
 	}
 
 	private ImageDescriptor getImageForBrowser(String name)
 	{
 		if (browsersImagesList == null) browsersImagesList = new HashMap<String, ImageDescriptor>();
-		if (!name.equals("") && !browsersImagesList.containsKey(name)) //$NON-NLS-1$
+		if (!name.equals("") && !browsersImagesList.containsKey(name))
 		{
-			ImageDescriptor id = AbstractUIPlugin.imageDescriptorFromPlugin(com.servoy.eclipse.ui.Activator.PLUGIN_ID, "icons/" + name); //$NON-NLS-1$
+			ImageDescriptor id = AbstractUIPlugin.imageDescriptorFromPlugin(com.servoy.eclipse.ui.Activator.PLUGIN_ID, "icons/" + name);
 			browsersImagesList.put(name, id);
 		}
 		return browsersImagesList.get(name);

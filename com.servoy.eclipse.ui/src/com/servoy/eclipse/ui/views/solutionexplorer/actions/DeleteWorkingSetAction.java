@@ -65,7 +65,7 @@ public class DeleteWorkingSetAction extends Action implements ISelectionChangedL
 	{
 		String workingSetName = selection.getName();
 		if (MessageDialog.openConfirm(UIUtils.getActiveShell(), "Delete working set",
-			"Are you sure you want to delete '" + workingSetName + "' ? (This will not delete its elements but can affect other solutions as well)")) //$NON-NLS-1$
+			"Are you sure you want to delete '" + workingSetName + "' ? (This will not delete its elements but can affect other solutions as well)"))
 		{
 			IWorkingSet workingSet = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSetName);
 			if (workingSet != null)

@@ -148,10 +148,10 @@ import com.servoy.j2db.util.Utils;
  */
 public class Activator extends Plugin
 {
-	public static final String RECREATE_ON_I18N_CHANGE_PREFERENCE = "recreate.forms.on.i18n.change"; //$NON-NLS-1$
+	public static final String RECREATE_ON_I18N_CHANGE_PREFERENCE = "recreate.forms.on.i18n.change";
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "com.servoy.eclipse.core"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "com.servoy.eclipse.core";
 
 	// The shared instance
 	private static Activator plugin;
@@ -210,7 +210,7 @@ public class Activator extends Plugin
 							IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(getId());
 							try
 							{
-								return new net.sourceforge.sqlexplorer.dbproduct.SQLConnection(user, server.getRawConnection(), this, "Servoy server: " + //$NON-NLS-1$
+								return new net.sourceforge.sqlexplorer.dbproduct.SQLConnection(user, server.getRawConnection(), this, "Servoy server: " +
 									getId());
 							}
 							catch (RepositoryException e)
@@ -266,7 +266,7 @@ public class Activator extends Plugin
 		ss = (IServerStarter)context.getService(ref);
 		if (ss == null)
 		{
-			throw new RuntimeException("Could not load application server plugin"); //$NON-NLS-1$ 
+			throw new RuntimeException("Could not load application server plugin");
 		}
 		ss.nativeStartup();
 
@@ -392,7 +392,7 @@ public class Activator extends Plugin
 				}
 				catch (Exception e)
 				{
-					ServoyLog.logError("Failed to open browser editor.", e); //$NON-NLS-1$
+					ServoyLog.logError("Failed to open browser editor.", e);
 				}
 			}
 		});
@@ -432,7 +432,7 @@ public class Activator extends Plugin
 			sqlExplorerLoaded = Boolean.FALSE;
 			try
 			{
-				Class.forName("net.sourceforge.sqlexplorer.plugin.SQLExplorerPlugin", false, getClass().getClassLoader()); //$NON-NLS-1$
+				Class.forName("net.sourceforge.sqlexplorer.plugin.SQLExplorerPlugin", false, getClass().getClassLoader());
 				sqlExplorerLoaded = Boolean.TRUE;
 				generateSQLExplorerAliasses();
 			}
@@ -449,7 +449,7 @@ public class Activator extends Plugin
 	 */
 	private void generateSQLExplorerAliasses()
 	{
-		WorkbenchJob job = new SQLExplorerAliasCreatorJob("creating db aliasses"); //$NON-NLS-1$
+		WorkbenchJob job = new SQLExplorerAliasCreatorJob("creating db aliasses");
 		job.setSystem(true);
 		job.setUser(false);
 		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
@@ -546,7 +546,7 @@ public class Activator extends Plugin
 		}
 		catch (InterruptedException e)
 		{
-			ServoyLog.logWarning("Interrupted while waiting for clients to shut down on stop. Continuing with server shutdown.", null); //$NON-NLS-1$
+			ServoyLog.logWarning("Interrupted while waiting for clients to shut down on stop. Continuing with server shutdown.", null);
 			interrupted = true;
 		}
 
@@ -619,7 +619,7 @@ public class Activator extends Plugin
 					Context.enter();
 					try
 					{
-						scope.put("servoyDeveloper", scope, new NativeJavaObject(scope, new JSDeveloperSolutionModel(client), new InstanceJavaMembers( //$NON-NLS-1$
+						scope.put("servoyDeveloper", scope, new NativeJavaObject(scope, new JSDeveloperSolutionModel(client), new InstanceJavaMembers(
 							scope, JSDeveloperSolutionModel.class)));
 					}
 					finally
@@ -777,7 +777,7 @@ public class Activator extends Plugin
 		// install servoy model listeners in separate job, when ServoyModel is created in bundle.activator thread
 		// a deadlock may occur (display thread waits for loading of ui bundle which waits for core bundle 
 		// which waits for ServoyModel latch, but the ServoyModel runnable is never running because display thread is blocking in wait)
-		new Job("HookupToServoyModel") //$NON-NLS-1$
+		new Job("HookupToServoyModel")
 		{
 			@Override
 			protected IStatus run(IProgressMonitor monitor)
@@ -952,7 +952,7 @@ public class Activator extends Plugin
 			}
 		}
 
-		String[] actionIds = { "org.eclipse.ui.edit.text.actionSet.convertLineDelimitersTo" }; //$NON-NLS-1$
+		String[] actionIds = { "org.eclipse.ui.edit.text.actionSet.convertLineDelimitersTo" };
 		ActionSetRegistry reg = WorkbenchPlugin.getDefault().getActionSetRegistry();
 		IActionSetDescriptor[] actionSets = reg.getActionSets();
 		for (IActionSetDescriptor element : actionSets)
@@ -986,38 +986,38 @@ public class Activator extends Plugin
 
 			if (extensions == null || extensions.length == 0)
 			{
-				ServoyLog.logWarning("Could not find documentation provider server starter plugin (extension point " + //$NON-NLS-1$
-					IDocumentationManagerProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$
+				ServoyLog.logWarning("Could not find documentation provider server starter plugin (extension point " +
+					IDocumentationManagerProvider.EXTENSION_ID + ")", null);
 				return null;
 			}
 			if (extensions.length > 1)
 			{
-				ServoyLog.logWarning("Multiple documentation manager plugins found (extension point " + //$NON-NLS-1$
-					IDocumentationManagerProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$
+				ServoyLog.logWarning("Multiple documentation manager plugins found (extension point " +
+					IDocumentationManagerProvider.EXTENSION_ID + ")", null);
 			}
 			IConfigurationElement[] ce = extensions[0].getConfigurationElements();
 			if (ce == null || ce.length == 0)
 			{
-				ServoyLog.logWarning("Could not read documentation provider plugin (extension point " + IDocumentationManagerProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$ //$NON-NLS-2$
+				ServoyLog.logWarning("Could not read documentation provider plugin (extension point " + IDocumentationManagerProvider.EXTENSION_ID + ")", null);
 				return null;
 			}
 			if (ce.length > 1)
 			{
-				ServoyLog.logWarning("Multiple extensions for documentation manager plugins found (extension point " + //$NON-NLS-1$
-					IDocumentationManagerProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$
+				ServoyLog.logWarning("Multiple extensions for documentation manager plugins found (extension point " +
+					IDocumentationManagerProvider.EXTENSION_ID + ")", null);
 			}
 			try
 			{
-				docManagerpProvider = (IDocumentationManagerProvider)ce[0].createExecutableExtension("class"); //$NON-NLS-1$
+				docManagerpProvider = (IDocumentationManagerProvider)ce[0].createExecutableExtension("class");
 			}
 			catch (CoreException e)
 			{
-				ServoyLog.logWarning("Could not create documentation provider plugin (extension point " + IDocumentationManagerProvider.EXTENSION_ID + ")", e); //$NON-NLS-1$ //$NON-NLS-2$
+				ServoyLog.logWarning("Could not create documentation provider plugin (extension point " + IDocumentationManagerProvider.EXTENSION_ID + ")", e);
 				return null;
 			}
 			if (docManagerpProvider == null)
 			{
-				ServoyLog.logWarning("Could not load documentation provider plugin (extension point " + IDocumentationManagerProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$ //$NON-NLS-2$
+				ServoyLog.logWarning("Could not load documentation provider plugin (extension point " + IDocumentationManagerProvider.EXTENSION_ID + ")", null);
 			}
 		}
 		return docManagerpProvider;
@@ -1043,46 +1043,46 @@ public class Activator extends Plugin
 
 		if (extensions == null || extensions.length == 0)
 		{
-			ServoyLog.logWarning("Could not find extension point " + //$NON-NLS-1$
+			ServoyLog.logWarning("Could not find extension point " +
 				extensionId, null);
 			return null;
 		}
 		if (extensions.length > 1)
 		{
-			ServoyLog.logWarning("Multiple extensions found for " + //$NON-NLS-1$
+			ServoyLog.logWarning("Multiple extensions found for " +
 				extensionId, null);
 		}
 		IConfigurationElement[] ce = extensions[0].getConfigurationElements();
 		if (ce == null || ce.length == 0)
 		{
-			ServoyLog.logWarning("Could not read  extension point " + extensionId, null); //$NON-NLS-1$ 
+			ServoyLog.logWarning("Could not read  extension point " + extensionId, null);
 			return null;
 		}
 		if (ce.length > 1)
 		{
-			ServoyLog.logWarning("Multiple extensions found for extension point " + //$NON-NLS-1$
+			ServoyLog.logWarning("Multiple extensions found for extension point " +
 				extensionId, null);
 		}
 		Object extension = null;
 		try
 		{
-			extension = ce[0].createExecutableExtension("class"); //$NON-NLS-1$
+			extension = ce[0].createExecutableExtension("class");
 		}
 		catch (CoreException e)
 		{
-			ServoyLog.logWarning("Could not create debug starter (extension point " + extensionId + ")", e); //$NON-NLS-1$ //$NON-NLS-2$
+			ServoyLog.logWarning("Could not create debug starter (extension point " + extensionId + ")", e);
 			return null;
 		}
 		if (extension == null)
 		{
-			ServoyLog.logWarning("Could not load debug starter (extension point " + extensionId + ")", null); //$NON-NLS-1$ //$NON-NLS-2$
+			ServoyLog.logWarning("Could not load debug starter (extension point " + extensionId + ")", null);
 		}
 		return extension;
 	}
 
 	private void showFirstCheatSheet()
 	{
-		final String cheatSheetId = "com.servoy.eclipse.ui.cheatsheet.firstcontact"; //$NON-NLS-1$
+		final String cheatSheetId = "com.servoy.eclipse.ui.cheatsheet.firstcontact";
 		Display.getDefault().syncExec(new Runnable()
 		{
 			public void run()
@@ -1138,7 +1138,7 @@ public class Activator extends Plugin
 	{
 		// check the app server dir
 		final String appServerDir = applicationServer.getServoyApplicationServerDirectory();
-		File j2dbLib = new File(appServerDir, "lib/j2db.jar"); //$NON-NLS-1$
+		File j2dbLib = new File(appServerDir, "lib/j2db.jar");
 
 		if (!j2dbLib.exists())
 		{
@@ -1146,8 +1146,8 @@ public class Activator extends Plugin
 			{
 				public void run()
 				{
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "No Servoy ApplicationServer found!", "No application server found at: " + //$NON-NLS-1$ //$NON-NLS-2$
-						appServerDir + "\nPlease make sure that you installed Servoy Developer correctly"); //$NON-NLS-1$
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "No Servoy ApplicationServer found!", "No application server found at: " +
+						appServerDir + "\nPlease make sure that you installed Servoy Developer correctly");
 				}
 			});
 		}
@@ -1156,8 +1156,8 @@ public class Activator extends Plugin
 			try
 			{
 				URLClassLoader classLoader = new URLClassLoader(new URL[] { j2dbLib.toURL() }, ClassLoader.getSystemClassLoader());
-				Class< ? > loadClass = classLoader.loadClass("com.servoy.j2db.ClientVersion"); //$NON-NLS-1$
-				Method method = loadClass.getMethod("getReleaseNumber", new Class[0]); //$NON-NLS-1$
+				Class< ? > loadClass = classLoader.loadClass("com.servoy.j2db.ClientVersion");
+				Method method = loadClass.getMethod("getReleaseNumber", new Class[0]);
 				Object o = method.invoke(null, new Object[0]);
 				if (o instanceof Integer)
 				{
@@ -1168,9 +1168,9 @@ public class Activator extends Plugin
 						{
 							public void run()
 							{
-								MessageDialog.openError(Display.getDefault().getActiveShell(), "Servoy ApplicationServer version check", //$NON-NLS-1$
-									"Application Server version (" + version + ") is higher than the developers (" + ClientVersion.getReleaseNumber() + //$NON-NLS-1$ //$NON-NLS-2$
-										") \nPlease upgrade the developer Help->Check for updates"); //$NON-NLS-1$
+								MessageDialog.openError(Display.getDefault().getActiveShell(), "Servoy ApplicationServer version check",
+									"Application Server version (" + version + ") is higher than the developers (" + ClientVersion.getReleaseNumber() +
+										") \nPlease upgrade the developer Help->Check for updates");
 							}
 						});
 					}
@@ -1182,7 +1182,7 @@ public class Activator extends Plugin
 							{
 								boolean upgrade = MessageDialog.openQuestion(
 									Display.getDefault().getActiveShell(),
-									"Servoy ApplicationServer version should be upgraded", "The ApplicationServers version (" + version + ") is lower than Developer's version (" + ClientVersion.getReleaseNumber() + ")\n Upgrade the ApplicationServer?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+									"Servoy ApplicationServer version should be upgraded", "The ApplicationServers version (" + version + ") is lower than Developer's version (" + ClientVersion.getReleaseNumber() + ")\n Upgrade the ApplicationServer?");
 
 								if (upgrade)
 								{
@@ -1226,8 +1226,8 @@ public class Activator extends Plugin
 													{
 														public void run()
 														{
-															MessageDialog.openError(new Shell(), "Servoy update problem", //$NON-NLS-1$
-																"Servoy ApplicationServer update failed; please shutdown developer and try to run the command line updater."); //$NON-NLS-1$
+															MessageDialog.openError(new Shell(), "Servoy update problem",
+																"Servoy ApplicationServer update failed; please shutdown developer and try to run the command line updater.");
 														}
 													});
 												}

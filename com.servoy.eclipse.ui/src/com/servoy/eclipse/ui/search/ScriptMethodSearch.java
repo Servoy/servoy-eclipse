@@ -130,9 +130,9 @@ public class ScriptMethodSearch extends DLTKSearchEngineSearch
 		{
 			if (i > 0)
 			{
-				pattern += "|";//$NON-NLS-1$
+				pattern += "|";
 			}
-			pattern += "\\b" + fixedString[i].replaceAll("\\.", "\\\\.") + "\\b"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			pattern += "\\b" + fixedString[i].replaceAll("\\.", "\\\\.") + "\\b";
 		}
 		return Pattern.compile(pattern);
 	}
@@ -144,7 +144,7 @@ public class ScriptMethodSearch extends DLTKSearchEngineSearch
 	 */
 	public String getLabel()
 	{
-		return "Searching references to method '" + method.getName() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+		return "Searching references to method '" + method.getName() + "'";
 	}
 
 }

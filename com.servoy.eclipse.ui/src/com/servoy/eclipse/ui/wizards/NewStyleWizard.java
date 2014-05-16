@@ -78,7 +78,7 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
  */
 public class NewStyleWizard extends Wizard implements INewWizard
 {
-	public static final String ID = "com.servoy.eclipse.ui.NewStyleWizard"; //$NON-NLS-1$
+	public static final String ID = "com.servoy.eclipse.ui.NewStyleWizard";
 
 	private NewStyleWizardPage page1;
 	private NewStyleContentPage page2;

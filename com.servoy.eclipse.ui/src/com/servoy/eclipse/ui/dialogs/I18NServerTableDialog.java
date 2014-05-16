@@ -46,7 +46,7 @@ import com.servoy.j2db.util.Utils;
 
 public class I18NServerTableDialog extends Dialog
 {
-	private static final String SELECTION_NONE = "<none>"; //$NON-NLS-1$
+	private static final String SELECTION_NONE = "<none>";
 
 	private String selectedServerName;
 	private String selectedTableName;
@@ -65,7 +65,7 @@ public class I18NServerTableDialog extends Dialog
 	@Override
 	protected Control createDialogArea(Composite parent)
 	{
-		getShell().setText("Create new I18N table"); //$NON-NLS-1$
+		getShell().setText("Create new I18N table");
 
 		Composite composite = (Composite)super.createDialogArea(parent);
 		composite.setLayout(new GridLayout());
@@ -78,14 +78,14 @@ public class I18NServerTableDialog extends Dialog
 		gridData.horizontalSpan = 2;
 
 		Label labelDefaultI18NServer = new Label(composite, SWT.NONE);
-		labelDefaultI18NServer.setText("I18N server"); //$NON-NLS-1$
+		labelDefaultI18NServer.setText("I18N server");
 
 		defaultI18NServer = new Combo(composite, SWT.NULL | SWT.READ_ONLY);
 		UIUtils.setDefaultVisibleItemCount(defaultI18NServer);
 		defaultI18NServer.setLayoutData(gridData);
 
 		Label labelDefaultI18NTable = new Label(composite, SWT.NONE);
-		labelDefaultI18NTable.setText("New I18N table"); //$NON-NLS-1$
+		labelDefaultI18NTable.setText("New I18N table");
 
 		defaultI18NTable = new Text(composite, SWT.BORDER);
 		defaultI18NTable.setText(selectedTableName);
@@ -149,8 +149,8 @@ public class I18NServerTableDialog extends Dialog
 		if ((serverName == null) || serverName.equals(SELECTION_NONE) || (serverName.trim().length() == 0))
 		{
 			MessageBox msg = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
-			msg.setText("No server selected"); //$NON-NLS-1$
-			msg.setMessage("Please select the server where the I18N table should be created."); //$NON-NLS-1$
+			msg.setText("No server selected");
+			msg.setMessage("Please select the server where the I18N table should be created.");
 			msg.open();
 			return null;
 		}
@@ -159,7 +159,7 @@ public class I18NServerTableDialog extends Dialog
 			String adjustedTableName = tableName;
 			if (adjustedTableName.equals(SELECTION_NONE) || adjustedTableName.trim().length() == 0)
 			{
-				String prefix = "i18n_messages"; //$NON-NLS-1$
+				String prefix = "i18n_messages";
 				adjustedTableName = prefix;
 				ITransactionConnection connection = null;
 				try
@@ -172,14 +172,14 @@ public class I18NServerTableDialog extends Dialog
 						do
 						{
 							counter++;
-							adjustedTableName = prefix + "_" + counter; //$NON-NLS-1$
+							adjustedTableName = prefix + "_" + counter;
 						}
 						while ((counter < 20) && (srv.checkIfTableExistsInDatabase(connection, adjustedTableName)));
 					}
 				}
 				catch (Exception ex)
 				{
-					ServoyLog.logError("Failed to propose a default name for the I18N table on server '" + serverName + "'.", ex); //$NON-NLS-1$//$NON-NLS-2$
+					ServoyLog.logError("Failed to propose a default name for the I18N table on server '" + serverName + "'.", ex);
 				}
 				finally
 				{
@@ -194,8 +194,8 @@ public class I18NServerTableDialog extends Dialog
 				if (table != null)
 				{
 					MessageBox msg = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
-					msg.setText("Table already exists"); //$NON-NLS-1$
-					msg.setMessage("A table named '" + adjustedTableName + "' already exists on server '" + serverName + "'."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					msg.setText("Table already exists");
+					msg.setMessage("A table named '" + adjustedTableName + "' already exists on server '" + serverName + "'.");
 					msg.open();
 					return null;
 				}
@@ -204,19 +204,19 @@ public class I18NServerTableDialog extends Dialog
 					// Create the table in the repository.
 					IValidateName validator = DummyValidator.INSTANCE;
 					table = server.createNewTable(validator, adjustedTableName);
-					Column column = table.createNewColumn(validator, "message_id", Types.INTEGER, 0, 0, false, true); //$NON-NLS-1$
+					Column column = table.createNewColumn(validator, "message_id", Types.INTEGER, 0, 0, false, true);
 					column.setSequenceType(ColumnInfo.SERVOY_SEQUENCE);
-					table.createNewColumn(validator, "message_key", Types.VARCHAR, 150, 0, false); //$NON-NLS-1$ 
-					table.createNewColumn(validator, "message_language", Types.VARCHAR, 5, 0, true); //$NON-NLS-1$
-					table.createNewColumn(validator, "message_value", Types.VARCHAR, 2000, 0, true); //$NON-NLS-1$
+					table.createNewColumn(validator, "message_key", Types.VARCHAR, 150, 0, false);
+					table.createNewColumn(validator, "message_language", Types.VARCHAR, 5, 0, true);
+					table.createNewColumn(validator, "message_value", Types.VARCHAR, 2000, 0, true);
 					server.syncTableObjWithDB(table, false, false, null);
 
 					// Store the I18N server/table names. In case the user later pushes the Cancel button, the server/table name
 					// will remain changed anyway, because the user pushed the Create button.
 					//storeI18NServerAndTable();
 					MessageBox msg = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-					msg.setText("I18N table successfully created"); //$NON-NLS-1$
-					msg.setMessage("I18N table named '" + adjustedTableName + "' was created on server '" + serverName + "'."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					msg.setText("I18N table successfully created");
+					msg.setMessage("I18N table named '" + adjustedTableName + "' was created on server '" + serverName + "'.");
 					msg.open();
 
 					return table;
@@ -224,10 +224,10 @@ public class I18NServerTableDialog extends Dialog
 			}
 			catch (Exception ex)
 			{
-				ServoyLog.logError("Failed to create I18N table '" + adjustedTableName + "' on server '" + serverName + "'.", ex); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+				ServoyLog.logError("Failed to create I18N table '" + adjustedTableName + "' on server '" + serverName + "'.", ex);
 				MessageBox msg = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-				msg.setText("Could not create I18N table"); //$NON-NLS-1$
-				msg.setMessage("An error occured while creating table named '" + adjustedTableName + "' on server '" + serverName + "'."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				msg.setText("Could not create I18N table");
+				msg.setMessage("An error occured while creating table named '" + adjustedTableName + "' on server '" + serverName + "'.");
 				msg.open();
 
 				return null;

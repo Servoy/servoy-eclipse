@@ -66,7 +66,7 @@ public class BasicElementLabels
 		{
 			label = path.makeRelative().toString();
 		}
-		return markLTR(label, "/\\:."); //$NON-NLS-1$
+		return markLTR(label, "/\\:.");
 	}
 
 	/**
@@ -77,7 +77,7 @@ public class BasicElementLabels
 	 */
 	public static String getFilePattern(String name)
 	{
-		return markLTR(name, "*.?/\\:."); //$NON-NLS-1$
+		return markLTR(name, "*.?/\\:.");
 	}
 
 	/**
@@ -88,7 +88,7 @@ public class BasicElementLabels
 	 */
 	public static String getURLPart(String name)
 	{
-		return markLTR(name, ":@?-#/\\:."); //$NON-NLS-1$
+		return markLTR(name, ":@?-#/\\:.");
 	}
 
 	/**
@@ -99,7 +99,7 @@ public class BasicElementLabels
 	 */
 	public static String getResourceName(IResource resource)
 	{
-		return markLTR(resource.getName(), ":."); //$NON-NLS-1$
+		return markLTR(resource.getName(), ":.");
 	}
 
 	/**
@@ -110,7 +110,7 @@ public class BasicElementLabels
 	 */
 	public static String getResourceName(String resourceName)
 	{
-		return markLTR(resourceName, ":."); //$NON-NLS-1$
+		return markLTR(resourceName, ":.");
 	}
 
 	/**
@@ -121,6 +121,6 @@ public class BasicElementLabels
 	 */
 	public static String getVersionName(String name)
 	{
-		return markLTR(name, ":."); //$NON-NLS-1$
+		return markLTR(name, ":.");
 	}
 }

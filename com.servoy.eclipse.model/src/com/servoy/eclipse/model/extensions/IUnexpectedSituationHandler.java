@@ -29,7 +29,7 @@ import com.servoy.j2db.persistence.ITable;
 public interface IUnexpectedSituationHandler
 {
 
-	static final String EXTENSION_ID = Activator.PLUGIN_ID + ".unexpectedSituationHandler"; //$NON-NLS-1$
+	static final String EXTENSION_ID = Activator.PLUGIN_ID + ".unexpectedSituationHandler";
 
 	void cannotFindRepository();
 

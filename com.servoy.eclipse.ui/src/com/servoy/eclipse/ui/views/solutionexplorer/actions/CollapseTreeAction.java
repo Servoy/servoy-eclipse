@@ -40,7 +40,7 @@ public class CollapseTreeAction extends Action
 	{
 		this.treeViewer = treeViewer;
 		setText("Collapse tree");
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("collapseall.gif"));//$NON-NLS-1$
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("collapseall.gif"));
 	}
 
 	@Override

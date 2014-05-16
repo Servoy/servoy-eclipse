@@ -139,7 +139,7 @@ public class MobileExporter
 	private static final String MIME_CSS = "text/css";
 
 	// this constant is also defined in testing.js inside servoy_mobile_testing and TestSuiteController.java; please update those as well if you change the value
-	private static final String SCOPE_NAME_SEPARATOR = "_sNS_"; //$NON-NLS-1$
+	private static final String SCOPE_NAME_SEPARATOR = "_sNS_";
 
 	private File outputFolder;
 	private String serverURL;
@@ -165,8 +165,8 @@ public class MobileExporter
 
 	private String doMediaExport(ZipOutputStream zos, File outputFolder) throws IOException
 	{
-		StringBuilder headerJS = new StringBuilder("var mediaJS = ["); //$NON-NLS-1$
-		StringBuilder headerCSS = new StringBuilder("var mediaCSS = ["); //$NON-NLS-1$
+		StringBuilder headerJS = new StringBuilder("var mediaJS = [");
+		StringBuilder headerCSS = new StringBuilder("var mediaCSS = [");
 
 		FlattenedSolution flattenedSolution = getFlattenedSolution();
 		if (flattenedSolution != null)
@@ -190,17 +190,17 @@ public class MobileExporter
 					headerCSS.append('"').append(media.getName()).append('"');
 				}
 
-				addZipEntry("media/" + media.getName(), zos,  new ByteArrayInputStream(content)); //$NON-NLS-1$
+				addZipEntry("media/" + media.getName(), zos,  new ByteArrayInputStream(content));
 				if (outputFolder != null)
 				{
-					File outputFolderJS = new File(outputFolder, "media"); //$NON-NLS-1$
+					File outputFolderJS = new File(outputFolder, "media");
 					outputFolderJS.mkdirs();
 					Utils.writeFile(new File(outputFolderJS, media.getName()), content);
 				}
 			}
 		}
 
-		return headerJS.append("];\n").append(headerCSS).append("];").toString(); //$NON-NLS-1$ //$NON-NLS-2$
+		return headerJS.append("];\n").append(headerCSS).append("];").toString();
 	}
 
 	public String doPersistExport()
@@ -421,7 +421,7 @@ public class MobileExporter
 		FlattenedSolution flattenedSolution = getFlattenedSolution();
 		if (flattenedSolution != null)
 		{
-			String template = Utils.getTXTFileContent(getClass().getResourceAsStream(RELATIVE_TEMPLATE_PATH), Charset.forName("UTF8")); //$NON-NLS-1$
+			String template = Utils.getTXTFileContent(getClass().getResourceAsStream(RELATIVE_TEMPLATE_PATH), Charset.forName("UTF8"));
 			ScriptStringBuilder builder = new ScriptStringBuilder(useTestWar); // when creating test war code we need to map line numbers so as to show correct stacks for failures/errors
 
 			if (debugMode)
@@ -479,11 +479,11 @@ public class MobileExporter
 			{
 				for (Entry<String, Integer> entry : filenameEndings.entrySet())
 				{
-					builder.append("\nJsHybugger.loadFile('"); //$NON-NLS-1$
+					builder.append("\nJsHybugger.loadFile('");
 					builder.append(entry.getKey());
-					builder.append("', "); //$NON-NLS-1$
+					builder.append("', ");
 					builder.append(String.valueOf(entry.getValue()));
-					builder.append(");"); //$NON-NLS-1$
+					builder.append(");");
 				}
 			}
 			return builder.toString();
@@ -503,7 +503,7 @@ public class MobileExporter
 
 		if (developmentWorkspaceExport)
 		{
-			File outputFile = new File(tmpP, "solution.js"); //$NON-NLS-1$
+			File outputFile = new File(tmpP, "solution.js");
 			Utils.writeTXTFile(outputFile, solutionJavascript);
 			Utils.writeTXTFile(new File(outputFolder, MOBILE_MODULE_NAME + "/solution.js"), solutionJavascript);
 
@@ -568,7 +568,7 @@ public class MobileExporter
 							{
 								String indexContent = Utils.getTXTFileContent(new FileInputStream(new File(outputFolder, htmlFile)), Charset.forName("UTF8"),
 									false);
-								File outputFile = new File(outputFolder, "index.html"); //$NON-NLS-1$
+								File outputFile = new File(outputFolder, "index.html");
 								indexContent = indexContent.replaceAll(Pattern.quote("<!--SOLUTION_MEDIA_JS_PLACEHOLDER-->"), mediaExport);
 								indexContent = indexContent.replaceAll(Pattern.quote("<!--PHONEGAP_JS_PLACEHOLDER-->"), "");
 								Utils.writeTXTFile(outputFile, indexContent);
@@ -730,13 +730,13 @@ public class MobileExporter
 		StringBuffer variablesScript = new StringBuffer();
 		if (parent instanceof Form)
 		{
-			variablesScript.append(buildVariablesScripting(template, parent.getScriptVariables(false), ",\n")); //$NON-NLS-1$
+			variablesScript.append(buildVariablesScripting(template, parent.getScriptVariables(false), ",\n"));
 		}
 		if (parent instanceof FlattenedSolution)
 		{
 			if (scopeName != null)
 			{
-				variablesScript.append(buildVariablesScripting(template, ((FlattenedSolution)parent).getScriptVariables(scopeName, false), ",\n")); //$NON-NLS-1$
+				variablesScript.append(buildVariablesScripting(template, ((FlattenedSolution)parent).getScriptVariables(scopeName, false), ",\n"));
 			}
 			else
 			{
@@ -801,7 +801,7 @@ public class MobileExporter
 				scriptResult.append(methodScripting.substring(functionCodeIdx + PROPERTY_FUNCTION_CODE.length()));
 				if (methodIterator.hasNext())
 				{
-					scriptResult.append("\n"); //$NON-NLS-1$
+					scriptResult.append("\n");
 				}
 			}
 		}
@@ -1003,17 +1003,17 @@ public class MobileExporter
 		SolutionJSUnitSuiteCodeBuilder builder = new SolutionJSUnitSuiteCodeBuilder();
 		if (sp == null || (s = sp.getSolution()) == null || flattenedSolution == null)
 		{
-			builder.initializeWithError("Cannot create JS Unit suite. Can't find active solution."); //$NON-NLS-1$
+			builder.initializeWithError("Cannot create JS Unit suite. Can't find active solution.");
 		}
 		else
 		{
 			builder.initializeWithSolution(s, flattenedSolution, testTarget);
 		}
 
-		testCode.append("if (typeof(this.__customTestSuiteCodeLoaded) == 'undefined') {\nthis.__customTestSuiteCodeLoaded = 1;\n"); //$NON-NLS-1$
-		testCode.append("    var __rootTestSuiteClassName = '" + builder.getRootTestClassName() + "';\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		testCode.append("if (typeof(this.__customTestSuiteCodeLoaded) == 'undefined') {\nthis.__customTestSuiteCodeLoaded = 1;\n");
+		testCode.append("    var __rootTestSuiteClassName = '" + builder.getRootTestClassName() + "';\n");
 		testCode.append(builder.getCode());
-		testCode.append("    __solutionTestSuite.sendTestTreeAndRun();\n}"); //$NON-NLS-1$
+		testCode.append("    __solutionTestSuite.sendTestTreeAndRun();\n}");
 
 		this.testSuiteCode = testCode.toString();
 	}

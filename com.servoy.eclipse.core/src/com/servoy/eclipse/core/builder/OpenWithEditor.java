@@ -81,7 +81,7 @@ public class OpenWithEditor implements IMarkerAttributeContributor
 
 				if (persist != null)
 				{
-					marker.setAttribute("elementUuid", persist.getUUID().toString()); //$NON-NLS-1$
+					marker.setAttribute("elementUuid", persist.getUUID().toString());
 				}
 			}
 			catch (CoreException e)

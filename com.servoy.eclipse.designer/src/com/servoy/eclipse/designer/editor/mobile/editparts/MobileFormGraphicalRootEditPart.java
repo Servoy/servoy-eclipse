@@ -36,12 +36,12 @@ public class MobileFormGraphicalRootEditPart extends BaseFormGraphicalRootEditPa
 	/**
 	 * The layer containing feedback for the selected element, this layer is below the handle layer and above the layers with the elements.
 	 */
-	public static final String SELECTED_ELEMENT_FEEDBACK_LAYER = "Feedback Layer for selected element"; //$NON-NLS-1$
+	public static final String SELECTED_ELEMENT_FEEDBACK_LAYER = "Feedback Layer for selected element";
 
 	/**
 	 * The layer that prints the form background.
 	 */
-	public static final String FORM_BACKGROUND_LAYER = "Layer for form background"; //$NON-NLS-1$
+	public static final String FORM_BACKGROUND_LAYER = "Layer for form background";
 
 	public MobileFormGraphicalRootEditPart(BaseVisualFormEditor editorPart)
 	{

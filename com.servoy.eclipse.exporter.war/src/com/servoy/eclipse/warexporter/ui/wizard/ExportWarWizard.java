@@ -73,12 +73,12 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 
 	public ExportWarWizard()
 	{
-		setWindowTitle("War Export"); //$NON-NLS-1$
+		setWindowTitle("War Export");
 		IDialogSettings workbenchSettings = Activator.getDefault().getDialogSettings();
-		IDialogSettings section = workbenchSettings.getSection("WarExportWizard");//$NON-NLS-1$
+		IDialogSettings section = workbenchSettings.getSection("WarExportWizard");
 		if (section == null)
 		{
-			section = workbenchSettings.addNewSection("WarExportWizard");//$NON-NLS-1$
+			section = workbenchSettings.addNewSection("WarExportWizard");
 		}
 		setDialogSettings(section);
 		setNeedsProgressMonitor(true);
@@ -118,7 +118,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 					{
 						public void run()
 						{
-							MessageDialog.openError(getShell(), "Error creating the WAR file", e.getMessage()); //$NON-NLS-1$
+							MessageDialog.openError(getShell(), "Error creating the WAR file", e.getMessage());
 						}
 					});
 				}

@@ -49,9 +49,9 @@ public class FileLabelProvider extends LabelProvider implements IStyledLabelProv
 	public static final int SHOW_LABEL_PATH = 2;
 	public static final int SHOW_PATH_LABEL = 3;
 
-	private static final String fgSeparatorFormat = "{0} - {1}"; //$NON-NLS-1$
+	private static final String fgSeparatorFormat = "{0} - {1}";
 
-	private static final String fgEllipses = " ... "; //$NON-NLS-1$
+	private static final String fgEllipses = " ... ";
 
 	private final WorkbenchLabelProvider fLabelProvider;
 	private final AbstractTextSearchViewPage fPage;
@@ -148,7 +148,7 @@ public class FileLabelProvider extends LabelProvider implements IStyledLabelProv
 			FileMatch match = matches[i];
 			if (match.isPossibleMatch())
 			{
-				str.append(" (none exact match) "); //$NON-NLS-1$
+				str.append(" (none exact match) ");
 			}
 			int start = Math.max(match.getOriginalOffset() - lineElement.getOffset(), 0);
 			// append gap between last match and the new one
@@ -223,7 +223,7 @@ public class FileLabelProvider extends LabelProvider implements IStyledLabelProv
 
 	private int getCharsToCut(int contentLength, Match[] matches)
 	{
-		if (contentLength <= 256 || !"win32".equals(SWT.getPlatform()) || matches.length == 0) { //$NON-NLS-1$
+		if (contentLength <= 256 || !"win32".equals(SWT.getPlatform()) || matches.length == 0) {
 			return 0; // no shortening required
 		}
 		// XXX: workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=38519

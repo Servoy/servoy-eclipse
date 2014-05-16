@@ -50,7 +50,7 @@ public class CreateVariableReferenceQuickFix implements IMarkerResolution
 
 	public String getLabel()
 	{
-		return "Create variable for invalid DataProviderID."; //$NON-NLS-1$
+		return "Create variable for invalid DataProviderID.";
 	}
 
 	public void run(IMarker marker)

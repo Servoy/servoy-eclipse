@@ -47,7 +47,7 @@ import com.servoy.j2db.util.rmi.IReconnectListener;
 
 public class RepositoryAccessPoint
 {
-	public static final String LOCALHOST = "localhost"; //$NON-NLS-1$
+	public static final String LOCALHOST = "localhost";
 
 	private static final AtomicReference<RepositoryAccessPoint> instanceRef = new AtomicReference<RepositoryAccessPoint>();
 
@@ -94,7 +94,7 @@ public class RepositoryAccessPoint
 		if (usedRMIPort == 0)
 		{
 			Properties settings = getServoySettings();
-			usedRMIPort = Utils.getAsInteger(settings.getProperty("usedRMIRegistryPort", "1099")); //$NON-NLS-1$ //$NON-NLS-2$
+			usedRMIPort = Utils.getAsInteger(settings.getProperty("usedRMIRegistryPort", "1099"));
 		}
 
 		if (serverAddr.equals(LOCALHOST))
@@ -285,7 +285,7 @@ public class RepositoryAccessPoint
 			}
 			catch (RemoteException e)
 			{
-				throw new ApplicationServerAccessException("Error getting localhost repository", e); //$NON-NLS-1$
+				throw new ApplicationServerAccessException("Error getting localhost repository", e);
 			}
 		}
 		if (asa == null)
@@ -325,34 +325,34 @@ public class RepositoryAccessPoint
 
 		if (extensions == null || extensions.length == 0)
 		{
-			ServoyLog.logWarning("Could not find rmi client factory provider server starter plugin (extension point " + //$NON-NLS-1$
-				IRMIClientFactoryProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$
+			ServoyLog.logWarning("Could not find rmi client factory provider server starter plugin (extension point " +
+				IRMIClientFactoryProvider.EXTENSION_ID + ")", null);
 			return null;
 		}
 		if (extensions.length > 1)
 		{
-			ServoyLog.logWarning("Multiple rmi client factory plugins found (extension point " + //$NON-NLS-1$
-				IRMIClientFactoryProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$
+			ServoyLog.logWarning("Multiple rmi client factory plugins found (extension point " +
+				IRMIClientFactoryProvider.EXTENSION_ID + ")", null);
 		}
 		IConfigurationElement[] ce = extensions[0].getConfigurationElements();
 		if (ce == null || ce.length == 0)
 		{
-			ServoyLog.logWarning("Could not read rmi client factory provider plugin (extension point " + IRMIClientFactoryProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$ //$NON-NLS-2$
+			ServoyLog.logWarning("Could not read rmi client factory provider plugin (extension point " + IRMIClientFactoryProvider.EXTENSION_ID + ")", null);
 			return null;
 		}
 		if (ce.length > 1)
 		{
-			ServoyLog.logWarning("Multiple extensions for rmi client factory plugins found (extension point " + //$NON-NLS-1$
-				IRMIClientFactoryProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$
+			ServoyLog.logWarning("Multiple extensions for rmi client factory plugins found (extension point " +
+				IRMIClientFactoryProvider.EXTENSION_ID + ")", null);
 		}
 		IRMIClientFactoryProvider rmiClientFactoryProvider;
 		try
 		{
-			rmiClientFactoryProvider = (IRMIClientFactoryProvider)ce[0].createExecutableExtension("class"); //$NON-NLS-1$
+			rmiClientFactoryProvider = (IRMIClientFactoryProvider)ce[0].createExecutableExtension("class");
 		}
 		catch (CoreException e)
 		{
-			ServoyLog.logWarning("Could not create rmi client factory provider plugin (extension point " + IRMIClientFactoryProvider.EXTENSION_ID + ")", e); //$NON-NLS-1$ //$NON-NLS-2$
+			ServoyLog.logWarning("Could not create rmi client factory provider plugin (extension point " + IRMIClientFactoryProvider.EXTENSION_ID + ")", e);
 			return null;
 		}
 		try
@@ -361,8 +361,8 @@ public class RepositoryAccessPoint
 		}
 		catch (Exception e)
 		{
-			Debug.error("couldn't instantiate the rmi socketfactory", e); //$NON-NLS-1$
-			throw new ApplicationServerAccessException("Error getting remote repository", e); //$NON-NLS-1$
+			Debug.error("couldn't instantiate the rmi socketfactory", e);
+			throw new ApplicationServerAccessException("Error getting remote repository", e);
 
 		}
 	}

@@ -96,7 +96,7 @@ public class ColumnNameEditingSupport extends EditingSupport
 					public void run()
 					{
 						MessageDialog.openError(Display.getDefault().getActiveShell(),
-							"Error setting " + (realName ? "name" : "dataproviderID") + " on the column", e.getMessage()); //$NON-NLS-1$
+							"Error setting " + (realName ? "name" : "dataproviderID") + " on the column", e.getMessage());
 						tableViewer.editElement(element, (realName ? ColumnComposite.CI_NAME : ColumnComposite.CI_DATAPROVIDER_ID));
 						editor.setValue((realName ? ((Column)element).getName() : ((Column)element).getDataProviderID()));
 					}

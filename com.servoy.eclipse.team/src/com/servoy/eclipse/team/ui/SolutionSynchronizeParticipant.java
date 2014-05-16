@@ -43,7 +43,7 @@ public class SolutionSynchronizeParticipant extends ModelSynchronizeParticipant
 	/**
 	 * The participant id.
 	 */
-	public static final String ID = "com.servoy.eclipse.team.ui.SolutionSynchronizeParticipant"; //$NON-NLS-1$	
+	public static final String ID = "com.servoy.eclipse.team.ui.SolutionSynchronizeParticipant";	
 
 	/**
 	 * Create a solution participant. This method is invoked by the Synchronize view when a persisted participant is being restored. Participants that are

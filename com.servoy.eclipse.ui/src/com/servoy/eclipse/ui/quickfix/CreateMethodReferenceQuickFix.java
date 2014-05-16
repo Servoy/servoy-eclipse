@@ -93,7 +93,7 @@ public class CreateMethodReferenceQuickFix implements IMarkerResolution
 			if (signature == null) return;
 
 			Map<String, String> substitutions = null;
-			if (dataSource != null) substitutions = Collections.singletonMap("dataSource", dataSource); //$NON-NLS-1$
+			if (dataSource != null) substitutions = Collections.singletonMap("dataSource", dataSource);
 			ScriptMethod method = NewMethodAction.createNewMethod(UIUtils.getActiveShell(), parent, eventName, true, null, null, substitutions, null);
 			if (method != null)
 			{

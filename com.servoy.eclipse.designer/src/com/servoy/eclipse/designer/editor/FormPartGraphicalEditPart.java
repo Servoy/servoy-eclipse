@@ -263,7 +263,7 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 				{
 
 					CompoundCommand command = new CompoundCommand();
-					command.setDebugLabel("Drag Object Tracker");//$NON-NLS-1$
+					command.setDebugLabel("Drag Object Tracker");
 
 					Request request = getTargetRequest();
 

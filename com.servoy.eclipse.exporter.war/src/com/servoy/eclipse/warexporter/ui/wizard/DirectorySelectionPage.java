@@ -174,7 +174,7 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 
 					public boolean accept(File dir, String name)
 					{
-						return name.toLowerCase().endsWith(".jar") || name.toLowerCase().endsWith(".zip"); //$NON-NLS-1$ //$NON-NLS-2$
+						return name.toLowerCase().endsWith(".jar") || name.toLowerCase().endsWith(".zip");
 					}
 				});
 				return appendRequiredLabel(fileNames);

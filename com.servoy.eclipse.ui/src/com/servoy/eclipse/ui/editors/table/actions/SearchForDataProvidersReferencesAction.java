@@ -45,7 +45,7 @@ public class SearchForDataProvidersReferencesAction extends Action implements IS
 
 	public SearchForDataProvidersReferencesAction(IColumn selectedDataProvider)
 	{
-		setText("Search for References"); //$NON-NLS-1$
+		setText("Search for References");
 		this.selectedDataProvider = selectedDataProvider;
 	}
 

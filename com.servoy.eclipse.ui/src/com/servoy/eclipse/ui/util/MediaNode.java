@@ -175,7 +175,7 @@ public class MediaNode
 					if (mediaNodeFilter.contains(TYPE.FOLDER))
 					{
 						String dirName = mediaPath.substring(0, pathSepIdx);
-						node = new MediaNode(dirName, ((mediaFolder == null ? "" //$NON-NLS-1$
+						node = new MediaNode(dirName, ((mediaFolder == null ? ""
 							: mediaFolder) + dirName + '/'), TYPE.FOLDER, mediaProvider, context);
 					}
 				}
@@ -183,7 +183,7 @@ public class MediaNode
 				{
 					if (mediaNodeFilter.contains(TYPE.IMAGE))
 					{
-						node = new MediaNode(mediaPath, mediaName, TYPE.IMAGE, mediaProvider, "\"media:///" + mediaName + "\"", mediaItem); //$NON-NLS-1$ //$NON-NLS-2$
+						node = new MediaNode(mediaPath, mediaName, TYPE.IMAGE, mediaProvider, "\"media:///" + mediaName + "\"", mediaItem);
 					}
 				}
 
@@ -208,7 +208,7 @@ public class MediaNode
 			{
 				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(mediaProviderSolution.getName());
 				IFolder mediasFolder = (IFolder)servoyProject.getProject().findMember(
-					new Path(SolutionSerializer.MEDIAS_DIR + (mediaFolder != null ? "/" + mediaFolder : ""))); //$NON-NLS-1$ //$NON-NLS-2$
+					new Path(SolutionSerializer.MEDIAS_DIR + (mediaFolder != null ? "/" + mediaFolder : "")));
 				if (mediasFolder != null)
 				{
 					try
@@ -234,7 +234,7 @@ public class MediaNode
 								if (!hasFile[0])
 								{
 									String dirName = mediasFolderChild.getName();
-									node = new MediaNode(dirName, ((mediaFolder == null ? "" : mediaFolder) + dirName + '/'), TYPE.FOLDER, mediaProvider); //$NON-NLS-1$
+									node = new MediaNode(dirName, ((mediaFolder == null ? "" : mediaFolder) + dirName + '/'), TYPE.FOLDER, mediaProvider);
 									childrenNodes.add(node);
 								}
 							}

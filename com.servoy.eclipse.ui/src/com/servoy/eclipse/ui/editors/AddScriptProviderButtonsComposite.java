@@ -143,7 +143,7 @@ public class AddScriptProviderButtonsComposite extends Composite
 					calc.setType(IColumnTypes.TEXT);
 					MethodTemplate template = MethodTemplate.getTemplate(calc.getClass(), methodKey);
 					String calcCode = template.getDefaultMethodCode();
-					if (calcCode == null || calcCode.trim().length() == 0) calcCode = "\treturn \"\";"; //$NON-NLS-1$
+					if (calcCode == null || calcCode.trim().length() == 0) calcCode = "\treturn \"\";";
 
 					ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solution.getName());
 					String userTemplate = JSDocScriptTemplates.getTemplates(servoyProject.getProject(), true).getMethodTemplate();
@@ -207,7 +207,7 @@ public class AddScriptProviderButtonsComposite extends Composite
 		{
 			public String isValid(String newText)
 			{
-				if (newText.length() == 0) return ""; //$NON-NLS-1$
+				if (newText.length() == 0) return "";
 				return validateCalculationName(newText);
 			}
 		});

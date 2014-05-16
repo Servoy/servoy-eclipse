@@ -29,9 +29,9 @@ public class I18NExternalizeAction extends Action
 	 */
 	public I18NExternalizeAction()
 	{
-		//setImageDescriptor(Activator.loadImageDescriptorFromBundle("i18n.gif")); //$NON-NLS-1$
-		setText("Externalize Strings"); //$NON-NLS-1$
-		setToolTipText("Externalize active solution's texts"); //$NON-NLS-1$
+		//setImageDescriptor(Activator.loadImageDescriptorFromBundle("i18n.gif"));
+		setText("Externalize Strings");
+		setToolTipText("Externalize active solution's texts");
 	}
 
 	@Override

@@ -66,7 +66,7 @@ public class StylesInstall implements InstallItem
 			public void run()
 			{
 				// show resource project choice dialog
-				final ResourceProjectChoiceDialog dialog = new ResourceProjectChoiceDialog(UIUtils.getActiveShell(), "Extension install - importing style(s)", //$NON-NLS-1$ 
+				final ResourceProjectChoiceDialog dialog = new ResourceProjectChoiceDialog(UIUtils.getActiveShell(), "Extension install - importing style(s)",
 					ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject(), true);
 
 				if (dialog.open() == Window.OK)
@@ -88,7 +88,7 @@ public class StylesInstall implements InstallItem
 						final WorkspaceFileAccess wfa = new WorkspaceFileAccess(resourcesProject.getWorkspace());
 						for (File styleFile : stylesFile)
 						{
-							final String txtContent = Utils.getTXTFileContent(styleFile, Charset.forName("UTF-8")); //$NON-NLS-1$
+							final String txtContent = Utils.getTXTFileContent(styleFile, Charset.forName("UTF-8"));
 							if (txtContent != null)
 							{
 								final String styleName;
@@ -137,7 +137,7 @@ public class StylesInstall implements InstallItem
 					}
 					else
 					{
-						ServoyLog.logError("Cannot install styles", new RuntimeException("Internal error: unexpected repo. type")); //$NON-NLS-1$ //$NON-NLS-2$
+						ServoyLog.logError("Cannot install styles", new RuntimeException("Internal error: unexpected repo. type"));
 					}
 				}
 			}

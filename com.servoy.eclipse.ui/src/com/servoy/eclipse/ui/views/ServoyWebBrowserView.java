@@ -110,8 +110,8 @@ public abstract class ServoyWebBrowserView extends WebBrowserView
 							ToolBar toolbar = (ToolBar)toolbarRaw;
 
 							final ToolItem maximizeRestore = new ToolItem(toolbar, SWT.NONE);
-							final Image maximize = Activator.loadImageDescriptorFromBundle("maximize.gif").createImage(); //$NON-NLS-1$
-							final Image restore = Activator.loadImageDescriptorFromBundle("restore.gif").createImage(); //$NON-NLS-1$
+							final Image maximize = Activator.loadImageDescriptorFromBundle("maximize.gif").createImage();
+							final Image restore = Activator.loadImageDescriptorFromBundle("restore.gif").createImage();
 							maximizeRestore.setImage(maximize);
 							maximizeRestore.setToolTipText("Maximize");
 							maximizeRestore.addSelectionListener(new SelectionAdapter()
@@ -133,13 +133,13 @@ public abstract class ServoyWebBrowserView extends WebBrowserView
 												if (currentState == IWorkbenchPage.STATE_MAXIMIZED)
 												{
 													newState = IWorkbenchPage.STATE_RESTORED;
-													newTooltip = "Maximize"; //$NON-NLS-1$
+													newTooltip = "Maximize";
 													newImage = maximize;
 												}
 												else
 												{
 													newState = IWorkbenchPage.STATE_MAXIMIZED;
-													newTooltip = "Restore"; //$NON-NLS-1$
+													newTooltip = "Restore";
 													newImage = restore;
 												}
 												page.setPartState(view, newState);

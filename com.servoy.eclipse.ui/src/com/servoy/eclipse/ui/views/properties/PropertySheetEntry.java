@@ -538,7 +538,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 	{
 		if (editValue == null)
 		{
-			return "";//$NON-NLS-1$
+			return "";
 		}
 		ILabelProvider provider = descriptor.getLabelProvider();
 		if (provider == null)
@@ -548,7 +548,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 		String text = provider.getText(editValue);
 		if (text == null)
 		{
-			return "";//$NON-NLS-1$
+			return "";
 		}
 		return text;
 	}

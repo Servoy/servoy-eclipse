@@ -42,7 +42,7 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 public class UninstallExtensionWizard extends Wizard implements IImportWizard
 {
 
-	protected static final String TITLE = "Extension uninstall"; //$NON-NLS-1$
+	protected static final String TITLE = "Extension uninstall";
 
 	protected String idToUninstall;
 	protected String versionToUninstall;
@@ -66,7 +66,7 @@ public class UninstallExtensionWizard extends Wizard implements IImportWizard
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
 		setWindowTitle(TITLE);
-		setDefaultPageImageDescriptor(Activator.loadImageDescriptorFromBundle("extension_x_wizard.png")); //$NON-NLS-1$
+		setDefaultPageImageDescriptor(Activator.loadImageDescriptorFromBundle("extension_x_wizard.png"));
 		setNeedsProgressMonitor(true);
 
 		state.display = workbench.getDisplay();
@@ -100,25 +100,25 @@ public class UninstallExtensionWizard extends Wizard implements IImportWizard
 			{
 				state.version = allV[0].version;
 				state.extensionProvider = null;
-				addPage(new UninstallReviewPage("UniRev", state)); //$NON-NLS-1$
+				addPage(new UninstallReviewPage("UniRev", state));
 			}
 			else
 			{
 				// should never happen
-				Message m1 = new Message("Cannot identify extension to uninstall with id '" + state.extensionID + "'.", Message.ERROR); //$NON-NLS-1$ //$NON-NLS-2$
+				Message m1 = new Message("Cannot identify extension to uninstall with id '" + state.extensionID + "'.", Message.ERROR);
 				Message m2 = (allV != null && allV.length > 1)
 					? new Message(
-						"Invalid state for '" + state.extensionID + "'. Multiple versions of this extension are marked as installed but this is not supported/allowed!", Message.ERROR) : null; //$NON-NLS-1$ //$NON-NLS-2$
+						"Invalid state for '" + state.extensionID + "'. Multiple versions of this extension are marked as installed but this is not supported/allowed!", Message.ERROR) : null;
 				Message[] msgs = (m2 != null) ? new Message[] { m2, m1 } : new Message[] { m1 };
 				addPage(new ShowMessagesPage(
-					"Error page", "Cannot uninstall extension", "A problem was encountered when looking for extension to uninstall.", null, msgs, false, null)); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+					"Error page", "Cannot uninstall extension", "A problem was encountered when looking for extension to uninstall.", null, msgs, false, null));
 			}
 		}
 		else
 		{
-			Message[] msgs = new Message[] { new Message("Cannot access directory '" + extDir.getAbsolutePath() + "'.", Message.ERROR) }; //$NON-NLS-1$ //$NON-NLS-2$
+			Message[] msgs = new Message[] { new Message("Cannot access directory '" + extDir.getAbsolutePath() + "'.", Message.ERROR) };
 			addPage(new ShowMessagesPage(
-				"Error page", "Cannot uninstall extension", "A problem was encountered accessing the extension dir.", null, msgs, false, null)); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+				"Error page", "Cannot uninstall extension", "A problem was encountered accessing the extension dir.", null, msgs, false, null));
 		}
 
 		// all other pages are not added here because they vary depending on what's going on;

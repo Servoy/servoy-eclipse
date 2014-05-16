@@ -81,9 +81,9 @@ public class I18NEditor extends EditorPart
 			if (row != null && row.key.equals(I18NEditor.this.keyText.getText()))
 			{
 				String currentRefText = I18NEditor.this.referenceText.getText();
-				if (currentRefText == null) currentRefText = ""; //$NON-NLS-1$
+				if (currentRefText == null) currentRefText = "";
 				String currentLocaleText = I18NEditor.this.localeText.getText();
-				if (currentLocaleText == null) currentLocaleText = ""; //$NON-NLS-1$
+				if (currentLocaleText == null) currentLocaleText = "";
 				i18nComposite.getTableViewer().removeSelectionChangedListener(i18nCompositeSelectionChangedListener);
 				onChange(row.key, currentRefText.trim(), currentLocaleText.trim());
 				i18nComposite.getTableViewer().addSelectionChangedListener(i18nCompositeSelectionChangedListener);
@@ -206,15 +206,15 @@ public class I18NEditor extends EditorPart
 					if (!row.key.equals(I18NEditor.this.keyText.getText()))
 					{
 						I18NEditor.this.keyText.setText(row.key);
-						I18NEditor.this.referenceText.setText(row.defaultvalue != null ? row.defaultvalue : ""); //$NON-NLS-1$
-						I18NEditor.this.localeText.setText(row.localeValue != null ? row.localeValue : ""); //$NON-NLS-1$
+						I18NEditor.this.referenceText.setText(row.defaultvalue != null ? row.defaultvalue : "");
+						I18NEditor.this.localeText.setText(row.localeValue != null ? row.localeValue : "");
 					}
 				}
 				else
 				{
-					I18NEditor.this.keyText.setText(""); //$NON-NLS-1$
-					I18NEditor.this.referenceText.setText(""); //$NON-NLS-1$
-					I18NEditor.this.localeText.setText(""); //$NON-NLS-1$
+					I18NEditor.this.keyText.setText("");
+					I18NEditor.this.referenceText.setText("");
+					I18NEditor.this.localeText.setText("");
 				}
 				I18NEditor.this.referenceText.addModifyListener(messageChanged);
 				I18NEditor.this.localeText.addModifyListener(messageChanged);
@@ -235,7 +235,7 @@ public class I18NEditor extends EditorPart
 				if (item != null && item.getBounds(I18nComposite.CI_COPY).contains(pt))
 				{
 					String txt = item.getText(I18nComposite.CI_KEY);
-					txt = "i18n:" + txt; //$NON-NLS-1$
+					txt = "i18n:" + txt;
 					StringSelection stsel = new StringSelection(txt);
 					Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stsel, stsel);
 				}
@@ -254,15 +254,15 @@ public class I18NEditor extends EditorPart
 			if (keyTextValue.length() > 0)
 			{
 				onChange(keyTextValue, referenceText.getText(), localeText.getText());
-				i18nComposite.selectKey("i18n:" + keyTextValue); //$NON-NLS-1$
+				i18nComposite.selectKey("i18n:" + keyTextValue);
 			}
 		}
 	}
 
 	private void onClear()
 	{
-		referenceText.setText(""); //$NON-NLS-1$
-		localeText.setText(""); //$NON-NLS-1$
+		referenceText.setText("");
+		localeText.setText("");
 	}
 
 	private void onDelete(String messageKey)

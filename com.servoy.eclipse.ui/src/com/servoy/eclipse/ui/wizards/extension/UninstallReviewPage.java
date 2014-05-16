@@ -62,7 +62,7 @@ public class UninstallReviewPage extends ReviewOperationPage
 	 */
 	public UninstallReviewPage(String pageName, InstallExtensionState state)
 	{
-		super(pageName, "The following extension will be uninstalled:", state); //$NON-NLS-1$
+		super(pageName, "The following extension will be uninstalled:", state);
 	}
 
 	@Override
@@ -109,7 +109,7 @@ public class UninstallReviewPage extends ReviewOperationPage
 				}
 				if (xml.getInfo().url != null)
 				{
-					setExtensionProductUrl("<a href=\"" + xml.getInfo().url + "\">" + xml.getInfo().url + "</a>", false); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+					setExtensionProductUrl("<a href=\"" + xml.getInfo().url + "\">" + xml.getInfo().url + "</a>", false);
 				}
 			}
 
@@ -160,15 +160,15 @@ public class UninstallReviewPage extends ReviewOperationPage
 				{
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 					{
-						monitor.beginTask("Preparing to uninstall", 2); //$NON-NLS-1$
-						monitor.subTask("Checking installed extensions..."); //$NON-NLS-1$
+						monitor.beginTask("Preparing to uninstall", 2);
+						monitor.subTask("Checking installed extensions...");
 
 						if (state.installedExtensionsProvider != null)
 						{
 							final UninstallDependencyResolver resolver = new UninstallDependencyResolver(state.installedExtensionsProvider);
 							monitor.worked(1);
 
-							monitor.subTask("Checking for dependent extensions..."); //$NON-NLS-1$
+							monitor.subTask("Checking for dependent extensions...");
 							resolver.resolveDependencies(state.extensionID, state.version);
 							Message[] resolveWarnings = resolver.getMessages();
 							if (resolveWarnings.length > 0) Debug.trace(Arrays.asList(resolveWarnings).toString());
@@ -178,14 +178,14 @@ public class UninstallReviewPage extends ReviewOperationPage
 							if (state.chosenPath == null)
 							{
 								// no uninstall dependency path found; normally this won't happen
-								failMessage.o = "Cannot prepare uninstall. Reason(s):)"; //$NON-NLS-1$
+								failMessage.o = "Cannot prepare uninstall. Reason(s):)";
 								warnings.o = resolveWarnings;
 							}
 						}
 						else
 						{
 							// should never happen
-							failMessage.o = "Cannot access installed extensions."; //$NON-NLS-1$
+							failMessage.o = "Cannot access installed extensions.";
 						}
 						monitor.done();
 					}
@@ -205,7 +205,7 @@ public class UninstallReviewPage extends ReviewOperationPage
 		else
 		{
 			// should never happen
-			failMessage.o = "Problem accessing install directory."; //$NON-NLS-1$
+			failMessage.o = "Problem accessing install directory.";
 		}
 
 		IWizardPage nextPage;
@@ -215,7 +215,7 @@ public class UninstallReviewPage extends ReviewOperationPage
 		{
 			if (failMessage.o == null)
 			{
-				failMessage.o = "Uninstall preparations failed."; //$NON-NLS-1$
+				failMessage.o = "Uninstall preparations failed.";
 			}
 			// show problems page with failMessage as description and warnings as list (which could be null)
 			List<Message> allWarnings = new ArrayList<Message>((warnings.o != null ? warnings.o.length : 0) + expW.length);
@@ -231,7 +231,7 @@ public class UninstallReviewPage extends ReviewOperationPage
 			{
 				messages = null;
 			}
-			nextPage = new ShowMessagesPage("DepWarnings", "Cannot uninstall extension", failMessage.o, null, messages, true, null); //$NON-NLS-1$//$NON-NLS-2$
+			nextPage = new ShowMessagesPage("DepWarnings", "Cannot uninstall extension", failMessage.o, null, messages, true, null);
 			nextPage.setWizard(getWizard());
 		}
 		else
@@ -239,7 +239,7 @@ public class UninstallReviewPage extends ReviewOperationPage
 			// uninstall dependency resolving succeeded
 
 			// prepare uninstall page; afterwards, we might postpone it for after some dummy info/warning page
-			nextPage = new ActualUninstallPage("DoUninstall", state); //$NON-NLS-1$
+			nextPage = new ActualUninstallPage("DoUninstall", state);
 			nextPage.setWizard(getWizard());
 
 			if (state.chosenPath.installSequence.length > 1)
@@ -248,14 +248,14 @@ public class UninstallReviewPage extends ReviewOperationPage
 				UIMessage[] messages;
 				Image removeIcon = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 
-				String[] header = new String[] { "", "Version", "Name", "Id" }; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$
+				String[] header = new String[] { "", "Version", "Name", "Id" };
 				messages = new UIMessage[state.chosenPath.installSequence.length];
 				for (int i = state.chosenPath.installSequence.length - 1; i >= 0; i--)
 				{
 					ExtensionNode ext = state.chosenPath.installSequence[i].extension;
 					DependencyMetadata[] extMeta = state.installedExtensionsProvider.getDependencyMetadata(new ExtensionDependencyDeclaration(ext.id,
 						ext.version, ext.version));
-					String name = ""; //$NON-NLS-1$
+					String name = "";
 					if (extMeta != null && extMeta.length == 1)
 					{
 						name = extMeta[0].extensionName;
@@ -265,7 +265,7 @@ public class UninstallReviewPage extends ReviewOperationPage
 				}
 
 				nextPage = new ShowMessagesPage(
-					"UniReview", "Dependent extensions will be uninstalled as well", "Please review uninstall changes.", header, messages, true, nextPage); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+					"UniReview", "Dependent extensions will be uninstalled as well", "Please review uninstall changes.", header, messages, true, nextPage);
 				nextPage.setWizard(getWizard());
 			} // else just use nextPage to uninstall
 
@@ -274,7 +274,7 @@ public class UninstallReviewPage extends ReviewOperationPage
 			{
 				// user should know about these; or should we just consider this step failed directly?
 				nextPage = new ShowMessagesPage(
-					"UniWarnings", "Some items require your attention", "However, you can continue with the uninstall process.", null, expW, true, nextPage); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+					"UniWarnings", "Some items require your attention", "However, you can continue with the uninstall process.", null, expW, true, nextPage);
 				nextPage.setWizard(getWizard());
 			}
 		}

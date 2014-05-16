@@ -45,7 +45,7 @@ public class RestartPage extends ShowMessagesPage
 	public RestartPage(InstallExtensionState state, Message[] messages, String operationTypeString)
 	{
 		super(
-			"InstRst", "Servoy Developer restart required", "A restart is needed in order to complete the " + operationTypeString.toLowerCase() + " process.", null, messages, false, null); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$ //$NON-NLS-4$
+			"InstRst", "Servoy Developer restart required", "A restart is needed in order to complete the " + operationTypeString.toLowerCase() + " process.", null, messages, false, null);
 		this.state = state;
 	}
 
@@ -54,7 +54,7 @@ public class RestartPage extends ShowMessagesPage
 	{
 		final Button restartCheck = new Button(parent, SWT.CHECK);
 		restartCheck.setSelection(true);
-		restartCheck.setText("restart developer when I press finish (recommended)"); //$NON-NLS-1$
+		restartCheck.setText("restart developer when I press finish (recommended)");
 
 		restartCheck.addSelectionListener(new SelectionListener()
 		{

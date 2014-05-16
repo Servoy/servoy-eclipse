@@ -832,10 +832,10 @@ public class EditorUtil
 		if (loadedRelationsNamingPattern != null && loadedRelationsNamingPattern.length() > 0)
 		{
 			Map<String, String> substitutions = new HashMap<String, String>(4);
-			substitutions.put(CHILD_TABLE_KEYWORD, childTable != null ? childTable : ""); //$NON-NLS-1$
-			substitutions.put(CHILD_COLUMN_KEYWORD, childColumn != null ? childColumn : "");//$NON-NLS-1$
-			substitutions.put(PARENT_TABLE_KEYWORD, parentTable != null ? parentTable : "");//$NON-NLS-1$ 
-			substitutions.put(PARENT_COLUMN_KEYWORD, parentColumn != null ? parentColumn : "");//$NON-NLS-1$ 
+			substitutions.put(CHILD_TABLE_KEYWORD, childTable != null ? childTable : "");
+			substitutions.put(CHILD_COLUMN_KEYWORD, childColumn != null ? childColumn : "");
+			substitutions.put(PARENT_TABLE_KEYWORD, parentTable != null ? parentTable : "");
+			substitutions.put(PARENT_COLUMN_KEYWORD, parentColumn != null ? parentColumn : "");
 
 			Matcher matcher = Pattern.compile("\\$\\{(\\w+)\\}").matcher(loadedRelationsNamingPattern.trim());
 			StringBuffer stringBuffer = new StringBuffer();

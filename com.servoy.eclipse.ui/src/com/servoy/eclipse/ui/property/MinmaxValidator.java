@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.property;
 
 
@@ -43,8 +43,7 @@ public class MinmaxValidator implements ICellEditorValidator, IExecutableExtensi
 
 	private static final String VALUE_OUT_OF_RANGE = "Value out of range";
 
-	public static final String MIN_ONLY = "minonly", // $NON-NLS-1$ //$NON-NLS-1$
-		MAX_ONLY = "maxonly"; // $NON-NLS-1$ //$NON-NLS-1$
+	public static final String MIN_ONLY = "minonly", MAX_ONLY = "maxonly";
 
 	public static final Long LONG_UNDERFLOW = new Long(-42L);
 	public static final Long LONG_OVERFLOW = new Long(42L);
@@ -108,10 +107,11 @@ public class MinmaxValidator implements ICellEditorValidator, IExecutableExtensi
 	{
 		if (initData instanceof String)
 		{
-			StringTokenizer st = new StringTokenizer((String)initData, ":,", true); //$NON-NLS-1$
+			StringTokenizer st = new StringTokenizer((String)initData, ":,", true);
 			String s = null;
 			if (st.hasMoreTokens()) s = st.nextToken();
-			if ("min".equalsIgnoreCase(s)) { //$NON-NLS-1$
+			if ("min".equalsIgnoreCase(s))
+			{
 				if (!st.hasMoreTokens()) return; // Invalid format;
 				s = st.nextToken();
 				if (!st.hasMoreTokens()) return; // Invalid format;
@@ -125,7 +125,8 @@ public class MinmaxValidator implements ICellEditorValidator, IExecutableExtensi
 				{
 				}
 			}
-			else if ("max".equalsIgnoreCase(s)) { //$NON-NLS-1$
+			else if ("max".equalsIgnoreCase(s))
+			{
 				try
 				{
 					if (!st.hasMoreTokens()) return; // Invalid format;

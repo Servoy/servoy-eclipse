@@ -68,7 +68,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 	private static final String COMPONENTS_DIR_NAME = "components";
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "com.servoy.eclipse.debug"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "com.servoy.eclipse.debug";
 
 	// The shared instance
 	private static Activator plugin;
@@ -102,10 +102,10 @@ public class Activator extends AbstractUIPlugin implements IStartup
 		plugin = this;
 
 		if (Utils.getPlatform() == Utils.PLATFORM_LINUX &&
-			"com.sun.java.swing.plaf.gtk.GTKLookAndFeel".equals(System.getProperty("swing.defaultlaf", "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"))) //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+			"com.sun.java.swing.plaf.gtk.GTKLookAndFeel".equals(System.getProperty("swing.defaultlaf", "com.sun.java.swing.plaf.gtk.GTKLookAndFeel")))
 		{
 			// GTK LaF causes crashes or hangs on linux in developer
-			System.setProperty("swing.defaultlaf", "javax.swing.plaf.metal.MetalLookAndFeel"); //$NON-NLS-1$ //$NON-NLS-2$
+			System.setProperty("swing.defaultlaf", "javax.swing.plaf.metal.MetalLookAndFeel");
 		}
 
 		registerResources();
@@ -302,7 +302,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 	public List<ShortcutDefinition> getDebugSmartclientShortcuts()
 	{
-		String extensionId = PLUGIN_ID + ".shortcuts"; //$NON-NLS-1$
+		String extensionId = PLUGIN_ID + ".shortcuts";
 
 		IExtension[] extensions = Platform.getExtensionRegistry().getExtensionPoint(extensionId).getExtensions();
 
@@ -318,14 +318,14 @@ public class Activator extends AbstractUIPlugin implements IStartup
 					{
 						try
 						{
-							String name = el.getAttribute("name"); //$NON-NLS-1$
-							String keystroke = el.getAttribute("keystroke"); //$NON-NLS-1$
-							Action action = (Action)el.createExecutableExtension("class"); //$NON-NLS-1$
+							String name = el.getAttribute("name");
+							String keystroke = el.getAttribute("keystroke");
+							Action action = (Action)el.createExecutableExtension("class");
 							shortcuts.add(new ShortcutDefinition(name, keystroke, action));
 						}
 						catch (CoreException e)
 						{
-							ServoyLog.logError("Error reading extension point " + extensionId, e); //$NON-NLS-1$
+							ServoyLog.logError("Error reading extension point " + extensionId, e);
 						}
 					}
 				}

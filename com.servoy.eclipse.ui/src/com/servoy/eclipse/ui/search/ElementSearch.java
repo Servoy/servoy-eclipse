@@ -97,7 +97,7 @@ public class ElementSearch extends AbstractPersistSearch
 	 */
 	public String getLabel()
 	{
-		return "Searching references to element '" + component.getName() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+		return "Searching references to element '" + component.getName() + "'";
 	}
 
 	private static class ElementSearchResultCollector extends TextSearchResultCollector

@@ -102,8 +102,8 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
 		setNeedsProgressMonitor(true);
-		page = new ImportSolutionWizardPage(this, "Import solution"); //$NON-NLS-1$
-		finishPage = new FinishPage("Solution imported"); //$NON-NLS-1$
+		page = new ImportSolutionWizardPage(this, "Import solution");
+		finishPage = new FinishPage("Solution imported");
 	}
 
 	@Override
@@ -119,9 +119,9 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 
 	private static String getInitialImportPath()
 	{
-		String as_dir = ApplicationServerRegistry.get().getServoyApplicationServerDirectory().replace("\\", "/").replace("//", "/"); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-		if (!as_dir.endsWith("/")) as_dir += "/"; //$NON-NLS-1$//$NON-NLS-2$
-		return as_dir + "solutions/examples"; //$NON-NLS-1$
+		String as_dir = ApplicationServerRegistry.get().getServoyApplicationServerDirectory().replace("\\", "/").replace("//", "/");
+		if (!as_dir.endsWith("/")) as_dir += "/";
+		return as_dir + "solutions/examples";
 	}
 
 	public void setSolutionFilePath(String solutionFilePath)
@@ -165,8 +165,8 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		{
 			super(pageName);
 			this.wizard = wizard;
-			setTitle(wizard.getFirstPageTitle() == null ? "Import a solution" : wizard.getFirstPageTitle()); //$NON-NLS-1$
-			setDescription("A solution (with or without modules) will be imported into the workspace from a .servoy file."); //$NON-NLS-1$
+			setTitle(wizard.getFirstPageTitle() == null ? "Import a solution" : wizard.getFirstPageTitle());
+			setDescription("A solution (with or without modules) will be imported into the workspace from a .servoy file.");
 		}
 
 		public void createControl(Composite parent)
@@ -189,14 +189,14 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			});
 
 			browseButton = new Button(topLevel, SWT.NONE);
-			browseButton.setText("Browse"); //$NON-NLS-1$
+			browseButton.setText("Browse");
 			browseButton.addSelectionListener(new SelectionAdapter()
 			{
 				@Override
 				public void widgetSelected(SelectionEvent e)
 				{
 					FileDialog dlg = new FileDialog(getShell(), SWT.NONE);
-					dlg.setFilterExtensions(new String[] { "*.servoy" }); //$NON-NLS-1$
+					dlg.setFilterExtensions(new String[] { "*.servoy" });
 					if (initialPath != null) dlg.setFilterPath(initialPath);
 					if (dlg.open() != null)
 					{
@@ -221,21 +221,21 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			}
 
 			cleanImport = new Button(topLevel, SWT.CHECK);
-			cleanImport.setText("Clean Import"); //$NON-NLS-1$
+			cleanImport.setText("Clean Import");
 
 			allowDataModelChange = new Button(topLevel, SWT.CHECK);
-			allowDataModelChange.setText("Allow data model (database) changes"); //$NON-NLS-1$
+			allowDataModelChange.setText("Allow data model (database) changes");
 			allowDataModelChange.setSelection(true);
 
 			displayDataModelChanges = new Button(topLevel, SWT.CHECK);
-			displayDataModelChanges.setText("Display data model (database) changes"); //$NON-NLS-1$
+			displayDataModelChanges.setText("Display data model (database) changes");
 
 			activateSolution = new Button(topLevel, SWT.CHECK);
-			activateSolution.setText("Activate solution after import"); //$NON-NLS-1$
+			activateSolution.setText("Activate solution after import");
 			activateSolution.setSelection(true);
 
 			resourceProjectComposite = new ResourcesProjectChooserComposite(topLevel, SWT.NONE, this,
-				"Please choose the resources project the solution will reference (for styles, column/sequence info, security)", //$NON-NLS-1$
+				"Please choose the resources project the solution will reference (for styles, column/sequence info, security)",
 				ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject());
 
 			// layout of the page
@@ -290,27 +290,27 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 
 		private boolean doSolutionImport()
 		{
-			importMessageDetails = ""; //$NON-NLS-1$
+			importMessageDetails = "";
 			final File file = new File(page.getPath());
 			if (!file.exists() || !file.isFile())
 			{
-				finishPage.setErrorMessage("Import failed"); //$NON-NLS-1$
-				finishPage.setTitle("Solution not imported"); //$NON-NLS-1$
-				importMessageDetails = "Could not import solution: Invalid file"; //$NON-NLS-1$
+				finishPage.setErrorMessage("Import failed");
+				finishPage.setTitle("Solution not imported");
+				importMessageDetails = "Could not import solution: Invalid file";
 				return false;
 			}
 			if (!file.canRead())
 			{
-				finishPage.setErrorMessage("Import failed"); //$NON-NLS-1$
-				finishPage.setTitle("Solution not imported"); //$NON-NLS-1$
-				importMessageDetails = "Could not import solution: File cannot be read"; //$NON-NLS-1$
+				finishPage.setErrorMessage("Import failed");
+				finishPage.setTitle("Solution not imported");
+				importMessageDetails = "Could not import solution: File cannot be read";
 				return false;
 			}
 			if (page.getErrorMessage() != null)
 			{
-				finishPage.setErrorMessage("Import failed"); //$NON-NLS-1$
-				finishPage.setTitle("Solution not imported"); //$NON-NLS-1$
-				importMessageDetails = "Could not import solution: " + page.getErrorMessage(); //$NON-NLS-1$
+				finishPage.setErrorMessage("Import failed");
+				finishPage.setTitle("Solution not imported");
+				importMessageDetails = "Could not import solution: " + page.getErrorMessage();
 				return false;
 			}
 			final String resourcesProjectName = page.getNewName();
@@ -340,20 +340,20 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 							doActivateSolution, isCleanImport);
 						if (rootObjects != null)
 						{
-							String detail = userChannel.getAllImportantMSGes() + "\nSolution '" + rootObjects[0].getName() + "' imported"; //$NON-NLS-1$ //$NON-NLS-2$
-							if (doActivateSolution) detail += " and activated"; //$NON-NLS-1$
-							detail += "."; //$NON-NLS-1$
+							String detail = userChannel.getAllImportantMSGes() + "\nSolution '" + rootObjects[0].getName() + "' imported";
+							if (doActivateSolution) detail += " and activated";
+							detail += ".";
 							importMessageDetails = detail;
 						}
 					}
 					catch (final RepositoryException ex)
 					{
-						finishPage.setTitle("Solution not imported"); //$NON-NLS-1$
+						finishPage.setTitle("Solution not imported");
 						if (ex.hasErrorCode(ServoyException.InternalCodes.OPERATION_CANCELLED))
 						{
 							// Don't show an error message if the import was canceled.
-							finishPage.setErrorMessage("Import cancelled"); //$NON-NLS-1$
-							importMessageDetails = "Import solution was cancelled"; //$NON-NLS-1$
+							finishPage.setErrorMessage("Import cancelled");
+							importMessageDetails = "Import solution was cancelled";
 						}
 						else
 						{
@@ -362,20 +362,20 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 							{
 								ServoyLog.logError(ex);
 							}
-							finishPage.setErrorMessage("Import failed"); //$NON-NLS-1$
-							importMessageDetails = "Could not import solution: " + ex.getMessage(); //$NON-NLS-1$
+							finishPage.setErrorMessage("Import failed");
+							importMessageDetails = "Could not import solution: " + ex.getMessage();
 						}
 					}
 					catch (final Exception ex)
 					{
 						ServoyLog.logError(ex);
-						String msg = "An unexpected error occured"; //$NON-NLS-1$
+						String msg = "An unexpected error occured";
 						if (ex.getMessage() != null) msg += ex.getMessage();
-						else msg += ". Check the log for more details."; //$NON-NLS-1$
+						else msg += ". Check the log for more details.";
 						final String mymsg = msg;
-						finishPage.setErrorMessage("Import failed"); //$NON-NLS-1$
-						finishPage.setTitle("Solution not imported"); //$NON-NLS-1$
-						importMessageDetails = "Could not import solution: " + mymsg; //$NON-NLS-1$
+						finishPage.setErrorMessage("Import failed");
+						finishPage.setTitle("Solution not imported");
+						importMessageDetails = "Could not import solution: " + mymsg;
 					}
 
 				}
@@ -416,7 +416,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			String error = null;
 			if (filePath.getText().trim().length() == 0)
 			{
-				error = "Please select servoy file to import."; //$NON-NLS-1$
+				error = "Please select servoy file to import.";
 			}
 			else if (resourceProjectComposite != null) error = resourceProjectComposite.validate();
 			setErrorMessage(error);
@@ -434,7 +434,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			String password = null;
 			if (CryptUtils.checkEncryption(file))
 			{
-				password = UIUtils.showPasswordDialog(getShell(), "This solution is password protected", "Please enter protection password:", "", null); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				password = UIUtils.showPasswordDialog(getShell(), "This solution is password protected", "Please enter protection password:", "", null);
 			}
 			else return file;
 
@@ -488,7 +488,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			if (canFlipToNextPage())
 			{
 				doSolutionImport();
-				finishPage.setTextMessage(importMessageDetails != null ? importMessageDetails : ""); //$NON-NLS-1$
+				finishPage.setTextMessage(importMessageDetails != null ? importMessageDetails : "");
 			}
 			return finishPage;
 		}

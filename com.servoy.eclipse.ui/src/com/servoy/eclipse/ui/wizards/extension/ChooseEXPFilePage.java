@@ -67,8 +67,8 @@ public class ChooseEXPFilePage extends WizardPage
 		this.state = state;
 		this.dialogOptions = dialogOptions;
 
-		setTitle("Please select an extension package"); //$NON-NLS-1$
-		setDescription("An extension will be installed from the selected .exp file."); //$NON-NLS-1$
+		setTitle("Please select an extension package");
+		setDescription("An extension will be installed from the selected .exp file.");
 	}
 
 	public void createControl(Composite parent)
@@ -91,14 +91,14 @@ public class ChooseEXPFilePage extends WizardPage
 		});
 
 		Button browseButton = new Button(topLevel, SWT.NONE);
-		browseButton.setText("Browse"); //$NON-NLS-1$
+		browseButton.setText("Browse");
 		browseButton.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
 				FileDialog dlg = new FileDialog(getShell(), SWT.NONE);
-				dlg.setFilterExtensions(new String[] { "*.exp", "*.*" }); //$NON-NLS-1$ //$NON-NLS-2$
+				dlg.setFilterExtensions(new String[] { "*.exp", "*.*" });
 				if (dialogOptions.fileImportParent != null) dlg.setFilterPath(dialogOptions.fileImportParent);
 				if (dlg.open() != null)
 				{
@@ -109,7 +109,7 @@ public class ChooseEXPFilePage extends WizardPage
 		});
 
 		useFolder = new Button(topLevel, SWT.CHECK);
-		useFolder.setText("search for dependencies in containing folder"); //$NON-NLS-1$
+		useFolder.setText("search for dependencies in containing folder");
 		useFolder.setSelection(dialogOptions.useLocalFolderForDependencies);
 		useFolder.addSelectionListener(new SelectionAdapter()
 		{
@@ -121,7 +121,7 @@ public class ChooseEXPFilePage extends WizardPage
 		});
 
 		useMarketplace = new Button(topLevel, SWT.CHECK);
-		useMarketplace.setText("search for dependencies in Servoy Marketplace"); //$NON-NLS-1$
+		useMarketplace.setText("search for dependencies in Servoy Marketplace");
 		useMarketplace.setSelection(dialogOptions.useMarketplaceForDependencies);
 		useMarketplace.addSelectionListener(new SelectionAdapter()
 		{
@@ -172,11 +172,11 @@ public class ChooseEXPFilePage extends WizardPage
 			File f = new File(state.expFile);
 			if (!f.isAbsolute())
 			{
-				error = "Absolute path required."; //$NON-NLS-1$
+				error = "Absolute path required.";
 			}
 			else if (!(f.exists() && f.isFile()))
 			{
-				error = "You must select a valid .exp file."; //$NON-NLS-1$
+				error = "You must select a valid .exp file.";
 			}
 			else
 			{
@@ -186,7 +186,7 @@ public class ChooseEXPFilePage extends WizardPage
 				if (dependencyMetadata == null)
 				{
 					Message[] warn = parser.getMessages();
-					error = "Cannot parse selected .exp file." + System.getProperty("line.separator") + (warn.length > 0 ? shortenIfNeeded(warn[0].message) : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					error = "Cannot parse selected .exp file." + System.getProperty("line.separator") + (warn.length > 0 ? shortenIfNeeded(warn[0].message) : "");
 				}
 				else
 				{
@@ -247,7 +247,7 @@ public class ChooseEXPFilePage extends WizardPage
 		}
 
 		// second page is always the dependency resolving page; when we reach it, first pages should have already set the extensionID/version pair in 'state'
-		DependencyResolvingPage next = new DependencyResolvingPage("DepResolver", state, dialogOptions, true); //$NON-NLS-1$
+		DependencyResolvingPage next = new DependencyResolvingPage("DepResolver", state, dialogOptions, true);
 		next.setWizard(getWizard());
 		return next;
 	}

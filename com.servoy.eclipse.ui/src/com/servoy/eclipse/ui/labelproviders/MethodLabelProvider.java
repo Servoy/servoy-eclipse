@@ -66,7 +66,7 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 	@Override
 	public String getText(Object value)
 	{
-		if (value == null) return ""; //$NON-NLS-1$
+		if (value == null) return "";
 		Object val = value;
 		if (val instanceof ComplexProperty)
 		{

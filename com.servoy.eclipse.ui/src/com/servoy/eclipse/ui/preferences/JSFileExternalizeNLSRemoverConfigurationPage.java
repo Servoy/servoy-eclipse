@@ -101,7 +101,7 @@ public class JSFileExternalizeNLSRemoverConfigurationPage extends AbstractConfig
 	@Override
 	protected String getPreferencePageId()
 	{
-		return "org.eclipse.dltk.javascript.editor.preferences.removeNLS"; //$NON-NLS-1$
+		return "org.eclipse.dltk.javascript.editor.preferences.removeNLS";
 	}
 
 	/*
@@ -110,7 +110,7 @@ public class JSFileExternalizeNLSRemoverConfigurationPage extends AbstractConfig
 	@Override
 	protected String getPropertyPageId()
 	{
-		return "org.eclipse.dltk.javascript.editor.propertyPage.removeNLS"; //$NON-NLS-1$
+		return "org.eclipse.dltk.javascript.editor.propertyPage.removeNLS";
 	}
 
 	class JSFileExternalizeNLSRemoverConfigurationBlock extends AbstractOptionsBlock

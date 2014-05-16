@@ -159,7 +159,7 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 		// // Calling showView will open the editor if it isn't already opened, and bring it to the
 		// front
 		// // if it already is
-		site.getPage().showView("org.eclipse.ui.views.PropertySheet", null, IWorkbenchPage.VIEW_VISIBLE); //$NON-NLS-1$	
+		site.getPage().showView("org.eclipse.ui.views.PropertySheet", null, IWorkbenchPage.VIEW_VISIBLE);	
 	}
 
 	protected abstract IAction createCopyAction();

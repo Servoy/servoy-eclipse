@@ -138,7 +138,7 @@ public class JSDeveloperSolutionModel
 					try
 					{
 						Form frm = solutionCopy.getForm(formName);
-						if (frm == null) throw new IllegalArgumentException("JSForm is not a solution model created/altered form"); //$NON-NLS-1$
+						if (frm == null) throw new IllegalArgumentException("JSForm is not a solution model created/altered form");
 
 						checkParent(frm);
 
@@ -230,7 +230,7 @@ public class JSDeveloperSolutionModel
 			}
 			else
 			{
-				throw new IllegalArgumentException("form " + name + " is not a workspace stored (blueprint) form"); //$NON-NLS-1$//$NON-NLS-2$
+				throw new IllegalArgumentException("form " + name + " is not a workspace stored (blueprint) form");
 			}
 		}
 	}

@@ -179,8 +179,8 @@ public class ClearOrModifyToCaseSensitiveMissingStyleQuickFix extends WorkbenchM
 					try
 					{
 						if (marker.exists() &&
-							!Utils.equalObjects(marker.getAttribute("Uuid"), this.uuid) && marker.getType().equals(ServoyBuilder.MISSING_STYLE) && //$NON-NLS-1$
-							marker.getAttribute("styleClass", null) != null) similar.add(marker); //$NON-NLS-1$
+							!Utils.equalObjects(marker.getAttribute("Uuid"), this.uuid) && marker.getType().equals(ServoyBuilder.MISSING_STYLE) &&
+							marker.getAttribute("styleClass", null) != null) similar.add(marker);
 					}
 					catch (CoreException e)
 					{

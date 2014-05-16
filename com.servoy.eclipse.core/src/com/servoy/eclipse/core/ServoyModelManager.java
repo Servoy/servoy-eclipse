@@ -109,7 +109,7 @@ public class ServoyModelManager
 						{
 							if (servoyModel == null)
 							{
-								if (initializingModel) throw new RuntimeException("Error: recursive attempt to create ServoyModel detected!"); //$NON-NLS-1$
+								if (initializingModel) throw new RuntimeException("Error: recursive attempt to create ServoyModel detected!");
 								initializingModel = true; // to avoid multiple creations of ServoyModel (reentrant calls) and fail fast (for example ServoyModel() -> Activator.getDefault() -> ServoyModel())
 								servoyModel = new ServoyModel();
 								initializingModel = false;
@@ -145,7 +145,7 @@ public class ServoyModelManager
 			}
 
 			// this access to servoyModel is not exactly thread safe, but as servoyModel can only be set to something as opposed to being null - it's a turn for the better
-			if (servoyModel == null) throw new RuntimeException("Error: ServoyModel creation failed!"); //$NON-NLS-1$
+			if (servoyModel == null) throw new RuntimeException("Error: ServoyModel creation failed!");
 
 			// notify the client debug handler that servoy model has been initialized.
 			// on the mac the debug smart client must wait until the swt main thread is not busy,

@@ -108,7 +108,7 @@ public class ConsoleWorkbenchPart implements IWorkbenchPart
 	 */
 	public String getTitle()
 	{
-		return ""; //$NON-NLS-1$
+		return "";
 	}
 
 	/*
@@ -128,7 +128,7 @@ public class ConsoleWorkbenchPart implements IWorkbenchPart
 	 */
 	public String getTitleToolTip()
 	{
-		return ""; //$NON-NLS-1$
+		return "";
 	}
 
 	/*

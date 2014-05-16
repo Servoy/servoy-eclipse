@@ -33,7 +33,7 @@ import com.servoy.j2db.persistence.Media;
 public class MediaURLStreamHandlerService extends AbstractURLStreamHandlerService
 {
 
-	public static final String PROTOCOL = "media"; //$NON-NLS-1$
+	public static final String PROTOCOL = "media";
 	private MediaURLStreamHandler mediaHandler;
 
 	/**

@@ -172,7 +172,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 			if (key == Openable.class)
 			{
 				Openable tmp = Openable.getOpenable(contextForm);
-				tmp.setAttribute("FormDesigner", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+				tmp.setAttribute("FormDesigner", "true");
 				return tmp;
 			}
 
@@ -256,7 +256,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 				}
 				if (parentProject == null)
 				{
-					ServoyLog.logError("Cannot find Servoy project for persist " + context, null); //$NON-NLS-1$
+					ServoyLog.logError("Cannot find Servoy project for persist " + context, null);
 					return null;
 				}
 				context = AbstractRepository.searchPersist(parentProject.getEditingSolution(), context);

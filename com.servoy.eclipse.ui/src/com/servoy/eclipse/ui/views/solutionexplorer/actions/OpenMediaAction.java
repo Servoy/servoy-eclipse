@@ -41,7 +41,7 @@ public class OpenMediaAction extends Action implements ISelectionChangedListener
 	 */
 	public OpenMediaAction()
 	{
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("open.gif")); //$NON-NLS-1$
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("open.gif"));
 		setText("View image");
 		setToolTipText("View image");
 	}

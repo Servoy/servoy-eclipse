@@ -76,7 +76,7 @@ public class PersistInheritenceDelegateLabelProvider extends DelegateLabelProvid
 		if (persist instanceof ISupportExtendsID && PersistHelper.isOverrideElement((ISupportExtendsID)persist) &&
 			((AbstractBase)persist).hasProperty((String)propertyId))
 		{
-			superText = (superText != null ? superText : "") + " (" + Messages.LabelOverride + ')'; //$NON-NLS-1$ //$NON-NLS-2$
+			superText = (superText != null ? superText : "") + " (" + Messages.LabelOverride + ')';
 		}
 
 		return superText;

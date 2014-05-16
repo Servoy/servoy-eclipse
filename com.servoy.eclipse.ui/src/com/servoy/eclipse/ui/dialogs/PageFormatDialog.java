@@ -56,9 +56,9 @@ import com.servoy.j2db.util.gui.PageSetupDialog.MySize2DSyntax;
 
 public class PageFormatDialog extends Dialog
 {
-	public static final String UNIT_MM = "mm"; //$NON-NLS-1$
-	public static final String UNIT_INCH = "inch"; //$NON-NLS-1$
-	public static final String UNIT_PIXELS = "pixels"; //$NON-NLS-1$
+	public static final String UNIT_MM = "mm";
+	public static final String UNIT_INCH = "inch";
+	public static final String UNIT_PIXELS = "pixels";
 
 	private final String title;
 	private final PageFormat format;
@@ -96,7 +96,7 @@ public class PageFormatDialog extends Dialog
 
 		String defaultCountry = Locale.getDefault().getCountry();
 		if (defaultCountry != null &&
-			(defaultCountry.equals("") //$NON-NLS-1$
+			(defaultCountry.equals("")
 				||
 				defaultCountry.equals(Locale.US.getCountry()) || defaultCountry.equals(Locale.CANADA.getCountry()) || defaultCountry.equals(Locale.UK.getCountry())))
 		{
@@ -433,7 +433,7 @@ public class PageFormatDialog extends Dialog
 					sizeCombo.add(names[i]);
 				}
 			}
-			sizeCombo.add(Messages.getString("servoy.pagesetup.list.size.custom")); //$NON-NLS-1$
+			sizeCombo.add(Messages.getString("servoy.pagesetup.list.size.custom"));
 			sizeCombo.addSelectionListener(new SelectionAdapter()
 			{
 				@Override

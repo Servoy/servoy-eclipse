@@ -37,10 +37,10 @@ import com.servoy.j2db.util.Utils;
 
 public class ColumnLabelProvider extends LabelProvider implements ITableLabelProvider, ITableColorProvider
 {
-	public static final Image TRUE_IMAGE = Activator.getDefault().loadImageFromBundle("chk_on_icon.gif"); //$NON-NLS-1$
-	public static final Image FALSE_IMAGE = Activator.getDefault().loadImageFromBundle("chk_off_icon.gif"); //$NON-NLS-1$
-	public static final Image TRUE_RADIO = Activator.getDefault().loadImageFromBundle("radio_on.gif"); //$NON-NLS-1$
-	public static final Image FALSE_RADIO = Activator.getDefault().loadImageFromBundle("radio_off.gif"); //$NON-NLS-1$
+	public static final Image TRUE_IMAGE = Activator.getDefault().loadImageFromBundle("chk_on_icon.gif");
+	public static final Image FALSE_IMAGE = Activator.getDefault().loadImageFromBundle("chk_off_icon.gif");
+	public static final Image TRUE_RADIO = Activator.getDefault().loadImageFromBundle("radio_on.gif");
+	public static final Image FALSE_RADIO = Activator.getDefault().loadImageFromBundle("radio_off.gif");
 
 	private static final RGB GRAY = new RGB(127, 127, 127);
 	private static final RGB GRAY2 = new RGB(160, 160, 160);
@@ -84,7 +84,7 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 		int delta = columnComposite != null && columnComposite.isDataProviderIdDisplayed() ? 1 : 0;
 		if ((columnIndex == ColumnComposite.CI_DELETE + delta) || (columnIndex == ColumnComposite.CI_ALLOW_NULL + delta))
 		{
-			return ""; //$NON-NLS-1$
+			return "";
 		}
 		if (columnIndex == ColumnComposite.CI_TYPE + delta)
 		{
@@ -92,7 +92,7 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 		}
 		if (columnIndex == ColumnComposite.CI_LENGTH + delta)
 		{
-			return columnType.getScale() > 0 ? columnType.getLength() + "," + columnType.getScale() : Integer.toString(columnType.getLength()); //$NON-NLS-1$
+			return columnType.getScale() > 0 ? columnType.getLength() + "," + columnType.getScale() : Integer.toString(columnType.getLength());
 		}
 		if (columnIndex == ColumnComposite.CI_ROW_IDENT + delta)
 		{
@@ -106,7 +106,7 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 		{
 			return info.getDataProviderID();
 		}
-		return columnIndex + ": " + element; //$NON-NLS-1$
+		return columnIndex + ": " + element;
 	}
 
 	public Color getBackground(Object element, int columnIndex)

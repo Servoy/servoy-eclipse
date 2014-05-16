@@ -111,11 +111,11 @@ public class SuggestForeignTypesWizard extends Wizard
 	// Only scores above this threshold are displayed when matching FKs.
 	private static final double MATCH_THRESHOLD = 7;
 
-	public static final String TABLE_OR_COLUMN_NAME = "Name"; //$NON-NLS-1$
-	public static final String DATATYPE = "Datatype"; //$NON-NLS-1$
-	public static final String CURRENT_FOREIGN_TYPE = "Current Foreign Type"; //$NON-NLS-1$
-	public static final String SUGGESTED_FOREIGN_TYPE = "Suggested Foreign Type"; //$NON-NLS-1$
-	public static final String SAVE = "Save"; //$NON-NLS-1$
+	public static final String TABLE_OR_COLUMN_NAME = "Name";
+	public static final String DATATYPE = "Datatype";
+	public static final String CURRENT_FOREIGN_TYPE = "Current Foreign Type";
+	public static final String SUGGESTED_FOREIGN_TYPE = "Suggested Foreign Type";
+	public static final String SAVE = "Save";
 
 	public static final int TABLE_OR_COLUMN_NAME_INDEX = 0;
 	public static final int DATATYPE_INDEX = 1;
@@ -123,7 +123,7 @@ public class SuggestForeignTypesWizard extends Wizard
 	public static final int SUGGESTED_FOREIGN_TYPE_INDEX = 3;
 	public static final int SAVE_INDEX = 4;
 
-	public static final String ENTRY_NONE = "-none-"; //$NON-NLS-1$
+	public static final String ENTRY_NONE = "-none-";
 
 	private final String[] columnNames = new String[] { TABLE_OR_COLUMN_NAME, DATATYPE, CURRENT_FOREIGN_TYPE, SUGGESTED_FOREIGN_TYPE, SAVE };
 
@@ -149,7 +149,7 @@ public class SuggestForeignTypesWizard extends Wizard
 
 	public SuggestForeignTypesWizard(String serverName)
 	{
-		setWindowTitle("Suggest Foreign Types"); //$NON-NLS-1$
+		setWindowTitle("Suggest Foreign Types");
 		ServoyModelManager.getServoyModelManager().getServoyModel();
 		server = ServoyModel.getServerManager().getServer(serverName);
 		hasServer = true;
@@ -166,12 +166,12 @@ public class SuggestForeignTypesWizard extends Wizard
 	@Override
 	public boolean performFinish()
 	{
-		WorkspaceJob exportJob = new WorkspaceJob("Saving foreign types") //$NON-NLS-1$ 
+		WorkspaceJob exportJob = new WorkspaceJob("Saving foreign types")
 		{
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 			{
-				monitor.beginTask("Saving foreign types", allTableNames.length); //$NON-NLS-1$
+				monitor.beginTask("Saving foreign types", allTableNames.length);
 
 				final String answer = data.commitData(monitor);
 
@@ -187,7 +187,7 @@ public class SuggestForeignTypesWizard extends Wizard
 					{
 						public void run()
 						{
-							MessageDialog.openError(Display.getDefault().getActiveShell(), "Errors occured while saving the foreign type changes", answer); //$NON-NLS-1$
+							MessageDialog.openError(Display.getDefault().getActiveShell(), "Errors occured while saving the foreign type changes", answer);
 						}
 					});
 					return Status.CANCEL_STATUS;
@@ -205,8 +205,8 @@ public class SuggestForeignTypesWizard extends Wizard
 	IWorkbench workbench, @SuppressWarnings("unused")
 	IStructuredSelection selection)
 	{
-		if (!hasServer) serverSelectionPage = new ServerSelectionPage("serverSelection"); //$NON-NLS-1$
-		suggestionPage = new SuggestionPage("suggestionPage"); //$NON-NLS-1$
+		if (!hasServer) serverSelectionPage = new ServerSelectionPage("serverSelection");
+		suggestionPage = new SuggestionPage("suggestionPage");
 	}
 
 	@Override
@@ -230,7 +230,7 @@ public class SuggestForeignTypesWizard extends Wizard
 		protected ServerSelectionPage(String pageName)
 		{
 			super(pageName);
-			setTitle("Select server"); //$NON-NLS-1$
+			setTitle("Select server");
 		}
 
 		public void createControl(Composite parent)
@@ -239,7 +239,7 @@ public class SuggestForeignTypesWizard extends Wizard
 			topLevel.setLayout(new GridLayout(2, false));
 
 			Label sourceServerLabel = new Label(topLevel, SWT.NONE);
-			sourceServerLabel.setText("Server"); //$NON-NLS-1$
+			sourceServerLabel.setText("Server");
 
 			serversCombo = new Combo(topLevel, SWT.DROP_DOWN | SWT.READ_ONLY);
 			UIUtils.setDefaultVisibleItemCount(serversCombo);
@@ -267,7 +267,7 @@ public class SuggestForeignTypesWizard extends Wizard
 			}
 			else
 			{
-				setMessage("No servers found.", IMessageProvider.WARNING); //$NON-NLS-1$
+				setMessage("No servers found.", IMessageProvider.WARNING);
 			}
 
 			setControl(topLevel);
@@ -291,7 +291,7 @@ public class SuggestForeignTypesWizard extends Wizard
 		protected SuggestionPage(String pageName)
 		{
 			super(pageName);
-			setTitle("Foreign Type Suggestions"); //$NON-NLS-1$
+			setTitle("Foreign Type Suggestions");
 			needsUpdate = false;
 		}
 
@@ -310,11 +310,11 @@ public class SuggestForeignTypesWizard extends Wizard
 			fd.left = new FormAttachment(0);
 			fd.right = new FormAttachment(100);
 			hintsLabel.setLayoutData(fd);
-			hintsLabel.setText("Below you can see the suggestions generated for foreign types. Please review them, make any adjustments that you consider necessary, and click the \"Finish\" button when you are ready to perform the changes."); //$NON-NLS-1$
+			hintsLabel.setText("Below you can see the suggestions generated for foreign types. Please review them, make any adjustments that you consider necessary, and click the \"Finish\" button when you are ready to perform the changes.");
 
 			// Second row, buttons for grouping, expanding and collapsing.
 			final Button collapseAllButton = new Button(parent, SWT.PUSH);
-			collapseAllButton.setText("Collapse all"); //$NON-NLS-1$
+			collapseAllButton.setText("Collapse all");
 			fd = new FormData();
 			fd.top = new FormAttachment(hintsLabel, space);
 			fd.right = new FormAttachment(100);
@@ -329,7 +329,7 @@ public class SuggestForeignTypesWizard extends Wizard
 			});
 
 			final Button expandAllButton = new Button(parent, SWT.PUSH);
-			expandAllButton.setText("Expand all"); //$NON-NLS-1$
+			expandAllButton.setText("Expand all");
 			fd = new FormData();
 			fd.top = new FormAttachment(collapseAllButton, 0, SWT.TOP);
 			fd.right = new FormAttachment(collapseAllButton, -space);
@@ -349,10 +349,10 @@ public class SuggestForeignTypesWizard extends Wizard
 			fd.top = new FormAttachment(collapseAllButton, delta / 2, SWT.TOP);
 			fd.left = new FormAttachment(0);
 			groupingLabel.setLayoutData(fd);
-			groupingLabel.setText("Group by"); //$NON-NLS-1$
+			groupingLabel.setText("Group by");
 
 			final Button groupByTablesButton = new Button(parent, SWT.RADIO);
-			groupByTablesButton.setText("Tables"); //$NON-NLS-1$
+			groupByTablesButton.setText("Tables");
 			fd = new FormData();
 			fd.top = new FormAttachment(groupingLabel, 0, SWT.TOP);
 			fd.bottom = new FormAttachment(collapseAllButton, 0, SWT.BOTTOM);
@@ -370,7 +370,7 @@ public class SuggestForeignTypesWizard extends Wizard
 			});
 
 			final Button groupByColumnsButton = new Button(parent, SWT.RADIO);
-			groupByColumnsButton.setText("Columns"); //$NON-NLS-1$
+			groupByColumnsButton.setText("Columns");
 			fd = new FormData();
 			fd.top = new FormAttachment(groupingLabel, 0, SWT.TOP);
 			fd.bottom = new FormAttachment(collapseAllButton, 0, SWT.BOTTOM);
@@ -392,7 +392,7 @@ public class SuggestForeignTypesWizard extends Wizard
 			// so it depends on this.
 			// We bind the checks from bottom to top and then bind the buttons to the checks
 			final Button skipTextButton = new Button(parent, SWT.CHECK);
-			skipTextButton.setText("Skip Text"); //$NON-NLS-1$
+			skipTextButton.setText("Skip Text");
 			fd = new FormData();
 			fd.bottom = new FormAttachment(100);
 			fd.left = new FormAttachment(0);
@@ -409,7 +409,7 @@ public class SuggestForeignTypesWizard extends Wizard
 			});
 
 			final Button skipDatetimeAndMediaButton = new Button(parent, SWT.CHECK);
-			skipDatetimeAndMediaButton.setText("Skip DATETIME and MEDIA"); //$NON-NLS-1$
+			skipDatetimeAndMediaButton.setText("Skip DATETIME and MEDIA");
 			fd = new FormData();
 			fd.bottom = new FormAttachment(skipTextButton, -space);
 			fd.left = new FormAttachment(skipTextButton, 0, SWT.LEFT);
@@ -426,7 +426,7 @@ public class SuggestForeignTypesWizard extends Wizard
 			});
 
 			final Button listOnlyColumnsWithoutCurrentTypeButton = new Button(parent, SWT.CHECK);
-			listOnlyColumnsWithoutCurrentTypeButton.setText("List only columns without current type"); //$NON-NLS-1$
+			listOnlyColumnsWithoutCurrentTypeButton.setText("List only columns without current type");
 			fd = new FormData();
 
 			fd.bottom = new FormAttachment(skipDatetimeAndMediaButton, -space);
@@ -444,7 +444,7 @@ public class SuggestForeignTypesWizard extends Wizard
 			});
 
 			final Button listOnlyChangesButton = new Button(parent, SWT.CHECK);
-			listOnlyChangesButton.setText("List only columns that change"); //$NON-NLS-1$
+			listOnlyChangesButton.setText("List only columns that change");
 			fd = new FormData();
 
 			fd.bottom = new FormAttachment(listOnlyColumnsWithoutCurrentTypeButton, -space);
@@ -462,7 +462,7 @@ public class SuggestForeignTypesWizard extends Wizard
 			});
 
 			Button selectNoneForSaving = new Button(parent, SWT.PUSH);
-			selectNoneForSaving.setText("Select none for saving"); //$NON-NLS-1$
+			selectNoneForSaving.setText("Select none for saving");
 			fd = new FormData();
 			fd.top = new FormAttachment(listOnlyChangesButton, 0, SWT.TOP);
 			fd.right = new FormAttachment(100);
@@ -479,7 +479,7 @@ public class SuggestForeignTypesWizard extends Wizard
 			});
 
 			Button selectAllForSaving = new Button(parent, SWT.PUSH);
-			selectAllForSaving.setText("Select all for saving"); //$NON-NLS-1$
+			selectAllForSaving.setText("Select all for saving");
 			fd = new FormData();
 			fd.top = new FormAttachment(selectNoneForSaving, 0, SWT.TOP);
 			fd.right = new FormAttachment(selectNoneForSaving, -space);
@@ -574,17 +574,17 @@ public class SuggestForeignTypesWizard extends Wizard
 				}
 				catch (RepositoryException e)
 				{
-					ServoyLog.logWarning("Failed to get table names list.", e); //$NON-NLS-1$
+					ServoyLog.logWarning("Failed to get table names list.", e);
 				}
 
 				data = new ForeignTypeSuggestionData();
 
-				WorkspaceJob foreignTypesComputationJob = new WorkspaceJob("Computing foreign type suggestions") //$NON-NLS-1$ 
+				WorkspaceJob foreignTypesComputationJob = new WorkspaceJob("Computing foreign type suggestions")
 				{
 					@Override
 					public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 					{
-						monitor.beginTask("Computing foreign types", allTableNames.length); //$NON-NLS-1$
+						monitor.beginTask("Computing foreign types", allTableNames.length);
 
 						try
 						{
@@ -602,13 +602,13 @@ public class SuggestForeignTypesWizard extends Wizard
 						}
 						catch (RepositoryException e)
 						{
-							ServoyLog.logWarning("Failed to compute foreign types.", e); //$NON-NLS-1$
+							ServoyLog.logWarning("Failed to compute foreign types.", e);
 							monitor.done();
 							return Status.CANCEL_STATUS;
 						}
 						catch (RemoteException e)
 						{
-							ServoyLog.logWarning("Failed to compute foreign types.", e); //$NON-NLS-1$
+							ServoyLog.logWarning("Failed to compute foreign types.", e);
 							monitor.done();
 							return Status.CANCEL_STATUS;
 						}
@@ -634,7 +634,7 @@ public class SuggestForeignTypesWizard extends Wizard
 
 			for (String fkTableName : tableNames)
 			{
-				monitor.setTaskName("Computing foreign types for table '" + fkTableName + "'"); //$NON-NLS-1$ //$NON-NLS-2$ 
+				monitor.setTaskName("Computing foreign types for table '" + fkTableName + "'");
 
 				Table fkTable = (Table)server.getTable(fkTableName);
 
@@ -693,7 +693,7 @@ public class SuggestForeignTypesWizard extends Wizard
 				Collection<Column> fkColumns = fkTable.getColumns();
 				for (Column fkCol : fkColumns)
 				{
-					monitor.subTask("column '" + fkCol.getName() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+					monitor.subTask("column '" + fkCol.getName() + "'");
 
 					// PKs don't need foreign type
 					if (!fkCol.isDatabasePK() && !matchedFromRelations.containsKey(fkCol.getName()))
@@ -871,7 +871,7 @@ public class SuggestForeignTypesWizard extends Wizard
 			StringBuilder result = new StringBuilder();
 			for (ITable parentTable : suggestionsByTable.keySet())
 			{
-				monitor.setTaskName("Saving foreign types for table '" + parentTable.getName() + "'."); //$NON-NLS-1$ //$NON-NLS-2$
+				monitor.setTaskName("Saving foreign types for table '" + parentTable.getName() + "'.");
 
 				SortedMap<IColumn, ForeignTypeSuggestionEntry> suggestionsForTable = suggestionsByTable.get(parentTable);
 				for (IColumn parentColumn : suggestionsForTable.keySet())
@@ -909,8 +909,8 @@ public class SuggestForeignTypesWizard extends Wizard
 				}
 				catch (RepositoryException e)
 				{
-					result.append("Failed to save foreign types for table '" + parentTable.getName() + "'."); //$NON-NLS-1$//$NON-NLS-2$
-					ServoyLog.logError("Failed to save foreign types for table '" + parentTable.getName() + "'.", e); //$NON-NLS-1$//$NON-NLS-2$
+					result.append("Failed to save foreign types for table '" + parentTable.getName() + "'.");
+					ServoyLog.logError("Failed to save foreign types for table '" + parentTable.getName() + "'.", e);
 				}
 				monitor.worked(1);
 			}
@@ -927,7 +927,7 @@ public class SuggestForeignTypesWizard extends Wizard
 
 		private String buildKey(String tName, String cName)
 		{
-			return tName + "###" + cName; //$NON-NLS-1$
+			return tName + "###" + cName;
 		}
 	}
 
@@ -1196,7 +1196,7 @@ public class SuggestForeignTypesWizard extends Wizard
 				case DATATYPE_INDEX :
 					if (row.isGroupingEntry())
 					{
-						return ""; //$NON-NLS-1$
+						return "";
 					}
 
 					// use dataprovider type as defined by converter
@@ -1313,11 +1313,11 @@ public class SuggestForeignTypesWizard extends Wizard
 				}
 				catch (RepositoryException e)
 				{
-					ServoyLog.logError("Cannot find this table for foreign type: " + newTableName + ".", e); //$NON-NLS-1$//$NON-NLS-2$
+					ServoyLog.logError("Cannot find this table for foreign type: " + newTableName + ".", e);
 				}
 				catch (RemoteException e)
 				{
-					ServoyLog.logError("Cannot find this table for foreign type: " + newTableName + ".", e); //$NON-NLS-1$//$NON-NLS-2$
+					ServoyLog.logError("Cannot find this table for foreign type: " + newTableName + ".", e);
 				}
 			}
 			else

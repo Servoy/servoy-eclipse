@@ -75,8 +75,8 @@ public class ChooseMPExtensionVersion extends WizardPage
 		this.versions = versions;
 		this.marketplaceProvider = marketplaceProvider;
 
-		setTitle("Install extension from Marketplace"); //$NON-NLS-1$
-		setDescription("You can choose one of the available versions (or use suggested version)."); //$NON-NLS-1$
+		setTitle("Install extension from Marketplace");
+		setDescription("You can choose one of the available versions (or use suggested version).");
 		canGoToNext = false;
 	}
 
@@ -89,13 +89,13 @@ public class ChooseMPExtensionVersion extends WizardPage
 		setControl(topLevel);
 
 		final Label extensionID = new Label(topLevel, SWT.NONE);
-		extensionID.setText("Extension ID: '" + state.extensionID + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+		extensionID.setText("Extension ID: '" + state.extensionID + "'");
 
 		final Label extensionName = new Label(topLevel, SWT.NONE);
 		extensionName.setVisible(false);
 
 		final Label versionLabel = new Label(topLevel, SWT.NONE);
-		versionLabel.setText("Version"); //$NON-NLS-1$
+		versionLabel.setText("Version");
 		versionLabel.setVisible(false);
 
 		final Combo versionCombo = new Combo(topLevel, SWT.READ_ONLY);
@@ -151,7 +151,7 @@ public class ChooseMPExtensionVersion extends WizardPage
 		{
 			public void run(IProgressMonitor monitor)
 			{
-				monitor.beginTask("Getting version info", IProgressMonitor.UNKNOWN); //$NON-NLS-1$
+				monitor.beginTask("Getting version info", IProgressMonitor.UNKNOWN);
 				final int initialSelectedVersion = getInitialSelectedVersion(versions);
 				monitor.done();
 				// switch back to display thread to update UI
@@ -162,7 +162,7 @@ public class ChooseMPExtensionVersion extends WizardPage
 						versionCombo.select(initialSelectedVersion);
 
 						// ok, we are good to go now
-						extensionID.setText("Extension ID: '" + state.extensionID + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+						extensionID.setText("Extension ID: '" + state.extensionID + "'");
 						extensionName.setVisible(true);
 						versionLabel.setVisible(true);
 						versionCombo.setVisible(true);
@@ -239,7 +239,7 @@ public class ChooseMPExtensionVersion extends WizardPage
 			{
 				// else something went wrong... connection failure? anyway just continue cause we do have a version selected anyway
 				Message[] w = marketplaceProvider.getMessages();
-				ServoyLog.logWarning("Problems when trying to pre-select best version: " + (w.length > 0 ? w[w.length - 1].message : "<unknown>"), null); //$NON-NLS-1$ //$NON-NLS-2$
+				ServoyLog.logWarning("Problems when trying to pre-select best version: " + (w.length > 0 ? w[w.length - 1].message : "<unknown>"), null);
 			}
 			marketplaceProvider.clearMessages();
 		}
@@ -257,7 +257,7 @@ public class ChooseMPExtensionVersion extends WizardPage
 	public IWizardPage getNextPage()
 	{
 		// second page is always the dependency resolving page; when we reach it, first pages should have already set the extensionID/version pair in 'state'
-		DependencyResolvingPage next = new DependencyResolvingPage("DepResolver", state, dialogOptions, false); //$NON-NLS-1$
+		DependencyResolvingPage next = new DependencyResolvingPage("DepResolver", state, dialogOptions, false);
 		next.setWizard(getWizard());
 		return next;
 	}

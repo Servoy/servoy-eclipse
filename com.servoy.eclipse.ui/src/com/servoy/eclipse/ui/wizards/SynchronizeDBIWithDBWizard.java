@@ -125,7 +125,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 	public SynchronizeDBIWithDBWizard()
 	{
 		setWindowTitle("Synchronize DB tables with DB information");
-		setDefaultPageImageDescriptor(Activator.loadImageDescriptorFromBundle("sync_tables_large.png")); //$NON-NLS-1$
+		setDefaultPageImageDescriptor(Activator.loadImageDescriptorFromBundle("sync_tables_large.png"));
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)

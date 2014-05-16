@@ -85,7 +85,7 @@ public class ServerSearch extends DLTKSearchEngineSearch
 	{
 		try
 		{
-			return "Searching references to server '" + server.getName() + "'"; //$NON-NLS-1$//$NON-NLS-2$
+			return "Searching references to server '" + server.getName() + "'";
 		}
 		catch (RemoteException e)
 		{

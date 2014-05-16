@@ -81,7 +81,7 @@ public class FormSearch extends AbstractPersistSearch
 	protected TextSearchResultCollector createTextSearchCollector(AbstractTextSearchResult searchResult)
 	{
 		Pair<String, String> filePathPair = SolutionSerializer.getFilePath(form, false);
-		final String fileName = "/" + filePathPair.getLeft() + filePathPair.getRight(); //$NON-NLS-1$
+		final String fileName = "/" + filePathPair.getLeft() + filePathPair.getRight();
 
 		return new TextSearchResultCollector(searchResult)
 		{
@@ -111,6 +111,6 @@ public class FormSearch extends AbstractPersistSearch
 	 */
 	public String getLabel()
 	{
-		return "Searching references to form '" + form.getName() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+		return "Searching references to form '" + form.getName() + "'";
 	}
 }

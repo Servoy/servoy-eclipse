@@ -65,13 +65,13 @@ public class RenamePersistAction extends Action implements ISelectionChangedList
 	public void run()
 	{
 		final Form form = (Form)persist;
-		InputDialog nameDialog = new InputDialog(Display.getDefault().getActiveShell(), "Rename form", "Supply a new form name", form.getName(), //$NON-NLS-1$ //$NON-NLS-2$
+		InputDialog nameDialog = new InputDialog(Display.getDefault().getActiveShell(), "Rename form", "Supply a new form name", form.getName(),
 			new IInputValidator()
 			{
 				public String isValid(String newText)
 				{
-					return IdentDocumentValidator.isJavaIdentifier(newText) ? (newText.equals(form.getName()) ? "" : null) : (newText.length() == 0 //$NON-NLS-1$
-						? "" : "Invalid form name"); //$NON-NLS-1$ //$NON-NLS-2$
+					return IdentDocumentValidator.isJavaIdentifier(newText) ? (newText.equals(form.getName()) ? "" : null) : (newText.length() == 0
+						? "" : "Invalid form name");
 				}
 			});
 		int res = nameDialog.open();
@@ -91,7 +91,7 @@ public class RenamePersistAction extends Action implements ISelectionChangedList
 			catch (RepositoryException e)
 			{
 				ServoyLog.logError(e);
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot rename", e.getMessage()); //$NON-NLS-1$
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot rename", e.getMessage());
 			}
 
 		}

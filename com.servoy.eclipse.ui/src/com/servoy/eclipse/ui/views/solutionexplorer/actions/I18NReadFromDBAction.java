@@ -36,8 +36,8 @@ public class I18NReadFromDBAction extends Action
 	 */
 	public I18NReadFromDBAction()
 	{
-		setText("Read from DB"); //$NON-NLS-1$
-		setToolTipText("Read messages files from the i18n database tables"); //$NON-NLS-1$
+		setText("Read from DB");
+		setToolTipText("Read messages files from the i18n database tables");
 	}
 
 	@Override

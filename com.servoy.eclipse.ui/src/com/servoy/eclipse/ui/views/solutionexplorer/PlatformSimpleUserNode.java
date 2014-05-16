@@ -29,7 +29,7 @@ import com.servoy.j2db.persistence.IPersist;
 
 public class PlatformSimpleUserNode extends SimpleUserNode implements IAdaptable, IActionFilter
 {
-	public static final String TYPE = "type"; //$NON-NLS-1$
+	public static final String TYPE = "type";
 
 	public PlatformSimpleUserNode(String displayName, UserNodeType type)
 	{

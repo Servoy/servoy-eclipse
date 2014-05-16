@@ -45,7 +45,7 @@ public class UninstallChainedFileBasedExtensionProvider implements IFileBasedExt
 	 */
 	public UninstallChainedFileBasedExtensionProvider(RestartState rs, IFileBasedExtensionProvider child)
 	{
-		if (!rs.chosenPath.uninstall) throw new IllegalArgumentException("Pending chained provider expected to be an uninstall"); //$NON-NLS-1$
+		if (!rs.chosenPath.uninstall) throw new IllegalArgumentException("Pending chained provider expected to be an uninstall");
 		this.child = child;
 		this.uninstalled = rs.chosenPath.installSequence;
 	}

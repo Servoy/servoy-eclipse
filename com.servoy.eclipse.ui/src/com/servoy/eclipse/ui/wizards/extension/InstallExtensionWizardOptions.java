@@ -26,13 +26,13 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 public class InstallExtensionWizardOptions
 {
 
-	protected final static String FILE_IMPORT_FOLDER = "file import folder"; //$NON-NLS-1$
-	protected final static String USE_LOCAL_FOLDER = "use local folder"; //$NON-NLS-1$
-	protected final static String USE_MARKETPLACE = "use marketplace"; //$NON-NLS-1$
-	protected final static String ALLOW_UPGRADES = "allow upgrades"; //$NON-NLS-1$
-	protected final static String ALLOW_DOWNGRADES = "allow downgrades"; //$NON-NLS-1$
-	protected final static String ALLOW_ONLY_FINAL = "allow only final"; //$NON-NLS-1$
-	protected final static String ALLOW_LIB_CONFLICTS = "allow lib conflicts"; //$NON-NLS-1$
+	protected final static String FILE_IMPORT_FOLDER = "file import folder";
+	protected final static String USE_LOCAL_FOLDER = "use local folder";
+	protected final static String USE_MARKETPLACE = "use marketplace";
+	protected final static String ALLOW_UPGRADES = "allow upgrades";
+	protected final static String ALLOW_DOWNGRADES = "allow downgrades";
+	protected final static String ALLOW_ONLY_FINAL = "allow only final";
+	protected final static String ALLOW_LIB_CONFLICTS = "allow lib conflicts";
 
 
 	public String fileImportParent;

@@ -179,7 +179,7 @@ public class DesignComponentFactory extends ComponentFactory
 						ComponentAccordionPanel tabs = new ComponentAccordionPanel();
 						applyBasicComponentProperties(application, tabs, (BaseComponent)meta, getStyleForBasicComponent(application, (BaseComponent)meta, form));
 						tabs.setAllTabsAlignment(((TabPanel)meta).getHorizontalAlignment());
-						tabs.addTab("position example", new JLabel("form will appear here", SwingConstants.LEFT)); //$NON-NLS-2$
+						tabs.addTab("position example", new JLabel("form will appear here", SwingConstants.LEFT)); 
 						tabs.addTab("position 2", new JLabel("another form showup here", SwingConstants.CENTER));
 						tabs.addTab("position 3", new JLabel("another form showup here", SwingConstants.CENTER));
 						retval = tabs;
@@ -188,7 +188,7 @@ public class DesignComponentFactory extends ComponentFactory
 					{
 						ComponentJTabbedPane tabs = new ComponentJTabbedPane();
 						applyBasicComponentProperties(application, tabs, (BaseComponent)meta, getStyleForBasicComponent(application, (BaseComponent)meta, form));
-						tabs.addTab("position example", new JLabel("form will appear here", SwingConstants.CENTER)); //$NON-NLS-2$
+						tabs.addTab("position example", new JLabel("form will appear here", SwingConstants.CENTER)); 
 						tabs.addTab("position 2", new JLabel("another form showup here", SwingConstants.CENTER));
 						if (orient == SwingConstants.TOP || orient == SwingConstants.LEFT || orient == SwingConstants.BOTTOM || orient == SwingConstants.RIGHT)
 						{

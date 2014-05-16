@@ -24,7 +24,7 @@ package com.servoy.eclipse.core;
  */
 public interface IDebuggerStarter
 {
-	static final String EXTENSION_ID = "com.servoy.eclipse.core.debugstarter"; //$NON-NLS-1$
+	static final String EXTENSION_ID = "com.servoy.eclipse.core.debugstarter";
 
 	void testAndStartDebugger();
 

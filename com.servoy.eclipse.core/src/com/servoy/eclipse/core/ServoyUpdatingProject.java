@@ -56,7 +56,7 @@ public class ServoyUpdatingProject implements IProjectNature
 	/**
 	 * ID of this project nature
 	 */
-	public static final String NATURE_ID = "com.servoy.eclipse.core.ServoyUpdatingProject"; //$NON-NLS-1$
+	public static final String NATURE_ID = "com.servoy.eclipse.core.ServoyUpdatingProject";
 	public static final int UPDATE_38 = SolutionSerializer.VERSION_38;
 	private IProject project;
 
@@ -77,9 +77,9 @@ public class ServoyUpdatingProject implements IProjectNature
 							int fileVersion = solutionMetaData.getFileVersion();
 							if (fileVersion < UPDATE_38) update_38();
 						}
-						else ServoyLog.logWarning("servoy updating project solution meta data is null", null); //$NON-NLS-1$
+						else ServoyLog.logWarning("servoy updating project solution meta data is null", null);
 					}
-					else ServoyLog.logWarning("servoy updating project solution is null", null); //$NON-NLS-1$
+					else ServoyLog.logWarning("servoy updating project solution is null", null);
 
 				}
 			}
@@ -97,7 +97,7 @@ public class ServoyUpdatingProject implements IProjectNature
 				project.setDescription(updatingProjectDescription, null);
 			}
 		}
-		else ServoyLog.logWarning("servoy updating project called with null project", null); //$NON-NLS-1$
+		else ServoyLog.logWarning("servoy updating project called with null project", null);
 	}
 
 	public void deconfigure() throws CoreException
@@ -125,7 +125,7 @@ public class ServoyUpdatingProject implements IProjectNature
 			{
 				if (resource.getType() == IResource.FOLDER)
 				{
-					if (".svn".equalsIgnoreCase(resource.getName())) return false; //$NON-NLS-1$
+					if (".svn".equalsIgnoreCase(resource.getName())) return false;
 
 					IResource methods_js = null;
 					boolean needToDelete = false;
@@ -133,7 +133,7 @@ public class ServoyUpdatingProject implements IProjectNature
 					if (resource.getParent().getName().equals(SolutionSerializer.FORMS_DIR))
 					{
 						needToDelete = true;
-						methods_js = ((IFolder)resource).findMember(resource.getName() + "_methods" + SolutionSerializer.JS_FILE_EXTENSION); //$NON-NLS-1$
+						methods_js = ((IFolder)resource).findMember(resource.getName() + "_methods" + SolutionSerializer.JS_FILE_EXTENSION);
 						newName = resource.getName();
 					}
 					else if (resource.getParent().getParent() != null &&

@@ -526,7 +526,7 @@ public class TextFilter extends ViewerFilter
 	{
 		fHasLeadingStar = (fPattern.startsWith("*"));
 
-		if (fPattern.endsWith("*")) {//$NON-NLS-1$
+		if (fPattern.endsWith("*")) {
 			/* make sure it's not an escaped wildcard */
 			if (fLength > 1 && fPattern.charAt(fLength - 2) != '\\')
 			{

@@ -71,7 +71,7 @@ public class CreateLoginSolutionQuickFix implements IMarkerResolution
 					{
 						// request login solution name
 						InputDialog loginSolutionNameDlg = new InputDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), DIALOG_TITLE,
-							"Please enter a name for the login solution", "login", null); //$NON-NLS-2$
+							"Please enter a name for the login solution", "login", null); 
 
 						if (loginSolutionNameDlg.open() == Window.OK)
 						{
@@ -106,7 +106,7 @@ public class CreateLoginSolutionQuickFix implements IMarkerResolution
 
 									// update the affected properties in the current solution
 									solution.setLoginSolutionName(loginSolutionName);
-									Element loginFormEl = repository.getContentSpec().getPropertyForObjectTypeByName(solution.getTypeID(), "loginFormID"); //$NON-NLS-1$
+									Element loginFormEl = repository.getContentSpec().getPropertyForObjectTypeByName(solution.getTypeID(), "loginFormID");
 									Object loginFormElDefValue = loginFormEl.getDefaultClassValue();
 									solution.setLoginFormID(loginFormElDefValue instanceof Integer ? ((Integer)loginFormElDefValue).intValue() : 0);
 									servoyProject.saveEditingSolutionNodes(new IPersist[] { solution }, false);

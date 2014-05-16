@@ -40,8 +40,8 @@ public class SuggestForeignTypesAction extends Action implements ISelectionChang
 	{
 		viewer = sev;
 
-		setText("Suggest Foreign Types"); //$NON-NLS-1$
-		setToolTipText("Suggest Foreign Types"); //$NON-NLS-1$
+		setText("Suggest Foreign Types");
+		setToolTipText("Suggest Foreign Types");
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)

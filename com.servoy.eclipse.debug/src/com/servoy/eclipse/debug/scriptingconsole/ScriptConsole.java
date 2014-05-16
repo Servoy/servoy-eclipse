@@ -78,7 +78,7 @@ import com.servoy.j2db.util.Pair;
  */
 public class ScriptConsole extends TextConsole implements IEvaluateConsole
 {
-	private static final String TEST_SCOPE = "____TEST_SCOPE____"; //$NON-NLS-1$
+	private static final String TEST_SCOPE = "____TEST_SCOPE____";
 	private ScriptConsolePage page;
 	private IMemento memento;
 
@@ -90,7 +90,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 	 */
 	public ScriptConsole()
 	{
-		super("Command Console", "CommandConsole", null, true); //$NON-NLS-1$ //$NON-NLS-2$
+		super("Command Console", "CommandConsole", null, true);
 
 		ScriptConsolePartitioner partitioner = new ScriptConsolePartitioner();
 		getDocument().setDocumentPartitioner(partitioner);

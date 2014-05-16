@@ -52,7 +52,7 @@ public class FormContextDelegateLabelProvider extends AbstractPersistContextDele
 				Form contextForm = (Form)getContext().getAncestor(IRepository.FORMS);
 				if (contextForm != null && !persist.getParent().getUUID().equals(contextForm.getUUID()))
 				{
-					return baseText + " [" + ((Form)persist.getParent()).getName() + ']'; //$NON-NLS-1$
+					return baseText + " [" + ((Form)persist.getParent()).getName() + ']';
 				}
 			}
 		}

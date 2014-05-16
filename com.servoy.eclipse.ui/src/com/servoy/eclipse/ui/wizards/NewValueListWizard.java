@@ -55,7 +55,7 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 public class NewValueListWizard extends Wizard implements INewWizard
 {
-	public static final String ID = "com.servoy.eclipse.ui.NewValueListWizard"; //$NON-NLS-1$
+	public static final String ID = "com.servoy.eclipse.ui.NewValueListWizard";
 
 	private ValueListNameSolutionPage valuelistPage;
 	private WizardPage errorPage;
@@ -140,8 +140,8 @@ public class NewValueListWizard extends Wizard implements INewWizard
 		private Combo solutionsCombo;
 		private String[] currentSolutionNames;
 
-		private String selectedSolutionName = ""; //$NON-NLS-1$
-		private String selectedvaluelistName = ""; //$NON-NLS-1$
+		private String selectedSolutionName = "";
+		private String selectedvaluelistName = "";
 		private Text valuelistNameText;
 
 		protected ValueListNameSolutionPage(String pageName)

@@ -128,8 +128,8 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 		if (importI18NPolicy == null)
 		{
 			final I18NDialog dialog = new I18NDialog(shell,
-				"Import I18N data", null, "Do you wish to import the I18N data contained in the import(updates and inserts)?", //$NON-NLS-2$
-				MessageDialog.NONE, new String[] { "Yes", "No" }, 0); //$NON-NLS-1$
+				"Import I18N data", null, "Do you wish to import the I18N data contained in the import(updates and inserts)?", 
+				MessageDialog.NONE, new String[] { "Yes", "No" }, 0);
 			Display.getDefault().syncExec(new Runnable()
 			{
 				public void run()
@@ -188,7 +188,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 		if (action == null)
 		{
 			action = new Integer(UIUtils.askQuestion(shell, "Sequence Types",
-				"The sequence types in the import are different from the sequence types on existing tables for server '" //$NON-NLS-1$
+				"The sequence types in the import are different from the sequence types on existing tables for server '"
 					+
 					serverName + "'.\nDo you wish to override the existing sequence types?") ? OK_ACTION : CANCEL_ACTION);
 			serverSequenceTypesMap.put(serverName, action);
@@ -202,7 +202,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 		if (action == null)
 		{
 			action = new Integer(UIUtils.askQuestion(shell, "Auto Enter",
-				"The default values in the import are different from the sequence types on existing tables for server '" //$NON-NLS-1$
+				"The default values in the import are different from the sequence types on existing tables for server '"
 					+
 					serverName + "'.\nDo you wish to override the existing default values?") ? OK_ACTION : CANCEL_ACTION);
 			serverDefaultValuesMap.put(serverName, action);
@@ -213,7 +213,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	public int askRenameRootObjectAction(final String name, final int objectTypeId)
 	{
 		String objectType = Utils.stringInitCap(RepositoryHelper.getObjectTypeName(objectTypeId));
-		final InputDialog nameDialog = new InputDialog(shell, objectType + " exists", objectType + " with name '" + name //$NON-NLS-1$
+		final InputDialog nameDialog = new InputDialog(shell, objectType + " exists", objectType + " with name '" + name
 			+ "' already exists(or you choose clean import), specify new name:", "", new IInputValidator()
 		{
 			public String isValid(String newText)
@@ -244,7 +244,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 		{
 			return RENAME_ACTION;
 		}
-		return UIUtils.askConfirmation(shell, "No new name specified for " + RepositoryHelper.getObjectTypeName(objectTypeId) + " '" + name + "'.", //$NON-NLS-1$
+		return UIUtils.askConfirmation(shell, "No new name specified for " + RepositoryHelper.getObjectTypeName(objectTypeId) + " '" + name + "'.",
 			"Do you wish to skip it and continue the import?") ? SKIP_ACTION : CANCEL_ACTION;
 
 	}
@@ -361,7 +361,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 			{
 				ServoyModelManager.getServoyModelManager().getServoyModel();
 				String[] serverNames = ServoyModel.getServerManager().getServerNames(true, true, true, false);
-				final OptionDialog optionDialog = new OptionDialog(shell, "Server not found", null, "Server with name '" //$NON-NLS-1$
+				final OptionDialog optionDialog = new OptionDialog(shell, "Server not found", null, "Server with name '"
 					+
 					name + "' is not found, but used by the import solution, select another server to use or press cancel to define the server first",
 					MessageDialog.WARNING, new String[] { "OK", "Cancel" }, 0, serverNames, 0);

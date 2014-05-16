@@ -61,7 +61,7 @@ public class SwitchableEclipseUserManager implements IUserManagerInternal, IUser
 	{
 		if (internalUserManager != null && !(internalUserManager instanceof IUserManagerInternal))
 		{
-			throw new RuntimeException("this user manager needs to implement IUserManagerInternal as well: " + internalUserManager.getClass()); //$NON-NLS-1$
+			throw new RuntimeException("this user manager needs to implement IUserManagerInternal as well: " + internalUserManager.getClass());
 		}
 		switchedTo = internalUserManager;
 	}

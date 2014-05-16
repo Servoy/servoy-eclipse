@@ -111,12 +111,12 @@ public class LoadRelationsWizard extends Wizard implements INewWizard
 		final List<RelationSelectorModel> rsms = new ArrayList<RelationSelectorModel>();
 		rsms.addAll(relationSelectorWizardPage.getList());
 
-		WorkspaceJob generateJob = new WorkspaceJob("Generating relations") //$NON-NLS-1$ 
+		WorkspaceJob generateJob = new WorkspaceJob("Generating relations")
 		{
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 			{
-				monitor.beginTask("Generating relations", rsms.size()); //$NON-NLS-1$
+				monitor.beginTask("Generating relations", rsms.size());
 				try
 				{
 					for (RelationSelectorModel relationSelector : rsms)
@@ -152,7 +152,7 @@ public class LoadRelationsWizard extends Wizard implements INewWizard
 					{
 						public void run()
 						{
-							MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured while generating the relations."); //$NON-NLS-1$ //$NON-NLS-2$
+							MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured while generating the relations.");
 						}
 					});
 					return Status.CANCEL_STATUS;
@@ -170,7 +170,7 @@ public class LoadRelationsWizard extends Wizard implements INewWizard
 		throws RepositoryException
 	{
 		Table ft = foreignColumns.get(0).getTable();
-		String rname = nm == null ? "db_" + table.getName().replace(' ', '_') + "_to_" + ft.getName().replace(' ', '_') : nm; //$NON-NLS-1$ //$NON-NLS-2$
+		String rname = nm == null ? "db_" + table.getName().replace(' ', '_') + "_to_" + ft.getName().replace(' ', '_') : nm;
 
 		Relation relation = s.getRelation(rname);
 		if (relation == null)
@@ -303,9 +303,9 @@ public class LoadRelationsWizard extends Wizard implements INewWizard
 				case RelationSelectorWizardPage.CI_SOLUTION :
 					return info.getSolution().getName();
 				case RelationSelectorWizardPage.CI_CREATE :
-					return ""; //$NON-NLS-1$
+					return "";
 				default :
-					return columnIndex + ": " + element; //$NON-NLS-1$
+					return columnIndex + ": " + element;
 			}
 		}
 	}

@@ -149,7 +149,7 @@ public class FoundsetMethodsComposite extends Composite
 				if (selection != null && selection.length > 0)
 				{
 					IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
-					String methodName = "new_method"; //$NON-NLS-1$
+					String methodName = "new_method";
 					String orgName = methodName;
 					try
 					{

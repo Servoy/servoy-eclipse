@@ -50,7 +50,7 @@ public class OpenStyleAction extends Action implements ISelectionChangedListener
 	{
 		viewer = sev;
 
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("open.gif")); //$NON-NLS-1$
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("open.gif"));
 		setText("Open style");
 		setToolTipText("Open style");
 	}

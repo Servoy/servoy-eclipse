@@ -32,7 +32,7 @@ public class Activator extends Plugin
 {
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "com.servoy.eclipse.client"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "com.servoy.eclipse.client";
 
 	// The shared instance
 	private static Activator plugin;

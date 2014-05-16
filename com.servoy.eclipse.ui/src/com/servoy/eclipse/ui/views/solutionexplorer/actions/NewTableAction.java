@@ -108,20 +108,20 @@ public class NewTableAction extends Action implements ISelectionChangedListener
 						{
 							if (s.getTable(newText) != null)
 							{
-								return "A table with the same name already exists"; //$NON-NLS-1$
+								return "A table with the same name already exists";
 							}
 						}
 						catch (RepositoryException e)
 						{
 							ServoyLog.logError(e);
-							MessageDialog.openError(UIUtils.getActiveShell(), "Error", e.getMessage()); //$NON-NLS-1$
+							MessageDialog.openError(UIUtils.getActiveShell(), "Error", e.getMessage());
 							return e.getMessage();
 						}
 
 						boolean valid = IdentDocumentValidator.isSQLIdentifier(newText) &&
 							(!(newText.toUpperCase()).startsWith(DataModelManager.TEMP_UPPERCASE_PREFIX)) &&
 							(!(newText.toUpperCase()).startsWith(IServer.SERVOY_UPPERCASE_PREFIX));
-						return valid ? null : (newText.length() == 0 ? "" : "Invalid table name"); //$NON-NLS-1$//$NON-NLS-2$
+						return valid ? null : (newText.length() == 0 ? "" : "Invalid table name");
 					}
 				});
 				int res = nameDialog.open();

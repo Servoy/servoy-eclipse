@@ -66,11 +66,11 @@ public class NewSybaseDbAction extends AbstractNewDbAction
 		try
 		{
 			ServerConfig origConfig = serverPrototype.getConfig();
-			String serverUrl = origConfig.getServerUrl().replaceFirst("ServiceName=[a-zA-Z_]*", "ServiceName=" + name); //$NON-NLS-1$ //$NON-NLS-2$
+			String serverUrl = origConfig.getServerUrl().replaceFirst("ServiceName=[a-zA-Z_]*", "ServiceName=" + name);
 			if (serverUrl.equals(origConfig.getServerUrl()))
 			{
 				// hmm, no replace, fall back to default
-				serverUrl = "jdbc:sybase:Tds:localhost:2638?ServiceName=" + name + "&CHARSET=utf8"; //$NON-NLS-1$ //$NON-NLS-2$
+				serverUrl = "jdbc:sybase:Tds:localhost:2638?ServiceName=" + name + "&CHARSET=utf8";
 			}
 
 			final IServerManagerInternal serverManager = ServoyModel.getServerManager();

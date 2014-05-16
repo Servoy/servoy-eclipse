@@ -64,7 +64,7 @@ public class CommandHandler implements ICommandHandler
 						try
 						{
 							Scriptable scope = ScriptConsole.getScope(state, true);
-							eval = cx.evaluateString(scope, userInput, "internal_anon", 1, null); //$NON-NLS-1$
+							eval = cx.evaluateString(scope, userInput, "internal_anon", 1, null);
 							if (eval instanceof Wrapper)
 							{
 								eval = ((Wrapper)eval).unwrap();

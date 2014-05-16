@@ -55,7 +55,7 @@ public class CreateColumnReferenceQuickFix implements IMarkerResolution
 
 	public String getLabel()
 	{
-		return "Create column for invalid DataProviderID."; //$NON-NLS-1$
+		return "Create column for invalid DataProviderID.";
 	}
 
 	public void run(IMarker marker)

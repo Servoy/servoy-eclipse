@@ -360,7 +360,7 @@ public class EventsComposite extends Composite
 
 		public EventNode(EventNodeType type, MethodWithArguments mwa, Solution solution, Table table)
 		{
-			if (type == null) throw new NullPointerException("Type can't be null"); //$NON-NLS-1$
+			if (type == null) throw new NullPointerException("Type can't be null");
 			this.type = type;
 			this.mwa = mwa;
 			this.solution = solution;

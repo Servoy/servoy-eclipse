@@ -45,7 +45,7 @@ public class OpenStartPage implements IWorkbenchWindowActionDelegate
 		}
 		catch (Exception e)
 		{
-			ServoyLog.logError("Failed to open StartPage browser.", e); //$NON-NLS-1$
+			ServoyLog.logError("Failed to open StartPage browser.", e);
 		}
 	}
 

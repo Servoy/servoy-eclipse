@@ -180,24 +180,24 @@ public class PatternFilter extends ViewerFilter
 	{
 		// these 2 strings allow the PatternFilter to be extended in
 		// 3.3 - https://bugs.eclipse.org/bugs/show_bug.cgi?id=186404
-		if ("org.eclipse.ui.keys.optimization.true".equals(patternString)) { //$NON-NLS-1$
+		if ("org.eclipse.ui.keys.optimization.true".equals(patternString)) {
 			useEarlyReturnIfMatcherIsNull = true;
 			return;
 		}
-		else if ("org.eclipse.ui.keys.optimization.false".equals(patternString)) { //$NON-NLS-1$
+		else if ("org.eclipse.ui.keys.optimization.false".equals(patternString)) {
 			useEarlyReturnIfMatcherIsNull = false;
 			return;
 		}
 		clearCaches();
-		if (patternString == null || patternString.equals("")) { //$NON-NLS-1$
+		if (patternString == null || patternString.equals("")) {
 			matcher = null;
 		}
 		else
 		{
-			String pattern = patternString + "*"; //$NON-NLS-1$
+			String pattern = patternString + "*";
 			if (includeLeadingWildcard)
 			{
-				pattern = "*" + pattern; //$NON-NLS-1$
+				pattern = "*" + pattern;
 			}
 			matcher = new StringMatcher(pattern, true, false);
 		}

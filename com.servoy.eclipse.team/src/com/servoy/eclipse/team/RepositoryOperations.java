@@ -1463,7 +1463,7 @@ public class RepositoryOperations
 	private void internalUpdate(IResource[] resources, int depth, boolean overrideOutgoing, IProgressMonitor progress) throws TeamException
 	{
 		// Traverse the resources and get any that are out-of-sync
-		progress.beginTask("update", IProgressMonitor.UNKNOWN); //$NON-NLS-1$
+		progress.beginTask("update", IProgressMonitor.UNKNOWN);
 
 		Arrays.sort(resources, new Comparator<IResource>()
 		{

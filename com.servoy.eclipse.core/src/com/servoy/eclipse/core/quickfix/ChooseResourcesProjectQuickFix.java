@@ -186,7 +186,7 @@ public abstract class ChooseResourcesProjectQuickFix implements IMarkerResolutio
 	{
 		// ok now associate the selected(create if necessary) resources project with the solution resources project
 		// create new resource project if necessary and reference it from selected solution
-		WorkspaceJob job = new ResourcesProjectSetupJob("Setting up resources project for solution '" + servoyProject.getName() + "'", servoyResourcesProject, //$NON-NLS-1$ //$NON-NLS-2$
+		WorkspaceJob job = new ResourcesProjectSetupJob("Setting up resources project for solution '" + servoyProject.getName() + "'", servoyResourcesProject,
 			null, servoyProject, true);
 		job.setRule(servoyProject.getWorkspace().getRoot());
 		job.setUser(true);

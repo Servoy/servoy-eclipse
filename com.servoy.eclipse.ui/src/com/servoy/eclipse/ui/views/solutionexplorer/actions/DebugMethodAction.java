@@ -89,7 +89,7 @@ public class DebugMethodAction extends Action implements ISelectionChangedListen
 			if (Activator.getDefault().getDebugClientHandler().getDebugReadyClient() != null) Activator.getDefault().getDebugClientHandler().executeMethod(
 				method.getParent(), method.getScopeName(), method.getName());
 			else MessageDialog.openError(Display.getDefault().getActiveShell(),
-				"Debug Method Problem", "Cannot debug method; please start a debug client first."); //$NON-NLS-1$ //$NON-NLS-2$
+				"Debug Method Problem", "Cannot debug method; please start a debug client first.");
 		}
 	}
 }

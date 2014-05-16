@@ -301,7 +301,7 @@ public class CalculationsComposite extends Composite
 		if (selection != null && selection.length > 0)
 		{
 			IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
-			String calcName = "type_here"; //$NON-NLS-1$
+			String calcName = "type_here";
 			String orgName = calcName;
 			try
 			{

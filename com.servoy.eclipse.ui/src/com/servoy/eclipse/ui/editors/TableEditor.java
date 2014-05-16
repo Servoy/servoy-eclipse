@@ -83,7 +83,7 @@ import com.servoy.j2db.util.Utils;
 
 public class TableEditor extends MultiPageEditorPart implements IActiveProjectListener
 {
-	public static final String ID = "com.servoy.eclipse.ui.editors.TableEditor"; //$NON-NLS-1$
+	public static final String ID = "com.servoy.eclipse.ui.editors.TableEditor";
 
 	private boolean isModified;
 
@@ -749,7 +749,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 							if (validator != null && validator.getDefaultProperties() != null && validator.getDefaultProperties().size() > 0)
 							{
 								throw new RepositoryException(
-									"Column " + column.getName() + " has validator " + validator.getName() + " that doesn't have properties filled in."); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+									"Column " + column.getName() + " has validator " + validator.getName() + " that doesn't have properties filled in.");
 							}
 						}
 						if (column.getColumnInfo().getConverterName() != null && column.getColumnInfo().getConverterProperties() == null)
@@ -759,7 +759,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 							if (converter != null && converter.getDefaultProperties() != null)
 							{
 								throw new RepositoryException(
-									"Column " + column.getName() + " has converter " + converter.getName() + " that doesn't have properties filled in."); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+									"Column " + column.getName() + " has converter " + converter.getName() + " that doesn't have properties filled in.");
 							}
 						}
 					}

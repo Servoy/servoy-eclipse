@@ -49,12 +49,12 @@ public class ExportServoyModel extends AbstractServoyModel implements IServoyMod
 		{
 			if (activeResourcesProject == null)
 			{
-				System.out.println("Cannot find solution project's resources project. (" + solutionName + ")"); //$NON-NLS-1$//$NON-NLS-2$
+				System.out.println("Cannot find solution project's resources project. (" + solutionName + ")");
 			}
 		}
 		else
 		{
-			System.out.println("Cannot find solution project named '" + solutionName + "'. Are you sure you specified the correct workspace location?"); //$NON-NLS-1$ //$NON-NLS-2$
+			System.out.println("Cannot find solution project named '" + solutionName + "'. Are you sure you specified the correct workspace location?");
 		}
 
 	}

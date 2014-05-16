@@ -59,7 +59,7 @@ public class Activator extends AbstractUIPlugin
 	/**
 	 * The PLUGIN_ID for com.servoy.eclipse.ui.
 	 */
-	public static final String PLUGIN_ID = "com.servoy.eclipse.ui"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "com.servoy.eclipse.ui";
 
 	// The shared instance
 	private static Activator plugin;
@@ -69,7 +69,7 @@ public class Activator extends AbstractUIPlugin
 	/**
 	 * The path to icons used by this view (relative to the plug-in folder).
 	 */
-	public static final String ICONS_PATH = "$nl$/icons"; //$NON-NLS-1$
+	public static final String ICONS_PATH = "$nl$/icons";
 
 	private final Map<String, Image> imageCacheOld = new HashMap<String, Image>();
 
@@ -153,7 +153,7 @@ public class Activator extends AbstractUIPlugin
 			getEclipsePreferences().getBoolean(StartupPreferences.STARTUP_EXTENSION_UPDATE_CHECK, StartupPreferences.DEFAULT_STARTUP_EXTENSION_UPDATE_CHECK))
 		{
 			Job updateCheckJob = new ExtensionUpdateAndIncompatibilityCheckJob(
-				"Checking for Servoy Extension " + (applicationServer.hadIncompatibleExtensionsWhenStarted() ? " incompatibilities." : "updates.")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"Checking for Servoy Extension " + (applicationServer.hadIncompatibleExtensionsWhenStarted() ? " incompatibilities." : "updates."));
 			updateCheckJob.setRule(new SerialRule(InstalledExtensionsDialog.SERIAL_RULE_ID));
 			updateCheckJob.setUser(false);
 			updateCheckJob.setSystem(false);
@@ -187,7 +187,7 @@ public class Activator extends AbstractUIPlugin
 		String storeName = name;
 		if (disabled)
 		{
-			storeName = name + "__DISABLED__"; //$NON-NLS-1$
+			storeName = name + "__DISABLED__";
 		}
 		Image img = imageCacheBundle.get(storeName);
 		if (img == null)
@@ -219,7 +219,7 @@ public class Activator extends AbstractUIPlugin
 		String storeName = name;
 		if (disabled)
 		{
-			storeName = name + "__DISABLED__"; //$NON-NLS-1$
+			storeName = name + "__DISABLED__";
 		}
 
 		Image img = imageCacheOld.get(storeName);
@@ -251,7 +251,7 @@ public class Activator extends AbstractUIPlugin
 	public static ImageDescriptor loadImageDescriptorFromOldLocations(String name)
 	{
 		ImageDescriptor neededDescriptor = null;
-		ImageDescriptor id = ImageDescriptor.createFromFile(IApplication.class, "images/" + name); //$NON-NLS-1$
+		ImageDescriptor id = ImageDescriptor.createFromFile(IApplication.class, "images/" + name);
 		if (id.getImageData() != null)
 		{
 			neededDescriptor = id;
@@ -326,7 +326,7 @@ public class Activator extends AbstractUIPlugin
 			{
 				IProvisioningAgentProvider agentProvider = (IProvisioningAgentProvider)context.getService(sr);
 
-				URI p2URI = new File(ApplicationServerRegistry.get().getServoyApplicationServerDirectory(), "../developer/p2/").toURI(); //$NON-NLS-1$
+				URI p2URI = new File(ApplicationServerRegistry.get().getServoyApplicationServerDirectory(), "../developer/p2/").toURI();
 				try
 				{
 					provisioningAgent = agentProvider.createAgent(p2URI);

@@ -70,7 +70,7 @@ public class PluginSearch extends AbstractPersistSearch
 	 */
 	public String getLabel()
 	{
-		return "Searching references to plugin '" + pluginName + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+		return "Searching references to plugin '" + pluginName + "'";
 	}
 
 }

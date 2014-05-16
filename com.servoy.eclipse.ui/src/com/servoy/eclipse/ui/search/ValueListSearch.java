@@ -76,7 +76,7 @@ public class ValueListSearch extends AbstractPersistSearch
 	protected TextSearchResultCollector createTextSearchCollector(AbstractTextSearchResult searchResult)
 	{
 		Pair<String, String> filePathPair = SolutionSerializer.getFilePath(valueList, false);
-		final String fileName = "/" + filePathPair.getLeft() + filePathPair.getRight(); //$NON-NLS-1$
+		final String fileName = "/" + filePathPair.getLeft() + filePathPair.getRight();
 
 		return new TextSearchResultCollector(searchResult)
 		{
@@ -101,7 +101,7 @@ public class ValueListSearch extends AbstractPersistSearch
 	 */
 	public String getLabel()
 	{
-		return "Searching references to valuelist '" + valueList.getName() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+		return "Searching references to valuelist '" + valueList.getName() + "'";
 	}
 
 

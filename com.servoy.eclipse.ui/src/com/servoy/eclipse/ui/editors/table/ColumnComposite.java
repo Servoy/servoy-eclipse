@@ -277,7 +277,7 @@ public class ColumnComposite extends Composite
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				String orgName = "type_here"; //$NON-NLS-1$
+				String orgName = "type_here";
 				String newName = orgName;
 				Column c = t.getColumn(newName);
 				boolean showWarning = false;
@@ -454,7 +454,7 @@ public class ColumnComposite extends Composite
 
 		copyColumnNameAction = new CopyColumnNameAction(tableViewer.getTable().getDisplay());//getSite().getShell().getDisplay());
 		searchForReferences = new SearchForDataProvidersReferencesAction();
-		MenuManager menuMgr = new MenuManager("#PopupMenu"); //$NON-NLS-1$
+		MenuManager menuMgr = new MenuManager("#PopupMenu");
 		menuMgr.add(copyColumnNameAction);
 		menuMgr.add(searchForReferences);
 		Menu menu = menuMgr.createContextMenu(nameViewerColumn.getViewer().getControl());
@@ -593,12 +593,12 @@ public class ColumnComposite extends Composite
 		if (t.getColumns().size() == 0)
 		{
 			String tname = t.getName();
-			if (tname.length() > 1 && tname.endsWith("s")) //$NON-NLS-1$
+			if (tname.length() > 1 && tname.endsWith("s"))
 			{
 				tname = tname.substring(0, tname.length() - 1);
 			}
 			IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
-			String colname = tname.substring(0, Math.min(tname.length(), Column.MAX_SQL_OBJECT_NAME_LENGTH - 3)) + "_id"; //$NON-NLS-1$
+			String colname = tname.substring(0, Math.min(tname.length(), Column.MAX_SQL_OBJECT_NAME_LENGTH - 3)) + "_id";
 			try
 			{
 				int defaultFirstColumnSequenceType = getDefaultFirstColumnSequenceType();

@@ -190,7 +190,7 @@ public class PropertyDirectEditManager extends DirectEditManager
 		else
 		{
 			// do not commit an invalid value, show a dialog instead
-			final String errorMessage = getCellEditor().getErrorMessage() == null ? "Invalid value" : getCellEditor().getErrorMessage(); //$NON-NLS-1$
+			final String errorMessage = getCellEditor().getErrorMessage() == null ? "Invalid value" : getCellEditor().getErrorMessage();
 			try
 			{
 				eraseFeedback();
@@ -203,7 +203,7 @@ public class PropertyDirectEditManager extends DirectEditManager
 			{
 				public void run()
 				{
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Could not set property value", errorMessage); //$NON-NLS-1$
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Could not set property value", errorMessage);
 				}
 			});
 		}

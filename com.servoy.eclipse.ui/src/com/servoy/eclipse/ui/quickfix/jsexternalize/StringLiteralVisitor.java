@@ -27,7 +27,7 @@ import org.eclipse.dltk.javascript.ast.StringLiteral;
  */
 public abstract class StringLiteralVisitor extends org.eclipse.dltk.ast.ASTVisitor
 {
-	public static final String I18N_EXTERNALIZE_CALLBACK = "i18n.getI18NMessage"; //$NON-NLS-1$
+	public static final String I18N_EXTERNALIZE_CALLBACK = "i18n.getI18NMessage";
 
 	private boolean isEvaluatingI18N;
 	private int parsingLineStartIdx, parsingLineEndIdx = -1;

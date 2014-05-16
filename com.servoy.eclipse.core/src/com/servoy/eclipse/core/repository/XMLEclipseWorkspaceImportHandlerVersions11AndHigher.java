@@ -751,7 +751,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 			boolean importMetaData = x11handler.getUserChannel().askImportMetaData() == IXMLImportUserChannel.OK_ACTION;
 			if (!importMetaData)
 			{
-				x11handler.getUserChannel().info("Skipping meta data import", ILogLevel.INFO); //$NON-NLS-1$
+				x11handler.getUserChannel().info("Skipping meta data import", ILogLevel.INFO);
 				// continue here to set the metadata flag for the table
 			}
 
@@ -845,7 +845,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					try
 					{
 						ws.setUTF8Contents(mdf.getFullPath().toString(), def.tableMetaData);
-						x11handler.getUserChannel().info("Saved meta data for datasource '" + dataSource + "' in workspace.", ILogLevel.INFO); //$NON-NLS-1$
+						x11handler.getUserChannel().info("Saved meta data for datasource '" + dataSource + "' in workspace.", ILogLevel.INFO);
 					}
 					catch (IOException e)
 					{
@@ -862,7 +862,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 						if (ds.getRowCount() == 0)
 						{
 							MetaDataUtils.loadMetadataInTable((Table)table, def.tableMetaData);
-							x11handler.getUserChannel().info("Loaded meta data for datasource '" + dataSource + "' in database.", ILogLevel.INFO); //$NON-NLS-1$
+							x11handler.getUserChannel().info("Loaded meta data for datasource '" + dataSource + "' in database.", ILogLevel.INFO);
 						}
 						else
 						{

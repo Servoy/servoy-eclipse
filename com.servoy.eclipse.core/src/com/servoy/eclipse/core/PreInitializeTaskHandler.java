@@ -33,7 +33,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 public class PreInitializeTaskHandler
 {
 
-	public static final String PRE_INITIALIZE_EXTENSION_ID = Activator.PLUGIN_ID + ".preInitializeJob"; //$NON-NLS-1$
+	public static final String PRE_INITIALIZE_EXTENSION_ID = Activator.PLUGIN_ID + ".preInitializeJob";
 
 	private static boolean tasksRan = false;
 	private static boolean preInitializeRunning = false;
@@ -56,7 +56,7 @@ public class PreInitializeTaskHandler
 						}
 						else
 						{
-							throw new RuntimeException("Detected pre initialize cycle..."); //$NON-NLS-1$
+							throw new RuntimeException("Detected pre initialize cycle...");
 						}
 
 					}
@@ -84,7 +84,7 @@ public class PreInitializeTaskHandler
 				{
 					try
 					{
-						Runnable job = (Runnable)ce[0].createExecutableExtension("class"); //$NON-NLS-1$
+						Runnable job = (Runnable)ce[0].createExecutableExtension("class");
 						if (job != null)
 						{
 							try
@@ -99,7 +99,7 @@ public class PreInitializeTaskHandler
 					}
 					catch (CoreException e)
 					{
-						ServoyLog.logError("Failed to run a pre-initialize job.", e); //$NON-NLS-1$
+						ServoyLog.logError("Failed to run a pre-initialize job.", e);
 					}
 				}
 			}

@@ -180,7 +180,7 @@ public class ContentInstaller
 
 	class ContentWrapper
 	{
-		private final static String CONTENT_TMP = ".tmpContent"; //$NON-NLS-1$
+		private final static String CONTENT_TMP = ".tmpContent";
 
 		private final File expFileObj;
 		private final Content contentObj;

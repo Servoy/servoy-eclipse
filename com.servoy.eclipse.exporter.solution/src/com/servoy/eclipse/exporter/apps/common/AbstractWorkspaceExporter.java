@@ -117,7 +117,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 					{
 						try
 						{
-							outputExtra("Loading settings from: " + f.getAbsolutePath()); //$NON-NLS-1$
+							outputExtra("Loading settings from: " + f.getAbsolutePath());
 							Settings s = Settings.getInstance();
 							s.loadFromFile(f);
 
@@ -126,7 +126,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 						catch (IOException e)
 						{
 							ServoyLog.logError(e);
-							outputError("Failed to load settings: " + e.getMessage() + ". Check workspace log."); //$NON-NLS-1$ //$NON-NLS-2$
+							outputError("Failed to load settings: " + e.getMessage() + ". Check workspace log.");
 						}
 					}
 				}
@@ -152,7 +152,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 					{
 						if (initialAutoBuild)
 						{
-							outputExtra("Temporarily disabling auto-build."); //$NON-NLS-1$
+							outputExtra("Temporarily disabling auto-build.");
 							IWorkspaceDescription description = ResourcesPlugin.getWorkspace().getDescription();
 							description.setAutoBuilding(false); // this doesn't actually apply
 							try
@@ -163,7 +163,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 							{
 								ServoyLog.logError(e);
 								// continuing would only lead to potential deadlock, if auto-build cannot be turned off
-								outputError("EXPORT FAILED. Cannot export solution(s) '" + configuration.getSolutionNamesAsString() + "'; unable to turn off auto-build. Check workspace log."); //$NON-NLS-1$//$NON-NLS-2$
+								outputError("EXPORT FAILED. Cannot export solution(s) '" + configuration.getSolutionNamesAsString() + "'; unable to turn off auto-build. Check workspace log.");
 								exitCode = EXIT_EXPORT_FAILED;
 							}
 						}
@@ -203,7 +203,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 				stopLock.notify();
 			}
 		}
-		if (exitCode.equals(EXIT_OK)) output("Export DONE."); //$NON-NLS-1$
+		if (exitCode.equals(EXIT_OK)) output("Export DONE.");
 		return exitCode;
 	}
 
@@ -221,7 +221,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 		// that some jobs were still started when the workbench closed; so we try to execute this as late as possible (when bundle is stopped)
 		if (initialAutoBuild)
 		{
-			outputExtra("Re-enabling auto-build."); //$NON-NLS-1$
+			outputExtra("Re-enabling auto-build.");
 			try
 			{
 				// try to restore the auto-build flag without triggering a build that will load TypeCreate/TypeProvider & hang on instantiating ServoyModel
@@ -232,7 +232,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 			catch (BackingStoreException e)
 			{
 				ServoyLog.logError(e);
-				outputError("Cannot restore auto-build flag. Check workspace log."); //$NON-NLS-1$
+				outputError("Cannot restore auto-build flag. Check workspace log.");
 			}
 		}
 	}
@@ -243,7 +243,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 		List<IProject> existingClosedProjects = new ArrayList<IProject>();
 		try
 		{
-			outputExtra("Importing existing projects into workspace and opening closed ones if needed. " + (configuration.shouldAggregateWorkspace() ? "(checking child folders for projects as well)" : "")); //$NON-NLS-1$
+			outputExtra("Importing existing projects into workspace and opening closed ones if needed. " + (configuration.shouldAggregateWorkspace() ? "(checking child folders for projects as well)" : ""));
 			IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
 			File wr = workspaceRoot.getLocation().toFile();
 			importExistingAndOpenClosedProjects(wr, workspaceRoot, importedProjects, existingClosedProjects);
@@ -257,7 +257,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 				}
 			}
 
-			outputExtra("Refreshing projects."); //$NON-NLS-1$
+			outputExtra("Refreshing projects.");
 			IProject[] prjs = workspaceRoot.getProjects();
 			try
 			{
@@ -272,7 +272,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 			catch (CoreException e)
 			{
 				ServoyLog.logError(e);
-				outputError("Refresh project roots encountered a problem. Check workspace log."); //$NON-NLS-1$
+				outputError("Refresh project roots encountered a problem. Check workspace log.");
 			}
 
 			ExportServoyModel sm = ServoyModelProvider.getModel();
@@ -282,7 +282,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 			{
 				String solutionName = solutionNames[i];
 
-				outputExtra("Refreshing and loading projects used by solution " + solutionName + "."); //$NON-NLS-1$ //$NON-NLS-2$
+				outputExtra("Refreshing and loading projects used by solution " + solutionName + ".");
 				sm.initialize(solutionName); // the actual refresh of solution projects happens in the modified EclipseRepository load; this just loads all modules (because it reloads all form security info)
 
 				if (!mustStop)
@@ -293,7 +293,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 
 						if (!mustStop)
 						{
-							outputExtra("Checking for problem markers"); //$NON-NLS-1$
+							outputExtra("Checking for problem markers");
 							sm.buildActiveProjects(null, true);
 
 							// check project markers
@@ -307,19 +307,19 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 
 							if (errors.size() > 0)
 							{
-								output("Found error markers in solution " + solutionName); //$NON-NLS-1$
+								output("Found error markers in solution " + solutionName);
 
 								for (IMarker marker : errors)
 								{
-									outputExtra(" -" + marker.getAttribute(IMarker.MESSAGE, "Unknown marker message.")); //$NON-NLS-1$
+									outputExtra(" -" + marker.getAttribute(IMarker.MESSAGE, "Unknown marker message."));
 								}
 								if (configuration.shouldIgnoreBuildErrors())
 								{
-									output("Ignoring error markers. ('-ie' was used)"); //$NON-NLS-1$
+									output("Ignoring error markers. ('-ie' was used)");
 								}
 								else
 								{
-									outputError("EXPORT FAILED. Solution '" + solutionName + "' will NOT be exported. It has error markers"); //$NON-NLS-1$//$NON-NLS-2$
+									outputError("EXPORT FAILED. Solution '" + solutionName + "' will NOT be exported. It has error markers");
 									exitCode = EXIT_EXPORT_FAILED;
 									return;
 								}
@@ -330,12 +330,12 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 
 								if (warnings.size() > 0)
 								{
-									output("Found warning markers in projects for solution " + solutionName); //$NON-NLS-1$
+									output("Found warning markers in projects for solution " + solutionName);
 									if (verbose)
 									{
 										for (IMarker marker : warnings)
 										{
-											outputExtra(" -" + marker.getAttribute(IMarker.MESSAGE, "Unknown marker message.")); //$NON-NLS-1$
+											outputExtra(" -" + marker.getAttribute(IMarker.MESSAGE, "Unknown marker message."));
 										}
 									}
 								}
@@ -347,7 +347,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 					}
 					else
 					{
-						outputError("EXPORT FAILED. Solution '" + solutionName + "' will NOT be exported. It cannot be activated."); //$NON-NLS-1$//$NON-NLS-2$
+						outputError("EXPORT FAILED. Solution '" + solutionName + "' will NOT be exported. It cannot be activated.");
 						exitCode = EXIT_EXPORT_FAILED;
 					}
 				}
@@ -355,7 +355,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 		}
 		finally
 		{
-			outputExtra("Restoring closed projects if needed."); //$NON-NLS-1$ 
+			outputExtra("Restoring closed projects if needed.");
 			for (IProject p : existingClosedProjects)
 			{
 				try
@@ -365,10 +365,10 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 				catch (CoreException e)
 				{
 					ServoyLog.logError(e);
-					outputError("Cannot restore project '" + p.getName() + "' to it's closed state after export. Check workspace log."); //$NON-NLS-1$ //$NON-NLS-2$
+					outputError("Cannot restore project '" + p.getName() + "' to it's closed state after export. Check workspace log.");
 				}
 			}
-			outputExtra("Removing imported projects from workspace (without removing content) if needed."); //$NON-NLS-1$ 
+			outputExtra("Removing imported projects from workspace (without removing content) if needed.");
 			for (IProject p : importedProjects)
 			{
 				try
@@ -378,7 +378,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 				catch (CoreException e)
 				{
 					ServoyLog.logError(e);
-					outputError("Cannot remove project (not content) '" + p.getName() + "' from workspace after export. Check workspace log."); //$NON-NLS-1$ //$NON-NLS-2$
+					outputError("Cannot remove project (not content) '" + p.getName() + "' from workspace after export. Check workspace log.");
 				}
 			}
 		}
@@ -441,7 +441,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 					catch (CoreException e)
 					{
 						ServoyLog.logError(e);
-						outputError("Cannot import and open project '" + f.getName() + "' into workspace. Check workspace log."); //$NON-NLS-1$//$NON-NLS-2$
+						outputError("Cannot import and open project '" + f.getName() + "' into workspace. Check workspace log.");
 					}
 				}
 				else if (useLinks && !p.getLocation().toFile().equals(f))
@@ -486,7 +486,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 		catch (CoreException e)
 		{
 			ServoyLog.logError(e);
-			outputError("Marker check encountered a problem. Check workspace log."); //$NON-NLS-1$
+			outputError("Marker check encountered a problem. Check workspace log.");
 		}
 	}
 
@@ -494,7 +494,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 	{
 		mustStop = true;
 		exitCode = EXIT_STOPPED;
-		output("Stopping export..."); //$NON-NLS-1$
+		output("Stopping export...");
 		synchronized (stopLock)
 		{
 			if (!finished)
@@ -505,7 +505,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 				}
 				catch (InterruptedException e)
 				{
-					ServoyLog.logWarning("Interrupted while waiting for requested application stop.", e); //$NON-NLS-1$
+					ServoyLog.logWarning("Interrupted while waiting for requested application stop.", e);
 				}
 			}
 		}
@@ -543,16 +543,16 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 			catch (Exception e)
 			{
 				ServoyLog.logError(e);
-				outputError("EXPORT FAILED. Cannot initialize app. server. Check workspace log."); //$NON-NLS-1$
+				outputError("EXPORT FAILED. Cannot initialize app. server. Check workspace log.");
 				exitCode = EXIT_EXPORT_FAILED;
 			}
 
-			ServoyModelFinder.initializeServoyModelProvider("exporter"); //$NON-NLS-1$
+			ServoyModelFinder.initializeServoyModelProvider("exporter");
 			ServoyModelFinder.getServoyModel(); // initialise servoy model as well
 		}
 		else
 		{
-			outputError("EXPORT FAILED. Cannot initialize exporter due to missing app. server starter extension."); //$NON-NLS-1$
+			outputError("EXPORT FAILED. Cannot initialize exporter due to missing app. server starter extension.");
 			exitCode = EXIT_EXPORT_FAILED;
 		}
 	}

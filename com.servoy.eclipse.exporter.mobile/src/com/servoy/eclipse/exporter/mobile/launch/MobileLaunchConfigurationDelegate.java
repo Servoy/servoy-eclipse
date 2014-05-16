@@ -178,12 +178,12 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		}
 		catch (final Throwable e)
 		{
-			ServoyLog.logError("Cant open external browser", e); //$NON-NLS-1$
+			ServoyLog.logError("Cant open external browser", e);
 			Display.getDefault().asyncExec(new Runnable()
 			{
 				public void run()
 				{
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Cant open external browser", e.getLocalizedMessage()); //$NON-NLS-1$
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Cant open external browser", e.getLocalizedMessage());
 				}
 			});
 		}

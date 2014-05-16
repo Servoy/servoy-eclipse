@@ -173,7 +173,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 					public boolean accept(File dir, String name)
 					{
 						boolean accept = fileNames != null ? fileNames.contains(name.toLowerCase()) : true;
-						return accept && (name.toLowerCase().endsWith(".jar") || name.toLowerCase().endsWith(".zip")); //$NON-NLS-1$ //$NON-NLS-2$
+						return accept && (name.toLowerCase().endsWith(".jar") || name.toLowerCase().endsWith(".zip"));
 					}
 				}));
 			}
@@ -229,7 +229,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 		catch (ExportException ex)
 		{
-			outputError("Exception while exporting solution. EXPORT FAILED for this solution. Check workspace log."); //$NON-NLS-1$
+			outputError("Exception while exporting solution. EXPORT FAILED for this solution. Check workspace log.");
 			exitCode = EXIT_EXPORT_FAILED;
 		}
 	}

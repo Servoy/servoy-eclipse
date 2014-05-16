@@ -85,7 +85,7 @@ public class DeleteScopeAction extends Action implements ISelectionChangedListen
 	@Override
 	public void run()
 	{
-		if (!MessageDialog.openConfirm(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getText(), "Are you sure you want to delete?")) //$NON-NLS-1$
+		if (!MessageDialog.openConfirm(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getText(), "Are you sure you want to delete?"))
 		{
 			return;
 		}

@@ -265,7 +265,7 @@ public class AggregationsComposite extends Composite
 		if (selection != null && selection.length > 0)
 		{
 			IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
-			String orgName = "type_here"; //$NON-NLS-1$
+			String orgName = "type_here";
 			String newName = orgName;
 			int type = QueryAggregate.ALL_DEFINED_AGGREGATES[0];
 			Iterator<Column> it = te.getTable().getColumns().iterator();

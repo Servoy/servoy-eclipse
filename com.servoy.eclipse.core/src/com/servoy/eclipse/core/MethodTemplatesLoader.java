@@ -38,7 +38,7 @@ public class MethodTemplatesLoader
 			// even if it was loaded before with "ClientMethodTemplatesLoader.loadClientMethodTemplatesIfNeeded" we must load the XML, as we are in developer and we need all the method template info
 			ClientMethodTemplatesLoader.setLoaded();
 
-			InputStream is = MethodTemplatesLoader.class.getResourceAsStream("doc/methodtemplates.xml"); //$NON-NLS-1$
+			InputStream is = MethodTemplatesLoader.class.getResourceAsStream("doc/methodtemplates.xml");
 			try
 			{
 				DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();

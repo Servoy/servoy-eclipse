@@ -28,7 +28,7 @@ import org.eclipse.osgi.util.NLS;
 public class SearchMessages extends NLS
 {
 
-	private static final String BUNDLE_NAME = "com.servoy.eclipse.ui.search.SearchMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME = "com.servoy.eclipse.ui.search.SearchMessages";
 
 	static
 	{

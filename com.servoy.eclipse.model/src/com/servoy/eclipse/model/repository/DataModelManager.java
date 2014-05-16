@@ -1243,7 +1243,7 @@ public class DataModelManager implements IColumnInfoManager
 
 					// we have an active solution with a resources project but with invalid security info; add problem marker
 					ServoyMarker mk = MarkerMessages.DBIBadDBInfo.fill(message);
-					ServoyBuilder.addMarker(file, mk.getType(), mk.getText(), charNo, ServoyBuilder.DBI_BAD_INFO, IMarker.PRIORITY_NORMAL, "JSON file"); //$NON-NLS-1$
+					ServoyBuilder.addMarker(file, mk.getType(), mk.getText(), charNo, ServoyBuilder.DBI_BAD_INFO, IMarker.PRIORITY_NORMAL, "JSON file");
 				}
 			}
 		});
@@ -1519,11 +1519,11 @@ public class DataModelManager implements IColumnInfoManager
 			}
 			else if (type == MISSING_TABLE)
 			{
-				mk = MarkerMessages.DBITableMissing.fill(serverName + "->" + tableName); //$NON-NLS-1$
+				mk = MarkerMessages.DBITableMissing.fill(serverName + "->" + tableName);
 			}
 			else if (type == MISSING_DBI_FILE)
 			{
-				mk = MarkerMessages.DBIFileMissing.fill(serverName + "->" + tableName); //$NON-NLS-1$
+				mk = MarkerMessages.DBIFileMissing.fill(serverName + "->" + tableName);
 			}
 			else if (type == COLUMN_SEQ_TYPE_OVERRIDEN)
 			{
@@ -1552,28 +1552,28 @@ public class DataModelManager implements IColumnInfoManager
 		private String getColumnDefinition(ColumnInfoDef definition)
 		{
 			StringBuffer message = new StringBuffer();
-			message.append("("); //$NON-NLS-1$
+			message.append("(");
 			if ((definition.flags & Column.PK_COLUMN) != 0)
 			{
-				message.append("pk, "); //$NON-NLS-1$
+				message.append("pk, ");
 			}
 			else if ((definition.flags & Column.USER_ROWID_COLUMN) != 0)
 			{
-				message.append("row_ident, "); //$NON-NLS-1$
+				message.append("row_ident, ");
 			}
 			message.append(Column.getDisplayTypeString(definition.columnType.getSqlType()));
-			message.append("(id:"); //$NON-NLS-1$
+			message.append("(id:");
 			message.append(definition.columnType.getSqlType());
-			message.append("), length: "); //$NON-NLS-1$
+			message.append("), length: ");
 			message.append(definition.columnType.getLength());
 			if (definition.columnType.getScale() != 0)
 			{
-				message.append(", scale: "); //$NON-NLS-1$
+				message.append(", scale: ");
 				message.append(definition.columnType.getScale());
 			}
-			message.append(", allowNull: "); //$NON-NLS-1$
+			message.append(", allowNull: ");
 			message.append(definition.allowNull);
-			message.append(")"); //$NON-NLS-1$
+			message.append(")");
 			return message.toString();
 		}
 
@@ -1581,9 +1581,9 @@ public class DataModelManager implements IColumnInfoManager
 		{
 			StringBuffer message = new StringBuffer();
 			message.append(serverName);
-			message.append("->"); //$NON-NLS-1$
+			message.append("->");
 			message.append(tableName);
-			message.append("->"); //$NON-NLS-1$
+			message.append("->");
 			message.append(columnName);
 			return message.toString();
 		}

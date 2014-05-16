@@ -119,14 +119,14 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 			}
 			catch (final RepositoryException e)
 			{
-				ServoyLog.logError("Failed to export solution.", e); //$NON-NLS-1$
-				outputError("Exception while exporting solution. EXPORT FAILED for this solution. Check workspace log."); //$NON-NLS-1$
+				ServoyLog.logError("Failed to export solution.", e);
+				outputError("Exception while exporting solution. EXPORT FAILED for this solution. Check workspace log.");
 				exitCode = EXIT_EXPORT_FAILED;
 			}
 		}
 		else
 		{
-			outputError("Solution in project '" + activeProject.getProject().getName() + "' is not valid. EXPORT FAILED for this solution."); //$NON-NLS-1$//$NON-NLS-2$
+			outputError("Solution in project '" + activeProject.getProject().getName() + "' is not valid. EXPORT FAILED for this solution.");
 			exitCode = EXIT_EXPORT_FAILED;
 		}
 	}

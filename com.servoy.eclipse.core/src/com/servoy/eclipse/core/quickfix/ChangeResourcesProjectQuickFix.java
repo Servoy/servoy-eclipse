@@ -244,8 +244,8 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 	 */
 	public static class ResourcesProjectSetupJob extends WorkspaceJob
 	{
-		public final static String CLOSED_DELETED_RESOURCES_PROJECT_KEY = "c_D_R"; //$NON-NLS-1$
-		public final static String CLOSED_DELETED_RESOURCES_PROJECT_DELIM = ">"; //$NON-NLS-1$ some illegal char for project names
+		public final static String CLOSED_DELETED_RESOURCES_PROJECT_KEY = "c_D_R";
+		public final static String CLOSED_DELETED_RESOURCES_PROJECT_DELIM = ">"; // some illegal char for project names
 
 		private final IProject newResourcesProject;
 		private final IProject solutionProject;
@@ -267,12 +267,12 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 		{
 			monitor.beginTask(getName(), 2);
 			// create Resource project if needed
-			monitor.setTaskName("Creating new resources project if needed"); //$NON-NLS-1$
+			monitor.setTaskName("Creating new resources project if needed");
 			createResourcesProjectIfNeeded(newResourcesProject);
 			monitor.worked(1);
 
 			// link active solution project to the resource project; store project description
-			monitor.setTaskName("Linking solution project to the resource project"); //$NON-NLS-1$
+			monitor.setTaskName("Linking solution project to the resource project");
 			IProjectDescription description = solutionProject.getDescription();
 			IProject[] oldReferences = description.getReferencedProjects();
 

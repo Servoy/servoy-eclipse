@@ -60,7 +60,7 @@ public class OpenMarketplace implements IWorkbenchWindowActionDelegate, IStartPa
 				p = (MarketplaceBrowserEditor)activePage.openEditor(MarketplaceBrowserEditor.INPUT, MarketplaceBrowserEditor.MARKETPLACE_BROWSER_EDITOR_ID);
 				if (param != null)
 				{
-					p.deepLink("/filter/" + param); //$NON-NLS-1$
+					p.deepLink("/filter/" + param);
 				}
 			}
 			else
@@ -72,7 +72,7 @@ public class OpenMarketplace implements IWorkbenchWindowActionDelegate, IStartPa
 		}
 		catch (Exception e)
 		{
-			ServoyLog.logError("Failed to open Marketplace browser.", e); //$NON-NLS-1$
+			ServoyLog.logError("Failed to open Marketplace browser.", e);
 		}
 	}
 

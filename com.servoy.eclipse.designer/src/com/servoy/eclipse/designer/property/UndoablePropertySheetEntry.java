@@ -164,7 +164,7 @@ public final class UndoablePropertySheetEntry extends ModifiedPropertySheetEntry
 				{
 					public void run()
 					{
-						MessageDialog.openError(Display.getDefault().getActiveShell(), "Could not set property value", errorMessage); //$NON-NLS-1$
+						MessageDialog.openError(Display.getDefault().getActiveShell(), "Could not set property value", errorMessage);
 					}
 				});
 			}

@@ -11,9 +11,9 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 public class ActiveSolutionProvider extends AbstractSourceProvider
 {
 
-	public static final String MOBILE_STATE = "com.servoy.eclipse.core.mobileState"; //$NON-NLS-1$
-	public static final String WEB_STATE = "com.servoy.eclipse.core.webClientState"; //$NON-NLS-1$
-	public static final String SMART_STATE = "com.servoy.eclipse.core.smartClientState"; //$NON-NLS-1$
+	public static final String MOBILE_STATE = "com.servoy.eclipse.core.mobileState";
+	public static final String WEB_STATE = "com.servoy.eclipse.core.webClientState";
+	public static final String SMART_STATE = "com.servoy.eclipse.core.smartClientState";
 
 	private ServoyModel sm;
 	private IActiveProjectListener listener;

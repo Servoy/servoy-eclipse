@@ -117,7 +117,7 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
  */
 public class NewFormWizard extends Wizard implements INewWizard
 {
-	public static final String ID = "com.servoy.eclipse.ui.NewFormWizard"; //$NON-NLS-1$
+	public static final String ID = "com.servoy.eclipse.ui.NewFormWizard";
 
 	private static Object SELECTION_NONE = new Object();
 
@@ -251,7 +251,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 	@Override
 	public IDialogSettings getDialogSettings()
 	{
-		return EditorUtil.getDialogSettings("newFormWizard"); //$NON-NLS-1$  
+		return EditorUtil.getDialogSettings("newFormWizard");
 	}
 
 	/*
@@ -265,20 +265,20 @@ public class NewFormWizard extends Wizard implements INewWizard
 		IDialogSettings settings = getDialogSettings();
 		if (dataProviderWizardPage != null)
 		{
-			settings.put("placeHorizontal", dataProviderWizardPage.optionsGroup.isPlaceHorizontal()); //$NON-NLS-1$
-			settings.put("placeAsLabels", dataProviderWizardPage.optionsGroup.isPlaceAsLabels()); //$NON-NLS-1$
-			settings.put("placeLabels", dataProviderWizardPage.optionsGroup.isPlaceWithLabels()); //$NON-NLS-1$
-			settings.put("fillText", dataProviderWizardPage.optionsGroup.isFillText()); //$NON-NLS-1$
-			settings.put("fillName", dataProviderWizardPage.optionsGroup.isFillName()); //$NON-NLS-1$
+			settings.put("placeHorizontal", dataProviderWizardPage.optionsGroup.isPlaceHorizontal());
+			settings.put("placeAsLabels", dataProviderWizardPage.optionsGroup.isPlaceAsLabels());
+			settings.put("placeLabels", dataProviderWizardPage.optionsGroup.isPlaceWithLabels());
+			settings.put("fillText", dataProviderWizardPage.optionsGroup.isFillText());
+			settings.put("fillName", dataProviderWizardPage.optionsGroup.isFillName());
 		}
 
 		TableWrapper tw = newFormWizardPage.getTableWrapper();
-		settings.put("servername", tw == null ? null : tw.getServerName()); //$NON-NLS-1$
-		settings.put("tablename", tw == null ? null : tw.getTableName()); //$NON-NLS-1$
+		settings.put("servername", tw == null ? null : tw.getServerName());
+		settings.put("tablename", tw == null ? null : tw.getTableName());
 		Style style = newFormWizardPage.getStyle();
-		settings.put("style", style == null ? null : style.getName()); //$NON-NLS-1$
+		settings.put("style", style == null ? null : style.getName());
 		Template template = newFormWizardPage.getTemplate();
-		settings.put("templatename", template == null ? null : template.getName()); //$NON-NLS-1$
+		settings.put("templatename", template == null ? null : template.getName());
 
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject activeProject = servoyModel.getActiveProject();
@@ -440,8 +440,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 		{
 			this(pageName);
 			IDialogSettings settings = NewFormWizard.this.getDialogSettings();
-			settings.put("servername", tableWrapper.getServerName()); //$NON-NLS-1$
-			settings.put("tablename", tableWrapper.getTableName()); //$NON-NLS-1$
+			settings.put("servername", tableWrapper.getServerName());
+			settings.put("tablename", tableWrapper.getTableName());
 		}
 
 		private TableWrapper getTableWrapper()
@@ -984,8 +984,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 		private void setFormName(String text)
 		{
-			formName = "".equals(text) ? null : text; //$NON-NLS-1$
-			formNameField.setText(text == null ? "" : text); //$NON-NLS-1$
+			formName = "".equals(text) ? null : text;
+			formNameField.setText(text == null ? "" : text);
 			formNameTyped = false;
 			setPageComplete(validatePage());
 		}

@@ -88,7 +88,7 @@ public class LinkWithEditorAction extends Action
 		this.tree = tree;
 		this.list = list;
 		setText("Link with Editor");
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("synced.gif"));//$NON-NLS-1$
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("synced.gif"));
 	}
 
 	/**
@@ -161,7 +161,7 @@ public class LinkWithEditorAction extends Action
 			if (file != null)
 			{
 				// globals, scope or foundset
-				if (file.getName().endsWith(".js")) //$NON-NLS-1$
+				if (file.getName().endsWith(".js"))
 				{
 					IContainer parent = file.getParent();
 					if (parent instanceof IProject)
@@ -193,7 +193,7 @@ public class LinkWithEditorAction extends Action
 						}
 					}
 				}
-				else if (file.getName().endsWith(".css")) //$NON-NLS-1$
+				else if (file.getName().endsWith(".css"))
 				{
 					PlatformSimpleUserNode styleNode = ((SolutionExplorerTreeContentProvider)contentProvider).getStylesNode();
 					tree.setSelection(new StructuredSelection(styleNode), true);

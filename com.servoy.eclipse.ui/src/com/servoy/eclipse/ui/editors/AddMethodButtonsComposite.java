@@ -84,7 +84,7 @@ public class AddMethodButtonsComposite extends Composite
 		Button createGlobalMethodButton;
 
 		Label createMethodLabel = new Label(this, SWT.NONE);
-		createMethodLabel.setText("Create method in"); //$NON-NLS-1$
+		createMethodLabel.setText("Create method in");
 
 		createFormMethodButton = new Button(this, SWT.NONE);
 		createFormMethodButton.addSelectionListener(new SelectionAdapter()
@@ -166,7 +166,7 @@ public class AddMethodButtonsComposite extends Composite
 				}
 			}
 		});
-		createGlobalMethodButton.setText("Scope"); //$NON-NLS-1$
+		createGlobalMethodButton.setText("Scope");
 	}
 
 	private ScriptMethod createMethod(IPersist parent)

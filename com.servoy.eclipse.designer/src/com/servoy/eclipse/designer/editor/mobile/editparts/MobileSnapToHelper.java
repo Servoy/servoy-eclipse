@@ -45,7 +45,7 @@ public class MobileSnapToHelper extends SnapToHelper
 	/**
 	 * Property set in the request extended data by the snap class, type will be  {@link MobileSnapData}.
 	 */
-	public static final String MOBILE_SNAP_DATA = "MobileSnapToHelper.requestData"; //$NON-NLS-1$
+	public static final String MOBILE_SNAP_DATA = "MobileSnapToHelper.requestData";
 
 	private final GraphicalEditPart container;
 

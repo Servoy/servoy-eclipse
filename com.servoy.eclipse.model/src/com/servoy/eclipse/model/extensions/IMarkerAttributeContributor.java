@@ -29,7 +29,7 @@ import com.servoy.j2db.persistence.IPersist;
 public interface IMarkerAttributeContributor
 {
 
-	static final String EXTENSION_ID = Activator.PLUGIN_ID + ".builder.attributeContributor"; //$NON-NLS-1$
+	static final String EXTENSION_ID = Activator.PLUGIN_ID + ".builder.attributeContributor";
 
 	/**
 	 * Contrbutes attributes to given marker that is associated with the given persist.

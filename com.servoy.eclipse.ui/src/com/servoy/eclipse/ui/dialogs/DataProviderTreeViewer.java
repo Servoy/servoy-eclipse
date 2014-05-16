@@ -88,14 +88,14 @@ import com.servoy.j2db.util.Utils;
 
 public class DataProviderTreeViewer extends FilteredTreeViewer
 {
-	public static final String CALCULATIONS = "calculations"; //$NON-NLS-1$
-	public static final String FORM_VARIABLES = "form variables"; //$NON-NLS-1$
-	public static final String SCOPE_VARIABLES = "scope variables"; //$NON-NLS-1$
-	public static final String SCOPE_METHODS = "scope methods"; //$NON-NLS-1$
-	public static final String AGGREGATES = "aggregates"; //$NON-NLS-1$
-	public static final String RELATIONS = "relations"; //$NON-NLS-1$
-	public static final String VARIABLES = "variables"; //$NON-NLS-1$
-	public static final String METHODS = "methods"; //$NON-NLS-1$
+	public static final String CALCULATIONS = "calculations";
+	public static final String FORM_VARIABLES = "form variables";
+	public static final String SCOPE_VARIABLES = "scope variables";
+	public static final String SCOPE_METHODS = "scope methods";
+	public static final String AGGREGATES = "aggregates";
+	public static final String RELATIONS = "relations";
+	public static final String VARIABLES = "variables";
+	public static final String METHODS = "methods";
 	public static final Object[] EMPTY_ARRAY = new Object[0];
 
 	public DataProviderTreeViewer(Composite parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, DataProviderOptions input,
@@ -895,7 +895,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		@Override
 		public String getText(Object value)
 		{
-			String append = ""; //$NON-NLS-1$
+			String append = "";
 			if (selectedElements != null && selectedElements.contains(value))
 			{
 				append += getDataProviderTypeByValue(value);
@@ -914,21 +914,21 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 			{
 				// use dataprovider type as defined by column converter
 				ComponentFormat componentFormat = ComponentFormat.getComponentFormat(null, (Column)value, Activator.getDefault().getDesignClient());
-				return " - " + Column.getDisplayTypeString(componentFormat.dpType); //$NON-NLS-1$
+				return " - " + Column.getDisplayTypeString(componentFormat.dpType);
 			}
 			if (value instanceof ScriptVariable)
 			{
-				return " - " + Column.getDisplayTypeString(((ScriptVariable)value).getVariableType()); //$NON-NLS-1$
+				return " - " + Column.getDisplayTypeString(((ScriptVariable)value).getVariableType());
 			}
 			if (value instanceof ScriptCalculation)
 			{
-				return " - " + ((ScriptCalculation)value).getTypeAsString(); //$NON-NLS-1$
+				return " - " + ((ScriptCalculation)value).getTypeAsString();
 			}
 			if (value instanceof AggregateVariable)
 			{
-				return " - " + Column.getDisplayTypeString(((AggregateVariable)value).getDataProviderType()); //$NON-NLS-1$
+				return " - " + Column.getDisplayTypeString(((AggregateVariable)value).getDataProviderType());
 			}
-			return "";//$NON-NLS-1$
+			return "";
 		}
 
 		protected String getDataProviderDialogText(Object value)

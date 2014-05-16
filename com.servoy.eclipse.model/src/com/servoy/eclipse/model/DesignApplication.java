@@ -166,7 +166,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	 */
 	public String getClientOSName()
 	{
-		return System.getProperty("os.name"); //$NON-NLS-1$
+		return System.getProperty("os.name");
 	}
 
 	public boolean isInDeveloper()
@@ -519,7 +519,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 
 	private String getI18NMessage(String key, Object[] args, Properties messages, ResourceBundle jar, Locale loc)
 	{
-		if (key.startsWith("i18n:")) //$NON-NLS-1$
+		if (key.startsWith("i18n:"))
 		{
 			key = key.substring(5);
 		}
@@ -542,7 +542,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 			}
 			message = messages.getProperty(key);
 			if (message == null) return '!' + key + '!';
-			message = Utils.stringReplace(message, "'", "''"); //$NON-NLS-1$ //$NON-NLS-2$
+			message = Utils.stringReplace(message, "'", "''");
 			MessageFormat mf = new MessageFormat(message);
 			mf.setLocale(loc);
 			return mf.format(args);
@@ -553,7 +553,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		}
 		catch (Exception e)
 		{
-			return '!' + key + "!,txt:" + message + ", error:" + e.getMessage(); //$NON-NLS-1$ //$NON-NLS-2$
+			return '!' + key + "!,txt:" + message + ", error:" + e.getMessage();
 		}
 	}
 
@@ -642,7 +642,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	{
 		if (pageFormat == null)
 		{
-			pageFormat = PersistHelper.createPageFormat(getSettings().getProperty("pageformat")); //$NON-NLS-1$
+			pageFormat = PersistHelper.createPageFormat(getSettings().getProperty("pageformat"));
 			if (pageFormat == null)
 			{
 				pageFormat = new PageFormat();

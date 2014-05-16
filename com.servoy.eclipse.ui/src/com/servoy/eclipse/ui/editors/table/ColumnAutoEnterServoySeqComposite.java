@@ -138,11 +138,11 @@ public class ColumnAutoEnterServoySeqComposite extends Composite implements Sele
 					{
 						sq = sp.getNextSequence(column, false);
 					}
-					nextValueText.setText(sq == null ? "" : sq.toString()); //$NON-NLS-1$
+					nextValueText.setText(sq == null ? "" : sq.toString());
 					if (!(sp instanceof IColumnInfoBasedSequenceProvider))
 					{
-						nextValueText.setToolTipText("Developer uses 'select max(pk)' to get a new pk, so this can't be controlled in the developer"); //$NON-NLS-1$
-						devInfo.setText("Developer uses 'select max(pk)' to get a new pk, so this can't be controlled in the developer"); //$NON-NLS-1$
+						nextValueText.setToolTipText("Developer uses 'select max(pk)' to get a new pk, so this can't be controlled in the developer");
+						devInfo.setText("Developer uses 'select max(pk)' to get a new pk, so this can't be controlled in the developer");
 						updateRepositoryButton.setEnabled(false);
 						refreshFromRepositoryButton.setEnabled(false);
 						calculateFromDataButton.setEnabled(false);
@@ -150,8 +150,8 @@ public class ColumnAutoEnterServoySeqComposite extends Composite implements Sele
 				}
 				else
 				{
-					nextValueText.setText(""); //$NON-NLS-1$
-					ServoyLog.logError("Cannot find server (for next sequence)" + column.getTable().getServerName(), null); //$NON-NLS-1$
+					nextValueText.setText("");
+					ServoyLog.logError("Cannot find server (for next sequence)" + column.getTable().getServerName(), null);
 				}
 			}
 			catch (RemoteException e)

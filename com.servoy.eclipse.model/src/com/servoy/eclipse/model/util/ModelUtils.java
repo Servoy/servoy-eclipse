@@ -76,7 +76,7 @@ import com.servoy.j2db.util.StringComparator;
 public class ModelUtils
 {
 
-	public static final String ONLY_WHEN_UI_DISABLED_ATTRIBUTE_NAME = "whenUIDisabledStateIs"; //$NON-NLS-1$
+	public static final String ONLY_WHEN_UI_DISABLED_ATTRIBUTE_NAME = "whenUIDisabledStateIs";
 
 	public static String getTokenValue(Object[] value, String delim)
 	{
@@ -105,7 +105,7 @@ public class ModelUtils
 		}
 		if (persist instanceof Form)
 		{
-			return "form"; //$NON-NLS-1$
+			return "form";
 		}
 		if (persist instanceof Part)
 		{
@@ -230,10 +230,10 @@ public class ModelUtils
 	{
 		List<String> styleClasses = new ArrayList<String>();
 		boolean matchedFormPrefix = false;
-		String formPrefix = "form"; //$NON-NLS-1$
+		String formPrefix = "form";
 		if (formStyleClass != null)
 		{
-			formPrefix += "." + formStyleClass; //$NON-NLS-1$
+			formPrefix += "." + formStyleClass;
 		}
 
 		if (!lookupName.equals("form"))
@@ -243,7 +243,7 @@ public class ModelUtils
 			List<String> selectors = styleSheet.getStyleNames();
 			for (String selector : selectors)
 			{
-				String[] styleParts = selector.split("\\p{Space}+?"); //$NON-NLS-1$
+				String[] styleParts = selector.split("\\p{Space}+?");
 				if (styleParts.length <= 2 && (styleParts.length == 1 || styleParts[0].equals(formPrefix)))
 				{
 					String styleName = styleParts[styleParts.length - 1];
@@ -264,7 +264,7 @@ public class ModelUtils
 			}
 			if (!styleExist && (lookupName.equals("check") || lookupName.equals("combobox") || lookupName.equals("radio")))
 			{
-				lookupName = "field"; //$NON-NLS-1$
+				lookupName = "field";
 				matchedFormPrefix = matchedFormPrefixField;
 			}
 		}
@@ -272,11 +272,11 @@ public class ModelUtils
 		List<String> selectors = styleSheet.getStyleNames();
 		for (String selector : selectors)
 		{
-			String[] styleParts = selector.split("\\p{Space}+?"); //$NON-NLS-1$
+			String[] styleParts = selector.split("\\p{Space}+?");
 			int stylePartsCount = styleParts.length;
 			String styleName;
 
-			if ("form".equals(lookupName)) //$NON-NLS-1$
+			if ("form".equals(lookupName))
 			{
 				styleName = styleParts[0];
 			}
@@ -417,7 +417,7 @@ public class ModelUtils
 		// but some extension points these use (for example DLTK extension points) will cause them to get loaded; do not allow this!
 		if (ModelUtils.isUIDisabled()) throw new RuntimeException(
 			bundleName != null
-				? "'" + bundleName + "' bundle will not be started as Servoy is started without UI. Please ignore this log message." : "Assertion failed. UI is marked as not running."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				? "'" + bundleName + "' bundle will not be started as Servoy is started without UI. Please ignore this log message." : "Assertion failed. UI is marked as not running.");
 	}
 
 	public static boolean isUIDisabled()
@@ -532,7 +532,7 @@ public class ModelUtils
 					String expectedUIDisabledState = ce.getAttribute(ONLY_WHEN_UI_DISABLED_ATTRIBUTE_NAME);
 					if (expectedUIDisabledState == null || expectedUIDisabledState.equals(Boolean.toString(ModelUtils.isUIDisabled())))
 					{
-						T t = (T)ce.createExecutableExtension("class"); //$NON-NLS-1$
+						T t = (T)ce.createExecutableExtension("class");
 						if (t != null)
 						{
 							ts.add(t);
@@ -557,7 +557,7 @@ public class ModelUtils
 		List<IUnexpectedSituationHandler> handlers = getExtensions(IUnexpectedSituationHandler.EXTENSION_ID);
 		if (handlers.size() == 1) return handlers.get(0);
 
-		throw new RuntimeException("Expected to find exactly one compatible '" + IUnexpectedSituationHandler.EXTENSION_ID + "' extension. Found:\n" + handlers); //$NON-NLS-1$//$NON-NLS-2$
+		throw new RuntimeException("Expected to find exactly one compatible '" + IUnexpectedSituationHandler.EXTENSION_ID + "' extension. Found:\n" + handlers);
 	}
 
 	@SuppressWarnings("unchecked")

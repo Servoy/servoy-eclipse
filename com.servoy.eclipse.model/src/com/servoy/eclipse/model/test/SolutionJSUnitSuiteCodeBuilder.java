@@ -50,15 +50,15 @@ public class SolutionJSUnitSuiteCodeBuilder
 {
 
 	private static final String INVALID_APP_SUITE = "CannotRunJSUnitTests";
-	public static final String TEST_METHOD_PREFIX = "test"; //$NON-NLS-1$
-	public static final String SET_UP_METHOD = "setUp"; //$NON-NLS-1$
-	public static final String TEAR_DOWN_METHOD = "tearDown"; //$NON-NLS-1$
+	public static final String TEST_METHOD_PREFIX = "test";
+	public static final String SET_UP_METHOD = "setUp";
+	public static final String TEAR_DOWN_METHOD = "tearDown";
 
 	// if this is set after a solution test method exits, it will fail that test (so at the end); it can be set by anyone that needs such behavior.
 	// when set it must be an error object; it will get thrown using JS "throw e;" it would be nice if it's a JSUnitError
 	// (+ if a jsunit.failAfterTest object is detected before any test started to run - so before a jsunit value is even set - it will be considered
 	// the same - an error that happened even before tests started to run - and will be reported as such, failing the first test)
-	public static final String FAIL_AFTER_CURRENT_TEST_KEY = "failAfterTest"; //$NON-NLS-1$
+	public static final String FAIL_AFTER_CURRENT_TEST_KEY = "failAfterTest";
 
 	protected boolean initialized = false;
 	protected String code;

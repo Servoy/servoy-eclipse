@@ -69,7 +69,7 @@ public class SolutionContextDelegateLabelProvider extends AbstractPersistContext
 					{
 						return persistSolution.getName() + '.' + baseText;
 					}
-					return baseText + " [" + persistSolution.getName() + ']'; //$NON-NLS-1$
+					return baseText + " [" + persistSolution.getName() + ']';
 				}
 			}
 		}

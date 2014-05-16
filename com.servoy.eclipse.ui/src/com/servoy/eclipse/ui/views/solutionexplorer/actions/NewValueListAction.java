@@ -65,7 +65,7 @@ public class NewValueListAction extends Action implements ISelectionChangedListe
 	{
 		viewer = sev;
 
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("newvaluelist.gif")); //$NON-NLS-1$
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("newvaluelist.gif"));
 		setText("Create valuelist");
 		setToolTipText("Create valuelist");
 	}

@@ -204,7 +204,7 @@ public class ServoyModel extends AbstractServoyModel
 	 */
 	public static final String SERVOY_WORKING_SET_ID = "com.servoy.eclipse.core.ServoyWorkingSet";
 
-	private static final String SERVOY_ACTIVE_PROJECT = "SERVOY_ACTIVE_PROJECT"; //$NON-NLS-1$
+	private static final String SERVOY_ACTIVE_PROJECT = "SERVOY_ACTIVE_PROJECT";
 
 	private final AtomicBoolean activatingProject = new AtomicBoolean(false);
 	private final List<IActiveProjectListener> activeProjectListeners;
@@ -1865,7 +1865,7 @@ public class ServoyModel extends AbstractServoyModel
 		if (persist.getRootObject() != sp.getEditingSolution())
 		{
 			// not in this editing solution, probably in real solution.
-			throw new RepositoryException("Object to revert out of sync"); //$NON-NLS-1$
+			throw new RepositoryException("Object to revert out of sync");
 		}
 
 		final List<IPersist> changed = new ArrayList<IPersist>();
@@ -3426,7 +3426,7 @@ public class ServoyModel extends AbstractServoyModel
 					IAdaptable[] projects = getAllReferencedProjectsOfActiveProject();
 
 					IWorkingSetManager workingSetManager = PlatformUI.getWorkbench().getWorkingSetManager();
-					IWorkingSet ws = workingSetManager.getWorkingSet("Servoy Active Solution"); //$NON-NLS-1$
+					IWorkingSet ws = workingSetManager.getWorkingSet("Servoy Active Solution");
 					if (ws == null)
 					{
 						ws = workingSetManager.createWorkingSet("Servoy Active Solution", projects);

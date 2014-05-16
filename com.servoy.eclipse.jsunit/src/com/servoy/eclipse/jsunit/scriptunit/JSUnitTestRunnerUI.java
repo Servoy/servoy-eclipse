@@ -83,10 +83,10 @@ public class JSUnitTestRunnerUI extends AbstractTestRunnerUI implements ITestEle
 
 	public static final String LAUNCH_CONFIGURATION_FINDER_EXTENSION = "com.servoy.eclipse.jsunit.launchConfigurationProvider";
 
-	protected static final Pattern STACK_FRAME_PATTERN = Pattern.compile("(.*)\\.method\\(file:(\\d*).*"); //$NON-NLS-1$
+	protected static final Pattern STACK_FRAME_PATTERN = Pattern.compile("(.*)\\.method\\(file:(\\d*).*");
 
 	// lines like "scopes.globals.testRoundingFailure1(f:0)"
-	protected static final Pattern MOBILE_STACK_FRAME_PATTERN = Pattern.compile("(?:(?:(.*)\\.(.*)\\.(.*))|javascript\\..*)?\\((.+):(\\d+)\\)"); //$NON-NLS-1$
+	protected static final Pattern MOBILE_STACK_FRAME_PATTERN = Pattern.compile("(?:(?:(.*)\\.(.*)\\.(.*))|javascript\\..*)?\\((.+):(\\d+)\\)");
 
 	protected static final String FORM_TEST_ELEMENT_PATTERN = "Form '([\\w\\s]+)' tests";
 
@@ -481,7 +481,7 @@ public class JSUnitTestRunnerUI extends AbstractTestRunnerUI implements ITestEle
 							{
 								try
 								{
-									provider = (ITestLaunchConfigurationProvider)ce.createExecutableExtension("class"); //$NON-NLS-1$
+									provider = (ITestLaunchConfigurationProvider)ce.createExecutableExtension("class");
 									launchConfiguration = provider.findOrCreateLaunchConfiguration(target, launchMode, launchConfigurationType, launch);
 									if (launchConfiguration != null) break;
 								}

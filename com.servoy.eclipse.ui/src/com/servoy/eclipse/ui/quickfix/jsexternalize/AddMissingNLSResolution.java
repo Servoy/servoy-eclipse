@@ -78,7 +78,7 @@ public class AddMissingNLSResolution extends TextFileEditResolution
 			StringBuilder sb = new StringBuilder(lastIndex - firstIndex + 50);
 			sb.append("<html><body>");
 			sb.append(contents.substring(firstIndex, lastIndex));
-			sb.append(" <b>//$NON-NLS-1$</b></body></html>");
+			sb.append(" <b></b></body></html>");
 			return sb.toString();
 		}
 		catch (ModelException e)
@@ -107,7 +107,7 @@ public class AddMissingNLSResolution extends TextFileEditResolution
 					int nodeOffset = node.getRange().getOffset();
 					if (nodeOffset <= problemStartIdx && problemStartIdx < nodeOffset + node.getRange().getLength())
 					{
-						InsertEdit nonNLSTextEdit = new InsertEdit(lineEndIdx + 1, " //$NON-NLS-" + stringLiteralIdx + "$"); //$NON-NLS-1$ 
+						InsertEdit nonNLSTextEdit = new InsertEdit(lineEndIdx + 1, " //$NON-NLS-" + stringLiteralIdx + "$");
 						TextFileEditUtil.applyTextEdit(scriptFile, nonNLSTextEdit);
 						return false;
 					}

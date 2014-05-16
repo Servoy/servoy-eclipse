@@ -95,7 +95,7 @@ import com.servoy.j2db.util.xmlxport.IXMLExporter;
 public class ExportSolutionWizard extends Wizard implements IExportWizard
 {
 
-	private static final String DB_DOWN_WARNING = "Error markers will be ignored because the DB seems to be offline (.dbi files will be used instead)."; //$NON-NLS-1$
+	private static final String DB_DOWN_WARNING = "Error markers will be ignored because the DB seems to be offline (.dbi files will be used instead).";
 
 	private Solution activeSolution;
 	private ExportSolutionModel exportModel;
@@ -111,12 +111,12 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 	public ExportSolutionWizard()
 	{
 		super();
-		setWindowTitle("Solution Export"); //$NON-NLS-1$
+		setWindowTitle("Solution Export");
 		IDialogSettings workbenchSettings = Activator.getDefault().getDialogSettings();
-		IDialogSettings section = workbenchSettings.getSection("SolutionExportWizard");//$NON-NLS-1$
+		IDialogSettings section = workbenchSettings.getSection("SolutionExportWizard");
 		if (section == null)
 		{
-			section = workbenchSettings.addNewSection("SolutionExportWizard");//$NON-NLS-1$
+			section = workbenchSettings.addNewSection("SolutionExportWizard");
 		}
 		setDialogSettings(section);
 		workspace = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
@@ -127,16 +127,16 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 	public boolean performFinish()
 	{
 		EditorUtil.saveDirtyEditors(getShell(), true);
-		getDialogSettings().put("initialFileName", exportModel.getFileName()); //$NON-NLS-1$
+		getDialogSettings().put("initialFileName", exportModel.getFileName());
 
-		WorkspaceJob exportJob = new WorkspaceJob("Exporting solution '" + activeSolution.getName() + "'") //$NON-NLS-2$
+		WorkspaceJob exportJob = new WorkspaceJob("Exporting solution '" + activeSolution.getName() + "'") 
 		{
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 			{
 				int totalDuration = IProgressMonitor.UNKNOWN;
 				if (exportModel.getModulesToExport() != null) totalDuration = (int)(1.42 * exportModel.getModulesToExport().length); // make the main export be 70% of the time, leave the rest for sample data
-				monitor.beginTask("Exporting solution", totalDuration); //$NON-NLS-1$
+				monitor.beginTask("Exporting solution", totalDuration);
 
 				AbstractRepository rep = (AbstractRepository)ServoyModel.getDeveloperRepository();
 
@@ -195,8 +195,8 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 						{
 							public void run()
 							{
-								MessageDialog.openError(Display.getDefault().getActiveShell(), "Solution exported with errors", //$NON-NLS-1$
-									"Solution has been exported with errors. This may prevent the solution from functioning well.\nOnly minimal database info has been exported."); //$NON-NLS-1$
+								MessageDialog.openError(Display.getDefault().getActiveShell(), "Solution exported with errors",
+									"Solution has been exported with errors. This may prevent the solution from functioning well.\nOnly minimal database info has been exported.");
 							}
 						});
 					}
@@ -210,12 +210,12 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 				}
 				catch (JSONException jsonex)
 				{
-					handleExportException(jsonex, "Bad JSON file structure.", monitor); //$NON-NLS-1$
+					handleExportException(jsonex, "Bad JSON file structure.", monitor);
 					return Status.CANCEL_STATUS;
 				}
 				catch (IOException ioex)
 				{
-					handleExportException(ioex, "Exception getting files.", monitor); //$NON-NLS-1$
+					handleExportException(ioex, "Exception getting files.", monitor);
 					return Status.CANCEL_STATUS;
 				}
 
@@ -230,7 +230,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 	private void handleExportException(final Exception ex, final String extraMsg, IProgressMonitor monitor)
 	{
-		ServoyLog.logError("Failed to export solution. " + (extraMsg == null ? "" : extraMsg), ex); //$NON-NLS-1$ //$NON-NLS-2$
+		ServoyLog.logError("Failed to export solution. " + (extraMsg == null ? "" : extraMsg), ex);
 		monitor.done();
 		Display.getDefault().syncExec(new Runnable()
 		{
@@ -242,7 +242,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 				else message = ex.getMessage();
 				if (message == null) message = ex.toString();
 				MessageDialog.openError(Display.getDefault().getActiveShell(),
-					"Failed to export the active solution", extraMsg == null ? message : (extraMsg + '\n' + message)); //$NON-NLS-1$
+					"Failed to export the active solution", extraMsg == null ? message : (extraMsg + '\n' + message));
 			}
 		});
 	}
@@ -258,12 +258,12 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		{
 			ServoyModelManager.getServoyModelManager().getServoyModel();
 			String dir = ServoyModel.getSettings().getProperty(J2DBGlobals.SERVOY_APPLICATION_SERVER_DIRECTORY_KEY);
-			initialFileName = new File(dir, "solutions/" + activeSolution.getName() + ".servoy").getAbsolutePath(); //$NON-NLS-1$ //$NON-NLS-2$
+			initialFileName = new File(dir, "solutions/" + activeSolution.getName() + ".servoy").getAbsolutePath();
 		}
 		else
 		{
 			// use the previous export directory, with the name of the active solution
-			initialFileName = new File(new File(initialFileName).getParent(), activeSolution.getName() + ".servoy").getAbsolutePath(); //$NON-NLS-1$
+			initialFileName = new File(new File(initialFileName).getParent(), activeSolution.getName() + ".servoy").getAbsolutePath();
 		}
 		exportModel.setFileName(initialFileName);
 
@@ -351,9 +351,9 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 		public ExportConfirmationPage()
 		{
-			super("export confirmation page"); //$NON-NLS-1$
-			setTitle("Export solution confirmation"); //$NON-NLS-1$
-			setErrorMessage("One or more databases used in the solution are unreacheable"); //$NON-NLS-1$
+			super("export confirmation page");
+			setTitle("Export solution confirmation");
+			setErrorMessage("One or more databases used in the solution are unreacheable");
 		}
 
 		public void createControl(Composite parent)
@@ -372,7 +372,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			gridData.horizontalSpan = 1;
 			message.setLayoutData(gridData);
 			message.setEditable(false);
-			message.setText("Are you sure you want to proceed with the export?  \nYou can continue to export based on dbi(database information) files only."); //$NON-NLS-1$
+			message.setText("Are you sure you want to proceed with the export?  \nYou can continue to export based on dbi(database information) files only.");
 
 			setControl(container);
 			setPageComplete(true);
@@ -394,9 +394,9 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 		public FileSelectionPage()
 		{
-			super("page1"); //$NON-NLS-1$
-			setTitle("Choose the destination file"); //$NON-NLS-1$
-			setDescription("Select the file where you want your solution exported to"); //$NON-NLS-1$
+			super("page1");
+			setTitle("Choose the destination file");
+			setDescription("Select the file where you want your solution exported to");
 			projectProblemsType = BuilderUtils.getMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
 			if (projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS)
 			{
@@ -405,12 +405,12 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 					projectProblemsType = BuilderUtils.HAS_WARNING_MARKERS;
 					setMessage(DB_DOWN_WARNING, IMessageProvider.WARNING);
 				}
-				else setErrorMessage("Errors in the solution will prevent it from functioning well. Please solve errors (problems view) first."); //$NON-NLS-1$
+				else setErrorMessage("Errors in the solution will prevent it from functioning well. Please solve errors (problems view) first.");
 			}
 			else if (projectProblemsType == BuilderUtils.HAS_WARNING_MARKERS)
 			{
 				setMessage(
-					"Warnings in the solution may prevent it from functioning well. You may want to solve warnings (problems view) first.", IMessageProvider.WARNING); //$NON-NLS-1$
+					"Warnings in the solution may prevent it from functioning well. You may want to solve warnings (problems view) first.", IMessageProvider.WARNING);
 			}
 		}
 
@@ -427,7 +427,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			if (exportModel.getFileName() != null) fileNameText.setText(exportModel.getFileName());
 
 			browseButton = new Button(composite, SWT.PUSH);
-			browseButton.setText("Browse..."); //$NON-NLS-1$
+			browseButton.setText("Browse...");
 			browseButton.addListener(SWT.Selection, this);
 
 			setControl(composite);
@@ -458,7 +458,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 					{
 						dlg.setFilterPath(f.getParent());
 						dlg.setFileName(f.getName());
-						String[] extensions = { "*.servoy" }; //$NON-NLS-1$
+						String[] extensions = { "*.servoy" };
 						dlg.setFilterExtensions(extensions);
 					}
 				}
@@ -492,13 +492,13 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 				{
 					if (f.isDirectory())
 					{
-						if (!messageSet) setMessage("Specified path points to an existing folder.", IMessageProvider.WARNING); //$NON-NLS-1$
+						if (!messageSet) setMessage("Specified path points to an existing folder.", IMessageProvider.WARNING);
 						result = false;
 						messageSet = true;
 					}
 					else
 					{
-						if (!messageSet) setMessage("Specified path points to an existing file.", IMessageProvider.INFORMATION); //$NON-NLS-1$
+						if (!messageSet) setMessage("Specified path points to an existing file.", IMessageProvider.INFORMATION);
 						messageSet = true;
 					}
 				}
@@ -521,8 +521,8 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 				if (!f.getAbsolutePath().equals(exportModel.getUserAcknowledgedFileToOverwrite()))
 				{
 					MessageBox msg = new MessageBox(this.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO | SWT.CANCEL);
-					msg.setText("File already exists"); //$NON-NLS-1$
-					msg.setMessage("The file you selected already exists on disk. Do you want to overwrite it?"); //$NON-NLS-1$
+					msg.setText("File already exists");
+					msg.setMessage("The file you selected already exists on disk. Do you want to overwrite it?");
 					if (msg.open() == SWT.YES)
 					{
 						exportModel.setUserAcknowledgedFileToOverwrite(f.getAbsolutePath());
@@ -566,9 +566,9 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 		public ExportOptionsPage()
 		{
-			super("page2"); //$NON-NLS-1$
-			setTitle("Choose export options"); //$NON-NLS-1$
-			setDescription("Specify the options for your export"); //$NON-NLS-1$
+			super("page2");
+			setTitle("Choose export options");
+			setDescription("Specify the options for your export");
 
 			ServoyModel model = ServoyModelManager.getServoyModelManager().getServoyModel();
 			resourcesProjectProblemsType = model.getActiveResourcesProject() != null
@@ -593,7 +593,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 				exportUsingDbiFileInfoOnlyButton.getSelection())
 			{
 				// if this is selected ignore error markers (to allow exporting out-of-sync dbi files) // TODO limit marker check to all but dbi? (the same must happen in command line exporter then)
-				setMessage("Error markers will be ignored in resources project to allow .dbi based export.", IMessageProvider.WARNING); //$NON-NLS-1$
+				setMessage("Error markers will be ignored in resources project to allow .dbi based export.", IMessageProvider.WARNING);
 			}
 			else
 			{
@@ -603,12 +603,12 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 					{
 						setMessage(DB_DOWN_WARNING, IMessageProvider.WARNING);
 					}
-					else setErrorMessage("Errors in the resources project will make the solution misbehave. Please solve errors (problems view) first."); //$NON-NLS-1$
+					else setErrorMessage("Errors in the resources project will make the solution misbehave. Please solve errors (problems view) first.");
 				}
 				else if (resourcesProjectProblemsType == BuilderUtils.HAS_WARNING_MARKERS)
 				{
 					setMessage(
-						"Warnings in the resources project may make the solution misbehave. You may want to solve warnings (problems view) first.", IMessageProvider.WARNING); //$NON-NLS-1$
+						"Warnings in the resources project may make the solution misbehave. You may want to solve warnings (problems view) first.", IMessageProvider.WARNING);
 				}
 			}
 			if (isCurrentPage()) getWizard().getContainer().updateButtons();
@@ -621,22 +621,22 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			composite.setLayout(gridLayout);
 
 			protectWithPasswordButton = new Button(composite, SWT.CHECK);
-			protectWithPasswordButton.setText("Protect solution with password"); //$NON-NLS-1$
+			protectWithPasswordButton.setText("Protect solution with password");
 			protectWithPasswordButton.setSelection(exportModel.isProtectWithPassword());
 			protectWithPasswordButton.addListener(SWT.Selection, this);
 
 			exportReferencedModulesButton = new Button(composite, SWT.CHECK);
-			exportReferencedModulesButton.setText("Export referenced modules"); //$NON-NLS-1$
+			exportReferencedModulesButton.setText("Export referenced modules");
 			exportReferencedModulesButton.setSelection(exportModel.isExportReferencedModules());
 			exportReferencedModulesButton.addListener(SWT.Selection, this);
 
 			exportAllTablesFromReferencedServers = new Button(composite, SWT.CHECK);
-			exportAllTablesFromReferencedServers.setText("Export all tables from referenced servers"); //$NON-NLS-1$
+			exportAllTablesFromReferencedServers.setText("Export all tables from referenced servers");
 			exportAllTablesFromReferencedServers.setSelection(exportModel.isExportAllTablesFromReferencedServers());
 			exportAllTablesFromReferencedServers.addListener(SWT.Selection, this);
 
 			exportMetadataTablesButton = new Button(composite, SWT.CHECK);
-			exportMetadataTablesButton.setText("Export metadata tables"); //$NON-NLS-1$ 
+			exportMetadataTablesButton.setText("Export metadata tables");
 			exportMetadataTablesButton.setSelection(exportModel.isExportMetaData());
 			exportMetadataTablesButton.addListener(SWT.Selection, this);
 
@@ -713,17 +713,17 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			textLabel4.setLayoutData(data7);
 
 			exportI18NDataButton = new Button(composite, SWT.CHECK);
-			exportI18NDataButton.setText("Export i18n data"); //$NON-NLS-1$
+			exportI18NDataButton.setText("Export i18n data");
 			exportI18NDataButton.setSelection(exportModel.isExportI18NData());
 			exportI18NDataButton.addListener(SWT.Selection, this);
 
 			exportUsersButton = new Button(composite, SWT.CHECK);
-			exportUsersButton.setText("Export users"); //$NON-NLS-1$
+			exportUsersButton.setText("Export users");
 			exportUsersButton.setSelection(exportModel.isExportUsers());
 			exportUsersButton.addListener(SWT.Selection, this);
 
 			exportUsingDbiFileInfoOnlyButton = new Button(composite, SWT.CHECK);
-			exportUsingDbiFileInfoOnlyButton.setText("Export based on DBI files only"); //$NON-NLS-1$
+			exportUsingDbiFileInfoOnlyButton.setText("Export based on DBI files only");
 			exportUsingDbiFileInfoOnlyButton.addListener(SWT.Selection, this);
 
 			refreshDBIDownFlag(exportModel.isExportReferencedModules() && modulesSelectionPage.hasDBDownErrors());
@@ -740,7 +740,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			}
 			else
 			{
-				exportUsingDbiFileInfoOnlyButton.setText("Export based on DBI files only"); //$NON-NLS-1$
+				exportUsingDbiFileInfoOnlyButton.setText("Export based on DBI files only");
 			}
 
 			exportSampleDataButton.setEnabled(!dbiDown);
@@ -757,11 +757,11 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			checkMetadataTablesButton.setSelection(dbiDown ? false : exportModel.isExportMetaData());
 			if (dbiDown)
 			{
-				checkMetadataTablesButton.setText("Check metadata tables (one or more used databases is unreacheable)"); //$NON-NLS-1$ 
+				checkMetadataTablesButton.setText("Check metadata tables (one or more used databases is unreacheable)");
 			}
 			else
 			{
-				checkMetadataTablesButton.setText("Check metadata tables"); //$NON-NLS-1$ 
+				checkMetadataTablesButton.setText("Check metadata tables");
 			}
 		}
 
@@ -836,9 +836,9 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 		protected ModulesSelectionPage()
 		{
-			super("page3"); //$NON-NLS-1$
-			setTitle("Choose modules to export"); //$NON-NLS-1$
-			setDescription("Select additional modules that you want to have exported too"); //$NON-NLS-1$
+			super("page3");
+			setTitle("Choose modules to export");
+			setDescription("Select additional modules that you want to have exported too");
 		}
 
 		public void createControl(Composite parent)
@@ -857,7 +857,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			}
 			catch (Exception e)
 			{
-				Debug.error("Failed to retrieve referenced modules for solution.", e); //$NON-NLS-1$
+				Debug.error("Failed to retrieve referenced modules for solution.", e);
 			}
 			Arrays.sort(moduleNames);
 			final String[] moduleNamesFinal = moduleNames;
@@ -928,7 +928,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			else if (projectProblemsType == BuilderUtils.HAS_WARNING_MARKERS)
 			{
 				setMessage(
-					"There are warnings in the modules that may prevent the solution from functioning well. You may want to solve warnings (problems view) first.", IMessageProvider.WARNING); //$NON-NLS-1$
+					"There are warnings in the modules that may prevent the solution from functioning well. You may want to solve warnings (problems view) first.", IMessageProvider.WARNING);
 			}
 
 			if (isCurrentPage()) getWizard().getContainer().updateButtons();
@@ -977,9 +977,9 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 		public PasswordPage()
 		{
-			super("page4"); //$NON-NLS-1$
-			setTitle("Choose a password"); //$NON-NLS-1$
-			setDescription("Provide the password that will be used to protect the exported solution"); //$NON-NLS-1$
+			super("page4");
+			setTitle("Choose a password");
+			setDescription("Provide the password that will be used to protect the exported solution");
 		}
 
 		public void createControl(Composite parent)

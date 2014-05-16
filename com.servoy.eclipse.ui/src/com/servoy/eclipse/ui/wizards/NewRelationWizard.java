@@ -55,7 +55,7 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 public class NewRelationWizard extends Wizard implements INewWizard
 {
-	public static final String ID = "com.servoy.eclipse.ui.NewRelationWizard"; //$NON-NLS-1$
+	public static final String ID = "com.servoy.eclipse.ui.NewRelationWizard";
 
 	private RelationNameSolutionPage relationPage;
 	private WizardPage errorPage;
@@ -138,8 +138,8 @@ public class NewRelationWizard extends Wizard implements INewWizard
 		private Combo solutionsCombo;
 		private String[] currentSolutionNames;
 
-		private String selectedSolutionName = ""; //$NON-NLS-1$
-		private String selectedRelationName = ""; //$NON-NLS-1$
+		private String selectedSolutionName = "";
+		private String selectedRelationName = "";
 		private Text relationNameText;
 
 		protected RelationNameSolutionPage(String pageName)

@@ -67,7 +67,7 @@ public abstract class ReviewOperationPage extends WizardPage
 		this.state = state;
 
 		setTitle(pageTitle);
-		setDescription(""); //$NON-NLS-1$
+		setDescription("");
 	}
 
 	public void createControl(Composite parent)
@@ -97,14 +97,14 @@ public abstract class ReviewOperationPage extends WizardPage
 		textInfo.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
 
 //		Label extensionName = new Label(textInfo, SWT.NONE);
-//		extensionName.setText("Name:"); //$NON-NLS-1$
+//		extensionName.setText("Name:");
 //		Text extensionNameText = new Text(textInfo, SWT.READ_ONLY | SWT.BORDER);
 
 //		extensionName.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 //		extensionNameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
 		Label extensionID = new Label(textInfo, SWT.NONE);
-		extensionID.setText("Id"); //$NON-NLS-1$
+		extensionID.setText("Id");
 		Text extensionIDText = new Text(textInfo, SWT.READ_ONLY | SWT.BORDER);
 		extensionIDText.setText(state.extensionID);
 //		extensionIDText.setBackground(state.display.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
@@ -113,7 +113,7 @@ public abstract class ReviewOperationPage extends WizardPage
 		extensionIDText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		Label version = new Label(textInfo, SWT.NONE);
-		version.setText("Version"); //$NON-NLS-1$
+		version.setText("Version");
 		Text versionText = new Text(textInfo, SWT.READ_ONLY | SWT.BORDER);
 		versionText.setText(state.version);
 //		versionText.setBackground(state.display.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
@@ -122,7 +122,7 @@ public abstract class ReviewOperationPage extends WizardPage
 		versionText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		productUrl = new Label(textInfo, SWT.NONE);
-		productUrl.setText("Product URL"); //$NON-NLS-1$
+		productUrl.setText("Product URL");
 		productUrlLink = new Link(textInfo, SWT.NONE);
 		productUrlLink.addListener(SWT.Selection, new Listener()
 		{
@@ -153,7 +153,7 @@ public abstract class ReviewOperationPage extends WizardPage
 		descriptionComposite.setExpandHorizontal(true);
 		descriptionComposite.setMinWidth(10);
 		descriptionText = new Label(descriptionComposite, SWT.WRAP);
-		descriptionText.setText(""); //$NON-NLS-1$
+		descriptionText.setText("");
 		descriptionComposite.setContent(descriptionText);
 
 		// layout the page
@@ -188,7 +188,7 @@ public abstract class ReviewOperationPage extends WizardPage
 	{
 		if (afterInitialLayout)
 		{
-			descriptionText.setText(text.replace("\r\n", "\n").replace("\n", System.getProperty("line.separator"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			descriptionText.setText(text.replace("\r\n", "\n").replace("\n", System.getProperty("line.separator")));
 			descriptionText.setSize(descriptionText.computeSize(descriptionText.getParent().getSize().x, SWT.DEFAULT));
 		}
 		else
@@ -197,7 +197,7 @@ public abstract class ReviewOperationPage extends WizardPage
 			{
 				public void run()
 				{
-					descriptionText.setText(text.replace("\r\n", "\n").replace("\n", System.getProperty("line.separator"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					descriptionText.setText(text.replace("\r\n", "\n").replace("\n", System.getProperty("line.separator")));
 					descriptionText.setSize(descriptionText.computeSize(descriptionText.getParent().getSize().x, SWT.DEFAULT));
 				}
 			});

@@ -128,7 +128,7 @@ public class ColorPropertyController extends PropertyDescriptor implements IProp
 			String hexString = Integer.toHexString(awtcolor.getRGB() & 0x00ffffff);
 			if (hexString.length() < 6)
 			{
-				hexString = "000000".substring(hexString.length()) + hexString; //$NON-NLS-1$
+				hexString = "000000".substring(hexString.length()) + hexString;
 			}
 			return '#' + hexString;
 		}

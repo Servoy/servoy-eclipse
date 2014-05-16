@@ -32,7 +32,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
  */
 public class NewModuleWizard extends NewSolutionWizard
 {
-	public static final String ID = "com.servoy.eclipse.ui.NewModuleWizard"; //$NON-NLS-1$
+	public static final String ID = "com.servoy.eclipse.ui.NewModuleWizard";
 
 	/**
 	 * Creates a new wizard.

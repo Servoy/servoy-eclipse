@@ -77,7 +77,7 @@ public class MediaSearch extends AbstractPersistSearch
 	 */
 	public String getLabel()
 	{
-		return "Searching references to media '" + mediaImage.getName() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+		return "Searching references to media '" + mediaImage.getName() + "'";
 	}
 
 

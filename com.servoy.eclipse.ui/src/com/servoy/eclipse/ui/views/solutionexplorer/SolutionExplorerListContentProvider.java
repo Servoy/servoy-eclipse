@@ -184,7 +184,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 	}
 
-	public static final String PLUGIN_PREFIX = "plugins"; //$NON-NLS-1$
+	public static final String PLUGIN_PREFIX = "plugins";
 
 	public static final FieldComparator fieldComparator = new FieldComparator();
 
@@ -502,7 +502,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else if (type == UserNodeType.FORMS)
 			{
-				lm = TreeBuilder.docToNodes(Forms.class, this, UserNodeType.ARRAY, "forms.", null); //$NON-NLS-1$
+				lm = TreeBuilder.docToNodes(Forms.class, this, UserNodeType.ARRAY, "forms.", null);
 			}
 			else if (type == UserNodeType.PLUGINS)
 			{
@@ -547,7 +547,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else if (type == UserNodeType.FORM_ELEMENTS)
 			{
-				lm = TreeBuilder.docToNodes(FormElements.class, this, UserNodeType.ARRAY, "elements.", null); //$NON-NLS-1$
+				lm = TreeBuilder.docToNodes(FormElements.class, this, UserNodeType.ARRAY, "elements.", null);
 			}
 			else if (type == UserNodeType.FORM_ELEMENTS_GROUP)
 			{
@@ -1051,18 +1051,18 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			if (showParamType) methodSignatureBuilder.append(args[i].getType());
 			if ((showParam || showParamType) && args[i].isOptional()) methodSignatureBuilder.append(']');
-			if (i < args.length - 1) methodSignatureBuilder.append(", "); //$NON-NLS-1$
+			if (i < args.length - 1) methodSignatureBuilder.append(", ");
 		}
 		methodSignatureBuilder.append(')');
 
 		if (showReturnType)
 		{
 			String returnType = sm.getRuntimeProperty(IScriptProvider.METHOD_RETURN_TYPE);
-			if (returnType == null) returnType = "void"; //$NON-NLS-1$
-			else if ("*".equals(returnType)) returnType = "Any"; //$NON-NLS-1$ //$NON-NLS-2$
+			if (returnType == null) returnType = "void";
+			else if ("*".equals(returnType)) returnType = "Any";
 			if (showReturnTypeAtEnd)
 			{
-				methodSignatureBuilder.append(" - ").append(returnType); //$NON-NLS-1$
+				methodSignatureBuilder.append(" - ").append(returnType);
 			}
 			else
 			{
@@ -1144,7 +1144,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			ScriptVariable var = (ScriptVariable)persist;
 			SimpleUserNode node = new UserNode(getDisplayName(var, pair.getLeft()), UserNodeType.GLOBAL_VARIABLE_ITEM, var.getDataProviderID(),
-				Column.getDisplayTypeString(var.getDataProviderType()) + " " + var.getDataProviderID(), var, getImageForVariableEncapsulation(var)); //$NON-NLS-1$
+				Column.getDisplayTypeString(var.getDataProviderType()) + " " + var.getDataProviderID(), var, getImageForVariableEncapsulation(var));
 			dlm.add(node);
 		}
 		return dlm.toArray();
@@ -1242,7 +1242,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			ValueList var = (ValueList)persist;
 			SimpleUserNode node = new UserNode(getDisplayName(var, s), UserNodeType.VALUELIST_ITEM, null, var.getName(), var,
-				uiActivator.loadImageFromBundle(PersistEncapsulation.isModuleScope(var, null) ? "valuelist_protected.gif" : "valuelists.gif")); //$NON-NLS-1$ //$NON-NLS-2$
+				uiActivator.loadImageFromBundle(PersistEncapsulation.isModuleScope(var, null) ? "valuelist_protected.gif" : "valuelists.gif"));
 			dlm.add(node);
 		}
 		return dlm.toArray();
@@ -1472,7 +1472,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				constantsElementName = ((Class< ? >)real).getSimpleName() + ".";
 			}
-			ITagResolver resolver = new TagResolver(constantsElementName, (prefix == null ? "%%prefix%%" : prefix)); //$NON-NLS-1$
+			ITagResolver resolver = new TagResolver(constantsElementName, (prefix == null ? "%%prefix%%" : prefix));
 			if (!constantsElementName.endsWith(".")) constantsElementName = constantsElementName + ".";
 			if (elementName.startsWith(PLUGIN_PREFIX))
 			{
@@ -1508,7 +1508,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 		}
 
-		ITagResolver resolver = new TagResolver(elementName, (prefix == null ? "%%prefix%%" : prefix)); //$NON-NLS-1$
+		ITagResolver resolver = new TagResolver(elementName, (prefix == null ? "%%prefix%%" : prefix));
 		if (!elementName.endsWith(".")) elementName = elementName + ".";
 
 
@@ -1960,7 +1960,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					paramNames = scriptObject.getParameterNames(name);
 				}
 			}
-			return prefix + name + "(" + getPrettyParameterTypesString(paramNames, true) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+			return prefix + name + "(" + getPrettyParameterTypesString(paramNames, true) + ")";
 		}
 
 		/**
@@ -2004,16 +2004,16 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				returnType = getMethodReturnType();
 			}
-			if (tooltip == null) tooltip = ""; //$NON-NLS-1$
+			if (tooltip == null) tooltip = "";
 
-			String tmp = "<html><body><b>" + getReturnTypeString(returnType) + " " + name + "(" + getPrettyParameterTypesString(paramNames, namesOnly) + ")</b>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			if ("".equals(tooltip)) //$NON-NLS-1$
+			String tmp = "<html><body><b>" + getReturnTypeString(returnType) + " " + name + "(" + getPrettyParameterTypesString(paramNames, namesOnly) + ")</b>";
+			if ("".equals(tooltip))
 			{
-				tooltip = tmp + "</body></html>"; //$NON-NLS-1$
+				tooltip = tmp + "</body></html>";
 			}
 			else
 			{
-				tooltip = tmp + "<br><pre>" + tooltip + "</pre></body></html>"; //$NON-NLS-1$ //$NON-NLS-2$
+				tooltip = tmp + "<br><pre>" + tooltip + "</pre></body></html>";
 			}
 			return tooltip;
 		}
@@ -2033,7 +2033,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 		private String getPrettyParameterTypesString(String[] names, boolean namesOnly)
 		{
-			if (parameterTypes.length == 0) return ""; //$NON-NLS-1$
+			if (parameterTypes.length == 0) return "";
 
 			StringBuilder paramTypes = new StringBuilder(32);
 			if (names == null || names.length != parameterTypes.length)
@@ -2047,7 +2047,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						for (int k = 0; k < names.length; k++)
 						{
 							paramTypes.append(names[k]);
-							if (k < names.length - 1) paramTypes.append(", "); //$NON-NLS-1$
+							if (k < names.length - 1) paramTypes.append(", ");
 						}
 					}
 					return paramTypes.toString();
@@ -2159,17 +2159,17 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 				toolTip = Text.processTags(toolTip, resolver);
 			}
-			if (toolTip == null) toolTip = ""; //$NON-NLS-1$
+			if (toolTip == null) toolTip = "";
 
 			Object bp = ijm.getField(name, false);
-			String tmp = ""; //$NON-NLS-1$
+			String tmp = "";
 			if (bp instanceof JavaMembers.BeanProperty)
 			{
-				tmp = "<html><body><b>" + getReturnTypeString(((JavaMembers.BeanProperty)bp).getGetter().getReturnType()) + " " + name + "</b>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				tmp = "<html><body><b>" + getReturnTypeString(((JavaMembers.BeanProperty)bp).getGetter().getReturnType()) + " " + name + "</b>";
 			}
 			else if (bp instanceof Field)
 			{
-				tmp = "<html><body><b>" + DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(((Field)bp).getType()) + " " + name + "</b>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				tmp = "<html><body><b>" + DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(((Field)bp).getType()) + " " + name + "</b>";
 			}
 			else if (bp == null)
 			{
@@ -2177,16 +2177,16 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				bp = ijm.getField(name, true);
 				if (bp instanceof Field)
 				{
-					tmp = "<html><body><b>" + prefix + name + "</b>"; //$NON-NLS-1$ //$NON-NLS-2$
+					tmp = "<html><body><b>" + prefix + name + "</b>";
 				}
 			}
-			if ("".equals(toolTip)) //$NON-NLS-1$
+			if ("".equals(toolTip))
 			{
-				toolTip = tmp + "</body></html>"; //$NON-NLS-1$
+				toolTip = tmp + "</body></html>";
 			}
 			else
 			{
-				toolTip = tmp + "<br><pre>" + toolTip + "</pre></body></html>"; //$NON-NLS-1$ //$NON-NLS-2$
+				toolTip = tmp + "<br><pre>" + toolTip + "</pre></body></html>";
 			}
 			return toolTip;
 		}
@@ -2236,7 +2236,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		StringBuilder sb = new StringBuilder();
 		while (returnType.isArray())
 		{
-			sb.append("[]"); //$NON-NLS-1$
+			sb.append("[]");
 			returnType = returnType.getComponentType();
 		}
 		sb.insert(0, DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(returnType));

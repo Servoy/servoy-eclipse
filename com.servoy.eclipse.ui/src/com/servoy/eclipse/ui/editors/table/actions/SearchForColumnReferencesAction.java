@@ -40,7 +40,7 @@ public class SearchForColumnReferencesAction extends Action implements ISelectio
 
 	public SearchForColumnReferencesAction()
 	{
-		setText("Search for References"); //$NON-NLS-1$
+		setText("Search for References");
 	}
 
 	/*

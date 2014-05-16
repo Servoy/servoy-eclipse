@@ -186,7 +186,7 @@ public class CustomViewportAutoexposeHelper extends CustomViewportHelper impleme
 	@Override
 	public String toString()
 	{
-		return "ViewportAutoexposeHelper for: " + owner; //$NON-NLS-1$
+		return "ViewportAutoexposeHelper for: " + owner;
 	}
 
 }

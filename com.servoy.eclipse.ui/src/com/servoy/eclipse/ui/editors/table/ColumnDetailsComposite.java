@@ -77,7 +77,7 @@ import com.servoy.j2db.util.Debug;
 public class ColumnDetailsComposite extends Composite
 {
 
-	public static final String[] DATE_FORMAT_VALUES = new String[] { "#%", "\u00A4#.00",//first char is currency symbol //$NON-NLS-1$
+	public static final String[] DATE_FORMAT_VALUES = new String[] { "#%", "\u00A4#.00",//first char is currency symbol
 	"dd-MM-yyyy", "dd/MM/yyyy", "MM-dd-yyyy", "MM/dd/yyyy", "dd-MM-yyyy HH:mm:ss", "MM-dd-yyyy hh:mm:ss", "dd-MM-yyyy HH:mm", "MM-dd-yyyy hh:mm", "yyyy-MM-dd HH:mm:ss.S" };
 
 	private DataBindingContext bindingContext;

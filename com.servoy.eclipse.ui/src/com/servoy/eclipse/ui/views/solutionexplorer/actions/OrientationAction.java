@@ -34,16 +34,16 @@ public class OrientationAction extends Action
     
     public OrientationAction(SolutionExplorerView v, int orientation)
     {
-        super("", AS_RADIO_BUTTON); //$NON-NLS-1$
+        super("", AS_RADIO_BUTTON);
         if (orientation == SolutionExplorerView.VIEW_ORIENTATION_HORIZONTAL) {
             setText("Horizontal View Orientation"); 
-            setImageDescriptor(Activator.loadImageDescriptorFromBundle("th_horizontal.gif")); //$NON-NLS-1$
+            setImageDescriptor(Activator.loadImageDescriptorFromBundle("th_horizontal.gif"));
         } else if (orientation == SolutionExplorerView.VIEW_ORIENTATION_VERTICAL) {
             setText("Vertical View Orientation"); 
-            setImageDescriptor(Activator.loadImageDescriptorFromBundle("th_vertical.gif")); //$NON-NLS-1$
+            setImageDescriptor(Activator.loadImageDescriptorFromBundle("th_vertical.gif"));
 		} else if (orientation == SolutionExplorerView.VIEW_ORIENTATION_AUTOMATIC) {
             setText("Automatic View Orientation"); 
-			setImageDescriptor(Activator.loadImageDescriptorFromBundle("th_automatic.gif")); //$NON-NLS-1$
+			setImageDescriptor(Activator.loadImageDescriptorFromBundle("th_automatic.gif"));
         } else {
             Assert.isTrue(false);
         }

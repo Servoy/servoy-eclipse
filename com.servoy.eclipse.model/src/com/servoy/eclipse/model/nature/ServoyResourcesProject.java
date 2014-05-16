@@ -47,7 +47,7 @@ public class ServoyResourcesProject implements IProjectNature
 	/**
 	 * ID of this project nature
 	 */
-	public static final String NATURE_ID = "com.servoy.eclipse.core.ServoyResources"; //$NON-NLS-1$
+	public static final String NATURE_ID = "com.servoy.eclipse.core.ServoyResources";
 
 	private IProject project;
 

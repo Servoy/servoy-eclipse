@@ -78,7 +78,7 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 	private Text groupText;
 	private Composite treeContainer;
 	private Composite tableContainer;
-	public static final String ID = "com.servoy.eclipse.ui.editors.SecurityEditor"; //$NON-NLS-1$
+	public static final String ID = "com.servoy.eclipse.ui.editors.SecurityEditor";
 
 	private boolean disposed = false;
 

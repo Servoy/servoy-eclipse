@@ -61,7 +61,7 @@ public class CopyTableAction extends Action implements ISelectionChangedListener
 	public CopyTableAction(Shell shell)
 	{
 		this.shell = shell;
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("copy_edit.gif")); //$NON-NLS-1$
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("copy_edit.gif"));
 		setText("Copy table");
 		setToolTipText("Copy table");
 	}
@@ -138,7 +138,7 @@ public class CopyTableAction extends Action implements ISelectionChangedListener
 			{
 				if (targetServer.getTable(tableName) != null)
 				{
-					MessageDialog.openError(shell, "Error", "Could not copy table:\nA table with the name '" + tableName + "' already exists in server "); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+					MessageDialog.openError(shell, "Error", "Could not copy table:\nA table with the name '" + tableName + "' already exists in server ");
 				}
 				Table newTable = targetServer.createNewTable(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), selectedTable,
 					tableName);

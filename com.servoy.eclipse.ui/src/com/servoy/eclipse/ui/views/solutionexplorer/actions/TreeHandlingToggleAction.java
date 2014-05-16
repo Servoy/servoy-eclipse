@@ -33,9 +33,9 @@ public class TreeHandlingToggleAction extends Action
 
 	public TreeHandlingToggleAction(SolutionExplorerView solexView, boolean checked)
 	{
-		super("", AS_CHECK_BOX); //$NON-NLS-1$
+		super("", AS_CHECK_BOX);
 		this.solexView = solexView;
-		setText("Show Tree Handling Group In Context Menu"); //$NON-NLS-1$
+		setText("Show Tree Handling Group In Context Menu");
 		setChecked(checked);
 	}
 

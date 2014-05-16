@@ -42,17 +42,17 @@ public class EditorInputFactory implements IElementFactory, IAdapterFactory
 	/**
 	 * Factory id. The workbench plug-in registers a factory by this name with the "org.eclipse.ui.elementFactories" extension point.
 	 */
-	private static final String ID_FACTORY = "com.servoy.eclipse.core.resource.EditorInputFactory"; //$NON-NLS-1$
+	private static final String ID_FACTORY = "com.servoy.eclipse.core.resource.EditorInputFactory";
 
-	private static final String TAG_TYPE = "type"; //$NON-NLS-1$
-	private static final String TYPE_PERSIST = "persist"; //$NON-NLS-1$
-	private static final String TYPE_SERVER = "server"; //$NON-NLS-1$
-	private static final String TYPE_TABLE = "table"; //$NON-NLS-1$
+	private static final String TAG_TYPE = "type";
+	private static final String TYPE_PERSIST = "persist";
+	private static final String TYPE_SERVER = "server";
+	private static final String TYPE_TABLE = "table";
 
-	private static final String TAG_UUID = "uuid"; //$NON-NLS-1$
-	private static final String TAG_NAME = "name"; //$NON-NLS-1$
-	private static final String TAG_SOLUTION_NAME = "solutionName"; //$NON-NLS-1$
-	private static final String TAG_SERVER_NAME = "serverName"; //$NON-NLS-1$
+	private static final String TAG_UUID = "uuid";
+	private static final String TAG_NAME = "name";
+	private static final String TAG_SOLUTION_NAME = "solutionName";
+	private static final String TAG_SERVER_NAME = "serverName";
 
 	/**
 	 * Creates a new factory.

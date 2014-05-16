@@ -129,11 +129,11 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 
 	public String[] getJsUnitJavascriptCode()
 	{
-		log.trace("[.......] Getting javascript library code"); //$NON-NLS-1$
+		log.trace("[.......] Getting javascript library code");
 		String[] libs = new String[3];
 		libs[0] = CodeFinderUtils.getFixedJSUtilScriptFromResource();
 		libs[1] = CodeFinderUtils.getFixedJSUnitScriptFromResource();
-		libs[2] = CodeFinderUtils.getScriptAsStringFromResource("this.JsUnitToJavaLoaded", JSUnitToJavaRunner.class, "JsUnitToJava.js"); //$NON-NLS-1$//$NON-NLS-2$
+		libs[2] = CodeFinderUtils.getScriptAsStringFromResource("this.JsUnitToJavaLoaded", JSUnitToJavaRunner.class, "JsUnitToJava.js");
 		return libs;
 	}
 
@@ -155,8 +155,8 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 					if (staticLaunchMonitor != null && staticLaunchMonitor.isCanceled())
 					{
 						// if the user is in a hurry or not going to wait for "testTreeWaitTimeout" when something went wrong
-						testSuite.setName("Stop requested"); //$NON-NLS-1$
-						unexpectedRunProblemMessage = "Stop requested after " + ((System.currentTimeMillis() - ct) / 1000 + " sec of waiting for the mobile test client to connect... "); //$NON-NLS-1$ //$NON-NLS-2$
+						testSuite.setName("Stop requested");
+						unexpectedRunProblemMessage = "Stop requested after " + ((System.currentTimeMillis() - ct) / 1000 + " sec of waiting for the mobile test client to connect... ");
 						break;
 					}
 				}
@@ -167,12 +167,12 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 			}
 			if (testTree == null && !unexpectedProblemOccurred())
 			{
-				testSuite.setName("Connection problem"); //$NON-NLS-1$
-				unexpectedRunProblemMessage = "Timed out - " + ((System.currentTimeMillis() - ct) / 1000 + " sec - waiting for mobile client to connect... "); //$NON-NLS-1$ //$NON-NLS-2$
+				testSuite.setName("Connection problem");
+				unexpectedRunProblemMessage = "Timed out - " + ((System.currentTimeMillis() - ct) / 1000 + " sec - waiting for mobile client to connect... ");
 			}
 			if (unexpectedProblemOccurred())
 			{
-				if (testSuite.getName() == null) testSuite.setName("Test session failed"); //$NON-NLS-1$
+				if (testSuite.getName() == null) testSuite.setName("Test session failed");
 				testSuite.addTest(new TestCase(getUnexpectedProblemDescription())
 				{
 				});
@@ -188,7 +188,7 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 
 	private String getUnexpectedProblemDescription()
 	{
-		return unexpectedRunProblemMessage != null ? unexpectedRunProblemMessage : (unexpectedRunThrowable != null ? unexpectedRunThrowable.getMessage() : ""); //$NON-NLS-1$
+		return unexpectedRunProblemMessage != null ? unexpectedRunProblemMessage : (unexpectedRunThrowable != null ? unexpectedRunThrowable.getMessage() : "");
 	}
 
 	/**
@@ -199,7 +199,7 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 		junitHandler = new JSUnitMobileTestListenerHandler(result, testList);
 
 		if (testCycleListener != null) testCycleListener.started();
-		else log.info("When starting test run, runStartListener is null (in bridge)."); //$NON-NLS-1$
+		else log.info("When starting test run, runStartListener is null (in bridge).");
 
 		synchronized (runLock)
 		{
@@ -223,7 +223,7 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 							runLock.wait(stopRequestedWait);
 							if (!doneTesting && !unexpectedProblemOccurred())
 							{
-								log.warn("Stop requested; Shutting down server side because client side didn't report as stopped in under " + (stopRequestedWait / 1000) + " seconds."); //$NON-NLS-1$//$NON-NLS-2$
+								log.warn("Stop requested; Shutting down server side because client side didn't report as stopped in under " + (stopRequestedWait / 1000) + " seconds.");
 								break; // end anyway
 							}
 						}
@@ -237,7 +237,7 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 		}
 		showUnexpectedThrowableIfNeeded();
 		if (testCycleListener != null) testCycleListener.finished();
-		log.trace("Test session finished."); //$NON-NLS-1$
+		log.trace("Test session finished.");
 	}
 
 	private void showUnexpectedThrowableIfNeeded()
@@ -262,7 +262,7 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 	@Override
 	public void setFlattenedTestTree(String[] testTree)
 	{
-		log.trace("[.......] setFlattenedTestTree - " + Arrays.asList(testTree).toString()); //$NON-NLS-1$
+		log.trace("[.......] setFlattenedTestTree - " + Arrays.asList(testTree).toString());
 		synchronized (testTreeLock)
 		{
 			this.testTree = testTree;
@@ -272,25 +272,25 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 
 	public void addError(final String testName, final Throwable throwable)
 	{
-		log.trace("[.......] addError - " + testName + "; throwable: " + throwable); //$NON-NLS-1$ //$NON-NLS-2$
+		log.trace("[.......] addError - " + testName + "; throwable: " + throwable);
 		junitHandler.addError(testName, throwable);
 	}
 
 	public void addFailure(final String testName, final Throwable throwable)
 	{
-		log.trace("[.......] addFailure - " + testName + "; throwable: " + throwable); //$NON-NLS-1$ //$NON-NLS-2$
+		log.trace("[.......] addFailure - " + testName + "; throwable: " + throwable);
 		junitHandler.addFailure(testName, throwable);
 	}
 
 	public void startTest(final String testName)
 	{
-		log.trace("[.......] startTest - " + testName); //$NON-NLS-1$
+		log.trace("[.......] startTest - " + testName);
 		junitHandler.startTest(testName);
 	}
 
 	public void endTest(final String testName)
 	{
-		log.trace("[.......] endTest - " + testName); //$NON-NLS-1$
+		log.trace("[.......] endTest - " + testName);
 		junitHandler.endTest(testName);
 	}
 
@@ -302,7 +302,7 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 	@Override
 	public void doneTesting()
 	{
-		log.trace("[.......] DONE TESTING."); //$NON-NLS-1$
+		log.trace("[.......] DONE TESTING.");
 		synchronized (runLock)
 		{
 			doneTesting = true;
@@ -312,7 +312,7 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 
 	public void reportUnexpectedThrowable(String msg, Throwable t)
 	{
-		log.error("[.......] unexpected throwable: ", t); //$NON-NLS-1$
+		log.error("[.......] unexpected throwable: ", t);
 
 		synchronized (runLock)
 		{

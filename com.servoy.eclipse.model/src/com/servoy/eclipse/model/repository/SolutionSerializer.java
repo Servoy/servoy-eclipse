@@ -97,28 +97,28 @@ public class SolutionSerializer
 {
 	public static final int VERSION_38 = 38;
 
-	public static final String FORMS_DIR = "forms"; //$NON-NLS-1$
-	public static final String WORKINGSETS_DIR = "workingsets"; //$NON-NLS-1$
-	public static final String VALUELISTS_DIR = "valuelists"; //$NON-NLS-1$
-	public static final String RELATIONS_DIR = "relations"; //$NON-NLS-1$
+	public static final String FORMS_DIR = "forms";
+	public static final String WORKINGSETS_DIR = "workingsets";
+	public static final String VALUELISTS_DIR = "valuelists";
+	public static final String RELATIONS_DIR = "relations";
 
-	public static final String DATASOURCES_DIR_NAME = "datasources"; //$NON-NLS-1$
+	public static final String DATASOURCES_DIR_NAME = "datasources";
 	public static final int JSON_FILE_EXTENSION_SIZE = 4;
-	public static final String JSON_DEFAULT_FILE_EXTENSION = ".obj"; //$NON-NLS-1$
-	public static final String FORM_FILE_EXTENSION = ".frm"; //$NON-NLS-1$
-	public static final String RELATION_FILE_EXTENSION = ".rel"; //$NON-NLS-1$
-	public static final String VALUELIST_FILE_EXTENSION = ".val"; //$NON-NLS-1$
-	public static final String TABLENODE_FILE_EXTENSION = ".tbl"; //$NON-NLS-1$
-	public static final String JS_FILE_EXTENSION_WITHOUT_DOT = "js"; //$NON-NLS-1$
+	public static final String JSON_DEFAULT_FILE_EXTENSION = ".obj";
+	public static final String FORM_FILE_EXTENSION = ".frm";
+	public static final String RELATION_FILE_EXTENSION = ".rel";
+	public static final String VALUELIST_FILE_EXTENSION = ".val";
+	public static final String TABLENODE_FILE_EXTENSION = ".tbl";
+	public static final String JS_FILE_EXTENSION_WITHOUT_DOT = "js";
 	public static final String JS_FILE_EXTENSION = '.' + JS_FILE_EXTENSION_WITHOUT_DOT;
-	public static final String STYLE_FILE_EXTENSION = ".css"; //$NON-NLS-1$
-	public static final String TEMPLATE_FILE_EXTENSION = ".template"; //$NON-NLS-1$
-	public static final String CALCULATIONS_POSTFIX_WITHOUT_EXT = "_calculations"; //$NON-NLS-1$
+	public static final String STYLE_FILE_EXTENSION = ".css";
+	public static final String TEMPLATE_FILE_EXTENSION = ".template";
+	public static final String CALCULATIONS_POSTFIX_WITHOUT_EXT = "_calculations";
 	public static final String CALCULATIONS_POSTFIX = CALCULATIONS_POSTFIX_WITHOUT_EXT + JS_FILE_EXTENSION;
-	public static final String FOUNDSET_POSTFIX_WITHOUT_EXT = "_entity"; //$NON-NLS-1$
+	public static final String FOUNDSET_POSTFIX_WITHOUT_EXT = "_entity";
 	public static final String FOUNDSET_POSTFIX = FOUNDSET_POSTFIX_WITHOUT_EXT + JS_FILE_EXTENSION;
 	public static final String GLOBALS_FILE = ScriptVariable.GLOBAL_SCOPE + JS_FILE_EXTENSION;
-	public static final String WORKINGSETS_FILE = "workingsets.json"; //$NON-NLS-1$
+	public static final String WORKINGSETS_FILE = "workingsets.json";
 
 	public static boolean isJSONFile(String fileName)
 	{
@@ -180,25 +180,25 @@ public class SolutionSerializer
 		}
 	};
 
-	public static final String SOLUTION_SETTINGS = "solution_settings" + JSON_DEFAULT_FILE_EXTENSION; //$NON-NLS-1$
-	public static final String ROOT_METADATA = "rootmetadata" + JSON_DEFAULT_FILE_EXTENSION; //$NON-NLS-1$
-	public static final String MEDIAS_DIR = "medias"; //$NON-NLS-1$
+	public static final String SOLUTION_SETTINGS = "solution_settings" + JSON_DEFAULT_FILE_EXTENSION;
+	public static final String ROOT_METADATA = "rootmetadata" + JSON_DEFAULT_FILE_EXTENSION;
+	public static final String MEDIAS_DIR = "medias";
 	public static final String MEDIAS_FILE = MEDIAS_DIR + JSON_DEFAULT_FILE_EXTENSION;
-	public static final String FUNCTION_KEYWORD = "function"; //$NON-NLS-1$
-	public static final String VAR_KEYWORD = "var"; //$NON-NLS-1$
-	public static final String SV_COMMENT_START = "/**"; //$NON-NLS-1$
-	public static final String SV_COMMENT_END = "*/"; //$NON-NLS-1$
-	public static final String PROP_ITEMS = "items"; //$NON-NLS-1$
-	public static final String PROP_NAME = "name"; //$NON-NLS-1$
-	public static final String PROP_TYPEID = "typeid"; //$NON-NLS-1$
-	public static final String PROP_MIME_TYPE = "mimeType"; //$NON-NLS-1$
-	public static final String PROP_UUID = "uuid"; //$NON-NLS-1$
-	public static final String PROP_FILE_VERSION = "fileVersion"; //$NON-NLS-1$
-	public static final String PROP_ENCAPSULATION = "encapsulation"; //$NON-NLS-1$
-	public static final String PROP_DEPRECATED = "deprecated"; //$NON-NLS-1$
+	public static final String FUNCTION_KEYWORD = "function";
+	public static final String VAR_KEYWORD = "var";
+	public static final String SV_COMMENT_START = "/**";
+	public static final String SV_COMMENT_END = "*/";
+	public static final String PROP_ITEMS = "items";
+	public static final String PROP_NAME = "name";
+	public static final String PROP_TYPEID = "typeid";
+	public static final String PROP_MIME_TYPE = "mimeType";
+	public static final String PROP_UUID = "uuid";
+	public static final String PROP_FILE_VERSION = "fileVersion";
+	public static final String PROP_ENCAPSULATION = "encapsulation";
+	public static final String PROP_DEPRECATED = "deprecated";
 
-	public static final String PROPERTIESKEY = "@properties="; //$NON-NLS-1$
-	public static final String TYPEKEY = "@type"; //$NON-NLS-1$
+	public static final String PROPERTIESKEY = "@properties=";
+	public static final String TYPEKEY = "@type";
 
 	/**
 	 * 
@@ -248,7 +248,7 @@ public class SolutionSerializer
 			return sb.toString();
 		}
 
-		return ""; //$NON-NLS-1$
+		return "";
 	}
 
 	public static void writePersist(IPersist node, IFileAccess fileAccess, final IDeveloperRepository repository, boolean overwriteExisting,
@@ -303,7 +303,7 @@ public class SolutionSerializer
 						}
 						else
 						{
-							ServoyLog.logWarning("multiple objects found for the same file: " + p + " and " + fileContents + " -- ignoring input", null); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							ServoyLog.logWarning("multiple objects found for the same file: " + p + " and " + fileContents + " -- ignoring input", null);
 						}
 					}
 					return recursive && (!isCompositeWithItems(p) || p.getTypeID() == IRepository.FORMS || p.getTypeID() == IRepository.TABLENODES)
@@ -338,7 +338,7 @@ public class SolutionSerializer
 						}
 						else if (content instanceof CharSequence)
 						{
-							fos.write(content.toString().getBytes("UTF8")); //$NON-NLS-1$
+							fos.write(content.toString().getBytes("UTF8"));
 							if (i < persistArray.length - 1) fos.write('\n');
 						}
 					}
@@ -395,7 +395,7 @@ public class SolutionSerializer
 							}
 							catch (IOException e)
 							{
-								ServoyLog.logError("Could not delete file " + fmedias, e); //$NON-NLS-1$
+								ServoyLog.logError("Could not delete file " + fmedias, e);
 							}
 						}
 					}
@@ -411,13 +411,13 @@ public class SolutionSerializer
 		{
 			Solution s = (Solution)node.getAncestor(IRepository.SOLUTIONS);
 			throw new RepositoryException(
-				"Could not write object " + node + " to workspace directory " + fileAccess.getWorkspaceOSPath(s != null ? s.getName() : null), e); //$NON-NLS-1$ //$NON-NLS-2$
+				"Could not write object " + node + " to workspace directory " + fileAccess.getWorkspaceOSPath(s != null ? s.getName() : null), e);
 		}
 		catch (JSONException e)
 		{
 			Solution s = (Solution)node.getAncestor(IRepository.SOLUTIONS);
 			throw new RepositoryException(
-				"Could not write object " + node + " to workspace directory " + fileAccess.getWorkspaceOSPath(s != null ? s.getName() : null), e); //$NON-NLS-1$ //$NON-NLS-2$
+				"Could not write object " + node + " to workspace directory " + fileAccess.getWorkspaceOSPath(s != null ? s.getName() : null), e);
 		}
 	}
 
@@ -429,8 +429,8 @@ public class SolutionSerializer
 		obj.put(PROP_TYPEID, new Integer(smd.getObjectTypeId()));//just to be sure
 		obj.put(PROP_NAME, smd.getName());
 		obj.put(PROP_FILE_VERSION, AbstractRepository.repository_version);
-		obj.put("solutionType", new Integer(smd.getSolutionType())); //$NON-NLS-1$
-		obj.put("mustAuthenticate", Boolean.valueOf(smd.getMustAuthenticate())); //$NON-NLS-1$
+		obj.put("solutionType", new Integer(smd.getSolutionType()));
+		obj.put("mustAuthenticate", Boolean.valueOf(smd.getMustAuthenticate()));
 		return obj.toString(true);
 	}
 
@@ -536,7 +536,7 @@ public class SolutionSerializer
 		if (persist instanceof AbstractScriptProvider)
 		{
 			String comment = ((AbstractScriptProvider)persist).getRuntimeProperty(IScriptProvider.COMMENT);
-			if ("".equals(comment)) comment = null; //$NON-NLS-1$
+			if ("".equals(comment)) comment = null;
 			if (comment == null)
 			{
 				String declaration = ((AbstractScriptProvider)persist).getDeclaration();
@@ -549,7 +549,7 @@ public class SolutionSerializer
 			}
 			return getCommentImpl(persist, repository, comment, userTemplate);
 		}
-		throw new IllegalArgumentException("Persist must be an ScriptMethod/Calc or Variable " + persist); //$NON-NLS-1$
+		throw new IllegalArgumentException("Persist must be an ScriptMethod/Calc or Variable " + persist);
 	}
 
 	/**
@@ -589,7 +589,7 @@ public class SolutionSerializer
 		}
 		catch (RepositoryException e)
 		{
-			ServoyLog.logError("Error generation json for: " + persist, e); //$NON-NLS-1$
+			ServoyLog.logError("Error generation json for: " + persist, e);
 		}
 		return null;
 	}
@@ -627,7 +627,7 @@ public class SolutionSerializer
 					if (lineEnd == -1)
 					{
 						// else insert after comment start
-						lineEnd = sb.indexOf("\n", sb.indexOf(SV_COMMENT_START)); //$NON-NLS-1$
+						lineEnd = sb.indexOf("\n", sb.indexOf(SV_COMMENT_START));
 					}
 					sb.insert(lineEnd, "\n * " + TYPEKEY + " {" + argumentType.getName() + "}\n *");
 				}
@@ -672,7 +672,7 @@ public class SolutionSerializer
 			}
 			catch (RepositoryException e)
 			{
-				ServoyLog.logError("Error generation json for: " + persist, e); //$NON-NLS-1$
+				ServoyLog.logError("Error generation json for: " + persist, e);
 				return null;
 			}
 
@@ -702,9 +702,9 @@ public class SolutionSerializer
 					else
 					{
 						generateDefaultJSDoc(obj, sb, userTemplate, abstractScriptProvider);
-						sb.append("function "); //$NON-NLS-1$
+						sb.append("function ");
 						sb.append(abstractScriptProvider.getName());
-						sb.append("()\n{\n}\n"); //$NON-NLS-1$
+						sb.append("()\n{\n}\n");
 					}
 				}
 				else if (persist instanceof ScriptVariable)
@@ -735,23 +735,23 @@ public class SolutionSerializer
 					{
 						if (val == null)
 						{
-							val = "''"; // to keep same behavior //$NON-NLS-1$
+							val = "''"; // to keep same behavior
 						}
 					}
 					else if (type == IColumnTypes.NUMBER)
 					{
 						if (val != null)
 						{
-							val = val.replace(",", "."); // you cannot have comma as decimal separator inside JS code  //$NON-NLS-1$ //$NON-NLS-2$
+							val = val.replace(",", "."); // you cannot have comma as decimal separator inside JS code
 						}
 					}
 					if (val != null)
 					{
-						sb.append(" = "); //$NON-NLS-1$
-						if ("now".equals(val)) val = "new Date()";//to keep same behavior //$NON-NLS-1$ //$NON-NLS-2$
+						sb.append(" = ");
+						if ("now".equals(val)) val = "new Date()";//to keep same behavior
 						sb.append(val);
 					}
-					sb.append(";\n"); //$NON-NLS-1$
+					sb.append(";\n");
 				}
 			}
 			else
@@ -776,7 +776,7 @@ public class SolutionSerializer
 			int index = sb.lastIndexOf(PROPERTIESKEY, endComment);
 			if (index != -1)
 			{
-				int lineEnd = sb.indexOf("\n", index); //$NON-NLS-1$
+				int lineEnd = sb.indexOf("\n", index);
 				lineEnd = lineEnd < endComment ? lineEnd : endComment;
 				sb.replace(index + PROPERTIESKEY.length(), lineEnd, obj.toString(false));
 			}
@@ -792,7 +792,7 @@ public class SolutionSerializer
 						endComment += params.length() + 4;
 					}
 				}
-				sb.insert(endComment, "*\n * " + PROPERTIESKEY + obj.toString(false) + "\n "); //$NON-NLS-1$ //$NON-NLS-2$
+				sb.insert(endComment, "*\n * " + PROPERTIESKEY + obj.toString(false) + "\n ");
 
 			}
 		}
@@ -818,9 +818,9 @@ public class SolutionSerializer
 		{
 			for (String line : userTemplate.split("\n"))
 			{
-				sb.append(" * ").append(line).append('\n'); //$NON-NLS-1$ 
+				sb.append(" * ").append(line).append('\n');
 			}
-			sb.append(" *\n"); //$NON-NLS-1$
+			sb.append(" *\n");
 		}
 
 		if (generateParams(sb, abstractScriptProvider))
@@ -837,7 +837,7 @@ public class SolutionSerializer
 		{
 			sb.append(" *");
 		}
-		sb.append("\n " + SV_COMMENT_END + "\n"); //$NON-NLS-1$
+		sb.append("\n " + SV_COMMENT_END + "\n");
 	}
 
 	/**
@@ -991,7 +991,7 @@ public class SolutionSerializer
 						}
 						catch (JSONException ex)
 						{
-							ServoyLog.logWarning("Cannot compare json objects based on uuid", ex); //$NON-NLS-1$
+							ServoyLog.logWarning("Cannot compare json objects based on uuid", ex);
 							return 0;
 						}
 					}
@@ -1034,7 +1034,7 @@ public class SolutionSerializer
 		{
 			return name;
 		}
-		return "sv_" + persist.getUUID().toString().replace('-', '_'); //$NON-NLS-1$
+		return "sv_" + persist.getUUID().toString().replace('-', '_');
 	}
 
 	public static String getFileName(IPersist persist, boolean useOldName)
@@ -1088,7 +1088,7 @@ public class SolutionSerializer
 
 	public static String getRelativePath(IPersist persist, boolean useOldName)
 	{
-		if (persist == null) return ""; //$NON-NLS-1$
+		if (persist == null) return "";
 
 		// Some persists do not have a file of its own, but are saved as item in its parents file
 		if (isCompositeWithItems(persist.getParent()))
@@ -1096,7 +1096,7 @@ public class SolutionSerializer
 			return getRelativePath(persist.getParent(), useOldName);
 		}
 
-		String name = ""; //$NON-NLS-1$
+		String name = "";
 
 		/*
 		 * <solutionname> (as project) /datamodel.xml /<styles>.css (? needed here) /calculations.js (all .js files do contain javadoc tags as
@@ -1359,7 +1359,7 @@ public class SolutionSerializer
 			String oldName = ((AbstractBase)p).getRuntimeProperty(AbstractBase.NameChangeProperty);
 			if (oldName != null)
 			{
-				if (oldName.equals("")) //$NON-NLS-1$
+				if (oldName.equals(""))
 				{
 					retval = null;
 				}

@@ -63,7 +63,7 @@ public class XMLScriptObjectAdapterLoader
 	{
 		if (!coreLoaded)
 		{
-			URL url = XMLScriptObjectAdapterLoader.class.getResource("doc/servoydoc.xml"); //$NON-NLS-1$
+			URL url = XMLScriptObjectAdapterLoader.class.getResource("doc/servoydoc.xml");
 			IDocumentationManagerProvider documentationManagerProvider = Activator.getDefault().getDocumentationManagerProvider();
 			if (documentationManagerProvider != null)
 			{

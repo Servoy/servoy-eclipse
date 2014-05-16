@@ -128,7 +128,7 @@ public class ScriptVariableSearch extends DLTKSearchEngineSearch
 	 */
 	public String getLabel()
 	{
-		return "Searching references to variable '" + variable.getName() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+		return "Searching references to variable '" + variable.getName() + "'";
 	}
 
 	/*

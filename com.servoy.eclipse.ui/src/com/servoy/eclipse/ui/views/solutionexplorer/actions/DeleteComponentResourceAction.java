@@ -47,8 +47,8 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 	public DeleteComponentResourceAction(Shell shell)
 	{
 		this.shell = shell;
-		setText("Delete Component"); //$NON-NLS-1$
-		setToolTipText("Delete Component"); //$NON-NLS-1$
+		setText("Delete Component");
+		setToolTipText("Delete Component");
 	}
 
 	/*
@@ -59,7 +59,7 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 	@Override
 	public void run()
 	{
-		if (selection != null && MessageDialog.openConfirm(shell, getText(), "Are you sure you want to delete?")) //$NON-NLS-1$
+		if (selection != null && MessageDialog.openConfirm(shell, getText(), "Are you sure you want to delete?"))
 		{
 			Iterator<SimpleUserNode> it = selection.iterator();
 			String[] componentName;

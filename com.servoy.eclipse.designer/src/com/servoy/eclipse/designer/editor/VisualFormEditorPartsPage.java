@@ -821,20 +821,20 @@ public class VisualFormEditorPartsPage extends Composite
 
 	protected DataBindingContext initDataBindings()
 	{
-		IObservableValue currentPartSinkWhenLastObserveValue = PojoObservables.observeValue(currentPartBean, "sinkWhenLast"); //$NON-NLS-1$
-		IObservableValue currentPartAllowBreakAcrossPageBoundsObserveValue = PojoObservables.observeValue(currentPartBean, "allowBreakAcrossPageBounds"); //$NON-NLS-1$
+		IObservableValue currentPartSinkWhenLastObserveValue = PojoObservables.observeValue(currentPartBean, "sinkWhenLast");
+		IObservableValue currentPartAllowBreakAcrossPageBoundsObserveValue = PojoObservables.observeValue(currentPartBean, "allowBreakAcrossPageBounds");
 		IObservableValue pageBreakAfterTextTextObserveWidget = SWTObservables.observeText(pageBreakAfterText, SWT.Modify);
 		IObservableValue pageBreakBeforeButtonSelectionObserveWidget = SWTObservables.observeSelection(pageBreakBeforeButton);
-		IObservableValue currentPartPageBreakAfterOccurrenceObserveValue = PojoObservables.observeValue(currentPartBean, "pageBreakAfterOccurrence"); //$NON-NLS-1$
-		IObservableValue currentPartDiscardRemainderAfterBreakObserveValue = PojoObservables.observeValue(currentPartBean, "discardRemainderAfterBreak"); //$NON-NLS-1$
-		IObservableValue currentPartRestartPageNumberObserveValue = PojoObservables.observeValue(currentPartBean, "restartPageNumber"); //$NON-NLS-1$
+		IObservableValue currentPartPageBreakAfterOccurrenceObserveValue = PojoObservables.observeValue(currentPartBean, "pageBreakAfterOccurrence");
+		IObservableValue currentPartDiscardRemainderAfterBreakObserveValue = PojoObservables.observeValue(currentPartBean, "discardRemainderAfterBreak");
+		IObservableValue currentPartRestartPageNumberObserveValue = PojoObservables.observeValue(currentPartBean, "restartPageNumber");
 		IObservableValue pageBreakAfterButtonSelectionObserveWidget = SWTObservables.observeSelection(pageBreakAfterButton);
 		IObservableValue allowPartToButtonSelectionObserveWidget = SWTObservables.observeSelection(allowPartToButton);
 		IObservableValue discardRemainderOfButtonSelectionObserveWidget = SWTObservables.observeSelection(discardRemainderOfButton);
 		IObservableValue sinkPartIfButtonSelectionObserveWidget = SWTObservables.observeSelection(sinkPartIfButton);
-		IObservableValue currentPartPageBreakBeforeObserveValue = PojoObservables.observeValue(currentPartBean, "pageBreakBefore"); //$NON-NLS-1$
+		IObservableValue currentPartPageBreakBeforeObserveValue = PojoObservables.observeValue(currentPartBean, "pageBreakBefore");
 		IObservableValue currentPartPageBreakAfterEveryNthOccurenceObserveValue = PojoObservables.observeValue(currentPartBean,
-			"pageBreakAfterEveryNthOccurence"); //$NON-NLS-1$
+			"pageBreakAfterEveryNthOccurence");
 		IObservableValue restartPageNumbersButtonSelectionObserveWidget = SWTObservables.observeSelection(restartPageNumbersButton);
 		//
 		//

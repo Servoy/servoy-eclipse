@@ -56,10 +56,10 @@ import com.servoy.j2db.util.Utils;
 public class ZOrderAction extends DesignerSelectionAction
 {
 
-	public static final String ID_Z_ORDER_BRING_TO_FRONT = "z_order_bring_to_front"; //$NON-NLS-1$
-	public static final String ID_Z_ORDER_SEND_TO_BACK = "z_order_send_to_back"; //$NON-NLS-1$
-	public static final String ID_Z_ORDER_BRING_TO_FRONT_ONE_STEP = "z_order_bring_to_front_one_step"; //$NON-NLS-1$
-	public static final String ID_Z_ORDER_SEND_TO_BACK_ONE_STEP = "z_order_send_to_back_one_step"; //$NON-NLS-1$
+	public static final String ID_Z_ORDER_BRING_TO_FRONT = "z_order_bring_to_front";
+	public static final String ID_Z_ORDER_SEND_TO_BACK = "z_order_send_to_back";
+	public static final String ID_Z_ORDER_BRING_TO_FRONT_ONE_STEP = "z_order_bring_to_front_one_step";
+	public static final String ID_Z_ORDER_SEND_TO_BACK_ONE_STEP = "z_order_send_to_back_one_step";
 
 	private static class OrderableElement
 	{
@@ -402,7 +402,7 @@ public class ZOrderAction extends DesignerSelectionAction
 					requests = new HashMap<EditPart, Request>();
 				}
 				if (oe.element instanceof IFormElement) requests.put(editPartMap.get(oe.element), new SetPropertyRequest(BaseVisualFormEditor.REQ_SET_PROPERTY,
-					StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), Integer.valueOf(oe.zIndex), "")); //$NON-NLS-1$
+					StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), Integer.valueOf(oe.zIndex), ""));
 				else
 				{
 					ArrayList<IFormElement> groupElements = new ArrayList<IFormElement>(oe.getElements().values());
@@ -411,7 +411,7 @@ public class ZOrderAction extends DesignerSelectionAction
 					for (IFormElement bc : groupElements)
 					{
 						requests.put(editPartMap.get(bc), new SetPropertyRequest(BaseVisualFormEditor.REQ_SET_PROPERTY,
-							StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), Integer.valueOf(index++), "")); //$NON-NLS-1$
+							StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), Integer.valueOf(index++), ""));
 					}
 				}
 			}

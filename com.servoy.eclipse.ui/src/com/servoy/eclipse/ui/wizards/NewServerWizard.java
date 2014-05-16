@@ -45,13 +45,13 @@ import com.servoy.j2db.persistence.ServerConfig;
  */
 public class NewServerWizard extends Wizard implements INewWizard
 {
-	public static final String ID = "com.servoy.eclipse.ui.NewServerWizard"; //$NON-NLS-1$
+	public static final String ID = "com.servoy.eclipse.ui.NewServerWizard";
 
 	private ServerTypeSelectionPage typeSelectionPage;
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
-		setWindowTitle("New Database Server"); //$NON-NLS-1$
+		setWindowTitle("New Database Server");
 	}
 
 	@Override
@@ -67,7 +67,7 @@ public class NewServerWizard extends Wizard implements INewWizard
 	@Override
 	public void addPages()
 	{
-		typeSelectionPage = new ServerTypeSelectionPage("serverTypeSelection"); //$NON-NLS-1$
+		typeSelectionPage = new ServerTypeSelectionPage("serverTypeSelection");
 		this.addPage(typeSelectionPage);
 	}
 
@@ -79,7 +79,7 @@ public class NewServerWizard extends Wizard implements INewWizard
 		protected ServerTypeSelectionPage(String pageName)
 		{
 			super(pageName);
-			setTitle("Choose the Type of the new Database Server"); //$NON-NLS-1$
+			setTitle("Choose the Type of the new Database Server");
 			setPageComplete(false);
 		}
 
@@ -94,14 +94,14 @@ public class NewServerWizard extends Wizard implements INewWizard
 			topLevel.setLayout(new GridLayout(2, false));
 
 			Label sourceServerLabel = new Label(topLevel, SWT.NONE);
-			sourceServerLabel.setText("Server type"); //$NON-NLS-1$
+			sourceServerLabel.setText("Server type");
 
 			serverTypesCombo = new Combo(topLevel, SWT.DROP_DOWN | SWT.READ_ONLY);
 			UIUtils.setDefaultVisibleItemCount(serverTypesCombo);
 			serverTypesCombo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 			List<String> availableTypes = new ArrayList<String>();
-			availableTypes.add("Please choose a server type..."); //$NON-NLS-1$
+			availableTypes.add("Please choose a server type...");
 			availableTypes.addAll(ServerConfig.TEMPLATES.keySet());
 			serverTypesCombo.setItems(availableTypes.toArray(new String[availableTypes.size()]));
 			serverTypesCombo.select(0);

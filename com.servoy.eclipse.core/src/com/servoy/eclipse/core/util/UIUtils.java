@@ -698,7 +698,7 @@ public class UIUtils
 	{
 		if (errorImageDescriptor == null)
 		{
-			errorImageDescriptor = ImageDescriptor.createFromFile(IApplication.class, "images/error.gif"); //$NON-NLS-1$
+			errorImageDescriptor = ImageDescriptor.createFromFile(IApplication.class, "images/error.gif");
 		}
 		return errorImageDescriptor.getImageData();
 	}
@@ -1070,7 +1070,7 @@ public class UIUtils
 		}
 		else
 		{
-			Job j = new Job("Call later on AWT") //$NON-NLS-1$
+			Job j = new Job("Call later on AWT")
 			{
 				@Override
 				protected IStatus run(IProgressMonitor monitor)

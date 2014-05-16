@@ -74,7 +74,7 @@ public class EclipseSequenceProvider implements ISequenceProvider
 
 	public synchronized Object getNextSequence(Column column, boolean update) throws RepositoryException
 	{
-		if (column == null) throw new RepositoryException("Invalid column"); //$NON-NLS-1$
+		if (column == null) throw new RepositoryException("Invalid column");
 
 		String preSequenceChars = null;
 		String postSequenceChars = null;
@@ -96,7 +96,7 @@ public class EclipseSequenceProvider implements ISequenceProvider
 				if (ci.getAutoEnterType() != ColumnInfo.SEQUENCE_AUTO_ENTER)
 				{
 					columnInfoSeqCache.remove(column);
-					throw new RepositoryException("Cannot get sequence for column without sequence settings"); //$NON-NLS-1$
+					throw new RepositoryException("Cannot get sequence for column without sequence settings");
 				}
 
 				IServerInternal tableServer = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(column.getTable().getServerName(),
@@ -190,12 +190,12 @@ public class EclipseSequenceProvider implements ISequenceProvider
 		catch (ServoyException e)
 		{
 			ServoyLog.logError(e);
-			throw new RepositoryException("error getting next sequence for " + column, e); //$NON-NLS-1$
+			throw new RepositoryException("error getting next sequence for " + column, e);
 		}
 		catch (RemoteException e)
 		{
 			ServoyLog.logError(e);
-			throw new RepositoryException("error getting next sequence for " + column, e); //$NON-NLS-1$
+			throw new RepositoryException("error getting next sequence for " + column, e);
 		}
 
 
@@ -225,7 +225,7 @@ public class EclipseSequenceProvider implements ISequenceProvider
 
 	public Object syncSequence(Column column) throws RepositoryException
 	{
-		if (column == null) throw new RepositoryException("Can't sync on null column"); //$NON-NLS-1$
+		if (column == null) throw new RepositoryException("Can't sync on null column");
 
 		IServerInternal tableServer = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(column.getTable().getServerName(), false,
 			true);
@@ -260,7 +260,7 @@ public class EclipseSequenceProvider implements ISequenceProvider
 			// Set maximum to 0 if no maximum value found, i.e., next value is 1.
 			if (val == null)
 			{
-				val = "0"; //$NON-NLS-1$
+				val = "0";
 			}
 
 			String last = Utils.findLastNumber(val);
@@ -294,7 +294,7 @@ public class EclipseSequenceProvider implements ISequenceProvider
 		}
 		catch (SQLException e)
 		{
-			throw new RepositoryException("error synchronizing sequence for " + column, e); //$NON-NLS-1$
+			throw new RepositoryException("error synchronizing sequence for " + column, e);
 		}
 		finally
 		{

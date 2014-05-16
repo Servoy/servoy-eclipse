@@ -169,8 +169,8 @@ public class DebugStarter implements IDebuggerStarter
 			candidateConfigs = new ArrayList<ILaunchConfiguration>(configs.length);
 			for (ILaunchConfiguration config : configs)
 			{
-				if (config.getAttribute(ScriptLaunchConfigurationConstants.ATTR_MAIN_SCRIPT_NAME, "").equals(script.getProjectRelativePath().toString()) && //$NON-NLS-1$
-					config.getAttribute(ScriptLaunchConfigurationConstants.ATTR_PROJECT_NAME, "").equals(script.getProject().getName())) { //$NON-NLS-1$
+				if (config.getAttribute(ScriptLaunchConfigurationConstants.ATTR_MAIN_SCRIPT_NAME, "").equals(script.getProjectRelativePath().toString()) &&
+					config.getAttribute(ScriptLaunchConfigurationConstants.ATTR_PROJECT_NAME, "").equals(script.getProject().getName())) {
 					candidateConfigs.add(config);
 				}
 			}

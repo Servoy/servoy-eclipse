@@ -31,7 +31,7 @@ import com.servoy.eclipse.core.util.UIUtils.MessageAndCheckBoxDialog;
 public class I18NMessagesUtil
 {
 
-	private static final String DO_NOT_WARN_ON_I18N_DATASOURCE = "DO_NOT_WARN_ON_I18N_DATASOURCE"; //$NON-NLS-1$
+	private static final String DO_NOT_WARN_ON_I18N_DATASOURCE = "DO_NOT_WARN_ON_I18N_DATASOURCE";
 
 	public static void showDatasourceWarning()
 	{

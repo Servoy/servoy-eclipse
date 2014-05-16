@@ -55,7 +55,7 @@ class GenerateSuppressWarningsResolution extends TextFileEditResolution
 
 	private String getAnnotation()
 	{
-		return "@SuppressWarnings(" + type + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+		return "@SuppressWarnings(" + type + ")";
 	}
 
 	/*
@@ -146,7 +146,7 @@ class GenerateSuppressWarningsResolution extends TextFileEditResolution
 			if (documentation.isDocumentation()) // it must have doc
 			{
 				insertOffset = documentation.sourceEnd() - 2;
-				InsertEdit suppressTextEdit = new InsertEdit(insertOffset, "* " + getAnnotation() + "\n "); //$NON-NLS-1$ //$NON-NLS-2$
+				InsertEdit suppressTextEdit = new InsertEdit(insertOffset, "* " + getAnnotation() + "\n ");
 				TextFileEditUtil.applyTextEdit(scriptFile, suppressTextEdit);
 			}
 		}

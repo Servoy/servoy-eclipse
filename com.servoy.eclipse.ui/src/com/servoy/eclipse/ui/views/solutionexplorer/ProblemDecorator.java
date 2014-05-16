@@ -40,10 +40,10 @@ import com.servoy.eclipse.model.util.ServoyLog;
  */
 public class ProblemDecorator implements ILightweightLabelDecorator
 {
-	public static final String ID = "com.servoy.eclipse.ui.views.solutionexplorer.ProblemDecorator"; //$NON-NLS-1$
+	public static final String ID = "com.servoy.eclipse.ui.views.solutionexplorer.ProblemDecorator";
 
-	private final ImageDescriptor IMG_ERROR = JFaceResources.getImageRegistry().getDescriptor("org.eclipse.jface.fieldassist.IMG_DEC_FIELD_ERROR"); //$NON-NLS-1$
-	private final ImageDescriptor IMG_WARNING = JFaceResources.getImageRegistry().getDescriptor("org.eclipse.jface.fieldassist.IMG_DEC_FIELD_WARNING"); //$NON-NLS-1$
+	private final ImageDescriptor IMG_ERROR = JFaceResources.getImageRegistry().getDescriptor("org.eclipse.jface.fieldassist.IMG_DEC_FIELD_ERROR");
+	private final ImageDescriptor IMG_WARNING = JFaceResources.getImageRegistry().getDescriptor("org.eclipse.jface.fieldassist.IMG_DEC_FIELD_WARNING");
 
 	private static int ERRORTICK_NONE = 0;
 	private static int ERRORTICK_WARNING = 1;

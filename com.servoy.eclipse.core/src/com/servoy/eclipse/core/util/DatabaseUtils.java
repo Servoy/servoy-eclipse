@@ -104,7 +104,7 @@ public final class DatabaseUtils
 					catch (RepositoryException e)
 					{
 						ServoyLog.logWarning("Create new table from column info - " + e.getMessage(), null);
-						problems.append("WARNING! " + e.getMessage() + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ 
+						problems.append("WARNING! " + e.getMessage() + "\n");
 					}
 				}
 			};
@@ -115,7 +115,7 @@ public final class DatabaseUtils
 			// Warn if the table types are different.
 			if (table.getTableType() != tableInfo.tableType)
 			{
-				problems.append("WARNING! The table '" + table.getName() + " in server '" + table.getServerName() + "' has type " + Table.getTableTypeAsString(table.getTableType()) + " but in the import it has type " + Table.getTableTypeAsString(tableInfo.tableType) + ". Servoy cannot keep the datamodels synchronized automatically if you use database views, please do so manually.\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+				problems.append("WARNING! The table '" + table.getName() + " in server '" + table.getServerName() + "' has type " + Table.getTableTypeAsString(table.getTableType()) + " but in the import it has type " + Table.getTableTypeAsString(tableInfo.tableType) + ". Servoy cannot keep the datamodels synchronized automatically if you use database views, please do so manually.\n");
 			}
 
 			// Iterate over all the columns of this table and add them to
@@ -151,7 +151,7 @@ public final class DatabaseUtils
 						if (!server.supportsSequenceType(sequenceType, null))
 						{
 							// Database does not support the import sequence type, default to servoy sequence.
-							problems.append("The import version of the column '" + columnInfoInfo.name + "' of table '" + tableInfo.name + "' in server '" + server.getName() + "' has '" + ColumnInfo.getSeqDisplayTypeString(sequenceType) + "' sequence type which is not supported by the database, using '" + ColumnInfo.getSeqDisplayTypeString(ColumnInfo.SERVOY_SEQUENCE) + "' sequence type instead.\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+							problems.append("The import version of the column '" + columnInfoInfo.name + "' of table '" + tableInfo.name + "' in server '" + server.getName() + "' has '" + ColumnInfo.getSeqDisplayTypeString(sequenceType) + "' sequence type which is not supported by the database, using '" + ColumnInfo.getSeqDisplayTypeString(ColumnInfo.SERVOY_SEQUENCE) + "' sequence type instead.\n");
 							sequenceType = ColumnInfo.SERVOY_SEQUENCE;
 						}
 
@@ -203,7 +203,7 @@ public final class DatabaseUtils
 				if (column == null)
 				{
 					throw new RepositoryException(
-						"Column '" + columnInfoDef.name + "' in table '" + tableInfo.name + "' for server '" + server.getName() + "' does not exist and could not be created."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+						"Column '" + columnInfoDef.name + "' in table '" + tableInfo.name + "' for server '" + server.getName() + "' does not exist and could not be created.");
 				}
 
 				// Update the column info of this table.
@@ -245,7 +245,7 @@ public final class DatabaseUtils
 			}
 			catch (SQLException e)
 			{
-				throw new RepositoryException("Could not create db sequences for table " + table, e); //$NON-NLS-1$ 
+				throw new RepositoryException("Could not create db sequences for table " + table, e);
 			}
 
 			dmm.updateAllColumnInfo(table, writeBackLater);

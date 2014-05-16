@@ -128,10 +128,10 @@ public class WarExportPage extends WizardPage implements IMobileExportProperties
 		});
 
 		Label typeLabel = new Label(container, SWT.NONE);
-		typeLabel.setText("Export type"); //$NON-NLS-1$
+		typeLabel.setText("Export type");
 
 		exportAsWar = new Button(container, SWT.RADIO);
-		exportAsWar.setText("Export as War"); //$NON-NLS-1$
+		exportAsWar.setText("Export as War");
 
 		final Button exportUsingPhoneGap = new Button(container, SWT.RADIO);
 		Link phoneGapLink = new Link(container, SWT.NONE);
@@ -429,7 +429,7 @@ public class WarExportPage extends WizardPage implements IMobileExportProperties
 	{
 		String serverDir = ApplicationServerRegistry.get().getServoyApplicationServerDirectory();
 		if (!serverDir.endsWith(File.separator)) serverDir = serverDir + File.separator;
-		serverDir = new StringBuilder(serverDir).append("server").append(File.separator).append("webapps").append(File.separator).toString(); //$NON-NLS-1$ //$NON-NLS-2$
+		serverDir = new StringBuilder(serverDir).append("server").append(File.separator).append("webapps").append(File.separator).toString();
 		String outputFolder = getOutputFolder();
 		if (!outputFolder.endsWith(File.pathSeparator)) outputFolder = outputFolder + File.separator;
 
@@ -438,8 +438,8 @@ public class WarExportPage extends WizardPage implements IMobileExportProperties
 		String error = doExport(isLocalDeploy && finishPage.isOpenUrl() ? 3000 : 0);
 		if (isLocalDeploy)
 		{
-			finishPage.setApplicationURL(new StringBuilder("http://localhost:").append(ApplicationServerRegistry.get().getWebServerPort()).append("/").append( //$NON-NLS-1$ //$NON-NLS-2$
-				mobileExporter.getSolutionName()).append("/index.html").toString(), "Open WAR application in browser at finish.", false); //$NON-NLS-1$ //$NON-NLS-2$
+			finishPage.setApplicationURL(new StringBuilder("http://localhost:").append(ApplicationServerRegistry.get().getWebServerPort()).append("/").append(
+				mobileExporter.getSolutionName()).append("/index.html").toString(), "Open WAR application in browser at finish.", false);
 			finishPage.createControl(WarExportPage.this.getControl().getParent());
 			finishPage.getControl().getParent().layout(true);
 		}

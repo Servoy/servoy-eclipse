@@ -42,7 +42,7 @@ import com.servoy.j2db.util.xmlxport.IXMLExportUserChannel;
  */
 public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUserChannel
 {
-	private static final String FILE_EXTENSION = ".servoy"; //$NON-NLS-1$
+	private static final String FILE_EXTENSION = ".servoy";
 
 	private static final int META_DATA_NONE = 0;
 	private static final int META_DATA_WS = 1;
@@ -257,7 +257,7 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 			allModules.retainAll(moduleList);
 			if (allModules.size() != moduleList.size())
 			{
-				info("Some of the modules specified for export were not actually modules of exported solution.", ILogLevel.ERROR); //$NON-NLS-1$
+				info("Some of the modules specified for export were not actually modules of exported solution.", ILogLevel.ERROR);
 				return null;
 			}
 		}

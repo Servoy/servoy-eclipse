@@ -122,7 +122,7 @@ public class DragFormPartPolicy extends ResizableEditPolicy
 		Part prev = getPreviousPart();
 		if (prev != null && prev.getHeight() > 0)
 		{
-			message.append(" (").append(newHeight - prev.getHeight()).append(')'); //$NON-NLS-1$
+			message.append(" (").append(newHeight - prev.getHeight()).append(')');
 		}
 		if (formWidth != -1)
 		{

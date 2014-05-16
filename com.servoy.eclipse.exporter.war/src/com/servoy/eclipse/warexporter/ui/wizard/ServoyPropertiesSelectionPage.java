@@ -58,11 +58,11 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 
 	public ServoyPropertiesSelectionPage(ExportWarModel exportModel, IWizardPage nextPage)
 	{
-		super("servoypropertyselection"); //$NON-NLS-1$
+		super("servoypropertyselection");
 		this.exportModel = exportModel;
 		this.nextPage = nextPage;
-		setTitle("Choose an existing servoy properties file (skip to generate default)"); //$NON-NLS-1$
-		setDescription("Select the servoy properties file that you want to use, skip if default should be generated"); //$NON-NLS-1$
+		setTitle("Choose an existing servoy properties file (skip to generate default)");
+		setDescription("Select the servoy properties file that you want to use, skip if default should be generated");
 	}
 
 	public void createControl(Composite parent)
@@ -78,7 +78,7 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 		if (exportModel.getServoyPropertiesFileName() != null) fileNameText.setText(exportModel.getServoyPropertiesFileName());
 
 		browseButton = new Button(composite, SWT.PUSH);
-		browseButton.setText("Browse..."); //$NON-NLS-1$
+		browseButton.setText("Browse...");
 		browseButton.addListener(SWT.Selection, this);
 
 		setControl(composite);
@@ -114,7 +114,7 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 					dlg.setFileName(f.getName());
 				}
 			}
-			String[] extensions = { "*.properties" }; //$NON-NLS-1$
+			String[] extensions = { "*.properties" };
 			dlg.setFilterExtensions(extensions);
 			String chosenFileName = dlg.open();
 			if (chosenFileName != null)

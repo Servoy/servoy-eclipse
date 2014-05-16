@@ -29,7 +29,7 @@ import com.servoy.j2db.util.UUID;
 
 public abstract class FormElementDragData implements IDragData, Serializable
 {
-	public static final String DND_PREFIX = "%SERVOY%"; //$NON-NLS-1$
+	public static final String DND_PREFIX = "%SERVOY%";
 
 	public static class PersistDragData extends FormElementDragData
 	{

@@ -39,8 +39,8 @@ public class ToggleFormCommandsAction extends Action implements ISelectionChange
 	public ToggleFormCommandsAction(SolutionExplorerView viewer)
 	{
 		this.viewer = viewer;
-		setText("Toggle Form Commands"); //$NON-NLS-1$
-		setToolTipText("Toggle Form Commands"); //$NON-NLS-1$
+		setText("Toggle Form Commands");
+		setToolTipText("Toggle Form Commands");
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)

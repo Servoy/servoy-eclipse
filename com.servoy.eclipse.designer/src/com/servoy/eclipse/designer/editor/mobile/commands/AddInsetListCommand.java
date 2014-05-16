@@ -81,12 +81,12 @@ public class AddInsetListCommand extends BaseFormPlaceElementCommand
 			// add header
 			GraphicalComponent header = ElementFactory.createLabel(portal, null, location);
 			// set labelfor for display in webclient
-			button.setName("button" + UUID.randomUUID().toString().replace('-', '_').toLowerCase()); //$NON-NLS-1$
+			button.setName("button" + UUID.randomUUID().toString().replace('-', '_').toLowerCase());
 			header.setLabelFor(button.getName());
 			header.setText("Header");
 			header.putCustomMobileProperty(IMobileProperties.LIST_ITEM_HEADER.propertyName, Boolean.TRUE);
 			// for debug in developer
-			header.setStyleClass("b"); // default for headers //$NON-NLS-1$
+			header.setStyleClass("b"); // default for headers
 
 			// models is portal
 			return new IPersist[] { portal };

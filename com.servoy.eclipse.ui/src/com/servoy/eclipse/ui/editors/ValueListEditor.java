@@ -189,7 +189,7 @@ public class ValueListEditor extends PersistEditor
 
 		valueListEditorComposite = new Composite(myScrolledComposite, SWT.NONE);
 		Label nameLabel = new Label(valueListEditorComposite, SWT.NONE);
-		nameLabel.setText("Valuelist Name"); //$NON-NLS-1$
+		nameLabel.setText("Valuelist Name");
 
 		myScrolledComposite.setContent(valueListEditorComposite);
 
@@ -197,9 +197,9 @@ public class ValueListEditor extends PersistEditor
 		nameField.addVerifyListener(DocumentValidatorVerifyListener.IDENT_SERVOY_VERIFIER);
 
 		customValues = new Text(valueListEditorComposite, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
-		customValues.setToolTipText("list with fixed displayValue[|realValue] ('^' for null real value, %%scopes.globals.NAME%% for global real value)"); //$NON-NLS-1$
+		customValues.setToolTipText("list with fixed displayValue[|realValue] ('^' for null real value, %%scopes.globals.NAME%% for global real value)");
 		customValuesButton = new Button(valueListEditorComposite, SWT.RADIO);
-		customValuesButton.setText("Custom Values"); //$NON-NLS-1$
+		customValuesButton.setText("Custom Values");
 		customvalueButtonSelectionListener = new SelectionAdapter()
 		{
 			@Override
@@ -215,7 +215,7 @@ public class ValueListEditor extends PersistEditor
 		};
 
 		tableValuesButton = new Button(valueListEditorComposite, SWT.RADIO);
-		tableValuesButton.setText("Table Values"); //$NON-NLS-1$
+		tableValuesButton.setText("Table Values");
 		tableValuesButtonSelectionListener = new SelectionAdapter()
 		{
 			@Override
@@ -235,7 +235,7 @@ public class ValueListEditor extends PersistEditor
 		tableSelect.setContentProvider(new TableContentProvider());
 		tableSelect.setLabelProvider(DatasourceLabelProvider.INSTANCE_IMAGE_NAMEONLY);
 		tableSelect.setTextLabelProvider(new DatasourceLabelProvider("", false, true));
-		tableSelect.setTitleText("Select table"); //$NON-NLS-1$
+		tableSelect.setTitleText("Select table");
 		tableSelectionListener = new ISelectionChangedListener()
 		{
 			public void selectionChanged(SelectionChangedEvent event)
@@ -253,11 +253,11 @@ public class ValueListEditor extends PersistEditor
 		disableInMobileControls.add(tableSelectControl);
 
 		applyValuelistNameButton = new Button(valueListEditorComposite, SWT.CHECK);
-		applyValuelistNameButton.setText("Apply valuelist name as filter on column 'valuelist_name'"); //$NON-NLS-1$
+		applyValuelistNameButton.setText("Apply valuelist name as filter on column 'valuelist_name'");
 		disableInMobileControls.add(applyValuelistNameButton);
 
 		relatedValuesButton = new Button(valueListEditorComposite, SWT.RADIO);
-		relatedValuesButton.setText("Related Values"); //$NON-NLS-1$
+		relatedValuesButton.setText("Related Values");
 		relatedValuesButtoneSelectionListener = new SelectionAdapter()
 		{
 			@Override
@@ -278,7 +278,7 @@ public class ValueListEditor extends PersistEditor
 		relationSelect.setLabelProvider(RelationLabelProvider.INSTANCE_LAST_NAME_ONLY);
 		relationSelect.setTextLabelProvider(new RelationLabelProvider("", false, false));
 		relationSelect.setSelectionFilter(AcceptAllFilter.getInstance()); // by default only leaf nodes can be selected
-		relationSelect.setTitleText("Select relation"); //$NON-NLS-1$
+		relationSelect.setTitleText("Select relation");
 		relationSelect.setEditable(true);
 		relationSelectionListener = new ISelectionChangedListener()
 		{
@@ -296,7 +296,7 @@ public class ValueListEditor extends PersistEditor
 		disableInMobileControls.add(relationSelectControl);
 
 		globalMethodValuesButton = new Button(valueListEditorComposite, SWT.RADIO);
-		globalMethodValuesButton.setText("Global method"); //$NON-NLS-1$
+		globalMethodValuesButton.setText("Global method");
 		globalMethodValuesSelectionListener = new SelectionAdapter()
 		{
 			@Override
@@ -327,7 +327,7 @@ public class ValueListEditor extends PersistEditor
 					public Control createControl(Composite composite)
 					{
 						final AddMethodButtonsComposite buttons = new AddMethodButtonsComposite(composite, SWT.NONE);
-						buttons.setContext(context, "valueListGlobalMethod"); //$NON-NLS-1$
+						buttons.setContext(context, "valueListGlobalMethod");
 						buttons.setDialog(dialog);
 						buttons.searchSelectedScope((IStructuredSelection)dialog.getTreeViewer().getViewer().getSelection());
 						dialog.getTreeViewer().addSelectionChangedListener(new ISelectionChangedListener()
@@ -374,10 +374,10 @@ public class ValueListEditor extends PersistEditor
 		};
 
 		definitionGroup = new Group(valueListEditorComposite, SWT.NONE);
-		definitionGroup.setText("Definition"); //$NON-NLS-1$
+		definitionGroup.setText("Definition");
 		disableInMobileControls.add(definitionGroup);
 		allowEmptyValueButton = new Button(valueListEditorComposite, SWT.CHECK);
-		allowEmptyValueButton.setText("Allow empty value"); //$NON-NLS-1$
+		allowEmptyValueButton.setText("Allow empty value");
 		disableInMobileControls.add(allowEmptyValueButton);
 
 		dp_select1 = new ValueListDPSelectionComposite(definitionGroup, editingFlattenedSolution, SWT.NONE);
@@ -385,7 +385,7 @@ public class ValueListEditor extends PersistEditor
 		dp_select3 = new ValueListDPSelectionComposite(definitionGroup, editingFlattenedSolution, SWT.NONE);
 
 		separatorCharacterLabel = new Label(definitionGroup, SWT.NONE);
-		separatorCharacterLabel.setText("Separator character"); //$NON-NLS-1$
+		separatorCharacterLabel.setText("Separator character");
 		separator_char = new Text(definitionGroup, SWT.BORDER);
 
 		sortingDefinitionSelect = new TreeSelectViewer(valueListEditorComposite, SWT.NONE)
@@ -399,7 +399,7 @@ public class ValueListEditor extends PersistEditor
 				{
 					FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(getPersist());
 
-					SortDialog dialog = new SortDialog(control.getShell(), flattenedSolution, currentTable, sortOptions, "Sort options"); //$NON-NLS-1$
+					SortDialog dialog = new SortDialog(control.getShell(), flattenedSolution, currentTable, sortOptions, "Sort options");
 					dialog.open();
 
 					if (dialog.getReturnCode() != Window.CANCEL)
@@ -411,16 +411,16 @@ public class ValueListEditor extends PersistEditor
 				return sortOptions == null || sortOptions.length() == 0 ? StructuredSelection.EMPTY : new StructuredSelection(sortOptions);
 			}
 		};
-		sortingDefinitionSelect.setButtonText("Sorting Definition..."); //$NON-NLS-1$
+		sortingDefinitionSelect.setButtonText("Sorting Definition...");
 		Control sortingDefinitionControl = sortingDefinitionSelect.getControl();
 		disableInMobileControls.add(sortingDefinitionControl);
 
 		fallbackValuelist = new TreeSelectViewer(valueListEditorComposite, SWT.NONE, new ValuelistPropertyController.ValueListValueEditor(
 			editingFlattenedSolution));
-		fallbackValuelist.setButtonText("Fallback Valuelist"); //$NON-NLS-1$
+		fallbackValuelist.setButtonText("Fallback Valuelist");
 		fallbackValuelist.setContentProvider(new FallbackValuelistContentProvider(editingFlattenedSolution, getValueList()));
 		fallbackValuelist.setLabelProvider(new ValuelistLabelProvider(editingFlattenedSolution));
-		fallbackValuelist.setTitleText("Select fallback valuelist"); //$NON-NLS-1$
+		fallbackValuelist.setTitleText("Select fallback valuelist");
 		fallbackValuelist.setInput(getValueList());
 		fallbackValuelist.setEditable(true);
 
@@ -530,7 +530,7 @@ public class ValueListEditor extends PersistEditor
 		}
 		if (message != null)
 		{
-			MessageDialog.openWarning(getSite().getShell(), "Invalid valuelist", message); //$NON-NLS-1$
+			MessageDialog.openWarning(getSite().getShell(), "Invalid valuelist", message);
 			getValueList().flagChanged();
 			flagModified();
 		}
@@ -628,7 +628,7 @@ public class ValueListEditor extends PersistEditor
 
 			if (valueList.getValueListType() != IValueListConstants.CUSTOM_VALUES && valueList.getValueListType() != IValueListConstants.GLOBAL_METHOD_VALUES)
 			{
-				customValues.setText(""); //$NON-NLS-1$
+				customValues.setText("");
 			}
 
 			currentTable = table;
@@ -718,14 +718,14 @@ public class ValueListEditor extends PersistEditor
 	{
 		m_bindingContext = BindingHelper.dispose(m_bindingContext);
 
-		IObservableValue getValueListCustomValuesObserveValue = PojoObservables.observeValue(getValueList(), "customValues"); //$NON-NLS-1$
-		IObservableValue fallbackValueListObserveValue = PojoObservables.observeValue(getValueList(), "fallbackValueListID"); //$NON-NLS-1$
+		IObservableValue getValueListCustomValuesObserveValue = PojoObservables.observeValue(getValueList(), "customValues");
+		IObservableValue fallbackValueListObserveValue = PojoObservables.observeValue(getValueList(), "fallbackValueListID");
 
 		IObservableValue customValuesTextObserveWidget = SWTObservables.observeText(customValues, SWT.Modify);
 		IObservableValue globalMethodtObserveWidget = new TreeSelectObservableValue(globalMethodSelect, MethodWithArguments.class);
 		IObservableValue fallbackValueListObserveWidget = new TreeSelectObservableValue(fallbackValuelist, int.class);
 
-		IObservableValue getValueListSortOpotionsObserveValue = PojoObservables.observeValue(getValueList(), "sortOptions"); //$NON-NLS-1$
+		IObservableValue getValueListSortOpotionsObserveValue = PojoObservables.observeValue(getValueList(), "sortOptions");
 		IObservableValue sortingDefinitionSelectObserveWidget = new TreeSelectObservableValue(sortingDefinitionSelect, String.class);
 
 		IObservableValue nameFieldTextObserveWidget = SWTObservables.observeText(nameField, SWT.Modify);
@@ -751,12 +751,12 @@ public class ValueListEditor extends PersistEditor
 			}
 		};
 		IObservableValue separatorFieldTextObserveWidget = SWTObservables.observeText(separator_char, SWT.Modify);
-		IObservableValue getValueListSeparatorObserveValue = PojoObservables.observeValue(getValueList(), "separator"); //$NON-NLS-1$
+		IObservableValue getValueListSeparatorObserveValue = PojoObservables.observeValue(getValueList(), "separator");
 
 		IObservableValue allowEmptyFieldTextObserveWidget = SWTObservables.observeSelection(allowEmptyValueButton);
-		IObservableValue getValueListAllowEmptyValueObserveValue = PojoObservables.observeValue(getValueList(), "addEmptyValue"); //$NON-NLS-1$
+		IObservableValue getValueListAllowEmptyValueObserveValue = PojoObservables.observeValue(getValueList(), "addEmptyValue");
 		IObservableValue applyNameFilterSelectionObserveWidget = SWTObservables.observeSelection(applyValuelistNameButton);
-		IObservableValue getApplyNameFilterSelectionObserveValue = PojoObservables.observeValue(getValueList(), "useTableFilter"); //$NON-NLS-1$
+		IObservableValue getApplyNameFilterSelectionObserveValue = PojoObservables.observeValue(getValueList(), "useTableFilter");
 		IObservableValue deprecatedObserveWidget = SWTObservables.observeText(deprecated, SWT.Modify);
 		IObservableValue deprecatedObserveValue = PojoObservables.observeValue(getValueList(), "deprecated");
 		IObservableValue encapsulationObserveWidget = SWTObservables.observeSelection(encapsulation);
@@ -779,7 +779,7 @@ public class ValueListEditor extends PersistEditor
 			{
 				public Object convert(Object fromObject)
 				{
-					if ("".equals(fromObject)) return null; //$NON-NLS-1$
+					if ("".equals(fromObject)) return null;
 					return fromObject;
 				}
 			}), new UpdateValueStrategy().setConverter(new Converter(String.class, String.class)
@@ -789,10 +789,10 @@ public class ValueListEditor extends PersistEditor
 				 */
 				public Object convert(Object fromObject)
 				{
-					if (fromObject == null) return ""; //$NON-NLS-1$
+					if (fromObject == null) return "";
 					if (getValueList().getValueListType() == IValueListConstants.GLOBAL_METHOD_VALUES)
 					{
-						return ""; //$NON-NLS-1$
+						return "";
 					}
 					return fromObject;
 				}
@@ -802,7 +802,7 @@ public class ValueListEditor extends PersistEditor
 			{
 				public Object convert(Object fromObject)
 				{
-					if ("".equals(fromObject)) return null; //$NON-NLS-1$
+					if ("".equals(fromObject)) return null;
 					if (fromObject instanceof String) return fromObject;
 					if (fromObject instanceof MethodWithArguments)
 					{
@@ -1003,7 +1003,7 @@ public class ValueListEditor extends PersistEditor
 			}
 			catch (RepositoryException e)
 			{
-				MessageDialog.openError(getSite().getShell(), "Error while saving", e.getMessage()); //$NON-NLS-1$
+				MessageDialog.openError(getSite().getShell(), "Error while saving", e.getMessage());
 				if (monitor != null) monitor.setCanceled(true);
 				return;
 			}
@@ -1011,7 +1011,7 @@ public class ValueListEditor extends PersistEditor
 			String message = checkValidState();
 			if (message != null)
 			{
-				MessageDialog.openWarning(getSite().getShell(), "Error while saving", message); //$NON-NLS-1$
+				MessageDialog.openWarning(getSite().getShell(), "Error while saving", message);
 				if (monitor != null) monitor.setCanceled(true);
 				return;
 			}
@@ -1019,20 +1019,20 @@ public class ValueListEditor extends PersistEditor
 			{
 				// if valuelist still has invalid data in it, try to correct it automatically and tell the user what was changed
 				List<Problem> problems = ServoyBuilder.checkValuelist(getValueList(), servoyModel.getFlattenedSolution(), ServoyModel.getServerManager(), true);
-				StringBuilder paf = new StringBuilder("Some problems with the contents of this valuelist were noticed and corrected:\n"); //$NON-NLS-1$
+				StringBuilder paf = new StringBuilder("Some problems with the contents of this valuelist were noticed and corrected:\n");
 				boolean autoFixes = false;
 				for (Problem problem : problems)
 				{
 					if (problem.fix != null)
 					{
 						autoFixes = true;
-						paf.append("\n- "); //$NON-NLS-1$
+						paf.append("\n- ");
 						paf.append(problem.message);
-						paf.append(" Auto changed: "); //$NON-NLS-1$
+						paf.append(" Auto changed: ");
 						paf.append(problem.fix);
 					}
 				}
-				if (autoFixes) MessageDialog.openWarning(getSite().getShell(), "Auto fixes when saving", paf.toString()); //$NON-NLS-1$
+				if (autoFixes) MessageDialog.openWarning(getSite().getShell(), "Auto fixes when saving", paf.toString());
 			}
 		}
 		super.doSave(monitor);
@@ -1040,16 +1040,16 @@ public class ValueListEditor extends PersistEditor
 
 	private String checkValidState()
 	{
-		if (nameField.getText() == null || nameField.getText().equals("")) //$NON-NLS-1$
+		if (nameField.getText() == null || nameField.getText().equals(""))
 		{
-			return "You must specify the name of the valuelist."; //$NON-NLS-1$
+			return "You must specify the name of the valuelist.";
 		}
 
 		if (tableValuesButton.getSelection())
 		{
 			if (!tableSelect.isValid())
 			{
-				return "The table name field is invalid"; //$NON-NLS-1$
+				return "The table name field is invalid";
 			}
 
 			String warningMessage = validateFlags();
@@ -1059,7 +1059,7 @@ public class ValueListEditor extends PersistEditor
 		{
 			if (!relationSelect.isValid())
 			{
-				return "The relation name field is invalid"; //$NON-NLS-1$
+				return "The relation name field is invalid";
 			}
 			String warningMessage = validateFlags();
 			if (warningMessage != null) return warningMessage;
@@ -1069,18 +1069,18 @@ public class ValueListEditor extends PersistEditor
 		{
 			if (!globalMethodSelect.isValid())
 			{
-				return "The global method field is invalid"; //$NON-NLS-1$
+				return "The global method field is invalid";
 			}
 		}
 
 		if (!sortingDefinitionSelect.isValid())
 		{
-			return "The sorting definition is invalid"; //$NON-NLS-1$
+			return "The sorting definition is invalid";
 		}
 
 		if (!fallbackValuelist.isValid())
 		{
-			return "The fallback value list is invalid"; //$NON-NLS-1$
+			return "The fallback value list is invalid";
 		}
 
 		return null;
@@ -1171,27 +1171,27 @@ public class ValueListEditor extends PersistEditor
 
 		if (boxesUsed == 0)
 		{
-			return "You must use at least one definition box."; //$NON-NLS-1$
+			return "You must use at least one definition box.";
 		}
 		if (showUsed == 0)
 		{
-			return "You must check at least one Show in field/list from a selected column."; //$NON-NLS-1$
+			return "You must check at least one Show in field/list from a selected column.";
 		}
 		if (returnUsed == 0)
 		{
-			return "You must check at least one Return in dataprovider from a selected column."; //$NON-NLS-1$
+			return "You must check at least one Return in dataprovider from a selected column.";
 		}
 		if (!box1)
 		{
-			return "There is an error in the first definition box"; //$NON-NLS-1$
+			return "There is an error in the first definition box";
 		}
 		if (!box2)
 		{
-			return "There is an error in the second definition box"; //$NON-NLS-1$
+			return "There is an error in the second definition box";
 		}
 		if (!box3)
 		{
-			return "There is an error in the third definition box"; //$NON-NLS-1$
+			return "There is an error in the third definition box";
 		}
 		return null;
 	}
@@ -1266,7 +1266,7 @@ public class ValueListEditor extends PersistEditor
 					return relations[relations.length - 1].getForeignDataSource();
 				}
 			}
-			return ""; //$NON-NLS-1$
+			return "";
 		}
 
 	}

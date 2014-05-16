@@ -45,9 +45,9 @@ import com.servoy.j2db.util.SortedList;
 public class InstalledWithPendingExtensionProvider implements IFileBasedExtensionProvider
 {
 
-	public final static String PENDING_FOLDER = ".pending"; //$NON-NLS-1$
+	public final static String PENDING_FOLDER = ".pending";
 
-	protected final static String DOT = "."; //$NON-NLS-1$
+	protected final static String DOT = ".";
 
 	protected IFileBasedExtensionProvider topMostProvider;
 	protected MessageKeeper messages = new MessageKeeper();
@@ -122,12 +122,12 @@ public class InstalledWithPendingExtensionProvider implements IFileBasedExtensio
 					}
 					catch (NumberFormatException e)
 					{
-						Debug.log("Found an invalid file name in .pending folder (it will probably be ignored and deleted)!", new RuntimeException()); //$NON-NLS-1$
+						Debug.log("Found an invalid file name in .pending folder (it will probably be ignored and deleted)!", new RuntimeException());
 					}
 				}
 				else
 				{
-					Debug.log("Found an invalid file/file name in .pending folder (it will probably be ignored and deleted)!", new RuntimeException()); //$NON-NLS-1$
+					Debug.log("Found an invalid file/file name in .pending folder (it will probably be ignored and deleted)!", new RuntimeException());
 				}
 			}
 		}
@@ -158,12 +158,12 @@ public class InstalledWithPendingExtensionProvider implements IFileBasedExtensio
 					}
 					catch (NumberFormatException e)
 					{
-						Debug.log("Found an invalid file name in .pending folder (it will probably be ignored and deleted)!", new RuntimeException()); //$NON-NLS-1$
+						Debug.log("Found an invalid file name in .pending folder (it will probably be ignored and deleted)!", new RuntimeException());
 					}
 				}
 				else
 				{
-					Debug.log("Found an invalid file/file name in .pending folder (it will probably be ignored and deleted)!", new RuntimeException()); //$NON-NLS-1$
+					Debug.log("Found an invalid file/file name in .pending folder (it will probably be ignored and deleted)!", new RuntimeException());
 				}
 			}
 		}

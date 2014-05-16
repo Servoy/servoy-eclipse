@@ -103,7 +103,7 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPag
 	/**
 	 * A viewer property indicating whether inherited elements are hidden. The value must  be a Boolean.
 	 */
-	public static final String PROPERTY_HIDE_INHERITED = "Hide.inherited"; //$NON-NLS-1$
+	public static final String PROPERTY_HIDE_INHERITED = "Hide.inherited";
 
 	public static final String COOLBAR_ACTIONS = "Actions";
 	public static final String COOLBAR_ALIGN = "Alignment";
@@ -588,7 +588,7 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPag
 								Part prev = DesignerUtil.getPreviousPart(part);
 								if (prev != null && prev.getHeight() > 0)
 								{
-									sb.append(" (").append(part.getHeight() - prev.getHeight()).append(')'); //$NON-NLS-1$
+									sb.append(" (").append(part.getHeight() - prev.getHeight()).append(')');
 								}
 							}
 						}

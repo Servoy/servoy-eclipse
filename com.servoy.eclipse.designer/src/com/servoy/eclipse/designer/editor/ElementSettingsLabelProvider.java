@@ -34,8 +34,8 @@ import com.servoy.j2db.persistence.ISupportName;
 
 public class ElementSettingsLabelProvider extends LabelProvider implements ITableLabelProvider
 {
-	public static final Image TRUE_IMAGE = Activator.getDefault().loadImageFromBundle("chk_on.gif"); //$NON-NLS-1$
-	public static final Image FALSE_IMAGE = Activator.getDefault().loadImageFromBundle("chk_off.gif"); //$NON-NLS-1$
+	public static final Image TRUE_IMAGE = Activator.getDefault().loadImageFromBundle("chk_on.gif");
+	public static final Image FALSE_IMAGE = Activator.getDefault().loadImageFromBundle("chk_off.gif");
 
 	private final ElementSettingsModel model;
 

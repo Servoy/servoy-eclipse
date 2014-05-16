@@ -260,7 +260,7 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 
 		public static class ScriptDialogLabelProvider implements IPersistLabelProvider, IFontProvider
 		{
-			private static final Image globalMethodsImage = Activator.getDefault().loadImageFromBundle("global_method.gif"); //$NON-NLS-1$
+			private static final Image globalMethodsImage = Activator.getDefault().loadImageFromBundle("global_method.gif");
 			private final boolean showPrefix;
 			private final PersistContext persistContext;
 			private final Table table;

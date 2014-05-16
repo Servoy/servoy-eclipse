@@ -52,8 +52,8 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 		super(title);
 		this.exportModel = exportModel;
 		this.nextPage = nextPage;
-		setTitle("Configuration settings for the generated servoy properties file"); //$NON-NLS-1$
-		setDescription("Specify following settings"); //$NON-NLS-1$
+		setTitle("Configuration settings for the generated servoy properties file");
+		setDescription("Specify following settings");
 	}
 
 	public void createControl(Composite parent)
@@ -63,7 +63,7 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 		composite.setLayout(gridLayout);
 
 		Label label = new Label(composite, SWT.NONE);
-		label.setText("Allow running smart clients"); //$NON-NLS-1$
+		label.setText("Allow running smart clients");
 
 		useRMI = new Button(composite, SWT.CHECK);
 		GridData gd = new GridData();
@@ -88,21 +88,21 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 		});
 
 		label = new Label(composite, SWT.NONE);
-		label.setText("Port used by RMI Registry "); //$NON-NLS-1$
+		label.setText("Port used by RMI Registry ");
 
 		startRMIPortText = new Text(composite, SWT.BORDER);
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 3;
 		startRMIPortText.setLayoutData(gd);
-		startRMIPortText.setText("1099"); //$NON-NLS-1$
-		exportModel.setStartRMIPort("1099"); //$NON-NLS-1$
+		startRMIPortText.setText("1099");
+		exportModel.setStartRMIPort("1099");
 		startRMIPortText.addListener(SWT.KeyUp, this);
 
 		label = new Label(composite, SWT.NONE);
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 4;
 		label.setLayoutData(gd);
-		label.setText("\nNOTE: If running of smart clients is enabled, please take in consideration\nthat on each restart of the application context in the web container,\nRMI related classes cannot be GC and that may lead to out-of-memory errors."); //$NON-NLS-1$
+		label.setText("\nNOTE: If running of smart clients is enabled, please take in consideration\nthat on each restart of the application context in the web container,\nRMI related classes cannot be GC and that may lead to out-of-memory errors.");
 
 
 		setControl(composite);

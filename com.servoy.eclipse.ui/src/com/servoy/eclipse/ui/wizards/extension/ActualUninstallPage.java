@@ -55,7 +55,7 @@ public class ActualUninstallPage extends ActualExecuteOperationPage
 
 	public ActualUninstallPage(String pageName, InstallExtensionState state)
 	{
-		super(pageName, state, "Uninstalling extension", "The extension is being uninstalled. Please wait.", "Uninstall"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		super(pageName, state, "Uninstalling extension", "The extension is being uninstalled. Please wait.", "Uninstall");
 	}
 
 	@Override
@@ -73,9 +73,9 @@ public class ActualUninstallPage extends ActualExecuteOperationPage
 			List<Message> allMessages = new ArrayList<Message>();
 			state.installedExtensionsProvider.clearMessages();
 
-			String tmp = "Preparing to uninstall"; //$NON-NLS-1$
+			String tmp = "Preparing to uninstall";
 			monitor.beginTask(tmp, state.chosenPath.installSequence.length * 100 + 50); // uninstall (100 * #) + restart search 30 & serialize 20 
-			appendTextToLog(tmp + "..."); //$NON-NLS-1$
+			appendTextToLog(tmp + "...");
 
 			File pendingDir = InstalledWithPendingExtensionProvider.getNextFreePendingDir(new File(state.installDir, ExtensionUtils.EXPFILES_FOLDER));
 			try
@@ -85,8 +85,8 @@ public class ActualUninstallPage extends ActualExecuteOperationPage
 				if (pendingDir.exists() && pendingDir.list().length == 0)
 				{
 					// check to see if restart is needed...
-					monitor.setTaskName("Verifying the need for restart"); //$NON-NLS-1$
-					monitor.subTask(""); //$NON-NLS-1$
+					monitor.setTaskName("Verifying the need for restart");
+					monitor.subTask("");
 					if (!state.mustRestart) // can be already set to true if there are already pending installs to be performed (from other install operations)
 					{
 						for (InstallStep step : state.chosenPath.installSequence)
@@ -107,7 +107,7 @@ public class ActualUninstallPage extends ActualExecuteOperationPage
 							}
 							else
 							{
-								error.o = "Cannot parse package.xml of extension '" + state.installedExtensionsProvider.getDependencyMetadata(new ExtensionDependencyDeclaration(n.id, n.installedVersion, n.installedVersion))[0].extensionName + "'."; //$NON-NLS-1$ //$NON-NLS-2$
+								error.o = "Cannot parse package.xml of extension '" + state.installedExtensionsProvider.getDependencyMetadata(new ExtensionDependencyDeclaration(n.id, n.installedVersion, n.installedVersion))[0].extensionName + "'.";
 								break;
 							}
 						}
@@ -116,14 +116,14 @@ public class ActualUninstallPage extends ActualExecuteOperationPage
 
 					if (error.o == null && monitor.isCanceled())
 					{
-						error.o = "Canceled by user."; //$NON-NLS-1$
+						error.o = "Canceled by user.";
 					}
 
 					if (error.o == null)
 					{
-						monitor.setTaskName("Uninstall progress"); //$NON-NLS-1$
-						appendTextToLog(""); // new line //$NON-NLS-1$
-						appendTextToLog("Uninstalling extension" + (state.chosenPath.installSequence.length > 1 ? "s..." : "...")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+						monitor.setTaskName("Uninstall progress");
+						appendTextToLog(""); // new line
+						appendTextToLog("Uninstalling extension" + (state.chosenPath.installSequence.length > 1 ? "s..." : "..."));
 						if (!state.mustRestart)
 						{
 							// start uninstalling what's needed!
@@ -134,13 +134,13 @@ public class ActualUninstallPage extends ActualExecuteOperationPage
 							// only install developer specific content
 							state.disallowCancel = true; // because a restart is needed
 						}
-						appendTextToLog(""); // new line //$NON-NLS-1$ 
+						appendTextToLog(""); // new line
 					}
 				}
 				else
 				{
 					// unable to set-up the .pending install dir; install failed
-					error.o = "Problem accessing an internal directory."; //$NON-NLS-1$
+					error.o = "Problem accessing an internal directory.";
 				}
 			}
 			finally
@@ -169,7 +169,7 @@ public class ActualUninstallPage extends ActualExecuteOperationPage
 		// this can no longer be cancelled
 		state.disallowCancel = true;
 
-		monitor.beginTask("Uninstalling extension" + (state.chosenPath.installSequence.length > 1 ? "s" : ""), state.chosenPath.installSequence.length + 1);//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+		monitor.beginTask("Uninstalling extension" + (state.chosenPath.installSequence.length > 1 ? "s" : ""), state.chosenPath.installSequence.length + 1);
 
 		LibChoiceHandler libHandler = null;
 		if (state.chosenPath.libChoices != null)
@@ -184,7 +184,7 @@ public class ActualUninstallPage extends ActualExecuteOperationPage
 			{
 				DependencyMetadata dmd = state.installedExtensionsProvider.getDependencyMetadata(new ExtensionDependencyDeclaration(step.extension.id,
 					step.extension.installedVersion, step.extension.installedVersion))[0];
-				monitor.subTask("uninstalling '" + dmd.extensionName + "'..."); //$NON-NLS-1$//$NON-NLS-2$
+				monitor.subTask("uninstalling '" + dmd.extensionName + "'...");
 
 				File f = state.installedExtensionsProvider.getEXPFile(step.extension.id, step.extension.installedVersion, null);
 
@@ -197,17 +197,17 @@ public class ActualUninstallPage extends ActualExecuteOperationPage
 				allMessages.addAll(Arrays.asList(uninstaller.getMessages()));
 
 				monitor.worked(1);
-				appendTextToLog("           [-] " + dmd.extensionName); //$NON-NLS-1$
+				appendTextToLog("           [-] " + dmd.extensionName);
 			}
 			else
 			{
 				// should never happen; if it does it's an implementation error
-				allMessages.add(new Message("Internal error [uist]...", Message.ERROR)); //$NON-NLS-1$
-				ServoyLog.logError("Unknown install step type...", null); //$NON-NLS-1$
+				allMessages.add(new Message("Internal error [uist]...", Message.ERROR));
+				ServoyLog.logError("Unknown install step type...", null);
 			}
 		}
 
-		monitor.subTask("handling library dependencies..."); //$NON-NLS-1$
+		monitor.subTask("handling library dependencies...");
 
 		if (libHandler != null)
 		{

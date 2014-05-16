@@ -53,7 +53,7 @@ public class CopyColumnNameAction extends Action implements ISelectionChangedLis
 		setEnabled(false);
 
 		setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
-		setText("Copy"); //$NON-NLS-1$
+		setText("Copy");
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)

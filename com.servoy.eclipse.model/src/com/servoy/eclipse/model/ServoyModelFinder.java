@@ -67,7 +67,7 @@ public class ServoyModelFinder
 
 			if (extensions == null || extensions.length == 0)
 			{
-				ServoyLog.logError("Could not find servoy model provider extension (extension point " + IServoyEnvironmentProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$//$NON-NLS-2$
+				ServoyLog.logError("Could not find servoy model provider extension (extension point " + IServoyEnvironmentProvider.EXTENSION_ID + ")", null);
 			}
 			else
 			{
@@ -76,7 +76,7 @@ public class ServoyModelFinder
 				{
 					for (IExtension ext : extensions)
 					{
-						String instanceString = ext.getConfigurationElements()[0].getAttribute("instance"); //$NON-NLS-1$
+						String instanceString = ext.getConfigurationElements()[0].getAttribute("instance");
 						if ((instanceString == null && instance == null) || instanceString != null && instance != null && instance.equals(instanceString))
 						{
 							extension = ext;
@@ -89,26 +89,26 @@ public class ServoyModelFinder
 				if (ce == null || ce.length == 0)
 				{
 					ServoyLog.logError(
-						"Could not read servoy model provider extension element (extension point " + IServoyEnvironmentProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$//$NON-NLS-2$
+						"Could not read servoy model provider extension element (extension point " + IServoyEnvironmentProvider.EXTENSION_ID + ")", null);
 				}
 				else
 				{
 					if (ce.length > 1)
 					{
 						ServoyLog.logError(
-							"Multiple servoy model provider extension elements found (extension point " + IServoyEnvironmentProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$ //$NON-NLS-2$
+							"Multiple servoy model provider extension elements found (extension point " + IServoyEnvironmentProvider.EXTENSION_ID + ")", null);
 					}
 					try
 					{
-						modelProvider = (IServoyEnvironmentProvider)ce[0].createExecutableExtension("class"); //$NON-NLS-1$
+						modelProvider = (IServoyEnvironmentProvider)ce[0].createExecutableExtension("class");
 						if (modelProvider == null)
 						{
-							ServoyLog.logError("Could not load servoy model provider (extension point " + IServoyEnvironmentProvider.EXTENSION_ID + ")", null); //$NON-NLS-1$//$NON-NLS-2$
+							ServoyLog.logError("Could not load servoy model provider (extension point " + IServoyEnvironmentProvider.EXTENSION_ID + ")", null);
 						}
 					}
 					catch (CoreException e)
 					{
-						ServoyLog.logError("Could not load servoy model provider (extension point " + IServoyEnvironmentProvider.EXTENSION_ID + ")", e); //$NON-NLS-1$//$NON-NLS-2$
+						ServoyLog.logError("Could not load servoy model provider (extension point " + IServoyEnvironmentProvider.EXTENSION_ID + ")", e);
 					}
 				}
 			}

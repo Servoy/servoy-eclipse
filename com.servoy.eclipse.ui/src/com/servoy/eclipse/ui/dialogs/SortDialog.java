@@ -105,7 +105,7 @@ public class SortDialog extends Dialog
 			TreePatternFilter.FILTER_PARENTS), SWT.MULTI);
 
 		final Button leftButton = new Button(composite, SWT.NONE);
-		leftButton.setText("<<"); //$NON-NLS-1$
+		leftButton.setText("<<");
 		leftButton.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -123,7 +123,7 @@ public class SortDialog extends Dialog
 		});
 
 		final Button rightButton = new Button(composite, SWT.NONE);
-		rightButton.setText(">>"); //$NON-NLS-1$
+		rightButton.setText(">>");
 		rightButton.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -356,7 +356,7 @@ public class SortDialog extends Dialog
 	@Override
 	protected IDialogSettings getDialogBoundsSettings()
 	{
-		return EditorUtil.getDialogSettings("sortDialog"); //$NON-NLS-1$
+		return EditorUtil.getDialogSettings("sortDialog");
 	}
 
 	public class SortModel
@@ -371,13 +371,13 @@ public class SortDialog extends Dialog
 			{
 				try
 				{
-					StringTokenizer tk = new StringTokenizer(initialData.toString(), ","); //$NON-NLS-1$
+					StringTokenizer tk = new StringTokenizer(initialData.toString(), ",");
 					while (tk.hasMoreTokens())
 					{
 						String columnName = null;
 						String order = null;
 						String def = tk.nextToken().trim();
-						int index = def.indexOf(" "); //$NON-NLS-1$
+						int index = def.indexOf(" ");
 						if (index != -1)
 						{
 							columnName = def.substring(0, index);
@@ -392,7 +392,7 @@ public class SortDialog extends Dialog
 							SortColumn sortColumn = getSortColumn(columnName);
 							if (sortColumn != null)
 							{
-								sortColumn.setSortOrder(order != null && order.trim().startsWith("desc") ? SortColumn.DESCENDING : SortColumn.ASCENDING); //$NON-NLS-1$
+								sortColumn.setSortOrder(order != null && order.trim().startsWith("desc") ? SortColumn.DESCENDING : SortColumn.ASCENDING);
 								tableColumns.add(sortColumn);
 							}
 						}
@@ -409,7 +409,7 @@ public class SortDialog extends Dialog
 		{
 			com.servoy.j2db.persistence.Table lastTable = table;
 			List<Relation> relations = new ArrayList<Relation>();
-			String[] split = dataProviderID.split("\\."); //$NON-NLS-1$
+			String[] split = dataProviderID.split("\\.");
 			for (int i = 0; i < split.length - 1; i++)
 			{
 				Relation r = flattenedEditingSolution.getRelation(split[i]);
@@ -527,7 +527,7 @@ public class SortDialog extends Dialog
 			for (int i = 0; i < tableColumns.size(); i++)
 			{
 				sb.append(tableColumns.get(i).toString());
-				if (i < tableColumns.size() - 1) sb.append(", "); //$NON-NLS-1$
+				if (i < tableColumns.size() - 1) sb.append(", ");
 			}
 			return sb.toString();
 		}

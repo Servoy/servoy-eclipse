@@ -147,7 +147,7 @@ public class TableEditorInput implements IEditorInput
 	@Override
 	public String toString()
 	{
-		return getClass().getName() + "(" + getToolTipText() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+		return getClass().getName() + "(" + getToolTipText() + ")";
 	}
 
 	@Override

@@ -113,7 +113,7 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 	@Override
 	protected IDataProvider getEnumDataProvider(String id) throws RepositoryException
 	{
-		String[] enumParts = id.split("\\."); //$NON-NLS-1$
+		String[] enumParts = id.split("\\.");
 		if (enumParts.length > 3)
 		{
 			IDataProvider globalDataProvider = getGlobalDataProvider(enumParts[0] + '.' + enumParts[1] + '.' + enumParts[2]);

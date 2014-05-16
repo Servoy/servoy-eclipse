@@ -114,15 +114,15 @@ public class DeleteMediaAction extends Action implements ISelectionChangedListen
 	public void run()
 	{
 		if (((selectedMediaFolders != null && selectedMediaFolders.size() > 0) || (selectedMedias != null && selectedMedias.size() > 0)) &&
-			MessageDialog.openConfirm(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getText(), "Are you sure you want to delete?")) //$NON-NLS-1$
+			MessageDialog.openConfirm(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getText(), "Are you sure you want to delete?"))
 		{
-			Job job = new WorkspaceJob("Delete Media") //$NON-NLS-1$
+			Job job = new WorkspaceJob("Delete Media")
 			{
 
 				@Override
 				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 				{
-					monitor.beginTask("Deleting Media", IProgressMonitor.UNKNOWN); //$NON-NLS-1$
+					monitor.beginTask("Deleting Media", IProgressMonitor.UNKNOWN);
 					try
 					{
 
@@ -176,7 +176,7 @@ public class DeleteMediaAction extends Action implements ISelectionChangedListen
 										}
 										catch (RepositoryException e)
 										{
-											ServoyLog.logError("Could not delete media", e); //$NON-NLS-1$
+											ServoyLog.logError("Could not delete media", e);
 										}
 									}
 
@@ -186,7 +186,7 @@ public class DeleteMediaAction extends Action implements ISelectionChangedListen
 									}
 									catch (RepositoryException e)
 									{
-										ServoyLog.logError("Could not save editing solution when deleting media folder", e); //$NON-NLS-1$
+										ServoyLog.logError("Could not save editing solution when deleting media folder", e);
 									}
 
 									try
@@ -233,12 +233,12 @@ public class DeleteMediaAction extends Action implements ISelectionChangedListen
 					}
 					catch (RepositoryException e)
 					{
-						MessageDialog.openError(viewer.getSite().getShell(), "Error", "Could not delete media: " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
-						ServoyLog.logError("Could not delete media files", e); //$NON-NLS-1$
+						MessageDialog.openError(viewer.getSite().getShell(), "Error", "Could not delete media: " + e.getMessage());
+						ServoyLog.logError("Could not delete media files", e);
 					}
 					catch (Exception e)
 					{
-						ServoyLog.logError("Could not delete media files", e); //$NON-NLS-1$
+						ServoyLog.logError("Could not delete media files", e);
 					}
 					finally
 					{

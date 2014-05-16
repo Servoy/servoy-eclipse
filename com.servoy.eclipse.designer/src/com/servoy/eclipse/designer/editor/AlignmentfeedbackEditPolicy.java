@@ -73,16 +73,16 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 	/**
 	 * A viewer property indicating whether the alignment feedback is enabled. The value must  be a Boolean.
 	 */
-	public static final String PROPERTY_ALIGMENT_FEEDBACK_VISIBLE = "AlignmentfeedbackEditPolicy.alignmentFeedbackVisible"; //$NON-NLS-1$
+	public static final String PROPERTY_ALIGMENT_FEEDBACK_VISIBLE = "AlignmentfeedbackEditPolicy.alignmentFeedbackVisible";
 	/**
 	 * A viewer property indicating whether the anchor feedback is enabled. The value must  be a Boolean.
 	 */
-	public static final String PROPERTY_ANCHOR_FEEDBACK_VISIBLE = "AlignmentfeedbackEditPolicy.anchorFeedbackVisible"; //$NON-NLS-1$
+	public static final String PROPERTY_ANCHOR_FEEDBACK_VISIBLE = "AlignmentfeedbackEditPolicy.anchorFeedbackVisible";
 
 	/**
 	 * A viewer property indicating whether the same size feedback is enabled. The value must  be a Boolean.
 	 */
-	public static final String PROPERTY_SAME_SIZE_FEEDBACK_VISIBLE = "AlignmentfeedbackEditPolicy.sameSizeFeedbackVisible"; //$NON-NLS-1$
+	public static final String PROPERTY_SAME_SIZE_FEEDBACK_VISIBLE = "AlignmentfeedbackEditPolicy.sameSizeFeedbackVisible";
 
 	private AlignmentFeedbackHelper alignmentFeedbackHelper;
 

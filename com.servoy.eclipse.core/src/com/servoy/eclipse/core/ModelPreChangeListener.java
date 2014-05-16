@@ -71,7 +71,7 @@ public class ModelPreChangeListener implements IResourceChangeListener
 									if (projectThatWillChange == referencedP)
 									{
 										// remember that this was a resources project for the solution
-										WorkspaceJob job = new WorkspaceJob("Marking deleted/closed resources project") //$NON-NLS-1$
+										WorkspaceJob job = new WorkspaceJob("Marking deleted/closed resources project")
 										{
 											@Override
 											public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
@@ -100,7 +100,7 @@ public class ModelPreChangeListener implements IResourceChangeListener
 				}
 				catch (CoreException e)
 				{
-					ServoyLog.logError("Exception while checking for urpdoc.", e); //$NON-NLS-1$
+					ServoyLog.logError("Exception while checking for urpdoc.", e);
 				}
 			}
 		}

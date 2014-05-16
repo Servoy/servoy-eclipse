@@ -287,7 +287,7 @@ public class ElementFactory
 		if (name != null)
 		{
 			((ISupportUpdateableName)copy).updateName(validator, name);
-			copy.setRuntimeProperty(AbstractBase.NameChangeProperty, ""); //$NON-NLS-1$
+			copy.setRuntimeProperty(AbstractBase.NameChangeProperty, "");
 		}
 		if (copy instanceof IFormElement)
 		{
@@ -303,7 +303,7 @@ public class ElementFactory
 		if (ii == null) return null;
 
 		GraphicalComponent label = parent.createNewGraphicalComponent(new java.awt.Point(location == null ? 0 : location.x, location == null ? 0 : location.y));
-		label.setText(""); //$NON-NLS-1$
+		label.setText("");
 		label.setImageMediaID(media.getID());
 		label.setTransparent(ImageLoader.imageHasAlpha(ii.getImage(), 0));
 		Dimension labeldim = new Dimension(ii.getIconWidth(), ii.getIconHeight());
@@ -328,7 +328,7 @@ public class ElementFactory
 
 	public static IPersist createBean(Form form, String beanClassName, Point location) throws RepositoryException
 	{
-		Bean bean = form.createNewBean("bean_" + random.nextInt(1024), beanClassName); //$NON-NLS-1$
+		Bean bean = form.createNewBean("bean_" + random.nextInt(1024), beanClassName);
 		bean.setLocation(new java.awt.Point(location == null ? 0 : location.x, location == null ? 0 : location.y));
 
 		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
@@ -510,7 +510,7 @@ public class ElementFactory
 						cutofDPID = cutofDPID.substring(indx + 1);
 					}
 				}
-				String labelText = Utils.stringInitCap(Utils.stringReplace(cutofDPID, "_", " ")); //$NON-NLS-1$ //$NON-NLS-2$
+				String labelText = Utils.stringInitCap(Utils.stringReplace(cutofDPID, "_", " "));
 				if (dataProvider.getColumnWrapper() != null)
 				{
 					IColumn c = dataProvider.getColumnWrapper().getColumn();
@@ -537,7 +537,7 @@ public class ElementFactory
 					if (fillName)
 					{
 						label.setLabelFor(name);
-						label.setName(name + "_label"); //$NON-NLS-1$
+						label.setName(name + "_label");
 					}
 
 					if (placeHorizontal)
@@ -892,10 +892,10 @@ public class ElementFactory
 		int typeId = object.optInt(SolutionSerializer.PROP_TYPEID);
 
 		// adjust location, make relative to base
-		if (base != null && object.has("location")) //$NON-NLS-1$
+		if (base != null && object.has("location"))
 		{
-			java.awt.Point location = PersistHelper.createPoint((String)object.opt("location")); //$NON-NLS-1$
-			object.put("location", PersistHelper.createPointString(new java.awt.Point(location.x - base.x, location.y - base.y))); //$NON-NLS-1$
+			java.awt.Point location = PersistHelper.createPoint((String)object.opt("location"));
+			object.put("location", PersistHelper.createPointString(new java.awt.Point(location.x - base.x, location.y - base.y)));
 		}
 
 		Iterator<String> keys = object.keys();
@@ -927,7 +927,7 @@ public class ElementFactory
 					}
 				}
 			}
-			else if (key.endsWith("FormID") || (typeId == IRepository.FORMS && StaticContentSpecLoader.PROPERTY_EXTENDSID.getPropertyName().equals(key))) //$NON-NLS-1$
+			else if (key.endsWith("FormID") || (typeId == IRepository.FORMS && StaticContentSpecLoader.PROPERTY_EXTENDSID.getPropertyName().equals(key)))
 			{
 				// replace form references with their string name to be resolved when template is applied
 				UUID uuid;
@@ -1291,7 +1291,7 @@ public class ElementFactory
 				{
 					scriptMethod = flattenedSolution.getScriptMethod(null, name);
 				}
-				else if (!name.equals("-1") && !name.equals("0")) //$NON-NLS-1$ //$NON-NLS-2$
+				else if (!name.equals("-1") && !name.equals("0"))
 				{
 					scriptMethod = flattenedForm.getScriptMethod(name);
 				}
@@ -1300,7 +1300,7 @@ public class ElementFactory
 					object.put(key, scriptMethod.getUUID().toString());
 				}
 			}
-			else if (key.endsWith("FormID")) //$NON-NLS-1$
+			else if (key.endsWith("FormID"))
 			{
 				// find form from name replace form references with their string name to be resolved when template is applied
 				String formName = object.getString(key);

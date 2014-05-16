@@ -42,8 +42,8 @@ import com.servoy.j2db.util.Pair;
 public class InstallExtensionWizard extends Wizard implements IImportWizard
 {
 
-	protected static final String WIZARD_SETTINGS_SECTION = "ExtensionInstallWizard"; //$NON-NLS-1$
-	protected static final String TITLE = "Extension install"; //$NON-NLS-1$
+	protected static final String WIZARD_SETTINGS_SECTION = "ExtensionInstallWizard";
+	protected static final String TITLE = "Extension install";
 
 	private Pair<String, Message[]> errorAndMsgs;
 
@@ -80,9 +80,9 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
-		setWindowTitle(errorAndMsgs == null ? TITLE : "Extension install/uninstall"); //$NON-NLS-1$
+		setWindowTitle(errorAndMsgs == null ? TITLE : "Extension install/uninstall");
 		setDefaultPageImageDescriptor(idToInstallFromMP != null
-			? Activator.loadImageDescriptorFromBundle("marketplace_wizard.png") : Activator.loadImageDescriptorFromBundle("extension_wizard.png")); //$NON-NLS-1$ //$NON-NLS-2$
+			? Activator.loadImageDescriptorFromBundle("marketplace_wizard.png") : Activator.loadImageDescriptorFromBundle("extension_wizard.png"));
 		IDialogSettings workbenchSettings = Activator.getDefault().getDialogSettings();
 		IDialogSettings section = workbenchSettings.getSection(WIZARD_SETTINGS_SECTION);
 		if (section == null)
@@ -105,7 +105,7 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 			state.canFinish = true;
 			state.disallowCancel = true; // install/uninstall is over, it can't be cancelled
 			addPage(new ShowMessagesPage(
-				"Error page", "Extension install/uninstall", errorAndMsgs.getLeft() != null ? errorAndMsgs.getLeft() : "Some items may need your attention.", null, errorAndMsgs.getRight(), false, null)); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+				"Error page", "Extension install/uninstall", errorAndMsgs.getLeft() != null ? errorAndMsgs.getLeft() : "Some items may need your attention.", null, errorAndMsgs.getRight(), false, null));
 		}
 		else
 		{
@@ -144,10 +144,10 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 							Message[] msgs = marketplaceProvider.getMessages();
 							if (msgs.length == 0)
 							{
-								msgs = new Message[] { new Message("Unknown error", Message.ERROR) }; //$NON-NLS-1$
+								msgs = new Message[] { new Message("Unknown error", Message.ERROR) };
 							}
 							addPage(new ShowMessagesPage(
-								"Error page", "Cannot install extension", "A problem was encountered during available versions lookup.", null, msgs, false, null)); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+								"Error page", "Cannot install extension", "A problem was encountered during available versions lookup.", null, msgs, false, null));
 						}
 						else
 						{
@@ -155,12 +155,12 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 							if (versions.length == 1)
 							{
 								state.version = versions[0];
-								addPage(new DependencyResolvingPage("DepResolver", state, dialogOptions, false)); //$NON-NLS-1$
+								addPage(new DependencyResolvingPage("DepResolver", state, dialogOptions, false));
 							}
 							else
 							{
 								// show a page that allows the user to choose a version and auto-selects the most appropriate one (highest compatible)
-								addPage(new ChooseMPExtensionVersion("MPver", state, dialogOptions, marketplaceProvider, versions)); //$NON-NLS-1$
+								addPage(new ChooseMPExtensionVersion("MPver", state, dialogOptions, marketplaceProvider, versions));
 							}
 						}
 					}
@@ -168,19 +168,19 @@ public class InstallExtensionWizard extends Wizard implements IImportWizard
 					{
 						state.extensionProvider = marketplaceProvider;
 						state.version = versionToInstallFromMP;
-						addPage(new DependencyResolvingPage("DepResolver", state, dialogOptions, false)); //$NON-NLS-1$
+						addPage(new DependencyResolvingPage("DepResolver", state, dialogOptions, false));
 					}
 				}
 				else
 				{
-					addPage(new ChooseEXPFilePage("EXPchooser", state, dialogOptions)); //$NON-NLS-1$
+					addPage(new ChooseEXPFilePage("EXPchooser", state, dialogOptions));
 				}
 			}
 			else
 			{
-				Message[] msgs = new Message[] { new Message("Cannot access directory '" + extDir.getAbsolutePath() + "'.", Message.ERROR) }; //$NON-NLS-1$ //$NON-NLS-2$
+				Message[] msgs = new Message[] { new Message("Cannot access directory '" + extDir.getAbsolutePath() + "'.", Message.ERROR) };
 				addPage(new ShowMessagesPage(
-					"Error page", "Cannot install extension", "A problem was encountered accessing the extension dir.", null, msgs, false, null)); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+					"Error page", "Cannot install extension", "A problem was encountered accessing the extension dir.", null, msgs, false, null));
 			}
 		}
 

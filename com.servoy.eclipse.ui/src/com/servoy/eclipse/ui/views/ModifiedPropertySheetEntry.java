@@ -73,7 +73,7 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 		String text = provider.getText(editValue);
 		if (text == null)
 		{
-			return "";//$NON-NLS-1$
+			return "";
 		}
 		return text;
 	}

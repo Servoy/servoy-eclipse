@@ -131,13 +131,13 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 			{
 				// arguments defined in template, will be overridden at runtime
 				final MethodArgument templateArgument = template.getArguments()[i];
-				String argName = (combinedArguments != null && i < combinedArguments.length) ? combinedArguments[i].getName() : "arguments[" + i + ']'; //$NON-NLS-1$
+				String argName = (combinedArguments != null && i < combinedArguments.length) ? combinedArguments[i].getName() : "arguments[" + i + ']';
 				propertyController = new PropertyController<String, String>(Integer.valueOf(i), argName, null, new LabelProvider()
 				{
 					@Override
 					public String getText(Object element)
 					{
-						return templateArgument.getName() + " {" + templateArgument.getType() + '}'; //$NON-NLS-1$
+						return templateArgument.getName() + " {" + templateArgument.getType() + '}';
 					}
 				}, null);
 				propertyController.setDescription(templateArgument.getDescription());
@@ -150,7 +150,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 					@Override
 					public String getText(Object element)
 					{
-						if (element == null || "".equals(element)) //$NON-NLS-1$
+						if (element == null || "".equals(element))
 						{
 							// argument is not set in method call in subform, show inherited value
 							Form contextForm = (Form)context.getContext().getAncestor(IRepository.FORMS);
@@ -165,7 +165,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 										Object inherited = instanceMethodArguments.get(index);
 										if (inherited != null)
 										{
-											return inherited.toString() + " [" + form.getName() + ']'; //$NON-NLS-1$
+											return inherited.toString() + " [" + form.getName() + ']';
 										}
 									}
 								}
@@ -285,7 +285,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 
 	public static class MethodPropertySource extends ComplexPropertySource<MethodWithArguments>
 	{
-		public static final String DELETED_ARGUMENT = "-DELETED-ARGUMENT-"; //$NON-NLS-1$
+		public static final String DELETED_ARGUMENT = "-DELETED-ARGUMENT-";
 
 		private IPropertyDescriptor[] propertyDescriptors = null;
 		private final PersistContext persistContext;

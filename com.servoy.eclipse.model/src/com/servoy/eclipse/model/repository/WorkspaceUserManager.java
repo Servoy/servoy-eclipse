@@ -147,9 +147,9 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	public static class User implements Comparable<User>, PCloneable<User>
 	{
-		public static final String NAME = "name"; //$NON-NLS-1$
-		public static final String PASSWORD_HASH = "password_hash"; //$NON-NLS-1$
-		public static final String USER_UID = "user_uid"; //$NON-NLS-1$
+		public static final String NAME = "name";
+		public static final String PASSWORD_HASH = "password_hash";
+		public static final String USER_UID = "user_uid";
 
 		public String name;
 		public String passwordHash;
@@ -187,7 +187,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		@Override
 		public String toString()
 		{
-			return "Name: " + name + ", PWD Hash: " + passwordHash + ", UID: " + userUid; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+			return "Name: " + name + ", PWD Hash: " + passwordHash + ", UID: " + userUid;
 		}
 
 		// needed in order for remove(Object) to work correctly in a sorted list
@@ -340,23 +340,23 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	public static final int WRITE_MODE_MANUAL = 0;
 	public static final int WRITE_MODE_AUTOMATIC = 1;
 
-	public static final String SECURITY_DIR = "security"; //$NON-NLS-1$
-	public static final String SECURITY_FILE_EXTENSION_WITHOUT_DOT = "sec"; //$NON-NLS-1$
+	public static final String SECURITY_DIR = "security";
+	public static final String SECURITY_FILE_EXTENSION_WITHOUT_DOT = "sec";
 	public static final String SECURITY_FILE_EXTENSION = '.' + SECURITY_FILE_EXTENSION_WITHOUT_DOT;
-	public static final String SECURITY_FILENAME_WITHOUT_EXTENSION = "security"; //$NON-NLS-1$
+	public static final String SECURITY_FILENAME_WITHOUT_EXTENSION = "security";
 	public static final String SECURITY_FILENAME = SECURITY_FILENAME_WITHOUT_EXTENSION + SECURITY_FILE_EXTENSION;
 	public static final String SECURITY_FILE_RELATIVE_TO_PROJECT = SECURITY_DIR + IPath.SEPARATOR + SECURITY_FILENAME;
 
-	public static final String MARKER_ATTRIBUTE_TYPE = "SPM_type"; // security problem marker type //$NON-NLS-1$
-	public static final String MARKER_ATTRIBUTE_WRONG_VALUE = "SPM_wrong_value"; // security problem marker wrong value (for example the name of an invalid group...) - if not an array //$NON-NLS-1$
-	public static final String MARKER_ATTRIBUTE_WRONG_VALUE_ARRAY_LENGTH = "SPM_wrong_value_array_length"; // security problem marker wrong value array length //$NON-NLS-1$
-	public static final String MARKER_ATTRIBUTE_WRONG_VALUE_ARRAY = "SPM_wrong_value_array_index_"; // security problem marker wrong value array element //$NON-NLS-1$
+	public static final String MARKER_ATTRIBUTE_TYPE = "SPM_type"; // security problem marker type
+	public static final String MARKER_ATTRIBUTE_WRONG_VALUE = "SPM_wrong_value"; // security problem marker wrong value (for example the name of an invalid group...) - if not an array
+	public static final String MARKER_ATTRIBUTE_WRONG_VALUE_ARRAY_LENGTH = "SPM_wrong_value_array_length"; // security problem marker wrong value array length
+	public static final String MARKER_ATTRIBUTE_WRONG_VALUE_ARRAY = "SPM_wrong_value_array_index_"; // security problem marker wrong value array element
 
-	private static final String TABLE_PERMISSION_KEY = "permission"; //$NON-NLS-1$
+	private static final String TABLE_PERMISSION_KEY = "permission";
 
-	public static final String JSON_GROUPS = "groups"; //$NON-NLS-1$
-	public static final String JSON_USERS = "users"; //$NON-NLS-1$
-	public static final String JSON_USERGROUPS = "usergroups"; //$NON-NLS-1$
+	public static final String JSON_GROUPS = "groups";
+	public static final String JSON_USERS = "users";
+	public static final String JSON_USERGROUPS = "usergroups";
 
 	private final HashMap<Integer, String> idToUUID = new HashMap<Integer, String>();
 	private final HashMap<String, Integer> UUIDToId = new HashMap<String, Integer>();
@@ -703,7 +703,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	public static final String serializeUserAndGroupInfo(List<String> groups, List<User> users, Map<String, List<String>> usersForGroups) throws JSONException
 	{
-		if (groups.size() == 0 && users.size() == 0 && usersForGroups.size() == 0) return ""; //$NON-NLS-1$
+		if (groups.size() == 0 && users.size() == 0 && usersForGroups.size() == 0) return "";
 		ServoyJSONObject obj = new ServoyJSONObject();
 
 		ServoyJSONArray jsonGroups = new ServoyJSONArray();
@@ -1011,7 +1011,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	private void runLaterInUserJob(IResource resource, final Runnable runnable)
 	{
-		Job job = new Job("Correcting security info") //$NON-NLS-1$
+		Job job = new Job("Correcting security info")
 		{
 			@Override
 			protected IStatus run(IProgressMonitor monitor)
@@ -1045,7 +1045,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		{
 			if (file.exists())
 			{
-				String fileContent = Utils.getTXTFileContent(file.getContents(true), Charset.forName("UTF8")); //$NON-NLS-1$
+				String fileContent = Utils.getTXTFileContent(file.getContents(true), Charset.forName("UTF8"));
 				deserializeUserAndGroupInfo(clientId, fileContent);
 			}
 		}
@@ -1123,7 +1123,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				else
 				{
 					// invalid group name
-					throw new SecurityReadException(SecurityReadException.INVALID_GROUP_NAME, "Invalid group name '" + groupName + "' in security file.", //$NON-NLS-1$ //$NON-NLS-2$
+					throw new SecurityReadException(SecurityReadException.INVALID_GROUP_NAME, "Invalid group name '" + groupName + "' in security file.",
 						groupName);
 				}
 			}
@@ -1141,12 +1141,12 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				if (getUserName(clientId, u.userUid) != null)
 				{
 					// duplicate UUID for users
-					throw new SecurityReadException(SecurityReadException.DUPLICATE_USER_UID, "Duplicate UUID for users security file: " + u.userUid, u.userUid); //$NON-NLS-1$
+					throw new SecurityReadException(SecurityReadException.DUPLICATE_USER_UID, "Duplicate UUID for users security file: " + u.userUid, u.userUid);
 				}
 				else if (getUserUID(clientId, u.name) != null)
 				{
 					// do not choose one or the other automatically - user should know about this
-					throw new SecurityReadException(SecurityReadException.DUPLICATE_USER_NAME, "Duplicate user name in security file: " + u.name, u.name); //$NON-NLS-1$
+					throw new SecurityReadException(SecurityReadException.DUPLICATE_USER_NAME, "Duplicate user name in security file: " + u.name, u.name);
 				}
 				else
 				{
@@ -1156,7 +1156,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			else
 			{
 				// invalid user
-				throw new SecurityReadException(SecurityReadException.INVALID_USER_NAME_OR_PASSWORD, "Invalid user in security file: " + u, //$NON-NLS-1$
+				throw new SecurityReadException(SecurityReadException.INVALID_USER_NAME_OR_PASSWORD, "Invalid user in security file: " + u,
 					u.toJSON().toString(true));
 			}
 		}
@@ -1171,8 +1171,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				mustWriteBack = true;
 				if (!createGroupInternal(clientId, groupName))
 				{
-					throw new SecurityReadException(SecurityReadException.INVALID_GROUP_NAME_IN_USER_LIST, "Invalid group name '" + groupName + //$NON-NLS-1$
-						"' is listing users in security file.", groupName); //$NON-NLS-1$
+					throw new SecurityReadException(SecurityReadException.INVALID_GROUP_NAME_IN_USER_LIST, "Invalid group name '" + groupName +
+						"' is listing users in security file.", groupName);
 				}
 			}
 
@@ -1183,8 +1183,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 					if (userUID != null && userUID.trim().length() != 0)
 					{
 						// some user mentioned here does not exist...
-						throw new SecurityReadException(SecurityReadException.MISSING_USER_REFERENCED_IN_GROUP, "User with uid '" + userUID + //$NON-NLS-1$
-							"' referenced in group '" + groupName + "' does not exist.", userUID); //$NON-NLS-1$ //$NON-NLS-2$
+						throw new SecurityReadException(SecurityReadException.MISSING_USER_REFERENCED_IN_GROUP, "User with uid '" + userUID +
+							"' referenced in group '" + groupName + "' does not exist.", userUID);
 					}
 					else
 					{
@@ -1239,7 +1239,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		{
 			if (file.exists())
 			{
-				String fileContent = Utils.getTXTFileContent(file.getContents(true), Charset.forName("UTF8")); //$NON-NLS-1$
+				String fileContent = Utils.getTXTFileContent(file.getContents(true), Charset.forName("UTF8"));
 				deserializeSecurityInfo(serverName, tableName, fileContent);
 			}
 		}
@@ -1316,8 +1316,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			}
 			else
 			{
-				throw new SecurityReadException(SecurityReadException.GROUP_NOT_DECLARED, "Group '" + groupName + "' not defined, but referenced in table '" + //$NON-NLS-1$ //$NON-NLS-2$
-					serverName + "->" + tableName + "' security file.", groupName); //$NON-NLS-1$//$NON-NLS-2$
+				throw new SecurityReadException(SecurityReadException.GROUP_NOT_DECLARED, "Group '" + groupName + "' not defined, but referenced in table '" +
+					serverName + "->" + tableName + "' security file.", groupName);
 			}
 		}
 
@@ -1346,7 +1346,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		{
 			if (file.exists())
 			{
-				String fileContent = Utils.getTXTFileContent(file.getContents(true), Charset.forName("UTF8")); //$NON-NLS-1$
+				String fileContent = Utils.getTXTFileContent(file.getContents(true), Charset.forName("UTF8"));
 				deserializeSecurityInfo(form, fileContent);
 			}
 		}
@@ -1424,22 +1424,22 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 						if (replaced)
 						{
 							// this cannot happen with current structure of JSON file and the in-mem structures that are read (having more entries with same key in a JSON obj)
-							throw new SecurityReadException(SecurityReadException.DUPLICATE_ELEMENT_PERMISSION, "Element with UUID " + element.element_uid + //$NON-NLS-1$
-								" on form " + form.getName() + " is mentioned multiple times within the same group " + groupName + //$NON-NLS-1$//$NON-NLS-2$
-								"; it can only have 1 access mask specified...", new String[] { element.element_uid, groupName }); //$NON-NLS-1$
+							throw new SecurityReadException(SecurityReadException.DUPLICATE_ELEMENT_PERMISSION, "Element with UUID " + element.element_uid +
+								" on form " + form.getName() + " is mentioned multiple times within the same group " + groupName +
+								"; it can only have 1 access mask specified...", new String[] { element.element_uid, groupName });
 						}
 					}
 					else
 					{
-						throw new SecurityReadException(SecurityReadException.MISSING_ELEMENT, "Element with UUID " + element.element_uid + " on form " + //$NON-NLS-1$ //$NON-NLS-2$
-							form.getName() + " does not exist, but has an access mask specified...", element.element_uid); //$NON-NLS-1$
+						throw new SecurityReadException(SecurityReadException.MISSING_ELEMENT, "Element with UUID " + element.element_uid + " on form " +
+							form.getName() + " does not exist, but has an access mask specified...", element.element_uid);
 					}
 				}
 			}
 			else
 			{
-				throw new SecurityReadException(SecurityReadException.GROUP_NOT_DECLARED, "Group '" + groupName + "' not defined, but referenced in form '" + //$NON-NLS-1$ //$NON-NLS-2$
-					form.getName() + "' security file.", groupName); //$NON-NLS-1$
+				throw new SecurityReadException(SecurityReadException.GROUP_NOT_DECLARED, "Group '" + groupName + "' not defined, but referenced in form '" +
+					form.getName() + "' security file.", groupName);
 			}
 		}
 
@@ -1561,12 +1561,12 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				}
 				catch (RepositoryException e)
 				{
-					ServoyLog.logError("Cannot get security access for solution with id, release = " + solution_id + ", " + releaseNumber, e); //$NON-NLS-1$ //$NON-NLS-2$
+					ServoyLog.logError("Cannot get security access for solution with id, release = " + solution_id + ", " + releaseNumber, e);
 					return retval;
 				}
 				if (solution == null)
 				{
-					ServoyLog.logError("Cannot get security access because of missing solution with id, release = " + solution_id + ", " + releaseNumber, null); //$NON-NLS-1$ //$NON-NLS-2$
+					ServoyLog.logError("Cannot get security access because of missing solution with id, release = " + solution_id + ", " + releaseNumber, null);
 					return retval;
 				}
 			}
@@ -1767,7 +1767,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			groups.add(new Object[] { new Integer(getId(gi.groupName)), gi.groupName });
 		}
 
-		BufferedDataSet dataSet = new BufferedDataSet(new String[] { "group_id", "group_name" }, groups); //$NON-NLS-1$ //$NON-NLS-2$
+		BufferedDataSet dataSet = new BufferedDataSet(new String[] { "group_id", "group_name" }, groups);
 		return dataSet;
 	}
 
@@ -1792,7 +1792,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				groups.add(new Object[] { new Integer(getId(groupName)), groupName });
 			}
 		}
-		BufferedDataSet dataSet = new BufferedDataSet(new String[] { "group_id", "group_name" }, groups); //$NON-NLS-1$ //$NON-NLS-2$
+		BufferedDataSet dataSet = new BufferedDataSet(new String[] { "group_id", "group_name" }, groups);
 		return dataSet;
 	}
 
@@ -1879,7 +1879,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		{
 			users.add(new Object[] { u.userUid, u.name, new Integer(getId(u.userUid)) });
 		}
-		BufferedDataSet dataSet = new BufferedDataSet(new String[] { "user_uid", "user_name", "user_id" }, users); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		BufferedDataSet dataSet = new BufferedDataSet(new String[] { "user_uid", "user_name", "user_id" }, users);
 		return dataSet;
 	}
 
@@ -1903,7 +1903,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				}
 			}
 		}
-		BufferedDataSet dataSet = new BufferedDataSet(new String[] { "user_uid", "user_name", "user_id" }, users); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		BufferedDataSet dataSet = new BufferedDataSet(new String[] { "user_uid", "user_name", "user_id" }, users);
 		return dataSet;
 	}
 
@@ -1972,7 +1972,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	{
 		if (groupName == null || groupName.length() == 0 || accessMask == null || elementUUID == null || (!isOperational()))
 		{
-			ServoyLog.logError("Invalid parameters received, or manager is not operational - setFormSecurityAccess(...)", null); //$NON-NLS-1$
+			ServoyLog.logError("Invalid parameters received, or manager is not operational - setFormSecurityAccess(...)", null);
 			return;
 		}
 
@@ -2013,12 +2013,12 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			}
 			else
 			{
-				ServoyLog.logWarning("setFormSecurityAccess(...) cannot find element with given UUID or not form element!", null); //$NON-NLS-1$
+				ServoyLog.logWarning("setFormSecurityAccess(...) cannot find element with given UUID or not form element!", null);
 			}
 		}
 		else
 		{
-			ServoyLog.logWarning("setFormSecurityAccess(...) cannot find the group with the given name!", null); //$NON-NLS-1$
+			ServoyLog.logWarning("setFormSecurityAccess(...) cannot find the group with the given name!", null);
 		}
 	}
 
@@ -2038,7 +2038,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		}
 		else
 		{
-			ServoyLog.logWarning("setFormSecurityAccess(...) cannot find the group with the given name!", null); //$NON-NLS-1$
+			ServoyLog.logWarning("setFormSecurityAccess(...) cannot find the group with the given name!", null);
 		}
 	}
 
@@ -2047,7 +2047,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	{
 		if (groupName == null || groupName.length() == 0 || accessMask == null || (!isOperational()))
 		{
-			ServoyLog.logError("Invalid parameters received, or manager is not operational - setTableSecurityAccess(...)", null); //$NON-NLS-1$
+			ServoyLog.logError("Invalid parameters received, or manager is not operational - setTableSecurityAccess(...)", null);
 			return;
 		}
 
@@ -2070,7 +2070,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		}
 		else
 		{
-			ServoyLog.logWarning("setTableSecurityAccess(...) cannot find the group with the given name!", null); //$NON-NLS-1$
+			ServoyLog.logWarning("setTableSecurityAccess(...) cannot find the group with the given name!", null);
 		}
 	}
 
@@ -2332,7 +2332,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 						}
 						else
 						{
-							ServoyLog.logError("Cannot find form with UUID " + formUUID + " for delete group", null); //$NON-NLS-1$ //$NON-NLS-2$
+							ServoyLog.logError("Cannot find form with UUID " + formUUID + " for delete group", null);
 						}
 					}
 					Set<String> tablesUsingThisGroup = gsi.tableSecurity.keySet();
@@ -2345,7 +2345,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 						}
 						else
 						{
-							ServoyLog.logError("Cannot find table " + tableString + " for delete group", null); //$NON-NLS-1$ //$NON-NLS-2$
+							ServoyLog.logError("Cannot find table " + tableString + " for delete group", null);
 						}
 					}
 					if (deleteGroup) it.remove();
@@ -2397,7 +2397,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 								IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
 								if (file.exists())
 								{
-									String fileContent = Utils.getTXTFileContent(file.getContents(true), Charset.forName("UTF8")); //$NON-NLS-1$
+									String fileContent = Utils.getTXTFileContent(file.getContents(true), Charset.forName("UTF8"));
 									ServoyJSONObject obj = new ServoyJSONObject(fileContent, true);
 									boolean changed = false;
 									for (String groupName : groupNames)
@@ -2482,7 +2482,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	private TableWrapper getTable(String tableString)
 	{
-		StringTokenizer st = new StringTokenizer(tableString, "."); //$NON-NLS-1$
+		StringTokenizer st = new StringTokenizer(tableString, ".");
 		try
 		{
 			String serverName = st.nextToken();
@@ -2505,7 +2505,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		}
 		catch (NoSuchElementException e)
 		{
-			ServoyLog.logError("Table identifier string is bad: " + tableString, e); //$NON-NLS-1$
+			ServoyLog.logError("Table identifier string is bad: " + tableString, e);
 		}
 		return null;
 	}
@@ -2834,7 +2834,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		{
 			readError = null;
 			final IResource er = lastReadResource;
-			Job job = new Job("Remove old security problem marker - active project changed") //$NON-NLS-1$
+			Job job = new Job("Remove old security problem marker - active project changed")
 			{
 				@Override
 				protected IStatus run(IProgressMonitor monitor)
@@ -2862,7 +2862,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		{
 			final IResource er = lastReadResource;
 			final SecurityReadException error = readError;
-			Job job = new Job("Update security problem marker") //$NON-NLS-1$
+			Job job = new Job("Update security problem marker")
 			{
 				@Override
 				protected IStatus run(IProgressMonitor monitor)
@@ -2875,10 +2875,10 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 						if (error.getType() == SecurityReadException.JSON_DESERIALIZE_ERROR)
 						{
 							// find out where the error occurred if possible...
-							int idx = error.getMessage().indexOf("character"); //$NON-NLS-1$
+							int idx = error.getMessage().indexOf("character");
 							if (idx >= 0)
 							{
-								StringTokenizer st = new StringTokenizer(error.getMessage().substring(idx + 9), " "); //$NON-NLS-1$
+								StringTokenizer st = new StringTokenizer(error.getMessage().substring(idx + 9), " ");
 								if (st.hasMoreTokens())
 								{
 									String charNoString = st.nextToken();
@@ -2895,8 +2895,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 						}
 
 						// we have an active solution with a resources project but with invalid security info; add problem marker
-						IMarker marker = ServoyBuilder.addMarker(er, ServoyBuilder.USER_SECURITY_MARKER_TYPE, "Bad User/Security information: " + //$NON-NLS-1$
-							error.getMessage(), charNo, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, "JSON file"); //$NON-NLS-1$
+						IMarker marker = ServoyBuilder.addMarker(er, ServoyBuilder.USER_SECURITY_MARKER_TYPE, "Bad User/Security information: " +
+							error.getMessage(), charNo, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, "JSON file");
 						if (marker != null)
 						{
 							try
@@ -2918,7 +2918,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 							}
 							catch (CoreException e)
 							{
-								ServoyLog.logError("Cannot set security problem marker attributes.", e); //$NON-NLS-1$
+								ServoyLog.logError("Cannot set security problem marker attributes.", e);
 							}
 						}
 					}

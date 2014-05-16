@@ -33,9 +33,9 @@ public class NavigationToggleAction extends Action
 
 	public NavigationToggleAction(SolutionExplorerView solexView, boolean checked)
 	{
-		super("", AS_CHECK_BOX); //$NON-NLS-1$
+		super("", AS_CHECK_BOX);
 		this.solexView = solexView;
-		setText("Show Navigation Group In Context Menu"); //$NON-NLS-1$
+		setText("Show Navigation Group In Context Menu");
 		setChecked(checked);
 	}
 

@@ -84,7 +84,7 @@ public class ImmutableObjectObservable<T>
 				return descriptor;
 			}
 		}
-		throw new BindingException("Could not find property with name " + propertyName + " in class " + beanClass); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new BindingException("Could not find property with name " + propertyName + " in class " + beanClass);
 	}
 
 	private static Object getPropertyValue(Object object, PropertyDescriptor propertyDescriptor)
@@ -146,7 +146,7 @@ public class ImmutableObjectObservable<T>
 				Object[] initargs = new Object[constructorProperties.length];
 				for (int i = 0; i < initargs.length; i++)
 				{
-					if ("this".equals(constructorProperties[i])) //$NON-NLS-1$
+					if ("this".equals(constructorProperties[i]))
 					{
 						initargs[i] = object;
 					}

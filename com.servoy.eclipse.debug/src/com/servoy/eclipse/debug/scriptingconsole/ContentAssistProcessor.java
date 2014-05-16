@@ -296,7 +296,7 @@ final class ContentAssistProcessor implements IContentAssistProcessor
 	{
 		int i = offset;
 		IDocument document = viewer.getDocument();
-		if (i > document.getLength()) return ""; //$NON-NLS-1$
+		if (i > document.getLength()) return "";
 
 		try
 		{
@@ -311,7 +311,7 @@ final class ContentAssistProcessor implements IContentAssistProcessor
 		}
 		catch (BadLocationException e)
 		{
-			return ""; //$NON-NLS-1$
+			return "";
 		}
 	}
 }

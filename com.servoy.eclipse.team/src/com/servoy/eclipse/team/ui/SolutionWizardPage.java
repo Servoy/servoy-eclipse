@@ -50,9 +50,9 @@ public class SolutionWizardPage extends WizardPage
 	private boolean canFinish;
 	public static final String NAME = "SolutionWizardPage";
 
-	public static final Image SOLUTION = Activator.getDefault().loadImageFromBundle("solution.gif"); //$NON-NLS-1$
-	public static final Image ACTIVE_RELEASE = Activator.getDefault().loadImageFromBundle("active_release.gif"); //$NON-NLS-1$
-	public static final Image RELEASE = Activator.getDefault().loadImageFromBundle("release.gif"); //$NON-NLS-1$
+	public static final Image SOLUTION = Activator.getDefault().loadImageFromBundle("solution.gif");
+	public static final Image ACTIVE_RELEASE = Activator.getDefault().loadImageFromBundle("active_release.gif");
+	public static final Image RELEASE = Activator.getDefault().loadImageFromBundle("release.gif");
 
 	public SolutionWizardPage(String title, String description, ImageDescriptor titleImage)
 	{

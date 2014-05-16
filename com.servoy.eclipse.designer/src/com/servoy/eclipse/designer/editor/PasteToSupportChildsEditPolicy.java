@@ -53,7 +53,7 @@ import com.servoy.j2db.persistence.Solution;
  */
 class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 {
-	public static String PASTE_ROLE = "Paste Policy"; //$NON-NLS-1$
+	public static String PASTE_ROLE = "Paste Policy";
 
 	private final IFieldPositioner fieldPositioner;
 

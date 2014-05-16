@@ -128,7 +128,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 								defaultBorderValues.put(BorderType.Etched, new EtchedBorder(EtchedBorder.RAISED));
 								defaultBorderValues.put(BorderType.Bevel, new BevelBorder(BevelBorder.RAISED));
 								defaultBorderValues.put(BorderType.Line, new LineBorder(Color.BLACK));
-								defaultBorderValues.put(BorderType.Title, new TitledBorder("Title")); //$NON-NLS-1$
+								defaultBorderValues.put(BorderType.Title, new TitledBorder("Title"));
 								defaultBorderValues.put(BorderType.Matte, new MatteBorder(0, 0, 0, 0, Color.BLACK));
 								defaultBorderValues.put(BorderType.SpecialMatte, new SpecialMatteBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK,
 									Color.BLACK));
@@ -401,19 +401,19 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		public Object resetComplexPropertyValue(Object id)
 		{
 			EmptyBorder defVal = (EmptyBorder)getDefaultBorderValuesMap().get(BorderType.Empty);
-			if (id instanceof String && ((String)id).contains("top")) //$NON-NLS-1$
+			if (id instanceof String && ((String)id).contains("top"))
 			{
 				return defVal.getBorderInsets().top;
 			}
-			if (id instanceof String && ((String)id).contains("bottom")) //$NON-NLS-1$
+			if (id instanceof String && ((String)id).contains("bottom"))
 			{
 				return defVal.getBorderInsets().bottom;
 			}
-			if (id instanceof String && ((String)id).contains("left")) //$NON-NLS-1$
+			if (id instanceof String && ((String)id).contains("left"))
 			{
 				return defVal.getBorderInsets().left;
 			}
-			if (id instanceof String && ((String)id).contains("right")) //$NON-NLS-1$
+			if (id instanceof String && ((String)id).contains("right"))
 			{
 				return defVal.getBorderInsets().right;
 			}
@@ -496,19 +496,19 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			{
 				return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty(id, defVal.getMatteColor());
 			}
-			if (id instanceof String && ((String)id).contains("top")) //$NON-NLS-1$
+			if (id instanceof String && ((String)id).contains("top"))
 			{
 				return defVal.getBorderInsets().top;
 			}
-			if (id instanceof String && ((String)id).contains("bottom")) //$NON-NLS-1$
+			if (id instanceof String && ((String)id).contains("bottom"))
 			{
 				return defVal.getBorderInsets().bottom;
 			}
-			if (id instanceof String && ((String)id).contains("left")) //$NON-NLS-1$
+			if (id instanceof String && ((String)id).contains("left"))
 			{
 				return defVal.getBorderInsets().left;
 			}
-			if (id instanceof String && ((String)id).contains("right")) //$NON-NLS-1$
+			if (id instanceof String && ((String)id).contains("right"))
 			{
 				return defVal.getBorderInsets().right;
 			}
@@ -596,7 +596,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		@Override
 		public Object resetComplexPropertyValue(Object id)
 		{
-			return "solid"; //$NON-NLS-1$
+			return "solid";
 		}
 	}
 

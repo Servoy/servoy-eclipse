@@ -40,7 +40,7 @@ public class I18NPreferences extends AbstractConfigurationBlockPreferencePage
 	@Override
 	protected void setDescription()
 	{
-		setDescription("I18N"); //$NON-NLS-1$
+		setDescription("I18N");
 	}
 
 	@Override

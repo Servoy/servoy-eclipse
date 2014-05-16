@@ -58,7 +58,7 @@ public class NewRelationAction extends Action implements ISelectionChangedListen
 	{
 		viewer = sev;
 
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("newrelation.gif")); //$NON-NLS-1$
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("newrelation.gif"));
 		setText("Create relation");
 		setToolTipText("Create relation");
 	}

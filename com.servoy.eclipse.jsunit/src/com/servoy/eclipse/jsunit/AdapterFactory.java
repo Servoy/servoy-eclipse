@@ -36,7 +36,7 @@ import com.servoy.j2db.util.Pair;
 public class AdapterFactory implements IAdapterFactory
 {
 
-	public final static String MOBILE_TARGET_PROPERTY = "mobile_target"; //$NON-NLS-1$
+	public final static String MOBILE_TARGET_PROPERTY = "mobile_target";
 
 	// this class is used for attaching
 	// the "run unit tests" action to the correct node

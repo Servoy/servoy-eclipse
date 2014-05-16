@@ -55,7 +55,7 @@ public class ChainedFileBasedExtensionProvider implements IFileBasedExtensionPro
 	{
 		provider = new FileBasedExtensionProvider(pendingFolder, true, parserSource);
 		this.child = child;
-		if (child == null) throw new NullPointerException("Child linked provider cannot be null"); //$NON-NLS-1$
+		if (child == null) throw new NullPointerException("Child linked provider cannot be null");
 	}
 
 	public DependencyMetadata[] getDependencyMetadata(ExtensionDependencyDeclaration extensionDependency)
@@ -75,7 +75,7 @@ public class ChainedFileBasedExtensionProvider implements IFileBasedExtensionPro
 			{
 				if (tmps.length > 1)
 				{
-					messages.addWarning("More then one extension with id='" + toSearchFor.id + "' marked as installed. This is not supported."); //$NON-NLS-1$//$NON-NLS-2$
+					messages.addWarning("More then one extension with id='" + toSearchFor.id + "' marked as installed. This is not supported.");
 				} // else found it, but another version; this provider can only supply 1 version for each extension id (simulates installed)
 			}
 		}
@@ -100,7 +100,7 @@ public class ChainedFileBasedExtensionProvider implements IFileBasedExtensionPro
 		}
 		else if (x.length > 1)
 		{
-			messages.addWarning("More then one extension with id='" + extensionId + "' marked as installed. This is not supported..."); //$NON-NLS-1$//$NON-NLS-2$
+			messages.addWarning("More then one extension with id='" + extensionId + "' marked as installed. This is not supported...");
 		}
 
 		return null;

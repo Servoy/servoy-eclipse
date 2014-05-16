@@ -25,7 +25,7 @@ import org.eclipse.osgi.util.NLS;
  */
 public class Messages extends NLS
 {
-	private static final String BUNDLE_NAME = "com.servoy.eclipse.ui.messages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "com.servoy.eclipse.ui.messages";
 
 	public static String MoveTextAction_moveCode;
 	public static String MoveTextAction_moveSample;

@@ -69,7 +69,7 @@ public abstract class ObjectCellEditor extends TextCellEditor
 		setValue = value;
 		doSetObject(value); // Let implementers do something with it.
 		String v = doGetString(value);
-		doSetEditorString(v != null ? v : ""); //$NON-NLS-1$
+		doSetEditorString(v != null ? v : "");
 	}
 
 	/**

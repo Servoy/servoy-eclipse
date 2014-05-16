@@ -132,7 +132,7 @@ public class ScriptingUtils
 						}
 						else
 						{
-							Debug.error("unsuported enum constant: " + part); //$NON-NLS-1$
+							Debug.error("unsuported enum constant: " + part);
 						}
 					}
 					return null;

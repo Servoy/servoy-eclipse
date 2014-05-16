@@ -74,6 +74,6 @@ public class TableSearch extends DLTKSearchEngineSearch
 	 */
 	public String getLabel()
 	{
-		return "Searching references to server '" + table.getTableName() + "'"; //$NON-NLS-1$//$NON-NLS-2$
+		return "Searching references to server '" + table.getTableName() + "'";
 	}
 }

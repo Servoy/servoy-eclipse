@@ -238,7 +238,7 @@ public class ReplaceServerAction extends Action implements ISelectionChangedList
 					});
 
 					final Button replaceCalculationsButton = new Button(topLevel, SWT.CHECK);
-					replaceCalculationsButton.setText("Replace server in calculations/aggregations"); //$NON-NLS-1$
+					replaceCalculationsButton.setText("Replace server in calculations/aggregations");
 					replaceCalculationsButton.addSelectionListener(new SelectionAdapter()
 					{
 						@Override

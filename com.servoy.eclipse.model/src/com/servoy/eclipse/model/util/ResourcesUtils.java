@@ -35,7 +35,7 @@ public class ResourcesUtils
 {
 
 	public static String BUILDPATH_FILE = IScriptProjectFilenames.BUILDPATH_FILENAME;
-	public static String STP_DIR = ".stp"; //$NON-NLS-1$
+	public static String STP_DIR = ".stp";
 
 	/**
 	 * Creates the given file, and it's parent containers (if they do not already exist).

@@ -59,7 +59,7 @@ public class ExtensionUpdateAndIncompatibilityCheckJob extends Job
 		{
 			showInstalledExtensionsDialog(
 				dialog,
-				"Incompatible extension found", "One or more installed extensions are incompatible with the current Servoy release (probably due to a Servoy update).\nDo you want to check for extension updates?", "Check for updates", "Ignore", true); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				"Incompatible extension found", "One or more installed extensions are incompatible with the current Servoy release (probably due to a Servoy update).\nDo you want to check for extension updates?", "Check for updates", "Ignore", true);
 		}
 		else
 		{
@@ -79,7 +79,7 @@ public class ExtensionUpdateAndIncompatibilityCheckJob extends Job
 			if (updatesFound)
 			{
 				showInstalledExtensionsDialog(dialog,
-					"Extension update checker", "New versions are available for installed extensions.", "Show updates", "Ignore", false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					"Extension update checker", "New versions are available for installed extensions.", "Show updates", "Ignore", false);
 			}
 		}
 		return Status.OK_STATUS;
