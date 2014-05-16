@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.exporter.apps.common;
 
+import java.util.HashMap;
+
 import com.servoy.j2db.util.ILogLevel;
 
 /**
@@ -44,82 +46,21 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 		if (args.length == 0) mustShowHelp = true;
 		else
 		{
-			int i = 0;
-			while (i < args.length)
+			HashMap<String, String> argsMap = getArgsAsMap(args);
+			if (argsMap.containsKey("help") || argsMap.containsKey("?")) mustShowHelp = true;
+			solutionNames = parseArg("s", "Solution name(s) was(were) not specified after '-s' argument.", argsMap);
+			exportFilePath = parseArg("o", "Export file path was not specified after '-o' argument.", argsMap);
+			if (argsMap.containsKey("verbose")) verbose = true;
+			settingsFile = parseArg("p", "Properties file was not specified after '-p' argument.", argsMap);
+			if (argsMap.containsKey("as"))
 			{
-				if ("-help".equalsIgnoreCase(args[i]) || "-?".equals(args[i]) || "/?".equals(args[i]))
-				{
-					mustShowHelp = true;
-					i = args.length - 1;
-				}
-				else if ("-s".equalsIgnoreCase(args[i]))
-				{
-					if (i < (args.length - 1))
-					{
-						solutionNames = args[++i];
-					}
-					else
-					{
-						info("Solution name(s) was(were) not specified after '-s' argument.", ILogLevel.ERROR);
-						markInvalid();
-					}
-				}
-				else if ("-o".equalsIgnoreCase(args[i]))
-				{
-					if (i < (args.length - 1))
-					{
-						exportFilePath = args[++i];
-					}
-					else
-					{
-						info("Export file path was not specified after '-o' argument.", ILogLevel.ERROR);
-						markInvalid();
-					}
-				}
-				else if ("-verbose".equalsIgnoreCase(args[i]))
-				{
-					verbose = true;
-				}
-				else if ("-p".equalsIgnoreCase(args[i]))
-				{
-					if (i < (args.length - 1))
-					{
-						settingsFile = args[++i];
-					}
-					else
-					{
-						info("Properties file was not specified after '-p' argument.", ILogLevel.ERROR);
-						markInvalid();
-					}
-				}
-				else if ("-as".equalsIgnoreCase(args[i]))
-				{
-					if (i < (args.length - 1))
-					{
-						appServerDir = args[++i];
-					}
-					else
-					{
-						info("Application server directory was not specified after '-as' argument.", ILogLevel.ERROR);
-						markInvalid();
-					}
-				}
-				else if ("-pl".equalsIgnoreCase(args[i]))
-				{
-					aggregateWorkspace = true;
-				}
-				else if ("-dbi".equalsIgnoreCase(args[i]) || "-dbd".equalsIgnoreCase(args[i]))
-				{
-					exportUsingDbiFileInfoOnly = true;
-				}
-				else if ("-ie".equals(args[i]))
-				{
-					ignoreBuildErrors = true;
-				}
-				i++;
+				appServerDir = parseArg("as", "Application server directory was not specified after '-as' argument.", argsMap);
 			}
+			if (argsMap.containsKey("pl")) aggregateWorkspace = true;
+			if (argsMap.containsKey("dbi") || argsMap.containsKey("dbd")) exportUsingDbiFileInfoOnly = true;
+			if (argsMap.containsKey("ie")) ignoreBuildErrors = true;
 
-			parseArguments(args);
+			if (!mustShowHelp) parseArguments(argsMap);
 
 			// check that the required arguments are provided
 			if (!mustShowHelp && !invalidArguments)
@@ -137,6 +78,57 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 				}
 			}
 		}
+	}
+
+	private HashMap<String, String> getArgsAsMap(String[] args)
+	{
+		StringBuilder argsString = new StringBuilder();
+		for (String arg : args)
+		{
+			argsString.append(arg + " ");
+		}
+		String a = argsString.toString();
+
+		HashMap<String, String> argsMap = new HashMap<String, String>();
+		if (a.contains("/?"))
+		{
+			a = a.replace("/?", "");
+			argsMap.put("?", "");
+		}
+
+		String[] argss = argsString.toString().split("-");
+		for (String arg : argss)
+		{
+			if (arg != null && !arg.trim().equals(""))
+			{
+				int idx = arg.indexOf(" ");
+				if (idx > 0 && arg.length() > idx)
+				{
+					argsMap.put(arg.substring(0, idx).toLowerCase(), arg.substring(idx + 1).trim());
+				}
+				else
+				{
+					argsMap.put(arg.toLowerCase(), "");
+				}
+			}
+		}
+		return argsMap;
+	}
+
+	protected String parseArg(String argName, String errMsg, HashMap<String, String> argsMap)
+	{
+		if (argsMap.containsKey(argName))
+		{
+			String val = argsMap.get(argName);
+			if (val != null & !val.trim().equals("")) return val;
+
+			if (errMsg != null)
+			{
+				info(errMsg, ILogLevel.ERROR);
+				markInvalid();
+			}
+		}
+		return null;
 	}
 
 	void printArguments(String args[])
@@ -193,7 +185,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 	/**
 	 * Called inside the constructor. So you can count on this method being called in child classes as part of the super(...) call. 
 	 */
-	protected abstract void parseArguments(String[] args);
+	protected abstract void parseArguments(HashMap<String, String> argsMap);
 
 	protected void markInvalid()
 	{

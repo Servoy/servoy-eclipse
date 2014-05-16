@@ -20,7 +20,6 @@ package com.servoy.eclipse.exporter.apps.war;
 import java.util.HashMap;
 
 import com.servoy.eclipse.exporter.apps.common.AbstractArgumentChest;
-import com.servoy.j2db.util.ILogLevel;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -81,65 +80,15 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "				Default: true\n";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.servoy.eclipse.exporter.apps.common.AbstractArgumentChest#parseArguments(java.lang.String[])
-	 */
 	@Override
-	protected void parseArguments(String[] args)
+	protected void parseArguments(HashMap<String, String> argsMap)
 	{
-		if (!mustShowHelp())
-		{
-			HashMap<String, String> argsMap = getArgsAsMap(args);
-			
-			plugins = parseArg("pi", "Plugin name(s) was(were) not specified after '-pi' argument.", argsMap);
-			beans = parseArg("b", "Bean name(s) was(were) not specified after '-b' argument.", argsMap);
-			lafs = parseArg("l", "Laf name(s) was(were) not specified after '-l' argument.", argsMap);
-			drivers = parseArg("d","Driver name(s) was(were) not specified after '-d' argument.", argsMap);
-			isExportActiveSolutionOnly = true;
-			if (argsMap.containsKey("active") && !Utils.getAsBoolean(argsMap.get("active"))) isExportActiveSolutionOnly = false;
-		}
-	}
-
-	private HashMap<String, String> getArgsAsMap(String[] args)
-	{
-		StringBuilder argsString = new StringBuilder();
-		for (String arg :  args)
-		{
-			argsString.append(arg+" ");
-		}
-		String[] a = argsString.toString().split("-");
-		HashMap<String,String> argsMap = new HashMap<String,String>();
-		for (String arg : a)
-		{
-			if (arg != null && !arg.trim().equals(""))
-			{
-				int idx = arg.indexOf(" ");
-				if (idx > 0 &&  arg.length() > idx)
-				{
-					argsMap.put(arg.substring(0, idx).toLowerCase(), arg.substring(idx+1).trim());
-				}
-				else
-				{
-					argsMap.put(arg,  "");
-				}
-			}
-		}
-		return argsMap;
-	}
-
-	private String parseArg(String argName, String errMsg, HashMap<String, String> argsMap)
-	{
-		if (argsMap.containsKey(argName))
-		{
-			String val = argsMap.get(argName);
-			if (val != null & !val.trim().equals("")) return val;
-			
-			info(errMsg, ILogLevel.ERROR);
-			markInvalid();
-		}
-		return null;
+		plugins = parseArg("pi", "Plugin name(s) was(were) not specified after '-pi' argument.", argsMap);
+		beans = parseArg("b", "Bean name(s) was(were) not specified after '-b' argument.", argsMap);
+		lafs = parseArg("l", "Laf name(s) was(were) not specified after '-l' argument.", argsMap);
+		drivers = parseArg("d","Driver name(s) was(were) not specified after '-d' argument.", argsMap);
+		isExportActiveSolutionOnly = true;
+		if (argsMap.containsKey("active") && !Utils.getAsBoolean(argsMap.get("active"))) isExportActiveSolutionOnly = false;
 	}
 
 	public String getPlugins()

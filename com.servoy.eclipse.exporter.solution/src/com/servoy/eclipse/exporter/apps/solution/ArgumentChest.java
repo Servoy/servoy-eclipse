@@ -19,7 +19,8 @@ package com.servoy.eclipse.exporter.apps.solution;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -66,120 +67,83 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 	}
 
 	@Override
-	protected void parseArguments(String[] args)
+	protected void parseArguments(HashMap<String, String> argsMap)
 	{
-		if (!mustShowHelp())
+		metadataSource = parseMetadata(argsMap);
+		if (argsMap.containsKey("sd"))
 		{
-			int i = 0;
-			while (i < args.length)
+			exportSampleData = true;
+			parseSampleDataCount(argsMap);
+		}
+		if (argsMap.containsKey("i18n")) exportI18N = true;
+		if (argsMap.containsKey("users")) exportUsers = true;
+		if (argsMap.containsKey("tables")) exportAllTablesFromReferencedServers = true;
+		protectionPassword = parseArg("pwd", "Protection password was not specified after '-pwd' argument.", argsMap);
+
+		if (argsMap.containsKey("modules"))
+		{
+			exportModules = true;
+			String modules = parseArg("modules", null, argsMap);
+			if (modules != null) moduleList = Arrays.asList(modules.split(" "));
+		}
+	}
+
+	private void parseSampleDataCount(HashMap<String, String> argsMap)
+	{
+		if (argsMap.containsKey("sdcount"))
+		{
+			if (!argsMap.get("sdcount").equals(""))
 			{
-				if ("-md".equalsIgnoreCase(args[i]))
+				try
 				{
-					if (i < (args.length - 1))
+					sampleDataCount = Integer.parseInt(argsMap.get("sdcount"));
+					if (sampleDataCount < 1)
 					{
-						String mdarg = args[++i];
-						if ("ws".equals(mdarg))
-						{
-							metadataSource = META_DATA_WS;
-						}
-						else if ("db".equals(mdarg))
-						{
-							metadataSource = META_DATA_DB;
-						}
-						else if ("none".equals(mdarg))
-						{
-							metadataSource = META_DATA_NONE;
-						}
-						else if ("both".equals(mdarg))
-						{
-							metadataSource = META_DATA_BOTH;
-						}
-						else
-						{
-							info("unknown meta data source '" + mdarg + "'", ILogLevel.ERROR);
-							markInvalid();
-						}
+						sampleDataCount = 1;
+						info("Number of rows to export per table cannot be < 1. Corrected to 1.", ILogLevel.ERROR);
 					}
-					else
+					else if (sampleDataCount > IDataServerInternal.MAX_ROWS_TO_RETRIEVE)
 					{
-						info("meta data source was not specified after '-md' argument.", ILogLevel.ERROR);
-						markInvalid();
+						sampleDataCount = IDataServerInternal.MAX_ROWS_TO_RETRIEVE;
+						info("Number of rows to export per table cannot be > " + IDataServerInternal.MAX_ROWS_TO_RETRIEVE + ". Corrected.", ILogLevel.ERROR);
 					}
 				}
-				else if ("-sd".equalsIgnoreCase(args[i]))
+				catch (NumberFormatException e)
 				{
-					exportSampleData = true;
+					info("Number of rows to export per table specified after '-sdcount' argument is not an integer value.", ILogLevel.ERROR);
+					markInvalid();
 				}
-				else if ("-sdcount".equalsIgnoreCase(args[i]))
-				{
-					if (i < (args.length - 1))
-					{
-						try
-						{
-							sampleDataCount = Integer.parseInt(args[++i]);
-							if (sampleDataCount < 1)
-							{
-								sampleDataCount = 1;
-								info("Number of rows to export per table cannot be < 1. Corrected to 1.", ILogLevel.ERROR);
-							}
-							else if (sampleDataCount > IDataServerInternal.MAX_ROWS_TO_RETRIEVE)
-							{
-								sampleDataCount = IDataServerInternal.MAX_ROWS_TO_RETRIEVE;
-								info("Number of rows to export per table cannot be > " + IDataServerInternal.MAX_ROWS_TO_RETRIEVE + ". Corrected.",
-									ILogLevel.ERROR);
-							}
-						}
-						catch (NumberFormatException e)
-						{
-							info("Number of rows to export per table specified after '-sdcount' argument is not an integer value.", ILogLevel.ERROR);
-							markInvalid();
-						}
-					}
-					else
-					{
-						info("Number of rows to export per table was not specified after '-sdcount' argument.", ILogLevel.ERROR);
-						markInvalid();
-					}
-				}
-				else if ("-i18n".equalsIgnoreCase(args[i]))
-				{
-					exportI18N = true;
-				}
-				else if ("-users".equalsIgnoreCase(args[i]))
-				{
-					exportUsers = true;
-				}
-				else if ("-tables".equalsIgnoreCase(args[i]))
-				{
-					exportAllTablesFromReferencedServers = true;
-				}
-				else if ("-pwd".equalsIgnoreCase(args[i]))
-				{
-					if (i < (args.length - 1))
-					{
-						protectionPassword = args[++i];
-					}
-					else
-					{
-						info("Protection password was not specified after '-pwd' argument.", ILogLevel.ERROR);
-						markInvalid();
-					}
-				}
-				else if ("-modules".equalsIgnoreCase(args[i]))
-				{
-					exportModules = true;
-					if (i < (args.length - 1))
-					{
-						moduleList = new ArrayList<String>();
-						while ((++i) < args.length)
-						{
-							moduleList.add(args[i]);
-						}
-					}
-				}
-				i++;
+			}
+			else
+			{
+				info("Number of rows to export per table was not specified after '-sdcount' argument.", ILogLevel.ERROR);
+				markInvalid();
 			}
 		}
+	}
+
+	private int parseMetadata(HashMap<String, String> argsMap)
+	{
+		if (argsMap.containsKey("md"))
+		{
+			String mdarg = argsMap.get("md");
+			if (!mdarg.equals(""))
+			{
+				if ("ws".equals(mdarg)) return META_DATA_WS;
+				if ("db".equals(mdarg)) return META_DATA_DB;
+				if ("none".equals(mdarg)) return META_DATA_NONE;
+				if ("both".equals(mdarg)) return META_DATA_BOTH;
+
+				info("unknown meta data source '" + mdarg + "'", ILogLevel.ERROR);
+				markInvalid();
+			}
+			else
+			{
+				info("meta data source was not specified after '-md' argument.", ILogLevel.ERROR);
+				markInvalid();
+			}
+		}
+		return META_DATA_WS;
 	}
 
 	@Override
@@ -199,7 +163,7 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 			+ "        -tables ... export  all table  information  about  tables from  referenced  servers.\n"
 			+ "             IMPORTANT: all needed DB servers must already be started\n"
 			+ "        -pwd <protection_password> ... protect  the exported  solution with given  password.\n"
-			+ "        -modules [<module1_name> <module2_name> ... <moduleN_name>] ... MUST   be  the  last\n"
+			+ "        -modules [<module1_name> <module2_name> ... <moduleN_name>]\n"
 			+ "             argument  specified in command line. Includes all or part of referenced modules\n"
 			+ "             in export. If only '-modules' is used,  it will export all  referenced modules.\n"
 			+ "             If a list of  modules is also included, it  will export only  modules from this\n"

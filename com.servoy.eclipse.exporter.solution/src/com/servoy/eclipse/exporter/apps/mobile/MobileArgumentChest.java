@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.exporter.apps.mobile;
 
+import java.util.HashMap;
+
 import com.servoy.eclipse.exporter.apps.common.AbstractArgumentChest;
 import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.j2db.util.ILogLevel;
@@ -40,73 +42,40 @@ public class MobileArgumentChest extends AbstractArgumentChest
 	}
 
 	@Override
-	protected void parseArguments(String[] args)
+	protected void parseArguments(HashMap<String, String> argsMap)
 	{
-		if (!mustShowHelp())
-		{
-			// set defaults; these can't be set when declaring the member because this method is called from the super class constructor
-			testing = true; // test war by default
-			syncTimeout = MobileExporter.DEFAULT_SYNC_TIMEOUT;
+		// set defaults; these can't be set when declaring the member because this method is called from the super class constructor
+		testing = true; // test war by default
+		syncTimeout = MobileExporter.DEFAULT_SYNC_TIMEOUT;
+		serverURL = parseArg("server_url", "Server url was not specified after '-server_url' argument.", argsMap);
+		serviceSolutionName = parseArg("service_solution", "Service solution was not specified after '-service_solution' argument.", argsMap);
+		if (argsMap.containsKey("production")) testing = false;
+		if (argsMap.containsKey("sync_timeout")) parseSyncTimeout(argsMap.get("sync_timeout"));
+	}
 
-			// now check command line arguments
-			int i = 0;
-			while (i < args.length)
+	private void parseSyncTimeout(String value)
+	{
+		if (!value.equals(""))
+		{
+			try
 			{
-				if ("-server_url".equalsIgnoreCase(args[i]))
+				syncTimeout = Integer.parseInt(value);
+				if (syncTimeout < 1)
 				{
-					if (i < (args.length - 1))
-					{
-						serverURL = args[++i];
-					}
-					else
-					{
-						info("server url was not specified after '-server_url' argument.", ILogLevel.ERROR);
-						markInvalid();
-					}
+					syncTimeout = 1;
+					info("Sync timeout < 1. Corrected to 1.", ILogLevel.ERROR);
 				}
-				else if ("-service_solution".equalsIgnoreCase(args[i]))
-				{
-					if (i < (args.length - 1))
-					{
-						serviceSolutionName = args[++i];
-					}
-					else
-					{
-						info("service solution was not specified after '-service_solution' argument.", ILogLevel.ERROR);
-						markInvalid();
-					}
-				}
-				else if ("-production".equalsIgnoreCase(args[i]))
-				{
-					testing = false;
-				}
-				else if ("-sync_timeout".equalsIgnoreCase(args[i]))
-				{
-					if (i < (args.length - 1))
-					{
-						try
-						{
-							syncTimeout = Integer.parseInt(args[++i]);
-							if (syncTimeout < 1)
-							{
-								syncTimeout = 1;
-								info("Sync timeout < 1. Corrected to 1.", ILogLevel.ERROR);
-							}
-						}
-						catch (NumberFormatException e)
-						{
-							info("Sync timeout specified after '-sync_timeout' argument is not an integer value.", ILogLevel.ERROR);
-							markInvalid();
-						}
-					}
-					else
-					{
-						info("Sync timeout was not specified after '-sync_timeout' argument.", ILogLevel.ERROR);
-						markInvalid();
-					}
-				}
-				i++;
 			}
+			catch (NumberFormatException e)
+			{
+				info("Sync timeout specified after '-sync_timeout' argument is not an integer value.", ILogLevel.ERROR);
+				markInvalid();
+			}
+		}
+		else
+		{
+			info("Sync timeout was not specified after '-sync_timeout' argument.", ILogLevel.ERROR);
+			markInvalid();
 		}
 	}
 
