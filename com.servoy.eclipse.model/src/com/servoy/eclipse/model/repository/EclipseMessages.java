@@ -621,7 +621,7 @@ public class EclipseMessages implements ICustomMessageLoader
 										}
 
 									}
-									fileNames.add(resourceName);
+									if (resourceName.endsWith(EclipseMessages.MESSAGES_EXTENSION)) fileNames.add(resourceName);
 								}
 							}
 							return true;
