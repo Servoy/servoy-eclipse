@@ -14774,7 +14774,7 @@ var tab = dataset.getAsText('\t','\n','"',true)]]></sample>
               <description><![CDATA[the specified row separator; examples: new line '\n'.]]></description>
             </parameter>
             <parameter name="value_delimiter" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[the specified value delimiter; example: double quote '"'.]]></description>
+              <description><![CDATA[the specified value delimiter; null means empty string; example: double quote '"'.]]></description>
             </parameter>
             <parameter name="add_column_names" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[if true column names will be added as a first row.]]></description>
@@ -62644,8 +62644,8 @@ For example, "record.department_id = [1, 33, 99]"]]></description>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Sets focus to a field specified by its name. 
-If the second parameter is set to true, then readonly fields will be skipped 
+            <description clientSupport="wc,sc"><![CDATA[Sets focus to a field specified by its name.
+If the second parameter is set to true, then readonly fields will be skipped
 (the focus will be set to the first non-readonly field located after the field with the specified name; the tab sequence is respected when searching for the non-readonly field).]]></description>
           </descriptions>
           <summaries>
@@ -62654,7 +62654,7 @@ If the second parameter is set to true, then readonly fields will be skipped
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var tabseq = %%prefix%%controller.getTabSequence();
 if (tabseq.length > 1) {
-	// If there is more than one field in the tab sequence, 
+	// If there is more than one field in the tab sequence,
 	// focus the second one and skip over readonly fields.
 	%%prefix%%controller.focusField(tabseq[1], true);
 }
@@ -62800,7 +62800,7 @@ Note2: tabindex is 1 (left) or 2 (right) for a SplitPane and 0 based for the oth
 //dataset rows: mainform(1) -> parent(2)  -> current form(3) (when 3 forms deep)
 /** @type {JSDataSet} */
 var dataset = %%prefix%%controller.getFormContext();
-if (dataset.getMaxRowIndex() > 1) 
+if (dataset.getMaxRowIndex() > 1)
 {
 	// form is in a tabpanel
 	var parentFormName = dataset.getValue(1,2)
@@ -62824,8 +62824,8 @@ if (dataset.getMaxRowIndex() > 1)
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[the max record index]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns the current cached record count of the current foundset. 
-To return the full foundset count, use: databaseManager.getFoundSetCount(...) 
+            <description clientSupport="wc,sc"><![CDATA[Returns the current cached record count of the current foundset.
+To return the full foundset count, use: databaseManager.getFoundSetCount(...)
 Tip: get the the table count of all rows in a table, use: databaseManager.getTableCount(...)]]></description>
           </descriptions>
           <summaries>
@@ -62923,8 +62923,8 @@ var current = %%prefix%%controller.getSelectedIndex();
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"><![CDATA[array of names]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Get an array with the names of the components that are part of the tab sequence. 
-The order of the names respects the order of the tab sequence. 
+            <description clientSupport="wc,sc"><![CDATA[Get an array with the names of the components that are part of the tab sequence.
+The order of the names respects the order of the tab sequence.
 Components that are not named will not appear in the returned array, although they may be in the tab sequence.]]></description>
           </descriptions>
           <summaries>
@@ -62933,7 +62933,7 @@ Components that are not named will not appear in the returned array, although th
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[var tabseq = %%prefix%%controller.getTabSequence();
 if (tabseq.length > 1) {
-	// If there is more than one field in the tab sequence, 
+	// If there is more than one field in the tab sequence,
 	// focus the second one and skip over readonly fields.
 	%%prefix%%controller.focusField(tabseq[1], true);
 }
@@ -62996,7 +62996,7 @@ if (currentWindow != null) {
             <description clientSupport="wc,sc"><![CDATA[Loads all accessible records from the datasource into the form foundset.
 When the form contains a related foundset it will be replaced by a default foundset on same datasource.
 
-Notes: 
+Notes:
 -the default foundset is always limited by filters, if databaseManager.addFoundSetFilterParam function is used.
 -typical use is loading the normal foundset again after form usage in a related tabpanel]]></description>
           </descriptions>
@@ -63024,7 +63024,7 @@ Notes:
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Loads all accessible records from the datasource into the form foundset. Typical usage is loading records after search in related tabpanel. 
+            <description clientSupport="wc,sc"><![CDATA[Loads all accessible records from the datasource into the form foundset. Typical usage is loading records after search in related tabpanel.
 The difference to loadAllRecords() is that related foundset will load related records.]]></description>
           </descriptions>
           <summaries>
@@ -63041,7 +63041,7 @@ The difference to loadAllRecords() is that related foundset will load related re
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Loads a (related) foundset into the form. 
+            <description clientSupport="wc,sc"><![CDATA[Loads a (related) foundset into the form.
 The form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset.
 
 This will really update the foundset instance itself of the form, so now existing foundset is altered just the new foundset is shown.
@@ -63053,7 +63053,7 @@ that is given.]]></description>
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[//to load a (related)foundset into the form.
-//the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset 
+//the form will no longer share the default foundset with forms of the same datasource, use loadAllRecords to restore the default foundset
 %%prefix%%controller.loadRecords(order_to_orderdetails);]]></sample>
           </samples>
           <parameters>
@@ -63306,7 +63306,7 @@ The query will be wrapped when one of the following is true:
             <summary clientSupport="wc,sc"><![CDATA[Create a new record in the form foundset.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// foreign key data is only filled in for equals (=) relation items 
+            <sample clientSupport="wc,sc"><![CDATA[// foreign key data is only filled in for equals (=) relation items
 %%prefix%%controller.newRecord();//default adds on top
 //%%prefix%%controller.newRecord(false); //adds at bottom
 //%%prefix%%controller.newRecord(2); //adds as second record]]></sample>
@@ -63324,7 +63324,7 @@ The query will be wrapped when one of the following is true:
             <summary clientSupport="wc,sc"><![CDATA[Create a new record in the form foundset.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// foreign key data is only filled in for equals (=) relation items 
+            <sample clientSupport="wc,sc"><![CDATA[// foreign key data is only filled in for equals (=) relation items
 %%prefix%%controller.newRecord();//default adds on top
 //%%prefix%%controller.newRecord(false); //adds at bottom
 //%%prefix%%controller.newRecord(2); //adds as second record]]></sample>
@@ -63347,7 +63347,7 @@ The query will be wrapped when one of the following is true:
             <summary clientSupport="wc,sc"><![CDATA[Create a new record in the form foundset.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// foreign key data is only filled in for equals (=) relation items 
+            <sample clientSupport="wc,sc"><![CDATA[// foreign key data is only filled in for equals (=) relation items
 %%prefix%%controller.newRecord();//default adds on top
 //%%prefix%%controller.newRecord(false); //adds at bottom
 //%%prefix%%controller.newRecord(2); //adds as second record]]></sample>
@@ -63489,7 +63489,7 @@ Note: The omitted records are discarded when these functions are executed: loadA
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[//TIP: see also plugins.file.writeXMLFile(...)
 var xml = %%prefix%%controller.printXML();
-//print only current record 
+//print only current record
 //var xml = %%prefix%%controller.printXML(true);]]></sample>
           </samples>
         </function>
@@ -63507,7 +63507,7 @@ var xml = %%prefix%%controller.printXML();
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[//TIP: see also plugins.file.writeXMLFile(...)
 var xml = %%prefix%%controller.printXML();
-//print only current record 
+//print only current record
 //var xml = %%prefix%%controller.printXML(true);]]></sample>
           </samples>
           <parameters>
@@ -63527,9 +63527,9 @@ Use this after altering the elements via solutionModel at the JSForm of this for
             <summary clientSupport="wc,sc"><![CDATA[Recreates the forms UI components, to reflect the latest solution model.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// get the solution model JSForm 
+            <sample clientSupport="wc,sc"><![CDATA[// get the solution model JSForm
 var form = solutionModel.getForm("myForm");
-// get the JSField of the form 
+// get the JSField of the form
 var field = form.getField("myField");
 // alter the field
 field.x = field.x + 10;
@@ -64311,7 +64311,7 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
 %%prefix%%controller.showPrintPreview();
 //to print preview current record only
 //%%prefix%%controller.showPrintPreview(true);
-//to print preview current record only with 125% zoom factor; 
+//to print preview current record only with 125% zoom factor;
 //%%prefix%%controller.showPrintPreview(true, null, 125);]]></sample>
           </samples>
         </function>
@@ -64331,7 +64331,7 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
 %%prefix%%controller.showPrintPreview();
 //to print preview current record only
 //%%prefix%%controller.showPrintPreview(true);
-//to print preview current record only with 125% zoom factor; 
+//to print preview current record only with 125% zoom factor;
 //%%prefix%%controller.showPrintPreview(true, null, 125);]]></sample>
           </samples>
           <parameters>
@@ -64357,7 +64357,7 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
 %%prefix%%controller.showPrintPreview();
 //to print preview current record only
 //%%prefix%%controller.showPrintPreview(true);
-//to print preview current record only with 125% zoom factor; 
+//to print preview current record only with 125% zoom factor;
 //%%prefix%%controller.showPrintPreview(true, null, 125);]]></sample>
           </samples>
           <parameters>
@@ -64387,7 +64387,7 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
 %%prefix%%controller.showPrintPreview();
 //to print preview current record only
 //%%prefix%%controller.showPrintPreview(true);
-//to print preview current record only with 125% zoom factor; 
+//to print preview current record only with 125% zoom factor;
 //%%prefix%%controller.showPrintPreview(true, null, 125);]]></sample>
           </samples>
           <parameters>
@@ -65086,7 +65086,7 @@ var w = application.getWindow("mydialog"); // use null name for main app. window
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Sorts the form foundset based on the given sort string. 
+            <description clientSupport="wc,sc"><![CDATA[Sorts the form foundset based on the given sort string.
 TIP: You can use the Copy button in the developer Select Sorting Fields dialog to get the needed syntax string for the desired sort fields/order.]]></description>
           </descriptions>
           <summaries>
@@ -65108,7 +65108,7 @@ TIP: You can use the Copy button in the developer Select Sorting Fields dialog t
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Sorts the form foundset based on the given sort string. 
+            <description clientSupport="wc,sc"><![CDATA[Sorts the form foundset based on the given sort string.
 TIP: You can use the Copy button in the developer Select Sorting Fields dialog to get the needed syntax string for the desired sort fields/order.]]></description>
           </descriptions>
           <summaries>
@@ -65261,7 +65261,7 @@ var timezones = i18n.getAvailableTimeZoneIDs();]]></sample>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Gets the current country; based on the current locale settings in the Servoy Client Locale preferences. 
 
-NOTE: For more information on i18n, see the chapter on Internationalization (i18n) in the Servoy Developer User's Guide, beginning with the Introduction to i18n]]></description>
+NOTE: For more information on i18n, see the chapter on Internationalization in the Servoy Developer User's Guide, and the chapter on Internationalization-I18N in the Programming Guide.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Gets the current country; based on the current locale settings in the Servoy Client Locale preferences.]]></summary>
@@ -65276,7 +65276,7 @@ NOTE: For more information on i18n, see the chapter on Internationalization (i18
           <descriptions>
             <description clientSupport="mc,wc,sc"><![CDATA[Gets the current language; based on the current locale settings in the Servoy Client Locale preferences. 
 
-NOTE: For more information on i18n, see the chapter on Internationalization (i18n) in the Servoy Developer User's Guide, beginning with the Introduction to i18n]]></description>
+NOTE: For more information on i18n, see the chapter on Internationalization in the Servoy Developer User's Guide, and the chapter on Internationalization-I18N in the Programming Guide.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="mc,wc,sc"><![CDATA[Gets the current language; based on the current locale settings in the Servoy Client Locale preferences.]]></summary>
@@ -65603,7 +65603,7 @@ see http://www.ics.uci.edu/pub/ietf/http/related/iso639.txt
 The country must be an upper case 2 letter code defined by IS-3166
 see http://www.chemie.fu-berlin.de/diverse/doc/ISO_3166.html 
 
-NOTE: For more information on i18n, see the chapter on Internationalization (i18n) in the Servoy Developer User's Guide, beginning with the Introduction to i18n]]></description>
+NOTE: For more information on i18n, see the chapter on Internationalization in the Servoy Developer User's Guide, and the chapter on Internationalization-I18N in the Programming Guide.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="mc,wc,sc"><![CDATA[Set/Overwrite the locale for this client.]]></summary>
@@ -65641,6 +65641,11 @@ For instance the time zone for Netherlands is set using the ID "Europe/Amsterdam
             <sample clientSupport="wc,sc"><![CDATA[// This will set the default time zone to Central European Time
 i18n.setTimeZone("Europe/Amsterdam");]]></sample>
           </samples>
+          <parameters>
+            <parameter name="timezone" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the client's time zone]]></description>
+            </parameter>
+          </parameters>
         </function>
       </functions>
     </object>
