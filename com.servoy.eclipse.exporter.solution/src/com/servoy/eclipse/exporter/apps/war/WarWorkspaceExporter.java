@@ -20,7 +20,9 @@ package com.servoy.eclipse.exporter.apps.war;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -64,7 +66,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			@Override
 			public boolean isExportActiveSolutionOnly()
 			{
-				return true;
+				return configuration.isExportActiveSolutionOnly();
 			}
 
 			@Override
@@ -105,13 +107,23 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			@Override
 			public List<String> getPlugins()
 			{
-				return getFiles(ApplicationServerRegistry.get().getPluginManager().getPluginsDir());
+				Set<String> names = null;
+				if (configuration.getPlugins() != null)
+				{
+					names = new HashSet<String>(Arrays.asList(configuration.getPlugins().toLowerCase().split(" ")));
+				}
+				return getFiles(ApplicationServerRegistry.get().getPluginManager().getPluginsDir(), names);
 			}
 
 			@Override
 			public List<String> getLafs()
 			{
-				return getFiles(ApplicationServerRegistry.get().getLafManager().getLAFDir());
+				Set<String> names = null;
+				if (configuration.getLafs() != null)
+				{
+					names = new HashSet<String>(Arrays.asList(configuration.getLafs().toLowerCase().split(" ")));
+				}
+				return getFiles(ApplicationServerRegistry.get().getLafManager().getLAFDir(), names);
 			}
 
 			@Override
@@ -123,13 +135,23 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			@Override
 			public List<String> getDrivers()
 			{
-				return getFiles(ApplicationServerRegistry.get().getServerManager().getDriversDir());
+				Set<String> names = null;
+				if (configuration.getDrivers() != null)
+				{
+					names = new HashSet<String>(Arrays.asList(configuration.getDrivers().toLowerCase().split(" ")));
+				}
+				return getFiles(ApplicationServerRegistry.get().getServerManager().getDriversDir(), names);
 			}
 
 			@Override
 			public List<String> getBeans()
 			{
-				return getFiles(ApplicationServerRegistry.get().getBeanManager().getBeansDir());
+				Set<String> names = null;
+				if (configuration.getBeans() != null)
+				{
+					names = new HashSet<String>(Arrays.asList(configuration.getBeans().toLowerCase().split(" ")));
+				}
+				return getFiles(ApplicationServerRegistry.get().getBeanManager().getBeansDir(), names);
 			}
 
 			@Override
@@ -144,13 +166,14 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 				return configuration.getAppServerDir();
 			}
 
-			List<String> getFiles(File dir)
+			List<String> getFiles(File dir, final Set<String> fileNames)
 			{
 				return Arrays.asList(dir.list(new FilenameFilter()
 				{
 					public boolean accept(File dir, String name)
 					{
-						return name.toLowerCase().endsWith(".jar") || name.toLowerCase().endsWith(".zip"); //$NON-NLS-1$ //$NON-NLS-2$
+						boolean accept = fileNames != null ? fileNames.contains(name.toLowerCase()) : true;
+						return accept && (name.toLowerCase().endsWith(".jar") || name.toLowerCase().endsWith(".zip")); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 				}));
 			}

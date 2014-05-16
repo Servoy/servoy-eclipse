@@ -17,7 +17,11 @@
 
 package com.servoy.eclipse.exporter.apps.war;
 
+import java.util.HashMap;
+
 import com.servoy.eclipse.exporter.apps.common.AbstractArgumentChest;
+import com.servoy.j2db.util.ILogLevel;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Stores and provides the export-relevant arguments the product was started with.
@@ -25,6 +29,12 @@ import com.servoy.eclipse.exporter.apps.common.AbstractArgumentChest;
  */
 public class WarArgumentChest extends AbstractArgumentChest
 {
+
+	private String plugins;
+	private String beans;
+	private String lafs;
+	private String drivers;
+	private boolean isExportActiveSolutionOnly;
 
 	public WarArgumentChest(String[] args)
 	{
@@ -51,6 +61,14 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        -verbose ... prints more info to console\n"
 			+ "        -p <properties_file> ... path and name of properties file.\n"
 			+ "             Default: the 'servoy.properties' file  from 'application_server'  will be used.\n"
+			+ "        -pi <plugin_names> ... the list of plugins to export e.g. -pi plugin1.jar plugin2.zip\n" 
+			+			    "Default: all plugins from application_server/plugins are exported.\n"
+			+ "        -b <bean_names> ... the list of beans to export \n" 
+			+			   "Default: all beans from application_server/beans are exported.\n"
+			+ "        -l <lafs_names> ... the list of lafs to export \n" 
+			+			    "Default: all lafs from application_server/lafs are exported.\n"
+			+ "        -d <jdbc_drivers> ... the list of drivers to export\n" 
+			+			    "Default: all drivers from application_server/drivers are exported.\n"
 			+ "        -as <app_server_dir> ... specifies where to find the 'application_server' directory.\n"
 			+ "             Default: '../../application_server'.\n"
 			+ "        -pl alternate project locations; solution  and  resources projects will  be searched\n"
@@ -58,7 +76,9 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             workspace needs to contain projects from different git repositories,  those can\n"
 			+ "             be checked out in '<workspace_location>/a', '<workspace_location>/b' and so on.\n"
 			+ "        -ie ignore build errors.  CAUTION! the use of this flag is discouraged; it can cause\n"
-			+ "             invalid solutions to be exported.";
+			+ "             invalid solutions to be exported.\n"
+			+ "        -active <true/false> export active solution (and its modules) only\n"
+			+ "				Default: true\n";
 	}
 
 	/*
@@ -69,5 +89,81 @@ public class WarArgumentChest extends AbstractArgumentChest
 	@Override
 	protected void parseArguments(String[] args)
 	{
+		if (!mustShowHelp())
+		{
+			HashMap<String, String> argsMap = getArgsAsMap(args);
+			
+			plugins = parseArg("pi", "Plugin name(s) was(were) not specified after '-pi' argument.", argsMap);
+			beans = parseArg("b", "Bean name(s) was(were) not specified after '-b' argument.", argsMap);
+			lafs = parseArg("l", "Laf name(s) was(were) not specified after '-l' argument.", argsMap);
+			drivers = parseArg("d","Driver name(s) was(were) not specified after '-d' argument.", argsMap);
+			isExportActiveSolutionOnly = true;
+			if (argsMap.containsKey("active") && !Utils.getAsBoolean(argsMap.get("active"))) isExportActiveSolutionOnly = false;
+		}
+	}
+
+	private HashMap<String, String> getArgsAsMap(String[] args)
+	{
+		StringBuilder argsString = new StringBuilder();
+		for (String arg :  args)
+		{
+			argsString.append(arg+" ");
+		}
+		String[] a = argsString.toString().split("-");
+		HashMap<String,String> argsMap = new HashMap<String,String>();
+		for (String arg : a)
+		{
+			if (arg != null && !arg.trim().equals(""))
+			{
+				int idx = arg.indexOf(" ");
+				if (idx > 0 &&  arg.length() > idx)
+				{
+					argsMap.put(arg.substring(0, idx).toLowerCase(), arg.substring(idx+1).trim());
+				}
+				else
+				{
+					argsMap.put(arg,  "");
+				}
+			}
+		}
+		return argsMap;
+	}
+
+	private String parseArg(String argName, String errMsg, HashMap<String, String> argsMap)
+	{
+		if (argsMap.containsKey(argName))
+		{
+			String val = argsMap.get(argName);
+			if (val != null & !val.trim().equals("")) return val;
+			
+			info(errMsg, ILogLevel.ERROR);
+			markInvalid();
+		}
+		return null;
+	}
+
+	public String getPlugins()
+	{
+		return plugins;
+	}
+
+	public String getBeans()
+	{
+		return beans;
+	}
+
+	public String getLafs()
+	{
+		return lafs;
+	}
+
+	public String getDrivers()
+	{
+		return drivers;
+	}
+
+	public boolean isExportActiveSolutionOnly()
+	{
+		return isExportActiveSolutionOnly;
 	}
 }
