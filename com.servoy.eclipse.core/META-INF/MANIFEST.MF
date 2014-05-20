@@ -42,7 +42,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui.editors,
  com.servoy.eclipse.model.exporter.mobile,
  net.sourceforge.sqlexplorer;resolution:=optional,
- sablo
+ sablo,
+ org.apache.commons.io;bundle-version="2.4.0"
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.core,
  com.servoy.eclipse.core.builder,

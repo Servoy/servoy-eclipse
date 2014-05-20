@@ -15,7 +15,8 @@ Require-Bundle: com.servoy.eclipse.model,
  com.servoy.eclipse.jsunit,
  org.eclipse.core.expressions,
  org.eclipse.equinox.security,
- com.servoy.eclipse.model.exporter.mobile
+ com.servoy.eclipse.model.exporter.mobile,
+ org.apache.commons.io;bundle-version="2.4.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .

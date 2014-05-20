@@ -18,6 +18,7 @@ package com.servoy.eclipse.core;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -41,7 +42,6 @@ import net.sourceforge.sqlexplorer.dbproduct.ManagedDriver;
 import net.sourceforge.sqlexplorer.dbproduct.User;
 import net.sourceforge.sqlexplorer.plugin.SQLExplorerPlugin;
 
-import org.apache.wicket.util.file.File;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -619,8 +619,8 @@ public class Activator extends Plugin
 					Context.enter();
 					try
 					{
-						scope.put("servoyDeveloper", scope, new NativeJavaObject(scope, new JSDeveloperSolutionModel(client), new InstanceJavaMembers(
-							scope, JSDeveloperSolutionModel.class)));
+						scope.put("servoyDeveloper", scope, new NativeJavaObject(scope, new JSDeveloperSolutionModel(client), new InstanceJavaMembers(scope,
+							JSDeveloperSolutionModel.class)));
 					}
 					finally
 					{
@@ -992,8 +992,7 @@ public class Activator extends Plugin
 			}
 			if (extensions.length > 1)
 			{
-				ServoyLog.logWarning("Multiple documentation manager plugins found (extension point " +
-					IDocumentationManagerProvider.EXTENSION_ID + ")", null);
+				ServoyLog.logWarning("Multiple documentation manager plugins found (extension point " + IDocumentationManagerProvider.EXTENSION_ID + ")", null);
 			}
 			IConfigurationElement[] ce = extensions[0].getConfigurationElements();
 			if (ce == null || ce.length == 0)
@@ -1043,14 +1042,12 @@ public class Activator extends Plugin
 
 		if (extensions == null || extensions.length == 0)
 		{
-			ServoyLog.logWarning("Could not find extension point " +
-				extensionId, null);
+			ServoyLog.logWarning("Could not find extension point " + extensionId, null);
 			return null;
 		}
 		if (extensions.length > 1)
 		{
-			ServoyLog.logWarning("Multiple extensions found for " +
-				extensionId, null);
+			ServoyLog.logWarning("Multiple extensions found for " + extensionId, null);
 		}
 		IConfigurationElement[] ce = extensions[0].getConfigurationElements();
 		if (ce == null || ce.length == 0)
@@ -1060,8 +1057,7 @@ public class Activator extends Plugin
 		}
 		if (ce.length > 1)
 		{
-			ServoyLog.logWarning("Multiple extensions found for extension point " +
-				extensionId, null);
+			ServoyLog.logWarning("Multiple extensions found for extension point " + extensionId, null);
 		}
 		Object extension = null;
 		try
@@ -1180,9 +1176,9 @@ public class Activator extends Plugin
 						{
 							public void run()
 							{
-								boolean upgrade = MessageDialog.openQuestion(
-									Display.getDefault().getActiveShell(),
-									"Servoy ApplicationServer version should be upgraded", "The ApplicationServers version (" + version + ") is lower than Developer's version (" + ClientVersion.getReleaseNumber() + ")\n Upgrade the ApplicationServer?");
+								boolean upgrade = MessageDialog.openQuestion(Display.getDefault().getActiveShell(),
+									"Servoy ApplicationServer version should be upgraded", "The ApplicationServers version (" + version +
+										") is lower than Developer's version (" + ClientVersion.getReleaseNumber() + ")\n Upgrade the ApplicationServer?");
 
 								if (upgrade)
 								{

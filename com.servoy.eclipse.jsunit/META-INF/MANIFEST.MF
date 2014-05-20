@@ -26,7 +26,8 @@ Require-Bundle: org.eclipse.dltk.javascript.rhino,
  org.eclipse.ui.ide,
  org.eclipse.dltk.ui,
  org.eclipse.ui.workbench.texteditor,
- org.eclipse.core.expressions
+ org.eclipse.core.expressions,
+ slf4j.api;bundle-version="1.6.1"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: jsunit-1.3.jar,
