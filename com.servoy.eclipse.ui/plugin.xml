@@ -75,7 +75,7 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             class="com.servoy.eclipse.ui.DesignPerspective"
-            icon="icons/windowicon.gif"
+            icon="icons/windowicon.png"
             id="com.servoy.eclipse.ui.DesignPerspective"
             name="Servoy Design">
       </perspective>
