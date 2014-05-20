@@ -60,7 +60,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ltk.core.refactoring,
  org.eclipse.ltk.ui.refactoring,
  servoy_ngclient,
- org.apache.commons.io;bundle-version="2.4.0"
+ org.apache.commons.io;bundle-version="2.4.0",
+ org.maven.ide.eclipse.grouplayout;bundle-version="1.1.0"
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.ui,
  com.servoy.eclipse.ui.actions,
@@ -79,8 +80,6 @@ Export-Package: com.servoy.eclipse.ui,
  com.servoy.eclipse.ui.views.properties,
  com.servoy.eclipse.ui.views.solutionexplorer,
  com.servoy.eclipse.ui.views.solutionexplorer.actions,
- com.servoy.eclipse.ui.wizards,
- org.eclipse.swt.layout.grouplayout,
- org.eclipse.swt.widgets.baseline
-Bundle-ClassPath: .,baseline.jar,swt-grouplayout.jar
+ com.servoy.eclipse.ui.wizards
+Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

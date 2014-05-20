@@ -19,7 +19,8 @@ Require-Bundle: org.eclipse.core.resources,
  com.servoy.eclipse.core,
  com.servoy.eclipse.ui,
  org.eclipse.compare,
- org.eclipse.equinox.security
+ org.eclipse.equinox.security,
+ org.maven.ide.eclipse.grouplayout;bundle-version="1.1.0"
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Export-Package: com.servoy.eclipse.team,com.servoy.eclipse.team.actions
