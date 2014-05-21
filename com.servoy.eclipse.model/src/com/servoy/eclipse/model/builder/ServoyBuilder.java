@@ -4144,7 +4144,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				IServerInternal server = (IServerInternal)ApplicationServerSingleton.get().getServerManager().getServer(server_name, true, false);
 				boolean existing = false;
-				for (String name : ApplicationServerSingleton.get().getServerManager().getKnownDriverClassNames())
+				for (String name : ApplicationServerSingleton.get().getServerManager().getAllDriverClassNames())
 				{
 					if (server != null && name.equals(server.getConfig().getDriver()))
 					{
