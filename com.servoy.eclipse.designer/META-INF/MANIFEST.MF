@@ -15,6 +15,7 @@ Require-Bundle: org.eclipse.core.databinding,
  org.eclipse.core.resources,
  org.eclipse.ui.editors,
  org.eclipse.ui.ide,
+ sablo,
  servoy_shared,
  servoy_ngclient,
  servoy_debug,
@@ -26,7 +27,7 @@ Require-Bundle: org.eclipse.core.databinding,
  org.eclipse.core.expressions,
  com.servoy.eclipse.designer.rfb,
  sablo,
- org.maven.ide.eclipse.grouplayout;bundle-version="1.1.0"
+ org.maven.ide.eclipse.grouplayout
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.designer;uses:="org.eclipse.jface.re
  source,org.eclipse.ui.plugin,org.osgi.framework"
