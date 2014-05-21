@@ -802,7 +802,7 @@ public class ServerEditor extends EditorPart
 	private boolean isExistingDriver(String driver)
 	{
 		boolean existing = false;
-		for (String name : ServoyModel.getServerManager().getKnownDriverClassNames())
+		for (String name : ServoyModel.getServerManager().getAllDriverClassNames())
 		{
 			if (name.equals(driver))
 			{
