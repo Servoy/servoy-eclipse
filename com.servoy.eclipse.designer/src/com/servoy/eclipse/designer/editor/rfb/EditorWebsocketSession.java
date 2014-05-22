@@ -22,13 +22,18 @@ import org.sablo.websocket.BaseWebsocketSession;
 
 /**
  * Handle communication with a remote rfb form editor.
- * 
+ *
  * @author rgansevles
  *
  */
 public class EditorWebsocketSession extends BaseWebsocketSession
 {
 	public static final String EDITOR_ENDPOINT = "editor";
+
+	public EditorWebsocketSession(String uuid)
+	{
+		super(uuid);
+	}
 
 	@Override
 	public boolean isValid()

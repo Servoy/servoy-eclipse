@@ -73,7 +73,7 @@ import com.servoy.j2db.persistence.IPersist;
 
 /**
  * Tab in form editor for designing the form visually.
- * 
+ *
  * @author rgansevles
  */
 
@@ -93,8 +93,7 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 		setEditDomain(editDomain);
 
 		// Serve requests for rfb editor, TODO: somehow tell the editor which editorid to use
-		WebsocketSessionManager.addSession(EditorWebsocketSession.EDITOR_ENDPOINT, "rfbtest" /* UUID.randomUUID(). toString() */,
-			editorWebsocketSession = new EditorWebsocketSession());
+		WebsocketSessionManager.addSession(EditorWebsocketSession.EDITOR_ENDPOINT, editorWebsocketSession = new EditorWebsocketSession("rfbtest"));
 		editorWebsocketSession.registerService("formeditor", new EditorServiceHandler(editorPart));
 	}
 
@@ -159,7 +158,7 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 		// // Calling showView will open the editor if it isn't already opened, and bring it to the
 		// front
 		// // if it already is
-		site.getPage().showView("org.eclipse.ui.views.PropertySheet", null, IWorkbenchPage.VIEW_VISIBLE);	
+		site.getPage().showView("org.eclipse.ui.views.PropertySheet", null, IWorkbenchPage.VIEW_VISIBLE);
 	}
 
 	protected abstract IAction createCopyAction();
