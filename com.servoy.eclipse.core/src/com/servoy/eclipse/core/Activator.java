@@ -369,11 +369,10 @@ public class Activator extends Plugin
 				//add perspective activated listener to remove External Tools set from any activated perspective
 				workbenchWindow.addPerspectiveListener(new PerspectiveAdapter()
 				{
-
 					@Override
 					public void perspectiveActivated(IWorkbenchPage page, IPerspectiveDescriptor perspectiveDescriptor)
 					{
-						if (node.getBoolean(perspectiveDescriptor.getId(), true))
+						if (perspectiveDescriptor != null && node.getBoolean(perspectiveDescriptor.getId(), true))
 						{
 							super.perspectiveActivated(page, perspectiveDescriptor);
 							turnOffExternalToolsActionSet(workbenchWindow, perspectiveDescriptor, node);
