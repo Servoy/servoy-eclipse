@@ -975,7 +975,7 @@ public class TypeCreator extends TypeCache
 						members.add(createProperty(name, false, getType(context, pd), "", null));
 					}
 				}
-				Map<String, WebComponentApiDefinition> apis = spec.getApis();
+				Map<String, WebComponentApiDefinition> apis = spec.getApiFunctions();
 				for (WebComponentApiDefinition api : apis.values())
 				{
 					Method method = TypeInfoModelFactory.eINSTANCE.createMethod();

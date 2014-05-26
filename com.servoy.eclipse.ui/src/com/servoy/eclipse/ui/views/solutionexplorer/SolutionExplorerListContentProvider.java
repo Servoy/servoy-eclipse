@@ -1664,7 +1664,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					nodes.add(new UserNode(name, UserNodeType.FORM_ELEMENTS, prefixForWebComponentMembers + name, name, webcomponent, propertiesIcon));
 				}
 			}
-			Map<String, WebComponentApiDefinition> apis = spec.getApis();
+			Map<String, WebComponentApiDefinition> apis = spec.getApiFunctions();
 			for (WebComponentApiDefinition api : apis.values())
 			{
 				String name = api.getName();
