@@ -39,7 +39,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.ValuesConfig;
-import org.sablo.specification.WebComponentSpec;
+import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -271,7 +271,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		Map<String, List<String>> allComponents = new HashMap<String, List<String>>();
 		Map<String, String> drawerNames = new HashMap<String, String>();
 
-		for (WebComponentSpec spec : WebComponentSpecProvider.getInstance().getWebComponentDescriptions())
+		for (WebComponentSpecification spec : WebComponentSpecProvider.getInstance().getWebComponentSpecifications())
 		{
 			String packageName = spec.getPackageName();
 			String id = COMPONENTS_ID + "." + packageName;
@@ -722,7 +722,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 	private static PaletteEntry createComponentsEntry(String beanClassName)
 	{
 		String webComponentClassName = FormTemplateGenerator.getComponentTypeName(beanClassName);
-		WebComponentSpec webComponentDescription = WebComponentSpecProvider.getInstance().getWebComponentDescription(webComponentClassName);
+		WebComponentSpecification webComponentDescription = WebComponentSpecProvider.getInstance().getWebComponentSpecification(webComponentClassName);
 		Dimension dimension = getDimensionFromSpec(webComponentDescription);
 		ImageDescriptor beanIcon = Activator.loadImageDescriptorFromBundle("bean.gif");
 		RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_BEAN, dimension);
@@ -736,7 +736,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 	 * @param dimension
 	 * @return
 	 */
-	private static Dimension getDimensionFromSpec(WebComponentSpec webComponentDescription)
+	private static Dimension getDimensionFromSpec(WebComponentSpecification webComponentDescription)
 	{
 		Dimension dimension = new Dimension(100, 100);
 		if (webComponentDescription.getProperty("size") != null)

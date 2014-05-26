@@ -49,7 +49,7 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentApiDefinition;
-import org.sablo.specification.WebComponentSpec;
+import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.property.IPropertyType;
 
@@ -1650,7 +1650,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 		String webComponentClassName = FormTemplateGenerator.getComponentTypeName(webcomponent);
 
-		WebComponentSpec spec = WebComponentSpecProvider.getInstance().getWebComponentDescription(webComponentClassName);
+		WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(webComponentClassName);
 		if (spec != null)
 		{
 			Map<String, PropertyDescription> properties = spec.getProperties();

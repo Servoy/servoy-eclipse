@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebComponentSpec;
+import org.sablo.specification.WebComponentSpecification;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.BeanPropertyHandler;
@@ -70,9 +70,9 @@ public class WebComponentPropertySource extends PersistPropertySource
 		}
 	}
 
-	private final WebComponentSpec webComponentSpec;
+	private final WebComponentSpecification webComponentSpec;
 
-	public WebComponentPropertySource(PersistContext persistContext, boolean readonly, WebComponentSpec webComponentSpec)
+	public WebComponentPropertySource(PersistContext persistContext, boolean readonly, WebComponentSpecification webComponentSpec)
 	{
 		super(persistContext, readonly);
 		if (!(persistContext.getPersist() instanceof Bean))

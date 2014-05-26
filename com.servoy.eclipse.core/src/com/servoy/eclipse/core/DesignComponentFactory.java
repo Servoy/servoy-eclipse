@@ -24,7 +24,7 @@ import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
 import org.mozilla.javascript.Scriptable;
-import org.sablo.specification.WebComponentSpec;
+import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -106,7 +106,7 @@ public class DesignComponentFactory extends ComponentFactory
 		{
 			if (FormTemplateGenerator.isWebcomponentBean(meta))
 			{
-				WebComponentSpec spec = WebComponentSpecProvider.getInstance().getWebComponentDescription(
+				WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
 					FormTemplateGenerator.getComponentTypeName((Bean)meta));
 				String label;
 				if (spec == null)

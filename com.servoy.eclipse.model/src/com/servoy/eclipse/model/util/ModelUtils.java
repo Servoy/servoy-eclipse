@@ -34,7 +34,7 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebComponentSpec;
+import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -138,7 +138,7 @@ public class ModelUtils
 					List<Object> cssClasses = new ArrayList<Object>();
 					if (persist != null)
 					{
-						WebComponentSpec spec = WebComponentSpecProvider.getInstance().getWebComponentDescription(
+						WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
 							FormTemplateGenerator.getComponentTypeName(persist));
 						if (spec != null)
 						{

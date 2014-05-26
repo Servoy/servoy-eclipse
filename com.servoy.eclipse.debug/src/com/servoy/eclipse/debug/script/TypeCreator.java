@@ -83,7 +83,7 @@ import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.Scriptable;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentApiDefinition;
-import org.sablo.specification.WebComponentSpec;
+import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.property.IPropertyType;
 
@@ -956,7 +956,7 @@ public class TypeCreator extends TypeCache
 		}
 		if (wcTypeNames.get(typeNameClassName) != null)
 		{
-			WebComponentSpec spec = WebComponentSpecProvider.getInstance().getWebComponentDescription(typeNameClassName);
+			WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(typeNameClassName);
 			if (spec != null)
 			{
 				Type type = TypeInfoModelFactory.eINSTANCE.createType();

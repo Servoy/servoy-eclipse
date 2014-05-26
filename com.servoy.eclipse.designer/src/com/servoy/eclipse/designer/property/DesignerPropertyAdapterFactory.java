@@ -25,7 +25,7 @@ import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.gef.EditPart;
 import org.eclipse.ui.views.properties.IPropertySource;
-import org.sablo.specification.WebComponentSpec;
+import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 
 import com.servoy.base.persistence.IMobileProperties;
@@ -274,7 +274,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 
 				if (FormTemplateGenerator.isWebcomponentBean(persist))
 				{
-					WebComponentSpec spec = WebComponentSpecProvider.getInstance().getWebComponentDescription(
+					WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
 						FormTemplateGenerator.getComponentTypeName((Bean)persist));
 					if (spec != null)
 					{
