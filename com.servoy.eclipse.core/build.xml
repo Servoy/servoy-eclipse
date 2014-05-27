@@ -18,7 +18,10 @@
 	<property name="compilerArg" value=""/>
 	<property name="compilation.prereq.log" value="${buildDirectory}/prereqErrors.log"/>
 	<condition property="dir_bootclasspath" value="${java.home}/../Classes">
-		<os family="mac"/>
+		<and>
+			<os family="mac"/>
+			<available file="${java.home}/../Classes" type="dir"/>
+		</and>
 	</condition>
 	<property name="dir_bootclasspath" value="${java.home}/lib"/>
 	<path id="path_bootclasspath">
@@ -326,9 +329,9 @@
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.wst.common.emf_1.2.200.v201301171800.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.wst.common.emfworkbench.integration_1.2.101.v201107140600.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.emf.edit_2.9.0.v20130610-0406.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.parser_5.0.0.201404231746.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.core_5.0.0.201404231746.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.annotations_5.0.0.201404231746.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.parser_5.1.0.201405261420.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.core_5.1.0.201405261420.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.annotations_5.1.0.201405261420.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.antlr.runtime_3.0.0.v200803061811.jar"/>
 			<pathelement path="../j2db_server/bin/"/>
 			
@@ -360,7 +363,7 @@
 			
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.junit_4.11.0.v201303080030/junit.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.hamcrest.core_1.3.0.v201303031735.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.core_5.0.0.201404231746.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.core_5.1.0.201405261420.jar"/>
 			<pathelement path="${buildDirectory}/nestedJars/org.eclipse.ui.ide_3.9.2.v20131004-0923/e4-ide.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.ide_3.9.2.v20131004-0923.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.win32_3.2.400.v20130516-1056.jar"/>
@@ -395,23 +398,23 @@
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.team.core_3.7.0.v20130514-1224.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.compare.core_3.5.300.v20130514-1224.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.workbench.texteditor_3.8.101.v20130729-1318.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.debug.ui_5.0.0.201404231746.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.debug.ui_5.1.0.201405261420.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.debug.ui_3.9.0.v20130516-1713.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.console_3.5.200.v20130514-0954.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.debug.core_3.8.0.v20130514-0954.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.editors_3.8.100.v20130513-1637.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.ui_5.0.0.201404231746.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.ui_5.1.0.201405261420.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ui.navigator_3.5.300.v20130517-0139.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ltk.core.refactoring_3.6.100.v20130605-1748.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.ltk.ui.refactoring_3.7.100.v20130605-1748.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.compare_3.5.401.v20130709-1308.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.team.ui_3.7.1.v20130729-1104.jar"/>
 			<pathelement path="../eclipse_target/compile_target/install/plugins/org.eclipse.search_3.9.1.v20131121-1346.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.launching_5.0.0.201404231746.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.debug_5.0.0.201404231746.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.core.manipulation_5.0.0.201404231746.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.console_5.0.0.201404231746.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.console.ui_5.0.0.201404231746.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.launching_5.1.0.201405261420.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.debug_5.1.0.201405261420.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.core.manipulation_5.1.0.201405261420.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.console_5.1.0.201405261420.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.console.ui_5.1.0.201405261420.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.wst.css.ui_1.0.800.v201306071601.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.wst.xml.ui_1.1.400.v201302260115.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.wst.sse.ui_1.3.200.v201303281757.jar"/>
@@ -420,10 +423,8 @@
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.wst.common.frameworks.ui_1.2.201.v201208292200.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.wst.html.core_1.1.700.v201304301743.jar"/>
 			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.wst.common.modulecore_1.2.300.v201305151500.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.ui_5.0.0.201404231746.jar"/>
-			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.core.manipulation_5.0.0.201404231746.jar"/>
-			<pathelement path="../com.servoy.eclipse.model.exporter.mobile/bin"/>
-			
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.ui_5.1.0.201405261420.jar"/>
+			<pathelement path="../eclipse_target/ship_plugins/plugins/org.eclipse.dltk.javascript.core.manipulation_5.1.0.201405261420.jar"/>
 			<pathelement path="../com.servoy.eclipse.model.exporter.mobile/lib/js.jar"/>
 			
 			<pathelement path="../com.servoy.eclipse.model.exporter.mobile/lib/jshybugger.jar"/>
@@ -433,6 +434,8 @@
 			<pathelement path="../com.servoy.eclipse.model.exporter.mobile/lib/netty-3.6.5.Final.jar"/>
 			
 			<pathelement path="../com.servoy.eclipse.model.exporter.mobile/lib/webbit-0.4.15.jar"/>
+			
+			<pathelement path="../com.servoy.eclipse.model.exporter.mobile/bin"/>
 			
 			<pathelement path="../com.servoy.eclipse.model.exporter.mobile/bin/"/>
 			
@@ -494,27 +497,27 @@
 	<target name="checkCompilationResults" if="compilation.error.occured">
 		<echo file="${compilation.problem.marker}" message="com.servoy.eclipse.core_7.4.1.2027${line.separator}compilation.error.occured=${compilation.error.occured}"/>
 		<eclipse.logCompileError bundle="com.servoy.eclipse.core_7.4.1.2027" log="${compilation.prereq.log}">
-			<include name="C:/Users/Administrator/dev_v7xx_branch/org.eclipse.dltk.javascript.rhino/compilation.problem"/>
+			<include name="C:/Users/jblok/dev_branch70x/org.eclipse.dltk.javascript.rhino/compilation.problem"/>
 			<include name="${pluginTemp}/org.eclipse.dltk.javascript.rhino_7.4.1.2027/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_v7xx_branch/servoy_headless_client/compilation.problem"/>
+			<include name="C:/Users/jblok/dev_branch70x/servoy_headless_client/compilation.problem"/>
 			<include name="${pluginTemp}/servoy_headless_client_7.4.1.2027/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_v7xx_branch/servoy_debug/compilation.problem"/>
+			<include name="C:/Users/jblok/dev_branch70x/servoy_debug/compilation.problem"/>
 			<include name="${pluginTemp}/servoy_debug_7.4.1.2027/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_v7xx_branch/servoy_shared/compilation.problem"/>
+			<include name="C:/Users/jblok/dev_branch70x/servoy_shared/compilation.problem"/>
 			<include name="${pluginTemp}/servoy_shared_7.4.1.2027/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_v7xx_branch/com.servoy.eclipse.model.exporter.mobile/compilation.problem"/>
+			<include name="C:/Users/jblok/dev_branch70x/com.servoy.eclipse.model.exporter.mobile/compilation.problem"/>
 			<include name="${pluginTemp}/com.servoy.eclipse.model.exporter.mobile_7.4.1.2027/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_v7xx_branch/j2db_tunnel/compilation.problem"/>
+			<include name="C:/Users/jblok/dev_branch70x/j2db_tunnel/compilation.problem"/>
 			<include name="${pluginTemp}/j2db_tunnel_7.4.1.2027/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_v7xx_branch/j2db_server/compilation.problem"/>
-			<include name="${pluginTemp}/j2db_server_7.4.1.2027/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_v7xx_branch/servoy_base/compilation.problem"/>
+			<include name="C:/Users/jblok/dev_branch70x/servoy_base/compilation.problem"/>
 			<include name="${pluginTemp}/servoy_base_7.4.1.2027/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_v7xx_branch/servoy_smart_client/compilation.problem"/>
+			<include name="C:/Users/jblok/dev_branch70x/j2db_server/compilation.problem"/>
+			<include name="${pluginTemp}/j2db_server_7.4.1.2027/compilation.problem"/>
+			<include name="C:/Users/jblok/dev_branch70x/servoy_smart_client/compilation.problem"/>
 			<include name="${pluginTemp}/servoy_smart_client_7.4.1.2027/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_v7xx_branch/com.servoy.eclipse.model/compilation.problem"/>
+			<include name="C:/Users/jblok/dev_branch70x/com.servoy.eclipse.model/compilation.problem"/>
 			<include name="${pluginTemp}/com.servoy.eclipse.model_7.4.1.2027/compilation.problem"/>
-			<include name="C:/Users/Administrator/dev_v7xx_branch/eclipse_target/compile_target/optional/net.sourceforge.sqlexplorer_3.5.1.v20100211_SR3b/compilation.problem"/>
+			<include name="C:/Users/jblok/dev_branch70x/eclipse_target/compile_target/optional/net.sourceforge.sqlexplorer_3.5.1.v20100211_SR3b/compilation.problem"/>
 			<include name="${pluginTemp}/net.sourceforge.sqlexplorer_3.5.1.v20100211_SR3b/compilation.problem"/>
 		</eclipse.logCompileError>
 	</target>
@@ -622,7 +625,7 @@
 	</target>
 
 	<target name="refresh" depends="init" if="eclipse.running" description="Refresh this folder.">
-		<eclipse.convertPath fileSystemPath="C:/Users/Administrator/dev_v7xx_branch/com.servoy.eclipse.core" property="resourcePath"/>
+		<eclipse.convertPath fileSystemPath="C:/Users/jblok/dev_branch70x/com.servoy.eclipse.core" property="resourcePath"/>
 		<eclipse.refreshLocal resource="${resourcePath}" depth="infinite"/>
 	</target>
 
