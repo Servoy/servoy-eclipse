@@ -270,6 +270,19 @@ public class Activator extends Plugin
 		}
 		ss.nativeStartup();
 
+		IExtensionRegistry reg = Platform.getExtensionRegistry();
+		IExtensionPoint ep = reg.getExtensionPoint(IPluginBaseClassLoaderProvider.EXTENSION_ID);
+		IExtension[] extensions = ep.getExtensions();
+		if (extensions != null && extensions.length > 0)
+		{
+			for (IExtension extension : extensions)
+			{
+				IPluginBaseClassLoaderProvider provider = (IPluginBaseClassLoaderProvider)extension.getConfigurationElements()[0].createExecutableExtension("class");
+				ss.setBaseClassloader(provider.getClassLoader());
+				return; //we support only one
+			}
+		}
+
 		IPreferenceStore prefs = PlatformUI.getPreferenceStore();
 		prefs.setValue(IWorkbenchPreferenceConstants.SHOW_PROGRESS_ON_STARTUP, true);
 
