@@ -70,8 +70,13 @@ public class DebugJ2DBTestClient extends DebugJ2DBClient
 	protected boolean registerClient(IUserClient uc) throws Exception
 	{
 		boolean register = super.registerClient(uc);
+
 		// access the server directly to mark the client as local
-		ApplicationServerRegistry.get().setServerProcess(getClientID());
+		// * commented out to work the same as automated import test client - it will need authentication in
+		// order to provide access to remote services when enhanced security is enabled - (more like smart client); if this is too restrictive, in the future we
+		// can uncomment this and do the same for import test client; see case SVY-6360
+		// ApplicationServerRegistry.get().setServerProcess(getClientID());
+
 		return register;
 	}
 
