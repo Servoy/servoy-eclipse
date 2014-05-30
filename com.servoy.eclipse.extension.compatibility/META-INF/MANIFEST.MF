@@ -2,8 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Compatibility
 Bundle-SymbolicName: com.servoy.eclipse.extension.compatibility;singleton:=true
-Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: com.servoy.eclipse.extension.compatibility.Activator
+Bundle-Version: 8.0.0.3001
 Bundle-Vendor: SERVOY
 Require-Bundle: org.eclipse.core.runtime,
  com.servoy.eclipse.core,
