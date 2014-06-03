@@ -140,12 +140,12 @@ public class PhoneGapConnector
 			{
 				String reason = "Status code " + status +
 					(response.getStatusLine().getReasonPhrase() != null ? " " + response.getStatusLine().getReasonPhrase() : "");
-				EntityUtils.consumeQuietly(response.getEntity());
+				EntityUtils.consume(response.getEntity());
 				throw new HttpException(errorMsg + " " + reason);
 			}
 		}
 
-		EntityUtils.consumeQuietly(response.getEntity());
+		EntityUtils.consume(response.getEntity());
 		return new ServoyJSONObject(content, false);
 	}
 
