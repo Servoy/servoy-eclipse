@@ -22,6 +22,8 @@ import java.awt.Color;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.json.JSONException;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.property.types.ColorPropertyType;
+import org.sablo.specification.property.types.FunctionPropertyType;
 
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -42,7 +44,7 @@ import com.servoy.j2db.util.UUID;
 
 /**
  * Property handler for web components
- * 
+ *
  * @author rgansevles
  *
  */
@@ -107,23 +109,21 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			ServoyLog.logError(e);
 		}
 
-		switch (propertyDescription.getType().getDefaultEnumValue())
+		if (propertyDescription.getType() == ColorPropertyType.INSTANCE)
 		{
-			case color :
-				return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(null, (String)value);
+			return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(null, (String)value);
+		}
+		else if (propertyDescription.getType() == FunctionPropertyType.INSTANCE)
+		{
+			if (value == null) return Integer.valueOf(0);
 
-			case function :
-				if (value == null) return Integer.valueOf(0);
+			IPersist func = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).searchPersist(UUID.fromString((String)value));
+			if (func instanceof AbstractBase)
+			{
+				return new Integer(func.getID());
+			}
 
-				IPersist func = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).searchPersist(UUID.fromString((String)value));
-				if (func instanceof AbstractBase)
-				{
-					return new Integer(func.getID());
-				}
-
-				return Integer.valueOf(-1);
-
-			default :
+			return Integer.valueOf(-1);
 		}
 
 		return value;
@@ -135,31 +135,27 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		Bean bean = (Bean)obj;
 
 		Object convertedValue = value;
-		switch (propertyDescription.getType().getDefaultEnumValue())
+		if (propertyDescription.getType() == ColorPropertyType.INSTANCE)
 		{
-			case color :
-				convertedValue = PropertyColorConverter.getColorString((Color)value);
-				break;
-
-			case function :
-				//  value is methodid
-				ITable table = null;
-				if (persistContext.getContext() instanceof Form)
+			convertedValue = PropertyColorConverter.getColorString((Color)value);
+		}
+		else if (propertyDescription.getType() == FunctionPropertyType.INSTANCE)
+		{
+			//  value is methodid
+			ITable table = null;
+			if (persistContext.getContext() instanceof Form)
+			{
+				try
 				{
-					try
-					{
-						table = ((Form)persistContext.getContext()).getTable();
-					}
-					catch (RepositoryException e)
-					{
-						ServoyLog.logError(e);
-					}
+					table = ((Form)persistContext.getContext()).getTable();
 				}
-				IScriptProvider scriptMethod = ModelUtils.getScriptMethod(bean, persistContext.getContext(), table, ((Integer)value).intValue());
-				convertedValue = scriptMethod == null ? null : scriptMethod.getUUID().toString();
-				break;
-
-			default :
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+			IScriptProvider scriptMethod = ModelUtils.getScriptMethod(bean, persistContext.getContext(), table, ((Integer)value).intValue());
+			convertedValue = scriptMethod == null ? null : scriptMethod.getUUID().toString();
 		}
 
 		try

@@ -52,6 +52,26 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.property.IPropertyType;
+import org.sablo.specification.property.types.BooleanPropertyType;
+import org.sablo.specification.property.types.BorderPropertyType;
+import org.sablo.specification.property.types.BytePropertyType;
+import org.sablo.specification.property.types.ColorPropertyType;
+import org.sablo.specification.property.types.DataproviderPropertyType;
+import org.sablo.specification.property.types.DimensionPropertyType;
+import org.sablo.specification.property.types.DoublePropertyType;
+import org.sablo.specification.property.types.FloatPropertyType;
+import org.sablo.specification.property.types.FontPropertyType;
+import org.sablo.specification.property.types.FunctionPropertyType;
+import org.sablo.specification.property.types.InsetsPropertyType;
+import org.sablo.specification.property.types.IntPropertyType;
+import org.sablo.specification.property.types.LongPropertyType;
+import org.sablo.specification.property.types.PointPropertyType;
+import org.sablo.specification.property.types.ScrollbarsPropertyType;
+import org.sablo.specification.property.types.StringPropertyType;
+import org.sablo.specification.property.types.StyleClassPropertyType;
+import org.sablo.specification.property.types.TabSeqPropertyType;
+import org.sablo.specification.property.types.TagStringPropertyType;
+import org.sablo.specification.property.types.ValuesPropertyType;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.util.DataSourceUtilsBase;
@@ -153,6 +173,11 @@ import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.scripting.FunctionDefinition;
+import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.FormatPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.RelationPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.smart.dataui.InvisibleBean;
 import com.servoy.j2db.util.ComponentFactoryHelper;
 import com.servoy.j2db.util.IDelegate;
@@ -164,9 +189,9 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Property source for IPersist objects.
- * This class manages contents of the properties view by returning a list of 
+ * This class manages contents of the properties view by returning a list of
  * property descriptors depending on value and context of the persist object.
- * 
+ *
  * @author rgansevles
  */
 
@@ -441,8 +466,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	}
 
 	/**
-	 * @param form 
-	 * @param flattenedEditingSolution 
+	 * @param form
+	 * @param flattenedEditingSolution
 	 * @return
 	 */
 	protected Object getValueObject(FlattenedSolution flattenedEditingSolution, Form form)
@@ -745,12 +770,12 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			return (IPropertyDescriptor)propertyDescription.getConfig();
 		}
 
-		IPropertyType propertyType = (propertyDescription == null ? null : propertyDescription.getType());
+		IPropertyType< ? > propertyType = (propertyDescription == null ? null : propertyDescription.getType());
 
 		/*
 		 * Category based property controllers.
 		 */
-		if (propertyType == IPropertyType.Default.function.getType())
+		if (propertyType == FunctionPropertyType.INSTANCE)
 		{
 			final Table table = form == null ? null : form.getTable();
 			return new MethodPropertyController<Integer>(id, displayName, persistContext, new MethodListOptions(true,
@@ -1265,7 +1290,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		 * Type based property controllers.
 		 */
 
-		if (propertyType == IPropertyType.Default.dimension.getType())
+		if (propertyType == DimensionPropertyType.INSTANCE)
 		{
 			final java.awt.Dimension defaultDimension = id.equals("intercellSpacing") ? new Dimension(1, 1) : new Dimension(0, 0);
 			return new PropertyController<java.awt.Dimension, Object>(id, displayName, new ComplexPropertyConverter<java.awt.Dimension>()
@@ -1294,7 +1319,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			});
 		}
 
-		if (propertyType == IPropertyType.Default.point.getType())
+		if (propertyType == PointPropertyType.INSTANCE)
 		{
 			return new PropertyController<java.awt.Point, Object>(id, displayName, new ComplexPropertyConverter<java.awt.Point>()
 			{
@@ -1321,7 +1346,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			});
 		}
 
-		if (propertyType == IPropertyType.Default.insets.getType())
+		if (propertyType == InsetsPropertyType.INSTANCE)
 		{
 			return new PropertyController<java.awt.Insets, Object>(id, displayName, new ComplexPropertyConverter<java.awt.Insets>()
 			{
@@ -1348,12 +1373,12 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			});
 		}
 
-		if (propertyType == IPropertyType.Default.color.getType())
+		if (propertyType == ColorPropertyType.INSTANCE)
 		{
 			return new ColorPropertyController(id, displayName);
 		}
 
-		if (propertyType == IPropertyType.Default.border.getType())
+		if (propertyType == BorderPropertyType.INSTANCE)
 		{
 			BorderPropertyController borderPropertyController = new BorderPropertyController(id, displayName, propertySource, persistContext);
 			borderPropertyController.setReadonly(readOnly);
@@ -1368,7 +1393,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			return borderPropertyController;
 		}
 
-		if (propertyType == IPropertyType.Default.bool.getType())
+		if (propertyType == BooleanPropertyType.INSTANCE)
 		{
 			return new CheckboxPropertyDescriptor(id, displayName);
 		}
@@ -1379,7 +1404,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			return retval;
 		}
 
-		if (propertyType == IPropertyType.Default.scrollbars.getType())
+		if (propertyType == ScrollbarsPropertyType.INSTANCE)
 		{
 			return new PropertyController<Integer, Object>(id, displayName, new ComplexProperty.ComplexPropertyConverter<Integer>()
 			{
@@ -1400,7 +1425,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			}, ScrollbarSettingLabelProvider.INSTANCE, new DummyCellEditorFactory(ScrollbarSettingLabelProvider.INSTANCE));
 		}
 
-		if (propertyType == IPropertyType.Default.styleclass.getType())
+		if (propertyType == StyleClassPropertyType.INSTANCE)
 		{
 			return createStyleClassPropertyController(persistContext.getPersist(), id, displayName, null, form);
 		}
@@ -1412,7 +1437,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			return retval;
 		}
 
-		if (propertyType == IPropertyType.Default.string.getType())
+		if (propertyType == StringPropertyType.INSTANCE)
 		{
 			return new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, null, new ICellEditorFactory()
 			{
@@ -1424,34 +1449,34 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		}
 
 		final int type;
-		if (propertyType == IPropertyType.Default.bytenumber.getType())
+		if (propertyType == BytePropertyType.INSTANCE)
 		{
 			type = NumberCellEditor.BYTE;
 		}
-		else if (propertyType == IPropertyType.Default.doublenumber.getType())
+		else if (propertyType == DoublePropertyType.INSTANCE)
 		{
 			type = NumberCellEditor.DOUBLE;
 		}
-		else if (propertyType == IPropertyType.Default.floatnumber.getType())
+		else if (propertyType == FloatPropertyType.INSTANCE)
 		{
 			type = NumberCellEditor.FLOAT;
 		}
-		else if (propertyType == IPropertyType.Default.intnumber.getType())
+		else if (propertyType == IntPropertyType.INSTANCE)
 		{
 			type = NumberCellEditor.INTEGER;
 		}
-		else if (propertyType == IPropertyType.Default.tabseq.getType())
+		else if (propertyType == TabSeqPropertyType.INSTANCE)
 		{
 			type = NumberCellEditor.INTEGER;
 		}
-		else if (propertyType == IPropertyType.Default.longnumber.getType())
+		else if (propertyType == LongPropertyType.INSTANCE)
 		{
 			type = NumberCellEditor.LONG;
 		}
-		else if (propertyType == IPropertyType.Default.shortnumber.getType())
-		{
-			type = NumberCellEditor.SHORT;
-		}
+//		else if (propertyType == TypesRegistry.shortnumber)
+//		{
+//			type = NumberCellEditor.SHORT;
+//		}
 		else
 		{
 			type = -1;
@@ -1499,8 +1524,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 	/**
 	 * For which properties should foundset methods be allowed.
-	 * 
-	 * @param persistContext 
+	 *
+	 * @param persistContext
 	 * @param id
 	 * @return
 	 */
@@ -1523,7 +1548,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 	/**
 	 * Create a property controller for selecting a style class in Properties view.
-	 * 
+	 *
 	 * @param id
 	 * @param displayName
 	 * @param styleLookupname
@@ -1547,7 +1572,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 	/**
 	 * Get property descriptor that maps multiple properties into 1
-	 * 
+	 *
 	 * @param propertyDescriptor
 	 * @param displayName
 	 * @param category
@@ -1695,11 +1720,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					// no content spec (example: form.width), try based on property descriptor
 					PropertyDescription desc = beanPropertyDescriptor.propertyDescriptor.getPropertyDescription(beanPropertyDescriptor.valueObject, this,
 						persistContext);
-					if (desc != null && desc.getType() == IPropertyType.Default.intnumber.getType())
+					if (desc != null && desc.getType() == IntPropertyType.INSTANCE)
 					{
 						return repository.convertArgumentStringToObject(IRepository.INTEGER, null);
 					}
-					if (desc != null && desc.getType() == IPropertyType.Default.bool.getType())
+					if (desc != null && desc.getType() == BooleanPropertyType.INSTANCE)
 					{
 						return repository.convertArgumentStringToObject(IRepository.BOOLEAN, null);
 					}
@@ -1972,7 +1997,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 	/**
 	 * Create an override element of the current element if this is the first override
-	 * @throws RepositoryException 
+	 * @throws RepositoryException
 	 */
 	private boolean createOverrideElementIfNeeded() throws RepositoryException
 	{
@@ -2258,9 +2283,9 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 	/**
 	 * Wrapper class for PropertyDescriptor and value object.
-	 * 
+	 *
 	 * @author rgansevles
-	 * 
+	 *
 	 */
 	public static class PropertyDescriptorWrapper
 	{
@@ -2354,7 +2379,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		if (propertyDescription == null) return null;
 
 		IPropertyType propertyType = propertyDescription.getType();
-		if (propertyType == IPropertyType.Default.values.getType())
+		if (propertyType == ValuesPropertyType.INSTANCE)
 		{
 			final ValuesConfig config = (ValuesConfig)propertyDescription.getConfig();
 			if (config.isEditable())
@@ -2413,7 +2438,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			return new ComboboxPropertyController<Object>(id, displayName, model, Messages.LabelUnresolved);
 		}
 
-		if (propertyType == IPropertyType.Default.font.getType())
+		if (propertyType == FontPropertyType.INSTANCE)
 		{
 			final IDefaultValue<String> getLastPaintedFont;
 			if (persistContext != null && persistContext.getPersist() instanceof AbstractBase)
@@ -2433,7 +2458,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			}
 			if (Boolean.TRUE.equals(propertyDescription.getConfig()))
 			{
-				// Both property (P) and edit (E) types are font strings, parse the string as awt font and convert back so that guessed fonts are mapped to 
+				// Both property (P) and edit (E) types are font strings, parse the string as awt font and convert back so that guessed fonts are mapped to
 				// the correct string for that font
 				return new PropertyController<String, String>(id, displayName, new ChainedPropertyConverter<String, java.awt.Font, String>(
 					new InversedPropertyConverter<String, java.awt.Font>(PropertyFontConverter.INSTANCE), PropertyFontConverter.INSTANCE),
@@ -2458,7 +2483,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			}
 		}
 
-		if (propertyType == IPropertyType.Default.dataprovider.getType())
+		if (propertyType == DataproviderPropertyType.INSTANCE)
 		{
 			Table table = null;
 			boolean listItemHeader = persistContext != null && persistContext.getPersist() instanceof AbstractBase &&
@@ -2522,7 +2547,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			return propertyController;
 		}
 
-		if (propertyType == IPropertyType.Default.relation.getType())
+		if (propertyType == RelationPropertyType.INSTANCE)
 		{
 			Table primaryTable = null;
 			if (form != null)
@@ -2566,7 +2591,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			return new RelationPropertyController(id, displayName, persistContext, primaryTable, foreignTable, incudeNone, true);
 		}
 
-		if (propertyType == IPropertyType.Default.format.getType())
+		if (propertyType == FormatPropertyType.INSTANCE)
 		{
 			return new PropertyDescriptor(id, displayName)
 			{
@@ -2578,7 +2603,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			};
 		}
 
-		if (propertyType == IPropertyType.Default.form.getType())
+		if (propertyType == FormPropertyType.INSTANCE)
 		{
 			final ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedEditingSolution, false),
 				persistContext.getContext());
@@ -2595,12 +2620,12 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			pd.setLabelProvider(formLabelProvider);
 			return pd;
 		}
-		if (propertyType == IPropertyType.Default.valuelist.getType())
+		if (propertyType == ValueListPropertyType.INSTANCE)
 		{
 			return new ValuelistPropertyController<Integer>(id, displayName, persistContext, true);
 		}
 
-		if (propertyType == IPropertyType.Default.media.getType())
+		if (propertyType == MediaPropertyType.INSTANCE)
 		{
 			MediaPropertyControllerConfig config = null;
 			if (propertyDescription != null && propertyDescription.getConfig() instanceof MediaPropertyControllerConfig) config = (MediaPropertyControllerConfig)propertyDescription.getConfig();
@@ -2608,7 +2633,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		}
 
 
-		if (propertyType == IPropertyType.Default.tagstring.getType())
+		if (propertyType == TagStringPropertyType.INSTANCE)
 		{
 			Table table = null;
 			if (form != null)
@@ -2745,7 +2770,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	}
 
 	/** Sort property descriptors by PropertyEditorOption.propertyOrder if defined, else by displayName.
-	 * 
+	 *
 	 * @param propertyDescriptors2
 	 * @return
 	 */

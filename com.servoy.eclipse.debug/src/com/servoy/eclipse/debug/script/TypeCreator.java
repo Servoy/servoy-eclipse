@@ -83,9 +83,18 @@ import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.Scriptable;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentApiDefinition;
-import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.property.IPropertyType;
+import org.sablo.specification.property.types.BooleanPropertyType;
+import org.sablo.specification.property.types.DataproviderPropertyType;
+import org.sablo.specification.property.types.DatePropertyType;
+import org.sablo.specification.property.types.DoublePropertyType;
+import org.sablo.specification.property.types.FloatPropertyType;
+import org.sablo.specification.property.types.IntPropertyType;
+import org.sablo.specification.property.types.LongPropertyType;
+import org.sablo.specification.property.types.StringPropertyType;
+import org.sablo.specification.property.types.TagStringPropertyType;
 
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.core.IActiveProjectListener;
@@ -969,8 +978,7 @@ public class TypeCreator extends TypeCache
 					String name = pd.getName();
 					// skip the default once added by servoy, see WebComponentPackage.getWebComponentDescriptions()
 					// and skip the dataprovider properties (those are not accesable through scripting)
-					if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") &&
-						pd.getType() != IPropertyType.Default.dataprovider.getType())
+					if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && pd.getType() != DataproviderPropertyType.INSTANCE)
 					{
 						members.add(createProperty(name, false, getType(context, pd), "", null));
 					}
@@ -1007,26 +1015,12 @@ public class TypeCreator extends TypeCache
 	private JSType getType(String context, PropertyDescription pd)
 	{
 		if (pd == null) return null;
-		IPropertyType type = pd.getType();
-		switch (type.getDefaultEnumValue())
-		{
-			case bool :
-				return getTypeRef(context, ITypeNames.BOOLEAN);
-			case bytenumber :
-			case doublenumber :
-			case floatnumber :
-			case intnumber :
-			case longnumber :
-			case shortnumber :
-				return getTypeRef(context, ITypeNames.NUMBER);
-			case string :
-			case tagstring :
-				return getTypeRef(context, ITypeNames.STRING);
-			case date :
-				return getTypeRef(context, ITypeNames.DATE);
-			default :
-				break;
-		}
+		IPropertyType< ? > type = pd.getType();
+		if (type == BooleanPropertyType.INSTANCE) return getTypeRef(context, ITypeNames.BOOLEAN);
+		if (type == IntPropertyType.INSTANCE || type == LongPropertyType.INSTANCE || type == FloatPropertyType.INSTANCE || type == DoublePropertyType.INSTANCE) return getTypeRef(
+			context, ITypeNames.NUMBER);
+		if (type == StringPropertyType.INSTANCE || type == TagStringPropertyType.INSTANCE) return getTypeRef(context, ITypeNames.STRING);
+		if (type == DatePropertyType.INSTANCE) return getTypeRef(context, ITypeNames.DATE);
 		return null;
 	}
 

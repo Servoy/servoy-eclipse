@@ -49,9 +49,9 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentApiDefinition;
-import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.property.IPropertyType;
+import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.property.types.DataproviderPropertyType;
 
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.base.util.ITagResolver;
@@ -1659,7 +1659,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				String name = pd.getName();
 				// skip the default once added by servoy, see WebComponentPackage.getWebComponentDescriptions()
 				// and skip the dataprovider properties (those are not accesable through scripting)
-				if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && pd.getType() != IPropertyType.Default.dataprovider.getType())
+				if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && pd.getType() != DataproviderPropertyType.INSTANCE)
 				{
 					nodes.add(new UserNode(name, UserNodeType.FORM_ELEMENTS, prefixForWebComponentMembers + name, name, webcomponent, propertiesIcon));
 				}
@@ -2006,7 +2006,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			if (tooltip == null) tooltip = "";
 
-			String tmp = "<html><body><b>" + getReturnTypeString(returnType) + " " + name + "(" + getPrettyParameterTypesString(paramNames, namesOnly) + ")</b>";
+			String tmp = "<html><body><b>" + getReturnTypeString(returnType) + " " + name + "(" + getPrettyParameterTypesString(paramNames, namesOnly) +
+				")</b>";
 			if ("".equals(tooltip))
 			{
 				tooltip = tmp + "</body></html>";
@@ -2169,7 +2170,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else if (bp instanceof Field)
 			{
-				tmp = "<html><body><b>" + DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(((Field)bp).getType()) + " " + name + "</b>";
+				tmp = "<html><body><b>" + DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(((Field)bp).getType()) + " " + name +
+					"</b>";
 			}
 			else if (bp == null)
 			{

@@ -23,7 +23,19 @@ import javax.swing.border.Border;
 
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.property.IPropertyType;
+import org.sablo.specification.property.types.BooleanPropertyType;
+import org.sablo.specification.property.types.BorderPropertyType;
+import org.sablo.specification.property.types.BytePropertyType;
+import org.sablo.specification.property.types.ColorPropertyType;
+import org.sablo.specification.property.types.DimensionPropertyType;
+import org.sablo.specification.property.types.DoublePropertyType;
+import org.sablo.specification.property.types.FloatPropertyType;
+import org.sablo.specification.property.types.FontPropertyType;
+import org.sablo.specification.property.types.InsetsPropertyType;
+import org.sablo.specification.property.types.IntPropertyType;
+import org.sablo.specification.property.types.LongPropertyType;
+import org.sablo.specification.property.types.PointPropertyType;
+import org.sablo.specification.property.types.StringPropertyType;
 
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -42,7 +54,7 @@ import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 
 /**
  * Base class for property handlers base on java beans/introspection.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -90,72 +102,72 @@ public class BasePropertyHandler implements IPropertyHandler
 
 		if (clazz == java.awt.Dimension.class)
 		{
-			return new PropertyDescription(name, IPropertyType.Default.dimension.getType());
+			return new PropertyDescription(name, DimensionPropertyType.INSTANCE);
 		}
 
 		if (clazz == java.awt.Point.class)
 		{
-			return new PropertyDescription(name, IPropertyType.Default.point.getType());
+			return new PropertyDescription(name, PointPropertyType.INSTANCE);
 		}
 
 		if (clazz == java.awt.Insets.class)
 		{
-			return new PropertyDescription(name, IPropertyType.Default.insets.getType());
+			return new PropertyDescription(name, InsetsPropertyType.INSTANCE);
 		}
 
 		if (clazz == java.awt.Color.class)
 		{
-			return new PropertyDescription(name, IPropertyType.Default.color.getType());
+			return new PropertyDescription(name, ColorPropertyType.INSTANCE);
 		}
 
 		if (clazz == java.awt.Font.class)
 		{
-			return new PropertyDescription(name, IPropertyType.Default.font.getType(), Boolean.FALSE);
+			return new PropertyDescription(name, FontPropertyType.INSTANCE, Boolean.FALSE);
 		}
 
 		if (clazz == Border.class)
 		{
-			return new PropertyDescription(name, IPropertyType.Default.border.getType(), Boolean.FALSE);
+			return new PropertyDescription(name, BorderPropertyType.INSTANCE, Boolean.FALSE);
 		}
 
 		if (clazz == boolean.class || clazz == Boolean.class)
 		{
-			return new PropertyDescription(name, IPropertyType.Default.bool.getType());
+			return new PropertyDescription(name, BooleanPropertyType.INSTANCE);
 		}
 
 		if (clazz == String.class)
 		{
-			return new PropertyDescription(name, IPropertyType.Default.string.getType());
+			return new PropertyDescription(name, StringPropertyType.INSTANCE);
 		}
 
 		if (clazz == byte.class || clazz == Byte.class)
 		{
-			return new PropertyDescription(name, IPropertyType.Default.bytenumber.getType());
+			return new PropertyDescription(name, BytePropertyType.INSTANCE);
 		}
 
 		if (clazz == double.class || clazz == Double.class)
 		{
-			return new PropertyDescription(name, IPropertyType.Default.doublenumber.getType());
+			return new PropertyDescription(name, DoublePropertyType.INSTANCE);
 		}
 
 		if (clazz == float.class || clazz == Float.class)
 		{
-			return new PropertyDescription(name, IPropertyType.Default.floatnumber.getType());
+			return new PropertyDescription(name, FloatPropertyType.INSTANCE);
 		}
 
 		if (clazz == int.class || clazz == Integer.class)
 		{
-			return new PropertyDescription(name, IPropertyType.Default.intnumber.getType());
+			return new PropertyDescription(name, IntPropertyType.INSTANCE);
 		}
 
 		if (clazz == long.class || clazz == Long.class)
 		{
-			return new PropertyDescription(name, IPropertyType.Default.longnumber.getType());
+			return new PropertyDescription(name, LongPropertyType.INSTANCE);
 		}
 
 		if (clazz == short.class || clazz == Short.class)
 		{
-			return new PropertyDescription(name, IPropertyType.Default.shortnumber.getType());
+			return new PropertyDescription(name, IntPropertyType.INSTANCE);
 		}
 
 		return null;
