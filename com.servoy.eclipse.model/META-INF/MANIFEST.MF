@@ -16,7 +16,8 @@ Require-Bundle: servoy_shared,
  servoy_headless_client,
  org.eclipse.dltk.javascript.rhino,
  servoy_ngclient,
- sablo
+ sablo,
+ org.apache.commons.dbcp;bundle-version="1.4.0"
 Export-Package: com.servoy.eclipse.model,
  com.servoy.eclipse.model.builder,
  com.servoy.eclipse.model.extensions,

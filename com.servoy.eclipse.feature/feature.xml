@@ -870,7 +870,7 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="servoy_base"
          download-size="0"
@@ -924,7 +924,7 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="servoy_ngclient"
          download-size="0"
@@ -945,7 +945,7 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="org.maven.ide.eclipse.grouplayout"
          download-size="0"
@@ -973,19 +973,68 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="slf4j.log4j12"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="log4j"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/>      
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.james.apache-mime4j"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.commons.codec"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.commons.collections"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.commons.dbcp"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.commons.pool"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.httpcomponents.httpclient"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.httpcomponents.httpcore"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
 </feature>
