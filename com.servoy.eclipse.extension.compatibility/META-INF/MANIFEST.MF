@@ -4,17 +4,21 @@ Bundle-Name: Compatibility
 Bundle-SymbolicName: com.servoy.eclipse.extension.compatibility;singleton:=true
 Bundle-Version: 8.0.0.3001
 Bundle-Vendor: SERVOY
-Require-Bundle: org.eclipse.core.runtime,
+Require-Bundle: servoy_shared,
+ servoy_smart_client,
+ servoy_headless_client,
+ org.eclipse.core.runtime,
  com.servoy.eclipse.core,
  slf4j.api;bundle-version="1.6.1",
- servoy_headless_client,
- servoy_shared,
- servoy_smart_client,
  org.eclipse.dltk.javascript.rhino,
  javax.servlet;bundle-version="3.0.0",
  log4j;bundle-version="1.2.17",
  org.apache.commons.logging;bundle-version="1.1.1",
- com.sun.mail.javax.mail;bundle-version="1.4.5"
+ com.sun.mail.javax.mail;bundle-version="1.4.5",
+ org.apache.httpcomponents.httpclient;bundle-version="4.2.5",
+ org.apache.httpcomponents.httpcore;bundle-version="4.2.4",
+ org.apache.httpcomponents.httpclient;bundle-version="4.2.5",
+ org.apache.httpcomponents.httpcore;bundle-version="4.2.4"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
