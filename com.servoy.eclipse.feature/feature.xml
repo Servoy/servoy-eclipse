@@ -1037,4 +1037,11 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          version="0.0.0"
          unpack="false"/>
 
+	<plugin
+         id="com.sun.mail.javax.mail"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+         
 </feature>
