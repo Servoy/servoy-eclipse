@@ -34,6 +34,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private String lafs;
 	private String drivers;
 	private boolean isExportActiveSolutionOnly;
+	private String pluginLocations;
 
 	public WarArgumentChest(String[] args)
 	{
@@ -78,6 +79,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             invalid solutions to be exported.\n"
 			+ "        -active <true/false> export active solution (and its modules) only\n"
 			+ "				Default: true\n";
+		//TODO add plugin locations
 	}
 
 	@Override
@@ -89,6 +91,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 		drivers = parseArg("d","Driver name(s) was(were) not specified after '-d' argument.", argsMap);
 		isExportActiveSolutionOnly = true;
 		if (argsMap.containsKey("active") && !Utils.getAsBoolean(argsMap.get("active"))) isExportActiveSolutionOnly = false;
+		pluginLocations = parseArg("pluginLocations", null, argsMap);
 	}
 
 	public String getPlugins()
@@ -114,5 +117,13 @@ public class WarArgumentChest extends AbstractArgumentChest
 	public boolean isExportActiveSolutionOnly()
 	{
 		return isExportActiveSolutionOnly;
+	}
+
+	/**
+	 * @return
+	 */
+	public String getPluginLocations()
+	{
+		return pluginLocations;
 	}
 }

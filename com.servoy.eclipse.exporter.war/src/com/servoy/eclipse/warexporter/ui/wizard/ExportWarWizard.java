@@ -30,6 +30,8 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
@@ -105,10 +107,34 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		{
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 			{
-				WarExporter exporter = new WarExporter(exportModel);
+				final WarExporter exporter = new WarExporter(exportModel);
 				try
 				{
-					exporter.doExport(monitor);
+					final boolean[] cancel = new boolean[] { false };
+					Display.getDefault().syncExec(new Runnable()
+					{
+						public void run()
+						{
+							String message = exporter.searchExportedPlugins();
+							while (message != null)
+							{
+								DirectoryDialog dialog = new DirectoryDialog(getShell(), SWT.OPEN);
+								dialog.setMessage(message);
+								String chosenDirName = dialog.open();
+								if (chosenDirName != null)
+								{
+									exportModel.addPluginLocations(chosenDirName);
+									message = exporter.searchExportedPlugins();
+								}
+								else
+								{
+									cancel[0] = true;
+									return;
+								}
+							}
+						}
+					});
+					if (!cancel[0]) exporter.doExport(monitor);
 				}
 				catch (final ExportException e)
 				{

@@ -177,6 +177,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 					}
 				}));
 			}
+
+			@Override
+			public List<String> getPluginLocations()
+			{
+				return Arrays.asList(configuration.getPluginLocations().toLowerCase().split(" "));
+			}
 		});
 		try
 		{

@@ -19,6 +19,7 @@ package com.servoy.eclipse.model.war.exporter;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -39,11 +40,13 @@ import java.util.SortedSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
@@ -83,6 +86,8 @@ public class WarExporter
 
 	private static final String COMPONENTS_DIR_NAME = "components";
 	private final IWarExportModel exportModel;
+	private static final String[] EXCLUDE_FROM_NG_JAR = new String[] { "com/servoy/j2db/server/ngclient/startup", "war/" };
+	private static final String[] NG_LIBS = new String[] { "org.freemarker*.jar", "org.jsoup*.jar", "servoy_ngclient*.jar", "sablo*.jar" };
 
 	/**
 	 * @param exportModel
@@ -165,12 +170,81 @@ public class WarExporter
 			locations.append(ComponentResourcesExporter.getComponentDirectoryNames());
 			locations.append(copyNGComponents(tmpWarDir, monitor));
 			createComponentsPropertiesFile(tmpWarDir, locations.toString());
-			ComponentResourcesExporter.copyLibs(targetLibDir);
+			copyNGLibs(targetLibDir);
 		}
 		catch (IOException e)
 		{
 			throw new ExportException("Could not copy default components", e);
 		}
+	}
+
+	private void copyNGLibs(File targetLibDir) throws ExportException, IOException
+	{
+		List<String> pluginLocations = exportModel.getPluginLocations();
+		for (String libName : NG_LIBS)
+		{
+			int i = 0;
+			while (i < pluginLocations.size())
+			{
+				File pluginLocation = new File(pluginLocations.get(i));
+				FileFilter filter = new WildcardFileFilter(libName);
+				File[] libs = pluginLocation.listFiles(filter);
+				if (libs.length > 0)
+				{
+					File file = libs[0];
+					if (libName.contains("servoy_ngclient"))
+					{
+						copyNGClientJar(file, targetLibDir);
+					}
+					else
+					{
+						copyFile(file, new File(targetLibDir, file.getName()));
+					}
+					break;
+				}
+				i++;
+			}
+		}
+	}
+
+	private void copyNGClientJar(File file, File targetLibDir) throws IOException
+	{
+		File dest = new File(targetLibDir, file.getName());
+		ZipInputStream zin = new ZipInputStream(new FileInputStream(file));
+		ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(dest));
+		byte[] buf = new byte[1024];
+
+		ZipEntry entry = zin.getNextEntry();
+		while (entry != null)
+		{
+			String name = entry.getName();
+			boolean toBeDeleted = false;
+			for (String f : EXCLUDE_FROM_NG_JAR)
+			{
+				if (name.startsWith(f))
+				{
+					toBeDeleted = true;
+					break;
+				}
+			}
+			if (!toBeDeleted)
+			{
+				// Add ZIP entry to output stream.
+				zout.putNextEntry(new ZipEntry(name));
+				// Transfer bytes from the ZIP file to the output file
+				int len;
+				while ((len = zin.read(buf)) > 0)
+				{
+					zout.write(buf, 0, len);
+				}
+			}
+			entry = zin.getNextEntry();
+		}
+		// Close the streams        
+		zin.close();
+		// Compress the files
+		// Complete the ZIP file
+		zout.close();
 	}
 
 	/**
@@ -1173,4 +1247,27 @@ public class WarExporter
 
 	}
 
+	public String searchExportedPlugins()
+	{
+		List<String> pluginLocations = exportModel.getPluginLocations();
+		for (String libName : NG_LIBS)
+		{
+			int i = 0;
+			boolean found = false;
+			while (!found && i < pluginLocations.size())
+			{
+				File pluginLocation = new File(pluginLocations.get(i));
+				FileFilter filter = new WildcardFileFilter(libName);
+				File[] libs = pluginLocation.listFiles(filter);
+				if (libs.length > 0)
+				{
+					found = true;
+					break;
+				}
+				i++;
+			}
+			if (!found) return "Please select the directory where " + libName + " is located";
+		}
+		return null;
+	}
 }

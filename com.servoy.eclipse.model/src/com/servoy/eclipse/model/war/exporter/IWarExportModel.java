@@ -37,4 +37,6 @@ public interface IWarExportModel
 	public SortedSet<String> getSelectedServerNames();
 
 	public ServerConfiguration getServerConfiguration(String serverName);
+
+	public List<String> getPluginLocations();
 }

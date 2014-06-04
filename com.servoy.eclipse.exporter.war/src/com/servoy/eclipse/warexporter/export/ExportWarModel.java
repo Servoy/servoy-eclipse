@@ -53,6 +53,7 @@ public class ExportWarModel implements IWarExportModel
 	private boolean startRMI;
 	private boolean exportActiveSolutionOnly;
 	private boolean overwriteSocketFactoryProperties;
+	private final List<String> pluginLocations;
 
 	/**
 	 * @param dialogSettings
@@ -62,6 +63,8 @@ public class ExportWarModel implements IWarExportModel
 		fileName = settings.get("export.filename");
 		servoyPropertiesFileName = settings.get("export.servoyPropertiesFileName");
 		exportActiveSolutionOnly = Utils.getAsBoolean(settings.get("export.exportActiveSolutionOnly"));
+		pluginLocations = new ArrayList<String>();
+		pluginLocations.add("plugins/");
 
 		if (settings.get("export.plugins") != null)
 		{
@@ -353,5 +356,24 @@ public class ExportWarModel implements IWarExportModel
 	public String getServoyApplicationServerDir()
 	{
 		return ApplicationServerRegistry.get().getServoyApplicationServerDirectory();
+	}
+
+	/**
+	 * @param chosenFileName
+	 */
+	public void addPluginLocations(String pluginsDir)
+	{
+		pluginLocations.add(pluginsDir);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getPluginLocations()
+	 */
+	@Override
+	public List<String> getPluginLocations()
+	{
+		return pluginLocations;
 	}
 }
