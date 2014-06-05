@@ -51,7 +51,6 @@ import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentApiDefinition;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
-import org.sablo.specification.property.types.DataproviderPropertyType;
 
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.base.util.ITagResolver;
@@ -138,6 +137,7 @@ import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
+import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HtmlUtils;
