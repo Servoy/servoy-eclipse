@@ -198,7 +198,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 				{
 					if (readers.size() > 0)
 					{
-						ResourceProvider.removeResources(readers.values());
+						ResourceProvider.removeComponentResources(readers.values());
 						readers.clear();
 					}
 					IFolder folder = activeResourcesProject.getProject().getFolder(COMPONENTS_DIR_NAME);
@@ -234,7 +234,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 							ServoyLog.logError(e);
 						}
 					}
-					ResourceProvider.addResources(readers.values());
+					ResourceProvider.addComponentResources(readers.values());
 
 					for (IWebResourceChangedListener listener : webResourceChangedListeners)
 					{
@@ -267,7 +267,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 	public void stop(BundleContext context) throws Exception
 	{
 		ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
-		ResourceProvider.removeResources(readers.values());
+		ResourceProvider.removeComponentResources(readers.values());
 		plugin = null;
 		super.stop(context);
 		for (Image image : imageList)

@@ -18,7 +18,7 @@
 package com.servoy.eclipse.designer.editor.rfb;
 
 import org.json.JSONObject;
-import org.sablo.websocket.IService;
+import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 
@@ -28,7 +28,7 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
  * @author rgansevles
  *
  */
-public class EditorServiceHandler implements IService
+public class EditorServiceHandler implements IServerService
 {
 	private final BaseVisualFormEditor editorPart;
 

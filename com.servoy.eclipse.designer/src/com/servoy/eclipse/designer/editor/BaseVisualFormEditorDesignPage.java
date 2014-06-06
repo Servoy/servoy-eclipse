@@ -94,7 +94,7 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 
 		// Serve requests for rfb editor, TODO: somehow tell the editor which editorid to use
 		WebsocketSessionManager.addSession(EditorWebsocketSession.EDITOR_ENDPOINT, editorWebsocketSession = new EditorWebsocketSession("rfbtest"));
-		editorWebsocketSession.registerService("formeditor", new EditorServiceHandler(editorPart));
+		editorWebsocketSession.registerServerService("formeditor", new EditorServiceHandler(editorPart));
 	}
 
 	@Override
