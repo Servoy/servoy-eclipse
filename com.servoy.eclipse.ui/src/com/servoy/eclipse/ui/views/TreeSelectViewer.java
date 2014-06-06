@@ -580,10 +580,21 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 		return composite;
 	}
 
+	/**
+	 * Set button label
+	 * @param s
+	 */
+
 	public void setButtonText(String s)
 	{
 		if (s == null || s.length() == 0) button.setText("   ");
 		else button.setText(s);
+		int noLoops = 10; //at least 7 loops are necessary; for the ValueListEditor layout to be displayed correctly 
+		while (composite.getShell().isLayoutDeferred() && noLoops > 0)
+		{
+			composite.getShell().setLayoutDeferred(false);
+			noLoops--;
+		}
 		composite.layout();
 	}
 
