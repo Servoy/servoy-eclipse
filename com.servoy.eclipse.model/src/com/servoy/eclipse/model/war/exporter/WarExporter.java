@@ -62,6 +62,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IBeanManagerInternal;
 import com.servoy.j2db.ILAFManagerInternal;
@@ -86,8 +87,9 @@ public class WarExporter
 
 	private static final String COMPONENTS_DIR_NAME = "components";
 	private final IWarExportModel exportModel;
-	private static final String[] EXCLUDE_FROM_NG_JAR = new String[] { "com/servoy/j2db/server/ngclient/startup", "war/" };
-	private static final String[] NG_LIBS = new String[] { "org.freemarker*.jar", "org.jsoup*.jar", "servoy_ngclient*.jar", "sablo*.jar" };
+	private static final String[] EXCLUDE_FROM_NG_JAR = new String[] { "com/servoy/j2db/server/ngclient/startup", "war/", "META-INF/" };
+	private static final String[] NG_LIBS = new String[] { "org.freemarker*.jar", "org.jsoup*.jar", "servoy_ngclient_" + ClientVersion.getBundleVersion() +
+		".jar", "sablo_" + ClientVersion.getBundleVersion() + ".jar" };
 
 	/**
 	 * @param exportModel
@@ -98,8 +100,9 @@ public class WarExporter
 	}
 
 	/**
-	 * @param monitor 
-	 * @return
+	 * Export the solution as war.
+	 * @param monitor
+	 * @throws ExportException if export fails
 	 */
 	public void doExport(IProgressMonitor monitor) throws ExportException
 	{
@@ -156,6 +159,7 @@ public class WarExporter
 	}
 
 	/**
+	 * Copy to the war all NG components (default and user-defined), as well as the jars required by the NGClient.
 	 * @param monitor
 	 * @param tmpWarDir
 	 * @param targetLibDir
@@ -174,17 +178,24 @@ public class WarExporter
 		}
 		catch (IOException e)
 		{
-			throw new ExportException("Could not copy default components", e);
+			throw new ExportException("Could not copy the components", e);
 		}
 	}
 
+	/**
+	 * Add all NG_LIBS to the war.
+	 * @param targetLibDir
+	 * @throws ExportException
+	 * @throws IOException
+	 */
 	private void copyNGLibs(File targetLibDir) throws ExportException, IOException
 	{
 		List<String> pluginLocations = exportModel.getPluginLocations();
 		for (String libName : NG_LIBS)
 		{
 			int i = 0;
-			while (i < pluginLocations.size())
+			boolean found = false;
+			while (!found && i < pluginLocations.size())
 			{
 				File pluginLocation = new File(pluginLocations.get(i));
 				FileFilter filter = new WildcardFileFilter(libName);
@@ -200,13 +211,21 @@ public class WarExporter
 					{
 						copyFile(file, new File(targetLibDir, file.getName()));
 					}
-					break;
+					found = true;
 				}
 				i++;
 			}
+			if (!found) throw new ExportException(libName + " was not found. Please specify location");
 		}
 	}
 
+	/**
+	 * Copy the servoy_ngclient jar to the libs folder in the .war.
+	 * Exclude folders defined in EXCLUDE_FROM_NG_JAR.
+	 * @param file
+	 * @param targetLibDir
+	 * @throws IOException
+	 */
 	private void copyNGClientJar(File file, File targetLibDir) throws IOException
 	{
 		File dest = new File(targetLibDir, file.getName());
@@ -279,6 +298,7 @@ public class WarExporter
 	}
 
 	/**
+	 * Copy all user-defined components from resources/components to the war.
 	 * @param tmpWarDir
 	 * @param monitor 
 	 * @param locations 
@@ -1247,6 +1267,10 @@ public class WarExporter
 
 	}
 
+	/**
+	 * Check if all NG_LIBS can be found in the specified plugin locations.
+	 * @return message to add path to the missing jar
+	 */
 	public String searchExportedPlugins()
 	{
 		List<String> pluginLocations = exportModel.getPluginLocations();
@@ -1266,7 +1290,7 @@ public class WarExporter
 				}
 				i++;
 			}
-			if (!found) return "Please select the directory where " + libName + " is located";
+			if (!found) return libName;
 		}
 		return null;
 	}

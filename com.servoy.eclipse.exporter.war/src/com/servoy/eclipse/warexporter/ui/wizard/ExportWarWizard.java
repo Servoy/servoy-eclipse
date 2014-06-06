@@ -115,16 +115,16 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 					{
 						public void run()
 						{
-							String message = exporter.searchExportedPlugins();
-							while (message != null)
+							String missingJarName = exporter.searchExportedPlugins();
+							while (missingJarName != null)
 							{
 								DirectoryDialog dialog = new DirectoryDialog(getShell(), SWT.OPEN);
-								dialog.setMessage(message);
+								dialog.setMessage("Please select the directory where " + missingJarName + " is located");
 								String chosenDirName = dialog.open();
 								if (chosenDirName != null)
 								{
 									exportModel.addPluginLocations(chosenDirName);
-									message = exporter.searchExportedPlugins();
+									missingJarName = exporter.searchExportedPlugins();
 								}
 								else
 								{

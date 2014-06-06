@@ -78,8 +78,9 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        -ie ignore build errors.  CAUTION! the use of this flag is discouraged; it can cause\n"
 			+ "             invalid solutions to be exported.\n"
 			+ "        -active <true/false> export active solution (and its modules) only\n"
-			+ "				Default: true\n";
-		//TODO add plugin locations
+			+ "				Default: true\n"
+			+ "        -pluginLocations absolute paths to plugin folders.\n" 
+			+			    "Default: current directory.\n";
 	}
 
 	@Override
@@ -92,6 +93,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 		isExportActiveSolutionOnly = true;
 		if (argsMap.containsKey("active") && !Utils.getAsBoolean(argsMap.get("active"))) isExportActiveSolutionOnly = false;
 		pluginLocations = parseArg("pluginLocations", null, argsMap);
+		if (pluginLocations == null) pluginLocations = ".";
 	}
 
 	public String getPlugins()
@@ -120,7 +122,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 	}
 
 	/**
-	 * @return
+	 * @return the paths to plugin directories
 	 */
 	public String getPluginLocations()
 	{
