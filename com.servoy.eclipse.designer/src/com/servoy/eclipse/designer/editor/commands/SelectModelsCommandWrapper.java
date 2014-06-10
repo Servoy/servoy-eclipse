@@ -86,13 +86,7 @@ public class SelectModelsCommandWrapper extends CompoundCommand
 			return;
 		}
 
-		if (toRefresh != null)
-		{
-			for (EditPart editPart : toRefresh)
-			{
-				editPart.refresh();
-			}
-		}
+		viewer.getRootEditPart().getContents().refresh();
 
 		// select the models later in the display thread, some editparts may not have been created yet.
 		final List<Object> models = getModels();
