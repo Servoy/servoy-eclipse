@@ -90,14 +90,12 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.progress.UIJob;
@@ -115,7 +113,6 @@ import org.webbitserver.HttpResponse;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
 import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
-import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.extensions.AbstractServoyModel;
@@ -1167,47 +1164,12 @@ public class ServoyModel extends AbstractServoyModel
 						{
 							public void run()
 							{
-								Solution[] modulesOfActiveProject = project != null ? project.getFlattenedSolution().getModules() : null;
 								IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
 								for (IWorkbenchWindow workbenchWindow : workbenchWindows)
 								{
 									if (workbenchWindow.getActivePage() == null) continue;
 									IEditorReference[] editorReferences = workbenchWindow.getActivePage().getEditorReferences();
-									ArrayList<IEditorReference> references = new ArrayList<IEditorReference>(editorReferences.length);
-									outer : for (IEditorReference editorReference : editorReferences)
-									{
-										try
-										{
-											IEditorInput editorInput = editorReference.getEditorInput();
-											IFile file = (IFile)editorInput.getAdapter(IFile.class);
-											if (file != null)
-											{
-												IProject p = file.getProject();
-												if (project != null && project.getResourcesProject() != null && project.getResourcesProject().getProject() == p) continue outer;
-												if (modulesOfActiveProject != null)
-												{
-													for (Solution module : modulesOfActiveProject)
-													{
-														if (Utils.equalObjects(module.getName(), p.getName()))
-														{
-															continue outer;
-														}
-													}
-												}
-												references.add(editorReference);
-											}
-											else if (editorInput instanceof PersistEditorInput &&
-												(project == null || !((PersistEditorInput)editorInput).getSolutionName().equals(project.getProject().getName())))
-											{
-												references.add(editorReference);
-											}
-										}
-										catch (PartInitException e)
-										{
-											ServoyLog.logError(e);
-										}
-									}
-									workbenchWindow.getActivePage().closeEditors(references.toArray(new IEditorReference[references.size()]), true);
+									workbenchWindow.getActivePage().closeEditors(editorReferences, true);
 								}
 							}
 						});
