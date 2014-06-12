@@ -266,7 +266,7 @@ public class Activator extends Plugin
 		ss = (IServerStarter)context.getService(ref);
 		if (ss == null)
 		{
-			throw new RuntimeException("Could not load application server plugin");
+			throw new IllegalStateException("Could not load application server plugin");
 		}
 		ss.nativeStartup();
 
@@ -282,7 +282,10 @@ public class Activator extends Plugin
 				return; //we support only one
 			}
 		}
-
+		else
+		{
+			throw new IllegalStateException("Could not load plugin base classloader provider");
+		}
 		IPreferenceStore prefs = PlatformUI.getPreferenceStore();
 		prefs.setValue(IWorkbenchPreferenceConstants.SHOW_PROGRESS_ON_STARTUP, true);
 
