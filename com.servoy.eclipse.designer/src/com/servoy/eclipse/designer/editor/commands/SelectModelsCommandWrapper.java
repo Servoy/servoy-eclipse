@@ -86,7 +86,7 @@ public class SelectModelsCommandWrapper extends CompoundCommand
 			return;
 		}
 
-		viewer.getRootEditPart().getContents().refresh();
+		refresh();
 
 		// select the models later in the display thread, some editparts may not have been created yet.
 		final List<Object> models = getModels();
@@ -111,6 +111,20 @@ public class SelectModelsCommandWrapper extends CompoundCommand
 					}
 				}
 			});
+		}
+	}
+
+	/** Template method that refreshes parts before they are selected
+	 * 
+	 */
+	protected void refresh()
+	{
+		if (toRefresh != null)
+		{
+			for (EditPart editPart : toRefresh)
+			{
+				editPart.refresh();
+			}
 		}
 	}
 
