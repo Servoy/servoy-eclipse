@@ -1478,6 +1478,22 @@ public class SolutionDeserializer
 		return filename;
 	}
 
+
+	/**
+	 * Deserialize JSONObject obj into parent persist.
+	 * 
+	 * @param repository
+	 * @param parent
+	 * @param persist_json_map
+	 * @param obj
+	 * @param strayCats
+	 * @param file
+	 * @param saved
+	 * @param useFilesForDirtyMark
+	 * @return
+	 * @throws RepositoryException
+	 * @throws JSONException
+	 */
 	public static IPersist deserializePersist(IDeveloperRepository repository, final ISupportChilds parent, Map<IPersist, JSONObject> persist_json_map,
 		JSONObject obj, final List<IPersist> strayCats, File file, Set<UUID> saved, boolean useFilesForDirtyMark) throws RepositoryException, JSONException
 	{
@@ -1491,7 +1507,7 @@ public class SolutionDeserializer
 
 		IPersist existingNode = null;
 		UUID uuid;
-		boolean scriptUUIDNotFound = false;
+		boolean persistUUIDNotFound = false;
 		if (obj.has(SolutionSerializer.PROP_UUID))
 		{
 			try
@@ -1543,9 +1559,9 @@ public class SolutionDeserializer
 					if (strayCats != null) strayCats.add(persistInSameFile);
 				}
 			}
-			else if (existingNode == null && file.getPath().endsWith(SolutionSerializer.JS_FILE_EXTENSION))
+			else if (existingNode == null)
 			{
-				scriptUUIDNotFound = true;
+				persistUUIDNotFound = true;
 			}
 		}
 		else
@@ -1572,7 +1588,7 @@ public class SolutionDeserializer
 						// object with same name and other uuid found in same file
 						// when found in other file (like different scope.js file), the uuid should not be reused because the found persist is defined in another scope.
 						retval = persist;
-						if (scriptUUIDNotFound)
+						if (persistUUIDNotFound)
 						{
 							// scriptUUID wasnt found previously. let this persist that maps with its name use the uuid from the file
 							// so that overwrite and update from a team provider really overwrites it
@@ -1586,7 +1602,7 @@ public class SolutionDeserializer
 			if (retval == null)
 			{
 				retval = createPersistInParent(parent, repository, obj, uuid);
-				if (scriptUUIDNotFound && solutionUUIDs.contains(uuid))
+				if (persistUUIDNotFound && solutionUUIDs.contains(uuid))
 				{
 					((AbstractBase)retval).setRuntimeProperty(POSSIBLE_DUPLICATE_UUID, Boolean.TRUE);
 				}
@@ -1743,14 +1759,12 @@ public class SolutionDeserializer
 							if ((JSDocTag.PARAM.equals(jsDocTagName) || JSDocTag.RETURNS.equals(jsDocTagName) || JSDocTag.RETURN.equals(jsDocTagName)))
 							{
 								String tagValueType = null;
-								if (jsDocTagValue.startsWith("{{") &&
-									(endBracketIdx = jsDocTagValue.indexOf("}}", 1)) != -1)
+								if (jsDocTagValue.startsWith("{{") && (endBracketIdx = jsDocTagValue.indexOf("}}", 1)) != -1)
 								{
 									endBracketIdx++;
 									tagValueType = jsDocTagValue.substring(1, endBracketIdx);
 								}
-								else if (jsDocTagValue.startsWith("{") &&
-									(endBracketIdx = jsDocTagValue.indexOf('}', 1)) != -1)
+								else if (jsDocTagValue.startsWith("{") && (endBracketIdx = jsDocTagValue.indexOf('}', 1)) != -1)
 								{
 									tagValueType = jsDocTagValue.substring(1, endBracketIdx);
 								}
