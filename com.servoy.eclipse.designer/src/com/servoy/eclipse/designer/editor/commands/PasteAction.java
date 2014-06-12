@@ -70,7 +70,7 @@ public class PasteAction extends SelectionAction
 		}
 
 		EditPart editPart = ((EditPart)objects.get(0));
-		return new SelectModelsCommandWrapper(editPart.getViewer(), editPart, editPart.getCommand(new Request(BaseVisualFormEditor.REQ_PASTE)));
+		return new SelectModelsCommandWrapperForPaste(editPart.getViewer(), editPart, editPart.getCommand(new Request(BaseVisualFormEditor.REQ_PASTE)));
 	}
 
 	/**
