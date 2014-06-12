@@ -1024,17 +1024,17 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          unpack="false"/>
 
    <plugin
-         id="org.apache.httpcomponents.httpclient"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.apache.httpcomponents.httpcore"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="4.2.4"
+         unpack="false"/>
+         
+   <plugin
+         id="org.apache.httpcomponents.httpclient"
+         download-size="0"
+         install-size="0"
+         version="4.2.5"
          unpack="false"/>
 
 	<plugin
