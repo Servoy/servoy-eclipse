@@ -173,7 +173,8 @@ public class WarExporter
 			ComponentResourcesExporter.copyComponents(tmpWarDir);
 			locations.append(ComponentResourcesExporter.getComponentDirectoryNames());
 			locations.append(copyNGComponents(tmpWarDir, monitor));
-			createComponentsPropertiesFile(tmpWarDir, locations.toString());
+			createSpecLocationsPropertiesFile(new File(tmpWarDir, "WEB-INF/components.properties"), locations.toString());
+			createSpecLocationsPropertiesFile(new File(tmpWarDir, "WEB-INF/services.properties"), ComponentResourcesExporter.getServicesDirectoryNames());
 			copyNGLibs(targetLibDir);
 		}
 		catch (IOException e)
@@ -271,14 +272,14 @@ public class WarExporter
 	 * @param locations
 	 * @throws ExportException 
 	 */
-	private void createComponentsPropertiesFile(File tmpWarDir, String locations) throws ExportException
+	private void createSpecLocationsPropertiesFile(File file, String locations) throws ExportException
 	{
 		Properties properties = new Properties();
 		properties.put("locations", locations);
 		FileOutputStream fos = null;
 		try
 		{
-			fos = new FileOutputStream(new File(tmpWarDir, "WEB-INF/components.properties"));
+			fos = new FileOutputStream(file);
 			properties.store(fos, "");
 		}
 		catch (Exception e)
