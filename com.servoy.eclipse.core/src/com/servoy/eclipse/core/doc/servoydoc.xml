@@ -1859,7 +1859,7 @@ for( var i = 1 ; i <= dataset.getMaxRowIndex() ; i++ )
 In a smart client this is always just the first started window where the solution is loaded in.
 In a webclient the user may open the same solution in a new tab in the same browser. In that case the main solution
 window will always be the first opened tab, even if that one was already closed.
-application.getActiveWindow() will aways return the currently active/focused window or dialog.
+application.getActiveWindow() will always return the currently active/focused window or dialog.
 If you need the window of the current top-level form, controller.getWindow() of that form will
 always return the correct window.]]></description>
           </descriptions>
@@ -5431,7 +5431,7 @@ if(databaseManager.nullColumnValidatorEnabled) application.output('null validati
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the lock could be acquired.]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Request lock(s) for a foundset, can be a normal or related foundset.
-The record_index can be -1 to lock all rows, 0 to lock the current row, or a specific row of > 0 
+The record_index can be -1 to lock all rows, 0 to lock the current row, or a specific row of > 0
 Optionally name the lock(s) so that it can be referenced it in releaseAllLocks()
 
 returns true if the lock could be acquired.]]></description>
@@ -5471,7 +5471,7 @@ if(!success)
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the lock could be acquired.]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Request lock(s) for a foundset, can be a normal or related foundset.
-The record_index can be -1 to lock all rows, 0 to lock the current row, or a specific row of > 0 
+The record_index can be -1 to lock all rows, 0 to lock the current row, or a specific row of > 0
 Optionally name the lock(s) so that it can be referenced it in releaseAllLocks()
 
 returns true if the lock could be acquired.]]></description>
@@ -5542,7 +5542,7 @@ var success = databaseManager.addTableFilterParam('crm', 'companies', 'companyna
 // the value may be null, this will result in 'column is null' sql condition.
 var success = databaseManager.addTableFilterParam('crm', 'companies', 'verified', '=', null)
 
-//if you want to add a filter for a column (created by you) in the i18n table 
+//if you want to add a filter for a column (created by you) in the i18n table
 databaseManager.addTableFilterParam('database', 'your_i18n_table', 'message_variant', 'in', [1, 2])]]></sample>
           </samples>
           <parameters>
@@ -5598,7 +5598,7 @@ var success = databaseManager.addTableFilterParam('crm', 'companies', 'companyna
 // the value may be null, this will result in 'column is null' sql condition.
 var success = databaseManager.addTableFilterParam('crm', 'companies', 'verified', '=', null)
 
-//if you want to add a filter for a column (created by you) in the i18n table 
+//if you want to add a filter for a column (created by you) in the i18n table
 databaseManager.addTableFilterParam('database', 'your_i18n_table', 'message_variant', 'in', [1, 2])]]></sample>
           </samples>
           <parameters>
@@ -5657,7 +5657,7 @@ var success = databaseManager.addTableFilterParam('crm', 'companies', 'companyna
 // the value may be null, this will result in 'column is null' sql condition.
 var success = databaseManager.addTableFilterParam('crm', 'companies', 'verified', '=', null)
 
-//if you want to add a filter for a column (created by you) in the i18n table 
+//if you want to add a filter for a column (created by you) in the i18n table
 databaseManager.addTableFilterParam('database', 'your_i18n_table', 'message_variant', 'in', [1, 2])]]></sample>
           </samples>
           <parameters>
@@ -5717,7 +5717,7 @@ var success = databaseManager.addTableFilterParam('crm', 'companies', 'companyna
 // the value may be null, this will result in 'column is null' sql condition.
 var success = databaseManager.addTableFilterParam('crm', 'companies', 'verified', '=', null)
 
-//if you want to add a filter for a column (created by you) in the i18n table 
+//if you want to add a filter for a column (created by you) in the i18n table
 databaseManager.addTableFilterParam('database', 'your_i18n_table', 'message_variant', 'in', [1, 2])]]></sample>
           </samples>
           <parameters>
@@ -5771,7 +5771,7 @@ if it has a column named 'columnName', its value will be set with 'value']]></de
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[if the transaction could be committed.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns true if a transaction is committed; rollback if commit fails. 
+            <description clientSupport="wc,sc"><![CDATA[Returns true if a transaction is committed; rollback if commit fails.
 Saves all edited records and commits the data.]]></description>
           </descriptions>
           <summaries>
@@ -5782,7 +5782,7 @@ Saves all edited records and commits the data.]]></description>
 databaseManager.startTransaction()
 //Now let users input data
 
-//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.  
+//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.
 if (cancel || !databaseManager.commitTransaction())
 {
 	databaseManager.rollbackTransaction();
@@ -5805,7 +5805,7 @@ if (cancel || !databaseManager.commitTransaction())
 databaseManager.startTransaction()
 //Now let users input data
 
-//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.  
+//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.
 if (cancel || !databaseManager.commitTransaction())
 {
 	databaseManager.rollbackTransaction();
@@ -5834,7 +5834,7 @@ if (cancel || !databaseManager.commitTransaction())
 databaseManager.startTransaction()
 //Now let users input data
 
-//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.  
+//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.
 if (cancel || !databaseManager.commitTransaction())
 {
 	databaseManager.rollbackTransaction();
@@ -5857,14 +5857,14 @@ if (cancel || !databaseManager.commitTransaction())
           <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"><![CDATA[The converted JSFoundset.]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Creates a foundset that combines all the records of the specified one-to-many relation seen from the given parent/primary foundset.
-The created foundset will not contain records that have not been saved in the database, because the records in the foundset will be the 
+The created foundset will not contain records that have not been saved in the database, because the records in the foundset will be the
 result of a select query to the database.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Creates a foundset that combines all the records of the specified one-to-many relation seen from the given parent/primary foundset.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Convert in the order form a orders foundset into a orderdetails foundset, 
+            <sample clientSupport="wc,sc"><![CDATA[// Convert in the order form a orders foundset into a orderdetails foundset,
 // that has all the orderdetails from all the orders in the foundset.
 var convertedFoundSet = databaseManager.convertFoundSet(foundset,order_to_orderdetails);
 // or var convertedFoundSet = databaseManager.convertFoundSet(foundset,"order_to_orderdetails");
@@ -5887,14 +5887,14 @@ forms.orderdetails.controller.showRecords(convertedFoundSet);]]></sample>
           <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"><![CDATA[The converted JSFoundset.]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Creates a foundset that combines all the records of the specified one-to-many relation seen from the given parent/primary foundset.
-The created foundset will not contain records that have not been saved in the database, because the records in the foundset will be the 
+The created foundset will not contain records that have not been saved in the database, because the records in the foundset will be the
 result of a select query to the database.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Creates a foundset that combines all the records of the specified one-to-many relation seen from the given parent/primary foundset.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Convert in the order form a orders foundset into a orderdetails foundset, 
+            <sample clientSupport="wc,sc"><![CDATA[// Convert in the order form a orders foundset into a orderdetails foundset,
 // that has all the orderdetails from all the orders in the foundset.
 var convertedFoundSet = databaseManager.convertFoundSet(foundset,order_to_orderdetails);
 // or var convertedFoundSet = databaseManager.convertFoundSet(foundset,"order_to_orderdetails");
@@ -6113,7 +6113,7 @@ databaseManager.saveData();]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if no errors happened.]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Copies all matching non empty columns (if overwrite boolean is given all columns except pk/ident, if array then all columns except pk and array names).
-The matching requires the properties and getter functions of the source to match those of the destination; for the getter functions, 
+The matching requires the properties and getter functions of the source to match those of the destination; for the getter functions,
 the 'get' will be removed and the remaining name will be converted to lowercase before attempting to match.
 Returns true if no error occurred.
 
@@ -6162,7 +6162,7 @@ databaseManager.saveData();
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if no errors happened.]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Copies all matching non empty columns (if overwrite boolean is given all columns except pk/ident, if array then all columns except pk and array names).
-The matching requires the properties and getter functions of the source to match those of the destination; for the getter functions, 
+The matching requires the properties and getter functions of the source to match those of the destination; for the getter functions,
 the 'get' will be removed and the remaining name will be converted to lowercase before attempting to match.
 Returns true if no error occurred.
 
@@ -6214,7 +6214,7 @@ databaseManager.saveData();
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if no errors happened.]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Copies all matching non empty columns (if overwrite boolean is given all columns except pk/ident, if array then all columns except pk and array names).
-The matching requires the properties and getter functions of the source to match those of the destination; for the getter functions, 
+The matching requires the properties and getter functions of the source to match those of the destination; for the getter functions,
 the 'get' will be removed and the remaining name will be converted to lowercase before attempting to match.
 Returns true if no error occurred.
 
@@ -6287,8 +6287,8 @@ Using this variation of createDataSourceByQuery any Tablefilter on the involved 
 var q = databaseManager.createSelect("db:/example_data/customers");
 q.result.add(q.columns.address).add(q.columns.city).add(q.columns.country);
 q.where.add(q.joins.customers_to_orders.columns.orderid.eq(1234));
-var uri = databaseManager.createDataSourceByQuery('mydata', q, 999); 
-//var uri = databaseManager.createDataSourceByQuery('mydata', q, 999, [JSColumn.TEXT, JSColumn.TEXT, JSColumn.TEXT]); 
+var uri = databaseManager.createDataSourceByQuery('mydata', q, 999);
+//var uri = databaseManager.createDataSourceByQuery('mydata', q, 999, [JSColumn.TEXT, JSColumn.TEXT, JSColumn.TEXT]);
 
 // the uri can be used to create a form using solution model
 var myForm = solutionModel.newForm('newForm', uri, 'myStyleName', false, 800, 600);
@@ -6334,8 +6334,8 @@ Using this variation of createDataSourceByQuery any Tablefilter on the involved 
 var q = databaseManager.createSelect("db:/example_data/customers");
 q.result.add(q.columns.address).add(q.columns.city).add(q.columns.country);
 q.where.add(q.joins.customers_to_orders.columns.orderid.eq(1234));
-var uri = databaseManager.createDataSourceByQuery('mydata', q, 999); 
-//var uri = databaseManager.createDataSourceByQuery('mydata', q, 999, [JSColumn.TEXT, JSColumn.TEXT, JSColumn.TEXT]); 
+var uri = databaseManager.createDataSourceByQuery('mydata', q, 999);
+//var uri = databaseManager.createDataSourceByQuery('mydata', q, 999, [JSColumn.TEXT, JSColumn.TEXT, JSColumn.TEXT]);
 
 // the uri can be used to create a form using solution model
 var myForm = solutionModel.newForm('newForm', uri, 'myStyleName', false, 800, 600);
@@ -6385,8 +6385,8 @@ Using this variation of createDataSourceByQuery any Tablefilter on the involved 
 var q = databaseManager.createSelect("db:/example_data/customers");
 q.result.add(q.columns.customer_id).add(q.columns.city).add(q.columns.country);
 q.where.add(q.joins.customers_to_orders.columns.orderid.eq(1234));
-var uri = databaseManager.createDataSourceByQuery('mydata', q, 999, null, ['customer_id']); 
-//var uri = databaseManager.createDataSourceByQuery('mydata', q, 999, [JSColumn.TEXT, JSColumn.TEXT, JSColumn.TEXT], ['customer_id']); 
+var uri = databaseManager.createDataSourceByQuery('mydata', q, 999, null, ['customer_id']);
+//var uri = databaseManager.createDataSourceByQuery('mydata', q, 999, [JSColumn.TEXT, JSColumn.TEXT, JSColumn.TEXT], ['customer_id']);
 
 // the uri can be used to create a form using solution model
 var myForm = solutionModel.newForm('newForm', uri, 'myStyleName', false, 800, 600);
@@ -6835,7 +6835,7 @@ var args = new Array();
 args[0] = order_date //or  new Date()
 var dataset = databaseManager.getDataSetByQuery(databaseManager.getDataSourceServerName(controller.getDataSource()), query, args, maxReturnedRows);
 
-// place in label: 
+// place in label:
 // elements.myLabel.text = '<html>'+dataset.getAsHTML()+'</html>';
 
 //example to calc a strange total
@@ -6956,7 +6956,7 @@ NOTE: For more detail on named server connections, see the chapter on Database C
           <argumentsTypes/>
           <return type="com.servoy.j2db.dataprocessing.Record[]" typecode="[Lcom.servoy.j2db.dataprocessing.IRecordInternal;"><![CDATA[Array of outstanding/unsaved JSRecords.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns an array of edited records with outstanding (unsaved) data. 
+            <description clientSupport="wc,sc"><![CDATA[Returns an array of edited records with outstanding (unsaved) data.
 
 NOTE: To return a dataset of outstanding (unsaved) edited data for each record, see JSRecord.getChangedData();
 NOTE2: The fields focus may be lost in user interface in order to determine the edits.]]></description>
@@ -6996,7 +6996,7 @@ databaseManager.setAutoSave(true);]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.dataprocessing.Record[]" typecode="[Lcom.servoy.j2db.dataprocessing.IRecordInternal;"><![CDATA[Array of outstanding/unsaved JSRecords.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns an array of edited records with outstanding (unsaved) data. 
+            <description clientSupport="wc,sc"><![CDATA[Returns an array of edited records with outstanding (unsaved) data.
 
 NOTE: To return a dataset of outstanding (unsaved) edited data for each record, see JSRecord.getChangedData();
 NOTE2: The fields focus may be lost in user interface in order to determine the edits.]]></description>
@@ -7280,7 +7280,7 @@ while(fsUpdater.next())
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[The next sequence for the column, null if there was no sequence for that column 
+          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[The next sequence for the column, null if there was no sequence for that column
         or if there is no column with the given name.]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Gets the next sequence for a column which has a sequence defined in its column dataprovider properties.
@@ -7317,7 +7317,7 @@ application.output(nextValue);]]></sample>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[The next sequence for the column, null if there was no sequence for that column 
+          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[The next sequence for the column, null if there was no sequence for that column
         or if there is no column with the given name.]]></return>
           <deprecated><![CDATA[Use getNextSequence(datasource,column)]]></deprecated>
           <parameters>
@@ -7354,8 +7354,8 @@ Make sure to set the applicable filters when the sql is used in a loadRecords() 
             <sample clientSupport="wc,sc"><![CDATA[var sql = databaseManager.getSQL(foundset)]]></sample>
           </samples>
           <parameters>
-            <parameter name="foundset" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
-              <description><![CDATA[The JSFoundset to get the sql for.]]></description>
+            <parameter name="foundsetOrQBSelect" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[The JSFoundset or QBSelect to get the sql for.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -7378,8 +7378,8 @@ When the founset is in find mode, the find conditions are included in the result
             <sample clientSupport="wc,sc"><![CDATA[var sql = databaseManager.getSQL(foundset)]]></sample>
           </samples>
           <parameters>
-            <parameter name="foundset" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
-              <description><![CDATA[The JSFoundset to get the sql for.]]></description>
+            <parameter name="foundsetOrQBSelect" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[The JSFoundset or QBSelect to get the sql for.]]></description>
             </parameter>
             <parameter name="includeFilters" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[include the foundset and table filters.]]></description>
@@ -7402,8 +7402,8 @@ Parameters for the filters are included.]]></description>
             <sample clientSupport="wc,sc"><![CDATA[var sqlParameterArray = databaseManager.getSQLParameters(foundset,false)]]></sample>
           </samples>
           <parameters>
-            <parameter name="foundset" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
-              <description><![CDATA[The JSFoundset to get the sql parameters for.]]></description>
+            <parameter name="foundsetOrQBSelect" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[The JSFoundset or QBSelect to get the sql parameters for.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -7424,8 +7424,8 @@ When the founset is in find mode, the arguments for the find conditions are incl
             <sample clientSupport="wc,sc"><![CDATA[var sqlParameterArray = databaseManager.getSQLParameters(foundset,false)]]></sample>
           </samples>
           <parameters>
-            <parameter name="foundset" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
-              <description><![CDATA[The JSFoundset to get the sql parameters for.]]></description>
+            <parameter name="foundsetOrQBSelect" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+              <description><![CDATA[The JSFoundset or QBSelect to get the sql parameters for.]]></description>
             </parameter>
             <parameter name="includeFilters" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[include the parameters for the filters.]]></description>
@@ -7989,21 +7989,21 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the records could me merged.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Merge records from the same foundset, updates entire datamodel (via foreign type on columns) with destination 
+            <description clientSupport="wc,sc"><![CDATA[Merge records from the same foundset, updates entire datamodel (via foreign type on columns) with destination
 record pk, deletes source record. Do use a transaction!
 
-This function is very handy in situations where duplicate data exists. It allows you to merge the two records 
-and move all related records in one go. Say the source_record is "Ikea" and the combined_destination_record is "IKEA", the 
-"Ikea" record is deleted and all records related to it (think of contacts and orders, for instance) will be related 
-to the "IKEA" record. 
+This function is very handy in situations where duplicate data exists. It allows you to merge the two records
+and move all related records in one go. Say the source_record is "Ikea" and the combined_destination_record is "IKEA", the
+"Ikea" record is deleted and all records related to it (think of contacts and orders, for instance) will be related
+to the "IKEA" record.
 
-The function takes an optional array of column names. If provided, the data in the named columns will be copied 
-from source_record to combined_destination_record. 
+The function takes an optional array of column names. If provided, the data in the named columns will be copied
+from source_record to combined_destination_record.
 
 Note that it is essential for both records to originate from the same foundset, as shown in the sample code.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Merge records from the same foundset, updates entire datamodel (via foreign type on columns) with destination 
+            <summary clientSupport="wc,sc"><![CDATA[Merge records from the same foundset, updates entire datamodel (via foreign type on columns) with destination
 record pk, deletes source record.]]></summary>
           </summaries>
           <samples>
@@ -8026,21 +8026,21 @@ record pk, deletes source record.]]></summary>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the records could me merged.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Merge records from the same foundset, updates entire datamodel (via foreign type on columns) with destination 
+            <description clientSupport="wc,sc"><![CDATA[Merge records from the same foundset, updates entire datamodel (via foreign type on columns) with destination
 record pk, deletes source record. Do use a transaction!
 
-This function is very handy in situations where duplicate data exists. It allows you to merge the two records 
-and move all related records in one go. Say the source_record is "Ikea" and the combined_destination_record is "IKEA", the 
-"Ikea" record is deleted and all records related to it (think of contacts and orders, for instance) will be related 
-to the "IKEA" record. 
+This function is very handy in situations where duplicate data exists. It allows you to merge the two records
+and move all related records in one go. Say the source_record is "Ikea" and the combined_destination_record is "IKEA", the
+"Ikea" record is deleted and all records related to it (think of contacts and orders, for instance) will be related
+to the "IKEA" record.
 
-The function takes an optional array of column names. If provided, the data in the named columns will be copied 
-from source_record to combined_destination_record. 
+The function takes an optional array of column names. If provided, the data in the named columns will be copied
+from source_record to combined_destination_record.
 
 Note that it is essential for both records to originate from the same foundset, as shown in the sample code.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Merge records from the same foundset, updates entire datamodel (via foreign type on columns) with destination 
+            <summary clientSupport="wc,sc"><![CDATA[Merge records from the same foundset, updates entire datamodel (via foreign type on columns) with destination
 record pk, deletes source record.]]></summary>
           </summaries>
           <samples>
@@ -8065,7 +8065,7 @@ record pk, deletes source record.]]></summary>
           <return type="void" typecode="void"/>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Can be used to recalculate a specified record or all rows in the specified foundset.
-May be necessary when data is changed from outside of servoy, or when there is data changed inside servoy 
+May be necessary when data is changed from outside of servoy, or when there is data changed inside servoy
 but records with calculations depending on that data where not loaded so not updated and you need to update
 the stored calculation values because you are depending on that with queries or aggregates.]]></description>
           </descriptions>
@@ -8196,7 +8196,7 @@ return true if the locks are released.]]></description>
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Reverts outstanding (not saved) in memory changes from edited records. 
+            <description clientSupport="wc,sc"><![CDATA[Reverts outstanding (not saved) in memory changes from edited records.
 Can specify a record or foundset as parameter to rollback.
 Best used in combination with the function databaseManager.setAutoSave()
 This does not include deletes, they do not honor the autosafe false flag so they cant be rollbacked by this call.]]></description>
@@ -8223,7 +8223,7 @@ databaseManager.setAutoSave(true)]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Reverts outstanding (not saved) in memory changes from edited records. 
+            <description clientSupport="wc,sc"><![CDATA[Reverts outstanding (not saved) in memory changes from edited records.
 Can specify a record or foundset as parameter to rollback.
 Best used in combination with the function databaseManager.setAutoSave()
 This does not include deletes, they do not honor the autosafe false flag so they cant be rollbacked by this call.]]></description>
@@ -8255,7 +8255,7 @@ databaseManager.setAutoSave(true)]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Reverts outstanding (not saved) in memory changes from edited records. 
+            <description clientSupport="wc,sc"><![CDATA[Reverts outstanding (not saved) in memory changes from edited records.
 Can specify a record or foundset as parameter to rollback.
 Best used in combination with the function databaseManager.setAutoSave()
 This does not include deletes, they do not honor the autosafe false flag so they cant be rollbacked by this call.]]></description>
@@ -8286,7 +8286,7 @@ databaseManager.setAutoSave(true)]]></sample>
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Rolls back in memory edited records that are outstanding (not saved). 
+            <description clientSupport="wc,sc"><![CDATA[Rolls back in memory edited records that are outstanding (not saved).
 Can specify a record or foundset as parameter to rollback.
 Best used in combination with the function databaseManager.setAutoSave()
 This does not include deletes, they do not honor the autosafe false flag so they cant be rollbacked by this call.]]></description>
@@ -8314,7 +8314,7 @@ databaseManager.setAutoSave(true)]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Rolls back in memory edited records that are outstanding (not saved). 
+            <description clientSupport="wc,sc"><![CDATA[Rolls back in memory edited records that are outstanding (not saved).
 Can specify a record or foundset as parameter to rollback.
 Best used in combination with the function databaseManager.setAutoSave()
 This does not include deletes, they do not honor the autosafe false flag so they cant be rollbacked by this call.]]></description>
@@ -8347,7 +8347,7 @@ databaseManager.setAutoSave(true)]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Rolls back in memory edited records that are outstanding (not saved). 
+            <description clientSupport="wc,sc"><![CDATA[Rolls back in memory edited records that are outstanding (not saved).
 Can specify a record or foundset as parameter to rollback.
 Best used in combination with the function databaseManager.setAutoSave()
 This does not include deletes, they do not honor the autosafe false flag so they cant be rollbacked by this call.]]></description>
@@ -8391,7 +8391,7 @@ and saved records within the transactions are restored to the database values, s
 databaseManager.startTransaction()
 //Now let users input data
 
-//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.  
+//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.
 if (cancel || !databaseManager.commitTransaction())
 {
 	databaseManager.rollbackTransaction();
@@ -8416,7 +8416,7 @@ Also, saved records within the transactions are restored to the database values,
 databaseManager.startTransaction()
 //Now let users input data
 
-//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.  
+//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.
 if (cancel || !databaseManager.commitTransaction())
 {
 	databaseManager.rollbackTransaction();
@@ -8446,7 +8446,7 @@ Note that when autosave is false, rollbackEditedRecords() will not handle delete
 databaseManager.startTransaction()
 //Now let users input data
 
-//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.  
+//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.
 if (cancel || !databaseManager.commitTransaction())
 {
 	databaseManager.rollbackTransaction();
@@ -8465,13 +8465,13 @@ if (cancel || !databaseManager.commitTransaction())
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the save was done without an error.]]></return>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[Saves all outstanding (unsaved) data and exits the current record. 
+            <description clientSupport="mc,wc,sc"><![CDATA[Saves all outstanding (unsaved) data and exits the current record.
 Optionally, by specifying a record or foundset, can save a single record or all records from foundset instead of all the data.
 
 NOTE: The fields focus may be lost in user interface in order to determine the edits.
-		 SaveData called from table events (like afterRecordInsert) is only partially supported depeding on how first saveData (that triggers the event) is called. 
+		 SaveData called from table events (like afterRecordInsert) is only partially supported depeding on how first saveData (that triggers the event) is called.
 		 If first saveData is called with no arguments, all saveData from table events are returning immediatelly with true value and records will be saved as part of first save.
-      If first saveData is called with record(s) as arguments, saveData from table event will try to save record(s) from arguments that are different than those in first call. 
+      If first saveData is called with record(s) as arguments, saveData from table event will try to save record(s) from arguments that are different than those in first call.
       SaveData with no arguments inside table events will always return true without saving anything.]]></description>
           </descriptions>
           <summaries>
@@ -8483,7 +8483,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
 //databaseManager.saveData(foundset);//save all records from foundset
 
 // when creating many records in a loop do a batch save on an interval as every 10 records (to save on memory and roundtrips)
-// for (var recordIndex = 1; recordIndex <= 5000; recordIndex++) 
+// for (var recordIndex = 1; recordIndex <= 5000; recordIndex++)
 // {
 //		foundset.newRecord();
 //		someColumn = recordIndex;
@@ -8498,13 +8498,13 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the save was done without an error.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Saves all outstanding (unsaved) data and exits the current record. 
+            <description clientSupport="wc,sc"><![CDATA[Saves all outstanding (unsaved) data and exits the current record.
 Optionally, by specifying a record or foundset, can save a single record or all records from foundset instead of all the data.
 
 NOTE: The fields focus may be lost in user interface in order to determine the edits.
-		 SaveData called from table events (like afterRecordInsert) is only partially supported depeding on how first saveData (that triggers the event) is called. 
+		 SaveData called from table events (like afterRecordInsert) is only partially supported depeding on how first saveData (that triggers the event) is called.
 		 If first saveData is called with no arguments, all saveData from table events are returning immediatelly with true value and records will be saved as part of first save.
-      If first saveData is called with record(s) as arguments, saveData from table event will try to save record(s) from arguments that are different than those in first call. 
+      If first saveData is called with record(s) as arguments, saveData from table event will try to save record(s) from arguments that are different than those in first call.
       SaveData with no arguments inside table events will always return true without saving anything.]]></description>
           </descriptions>
           <summaries>
@@ -8516,7 +8516,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
 //databaseManager.saveData(foundset);//save all records from foundset
 
 // when creating many records in a loop do a batch save on an interval as every 10 records (to save on memory and roundtrips)
-// for (var recordIndex = 1; recordIndex <= 5000; recordIndex++) 
+// for (var recordIndex = 1; recordIndex <= 5000; recordIndex++)
 // {
 //		foundset.newRecord();
 //		someColumn = recordIndex;
@@ -8536,13 +8536,13 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the save was done without an error.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Saves all outstanding (unsaved) data and exits the current record. 
+            <description clientSupport="wc,sc"><![CDATA[Saves all outstanding (unsaved) data and exits the current record.
 Optionally, by specifying a record or foundset, can save a single record or all records from foundset instead of all the data.
 
 NOTE: The fields focus may be lost in user interface in order to determine the edits.
-		 SaveData called from table events (like afterRecordInsert) is only partially supported depeding on how first saveData (that triggers the event) is called. 
+		 SaveData called from table events (like afterRecordInsert) is only partially supported depeding on how first saveData (that triggers the event) is called.
 		 If first saveData is called with no arguments, all saveData from table events are returning immediatelly with true value and records will be saved as part of first save.
-      If first saveData is called with record(s) as arguments, saveData from table event will try to save record(s) from arguments that are different than those in first call. 
+      If first saveData is called with record(s) as arguments, saveData from table event will try to save record(s) from arguments that are different than those in first call.
       SaveData with no arguments inside table events will always return true without saving anything.]]></description>
           </descriptions>
           <summaries>
@@ -8554,7 +8554,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
 //databaseManager.saveData(foundset);//save all records from foundset
 
 // when creating many records in a loop do a batch save on an interval as every 10 records (to save on memory and roundtrips)
-// for (var recordIndex = 1; recordIndex <= 5000; recordIndex++) 
+// for (var recordIndex = 1; recordIndex <= 5000; recordIndex++)
 // {
 //		foundset.newRecord();
 //		someColumn = recordIndex;
@@ -8574,7 +8574,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[false if the current edited record could not be saved.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Set autosave, if false then no saves will happen by the ui (not including deletes!). 
+            <description clientSupport="wc,sc"><![CDATA[Set autosave, if false then no saves will happen by the ui (not including deletes!).
 Until you call databaseManager.saveData() or setAutoSave(true)
 
 If you also want to be able to rollback deletes then you have to use databaseManager.startTransaction().
@@ -8620,7 +8620,7 @@ databaseManager.setCreateEmptyFormFoundsets()]]></sample>
           <return type="void" typecode="void"/>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Start a database transaction.
-If you want to avoid round trips to the server or avoid the posibility of blocking other clients 
+If you want to avoid round trips to the server or avoid the posibility of blocking other clients
 because of your pending changes, you can use databaseManager.setAutoSave(false/true) and databaseManager.rollbackEditedRecords().
 
 startTransaction, commit/rollbackTransacton() does support rollbacking of record deletes which autoSave = false doesnt support.]]></description>
@@ -8633,7 +8633,7 @@ startTransaction, commit/rollbackTransacton() does support rollbacking of record
 databaseManager.startTransaction()
 //Now let users input data
 
-//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.  
+//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.
 if (cancel || !databaseManager.commitTransaction())
 {
 	databaseManager.rollbackTransaction();
@@ -8657,7 +8657,7 @@ Note that this only works if source and destination server are of the same datab
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[//dynamically changes a server for the entire solution, destination database server must contain the same tables/columns!
 //will fail if there is a lock, transaction , if repository_server is used or if destination server is invalid
-//in the solution keep using the sourceName every where to reference the server!  
+//in the solution keep using the sourceName every where to reference the server!
 var success = databaseManager.switchServer('crm', 'crm1')]]></sample>
           </samples>
           <parameters>
@@ -37008,13 +37008,15 @@ foundset.loadRecords(q);]]></sample>
         <property clientSupport="wc,sc" name="columns">
           <return type="com.servoy.j2db.querybuilder.impl.QBColumns" typecode="com.servoy.j2db.querybuilder.impl.QBColumns"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Get columns from query]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Get all the columns of the datasource that can be used for this query (select or where clause)]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Get columns from query]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[Get all the columns of the datasource that can be used for this query (select or where clause)]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[foundset.getQuery().columns]]></sample>
+            <sample clientSupport="wc,sc"><![CDATA[var query = foundset.getQuery();
+query.result.add(query.columns.name, "name");
+query.where.add(query.columns.orderdate.isNull)]]></sample>
           </samples>
         </property>
         <property clientSupport="wc,sc" name="joins">
@@ -37047,7 +37049,7 @@ join1.on.add(query.columns.parent_person_id.eq(join1.columns.person_id))
 /** @type {QBJoin<db:/example_data/person>} */
 var join2 = query.joins.add('db:/example_data/person')
 join2.on.add(join1.columns.parent_person_id.eq(join2.columns.person_id))
-	
+
 query.where.add(join2.columns.name.eq('john'))
 foundset.loadRecords(query)]]></sample>
           </samples>
@@ -37140,6 +37142,36 @@ The alias may be of the main table or any level deep joined table.]]></descripti
             </parameter>
           </parameters>
         </function>
+        <function clientSupport="wc,sc" name="getDataSource">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the dataSource]]></return>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Returns the datasource for this.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Returns the datasource for this.]]></summary>
+          </summaries>
+        </function>
+        <function clientSupport="wc,sc" name="getJoinType">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[joinType.]]></return>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Returns the join type, one of IQueryBuilderJoin#LEFT_OUTER_JOIN, IQueryBuilderJoin#INNER_JOIN, IQueryBuilderJoin#RIGHT_OUTER_JOIN, IQueryBuilderJoin#FULL_JOIN]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Returns the join type, one of IQueryBuilderJoin#LEFT_OUTER_JOIN, IQueryBuilderJoin#INNER_JOIN, IQueryBuilderJoin#RIGHT_OUTER_JOIN, IQueryBuilderJoin#FULL_JOIN]]></summary>
+          </summaries>
+        </function>
+        <function clientSupport="wc,sc" name="getTableAlias">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the tableAlias]]></return>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Returns the table alias for this.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Returns the table alias for this.]]></summary>
+          </summaries>
+        </function>
       </functions>
     </object>
     <object clientSupport="wc,sc" publicName="QBJoins" qualifiedName="com.servoy.j2db.querybuilder.impl.QBJoins">
@@ -37170,18 +37202,18 @@ The alias may be of the main table or any level deep joined table.]]></descripti
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
 	var subquery = databaseManager.createSelect('db:/example_data/order_details')
-		
+
  /** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query
-		.or 
+		.or
 			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
+
 			.add(query.exists(
 					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
 			))
 		)
-		
+
 	foundset.loadRecords(query)]]></sample>
           </samples>
         </property>
@@ -37316,6 +37348,10 @@ When dataSourceOrRelation is a data source, an empty join will be added with joi
               <description><![CDATA[the alias for joining table]]></description>
             </parameter>
           </parameters>
+        </function>
+        <function clientSupport="wc,sc" name="getJoins" undocumented="true">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.querybuilder.impl.QBJoin[]" typecode="[Lcom.servoy.j2db.querybuilder.impl.QBJoin;"/>
         </function>
       </functions>
     </object>
@@ -37738,6 +37774,20 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
             <sample clientSupport="wc,sc"><![CDATA[query.result.clear()]]></sample>
           </samples>
         </function>
+        <function clientSupport="wc,sc" name="getColumns">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.querybuilder.impl.QBColumn[]" typecode="[Lcom.servoy.j2db.querybuilder.impl.QBColumn;"><![CDATA[An array of QBColumn thats in the select of this query.]]></return>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[returns an array with all the columns that will be in the select of this query.
+can return empty array. Then the system will auto append the pk when this query is used.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[returns an array with all the columns that will be in the select of this query.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[var columns = query.result.getColumns();]]></sample>
+          </samples>
+        </function>
       </functions>
     </object>
     <object clientSupport="wc,sc" publicName="QBSelect" qualifiedName="com.servoy.j2db.querybuilder.impl.QBSelect" scriptingName="QBSelect">
@@ -37769,13 +37819,15 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
         <property clientSupport="wc,sc" name="columns">
           <return type="com.servoy.j2db.querybuilder.impl.QBColumns" typecode="com.servoy.j2db.querybuilder.impl.QBColumns"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Get columns from query]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Get all the columns of the datasource that can be used for this query (select or where clause)]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Get columns from query]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[Get all the columns of the datasource that can be used for this query (select or where clause)]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[foundset.getQuery().columns]]></sample>
+            <sample clientSupport="wc,sc"><![CDATA[var query = foundset.getQuery();
+query.result.add(query.columns.name, "name");
+query.where.add(query.columns.orderdate.isNull)]]></sample>
           </samples>
         </property>
         <property clientSupport="wc,sc" name="functions">
@@ -37875,11 +37927,11 @@ Joins added to this clause will be based on this table clauses table.]]></descri
             <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query.columns.contact_id.eq(query.getParameter('mycontactid')))
-	
+
 	// load orders where contact_id = 100
 	query.params['mycontactid'] = 100
 	foundset.loadRecords(query)
-	
+
 	// load orders where contact_id = 200
 	query.params['mycontactid'] = 200
 	foundset.loadRecords(query)]]></sample>
@@ -38047,6 +38099,16 @@ The alias may be of the main table or any level deep joined table.]]></descripti
             </parameter>
           </parameters>
         </function>
+        <function clientSupport="wc,sc" name="getDataSource">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the dataSource]]></return>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Returns the datasource for this.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Returns the datasource for this.]]></summary>
+          </summaries>
+        </function>
         <function clientSupport="wc,sc" name="getParameter">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
@@ -38062,15 +38124,25 @@ The alias may be of the main table or any level deep joined table.]]></descripti
             <sample clientSupport="wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
 	var query = databaseManager.createSelect('db:/example_data/orders')
 	query.where.add(query.columns.contact_id.eq(query.getParameter('mycontactid')))
-	
+
 	// load orders where contact_id = 100
 	query.params['mycontactid'] = 100
 	foundset.loadRecords(query)
-	
+
 	// load orders where contact_id = 200
 	query.params['mycontactid'] = 200
 	foundset.loadRecords(query)]]></sample>
           </samples>
+        </function>
+        <function clientSupport="wc,sc" name="getTableAlias">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the tableAlias]]></return>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Returns the table alias for this.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Returns the table alias for this.]]></summary>
+          </summaries>
         </function>
         <function clientSupport="wc,sc" name="not">
           <argumentsTypes>
@@ -38297,13 +38369,15 @@ The alias may be of the main table or any level deep joined table.]]></descripti
         <property clientSupport="wc,sc" name="columns">
           <return type="com.servoy.j2db.querybuilder.impl.QBColumns" typecode="com.servoy.j2db.querybuilder.impl.QBColumns"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Get columns from query]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Get all the columns of the datasource that can be used for this query (select or where clause)]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Get columns from query]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[Get all the columns of the datasource that can be used for this query (select or where clause)]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[foundset.getQuery().columns]]></sample>
+            <sample clientSupport="wc,sc"><![CDATA[var query = foundset.getQuery();
+query.result.add(query.columns.name, "name");
+query.where.add(query.columns.orderdate.isNull)]]></sample>
           </samples>
         </property>
         <property clientSupport="wc,sc" name="joins">
@@ -38406,6 +38480,26 @@ The alias may be of the main table or any level deep joined table.]]></descripti
               <description><![CDATA[the name of column to get]]></description>
             </parameter>
           </parameters>
+        </function>
+        <function clientSupport="wc,sc" name="getDataSource">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the dataSource]]></return>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Returns the datasource for this.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Returns the datasource for this.]]></summary>
+          </summaries>
+        </function>
+        <function clientSupport="wc,sc" name="getTableAlias">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the tableAlias]]></return>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Returns the table alias for this.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Returns the table alias for this.]]></summary>
+          </summaries>
         </function>
       </functions>
     </object>
@@ -45506,7 +45600,9 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
         <property clientSupport="wc,sc" name="caretPosition">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Gets or sets the number value (position) of the text caret (text "I" bar) in a field.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Gets or sets the number value (position) of the text caret (text "I" bar) in a field.
+ 
+NOTE: This does not work in Web Client.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Gets or sets the number value (position) of the text caret (text "I" bar) in a field.]]></summary>
@@ -51073,7 +51169,9 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
         <property clientSupport="wc,sc" name="caretPosition">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Gets or sets the number value (position) of the text caret (text "I" bar) in a field.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Gets or sets the number value (position) of the text caret (text "I" bar) in a field.
+ 
+NOTE: This does not work in Web Client.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Gets or sets the number value (position) of the text caret (text "I" bar) in a field.]]></summary>
@@ -54030,7 +54128,9 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
         <property clientSupport="wc,sc" name="caretPosition">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Gets or sets the number value (position) of the text caret (text "I" bar) in a field.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Gets or sets the number value (position) of the text caret (text "I" bar) in a field.
+ 
+NOTE: This does not work in Web Client.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Gets or sets the number value (position) of the text caret (text "I" bar) in a field.]]></summary>
@@ -54734,7 +54834,9 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
         <property clientSupport="wc,sc" name="caretPosition">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Gets or sets the number value (position) of the text caret (text "I" bar) in a field.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Gets or sets the number value (position) of the text caret (text "I" bar) in a field.
+ 
+NOTE: This does not work in Web Client.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Gets or sets the number value (position) of the text caret (text "I" bar) in a field.]]></summary>
