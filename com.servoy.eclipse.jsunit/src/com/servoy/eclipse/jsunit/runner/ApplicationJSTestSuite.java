@@ -33,6 +33,7 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServiceProvider;
 import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
+import com.servoy.j2db.scripting.ScriptEngine;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
@@ -42,9 +43,6 @@ import com.servoy.j2db.util.Utils;
  */
 public class ApplicationJSTestSuite extends JSUnitSuite
 {
-
-	private static final String SERVOY_DISABLE_SCRIPT_COMPILE_PROPERTY = "servoy.disableScriptCompile";
-
 	public static final String SOLUTION_TEST_JS_NAME = "solutionTestSuite.js";
 
 	protected static IApplication staticSuiteApplication;
@@ -72,9 +70,9 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 	protected ApplicationJSTestSuite()
 	{
 		// make sure that the solution scripts are compiled in interpreted mode by default
-		if (System.getProperty(SERVOY_DISABLE_SCRIPT_COMPILE_PROPERTY) == null)
+		if (System.getProperty(ScriptEngine.SERVOY_DISABLE_SCRIPT_COMPILE_PROPERTY) == null)
 		{
-			System.setProperty(SERVOY_DISABLE_SCRIPT_COMPILE_PROPERTY, "true");
+			System.setProperty(ScriptEngine.SERVOY_DISABLE_SCRIPT_COMPILE_PROPERTY, "true");
 		}
 
 		setStackElementFilters(new String[] { "\\A" + SOLUTION_TEST_JS_NAME + "\\z" });
@@ -117,7 +115,7 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 
 	private boolean isDebugModeOn()
 	{
-		return Utils.getAsBoolean(System.getProperty(SERVOY_DISABLE_SCRIPT_COMPILE_PROPERTY)); // prop. can't be null here, default would be set by constructor
+		return Utils.getAsBoolean(System.getProperty(ScriptEngine.SERVOY_DISABLE_SCRIPT_COMPILE_PROPERTY)); // prop. can't be null here, default would be set by constructor
 	}
 
 	/**
