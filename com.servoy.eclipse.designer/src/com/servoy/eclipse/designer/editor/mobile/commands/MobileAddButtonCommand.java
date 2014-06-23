@@ -83,7 +83,7 @@ public class MobileAddButtonCommand extends BaseFormPlaceElementCommand
 				button.setAnchors(IAnchorConstants.WEST | IAnchorConstants.EAST | IAnchorConstants.NORTH);
 				if (location != null) button.setLocation(new java.awt.Point(location.x, location.y));
 			}
-			button.setStyleClass("b"); // default theme for buttons
+			button.setStyleClass("c"); // default theme for buttons
 
 			return toArrAy(button);
 		}

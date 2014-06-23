@@ -70,7 +70,7 @@ public class MobileAddHeaderTitleCommand extends BaseFormPlaceElementCommand
 		// for debug in developer
 		label.setAnchors(IAnchorConstants.EAST | IAnchorConstants.WEST | IAnchorConstants.NORTH);
 		label.setHorizontalAlignment(ISupportTextSetup.CENTER);
-		label.setStyleClass("b"); // default for header text
+		label.setStyleClass("c"); // default for header text
 		return label;
 	}
 }

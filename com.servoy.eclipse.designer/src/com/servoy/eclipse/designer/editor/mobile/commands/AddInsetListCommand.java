@@ -86,7 +86,7 @@ public class AddInsetListCommand extends BaseFormPlaceElementCommand
 			header.setText("Header");
 			header.putCustomMobileProperty(IMobileProperties.LIST_ITEM_HEADER.propertyName, Boolean.TRUE);
 			// for debug in developer
-			header.setStyleClass("b"); // default for headers
+			header.setStyleClass("c"); // default for headers
 
 			// models is portal
 			return new IPersist[] { portal };

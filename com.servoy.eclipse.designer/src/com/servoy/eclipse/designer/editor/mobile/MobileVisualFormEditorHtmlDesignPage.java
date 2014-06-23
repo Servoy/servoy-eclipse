@@ -520,7 +520,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 					protected Part createPart(int partTypeId) throws RepositoryException
 					{
 						Part part = super.createPart(partTypeId);
-						part.setStyleClass("b"); // default theme
+						part.setStyleClass("c"); // default theme
 						return part;
 					}
 				});
