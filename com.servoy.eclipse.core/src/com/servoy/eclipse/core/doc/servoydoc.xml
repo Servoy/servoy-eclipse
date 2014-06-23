@@ -45490,7 +45490,9 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
         <property clientSupport="wc,sc" name="caretPosition">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Gets or sets the number value (position) of the text caret (text "I" bar) in a field.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Gets or sets the number value (position) of the text caret (text "I" bar) in a field.
+
+NOTE: This does not work in Web Client.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Gets or sets the number value (position) of the text caret (text "I" bar) in a field.]]></summary>
@@ -51057,7 +51059,9 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
         <property clientSupport="wc,sc" name="caretPosition">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Gets or sets the number value (position) of the text caret (text "I" bar) in a field.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Gets or sets the number value (position) of the text caret (text "I" bar) in a field.
+
+NOTE: This does not work in Web Client.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Gets or sets the number value (position) of the text caret (text "I" bar) in a field.]]></summary>
@@ -54014,7 +54018,9 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
         <property clientSupport="wc,sc" name="caretPosition">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Gets or sets the number value (position) of the text caret (text "I" bar) in a field.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Gets or sets the number value (position) of the text caret (text "I" bar) in a field.
+
+NOTE: This does not work in Web Client.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Gets or sets the number value (position) of the text caret (text "I" bar) in a field.]]></summary>
@@ -54718,7 +54724,9 @@ NOTE: Use the same value(s) and order of attribute(s) from the element design ti
         <property clientSupport="wc,sc" name="caretPosition">
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Gets or sets the number value (position) of the text caret (text "I" bar) in a field.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Gets or sets the number value (position) of the text caret (text "I" bar) in a field.
+
+NOTE: This does not work in Web Client.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Gets or sets the number value (position) of the text caret (text "I" bar) in a field.]]></summary>
