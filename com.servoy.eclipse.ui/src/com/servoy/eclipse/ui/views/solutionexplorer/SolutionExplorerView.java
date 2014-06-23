@@ -133,11 +133,12 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Text;
@@ -342,7 +343,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private static final long TREE_FILTER_DELAY_TIME = 500;
 
-	private static final int DEFAULT_SEARCH_FIELD_WIDTH = 64; // Widget.DEFAULT_WIDTH
+	private static final int DEFAULT_SEARCH_FIELD_WIDTH = 100; // Widget.DEFAULT_WIDTH would be 64
+
 	/**
 	 * Constant used to point to a method.
 	 */
@@ -2014,7 +2016,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				{
 					SolutionExplorerTreeContentProvider treeContentProvider = (SolutionExplorerTreeContentProvider)tree.getContentProvider();
 					final Object serversNode = treeContentProvider.getServers();
-					UIJob expandServersNode = new UIJob(tree.getControl().getDisplay(), "Expand servers node") {
+					UIJob expandServersNode = new UIJob(tree.getControl().getDisplay(), "Expand servers node")
+					{
 						@Override
 						public IStatus runInUIThread(IProgressMonitor monitor)
 						{
@@ -2499,33 +2502,31 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private void fillViewToolBar(IToolBarManager manager)
 	{
-		IContributionItem searchLabel = new ControlContribution("searchLabel")
-		{
-			@Override
-			protected Control createControl(Composite parent)
-			{
-				// vertically center the label
-				Composite labelPositioner = new Composite(parent, SWT.NONE);
-				RowLayout la = new RowLayout(SWT.VERTICAL);
-				la.wrap = false;
-				la.pack = true;
-				la.fill = true;
-				la.justify = true;
-				labelPositioner.setLayout(la);
-
-				Label l = new Label(labelPositioner, SWT.NONE);
-				l.setText(Messages.SolutionExplorerView_filter);
-
-				return labelPositioner;
-			}
-		};
 		IContributionItem searchField = new ControlContribution("searchField")
 		{
 			@Override
 			protected Control createControl(Composite parent)
 			{
-				final Text searchFld = new Text(parent, SWT.SEARCH);
+				final Text searchFld = new Text(parent, SWT.SEARCH | SWT.ICON_CANCEL);
+				searchFld.setMessage(Messages.SolutionExplorerView_filter);
 				final FilterDelayJob filterDelayJob = new FilterDelayJob(SolutionExplorerView.this, TREE_FILTER_DELAY_TIME, "Applying Solution Explorer filter");
+
+				Listener listener = new Listener()
+				{
+					@Override
+					public void handleEvent(Event event)
+					{
+						if (event.detail == SWT.ICON_CANCEL)
+						{
+							searchFld.setText(""); // already done by default
+							filterDelayJob.setFilterText("");
+						}
+					}
+				};
+
+				searchFld.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+				searchFld.addListener(SWT.DefaultSelection, listener);
+
 				searchFld.addModifyListener(new ModifyListener()
 				{
 					public void modifyText(ModifyEvent e)
@@ -2576,7 +2577,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		};
 		drillDownAdapter.addNavigationActions(manager);
 		manager.add(new Separator());
-		manager.add(searchLabel);
 		manager.add(searchField);
 		manager.add(new Separator());
 		manager.add(fRefreshAction);
