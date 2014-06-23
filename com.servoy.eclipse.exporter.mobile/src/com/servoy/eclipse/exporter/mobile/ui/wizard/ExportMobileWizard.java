@@ -258,11 +258,11 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 		else
 		{
 			addPage(optionsPage);
-			addPage(warExportPage);
-			if (mobileExporter.getMediaOrder().size() > 0) addPage(mediaOrderPage);
-			addPage(finishPage);
-			addPage(pgAppPage);
 			addPage(licensePage);
+			if (mobileExporter.getMediaOrder().size() > 0) addPage(mediaOrderPage);
+			addPage(warExportPage);
+			addPage(pgAppPage);
+			addPage(finishPage);
 		}
 	}
 
