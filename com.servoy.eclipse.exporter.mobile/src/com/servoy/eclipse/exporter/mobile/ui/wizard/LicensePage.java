@@ -43,13 +43,11 @@ public class LicensePage extends WizardPage implements IMobileExportPropertiesPa
 
 	private Text companyText;
 	private Text licenseText;
-	private final WizardPage nextPage;
 	private final MobileExporter mobileExporter;
 
-	public LicensePage(String pageName, WizardPage nextPage, MobileExporter mobileExporter)
+	public LicensePage(String pageName, MobileExporter mobileExporter)
 	{
 		super(pageName);
-		this.nextPage = nextPage;
 		setTitle("Servoy Mobile License");
 		this.mobileExporter = mobileExporter;
 	}

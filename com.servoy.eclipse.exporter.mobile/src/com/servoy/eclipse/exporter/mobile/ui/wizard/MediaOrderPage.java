@@ -41,7 +41,6 @@ import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
  */
 public class MediaOrderPage extends WizardPage
 {
-	private final WizardPage nextPage;
 	private final MobileExporter mobileExporter;
 	private ListViewer listViewer;
 
@@ -50,10 +49,9 @@ public class MediaOrderPage extends WizardPage
 	 * @param mobileExporter 
 	 * @param licensePage 
 	 */
-	protected MediaOrderPage(String pageName, WizardPage nextPage, MobileExporter mobileExporter)
+	protected MediaOrderPage(String pageName, MobileExporter mobileExporter)
 	{
 		super(pageName);
-		this.nextPage = nextPage;
 		this.mobileExporter = mobileExporter;
 		setTitle("Order the media how they must be loaded in the browser");
 	}
