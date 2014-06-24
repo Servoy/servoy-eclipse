@@ -47,14 +47,12 @@ public class ExportOptionsPage extends WizardPage implements IMobileExportProper
 	private Text serverURL;
 	private Text serviceSolutionName;
 	private Text timeout;
-	private final WizardPage nextPage;
 	private final MobileExporter mobileExporter;
 	private Button debugCheck;
 
-	public ExportOptionsPage(String pageName, WizardPage nextPage, MobileExporter mobileExporter)
+	public ExportOptionsPage(String pageName, MobileExporter mobileExporter)
 	{
 		super(pageName);
-		this.nextPage = nextPage;
 		this.mobileExporter = mobileExporter;
 		setTitle("Export Options");
 	}

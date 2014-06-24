@@ -81,9 +81,9 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 		pgAppPage = new PhoneGapApplicationPage("PhoneGap Application", mobileExporter);
 		warExportPage = new WarExportPage("outputPage", "Choose output", null, finishPage, pgAppPage, mobileExporter);
 		pgAppPage.setWarExportPage(warExportPage);
-		licensePage = new LicensePage("licensePage", warExportPage, mobileExporter);
-		mediaOrderPage = new MediaOrderPage("mediaOrderPage", licensePage, mobileExporter);
-		optionsPage = new ExportOptionsPage("optionsPage", mobileExporter.getMediaOrder().size() > 0 ? mediaOrderPage : licensePage, mobileExporter);
+		licensePage = new LicensePage("licensePage", mobileExporter);
+		mediaOrderPage = new MediaOrderPage("mediaOrderPage", mobileExporter);
+		optionsPage = new ExportOptionsPage("optionsPage", mobileExporter);
 
 		IDialogSettings workbenchSettings = Activator.getDefault().getDialogSettings();
 		IDialogSettings section = workbenchSettings.getSection("MobileExportWizard");//$NON-NLS-1$
@@ -248,6 +248,8 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 		return true;
 	}
 
+	//Also used to specify the static order of the pages.
+	//Please see http://wiki.eclipse.org/FAQ_How_do_I_specify_the_order_of_pages_in_a_wizard%3F for more info.
 	@Override
 	public void addPages()
 	{
@@ -258,8 +260,8 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 		else
 		{
 			addPage(optionsPage);
-			addPage(licensePage);
 			if (mobileExporter.getMediaOrder().size() > 0) addPage(mediaOrderPage);
+			addPage(licensePage);
 			addPage(warExportPage);
 			addPage(pgAppPage);
 			addPage(finishPage);
