@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.equinox.app.IApplicationContext;
 
 import com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.ExportException;
 import com.servoy.eclipse.model.war.exporter.IWarExportModel;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
@@ -235,6 +236,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 		catch (ExportException ex)
 		{
+			ServoyLog.logError("Failed to export solution.", ex);
 			outputError("Exception while exporting solution. EXPORT FAILED for this solution. Check workspace log.");
 			exitCode = EXIT_EXPORT_FAILED;
 		}
