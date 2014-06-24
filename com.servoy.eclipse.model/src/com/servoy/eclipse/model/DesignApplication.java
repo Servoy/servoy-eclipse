@@ -577,7 +577,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 			}
 		}
 		// also test here for the local jar message
-		if (localeJarMessages == null && locale.equals(getLocale()))
+		if (locale.equals(getLocale()))
 		{
 			localeJarMessages = ResourceBundle.getBundle(Messages.BUNDLE_NAME, locale);
 		}
