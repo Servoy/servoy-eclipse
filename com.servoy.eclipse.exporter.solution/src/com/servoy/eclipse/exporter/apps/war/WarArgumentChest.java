@@ -80,7 +80,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        -active <true/false> export active solution (and its modules) only\n"
 			+ "				Default: true\n"
 			+ "        -pluginLocations absolute paths to plugin folders.\n" 
-			+			    "Default: current directory.\n";
+			+			    "Default: '../plugins'.\n";
 	}
 
 	@Override
@@ -93,7 +93,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 		isExportActiveSolutionOnly = true;
 		if (argsMap.containsKey("active") && !Utils.getAsBoolean(argsMap.get("active"))) isExportActiveSolutionOnly = false;
 		pluginLocations = parseArg("pluginLocations", null, argsMap);
-		if (pluginLocations == null) pluginLocations = ".";
+		if (pluginLocations == null) pluginLocations = "../plugins";
 	}
 
 	public String getPlugins()
