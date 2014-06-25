@@ -79,7 +79,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             invalid solutions to be exported.\n"
 			+ "        -active <true/false> export active solution (and its modules) only\n"
 			+ "				Default: true\n"
-			+ "        -pluginLocations absolute paths to plugin folders.\n" 
+			+ "        -pluginlocations absolute paths to plugin folders.\n" 
 			+			    "Default: '../plugins'.\n";
 	}
 
@@ -92,7 +92,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 		drivers = parseArg("d","Driver name(s) was(were) not specified after '-d' argument.", argsMap);
 		isExportActiveSolutionOnly = true;
 		if (argsMap.containsKey("active") && !Utils.getAsBoolean(argsMap.get("active"))) isExportActiveSolutionOnly = false;
-		pluginLocations = parseArg("pluginLocations", null, argsMap);
+		pluginLocations = parseArg("pluginlocations", null, argsMap);
 		if (pluginLocations == null) pluginLocations = "../plugins";
 	}
 
