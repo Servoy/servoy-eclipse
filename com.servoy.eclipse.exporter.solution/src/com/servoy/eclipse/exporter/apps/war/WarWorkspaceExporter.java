@@ -29,6 +29,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.equinox.app.IApplicationContext;
 
 import com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter;
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.ExportException;
 import com.servoy.eclipse.model.war.exporter.IWarExportModel;
@@ -130,7 +132,8 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			@Override
 			public String getFileName()
 			{
-				return configuration.getExportFilePath() + File.separator + configuration.getSolutionNames()[0] + ".war";
+				ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
+				return configuration.getExportFilePath() + File.separator + activeProject.getProject().getName() + ".war";
 			}
 
 			@Override
