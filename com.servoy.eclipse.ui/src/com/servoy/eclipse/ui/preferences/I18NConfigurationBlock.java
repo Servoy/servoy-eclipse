@@ -391,8 +391,8 @@ public class I18NConfigurationBlock extends AbstractConfigurationBlock
 		else settings.put(DEFAULT_MESSAGES_SERVER, defaultI18NServer.getText());
 		if (defaultI18NTable.getText().equals(SELECTION_NONE)) settings.put(DEFAULT_MESSAGES_TABLE, ""); //$NON-NLS-1$
 		else settings.put(DEFAULT_MESSAGES_TABLE, defaultI18NTable.getText());
-
-		// refresh the i18n messages from the design client so that the visual designer will use new messages if changed 
+		Locale.setDefault(newLocale);
+		// refresh the i18n messages from the design client so that the visual designer will use new messages if changed
 		Activator.getDefault().getDesignClient().refreshI18NMessages();
 	}
 
