@@ -389,7 +389,7 @@ public class ServoyModel extends AbstractServoyModel
 									{
 										String code = method.getDeclaration();
 										String scriptPath = SolutionSerializer.getScriptPath(method, false);
-										code = ScriptEngine.docStripper.matcher(code).replaceFirst("function $1");
+										code = ScriptEngine.extractFunction(code, "function $1");
 										byte[] bytes = code.getBytes(Charset.forName("UTF8"));
 										ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 										ByteArrayOutputStream baos = new ByteArrayOutputStream(bytes.length * 2);
@@ -403,7 +403,7 @@ public class ServoyModel extends AbstractServoyModel
 										JsCodeLoader.instrumentFile(scriptPath, bais, baos, new HashMap<String, Object>(), method.getLineNumberOffset() - 1,
 											instrumenator, false);
 										code = new String(baos.toByteArray(), Charset.forName("UTF8"));
-										return JSONObject.quote(ScriptEngine.docStripper.matcher(code).replaceFirst(""));
+										return JSONObject.quote(ScriptEngine.extractFunction(code, ""));
 									}
 									catch (Exception e)
 									{

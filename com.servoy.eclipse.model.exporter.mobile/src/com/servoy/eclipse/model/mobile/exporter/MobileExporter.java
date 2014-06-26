@@ -176,7 +176,7 @@ public class MobileExporter
 			{
 				Media media = flattenedSolution.getMedia(mediaName);
 				byte[] content = media.getMediaData();
-		
+
 				if (MIME_JS.equals(media.getMimeType()))
 				{
 					if (headerJSEmpty) headerJSEmpty = false;
@@ -190,7 +190,7 @@ public class MobileExporter
 					headerCSS.append('"').append(media.getName()).append('"');
 				}
 
-				addZipEntry("media/" + media.getName(), zos,  new ByteArrayInputStream(content));
+				addZipEntry("media/" + media.getName(), zos, new ByteArrayInputStream(content));
 				if (outputFolder != null)
 				{
 					File outputFolderJS = new File(outputFolder, "media");
@@ -818,7 +818,7 @@ public class MobileExporter
 				(method.getParent().getTypeID() == IRepository.FORMS ? "forms" + SCOPE_NAME_SEPARATOR + ((Form)method.getParent()).getName() : "scopes" +
 					SCOPE_NAME_SEPARATOR + method.getScopeName()) + SCOPE_NAME_SEPARATOR + method.getName();
 		}
-		String code = ScriptEngine.docStripper.matcher(method.getDeclaration()).replaceFirst(functionAndName);
+		String code = ScriptEngine.extractFunction(method.getDeclaration(), functionAndName);
 
 		if (debugMode)
 		{
@@ -887,11 +887,12 @@ public class MobileExporter
 	{
 		this.solutionName = solutionName;
 	}
-	
+
 	/**
 	 * @return the outputFolder
 	 */
-	public File getOutputFolder() {
+	public File getOutputFolder()
+	{
 		return outputFolder;
 	}
 

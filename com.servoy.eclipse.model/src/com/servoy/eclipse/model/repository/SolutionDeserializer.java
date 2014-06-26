@@ -1007,6 +1007,7 @@ public class SolutionDeserializer
 			}
 
 
+			List<CallExpression> callExpressions = new ArrayList<CallExpression>();
 			List<VariableDeclaration> variables = new ArrayList<VariableDeclaration>();
 			List<FunctionStatement> functions = new ArrayList<FunctionStatement>();
 			final List<ConstStatement> constants = new ArrayList<ConstStatement>();
@@ -1023,6 +1024,10 @@ public class SolutionDeserializer
 					else if (exp instanceof FunctionStatement)
 					{
 						functions.add((FunctionStatement)exp);
+					}
+					else if (exp instanceof CallExpression)
+					{
+						callExpressions.add((CallExpression)exp);
 					}
 				}
 				else if (node instanceof ConstStatement)
@@ -1333,6 +1338,8 @@ public class SolutionDeserializer
 					}
 				}
 
+				commentString = insertCommentsAndStandAloneCallStements(commentString, script, variables, functions, callExpressions, field);
+
 				json.put(LINE_NUMBER_OFFSET_JSON_ATTRIBUTE, linenr);
 				json.put(COMMENT_JSON_ATTRIBUTE, commentString);
 				json.put(CHANGED_JSON_ATTRIBUTE, markAsChanged);
@@ -1381,17 +1388,14 @@ public class SolutionDeserializer
 				json.put(SolutionSerializer.PROP_NAME, function.getName().getName());
 
 				String source = fileContent.substring(function.sourceStart(), function.sourceEnd());
+				if ("".equals(comment) && (source.indexOf(".search") != -1 || source.indexOf("controller.loadAllRecords") != -1))
+				{
+					comment = "/**\n * @AllowToRunInFind\n */\n";
+				}
+				comment = insertCommentsAndStandAloneCallStements(comment, script, variables, functions, callExpressions, function);
 				if ("".equals(comment))
 				{
-					if (source.indexOf(".search") != -1 || source.indexOf("controller.loadAllRecords") != -1)
-					{
-						comment = "/**\n * @AllowToRunInFind\n */\n";
-						json.put("declaration", comment + source + '\n');
-					}
-					else
-					{
-						json.put("declaration", source + '\n');
-					}
+					json.put("declaration", source + '\n');
 				}
 				else
 				{
@@ -1433,6 +1437,76 @@ public class SolutionDeserializer
 			ServoyLog.logWarning("Javascript file '" + file + "' had a parsing error ", e);
 		}
 		return null;
+	}
+
+	private String insertCommentsAndStandAloneCallStements(String comment, Script script, List<VariableDeclaration> variables,
+		List<FunctionStatement> functions, List<CallExpression> callExpressions, ASTNode currentNode)
+	{
+		String commentString = comment;
+		List<Object> commentsAndCallExpressionsToAdd = new ArrayList<Object>();
+		outer : for (Comment scriptComment : script.getComments())
+		{
+			if (scriptComment.getText().startsWith(SolutionSerializer.SV_COMMENT_START)) continue;
+			if (currentNode.sourceStart() > scriptComment.sourceStart())
+			{
+				for (FunctionStatement function : functions)
+				{
+					// inner comment inside function
+					if (function.sourceStart() < scriptComment.sourceStart() && function.sourceEnd() > scriptComment.sourceStart()) continue outer;
+					// find if closer to comment
+					if (function != currentNode && function.sourceStart() > scriptComment.sourceStart() && function.sourceStart() < currentNode.sourceStart()) continue outer;
+				}
+				for (VariableDeclaration variable : variables)
+				{
+					// find if closer to comment
+					if (variable != currentNode && variable.sourceStart() > scriptComment.sourceStart() && variable.sourceStart() < currentNode.sourceStart()) continue outer;
+				}
+				//this variable is closest to comment
+				commentsAndCallExpressionsToAdd.add(scriptComment);
+			}
+		}
+		outer2 : for (CallExpression callExpression : callExpressions)
+		{
+			if (currentNode.sourceStart() > callExpression.sourceStart())
+			{
+				for (FunctionStatement function : functions)
+				{
+					// find if closer to call expression
+					if (function != currentNode && function.sourceStart() > callExpression.sourceStart() && function.sourceStart() < currentNode.sourceStart()) continue outer2;
+				}
+				for (VariableDeclaration variable : variables)
+				{
+					// find if closer to call expression
+					if (variable != currentNode && variable.sourceStart() > callExpression.sourceStart() && variable.sourceStart() < currentNode.sourceStart()) continue outer2;
+				}
+				//this variable is closest to comment
+				for (int i = 0; i < commentsAndCallExpressionsToAdd.size(); i++)
+				{
+					if (callExpression.sourceStart() < ((ASTNode)commentsAndCallExpressionsToAdd.get(i)).sourceStart())
+					{
+						commentsAndCallExpressionsToAdd.add(i, callExpression);
+						break;
+					}
+					else if (i == commentsAndCallExpressionsToAdd.size() - 1)
+					{
+						commentsAndCallExpressionsToAdd.add(callExpression);
+					}
+				}
+			}
+		}
+		for (int i = commentsAndCallExpressionsToAdd.size() - 1; i >= 0; i--)
+		{
+			Object commentOrCallExpression = commentsAndCallExpressionsToAdd.get(i);
+			if (commentOrCallExpression instanceof Comment)
+			{
+				commentString = ((Comment)commentsAndCallExpressionsToAdd.get(i)).getText() + "\n\n" + commentString;
+			}
+			else if (commentOrCallExpression instanceof CallExpression)
+			{
+				commentString = ((CallExpression)commentsAndCallExpressionsToAdd.get(i)).toString() + "\n" + commentString;
+			}
+		}
+		return commentString;
 	}
 
 	/**

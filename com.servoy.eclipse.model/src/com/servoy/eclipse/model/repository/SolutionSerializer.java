@@ -410,14 +410,14 @@ public class SolutionSerializer
 		catch (IOException e)
 		{
 			Solution s = (Solution)node.getAncestor(IRepository.SOLUTIONS);
-			throw new RepositoryException(
-				"Could not write object " + node + " to workspace directory " + fileAccess.getWorkspaceOSPath(s != null ? s.getName() : null), e);
+			throw new RepositoryException("Could not write object " + node + " to workspace directory " +
+				fileAccess.getWorkspaceOSPath(s != null ? s.getName() : null), e);
 		}
 		catch (JSONException e)
 		{
 			Solution s = (Solution)node.getAncestor(IRepository.SOLUTIONS);
-			throw new RepositoryException(
-				"Could not write object " + node + " to workspace directory " + fileAccess.getWorkspaceOSPath(s != null ? s.getName() : null), e);
+			throw new RepositoryException("Could not write object " + node + " to workspace directory " +
+				fileAccess.getWorkspaceOSPath(s != null ? s.getName() : null), e);
 		}
 	}
 
@@ -531,7 +531,20 @@ public class SolutionSerializer
 	{
 		if (persist instanceof ScriptVariable)
 		{
-			return getCommentImpl(persist, repository, ((ScriptVariable)persist).getComment(), userTemplate);
+			String comment = ((ScriptVariable)persist).getComment();
+			if (comment != null)
+			{
+				if (comment.indexOf(SV_COMMENT_START) >= 0)
+				{
+					comment = comment.substring(comment.indexOf(SV_COMMENT_START));
+				}
+				else
+				{
+					// new variable
+					comment = "";
+				}
+			}
+			return getCommentImpl(persist, repository, comment, userTemplate);
 		}
 		if (persist instanceof AbstractScriptProvider)
 		{
@@ -546,6 +559,15 @@ public class SolutionSerializer
 					int commentEnd = declaration.indexOf(SV_COMMENT_END, commentStart);
 					comment = declaration.substring(commentStart, commentEnd + 2);
 				}
+			}
+			if (comment != null && comment.indexOf(SV_COMMENT_START) >= 0)
+			{
+				comment = comment.substring(comment.indexOf(SV_COMMENT_START));
+			}
+			else
+			{
+				// new function
+				comment = "";
 			}
 			return getCommentImpl(persist, repository, comment, userTemplate);
 		}
@@ -768,9 +790,10 @@ public class SolutionSerializer
 	 */
 	private static void replacePropertiesTag(ServoyJSONObject obj, StringBuilder sb, String userTemplate, AbstractScriptProvider abstractScriptProvider)
 	{
-		if (sb.toString().trim().startsWith(SV_COMMENT_START))
+		if (sb.toString().trim().contains(SV_COMMENT_START))
 		{
-			int endComment = sb.indexOf("*/");
+			int startIndex = sb.indexOf(SV_COMMENT_START);
+			int endComment = sb.indexOf("*/", startIndex);
 			if (endComment == -1) return;
 			// just always replace the properties to be sure those are accurate. 
 			int index = sb.lastIndexOf(PROPERTIESKEY, endComment);
