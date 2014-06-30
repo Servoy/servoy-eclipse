@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         id="com.servoy.eclipse.exporter.application"
+         point="org.eclipse.core.runtime.applications">
+      <application
+            cardinality="singleton-global"
+            thread="main"
+            visible="true">
+         <run
+               class="com.servoy.eclipse.exporter.WorkspaceExporter">
+         </run>
+      </application>
+   </extension>
+   <extension
+         point="com.servoy.eclipse.model.modelProvider">
+      <provider
+            class="com.servoy.eclipse.exporter.ServoyModelProvider"
+            id="com.servoy.eclipse.exporter.modelProvider"
+            instance="exporter">
+      </provider>
+   </extension>
+
+</plugin>
