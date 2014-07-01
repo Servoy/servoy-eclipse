@@ -975,6 +975,11 @@ public class TypeCreator extends TypeCache
 				Map<String, PropertyDescription> properties = spec.getProperties();
 				for (PropertyDescription pd : properties.values())
 				{
+					if ("design".equals(pd.getScope()))
+					{
+						// skip design properties
+						continue;
+					}
 					String name = pd.getName();
 					// skip the default once added by servoy, see WebComponentPackage.getWebComponentDescriptions()
 					// and skip the dataprovider properties (those are not accesable through scripting)

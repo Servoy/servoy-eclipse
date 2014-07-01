@@ -95,6 +95,11 @@ public class WebComponentPropertySource extends PersistPropertySource
 
 		for (PropertyDescription desc : webComponentSpec.getProperties().values())
 		{
+			if (desc.getScope() != null && !"design".equals(desc.getScope()))
+			{
+				// only show design properties
+				continue;
+			}
 			PropertyDescriptor beanPropertyDescriptor = BEAN_PROPERTIES.get(desc.getName());
 			if (beanPropertyDescriptor != null)
 			{
