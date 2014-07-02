@@ -25,8 +25,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.property.types.ValuesPropertyType;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.BeanPropertyHandler;
@@ -108,7 +111,40 @@ public class WebComponentPropertySource extends PersistPropertySource
 			}
 			else
 			{
-				props.add(new WebComponentPropertyHandler(desc));
+				if (desc.getValues() != null && desc.getValues().size() > 0)
+				{
+					ValuesConfig config = new ValuesConfig();
+					if (!(desc.getValues().get(0) instanceof JSONObject))
+					{
+						config.setValues(desc.getValues().toArray(new Object[0]));
+						config.setEditable(true);
+					}
+					else
+					{
+						List<String> displayValues = new ArrayList<String>();
+						List<Object> realValues = new ArrayList<Object>();
+						for (Object jsonObject : desc.getValues())
+						{
+							if (jsonObject instanceof JSONObject)
+							{
+								String key = (String)((JSONObject)jsonObject).keys().next();
+								Object value = ((JSONObject)jsonObject).opt(key);
+								displayValues.add(key);
+								realValues.add(value);
+							}
+						}
+						config.setValues(realValues.toArray(), displayValues.toArray(new String[0]));
+					}
+					if (desc.getDefaultValue() != null)
+					{
+						config.addDefault(desc.getDefaultValue(), null);
+					}
+					props.add(new WebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config)));
+				}
+				else
+				{
+					props.add(new WebComponentPropertyHandler(desc));
+				}
 			}
 		}
 		for (PropertyDescription desc : webComponentSpec.getHandlers().values())
