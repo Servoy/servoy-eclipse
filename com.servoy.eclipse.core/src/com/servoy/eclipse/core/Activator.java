@@ -279,7 +279,7 @@ public class Activator extends Plugin
 			{
 				IPluginBaseClassLoaderProvider provider = (IPluginBaseClassLoaderProvider)extension.getConfigurationElements()[0].createExecutableExtension("class");
 				ss.setBaseClassloader(provider.getClassLoader());
-				return; //we support only one
+				break; //we support only one
 			}
 		}
 		else
