@@ -85,6 +85,7 @@ import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentApiDefinition;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebServiceSpecProvider;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.BooleanPropertyType;
 import org.sablo.specification.property.types.DatePropertyType;
@@ -352,6 +353,7 @@ public class TypeCreator extends TypeCache
 	private final ConcurrentMap<String, Class< ? >> classTypes = new ConcurrentHashMap<String, Class< ? >>();
 	private final ConcurrentMap<String, Class< ? >> anonymousClassTypes = new ConcurrentHashMap<String, Class< ? >>();
 	private final ConcurrentMap<String, String> wcTypeNames = new ConcurrentHashMap<String, String>();
+	private final ConcurrentMap<String, WebComponentSpecification> wcServices = new ConcurrentHashMap<String, WebComponentSpecification>();
 
 
 	private final ConcurrentMap<String, IScopeTypeCreator> scopeTypes = new ConcurrentHashMap<String, IScopeTypeCreator>();
@@ -968,49 +970,65 @@ public class TypeCreator extends TypeCache
 			WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(typeNameClassName);
 			if (spec != null)
 			{
-				Type type = TypeInfoModelFactory.eINSTANCE.createType();
-				type.setName(fullTypeName);
-				type.setKind(TypeKind.JAVA);
-				EList<Member> members = type.getMembers();
-				Map<String, PropertyDescription> properties = spec.getProperties();
-				for (PropertyDescription pd : properties.values())
-				{
-					if ("design".equals(pd.getScope()))
-					{
-						// skip design properties
-						continue;
-					}
-					String name = pd.getName();
-					// skip the default once added by servoy, see WebComponentPackage.getWebComponentDescriptions()
-					// and skip the dataprovider properties (those are not accesable through scripting)
-					if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && pd.getType() != DataproviderPropertyType.INSTANCE)
-					{
-						members.add(createProperty(name, false, getType(context, pd), "", null));
-					}
-				}
-				Map<String, WebComponentApiDefinition> apis = spec.getApiFunctions();
-				for (WebComponentApiDefinition api : apis.values())
-				{
-					Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
-					method.setName(api.getName());
-					method.setType(getType(context, api.getReturnType()));
-					EList<Parameter> parameters = method.getParameters();
-					for (PropertyDescription paramDesc : api.getParameters())
-					{
-						Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
-						param.setName(paramDesc.getName());
-						if (paramDesc.isOptional()) param.setKind(ParameterKind.OPTIONAL);
-						param.setType(getType(context, paramDesc));
-						parameters.add(param);
-
-					}
-
-					members.add(method);
-				}
-				return addType("WEB:COMPONENTS", type);
+				return createWebComponentType(context, fullTypeName, spec);
 			}
 		}
+		WebComponentSpecification webComponentSpecification = wcServices.get(typeNameClassName);
+		if (webComponentSpecification != null)
+		{
+			return createWebComponentType(context, fullTypeName, webComponentSpecification);
+		}
 		return null;
+	}
+
+	/**
+	 * @param context
+	 * @param fullTypeName
+	 * @param spec
+	 * @return
+	 */
+	private Type createWebComponentType(String context, String fullTypeName, WebComponentSpecification spec)
+	{
+		Type type = TypeInfoModelFactory.eINSTANCE.createType();
+		type.setName(fullTypeName);
+		type.setKind(TypeKind.JAVA);
+		EList<Member> members = type.getMembers();
+		Map<String, PropertyDescription> properties = spec.getProperties();
+		for (PropertyDescription pd : properties.values())
+		{
+			if ("design".equals(pd.getScope()))
+			{
+				// skip design properties
+				continue;
+			}
+			String name = pd.getName();
+			// skip the default once added by servoy, see WebComponentPackage.getWebComponentDescriptions()
+			// and skip the dataprovider properties (those are not accesable through scripting)
+			if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && pd.getType() != DataproviderPropertyType.INSTANCE)
+			{
+				members.add(createProperty(name, false, getType(context, pd), "", null));
+			}
+		}
+		Map<String, WebComponentApiDefinition> apis = spec.getApiFunctions();
+		for (WebComponentApiDefinition api : apis.values())
+		{
+			Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
+			method.setName(api.getName());
+			method.setType(getType(context, api.getReturnType()));
+			EList<Parameter> parameters = method.getParameters();
+			for (PropertyDescription paramDesc : api.getParameters())
+			{
+				Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
+				param.setName(paramDesc.getName());
+				if (paramDesc.isOptional()) param.setKind(ParameterKind.OPTIONAL);
+				param.setType(getType(context, paramDesc));
+				parameters.add(param);
+
+			}
+
+			members.add(method);
+		}
+		return addType("WEB:COMPONENTS", type);
 	}
 
 	/**
@@ -2632,6 +2650,20 @@ public class TypeCreator extends TypeCache
 					members.add(property);
 				}
 			}
+			if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType().supports(ClientSupport.ng))
+			{
+				WebComponentSpecification[] serviceSpecifications = WebServiceSpecProvider.getInstance().getWebServiceSpecifications();
+				for (WebComponentSpecification spec : serviceSpecifications)
+				{
+					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+					property.setName(spec.getName());
+					property.setReadOnly(true);
+					wcServices.put("WebService<" + spec.getName() + '>', spec);
+					property.setType(getTypeRef(context, "WebService<" + spec.getName() + '>'));
+					members.add(property);
+				}
+			}
+
 			// quickly add this one to the static types.
 			return addType(null, type);
 		}
