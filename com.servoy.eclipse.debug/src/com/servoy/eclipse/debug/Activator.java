@@ -109,35 +109,22 @@ public class Activator extends AbstractUIPlugin implements IStartup
 		}
 
 		registerResources();
-		((ServoyModel)ServoyModelFinder.getServoyModel()).addActiveProjectListener(new IActiveProjectListener()
-		{
-			public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
-			{
-				return true;
-			}
-
-			public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
-			{
-				// todo maybe fush on certain things?
-			}
-
-			public void activeProjectChanged(ServoyProject activeProject)
-			{
-				registerResources();
-			}
-		});
 
 		resourceChangeListener = new IResourceChangeListener()
 		{
 			@Override
 			public void resourceChanged(IResourceChangeEvent event)
 			{
-				IProject resourceProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject().getProject();
-				IResourceDelta delta = event.getDelta();
-				IResourceDelta[] affectedChildren = delta.getAffectedChildren();
-				if (shouldRefresh(resourceProject, affectedChildren))
+				ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
+				if (activeResourcesProject != null)
 				{
-					registerResources();
+					IProject resourceProject = activeResourcesProject.getProject();
+					IResourceDelta delta = event.getDelta();
+					IResourceDelta[] affectedChildren = delta.getAffectedChildren();
+					if (shouldRefresh(resourceProject, affectedChildren))
+					{
+						registerResources();
+					}
 				}
 			}
 
@@ -193,6 +180,23 @@ public class Activator extends AbstractUIPlugin implements IStartup
 			@Override
 			public IStatus run(IProgressMonitor monitor)
 			{
+				((ServoyModel)ServoyModelFinder.getServoyModel()).addActiveProjectListener(new IActiveProjectListener()
+				{
+					public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
+					{
+						return true;
+					}
+
+					public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
+					{
+						// todo maybe fush on certain things?
+					}
+
+					public void activeProjectChanged(ServoyProject activeProject)
+					{
+						registerResources();
+					}
+				});
 				ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
 				if (activeResourcesProject != null)
 				{
@@ -285,7 +289,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 	/**
 	 * Returns the shared instance
-	 * 
+	 *
 	 * @return the shared instance
 	 */
 	public static Activator getDefault()
