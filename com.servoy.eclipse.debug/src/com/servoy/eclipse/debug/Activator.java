@@ -90,7 +90,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.runtime.Plugins#start(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -109,23 +109,6 @@ public class Activator extends AbstractUIPlugin implements IStartup
 		}
 
 		registerResources();
-		((ServoyModel)ServoyModelFinder.getServoyModel()).addActiveProjectListener(new IActiveProjectListener()
-		{
-			public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
-			{
-				return true;
-			}
-
-			public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
-			{
-				// todo maybe fush on certain things?
-			}
-
-			public void activeProjectChanged(ServoyProject activeProject)
-			{
-				registerResources();
-			}
-		});
 
 		resourceChangeListener = new IResourceChangeListener()
 		{
@@ -193,6 +176,23 @@ public class Activator extends AbstractUIPlugin implements IStartup
 			@Override
 			public IStatus run(IProgressMonitor monitor)
 			{
+				((ServoyModel)ServoyModelFinder.getServoyModel()).addActiveProjectListener(new IActiveProjectListener()
+				{
+					public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
+					{
+						return true;
+					}
+
+					public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
+					{
+						// todo maybe fush on certain things?
+					}
+
+					public void activeProjectChanged(ServoyProject activeProject)
+					{
+						registerResources();
+					}
+				});
 				ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
 				if (activeResourcesProject != null)
 				{
@@ -260,7 +260,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -285,7 +285,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 	/**
 	 * Returns the shared instance
-	 * 
+	 *
 	 * @return the shared instance
 	 */
 	public static Activator getDefault()
