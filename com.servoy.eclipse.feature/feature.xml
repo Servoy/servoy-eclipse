@@ -6,11 +6,11 @@
       provider-name="Servoy"
       plugin="com.servoy.eclipse.core">
 
-   <description url="http://www.servoy.com/developer/description.html">
+   <description url="http://download.servoy.com/developer/description.html">
       Servoy Developer IDE
    </description>
 
-   <copyright url="http://www.servoy.com/developer/copyright.html">
+   <copyright url="http://download.servoy.com/developer/copyright.html">
       Copyright © 1997-2012 Servoy BV. All rights reserved.
 Visit http://www.servoy.com
 This computer program is protected by copyright law and international
@@ -21,7 +21,7 @@ portion of it, may result in severe civil and criminal penalties,
 and will be prosecuted to the maximum extent possible under law.
    </copyright>
 
-   <license url="http://www.servoy.com/developer/license.txt">
+   <license url="http://download.servoy.com/developer/license.txt">
       Servoy Binary Code License
 
 This binary code license (&quot;License&quot;) contains rights and restrictions associated with use of the accompanying Servoy software,datamodel and documentation (&quot;Software&quot;). Read the License carefully before using the Software. By using the Software you agree to the terms and conditions of this License.
@@ -672,8 +672,8 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
    </license>
 
    <url>
-      <update label="Servoy Update Site" url="http://www.servoy.com/developer/8xx_updates"/>
-      <discovery label="Servoy Update Site" url="http://www.servoy.com/developer/8xx_updates"/>
+      <update label="Servoy Update Site" url="http://download.servoy.com/developer/8xx_updates"/>
+      <discovery label="Servoy Update Site" url="http://download.servoy.com/developer/8xx_updates"/>
    </url>
 
    <includes
