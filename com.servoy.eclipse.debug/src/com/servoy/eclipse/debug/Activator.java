@@ -90,7 +90,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.core.runtime.Plugins#start(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -115,12 +115,16 @@ public class Activator extends AbstractUIPlugin implements IStartup
 			@Override
 			public void resourceChanged(IResourceChangeEvent event)
 			{
-				IProject resourceProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject().getProject();
-				IResourceDelta delta = event.getDelta();
-				IResourceDelta[] affectedChildren = delta.getAffectedChildren();
-				if (shouldRefresh(resourceProject, affectedChildren))
+				ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
+				if (activeResourcesProject != null)
 				{
-					registerResources();
+					IProject resourceProject = activeResourcesProject.getProject();
+					IResourceDelta delta = event.getDelta();
+					IResourceDelta[] affectedChildren = delta.getAffectedChildren();
+					if (shouldRefresh(resourceProject, affectedChildren))
+					{
+						registerResources();
+					}
 				}
 			}
 
@@ -260,7 +264,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
