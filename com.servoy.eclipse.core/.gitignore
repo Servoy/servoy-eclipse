@@ -4,3 +4,7 @@
 /build.xml
 /${buildDirectory}
 /@dot
+servoydoc_jslib.html
+servoydoc_jslib.warnings.txt
+servoydoc.html
+servoydoc.warnings.txt
