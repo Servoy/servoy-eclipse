@@ -13,11 +13,11 @@
   </listener>  
    
    <filter>
-      <filter-name>TemplateGeneratorFilter</filter-name>
-      <filter-class>com.servoy.j2db.server.ngclient.TemplateGeneratorFilter</filter-class>
+      <filter-name>NGClientEntryFilter</filter-name>
+      <filter-class>com.servoy.j2db.server.ngclient.NGClientEntryFilter</filter-class>
    </filter>
    <filter-mapping>
-      <filter-name>TemplateGeneratorFilter</filter-name>
+      <filter-name>NGClientEntryFilter</filter-name>
       <url-pattern>/solutions/*</url-pattern>
    </filter-mapping>  
      
