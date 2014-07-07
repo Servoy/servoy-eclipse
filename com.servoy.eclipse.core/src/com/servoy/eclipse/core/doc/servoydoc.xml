@@ -2199,17 +2199,17 @@ application.putClientProperty('templates.dir','green_skin');]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <deprecated><![CDATA[As of release 2.x, replaced by plugins.file#readTXTFile(Object[]).]]></deprecated>
         </function>
-        <function clientSupport="wc,sc" name="redo">
+        <function clientSupport="sc" name="redo">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Redo last action (if possible).]]></description>
+            <description clientSupport="sc"><![CDATA[Redo last action (if possible).]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Redo last action (if possible).]]></summary>
+            <summary clientSupport="sc"><![CDATA[Redo last action (if possible).]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[application.redo();]]></sample>
+            <sample clientSupport="sc"><![CDATA[application.redo();]]></sample>
           </samples>
         </function>
         <function clientSupport="ng,wc,sc" name="removeAllClientInfo">
@@ -3296,17 +3296,17 @@ application.sleep(3000);]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="wc,sc" name="undo">
+        <function clientSupport="sc" name="undo">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Undo last action (if possible).]]></description>
+            <description clientSupport="sc"><![CDATA[Undo last action (if possible).]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Undo last action (if possible).]]></summary>
+            <summary clientSupport="sc"><![CDATA[Undo last action (if possible).]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[application.undo();]]></sample>
+            <sample clientSupport="sc"><![CDATA[application.undo();]]></sample>
           </samples>
         </function>
         <function clientSupport="sc" name="updateUI">
@@ -18467,16 +18467,16 @@ form.onRecordSelection = form.newMethod('function onRecordSelection(event) { app
             <sample clientSupport="wc,sc"><![CDATA[form.onRender = form.newMethod('function onRender(event) { event.getElement().bgcolor = \'#00ff00\' }');]]></sample>
           </samples>
         </property>
-        <property clientSupport="wc,sc" name="onResize">
+        <property clientSupport="ng,wc,sc" name="onResize">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[The method that gets triggered when resize occurs.]]></description>
+            <description clientSupport="ng,wc,sc"><![CDATA[The method that gets triggered when resize occurs.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[The method that gets triggered when resize occurs.]]></summary>
+            <summary clientSupport="ng,wc,sc"><![CDATA[The method that gets triggered when resize occurs.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[form.onResize = form.newMethod('function onResize(event) { application.output("onResize intercepted on " + event.getFormName()); }');]]></sample>
+            <sample clientSupport="ng,wc,sc"><![CDATA[form.onResize = form.newMethod('function onResize(event) { application.output("onResize intercepted on " + event.getFormName()); }');]]></sample>
           </samples>
         </property>
         <property clientSupport="ng,wc,sc" name="onSearchCmd">
