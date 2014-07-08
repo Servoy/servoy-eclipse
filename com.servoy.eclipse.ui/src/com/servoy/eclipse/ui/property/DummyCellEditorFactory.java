@@ -22,7 +22,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 
 /**
  * CellEditorFactory that creates a dummy cell editor, this enables restore-default in the properties view menu.
@@ -48,7 +48,7 @@ public class DummyCellEditorFactory implements ICellEditorFactory
 			@Override
 			protected Control createControl(Composite parent)
 			{
-				return new Label(parent, SWT.NONE);
+				return new Text(parent, SWT.READ_ONLY);
 			}
 
 			@Override
@@ -68,7 +68,7 @@ public class DummyCellEditorFactory implements ICellEditorFactory
 				this.value = newValue;
 				if (getControl() != null && !getControl().isDisposed())
 				{
-					((Label)getControl()).setText(labelProvider.getText(newValue));
+					((Text)getControl()).setText(labelProvider.getText(newValue));
 				}
 			}
 		};
