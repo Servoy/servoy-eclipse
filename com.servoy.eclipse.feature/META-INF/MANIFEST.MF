@@ -1,1 +1,5 @@
-Comment: Dummy file to enable Plug-in Tools -> Create Ant Build File on feature project
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Servoy Eclipse Feature
+Bundle-SymbolicName: com.servoy.eclipse.feature
+Bundle-Vendor: Servoy
