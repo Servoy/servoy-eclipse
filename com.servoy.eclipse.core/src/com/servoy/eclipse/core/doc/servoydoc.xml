@@ -9308,7 +9308,7 @@ for (var i=0; i<allVarNames.length; i++)
         </property>
       </properties>
     </object>
-    <object clientSupport="mc,wc,sc" publicName="History" qualifiedName="com.servoy.j2db.FormManager$HistoryProvider" scriptingName="history">
+    <object clientSupport="ng,mc,wc,sc" publicName="History" qualifiedName="com.servoy.j2db.FormManager$HistoryProvider" scriptingName="history">
       <properties>
         <property clientSupport="ng,wc,sc" name="buttonsEnabled">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
@@ -9417,13 +9417,13 @@ var status = history.buttonsEnabled;]]></sample>
             </parameter>
           </parameters>
         </function>
-        <function clientSupport="mc,wc,sc" name="removeForm">
+        <function clientSupport="ng,mc,wc,sc" name="removeForm">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[Removes the named form item from the history stack (and from memory) if not currently shown.
+            <description clientSupport="ng,mc,wc,sc"><![CDATA[Removes the named form item from the history stack (and from memory) if not currently shown.
 Will return false when the form can't be removed, this can happen in certain situations: 
 1> The form is visible, 
 2> The form is executing a function (is actively used),
@@ -9431,10 +9431,10 @@ Will return false when the form can't be removed, this can happen in certain sit
 4> If the form has a separate foundset with edited records that can't be saved (for example autosave is false)]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="mc,wc,sc"><![CDATA[Removes the named form item from the history stack (and from memory) if not currently shown.]]></summary>
+            <summary clientSupport="ng,mc,wc,sc"><![CDATA[Removes the named form item from the history stack (and from memory) if not currently shown.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[var done = history.removeForm('mypreviousform');]]></sample>
+            <sample clientSupport="ng,mc,wc,sc"><![CDATA[var done = history.removeForm('mypreviousform');]]></sample>
           </samples>
           <parameters>
             <parameter name="formName" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">

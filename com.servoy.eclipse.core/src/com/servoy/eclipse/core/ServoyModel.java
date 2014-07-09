@@ -3538,6 +3538,9 @@ public class ServoyModel extends AbstractServoyModel
 
 			case SolutionMetaData.SMART_CLIENT_ONLY :
 				return ClientSupport.sc;
+
+			case SolutionMetaData.NG_CLIENT_ONLY :
+				return ClientSupport.ng;
 		}
 
 		return ClientSupport.Default;
