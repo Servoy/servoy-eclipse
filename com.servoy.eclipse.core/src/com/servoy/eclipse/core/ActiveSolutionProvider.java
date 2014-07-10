@@ -10,7 +10,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 
 public class ActiveSolutionProvider extends AbstractSourceProvider
 {
-
+	public static final String NG_STATE = "com.servoy.eclipse.core.ngClientState";
 	public static final String MOBILE_STATE = "com.servoy.eclipse.core.mobileState";
 	public static final String WEB_STATE = "com.servoy.eclipse.core.webClientState";
 	public static final String SMART_STATE = "com.servoy.eclipse.core.smartClientState";
@@ -33,6 +33,7 @@ public class ActiveSolutionProvider extends AbstractSourceProvider
 			@Override
 			public void activeProjectChanged(ServoyProject activeProject)
 			{
+				fireSourceChanged(ISources.WORKBENCH, NG_STATE, getNGVariableState());
 				fireSourceChanged(ISources.WORKBENCH, MOBILE_STATE, getMobileVariableState());
 				fireSourceChanged(ISources.WORKBENCH, WEB_STATE, getWebVariableState());
 				fireSourceChanged(ISources.WORKBENCH, SMART_STATE, getSmartClientVariableState());
@@ -60,6 +61,7 @@ public class ActiveSolutionProvider extends AbstractSourceProvider
 		map.put(MOBILE_STATE, getMobileVariableState());
 		map.put(WEB_STATE, getWebVariableState());
 		map.put(SMART_STATE, getWebVariableState());
+		map.put(NG_STATE, getNGVariableState());
 		return map;
 	}
 
@@ -86,11 +88,15 @@ public class ActiveSolutionProvider extends AbstractSourceProvider
 		return translateEnablement(sm.isActiveSolutionWeb());
 	}
 
+	private String getNGVariableState()
+	{
+		return translateEnablement(sm.isActiveSolutionNGClient());
+	}
 
 	@Override
 	public String[] getProvidedSourceNames()
 	{
-		return new String[] { MOBILE_STATE, WEB_STATE, SMART_STATE };
+		return new String[] { NG_STATE, MOBILE_STATE, WEB_STATE, SMART_STATE };
 	}
 
 }

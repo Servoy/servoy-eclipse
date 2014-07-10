@@ -3559,6 +3559,12 @@ public class ServoyModel extends AbstractServoyModel
 		else return false;
 	}
 
+	public boolean isActiveSolutionNGClient()
+	{
+		if (getActiveSolutionClientType() != null) return getActiveSolutionClientType().supports(ClientSupport.ng);
+		else return false;
+	}
+
 	/**
 	 * @return
 	 */

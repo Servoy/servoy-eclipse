@@ -401,7 +401,7 @@
               commandId="com.servoy.eclipse.ui.StartNGClient">
            <enabledWhen>
               <with
-                    variable="com.servoy.eclipse.core.webClientState">
+                    variable="com.servoy.eclipse.core.ngClientState">
                  <equals
                        value="ENABLED">
                  </equals>
