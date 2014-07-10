@@ -20,10 +20,7 @@
 	<property name="javacSource" value="1.3"/>
 	<property name="javacTarget" value="1.2"/>
 	<condition property="dir_bootclasspath" value="${java.home}/../Classes">
-		<and>
-			<os family="mac"/>
-			<available file="${java.home}/../Classes" type="dir"/>
-		</and>
+		<os family="mac"/>
 	</condition>
 	<property name="dir_bootclasspath" value="${java.home}/lib"/>
 	<path id="path_bootclasspath">
@@ -100,7 +97,7 @@
 		<antcall target="apitools.generation">
 			<param name="target.folder" value="${build.result.folder}"/>
 			<param name="projectLocation" value="${basedir}"/>
-			<param name="binary.folders" value="E:\GitHome\git\servoy-eclipse\com.servoy.eclipse.designer.rib"/>
+			<param name="binary.folders" value="C:\Users\Administrator\dev_v7xx_branch\com.servoy.eclipse.designer.rib"/>
 			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
 		</antcall>
 		<eclipse.gatherBundle 
@@ -123,7 +120,7 @@
 		<antcall target="apitools.generation">
 			<param name="target.folder" value="${destination.temp.folder}/com.servoy.eclipse.designer.rib_7.4.1.2028"/>
 			<param name="projectLocation" value="${basedir}"/>
-			<param name="binary.folders" value="E:\GitHome\git\servoy-eclipse\com.servoy.eclipse.designer.rib"/>
+			<param name="binary.folders" value="C:\Users\Administrator\dev_v7xx_branch\com.servoy.eclipse.designer.rib"/>
 			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
 		</antcall>
 	</target>
@@ -157,7 +154,7 @@
 	</target>
 
 	<target name="refresh" depends="init" if="eclipse.running" description="Refresh this folder.">
-		<eclipse.convertPath fileSystemPath="E:/GitHome/git/servoy-eclipse/com.servoy.eclipse.designer.rib" property="resourcePath"/>
+		<eclipse.convertPath fileSystemPath="C:/Users/Administrator/dev_v7xx_branch/com.servoy.eclipse.designer.rib" property="resourcePath"/>
 		<eclipse.refreshLocal resource="${resourcePath}" depth="infinite"/>
 	</target>
 
