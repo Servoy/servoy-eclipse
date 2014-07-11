@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.zip.GZIPOutputStream;
 
 import org.eclipse.core.resources.IFile;
@@ -37,8 +38,11 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.dltk.javascript.ast.Comment;
+import org.eclipse.dltk.javascript.ast.MultiLineComment;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.model.util.IFileAccess;
@@ -90,7 +94,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Writes repository (solution) objects from file system directories.
- * 
+ *
  * @author jblok
  */
 public class SolutionSerializer
@@ -201,7 +205,7 @@ public class SolutionSerializer
 	public static final String TYPEKEY = "@type";
 
 	/**
-	 * 
+	 *
 	 * @param parent
 	 * @param scriptPath file path to generate
 	 * @param repository
@@ -212,6 +216,14 @@ public class SolutionSerializer
 		final String userTemplate)
 	{
 		final Map<IPersist, Object> fileContents = new HashMap<IPersist, Object>(); // map(persist -> contents)
+		final TreeSet<Comment> comments = new TreeSet<Comment>(new Comparator<Comment>()
+		{
+			@Override
+			public int compare(Comment o1, Comment o2)
+			{
+				return o1.sourceStart() - o2.sourceStart();
+			}
+		});
 		parent.acceptVisitor(new IPersistVisitor()
 		{
 			public Object visit(IPersist p)
@@ -221,7 +233,31 @@ public class SolutionSerializer
 				if (p instanceof IScriptElement && scriptPath.equals(getScriptPath(p, false)))
 				{
 					Object val = serializePersist(p, true, repository, userTemplate);
-					if (val != null) fileContents.put(p, val);
+					if (val != null)
+					{
+						fileContents.put(p, val);
+						Object prop = ((AbstractBase)p).getCustomProperty(new String[] { SolutionDeserializer.EXTRA_DOC_COMMENTS });
+						if (prop != null)
+						{
+							try
+							{
+								JSONArray array = new JSONArray((String)prop);
+								for (int i = 0; i < array.length(); i++)
+								{
+									JSONObject jsonObject = array.getJSONObject(i);
+									MultiLineComment multiLineComment = new MultiLineComment();
+									multiLineComment.setStart(jsonObject.getInt("start"));
+									multiLineComment.setEnd(jsonObject.getInt("end"));
+									multiLineComment.setText(jsonObject.getString("text"));
+									comments.add(multiLineComment);
+								}
+							}
+							catch (JSONException e)
+							{
+								ServoyLog.logError(e);
+							}
+						}
+					}
 				}
 				return CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
 			}
@@ -237,14 +273,28 @@ public class SolutionSerializer
 			for (AbstractBase persist : persistArray)
 			{
 				if (sb.length() > 0) sb.append('\n');
-
 				Object content = fileContents.get(persist);
 				if (content instanceof CharSequence)
 				{
+					Comment nextComment = comments.first();
+					while (nextComment.sourceStart() <= (sb.length() + ((CharSequence)content).length()))
+					{
+						sb.append(nextComment.getText());
+						sb.append('\n');
+						sb.append('\n');
+						comments.remove(nextComment);
+						nextComment = comments.first();
+					}
 					sb.append(((CharSequence)content).toString());
 				}
 			}
 
+			for (Comment comment : comments)
+			{
+				sb.append(comment.getText());
+				sb.append('\n');
+				sb.append('\n');
+			}
 			return sb.toString();
 		}
 
@@ -274,6 +324,7 @@ public class SolutionSerializer
 			}
 
 			final Map<Pair<String, String>, Map<IPersist, Object>> projectContents = new HashMap<Pair<String, String>, Map<IPersist, Object>>();//filepathname -> map(persist -> contents)
+			final Map<Pair<String, String>, TreeSet<Comment>> projectComments = new HashMap<Pair<String, String>, TreeSet<Comment>>();//filepathname -> map(persist -> contents)
 			IPersist compositeWithItems = node;
 			while (compositeWithItems != null && SolutionSerializer.isCompositeItem(compositeWithItems))
 			{
@@ -299,7 +350,47 @@ public class SolutionSerializer
 						{
 							// only js-files have multiple top-level persists in 1 file.
 							Object val = serializePersist(p, !(p instanceof Solution), repository, null);
-							if (val != null) fileContents.put(p, val);
+							if (val != null)
+							{
+								if (p instanceof IScriptElement)
+								{
+									Object prop = ((AbstractBase)p).getCustomProperty(new String[] { SolutionDeserializer.EXTRA_DOC_COMMENTS });
+									if (prop != null)
+									{
+										TreeSet<Comment> comments = projectComments.get(filepathname);
+										if (comments == null)
+										{
+											comments = new TreeSet<Comment>(new Comparator<Comment>()
+											{
+												@Override
+												public int compare(Comment o1, Comment o2)
+												{
+													return o1.sourceStart() - o2.sourceStart();
+												}
+											});
+											projectComments.put(filepathname, comments);
+										}
+										try
+										{
+											JSONArray array = new JSONArray((String)prop);
+											for (int i = 0; i < array.length(); i++)
+											{
+												JSONObject jsonObject = array.getJSONObject(i);
+												MultiLineComment multiLineComment = new MultiLineComment();
+												multiLineComment.setStart(jsonObject.getInt("start"));
+												multiLineComment.setEnd(jsonObject.getInt("end"));
+												multiLineComment.setText(jsonObject.getString("text"));
+												comments.add(multiLineComment);
+											}
+										}
+										catch (JSONException e)
+										{
+											ServoyLog.logError(e);
+										}
+									}
+								}
+								fileContents.put(p, val);
+							}
 						}
 						else
 						{
@@ -328,18 +419,44 @@ public class SolutionSerializer
 
 				if (persistArray.length > 0)
 				{
+					TreeSet<Comment> comments = projectComments.get(filepathname);
 					OutputStream fos = fileAccess.getOutputStream(fileRelativePath);
+					int written = 0;
 					for (int i = 0; i < persistArray.length; i++)
 					{
 						Object content = fileContents.get(persistArray[i]);
 						if (content instanceof byte[])
 						{
+							written += ((byte[])content).length;
 							fos.write((byte[])content);
 						}
 						else if (content instanceof CharSequence)
 						{
+							if (comments != null && comments.size() > 0)
+							{
+								Comment first = comments.first();
+								while (first.sourceStart() <= (written + ((CharSequence)content).length()))
+								{
+									written += first.getText().length();
+									fos.write(first.getText().getBytes("UTF8"));
+									fos.write('\n');
+									fos.write('\n');
+									comments.remove(first);
+									first = comments.first();
+								}
+							}
+							written += ((CharSequence)content).length();
 							fos.write(content.toString().getBytes("UTF8"));
 							if (i < persistArray.length - 1) fos.write('\n');
+						}
+					}
+					if (comments != null && comments.size() > 0)
+					{
+						for (Comment comment : comments)
+						{
+							fos.write(comment.getText().getBytes("UTF8"));
+							fos.write('\n');
+							fos.write('\n');
 						}
 					}
 					fileAccess.closeOutputStream(fos);
@@ -592,6 +709,8 @@ public class SolutionSerializer
 			obj.remove(StaticContentSpecLoader.PROPERTY_SCOPENAME.getPropertyName());
 			obj.remove(SolutionDeserializer.COMMENT_JSON_ATTRIBUTE);
 			obj.remove(SolutionDeserializer.LINE_NUMBER_OFFSET_JSON_ATTRIBUTE);
+			// remove custom properties (extra comment part)
+			obj.remove("customProperties");
 			StringBuilder sb = new StringBuilder();
 			if (currentComment == null)
 			{
@@ -709,6 +828,8 @@ public class SolutionSerializer
 				obj.remove(StaticContentSpecLoader.PROPERTY_SCOPENAME.getPropertyName());
 				obj.remove(SolutionDeserializer.COMMENT_JSON_ATTRIBUTE);
 				obj.remove(SolutionDeserializer.LINE_NUMBER_OFFSET_JSON_ATTRIBUTE);
+				// remove custom properties (extra comment part)
+				obj.remove("customProperties");
 
 				if (persist instanceof AbstractScriptProvider)
 				{
@@ -795,7 +916,7 @@ public class SolutionSerializer
 			int startIndex = sb.indexOf(SV_COMMENT_START);
 			int endComment = sb.indexOf("*/", startIndex);
 			if (endComment == -1) return;
-			// just always replace the properties to be sure those are accurate. 
+			// just always replace the properties to be sure those are accurate.
 			int index = sb.lastIndexOf(PROPERTIESKEY, endComment);
 			if (index != -1)
 			{
@@ -897,7 +1018,7 @@ public class SolutionSerializer
 
 	/**
 	 * Get the persist values as map, when makeFlattened is true, the map will contain all super-propewrties as well.
-	 * 
+	 *
 	 * @param persist
 	 * @param repository
 	 * @param makeFlattened
@@ -1036,7 +1157,7 @@ public class SolutionSerializer
 
 	/**
 	 * Get the name of the file for a persist without the filename extension.
-	 * 
+	 *
 	 * @param persist
 	 * @param useOldName
 	 * @return
@@ -1251,7 +1372,7 @@ public class SolutionSerializer
 
 	/**
 	 * Get the file that contains the parent of the persist saved in file.
-	 * 
+	 *
 	 * @param file
 	 * @return
 	 */
@@ -1397,7 +1518,7 @@ public class SolutionSerializer
 
 	/**
 	 * check if the file is for the persist
-	 * 
+	 *
 	 */
 	public static boolean isPersistWorkspaceFile(IPersist persist, boolean useOldName, File file)
 	{
@@ -1471,7 +1592,7 @@ public class SolutionSerializer
 		Map<String, IServer> serverProxies = solution.getServerProxies();
 		IRepository oldRepository = solution.getRepository();
 		solution.setServerProxies(null);//clear
-		solution.setRepository(null);//clear		
+		solution.setRepository(null);//clear
 
 		//write solution into stream
 		ois.writeObject(solution);

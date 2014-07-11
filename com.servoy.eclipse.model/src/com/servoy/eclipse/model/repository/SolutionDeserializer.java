@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -120,7 +121,7 @@ import com.servoy.j2db.util.Utils;
 /**
  * Reads repository (solution) objects from file system directories. (since we don't want to store the parent uuid in each element, we assume a certain aspects
  * from serializer. (such as directory structure and file locations)
- * 
+ *
  * @author jblok
  */
 public class SolutionDeserializer
@@ -129,6 +130,7 @@ public class SolutionDeserializer
 	private static final String JS_TYPE_JSON_ATTRIBUTE = "jsType";
 	private static final String ARGUMENTS_JSON_ATTRIBUTE = "arguments";
 	static final String LINE_NUMBER_OFFSET_JSON_ATTRIBUTE = "lineNumberOffset";
+	static final String EXTRA_DOC_COMMENTS = "EXTRA_DOC_COMMENTS";
 	static final String COMMENT_JSON_ATTRIBUTE = "comment";
 	private static final String CHANGED_JSON_ATTRIBUTE = "changed";
 
@@ -226,7 +228,7 @@ public class SolutionDeserializer
 
 	/**
 	 * Update the solution
-	 * 
+	 *
 	 * @param solutionDir
 	 * @param solution
 	 * @param changedFiles flag objects listed in these files as changed
@@ -736,7 +738,7 @@ public class SolutionDeserializer
 	 * Check if file is a subdir-file and child elements are in the files list.
 	 * <p>
 	 * For example, file mysolution/forms/orders/button.obj is a sub-entry of mysolution/forms/orders.obj
-	 * 
+	 *
 	 * @param file
 	 * @param files
 	 * @return
@@ -762,7 +764,7 @@ public class SolutionDeserializer
 	 * Check if file is a form or tablenode file and child elements are in the files list.
 	 * <p>
 	 * For example, file mysolution/forms/orders.js is a sub-entry of mysolution/forms/orders.obj
-	 * 
+	 *
 	 * @param file
 	 * @param files
 	 * @return
@@ -836,7 +838,7 @@ public class SolutionDeserializer
 				// strange, type id is set, but different from what we would expect
 				if ((declaredTypeId == IRepository.METHODS || declaredTypeId == IRepository.SCRIPTCALCULATIONS) && !object.has("declaration"))
 				{
-					object.put("declaration", "/* declaration missing */"); // scripts are expected to have a declaration, 
+					object.put("declaration", "/* declaration missing */"); // scripts are expected to have a declaration,
 				}
 			}
 		}
@@ -1007,11 +1009,20 @@ public class SolutionDeserializer
 			}
 
 
-			List<CallExpression> callExpressions = new ArrayList<CallExpression>();
 			List<VariableDeclaration> variables = new ArrayList<VariableDeclaration>();
 			List<FunctionStatement> functions = new ArrayList<FunctionStatement>();
 			final List<ConstStatement> constants = new ArrayList<ConstStatement>();
 			List<Statement> statements = script.getStatements();
+			List<Comment> comments = script.getComments();
+			Set<Comment> sortedComments = new TreeSet<Comment>(new Comparator<Comment>()
+			{
+				@Override
+				public int compare(Comment o1, Comment o2)
+				{
+					return o1.start() - o2.start();
+				}
+			});
+			sortedComments.addAll(comments);
 			for (ASTNode node : statements)
 			{
 				if (node instanceof VoidExpression)
@@ -1019,15 +1030,33 @@ public class SolutionDeserializer
 					Expression exp = ((VoidExpression)node).getExpression();
 					if (exp instanceof VariableStatement)
 					{
-						variables.addAll(((VariableStatement)exp).getVariables());
+						Comment doc = exp.getDocumentation();
+						if (doc != null) sortedComments.remove(doc);
+						List<VariableDeclaration> vars = ((VariableStatement)exp).getVariables();
+						for (VariableDeclaration var : vars)
+						{
+							doc = var.getDocumentation();
+							if (doc != null) sortedComments.remove(doc);
+						}
+						Iterator<Comment> it = sortedComments.iterator();
+						while (it.hasNext())
+						{
+							doc = it.next();
+							if (doc.sourceStart() > exp.sourceStart() && doc.sourceEnd() < exp.sourceEnd()) it.remove();
+						}
+						variables.addAll(vars);
 					}
 					else if (exp instanceof FunctionStatement)
 					{
+						Comment doc = exp.getDocumentation();
+						if (doc != null) sortedComments.remove(doc);
+						Iterator<Comment> it = sortedComments.iterator();
+						while (it.hasNext())
+						{
+							doc = it.next();
+							if (doc.sourceStart() > exp.sourceStart() && doc.sourceEnd() < exp.sourceEnd()) it.remove();
+						}
 						functions.add((FunctionStatement)exp);
-					}
-					else if (exp instanceof CallExpression)
-					{
-						callExpressions.add((CallExpression)exp);
 					}
 				}
 				else if (node instanceof ConstStatement)
@@ -1338,8 +1367,6 @@ public class SolutionDeserializer
 					}
 				}
 
-				commentString = insertCommentsAndStandAloneCallStements(commentString, script, variables, functions, callExpressions, field);
-
 				json.put(LINE_NUMBER_OFFSET_JSON_ATTRIBUTE, linenr);
 				json.put(COMMENT_JSON_ATTRIBUTE, commentString);
 				json.put(CHANGED_JSON_ATTRIBUTE, markAsChanged);
@@ -1392,7 +1419,6 @@ public class SolutionDeserializer
 				{
 					comment = "/**\n * @AllowToRunInFind\n */\n";
 				}
-				comment = insertCommentsAndStandAloneCallStements(comment, script, variables, functions, callExpressions, function);
 				if ("".equals(comment))
 				{
 					json.put("declaration", source + '\n');
@@ -1428,6 +1454,19 @@ public class SolutionDeserializer
 				json.put(CHANGED_JSON_ATTRIBUTE, markAsChanged);
 				jsonObjects.add(json);
 			}
+			if (jsonObjects.size() > 0)
+			{
+				JSONArray array = new JSONArray();
+				for (Comment comment : sortedComments)
+				{
+					JSONObject object = new JSONObject();
+					object.put("start", comment.sourceStart());
+					object.put("end", comment.sourceEnd());
+					object.put("text", comment.getText());
+					array.put(object);
+				}
+				jsonObjects.get(0).put(EXTRA_DOC_COMMENTS, array.toString());
+			}
 			return jsonObjects;
 		}
 		catch (RuntimeException e)
@@ -1437,76 +1476,6 @@ public class SolutionDeserializer
 			ServoyLog.logWarning("Javascript file '" + file + "' had a parsing error ", e);
 		}
 		return null;
-	}
-
-	private String insertCommentsAndStandAloneCallStements(String comment, Script script, List<VariableDeclaration> variables,
-		List<FunctionStatement> functions, List<CallExpression> callExpressions, ASTNode currentNode)
-	{
-		String commentString = comment;
-		List<Object> commentsAndCallExpressionsToAdd = new ArrayList<Object>();
-		outer : for (Comment scriptComment : script.getComments())
-		{
-			if (scriptComment.getText().startsWith(SolutionSerializer.SV_COMMENT_START)) continue;
-			if (currentNode.sourceStart() > scriptComment.sourceStart())
-			{
-				for (FunctionStatement function : functions)
-				{
-					// inner comment inside function
-					if (function.sourceStart() < scriptComment.sourceStart() && function.sourceEnd() > scriptComment.sourceStart()) continue outer;
-					// find if closer to comment
-					if (function != currentNode && function.sourceStart() > scriptComment.sourceStart() && function.sourceStart() < currentNode.sourceStart()) continue outer;
-				}
-				for (VariableDeclaration variable : variables)
-				{
-					// find if closer to comment
-					if (variable != currentNode && variable.sourceStart() > scriptComment.sourceStart() && variable.sourceStart() < currentNode.sourceStart()) continue outer;
-				}
-				//this variable is closest to comment
-				commentsAndCallExpressionsToAdd.add(scriptComment);
-			}
-		}
-		outer2 : for (CallExpression callExpression : callExpressions)
-		{
-			if (currentNode.sourceStart() > callExpression.sourceStart())
-			{
-				for (FunctionStatement function : functions)
-				{
-					// find if closer to call expression
-					if (function != currentNode && function.sourceStart() > callExpression.sourceStart() && function.sourceStart() < currentNode.sourceStart()) continue outer2;
-				}
-				for (VariableDeclaration variable : variables)
-				{
-					// find if closer to call expression
-					if (variable != currentNode && variable.sourceStart() > callExpression.sourceStart() && variable.sourceStart() < currentNode.sourceStart()) continue outer2;
-				}
-				//this variable is closest to comment
-				for (int i = 0; i < commentsAndCallExpressionsToAdd.size(); i++)
-				{
-					if (callExpression.sourceStart() < ((ASTNode)commentsAndCallExpressionsToAdd.get(i)).sourceStart())
-					{
-						commentsAndCallExpressionsToAdd.add(i, callExpression);
-						break;
-					}
-					else if (i == commentsAndCallExpressionsToAdd.size() - 1)
-					{
-						commentsAndCallExpressionsToAdd.add(callExpression);
-					}
-				}
-			}
-		}
-		for (int i = commentsAndCallExpressionsToAdd.size() - 1; i >= 0; i--)
-		{
-			Object commentOrCallExpression = commentsAndCallExpressionsToAdd.get(i);
-			if (commentOrCallExpression instanceof Comment)
-			{
-				commentString = ((Comment)commentsAndCallExpressionsToAdd.get(i)).getText() + "\n\n" + commentString;
-			}
-			else if (commentOrCallExpression instanceof CallExpression)
-			{
-				commentString = ((CallExpression)commentsAndCallExpressionsToAdd.get(i)).toString() + "\n" + commentString;
-			}
-		}
-		return commentString;
 	}
 
 	/**
@@ -1555,7 +1524,7 @@ public class SolutionDeserializer
 
 	/**
 	 * Deserialize JSONObject obj into parent persist.
-	 * 
+	 *
 	 * @param repository
 	 * @param parent
 	 * @param persist_json_map
@@ -1921,19 +1890,15 @@ public class SolutionDeserializer
 				((AbstractBase)retval).resetUUID();
 				((ISupportExtendsID)retval).setExtendsID(((AbstractPersistFactory)repository).getElementIdForUUID(uuid));
 			}
+			if (obj.has(EXTRA_DOC_COMMENTS))
+			{
+				((AbstractBase)retval).putCustomProperty(new String[] { EXTRA_DOC_COMMENTS }, obj.get(EXTRA_DOC_COMMENTS));
+			}
 			if (useFilesForDirtyMark) handleChanged(obj, retval);
 		}
 	}
 
 	private static MethodArgument[] NULL = new MethodArgument[0];
-
-//	private static MethodArgument[] parseJSDocArguments(String doc)
-//	{
-//		MethodArgument[] arguments = NULL;
-//
-//
-//		return arguments;
-//	}
 
 	public static void setPersistValues(IDeveloperRepository repository, IPersist persist, JSONObject obj) throws RepositoryException, JSONException
 	{
