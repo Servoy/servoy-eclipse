@@ -197,9 +197,18 @@ function cleanHtml(e)
 	$(e).parent().append($(e).children().html())
 }
 
-function setLayoutSrc(src)
+function setLayoutSrc(src, callback)
 {
 	$("#canvas").html(src);
+	
+	$("#canvas").selectable({
+		filter: ".element",
+		selected: function(event, ui) {
+			
+			// send selected element ids
+			callback.setSelection($("#canvas .ui-selected").map(function(index,dom){return dom.id}).toArray())
+		}
+	});
 }
 
 function downloadLayoutSrc()
@@ -420,9 +429,10 @@ $(document).ready(function()
 		//set helper class
 		$("body").addClass("abs");
 
-		$("#canvas").selectable({
-			filter:".box",cancel:"a,span",delay:150 
-		});
+// Commented this out because it clashes with selectable set in setLayoutSrc()
+//		$("#canvas").selectable({
+//			filter:".box",cancel:"a,span",delay:150
+//		});
 
 		$("#canvas").droppable();
 	}

@@ -17,6 +17,7 @@
 package com.servoy.eclipse.designer.editor;
 
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.PositionConstants;
@@ -95,6 +96,17 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 		// Serve requests for rfb editor, TODO: somehow tell the editor which editorid to use
 		WebsocketSessionManager.addSession(EditorWebsocketSession.EDITOR_ENDPOINT, editorWebsocketSession = new EditorWebsocketSession("rfbtest"));
 		editorWebsocketSession.registerServerService("formeditor", new EditorServiceHandler(editorPart));
+	}
+
+
+//	public ISelectionProvider getSelectionProvider()
+//	{
+//		return getGraphicalViewer();
+//	}
+
+	public Map getEditPartRegistry()
+	{
+		return getGraphicalViewer().getEditPartRegistry();
 	}
 
 	@Override

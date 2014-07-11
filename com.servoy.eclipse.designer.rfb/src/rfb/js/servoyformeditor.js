@@ -4,11 +4,18 @@ angular.module('servoyEditorApp', ['webSocketModule'])
 }).factory("$editorService", function($rootScope, $webSocket, $log) {
 	
 	var wsSession = $webSocket.connect('editor', 'rfbtest') // TODO: use uuid of EditorWebsocketSession instance
+	
+	var callback = {
+		setSelection: function(sel) {
+			wsSession.callService('formeditor', 'setSelection', {selection: sel}, true)
+		}
+	}
+	
 	wsSession.onopen = function()
 	{
 		$log.info('Info: WebSocket connection opened.');
 		wsSession.callService('formeditor', 'getFormLayoutGrid').then(function(layoutGrid) {
-    		setLayoutSrc(layoutGrid)
+    		setLayoutSrc(layoutGrid, callback)
     	})
 	}
 	

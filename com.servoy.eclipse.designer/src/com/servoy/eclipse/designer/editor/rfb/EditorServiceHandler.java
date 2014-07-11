@@ -17,10 +17,18 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.widgets.Display;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.util.UUID;
 
 /** 
  * Handle requests from the rfb html editor.
@@ -31,6 +39,7 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 public class EditorServiceHandler implements IServerService
 {
 	private final BaseVisualFormEditor editorPart;
+
 
 	/**
 	 * @param editorPart
@@ -43,12 +52,37 @@ public class EditorServiceHandler implements IServerService
 	@Override
 	public Object executeMethod(String methodName, JSONObject args)
 	{
-		if ("getFormLayoutGrid".equals(methodName))
+		try
 		{
-			return editorPart.getForm().getLayoutGrid();
+			if ("getFormLayoutGrid".equals(methodName))
+			{
+				return editorPart.getForm().getLayoutGrid();
+			}
+
+			// void methods 
+			if ("setSelection".equals(methodName))
+			{
+				JSONArray json = args.getJSONArray("selection");
+				final Object[] selection = new Object[json.length()];
+				for (int i = 0; i < json.length(); i++)
+				{
+					selection[i] = ((BaseVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).getEditPartRegistry().get(
+						ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(UUID.fromString(json.getString(i))));
+				}
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						editorPart.getSite().getSelectionProvider().setSelection(new StructuredSelection(selection));
+					}
+				});
+			}
+		}
+		catch (JSONException e)
+		{
+			ServoyLog.logError(e);
 		}
 
 		return null;
 	}
-
 }
