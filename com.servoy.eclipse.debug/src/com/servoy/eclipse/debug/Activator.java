@@ -81,6 +81,8 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 	private final List<IWebResourceChangedListener> webResourceChangedListeners = Collections.synchronizedList(new ArrayList<IWebResourceChangedListener>());
 
+	private IActiveProjectListener activeProjectListenerForRegisteringResources;
+
 	/**
 	 * The constructor
 	 */
@@ -180,23 +182,28 @@ public class Activator extends AbstractUIPlugin implements IStartup
 			@Override
 			public IStatus run(IProgressMonitor monitor)
 			{
-				((ServoyModel)ServoyModelFinder.getServoyModel()).addActiveProjectListener(new IActiveProjectListener()
+				if (monitor != null) return Status.OK_STATUS;
+				if (activeProjectListenerForRegisteringResources == null)
 				{
-					public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
+					activeProjectListenerForRegisteringResources = new IActiveProjectListener()
 					{
-						return true;
-					}
+						public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
+						{
+							return true;
+						}
 
-					public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
-					{
-						// todo maybe fush on certain things?
-					}
+						public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
+						{
+							// todo maybe fush on certain things?
+						}
 
-					public void activeProjectChanged(ServoyProject activeProject)
-					{
-						registerResources();
-					}
-				});
+						public void activeProjectChanged(ServoyProject activeProject)
+						{
+							registerResources();
+						}
+					};
+					((ServoyModel)ServoyModelFinder.getServoyModel()).addActiveProjectListener(activeProjectListenerForRegisteringResources);
+				}
 				ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
 				if (activeResourcesProject != null)
 				{
@@ -272,6 +279,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 	{
 		ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
 		ResourceProvider.removeComponentResources(readers.values());
+		if (activeProjectListenerForRegisteringResources != null) ((ServoyModel)ServoyModelFinder.getServoyModel()).removeActiveProjectListener(activeProjectListenerForRegisteringResources);
 		plugin = null;
 		super.stop(context);
 		for (Image image : imageList)
