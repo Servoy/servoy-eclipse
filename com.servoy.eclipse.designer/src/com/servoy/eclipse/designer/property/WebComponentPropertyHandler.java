@@ -126,6 +126,14 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			return Integer.valueOf(-1);
 		}
 
+		if (value == null)
+		{
+			if (propertyDescription.getDefaultValue() != null)
+			{
+				return propertyDescription.getDefaultValue();
+			}
+			return propertyDescription.getType().defaultValue();
+		}
 		return value;
 	}
 

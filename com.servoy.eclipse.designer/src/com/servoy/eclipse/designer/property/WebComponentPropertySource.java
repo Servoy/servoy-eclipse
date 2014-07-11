@@ -117,7 +117,6 @@ public class WebComponentPropertySource extends PersistPropertySource
 					if (!(desc.getValues().get(0) instanceof JSONObject))
 					{
 						config.setValues(desc.getValues().toArray(new Object[0]));
-						config.setEditable(true);
 					}
 					else
 					{
@@ -139,7 +138,8 @@ public class WebComponentPropertySource extends PersistPropertySource
 					{
 						config.addDefault(desc.getDefaultValue(), null);
 					}
-					props.add(new WebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config)));
+					props.add(new WebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, false, config,
+						desc.getDefaultValue())));
 				}
 				else
 				{
