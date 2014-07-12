@@ -207,6 +207,11 @@ function setLayoutSrc(src, callback)
 			
 			// send selected element ids
 			callback.setSelection($("#canvas .ui-selected").map(function(index,dom){return dom.id}).toArray())
+		},
+		unselected: function(event, ui) {
+			
+			// send selected element ids
+			callback.setSelection($("#canvas .ui-selected").map(function(index,dom){return dom.id}).toArray())
 		}
 	});
 }

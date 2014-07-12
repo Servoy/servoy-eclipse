@@ -38,7 +38,7 @@ public class SelectionProviderAdapter implements ISelectionProvider
 	 * @see #fireSelectionChanged
 	 */
 	private final ListenerList selectionChangedListeners = new ListenerList();
-	private ISelection selection;
+	protected ISelection selection;
 
 	public void addSelectionChangedListener(ISelectionChangedListener listener)
 	{

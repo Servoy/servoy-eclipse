@@ -44,8 +44,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.ui.views.properties.PropertySheetPage;
-import org.sablo.websocket.IWebsocketSession;
-import org.sablo.websocket.WebsocketSessionManager;
 
 import com.servoy.eclipse.designer.actions.AlignmentSortPartsAction;
 import com.servoy.eclipse.designer.actions.DistributeAction;
@@ -64,8 +62,6 @@ import com.servoy.eclipse.designer.editor.commands.SameWidthAction;
 import com.servoy.eclipse.designer.editor.commands.SaveAsTemplateAction;
 import com.servoy.eclipse.designer.editor.commands.SetTabSequenceAction;
 import com.servoy.eclipse.designer.editor.commands.UngroupAction;
-import com.servoy.eclipse.designer.editor.rfb.EditorServiceHandler;
-import com.servoy.eclipse.designer.editor.rfb.EditorWebsocketSession;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.property.UndoablePropertySheetEntry;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -84,25 +80,13 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 	private ISelectionListener selectionChangedHandler;
 	private ISelection currentSelection;
 
-	private final IWebsocketSession editorWebsocketSession;
-
 	public BaseVisualFormEditorDesignPage(BaseVisualFormEditor editorPart)
 	{
 		this.editorPart = editorPart;
 		DefaultEditDomain editDomain = new DefaultEditDomain(editorPart);
 		editDomain.getCommandStack().addCommandStackListener(editorPart);
 		setEditDomain(editDomain);
-
-		// Serve requests for rfb editor, TODO: somehow tell the editor which editorid to use
-		WebsocketSessionManager.addSession(EditorWebsocketSession.EDITOR_ENDPOINT, editorWebsocketSession = new EditorWebsocketSession("rfbtest"));
-		editorWebsocketSession.registerServerService("formeditor", new EditorServiceHandler(editorPart));
 	}
-
-
-//	public ISelectionProvider getSelectionProvider()
-//	{
-//		return getGraphicalViewer();
-//	}
 
 	public Map getEditPartRegistry()
 	{
@@ -197,8 +181,11 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 		registry.registerAction(action);
 
 		action = createDeleteAction();
-		registry.registerAction(action);
-		getSelectionActions().add(action.getId());
+		if (action != null)
+		{
+			registry.registerAction(action);
+			getSelectionActions().add(action.getId());
+		}
 
 		action = new SaveAction(editorPart);
 		registry.registerAction(action);
@@ -416,12 +403,5 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 	protected PaletteRoot getPaletteRoot()
 	{
 		return null;
-	}
-
-	@Override
-	public void dispose()
-	{
-		super.dispose();
-		WebsocketSessionManager.removeSession(EditorWebsocketSession.EDITOR_ENDPOINT, editorWebsocketSession.getUuid());
 	}
 }

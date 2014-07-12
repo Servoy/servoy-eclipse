@@ -29,6 +29,7 @@ import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditorHtmlDesignPage;
+import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
 import com.servoy.eclipse.ui.editors.ITabbedEditor;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.j2db.persistence.Form;
@@ -129,6 +130,10 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 				return new MobileVisualFormEditorDesignPage(this);
 			}
 			return new MobileVisualFormEditorHtmlDesignPage(this);
+		}
+		if (new DesignerPreferences().getExperimentalFormEditor())
+		{
+			return new RfbVisualFormEditorDesignPage(this);
 		}
 		return new VisualFormEditorDesignPage(this);
 	}

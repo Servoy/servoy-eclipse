@@ -2,8 +2,8 @@ angular.module('servoyEditorApp', ['webSocketModule'])
 .controller("editorController", function($scope) {
 	
 }).factory("$editorService", function($rootScope, $webSocket, $log) {
-	
-	var wsSession = $webSocket.connect('editor', 'rfbtest') // TODO: use uuid of EditorWebsocketSession instance
+
+	var wsSession = $webSocket.connect('editor', getURLParameter('editorid'))
 	
 	var callback = {
 		setSelection: function(sel) {

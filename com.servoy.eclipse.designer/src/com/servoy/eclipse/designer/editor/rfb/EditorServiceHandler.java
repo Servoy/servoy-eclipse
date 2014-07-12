@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.json.JSONArray;
@@ -25,7 +26,6 @@ import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.util.UUID;
@@ -39,14 +39,12 @@ import com.servoy.j2db.util.UUID;
 public class EditorServiceHandler implements IServerService
 {
 	private final BaseVisualFormEditor editorPart;
+	private final ISelectionProvider selectionProvider;
 
-
-	/**
-	 * @param editorPart
-	 */
-	public EditorServiceHandler(BaseVisualFormEditor editorPart)
+	public EditorServiceHandler(BaseVisualFormEditor editorPart, ISelectionProvider selectionProvider)
 	{
 		this.editorPart = editorPart;
+		this.selectionProvider = selectionProvider;
 	}
 
 	@Override
@@ -66,14 +64,13 @@ public class EditorServiceHandler implements IServerService
 				final Object[] selection = new Object[json.length()];
 				for (int i = 0; i < json.length(); i++)
 				{
-					selection[i] = ((BaseVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).getEditPartRegistry().get(
-						ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(UUID.fromString(json.getString(i))));
+					selection[i] = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(UUID.fromString(json.getString(i)));
 				}
 				Display.getDefault().asyncExec(new Runnable()
 				{
 					public void run()
 					{
-						editorPart.getSite().getSelectionProvider().setSelection(new StructuredSelection(selection));
+						selectionProvider.setSelection(selection.length == 0 ? null : new StructuredSelection(selection));
 					}
 				});
 			}
