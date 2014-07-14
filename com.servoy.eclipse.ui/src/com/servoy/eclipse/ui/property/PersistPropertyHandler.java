@@ -510,7 +510,8 @@ public class PersistPropertyHandler extends BasePropertyHandler
 					boolean isMobile = form.getSolution().getSolutionMetaData().getSolutionType() == SolutionMetaData.MOBILE;
 					return new ListSelectCellEditor(parent, "Select navigator form", new FormContentProvider(flattenedEditingSolution, form),
 						formLabelProvider, new FormValueEditor(flattenedEditingSolution), false, new FormContentProvider.FormListOptions(
-							FormListOptions.FormListType.FORMS, Boolean.valueOf(isMobile), true, !isMobile, true), SWT.NONE, null, "navigatorFormDialog");
+							FormListOptions.FormListType.FORMS, Boolean.valueOf(isMobile), true, !isMobile, true), SWT.NONE, null, "navigatorFormDialog",
+						"Only forms that have navigator set to -none- and showInMenu deselected appear in this list.");
 				}
 			};
 			pd.setLabelProvider(formLabelProvider);

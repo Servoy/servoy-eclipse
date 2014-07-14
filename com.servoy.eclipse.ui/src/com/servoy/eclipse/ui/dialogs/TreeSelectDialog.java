@@ -66,8 +66,12 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 
 	private static final int LIST_WIDTH = 250;
 
+
+	private String optionalMessage = null;
+
 	private Button okButton;
 	private Button openButton;
+
 
 	private final Object input;
 
@@ -125,6 +129,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 		this.valueEditor = valueEditor;
 		this.allowEmptySelection = allowEmptySelection;
 		this.selection = selection;
+		this.optionalMessage = "";
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 	}
 
@@ -191,6 +196,8 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 
 		applyDialogFont(treeViewer);
 
+		createDialogMessage(composite);
+
 		// options area
 		Control optionsArea = null;
 		if (optionsAreaFactory != null)
@@ -225,6 +232,21 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 
 		// Return results.
 		return composite;
+	}
+
+	/**
+	 * @param composite
+	 */
+	private void createDialogMessage(Composite composite)
+	{
+		if (optionalMessage != null)
+		{
+			org.eclipse.swt.widgets.Label label = new org.eclipse.swt.widgets.Label(composite, SWT.WRAP);
+			label.setText(optionalMessage);
+			GridData spec = new GridData(GridData.FILL_HORIZONTAL);
+			spec.widthHint = LIST_WIDTH;
+			label.setLayoutData(spec);
+		}
 	}
 
 	/**
@@ -399,6 +421,11 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	public boolean isAllowEmptySelection()
 	{
 		return allowEmptySelection;
+	}
+
+	public void setOptionalMessage(String message)
+	{
+		this.optionalMessage = message;
 	}
 
 }
