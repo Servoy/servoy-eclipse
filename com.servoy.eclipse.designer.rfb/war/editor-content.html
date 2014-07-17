@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>SF Editor</title>
+		
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+		
+		<!-- Latest compiled and minified Bootstrap -->
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+		<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+		
+		<link href="form_default.css" rel="stylesheet"></link>
+		<link href="form.css" rel="stylesheet"></link>
+		
+		<script src="js/editor-content.js"></script>
+		
+		// generate all component js 
+		
+		<script>
+			var editorNode = parent.$(decodeURIComponent(location.search.split('id=')[1]))
+			
+			function renderDecorators() {
+				editorNode.trigger('renderDecorators.content')
+			}
+
+			$(document).ready(function(){
+				editorNode.trigger('documentReady.content', document)
+
+				/* 
+				 * Attach scroll listeners on all elements to update decorators when scrolling
+				 * Since scroll doesn't bubble, need to attach them directly on each element
+				 * Using a MutationObserver to also hook up listener to newly inserted nodes
+				 */
+				//Attach to initial content
+				$('.svelement, .drag-scroll-preventer').on('scroll', function() { //CHECKME: is assignment to .svelement enough? What about other non-svelement scrollable nodes?
+					renderDecorators()			
+				})
+				
+				function attachScrollListeners(mutations) {
+					for (var i = 0; i < mutations.length; i++) {
+						var addedNodes = mutations[i].addedNodes
+						for (var j = 0; j < addedNodes.length; j++) {
+							$(addedNodes[j]).on('scroll', function() {
+								renderDecorators()			
+							})					
+						}
+					}
+				}
+				var newNodeObserver = new MutationObserver(attachScrollListeners);
+				newNodeObserver.observe(document.querySelector('.sfcontent'), {
+					subtree: true,
+					childList: true
+				});
+				
+			})
+
+			$(window).resize(renderDecorators)
+			
+			//Prevent anchors being clicked
+			$(document).on('click', 'a', function(e){
+				e.preventDefault()
+			})
+		</script>
+		<style>
+			/* Prevent scrollbars due to dragged element */
+			body {
+				overflow: hidden
+			}
+			/* Force rendering layer, so DND's are always on top'*/
+			.sfcontent {
+				position: relative;
+				z-index: 1;
+				background-image: url("images/transparent.png")
+			}
+			
+		</style>
+	</head>
+	<body class="user-selection-off content">
+		<div class="drag-scroll-preventer max" style="overflow: auto; z-index: 0">
+			<!--Content-->
+			<div class="sfcontent" ng-include="formtemplate">
+			</div>
+		</div>
+	</body>
+</html>
