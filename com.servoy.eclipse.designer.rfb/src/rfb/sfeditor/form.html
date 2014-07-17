@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!--LiveReload-->
+		<script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')</script>
+		
+		<title>SF Editor</title>
+		
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+		
+		<!-- Latest compiled and minified Bootstrap -->
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+		<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+		
+		<link href="form_default.css" rel="stylesheet"></link>
+		<link href="form.css" rel="stylesheet"></link>
+		
+		<!-- Component dependancies -->
+		<script src="//cdn.jsdelivr.net/raphael/2.1.2/raphael-min.js"></script>
+		<script src="//cdn.jsdelivr.net/justgage/1.0.1/justgage.min.js"></script>
+		
+		<script src="componentFactory.js"></script>
+		<script>
+			var editorNode = parent.$(decodeURIComponent(location.search.split('id=')[1]))
+			
+			function renderDecorators() {
+				editorNode.trigger('renderDecorators.content')
+			}
+
+			$(document).ready(function(){
+				editorNode.trigger('documentReady.content', document)
+
+				/* 
+				 * Attach scroll listeners on all elements to update decorators when scrolling
+				 * Since scroll doesn't bubble, need to attach them directly on each element
+				 * Using a MutationObserver to also hook up listener to newly inserted nodes
+				 */
+				//Attach to initial content
+				$('.svelement, .drag-scroll-preventer').on('scroll', function() { //CHECKME: is assignment to .svelement enough? What about other non-svelement scrollable nodes?
+					renderDecorators()			
+				})
+				
+				function attachScrollListeners(mutations) {
+					for (var i = 0; i < mutations.length; i++) {
+						var addedNodes = mutations[i].addedNodes
+						for (var j = 0; j < addedNodes.length; j++) {
+							$(addedNodes[j]).on('scroll', function() {
+								renderDecorators()			
+							})					
+						}
+					}
+				}
+				var newNodeObserver = new MutationObserver(attachScrollListeners);
+				newNodeObserver.observe(document.querySelector('.sfcontent'), {
+					subtree: true,
+					childList: true
+				});
+				
+			})
+
+			$(window).resize(renderDecorators)
+			
+			//Prevent anchors being clicked
+			$(document).on('click', 'a', function(e){
+				e.preventDefault()
+			})
+		</script>
+		<style>
+			/* Prevent scrollbars due to dragged element */
+			body {
+				overflow: hidden
+			}
+			/* Force rendering layer, so DND's are always on top'*/
+			.sfcontent {
+				position: relative;
+				z-index: 1;
+				background-image: url("images/transparent.png")
+			}
+			
+		</style>
+	</head>
+	<body class="user-selection-off content">
+		<div class="drag-scroll-preventer max" style="overflow: auto; z-index: 0">
+			<!--Content-->
+			<div class="sfcontent">
+				<div id="content" class="svelement svcontainer" tabindex="0"> <!--tabindex set to 0 so editor has focus after being clicked, so keyboard events are registered-->
+					<div id="sv1" class="svelement svcontainer abs" style="z-index: 500">
+						<button id="sv2" class="svelement">TL + marginTop: 1em</button>
+						<button id="sv3" class="svelement" contenteditable
+							style="z-index: 10000000" spellcheck="false">
+							<span>Content Editable</span>
+						</button>
+						<button id="sv4" class="svelement">RB</button>
+						<div id="sv5" class="svelement">
+							<button class="replaced-element">TRBL</button>
+						</div>
+						<button id="sv6" class="svelement" style="margin: 10px">Margin
+							TRBL</button>
+						<p id="sv7" class="svelement">Hello</p>
+						<a id="sv8" class="svelement" href="http://servoy.com">Servoy rocks!</a>
+					</div>
+					<div id="9" class="svelement svcontainer vert">
+						<button id="10" class="svelement">Test1</button>
+						<button id="11" class="svelement" style="float: right">float: right</button>
+						<button id="12" class="svelement" style="float: left">float: left</button>
+						<button id="13" class="svelement" style="clear: both">clear: both</button>
+						<button id="14" class="svelement" style="margin: 0px auto">margin:
+							0px auto</button>
+					</div>
+					<div id="15" class="svelement svcontainer hor">
+						<button id="16" class="svelement">Test1</button>
+						<button id="17" class="svelement" style="margin-left: 10px">MarginLeft: 10px</button>
+						<button id="18" class="svelement">Test3</button>
+						<button id="19" class="svelement">Test4</button>
+						<button id="20" class="svelement">Test5</button>
+					</div>
+					<div class="container svelement svcontainer">
+						<!--Need to wrap Bootstrap Row in container to counter row's negavite margin-->
+						<div class="row svelement svcontainer">
+							<div id="sv21" class="col-md-4 svelement svcontainer">
+								<div id="22" class="svelement svcontainer hor">
+									<button id="23" class="svelement">Test1</button>
+									<button id="24" class="svelement">Test2</button>
+									<button id="25" class="svelement" style="position: relative; left: 20px">Relative left: 20px</button>
+									<button id="26" class="svelement">Test4</button>
+									<button id="27" class="svelement">Test5</button>
+								</div>
+							</div>
+							<div id="sv28" class="col-md-4 svelement svcontainer">
+								<div id="29" class="svelement svcontainer vert">
+									<button id="30" class="svelement">Test1</button>
+									<button id="31" class="svelement" style="float: right">Test2</button>
+									<button id="32" class="svelement" style="float: left">Test3</button>
+									<button id="33" class="svelement" style="clear: both">Test4</button>
+									<button id="34" class="svelement" style="margin: 0px auto">Test5</button>
+								</div>
+							</div>
+							<div id="sv35" class="col-md-4 svelement svcontainer">
+								<button id="36" class="svelement">Test1</button>
+								<button id="37" class="svelement">Test2</button>
+								<button id="38" class="svelement">Test3</button>
+								<button id="39" class="svelement">Test4</button>
+								<button id="40" class="svelement">Test5</button>
+							</div>
+						</div>
+					</div>
+					<div id="41" class="svelement svcontainer">
+						<div id="42" class="svelement svcontainer">
+							<div id="43" class="svelement svcontainer"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

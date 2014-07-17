@@ -1,0 +1,74 @@
+.abs {
+	background-color: yellow;
+}
+
+.vert {
+	background-color: orange
+}
+
+.hor {
+	background-color: red
+}
+
+#sv1 {
+	height: 300px;
+	overflow: auto;
+	overflow-x: scroll;
+	min-width: 350px
+}
+
+#sv2 {
+	top: 20px;
+	left: 20px;
+	margin-top: 1em
+}
+
+#sv3 {
+	top: 20px;
+	left: 768px
+}
+
+#sv4 {
+	bottom: 100px;
+	right: 100px
+}
+
+#sv5 {
+	position: absolute;
+	top: 220px;
+	left: 20px;
+	bottom: 40px;
+	right: 300px
+}
+
+#sv6 {
+	top: 100px;
+	left: 100px;
+	/*-webkit-transform: translate(10px, 10px)*/
+}
+
+#sv7 {
+	top: 100px;
+	left: 20px
+}
+
+#sv8 {
+	top: 350px;
+	left: 220px
+}
+
+.row .svcontainer {
+	background-color: inherit
+}
+
+.row #sv21 {
+	background-color: gray
+}
+
+.row #sv28 {
+	background-color: white
+}
+
+.row #sv35 {
+	background-color: lightgray
+}

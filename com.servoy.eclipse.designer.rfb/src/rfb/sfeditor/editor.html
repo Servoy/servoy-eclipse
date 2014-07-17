@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!-- 
+		TODO body shows scrollbars when starting a DND operation op a larger element near the bottom, as the node that follows the cursor is positioned so that the body height increases
+		
+		 -->
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		
+		<!--LiveReload-->
+		<script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')</script>
+		
+		<title>SF Editor</title>
+
+		<link href='http://fonts.googleapis.com/css?family=Roboto:400,100,300,500' rel='stylesheet' type='text/css'>
+		
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+		
+		<!-- Latest compiled and minified Bootstrap -->
+		<!-- TODO: do we want to use bootstrap in the editor as well? -->
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+		<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+		
+		<link href="editor.css" rel="stylesheet"></link>
+		<script src="editor.js"></script>
+		<link href="palette.css" rel="stylesheet"></link>
+		<script src="palette.js"></script>
+		<link href="outline.css" rel="stylesheet"></link>
+		<script src="outline.js"></script>
+		<script src="componentFactory.js"></script>
+		
+		
+		<script src="plugins/zoom.js"></script>
+		<script src="plugins/select.js"></script>
+		<link href="plugins/resize.css" rel="stylesheet"></link>
+		<link href="plugins/content-editable.css" rel="stylesheet"></link>
+		<script src="plugins/content-editable.js"></script>
+		<link href="plugins/margin-decorator.css" rel="stylesheet"></link>
+	</head>
+	<body>
+		<div id="editor">
+			<div class="sfeditor" tabindex="0">
+				<!-- 
+					TODO: everything inside the #editor div should be dynamically generated and inserted.
+					Take special care of making sure the ID query parameter on the src url of the iframe is set to the ID of the div in which the editor is instantiated
+				-->
+				<!-- Toolbar -->
+				<div class="toolbar-area">
+					<!-- Right aligned toolbars included in DOm first, to get desired toolbar overflow behavior -->
+					<div class="toolbar editor-options right-aligned">
+						<span class="toolbar-action" data-selected="true" data-action-type="highlight-empty-containers">
+							<span>
+								<img src="images/eye-24.png" style="width: 1.4em; height: 1.4em"/>
+							</span>
+						</span>
+						
+						<!-- 
+						<input type="checkbox" value="false" class="toolbar-action">Show Containers</input>
+						 -->
+						
+						<div class="toolbar-action zoom">
+							<span class="zoom-out" title="Zoom Out (Ctrl + -)">&#150;</span>
+							<input type="text" value="100%"></input>
+							<span class="zoom-in" title="Zoom In (Ctrl + +)">&#043;</span>
+						</div>
+					</div>
+					
+					<div class="toolbar viewing-dimensions right-aligned">
+						<span class="toolbar-action" title="Desktop" data-width="100%" data-height="100%">
+							<img src="images/imac-64x64.png" style="width: 1.4em; height: 1.4em"/>
+						</span>
+						<span class="toolbar-action" title="Tablet" data-width="768" data-height="1024">
+							<img src="images/ipad-landscape-portrait-64x64.png" style="width: 1.4em; height: 1.4em"/>	
+						</span>
+						<span class="toolbar-action" title="Phone" data-width="320" data-height="568">
+							<img src="images/iphone-portrait-64x64.png" style="width: 1.4em; height: 1.4em"/>
+						</span>
+						<span class="toolbar-action" title="400x400" data-width="400" data-height="400" style="font-size: 8px; line-height: 8px">400<br><span style="font-size: 6px; line-height: 6px">x</span><br>400
+						</span>
+						<span class="toolbar-action rotate">
+							<img src="images/gear-1-64x64.png" style="width: 1.4em; height: 1.4em"/>
+						</span>
+						<span class="toolbar-action">
+							<img src="images/gear-1-64x64.png" style="width: 1.4em; height: 1.4em"/>
+						</span>
+					</div>
+				
+					<div class="toolbar wizards first">
+						<span class="toolbar-action new-grid"></span>
+						<span class="toolbar-action new-fields"></span>
+						<span class="toolbar-action new-image"></span>
+						<span class="toolbar-action new-portal"></span>
+						<span class="toolbar-action new-tabbed-pane"></span>
+						<span class="toolbar-action new-split-pane"></span>
+						<span class="toolbar-action new-accordion-pane"></span>
+					</div>
+					
+					<div class="toolbar layering">
+						<span class="toolbar-action"></span>
+						<span class="toolbar-action"></span>
+						<span class="toolbar-action"></span>
+						<span class="toolbar-action"></span>
+					</div>
+		
+					<div class="toolbar grouping">
+						<span class="toolbar-action"></span>
+						<span class="toolbar-action"></span>
+					</div>
+		
+					<div class="toolbar alignment">
+						<span class="toolbar-action"></span>
+						<span class="toolbar-action"></span>
+						<span class="toolbar-action"></span>
+						<span class="toolbar-action"></span>
+						<span class="toolbar-action"></span>
+						<span class="toolbar-action"></span>
+					</div>
+		
+					<div class="toolbar distribute">
+						<span class="toolbar-action"></span>
+						<span class="toolbar-action"></span>
+						<span class="toolbar-action"></span>
+						<span class="toolbar-action"></span>
+						<span class="toolbar-action"></span>
+						<span class="toolbar-action"></span>
+					</div>
+		
+					<div class="toolbar same-dimensions">
+						<span class="toolbar-action"></span>
+						<span class="toolbar-action"></span>
+					</div>
+		
+					<div class="toolbar extra">
+						<span class="toolbar-action"></span>
+						<span class="toolbar-action"></span>
+						<span class="toolbar-action"></span>
+						<span class="toolbar-action"></span>
+						<span class="toolbar-action"></span>
+					</div>
+				</div>
+				
+				<!-- Outline -->
+				<div class="outline lhs-panel user-selection-off">
+					
+				</div>
+			
+				<!--Palette-->
+				<div class="palette lhs-panel user-selection-off" style="width: 200px">
+					<section>
+					    <h1 class="palette-heading">Form Components<span style="float: right">&#x2C5;</span></h1>
+					    <div>
+						    <ul>
+						        <li data-role="component" data-component-template="<button>button</button>"><img src="images/old/button.gif"/>Button</li>
+						        <li><img src="images/old/RADIO16.png"/>Radio</li>
+						        <li><img src="images/old/CHECKBOX16.png"/>Checkbox</li>
+								<li><img src="images/old/text.gif"/>Label</li>
+								<li><img src="images/old/textinput.png"/>Text Field</li>
+								<li><img src="images/old/TEXTAREA16.png"/>Text Area</li>
+								<li><img src="images/old/H1_C16.png"/>HTML Area</li>
+								<li><img src="images/old/doc_rtf.png"/>RTF Area</li>
+								<li><img src="images/old/password_field_16.png"/>Password Field</li>
+								<li><img src="images/old/Calendar_C16.png"/>Calendar Field</li>
+								<li><img src="images/old/IMG16.png"/>Media Field</li>
+								<li><img src="images/old/SELECT16.png"/>Combobox</li>
+								<li><img src="images/old/listbox.png"/>Listbox</li>
+								<li><img src="images/old/listbox.png"/>Multiselect Listbox</li>
+								<li><img src="images/old/bhdropdownlisticon.gif"/>TypeAhead</li>
+								<li><img src="images/old/spinner.png"/>Spinner</li>
+								<li><img src="images/old/portal.gif"/>Portal</li>
+						    </ul>
+						 </div>
+					</section>
+			
+					<section>
+					    <h1 class="palette-heading">Containers<span style="float: right">&#x2C5;</span></h1>
+					    <div>
+						    <ul>
+						        <li><img/>Horizontal Flow</li>
+						        <li><img/>Vertical Flow</li>
+						        <li><img/>Absolute Layout</li>
+								<li data-role="component" data-component-type="BOOTSTRAP.GRID"><img/>Grid Row</li>
+						        <li><img/>Tabbed Pane</li>
+						        <li><img/>Split Pane</li>
+						        <li><img/>Tabless Pane</li>
+						    </ul>
+						</div>
+					</section>
+			
+					<section>
+					    <h1 class="palette-heading">Charts<span style="float: right">&#x2C5;</span></h1>
+						<div>
+						    <ul>
+						        <li data-role="component" data-component-type="JUSTGAGE"><img/>Gauge</li>
+						    </ul>
+						</div>
+					</section>
+			
+					<section>
+					    <h1 class="palette-heading">HTML<span style="float: right">&#x2C5;</span></h1>
+						<div>
+						    <ul>
+						        <li><img/>DIV</li>
+						        <li><img/>SPAN</li>
+						        <li><img/>H1</li>
+						        <li><img/>P</li>
+						    </ul>
+						</div>
+					</section>
+				</div>
+			
+				<!--  Editor -->
+				<div class="content-area" tabindex="0">
+					<div class="content">
+						<!--Decorators-->
+						<div class="decorators">
+							<div class="glasspane max"></div>  <!-- z-index: 2 -->
+						</div>
+						
+						<div class="contentframe-overlay max"></div> <!-- z-index: 1 -->
+
+						<!-- Content -->
+						<!-- id query param should be dynamically set to the selector of the div in which the editor is placed -->
+						<iframe class="contentframe" src="form.html?id=%23editor"></iframe>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
