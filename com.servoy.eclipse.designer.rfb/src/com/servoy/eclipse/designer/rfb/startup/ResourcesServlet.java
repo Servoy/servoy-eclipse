@@ -34,7 +34,7 @@ public class ResourcesServlet extends HttpServlet
 			resp.setContentType(MimeTypes.guessContentTypeFromName(path));
 			InputStream in = uc.getInputStream();
 			ServletOutputStream outputStream = resp.getOutputStream();
-			Utils.streamCopy(in,outputStream);
+			Utils.streamCopy(in, outputStream);
 			outputStream.flush();
 			Utils.close(in);
 		}
