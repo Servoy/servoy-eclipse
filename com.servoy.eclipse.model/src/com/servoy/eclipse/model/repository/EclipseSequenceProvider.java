@@ -123,7 +123,7 @@ public class EclipseSequenceProvider implements ISequenceProvider
 				}
 
 				rs = dataServer.performCustomQuery(clientId, column.getTable().getServerName(), column.getTable().getName(), tid, new QueryCustomSelect(
-					maxSeqSelect), 0, -1);
+					maxSeqSelect), null, 0, -1);
 				String val = null;
 				if (rs.getRowCount() == 1)
 				{
