@@ -68,7 +68,7 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 	private static final String DASH = " - ";
 
 	IWorkbenchWindow window = null;
-	ServoyProject activeProject = null;
+	private ServoyProject activeProject = null;
 
 	/**
 	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
@@ -104,6 +104,7 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 		if (activeProject != null && activeProject.getSolution() != null)
 		{
 			final Solution solution = activeProject.getSolution();
+			if (this.activeProject != null && this.activeProject.getSolution().getID() != solution.getID()) configToLaunch = null;
 			this.activeProject = activeProject;
 			if (solution.getSolutionType() == SolutionMetaData.MOBILE) enabled = true;
 		}
