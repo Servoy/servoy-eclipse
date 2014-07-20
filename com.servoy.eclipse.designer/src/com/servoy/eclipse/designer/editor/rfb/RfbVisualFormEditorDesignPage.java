@@ -17,15 +17,16 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.gef.ui.actions.DeleteAction;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
@@ -33,6 +34,8 @@ import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.ISelectionListener;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.sablo.websocket.WebsocketSessionManager;
 
@@ -41,6 +44,7 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Design page for browser based rfb editor.
@@ -50,6 +54,7 @@ import com.servoy.j2db.persistence.IPersist;
  */
 public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage
 {
+	// for setting selection when clicked in editor
 	private final ISelectionProvider selectionProvider = new SelectionProviderAdapter()
 	{
 		@Override
@@ -57,6 +62,37 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		{
 			// select form if nothing else is selected
 			return selection == null ? new StructuredSelection(editorPart.getForm()) : selection;
+		}
+	};
+
+	// for updating selection in editor when selection changes in IDE
+	private final ISelectionListener selectionListener = new ISelectionListener()
+	{
+		@SuppressWarnings("unchecked")
+		@Override
+		public void selectionChanged(IWorkbenchPart part, ISelection selection)
+		{
+			final List<String> uuids = new ArrayList<String>();
+			if (selection instanceof IStructuredSelection)
+			{
+				for (Object sel : Utils.iterate(((IStructuredSelection)selection).iterator()))
+				{
+					IPersist persist = (IPersist)Platform.getAdapterManager().getAdapter(sel, IPersist.class);
+					if (persist != null)
+					{
+						uuids.add(persist.getUUID().toString());
+					}
+				}
+				editorWebsocketSession.getEventDispatcher().addEvent(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						editorWebsocketSession.getService(EditorWebsocketSession.EDITOR_SERVICE).executeAsyncServiceCall("updateSelection",
+							new Object[] { uuids.toArray() });
+					}
+				});
+			}
 		}
 	};
 
@@ -90,7 +126,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		String url = "http://localhost:8080/rfb/index.html?absolute_layout=true&editorid=" + editorId;
 		try
 		{
-			// System.err.println("Browser url: " + url);
+			ServoyLog.logInfo("Browser url for editor: " + url);
 			browser.setUrl(url);
 		}
 		catch (Exception e)
@@ -100,15 +136,6 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 
 		// install fake WebSocket in case browser does not support it
 		SwtWebsocket.installFakeWebSocket(browser);
-
-		selectionProvider.addSelectionChangedListener(new ISelectionChangedListener()
-		{
-			@Override
-			public void selectionChanged(SelectionChangedEvent event)
-			{
-				// TODO: set selection in browser
-			}
-		});
 	}
 
 	@Override
@@ -116,6 +143,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	{
 		super.init(site, input);
 		site.setSelectionProvider(selectionProvider);
+		getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(selectionListener);
 	}
 
 	@Override

@@ -216,6 +216,11 @@ function setLayoutSrc(src, callback)
 	});
 }
 
+function updateSelection(ids)
+{
+	$("#canvas .element").each(function(idv, elem) { $(elem)[ids.indexOf(elem.id) >= 0 ? 'addClass' : 'removeClass']('ui-selected') } )
+}
+
 function downloadLayoutSrc()
 {
 	var e="";

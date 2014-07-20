@@ -20,10 +20,11 @@ angular.module('servoyEditorApp', ['webSocketModule'])
 	}
 	
 	return {
-		// add service methods here
-		somemethod: function(somearg) {
-			return "did something"
+		updateSelection: function(ids) {
+			return updateSelection(ids)
 		}
+	
+	// add more service methods here
 	}
 })
 .run(function($editorService) {

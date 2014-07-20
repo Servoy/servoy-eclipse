@@ -18,7 +18,10 @@
 package com.servoy.eclipse.designer.editor.rfb;
 
 import org.json.JSONObject;
+import org.sablo.specification.WebComponentSpecification;
 import org.sablo.websocket.BaseWebsocketSession;
+import org.sablo.websocket.IClientService;
+import org.sablo.websocket.impl.ClientService;
 
 /**
  * Handle communication with a remote rfb form editor.
@@ -29,6 +32,9 @@ import org.sablo.websocket.BaseWebsocketSession;
 public class EditorWebsocketSession extends BaseWebsocketSession
 {
 	public static final String EDITOR_ENDPOINT = "editor";
+	public static final String EDITOR_SERVICE = "$editorService";
+
+	private static final WebComponentSpecification EDITOR_SERVICE_SPECIFICATION = new WebComponentSpecification(EDITOR_SERVICE, "", EDITOR_SERVICE, "", null);
 
 	public EditorWebsocketSession(String uuid)
 	{
@@ -45,5 +51,15 @@ public class EditorWebsocketSession extends BaseWebsocketSession
 	@Override
 	public void handleMessage(JSONObject obj)
 	{
+	}
+
+	@Override
+	protected IClientService createClientService(String name)
+	{
+		if (EDITOR_SERVICE.equals(name))
+		{
+			return new ClientService(name, EDITOR_SERVICE_SPECIFICATION);
+		}
+		return super.createClientService(name);
 	}
 }
