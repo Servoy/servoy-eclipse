@@ -1,27 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="editor" ng-controller="MainController">
 	<head>
 		<!-- 
 		TODO body shows scrollbars when starting a DND operation op a larger element near the bottom, as the node that follows the cursor is positioned so that the body height increases
 		 -->
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 		
-		<title>SF Editor</title>
+		<title>RFB Editor</title>
 
-		<link href='http://fonts.googleapis.com/css?family=Roboto:400,100,300,500' rel='stylesheet' type='text/css'>
+		<!-- <link href='http://fonts.googleapis.com/css?family=Roboto:400,100,300,500' rel='stylesheet' type='text/css'> -->
 		
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+		<script src="js/libs/jquery-1.11.1.js"></script>
+		<script src="js/libs/angular.js"></script>
 		
-		<!-- Latest compiled and minified Bootstrap -->
 		<!-- TODO: do we want to use bootstrap in the editor as well? -->
-		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-		<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
 		
 		<!-- <link href="editor.css" rel="stylesheet"></link>-->
 		<script src="js/editor.js"></script>
 		<!-- <link href="palette.css" rel="stylesheet"></link>-->
 		<script src="js/palette.js"></script>
+		<script src="js/toolbar.js"></script>
 		
+		<script src="js/modules/allignment.js"></script>
 		<script src="js/modules/mouseselection.js"></script>
 		
 	</head>

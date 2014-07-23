@@ -1,4 +1,4 @@
-angular.module('mouseselection',['editor']).run($editor){
+angular.module('mouseselection',['editor']).run(function($editor){
 	
 	function onmousedown(event) {
 		$editor.setSelection(calculatedSelection)

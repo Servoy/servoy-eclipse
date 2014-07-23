@@ -1,4 +1,5 @@
-angular.module('editor').factory("$editor",function($rootScope, EDITOR_EVENTS) {
+angular.module('editor', ['palette','toolbar'])
+  .factory("$editor",function($rootScope, EDITOR_EVENTS) {
 	var selection = [];
 	
 	function fireSelectionChanged(){
@@ -48,7 +49,7 @@ angular.module('editor').factory("$editor",function($rootScope, EDITOR_EVENTS) {
 			Array.prototype.push.call(this.selection, node)
 			
 			fireSelectionChanged()
-		}
+		},
 		
 		registerDOMEvent:function(eventType, target,callback) {
 			
@@ -63,4 +64,6 @@ angular.module('editor').factory("$editor",function($rootScope, EDITOR_EVENTS) {
 	}
 }).value("EDITOR_EVENTS", {
     SELECTION_CHANGED : "SELECTION_CHANGED"
+}).controller("MainController", function($scope) {
+	
 });

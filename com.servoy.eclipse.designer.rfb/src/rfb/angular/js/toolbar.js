@@ -1,7 +1,14 @@
-angular.module("toolbar").directive("toolbar", function($scope,$toolbar){
-	
-	$scope.buttons = $toolbar.getButtons();
-	
+angular.module("toolbar",[]).directive("toolbar", function(){
+	return {
+	      restrict: 'E',
+	      transclude: true,
+	      scope: {},
+	      controller: function($scope, $element, $attrs,$toolbar) {
+	    	 
+	      },
+	      templateUrl: 'templates/toolbar.html',
+	      replace: true
+	    };
 	
 }).factory("$toolbar", function(){
 	var buttons = [];
@@ -11,7 +18,7 @@ angular.module("toolbar").directive("toolbar", function($scope,$toolbar){
 			buttons.push(buttonState);
 		}
 	}
-}).values("CATEGORIES", {
+}).value("CATEGORIES", {
 	EDITOR: 1,
 	ELEMENTS: 2,
 	FORM: 3

@@ -1,20 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="editorContent" ng-controller="MainController">
 	<head>
-		<title>SF Editor</title>
-		
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+		<title>RFB Editor</title>
 		
 		<!-- Latest compiled and minified Bootstrap -->
-		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-		<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+		<link rel="stylesheet" href="js/libs/bootstrap/css/bootstrap.min.css">
 		
-		<link href="form_default.css" rel="stylesheet"></link>
-		<link href="form.css" rel="stylesheet"></link>
-		
+		<script src="js/libs/jquery-1.11.1.js"></script>
+		<script src="js/libs/angular.js"></script>
 		<script src="js/editor-content.js"></script>
 		
-		// generate all component js 
+		<!-- generate all component js --> 
 		
 		<script>
 			var editorNode = parent.$(decodeURIComponent(location.search.split('id=')[1]))
@@ -32,6 +28,7 @@
 				 * Using a MutationObserver to also hook up listener to newly inserted nodes
 				 */
 				//Attach to initial content
+/* TODO is this needed this scrolling, if so then this should work the angular way because .sfcontent is not there yet.
 				$('.svelement, .drag-scroll-preventer').on('scroll', function() { //CHECKME: is assignment to .svelement enough? What about other non-svelement scrollable nodes?
 					renderDecorators()			
 				})
@@ -51,7 +48,7 @@
 					subtree: true,
 					childList: true
 				});
-				
+*/				
 			})
 
 			$(window).resize(renderDecorators)

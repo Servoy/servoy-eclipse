@@ -1,4 +1,4 @@
-angular.module('allignment',['toolbar','editor']).run($rootScope,$toolbar, EDITOR_EVENTS){
+angular.module('allignment',['toolbar','editor']).run(function($rootScope,$toolbar, EDITOR_EVENTS){
 	var buttons = [{
 		text: "Left Align",
 		enabled: false,
