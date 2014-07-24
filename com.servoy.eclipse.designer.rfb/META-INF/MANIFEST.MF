@@ -6,7 +6,8 @@ Bundle-Version: 8.0.0.3002
 Bundle-Vendor: Servoy
 Require-Bundle: org.apache.tomcat;bundle-version="7.0.52",
  javax.servlet;bundle-version="3.0.0",
- servoy_shared
+ servoy_shared,
+ sablo
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.osgi.framework

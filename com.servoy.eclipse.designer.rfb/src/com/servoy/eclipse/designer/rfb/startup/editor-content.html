@@ -1,19 +1,46 @@
 <!DOCTYPE html>
 <html ng-app="editorContent" ng-controller="MainController">
 	<head>
+		<base href="/">
 		<title>RFB Editor</title>
 		
-		<!-- Latest compiled and minified Bootstrap -->
-		<link rel="stylesheet" href="js/libs/bootstrap/css/bootstrap.min.css">
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css"/>
+		<link rel="stylesheet" href="css/ng-grid.css"/>
+		<link rel="stylesheet" href="js/bootstrap-window/css/bootstrap-window.css"/>
 		
-		<script src="js/libs/jquery-1.11.1.js"></script>
-		<script src="js/libs/angular.js"></script>
-		<script src="js/editor-content.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.11/angular.js"></script>
+
+		<script src="rfb/angular/js/editor-content.js"></script>
 		
 		<!-- generate all component js --> 
+				<script src="js/angular-webstorage.js"></script>
+		<script src="js/angularui/ui-bootstrap-tpls-0.10.0.js"></script>
+		<script src="js/angularui/ng-grid-2.0.7.debug.js"></script>
+		<script src="js/numeral.js"></script>
+		<script src="js/angular-file-upload/dist/angular-file-upload.min.js"></script>
+		<script src="js/bootstrap-window/js/Window.js"></script>    <!-- TODO replace these with bootstrap-window.min.js --> 
+		<script src="js/bootstrap-window/js/WindowManager.js"></script>	<!-- see ^ -->
+		<script src="js/bindonce.js"></script>	
+		
+		<!-- base servoy libraries -->
+		<link rel="stylesheet" href="css/servoy.css"/>
+		<script src="js/servoy.js"></script>
+		<script src="js/servoyWindowManager.js"></script>
+		<script src="js/servoyformat.js"></script>
+		<script src="js/servoytooltip.js"></script>
+		<script src="js/fileupload.js"></script>
+		<script src="js/servoy-components.js"></script>
+		<script src="js/websocket.js"></script>
+		<script src="js/servoy_app.js"></script>
+		<script src="js/jquery.maskedinput.js"></script>
+
 		
 		<script>
-			var editorNode = parent.$(decodeURIComponent(location.search.split('id=')[1]))
+			function getURLParameter(name) {
+				return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null
+			}
+			var editorNode = parent.$(decodeURIComponent(getURLParameter('id')))
 			
 			function renderDecorators() {
 				editorNode.trigger('renderDecorators.content')
@@ -75,7 +102,7 @@
 	<body class="user-selection-off content">
 		<div class="drag-scroll-preventer max" style="overflow: auto; z-index: 0">
 			<!--Content-->
-			<div class="sfcontent" ng-include="formtemplate">
+			<div class="sfcontent" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px;" ng-include="formtemplate">
 			</div>
 		</div>
 	</body>

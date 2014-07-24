@@ -15,7 +15,7 @@
 		
 		<!-- TODO: do we want to use bootstrap in the editor as well? -->
 		
-		<!-- <link href="editor.css" rel="stylesheet"></link>-->
+		<link href="editor.css" rel="stylesheet"></link>
 		<script src="js/editor.js"></script>
 		<!-- <link href="palette.css" rel="stylesheet"></link>-->
 		<script src="js/palette.js"></script>
@@ -23,7 +23,6 @@
 		
 		<script src="js/modules/allignment.js"></script>
 		<script src="js/modules/mouseselection.js"></script>
-		
 	</head>
 	<body>
 		<div id="editor">
@@ -50,7 +49,7 @@
 
 						<!-- Content -->
 						<!-- id query param should be dynamically set to the selector of the div in which the editor is placed -->
-						<iframe class="contentframe" src="editor-content.html?id=%23editor"></iframe>
+						<iframe class="contentframe" ng-src="{{contentframe}}"></iframe>
 					</div>
 				</div>
 			</div>

@@ -21,6 +21,7 @@ public class ServicesProvider implements IServicesProvider
 		{
 			HashSet<Class< ? >> set = new HashSet<Class< ? >>();
 			set.add(ResourcesServlet.class);
+			set.add(EditorContentFilter.class);
 			return set;
 		}
 		return null;

@@ -64,6 +64,9 @@ angular.module('editor', ['palette','toolbar'])
 	}
 }).value("EDITOR_EVENTS", {
     SELECTION_CHANGED : "SELECTION_CHANGED"
-}).controller("MainController", function($scope) {
-	
+}).controller("MainController", function($scope,$window) {
+	function getURLParameter(name) {
+		return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec($window.location.search)||[,""])[1].replace(/\+/g, '%20'))||null
+	}
+	$scope.contentframe = "editor-content.html?id=%23editor&f=" + getURLParameter("f") +"&s=" + getURLParameter("s");
 });
