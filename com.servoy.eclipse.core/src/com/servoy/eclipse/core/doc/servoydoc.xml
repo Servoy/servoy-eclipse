@@ -6270,15 +6270,16 @@ databaseManager.saveData();
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
+            <argumentType typecode="java.lang.Boolean"/>
             <argumentType typecode="java.lang.Number"/>
+            <argumentType typecode="[I"/>
+            <argumentType typecode="[Ljava.lang.String;"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[datasource containing the results of the query or null if the parameters are wrong.]]></return>
           <descriptions>
             <description clientSupport="ng,wc,sc"><![CDATA[Performs a query and saves the result in a datasource.
 Will throw an exception if anything went wrong when executing the query.
-Column types in the datasource are inferred from the query result or can be explicitly specified.
-
-Using this variation of createDataSourceByQuery any Tablefilter on the involved tables will be taken into account.]]></description>
+Column types in the datasource are inferred from the query result or can be explicitly specified.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="ng,wc,sc"><![CDATA[Performs a query and saves the result in a datasource.]]></summary>
@@ -6287,10 +6288,63 @@ Using this variation of createDataSourceByQuery any Tablefilter on the involved 
             <sample clientSupport="ng,wc,sc"><![CDATA[// select customer data for order 1234
 /** @type {QBSelect<db:/example_data/customers>} */
 var q = databaseManager.createSelect("db:/example_data/customers");
-q.result.add(q.columns.address).add(q.columns.city).add(q.columns.country);
+q.result.add(q.columns.customer_id).add(q.columns.city).add(q.columns.country);
 q.where.add(q.joins.customers_to_orders.columns.orderid.eq(1234));
-var uri = databaseManager.createDataSourceByQuery('mydata', q, 999);
-//var uri = databaseManager.createDataSourceByQuery('mydata', q, 999, [JSColumn.TEXT, JSColumn.TEXT, JSColumn.TEXT]);
+var uri = databaseManager.createDataSourceByQuery('mydata', q, true, 999, null, ['customer_id']);
+//var uri = databaseManager.createDataSourceByQuery('mydata', q, true, 999, [JSColumn.TEXT, JSColumn.TEXT, JSColumn.TEXT], ['customer_id']);
+
+// the uri can be used to create a form using solution model
+var myForm = solutionModel.newForm('newForm', uri, 'myStyleName', false, 800, 600);
+myForm.newTextField('city', 140, 20, 140,20);
+
+// the uri can be used to acces a foundset directly
+var fs = databaseManager.getFoundSet(uri);
+fs.loadAllRecords();]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[Data source name]]></description>
+            </parameter>
+            <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
+              <description><![CDATA[The query builder to be executed.]]></description>
+            </parameter>
+            <parameter name="useTableFilters" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
+              <description><![CDATA[use table filters (default true).]]></description>
+            </parameter>
+            <parameter name="max_returned_rows" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
+              <description><![CDATA[The maximum number of rows returned by the query.]]></description>
+            </parameter>
+            <parameter name="types" type="com.servoy.j2db.documentation.scripting.docs.Number[]" typecode="[I">
+              <description><![CDATA[The column types, when null the types are inferred from the query.]]></description>
+            </parameter>
+            <parameter name="pkNames" type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;">
+              <description><![CDATA[array of pk names, when null a hidden pk-column will be added]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="ng,wc,sc" name="createDataSourceByQuery">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
+            <argumentType typecode="java.lang.Number"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[datasource containing the results of the query or null if the parameters are wrong.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Performs a query and saves the result in a datasource.
+Will throw an exception if anything went wrong when executing the query.
+Column types in the datasource are inferred from the query result or can be explicitly specified.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Performs a query and saves the result in a datasource.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[// select customer data for order 1234
+/** @type {QBSelect<db:/example_data/customers>} */
+var q = databaseManager.createSelect("db:/example_data/customers");
+q.result.add(q.columns.customer_id).add(q.columns.city).add(q.columns.country);
+q.where.add(q.joins.customers_to_orders.columns.orderid.eq(1234));
+var uri = databaseManager.createDataSourceByQuery('mydata', q, true, 999, null, ['customer_id']);
+//var uri = databaseManager.createDataSourceByQuery('mydata', q, true, 999, [JSColumn.TEXT, JSColumn.TEXT, JSColumn.TEXT], ['customer_id']);
 
 // the uri can be used to create a form using solution model
 var myForm = solutionModel.newForm('newForm', uri, 'myStyleName', false, 800, 600);
@@ -6770,6 +6824,49 @@ for( var i = 1 ; i <= dataset.getMaxRowIndex() ; i++ )
         <function clientSupport="ng,wc,sc" name="getDataSetByQuery">
           <argumentsTypes>
             <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
+            <argumentType typecode="java.lang.Boolean"/>
+            <argumentType typecode="java.lang.Number"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet"><![CDATA[The JSDataSet containing the results of the query.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Performs a sql query with a query builder object.
+Will throw an exception if anything did go wrong when executing the query.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Performs a sql query with a query builder object.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[// use the query froma foundset and add a condition
+/** @type {QBSelect<db:/example_data/orders>} */
+var q = foundset.getQuery()
+q.where.add(q.joins.orders_to_order_details.columns.discount.eq(2))
+var maxReturnedRows = 10;//useful to limit number of rows
+var ds = databaseManager.getDataSetByQuery(q, true, maxReturnedRows);
+
+// query: select PK from example.book_nodes where parent = 111 and(note_date is null or note_date > now)
+/** @type {QBSelect<db:/example_data/book_nodes>} */
+var query = databaseManager.createSelect('db:/example_data/book_nodes').result.addPk().root
+query.where.add(query.columns.parent_id.eq(111))
+	.add(query.or
+	.add(query.columns.note_date.isNull)
+	.add(query.columns.note_date.gt(new Date())))
+databaseManager.getDataSetByQuery(q, true, max_returned_rows)]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
+              <description><![CDATA[QBSelect query.]]></description>
+            </parameter>
+            <parameter name="useTableFilters" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
+              <description><![CDATA[use table filters (default true).]]></description>
+            </parameter>
+            <parameter name="max_returned_rows" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="java.lang.Number">
+              <description><![CDATA[The maximum number of rows returned by the query.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getDataSetByQuery">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
             <argumentType typecode="java.lang.Number"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet"><![CDATA[The JSDataSet containing the results of the query.]]></return>
@@ -7187,7 +7284,7 @@ databaseManager.saveData()]]></sample>
         </function>
         <function clientSupport="ng,wc,sc" name="getFoundSetCount">
           <argumentsTypes>
-            <argumentType typecode="java.lang.Object"/>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[the foundset count]]></return>
           <descriptions>
@@ -7203,7 +7300,7 @@ NOTE: This can be an expensive operation (time-wise) if your resultset is large.
 databaseManager.getFoundSetCount(foundset);]]></sample>
           </samples>
           <parameters>
-            <parameter name="foundset" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
               <description><![CDATA[The JSFoundset to get the count for.]]></description>
             </parameter>
           </parameters>
@@ -7235,7 +7332,7 @@ databaseManager.getFoundSetCount(foundset);]]></sample>
         </function>
         <function clientSupport="ng,wc,sc" name="getFoundSetUpdater">
           <argumentsTypes>
-            <argumentType typecode="java.lang.Object"/>
+            <argumentType typecode="com.servoy.j2db.dataprocessing.FoundSet"/>
           </argumentsTypes>
           <return type="com.servoy.j2db.dataprocessing.JSFoundSetUpdater" typecode="com.servoy.j2db.dataprocessing.JSFoundSetUpdater"><![CDATA[The JSFoundsetUpdater for the specified JSFoundset.]]></return>
           <descriptions>
@@ -7267,7 +7364,7 @@ while(fsUpdater.next())
 }]]></sample>
           </samples>
           <parameters>
-            <parameter name="foundset" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
+            <parameter name="foundset" type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet">
               <description><![CDATA[The foundset to update.]]></description>
             </parameter>
           </parameters>
@@ -14402,13 +14499,19 @@ dataset.addRow(2, new Array(1,2,3,4,5,6,7,7)); //adds a row with 8 columns at ro
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String uri reference to the created data source.]]></return>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String uri reference to the created datasource.]]></return>
           <descriptions>
-            <description clientSupport="ng,wc,sc"><![CDATA[Create a data source from the data set with specified name and using specified types.
-The types are inferred from the data if possible.]]></description>
+            <description clientSupport="ng,wc,sc"><![CDATA[Create a datasource from the data set with specified name and using specified types.
+The types are inferred from the data if possible.
+
+A temporary datasource cannot be removed because once created there may always be forms or relations that refer to it.
+When the client exits, all datasources used by that client are removed automatically.
+
+Most resources used by the datasource can be released by deleting all records:
+  dataset.removeRow(-1) or databaseManager.getFoundSet(datasource).deleteAllRecords()]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="ng,wc,sc"><![CDATA[Create a data source from the data set with specified name and using specified types.]]></summary>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Create a datasource from the data set with specified name and using specified types.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[ds.addColumn('my_id'); // note: use regular javascript identifiers so they can be used in scripting
@@ -14422,7 +14525,7 @@ var uri2 = ds2.createDataSource('mydata2'); // types are inferred from query res
           </samples>
           <parameters>
             <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[data source name]]></description>
+              <description><![CDATA[datasource name]]></description>
             </parameter>
           </parameters>
         </function>
@@ -14431,12 +14534,18 @@ var uri2 = ds2.createDataSource('mydata2'); // types are inferred from query res
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String uri reference to the created data source.]]></return>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String uri reference to the created datasource.]]></return>
           <descriptions>
-            <description clientSupport="ng,wc,sc"><![CDATA[Create a data source from the data set with specified name and using specified types.]]></description>
+            <description clientSupport="ng,wc,sc"><![CDATA[Create a datasource from the data set with specified name and using specified types.
+
+A temporary datasource cannot be removed because once created there may always be forms or relations that refer to it.
+When the client exits, all datasources used by that client are removed automatically.
+
+Most resources used by the datasource can be released by deleting all records:
+  dataset.removeRow(-1) or databaseManager.getFoundSet(datasource).deleteAllRecords()]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="ng,wc,sc"><![CDATA[Create a data source from the data set with specified name and using specified types.]]></summary>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Create a datasource from the data set with specified name and using specified types.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[ds.addColumn('my_id'); // note: use regular javascript identifiers so they can be used in scripting
@@ -14450,7 +14559,7 @@ var uri2 = ds2.createDataSource('mydata2'); // types are inferred from query res
           </samples>
           <parameters>
             <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[data source name]]></description>
+              <description><![CDATA[datasource name]]></description>
             </parameter>
             <parameter name="types" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[array of types as defined in JSColumn]]></description>
@@ -14463,12 +14572,18 @@ var uri2 = ds2.createDataSource('mydata2'); // types are inferred from query res
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="[Ljava.lang.String;"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String uri reference to the created data source.]]></return>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String uri reference to the created datasource.]]></return>
           <descriptions>
-            <description clientSupport="ng,wc,sc"><![CDATA[Create a data source from the data set with specified name and using specified types, add .]]></description>
+            <description clientSupport="ng,wc,sc"><![CDATA[Create a datasource from the data set with specified name and using specified types.
+
+A temporary datasource cannot be removed because once created there may always be forms or relations that refer to it.
+When the client exits, all datasources used by that client are removed automatically.
+
+Most resources used by the datasource can be released by deleting all records:
+  dataset.removeRow(-1) or databaseManager.getFoundSet(datasource).deleteAllRecords()]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="ng,wc,sc"><![CDATA[Create a data source from the data set with specified name and using specified types, add .]]></summary>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Create a datasource from the data set with specified name and using specified types.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[ds.addColumn('my_id'); // note: use regular javascript identifiers so they can be used in scripting
@@ -14482,7 +14597,7 @@ var uri2 = ds2.createDataSource('mydata2', null, ['customerid']); // types are i
           </samples>
           <parameters>
             <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[data source name]]></description>
+              <description><![CDATA[datasource name]]></description>
             </parameter>
             <parameter name="types" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[array of types as defined in JSColumn, when null types are inferred from the query result]]></description>
