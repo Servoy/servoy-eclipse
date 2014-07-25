@@ -1,12 +1,26 @@
-angular.module('editor', ['palette','toolbar'])
-  .factory("$editor",function($rootScope, EDITOR_EVENTS) {
+angular.module('editor', ['palette','toolbar','mouseselection']).run(function($rootScope, $editor) {
+	$(document).ready(function() {
+		$("#editor").on('documentReady.content', function(event, contentDocument) {
+			$editor.setIFrameDoc(contentDocument);
+		});
+	});
+}).factory("$editor",function($rootScope, EDITOR_EVENTS) {
 	var selection = [];
-	
+	var plugins = [];
+	var iframeDoc = null;
 	function fireSelectionChanged(){
 		$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED,selection)
 	}
 
 	return {
+		setIFrameDoc: function(contentDocument) {
+			iframeDoc = contentDocument;
+			
+			// editor is ready init plugins
+			for(var i=0;i<plugins.length;i++) {
+				plugins[i]();
+			}
+		},
 		
 		getSelection: function() {
 			//Returning a copy so selection can't be changed my modifying the selection array
@@ -51,14 +65,22 @@ angular.module('editor', ['palette','toolbar'])
 			fireSelectionChanged()
 		},
 		
+		registerPlugin: function(plugin) {
+			plugins[plugins.length] = plugin;
+			// if there is already a iframeDoc just init directly.
+			if (iframeDoc) plugin();
+		},
+		
+		// can only be called after a plugin gets the callback from the registerPlugin
 		registerDOMEvent:function(eventType, target,callback) {
-			
 			if (target == "FORM") {
 				// $(iframeDoc) == internal iframe document.
-				$(iframeDoc).on(eventType, context, callback.bind(this))
+				// TODO can we set a selector/class to filter? 
+				$(iframeDoc).on(eventType, null, callback.bind(this))
 			} else if (target == "EDITOR") {
+				console.log("registering dom event: " + eventType)
 				// $(doc) is the document of the editor (or a div)
-				$(doc).on(eventType, context, callback.bind(this))
+//				$(doc).on(eventType, context, callback.bind(this))
 			}
 		}
 	}
