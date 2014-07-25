@@ -13,8 +13,8 @@
 		</span>
 	</div>
 
-	<div class="toolbar wizards first">
-		<span class="toolbar-action new-grid"></span>
+	<div class="toolbar editor">
+		<span class="toolbar-action new-grid" ></span>
 		<span class="toolbar-action new-fields"></span>
 		<span class="toolbar-action new-image"></span>
 		<span class="toolbar-action new-portal"></span>
@@ -23,7 +23,11 @@
 		<span class="toolbar-action new-accordion-pane"></span>
 	</div>
 
-	<div class="toolbar alignment">
+	<div class="toolbar element" >
+		<span class="toolbar-action" ng-repeat="item in elements" ng-style="item.enabled ? {color:'black'} : {color:'grey'}">{{item.text}}</span>
+	</div>
+
+	<div class="toolbar form">
 		<span class="toolbar-action"></span>
 		<span class="toolbar-action"></span>
 		<span class="toolbar-action"></span>
@@ -31,5 +35,4 @@
 		<span class="toolbar-action"></span>
 		<span class="toolbar-action"></span>
 	</div>
-
 </div>

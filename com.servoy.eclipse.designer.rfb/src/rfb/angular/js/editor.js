@@ -56,11 +56,11 @@ angular.module('editor', ['palette','toolbar','mouseselection']).run(function($r
 		},
 
 		setSelection:function(node) {
-			Array.prototype.push.apply(delta.removedNodes, this.selection)
-			this.selection.length = 0
+//			Array.prototype.push.apply(delta.removedNodes, this.selection)
+//			this.selection.length = 0
 			
-			Array.prototype.push.call(delta.addedNodes, node)
-			Array.prototype.push.call(this.selection, node)
+//			Array.prototype.push.call(delta.addedNodes, node)
+//			Array.prototype.push.call(this.selection, node)
 			
 			fireSelectionChanged()
 		},
