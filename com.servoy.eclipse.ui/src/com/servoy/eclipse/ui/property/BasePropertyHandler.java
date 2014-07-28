@@ -24,7 +24,6 @@ import javax.swing.border.Border;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.property.types.BooleanPropertyType;
-import org.sablo.specification.property.types.BorderPropertyType;
 import org.sablo.specification.property.types.BytePropertyType;
 import org.sablo.specification.property.types.ColorPropertyType;
 import org.sablo.specification.property.types.DimensionPropertyType;
@@ -51,6 +50,7 @@ import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
+import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
 
 /**
  * Base class for property handlers base on java beans/introspection.
