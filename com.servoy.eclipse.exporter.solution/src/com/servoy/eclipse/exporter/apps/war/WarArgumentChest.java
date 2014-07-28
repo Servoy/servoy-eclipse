@@ -92,7 +92,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 		drivers = parseArg("d","Driver name(s) was(were) not specified after '-d' argument.", argsMap);
 		isExportActiveSolutionOnly = true;
 		if (argsMap.containsKey("active") && !Utils.getAsBoolean(argsMap.get("active"))) isExportActiveSolutionOnly = false;
-		pluginLocations = parseArg("pluginlocations", null, argsMap);
+		pluginLocations = parseArg("pluginLocations", null, argsMap);
 		if (pluginLocations == null) pluginLocations = "../plugins";
 	}
 
