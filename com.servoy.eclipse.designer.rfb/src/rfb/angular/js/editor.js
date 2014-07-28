@@ -1,12 +1,7 @@
-angular.module('editor', ['palette','toolbar','mouseselection']).run(function($rootScope, $editor) {
-	$(document).ready(function() {
-		$("#editor").on('documentReady.content', function(event, contentDocument) {
-			$editor.setIFrameDoc(contentDocument);
-		});
-	});
-}).factory("$editor",function($rootScope, EDITOR_EVENTS) {
-	var selection = [];
+angular.module('editor', ['palette','toolbar','mouseselection']).factory("$editor",function($rootScope, EDITOR_EVENTS) {
 	var plugins = [];
+	//TODO selection and iframe should move to directive (so all state is in the directive not global in a factor)
+	var selection = [];
 	var iframeDoc = null;
 	function fireSelectionChanged(){
 		$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED,selection)
@@ -18,6 +13,7 @@ angular.module('editor', ['palette','toolbar','mouseselection']).run(function($r
 			
 			// editor is ready init plugins
 			for(var i=0;i<plugins.length;i++) {
+				//TODO this call should get the editor instance (the scope of the directive below?)
 				plugins[i]();
 			}
 		},
@@ -86,9 +82,24 @@ angular.module('editor', ['palette','toolbar','mouseselection']).run(function($r
 	}
 }).value("EDITOR_EVENTS", {
     SELECTION_CHANGED : "SELECTION_CHANGED"
-}).controller("MainController", function($scope,$window) {
-	function getURLParameter(name) {
-		return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec($window.location.search)||[,""])[1].replace(/\+/g, '%20'))||null
-	}
-	$scope.contentframe = "editor-content.html?id=%23editor&f=" + getURLParameter("f") +"&s=" + getURLParameter("s");
+}).directive("editor", function( $window, $editor){
+	return {
+	      restrict: 'E',
+	      transclude: true,
+	      scope: {},
+	      link: function($scope, $element, $attrs) {
+			function getURLParameter(name) {
+				return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec($window.location.search)||[,""])[1].replace(/\+/g, '%20'))||null
+			}
+			//TODO the "editor" part in this url should be dynamic (like the id='editor' in the editor.template)
+			$scope.contentframe = "editor-content.html?id=%23editor&f=" + getURLParameter("f") +"&s=" + getURLParameter("s");
+			
+			$element.on('documentReady.content', function(event, contentDocument) {
+				$editor.setIFrameDoc(contentDocument);
+			});
+	      },
+	      templateUrl: 'templates/editor.html',
+	      replace: true
+	    };
+	
 });

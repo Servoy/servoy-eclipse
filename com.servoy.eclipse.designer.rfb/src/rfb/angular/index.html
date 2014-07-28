@@ -1,14 +1,12 @@
 <!DOCTYPE html>
-<html ng-app="editor" ng-controller="MainController">
+<html ng-app="editor">
 	<head>
 		<!-- 
 		TODO body shows scrollbars when starting a DND operation op a larger element near the bottom, as the node that follows the cursor is positioned so that the body height increases
 		 -->
-		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-		
 		<title>RFB Editor</title>
 
-		<!-- <link href='http://fonts.googleapis.com/css?family=Roboto:400,100,300,500' rel='stylesheet' type='text/css'> -->
+		<link href='http://fonts.googleapis.com/css?family=Roboto:400,100,300,500' rel='stylesheet' type='text/css'>
 		
 		<script src="js/libs/jquery-1.11.1.js"></script>
 		<script src="js/libs/angular.js"></script>
@@ -30,34 +28,6 @@
 		
 	</head>
 	<body>
-		<div id="editor">
-			<div class="sfeditor" tabindex="0">
-				<!-- 
-					TODO: everything inside the #editor div should be dynamically generated and inserted.
-					Take special care of making sure the ID query parameter on the src url of the iframe is set to the ID of the div in which the editor is instantiated
-				-->
-				<!-- Toolbar -->
-				<toolbar class="toolbar-area"></toolbar>
-				
-				<!--Palette-->
-				<palette class="palette lhs-panel user-selection-off" style="width: 200px"></palette>
-			
-				<!--  Editor -->
-				<div class="content-area" tabindex="0">
-					<div class="content">
-						<!--Decorators-->
-						<div class="decorators">
-							<div class="glasspane"></div>  <!-- z-index: 2 -->
-						</div>
-						
-						<div class="contentframe-overlay"></div> <!-- z-index: 1 -->
-
-						<!-- Content -->
-						<!-- id query param should be dynamically set to the selector of the div in which the editor is placed -->
-						<iframe class="contentframe" ng-src="{{contentframe}}"></iframe>
-					</div>
-				</div>
-			</div>
-		</div>
+		<editor></editor>
 	</body>
 </html>
