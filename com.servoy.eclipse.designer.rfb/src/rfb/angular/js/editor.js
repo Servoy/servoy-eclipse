@@ -1,4 +1,4 @@
-angular.module('editor', ['palette','toolbar','mouseselection']).factory("$pluginRegistry",function($rootScope) {
+angular.module('editor', ['palette','toolbar','mouseselection','decorators']).factory("$pluginRegistry",function($rootScope) {
 	var plugins = [];
 
 	return {
@@ -47,6 +47,8 @@ angular.module('editor', ['palette','toolbar','mouseselection']).factory("$plugi
 				return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec($window.location.search)||[,""])[1].replace(/\+/g, '%20'))||null
 			}
 			$scope.contentframe = "editor-content.html?id=%23" + $element.attr("id") + "&f=" + getURLParameter("f") +"&s=" + getURLParameter("s");
+			$scope.contentWindow = $element.find('.contentframe')[0].contentWindow;
+			console.log($scope.contentWindow)
 			$scope.registerDOMEvent = function(eventType, target,callback) {
 				if (target == "FORM") {
 				$(iframeDoc).on(eventType, null, callback.bind(this))
