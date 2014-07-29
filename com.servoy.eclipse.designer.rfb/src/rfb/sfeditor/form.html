@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<meta charset="utf-8">
 		<!--LiveReload-->
 		<script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')</script>
 		
 		<title>SF Editor</title>
 		
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+		<script src="https://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+		<!-- <script src="http://johnny.github.io/jquery-sortable/js/jquery-sortable-min.js"></script>-->
+		<!--<script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.4/handlebars.min.js"></script>-->
 		
 		<!-- Latest compiled and minified Bootstrap -->
 		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
@@ -20,6 +24,11 @@
 		<script src="//cdn.jsdelivr.net/justgage/1.0.1/justgage.min.js"></script>
 		
 		<script src="componentFactory.js"></script>
+		<!--
+		<style>
+			.ui-state-highlight {}
+		</style>
+		-->
 		<script>
 			var editorNode = parent.$(decodeURIComponent(location.search.split('id=')[1]))
 			
@@ -64,6 +73,43 @@
 			$(document).on('click', 'a', function(e){
 				e.preventDefault()
 			})
+		</script>
+
+
+		<script>
+		/* jQuery UI Sortable impl. attempt
+			$(document).ready(function() {
+				$('#content').sortable({
+					connectWith: '.svcontainer',
+					items: '.svelement',
+					placeholder: {
+				        element: function(currentItem) {
+				        	var clone = $(currentItem).clone();
+				        	clone.css({
+				        		opacity: .5,
+				        		position: 'relative'	
+				        	})
+				        	
+				            return clone
+				        },
+				        update: function(container, p) {
+				            return;
+				        }
+				    },
+					cancel: '',
+					start: function(event, ui) {   
+				        ui.placeholder.height(ui.item.height());  
+				        ui.placeholder.width(ui.item.width());
+				        parent.$('#outline').css('display', 'block')
+				   } 
+				})
+
+//				$('#content').sortable({
+//					containerSelector: '.svcontainer',
+//					itemSelector: '.svelement'
+//				})			
+			})
+		*/
 		</script>
 		<style>
 			/* Prevent scrollbars due to dragged element */

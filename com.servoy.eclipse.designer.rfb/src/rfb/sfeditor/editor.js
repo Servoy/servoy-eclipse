@@ -13,14 +13,14 @@ function Editor(selector, options) {
 		}, options)
 
 	this.editor = $(selector)
-
+	
 	//TODO: dynamically insert the markup needed for the editor into the node provided through the selector
 	
 	this.parts = {
-		DECORATORS: this.editor.find('.decorators'),
-		GLASSPANE: this.editor.find('.contentframe-overlay'),
 		EDITOR: this.editor.find('.content-area'),
-		CONTENT: this.editor.find('.content')
+		CONTENT: this.editor.find('.content'),
+		DECORATORS: this.editor.find('.decorators'),
+		GLASSPANE: this.editor.find('.contentframe-overlay')
 	}
 	Object.freeze(this.parts)
 
@@ -32,121 +32,211 @@ function Editor(selector, options) {
 
 	this.selection = []
 	
+	this.fire = function() {
+		this.editor.trigger.apply(this.editor, arguments)
+	}
+	
+	var intermediateChanges = []
+	var contentChangeListenerEnabled = true
+	this.disableContentChangeListener = function(state) {
+		if (!contentChangeListenerEnabled && 
+			!state && 
+			intermediateChanges.length) {
+			instance.fire(Editor.EVENT_TYPES.CONTENT_CHANGED, [intermediateChanges])
+		}
+		contentChangeListenerEnabled = !state
+	}
+	
 	$(this.editor).on('documentReady.content', function(event, contentDocument) {
 		instance.contentDocument = contentDocument
-
+		
 		//Call all plugin function in the context of the editor instance
-		for (var i = 0; i < Editor.pluginRegistry.length; i++) {
-			Editor.pluginRegistry[i].apply(instance);
-		}
+		instance.plugins = {}
 		
-		//Using MutationObserver to trigger renderDecorators when content changes
-		//http://addyosmani.com/blog/mutation-observers
-		var observer = new MutationObserver(function() {
-			instance.renderDecorators()
-			instance.editor.trigger(Editor.EVENT_TYPES.CONTENT_CHANGED)
-		});
-		observer.observe(instance.contentDocument.querySelector('.sfcontent'), {
-			subtree: true,
-			childList: true,
-			attributes: true
-		});
-
-		/* Mouse is moved, startposition is recorded, timeout started, while mouse is moving current position is stored
-		 * also need timeout to trigger hover is mouse stopped moving?
-		 * on timeout, check if delta start and current position meets distance threshold.
-		 * if yes: trigger hover
-		 * if no: update startposition, set timeout
-		 * 
-		 * Also need to take care not to trigger hover on the same element
-		 * Also need mouseleave 
-		 */
-		
-		var hoverIntentInfo = {
-			startPosition: {
-				x: null,
-				y: null
-			},
-		
-		}
-		
-		function check(){
+		var pluginNames = Object.keys(Editor.pluginRegistry)
+		for (var i = 0; i < pluginNames.length; i++) {
+			var pluginName = pluginNames[i]
 			
-		}
-		
-		$(instance.contentDocument).find('.sfcontent').on('mousemove', '.svelement', function(e) {
-			if (hoverIntentInfo.startPosition.x === null) {
-				hoverIntentInfo.startPosition.x = e.pageX
-				hoverIntentInfo.startPosition.y = e.pageY
+			var scope = Object.create(instance)
+			instance.plugins[pluginName] = scope
+			Editor.pluginRegistry[pluginName].apply(scope);
+			
+			//Check if plugin exposed public API. If not, remove the plugin
+			if (!Object.keys(instance.plugins[pluginName]).length) {
+				delete instance.plugins[pluginName]
 			}
-			setTimeout(check, 100)
+		}
+		
+		/* 
+		 * Monitoring content changes using MutationObserver: http://addyosmani.com/blog/mutation-observers
+		 *
+		 * Not all changes ought to be monitored, for example:
+		 * - Intermediate changes while moving or resizing (operation might even ne canceled completely)
+		 * - Dummy insertion while DND-ing
+		 */
+		function contentChangeObserver(changes, observer) {
+			instance.renderDecorators()
 			
-			
-			
-			if (currentElement !== e.currentTarget) {
-				nextElement = e.currentTarget
-				
-				var dX = prevPos.x - e.pageX,
-				dY = prevPos.y - e.pageY
-				if (Math.sqrt(dX * dX + dY * dY) < 6) {
-					triggerHover()
-				} else {
-					if (timeOut) {
-						clearTimeout(timeOut)
+			if (contentChangeListenerEnabled) {
+				instance.fire(Editor.EVENT_TYPES.CONTENT_CHANGED, [changes])
+			} else {
+				//TODO: change implementation to just store all arrays with MutationRecords while ContentChangeListener is disabled 
+				//and then do all processing when it gets enabled again, to bring down performance overhead
+				return
+				//record the changes internally, to trigger Editor.EVENT_TYPES.CONTENT_CHANGED when the CHangeListener gets enabled again
+				var intermediateRecord, handled
+				var MutationRecordProto = {
+					type: null,
+					target: null,
+					removedNodes: [],
+					previousSibling: null,
+					oldValue: null,
+					nextSibling: null,
+					attributeNamespace: null,
+					attributeName: null,
+					addedNodes: []
+				}
+				changes: for (var i = 0; i < changes.length; i++) {
+					handled = false
+					var mutationRecord = changes[i]
+					
+					switch (mutationRecord.type) {
+						case 'attributes':
+							/* Attribute changes always cause one MutationRecord per attribute change per element
+							 * 
+							 * If an attribute change comes in, find if there's already an intermediate change for the node and that attribute.
+							 * If there is not, store the node/attribute combination and record the old value for final comparison and store the MutationRecord
+							 * If there is, compare the new value against the previously recorded old value. If equal, remove node, if not update current value
+							 */
+							for (var j = 0; j < intermediateChanges.length; j++) {
+								intermediateRecord = intermediateChanges[j]
+								if(intermediateRecord.type === 'attributes' && 
+									intermediateRecord.target === mutationRecord.target &&
+								 	intermediateRecord.attributeName === mutationRecord.attributeName) {
+									if (mutationRecord.target.getAttribute(mutationRecord.attributeName) === intermediateRecord.oldValue) {
+										intermediateChanges.splice(j)
+									} else {
+										intermediateChanges[j].oldValue = intermediateRecord.oldValue
+									}
+									continue changes
+								 }
+							}
+							
+							var rec = Object.create(MutationRecordProto)
+							rec.type = 'attributes'
+							rec.target = mutationRecord.target
+							rec.oldValue = mutationRecord.oldValue
+							rec.attributeName = mutationRecord.attributeName
+							
+							intermediateChanges[intermediateChanges.length] = rec
+							break
+						case 'childList':
+							//TODO: test this logic with DND implementation, when inserting placeholders during the Drag
+							/* Use case of this branch: filtering out the placeholder nodes added during DND
+							 * 
+							 * Mutation Records are distinct based on:
+							 * 1: target
+							 * 2: previousSibling
+							 * 
+							 * 
+							 */
+							for (var j = 0; j < intermediateChanges.length; j++) {
+								 intermediateRecord = intermediateChanges[j]
+								 if (intermediateRecord.type === 'childList' && 
+								 	intermediateRecord.target === mutationRecord.target &&
+								 	intermediateRecord.previousSibling === mutationRecord.previousSibling) {
+								 	
+							 		/* For added/removedNodes, the intermediateChanges need to be checked and updated
+							 		 * 
+							 		 * Previous adds and removes need to be removed from intermediate history
+							 		 * The add/remove needs to be added to the intermediateChanges
+							 		 */	
+								 	if (mutationRecord.addedNodes.length) {
+								 		if (!intermediateRecord.hasOwnProperty('addedNodes')) {
+									 		intermediateRecord.addedNodes = []
+								 		}
+								 		for (var k = 0; k < mutationRecord.addedNodes.length; k++) {
+								 			var addedNode = mutationRecord.addedNodes[k]
+								 			for (var l = 0; l < intermediateRecord.addedNodes.length; l++) {
+								 				if (intermediateRecord.addedNodes[l] === addedNode) {
+								 					intermediateRecord.addedNodes.slice(l)
+								 				}
+								 			}
+								 			for (l = 0; l < intermediateRecord.removedNodes.length; l++) {
+								 				if (intermediateRecord.removedNodes[l] === addedNode) {
+								 					intermediateRecord.removedNodes.slice(l)
+								 				}
+								 			}
+								 			intermediateRecord.addedNodes[intermediateRecord.addedNodes.length] = addedNode
+									 	}
+								 	} else { //Must be removedNodes
+								 		if (!intermediateRecord.hasOwnProperty('removedNodes')) {
+									 		intermediateRecord.removedNodes = []
+								 		}
+								 		for (var k = 0; k < mutationRecord.removedNodes.length; k++) {
+								 			var removedNode = mutationRecord.removedNodes[k]
+								 			for (var l = 0; l < intermediateRecord.removedNodes.length; l++) {
+								 				if (intermediateRecord.removedNodes[l] === removedNode) {
+								 					intermediateRecord.removedNodes.slice(l)
+								 				}
+								 			}
+								 			for (var l = 0; l < intermediateRecord.addedNodes.length; l++) {
+								 				if (intermediateRecord.addedNodes[l] === removedNode) {
+								 					intermediateRecord.addedNodes.slice(l)
+								 				}
+								 			}
+								 			intermediateRecord.removedNodes[intermediateRecord.removedNodes.length] = removedNode
+									 	}
+								 	}
+								 	continue changes
+								 }
+							}
+							
+							var rec = Object.create(MutationRecordProto)
+							rec.type = 'childList'
+							
+							intermediateChanges[intermediateChanges.length] = rec
+							
+							break
+						default:
 					}
-					timeOut = setTimeout(triggerHover, 100)					
 				}
 			}
-			prevPos.x = e.pageX
-			prevPos.y = e.pageY
-			e.stopPropagation()
-		})
-		
-//------------		
-		var prevPos = {
-			x: null,
-			y: null
 		}
-		var timeOut,
-			currentElement,
-			nextElement
+		
+		new MutationObserver(contentChangeObserver).observe(instance.contentDocument.querySelector('.sfcontent'), {
+			subtree: true,
+			childList: true,
+			attributes: true,
+			attributeOldValue: true
+		});
 			
-		function triggerHover() {
-//			console.log('Hover triggered')
-//			console.log(nextElement)
-			currentElement = nextElement
-			instance.editor.trigger('hover')
-			clearTimeout(timeOut)
-			timeOut = null
-		}
+		//TODO: this should be externalized into plugin
+		var hoverDecorator = $('<div style="position: absolute; display: none; outline: 1px solid black; pointer-events: none"></div>')
+		instance.parts.DECORATORS.append(hoverDecorator)
 		
-//		$(instance.contentDocument).find('.sfcontent').on('mousemove', '.svelement', function(e) {
-//			if (currentElement !== e.currentTarget) {
-//				nextElement = e.currentTarget
-//				
-//				var dX = prevPos.x - e.pageX,
-//				dY = prevPos.y - e.pageY
-//				if (Math.sqrt(dX * dX + dY * dY) < 6) {
-//					triggerHover()
-//				} else {
-//					if (timeOut) {
-//						clearTimeout(timeOut)
-//					}
-//					timeOut = setTimeout(triggerHover, 100)					
-//				}
-//
-//			}
-//			prevPos.x = e.pageX
-//			prevPos.y = e.pageY
-//			e.stopPropagation()
-//		})
-//		.on('mouseenter', '.svelement', function(e) {
-//			if (hoveredElement !== e.currentTarget)
-//				hoveredElement = e.currentTarget
-//				dirty = true
-//		})
-		
-		instance.editor.trigger(Editor.EVENT_TYPES.CONTENT_READY)
+		//Setup to fire hoverIntent event
+		$(instance.contentDocument).find('.sfcontent').hoverIntent({
+		    over: function() {
+				var rect = this.getBoundingClientRect()
+				var css = {
+					top: rect.top,
+					left: rect.left,
+					width: this.offsetWidth,
+					height: this.offsetHeight,
+					display: 'block'
+				}
+				hoverDecorator.css(css)
+		    },
+		    out: function() {
+		    	hoverDecorator.css('display', 'none')
+		    },
+		    selector: '.svelement',
+			interval: 100,
+			timeout: 100
+		});
+
+		instance.fire(Editor.EVENT_TYPES.CONTENT_READY)
 	}).on('renderDecorators.content', function() {
 		instance.renderDecorators()
 	}).on(Editor.EVENT_TYPES.SELECTION_CHANGED, function(e, mutations){
@@ -197,76 +287,34 @@ Editor.prototype.convertToContentPoint = function(point, element) {
 	return point
 };
 
-(function(){
-	//TODO: selection should update itself when elements get deleted
-	//FIXME: this breaks multi-instance support
-	var timeout, 
-		delta = {
-			addedNodes: [],
-			removedNodes: []
-		}
-
-	function markDirty() {
-		if (timeout) {
-			clearTimeout(timeout)
-		}
-		timeout = setTimeout(fireSelectionChanged, 1)
-	}
-	
-	function fireSelectionChanged(){
-		//Reference to editor should be gotten from Editor instance somehow
-		$('#editor').trigger(Editor.EVENT_TYPES.SELECTION_CHANGED, delta)
-		delta.addedNodes.length = delta.removedNodes.length = 0
-		timeout = null
-	}
-
-	Editor.prototype.getSelection = function() {
-		//Returning a copy so selection can't be changed my modifying the selection array
-		return this.selection.slice(0)
-	}
-
-	Editor.prototype.extendSelection = function(nodes) {
-		var ar = Array.isArray(nodes) ? nodes : [nodes]
-		var dirty = false
+Editor.prototype.getElementsByRectangle = function(p1, p2, percentage) {
+	var i,
+		element,
+		rect,
+		overlapX,
+		overlapY,
+		nodes = this.contentDocument.querySelectorAll(Editor.ACTION_CONTEXT.ELEMENT),
+		matchedElements = []
 		
-		for (var i = 0; i < ar.length; i++) {
-			if (this.selection.indexOf(ar[i]) === -1) {
-				dirty = true
-				delta.addedNodes.push(ar[i])
-				this.selection.push(ar[i])
+	for (i = 0; i < nodes.length; i++) {
+		element = nodes[i]
+		rect = element.getBoundingClientRect()
+		
+		if (percentage == undefined || percentage == 100) { //Element must be fully enclosed
+			if (p1.top <= rect.top && p1.left <= rect.left && p2.top >= rect.top + element.clientHeight && p2.left >= rect.left + element.clientWidth) {
+				matchedElements.push(element)
+			}
+		} else {
+			overlapX = Math.max(0, Math.min(p2.left, rect.left + element.clientWidth) - Math.max(p1.left, rect.left))
+			overlapY = Math.max(0, Math.min(p2.top, rect.top + element.clientHeight) - Math.max(p1.top, rect.top))
+
+			if ( ( (element.clientWidth * element.clientHeight) / 100) * percentage < (overlapX * overlapY)) {
+				matchedElements.push(element)
 			}
 		}
-		if (dirty) {
-			markDirty()
-		}
 	}
-
-	Editor.prototype.reduceSelection = function(nodes) {
-		var ar = Array.isArray(nodes) ? nodes : [nodes]
-		var dirty = false
-		for (var i = 0; i < ar.length; i++) {
-			var idx = this.selection.indexOf(ar[i])
-			if (idx !== -1) {
-				dirty = true
-				delta.removedNodes.push(ar[i])
-				this.selection.splice(idx)
-			}
-		}
-		if (dirty) {
-			markDirty()
-		}
-	}
-
-	Editor.prototype.setSelection = function(node) {
-		Array.prototype.push.apply(delta.removedNodes, this.selection)
-		this.selection.length = 0
-		
-		Array.prototype.push.call(delta.addedNodes, node)
-		Array.prototype.push.call(this.selection, node)
-		
-		markDirty()
-	}
-}())
+	return matchedElements
+}
 
 /**
  * Call to rerender the Editor component if it's container dimensions have changed
@@ -301,7 +349,7 @@ Editor.prototype.renderDecorators = function renderDecorators() {
 	var decorationOverlays = decorators.children('.decorationOverlay')
 
 	var i = -1;
-	this.getSelection().forEach(function(value, index, array) {
+	this.selection.forEach(function(value, index, array) {
 		i = index
 		var node = $(value)
 
@@ -363,30 +411,31 @@ Editor.prototype.renderDecorators = function renderDecorators() {
 				display: 'block'
 			})
 
-			var marginTBWidth = width + marginRight + marginLeft
-			var marginRLHeight = height
-
 			decorationOverlay.children('.margin.t').css({
-				width: marginTBWidth,
 				height: marginTop,
+				left: 0,
+				right: -marginLeft - 1,
 				marginTop: -marginTop - 1,
 				marginLeft: -marginLeft - 1
 			})
 			decorationOverlay.children('.margin.r').css({
-				height: marginRLHeight,
 				width: marginRight,
+				top: 0,
+				bottom: -1,
 				marginRight: -marginRight - 1,
 				marginTop: -1
 			})
 			decorationOverlay.children('.margin.b').css({
-				width: marginTBWidth,
 				height: marginBottom,
+				left: 0,
+				right: -marginLeft - 1,
 				marginBottom: -marginBottom - 1,
 				marginLeft: -marginLeft - 1
 			})
 			decorationOverlay.children('.margin.l').css({
-				height: marginRLHeight,
 				width: marginLeft,
+				top: 0,
+				bottom: -1,
 				marginLeft: -marginLeft - 1,
 				marginTop: -1
 			})
@@ -427,6 +476,9 @@ Editor.prototype.registerBehavior = function(config) {
 	$(doc).on(config.event, context, config.action.bind(this))
 }
 
+Editor.prototype.registerDecorator = function(context, markup) {
+	//TODO: store the markup, for renderDecorators to use
+}
 //Static API
 Editor.EVENT_TYPES = {
 	CONTENT_READY: 'content_ready.editor',
@@ -448,15 +500,24 @@ Editor.ACTION_CONTEXT = {
 	CONTAINER: '.svcontainer',
 	ELEMENT: '.svelement'
 }
-Editor.pluginRegistry = []
 
-Editor.registerPlugin = function(plugin){
-	Editor.pluginRegistry.push(plugin)
+Editor.pluginRegistry = {}
+
+Editor.registerPlugin = function(name, plugin){
+	if (Editor.pluginRegistry.hasOwnProperty(name)) {
+		console.log('Duplicate plugin name used: ' + name + '\nIgnoring registration')
+		return
+	}
+	Editor.pluginRegistry[name] = plugin
 }
 
 //------------Old code, yet to be made obsolete--------------
 var randomId = 0
 var resizeDecoratorIncludeMargin = false
+var editorId = 'editor'
+var zoom = 1
+//TODO: Remove this cached editorOffset: offset changes when editor is scrolled
+var editorOffset
 
 //Bootstrapping
 $(document).ready(function() {
@@ -511,4 +572,117 @@ $(document).ready(function() {
 				contentAreaNode.addClass('non-full')
 			}
 		})
+
+	editorOffset = $('#' + editorId + ' .content').offset()
+
+	//======Event Dispatcher logic=========================================
+	//TODO: implement
+	//TODO: events on decorators should not "bubble""
+	//TODO: provide help option showing all available interaction commands (see JSFiddle's display for idea's)
+	//   Global:
+	//   Ctrl-Z == Undo
+	//   Ctrl-Y == Redo
+	//   SpaceBar-MouseDown > MouseMove == Pan Editor
+	//   Ctrl-+ == Zoom In
+	//   Ctrl-- == Zoom Out
+	//   Ctrl-0 == Reset Zoom
+	//   Alt-Mousewheel == Zoom
+	//   Alt-MouseDown > MouseMove == Forced Marquee Select
+
+	//   On main canvas
+	//   MouseDown > MouseMove == Marquee Select
+
+	//   On containers:
+
+	//   On elements:
+	//   MouseDown == Select element
+	//   Ctrl-MouseDown == Toggle selected state
+	//   Shift-MouseDown == Range Select
+
+	//   On DecoratorOverlays
+
+	//   On decorators: (maybe these can just be handled directly on the decorator)
+	//   knobs: MouseDown > MouseMove == Resize
+
+	//   TODO: DND from Palette/Move
+
+	var actions = [{ category: 'history', description: 'Undo', event: 'undo.history', modifier: 'ctrl', action: 'z' }, { category: 'history', description: 'Redo', event: 'redo.history', modifier: 'ctrl', action: 'y' }, { category: 'zoom', description: 'Zoom In', event: 'zoom_in.zoom', modifier: 'ctrl', action: '+' }, { category: 'zoom', description: 'Zoom Out', event: 'zoom_out.zoom', modifier: 'ctrl', action: '-' }, { category: 'zoom', description: 'Reset Zoom', event: 'reset_zoom.zoom', modifier: 'ctrl', action: '0' }, { category: 'selection', description: 'Select Element', event: 'select_element.selection', modifier: 'ctrl', action: 'MouseDown' }, { category: 'move', description: 'Move Up Small Step', event: 'move_up_small_step.move', modifier: 'ctrl', action: 'up' }, { category: 'move', description: 'Move Right Small Step', event: 'move_right_small_step.move', modifier: 'ctrl', action: 'right' }, { category: 'move', description: 'Move Down Small Step', event: 'move_down_small_step.move', modifier: 'ctrl', action: 'down' }, { category: 'move', description: 'Move Left Small Step', event: 'move_left_small_step.move', modifier: 'ctrl', action: 'left' }, { category: 'layering', description: 'Bring 1 Level Forward', event: 'bring_1_level_forward.layering', modifier: 'ctrl', action: '[' }, { category: 'layering', description: 'Send 1 Level Backwards', event: 'send_1_level_backwards.layering', modifier: 'ctrl', action: ']' }, { category: 'selection', description: 'Select All Elements', event: 'select_all_elements.selection', modifier: 'ctrl', action: 'a' }, { category: 'selection', description: 'Deselect Last Selected Element', event: 'deselect_last_selected_element.selection', modifier: 'ctrl', action: 'space' }, { category: '', description: 'Paste', event: 'paste.', modifier: 'ctrl', action: 'v' }, { category: '', description: 'Copy', event: 'copy.', modifier: 'ctrl', action: 'c' }, { category: '', description: 'Cut', event: 'cut.', modifier: 'ctrl', action: 'x' }, { category: 'grouping', description: 'Group Selected Elements', event: 'group_selected_elements.grouping', modifier: 'ctrl', action: 'g' }, { category: 'grouping', description: 'Ungroup Selected Elements', event: 'ungroup_selected_elements.grouping', modifier: 'ctrl', action: 'u' }, { category: 'tabbing', description: 'Set Tab Sequence', event: 'set_tab_sequence.tabbing', modifier: 'ctrl', action: 't' }, { category: '', description: '', event: '.', modifier: '', action: '' }, { category: 'selection', description: 'Range Select', event: 'range_select.selection', modifier: 'shift', action: 'MouseDown' }, { category: 'move', description: 'Move Up 1px', event: 'move_up_1px.move', modifier: 'shift', action: 'up' }, { category: 'move', description: 'Move Right 1px', event: 'move_right_1px.move', modifier: 'shift', action: 'right' }, { category: 'move', description: 'Move Down 1px', event: 'move_down_1px.move', modifier: 'shift', action: 'down' }, { category: 'move', description: 'Move Left 1px', event: 'move_left_1px.move', modifier: 'shift', action: 'left' }, { category: 'sizing', description: 'Same Width', event: 'same_width.sizing', modifier: 'shift', action: 'w' }, { category: 'sizing', description: 'Same Height', event: 'same_height.sizing', modifier: 'shift', action: 'y' }, { category: 'anchoring', description: 'Anchor Top', event: 'anchor_top.anchoring', modifier: 'shift', action: '-' }, { category: 'anchoring', description: 'Anchor Right', event: 'anchor_right.anchoring', modifier: 'shift', action: '*' }, { category: 'anchoring', description: 'Anchor Bottom', event: 'anchor_bottom.anchoring', modifier: 'shift', action: '+' }, { category: 'anchoring', description: 'Anchor Left', event: 'anchor_left.anchoring', modifier: 'shift', action: '/' }, { category: 'tabbing', description: 'Previous Element', event: 'previous_element.tabbing', modifier: 'shift', action: 'tab' }, { category: '', description: '', event: '.', modifier: '', action: '' }, { category: 'tabbing', description: 'Next Element', event: 'next_element.tabbing', modifier: '', action: 'tab' }, { category: 'layering', description: 'Bring to Front', event: 'bring_to_front.layering', modifier: '', action: '[' }, { category: 'layering', description: 'Send to Back', event: 'send_to_back.layering', modifier: '', action: ']' }, { category: 'delete', description: 'Delete Selected Elements', event: 'delete_selected_elements.delete', modifier: '', action: 'del' }, { category: 'move', description: 'Move Up 1px', event: 'move_up_1px.move', modifier: '', action: 'up' }, { category: 'move', description: 'Move Right 1px', event: 'move_right_1px.move', modifier: '', action: 'right' }, { category: 'move', description: 'Move Down 1px', event: 'move_down_1px.move', modifier: '', action: 'down' }, { category: 'move', description: 'Move Left 1px', event: 'move_left_1px.move', modifier: '', action: 'left' }, { category: 'selection', description: 'Select Element', event: 'select_element.selection', modifier: '', action: 'MouseDown' }, { category: 'selection', description: 'Forced Marquee Select', event: 'forced_marquee_select.selection', modifier: 'alt', action: 'MouseDown' }, { category: 'selection', description: 'Marquee Select', event: 'marquee_select.selection', modifier: '', action: 'MouseDown' }, { category: 'zoom', description: 'Zoom In/Out', event: 'zoom_in/out.zoom', modifier: 'ctrl', action: 'MouseWheel' }, { category: 'pan', description: 'Pan Editor', event: 'pan_editor.pan', modifier: 'space', action: 'MouseDown' },
+		]
+
+	function codeFor(text) {
+		var code
+		//TODO: extend with more codes
+		switch (text) {
+			case 'up':
+				code = 38;
+				break;
+			case 'right':
+				code = 39;
+				break;
+			case 'down':
+				code = 40;
+				break;
+			case 'left':
+				code = 37;
+				break;
+			case 'space':
+				code = 32;
+				break;
+			case 'tab':
+				code = 9;
+				break;
+			case 'del':
+				code = 46;
+				break;
+			case 'esc':
+				code = 27;
+				break;
+			default:
+				code = text.toUpperCase().charCodeAt(0)
+		}
+		return code
+	}
+
+	//TODO: this data below should be filled based on the config
+	var customModifierKeyCodes = [32]
+	var actionMap = {}
+	for (var i = 0; i < actions.length; i++) {
+		var action = actions[i]
+		var keyCode = codeFor(action.action)
+		if (!actionMap.hasOwnProperty(keyCode)) {
+			actionMap[keyCode] = []
+		}
+		actionMap[keyCode].push(action)
+	}
+
+	var currentModifiers = []
+	$(document).keydown(function(e) {
+		if (e.keyCode == 16 || e.keyCode == 17 || e.keyCode == 18) {
+			return; //Not interested in default modifier keys
+		}
+		if (customModifierKeyCodes.indexOf(e.keyCode)) {
+			currentModifiers.push(e.keyCode)
+		}
+
+		if (actionMap.hasOwnProperty(e.keyCode)) {
+			var actions = actionMap[e.keyCode]
+			for (var i = 0; i < actions.length; i++) {
+				if (actions[i].modifier) {
+					//TODO: figure out how to properly handle all interaction when clicking on an element (forced lasso, duplicate, move, (de)select)
+					//lasso/move/duplicate happen only after mousemove threshold
+				}
+			}
+			console.log('action detected: ' + JSON.stringify(actionMap[e.keyCode]))
+		}
+	}).keyup(function(e) {
+		currentModifiers.slice(currentModifiers.indexOf(e.keyCode), 1)
+	})
+	//.mousedown(function(e){}).mousewheel(function(e){})
+
+//	$(document).on('mousedown.marquee', function(e) {
+//			console.log('start marquee')
+//			if (e.ctrlKey && e.shiftKey) {
+//				startMarquee(e)
+//			}
+//		})
 })

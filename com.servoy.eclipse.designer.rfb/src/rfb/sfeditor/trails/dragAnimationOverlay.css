@@ -1,0 +1,31 @@
+#container {
+    display: inline-block;
+    position: relative;
+    margin: 20px;
+    width: 300px;
+    height: 300px;
+    border: 1px solid grey;
+    overflow: visible
+}
+
+#one {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 100px;
+    height: 100px;
+    background-color: red
+}
+
+#two {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 100px;
+    height: 100px;
+    background-color: blue
+}
+
+.animate {
+    transition: all 0.2s ease-out;
+}

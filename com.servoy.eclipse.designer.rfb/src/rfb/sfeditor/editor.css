@@ -184,8 +184,3 @@ body {
 	cursor: -moz-grab;
 	cursor: grab
 }
-
-.glasspane {
-	display: none;
-	z-index: 2
-}

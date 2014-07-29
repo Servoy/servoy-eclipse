@@ -32,9 +32,16 @@ Outline.prototype.setEditor = function(editor) {
 		})
 		
 	}).on(Editor.EVENT_TYPES.CONTENT_CHANGED, function(e, changes) {
-		console.log('Outline should update, as content has changed')
+		console.log('Outline should update, as content has changed', changes)
 		//TODO: optimize: instead of full render, try updating existing content
-		instance.initTree()
+		//Only trigger reinitializing the tree if nodes were added/removed
+		for (var i = 0; i < changes.length; i++) {
+			if (changes[i].addedNodes.length || changes[i].removedNodes.length) {
+				instance.initTree()
+				break;
+			}
+		}
+
 	}).on('selection_changed.editor', function(e, changes) {
 		console.log('Outline should update, as selection has changed')
 	}).on(Editor.EVENT_TYPES.DRAG_START, function(e){
@@ -47,7 +54,6 @@ Outline.prototype.setEditor = function(editor) {
 }
 
 Outline.prototype.initTree = function(){
-	//TODO: this code is not done, was created to build a structure out of the dom and then generate HTML based on the structure
 	var structure = []
 	var stack = [{ node: $(this.editor.contentDocument).find('.sfcontent').children(), children: structure }]
 
@@ -67,7 +73,6 @@ Outline.prototype.initTree = function(){
 	var retval = '<ul class="tree">',
 		level = [stack.length]
 
-	//TODO: generated HTML contains extra UL's, due to which the last node doesn't get the right image
 	while (stack.length) {
 		while (level[level.length - 1] === 0) {
 			level.pop()

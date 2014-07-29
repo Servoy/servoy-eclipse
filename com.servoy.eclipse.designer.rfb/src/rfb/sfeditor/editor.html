@@ -5,7 +5,7 @@
 		TODO body shows scrollbars when starting a DND operation op a larger element near the bottom, as the node that follows the cursor is positioned so that the body height increases
 		
 		 -->
-		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta charset="utf-8">
 		
 		<!--LiveReload-->
 		<script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')</script>
@@ -20,7 +20,38 @@
 		<!-- TODO: do we want to use bootstrap in the editor as well? -->
 		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 		<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-		
+		 
+		<!--jQuery plugins-->
+		<!--<script src="http://cherne.net/brian/resources/jquery.hoverIntent.js"></script> -->
+		<!--<script>
+			//JQuery click/doubleclick extensions
+			$.fn.distinguishedClicks = function(click, dblclick, dblclickWait) {
+			return this.each(function() {
+				var clicks = 0,
+					 $this = $(this);
+					 
+				$this.click(function(event) {
+					clicks++;
+					if (clicks === 1) {
+						setTimeout(function(){
+							if (clicks === 1) {
+								click.call(self, event);
+							}
+							else {
+								dblclick.call(self, event);
+							}
+							
+							clicks = 0;
+						}, dblclickWait || 200);
+					}
+				});
+			});
+		};
+		</script>-->
+		<script src="libs/keypress-2.0.3.min.js"></script>
+		<script src="libs/jquery.hoverIntent.js"></script>
+
+
 		<link href="editor.css" rel="stylesheet"></link>
 		<script src="editor.js"></script>
 		<link href="palette.css" rel="stylesheet"></link>
@@ -30,12 +61,19 @@
 		<script src="componentFactory.js"></script>
 		
 		
+		<script src="plugins/pan.js"></script>
 		<script src="plugins/zoom.js"></script>
+		<script src="plugins/dnd.js"></script>
 		<script src="plugins/select.js"></script>
+		<link href="plugins/marquee.css" rel="stylesheet"></link>
+		<script src="plugins/marquee.js"></script>
 		<link href="plugins/resize.css" rel="stylesheet"></link>
+		<script src="plugins/resize.js"></script>
+		<script src="plugins/history.js"></script>
 		<link href="plugins/content-editable.css" rel="stylesheet"></link>
 		<script src="plugins/content-editable.js"></script>
 		<link href="plugins/margin-decorator.css" rel="stylesheet"></link>
+		<script src="plugins/margin-decorator.js"></script>
 	</head>
 	<body>
 		<div id="editor">
@@ -210,14 +248,12 @@
 			
 				<!--  Editor -->
 				<div class="content-area" tabindex="0">
+					<div class="contentframe-overlay max"></div> <!-- z-index: 1 -->
+
 					<div class="content">
 						<!--Decorators-->
-						<div class="decorators">
-							<div class="glasspane max"></div>  <!-- z-index: 2 -->
-						</div>
+						<div class="decorators"></div>
 						
-						<div class="contentframe-overlay max"></div> <!-- z-index: 1 -->
-
 						<!-- Content -->
 						<!-- id query param should be dynamically set to the selector of the div in which the editor is placed -->
 						<iframe class="contentframe" src="form.html?id=%23editor"></iframe>

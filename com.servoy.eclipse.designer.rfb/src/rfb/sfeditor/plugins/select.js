@@ -1,5 +1,8 @@
 /*
- * Handles selecting elements using the mouse.
+ * Selection plugin
+ * - Handles selecting elements using the mouse.
+ * - Exposes selection API
+ * 
  * Tricky detail is NOT changing selection when clicking on a scrollbar of a container that results in a scroll
  */
 (function(){
@@ -12,25 +15,33 @@
 	
 	function Selection() {
 		var instance = this
+
+		/* Selection Behavior */
 		function handleSelectionEvent(e, node) {
+			var htmlNode = node[0]
 			if (e.ctrlKey) {
-				if (instance.getSelection().indexOf(node[0]) !== -1) {
-					instance.reduceSelection(node[0])
+				if (instance.getSelection().indexOf(htmlNode) !== -1) {
+					instance.reduceSelection(htmlNode)
 				} else {
-					instance.extendSelection(node[0])
+					instance.extendSelection(htmlNode)
 				}
 			} else if (e.shiftKey) {
 				//TODO: implement
+				/*
+				 * Shift-Click does range select: all elements within the box defined by the uttermost top/left point of selected elements
+				 * to the uttermost bottom-right of the clicked element
+				 */
 			} else {
-				instance.setSelection(node[0])
+				instance.setSelection(htmlNode)
 			}
 			e.stopPropagation()
 		}
-		
+
 		this.registerBehavior({
 			context: Editor.ACTION_CONTEXT.ELEMENT,
 			event: 'mousedown',
 			action: function(e) {
+				console.log('select start')
 				var node = $(e.currentTarget)
 				if (!node.is(Editor.ACTION_CONTEXT.ELEMENT)) {
 					node = node.parent(Editor.ACTION_CONTEXT.ELEMENT)
@@ -79,7 +90,80 @@
 				handleSelectionEvent(e, node)
 			}
 		})
+
+		/* Expose Selection API */
+		//TODO: selection should update itself when elements get deleted
+		var timeout, 
+			delta = {
+				addedNodes: [],
+				removedNodes: []
+			}
+		
+		function markDirty() {
+			if (timeout) {
+				clearTimeout(timeout)
+			}
+			timeout = setTimeout(fireSelectionChanged, 1)
+		}
+		
+		function fireSelectionChanged(){
+			//Reference to editor should be gotten from Editor instance somehow
+			instance.fire(Editor.EVENT_TYPES.SELECTION_CHANGED, delta)
+			delta.addedNodes.length = delta.removedNodes.length = 0
+			timeout = null
+		}
+		
+		this.getSelection = function() {
+			//Returning a copy so selection can't be changed my modifying the selection array
+			return this.selection.slice(0)
+		}
+	
+		this.extendSelection = function(nodes) {
+			var ar = Array.isArray(nodes) ? nodes : [nodes]
+			var dirty = false
+			
+			for (var i = 0; i < ar.length; i++) {
+				if (this.selection.indexOf(ar[i]) === -1) {
+					dirty = true
+					delta.addedNodes.push(ar[i])
+					this.selection.push(ar[i])
+				}
+			}
+			if (dirty) {
+				markDirty()
+			}
+		}
+	
+		this.reduceSelection = function(nodes) {
+			var ar = Array.isArray(nodes) ? nodes : [nodes]
+			var dirty = false
+			for (var i = 0; i < ar.length; i++) {
+				var idx = this.selection.indexOf(ar[i])
+				if (idx !== -1) {
+					dirty = true
+					delta.removedNodes.push(ar[i])
+					this.selection.splice(idx)
+				}
+			}
+			if (dirty) {
+				markDirty()
+			}
+		}
+	
+		this.setSelection = function(node) {
+			var selection = Array.isArray(node) ? node : node ? [node] : []
+			var dirty = selection.length||this.selection.length
+			Array.prototype.push.apply(delta.removedNodes, this.selection)
+			this.selection.length = 0
+			
+			Array.prototype.push.apply(delta.addedNodes, selection)
+			Array.prototype.push.apply(this.selection, selection)
+			
+			if (dirty) {
+				markDirty()
+			}
+		}
 	}
 	
-	Editor.registerPlugin(Selection)
+	Editor.registerPlugin('selection', Selection)
 }())

@@ -1,0 +1,320 @@
+<html>
+	<head>
+		<!--LiveReload-->
+		<script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')</script>
+
+		<link href='http://fonts.googleapis.com/css?family=Roboto:400,100,300,500' rel='stylesheet' type='text/css'>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+
+		<style>
+			/* Helper classes */
+			.user-selection-off {
+				-webkit-user-select: none; /* Chrome all / Safari all */
+				-moz-user-select: none; /* Firefox all */
+				-ms-user-select: none; /* IE 10+ */
+				/* No support for these yet, use at own risk */
+				-o-user-select: none;
+				user-select: none;
+			}
+		
+			body {
+				font-family: 'Roboto', helvetica, sans-serif;
+				/*background-image: url("http://www.webtexture.net/wp-content/uploads/2013/06/18-Seamless-Grunge-Photoshop-Patterns-Thumb14.jpg");*/
+			}
+			#content-area {
+				position: absolute;
+				top: 0px;
+				left: 200px;
+				right: 0px;
+				bottom: 0px;
+				padding: 
+			}
+			#content {
+				width: 100%;
+				height: 100%;
+				transition: all 0.2s ease-out;
+				margin: 0px auto;
+				z-index: 100
+			}
+			#contentframe {
+				border-width: 0px;
+				width: 100%;
+				height: 100%;
+				z-index: 1
+			}
+			
+			#contentframe-overlay {
+				display: none;
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				z-index: 3;	
+			}
+			
+			#dimension-previews {
+				position: absolute;
+				bottom: 5px
+			}
+			#dimension-previews button {
+				display: block
+			}
+			
+			#dragNode {
+				transition: opacity .5s ease-in-out;
+			}
+			
+			#palette {
+				color: #000
+			}
+			
+			.palette-heading {
+				font-weight: 300;
+				font-size: 18px;
+				margin: 0px
+			}
+			
+			#palette div {
+				overflow: hidden;
+				transition: all .3s cubic-bezier(0.19, 1, 0.22, 1); /*ease-in-out;*/
+			}
+			
+			#palette ul {
+				list-style-type: none;
+				padding-left: 12px;
+				font-weight: 400;
+				font-size: 14px;
+				margin-top: 0px
+			}
+
+			#palette img {
+				width: 1em;
+				height: 1em;
+				visibility: hidden;
+			}
+			
+			#palette img[src] {
+				visibility: visible
+			}
+		</style>
+
+		<script>
+			$(document).ready(function() {
+				/* View Dimensions */
+				/*
+				 * TODO: toggle orientation on consecutive clicks
+				 * TODO: improve main scrollbars: should be positioned outside content area
+				 * WYSIWYG CHALLENGE: on mobile devices you don't see actual scrollbars, 
+				 */
+				$('#dimension-previews button').click(function(e) {
+					var width = $(this).attr('data-width'), 
+						height = $(this).attr('data-height')
+					
+					var rotate = $('#dimension-previews').attr('data-rotate') === 'true'
+
+					if ($(this).attr('data-active') === 'true' || $(this).is('#rotate')) {
+						rotate = !rotate
+						$('#dimension-previews').attr('data-rotate', rotate)
+					} else {
+						$('#dimension-previews button[data-active]').attr('data-active', null)
+						$(this).attr('data-active', true)
+						$('#rotate').attr('data-width', width)
+							.attr('data-height', height)
+					}
+
+					if (rotate) {
+						var tmp = width
+						width = height
+						height = tmp
+					} 
+
+					$('#content').css({
+						width: width,
+						height: height
+					})
+				})
+
+				/* Palette DND */
+				$('[data-role="component"]').on('mousedown', function(e){
+					var win = document.getElementById("contentframe").contentWindow
+
+					var clone = $(this).clone()
+					clone.attr('id', 'dragNode')
+					clone.css({
+						'z-index': 2,
+						position: 'absolute',
+						top: e.pageY,
+						left: e.pageX
+					})
+					$('body').append(clone)
+
+					$('#contentframe-overlay').css('display', 'block')
+
+					var message = {
+						type: 'dragstart',
+						top: e.pageY,
+						left: e.pageX
+					}
+					if (clone.attr('data-component-template')) {
+						message.componentTemplate = clone.attr('data-component-template')
+					} else {
+						message.componentType = clone.attr('data-component-type')
+					}
+					win.postMessage(JSON.stringify(message), '*')
+					
+					$(document).on('mousemove.drag', function(e){
+						clone.css({
+							top: e.pageY,
+							left: e.pageX
+						})
+
+						var message = {
+							type: 'dragover',
+							top: e.pageY,
+							left: e.pageX
+						}
+						win.postMessage(JSON.stringify(message), '*')
+					}).on('mouseup.drag', function(e) {
+						win.postMessage(JSON.stringify({
+							type: 'drop'
+						}), '*')
+						$('#contentframe-overlay').css('display', 'none')
+						clone.remove()
+						$(document).off('mousemove.drag mouseup.drag')
+					})
+
+					//TODO: the transitions don't seem to work here, needs improving
+					$('#contentframe-overlay').hover(function(e){
+						clone.css('opacity', '0')
+						win.postMessage(JSON.stringify({
+							type: 'fadeIn'
+						}), '*')
+					}, function(e) {
+						clone.css('opacity', '1')
+						win.postMessage(JSON.stringify({
+							type: 'fadeOut'
+						}), '*')
+					})
+				})
+			})
+
+			/* Test to see how cross DOM scripting works */
+			/*
+			$(document).on('contentReady.editor', function() {
+				var lastPosition = {
+					x: null,
+					y: null
+				}
+				console.log('initialized')
+				
+				$(contentDocument).mousemove(function(event){
+					console.log(event.pageX + ' - ' + event.pageY)
+				})
+			})
+			*/
+
+			/* Palette Expand/Collapse logic */
+			$(document).ready(function() {
+				var sections = $('.palette-heading')
+				
+				sections.each(function(){
+					var contentNode = $(this).next()
+					contentNode.css({
+						'max-height': $(contentNode.children()[0]).outerHeight()
+					})
+				})
+				
+				sections.on('click', function(event){
+					var contentNode = $(this).next()
+					
+					if (contentNode.attr('data-collapsed') === 'true') {
+						contentNode.attr('data-collapsed', false)
+						contentNode.css({
+							'max-height': $(contentNode.children()[0]).outerHeight()
+						})
+					} else {
+						contentNode.attr('data-collapsed', true)
+						contentNode.css({
+							'max-height': '0px'
+						})						
+					}
+					event.stopPropagation()
+				})
+			})
+		</script>
+	</head>
+	<body style="margin: 0px">
+		<div id="palette" class="user-selection-off" style="width: 200px">
+			<section>
+			    <h1 class="palette-heading">Form Components<span style="float: right">&#x2C5;</span></h1>
+			    <div>
+				    <ul>
+				        <li data-role="component" data-component-template="<button>button</button>"><img/>Button</li>
+				        <li><img/>Radio</li>
+				        <li><img/>Checkbox</li>
+						<li><img/>Label</li>
+						<li><img/>Text Field</li>
+						<li><img/>TextArea</li>
+						<li><img/>HTML Area</li>
+						<li><img/>RTF Area</li>
+						<li><img/>Password Field</li>
+						<li><img/>Calendar Field</li>
+						<li><img/>Media Field</li>
+						<li><img/>Combobox</li>
+						<li><img/>Listbox</li>
+						<li><img/>Multiselect Listbox</li>
+						<li><img/>TypeAhead</li>
+						<li><img/>Spinner</li>
+						<li><img/>Portal</li>
+				    </ul>
+				 </div>
+			</section>
+	
+			<section>
+			    <h1 class="palette-heading">Containers<span style="float: right">&#x2C5;</span></h1>
+			    <div>
+				    <ul>
+				        <li data-role="component" data-component-type="BOOTSTRAP.GRID"><img/>Grid</li>
+				        <li><img/>Tabbed Pane</li>
+				        <li><img/>Split Pane</li>
+				        <li><img/>Tabless Pane</li>
+				    </ul>
+				</div>
+			</section>
+	
+			<section>
+			    <h1 class="palette-heading">Charts<span style="float: right">&#x2C5;</span></h1>
+				<div>
+				    <ul>
+				        <li data-role="component" data-component-type="JUSTGAGE"><img/>Gauge</li>
+				    </ul>
+				</div>
+			</section>
+	
+			<section>
+			    <h1 class="palette-heading">HTML<span style="float: right">&#x2C5;</span></h1>
+				<div>
+				    <ul>
+				        <li><img/>DIV</li>
+				        <li><img/>SPAN</li>
+				        <li><img/>H1</li>
+				        <li><img/>P</li>
+				    </ul>
+				</div>
+			</section>
+		</div>
+
+		<div id="content-area">
+			<div id="content">
+				<div id="contentframe-overlay"></div>
+				<iframe id="contentframe" src="../content.html" ALLOWTRANSPARENCY="true"></iframe>
+			</div>
+		</div>
+		<div id="dimension-previews">
+			<button data-width="100%" data-height="100%">Desktop</button>
+			<button data-width="320" data-height="568">iPhone 5</button>
+			<button data-width="320" data-height="480">iPhone 4</button>
+			<button data-width="768" data-height="1024">iPad</button>
+			<button id="rotate">Rotate</button>
+		</div>
+	</body>
+</html>

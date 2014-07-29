@@ -1,7 +1,6 @@
 //======Zoom logic=========================================
 //TODO: binding with input field should be done nicer
-
-(function(){
+(function() {
 	function Zoom () {
 		var instance = this
 		var zoomFactors = [.25, .33, .5, .67, .75, .9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4, 5]
@@ -11,10 +10,10 @@
 //		})
 
 		this.setZoom = function(level) {
-			this.zoom = level
+			Object.getPrototypeOf(this).zoom = level
 			//$('#zoom input').val(Math.floor(zoom * 100) + '%')
 			this.parts.CONTENT.css({ transform: 'scale(' + level + ')' })
-			this.editor.trigger(Editor.EVENT_TYPES.ZOOM_CHANGED, level)
+			this.fire(Editor.EVENT_TYPES.ZOOM_CHANGED, level)
 		}
 
 		function zoomInOut(up) {
@@ -96,5 +95,5 @@
 		})
 	}
 	
-	Editor.registerPlugin(Zoom)		
+	Editor.registerPlugin('zoom', Zoom)		
 }())

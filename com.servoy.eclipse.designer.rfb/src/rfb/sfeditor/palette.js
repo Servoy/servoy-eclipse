@@ -1,10 +1,11 @@
+//TODO: Palette should remember expand/collapse state of Categories between sessions
 function Palette(selector) {
 	var instance  = this
 	this.palette = $(selector)
 	
 	//Handle expand/collapse of Palette sections
 	var collapseStateAttrName = 'data-collapsed'
-	this.palette.on('click', '.palette-heading', function(event){
+	this.palette.on('click', '.palette-heading', function(event) {
 		var contentNode = $(this).next()
 		
 		if (contentNode.attr(collapseStateAttrName) === 'true') {
@@ -22,13 +23,16 @@ function Palette(selector) {
 	})
 	
 	//Handle DND from Palette to Editor
+	//TODO: move to DND plugin, so can be reused for moving elements as well
 	var dragClone,
 		dragInfo = {
 			el: null,
 			xOffset: null,
 			yOffset: null
 		},
-		$glassPane
+		$glassPane,
+		elements,
+		additionalInfo
 	
 	function onDragStart(e) {
 		if (!instance.editor) {
@@ -36,7 +40,6 @@ function Palette(selector) {
 			return
 		}
 		
-		$glassPane = instance.editor.parts.GLASSPANE
 		var frame = instance.editor.editor.find('.contentframe')[0]
 		var frameRect = frame.getBoundingClientRect()
 		dragInfo.xOffset = frameRect.left
@@ -44,6 +47,7 @@ function Palette(selector) {
 		
 		var win = instance.editor.contentWindow
 	
+		//TODO: The dragClone attached to the cursor should only start to show when the mouse is moved over a certain threshold: currently it also shows when clicking an item in the palette
 		dragClone = $(this).clone()
 		dragClone.attr('id', 'dragNode')
 		dragClone.css({
@@ -62,7 +66,7 @@ function Palette(selector) {
 		var el
 		var template = dragClone.attr('data-component-template')
 		if (template) {
-			var id = SFComponentFactory.getNewID()
+			var id = win.SFComponentFactory.getNewID()
 			el = $(template)
 			el.attr('id', id)
 			
@@ -71,7 +75,7 @@ function Palette(selector) {
 			el = win.SFComponentFactory.getInstance(dragClone.attr('data-component-type'))
 		}
 		dragInfo.el = el
-		
+
 		el.css({
 			position: 'absolute',
 			top: e.pageY - dragInfo.yOffset,
@@ -81,11 +85,24 @@ function Palette(selector) {
 			transition: 'opacity .5s ease-in-out'
 		})
 		
+		//START logic to insert element in correct location
+		elements = document.querySelectorAll('.svelement')
+		additionalInfo = new Array(elements.length)
+		for (var i = 0; i < elements.length; i++) {
+			additionalInfo[i] = {
+				rect: elements[i].getBoundingClientRect()
+			}
+		}
+		
+		//END logic
+		
+		
 		$(document).on('mousemove.editor', onMove)
 			.on('mouseup.editor', onDrop)
 	
 		//TODO: the transitions don't seem to work here, needs improving
-		$glassPane.on('mouseenter.editor', function(e) {
+		//TODO: since the glasspane now covers the entire content-area, the item attached to the cursor while not over the content disappears too soon
+		instance.editor.parts.GLASSPANE.on('mouseenter.editor', function(e) {
 			dragClone.css('opacity', '0')
 			dragInfo.el.css('opacity', 1)
 			
@@ -96,9 +113,9 @@ function Palette(selector) {
 			}
 		})
 		
-		instance.editor.editor.trigger(Editor.EVENT_TYPES.DRAG_START)
+		instance.editor.fire(Editor.EVENT_TYPES.DRAG_START)
 	}
-	
+		
 	function onMove(e) {
 		var css = {
 			top: e.pageY,
@@ -123,8 +140,12 @@ function Palette(selector) {
 		var node = instance.editor.contentDocument.elementFromPoint(point.left, point.top)
 		var jqNode = $(node)
 
-		if (!jqNode.is('.svcontainer')) {
-			jqNode = jqNode.parent('.svcontainer')
+		if (!jqNode.is('.svelement')) {
+			jqNode = jqNode.parent('.svelement')
+		}
+		var jqParent = jqNode
+		if (!jqParent.is('.svcontainer')) {
+			jqParent = jqParent.parent('.svcontainer')
 		}
 		node = jqNode[0]
 		
@@ -139,17 +160,24 @@ function Palette(selector) {
 				left: ''
 			}
 			//TODO: instead of looking at the class, the positioning details of the dropped element should be evaluated within the dropped container
-			if (jqNode.is('.abs')) {
+			if (jqParent.is('.abs')) {
 				css.top = e.pageY,
 				css.left = e.pageX
-				instance.editor.convertToContentPoint(css, node)
-			} else if (jqNode.is('.vert')) {
+				instance.editor.convertToContentPoint(css, jqParent[0])
+			} else if (jqParent.is('.vert')) {
 			} else {
 			}
 			dragInfo.el.css(css)
-			jqNode.append(dragInfo.el)
+			//Start drop logic
+			if (jqNode.is('.svcontainer')) {
+				jqNode.append(dragInfo.el)				
+			} else {
+				jqNode.after(dragInfo.el)
+			}
+			//End drop logic
+			
 			dragInfo.el = null
-			instance.editor.editor.trigger(Editor.EVENT_TYPES.DROP)
+			instance.editor.fire(Editor.EVENT_TYPES.DROP)
 		} else {
 			dragInfo.el.remove()
 		}
@@ -157,7 +185,7 @@ function Palette(selector) {
 		dragClone.remove()
 		$(document).off('mousemove.editor mouseup.editor')
 		$glassPane.off('mouseenter.editor mouseleave.editor')
-		instance.editor.editor.trigger(Editor.EVENT_TYPES.DRAG_END)
+		instance.editor.fire(Editor.EVENT_TYPES.DRAG_END)
 	}
 	
 	this.palette.on('mousedown.editor', '[data-role="component"]', onDragStart)
@@ -174,7 +202,7 @@ Palette.prototype.setContent = function(content) {
 	//TODO: generate the innerHTML based on provided content. Currently content is hardcoded
 	
 	//Setting the max-height CSS property, needed to animate the expand/collapse
-	$('.palette-heading').each(function(){
+	this.palette.find('.palette-heading').each(function(){
 		var contentNode = $(this).next()
 		contentNode.css({
 			'max-height': $(contentNode.children()[0]).outerHeight()
