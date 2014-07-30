@@ -75,15 +75,14 @@
 					subtree: true,
 					childList: true
 				});
-*/				
+*/			
+document.addEventListener('click',  function(e){
+	e.preventDefault()
+	e.stopPropagation();
+},true)
 			})
 
 			$(window).resize(renderDecorators)
-			
-			//Prevent anchors being clicked
-			$(document).on('click', 'a', function(e){
-				e.preventDefault()
-			})
 		</script>
 		<style>
 			/* Prevent scrollbars due to dragged element */
