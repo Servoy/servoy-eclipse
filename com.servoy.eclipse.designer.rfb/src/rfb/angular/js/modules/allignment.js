@@ -10,6 +10,8 @@ angular.module('allignment',['toolbar','editor']).run(function($rootScope, $tool
 	$toolbar.add(btnLeftAlign, TOOLBAR_CATEGORIES.ELEMENTS);
 	$rootScope.$on(EDITOR_EVENTS.SELECTION_CHANGED, function(event, selection) {
 		// disable or enable buttons.
-		btnLeftAlign.enabled = !btnLeftAlign.enabled;
+		$rootScope.$apply(function() {
+			btnLeftAlign.enabled = !btnLeftAlign.enabled;
+		});
 	})
 });
