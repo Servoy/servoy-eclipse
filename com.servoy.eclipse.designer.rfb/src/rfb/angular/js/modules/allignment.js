@@ -1,7 +1,7 @@
 angular.module('allignment',['toolbar','editor']).run(function($rootScope, $toolbar, TOOLBAR_CATEGORIES, EDITOR_EVENTS){
 	var btnLeftAlign = {
 		text: "LeftAlign",
-		enabled: true,
+		enabled: false,
 		onclick: function() {
 			// handle click
 		},
@@ -11,7 +11,7 @@ angular.module('allignment',['toolbar','editor']).run(function($rootScope, $tool
 	$rootScope.$on(EDITOR_EVENTS.SELECTION_CHANGED, function(event, selection) {
 		// disable or enable buttons.
 		$rootScope.$apply(function() {
-			btnLeftAlign.enabled = !btnLeftAlign.enabled;
+			btnLeftAlign.enabled = selection.length > 0;
 		});
 	})
 });
