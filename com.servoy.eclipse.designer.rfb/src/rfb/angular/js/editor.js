@@ -20,7 +20,6 @@ angular.module('editor', ['palette','toolbar','mouseselection','decorators']).fa
 	      transclude: true,
 	      scope: {},
 	      link: function($scope, $element, $attrs) {
-			var iframeDoc;  
 			var timeout;
 			var delta = {
 				addedNodes: [],
@@ -48,10 +47,11 @@ angular.module('editor', ['palette','toolbar','mouseselection','decorators']).fa
 			}
 			$scope.contentframe = "editor-content.html?id=%23" + $element.attr("id") + "&f=" + getURLParameter("f") +"&s=" + getURLParameter("s");
 			$scope.contentWindow = $element.find('.contentframe')[0].contentWindow;
+			$scope.contentDocument = null;
 			console.log($scope.contentWindow)
 			$scope.registerDOMEvent = function(eventType, target,callback) {
 				if (target == "FORM") {
-				$(iframeDoc).on(eventType, null, callback.bind(this))
+				$($scope.contentDocument).on(eventType, null, callback.bind(this))
 			} else if (target == "EDITOR") {
 				console.log("registering dom event: " + eventType)
 				// $(doc) is the document of the editor (or a div)
@@ -87,7 +87,7 @@ angular.module('editor', ['palette','toolbar','mouseselection','decorators']).fa
 					if (idx !== -1) {
 						dirty = true
 						delta.removedNodes.push(ar[i])
-						selection.splice(idx)
+						selection.splice(idx,1)
 					}
 				}
 				if (dirty) {
@@ -109,7 +109,7 @@ angular.module('editor', ['palette','toolbar','mouseselection','decorators']).fa
 			}
 			
 			$element.on('documentReady.content', function(event, contentDocument) {
-				iframeDoc = contentDocument;
+				$scope.contentDocument = contentDocument;
 				$pluginRegistry.registerEditor($scope);
 			});
 	      },
