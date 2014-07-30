@@ -15332,6 +15332,16 @@ function mySortFunction(r1, r2)
  datasources.db.example_data.book_nodes.getFoundSet().loadRecords(q)]]></sample>
           </samples>
         </function>
+        <function clientSupport="ng,wc,sc" name="getColumnNames">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"><![CDATA[String[] column names]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Get the column names of a datasource.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Get the column names of a datasource.]]></summary>
+          </summaries>
+        </function>
         <function clientSupport="ng,wc,sc" name="getDatasource">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String datasource]]></return>
@@ -24181,8 +24191,8 @@ while(fsUpdater.next())
             <description clientSupport="ng,wc,sc"><![CDATA[Do the actual update in the database, returns true if successful.
 There are 3 types of possible use with the foundset updater
 1) update entire foundset by a single sql statement; that is not possible when the table of the foundset has tracking enabled then it will loop over the whole foundset. 
-   When a single sql statement is done, modification columns will not be updated, because it does the update directly in the database, without getting the records.
-   NOTE: this mode will refresh all foundsets based on same datasource
+   When a single sql statement is done, modification columns will not be updated and associated Table Events won't be triggered, because it does the update directly in the database, without getting the records.
+  NOTE: this mode will refresh all foundsets based on same datasource
 2) update part of foundset, for example the first 4 row (starts with selected row)
 3) safely loop through foundset (starts with selected row)
 
