@@ -2650,7 +2650,8 @@ public class TypeCreator extends TypeCache
 					members.add(property);
 				}
 			}
-			if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType().supports(ClientSupport.ng))
+			ClientSupport clientSupport = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
+			if (clientSupport != null && clientSupport.supports(ClientSupport.ng))
 			{
 				WebComponentSpecification[] serviceSpecifications = WebServiceSpecProvider.getInstance().getWebServiceSpecifications();
 				for (WebComponentSpecification spec : serviceSpecifications)
