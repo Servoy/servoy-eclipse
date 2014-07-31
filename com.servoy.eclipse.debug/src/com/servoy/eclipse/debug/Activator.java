@@ -146,7 +146,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 						IPath path = resource.getProjectRelativePath();
 						if (path.segmentCount() > 1)
 						{
-							if (path.segment(0).equals(COMPONENTS_DIR_NAME))
+							if (path.segment(0).equals(COMPONENTS_DIR_NAME) || path.segment(0).equals(SERVICES_DIR_NAME))
 							{
 								if (path.segmentCount() == 2 && resource instanceof IFile)
 								{
@@ -159,7 +159,8 @@ public class Activator extends AbstractUIPlugin implements IStartup
 								}
 							}
 						}
-						if (path.segmentCount() == 0 || (path.segmentCount() > 0 && path.segment(0).equals(COMPONENTS_DIR_NAME)))
+						if (path.segmentCount() == 0 ||
+							(path.segmentCount() > 0 && (path.segment(0).equals(COMPONENTS_DIR_NAME) || path.segment(0).equals(SERVICES_DIR_NAME))))
 						{
 							if (shouldRefresh(resourceProject, rd.getAffectedChildren()))
 							{
@@ -184,7 +185,6 @@ public class Activator extends AbstractUIPlugin implements IStartup
 			@Override
 			public IStatus run(IProgressMonitor monitor)
 			{
-				if (monitor != null) return Status.OK_STATUS;
 				if (activeProjectListenerForRegisteringResources == null)
 				{
 					activeProjectListenerForRegisteringResources = new IActiveProjectListener()
@@ -216,7 +216,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 					}
 					if (serviceReaders.size() > 0)
 					{
-						ResourceProvider.removeComponentResources(serviceReaders.values());
+						ResourceProvider.removeServiceResources(serviceReaders.values());
 						serviceReaders.clear();
 					}
 					componentReaders.putAll(readDir(monitor, activeResourcesProject, COMPONENTS_DIR_NAME));
@@ -299,6 +299,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 	{
 		ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
 		ResourceProvider.removeComponentResources(componentReaders.values());
+		ResourceProvider.removeServiceResources(serviceReaders.values());
 		if (activeProjectListenerForRegisteringResources != null) ((ServoyModel)ServoyModelFinder.getServoyModel()).removeActiveProjectListener(activeProjectListenerForRegisteringResources);
 		plugin = null;
 		super.stop(context);
