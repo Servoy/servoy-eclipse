@@ -204,8 +204,8 @@ public class WarExporter
 
 				if (libs == null)
 				{
-					Debug.log("missing lib name: " + libName);
-					Debug.log("missing filter: " + filter.toString());
+					System.err.println("missing lib name: " + libName);
+					System.err.println("missing filter: " + filter.toString());
 				}
 
 				if (libs != null && libs.length > 0)
