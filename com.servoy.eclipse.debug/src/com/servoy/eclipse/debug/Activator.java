@@ -66,6 +66,7 @@ import com.servoy.j2db.util.Utils;
 public class Activator extends AbstractUIPlugin implements IStartup
 {
 	private static final String COMPONENTS_DIR_NAME = "components";
+	private static final String SERVICES_DIR_NAME = "services";
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "com.servoy.eclipse.debug";
@@ -75,7 +76,8 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 	private final List<Image> imageList = Collections.synchronizedList(new ArrayList<Image>());
 
-	private final Map<String, IPackageReader> readers = new HashMap<String, IPackageReader>();
+	private final Map<String, IPackageReader> componentReaders = new HashMap<String, IPackageReader>();
+	private final Map<String, IPackageReader> serviceReaders = new HashMap<String, IPackageReader>();
 
 	private IResourceChangeListener resourceChangeListener;
 
@@ -207,45 +209,20 @@ public class Activator extends AbstractUIPlugin implements IStartup
 				ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
 				if (activeResourcesProject != null)
 				{
-					if (readers.size() > 0)
+					if (componentReaders.size() > 0)
 					{
-						ResourceProvider.removeComponentResources(readers.values());
-						readers.clear();
+						ResourceProvider.removeComponentResources(componentReaders.values());
+						componentReaders.clear();
 					}
-					IFolder folder = activeResourcesProject.getProject().getFolder(COMPONENTS_DIR_NAME);
-					if (folder.exists())
+					if (serviceReaders.size() > 0)
 					{
-						try
-						{
-							folder.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-							IResource[] members = folder.members();
-							for (IResource resource : members)
-							{
-								String name = resource.getName();
-								int index = name.lastIndexOf('.');
-								if (index != -1)
-								{
-									name = name.substring(0, index);
-								}
-								if (resource instanceof IFolder)
-								{
-									if (((IFolder)resource).getFile("META-INF/MANIFEST.MF").exists())
-									{
-										readers.put(name, new WebComponentPackage.DirPackageReader(new File(resource.getRawLocationURI())));
-									}
-								}
-								else if (resource instanceof IFile)
-								{
-									readers.put(name, new WebComponentPackage.JarPackageReader(new File(resource.getRawLocationURI())));
-								}
-							}
-						}
-						catch (CoreException e)
-						{
-							ServoyLog.logError(e);
-						}
+						ResourceProvider.removeComponentResources(serviceReaders.values());
+						serviceReaders.clear();
 					}
-					ResourceProvider.addComponentResources(readers.values());
+					componentReaders.putAll(readDir(monitor, activeResourcesProject, COMPONENTS_DIR_NAME));
+					serviceReaders.putAll(readDir(monitor, activeResourcesProject, SERVICES_DIR_NAME));
+					ResourceProvider.addComponentResources(componentReaders.values());
+					ResourceProvider.addServiceResources(serviceReaders.values());
 
 					for (IWebResourceChangedListener listener : webResourceChangedListeners)
 					{
@@ -253,6 +230,49 @@ public class Activator extends AbstractUIPlugin implements IStartup
 					}
 				}
 				return Status.OK_STATUS;
+			}
+
+			/**
+			 * @param monitor
+			 * @param activeResourcesProject
+			 */
+			private Map<String, IPackageReader> readDir(IProgressMonitor monitor, ServoyResourcesProject activeResourcesProject, String folderName)
+			{
+				Map<String, IPackageReader> readers = new HashMap<String, IPackageReader>();
+				IFolder folder = activeResourcesProject.getProject().getFolder(folderName);
+				if (folder.exists())
+				{
+					try
+					{
+						folder.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+						IResource[] members = folder.members();
+						for (IResource resource : members)
+						{
+							String name = resource.getName();
+							int index = name.lastIndexOf('.');
+							if (index != -1)
+							{
+								name = name.substring(0, index);
+							}
+							if (resource instanceof IFolder)
+							{
+								if (((IFolder)resource).getFile("META-INF/MANIFEST.MF").exists())
+								{
+									readers.put(name, new WebComponentPackage.DirPackageReader(new File(resource.getRawLocationURI())));
+								}
+							}
+							else if (resource instanceof IFile)
+							{
+								readers.put(name, new WebComponentPackage.JarPackageReader(new File(resource.getRawLocationURI())));
+							}
+						}
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
+				return readers;
 			}
 		};
 		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
@@ -278,7 +298,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 	public void stop(BundleContext context) throws Exception
 	{
 		ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
-		ResourceProvider.removeComponentResources(readers.values());
+		ResourceProvider.removeComponentResources(componentReaders.values());
 		if (activeProjectListenerForRegisteringResources != null) ((ServoyModel)ServoyModelFinder.getServoyModel()).removeActiveProjectListener(activeProjectListenerForRegisteringResources);
 		plugin = null;
 		super.stop(context);
