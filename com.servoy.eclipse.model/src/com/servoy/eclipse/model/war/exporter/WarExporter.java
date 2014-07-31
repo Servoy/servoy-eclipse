@@ -201,7 +201,14 @@ public class WarExporter
 				File pluginLocation = new File(pluginLocations.get(i));
 				FileFilter filter = new WildcardFileFilter(libName);
 				File[] libs = pluginLocation.listFiles(filter);
-				if (libs.length > 0)
+
+				if (libs == null)
+				{
+					Debug.log("missing lib name: " + libName);
+					Debug.log("missing filter: " + filter.toString());
+				}
+
+				if (libs != null && libs.length > 0)
 				{
 					File file = libs[0];
 					if (libName.contains("servoy_ngclient"))
