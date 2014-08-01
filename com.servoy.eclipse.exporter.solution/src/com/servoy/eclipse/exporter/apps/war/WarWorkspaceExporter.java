@@ -185,7 +185,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			@Override
 			public List<String> getPluginLocations()
 			{
-				return Arrays.asList(configuration.getPluginLocations().toLowerCase().split(" "));
+				return Arrays.asList(configuration.getPluginLocations().split(" "));
 			}
 		});
 		try

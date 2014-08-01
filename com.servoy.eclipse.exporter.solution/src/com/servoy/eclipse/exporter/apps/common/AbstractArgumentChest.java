@@ -120,7 +120,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 		if (argsMap.containsKey(argName))
 		{
 			String val = argsMap.get(argName);
-			if (val != null & !val.trim().equals("")) return val;
+			if (val != null && !val.trim().equals("")) return val;
 
 			if (errMsg != null)
 			{

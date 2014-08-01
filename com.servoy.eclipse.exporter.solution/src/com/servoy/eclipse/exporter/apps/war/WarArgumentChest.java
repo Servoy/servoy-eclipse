@@ -86,6 +86,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 	@Override
 	protected void parseArguments(HashMap<String, String> argsMap)
 	{
+		System.out.println("parsing arguments map "+argsMap);
 		plugins = parseArg("pi", "Plugin name(s) was(were) not specified after '-pi' argument.", argsMap);
 		beans = parseArg("b", "Bean name(s) was(were) not specified after '-b' argument.", argsMap);
 		lafs = parseArg("l", "Laf name(s) was(were) not specified after '-l' argument.", argsMap);
