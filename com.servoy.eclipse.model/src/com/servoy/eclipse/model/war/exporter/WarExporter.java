@@ -200,28 +200,37 @@ public class WarExporter
 			{
 				File pluginLocation = new File(pluginLocations.get(i));
 				FileFilter filter = new WildcardFileFilter(libName);
-				File[] libs = pluginLocation.listFiles(filter);
-
-				if (libs == null)
+				try
 				{
-					System.err.println("missing lib name: " + libName);
-					System.err.println("missing filter: " + filter.toString());
-				}
+					File[] libs = pluginLocation.listFiles(filter);
 
-				if (libs != null && libs.length > 0)
-				{
-					File file = libs[0];
-					if (libName.contains("servoy_ngclient"))
+					if (libs == null)
 					{
-						copyNGClientJar(file, targetLibDir);
+						System.err.println(pluginLocation.toString() + " is directory " + pluginLocation.isDirectory());
+						System.err.println("missing lib name: " + libName);
+						System.err.println("missing filter: " + filter.toString());
+						System.out.println(pluginLocation.listFiles());
 					}
-					else
+
+					if (libs != null && libs.length > 0)
 					{
-						copyFile(file, new File(targetLibDir, file.getName()));
+						File file = libs[0];
+						if (libName.contains("servoy_ngclient"))
+						{
+							copyNGClientJar(file, targetLibDir);
+						}
+						else
+						{
+							copyFile(file, new File(targetLibDir, file.getName()));
+						}
+						found = true;
 					}
-					found = true;
+					i++;
 				}
-				i++;
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
 			}
 			if (!found) throw new ExportException(libName + " was not found. Please specify location");
 		}
