@@ -14,7 +14,7 @@ angular.module('editor', ['palette','toolbar','mouseselection','decorators']).fa
 	}
 }).value("EDITOR_EVENTS", {
     SELECTION_CHANGED : "SELECTION_CHANGED"
-}).directive("editor", function( $window, $pluginRegistry,$rootScope,EDITOR_EVENTS){
+}).directive("editor", function( $window, $pluginRegistry,$rootScope,EDITOR_EVENTS, $timeout){
 	return {
 	      restrict: 'E',
 	      transclude: true,
@@ -30,7 +30,7 @@ angular.module('editor', ['palette','toolbar','mouseselection','decorators']).fa
 				if (timeout) {
 					clearTimeout(timeout)
 				}
-				timeout = setTimeout(fireSelectionChanged, 1)
+				timeout = $timeout(fireSelectionChanged, 1)
 			}
 			
 			function fireSelectionChanged(){
