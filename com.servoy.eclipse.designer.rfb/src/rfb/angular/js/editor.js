@@ -108,6 +108,12 @@ angular.module('editor', ['palette','toolbar','mouseselection','decorators']).fa
 				}
 			}
 			
+			$scope.contentStyle = {width: "100%", height: "100%"};
+			$scope.setContentSize = function(width, height) {
+				$scope.contentStyle.width = width;
+				$scope.contentStyle.height = height;
+			}
+			
 			$element.on('documentReady.content', function(event, contentDocument) {
 				$scope.contentDocument = contentDocument;
 				$pluginRegistry.registerEditor($scope);

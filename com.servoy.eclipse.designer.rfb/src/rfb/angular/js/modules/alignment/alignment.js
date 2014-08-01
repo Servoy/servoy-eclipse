@@ -1,6 +1,7 @@
-angular.module('allignment',['toolbar','editor']).run(function($rootScope, $toolbar, TOOLBAR_CATEGORIES, EDITOR_EVENTS){
+angular.module('alignment',['toolbar','editor']).run(function($rootScope, $toolbar, TOOLBAR_CATEGORIES, EDITOR_EVENTS){
 	var btnLeftAlign = {
-		text: "LeftAlign",
+		text: "Alignment",
+		icon: "alignment/distribute_leftward.gif",
 		enabled: false,
 		onclick: function() {
 			// handle click

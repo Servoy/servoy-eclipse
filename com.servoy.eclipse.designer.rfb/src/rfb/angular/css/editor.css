@@ -57,6 +57,7 @@ body {
 	right: 0px;
 	bottom: 0px;
 	overflow: auto;
+	background-image: url('../images/light-raster-background.png')
 }
 
 .content-area.non-full {

@@ -1,33 +1,34 @@
-angular.module("toolbar",['allignment']).directive("toolbar", function(){
+angular.module("toolbar",['alignment','designsize']).directive("toolbar", function(TOOLBAR_CATEGORIES){
 	return {
 	      restrict: 'E',
 	      transclude: true,
 	      scope: {
 	      },
 	      controller: function($scope, $element, $attrs, $toolbar) {
-	    	  $scope.elements = $toolbar.getElements();
+	    	  $scope.elements = $toolbar.getButtons(TOOLBAR_CATEGORIES.ELEMENTS);
+	    	  $scope.sticky = $toolbar.getButtons(TOOLBAR_CATEGORIES.STICKY);
 	      },
 	      templateUrl: 'templates/toolbar.html',
 	      replace: true
 	    };
 	
 }).factory("$toolbar", function(TOOLBAR_CATEGORIES){
-	var editor = [];
-	var elements = [];
-	var form = [];
+	var buttons= [];
 	return {
 		add: function(buttonState, category) {
-			if(category == TOOLBAR_CATEGORIES.ELEMENTS) {
-				elements.push(buttonState);
+			if(!buttons[category]){
+				buttons[category] = [];
 			}
+			buttons[category].push(buttonState);
 		},
 		
-		getElements: function() {
-			return elements;
+		getButtons: function(category) {
+			return buttons[category];
 		}
 	}
 }).value("TOOLBAR_CATEGORIES", {
-	EDITOR: 1,
-	ELEMENTS: 2,
-	FORM: 3
+	EDITOR: "editor",
+	ELEMENTS: "elements",
+	FORM: "forms",
+	STICKY: "sticky"
 })

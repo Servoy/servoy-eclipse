@@ -57,3 +57,8 @@
 .toolbar-action[data-action-type="highlight-empty-containers"] img {
 	border: 1px dashed #C0C0C0;
 }
+
+.disabled img {
+	opacity: 0.4;
+	filter: alpha(opacity=40); /* msie */
+}
