@@ -11,7 +11,7 @@
 		<palette class="palette lhs-panel user-selection-off" style="width: 200px"></palette>
 	
 		<!--  Editor -->
-		<div class="content-area" tabindex="0">
+		<div class="content-area {{ isContentSizeFull() ? '' : 'non-full' }}" tabindex="0">
 		    <div class="contentframe-overlay max"></div> <!-- z-index: 1 -->
 			<div class="content" ng-style="contentStyle">
 				<!--Decorators-->

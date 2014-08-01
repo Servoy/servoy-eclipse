@@ -109,9 +109,17 @@ angular.module('editor', ['palette','toolbar','mouseselection','decorators']).fa
 			}
 			
 			$scope.contentStyle = {width: "100%", height: "100%"};
+			
 			$scope.setContentSize = function(width, height) {
 				$scope.contentStyle.width = width;
 				$scope.contentStyle.height = height;
+			}
+			$scope.getContentSize = function() {
+				return {width: $scope.contentStyle.width, height: $scope.contentStyle.height};
+			}
+			$scope.isContentSizeFull = function() {
+				var size = $scope.getContentSize();
+				return (size.width == "100%") && (size.height == "100%");
 			}
 			
 			$element.on('documentReady.content', function(event, contentDocument) {
