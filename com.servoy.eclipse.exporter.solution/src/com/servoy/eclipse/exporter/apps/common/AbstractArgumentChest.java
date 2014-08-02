@@ -104,11 +104,11 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 				int idx = arg.indexOf(" ");
 				if (idx > 0 && arg.length() > idx)
 				{
-					argsMap.put(arg.substring(0, idx).toLowerCase(), arg.substring(idx + 1).trim());
+					argsMap.put(arg.substring(0, idx), arg.substring(idx + 1).trim());
 				}
 				else
 				{
-					argsMap.put(arg.toLowerCase(), "");
+					argsMap.put(arg, "");
 				}
 			}
 		}
