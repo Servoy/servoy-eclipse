@@ -66,12 +66,13 @@ public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigura
 	{
 		super.prepareExporter(exporter, exportFolder, configuration, launch, monitor);
 
+		// prepare javascript suite and link launcher to dltk unit test view
+		testTarget = JSUnitLaunchConfigurationDelegate.prepareForLaunch(configuration, launch);
+
+		if (monitor != null && monitor.isCanceled()) return;
 		exporter.useTestWar(testTarget);
 
 		if (monitor != null && monitor.isCanceled()) return;
-
-		// prepare javascript suite and link launcher to dltk unit test view
-		testTarget = JSUnitLaunchConfigurationDelegate.prepareForLaunch(configuration, launch);
 	}
 
 	@Override
