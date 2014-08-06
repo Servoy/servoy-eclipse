@@ -624,6 +624,7 @@ public class WarExporter
 		// delete the tomcat boostrapper, also not needed in a war file
 		new File(targetLibDir, "server-bootstrap.jar").delete();
 		new File(targetLibDir, "tomcat-juli.jar").delete();
+		new File(targetLibDir, "tim-api.jar").delete();
 		return targetLibDir;
 	}
 
