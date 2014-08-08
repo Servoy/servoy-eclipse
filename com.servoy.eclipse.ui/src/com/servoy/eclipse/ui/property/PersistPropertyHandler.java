@@ -322,19 +322,20 @@ public class PersistPropertyHandler extends BasePropertyHandler
 		{
 			if (persistContext.getPersist() instanceof Solution)
 			{
-				return new PropertyDescription(name, MediaPropertyType.INSTANCE, new MediaPropertyControllerConfig("Solution CSS picker", new IFilter()
-				{
-					@Override
-					public boolean select(Object toTest)
+				return new PropertyDescription(name, MediaPropertyType.INSTANCE, new MediaPropertyControllerConfig("Solution CSS picker (from media library)",
+					new IFilter()
 					{
-						if (toTest instanceof MediaNode)
+						@Override
+						public boolean select(Object toTest)
 						{
-							MediaNode node = ((MediaNode)toTest);
-							return node.getType() == MediaNode.TYPE.FOLDER || node.getName().endsWith(".css");
+							if (toTest instanceof MediaNode)
+							{
+								MediaNode node = ((MediaNode)toTest);
+								return node.getType() == MediaNode.TYPE.FOLDER || node.getName().endsWith(".css");
+							}
+							return false;
 						}
-						return false;
-					}
-				}, false));
+					}, false));
 			}
 		}
 

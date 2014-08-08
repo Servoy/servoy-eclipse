@@ -2,6 +2,9 @@ package com.servoy.eclipse.exporter.mobile.launch;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Iterator;
 
 import org.apache.commons.io.FileUtils;
@@ -33,11 +36,6 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelegate
 {
 
-	/**
-	 * 1 sec was too low - for test deployment I had a few times ~1.2 sec time between timestamp changes during deployment...
-	 */
-	private static final int DEPLOYMENT_FINISH_SILENCE_PERIOD = 2000;
-
 	@Override
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException
 	{
@@ -62,28 +60,29 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 			exporter.doExport(false);
 
 			if (monitor != null && monitor.isCanceled()) return;
-			if (monitor != null) monitor.subTask("deploying mobile solution");
+			if (monitor != null) monitor.subTask("deploying mobile solution)");
+
+			// there are Tomcat deploy/undeploy ant tasks that use the Tomcat Manager URLs to do the job, and we could do the same here
+			// but that would mean adding a user with the manager rights to Tomcat user list, so currently we do it by looking at the file-system
+			// and doing a delete/copy to undeploy and then redeploy (initially we did only copy for redeploy but it wasn't clear enough then starting with Tomcat 7 when the deployment was done)
+			
+			// we don't just copy but also undeploy first as in Tomcat >= 7 that sometimes resulted in partially deletion of contents and failed deployment - probably due to also accessing contents during deployment as timeouts could not be tuned ok
 
 			File warFinalLocation = getWarExportDir(configuration);
 			File tmpWarFile = tmpExportFolder.listFiles()[0]; // the temp dir should now contain a single .war file - otherwise we can accept a RuntimeException
 
-			// we initially traced actual deployment folder, but since Tomcat 7 that was not enough, there was an additional delay until app. was accessible, so
-			// now we track the internal Tomcat created one; TODO we should switch to Tomcat API in the future
-			File warDeploymentTrackingFolder = new File(warFinalLocation, "../work/Catalina/localhost/" +
-				tmpWarFile.getName().substring(0, tmpWarFile.getName().length() - 4)); // drop the ".war" extension
+			String dirName = tmpWarFile.getName().substring(0, tmpWarFile.getName().length() - 4); // drop the ".war" extension
 			File finalWarFile = new File(warFinalLocation, tmpWarFile.getName());
+			File finalWarDir = new File(warFinalLocation, dirName);
 
-			boolean deployed = false;
-			long initialModificationTimestampOfDeploymentTrackingFolder = warDeploymentTrackingFolder.exists() ? warDeploymentTrackingFolder.lastModified() : 0;
-
-			// actual deployment/move
-			if (finalWarFile.exists()) FileUtils.deleteQuietly(finalWarFile); // because moveFileToDirectory fails otherwise
-			FileUtils.moveFileToDirectory(tmpWarFile, warFinalLocation, false);
+			// we initially traced actual deployment folder, but since Tomcat 7 that was not enough, there was an additional delay until app. was accessible, so
+			// now we track the internal Tomcat created one;
+			File warDeploymentTrackingDir = new File(warFinalLocation, "../work/Catalina/localhost/" + dirName);
 
 			beforeWaitForDeployment(monitor, configuration);
 
-			if (monitor != null && monitor.isCanceled()) return;
-			if (monitor != null) monitor.subTask("deploying mobile solution; waiting for deployment");
+			// actual deployment/move
+			long startTimestamp = System.currentTimeMillis();
 
 			int maxWaitTime;
 			try
@@ -95,29 +94,59 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 			{
 				maxWaitTime = Integer.parseInt(IMobileLaunchConstants.DEFAULT_MAX_WAR_DEPLOYMENT_TIME);
 			}
+			maxWaitTime = maxWaitTime * 1000;
 
-			long startTimestamp = System.currentTimeMillis();
-			try
+			// undeploy if needed
+			if (finalWarFile.exists() || finalWarDir.exists())
 			{
-				while (!deployed && (System.currentTimeMillis() - startTimestamp) < maxWaitTime * 1000)
+				if (monitor != null && monitor.isCanceled()) return;
+				if (monitor != null) monitor.subTask("deploying mobile solution; undeploying previous version");
+				if (finalWarFile.exists()) FileUtils.deleteQuietly(finalWarFile); // because moveFileToDirectory fails otherwise
+				else FileUtils.deleteQuietly(finalWarDir); // this could happen if we deleted the war file but undeploy failed once
+
+				while ((warDeploymentTrackingDir.exists() || finalWarDir.exists()) && (System.currentTimeMillis() - startTimestamp) < maxWaitTime)
 				{
 					// wait for mobile war to be deployed
-					Thread.sleep(200);
+					try
+					{
+						Thread.sleep(50);
+					}
+					catch (InterruptedException e)
+					{
+						ServoyLog.logError(e);
+					}
 					if (monitor != null && monitor.isCanceled()) return;
-
-
-					long mostRecentChangeTimestamp = warDeploymentTrackingFolder.lastModified();
-					deployed = (warDeploymentTrackingFolder.exists() && mostRecentChangeTimestamp != initialModificationTimestampOfDeploymentTrackingFolder && (System.currentTimeMillis() -
-						mostRecentChangeTimestamp > DEPLOYMENT_FINISH_SILENCE_PERIOD));
-//					if (warContextFolder.exists() && mostRecentChangeTimestamp != initialModificationTimestampOfWarContextFolder) System.out.println(mostRecentChangeTimestamp);
 				}
-				if (!deployed) throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "War deployment timeout after: " + maxWaitTime +
-					" seconds."));
+				if (warDeploymentTrackingDir.exists()) throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
+					"Timed out undeploying old war - after: " + (maxWaitTime / 1000) + " seconds."));
 			}
-			catch (InterruptedException e)
+
+			// deploy
+			if (monitor != null && monitor.isCanceled()) return;
+			if (monitor != null) monitor.subTask("deploying mobile solution; waiting for deployment");
+
+			FileUtils.moveFileToDirectory(tmpWarFile, warFinalLocation, false);
+
+			while (!warDeploymentTrackingDir.exists() && (System.currentTimeMillis() - startTimestamp) < maxWaitTime)
 			{
-				ServoyLog.logError(e);
+				// wait for mobile war to be deployed
+				try
+				{
+					Thread.sleep(50);
+				}
+				catch (InterruptedException e)
+				{
+					ServoyLog.logError(e);
+				}
+				if (monitor != null && monitor.isCanceled()) return;
 			}
+			if (!warDeploymentTrackingDir.exists()) throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "War deployment timeout after: " +
+				(maxWaitTime / 1000) + " seconds."));
+
+			// make sure deployed war is available over HTTP - the file system checks are not enough...
+			if (!httpCheckOK(monitor, startTimestamp, maxWaitTime, getApplicationURL(configuration)) && monitor == null || monitor.isCanceled()) throw new CoreException(
+				new Status(IStatus.ERROR, Activator.PLUGIN_ID, "War deployment http check failed after: " + (maxWaitTime / 1000) + " seconds."));
+			if (monitor != null && monitor.isCanceled()) return;
 		}
 		catch (IOException e)
 		{
@@ -136,6 +165,60 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 			webBrowser = PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser();
 		}
 		openBrowser(webBrowser, launch, configuration, monitor);
+	}
+
+	protected boolean httpCheckOK(IProgressMonitor monitor, long startTimestamp, int maxWaitTime, String url)
+	{
+		if (monitor != null && monitor.isCanceled()) return false;
+		if (monitor != null) monitor.subTask("deploying mobile solution; verifying deployment");
+		boolean httpOK = testHTTPOKCode(url);
+
+		while (!httpOK && (System.currentTimeMillis() - startTimestamp) < maxWaitTime)
+		{
+			// wait for mobile war to be deployed
+			try
+			{
+				Thread.sleep(100);
+			}
+			catch (InterruptedException e)
+			{
+				ServoyLog.logError(e);
+			}
+			if (monitor != null && monitor.isCanceled()) return false;
+			httpOK = testHTTPOKCode(url);
+		}
+
+		return httpOK;
+	}
+
+	private boolean testHTTPOKCode(String url)
+	{
+		HttpURLConnection httpConnection = null;
+		try
+		{
+			URLConnection conn = (new URL(url)).openConnection();
+			httpConnection = (HttpURLConnection)conn;
+
+			// Set up standard connection characteristics
+			httpConnection.setAllowUserInteraction(false);
+			httpConnection.setDoInput(true);
+			httpConnection.setUseCaches(false);
+			httpConnection.setDoOutput(false);
+			httpConnection.setRequestMethod("GET");
+			httpConnection.setRequestProperty("User-Agent", "Servoy Availibility Checker 0.1");
+			httpConnection.setConnectTimeout(5000);
+			httpConnection.connect();
+			return httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK;
+		}
+		catch (IOException e)
+		{
+			ServoyLog.logWarning("While checking for HTTP availability of war deployment: ", e);
+		}
+		finally
+		{
+			if (httpConnection != null) httpConnection.disconnect();
+		}
+		return false;
 	}
 
 	protected void beforeWaitForDeployment(IProgressMonitor monitor, ILaunchConfiguration configuration) throws CoreException
@@ -230,7 +313,7 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 				org.eclipse.ui.internal.browser.IBrowserExt ext = null;
 				if (ewb != null && !ewb.getName().equals(Messages.prefSystemBrowser))
 				{
-					//ext := "org.eclipse.ui.browser." + specifiId 
+					//ext := "org.eclipse.ui.browser." + specifiId
 					ext = org.eclipse.ui.internal.browser.WebBrowserUIPlugin.findBrowsers(ewb.getLocation());
 					if (ext != null && ext.getId().equals(browserId))
 					{

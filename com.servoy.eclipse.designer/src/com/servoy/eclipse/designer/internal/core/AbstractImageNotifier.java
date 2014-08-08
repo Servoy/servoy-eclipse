@@ -23,13 +23,14 @@ import javax.swing.JLabel;
 import org.eclipse.swt.graphics.ImageData;
 
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.model.DesignApplication;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IApplication;
 
-/** 
+/**
  * Base class for painting components to an swt image.
- * 
+ *
  * @author rgansevles
  */
 
@@ -76,7 +77,7 @@ public abstract class AbstractImageNotifier implements IImageNotifier, IImageLis
 		{
 			if (isWaitingStart)
 			{
-				// am already waiting to paint the component, no need to paint again 
+				// am already waiting to paint the component, no need to paint again
 				return;
 			}
 			isWaitingStart = true;
@@ -87,6 +88,7 @@ public abstract class AbstractImageNotifier implements IImageNotifier, IImageLis
 				{
 					try
 					{
+						if (Activator.getDefault() == null) return; // workbench already was shut down
 						Component component = createComponent();
 						if (component == null)
 						{
@@ -137,7 +139,7 @@ public abstract class AbstractImageNotifier implements IImageNotifier, IImageLis
 	protected abstract Component createComponent();
 
 	/**
-	 * @param component  
+	 * @param component
 	 */
 	protected float handleAlpha(Component component)
 	{
