@@ -1,4 +1,4 @@
-angular.module("palette",[]).directive("palette", function(){
+angular.module("palette",['ui.bootstrap']).directive("palette", function(){
 	return {
 	      restrict: 'E',
 	      transclude: true,
@@ -6,13 +6,13 @@ angular.module("palette",[]).directive("palette", function(){
 	      controller: function($scope, $element, $attrs) {
 	    	 $scope.categories = [];
 	    	  
-	    	 function addCategory(name) {
+	    	 function addCategory(name, isOpen) {
 	    		 for(var c in $scope.categories) {
 	    			 if($scope.categories[c].name == name) {
 	    				 return $scope.categories[c];
 	    			 }
 	    		 }
-	    		 var category = {name : name, components: []};
+	    		 var category = {name : name, components: [], isOpen: isOpen};
 	    		 $scope.categories.push(category);
 	    		 
 	    		 return category;
@@ -23,7 +23,7 @@ angular.module("palette",[]).directive("palette", function(){
 	    		 category.components.push({name : name, icon : icon});
 	    	 }
 	    	 
-	    	 addCategory("Form Components");
+	    	 addCategory("Form Components", true);
 	    	 addCategory("Containers");
 	    	 addCategory("Charts");
 	    	 addCategory("HTML");
