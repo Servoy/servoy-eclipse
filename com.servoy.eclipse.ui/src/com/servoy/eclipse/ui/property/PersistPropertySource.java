@@ -788,6 +788,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					{
 						public MethodWithArguments convertProperty(Object id, Integer value)
 						{
+							if (value == null) return null;
+
 							SafeArrayList<Object> args = null;
 							SafeArrayList<Object> params = null;
 							if (persistContext != null && persistContext.getPersist() instanceof AbstractBase)
@@ -1669,8 +1671,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		{
 			propertyValue = getPersistPropertyValue(id);
 		}
-		if (propertyValue != null) return convertGetPropertyValue(id, propertyDescriptor, propertyValue);
-		return null;
+		return convertGetPropertyValue(id, propertyDescriptor, propertyValue);
 	}
 
 	public static Object convertGetPropertyValue(Object id, IPropertyDescriptor propertyDescriptor, Object rawValue)
