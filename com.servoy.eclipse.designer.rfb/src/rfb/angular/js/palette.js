@@ -24,9 +24,9 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function(){
 	    	 }
 	    	 
 	    	 addCategory("Form Components", true);
-	    	 addCategory("Containers");
-	    	 addCategory("Charts");
-	    	 addCategory("HTML");
+	    	 addCategory("Containers", true);
+	    	 addCategory("Charts", true);
+	    	 addCategory("HTML", true);
 	    	 
 	    	 addComponent("Form Components", "Button", "images/old/button.gif");
 	    	 addComponent("Form Components", "Radio", "images/old/RADIO16.png");

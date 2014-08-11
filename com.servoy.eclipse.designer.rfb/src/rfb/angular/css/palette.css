@@ -2,7 +2,6 @@
 	color: #000;
 	border: 0px solid #C0C0C0;
 	border-right-width: 1px;
-	padding-top: 6px;
 	overflow: auto
 }
 
@@ -45,4 +44,20 @@
 
 .palette img[src] {
 	visibility: visible
+}
+
+.palette .panel-heading {
+	padding: 0px;
+}
+
+.palette .panel-body {
+	padding: 0px;
+}
+
+.palette .panel-group .panel+.panel {
+	margin-top: 0px;
+}
+
+.palette a:hover, a:focus {
+	text-decoration: none;
 }
