@@ -2,7 +2,8 @@
 	color: #000;
 	border: 0px solid #C0C0C0;
 	border-right-width: 1px;
-	overflow: auto
+	overflow: auto;
+	padding-top: 6px;
 }
 
 .palette-heading {
@@ -31,7 +32,8 @@
 }
 
 .palette li {
-	padding-top: 3px
+	padding-top: 3px;
+	white-space: nowrap;
 }
 
 .palette img {
@@ -44,6 +46,10 @@
 
 .palette img[src] {
 	visibility: visible
+}
+
+.palette .panel {
+	border: 0px;
 }
 
 .palette .panel-heading {
@@ -60,4 +66,12 @@
 
 .palette a:hover, a:focus {
 	text-decoration: none;
+}
+
+.palette .panel-default>.panel-heading {
+	background: transparent;
+}
+
+.palette .panel-group .panel-heading+.panel-collapse>.panel-body {
+	border-top: 0px;
 }
