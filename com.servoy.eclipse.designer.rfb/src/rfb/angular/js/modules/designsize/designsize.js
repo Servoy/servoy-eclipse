@@ -16,20 +16,20 @@ angular.module('designsize',['toolbar','editor']).run(function($rootScope, $tool
 	
 	var isPortrait = true;
 	var lastClicked;
-	var btnTableSize = {
-			text: "Table",
+	var btnTabletSize = {
+			text: "Tablet",
 			icon: "designsize/ipad-landscape-portrait-64x64.png",
 			enabled: true,
 			onclick: function() {
-				if(lastClicked == "Table") isPortrait = !isPortrait;
+				if(lastClicked == "Tablet") isPortrait = !isPortrait;
 				if(isPortrait) 
 					editor.setContentSize("768px", "1024px");
 				else
 					editor.setContentSize("1024px", "768px");
-				lastClicked = "Table";
+				lastClicked = "Tablet";
 			},
 		};
-	$toolbar.add(btnTableSize, TOOLBAR_CATEGORIES.STICKY);	
+	$toolbar.add(btnTabletSize, TOOLBAR_CATEGORIES.STICKY);	
 
 	var btnMobileSize = {
 			text: "Phone",
