@@ -20,12 +20,13 @@ package com.servoy.eclipse.ui.views.solutionexplorer;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IServerConfigListener;
 import com.servoy.j2db.persistence.ServerConfig;
 
 /**
  * Listener responsible to make updates when changes occur in the server editor
- * 
+ *
  * @author alorincz
  *
  */
@@ -34,19 +35,26 @@ public class SolutionExplorerServerConfigSync implements IServerConfigListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.j2db.persistence.IServerConfigListener#serverConfigurationChanged(com.servoy.j2db.persistence.ServerConfig,
 	 * com.servoy.j2db.persistence.ServerConfig)
 	 */
 	public void serverConfigurationChanged(ServerConfig oldServerConfig, ServerConfig newServerConfig)
 	{
-		IViewReference solexRef = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findViewReference(SolutionExplorerView.PART_ID);
-		SolutionExplorerView solexView = null;
-		if (solexRef != null)
+		try
 		{
-			solexView = (SolutionExplorerView)solexRef.getView(false);
-			solexView.enablePostgresDBCreation();
-			solexView.enableSybaseDBCreation();
+			IViewReference solexRef = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findViewReference(SolutionExplorerView.PART_ID);
+			SolutionExplorerView solexView = null;
+			if (solexRef != null)
+			{
+				solexView = (SolutionExplorerView)solexRef.getView(false);
+				solexView.enablePostgresDBCreation();
+				solexView.enableSybaseDBCreation();
+			}
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logInfo("Server configuration is changes but the solex couldn't be updated: " + e.getMessage());
 		}
 	}
 }
