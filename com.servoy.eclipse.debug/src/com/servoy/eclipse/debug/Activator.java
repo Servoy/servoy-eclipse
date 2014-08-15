@@ -94,7 +94,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.runtime.Plugins#start(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -146,18 +146,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 						IPath path = resource.getProjectRelativePath();
 						if (path.segmentCount() > 1)
 						{
-							if (path.segment(0).equals(COMPONENTS_DIR_NAME) || path.segment(0).equals(SERVICES_DIR_NAME))
-							{
-								if (path.segmentCount() == 2 && resource instanceof IFile)
-								{
-									// a zip is changed refresh
-									return true;
-								}
-								else if (path.lastSegment().equalsIgnoreCase("MANIFEST.MF") || path.lastSegment().toLowerCase().endsWith(".spec"))
-								{
-									return true;
-								}
-							}
+							return (path.segment(0).equals(COMPONENTS_DIR_NAME) || path.segment(0).equals(SERVICES_DIR_NAME));
 						}
 						if (path.segmentCount() == 0 ||
 							(path.segmentCount() > 0 && (path.segment(0).equals(COMPONENTS_DIR_NAME) || path.segment(0).equals(SERVICES_DIR_NAME))))
@@ -291,7 +280,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
