@@ -23,7 +23,6 @@ import java.util.Iterator;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.swt.widgets.Display;
 
-import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.j2db.IApplication;
@@ -31,6 +30,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistChangeListener;
 
 /**
  * Base graphical edit part for element groups.

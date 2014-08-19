@@ -44,7 +44,6 @@ import org.eclipse.gef.tools.DragEditPartsTracker;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 
-import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
@@ -59,6 +58,7 @@ import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 

@@ -30,10 +30,10 @@ import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.actions.AbstractEditorActionDelegateHandler;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistChangeListener;
 
 /**
  * Base class for actions based on the selection in form designer.

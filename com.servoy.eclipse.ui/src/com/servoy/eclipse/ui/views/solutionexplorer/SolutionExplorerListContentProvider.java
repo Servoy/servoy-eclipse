@@ -55,7 +55,6 @@ import org.sablo.specification.WebComponentSpecification;
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.base.util.ITagResolver;
 import com.servoy.eclipse.core.Activator;
-import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -100,6 +99,7 @@ import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnListener;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
@@ -1740,7 +1740,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	}
 
 	/**
-	 * @see com.servoy.eclipse.model.nature.IPersistChangeListener#persistChanges(java.util.Collection)
+	 * @see com.com.servoy.j2db.persistence.IPersistChangeListener#persistChanges(java.util.Collection)
 	 */
 	public void persistChanges(Collection<IPersist> changes)
 	{

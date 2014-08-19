@@ -32,7 +32,6 @@ import org.eclipse.swt.widgets.Display;
 import org.xhtmlrenderer.css.constants.CSSName;
 
 import com.servoy.base.persistence.IMobileProperties;
-import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
@@ -47,6 +46,7 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.util.IStyleRule;
 import com.servoy.j2db.util.IStyleSheet;

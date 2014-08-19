@@ -29,7 +29,6 @@ import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 
-import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
@@ -40,6 +39,7 @@ import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.util.Pair;
 
 /**

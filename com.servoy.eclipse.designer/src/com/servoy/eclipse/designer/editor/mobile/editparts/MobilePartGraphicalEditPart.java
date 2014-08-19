@@ -25,7 +25,6 @@ import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.swt.widgets.Display;
 
-import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.ComponentDeleteEditPolicy;
@@ -34,6 +33,7 @@ import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Part;
 

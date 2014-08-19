@@ -49,7 +49,6 @@ import org.eclipse.ui.views.properties.IPropertySourceProvider;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IActiveProjectListener;
-import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
@@ -66,6 +65,7 @@ import com.servoy.j2db.persistence.FlattenedPortal;
 import com.servoy.j2db.persistence.FlattenedTabPanel;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;

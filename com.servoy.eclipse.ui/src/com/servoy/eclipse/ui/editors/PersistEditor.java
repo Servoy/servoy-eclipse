@@ -38,7 +38,6 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.IPropertySourceProvider;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
-import com.servoy.eclipse.core.IPersistChangeListener;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -46,6 +45,7 @@ import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportName;
