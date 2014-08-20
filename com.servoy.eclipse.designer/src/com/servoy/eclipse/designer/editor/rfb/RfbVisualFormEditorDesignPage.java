@@ -31,6 +31,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -133,6 +134,26 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 			browser.setUrl(url);
 			// install fake WebSocket in case browser does not support it
 			SwtWebsocket.installFakeWebSocket(browser);
+			// install console
+			new BrowserFunction(browser, "consoleLog")
+			{
+				@Override
+				public Object function(Object[] arguments)
+				{
+					if (arguments.length > 1)
+					{
+						if ("log".equals(arguments[0]))
+						{
+							ServoyLog.logInfo((String)arguments[1]);
+						}
+						else if ("error".equals(arguments[0]))
+						{
+							ServoyLog.logError((String)arguments[1], null);
+						}
+					}
+					return null;
+				}
+			};
 		}
 		catch (Exception e)
 		{

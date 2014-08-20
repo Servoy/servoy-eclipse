@@ -101,6 +101,23 @@ angular.module('editor', ['palette','toolbar','mouseselection','decorators']).fa
 				$scope.contentframe = "editor-content.html?endpoint=editor&id=%23" + $element.attr("id") + "&f=" + getURLParameter("f") +"&s=" + getURLParameter("s");
 			}
 			testWebsocket();
+			if (typeof(console) == "undefined") {
+				window.console = {
+						log: function(msg) {
+							if (typeof(consoleLog) != "undefined") {
+								consoleLog("log",msg)
+							}
+							else alert(msg);
+							
+						},
+						error: function(msg) {
+							if (typeof(consoleLog) != "undefined") {
+								consoleLog("error",msg)
+							}
+							else alert(msg);
+						}
+				}
+			}
 			$scope.contentWindow = $element.find('.contentframe')[0].contentWindow;
 			$scope.contentDocument = null;
 			$scope.registerDOMEvent = function(eventType, target,callback) {

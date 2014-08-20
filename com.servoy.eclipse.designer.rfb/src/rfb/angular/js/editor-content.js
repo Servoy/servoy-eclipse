@@ -22,6 +22,23 @@ angular.module('editorContent',['servoyApp'])
 			parent.window.SwtWebsocketBrowserFunction('send', str, this.id)
 		}
 	}
+	if (typeof(console) == "undefined") {
+		window.console = {
+				log: function(msg) {
+					if (typeof(consoleLog) != "undefined") {
+						consoleLog("log",msg)
+					}
+					else alert(msg);
+					
+				},
+				error: function(msg) {
+					if (typeof(consoleLog) != "undefined") {
+						consoleLog("error",msg)
+					}
+					else alert(msg);
+				}
+		}
+	}
 	 $servoyInternal.connect();
 	 var formName = getURLParameter("f");
 	 $scope.getUrl = function() {
