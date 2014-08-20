@@ -15,8 +15,10 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 					currentNode.name =  node.attr('name');
 					currentNode.node = node;
 					var offset = node.offset()
-					offset.top -= $scope.contentWindow.scrollY
-					offset.left -= $scope.contentWindow.scrollX
+					var x = (window.pageXOffset !== undefined) ? window.pageXOffset : (document.documentElement || document.body.parentNode || document.body).scrollLeft;
+					var y = (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
+					offset.top -= y;
+					offset.left -= x;
 					var height = node.outerHeight()
 					var width = node.outerWidth()
 					currentNode.style = {

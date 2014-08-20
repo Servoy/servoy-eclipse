@@ -34,7 +34,6 @@ angular.module('editor', ['palette','toolbar','mouseselection','decorators']).fa
 			}
 			
 			function fireSelectionChanged(){
-				console.log(selection)
 				//Reference to editor should be gotten from Editor instance somehow
 				//instance.fire(Editor.EVENT_TYPES.SELECTION_CHANGED, delta)
 				$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED,selection)
@@ -104,7 +103,6 @@ angular.module('editor', ['palette','toolbar','mouseselection','decorators']).fa
 			testWebsocket();
 			$scope.contentWindow = $element.find('.contentframe')[0].contentWindow;
 			$scope.contentDocument = null;
-			console.log($scope.contentWindow)
 			$scope.registerDOMEvent = function(eventType, target,callback) {
 				if (target == "FORM") {
 				$($scope.contentDocument).on(eventType, null, callback.bind(this))
