@@ -43,12 +43,13 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.util.Utils;
 
 /**
  * Design page for browser based rfb editor.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -123,19 +124,20 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 			return;
 		}
 
-		String url = "http://localhost:8080/rfb/index.html?absolute_layout=true&editorid=" + editorId;
+//		String url = "http://localhost:8080/rfb/index.html?absolute_layout=true&editorid=" + editorId;
+		Form form = editorPart.getForm();
+		String url = "http://localhost:8080/rfb/angular/index.html?s=" + form.getSolution().getName() + "&f=" + form.getName();
 		try
 		{
 			ServoyLog.logInfo("Browser url for editor: " + url);
 			browser.setUrl(url);
+			// install fake WebSocket in case browser does not support it
+			SwtWebsocket.installFakeWebSocket(browser);
 		}
 		catch (Exception e)
 		{
 			ServoyLog.logError("couldn't load the editor: " + url, e);
 		}
-
-		// install fake WebSocket in case browser does not support it
-		SwtWebsocket.installFakeWebSocket(browser);
 	}
 
 	@Override
@@ -144,6 +146,18 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		super.init(site, input);
 		site.setSelectionProvider(selectionProvider);
 		getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(selectionListener);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.gef.ui.parts.GraphicalEditor#dispose()
+	 */
+	@Override
+	public void dispose()
+	{
+		super.dispose();
+		getSite().getWorkbenchWindow().getSelectionService().removeSelectionListener(selectionListener);
 	}
 
 	@Override

@@ -24,6 +24,7 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.security.Principal;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,7 +48,7 @@ import com.servoy.j2db.util.Debug;
 
 /**
  * Fake WebSocket implementation that mimics WebSocket via SWT Browser functions.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -56,10 +57,9 @@ public class SwtWebsocket
 	private final WebsocketEndpoint websocketEndpoint;
 	private String endpointType;
 
-	public SwtWebsocket(Browser browser, String uriString) throws Exception
+	public SwtWebsocket(Browser browser, String uriString, int id) throws Exception
 	{
 		// @ServerEndpoint(value = "/websocket/{endpointType}/{sessionid}/{windowid}/{argument}")
-
 		String[] split = uriString.split("/");
 		if (split.length < 5 || !"websocket".equals(split[split.length - 5]))
 		{
@@ -67,7 +67,7 @@ public class SwtWebsocket
 		}
 
 		websocketEndpoint = new WebsocketEndpoint();
-		websocketEndpoint.start(new SwtWebSocketSession(browser), //
+		websocketEndpoint.start(new SwtWebSocketSession(browser, id), //
 			endpointType = split[split.length - 4], //
 			/* sessionid = */split[split.length - 3], //
 			/* windowid = */split[split.length - 2], //
@@ -88,9 +88,9 @@ public class SwtWebsocket
 	public static void installFakeWebSocket(final Browser browser)
 	{
 		// install fake WebSocket in case browser does not support it
-		new BrowserFunction(browser, "SwtWebsocketBrowserFunction")
+		new BrowserFunction(browser, "SwtWebsocketBrowserFunction", true, new String[0])
 		{
-			SwtWebsocket swtWebsocket;
+			HashMap<String, SwtWebsocket> swtWebsockets = new HashMap<String, SwtWebsocket>();
 
 			@Override
 			public Object function(Object[] arguments)
@@ -104,6 +104,7 @@ public class SwtWebsocket
 
 					if (arguments.length >= 1)
 					{
+						SwtWebsocket swtWebsocket = swtWebsockets.get(arguments[2].toString());
 						if ("open".equals(arguments[0]))
 						{
 							if (swtWebsocket != null)
@@ -111,7 +112,8 @@ public class SwtWebsocket
 								swtWebsocket.close();
 							}
 
-							swtWebsocket = new SwtWebsocket(browser, ((String)arguments[1]));
+							swtWebsocket = new SwtWebsocket(browser, ((String)arguments[1]), ((Number)arguments[2]).intValue());
+							swtWebsockets.put(arguments[2].toString(), swtWebsocket);
 						}
 
 						else if ("send".equals(arguments[0]))
@@ -136,9 +138,9 @@ public class SwtWebsocket
 	{
 		private final Basic basicRemote;
 
-		private SwtWebSocketSession(Browser browser)
+		private SwtWebSocketSession(Browser browser, int id)
 		{
-			basicRemote = new SwtWebSocketBasic(browser);
+			basicRemote = new SwtWebSocketBasic(browser, id);
 		}
 
 		@Override
@@ -300,10 +302,12 @@ public class SwtWebsocket
 	private static class SwtWebSocketBasic implements Basic
 	{
 		private final Browser browser;
+		private final int id;
 
-		private SwtWebSocketBasic(Browser browser)
+		private SwtWebSocketBasic(Browser browser, int id)
 		{
 			this.browser = browser;
+			this.id = id;
 		}
 
 		@Override
@@ -315,7 +319,7 @@ public class SwtWebsocket
 				{
 					if (!browser.isDisposed())
 					{
-						browser.execute("SwtWebsocketClient('receive', '" + StringEscapeUtils.escapeJavaScript(text) + "')");
+						browser.execute("SwtWebsocketClient('receive', '" + StringEscapeUtils.escapeJavaScript(text) + "',null, " + id + ")");
 					}
 				}
 			});

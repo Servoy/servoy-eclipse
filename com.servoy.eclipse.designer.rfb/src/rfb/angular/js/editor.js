@@ -45,7 +45,63 @@ angular.module('editor', ['palette','toolbar','mouseselection','decorators']).fa
 			function getURLParameter(name) {
 				return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec($window.location.search)||[,""])[1].replace(/\+/g, '%20'))||null
 			}
-			$scope.contentframe = "editor-content.html?endpoint=editor&id=%23" + $element.attr("id") + "&f=" + getURLParameter("f") +"&s=" + getURLParameter("s");
+			function testWebsocket() {
+				if (typeof(WebSocket) == 'undefined')
+				{
+					if (typeof(SwtWebsocketBrowserFunction) != 'undefined') 
+					{
+						WebSocket = SwtWebSocket
+	
+						var $currentSwtWebsockets = [];
+						
+						window.addWebSocket = function(socket) {
+							var id = $currentSwtWebsockets.length;
+							$currentSwtWebsockets[id] = socket;
+							return id;
+						}
+	
+						function SwtWebSocket(url)  
+						{
+							this.id = $currentSwtWebsockets.length;
+							$currentSwtWebsockets[id] = this
+							setTimeout(function(){
+								SwtWebsocketBrowserFunction('open', url, this.id)
+								this.onopen()
+							}, 0);
+						}
+	
+						SwtWebSocket.prototype.send = function(str)
+						{
+							SwtWebsocketBrowserFunction('send', str, this.id)
+						}
+	
+						function SwtWebsocketClient(command, arg1, arg2, id)
+						{
+							if (command == 'receive')
+							{
+								$currentSwtWebsockets[id].onmessage({data: arg1})
+							}
+							else if (command == 'close')
+							{
+								$currentSwtWebsockets[parseInt(id)].onclose({code: arg1, reason: arg2})
+								$currentSwtWebsockets[parseInt(id)] = null;
+							}
+							else if (command == 'error')
+							{
+								$currentSwtWebsockets[parseInt(id)].onerror(arg1)
+							}
+						}
+						window.SwtWebsocketClient = SwtWebsocketClient;
+					} 
+					else 
+					{
+						$timeout(testWebsocket,100);
+						return;
+					}
+				}
+				$scope.contentframe = "editor-content.html?endpoint=editor&id=%23" + $element.attr("id") + "&f=" + getURLParameter("f") +"&s=" + getURLParameter("s");
+			}
+			testWebsocket();
 			$scope.contentWindow = $element.find('.contentframe')[0].contentWindow;
 			$scope.contentDocument = null;
 			console.log($scope.contentWindow)
