@@ -11,18 +11,6 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					node = element;
 					// TODO search for the most top level?
 					// but if we have layout components in designer then we do need to select the nested.
-					
-					// this node could be the angular tag (replace is false, or dynamic template) with a 0 size
-					// try to look if there is a child element that is better suited.
-					var nd = $(node);
-					var height = nd.outerHeight()
-					var width = nd.outerWidth()
-					if (height == 0 && width == 0) {
-						var children = nd.children();
-						if (children.length == 1 && $(children[0]).outerHeight() > 0 && $(children[0]).outerWidth() > 0) {
-							node = children[0];
-						}
-					}
 				}
 				element = element.parentElement;
 			} while(element)
