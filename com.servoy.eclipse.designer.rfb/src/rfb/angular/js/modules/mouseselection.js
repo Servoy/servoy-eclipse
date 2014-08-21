@@ -7,7 +7,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 			var element = event.target;
 			do
 			{
-				if (element.hasAttribute("svy-model") && element.hasAttribute("name")) {
+				if (element.hasAttribute("svy-id")) {
 					node = element;
 					// TODO search for the most top level?
 					// but if we have layout components in designer then we do need to select the nested.
