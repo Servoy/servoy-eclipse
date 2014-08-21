@@ -1,4 +1,4 @@
-angular.module('editor', ['palette','toolbar','mouseselection','decorators']).factory("$pluginRegistry",function($rootScope) {
+angular.module('editor', ['palette','toolbar','mouseselection','decorators','webSocketModule']).factory("$pluginRegistry",function($rootScope) {
 	var plugins = [];
 
 	return {
@@ -14,7 +14,7 @@ angular.module('editor', ['palette','toolbar','mouseselection','decorators']).fa
 	}
 }).value("EDITOR_EVENTS", {
     SELECTION_CHANGED : "SELECTION_CHANGED"
-}).directive("editor", function( $window, $pluginRegistry,$rootScope,EDITOR_EVENTS, $timeout){
+}).directive("editor", function( $window, $pluginRegistry,$rootScope,EDITOR_EVENTS, $timeout,$editorService){
 	return {
 	      restrict: 'E',
 	      transclude: true,
@@ -41,83 +41,7 @@ angular.module('editor', ['palette','toolbar','mouseselection','decorators']).fa
 				timeout = null
 			}
 			
-			function getURLParameter(name) {
-				return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec($window.location.search)||[,""])[1].replace(/\+/g, '%20'))||null
-			}
-			function testWebsocket() {
-				if (typeof(WebSocket) == 'undefined')
-				{
-					if (typeof(SwtWebsocketBrowserFunction) != 'undefined') 
-					{
-						WebSocket = SwtWebSocket
-	
-						var $currentSwtWebsockets = [];
-						
-						window.addWebSocket = function(socket) {
-							var id = $currentSwtWebsockets.length;
-							$currentSwtWebsockets[id] = socket;
-							return id;
-						}
-	
-						function SwtWebSocket(url)  
-						{
-							this.id = $currentSwtWebsockets.length;
-							$currentSwtWebsockets[id] = this
-							setTimeout(function(){
-								SwtWebsocketBrowserFunction('open', url, this.id)
-								this.onopen()
-							}, 0);
-						}
-	
-						SwtWebSocket.prototype.send = function(str)
-						{
-							SwtWebsocketBrowserFunction('send', str, this.id)
-						}
-	
-						function SwtWebsocketClient(command, arg1, arg2, id)
-						{
-							if (command == 'receive')
-							{
-								$currentSwtWebsockets[id].onmessage({data: arg1})
-							}
-							else if (command == 'close')
-							{
-								$currentSwtWebsockets[parseInt(id)].onclose({code: arg1, reason: arg2})
-								$currentSwtWebsockets[parseInt(id)] = null;
-							}
-							else if (command == 'error')
-							{
-								$currentSwtWebsockets[parseInt(id)].onerror(arg1)
-							}
-						}
-						window.SwtWebsocketClient = SwtWebsocketClient;
-					} 
-					else 
-					{
-						$timeout(testWebsocket,100);
-						return;
-					}
-				}
-				$scope.contentframe = "editor-content.html?endpoint=editor&id=%23" + $element.attr("id") + "&f=" + getURLParameter("f") +"&s=" + getURLParameter("s");
-			}
-			testWebsocket();
-			if (typeof(console) == "undefined") {
-				window.console = {
-						log: function(msg) {
-							if (typeof(consoleLog) != "undefined") {
-								consoleLog("log",msg)
-							}
-							else alert(msg);
-							
-						},
-						error: function(msg) {
-							if (typeof(consoleLog) != "undefined") {
-								consoleLog("error",msg)
-							}
-							else alert(msg);
-						}
-				}
-			}
+
 			$scope.contentWindow = $element.find('.contentframe')[0].contentWindow;
 			$scope.contentDocument = null;
 			$scope.registerDOMEvent = function(eventType, target,callback) {
@@ -197,9 +121,134 @@ angular.module('editor', ['palette','toolbar','mouseselection','decorators']).fa
 				$scope.contentDocument = contentDocument;
 				$pluginRegistry.registerEditor($scope);
 			});
+			
+			var promise = $editorService.connect();
+			promise.then(function() {
+				$scope.contentframe = "editor-content.html?endpoint=editor&id=%23" + $element.attr("id") + "&f=" + $editorService.getURLParameter("f") +"&s=" + $editorService.getURLParameter("s");
+			})
 	      },
 	      templateUrl: 'templates/editor.html',
 	      replace: true
 	    };
 	
+}).factory("$editorService", function($rootScope, $webSocket, $log, $q,$window, EDITOR_EVENTS, $rootScope) {
+	
+	if (typeof(console) == "undefined") {
+		$window.console = {
+				log: function(msg) {
+					if (typeof(consoleLog) != "undefined") {
+						consoleLog("log",msg)
+					}
+					else alert(msg);
+					
+				},
+				error: function(msg) {
+					if (typeof(consoleLog) != "undefined") {
+						consoleLog("error",msg)
+					}
+					else alert(msg);
+				}
+		}
+	}
+	var wsSession = null;
+	var connected = false;
+	var deferred = null;
+	
+	function getURLParameter(name) {
+		return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec($window.location.search)||[,""])[1].replace(/\+/g, '%20'))||null
+	}
+	function testWebsocket() {
+		if (typeof(WebSocket) == 'undefined')
+		{
+			if (typeof(SwtWebsocketBrowserFunction) != 'undefined') 
+			{
+				WebSocket = SwtWebSocket
+
+				var $currentSwtWebsockets = [];
+				
+				$window.addWebSocket = function(socket) {
+					var id = $currentSwtWebsockets.length;
+					$currentSwtWebsockets[id] = socket;
+					return id;
+				}
+
+				function SwtWebSocket(url)  
+				{
+					var me = this;
+					me.id = $currentSwtWebsockets.length;
+					$currentSwtWebsockets[me.id] = me;
+					setTimeout(function(){
+						SwtWebsocketBrowserFunction('open', url, me.id)
+						me.onopen()
+					}, 0);
+				}
+
+				SwtWebSocket.prototype.send = function(str)
+				{
+					SwtWebsocketBrowserFunction('send', str, this.id)
+				}
+
+				function SwtWebsocketClient(command, arg1, arg2, id)
+				{
+					if (command == 'receive')
+					{
+						$currentSwtWebsockets[id].onmessage({data: arg1})
+					}
+					else if (command == 'close')
+					{
+						$currentSwtWebsockets[parseInt(id)].onclose({code: arg1, reason: arg2})
+						$currentSwtWebsockets[parseInt(id)] = null;
+					}
+					else if (command == 'error')
+					{
+						$currentSwtWebsockets[parseInt(id)].onerror(arg1)
+					}
+				}
+				$window.SwtWebsocketClient = SwtWebsocketClient;
+			} 
+			else 
+			{
+				$timeout(testWebsocket,100);
+				return;
+			}
+		}
+		wsSession = $webSocket.connect('editor', getURLParameter('editorid'))
+		wsSession.onopen = function()
+		{
+			connected = true;
+			if (deferred) deferred.resolve();
+			deferred = null;
+			
+		}
+	}
+	
+	$rootScope.$on(EDITOR_EVENTS.SELECTION_CHANGED, function(event, selection) {
+		var sel = []
+		for(var i=0;i<selection.length;i++) {
+			sel[sel.length] = selection[i].getAttribute("svy-id");
+		}
+		wsSession.callService('formeditor', 'setSelection', {selection: sel}, true)
+	})
+	
+	return {
+		connect: function() {
+			if (deferred) return deferred.promise;
+			deferred = $q.defer();
+			var promise = deferred.promise;
+			if(!connected) testWebsocket();
+			else {
+				deferred.resolve();
+				deferred = null;
+			}
+			return promise;
+		},
+		
+		getURLParameter: getURLParameter,
+		
+		updateSelection: function(ids) {
+			// TODO
+		}
+	
+	// add more service methods here
+	}
 });

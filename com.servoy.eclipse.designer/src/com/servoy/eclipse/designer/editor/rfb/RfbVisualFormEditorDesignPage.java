@@ -127,7 +127,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 
 //		String url = "http://localhost:8080/rfb/index.html?absolute_layout=true&editorid=" + editorId;
 		Form form = editorPart.getForm();
-		String url = "http://localhost:8080/rfb/angular/index.html?s=" + form.getSolution().getName() + "&f=" + form.getName();
+		String url = "http://localhost:8080/rfb/angular/index.html?s=" + form.getSolution().getName() + "&f=" + form.getName() + "&editorid=" + editorId;
 		try
 		{
 			ServoyLog.logInfo("Browser url for editor: " + url);
