@@ -124,7 +124,7 @@ angular.module('editor', ['palette','toolbar','mouseselection','decorators','web
 			
 			var promise = $editorService.connect();
 			promise.then(function() {
-				$scope.contentframe = "editor-content.html?endpoint=editor&id=%23" + $element.attr("id") + "&f=" + $editorService.getURLParameter("f") +"&s=" + $editorService.getURLParameter("s");
+				$scope.contentframe = "editor-content.html?endpoint=designclient&id=%23" + $element.attr("id") + "&f=" + $editorService.getURLParameter("f") +"&s=" + $editorService.getURLParameter("s");
 			})
 	      },
 	      templateUrl: 'templates/editor.html',
