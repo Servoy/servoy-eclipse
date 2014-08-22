@@ -49,7 +49,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 			}
 		}
 		function getElementsByRectangle(p1, p2, percentage) {
-			var nodes = editorScope.contentDocument.querySelectorAll("[svy-model]")
+			var nodes = editorScope.contentDocument.querySelectorAll("[svy-id]")
 			var matchedElements = []
 			for (var i = 0; i < nodes.length; i++) {
 				var element = nodes[i]

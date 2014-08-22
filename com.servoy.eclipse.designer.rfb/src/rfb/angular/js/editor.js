@@ -122,6 +122,31 @@ angular.module('editor', ['palette','toolbar','mouseselection','decorators','web
 				$pluginRegistry.registerEditor($scope);
 			});
 			
+
+			$element.on('renderDecorators.content', function(event) {
+				// TODO this is now in a timeout to let the editor-content be able to reload the form.
+				// could we have an event somewhere from the editor-content that the form is reloaded and ready?
+				// maybe the form controllers code could call $evalAsync as last thing in its controller when it is in design.
+				if (selection.length > 0) {
+					$timeout(function() {
+						var nodes = $scope.contentDocument.querySelectorAll("[svy-id]")
+						var matchedElements = []
+						for (var i = 0; i < nodes.length; i++) {
+							var element = nodes[i]
+							for(var s=0;s<selection.length;s++) {
+								if (selection[s].getAttribute("svy-id") == element.getAttribute("svy-id")){
+									matchedElements.push(element);
+									break;
+								}
+							}
+						}
+						selection = matchedElements;
+						$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED,selection)
+					},100)
+				}
+			});
+			
+			
 			var promise = $editorService.connect();
 			promise.then(function() {
 				$scope.contentframe = "editor-content.html?endpoint=designclient&id=%23" + $element.attr("id") + "&f=" + $editorService.getURLParameter("f") +"&s=" + $editorService.getURLParameter("s");

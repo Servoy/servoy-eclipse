@@ -46,4 +46,11 @@ angular.module('editorContent',['servoyApp'])
 			 return $windowService.getFormUrl(formName);
 		 }
 	 }
- })
+ }).factory("$editorContentService", function() {
+	 
+	 return  {
+		 refreshDecorators: function() {
+			 renderDecorators();
+		 }
+	 }
+ });
