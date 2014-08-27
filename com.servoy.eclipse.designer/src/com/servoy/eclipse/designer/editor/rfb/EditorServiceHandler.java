@@ -29,11 +29,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
+import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -44,6 +47,32 @@ import com.servoy.j2db.util.UUID;
  */
 public class EditorServiceHandler implements IServerService
 {
+	private final class SetPropertyCommand extends BaseRestorableCommand
+	{
+		private final Object value;
+		private final PersistPropertySource source;
+		private final String propertyName;
+
+		/**
+		 * @param label
+		 * @param newLocation
+		 * @param persist
+		 */
+		private SetPropertyCommand(String label, PersistPropertySource source, String propertyName, Object value)
+		{
+			super(label);
+			this.source = source;
+			this.propertyName = propertyName;
+			this.value = value;
+		}
+
+		@Override
+		public void execute()
+		{
+			setPropertyValue(source, propertyName, value);
+		}
+	}
+
 	private final BaseVisualFormEditor editorPart;
 	private final ISelectionProvider selectionProvider;
 
@@ -54,7 +83,7 @@ public class EditorServiceHandler implements IServerService
 	}
 
 	@Override
-	public Object executeMethod(String methodName, JSONObject args)
+	public Object executeMethod(String methodName, final JSONObject args)
 	{
 		try
 		{
@@ -82,25 +111,36 @@ public class EditorServiceHandler implements IServerService
 			}
 			else if ("setProperties".equals(methodName))
 			{
-				Iterator keys = args.keys();
-				while (keys.hasNext())
+				Display.getDefault().asyncExec(new Runnable()
 				{
-					String uuid = (String)keys.next();
-					IPersist persist = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(UUID.fromString(uuid));
-					if (persist instanceof BaseComponent)
+					public void run()
 					{
-						JSONObject properties = args.getJSONObject(uuid);
-						if (properties.has("x") && properties.has("y"))
+						Iterator keys = args.keys();
+						while (keys.hasNext())
 						{
-							((BaseComponent)persist).setLocation(new Point(properties.getInt("x"), properties.getInt("y")));
-						}
-						if (properties.has("width") && properties.has("height"))
-						{
-							((BaseComponent)persist).setSize(new Dimension(properties.getInt("width"), properties.getInt("height")));
+							String uuid = (String)keys.next();
+							final IPersist persist = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(UUID.fromString(uuid));
+							if (persist instanceof BaseComponent)
+							{
+								JSONObject properties = args.optJSONObject(uuid);
+								if (properties.has("x") && properties.has("y"))
+								{
+									editorPart.getCommandStack().execute(
+										new SetPropertyCommand("move", PersistPropertySource.createPersistPropertySource(persist, false),
+											StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), new Point(properties.optInt("x"),
+												properties.optInt("y"))));
+								}
+								if (properties.has("width") && properties.has("height"))
+								{
+									editorPart.getCommandStack().execute(
+										new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(persist, false),
+											StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), new Dimension(properties.optInt("width"),
+												properties.optInt("height"))));
+								}
+							}
 						}
 					}
-				}
-
+				});
 			}
 		}
 		catch (JSONException e)
