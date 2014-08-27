@@ -2,6 +2,10 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 	
 	$pluginRegistry.registerPlugin(function(editorScope) {
 		var selectedNodeMouseEvent;
+		var lassoStarted = false;
+		var mouseDownPosition = {"left":-1, "top":-1};
+		var lassoDiv = editorScope.content.firstElementChild
+		
 		function getNode(event) {
 			var node = null;
 			var element = event.target;
@@ -94,8 +98,94 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 			selectedNodeMouseEvent = null;
 			event.preventDefault();
 		}
+
+		function onmousedownLasso(event) {
+			var node = getNode(event);
+			if (!node) {
+				startLasso(event);
+			}
+		}
+
+		function onmouseupLasso(event) {
+			stopLasso(event);
+		}
+
+		function startLasso(event) {
+			mouseDownPosition = getMousePosition(event);
+			lassoDiv.style.left = mouseDownPosition.left + 'px';
+			lassoDiv.style.top = mouseDownPosition.top + 'px';
+			editorScope.content.style.zIndex = "1";
+			lassoStarted = true;
+		}
+
+		function stopLasso(event) {
+			if (lassoStarted) {
+				editorScope.content.style.zIndex = "0";
+				var lassoMouseSelectPosition = getMousePosition(event);
+				var p1 = adjustForPadding(mouseDownPosition);
+				var p2 = adjustForPadding(lassoMouseSelectPosition);
+				var selectedElements = getElementsByRectangle(p1,p2,100);
+				editorScope.setSelection(selectedElements);
+				lassoStarted = false;
+				lassoDiv.style.width = '0px';
+				lassoDiv.style.height = '0px';
+			}
+		}
+		
+		function adjustForPadding(mousePosition) {
+			return {
+				"left":mousePosition.left -= parseInt(angular.element(editorScope.content.parentElement).css("padding-left").replace("px","")),
+				"top" :mousePosition.top  -= parseInt(angular.element(editorScope.content.parentElement).css("padding-top").replace("px",""))
+			}
+		}
+
+		function getMousePosition(event) {
+			var xMouseDown = -1;
+			var yMouseDown = -1;
+			if (event.pageX || event.pageY){
+				xMouseDown = event.pageX;
+				yMouseDown = event.pageY;
+			}
+			else 
+				if (event.clientX || event.clientY){
+					xMouseDown = event.clientX;
+					yMouseDown = event.clientY;			
+			}
+			if (lassoStarted || hasClass(event.target,"contentframe-overlay")) {
+				xMouseDown -= editorScope.content.parentElement.offsetLeft;
+				yMouseDown -= editorScope.content.parentElement.offsetTop;
+			}
+			else if (!hasClass(event.target,"contentframe-overlay")){
+				xMouseDown += parseInt(angular.element(editorScope.content.parentElement).css("padding-left").replace("px",""));
+				yMouseDown += parseInt(angular.element(editorScope.content.parentElement).css("padding-top").replace("px",""));
+			}
+			console.log({"left":xMouseDown, "top":yMouseDown});
+			return {"left":xMouseDown, "top":yMouseDown};
+		}
+
+		function hasClass(element, cls) {
+			return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
+		}
+
+		function onmousemove(event) {
+			if (lassoStarted) {
+				mouseMovePosition = getMousePosition(event);
+				var currentWidth = mouseMovePosition.left - mouseDownPosition.left;
+				var currentHeight = mouseMovePosition.top - mouseDownPosition.top;
+				lassoDiv.style.width = currentWidth + 'px';
+				lassoDiv.style.height = currentHeight + 'px';
+			}
+		}
+
 		// register event on editor form iframe (see register event in the editor.js)
 		editorScope.registerDOMEvent("mousedown","FORM", onmousedown); // real selection in editor content iframe
 		editorScope.registerDOMEvent("mouseup","FORM", onmouseup); // real selection in editor content iframe
+
+		editorScope.registerDOMEvent("mousedown","FORM", onmousedownLasso); // real selection in editor content iframe
+		editorScope.registerDOMEvent("mouseup","FORM", onmouseupLasso); // real selection in editor content iframe
+		editorScope.registerDOMEvent("mousedown","CONTENTFRAME_OVERLAY", onmousedownLasso); 
+		editorScope.registerDOMEvent("mouseup","CONTENTFRAME_OVERLAY", onmouseupLasso); 
+		editorScope.registerDOMEvent("mousemove","CONTENTFRAME_OVERLAY", onmousemove); 
+
 	})
 });
