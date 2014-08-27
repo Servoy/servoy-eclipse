@@ -21,6 +21,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.util.Iterator;
 
+import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
@@ -64,6 +65,8 @@ public class EditorServiceHandler implements IServerService
 			this.source = source;
 			this.propertyName = propertyName;
 			this.value = value;
+
+			System.err.println("created set command: " + propertyName + " ," + value);
 		}
 
 		@Override
@@ -123,20 +126,19 @@ public class EditorServiceHandler implements IServerService
 							if (persist instanceof BaseComponent)
 							{
 								JSONObject properties = args.optJSONObject(uuid);
+								CompoundCommand cc = new CompoundCommand();
 								if (properties.has("x") && properties.has("y"))
 								{
-									editorPart.getCommandStack().execute(
-										new SetPropertyCommand("move", PersistPropertySource.createPersistPropertySource(persist, false),
-											StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), new Point(properties.optInt("x"),
-												properties.optInt("y"))));
+									cc.add(new SetPropertyCommand("move", PersistPropertySource.createPersistPropertySource(persist, false),
+										StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), new Point(properties.optInt("x"), properties.optInt("y"))));
 								}
 								if (properties.has("width") && properties.has("height"))
 								{
-									editorPart.getCommandStack().execute(
-										new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(persist, false),
-											StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), new Dimension(properties.optInt("width"),
-												properties.optInt("height"))));
+									cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(persist, false),
+										StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), new Dimension(properties.optInt("width"),
+											properties.optInt("height"))));
 								}
+								editorPart.getCommandStack().execute(cc);
 							}
 						}
 					}
