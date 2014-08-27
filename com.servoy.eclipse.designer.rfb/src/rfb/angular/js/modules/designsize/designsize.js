@@ -23,7 +23,7 @@ angular.module('designsize',['toolbar','editor']).run(function($rootScope, $tool
 			onclick: function() {
 				if(lastClicked == "Tablet") isPortrait = !isPortrait;
 				if(isPortrait) 
-					editor.setContentSize("1px", "1px");
+					editor.setContentSize("768px", "1024px");
 				else
 					editor.setContentSize("1024px", "768px");
 				lastClicked = "Tablet";
