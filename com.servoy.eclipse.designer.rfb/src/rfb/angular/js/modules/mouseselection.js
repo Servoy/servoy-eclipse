@@ -159,7 +159,6 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 				xMouseDown += parseInt(angular.element(editorScope.content.parentElement).css("padding-left").replace("px",""));
 				yMouseDown += parseInt(angular.element(editorScope.content.parentElement).css("padding-top").replace("px",""));
 			}
-			console.log({"left":xMouseDown, "top":yMouseDown});
 			return {"left":xMouseDown, "top":yMouseDown};
 		}
 
