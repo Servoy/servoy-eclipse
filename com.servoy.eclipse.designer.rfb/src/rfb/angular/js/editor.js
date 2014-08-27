@@ -49,21 +49,29 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 			$scope.contentWindow = $element.find('.contentframe')[0].contentWindow;
 			$scope.contentDocument = null;
 			$scope.registerDOMEvent = function(eventType, target,callback) {
-				if (target == "FORM") {
 				var eventCallback = callback.bind(this);
-				$($scope.contentDocument).on(eventType, null, eventCallback)
-				return eventCallback;
-			} else if (target == "EDITOR") {
-				console.log("registering dom event: " + eventType)
-				// $(doc) is the document of the editor (or a div)
-				//	$(doc).on(eventType, context, callback.bind(this))
+				if (target == "FORM") {
+					$($scope.contentDocument).on(eventType, null, eventCallback)
+				} else if (target == "EDITOR") {
+					console.log("registering dom event: " + eventType)
+					// $(doc) is the document of the editor (or a div)
+					//	$(doc).on(eventType, context, callback.bind(this))
 				}
+				else if (target == "CONTENT_AREA")
+				{
+					$($element.find('.content-area')[0]).on(eventType, null, eventCallback)
+				}
+				return eventCallback;
 			}
 			$scope.unregisterDOMEvent = function(eventType, target,callback) {
 				if (target == "FORM") {
 					$($scope.contentDocument).off(eventType,null,callback)
 				} else if (target == "EDITOR") {
 					console.log("unregistering dom event: " + eventType)
+				}
+				else if (target == "CONTENT_AREA")
+				{
+					$($element.find('.content-area')[0]).off(eventType,null,callback);
 				}
 			}
 			$scope.getSelection = function() {

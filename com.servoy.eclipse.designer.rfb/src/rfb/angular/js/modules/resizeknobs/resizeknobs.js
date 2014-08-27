@@ -1,4 +1,4 @@
-angular.module('resizeknobs',[]).directive("resizeknobs", function(EDITOR_EVENTS,$editorService)
+angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITOR_EVENTS,$editorService)
 {
 	return {
 		restrict: 'E',
@@ -18,6 +18,7 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function(EDITOR_EVENTS
 			}
 			var mousemovecallback;
 			var mouseupcallback;
+			var revertresizecallback;
 			$scope.enterResizeMode = function(event,resizeInfo)
 			{
 				var lastresizeStartPosition = {
@@ -44,17 +45,57 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function(EDITOR_EVENTS
 							y: ev.screenY
 					}
 				}
+				var cleanListeners = function(){
+					if (mousemovecallback) $scope.unregisterDOMEvent("mousemove","FORM",mousemovecallback);
+					if (mouseupcallback)  $scope.unregisterDOMEvent("mouseup","FORM",mouseupcallback);
+					if (revertresizecallback)  $scope.unregisterDOMEvent("keydown","CONTENT_AREA",revertresizecallback);
+					mousemovecallback = null;
+					mouseupcallback = null;
+					revertresizecallback = null;
+				}
+				
+				var selection = $scope.getSelection();
+				var formState = $scope.getFormState();
+				for(var i=0;i<selection.length;i++) {
+					var node = selection[i];
+					var name = node.getAttribute("name");
+					var beanModel = formState.model[name];
+					node.originalSize = {};
+					node.originalSize.width = beanModel.size.width;
+					node.originalSize.height = beanModel.size.height;
+					node.originalLocation = {};
+					node.originalLocation.x = beanModel.location.x;
+					node.originalLocation.y = beanModel.location.y;
+				}
+				cleanListeners();
 				mousemovecallback = $scope.registerDOMEvent("mousemove","FORM",resizeSelection);
 				mouseupcallback = $scope.registerDOMEvent("mouseup","FORM", function(ev){
-					$scope.unregisterDOMEvent("mousemove","FORM",mousemovecallback);
-					$scope.unregisterDOMEvent("mouseup","FORM",mouseupcallback);
+					cleanListeners();
 					resizeSelection(ev);
 					sendChanges();
 				});
+				revertresizecallback =  $scope.registerDOMEvent("keydown","CONTENT_AREA", function(ev){
+					if (ev.keyCode == 27)
+					{
+						cleanListeners();
+						var selection = $scope.getSelection();
+						var formState = $scope.getFormState();
+						for(var i=0;i<selection.length;i++) {
+							var node = selection[i];
+							var name = node.getAttribute("name");
+							var beanModel = formState.model[name];
+							beanModel.size.width = node.originalSize.width;
+							beanModel.size.height = node.originalSize.height ;
+							beanModel.location.x = node.originalLocation.x;
+							beanModel.location.y = node.originalLocation.y;
+						}
+						$scope.refreshEditorContent();
+						sendChanges();
+					}
+				});
 			}
 			$scope.cancelResizeMode = function (){
-				$scope.unregisterDOMEvent("mousemove","FORM",mousemovecallback);
-				$scope.unregisterDOMEvent("mouseup","FORM",mouseupcallback);
+				cleanListeners();
 				sendChanges();
 			}
 		},
