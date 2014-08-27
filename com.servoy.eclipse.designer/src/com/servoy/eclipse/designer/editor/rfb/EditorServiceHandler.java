@@ -17,6 +17,9 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
+import java.awt.Point;
+import java.util.Iterator;
+
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
@@ -28,11 +31,13 @@ import org.sablo.websocket.IServerService;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.util.UUID;
 
-/** 
+/**
  * Handle requests from the rfb html editor.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -57,7 +62,7 @@ public class EditorServiceHandler implements IServerService
 				return editorPart.getForm().getLayoutGrid();
 			}
 
-			// void methods 
+			// void methods
 			if ("setSelection".equals(methodName))
 			{
 				JSONArray json = args.getJSONArray("selection");
@@ -73,6 +78,21 @@ public class EditorServiceHandler implements IServerService
 						selectionProvider.setSelection(selection.length == 0 ? null : new StructuredSelection(selection));
 					}
 				});
+			}
+			else if ("setPosition".equals(methodName))
+			{
+				Iterator keys = args.keys();
+				while (keys.hasNext())
+				{
+					String uuid = (String)keys.next();
+					IPersist persist = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(UUID.fromString(uuid));
+					if (persist instanceof BaseComponent)
+					{
+						JSONObject position = args.getJSONObject(uuid);
+						((BaseComponent)persist).setLocation(new Point(position.getInt("x"), position.getInt("y")));
+					}
+				}
+
 			}
 		}
 		catch (JSONException e)

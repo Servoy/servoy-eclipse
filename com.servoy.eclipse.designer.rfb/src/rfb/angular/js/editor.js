@@ -1,4 +1,4 @@
-angular.module('editor', ['palette','toolbar','mouseselection','decorators','webSocketModule']).factory("$pluginRegistry",function($rootScope) {
+angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'decorators','webSocketModule']).factory("$pluginRegistry",function($rootScope) {
 	var plugins = [];
 
 	return {
@@ -32,6 +32,10 @@ angular.module('editor', ['palette','toolbar','mouseselection','decorators','web
 				}
 				timeout = $timeout(fireSelectionChanged, 1)
 			}
+			
+			var formName =  $editorService.getURLParameter("f");
+			var editorContentRootScope = null;
+			var formState = null;
 			
 			function fireSelectionChanged(){
 				//Reference to editor should be gotten from Editor instance somehow
@@ -110,6 +114,17 @@ angular.module('editor', ['palette','toolbar','mouseselection','decorators','web
 				}
 			}
 			
+			$scope.getFormState = function() {
+				return formState;
+			}
+			
+			$scope.refreshEditorContent = function() {
+				if (editorContentRootScope) {
+					editorContentRootScope.$digest();
+					$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED,selection)
+				}
+			}
+			
 			$scope.contentStyle = {width: "100%", height: "100%"};
 			
 			$scope.setContentSize = function(width, height) {
@@ -127,6 +142,15 @@ angular.module('editor', ['palette','toolbar','mouseselection','decorators','web
 			$element.on('documentReady.content', function(event, contentDocument) {
 				$scope.contentDocument = contentDocument;
 				$pluginRegistry.registerEditor($scope);
+				
+				var htmlTag = $scope.contentDocument.getElementsByTagName("html")[0];
+				var injector = $scope.contentWindow.angular.element(htmlTag).injector();
+				editorContentRootScope = injector.get("$rootScope");
+				var servoyInternal = injector.get("$servoyInternal");
+				var promise = servoyInternal.getFormState(formName);
+				promise.then(function(state){
+					formState = state;
+				})
 			});
 			
 
@@ -156,7 +180,7 @@ angular.module('editor', ['palette','toolbar','mouseselection','decorators','web
 			
 			var promise = $editorService.connect();
 			promise.then(function() {
-				$scope.contentframe = "editor-content.html?endpoint=designclient&id=%23" + $element.attr("id") + "&f=" + $editorService.getURLParameter("f") +"&s=" + $editorService.getURLParameter("s");
+				$scope.contentframe = "editor-content.html?endpoint=designclient&id=%23" + $element.attr("id") + "&f=" +formName +"&s=" + $editorService.getURLParameter("s");
 			})
 	      },
 	      templateUrl: 'templates/editor.html',
@@ -273,6 +297,10 @@ angular.module('editor', ['palette','toolbar','mouseselection','decorators','web
 				deferred = null;
 			}
 			return promise;
+		},
+		
+		sendPosition: function(selection) {
+			wsSession.callService('formeditor', 'setPosition', selection, true)
 		},
 		
 		getURLParameter: getURLParameter,
