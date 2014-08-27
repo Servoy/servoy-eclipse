@@ -50,7 +50,9 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 			$scope.contentDocument = null;
 			$scope.registerDOMEvent = function(eventType, target,callback) {
 				if (target == "FORM") {
-				$($scope.contentDocument).on(eventType, null, callback.bind(this))
+				var eventCallback = callback.bind(this);
+				$($scope.contentDocument).on(eventType, null, eventCallback)
+				return eventCallback;
 			} else if (target == "EDITOR") {
 				console.log("registering dom event: " + eventType)
 				// $(doc) is the document of the editor (or a div)
