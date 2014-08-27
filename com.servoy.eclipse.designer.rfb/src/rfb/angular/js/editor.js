@@ -53,6 +53,13 @@ angular.module('editor', ['palette','toolbar','mouseselection','decorators','web
 				//	$(doc).on(eventType, context, callback.bind(this))
 				}
 			}
+			$scope.unregisterDOMEvent = function(eventType, target) {
+				if (target == "FORM") {
+					$($scope.contentDocument).off(eventType)
+				} else if (target == "EDITOR") {
+					console.log("unregistering dom event: " + eventType)
+				}
+			}
 			$scope.getSelection = function() {
 				//Returning a copy so selection can't be changed my modifying the selection array
 				return selection.slice(0)
