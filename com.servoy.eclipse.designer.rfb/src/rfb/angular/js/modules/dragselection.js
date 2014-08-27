@@ -3,8 +3,26 @@ angular.module('dragselection',['editor']).run(function($rootScope, $pluginRegis
 	$pluginRegistry.registerPlugin(function(editorScope) {
 		
 		function onmousedown(event) {
-			dragStartEvent = event;
+			if (getNode(event)){
+				dragStartEvent = event;
+			}
+				
 		}
+		function getNode(event) {
+			var node = null;
+			var element = event.target;
+			do
+			{
+				if (element.hasAttribute("svy-id")) {
+					node = element;
+					// TODO do we really need to search for the most top level?
+					// but if we have layout components in designer then we do need to select the nested.
+				}
+				element = element.parentNode;
+			} while(element && element.hasAttribute)
+			return node;
+		}
+		
 		function onmouseup(event) {
 			dragStartEvent = null;
 			if (dragging) {
