@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
+import java.awt.Dimension;
 import java.awt.Point;
 import java.util.Iterator;
 
@@ -79,7 +80,7 @@ public class EditorServiceHandler implements IServerService
 					}
 				});
 			}
-			else if ("setPosition".equals(methodName))
+			else if ("setProperties".equals(methodName))
 			{
 				Iterator keys = args.keys();
 				while (keys.hasNext())
@@ -88,8 +89,15 @@ public class EditorServiceHandler implements IServerService
 					IPersist persist = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(UUID.fromString(uuid));
 					if (persist instanceof BaseComponent)
 					{
-						JSONObject position = args.getJSONObject(uuid);
-						((BaseComponent)persist).setLocation(new Point(position.getInt("x"), position.getInt("y")));
+						JSONObject properties = args.getJSONObject(uuid);
+						if (properties.has("x") && properties.has("y"))
+						{
+							((BaseComponent)persist).setLocation(new Point(properties.getInt("x"), properties.getInt("y")));
+						}
+						if (properties.has("width") && properties.has("height"))
+						{
+							((BaseComponent)persist).setSize(new Dimension(properties.getInt("width"), properties.getInt("height")));
+						}
 					}
 				}
 

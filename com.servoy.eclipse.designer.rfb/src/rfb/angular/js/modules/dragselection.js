@@ -21,7 +21,7 @@ angular.module('dragselection',['editor']).run(function($rootScope, $pluginRegis
 					beanModel.location.x 
 					obj[node.getAttribute("svy-id")] = {x:beanModel.location.x,y:beanModel.location.y}
 				}
-				$editorService.sendPositions(obj)
+				$editorService.sendChanges(obj)
 			}
 		}
 		var dragging = false;

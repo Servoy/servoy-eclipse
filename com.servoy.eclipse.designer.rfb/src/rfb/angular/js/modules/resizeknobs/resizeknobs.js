@@ -1,9 +1,23 @@
-angular.module('resizeknobs',[]).directive("resizeknobs", function(EDITOR_EVENTS)
+angular.module('resizeknobs',[]).directive("resizeknobs", function(EDITOR_EVENTS,$editorService)
 {
 	return {
 		restrict: 'E',
 		transclude: true,
 		link: function($scope, $element, $attrs) {
+			var sendChanges = function(){
+				var selection = $scope.getSelection();
+				var formState = $scope.getFormState();
+				var obj = {};
+				for(var i=0;i<selection.length;i++) {
+					var node = selection[i];
+					var name = node.getAttribute("name");
+					var beanModel = formState.model[name];
+					obj[node.getAttribute("svy-id")] = {x:beanModel.location.x,y:beanModel.location.y,width:beanModel.size.width,height:beanModel.size.height}
+				}
+				$editorService.sendChanges(obj)
+			}
+			var mousemovecallback;
+			var mouseupcallback;
 			$scope.enterResizeMode = function(event,resizeInfo)
 			{
 				var lastresizeStartPosition = {
@@ -14,28 +28,34 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function(EDITOR_EVENTS
 					var selection = $scope.getSelection();
 					var deltaX = ev.screenX - lastresizeStartPosition.x;
 					var deltaY = ev.screenY - lastresizeStartPosition.y;
+					var formState = $scope.getFormState();
 					for(var i=0;i<selection.length;i++) {
-						selection[i].parentNode.style.width = parseInt(selection[i].parentNode.style.width.substring(0,selection[i].parentNode.style.width.length-2)) + (deltaX* resizeInfo.width) + 'px';
-						selection[i].parentNode.style.left = parseInt(selection[i].parentNode.style.left.substring(0,selection[i].parentNode.style.left.length-2)) + (deltaX* resizeInfo.left) + 'px';
-						selection[i].parentNode.style.height = parseInt(selection[i].parentNode.style.height.substring(0,selection[i].parentNode.style.height.length-2)) + (deltaY* resizeInfo.height) + 'px';
-						selection[i].parentNode.style.top = parseInt(selection[i].parentNode.style.top.substring(0,selection[i].parentNode.style.top.length-2)) + (deltaY* resizeInfo.top) + 'px';
+						var node = selection[i];
+						var name = node.getAttribute("name");
+						var beanModel = formState.model[name];
+						beanModel.location.y = beanModel.location.y + deltaY* resizeInfo.top;
+						beanModel.location.x = beanModel.location.x + deltaX* resizeInfo.left;
+						beanModel.size.width = beanModel.size.width + deltaX* resizeInfo.width;
+						beanModel.size.height = beanModel.size.height + deltaY* resizeInfo.height;
 					}
-					$scope.$emit(EDITOR_EVENTS.SELECTION_CHANGED,selection);
+					$scope.refreshEditorContent();
 					lastresizeStartPosition = {
 							x: ev.screenX,
 							y: ev.screenY
 					}
 				}
-				$scope.registerDOMEvent("mousemove","FORM",resizeSelection);
-				$scope.registerDOMEvent("mouseup","FORM", function(ev){
-					$scope.unregisterDOMEvent("mousemove","FORM");
-					$scope.unregisterDOMEvent("mouseup","FORM");
+				mousemovecallback = $scope.registerDOMEvent("mousemove","FORM",resizeSelection);
+				mouseupcallback = $scope.registerDOMEvent("mouseup","FORM", function(ev){
+					$scope.unregisterDOMEvent("mousemove","FORM",mousemovecallback);
+					$scope.unregisterDOMEvent("mouseup","FORM",mouseupcallback);
 					resizeSelection(ev);
+					sendChanges();
 				});
 			}
 			$scope.cancelResizeMode = function (){
-				$scope.unregisterDOMEvent("mousemove","FORM");
-				$scope.unregisterDOMEvent("mouseup","FORM");
+				$scope.unregisterDOMEvent("mousemove","FORM",mousemovecallback);
+				$scope.unregisterDOMEvent("mouseup","FORM",mouseupcallback);
+				sendChanges();
 			}
 		},
 		templateUrl: 'js/modules/resizeknobs/resizeknobs.html',

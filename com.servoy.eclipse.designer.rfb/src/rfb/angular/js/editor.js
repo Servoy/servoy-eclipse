@@ -57,9 +57,9 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				//	$(doc).on(eventType, context, callback.bind(this))
 				}
 			}
-			$scope.unregisterDOMEvent = function(eventType, target) {
+			$scope.unregisterDOMEvent = function(eventType, target,callback) {
 				if (target == "FORM") {
-					$($scope.contentDocument).off(eventType)
+					$($scope.contentDocument).off(eventType,null,callback)
 				} else if (target == "EDITOR") {
 					console.log("unregistering dom event: " + eventType)
 				}
@@ -299,8 +299,8 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 			return promise;
 		},
 		
-		sendPosition: function(selection) {
-			wsSession.callService('formeditor', 'setPosition', selection, true)
+		sendChanges: function(properties) {
+			wsSession.callService('formeditor', 'setProperties', properties, true)
 		},
 		
 		getURLParameter: getURLParameter,
