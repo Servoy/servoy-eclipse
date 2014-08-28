@@ -4,7 +4,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 		var selectedNodeMouseEvent;
 		var lassoStarted = false;
 		var mouseDownPosition = {"left":-1, "top":-1};
-		var lassoDiv = editorScope.content.firstElementChild
+		var lassoDiv = editorScope.glasspane.firstElementChild
 		
 		function getNode(event) {
 			var node = null;
@@ -114,13 +114,13 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 			mouseDownPosition = getMousePosition(event);
 			lassoDiv.style.left = mouseDownPosition.left + 'px';
 			lassoDiv.style.top = mouseDownPosition.top + 'px';
-			editorScope.content.style.zIndex = "1";
+			editorScope.moveGlasspaneAbove();
 			lassoStarted = true;
 		}
 
 		function stopLasso(event) {
 			if (lassoStarted) {
-				editorScope.content.style.zIndex = "0";
+				editorScope.moveGlasspaneBelow();
 				var lassoMouseSelectPosition = getMousePosition(event);
 				var p1 = adjustForPadding(mouseDownPosition);
 				var p2 = adjustForPadding(lassoMouseSelectPosition);
@@ -133,8 +133,8 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 		}
 		
 		function adjustForPadding(mousePosition) {
-			mousePosition.left -= parseInt(angular.element(editorScope.content.parentElement).css("padding-left").replace("px",""));
-			mousePosition.top  -= parseInt(angular.element(editorScope.content.parentElement).css("padding-top").replace("px",""));
+			mousePosition.left -= parseInt(angular.element(editorScope.glasspane.parentElement).css("padding-left").replace("px",""));
+			mousePosition.top  -= parseInt(angular.element(editorScope.glasspane.parentElement).css("padding-top").replace("px",""));
 			return mousePosition;
 		}
 
@@ -151,12 +151,12 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					yMouseDown = event.clientY;			
 			}
 			if (lassoStarted || hasClass(event.target,"contentframe-overlay")) {
-				xMouseDown -= editorScope.content.parentElement.offsetLeft;
-				yMouseDown -= editorScope.content.parentElement.offsetTop;
+				xMouseDown -= editorScope.glasspane.parentElement.offsetLeft;
+				yMouseDown -= editorScope.glasspane.parentElement.offsetTop;
 			}
 			else if (!hasClass(event.target,"contentframe-overlay")){
-				xMouseDown += parseInt(angular.element(editorScope.content.parentElement).css("padding-left").replace("px",""));
-				yMouseDown += parseInt(angular.element(editorScope.content.parentElement).css("padding-top").replace("px",""));
+				xMouseDown += parseInt(angular.element(editorScope.glasspane.parentElement).css("padding-left").replace("px",""));
+				yMouseDown += parseInt(angular.element(editorScope.glasspane.parentElement).css("padding-top").replace("px",""));
 			}
 			return {"left":xMouseDown, "top":yMouseDown};
 		}

@@ -47,7 +47,7 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 			
 
 			$scope.contentWindow = $element.find('.contentframe')[0].contentWindow;
-			$scope.content = $element.find('.contentframe-overlay')[0];
+			$scope.glasspane = $element.find('.contentframe-overlay')[0];
 			$scope.contentDocument = null;
 			$scope.registerDOMEvent = function(eventType, target,callback) {
 				var eventCallback = callback.bind(this);
@@ -63,10 +63,18 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 					$($element.find('.content-area')[0]).on(eventType, null, eventCallback)
 				}
 				else if (target == "CONTENTFRAME_OVERLAY") {
-					$($scope.content).on(eventType, null, callback.bind(this))
+					$($scope.glasspane).on(eventType, null, callback.bind(this))
 				}
 				return eventCallback;
 			}
+			
+			$scope.moveGlasspaneAbove = function (){
+				$scope.glasspane.style.zIndex = "1";
+			} 
+			$scope.moveGlasspaneBelow = function (){
+				$scope.glasspane.style.zIndex = "0";
+			} 
+			
 			$scope.unregisterDOMEvent = function(eventType, target,callback) {
 				if (target == "FORM") {
 					$($scope.contentDocument).off(eventType,null,callback)
