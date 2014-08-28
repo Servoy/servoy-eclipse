@@ -133,10 +133,9 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 		}
 		
 		function adjustForPadding(mousePosition) {
-			return {
-				"left":mousePosition.left -= parseInt(angular.element(editorScope.content.parentElement).css("padding-left").replace("px","")),
-				"top" :mousePosition.top  -= parseInt(angular.element(editorScope.content.parentElement).css("padding-top").replace("px",""))
-			}
+			mousePosition.left -= parseInt(angular.element(editorScope.content.parentElement).css("padding-left").replace("px",""));
+			mousePosition.top  -= parseInt(angular.element(editorScope.content.parentElement).css("padding-top").replace("px",""));
+			return mousePosition;
 		}
 
 		function getMousePosition(event) {
