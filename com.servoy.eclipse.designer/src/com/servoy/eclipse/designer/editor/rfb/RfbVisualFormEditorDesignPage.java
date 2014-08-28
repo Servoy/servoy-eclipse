@@ -127,7 +127,9 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 
 //		String url = "http://localhost:8080/rfb/index.html?absolute_layout=true&editorid=" + editorId;
 		Form form = editorPart.getForm();
-		String url = "http://localhost:8080/rfb/angular/index.html?s=" + form.getSolution().getName() + "&f=" + form.getName() + "&editorid=" + editorId;
+		String layout = computeLayout(form);
+		String url = "http://localhost:8080/rfb/angular/index.html?s=" + form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&editorid=" +
+			editorId;
 		try
 		{
 			ServoyLog.logInfo("Browser url for editor: " + url);
@@ -159,6 +161,16 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		{
 			ServoyLog.logError("couldn't load the editor: " + url, e);
 		}
+	}
+
+	/**
+	 * @param form
+	 * @return
+	 */
+	private String computeLayout(Form form)
+	{
+		if (form.getLayoutContainers().hasNext()) return "flow";
+		else return "absolute";
 	}
 
 	@Override

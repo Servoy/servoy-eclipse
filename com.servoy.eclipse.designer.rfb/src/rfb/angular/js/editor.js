@@ -34,6 +34,7 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 			}
 			
 			var formName =  $editorService.getURLParameter("f");
+			var formLayout =  $editorService.getURLParameter("l");
 			var editorContentRootScope = null;
 			var formState = null;
 			
@@ -134,6 +135,10 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				if (dirty) {
 					markDirty()
 				}
+			}
+			
+			$scope.getFormLayout = function() {
+				return formLayout;
 			}
 			
 			$scope.getFormState = function() {
