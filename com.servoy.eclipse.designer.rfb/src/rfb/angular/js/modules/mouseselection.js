@@ -1,11 +1,11 @@
 angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegistry){
-	
+
 	$pluginRegistry.registerPlugin(function(editorScope) {
 		var selectedNodeMouseEvent;
 		var lassoStarted = false;
 		var mouseDownPosition = {"left":-1, "top":-1};
 		var lassoDiv = editorScope.glasspane.firstElementChild
-		
+
 		function getNode(event) {
 			var node = null;
 			var element = event.target;
@@ -18,7 +18,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 				}
 				element = element.parentNode;
 			} while(element && element.hasAttribute)
-			return node;
+				return node;
 		}
 		function select(event, node) {
 			if (event.ctrlKey) {
@@ -53,12 +53,23 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 			}
 		}
 		function getElementsByRectangle(p1, p2, percentage) {
+			var temp = 0;
+			if (p1.left > p2.left) {
+				var temp = p1.left;
+				p1.left = p2.left;
+				p2.left = temp;
+			}
+			if (p1.top > p2.top) {
+				var temp = p1.top;
+				p1.top = p2.top;
+				p2.top = temp;
+			}	
 			var nodes = editorScope.contentDocument.querySelectorAll("[svy-id]")
 			var matchedElements = []
 			for (var i = 0; i < nodes.length; i++) {
 				var element = nodes[i]
 				var rect = element.getBoundingClientRect();
-				
+
 				if (percentage == undefined || percentage == 100) { //Element must be fully enclosed
 					if (p1.top <= rect.top && p1.left <= rect.left && p2.top >= rect.top + element.clientHeight && p2.left >= rect.left + element.clientWidth) {
 						matchedElements.push(element)
@@ -131,7 +142,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 				lassoDiv.style.height = '0px';
 			}
 		}
-		
+
 		function adjustForPadding(mousePosition) {
 			mousePosition.left -= parseInt(angular.element(editorScope.glasspane.parentElement).css("padding-left").replace("px",""));
 			mousePosition.top  -= parseInt(angular.element(editorScope.glasspane.parentElement).css("padding-top").replace("px",""));
@@ -149,10 +160,12 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 				if (event.clientX || event.clientY){
 					xMouseDown = event.clientX;
 					yMouseDown = event.clientY;			
-			}
+				}
 			if (lassoStarted || hasClass(event.target,"contentframe-overlay")) {
 				xMouseDown -= editorScope.glasspane.parentElement.offsetLeft;
 				yMouseDown -= editorScope.glasspane.parentElement.offsetTop;
+				xMouseDown += editorScope.glasspane.parentElement.scrollLeft;
+				yMouseDown += editorScope.glasspane.parentElement.scrollTop;
 			}
 			else if (!hasClass(event.target,"contentframe-overlay")){
 				xMouseDown += parseInt(angular.element(editorScope.glasspane.parentElement).css("padding-left").replace("px",""));
@@ -168,10 +181,16 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 		function onmousemove(event) {
 			if (lassoStarted) {
 				mouseMovePosition = getMousePosition(event);
+				if (mouseMovePosition.left < mouseDownPosition.left){
+					lassoDiv.style.left = mouseMovePosition.left + 'px';
+				}
+				if (mouseMovePosition.top < mouseDownPosition.top){
+					lassoDiv.style.top = mouseMovePosition.top +'px'
+				}
 				var currentWidth = mouseMovePosition.left - mouseDownPosition.left;
 				var currentHeight = mouseMovePosition.top - mouseDownPosition.top;
-				lassoDiv.style.width = currentWidth + 'px';
-				lassoDiv.style.height = currentHeight + 'px';
+				lassoDiv.style.width = Math.abs(currentWidth) + 'px';
+				lassoDiv.style.height = Math.abs(currentHeight) + 'px';
 			}
 		}
 
