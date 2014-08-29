@@ -89,8 +89,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 				var selectedElements = utils.getElementsByRectangle(p1,p2,1);
 				editorScope.setSelection(selectedElements);
 				lassoStarted = false;
-				lassoDiv.style.width = '0px';
-				lassoDiv.style.height = '0px';
+				lassoDiv.style.display = 'none';
 			}
 		}
 		function onmousemove(event) {
@@ -106,6 +105,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 				var currentHeight = mouseMovePosition.top - mouseDownPosition.top;
 				lassoDiv.style.width = Math.abs(currentWidth) + 'px';
 				lassoDiv.style.height = Math.abs(currentHeight) + 'px';
+				lassoDiv.style.display = 'block';
 			}
 		}
 
