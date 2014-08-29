@@ -19,6 +19,7 @@ package com.servoy.eclipse.designer.editor.rfb;
 
 import java.awt.Dimension;
 import java.awt.Point;
+import java.util.Arrays;
 import java.util.Iterator;
 
 import org.eclipse.gef.commands.CompoundCommand;
@@ -30,14 +31,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.Field;
+import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -141,6 +146,134 @@ public class EditorServiceHandler implements IServerService
 								editorPart.getCommandStack().execute(cc);
 							}
 						}
+					}
+				});
+			}
+			else if ("createComponent".equals(methodName))
+			{
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						editorPart.getCommandStack().execute(new BaseRestorableCommand("createComponent")
+						{
+							@Override
+							public void execute()
+							{
+								try
+								{
+									int x = args.getInt("x");
+									int y = args.getInt("y");
+									String name = args.getString("name");
+									IPersist newPersist = null;
+									if ("svy-button".equals(name))
+									{
+										GraphicalComponent gc = editorPart.getForm().createNewGraphicalComponent(new Point(x, y));
+										gc.setText("button");
+										gc.setOnActionMethodID(-1);
+										newPersist = gc;
+									}
+									else if ("svy-label".equals(name))
+									{
+										GraphicalComponent gc = editorPart.getForm().createNewGraphicalComponent(new Point(x, y));
+										gc.setText("label");
+										newPersist = gc;
+									}
+									else if ("svy-combobox".equals(name))
+									{
+										Field field = editorPart.getForm().createNewField(new Point(x, y));
+										field.setDisplayType(Field.COMBOBOX);
+										newPersist = field;
+									}
+									else if ("svy-textfield".equals(name))
+									{
+										Field field = editorPart.getForm().createNewField(new Point(x, y));
+										field.setDisplayType(Field.TEXT_FIELD);
+										newPersist = field;
+									}
+									else if ("svy-textarea".equals(name))
+									{
+										Field field = editorPart.getForm().createNewField(new Point(x, y));
+										field.setDisplayType(Field.TEXT_AREA);
+										newPersist = field;
+									}
+									else if ("svy-password".equals(name))
+									{
+										Field field = editorPart.getForm().createNewField(new Point(x, y));
+										field.setDisplayType(Field.PASSWORD);
+										newPersist = field;
+									}
+									else if ("svy-calendar".equals(name))
+									{
+										Field field = editorPart.getForm().createNewField(new Point(x, y));
+										field.setDisplayType(Field.CALENDAR);
+										newPersist = field;
+									}
+									else if ("svy-typeahead".equals(name))
+									{
+										Field field = editorPart.getForm().createNewField(new Point(x, y));
+										field.setDisplayType(Field.TYPE_AHEAD);
+										newPersist = field;
+									}
+									else if ("svy-spinner".equals(name))
+									{
+										Field field = editorPart.getForm().createNewField(new Point(x, y));
+										field.setDisplayType(Field.SPINNER);
+										newPersist = field;
+									}
+									else if ("svy-check".equals(name) || "svy-checkgroup".equals(name))
+									{
+										Field field = editorPart.getForm().createNewField(new Point(x, y));
+										field.setDisplayType(Field.CHECKS);
+										newPersist = field;
+									}
+									else if ("svy-radio".equals(name) || "svy-radiogroup".equals(name))
+									{
+										Field field = editorPart.getForm().createNewField(new Point(x, y));
+										field.setDisplayType(Field.RADIOS);
+										newPersist = field;
+									}
+									else if ("svy-imagemedia".equals(name))
+									{
+										Field field = editorPart.getForm().createNewField(new Point(x, y));
+										field.setDisplayType(Field.IMAGE_MEDIA);
+										newPersist = field;
+									}
+									else if ("svy-listbox".equals(name))
+									{
+										Field field = editorPart.getForm().createNewField(new Point(x, y));
+										field.setDisplayType(Field.LIST_BOX);
+										newPersist = field;
+									}
+									else if ("svy-htmlarea".equals(name))
+									{
+										Field field = editorPart.getForm().createNewField(new Point(x, y));
+										field.setDisplayType(Field.HTML_AREA);
+										newPersist = field;
+									}
+									else if ("svy-htmlview".equals(name))
+									{
+										Field field = editorPart.getForm().createNewField(new Point(x, y));
+										field.setDisplayType(Field.HTML_AREA);
+										field.setEditable(false);
+										newPersist = field;
+									}
+									ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false,
+										Arrays.asList(new IPersist[] { newPersist }));
+								}
+								catch (Exception ex)
+								{
+									Debug.error(ex);
+								}
+							}
+
+							@Override
+							public void undo()
+							{
+
+							}
+
+						});
 					}
 				});
 			}

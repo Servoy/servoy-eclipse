@@ -55,38 +55,45 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				if (target == "FORM") {
 					$($scope.contentDocument).on(eventType, null, eventCallback)
 				} else if (target == "EDITOR") {
-					console.log("registering dom event: " + eventType)
-					// $(doc) is the document of the editor (or a div)
-					//	$(doc).on(eventType, context, callback.bind(this))
+					$($element).on(eventType, null, eventCallback);
 				}
 				else if (target == "CONTENT_AREA")
 				{
 					$($element.find('.content-area')[0]).on(eventType, null, eventCallback)
 				}
 				else if (target == "CONTENTFRAME_OVERLAY") {
-					$($scope.glasspane).on(eventType, null, callback.bind(this))
+					$($scope.glasspane).on(eventType, null, eventCallback)
 				}
 				return eventCallback;
 			}
-			
-			$scope.moveGlasspaneAbove = function (){
-				$scope.glasspane.style.zIndex = "1";
-			} 
-			$scope.moveGlasspaneBelow = function (){
-				$scope.glasspane.style.zIndex = "0";
-			} 
 			
 			$scope.unregisterDOMEvent = function(eventType, target,callback) {
 				if (target == "FORM") {
 					$($scope.contentDocument).off(eventType,null,callback)
 				} else if (target == "EDITOR") {
-					console.log("unregistering dom event: " + eventType)
+					$($element).off(eventType,null,callback);
 				}
 				else if (target == "CONTENT_AREA")
 				{
 					$($element.find('.content-area')[0]).off(eventType,null,callback);
 				}
 			}
+			
+			$scope.moveGlasspaneAbove = function (){
+				$scope.glasspane.style.zIndex = "1";
+			} 
+			
+			$scope.moveGlasspaneBelow = function (){
+				$scope.glasspane.style.zIndex = "0";
+			} 
+			
+			$scope.convertToContentPoint = function(point){
+				var frameRect = $element.find('.contentframe')[0].getBoundingClientRect()
+				point.x = point.x - frameRect.left;
+				point.y = point.y - frameRect.top;
+				return point
+			}
+			
 			$scope.getSelection = function() {
 				//Returning a copy so selection can't be changed my modifying the selection array
 				return selection.slice(0)
@@ -328,6 +335,10 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 		
 		sendChanges: function(properties) {
 			wsSession.callService('formeditor', 'setProperties', properties, true)
+		},
+		
+		createComponent: function(component) {
+			wsSession.callService('formeditor', 'createComponent', component, true)
 		},
 		
 		getURLParameter: getURLParameter,
