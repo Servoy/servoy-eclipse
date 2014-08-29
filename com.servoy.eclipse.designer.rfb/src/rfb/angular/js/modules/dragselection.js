@@ -1,26 +1,14 @@
-angular.module('dragselection',['editor']).run(function($rootScope, $pluginRegistry, $editorService)
+angular.module('dragselection',['mouseselection']).run(function($rootScope, $pluginRegistry, $editorService,$selectionUtils)
 {
 	$pluginRegistry.registerPlugin(function(editorScope) {
 		
+		var utils = $selectionUtils.getUtilsForScope(editorScope);
+		
 		function onmousedown(event) {
-			if (getNode(event)){
+			if (utils.getNode(event)){
 				dragStartEvent = event;
 			}
 				
-		}
-		function getNode(event) {
-			var node = null;
-			var element = event.target;
-			do
-			{
-				if (element.hasAttribute("svy-id")) {
-					node = element;
-					// TODO do we really need to search for the most top level?
-					// but if we have layout components in designer then we do need to select the nested.
-				}
-				element = element.parentNode;
-			} while(element && element.hasAttribute)
-			return node;
 		}
 		
 		function onmouseup(event) {
@@ -72,9 +60,9 @@ angular.module('dragselection',['editor']).run(function($rootScope, $pluginRegis
 		}
 		
 		// register event on editor form iframe (see register event in the editor.js)
-		editorScope.registerDOMEvent("mousedown","FORM", onmousedown); // real selection in editor content iframe
-		editorScope.registerDOMEvent("mouseup","FORM", onmouseup); // real selection in editor content iframe
-		editorScope.registerDOMEvent("mousemove","FORM", onmousemove); // real selection in editor content iframe
+		editorScope.registerDOMEvent("mousedown","CONTENTFRAME_OVERLAY", onmousedown); // real selection in editor content iframe
+		editorScope.registerDOMEvent("mouseup","CONTENTFRAME_OVERLAY", onmouseup); // real selection in editor content iframe
+		editorScope.registerDOMEvent("mousemove","CONTENTFRAME_OVERLAY", onmousemove); // real selection in editor content iframe
 		
 	})
 });

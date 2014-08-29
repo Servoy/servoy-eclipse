@@ -45,14 +45,12 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 	    			 'list-style-type': 'none'
 	    		 })
 	    		 $('body').append(dragClone);
-	    		 $scope.moveGlasspaneAbove();
 	    		 
 	    		 var mousemovecallback = $scope.registerDOMEvent("mousemove","EDITOR", function(ev){
 	    			 var css = { top: ev.pageY, left: ev.pageX }
 	    			 dragClone.css(css);
 	    		 });
 	    		 var mouseupcallback = $scope.registerDOMEvent("mouseup","EDITOR", function(ev){
-	    			 $scope.moveGlasspaneBelow();
 	    			 dragClone.remove();
 	    			 if (mousemovecallback) $scope.unregisterDOMEvent("mousemove","EDITOR",mousemovecallback);
 	    			 if (mouseupcallback)  $scope.unregisterDOMEvent("mouseup","EDITOR",mouseupcallback);

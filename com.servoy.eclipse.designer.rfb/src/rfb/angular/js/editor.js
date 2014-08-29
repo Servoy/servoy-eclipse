@@ -79,14 +79,6 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				}
 			}
 			
-			$scope.moveGlasspaneAbove = function (){
-				$scope.glasspane.style.zIndex = "1";
-			} 
-			
-			$scope.moveGlasspaneBelow = function (){
-				$scope.glasspane.style.zIndex = "0";
-			} 
-			
 			$scope.convertToContentPoint = function(point){
 				var frameRect = $element.find('.contentframe')[0].getBoundingClientRect()
 				point.x = point.x - frameRect.left;
@@ -221,24 +213,28 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 	      replace: true
 	    };
 	
-}).factory("$editorService", function($rootScope, $webSocket, $log, $q,$window, EDITOR_EVENTS, $rootScope) {
-	
-	if (typeof(console) == "undefined") {
-		$window.console = {
-				log: function(msg) {
-					if (typeof(consoleLog) != "undefined") {
-						consoleLog("log",msg)
-					}
-					else alert(msg);
-					
-				},
-				error: function(msg) {
-					if (typeof(consoleLog) != "undefined") {
-						consoleLog("error",msg)
-					}
-					else alert(msg);
+}).factory("$editorService", function($rootScope, $webSocket, $log, $q,$window, EDITOR_EVENTS, $rootScope,$timeout) {
+	var realConsole = $window.console;
+	$window.console = {
+			log: function(msg) {
+				if (typeof(consoleLog) != "undefined") {
+					consoleLog("log",msg)
 				}
-		}
+				else if (realConsole) {
+					realConsole.log(msg)
+				}
+				else alert(msg);
+				
+			},
+			error: function(msg) {
+				if (typeof(consoleLog) != "undefined") {
+					consoleLog("error",msg)
+				}
+				else if (realConsole) {
+					realConsole.error(msg)
+				}				
+				else alert(msg);
+			}
 	}
 	var wsSession = null;
 	var connected = false;

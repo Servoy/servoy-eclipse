@@ -12,7 +12,7 @@
 	
 		<!--  Editor -->
 		<div class="content-area {{ isContentSizeFull() ? '' : 'non-full' }}" tabindex="0">
-		    <div class="contentframe-overlay max" >
+		    <div class="contentframe-overlay max" style="z-index:2;background-color:rgba(255,255,255,0.01)">
 		    	<div id="lasso"></div>
 		    </div> <!--  -->
 			<div class="content" ng-style="contentStyle">
@@ -20,7 +20,7 @@
 				<decorator></decorator>
 				<!-- id query param should be dynamically set to the selector of the div in which the editor is placed -->
 				<iframe class="contentframe" ng-src="{{contentframe}}"></iframe>
-				</div>
+			</div>
 		</div>
 	</div>
 </div>
