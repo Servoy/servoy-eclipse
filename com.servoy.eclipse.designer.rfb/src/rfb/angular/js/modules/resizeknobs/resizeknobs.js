@@ -20,8 +20,8 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 			var mouseupcallback;
 			var revertresizecallback;
 			var cleanListeners = function(){
-				if (mousemovecallback) $scope.unregisterDOMEvent("mousemove","FORM",mousemovecallback);
-				if (mouseupcallback)  $scope.unregisterDOMEvent("mouseup","FORM",mouseupcallback);
+				if (mousemovecallback) $scope.unregisterDOMEvent("mousemove","CONTENT_AREA",mousemovecallback);
+				if (mouseupcallback)  $scope.unregisterDOMEvent("mouseup","CONTENT_AREA",mouseupcallback);
 				if (revertresizecallback)  $scope.unregisterDOMEvent("keydown","CONTENT_AREA",revertresizecallback);
 				mousemovecallback = null;
 				mouseupcallback = null;
@@ -29,6 +29,8 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 			}
 			$scope.enterResizeMode = function(event,resizeInfo)
 			{
+				event.preventDefault();
+				event.stopPropagation();
 				var lastresizeStartPosition = {
 						x: event.screenX,
 						y: event.screenY
@@ -67,8 +69,8 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 					node.originalLocation.y = beanModel.location.y;
 				}
 				cleanListeners();
-				mousemovecallback = $scope.registerDOMEvent("mousemove","FORM",resizeSelection);
-				mouseupcallback = $scope.registerDOMEvent("mouseup","FORM", function(ev){
+				mousemovecallback = $scope.registerDOMEvent("mousemove","CONTENT_AREA",resizeSelection);
+				mouseupcallback = $scope.registerDOMEvent("mouseup","CONTENT_AREA", function(ev){
 					cleanListeners();
 					resizeSelection(ev);
 					sendChanges();
