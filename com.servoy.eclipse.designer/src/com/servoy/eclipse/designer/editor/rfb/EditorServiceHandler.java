@@ -38,10 +38,16 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.GraphicalComponent;
+import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.Portal;
+import com.servoy.j2db.persistence.RectShape;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
 
@@ -157,6 +163,8 @@ public class EditorServiceHandler implements IServerService
 					{
 						editorPart.getCommandStack().execute(new BaseRestorableCommand("createComponent")
 						{
+							private IPersist newPersist;
+
 							@Override
 							public void execute()
 							{
@@ -165,7 +173,6 @@ public class EditorServiceHandler implements IServerService
 									int x = args.getInt("x");
 									int y = args.getInt("y");
 									String name = args.getString("name");
-									IPersist newPersist = null;
 									if ("svy-button".equals(name))
 									{
 										GraphicalComponent gc = editorPart.getForm().createNewGraphicalComponent(new Point(x, y));
@@ -258,6 +265,37 @@ public class EditorServiceHandler implements IServerService
 										field.setEditable(false);
 										newPersist = field;
 									}
+									else if ("svy-tabpanel".equals(name))
+									{
+										TabPanel tabPanel = editorPart.getForm().createNewTabPanel(null);
+										tabPanel.setLocation(new Point(x, y));
+										newPersist = tabPanel;
+									}
+									else if ("svy-splitpane".equals(name))
+									{
+										TabPanel tabPanel = editorPart.getForm().createNewTabPanel(null);
+										tabPanel.setLocation(new Point(x, y));
+										tabPanel.setTabOrientation(TabPanel.SPLIT_HORIZONTAL);
+										newPersist = tabPanel;
+									}
+									else if ("svy-portal".equals(name))
+									{
+										Portal portal = editorPart.getForm().createNewPortal(null, new Point(x, y));
+										newPersist = portal;
+									}
+									else if ("svy-rectangle".equals(name))
+									{
+										RectShape shape = editorPart.getForm().createNewRectangle(new Point(x, y));
+										shape.setLineSize(1);
+										newPersist = shape;
+									}
+									else
+									{
+										// bean
+										Bean bean = editorPart.getForm().createNewBean(null, name);
+										bean.setLocation(new Point(x, y));
+										newPersist = bean;
+									}
 									ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false,
 										Arrays.asList(new IPersist[] { newPersist }));
 								}
@@ -270,7 +308,19 @@ public class EditorServiceHandler implements IServerService
 							@Override
 							public void undo()
 							{
-
+								try
+								{
+									if (newPersist != null)
+									{
+										((IDeveloperRepository)newPersist.getRootObject().getRepository()).deleteObject(newPersist);
+										ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false,
+											Arrays.asList(new IPersist[] { newPersist }));
+									}
+								}
+								catch (RepositoryException e)
+								{
+									ServoyLog.logError("Could not undo create elements", e);
+								}
 							}
 
 						});

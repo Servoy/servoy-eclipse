@@ -34,32 +34,45 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 	    	 
 	    	 $scope.enterDragMode = function(event,componentName)
 	    	 {
-	    		 var dragClone = $(event.target).clone()
-	    		 dragClone.attr('id', 'dragNode')
-	    		 dragClone.css({
-	    			 position: 'absolute',
-	    			 top: event.pageY,
-	    			 left: event.pageX,
-	    			 'z-index': 4,
-	    			 'pointer-events': 'none',
-	    			 'list-style-type': 'none'
-	    		 })
-	    		 $('body').append(dragClone);
+	    		 var dragClone = null;
 	    		 
 	    		 var mousemovecallback = $scope.registerDOMEvent("mousemove","EDITOR", function(ev){
-	    			 var css = { top: ev.pageY, left: ev.pageX }
-	    			 dragClone.css(css);
+	    			 if (dragClone)
+	    			 {
+	    				 var css = { top: ev.pageY, left: ev.pageX }
+		    			 dragClone.css(css);
+	    			 }
+	    			 else
+	    			 {
+	    				 dragClone = $(event.target).clone()
+			    		 dragClone.attr('id', 'dragNode')
+			    		 dragClone.css({
+			    			 position: 'absolute',
+			    			 top: event.pageY,
+			    			 left: event.pageX,
+			    			 'z-index': 4,
+			    			 'pointer-events': 'none',
+			    			 'list-style-type': 'none'
+			    		 })
+			    		 $('body').append(dragClone); 
+	    			 }	 
 	    		 });
 	    		 var mouseupcallback = $scope.registerDOMEvent("mouseup","EDITOR", function(ev){
-	    			 dragClone.remove();
 	    			 if (mousemovecallback) $scope.unregisterDOMEvent("mousemove","EDITOR",mousemovecallback);
 	    			 if (mouseupcallback)  $scope.unregisterDOMEvent("mouseup","EDITOR",mouseupcallback);
-	    			 var component = {};
-	    			 component.name = componentName;
-	    			 component.x = ev.pageX;
-	    			 component.y = ev.pageY;
-	    			 component = $scope.convertToContentPoint(component);
-	    			 $editorService.createComponent(component);
+	    			 if (dragClone)
+	    			 {
+	    				 dragClone.remove();
+	    				 var component = {};
+		    			 component.name = componentName;
+		    			 component.x = ev.pageX;
+		    			 component.y = ev.pageY;
+		    			 component = $scope.convertToContentPoint(component);
+		    			 if (component.x >0 && component.y >0)
+		    			 {
+		    				 $editorService.createComponent(component); 
+		    			 }
+	    			 }	 
 	    		 });
 	    	 }
 	      },
