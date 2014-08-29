@@ -7,7 +7,7 @@
 	<property name="basearch" value="${arch}"/>
 	<property name="basenl" value="${nl}"/>
 	<property name="bundleId" value="com.servoy.eclipse.designer.rib"/>
-	<property name="bundleVersion" value="7.4.1.2030"/>
+	<property name="bundleVersion" value="7.4.1.2031"/>
 	<property name="p2.publishonerror" value="false"/>
 
 	<!-- Compiler settings. -->
@@ -38,7 +38,7 @@
 			<isset property="buildTempFolder"/>
 		</condition>
 		<property name="pluginTemp" value="${basedir}"/>
-		<condition property="build.result.folder" value="${pluginTemp}/com.servoy.eclipse.designer.rib_7.4.1.2030"		>
+		<condition property="build.result.folder" value="${pluginTemp}/com.servoy.eclipse.designer.rib_7.4.1.2031"		>
 			<isset property="buildTempFolder"/>
 		</condition>
 		<property name="build.result.folder" value="${basedir}"/>
@@ -68,7 +68,7 @@
 		<antcall target="gather.bin.parts">
 			<param name="destination.temp.folder" value="${temp.folder}/"/>
 		</antcall>
-		<jar destfile="${plugin.destination}/com.servoy.eclipse.designer.rib_7.4.1.2030.jar" basedir="${temp.folder}/com.servoy.eclipse.designer.rib_7.4.1.2030" filesetmanifest="merge"/>
+		<jar destfile="${plugin.destination}/com.servoy.eclipse.designer.rib_7.4.1.2031.jar" basedir="${temp.folder}/com.servoy.eclipse.designer.rib_7.4.1.2031" filesetmanifest="merge"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
@@ -77,8 +77,8 @@
 	</target>
 
 	<target name="checkCompilationResults" if="compilation.error.occured">
-		<echo file="${compilation.problem.marker}" message="com.servoy.eclipse.designer.rib_7.4.1.2030${line.separator}compilation.error.occured=${compilation.error.occured}"/>
-		<eclipse.logCompileError bundle="com.servoy.eclipse.designer.rib_7.4.1.2030" log="${compilation.prereq.log}">
+		<echo file="${compilation.problem.marker}" message="com.servoy.eclipse.designer.rib_7.4.1.2031${line.separator}compilation.error.occured=${compilation.error.occured}"/>
+		<eclipse.logCompileError bundle="com.servoy.eclipse.designer.rib_7.4.1.2031" log="${compilation.prereq.log}">
 		</eclipse.logCompileError>
 	</target>
 
@@ -86,7 +86,7 @@
 	</target>
 
 	<target name="publish.bin.parts" depends="init" if="p2.publish.parts" unless="compilation.problem.marker.exists">
-		<mkdir dir="${build.result.folder}/com.servoy.eclipse.designer.rib_7.4.1.2030"/>
+		<mkdir dir="${build.result.folder}/com.servoy.eclipse.designer.rib_7.4.1.2031"/>
 		<copy todir="${build.result.folder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}">
 				<include name="META-INF/MANIFEST.MF"/>
@@ -110,15 +110,15 @@
 	</target>
 
 	<target name="gather.bin.parts" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.designer.rib_7.4.1.2030"/>
-		<copy todir="${destination.temp.folder}/com.servoy.eclipse.designer.rib_7.4.1.2030" failonerror="true" overwrite="true">
+		<mkdir dir="${destination.temp.folder}/com.servoy.eclipse.designer.rib_7.4.1.2031"/>
+		<copy todir="${destination.temp.folder}/com.servoy.eclipse.designer.rib_7.4.1.2031" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}">
 				<include name="META-INF/"/>
 				<include name="rib/"/>
 			</fileset>
 		</copy>
 		<antcall target="apitools.generation">
-			<param name="target.folder" value="${destination.temp.folder}/com.servoy.eclipse.designer.rib_7.4.1.2030"/>
+			<param name="target.folder" value="${destination.temp.folder}/com.servoy.eclipse.designer.rib_7.4.1.2031"/>
 			<param name="projectLocation" value="${basedir}"/>
 			<param name="binary.folders" value="C:\Users\Administrator\dev_v7xx_branch\com.servoy.eclipse.designer.rib"/>
 			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
@@ -130,7 +130,7 @@
 
 	<target name="gather.sources" depends="init" if="destination.temp.folder">
 		<antcall target="copy.src.includes">
-			<param name="source.destination.folder" value="${destination.temp.folder}/com.servoy.eclipse.designer.rib_7.4.1.2030"/>
+			<param name="source.destination.folder" value="${destination.temp.folder}/com.servoy.eclipse.designer.rib_7.4.1.2031"/>
 		</antcall>
 	</target>
 
@@ -147,8 +147,8 @@
 	</target>
 
 	<target name="clean" depends="init" description="Clean the plug-in: com.servoy.eclipse.designer.rib of all the zips, jars and logs created.">
-		<delete file="${plugin.destination}/com.servoy.eclipse.designer.rib_7.4.1.2030.jar"/>
-		<delete file="${plugin.destination}/com.servoy.eclipse.designer.rib_7.4.1.2030.zip"/>
+		<delete file="${plugin.destination}/com.servoy.eclipse.designer.rib_7.4.1.2031.jar"/>
+		<delete file="${plugin.destination}/com.servoy.eclipse.designer.rib_7.4.1.2031.zip"/>
 		<delete dir="${temp.folder}"/>
 		<delete file="${compilation.problem.marker}" quiet="true"/>
 	</target>
@@ -174,7 +174,7 @@
 				<include name="**/*.bin${logExtension}"/>
 			</fileset>
 		</delete>
-		<zip destfile="${plugin.destination}/com.servoy.eclipse.designer.rib_7.4.1.2030.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
+		<zip destfile="${plugin.destination}/com.servoy.eclipse.designer.rib_7.4.1.2031.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
