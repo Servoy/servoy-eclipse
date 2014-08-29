@@ -133,7 +133,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		try
 		{
 			ServoyLog.logInfo("Browser url for editor: " + url);
-			browser.setUrl(url);
+			browser.setUrl(url + "&replacewebsocket=true");
 			// install fake WebSocket in case browser does not support it
 			SwtWebsocket.installFakeWebSocket(browser);
 			// install console

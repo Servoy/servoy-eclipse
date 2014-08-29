@@ -206,7 +206,10 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 			
 			var promise = $editorService.connect();
 			promise.then(function() {
-				$scope.contentframe = "editor-content.html?endpoint=designclient&id=%23" + $element.attr("id") + "&f=" +formName +"&s=" + $editorService.getURLParameter("s");
+				var replacews = "";
+				var value = $editorService.getURLParameter("replacewebsocket");
+				if (value) replacews = "&replacewebsocket=true";
+				$scope.contentframe = "editor-content.html?endpoint=designclient&id=%23" + $element.attr("id") + "&f=" +formName +"&s=" + $editorService.getURLParameter("s") + replacews;
 			})
 	      },
 	      templateUrl: 'templates/editor.html',
@@ -244,12 +247,11 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 		return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec($window.location.search)||[,""])[1].replace(/\+/g, '%20'))||null
 	}
 	function testWebsocket() {
-		if (typeof(WebSocket) == 'undefined')
+		if (typeof(WebSocket) == 'undefined' || getURLParameter("replacewebsocket"))
 		{
 			if (typeof(SwtWebsocketBrowserFunction) != 'undefined') 
 			{
 				WebSocket = SwtWebSocket
-
 				var $currentSwtWebsockets = [];
 				
 				$window.addWebSocket = function(socket) {

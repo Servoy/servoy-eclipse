@@ -1,9 +1,33 @@
 angular.module('editorContent',['servoyApp'])
  .controller("MainController", function($scope, $window, $timeout, $windowService, $webSocket, $servoyInternal){
+	var realConsole = $window.console;
+	$window.console = {
+			log: function(msg) {
+				if (typeof(consoleLog) != "undefined") {
+					consoleLog("log",msg)
+				}
+				else if (realConsole) {
+					realConsole.log(msg)
+				}
+				else alert(msg);
+				
+			},
+			error: function(msg) {
+				if (typeof(consoleLog) != "undefined") {
+					consoleLog("error",msg)
+				}
+				else if (realConsole) {
+					realConsole.error(msg)
+				}				
+				else alert(msg);
+			}
+	}
 	function getURLParameter(name) {
 			return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec($window.location.search)||[,""])[1].replace(/\+/g, '%20'))||null
 	}
-	if (typeof(WebSocket) == 'undefined') {
+	
+	if (typeof(WebSocket) == 'undefined' || getURLParameter("replacewebsocket")) {
+		
 		WebSocket = SwtWebSocket;
 		 
 		function SwtWebSocket(url)  
@@ -20,23 +44,6 @@ angular.module('editorContent',['servoyApp'])
 		SwtWebSocket.prototype.send = function(str)
 		{
 			parent.window.SwtWebsocketBrowserFunction('send', str, this.id)
-		}
-	}
-	if (typeof(console) == "undefined") {
-		window.console = {
-				log: function(msg) {
-					if (typeof(consoleLog) != "undefined") {
-						consoleLog("log",msg)
-					}
-					else alert(msg);
-					
-				},
-				error: function(msg) {
-					if (typeof(consoleLog) != "undefined") {
-						consoleLog("error",msg)
-					}
-					else alert(msg);
-				}
 		}
 	}
 	 $servoyInternal.connect();
