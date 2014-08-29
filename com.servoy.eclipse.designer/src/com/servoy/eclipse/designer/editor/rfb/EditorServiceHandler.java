@@ -21,6 +21,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Random;
 
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -89,6 +90,7 @@ public class EditorServiceHandler implements IServerService
 
 	private final BaseVisualFormEditor editorPart;
 	private final ISelectionProvider selectionProvider;
+	private static Random random = new Random();
 
 	public EditorServiceHandler(BaseVisualFormEditor editorPart, ISelectionProvider selectionProvider)
 	{
@@ -256,31 +258,25 @@ public class EditorServiceHandler implements IServerService
 									{
 										Field field = editorPart.getForm().createNewField(new Point(x, y));
 										field.setDisplayType(Field.HTML_AREA);
-										newPersist = field;
-									}
-									else if ("svy-htmlview".equals(name))
-									{
-										Field field = editorPart.getForm().createNewField(new Point(x, y));
-										field.setDisplayType(Field.HTML_AREA);
 										field.setEditable(false);
 										newPersist = field;
 									}
 									else if ("svy-tabpanel".equals(name))
 									{
-										TabPanel tabPanel = editorPart.getForm().createNewTabPanel(null);
+										TabPanel tabPanel = editorPart.getForm().createNewTabPanel("tabpanel_" + random.nextInt(1024));
 										tabPanel.setLocation(new Point(x, y));
 										newPersist = tabPanel;
 									}
 									else if ("svy-splitpane".equals(name))
 									{
-										TabPanel tabPanel = editorPart.getForm().createNewTabPanel(null);
+										TabPanel tabPanel = editorPart.getForm().createNewTabPanel("tabpanel_" + random.nextInt(1024));
 										tabPanel.setLocation(new Point(x, y));
 										tabPanel.setTabOrientation(TabPanel.SPLIT_HORIZONTAL);
 										newPersist = tabPanel;
 									}
 									else if ("svy-portal".equals(name))
 									{
-										Portal portal = editorPart.getForm().createNewPortal(null, new Point(x, y));
+										Portal portal = editorPart.getForm().createNewPortal("portal_" + random.nextInt(1024), new Point(x, y));
 										newPersist = portal;
 									}
 									else if ("svy-rectangle".equals(name))
@@ -292,7 +288,8 @@ public class EditorServiceHandler implements IServerService
 									else
 									{
 										// bean
-										Bean bean = editorPart.getForm().createNewBean(null, name);
+										String packageName = args.getString("packageName");
+										Bean bean = editorPart.getForm().createNewBean("bean_" + random.nextInt(1024), packageName + ":" + name);
 										bean.setLocation(new Point(x, y));
 										newPersist = bean;
 									}

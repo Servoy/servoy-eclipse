@@ -11,7 +11,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 		    		}
 	    	 });
 	    	 
-	    	 $scope.enterDragMode = function(event,componentName)
+	    	 $scope.enterDragMode = function(event,componentName,packageName)
 	    	 {
 	    		 var dragClone = null;
 	    		 
@@ -44,6 +44,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 	    				 dragClone.remove();
 	    				 var component = {};
 		    			 component.name = componentName;
+		    			 component.packageName = packageName;
 		    			 component.x = ev.pageX;
 		    			 component.y = ev.pageY;
 		    			 component = $scope.convertToContentPoint(component);
