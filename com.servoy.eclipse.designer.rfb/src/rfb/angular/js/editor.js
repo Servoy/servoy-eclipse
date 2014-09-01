@@ -61,6 +61,10 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				{
 					$($element.find('.content-area')[0]).on(eventType, null, eventCallback)
 				}
+				else if (target == "PALETTE")
+				{
+					$($element.find('.palette')[0]).on(eventType, null, eventCallback)
+				}
 				else if (target == "CONTENTFRAME_OVERLAY") {
 					$($scope.glasspane).on(eventType, null, eventCallback)
 				}
@@ -76,6 +80,14 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				else if (target == "CONTENT_AREA")
 				{
 					$($element.find('.content-area')[0]).off(eventType,null,callback);
+				}
+				else if (target == "CONTENTFRAME_OVERLAY")
+				{
+					$($scope.glasspane).off(eventType, null, callback)
+				}
+				else if (target == "PALETTE")
+				{
+					$($element.find('.palette')[0]).off(eventType,null,callback);
 				}
 			}
 			
@@ -149,6 +161,10 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 					editorContentRootScope.$digest();
 					$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED,selection)
 				}
+			}
+			
+			$scope.getEditorContentRootScope = function() {
+				return editorContentRootScope;
 			}
 			
 			$scope.contentStyle = {width: "100%", height: "100%"};

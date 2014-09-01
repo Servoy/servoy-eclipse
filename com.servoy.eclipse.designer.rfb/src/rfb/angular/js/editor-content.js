@@ -1,5 +1,9 @@
 angular.module('editorContent',['servoyApp'])
- .controller("MainController", function($scope, $window, $timeout, $windowService, $webSocket, $servoyInternal){
+ .controller("MainController", function($scope, $window, $timeout, $windowService, $webSocket, $servoyInternal,$rootScope,$compile){
+	 $rootScope.createComponent = function(html) {
+		  	return $compile(html)($scope);
+		  }
+	 
 	var realConsole = $window.console;
 	$window.console = {
 			log: function(msg) {

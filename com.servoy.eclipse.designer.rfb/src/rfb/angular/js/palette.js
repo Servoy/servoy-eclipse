@@ -1,4 +1,4 @@
-angular.module("palette",['ui.bootstrap']).directive("palette", function($editorService){
+angular.module("palette",['ui.bootstrap']).directive("palette", function($editorService,$compile){
 	return {
 	      restrict: 'E',
 	      transclude: true,
@@ -11,15 +11,19 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 		    		}
 	    	 });
 	    	 
-	    	 $scope.enterDragMode = function(event,componentName,packageName)
+	    	 $scope.enterDragMode = function(event,componentName,packageName,tagName)
 	    	 {
 	    		 var dragClone = null;
-	    		 
+	    		 var angularElement = null;
+	    		 var mouseentercallback;
+	    		 var mouseleavecallback;
+	    		 var mouseupcallback;
 	    		 var mousemovecallback = $scope.registerDOMEvent("mousemove","EDITOR", function(ev){
 	    			 if (dragClone)
 	    			 {
 	    				 var css = { top: ev.pageY, left: ev.pageX }
 		    			 dragClone.css(css);
+	    				 angularElement.css(css);
 	    			 }
 	    			 else
 	    			 {
@@ -33,12 +37,40 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 			    			 'pointer-events': 'none',
 			    			 'list-style-type': 'none'
 			    		 })
-			    		 $('body').append(dragClone); 
+			    		 $('body').append(dragClone);
+	    				 
+	    				 angularElement = $scope.getEditorContentRootScope().createComponent('<div><'+tagName+'/></div>');
+	    				 angularElement.css({
+			    			 position: 'absolute',
+			    			 top: event.pageY,
+			    			 left: event.pageX,
+			    			 width: '80px',
+			    			 height: '20px',
+			    			 'z-index': 4,
+			    			 opacity: 0,
+			    			 transition: 'opacity .5s ease-in-out 0'
+			    		 })
+			    		 angularElement.on('mouseup',null,function(ev){mouseupcallback(ev)});
+			    		 $('body').append(angularElement); 
 	    			 }	 
 	    		 });
-	    		 var mouseupcallback = $scope.registerDOMEvent("mouseup","EDITOR", function(ev){
+	    		 mouseentercallback = $scope.registerDOMEvent("mouseenter","CONTENTFRAME_OVERLAY", function(ev){
+	    			 dragClone.css('opacity', '0');
+	    			 angularElement.css('opacity', '1');
+	    		 });
+	    		 mouseleavecallback = $scope.registerDOMEvent("mouseleave","PALETTE", function(ev){
+	    			 dragClone.css('opacity', '1');
+	    			 angularElement.css('opacity', '0');
+	    		 });
+	    		 mouseupcallback = $scope.registerDOMEvent("mouseup","EDITOR", function(ev){
 	    			 if (mousemovecallback) $scope.unregisterDOMEvent("mousemove","EDITOR",mousemovecallback);
 	    			 if (mouseupcallback)  $scope.unregisterDOMEvent("mouseup","EDITOR",mouseupcallback);
+	    			 if (mouseentercallback) $scope.unregisterDOMEvent("mouseenter","CONTENTFRAME_OVERLAY",mouseentercallback);
+	    			 if (mouseleavecallback) $scope.unregisterDOMEvent("mouseleave","PALETTE",mouseleavecallback);
+	    			 if (angularElement)
+	    			 {
+	    				 angularElement.remove();
+	    			 }
 	    			 if (dragClone)
 	    			 {
 	    				 dragClone.remove();
@@ -52,7 +84,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 		    			 {
 		    				 $editorService.createComponent(component); 
 		    			 }
-	    			 }	 
+	    			 }
 	    		 });
 	    	 }
 	      },
