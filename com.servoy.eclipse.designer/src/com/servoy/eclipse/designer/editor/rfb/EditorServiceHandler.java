@@ -21,7 +21,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -43,6 +43,7 @@ import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IDeveloperRepository;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RectShape;
@@ -51,6 +52,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Handle requests from the rfb html editor.
@@ -88,7 +90,7 @@ public class EditorServiceHandler implements IServerService
 
 	private final BaseVisualFormEditor editorPart;
 	private final ISelectionProvider selectionProvider;
-	private static Random random = new Random();
+	private final AtomicInteger id = new AtomicInteger();
 
 	public EditorServiceHandler(BaseVisualFormEditor editorPart, ISelectionProvider selectionProvider)
 	{
@@ -261,20 +263,35 @@ public class EditorServiceHandler implements IServerService
 									}
 									else if ("svy-tabpanel".equals(name))
 									{
-										TabPanel tabPanel = editorPart.getForm().createNewTabPanel("tabpanel_" + random.nextInt(1024));
+										String compName = "tabpanel_" + id.incrementAndGet();
+										while (!checkName(compName))
+										{
+											compName = "tabpanel_" + id.incrementAndGet();
+										}
+										TabPanel tabPanel = editorPart.getForm().createNewTabPanel(compName);
 										tabPanel.setLocation(new Point(x, y));
 										newPersist = tabPanel;
 									}
 									else if ("svy-splitpane".equals(name))
 									{
-										TabPanel tabPanel = editorPart.getForm().createNewTabPanel("tabpanel_" + random.nextInt(1024));
+										String compName = "tabpanel_" + id.incrementAndGet();
+										while (!checkName(compName))
+										{
+											compName = "tabpanel_" + id.incrementAndGet();
+										}
+										TabPanel tabPanel = editorPart.getForm().createNewTabPanel(compName);
 										tabPanel.setLocation(new Point(x, y));
 										tabPanel.setTabOrientation(TabPanel.SPLIT_HORIZONTAL);
 										newPersist = tabPanel;
 									}
 									else if ("svy-portal".equals(name))
 									{
-										Portal portal = editorPart.getForm().createNewPortal("portal_" + random.nextInt(1024), new Point(x, y));
+										String compName = "portal_" + id.incrementAndGet();
+										while (!checkName(compName))
+										{
+											compName = "portal_" + id.incrementAndGet();
+										}
+										Portal portal = editorPart.getForm().createNewPortal(compName, new Point(x, y));
 										newPersist = portal;
 									}
 									else if ("svy-rectangle".equals(name))
@@ -286,8 +303,13 @@ public class EditorServiceHandler implements IServerService
 									else
 									{
 										// bean
+										String compName = "bean_" + id.incrementAndGet();
+										while (!checkName(compName))
+										{
+											compName = "bean_" + id.incrementAndGet();
+										}
 										String packageName = args.getString("packageName");
-										Bean bean = editorPart.getForm().createNewBean("bean_" + random.nextInt(1024), packageName + ":" + name);
+										Bean bean = editorPart.getForm().createNewBean(compName, packageName + ":" + name);
 										bean.setLocation(new Point(x, y));
 										newPersist = bean;
 									}
@@ -298,6 +320,22 @@ public class EditorServiceHandler implements IServerService
 								{
 									Debug.error(ex);
 								}
+							}
+
+							/**
+							 * @param compName
+							 */
+							private boolean checkName(String compName)
+							{
+								Iterator<IFormElement> fields = editorPart.getForm().getFormElementsSortedByFormIndex();
+								for (IFormElement element : Utils.iterate(fields))
+								{
+									if (compName.equals(element.getName()))
+									{
+										return false;
+									}
+								}
+								return true;
 							}
 
 							@Override
