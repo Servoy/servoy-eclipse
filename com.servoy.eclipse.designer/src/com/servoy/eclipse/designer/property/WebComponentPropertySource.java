@@ -44,7 +44,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
  * Properties for ngclient components.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -138,7 +138,7 @@ public class WebComponentPropertySource extends PersistPropertySource
 					{
 						config.addDefault(desc.getDefaultValue(), null);
 					}
-					props.add(new WebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, false, config,
+					props.add(new WebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config,
 						desc.getDefaultValue())));
 				}
 				else
@@ -157,11 +157,11 @@ public class WebComponentPropertySource extends PersistPropertySource
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * com.servoy.eclipse.ui.property.PersistPropertySource#createPropertyCategory(com.servoy.eclipse.ui.property.PersistPropertySource.PropertyDescriptorWrapper
 	 * )
-	 * 
+	 *
 	 * Properties from spec should be dispayed under "Beans" category except for handlers and BEAN_PROPERTIES. Properties found with reflection are handled by
 	 * the super class (they go under "Properties").
 	 */
