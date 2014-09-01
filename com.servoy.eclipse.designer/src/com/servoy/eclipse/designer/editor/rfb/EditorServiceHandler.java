@@ -77,8 +77,6 @@ public class EditorServiceHandler implements IServerService
 			this.source = source;
 			this.propertyName = propertyName;
 			this.value = value;
-
-			System.err.println("created set command: " + propertyName + " ," + value);
 		}
 
 		@Override
