@@ -50,7 +50,9 @@ angular.module('editorContent',['servoyApp'])
 	 var formName = getURLParameter("f");
 	 $scope.getUrl = function() {
 		 if ($webSocket.isConnected()) {
-			 return $windowService.getFormUrl(formName);
+			 var url = $windowService.getFormUrl(formName);
+			 // this main url is in design (the template must have special markers)
+			 return url?url+"&design=true":null;
 		 }
 	 }
  }).factory("$editorContentService", function() {
