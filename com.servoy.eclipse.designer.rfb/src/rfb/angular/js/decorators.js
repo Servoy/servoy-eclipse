@@ -4,6 +4,11 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 	      transclude: true,
 	      controller: function($scope, $element, $attrs) {
 			$scope.nodes = [];
+			function adjustForPadding(mousePosition) {
+				mousePosition.left += parseInt(angular.element($scope.glasspane.parentElement).css("padding-left").replace("px",""));
+				mousePosition.top  += parseInt(angular.element($scope.glasspane.parentElement).css("padding-top").replace("px",""));
+				return mousePosition;
+			}
 			function renderDecorators(selection) {
 				selection.forEach(function(value, index, array) {
 					var currentNode = $scope.nodes[index];
@@ -33,6 +38,7 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 					var y = (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
 					offset.top -= y;
 					offset.left -= x;
+					offset = adjustForPadding(offset)
 					currentNode.style = {
 						height: height,
 						width: width,
