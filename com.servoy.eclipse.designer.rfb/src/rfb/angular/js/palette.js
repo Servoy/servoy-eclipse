@@ -58,7 +58,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 	    			 dragClone.css('opacity', '0');
 	    			 angularElement.css('opacity', '1');
 	    		 });
-	    		 mouseleavecallback = $scope.registerDOMEvent("mouseleave","PALETTE", function(ev){
+	    		 mouseleavecallback = $scope.registerDOMEvent("mouseenter","PALETTE", function(ev){
 	    			 dragClone.css('opacity', '1');
 	    			 angularElement.css('opacity', '0');
 	    		 });
@@ -66,7 +66,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 	    			 if (mousemovecallback) $scope.unregisterDOMEvent("mousemove","EDITOR",mousemovecallback);
 	    			 if (mouseupcallback)  $scope.unregisterDOMEvent("mouseup","EDITOR",mouseupcallback);
 	    			 if (mouseentercallback) $scope.unregisterDOMEvent("mouseenter","CONTENTFRAME_OVERLAY",mouseentercallback);
-	    			 if (mouseleavecallback) $scope.unregisterDOMEvent("mouseleave","PALETTE",mouseleavecallback);
+	    			 if (mouseleavecallback) $scope.unregisterDOMEvent("mouseenter","PALETTE",mouseleavecallback);
 	    			 if (angularElement)
 	    			 {
 	    				 angularElement.remove();
