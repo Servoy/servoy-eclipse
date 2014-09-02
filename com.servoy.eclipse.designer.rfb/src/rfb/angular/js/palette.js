@@ -23,6 +23,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 	    			 {
 	    				 var css = { top: ev.pageY, left: ev.pageX }
 		    			 dragClone.css(css);
+	    				 css = $scope.convertToContentPoint(css);
 	    				 angularElement.css(css);
 	    			 }
 	    			 else
@@ -40,7 +41,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 			    		 $('body').append(dragClone);
 	    				 
 	    				 angularElement = $scope.getEditorContentRootScope().createComponent('<div><'+tagName+'/></div>');
-	    				 angularElement.css({
+	    				 var css = $scope.convertToContentPoint({
 			    			 position: 'absolute',
 			    			 top: event.pageY,
 			    			 left: event.pageX,
@@ -49,9 +50,9 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 			    			 'z-index': 4,
 			    			 opacity: 0,
 			    			 transition: 'opacity .5s ease-in-out 0'
-			    		 })
+			    		 });
+	    				 angularElement.css(css)
 			    		 angularElement.on('mouseup',null,function(ev){mouseupcallback(ev)});
-			    		 $('body').append(angularElement); 
 	    			 }	 
 	    		 });
 	    		 mouseentercallback = $scope.registerDOMEvent("mouseenter","CONTENTFRAME_OVERLAY", function(ev){

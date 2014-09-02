@@ -93,8 +93,15 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 			
 			$scope.convertToContentPoint = function(point){
 				var frameRect = $element.find('.contentframe')[0].getBoundingClientRect()
-				point.x = point.x - frameRect.left;
-				point.y = point.y - frameRect.top;
+				if (point.x && point.y)
+				{
+					point.x = point.x - frameRect.left;
+					point.y = point.y - frameRect.top;
+				} else if (point.top && point.left)
+				{
+					point.left = point.left - frameRect.left;
+					point.top = point.top - frameRect.top;
+				}
 				return point
 			}
 			
