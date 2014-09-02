@@ -1,10 +1,8 @@
 <div>
 	<!-- Right aligned toolbars included in DOm first, to get desired toolbar overflow behavior -->
 
-	<div class="toolbar right-aligned">
-		<span class="toolbar-action" ng-repeat="item in sticky" ng-click="item.onclick()">
-			<img ng-src="js/modules/{{item.icon}}" alt="{{item.text}}" title="{{item.text}}" style="width: 1.4em; height: 1.4em"/>
-		</span>
+	<div class="toolbar right-aligned">	
+    	<toolbar-item ng-repeat="item in sticky" model="item" class="toolbar-action"/>
 	</div>
 
 	<div class="toolbar editor">
@@ -18,9 +16,7 @@
 	</div>
 
 	<div class="toolbar element">
-		<span class="toolbar-action {{item.enabled ? '' : 'disabled'}}" ng-repeat="item in elements" ng-click="item.onclick()">
-			<img ng-src="js/modules/{{item.icon}}" alt="{{item.text}}" title="{{item.text}}" style="width: 1.4em; height: 1.4em"/>
-		</span>
+		<toolbar-item ng-repeat="item in elements" model="item" class="toolbar-action"/>
 	</div>
 
 	<div class="toolbar form">

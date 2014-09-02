@@ -31,6 +31,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -43,12 +44,13 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.util.Utils;
 
 /**
  * Design page for browser based rfb editor.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -110,7 +112,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	{
 		// Serve requests for rfb editor
 		String editorId = UUID.randomUUID().toString();
-		WebsocketSessionManager.addSession(EditorWebsocketSession.EDITOR_ENDPOINT, editorWebsocketSession = new EditorWebsocketSession(editorId));
+		WebsocketSessionManager.addSession(editorWebsocketSession = new EditorWebsocketSession(editorId));
 		editorWebsocketSession.registerServerService("formeditor", new EditorServiceHandler(editorPart, selectionProvider));
 
 		try
@@ -123,19 +125,52 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 			return;
 		}
 
-		String url = "http://localhost:8080/rfb/index.html?absolute_layout=true&editorid=" + editorId;
+//		String url = "http://localhost:8080/rfb/index.html?absolute_layout=true&editorid=" + editorId;
+		Form form = editorPart.getForm();
+		String layout = computeLayout(form);
+		String url = "http://localhost:8080/rfb/angular/index.html?s=" + form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&editorid=" +
+			editorId;
 		try
 		{
 			ServoyLog.logInfo("Browser url for editor: " + url);
-			browser.setUrl(url);
+			browser.setUrl(url + "&replacewebsocket=true");
+			// install fake WebSocket in case browser does not support it
+			SwtWebsocket.installFakeWebSocket(browser);
+			// install console
+			new BrowserFunction(browser, "consoleLog")
+			{
+				@Override
+				public Object function(Object[] arguments)
+				{
+					if (arguments.length > 1)
+					{
+						if ("log".equals(arguments[0]))
+						{
+							ServoyLog.logInfo((String)arguments[1]);
+						}
+						else if ("error".equals(arguments[0]))
+						{
+							ServoyLog.logError((String)arguments[1], null);
+						}
+					}
+					return null;
+				}
+			};
 		}
 		catch (Exception e)
 		{
 			ServoyLog.logError("couldn't load the editor: " + url, e);
 		}
+	}
 
-		// install fake WebSocket in case browser does not support it
-		SwtWebsocket.installFakeWebSocket(browser);
+	/**
+	 * @param form
+	 * @return
+	 */
+	private String computeLayout(Form form)
+	{
+		if (form.getLayoutContainers().hasNext()) return "flow";
+		else return "absolute";
 	}
 
 	@Override
@@ -144,6 +179,18 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		super.init(site, input);
 		site.setSelectionProvider(selectionProvider);
 		getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(selectionListener);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.gef.ui.parts.GraphicalEditor#dispose()
+	 */
+	@Override
+	public void dispose()
+	{
+		super.dispose();
+		getSite().getWorkbenchWindow().getSelectionService().removeSelectionListener(selectionListener);
 	}
 
 	@Override

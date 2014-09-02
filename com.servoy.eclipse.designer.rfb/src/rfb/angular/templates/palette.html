@@ -1,13 +1,13 @@
 <div>
 	<accordion close-others='false'>
-		<accordion-group ng-repeat="category in categories" is-open="category.isOpen">
+		<accordion-group ng-repeat="package in packages" is-open="package.isOpen">
 			<accordion-heading>
-				<h1 class="palette-heading">{{category.name}}<span style="float: right">˅</span></h1>
+				<h1 class="palette-heading">{{package.packageName}}<span style="float: right">˅</span></h1>
 			</accordion-heading>
 		    <div>
 			    <ul>
-					<li ng-repeat="item in category.components | orderBy:'name'">
-						<img ng-src="{{item.icon}}" alt="{{item.name}}" title="{{item.name}}"/>{{item.name}}
+					<li ng-repeat="item in package.components | orderBy:'displayName'" ng-mousedown="enterDragMode($event,item.name,package.packageName,item.tagName) " title="Place component {{item.displayName}}">
+						<img ng-src="/{{item.icon}}" alt="{{item.displayName}}"/>{{item.displayName}}
 					</li>
 			    </ul>
 			 </div>

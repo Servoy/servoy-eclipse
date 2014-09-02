@@ -1,20 +1,21 @@
 <!DOCTYPE html>
 <html ng-app="editorContent" ng-controller="MainController">
 	<head>
-		<base href="/">
+		<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+		<base href="http://localhost:8080/">
 		<title>RFB Editor</title>
 		
-		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css"/>
+		<link rel="stylesheet" href="css/bootstrap/css/bootstrap.css"/>
 		<link rel="stylesheet" href="css/ng-grid.css"/>
 		<link rel="stylesheet" href="js/bootstrap-window/css/bootstrap-window.css"/>
 		
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.js"></script>
-		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.11/angular.js"></script>
+		<script src="js/jquery-1.11.1.js"></script>
+		<script src="js/angular1.2.22.js"></script>
 
 		<script src="rfb/angular/js/editor-content.js"></script>
 		
 		<!-- generate all component js --> 
-				<script src="js/angular-webstorage.js"></script>
+		<script src="js/angular-webstorage.js"></script>
 		<script src="js/angularui/ui-bootstrap-tpls-0.10.0.js"></script>
 		<script src="js/angularui/ng-grid-2.0.7.debug.js"></script>
 		<script src="js/numeral.js"></script>
@@ -76,12 +77,7 @@
 					childList: true
 				});
 */			
-document.addEventListener('click',  function(e){
-	e.preventDefault()
-	e.stopPropagation();
-},true)
 			})
-
 			$(window).resize(renderDecorators)
 		</script>
 		<style>
@@ -101,7 +97,7 @@ document.addEventListener('click',  function(e){
 	<body class="user-selection-off content">
 		<div class="drag-scroll-preventer max" style="overflow: auto; z-index: 0">
 			<!--Content-->
-			<div class="sfcontent" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px;" ng-include="formtemplate">
+			<div class="sfcontent" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px;" ng-include="getUrl()">
 			</div>
 		</div>
 	</body>

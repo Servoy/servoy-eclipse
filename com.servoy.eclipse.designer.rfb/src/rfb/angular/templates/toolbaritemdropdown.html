@@ -1,0 +1,9 @@
+<div class="btn-group">
+	<button type="button" class="btn btn-xs" ng-click="model.onclick(model.text)" ng-disabled="!model.enabled">{{model.text}}</button>
+	<button type="button" class="btn btn-xs dropdown-toggle" data-toggle="dropdown" ng-disabled="!model.enabled">
+		<span class="caret"></span>
+	</button>
+	<ul class="dropdown-menu dropdown-menu-right" role="menu" style="min-width:inherit;">
+		<li ng-repeat="item in model.list"><a href="#" ng-click="onselection(item)">{{item}}</a></li> 
+	</ul>
+</div>

@@ -1,5 +1,5 @@
 <div id="editor">
-	<div class="sfeditor" tabindex="0">
+	<div tabindex="0">
 		<!-- 
 			TODO: everything inside the #editor div should be dynamically generated and inserted.
 			Take special care of making sure the ID query parameter on the src url of the iframe is set to the ID of the div in which the editor is instantiated
@@ -12,13 +12,15 @@
 	
 		<!--  Editor -->
 		<div class="content-area {{ isContentSizeFull() ? '' : 'non-full' }}" tabindex="0">
-		    <div class="contentframe-overlay max"></div> <!-- z-index: 1 -->
-			<div class="content" ng-style="contentStyle">
+		    <div class="contentframe-overlay max" style="z-index:2;background-color:rgba(255,255,255,0.01)">
+		    	<div id="lasso"></div>
 				<!--Decorators-->
 				<decorator></decorator>
+		    </div> <!--  -->
+			<div class="content" ng-style="contentStyle">
 				<!-- id query param should be dynamically set to the selector of the div in which the editor is placed -->
 				<iframe class="contentframe" ng-src="{{contentframe}}"></iframe>
-				</div>
+			</div>
 		</div>
 	</div>
 </div>
