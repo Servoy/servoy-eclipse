@@ -52,7 +52,6 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 			    			 transition: 'opacity .5s ease-in-out 0'
 			    		 });
 	    				 angularElement.css(css)
-			    		 angularElement.on('mouseup',null,function(ev){mouseupcallback(ev)});
 	    			 }	 
 	    		 });
 	    		 mouseentercallback = $scope.registerDOMEvent("mouseenter","CONTENTFRAME_OVERLAY", function(ev){
