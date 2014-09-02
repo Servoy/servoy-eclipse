@@ -36,7 +36,7 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 			var formName =  $editorService.getURLParameter("f");
 			var formLayout =  $editorService.getURLParameter("l");
 			var editorContentRootScope = null;
-			var formState = null;
+			var servoyInternal = null;
 			
 			function fireSelectionChanged(){
 				//Reference to editor should be gotten from Editor instance somehow
@@ -160,7 +160,7 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 			}
 			
 			$scope.getFormState = function() {
-				return formState;
+				return servoyInternal.initFormState(formName); // this is a normal direct get if no init config is given
 			}
 			
 			$scope.refreshEditorContent = function() {
@@ -195,11 +195,7 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				var htmlTag = $scope.contentDocument.getElementsByTagName("html")[0];
 				var injector = $scope.contentWindow.angular.element(htmlTag).injector();
 				editorContentRootScope = injector.get("$rootScope");
-				var servoyInternal = injector.get("$servoyInternal");
-				var promise = servoyInternal.getFormState(formName);
-				promise.then(function(state){
-					formState = state;
-				})
+				servoyInternal = injector.get("$servoyInternal");
 			});
 			
 
