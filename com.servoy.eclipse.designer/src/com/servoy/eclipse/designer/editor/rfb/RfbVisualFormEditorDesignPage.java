@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.gef.ui.actions.DeleteAction;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -40,8 +39,13 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.sablo.websocket.WebsocketSessionManager;
 
+import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
+import com.servoy.eclipse.designer.editor.rfb.actions.CopyAction;
+import com.servoy.eclipse.designer.editor.rfb.actions.CutAction;
+import com.servoy.eclipse.designer.editor.rfb.actions.DeleteAction;
+import com.servoy.eclipse.designer.editor.rfb.actions.PasteAction;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
 import com.servoy.j2db.persistence.Form;
@@ -218,24 +222,24 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	@Override
 	protected DeleteAction createDeleteAction()
 	{
-		return null;
+		return new DeleteAction(editorPart);
 	}
 
 	@Override
 	protected IAction createCopyAction()
 	{
-		return null;
+		return new CopyAction(editorPart);
 	}
 
 	@Override
 	protected IAction createCutAction()
 	{
-		return null;
+		return new CutAction(editorPart);
 	}
 
 	@Override
 	protected IAction createPasteAction()
 	{
-		return null;
+		return new PasteAction(Activator.getDefault().getDesignClient(), selectionProvider, editorPart);
 	}
 }
