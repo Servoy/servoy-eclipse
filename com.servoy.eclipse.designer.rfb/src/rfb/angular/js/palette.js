@@ -11,7 +11,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 		    		}
 	    	 });
 	    	 
-	    	 $scope.enterDragMode = function(event,componentName,packageName,tagName)
+	    	 $scope.enterDragMode = function(event,componentName,packageName,tagName,model)
 	    	 {
 	    		 var dragClone = null;
 	    		 var angularElement = null;
@@ -40,13 +40,15 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 			    		 })
 			    		 $('body').append(dragClone);
 	    				 
-	    				 angularElement = $scope.getEditorContentRootScope().createComponent('<div><'+tagName+'/></div>');
+	    				 angularElement = $scope.getEditorContentRootScope().createComponent('<div><'+tagName+' svy-model=\'model\' svy-api=\'api\' svy-handlers=\'handlers\'/></div>',model);
+	    				 var elWidth = model.size ? model.size.width : 100;
+	    				 var elHeight = model.size ? model.size.height : 100;
 	    				 var css = $scope.convertToContentPoint({
 			    			 position: 'absolute',
 			    			 top: event.pageY,
 			    			 left: event.pageX,
-			    			 width: '80px',
-			    			 height: '20px',
+			    			 width: (elWidth +'px'),
+			    			 height: (elHeight +'px'),
 			    			 'z-index': 4,
 			    			 opacity: 0,
 			    			 transition: 'opacity .5s ease-in-out 0'
