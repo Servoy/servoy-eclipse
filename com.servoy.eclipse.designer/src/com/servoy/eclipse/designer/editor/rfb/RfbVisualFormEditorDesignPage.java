@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.gef.ui.actions.SelectAllAction;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -45,6 +46,7 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.rfb.actions.CopyAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.CutAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.DeleteAction;
+import com.servoy.eclipse.designer.editor.rfb.actions.FixedSelectAllAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.PasteAction;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
@@ -241,5 +243,11 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	protected IAction createPasteAction()
 	{
 		return new PasteAction(Activator.getDefault().getDesignClient(), selectionProvider, editorPart);
+	}
+
+	@Override
+	protected SelectAllAction createSelectAllAction()
+	{
+		return new FixedSelectAllAction(editorPart, selectionProvider);
 	}
 }

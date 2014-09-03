@@ -196,6 +196,16 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				var injector = $scope.contentWindow.angular.element(htmlTag).injector();
 				editorContentRootScope = injector.get("$rootScope");
 				servoyInternal = injector.get("$servoyInternal");
+				$scope.glasspane.focus()
+				$(function(){   
+				    $(document).keydown(function(objEvent) {        
+				        if (objEvent.ctrlKey) {          
+				            if (objEvent.keyCode == 65) {                         
+				                return false;
+				            }            
+				        }        
+				    });
+				});  
 			});
 			
 
@@ -222,7 +232,7 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				}
 			});
 			
-			
+			$editorService.registerEditor($scope);
 			var promise = $editorService.connect();
 			promise.then(function() {
 				var replacews = "";
@@ -336,8 +346,11 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 		}
 		wsSession.callService('formeditor', 'setSelection', {selection: sel}, true)
 	})
-	
+	var editorScope; //todo this should become a array if we want to support multiply editors on 1 html page.
 	return {
+		registerEditor: function(scope) {
+			editorScope = scope;
+		},
 		connect: function() {
 			if (deferred) return deferred.promise;
 			deferred = $q.defer();
@@ -361,7 +374,21 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 		getURLParameter: getURLParameter,
 		
 		updateSelection: function(ids) {
-			// TODO
+			var prevSelection = editorScope.getSelection();
+			var changed = false;
+			var selection = [];
+			if (ids && ids.length > 0) {
+				var nodes = editorScope.contentDocument.querySelectorAll("[svy-id]")
+				for(var i=0;i<nodes.length;i++) {
+					var id = nodes[i].getAttribute("svy-id");
+					if (ids.indexOf(id) != -1) {
+						selection.push(nodes[i]);
+						changed = changed || prevSelection.indexOf(nodes[i]) == -1;
+						if (selection.length == ids.length) break;
+					}
+				}
+			}
+			if (changed) editorScope.setSelection(selection);
 		}
 	
 	// add more service methods here
