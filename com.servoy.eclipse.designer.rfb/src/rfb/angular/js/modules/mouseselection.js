@@ -165,7 +165,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					
 					var elements = this.getElementsByRectangle(p,p2,0.001);
 					
-					if (elements.length == 1) return elements[0];
+					if (elements.length > 0) return elements[0];
 					
 					return null;
 				},
@@ -192,8 +192,8 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 								matchedElements.push(element)
 							}
 						} else {
-							overlapX = Math.max(0, Math.min(p2.left, rect.left + element.clientWidth) - Math.max(p1.left, rect.left))
-							overlapY = Math.max(0, Math.min(p2.top, rect.top + element.clientHeight) - Math.max(p1.top, rect.top))
+							var overlapX = Math.max(0, Math.min(p2.left, rect.left + element.clientWidth) - Math.max(p1.left, rect.left))
+							var overlapY = Math.max(0, Math.min(p2.top, rect.top + element.clientHeight) - Math.max(p1.top, rect.top))
 
 							if ( ( (element.clientWidth * element.clientHeight) / 100) * percentage < (overlapX * overlapY)) {
 								matchedElements.push(element)

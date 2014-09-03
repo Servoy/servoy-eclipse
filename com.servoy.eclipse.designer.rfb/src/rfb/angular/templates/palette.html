@@ -6,7 +6,7 @@
 			</accordion-heading>
 		    <div>
 			    <ul>
-					<li ng-repeat="item in package.components | orderBy:'displayName'" ng-mousedown="enterDragMode($event,item.name,package.packageName,item.tagName) " title="Place component {{item.displayName}}">
+					<li ng-repeat="item in package.components | orderBy:'displayName'" ng-mousedown="enterDragMode($event,item.name,package.packageName,item.tagName,item.model) " title="Place component {{item.displayName}}">
 						<img ng-src="/{{item.icon}}" alt="{{item.displayName}}"/>{{item.displayName}}
 					</li>
 			    </ul>
