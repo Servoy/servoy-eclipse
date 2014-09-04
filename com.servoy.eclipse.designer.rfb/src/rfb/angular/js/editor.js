@@ -198,12 +198,17 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				servoyInternal = injector.get("$servoyInternal");
 				$scope.glasspane.focus()
 				$(function(){   
-				    $(document).keydown(function(objEvent) {        
+				    $(document).keydown(function(objEvent) {   
+				        // disable select-all  
 				        if (objEvent.ctrlKey) {          
 				            if (objEvent.keyCode == 65) {                         
 				                return false;
 				            }            
-				        }        
+				        }
+				        else if (objEvent.keyCode == 46) {
+				            // send the DELETE key code to the server
+				        	$editorService.keyPressed(objEvent);
+				        }
 				    });
 				});  
 			});
@@ -361,6 +366,10 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				deferred = null;
 			}
 			return promise;
+		},
+		
+		keyPressed: function(event) {
+			wsSession.callService('formeditor', 'keyPressed', {ctrl:event.ctrlKey,shift:event.shiftKey,alt:event.altKey,keyCode:event.keyCode}, true)
 		},
 		
 		sendChanges: function(properties) {

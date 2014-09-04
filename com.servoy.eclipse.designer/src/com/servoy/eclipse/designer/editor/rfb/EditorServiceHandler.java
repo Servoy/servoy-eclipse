@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.json.JSONArray;
@@ -35,6 +36,7 @@ import org.sablo.websocket.IServerService;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
@@ -124,6 +126,23 @@ public class EditorServiceHandler implements IServerService
 						selectionProvider.setSelection(selection.length == 0 ? null : new StructuredSelection(selection));
 					}
 				});
+			}
+			else if ("keyPressed".equals(methodName))
+			{
+				if (args.optInt("keyCode") == 46)
+				{
+					Display.getDefault().asyncExec(new Runnable()
+					{
+						public void run()
+						{
+							IPersist[] selection = (IPersist[])((IStructuredSelection)selectionProvider.getSelection()).toList().toArray(new IPersist[0]);
+							if (selection.length > 0)
+							{
+								editorPart.getCommandStack().execute(new FormElementDeleteCommand(selection));
+							}
+						}
+					});
+				}
 			}
 			else if ("setProperties".equals(methodName))
 			{

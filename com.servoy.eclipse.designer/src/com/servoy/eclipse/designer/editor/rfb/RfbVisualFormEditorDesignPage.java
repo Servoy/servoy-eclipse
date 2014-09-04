@@ -187,11 +187,6 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(selectionListener);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.ui.parts.GraphicalEditor#dispose()
-	 */
 	@Override
 	public void dispose()
 	{
