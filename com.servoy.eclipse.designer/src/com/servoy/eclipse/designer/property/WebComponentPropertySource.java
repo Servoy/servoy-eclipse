@@ -111,7 +111,8 @@ public class WebComponentPropertySource extends PersistPropertySource
 			}
 			else
 			{
-				if (desc.getValues() != null && desc.getValues().size() > 0)
+				if (desc.getValues() != null && desc.getValues().size() > 0 &&
+					!desc.getName().equals(StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName()))
 				{
 					ValuesConfig config = new ValuesConfig();
 					if (!(desc.getValues().get(0) instanceof JSONObject))
