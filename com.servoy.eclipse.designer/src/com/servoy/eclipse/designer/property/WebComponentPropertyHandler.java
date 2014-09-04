@@ -109,7 +109,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			ServoyLog.logError(e);
 		}
 
-		if (propertyDescription.getType() == ColorPropertyType.INSTANCE)
+		if (ColorPropertyType.TYPE_NAME.equals(propertyDescription.getType().getName()))
 		{
 			return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(null, (String)value);
 		}
@@ -146,7 +146,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		Bean bean = (Bean)obj;
 
 		Object convertedValue = value;
-		if (propertyDescription.getType() == ColorPropertyType.INSTANCE)
+		if (ColorPropertyType.TYPE_NAME.equals(propertyDescription.getType().getName()))
 		{
 			convertedValue = PropertyColorConverter.getColorString((Color)value);
 		}

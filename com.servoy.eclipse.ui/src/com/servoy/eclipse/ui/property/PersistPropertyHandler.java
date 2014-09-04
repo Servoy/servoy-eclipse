@@ -45,6 +45,7 @@ import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.property.types.FontPropertyType;
 import org.sablo.specification.property.types.FunctionPropertyType;
 import org.sablo.specification.property.types.ScrollbarsPropertyType;
+import org.sablo.specification.property.types.TypesRegistry;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
 import com.servoy.eclipse.core.ServoyModel;
@@ -779,7 +780,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 
 		if (name.equals("fontType"))
 		{
-			return new PropertyDescription(name, FontPropertyType.INSTANCE, Boolean.TRUE);
+			return new PropertyDescription(name, TypesRegistry.getType(FontPropertyType.TYPE_NAME), Boolean.TRUE);
 		}
 
 		if (name.endsWith("valuelistID"))

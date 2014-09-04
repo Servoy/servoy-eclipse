@@ -255,6 +255,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 					}
 					componentReaders.putAll(readDir(monitor, activeResourcesProject, COMPONENTS_DIR_NAME));
 					serviceReaders.putAll(readDir(monitor, activeResourcesProject, SERVICES_DIR_NAME));
+
 					ResourceProvider.addComponentResources(componentReaders.values());
 					ResourceProvider.addServiceResources(serviceReaders.values());
 

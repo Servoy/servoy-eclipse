@@ -1043,7 +1043,7 @@ public class TypeCreator extends TypeCache
 		if (type == IntPropertyType.INSTANCE || type == LongPropertyType.INSTANCE || type == FloatPropertyType.INSTANCE || type == DoublePropertyType.INSTANCE) return getTypeRef(
 			context, ITypeNames.NUMBER);
 		if (type == StringPropertyType.INSTANCE || type == TagStringPropertyType.INSTANCE) return getTypeRef(context, ITypeNames.STRING);
-		if (type == DatePropertyType.INSTANCE) return getTypeRef(context, ITypeNames.DATE);
+		if (DatePropertyType.TYPE_NAME.equals(type.getName())) return getTypeRef(context, ITypeNames.DATE);
 		return null;
 	}
 

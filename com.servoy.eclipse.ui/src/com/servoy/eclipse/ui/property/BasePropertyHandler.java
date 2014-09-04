@@ -35,6 +35,7 @@ import org.sablo.specification.property.types.IntPropertyType;
 import org.sablo.specification.property.types.LongPropertyType;
 import org.sablo.specification.property.types.PointPropertyType;
 import org.sablo.specification.property.types.StringPropertyType;
+import org.sablo.specification.property.types.TypesRegistry;
 
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -102,27 +103,27 @@ public class BasePropertyHandler implements IPropertyHandler
 
 		if (clazz == java.awt.Dimension.class)
 		{
-			return new PropertyDescription(name, DimensionPropertyType.INSTANCE);
+			return new PropertyDescription(name, TypesRegistry.getType(DimensionPropertyType.TYPE_NAME));
 		}
 
 		if (clazz == java.awt.Point.class)
 		{
-			return new PropertyDescription(name, PointPropertyType.INSTANCE);
+			return new PropertyDescription(name, TypesRegistry.getType(PointPropertyType.TYPE_NAME));
 		}
 
 		if (clazz == java.awt.Insets.class)
 		{
-			return new PropertyDescription(name, InsetsPropertyType.INSTANCE);
+			return new PropertyDescription(name, TypesRegistry.getType(InsetsPropertyType.TYPE_NAME));
 		}
 
 		if (clazz == java.awt.Color.class)
 		{
-			return new PropertyDescription(name, ColorPropertyType.INSTANCE);
+			return new PropertyDescription(name, TypesRegistry.getType(ColorPropertyType.TYPE_NAME));
 		}
 
 		if (clazz == java.awt.Font.class)
 		{
-			return new PropertyDescription(name, FontPropertyType.INSTANCE, Boolean.FALSE);
+			return new PropertyDescription(name, TypesRegistry.getType(FontPropertyType.TYPE_NAME), Boolean.FALSE);
 		}
 
 		if (clazz == Border.class)

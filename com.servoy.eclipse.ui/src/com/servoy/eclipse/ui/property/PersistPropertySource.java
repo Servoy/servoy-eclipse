@@ -1292,7 +1292,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		 * Type based property controllers.
 		 */
 
-		if (propertyType == DimensionPropertyType.INSTANCE)
+		if (DimensionPropertyType.TYPE_NAME.equals(propertyType.getName()))
 		{
 			final java.awt.Dimension defaultDimension = id.equals("intercellSpacing") ? new Dimension(1, 1) : new Dimension(0, 0);
 			return new PropertyController<java.awt.Dimension, Object>(id, displayName, new ComplexPropertyConverter<java.awt.Dimension>()
@@ -1321,7 +1321,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			});
 		}
 
-		if (propertyType == PointPropertyType.INSTANCE)
+		if (PointPropertyType.TYPE_NAME.equals(propertyType.getName()))
 		{
 			return new PropertyController<java.awt.Point, Object>(id, displayName, new ComplexPropertyConverter<java.awt.Point>()
 			{
@@ -1348,7 +1348,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			});
 		}
 
-		if (propertyType == InsetsPropertyType.INSTANCE)
+		if (InsetsPropertyType.TYPE_NAME.equals(propertyType.getName()))
 		{
 			return new PropertyController<java.awt.Insets, Object>(id, displayName, new ComplexPropertyConverter<java.awt.Insets>()
 			{
@@ -1375,7 +1375,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			});
 		}
 
-		if (propertyType == ColorPropertyType.INSTANCE)
+		if (ColorPropertyType.TYPE_NAME.equals(propertyType.getName()))
 		{
 			return new ColorPropertyController(id, displayName);
 		}
@@ -2440,7 +2440,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			return new ComboboxPropertyController<Object>(id, displayName, model, Messages.LabelUnresolved);
 		}
 
-		if (propertyType == FontPropertyType.INSTANCE)
+		if (FontPropertyType.TYPE_NAME.equals(propertyType.getName()))
 		{
 			final IDefaultValue<String> getLastPaintedFont;
 			if (persistContext != null && persistContext.getPersist() instanceof AbstractBase)
